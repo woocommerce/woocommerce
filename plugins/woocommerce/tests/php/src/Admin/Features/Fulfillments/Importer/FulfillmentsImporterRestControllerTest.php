@@ -50,9 +50,9 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		parent::setUpBeforeClass();
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		$sut = wc_get_container()->get( FulfillmentsController::class );
+		$sut->register();
+		$sut->initialize_fulfillments();
 
 		$result = wp_insert_user(
 			array(
@@ -155,11 +155,11 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	 * @return mixed
 	 */
 	private function invoke( string $method, WP_REST_Request $request ) {
-		$controller = wc_get_container()->get( FulfillmentsImporterRestController::class );
-		$reflection = new \ReflectionClass( $controller );
+		$sut = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$reflection = new \ReflectionClass( $sut );
 		$handler    = $reflection->getMethod( $method );
 		$handler->setAccessible( true );
-		return $handler->invoke( $controller, $request );
+		return $handler->invoke( $sut, $request );
 	}
 
 	/**
@@ -295,6 +295,53 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The completion action fires once, on the final chunk, with the summary counts.
+	 */
+	public function test_import_completed_action_fires_once_on_the_final_chunk(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 0; $i < 4; $i++ ) {
+			/** @var WC_Order $order */
+			$order = OrderHelper::create_order();
+			$csv  .= "{$order->get_id()},DONE-{$i},ups\n";
+		}
+		$session = $this->open_session_for( $this->make_csv( $csv ) );
+		$token   = $session->token();
+
+		$mapping = array(
+			'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+			'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+			'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+		);
+
+		$fired    = array();
+		$listener = function ( $summary ) use ( &$fired ) {
+			$fired[] = $summary;
+		};
+		add_action( 'woocommerce_fulfillments_csv_import_completed', $listener );
+
+		try {
+			foreach ( array( 0, 2 ) as $offset ) {
+				$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+				$request->set_param( 'token', $token );
+				$request->set_param( 'offset', $offset );
+				$request->set_param( 'limit', 2 );
+				$request->set_param( 'mapping', $mapping );
+
+				$response = $this->invoke( 'handle_run', $request );
+				$this->assertIsArray( $response );
+				$this->assertCount( 0 === $offset ? 0 : 1, $fired, 'The action must only fire on the final chunk' );
+			}
+		} finally {
+			remove_action( 'woocommerce_fulfillments_csv_import_completed', $listener );
+		}
+
+		$this->assertCount( 1, $fired );
+		$this->assertSame( 4, $fired[0]['created'] );
+		$this->assertSame( 0, $fired[0]['failed'] );
+		$this->assertSame( array(), $fired[0]['rows'] );
+	}
+
+	/**
 	 * @testdox handle_run freezes the first chunk's mapping and ignores later mapping changes.
 	 */
 	public function test_run_freezes_mapping_after_first_chunk(): void {
@@ -381,7 +428,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 
 		// is_uploaded_file() can never pass for files created inside a test process, so
 		// stub the staging seam and exercise everything handle_prepare does after it.
-		$controller         = new class() extends FulfillmentsImporterRestController {
+		$sut         = new class() extends FulfillmentsImporterRestController {
 			/**
 			 * Path returned instead of staging a real upload.
 			 *
@@ -403,17 +450,17 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 				);
 			}
 		};
-		$controller->staged = $file;
+		$sut->staged = $file;
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
 		$request->set_param( 'delimiter', ',' );
 		$request->set_param( 'notify_customer', false );
 		$request->set_param( 'update_existing', true );
 
-		$reflection = new \ReflectionClass( $controller );
+		$reflection = new \ReflectionClass( $sut );
 		$handler    = $reflection->getMethod( 'handle_prepare' );
 		$handler->setAccessible( true );
-		$response = $handler->invoke( $controller, $request );
+		$response = $handler->invoke( $sut, $request );
 
 		$this->assertIsArray( $response );
 		$this->assertArrayHasKey( 'token', $response );
@@ -441,7 +488,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		}
 		$file = $this->make_csv( $csv );
 
-		$controller         = new class() extends FulfillmentsImporterRestController {
+		$sut         = new class() extends FulfillmentsImporterRestController {
 			/**
 			 * Path returned instead of staging a real upload.
 			 *
@@ -463,15 +510,15 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 				);
 			}
 		};
-		$controller->staged = $file;
+		$sut->staged = $file;
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
 		$request->set_param( 'delimiter', ',' );
 
-		$reflection = new \ReflectionClass( $controller );
+		$reflection = new \ReflectionClass( $sut );
 		$handler    = $reflection->getMethod( 'handle_prepare' );
 		$handler->setAccessible( true );
-		$response = $handler->invoke( $controller, $request );
+		$response = $handler->invoke( $sut, $request );
 
 		$this->assertInstanceOf( \WP_Error::class, $response );
 		$this->assertSame( 'woocommerce_fulfillments_import_too_many_rows', $response->get_error_code() );
@@ -505,12 +552,12 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $subscriber );
 		wp_set_current_user( (int) $subscriber );
 
-		$controller = wc_get_container()->get( FulfillmentsImporterRestController::class );
-		$reflection = new \ReflectionClass( $controller );
+		$sut = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$reflection = new \ReflectionClass( $sut );
 		$method     = $reflection->getMethod( 'check_permission_for_fulfillments_import' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $controller, new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' ) );
+		$result = $method->invoke( $sut, new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' ) );
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
 
