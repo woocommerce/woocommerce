@@ -59,7 +59,7 @@ const Field = () => {
 </Form>
 ```
 
-To see the properties available within `useFormContext()`, check out the [`FormContext` type](./form-context.ts).
+To see the properties available within `useFormContext()`, check out the [`FormContextType` definition](./types.ts).
 
 ### Props
 
