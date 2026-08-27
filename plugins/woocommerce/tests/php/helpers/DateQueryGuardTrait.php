@@ -19,18 +19,6 @@ namespace Automattic\WooCommerce\Tests\Helpers;
 trait DateQueryGuardTrait {
 
 	/**
-	 * date_query clauses that must keep matching, seeded against an order created 2024-06-01.
-	 *
-	 * The list forms are how WP_Date_Query expresses IN, NOT IN, BETWEEN and NOT BETWEEN, and are
-	 * documented as supported, so a guard must validate their elements rather than the list. An
-	 * empty list is included because it is the shape that broke twice: a guard that iterates the
-	 * elements sees nothing to reject, which is correct here and wrong for 'compare' and
-	 * 'relation' below. The unrecognised key carries an object rather than a string, so that a
-	 * guard checking every leaf instead of the consumed keys fails here.
-	 *
-	 * @return array<string, array{0: array, 1: bool}>
-	 */
-	/**
 	 * A value usable as a string but not as a date component.
 	 *
 	 * WP_Date_Query hands numeric components to mktime(), which declares ?int, so this fatals
@@ -51,6 +39,18 @@ trait DateQueryGuardTrait {
 		};
 	}
 
+	/**
+	 * date_query clauses that must keep matching, seeded against an order created 2024-06-01.
+	 *
+	 * The list forms are how WP_Date_Query expresses IN, NOT IN, BETWEEN and NOT BETWEEN, and are
+	 * documented as supported, so a guard must validate their elements rather than the list. An
+	 * empty list is included because it is the shape that broke twice: a guard that iterates the
+	 * elements sees nothing to reject, which is correct here and wrong for 'compare' and
+	 * 'relation' below. The unrecognised key carries an object rather than a string, so that a
+	 * guard checking every leaf instead of the consumed keys fails here.
+	 *
+	 * @return array<string, array{0: array, 1: bool}>
+	 */
 	public function provider_date_query_must_match(): array {
 		return array(
 			'year scalar'      => array( array( array( 'year' => 2024 ) ) ),

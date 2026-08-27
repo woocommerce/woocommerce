@@ -1845,7 +1845,12 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$result = wc_get_orders(
 			array(
-				'date_query' => array( array( 'column' => new \stdClass(), 'year' => 2024 ) ),
+				'date_query' => array(
+					array(
+						'column' => new \stdClass(),
+						'year'   => 2024,
+					),
+				),
 				'return'     => 'ids',
 				'limit'      => -1,
 			)
