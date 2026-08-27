@@ -1131,7 +1131,7 @@ h3.jetpack-reasons {
 	line-height: 1.5;
 	margin: 5px 0;
 
-	& > * {
+	> * {
 		display: block;
 	}
 
@@ -1500,19 +1500,19 @@ p.jetpack-terms {
 			background-color: #f4a224;
 			max-height: 3em;
 			max-width: 3em;
-			padding: calc( ( 3.5em - 3em ) / 2 );
+			padding: calc(( 3.5em - 3em ) / 2);
 		}
 
 		&.recommended-item-icon-automated_taxes {
 			background-color: #d0011b;
 			max-height: 1.75em;
-			padding: calc( ( 3.5em - 1.75em ) / 2 );
+			padding: calc(( 3.5em - 1.75em ) / 2);
 		}
 
 		&.recommended-item-icon-mailchimp {
 			background-color: #ffe01b;
 			height: 2em;
-			padding: calc( ( 3.5em - 2em ) / 2 );
+			padding: calc(( 3.5em - 2em ) / 2);
 		}
 
 		&.recommended-item-icon-woocommerce_services {

@@ -1,3 +1,19 @@
 {
-  "extends": "@wordpress/stylelint-config",
+	"extends": "@wordpress/stylelint-config/scss",
+	"rules": {
+		"font-family-no-missing-generic-family-keyword": [
+			true,
+			{
+				"ignoreFontFamilies": [ "WooCommerce", "Dashicons", "dashicons" ]
+			}
+		],
+		"declaration-property-unit-allowed-list": null,
+		"function-url-quotes": "always",
+		"max-line-length": null,
+		"no-descending-specificity": null,
+		"no-duplicate-selectors": null,
+		"scss/no-global-function-names": null,
+		"selector-class-pattern": null,
+		"selector-id-pattern": null
+	}
 }
