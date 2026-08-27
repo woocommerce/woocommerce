@@ -66,12 +66,22 @@ test.describe(
 				BIS_EMAIL_LINKS.actionButton
 			);
 
-			expect( verifyLink ).toMatch( /email_link_action=verify/ );
-			expect( verifyLink ).toMatch( /email_link_action_key=/ );
-			expect( verifyLink ).toMatch(
-				/utm_source=back-in-stock-notifications/
+			// Read the params rather than substring-matching the URL: a
+			// present-but-empty key still satisfies `email_link_action_key=`.
+			const verifyUrl = new URL( verifyLink );
+
+			expect( verifyUrl.searchParams.get( 'email_link_action' ) ).toBe(
+				'verify'
 			);
-			expect( verifyLink ).toMatch( /utm_medium=email/ );
+			expect(
+				verifyUrl.searchParams.get( 'email_link_action_key' )
+			).toBeTruthy();
+			expect( verifyUrl.searchParams.get( 'utm_source' ) ).toBe(
+				'back-in-stock-notifications'
+			);
+			expect( verifyUrl.searchParams.get( 'utm_medium' ) ).toBe(
+				'email'
+			);
 		} );
 
 		test( 'clicking the verify link dispatches the confirmation email with UTM on unsubscribe link', async ( {
@@ -106,14 +116,20 @@ test.describe(
 				BIS_EMAIL_LINKS.unsubscribe
 			);
 
-			expect( unsubscribeLink ).toMatch(
-				/email_link_action=unsubscribe/
+			const unsubscribeUrl = new URL( unsubscribeLink );
+
+			expect(
+				unsubscribeUrl.searchParams.get( 'email_link_action' )
+			).toBe( 'unsubscribe' );
+			expect(
+				unsubscribeUrl.searchParams.get( 'email_link_action_key' )
+			).toBeTruthy();
+			expect( unsubscribeUrl.searchParams.get( 'utm_source' ) ).toBe(
+				'back-in-stock-notifications'
 			);
-			expect( unsubscribeLink ).toMatch( /email_link_action_key=/ );
-			expect( unsubscribeLink ).toMatch(
-				/utm_source=back-in-stock-notifications/
+			expect( unsubscribeUrl.searchParams.get( 'utm_medium' ) ).toBe(
+				'email'
 			);
-			expect( unsubscribeLink ).toMatch( /utm_medium=email/ );
 		} );
 
 		test( 'following the unsubscribe link cancels the notification', async ( {
