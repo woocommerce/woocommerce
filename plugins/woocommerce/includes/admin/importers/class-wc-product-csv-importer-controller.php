@@ -317,13 +317,38 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
+	 * Remove temporary products and mapping data left by the importer.
+	 */
+	private static function cleanup_after_import(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+
+		// Delete products first so WooCommerce can remove their variations through the normal lifecycle.
+		foreach ( array( 'product', 'product_variation' ) as $post_type ) {
+			// Query the exact type and status so MySQL can use the wp_posts type_status_date index.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$post_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+					$post_type,
+					'importing'
+				)
+			);
+
+			foreach ( $post_ids as $post_id ) {
+				wp_delete_post( absint( $post_id ), true );
+			}
+		}
+	}
+
+	/**
 	 * Processes AJAX requests related to a product CSV import.
 	 *
 	 * @since 9.3.0
 	 */
 	public static function dispatch_ajax() {
-		global $wpdb;
-
 		check_ajax_referer( 'wc-product-import', 'security' );
 
 		try {
@@ -365,42 +390,7 @@ class WC_Product_CSV_Importer_Controller {
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
 			if ( 100 === $percent_complete ) {
-				// @codingStandardsIgnoreStart.
-				$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-				$wpdb->delete( $wpdb->posts, array(
-					'post_type'   => 'product',
-					'post_status' => 'importing',
-				) );
-				$wpdb->delete( $wpdb->posts, array(
-					'post_type'   => 'product_variation',
-					'post_status' => 'importing',
-				) );
-				// @codingStandardsIgnoreEnd.
-
-				// Clean up orphaned data.
-				$wpdb->query(
-					"
-					DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
-					WHERE wp.ID IS NULL AND {$wpdb->posts}.post_type = 'product_variation'
-				"
-				);
-				$wpdb->query(
-					"
-					DELETE {$wpdb->postmeta}.* FROM {$wpdb->postmeta}
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->postmeta}.post_id
-					WHERE wp.ID IS NULL
-				"
-				);
-				// @codingStandardsIgnoreStart.
-				$wpdb->query( "
-					DELETE tr.* FROM {$wpdb->term_relationships} tr
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = tr.object_id
-					LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					WHERE wp.ID IS NULL
-					AND tt.taxonomy IN ( '" . implode( "','", array_map( 'esc_sql', get_object_taxonomies( 'product' ) ) ) . "' )
-				" );
-				// @codingStandardsIgnoreEnd.
+				self::cleanup_after_import();
 
 				// Send success.
 				wp_send_json_success(
