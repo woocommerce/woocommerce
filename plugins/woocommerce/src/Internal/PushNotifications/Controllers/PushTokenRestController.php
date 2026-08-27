@@ -353,13 +353,15 @@ class PushTokenRestController extends RestApiControllerBase {
 					),
 					'created_at_gmt'        => array(
 						'description' => __( 'The date the token was registered, as GMT. Null when the date is unknown.', 'woocommerce' ),
-						'type'        => array( 'date-time', 'null' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
 					'last_confirmed_at_gmt' => array(
 						'description' => __( 'The date the app last registered this token, as GMT. The app re-sends the token periodically, not only when the token value changes, so this shows how recently the app read the token from the device. Null when the date is unknown.', 'woocommerce' ),
-						'type'        => array( 'date-time', 'null' ),
+						'type'        => array( 'string', 'null' ),
+						'format'      => 'date-time',
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
