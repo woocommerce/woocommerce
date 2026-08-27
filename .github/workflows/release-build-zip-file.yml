@@ -40,6 +40,7 @@ jobs:
   verify:
     name: 'Pre-build verification'
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -83,7 +84,12 @@ jobs:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
           if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
-            echo "::error::Source branch '$BRANCH' does not exist."
+            error="Source branch '$BRANCH' does not exist."
+            if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\..+$ ]]; then
+              minor="${BASH_REMATCH[2]}"
+              error="$error Try 'release/$minor' or '$minor' instead."
+            fi
+            echo "::error::$error"
             exit 1
           fi
 
@@ -146,11 +152,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # Helper to fail with console error and summary message.
+            # Helper to fail with a console error and summary message. An optional second
+            # argument adds more detail (e.g. a PR list) to the summary only.
             fail() {
               echo "::error::$1"
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "❌ Build failed. See annotations or workflow logs for details." >> $GITHUB_STEP_SUMMARY
+              echo "❌ Build failed: $1" >> $GITHUB_STEP_SUMMARY
+              if [[ -n "$2" ]]; then
+                echo "$2" >> $GITHUB_STEP_SUMMARY
+              fi
               exit 1
             }
 
@@ -195,17 +205,31 @@ jobs:
               fi
             fi
 
-            # No non-draft PRs against release branch should remain open.
-            count=$( gh pr list --search "is:open draft:false base:$BRANCH" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-              fail "There are open PRs against the release branch ($BRANCH)."
-            fi
-
-            # No non-draft PRs with same milestone as main version should remain open.
+            # No non-draft PRs against the release branch, or carrying its milestone, should remain open.
             milestone="$version_prefix.0"
-            count=$( gh pr list --search "is:open draft:false milestone:$milestone" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-              fail "There are open PRs with milestone '$milestone'."
+            pr_query="repo:$GH_REPO is:pr is:open draft:false (base:$BRANCH OR milestone:$milestone) sort:created-asc"
+            search_result=$( gh api graphql -f query='
+              query($q: String!, $limit: Int!) {
+                search(query: $q, type: ISSUE_ADVANCED, first: $limit) {
+                  issueCount
+                  nodes { ... on PullRequest { number title url } }
+                }
+              }' -f q="$pr_query" -F limit=20 --jq '.data.search' )
+            blocking_total=$( echo "$search_result" | jq '.issueCount' )
+            blocking_prs=$( echo "$search_result" | jq '.nodes' )
+            if (( blocking_total > 0 )); then
+              details=$( {
+                echo "$blocking_prs" | jq -r '.[] | "- *[\(.title) #\(.number)](\(.url))*"'
+                if (( blocking_total > 20 )); then
+                  search_url="https://github.com/${GH_REPO}/pulls?q=$( echo -n "$pr_query" | jq -sRr @uri )"
+                  echo "- ... and $(( blocking_total - 20 )) more ([view all]($search_url))"
+                fi
+                if [[ $branch_plugin_version == *-beta* ]]; then
+                  echo ""
+                  echo "If a PR can't be merged or closed right now, temporarily marking it as a draft can be used as a workaround."
+                fi
+              } )
+              fail "There are open PRs against the release branch ($BRANCH) or with milestone '$milestone'." "$details"
             fi
 
             # Changelog section must have at least one entry.
@@ -228,6 +252,7 @@ jobs:
   build:
     name: Build release zip file
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 15
     needs: [ verify ]
     outputs:
       artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
@@ -279,6 +304,7 @@ jobs:
   create-release:
     name: Create GitHub release
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: [ verify, build ]
     if: ${{ inputs.create_github_release && needs.verify.outputs.is-release-branch == 'true' }}
     permissions:

@@ -19,9 +19,9 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 /**
  * Internal dependencies
  */
-import { SettingsUIPage } from '../settings-ui-page';
+import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import type { SettingsUIField, SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -39,6 +39,23 @@ const renderElement = ( element: JSX.Element ) => {
 
 	return { container, root };
 };
+
+const createSingleFieldSchema = (
+	field: SettingsUIField,
+	overrides: Partial< SettingsUISchema > = {}
+): SettingsUISchema => ( {
+	id: 'test-page',
+	title: 'Test page',
+	section: 'default',
+	save: { adapter: 'none' },
+	...overrides,
+	groups: {
+		general: {
+			id: 'general',
+			fields: [ field ],
+		},
+	},
+} );
 
 const renderElementInMainForm = ( element: JSX.Element ) => {
 	const form = document.createElement( 'form' );
@@ -99,8 +116,12 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
+	const originalUrl = window.location.href;
+
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
+		window.history.replaceState( {}, '', originalUrl );
 	} );
 
 	it( 'renders settings as centered sections and cards', () => {
@@ -194,6 +215,149 @@ describe( 'settings HTML rendering', () => {
 		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
 			''
 		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed when an explicit component is not registered', () => {
+		window.history.replaceState(
+			{},
+			'',
+			'/wp-admin/admin.php?page=wc-settings&tab=products&section=advanced&preserved=yes#wc-settings'
+		);
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+		const schema = createSingleFieldSchema(
+			{
+				id: 'test_field',
+				label: 'Test field',
+				type: 'text',
+				component: 'test/missing-component',
+			},
+			{
+				id: 'products',
+				title: 'Products',
+				section: 'advanced',
+				save: { adapter: 'form_post' },
+			}
+		);
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+		const classicAction = Array.from(
+			container.querySelectorAll( 'a' )
+		).find(
+			( link ) => link.textContent?.trim() === 'Use classic settings'
+		);
+		expect( classicAction ).toBeDefined();
+		expect(
+			classicAction?.closest( '.components-notice__actions' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.components-notice__content' )?.firstChild
+				?.textContent
+		).toBe( 'Something went wrong while rendering this settings page.' );
+		const classicUrl = new URL( classicAction?.href || '' );
+		expect( classicUrl.searchParams.getAll( 'wc_settings_ui' ) ).toEqual( [
+			'classic',
+		] );
+		expect( classicUrl.searchParams.get( 'page' ) ).toBe( 'wc-settings' );
+		expect( classicUrl.searchParams.get( 'tab' ) ).toBe( 'products' );
+		expect( classicUrl.searchParams.get( 'section' ) ).toBe( 'advanced' );
+		expect( classicUrl.searchParams.get( 'preserved' ) ).toBe( 'yes' );
+		expect( classicUrl.hash ).toBe( '#wc-settings' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'uses a field override when an explicit component is not registered', () => {
+		const FieldOverride = () => <div>Extension field override</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: { test_field: FieldOverride },
+		} );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'text',
+			component: 'test/missing-component',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension field override' );
+		expect( container.textContent ).not.toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'renders extension-defined types through registered type renderers', () => {
+		const TypeRenderer = () => <div>Extension type renderer</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			typeRenderers: { extension_defined: TypeRenderer },
+		} );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension type renderer' );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed and focuses the error region for an unrenderable type', () => {
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		const errorRegion = container.querySelector( '.wc-settings-ui__error' );
+		expect( errorRegion ).toHaveAttribute( 'role', 'region' );
+		expect( errorRegion ).toHaveAttribute( 'tabindex', '-1' );
+		expect( errorRegion?.ownerDocument.activeElement ).toBe( errorRegion );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
 
 		act( () => root.unmount() );
 		container.remove();

@@ -16,7 +16,7 @@ export default [
 		settings: {
 			'import/core-modules': [
 				...coreModules,
-				'@storybook/react',
+				'@storybook/react-webpack5',
 				'@automattic/tour-kit',
 				'dompurify',
 				'downshift',

@@ -8061,18 +8061,17 @@ table.bar_chart {
 		width: 100% !important;
 	}
 
-	// Reserve room for the clear (x) and chevron icons; .wc-backbone-modal-content lifts specificity
-	// to 0,5,0 so the later, equal-specificity WP 7.0 reset (`.wc-wp-version-gte-70 ... padding: 0 12px`)
-	// no longer wins the right padding.
+	// Reserve the end of the field for the clear (x) and chevron inside modals on every WP
+	// version; the .wc-wp-version-gte-70 rule below only reaches WP 7.0+.
 	.wc-backbone-modal-content .select2-container .select2-selection--single {
 		.select2-selection__rendered {
-			padding-right: 40px;
+			padding-inline-end: 40px;
 		}
 
 		// Pull the clear (x) into the 40px padding zone so it sits beside the chevron
 		// rather than at the text edge.
 		.select2-selection__clear {
-			margin-right: -10px;
+			margin-inline-end: -10px;
 		}
 	}
 }
@@ -8531,7 +8530,15 @@ table.bar_chart {
 
 			.select2-selection__rendered {
 				line-height: 38px;
-				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
+				padding-block: 0;
+				// 12px matches WP 7.0 native input padding; 40px reserves the end for the chevron and the clear (x).
+				padding-inline: 12px 40px;
+			}
+
+			// Pull the clear (x) into the reserved zone so it sits beside the chevron
+			// rather than out at the text edge.
+			.select2-selection__clear {
+				margin-inline-end: -10px;
 			}
 
 			.select2-selection__arrow {
@@ -8566,7 +8573,8 @@ table.bar_chart {
 
 		.select2-selection__rendered {
 			line-height: 38px;
-			padding: 0 12px; // Match WP 7.0 native input padding.
+			padding-block: 0;
+			padding-inline: 12px 40px; // Match WP 7.0 native input padding, reserving the end for the icons.
 		}
 
 		.select2-selection__arrow {
@@ -8582,7 +8590,8 @@ table.bar_chart {
 
 		.select2-selection__rendered {
 			line-height: 38px;
-			padding: 0 12px;
+			padding-block: 0;
+			padding-inline: 12px 40px; // Match WP 7.0 native input padding, reserving the end for the icons.
 		}
 
 		.select2-selection__arrow {
@@ -9575,7 +9584,7 @@ table.bar_chart {
 	margin-bottom: 0px;
 
 	.wp-editor-tools {
-		background: none;
+		background: #fff;
 		padding-top: 0px;
 		width: 100%;
 	}
@@ -9593,31 +9602,30 @@ table.bar_chart {
 		margin-bottom: .1em;
 	}
 
-	.woocommerce-order-attribution-origin-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: start;
+	&:has(.woocommerce-order-attribution-details-toggle[aria-expanded="false"]) .order-attribution-origin {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.order-attribution-origin {
-		flex-grow: 1;
-	}
-
-	.woocommerce-order-attribution-details-toggle {
-		white-space: nowrap;
+		display: block;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-container {
 		display: none;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-toggle {
 		display: block;
+		width: fit-content;
+		margin-top: 1em;
+		white-space: nowrap;
 		text-decoration: none;
 		vertical-align: middle;
-		margin-top: -7px;
 		position: relative;
-		top: 5px;
 
 		.toggle-text {
 			text-decoration: underline;

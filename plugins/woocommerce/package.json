@@ -159,6 +159,8 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -188,6 +190,8 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -681,6 +685,8 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -1091,9 +1097,9 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@babel/preset-env": "7.25.7",
+		"@babel/cli": "catalog:tooling",
+		"@babel/core": "catalog:tooling",
+		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.61.1",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
@@ -1109,7 +1115,7 @@
 		"allure-commandline": "^2.32.2",
 		"allure-playwright": "^3.1.0",
 		"autoprefixer": "9.8.6",
-		"axios": "^0.24.0",
+		"axios": "^0.33.0",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "^10.0.0",

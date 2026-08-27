@@ -4,7 +4,7 @@
 import { expect, test, tags, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setFeatureFlag, resetFeatureFlags } from '../../utils/features';
-import { setOption } from '../../utils/options';
+import { wpCLI } from '../../utils/cli';
 
 const compatibilityFailureFragments = [
 	'private api',
@@ -33,48 +33,29 @@ const getBaseURL = ( baseURL: string | undefined ): string => {
 	return baseURL;
 };
 
-test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
+test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.beforeEach( async ( { baseURL } ) => {
+	test.beforeAll( async ( { baseURL } ) => {
 		const url = getBaseURL( baseURL );
 
-		await setFeatureFlag( request, url, 'settings-ui', false );
-		await setOption( request, url, 'woocommerce_enable_reviews', 'yes' );
+		await wpCLI(
+			'wp plugin activate settings-ui-component-registration --skip-plugins'
+		);
+		await setFeatureFlag( request, url, 'settings-ui', true );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const url = getBaseURL( baseURL );
 
 		await resetFeatureFlags( request, url );
-		await setOption( request, url, 'woocommerce_enable_reviews', 'yes' );
-	} );
-
-	test( 'does not mount the settings UI when the feature flag is disabled', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
-
-		await expect(
-			page.locator( '#woocommerce_enable_reviews' )
-		).toBeVisible();
-		await expect( page.locator( '[data-wc-settings-ui]' ) ).toHaveCount(
-			0
+		await wpCLI(
+			'wp plugin deactivate settings-ui-component-registration --skip-plugins'
 		);
-		await page.locator( '#woocommerce_enable_reviews' ).uncheck();
-		await page.getByRole( 'button', { name: 'Save changes' } ).click();
-
-		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
-		await expect(
-			page.locator( '#woocommerce_enable_reviews' )
-		).not.toBeChecked();
 	} );
 
 	test( 'loads the private DataForm runtime without compatibility failures', async ( {
 		page,
-		baseURL,
 	} ) => {
 		const compatibilityFailures: string[] = [];
 		const recordCompatibilityFailure = ( message: string ) => {
@@ -90,12 +71,6 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 			recordCompatibilityFailure( message.text() );
 		} );
 
-		await setFeatureFlag(
-			request,
-			getBaseURL( baseURL ),
-			'settings-ui',
-			true
-		);
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
 		await expect( page.locator( '[data-wc-settings-ui]' ) ).toBeVisible();
 		await expect(
@@ -145,5 +120,72 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 		expect( dataFormGlobalType ).toBe( 'undefined' );
 
 		expect( compatibilityFailures ).toEqual( [] );
+	} );
+
+	test( 'loads a declared component registration before mounting settings', async ( {
+		page,
+	} ) => {
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=settings_ui_component_registered'
+		);
+
+		await expect(
+			page.locator( '[data-wc-settings-ui="1"]' )
+		).toBeVisible();
+		await expect(
+			page.getByTestId( 'settings-ui-registered-component' )
+		).toContainText( 'Registered settings UI component' );
+	} );
+
+	test( 'fails closed when an executed script omits its component registration', async ( {
+		page,
+	} ) => {
+		const settingsUrl =
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=settings_ui_component_missing&preserved=yes';
+
+		await page.goto( settingsUrl );
+
+		await expect( page.getByRole( 'textbox' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.woocommerce-save-button' ) ).toHaveCount(
+			0
+		);
+		const classicAction = page.getByRole( 'link', {
+			name: 'Use classic settings',
+		} );
+		await expect( classicAction ).toBeVisible();
+		expect(
+			await page.evaluate(
+				() =>
+					(
+						window as unknown as {
+							wcSettingsUIComponentTest?: {
+								missingRegistrationScriptExecuted?: boolean;
+							};
+						}
+					 ).wcSettingsUIComponentTest
+						?.missingRegistrationScriptExecuted
+			)
+		).toBe( true );
+
+		await classicAction.click();
+		await expect( page ).toHaveURL( ( url ) => {
+			const params = url.searchParams;
+
+			return (
+				params.get( 'wc_settings_ui' ) === 'classic' &&
+				params.get( 'tab' ) === 'products' &&
+				params.get( 'section' ) === 'settings_ui_component_missing' &&
+				params.get( 'preserved' ) === 'yes'
+			);
+		} );
+		await expect(
+			page.locator( '#settings_ui_component_missing_value' )
+		).toBeVisible();
+		await expect( page.locator( '[data-wc-settings-ui]' ) ).toHaveCount(
+			0
+		);
+		await expect(
+			page.getByRole( 'button', { name: 'Save changes' } )
+		).toBeVisible();
 	} );
 } );

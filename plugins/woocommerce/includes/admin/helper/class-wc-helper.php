@@ -160,6 +160,7 @@ class WC_Helper {
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-options.php';
 		include_once __DIR__ . '/class-wc-helper-api.php';
+		include_once __DIR__ . '/class-wc-helper-api-backoff.php';
 		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
 		include_once __DIR__ . '/class-wc-woo-helper-connection.php';
 		include_once __DIR__ . '/class-wc-helper-updater.php';
@@ -1142,6 +1143,10 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
+
+		// A manual refresh resets any rate-limit backoff so the subsequent
+		// Helper API calls (e.g. update-check) are made fresh rather than skipped.
+		WC_Helper_API_Backoff::clear_all();
 	}
 
 	/**
@@ -1937,10 +1942,17 @@ class WC_Helper {
 			delete_transient( $cache_key );
 		}
 
+		// If a previous subscriptions call was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. A manual
+		// refresh bypasses and clears the backoff (see WC_Helper_API_Backoff).
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ) ) {
+			return array();
+		}
+
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+			if ( WC_Helper_API_Backoff::is_refresh_request() ) :
 				$source = 'refresh-button';
 			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
@@ -1973,7 +1985,16 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+				// Respect server-side rate limiting: on a 429, record the reset window
+				// so we hold off on further subscriptions calls until then, and leave
+				// the cache alone. Caching an empty list here would outlive a shorter
+				// reset window and keep the site on an empty subscription list after
+				// WooCommerce.com already allows a retry. The backoff is the gate.
+				if ( 429 === (int) $code ) {
+					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS, $request );
+				} else {
+					set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+				}
 
 				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}

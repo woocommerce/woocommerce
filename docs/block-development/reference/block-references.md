@@ -262,7 +262,7 @@ Display an input field customers can use to select the number of products to add
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
-- **Supports:** interactivity
+- **Supports:** color (background, text), interactivity
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
 
@@ -1240,7 +1240,7 @@ Add a set of filters shoppers can use.
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
 - **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), spacing (blockGap), typography (fontSize)
-- **Attributes:** isPreview, showFilterDrawer
+- **Attributes:** isPreview, overlayMode, overlayPosition
 
 ## Active Filters - woocommerce/product-filter-active
 
@@ -1613,7 +1613,7 @@ Display items the shopper has saved from their cart for later.
 
 - **Name:** woocommerce/saved-for-later
 - **Category:** woocommerce
-- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** columnCount
 
 ## Product - woocommerce/single-product
