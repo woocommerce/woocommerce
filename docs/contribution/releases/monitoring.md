@@ -28,6 +28,6 @@ An old extension version can point to a compatibility issue, but it does not pro
 
 ## Handling Critical Issues
 
-If monitoring uncovers a bug that **cannot wait** for the next scheduled release, plan a point release. The [release decision matrix](/docs/contribution/releases/decision-matrix) is the criteria set for that call: look up the finding's impact class and apply the modifiers from there. Checkout, data-loss, and site-down issues warrant a point release even when a workaround exists; below that floor, limited scope, low commonality, and a documented workaround all weigh toward riding the next scheduled release.
+If monitoring uncovers a bug that **cannot wait** for the next scheduled release, plan a point release. The [release decision matrix](/docs/contribution/releases/decision-matrix) is the criteria set for that call: look up the finding's impact class and apply the modifiers from there. Checkout, data-loss, and site-down issues warrant a point release even when a workaround exists; below that floor, limited scope, low commonality, and a documented workaround can support a lower verdict, subject to the matrix's one-level modifier cap.
 
 If the verdict is a point release, follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
