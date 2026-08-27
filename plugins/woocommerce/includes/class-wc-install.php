@@ -1738,10 +1738,19 @@ class WC_Install {
 				// rather than falling back, so run it again on their terms.
 				$suppress_alter_errors = $wpdb->suppress_errors( true );
 				$tax_lookup_altered    = $wpdb->query( $tax_lookup_alter . ', ALGORITHM=INPLACE, LOCK=NONE' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+
+				if ( false === $tax_lookup_altered ) {
+					$tax_lookup_altered = $wpdb->query( $tax_lookup_alter ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+				}
+
+				$tax_lookup_alter_error = $wpdb->last_error;
 				$wpdb->suppress_errors( $suppress_alter_errors );
 
 				if ( false === $tax_lookup_altered ) {
-					$wpdb->query( $tax_lookup_alter ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+					wc_get_logger()->error(
+						"Could not re-key {$wpdb->prefix}wc_order_tax_lookup by tax order item: {$tax_lookup_alter_error}. Analytics tax reports will keep collapsing the tax lines of an order that share a tax rate until this statement runs: {$tax_lookup_alter}",
+						array( 'source' => 'wc-updater' )
+					);
 				}
 			}
 		}
