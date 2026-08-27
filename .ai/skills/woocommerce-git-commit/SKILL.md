@@ -79,6 +79,36 @@ Always stage specific files — never `git add -A` or `git add .`.
 
 After all commits, show `git log --oneline -n <number of new commits>` to confirm.
 
+## Changelog Entry Files
+
+`pnpm --filter=<project> changelog add` creates a file under `<package>/changelog/`. Fill it in as follows:
+
+- `Significance:` — `patch`, `minor`, or `major`.
+- `Type:` — one of the types declared in the package's `composer.json` under `extra.changelogger.types`. For WooCommerce Core: `fix`, `add`, `update`, `dev`, `tweak`, `performance`, `enhancement`.
+- **Body** — one user-facing sentence, after a blank line, describing what changed for merchants. This ships in the release changelog, so keep it short and leave out issue numbers, PR links, and implementation detail.
+- `Comment:` — **only** for entries that ship no body, to explain why there is no user-facing line. Almost always paired with `Type: dev`. Never use it alongside a body, and never as a place to record an issue reference.
+
+An entry with a user-facing change:
+
+```text
+Significance: patch
+Type: fix
+
+Restore the "Browse store" link on the empty cart page.
+```
+
+An entry with nothing to tell merchants:
+
+```text
+Significance: patch
+Type: dev
+Comment: Remove real sleep() calls from PHP unit tests; no production change.
+```
+
+Do not confuse `Comment:` with the pull request template's "Comment required below" field. That one belongs to the PR form and is unrelated to the changelog file.
+
+Changes that touch no package (for example `.ai/skills/` or `AGENTS.md`) need no entry at all.
+
 ## Constraints
 
 - No Co-Authored-By lines or self-attribution
