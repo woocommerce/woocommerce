@@ -49,3 +49,17 @@ if ( ! function_exists( 'WP_CLI\\Utils\\make_progress_bar' ) ) {
 		};
 	}
 }
+
+if ( ! function_exists( 'WP_CLI\\Utils\\get_flag_value' ) ) {
+	/**
+	 * Stand in for WP-CLI's flag reader.
+	 *
+	 * @param array  $assoc_args    Associative arguments.
+	 * @param string $flag          Flag name.
+	 * @param mixed  $default_value Value to return when the flag is absent.
+	 * @return mixed
+	 */
+	function get_flag_value( $assoc_args, $flag, $default_value = null ) {
+		return isset( $assoc_args[ $flag ] ) ? $assoc_args[ $flag ] : $default_value;
+	}
+}

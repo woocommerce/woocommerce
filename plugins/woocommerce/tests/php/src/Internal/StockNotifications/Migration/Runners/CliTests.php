@@ -202,6 +202,37 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox --yes should skip the confirmation prompt on every command that writes.
+	 */
+	public function test_yes_skips_the_confirmation_prompt(): void {
+		$this->seed_notifications( 1 );
+		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
+
+		$this->cli()->rollback( array(), array( 'yes' => true ) );
+		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
+
+		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
+		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
+	}
+
+	/**
+	 * @testdox every writing command should still confirm when --yes is absent.
+	 */
+	public function test_every_writing_command_confirms_without_yes(): void {
+		$this->seed_notifications( 1 );
+		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
+
+		$this->cli()->run( array(), array() );
+		$this->cli()->rollback( array(), array() );
+		$this->cli()->disable_legacy_links( array(), array() );
+
+		$this->assertCount( 3, MockWPCLI::$prompted_confirmations );
+	}
+
+	/**
 	 * @testdox a held CLI lock should stop run, rollback and disable-legacy-links alike.
 	 */
 	public function test_a_held_lock_stops_every_writing_command(): void {

@@ -387,7 +387,7 @@ class Cli {
 
 		if ( ! $dry_run ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::confirm( 'This will write to the database. Continue?' );
+			WP_CLI::confirm( 'This will write to the database. Continue?', $assoc_args );
 		}
 
 		if ( ! $this->acquire_lock( 'run' ) ) {
@@ -607,7 +607,7 @@ class Cli {
 
 		if ( ! $dry_run ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::confirm( 'This will permanently delete migrated Stock Notifications rows. Continue?' );
+			WP_CLI::confirm( 'This will permanently delete migrated Stock Notifications rows. Continue?', $assoc_args );
 		}
 
 		if ( ! $this->acquire_lock( 'rollback' ) ) {
@@ -679,7 +679,7 @@ class Cli {
 		}
 
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::confirm( 'This will permanently remove legacy unsubscribe links. Continue?' );
+		WP_CLI::confirm( 'This will permanently remove legacy unsubscribe links. Continue?', $assoc_args );
 
 		if ( ! $this->acquire_lock( 'disable-legacy-links' ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.

@@ -77,6 +77,13 @@ class MockWPCLI {
 	public static $last_halt_code = null;
 
 	/**
+	 * Questions that reached a prompt, i.e. were asked without `--yes`.
+	 *
+	 * @var array
+	 */
+	public static $prompted_confirmations = array();
+
+	/**
 	 * Simulated user input for STDIN reading in tests.
 	 *
 	 * @var string
@@ -175,25 +182,33 @@ class MockWPCLI {
 	 * Clear every recorded message so one test cannot read another's output.
 	 */
 	public static function reset(): void {
-		self::$last_debug_message   = '';
-		self::$last_warning_message = '';
-		self::$last_log_message     = '';
-		self::$last_error_message   = '';
-		self::$last_success_message = '';
-		self::$all_log_messages     = array();
-		self::$all_success_messages = array();
-		self::$last_halt_code       = null;
-		self::$last_table           = array();
+		self::$last_debug_message     = '';
+		self::$last_warning_message   = '';
+		self::$last_log_message       = '';
+		self::$last_error_message     = '';
+		self::$last_success_message   = '';
+		self::$all_log_messages       = array();
+		self::$all_success_messages   = array();
+		self::$last_halt_code         = null;
+		self::$last_table             = array();
+		self::$prompted_confirmations = array();
 	}
 
 	/**
-	 * Mock confirm method.
+	 * Mock confirm method. Honours `--yes` the way WP-CLI does, so a command that forgets to
+	 * forward its $assoc_args shows up as a prompt that should never have been reached.
 	 *
-	 * @param string $question Question to confirm.
+	 * @param string $question   Question to confirm.
+	 * @param array  $assoc_args Associative arguments the command was invoked with.
 	 * @return bool Always returns true in tests.
 	 */
-	public static function confirm( $question ): bool {
+	public static function confirm( $question, $assoc_args = array() ): bool {
 		self::$last_log_message = $question;
+
+		if ( ! \WP_CLI\Utils\get_flag_value( $assoc_args, 'yes' ) ) {
+			self::$prompted_confirmations[] = $question;
+		}
+
 		return true;
 	}
 }
