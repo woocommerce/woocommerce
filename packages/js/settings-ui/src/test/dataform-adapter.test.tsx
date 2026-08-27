@@ -266,6 +266,42 @@ describe( 'dataform adapter', () => {
 			);
 		} );
 
+		it( 'compares array controller values by element equality', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					visibility: {
+						controller: 'regions',
+						value: [ [ 'eu', 'us' ] ],
+					},
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isVisible?.( { regions: [ 'eu', 'us' ] } ) ).toBe(
+				true
+			);
+			expect( field.isVisible?.( { regions: [ 'eu' ] } ) ).toBe( false );
+			expect( field.isVisible?.( { regions: [ 'us', 'eu' ] } ) ).toBe(
+				false
+			);
+		} );
+
+		it( 'keeps disabled and visibility independent on the same field', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					disabled: true,
+					visibility: { controller: 'toggle', value: 'on' },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isDisabled ).toBe( true );
+			expect( field.isVisible?.( { toggle: 'off' } ) ).toBe( false );
+			expect( field.isVisible?.( { toggle: 'on' } ) ).toBe( true );
+		} );
+
 		it( 'applies a predicate registered after the field is built', () => {
 			const field = buildDataFormField(
 				textField,
