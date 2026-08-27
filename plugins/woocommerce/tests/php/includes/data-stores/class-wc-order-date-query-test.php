@@ -2,15 +2,9 @@
 /**
  * Tests that day-precision date queries behave identically on both order storage backends.
  *
- * Parity is asserted for ordinary 24-hour days only. HPOS derives its upper bound as
- * `$date1 + DAY_IN_SECONDS` in `OrdersTableQuery::local_time_to_gmt_date_query()`, so on a day
- * that runs 23 or 25 hours across a DST transition the two backends still disagree by an hour.
- * Post storage is the correct side there; closing the gap means fixing `OrdersTableQuery`.
- *
- * It is also asserted for `date_paid` only, which stands in for the meta-backed date fields.
- * `date_created` and `date_modified` map to `post_date`/`post_modified` and take a different
- * branch that still names the day in the site timezone, so they can disagree with HPOS on a
- * query var carrying an explicit UTC designator. That is pre-existing and out of scope here.
+ * Parity is scoped to ordinary 24-hour days and to `date_paid`. HPOS is an hour out on DST
+ * transition days, tracked in #68060. `date_created` and `date_modified` take the `post_date`
+ * branch, which names the day in the site timezone rather than UTC. Both predate this suite.
  *
  * @package WooCommerce\Tests\DataStores
  */

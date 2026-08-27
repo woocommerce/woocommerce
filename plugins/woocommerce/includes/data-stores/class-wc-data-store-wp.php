@@ -350,8 +350,7 @@ class WC_Data_Store_WP {
 		$dates    = array();
 		$operator = '=';
 
-		// The raw strings $dates[0] and $dates[1] were parsed from, so the day they name can be
-		// resolved later. Only day precision reads these, and only string input reaches it.
+		// The raw strings $dates[0] and $dates[1] came from. Only day precision reads them.
 		$raw_start = '';
 		$raw_end   = '';
 
@@ -453,21 +452,10 @@ class WC_Data_Store_WP {
 		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
 			/*
-			 * The meta values are UTC timestamps, while a day-precision query var names a calendar day,
-			 * so both boundaries have to be anchored on that day's local midnight.
-			 *
-			 * The day is named the same way OrdersTableQuery::local_time_to_gmt_date_query() names it:
-			 * the UTC calendar date of a bare strtotime() of the raw string, not of the timezone-aware
-			 * WC_DateTime in $dates. Deriving it from $dates instead would diverge for a naive datetime
-			 * such as '2026-07-20 22:00:00', which wc_string_to_datetime() reads as local time first.
-			 * Deriving it identically is what keeps the two order storage backends from resolving one
-			 * query var to different days on these meta keys.
-			 *
-			 * Constructing the bounds can still throw on a date beyond year 9999. Returning here with
-			 * no clause is not an option: both callers strip their own clause for this key before
-			 * calling, so an empty meta_query drops the date filter entirely and widens the query to
-			 * every record. A day that cannot be represented matches nothing instead, which is what
-			 * HPOS also does with the same input.
+			 * Anchor both bounds on the named day's local midnight. The day is named from the raw
+			 * string the way OrdersTableQuery::local_time_to_gmt_date_query() names it, never from
+			 * the timezone-aware $dates, or the two storage backends resolve one query var to
+			 * different days.
 			 */
 			try {
 				$timezone = wp_timezone();
@@ -477,9 +465,9 @@ class WC_Data_Store_WP {
 					: clone $start;
 			} catch ( Exception $e ) {
 				/*
-				 * An empty range: no value can be both at least 1 and at most 0. A one-sided bound
-				 * would not do, because these keys can legitimately hold a negative timestamp for a
-				 * date before 1970.
+				 * A date beyond year 9999 matches nothing. Adding no clause would instead drop the
+				 * filter and return everything, and a one-sided bound would still match the negative
+				 * timestamp of a pre-1970 date.
 				 */
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
@@ -492,10 +480,9 @@ class WC_Data_Store_WP {
 			}
 
 			/*
-			 * Derive the upper bound from the next local midnight rather than adding a fixed 86400 seconds,
-			 * so the range follows the real length of the day across a DST transition (a local day can be 23
-			 * or 25 hours). '+1 day' is not equivalent: it carries over the start time, which is not midnight
-			 * on days where DST begins at 00:00 and the constructor above had to shift the start forward.
+			 * Next local midnight, not a fixed 86400: a local day runs 23 or 25 hours across a DST
+			 * transition. '+1 day' would carry over the start time, which is not midnight on days
+			 * where DST begins at 00:00.
 			 */
 			$end->modify( 'tomorrow' );
 
