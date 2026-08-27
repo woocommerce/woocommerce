@@ -67,7 +67,7 @@ class FulfillmentsCsvImporterController {
 		register_importer(
 			self::WP_IMPORTER_ID,
 			__( 'WooCommerce fulfillments (CSV)', 'woocommerce' ),
-			__( 'Import <strong>order fulfillments</strong> to your store via a csv file.', 'woocommerce' ),
+			__( 'Import <strong>order fulfillments</strong> to your store via a CSV file.', 'woocommerce' ),
 			array( $this, 'render_importer_link' )
 		);
 	}
@@ -164,8 +164,8 @@ class FulfillmentsCsvImporterController {
 	/**
 	 * Should the importer UI render on the current screen?
 	 *
-	 * Mirrors the guard used by {@see FulfillmentsRenderer::should_render_fulfillment_drawer()}:
-	 * admin orders-list only, with the manage_woocommerce capability.
+	 * Admin orders list only, for users with the manage_woocommerce capability. The orders
+	 * list lives on a different screen depending on whether HPOS is enabled.
 	 *
 	 * @since 11.2.0
 	 *

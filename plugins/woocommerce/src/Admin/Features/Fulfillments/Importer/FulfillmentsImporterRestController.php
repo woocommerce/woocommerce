@@ -676,7 +676,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			 *
 			 * @since 11.2.0
 			 *
-			 * @param array $summary Import summary counts.
+			 * @param array $summary Import summary counts. Carries created, updated, skipped,
+			 *                       failed and notified totals, plus an always-empty rows key;
+			 *                       per-row results are streamed to the client, not persisted.
 			 */
 			do_action( 'woocommerce_fulfillments_csv_import_completed', $summary );
 

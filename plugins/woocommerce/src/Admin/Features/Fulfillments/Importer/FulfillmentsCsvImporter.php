@@ -63,7 +63,7 @@ class FulfillmentsCsvImporter {
 	private array $options;
 
 	/**
-	 * Per-run cache of resolved orders, keyed by the raw order number string from the CSV.
+	 * Per-run cache of resolved orders, keyed by the raw order number cell from the CSV.
 	 * Numeric keys appear when PHP canonicalizes numeric strings.
 	 *
 	 * @var array<int|string, WC_Order|null>
@@ -88,7 +88,7 @@ class FulfillmentsCsvImporter {
 	private array $fulfillments_cache = array();
 
 	/**
-	 * Validation-error codes seen since the last Tracks flush, with counts.
+	 * Validation-error codes seen since the last Tracks flush.
 	 *
 	 * @var array<string, int>
 	 */
@@ -274,8 +274,9 @@ class FulfillmentsCsvImporter {
 	 *
 	 *     @type array<string, true>    $seen_tracking_pairs Cross-chunk dedupe state; pass back in to subsequent calls.
 	 *     @type int                    $byte_offset         Byte position from a prior chunk's result to fseek to instead
-	 *                                                       of forward-reading rows. When > 0 only the header-row read is
-	 *                                                       skipped; mapping is still validated.
+	 *                                                       of forward-reading rows. When the seek succeeds, the header
+	 *                                                       read and the row fast-forward are both skipped; mapping is
+	 *                                                       still validated.
 	 * }
 	 * @return array{
 	 *     counts: array{created:int, updated:int, skipped:int, failed:int, notified:int},
@@ -512,7 +513,8 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Resolve the filtered chunk size, clamped to [1, MAX_CHUNK_SIZE].
+	 * Resolve the filtered chunk size. Falls back to the default when the filter returns
+	 * less than 1, and caps the result at MAX_CHUNK_SIZE.
 	 *
 	 * @since 11.2.0
 	 *

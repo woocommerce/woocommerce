@@ -644,6 +644,8 @@ final class ImportSession {
 	 * @return array<string, mixed>
 	 */
 	public function summary(): array {
+		// The rows key is part of the wizard's summary shape; the client fills it from the
+		// per-chunk responses, so the server side of it is always empty.
 		return array_merge( $this->counts(), array( 'rows' => array() ) );
 	}
 
