@@ -25,6 +25,14 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 						'textTransform' => 'uppercase',
 					),
 				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+				),
 			)
 		);
 
@@ -37,12 +45,46 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Border radius is not applied to visual swatch chip items.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::render
+	 */
+	public function test_does_not_apply_border_radius_to_swatch_items(): void {
+		$markup = $this->render_chips(
+			array(
+				'style' => array(
+					'border' => array(
+						'radius' => '0px',
+					),
+				),
+			),
+			array(
+				array(
+					'id'       => 'item-red',
+					'label'    => 'Red',
+					'value'    => 'red',
+					'selected' => false,
+					'visual'   => array(
+						'type'  => 'color',
+						'color' => '#ff0000',
+					),
+				),
+			)
+		);
+
+		$item_style = $this->get_style( $markup, 'wc-block-product-filter-chips__item' );
+
+		$this->assertStringContainsString( 'is-style-swatch', $markup, 'Visual items should use the swatch style.' );
+		$this->assertStringNotContainsString( 'border-radius', $item_style, 'Swatch items should not get an inline border radius.' );
+	}
+
+	/**
 	 * Render the Chips block with the given attributes.
 	 *
 	 * @param array $attributes Block attributes.
+	 * @param array $items      Selectable items.
 	 * @return string Rendered markup.
 	 */
-	private function render_chips( array $attributes ): string {
+	private function render_chips( array $attributes, array $items ): string {
 		$block = new \WP_Block(
 			array(
 				'blockName'    => 'woocommerce/product-filter-chips',
@@ -51,14 +93,7 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 			),
 			array(
 				'woocommerce/selectableItems' => array(
-					'items'          => array(
-						array(
-							'id'       => 'item-red',
-							'label'    => 'Red',
-							'value'    => 'red',
-							'selected' => false,
-						),
-					),
+					'items'          => $items,
 					'selectionMode'  => 'multiple',
 					'storeNamespace' => 'woocommerce/product-filters',
 				),

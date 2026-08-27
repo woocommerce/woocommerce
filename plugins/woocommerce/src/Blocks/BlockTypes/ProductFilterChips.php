@@ -68,7 +68,11 @@ final class ProductFilterChips extends AbstractBlock {
 			$classes = trim( $classes . ' wc-block-product-filter-chips' );
 		}
 
-		$chip_item_attributes = self::get_chip_item_attributes( is_array( $attributes ) ? $attributes : array() );
+		$has_visual_swatches  = self::has_visual_swatches( $items );
+		$chip_item_attributes = self::get_chip_item_attributes(
+			is_array( $attributes ) ? $attributes : array(),
+			$has_visual_swatches
+		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
@@ -103,10 +107,9 @@ final class ProductFilterChips extends AbstractBlock {
 		$visible_items           = array_merge( $first_items, $overflow_selected_items );
 		$hidden_count            = count( $items ) - count( $visible_items );
 
-		$first_item          = reset( $items );
-		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = self::has_visual_swatches( $items );
-		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
+		$first_item  = reset( $items );
+		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$button_role = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
 		if ( $has_visual_swatches && ! str_contains( $classes, 'is-style-swatch' ) ) {
 			$classes                    .= ' is-style-swatch';
@@ -239,10 +242,20 @@ final class ProductFilterChips extends AbstractBlock {
 	/**
 	 * Get class and style attributes for individual chip items.
 	 *
-	 * @param array $attributes Block attributes.
+	 * Visual swatches stay circular, so border radius is not applied to them.
+	 *
+	 * @param array $attributes          Block attributes.
+	 * @param bool  $has_visual_swatches Whether items use the swatch style.
 	 * @return array{class: string, style: string}
 	 */
-	private static function get_chip_item_attributes( array $attributes ): array {
+	private static function get_chip_item_attributes( array $attributes, bool $has_visual_swatches ): array {
+		if ( $has_visual_swatches ) {
+			return array(
+				'class' => 'wc-block-product-filter-chips__item',
+				'style' => '',
+			);
+		}
+
 		$border_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
 			$attributes,
 			array( 'border_radius' )

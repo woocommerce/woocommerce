@@ -74,8 +74,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const borderProps = useBorderProps( attributes );
 	const chipItemClassName = clsx(
 		'wc-block-product-filter-chips__item',
-		borderProps.className
+		! hasVisualSwatches && borderProps.className
 	);
+	const chipItemStyle = hasVisualSwatches ? undefined : borderProps.style;
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -102,7 +103,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				className={ chipItemClassName }
 				key={ i }
 				style={ {
-					...borderProps.style,
+					...chipItemStyle,
 					/* stylelint-disable */
 					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
 				} }
@@ -110,7 +111,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				&nbsp;
 			</div>
 		) );
-	}, [ borderProps.style, chipItemClassName ] );
+	}, [ chipItemStyle, chipItemClassName ] );
 
 	if ( ! items ) {
 		return <></>;
@@ -133,7 +134,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								<div
 									key={ index }
 									className={ chipItemClassName }
-									style={ borderProps.style }
+									style={ chipItemStyle }
 									aria-checked={ !! item.selected }
 								>
 									<span className="wc-block-product-filter-chips__label">
