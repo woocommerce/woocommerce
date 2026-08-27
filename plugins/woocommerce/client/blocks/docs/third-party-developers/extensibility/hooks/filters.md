@@ -564,7 +564,20 @@ apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array $d
 
 ### Description
 
-Accepts an array of hooked data. The array should be in the following format: [ [ hook => `<hook-name>`, function => `<function-name>`, priority => `<priority>`, ], ... ] Where:
+Accepts an array of hooked data. The array should be in the following format:
+
+```text
+[
+  [
+    hook => <hook-name>,
+    function => <function-name>,
+    priority => <priority>,
+ ],
+ ...
+]
+```
+
+Where:
 
 - hook-name is the name of the hook that have the functions hooked to.
 - function-name is the hooked function name.
