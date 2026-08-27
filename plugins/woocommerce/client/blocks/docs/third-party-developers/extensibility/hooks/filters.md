@@ -1079,7 +1079,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ### Description
 
-Filters the variation option name for custom option slugs.
+Allows extensions to attach their own name/value pairs to a cart item, which the Store API returns in the item's `item_data` field.
 
 ### Parameters
 

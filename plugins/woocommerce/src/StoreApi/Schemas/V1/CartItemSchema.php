@@ -157,7 +157,8 @@ class CartItemSchema extends ItemSchema {
 		/**
 		 * Filters cart item data.
 		 *
-		 * Filters the variation option name for custom option slugs.
+		 * Allows extensions to attach their own name/value pairs to a cart item, which the Store
+		 * API returns in the item's `item_data` field.
 		 *
 		 * @since 4.3.0
 		 *
