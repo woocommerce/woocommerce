@@ -10,6 +10,11 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 class CheckoutFieldsAdmin {
 
 	/**
+	 * Arguments a field type can contribute through prepare_form_field that the meta boxes understand.
+	 */
+	private const TYPE_ARGS = array( 'options', 'checked_value', 'unchecked_value', 'custom_attributes' );
+
+	/**
 	 * Checkout field controller.
 	 *
 	 * @var CheckoutFields
@@ -38,11 +43,17 @@ class CheckoutFieldsAdmin {
 	/**
 	 * Converts the shape of a checkout field to match whats needed in the WooCommerce meta boxes.
 	 *
+	 * The meta boxes render with the same woocommerce_wp_* helpers as the My Account forms, so the field
+	 * is passed through prepare_form_field() to pick up type-specific arguments: select option maps,
+	 * checkbox submit values, and the resolved date min/max attributes.
+	 *
 	 * @param array  $field The field to format.
 	 * @param string $key The field key. This will be used for the ID of the field when passed to the meta box.
 	 * @return array Formatted field.
 	 */
 	protected function format_field_for_meta_box( $field, $key ) {
+		$field = $this->checkout_fields_controller->prepare_form_field( $field );
+
 		$formatted_field = array(
 			'id'              => $key,
 			'label'           => $field['label'],
@@ -53,13 +64,10 @@ class CheckoutFieldsAdmin {
 			'wrapper_class'   => 'form-field-wide',
 		);
 
-		if ( 'select' === $field['type'] ) {
-			$formatted_field['options'] = array_column( $field['options'], 'label', 'value' );
-		}
-
-		if ( 'checkbox' === $field['type'] ) {
-			$formatted_field['checked_value']   = '1';
-			$formatted_field['unchecked_value'] = '0';
+		foreach ( self::TYPE_ARGS as $arg ) {
+			if ( isset( $field[ $arg ] ) ) {
+				$formatted_field[ $arg ] = $field[ $arg ];
+			}
 		}
 
 		return $formatted_field;
