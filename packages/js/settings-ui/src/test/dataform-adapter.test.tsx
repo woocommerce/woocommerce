@@ -91,7 +91,7 @@ describe( 'dataform adapter', () => {
 			[ 'radio', 'text', 'radio' ],
 			[ 'checkbox', 'boolean', 'checkbox' ],
 			[ 'number', 'number', 'number' ],
-			[ 'array', 'array', 'array' ],
+			[ 'array', 'array', 'select' ],
 		];
 
 		it.each( typeExpectations )(
@@ -493,6 +493,40 @@ describe( 'dataform adapter', () => {
 				1
 			);
 			expect( container.textContent ).toContain( 'Useful information.' );
+		} );
+
+		it( 'renders array fields as a closed multi-select', () => {
+			const arrayField: SettingsUIField = {
+				id: 'countries',
+				label: 'Countries',
+				type: 'array',
+				options: [
+					{ label: 'France', value: 'FR' },
+					{ label: 'Spain', value: 'ES' },
+				],
+			};
+			const options = createOptions( [ arrayField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { countries: [ 'FR' ] };
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ () => undefined }
+				/>
+			);
+
+			const select = container.querySelector( 'select' );
+			expect( select?.multiple ).toBe( true );
+			expect(
+				Array.from( select?.options ?? [] ).map( ( o ) => o.value )
+			).toEqual( [ 'FR', 'ES' ] );
+			// A closed control offers no free-text input.
+			expect(
+				container.querySelector( 'input[type="text"]' )
+			).toBeNull();
 		} );
 
 		it( 'surfaces grouped validity through FieldValidity children', () => {

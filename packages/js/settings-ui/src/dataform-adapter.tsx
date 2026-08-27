@@ -54,7 +54,9 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	radio: { type: 'text', edit: 'radio' },
 	textarea: { type: 'text', edit: 'textarea' },
 	number: { type: 'number', edit: 'number' },
-	array: { type: 'array', edit: 'array' },
+	// The select control renders as a closed multi-select for array fields,
+	// matching the `select multiple` the native renderer uses.
+	array: { type: 'array', edit: 'select' },
 	text: { type: 'text', edit: 'text' },
 	password: { type: 'password', edit: 'password' },
 	'datetime-local': { type: 'datetime', edit: 'datetime' },
