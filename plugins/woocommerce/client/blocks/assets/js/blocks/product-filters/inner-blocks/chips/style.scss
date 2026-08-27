@@ -1,3 +1,7 @@
+:where(.wp-block-woocommerce-product-filter-chips) {
+	font-size: 0.8em;
+}
+
 :where(.wc-block-product-filter-chips__fieldset) {
 	display: contents;
 }
@@ -8,14 +12,16 @@
 	gap: $gap-smallest;
 }
 
-.wc-block-product-filter-chips__item {
+:where(.wc-block-product-filter-chips__item) {
 	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
 	padding: 0.4em 0.75em;
 	appearance: none;
 	background: transparent;
 	border-radius: 2px;
-	font-size: 0.8em;
 	font-family: inherit;
+	font-size: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 	cursor: pointer;
 	color: inherit;
 
@@ -77,15 +83,24 @@
 	display: inline-flex;
 	align-items: center;
 	gap: $gap-smallest;
+	font-size: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 	vertical-align: bottom;
 }
 
 .wc-block-product-filter-chips__text {
 	display: contents;
+	font-size: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 }
 
 .wc-block-product-filter-chips__count {
 	white-space: nowrap;
+	font-size: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 }
 
 .wc-block-product-filter-chips__show-more {
@@ -94,7 +109,6 @@
 	border: 0;
 	padding: 0;
 	font: inherit;
-	font-size: 0.875em;
 	color: inherit;
 	text-decoration: underline;
 	cursor: pointer;

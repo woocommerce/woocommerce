@@ -17,6 +17,9 @@ import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalUseBorderProps as useBorderProps,
 } from '@wordpress/block-editor';
 
 /**
@@ -68,6 +71,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		{}
 	);
 	const colorVars = getColorVars( attributes );
+	const borderProps = useBorderProps( attributes );
+	const chipItemClassName = clsx(
+		'wc-block-product-filter-chips__item',
+		borderProps.className
+	);
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -91,9 +99,10 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const loadingState = useMemo( () => {
 		return [ ...Array( 10 ) ].map( ( _, i ) => (
 			<div
-				className="wc-block-product-filter-chips__item"
+				className={ chipItemClassName }
 				key={ i }
 				style={ {
+					...borderProps.style,
 					/* stylelint-disable */
 					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
 				} }
@@ -101,7 +110,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				&nbsp;
 			</div>
 		) );
-	}, [] );
+	}, [ borderProps.style, chipItemClassName ] );
 
 	if ( ! items ) {
 		return <></>;
@@ -123,7 +132,8 @@ const Edit = ( props: EditProps ): JSX.Element => {
 							).map( ( item, index ) => (
 								<div
 									key={ index }
-									className="wc-block-product-filter-chips__item"
+									className={ chipItemClassName }
+									style={ borderProps.style }
 									aria-checked={ !! item.selected }
 								>
 									<span className="wc-block-product-filter-chips__label">
