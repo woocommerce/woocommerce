@@ -783,7 +783,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Get persisted order item IDs, optionally limited to an item type.
 	 *
-	 * @since 11.0.2
+	 * @since 11.1.0
 	 *
 	 * @param WC_Order    $order Order object.
 	 * @param string|null $type Order item type, or null for every type.
@@ -832,7 +832,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Delete selected order items by ID.
 	 *
-	 * @since 11.0.2
+	 * @since 11.1.0
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param int[]    $ids   Order item IDs to delete.

@@ -121,7 +121,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Item IDs captured for bulk delete by type.
 	 *
-	 * @since 11.0.2
+	 * @since 11.1.0
 	 * @var array<string, array<int>>
 	 */
 	protected $item_ids_to_bulk_delete_by_type = array();
@@ -140,7 +140,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * IDs of items captured when a full deferred removal is requested.
 	 *
-	 * @since 11.0.2
+	 * @since 11.1.0
 	 * @var array<int>
 	 */
 	protected $item_ids_to_bulk_delete = array();
