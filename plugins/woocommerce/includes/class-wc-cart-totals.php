@@ -422,8 +422,9 @@ final class WC_Cart_Totals {
 				$a_position = $this->coupon_application_positions[ spl_object_id( $a ) ] ?? null;
 				$b_position = $this->coupon_application_positions[ spl_object_id( $b ) ] ?? null;
 
+				// Equal positions must fall through to the amount fallback, so the inequality check stays outside the helper.
 				if ( null !== $a_position && null !== $b_position && $a_position !== $b_position ) {
-					return ( $a_position < $b_position ) ? -1 : 1;
+					return wc_uasort_comparison( $a_position, $b_position );
 				}
 
 				if ( $a->get_amount() === $b->get_amount() ) {
