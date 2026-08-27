@@ -50,7 +50,7 @@ class FulfillmentsCsvImporterController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'register_wp_importer' ) );
 		add_action( 'load-importer-' . self::WP_IMPORTER_ID, array( $this, 'redirect_to_orders_screen' ) );
-		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'cleanup_abandoned_file' ), 10, 4 );
+		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10, 4 );
 	}
 
 	/**

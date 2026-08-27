@@ -174,7 +174,8 @@ final class ImportSession {
 		 *
 		 * Listeners receive the session metadata and can bail out early by checking whether
 		 * the matching session transient still exists. The default handler is
-		 * {@see ImportSession::cleanup_abandoned_file()}.
+		 * {@see ImportSession::handle_cleanup_hook()}. Action Scheduler fires the hook, so this
+		 * docblock sits on the scheduling call rather than on a do_action().
 		 *
 		 * @since 11.2.0
 		 *
@@ -192,10 +193,35 @@ final class ImportSession {
 	}
 
 	/**
-	 * Cleanup callback fired by Action Scheduler after the TTL grace window.
+	 * Hook callback for the cleanup action.
+	 *
+	 * The arguments arrive from a persisted Action Scheduler payload and from anything else
+	 * that fires the hook, so they are coerced before reaching the typed method below.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $user_id       User the session belongs to.
+	 * @param mixed $token         Session token.
+	 * @param mixed $file          Absolute path to the staged CSV.
+	 * @param mixed $attachment_id Attachment post created for the staged CSV.
+	 */
+	public static function handle_cleanup_hook( $user_id = 0, $token = '', $file = '', $attachment_id = 0 ): void {
+		if ( ! is_scalar( $token ) || ! is_scalar( $file ) ) {
+			return;
+		}
+		self::cleanup_abandoned_file(
+			is_numeric( $user_id ) ? (int) $user_id : 0,
+			(string) $token,
+			(string) $file,
+			is_numeric( $attachment_id ) ? (int) $attachment_id : 0
+		);
+	}
+
+	/**
+	 * Delete the staged CSV of a session that was never finished.
 	 *
 	 * Only deletes the file when the matching session transient has expired; if the user is
-	 * still mid-import the action becomes a no-op.
+	 * still mid-import this is a no-op.
 	 *
 	 * @since 11.2.0
 	 *

@@ -227,6 +227,35 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cleanup hook callback coerces loosely typed arguments instead of fataling.
+	 */
+	public function test_cleanup_hook_callback_coerces_arguments(): void {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10, 4 );
+
+		try {
+			// Action Scheduler payloads are persisted, so the user ID can come back as a string.
+			do_action( ImportSession::CLEANUP_HOOK, '73', 'ghost', $file, '0' );
+		} finally {
+			remove_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10 );
+		}
+
+		$this->assertFileDoesNotExist( $file );
+	}
+
+	/**
+	 * @testdox The cleanup hook callback ignores a non-scalar file argument.
+	 */
+	public function test_cleanup_hook_callback_ignores_non_scalar_args(): void {
+		ImportSession::handle_cleanup_hook( 74, 'ghost', array( 'not', 'a', 'path' ) );
+
+		$this->assertTrue( true, 'A malformed payload must not fatal' );
+	}
+
+	/**
 	 * @testdox cleanup_abandoned_file() deletes the staged file when the session transient is gone.
 	 */
 	public function test_cleanup_abandoned_file_deletes_when_session_is_gone(): void {
