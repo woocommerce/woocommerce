@@ -204,7 +204,10 @@ class DateFieldType extends AbstractFieldType {
 	 * @return array The updated arguments.
 	 */
 	public function prepare_form_field( array $form_field ): array {
-		$form_field['custom_attributes'] = array_filter( $this->get_constraints( $form_field ) );
+		$form_field['custom_attributes'] = array_merge(
+			isset( $form_field['custom_attributes'] ) && is_array( $form_field['custom_attributes'] ) ? $form_field['custom_attributes'] : array(),
+			array_filter( $this->get_constraints( $form_field ) )
+		);
 
 		return $form_field;
 	}
