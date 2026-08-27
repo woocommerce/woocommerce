@@ -862,24 +862,16 @@ function wc_scheduled_sales() {
 	/**
 	 * Apply a sale state to a list of products, priming caches in batches.
 	 *
-	 * Priming the whole result set up front is what exhausts memory on a large backlog:
-	 * the request can die before a single product is saved. Priming and releasing per
-	 * batch lets a run that cannot finish still get somewhere.
+	 * Priming the whole result set up front is what exhausts memory before the first save.
+	 * Relief is partial: each product read leaves a cache-prefix entry nothing releases, and
+	 * saving a variation queues its parent for the unbatched shutdown sync.
 	 *
-	 * The relief is partial. Every product read leaves a cache-prefix entry in a group
-	 * named for that product, which nothing releases, and saving a variation queues its
-	 * parent for the deferred sync WC_Post_Data::do_deferred_product_sync() drains
-	 * unbatched at shutdown.
-	 *
-	 * @param string[]|int[] $product_ids Products to process, in query order. The core data
-	 *                                    store returns numeric strings from $wpdb->get_col();
-	 *                                    a replaced store may return anything.
-	 * @param string          $mode        'start' or 'end'.
+	 * @param string[]|int[] $product_ids Products to process, in query order. $wpdb->get_col()
+	 *                                    returns strings; a replaced store may return anything.
+	 * @param string         $mode        'start' or 'end'.
 	 */
 	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
-		// Sliced per iteration rather than array_chunk()ed up front: chunking builds every
-		// batch before the first one runs, which allocates against the whole backlog at the
-		// exact moment this loop exists to keep flat.
+		// Sliced per iteration: array_chunk() would build every batch before the first runs.
 		$total = count( $product_ids );
 
 		for ( $offset = 0; $offset < $total; $offset += 50 ) {
@@ -887,13 +879,9 @@ function wc_scheduled_sales() {
 
 			_prime_post_caches( $chunk );
 
-			// These IDs become array keys below, where a non-scalar is a fatal, and the data
-			// store is replaceable through woocommerce_product_data_store. Screening on the
-			// rule _get_non_cached_ids() applied to the posts prime keeps the release set to
-			// entries this batch could have created, so one malformed row neither ends the
-			// run nor evicts an unrelated post. Only that prime is screened this way: the
-			// meta and term primes intval() the raw chunk instead, so a malformed row can
-			// leave those two behind. Bounded by the malformed rows, not by the backlog.
+			// _validate_cache_id()'s rule, which gated the posts prime. A replaced data store
+			// can return anything, and these become array keys below. The meta and term primes
+			// intval() the raw chunk instead, so a malformed row leaves those two behind.
 			$release_ids = array_values(
 				array_map(
 					'intval',
@@ -904,70 +892,42 @@ function wc_scheduled_sales() {
 				)
 			);
 
-			// Collected the way _prime_post_caches() collects them, so the release below can
-			// mirror it exactly. Priming resolves the batch's post types, then caches every
-			// ID against the union of their taxonomies, empty relationships included, so
-			// only the same union clears what it wrote. Reading the types here keeps
-			// get_post_type() a cache hit off that prime: saving inside the loop evicts the
-			// entries it reads, and a type that resolves to nothing primed nothing.
+			// Priming caches every ID against the union of these types' taxonomies, so only
+			// the same union clears it. Must be read here: the save loop evicts what it reads.
 			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $release_ids ) ) ) );
 
 			foreach ( $chunk as $product_id ) {
 				$product = wc_get_product( $product_id );
 
 				if ( $product ) {
-					// Note: this does not schedule the matching end event. Both modes change
-					// only the price prop, and get_props_to_update() queues a meta key only
-					// when its prop is in get_changes() or the key is missing entirely, so
-					// the sale date keys are never written for a product the sale queries
-					// matched. wc_maybe_schedule_sale_events_on_meta_change() gates on that
-					// key and returns early, leaving the ending to this daily run.
+					// Schedules no end event: only the price prop changes, so
+					// get_props_to_update() never writes a sale date key to trigger one.
 					wc_apply_sale_state_for_product( $product, $mode );
 				}
 
 				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 			}
 
-			// Release what this batch primed, so peak memory stays flat across a large
-			// backlog. These groups key on the object ID, so only this batch's own entries
-			// go: posts and post_meta are shared with every other post type and every other
-			// job in the same WP-Cron request, and must not be flushed whole.
+			// posts and post_meta are shared with every other job in this WP-Cron request,
+			// so delete this batch's own IDs rather than flushing the groups whole.
 			wp_cache_delete_multiple( $release_ids, 'posts' );
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
-			// Every ID against every type, one type per call. clean_object_term_cache()
-			// would take the whole list at once, but it passes the value straight to the
-			// public clean_object_term_cache action, whose signature is a single string, and
-			// a callback that type hints it would fatal on an array. Looping keeps that
-			// contract and still covers the union, since each pass clears one type's
-			// taxonomies for the whole batch.
+			// One type per call, though the function takes the whole list: it forwards the
+			// value to a public action typed string, where an array would fatal a listener.
 			foreach ( $release_types as $release_type ) {
 				clean_object_term_cache( $release_ids, $release_type );
 			}
 
-			// With product_instance_caching on, wc_get_product() caches every product it
-			// reads. Saving one already releases its own entry through
-			// ProductCacheController, but a product this loop reads without saving keeps
-			// its entry, so release the group. With the feature off this flush is a no-op. It is registered
-			// non-persistent, so this only ever touches the current request. A drop-in
-			// without flush_group support releases none of it: this is the one group with
-			// no other release path, so the relief does not reach that configuration.
+			// Saving releases a product's own entry; this catches the ones only read. The
+			// group is non-persistent, and has no other release path when flush_group is
+			// unsupported, so that configuration keeps them for the whole run.
 			if ( $flush_product_objects ) {
 				wp_cache_flush_group( 'product_objects' );
 			}
 
-			// These are persistent-capable, so only release them when the cache lives in
-			// this request rather than evicting entries other requests are using. products
-			// goes whole rather than per ID like posts above, because it is WooCommerce's
-			// own group, it is only reached here when the cache is request-local, and its
-			// keys carry a per-product random prefix a scoped delete would have to rebuild
-			// for every ID to find them.
-			//
-			// term-queries is the bulk of what this releases: priming a batch caches its
-			// term lookup under one entry, and clean_object_term_cache() only invalidates
-			// it by salt, which leaves the entry resident. The terms group is left alone on
-			// purpose: it keys by term ID and is bounded by the size of the taxonomy rather
-			// than the backlog, so flushing it per batch would re-query the same terms for
-			// nothing.
+			// Persistent-capable, so released only when the cache is request-local. Whole
+			// groups because their keys carry a random prefix. terms is left alone on
+			// purpose: it keys by term ID, so it is bounded by the taxonomy, not the backlog.
 			if ( $flush_shared_groups ) {
 				wp_cache_flush_group( 'products' );
 				wp_cache_flush_group( 'term-queries' );
