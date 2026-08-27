@@ -1459,17 +1459,17 @@ apply_filters( 'woocommerce_product_tabs', array $tabs )
 ## woocommerce_quantity_input_placeholder
 
 
-Filter the placeholder value allowed for the product.
+Filter the placeholder shown in the quantity input.
 
 ```php
-apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Product $product )
+apply_filters( 'woocommerce_quantity_input_placeholder', int $placeholder, \WC_Product $product )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $max_value | int | Maximum quantity value. |
+| $placeholder | int | Placeholder for the quantity input. |
 | $product | \WC_Product | Product object. |
 
 ### Source
