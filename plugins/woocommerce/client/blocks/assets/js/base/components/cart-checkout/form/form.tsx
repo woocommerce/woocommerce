@@ -38,6 +38,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  */
 import { Select } from '../../select';
 import AddressLineFields from './address-line-fields';
+import { resolveDateConstraint } from './date-constraints';
 import { FormProps } from './types';
 import { useFormFields } from './use-form-fields';
 import { useFormValidation } from './use-form-validation';
@@ -422,16 +423,23 @@ const Form = <
 						}
 						{ ...fieldProps }
 						type={ field.type }
-						icon={
-							field.type === 'date' ? (
-								<span
-									className="wc-block-components-text-input__date-icon"
-									aria-hidden="true"
-								>
-									<Icon icon={ calendar } size={ 24 } />
-								</span>
-							) : null
-						}
+						{ ...( field.type === 'date'
+							? {
+									min: resolveDateConstraint( field.min ),
+									max: resolveDateConstraint( field.max ),
+									icon: (
+										<span
+											className="wc-block-components-text-input__date-icon"
+											aria-hidden="true"
+										>
+											<Icon
+												icon={ calendar }
+												size={ 24 }
+											/>
+										</span>
+									),
+							  }
+							: {} ) }
 						ariaDescribedBy={ ariaDescribedBy }
 						value={
 							decodeEntities(

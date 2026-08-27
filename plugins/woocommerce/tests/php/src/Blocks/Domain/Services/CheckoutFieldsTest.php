@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldTypes\DateFieldType;
 use WP_UnitTestCase;
 
 /**
@@ -96,6 +97,22 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'label'    => 'Preferred delivery date',
 				'location' => 'order',
 				'type'     => 'date',
+			),
+			array(
+				'id'       => 'plugin-namespace/appointment-date',
+				'label'    => 'Appointment date',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'P0D',
+				'max'      => 'P30D',
+			),
+			array(
+				'id'       => 'plugin-namespace/promo-date',
+				'label'    => 'Promotion date',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => '2026-01-01',
+				'max'      => '2026-12-31',
 			),
 			array(
 				'id'         => 'namespace/vat-number',
@@ -266,6 +283,216 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			$this->controller->format_additional_field_value( $value, $fields['plugin-namespace/delivery-date'] ),
 			'A value that is not a real date should be shown as stored rather than rolled forward.'
 		);
+	}
+
+	/**
+	 * @testdox Date constraints are exposed on the field as registered, not resolved.
+	 */
+	public function test_date_constraints_are_not_resolved_on_the_field() {
+		$fields = $this->controller->get_additional_fields();
+
+		$this->assertSame( '2026-01-01', $fields['plugin-namespace/promo-date']['min'] );
+		$this->assertSame( '2026-12-31', $fields['plugin-namespace/promo-date']['max'] );
+
+		// A resolved value here would freeze into any page cache holding the rendered form.
+		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
+		$this->assertSame( 'P30D', $fields['plugin-namespace/appointment-date']['max'] );
+	}
+
+	/**
+	 * @testdox Date constraints are resolved against the current date in the store timezone.
+	 */
+	public function test_date_constraints_are_resolved_on_demand() {
+		$fields    = $this->controller->get_additional_fields();
+		$date_type = new DateFieldType();
+
+		$this->assertSame(
+			array(
+				'min' => $this->date_relative_to_today( 'today' ),
+				'max' => $this->date_relative_to_today( '+30 days' ),
+			),
+			$date_type->get_constraints( $fields['plugin-namespace/appointment-date'] )
+		);
+
+		$this->assertSame(
+			array(
+				'min' => '2026-01-01',
+				'max' => '2026-12-31',
+			),
+			$date_type->get_constraints( $fields['plugin-namespace/promo-date'] )
+		);
+
+		$this->assertSame(
+			array(
+				'min' => null,
+				'max' => null,
+			),
+			$date_type->get_constraints( $fields['plugin-namespace/delivery-date'] )
+		);
+	}
+
+	/**
+	 * @testdox Date fields without constraints are unbounded.
+	 */
+	public function test_date_field_without_constraints_has_no_bounds() {
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$this->assertArrayNotHasKey( 'min', $field );
+		$this->assertArrayNotHasKey( 'max', $field );
+		$this->assertFalse( $this->controller->validate_field( $field, '1901-01-01' )->has_errors() );
+		$this->assertFalse( $this->controller->validate_field( $field, '2222-12-31' )->has_errors() );
+	}
+
+	/**
+	 * @testdox Absolute date constraints are enforced, inclusive of both bounds.
+	 *
+	 * @testWith ["2026-01-01", false]
+	 *           ["2026-06-15", false]
+	 *           ["2026-12-31", false]
+	 *           ["2025-12-31", true]
+	 *           ["2027-01-01", true]
+	 *
+	 * @param string $value      The submitted value.
+	 * @param bool   $has_errors Whether the value should be rejected.
+	 */
+	public function test_absolute_date_constraints_are_enforced( string $value, bool $has_errors ) {
+		$field  = $this->controller->get_additional_fields()['plugin-namespace/promo-date'];
+		$errors = $this->controller->validate_field( $field, $value );
+
+		$this->assertSame( $has_errors, $errors->has_errors(), sprintf( 'Unexpected validation result for "%s".', $value ) );
+	}
+
+	/**
+	 * @testdox Relative date constraints are enforced against the current date.
+	 *
+	 * @testWith ["today", false]
+	 *           ["+1 day", false]
+	 *           ["+30 days", false]
+	 *           ["-1 day", true]
+	 *           ["+31 days", true]
+	 *
+	 * @param string $offset     The submitted value, relative to today.
+	 * @param bool   $has_errors Whether the value should be rejected.
+	 */
+	public function test_relative_date_constraints_are_enforced( string $offset, bool $has_errors ) {
+		$field  = $this->controller->get_additional_fields()['plugin-namespace/appointment-date'];
+		$errors = $this->controller->validate_field( $field, $this->date_relative_to_today( $offset ) );
+
+		$this->assertSame( $has_errors, $errors->has_errors(), sprintf( 'Unexpected validation result for "%s".', $offset ) );
+	}
+
+	/**
+	 * @testdox An out of range date is rejected with a message naming the boundary in the site date format.
+	 */
+	public function test_out_of_range_date_error_message() {
+		update_option( 'date_format', 'F j, Y' );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/promo-date'];
+
+		$this->assertSame(
+			'Please provide a Promotion date on or after January 1, 2026.',
+			$this->controller->validate_field( $field, '2025-12-31' )->get_error_message()
+		);
+		$this->assertSame(
+			'Please provide a Promotion date on or before December 31, 2026.',
+			$this->controller->validate_field( $field, '2027-01-01' )->get_error_message()
+		);
+	}
+
+	/**
+	 * @testdox A date field with an unparseable constraint is not registered.
+	 *
+	 * @testWith ["min", "not-a-date"]
+	 *           ["max", "2026-02-31"]
+	 *           ["min", "2026-8-6"]
+	 *           ["max", ""]
+	 *           ["min", "today"]
+	 *           ["max", "+1 day"]
+	 *           ["min", "PT1H"]
+	 *           ["max", 20260826]
+	 *
+	 * @param string $constraint The constraint being set.
+	 * @param mixed  $value      The invalid value.
+	 */
+	public function test_date_field_with_invalid_constraint_is_not_registered( string $constraint, $value ) {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		$field                = array(
+			'id'       => 'plugin-namespace/invalid-constraint',
+			'label'    => 'Invalid constraint',
+			'location' => 'order',
+			'type'     => 'date',
+		);
+		$field[ $constraint ] = $value;
+
+		woocommerce_register_additional_checkout_field( $field );
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/invalid-constraint', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox A date field whose min resolves later than its max is not registered.
+	 *
+	 * @testWith ["2026-12-31", "2026-01-01"]
+	 *           ["P2M", "P1M"]
+	 *           ["-P13Y", "-P18Y"]
+	 *
+	 * @param string $min The min constraint.
+	 * @param string $max The max constraint.
+	 */
+	public function test_date_field_with_inverted_constraints_is_not_registered( string $min, string $max ) {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/inverted-constraints',
+				'label'    => 'Inverted constraints',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => $min,
+				'max'      => $max,
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/inverted-constraints', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox An ordered min/max pair is registered, as is a mixed absolute/duration pair.
+	 *
+	 * @testWith ["P1D", "P1M"]
+	 *           ["P28D", "P1M"]
+	 *           ["P12M", "P370D"]
+	 *           ["-P18Y", "-P13Y"]
+	 *           ["P0D", "2999-12-31"]
+	 *           ["2020-01-01", "P0D"]
+	 *
+	 * @param string $min The min constraint.
+	 * @param string $max The max constraint.
+	 */
+	public function test_date_field_with_ordered_constraints_is_registered( string $min, string $max ) {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/ordered-constraints',
+				'label'    => 'Ordered constraints',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => $min,
+				'max'      => $max,
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/ordered-constraints', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * Returns a Y-m-d date, resolved independently of the code under test.
+	 *
+	 * @param string $expression An absolute Y-m-d date, or an expression relative to today such as "+1 day".
+	 * @return string
+	 */
+	private function date_relative_to_today( string $expression ): string {
+		return ( new \DateTime( $expression, wp_timezone() ) )->format( 'Y-m-d' );
 	}
 
 	/**

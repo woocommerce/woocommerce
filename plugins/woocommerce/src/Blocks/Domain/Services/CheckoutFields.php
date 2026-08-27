@@ -488,6 +488,9 @@ class CheckoutFields {
 	/**
 	 * Returns an array of all additional fields.
 	 *
+	 * Date field min/max constraints are returned as registered, not resolved to a date. Resolving them here
+	 * would freeze a duration such as "P1D" into whatever markup a page cache stored.
+	 *
 	 * @return array An array of fields.
 	 */
 	public function get_additional_fields() {
@@ -986,7 +989,8 @@ class CheckoutFields {
 	/**
 	 * Applies type-specific arguments to a field before it is rendered with woocommerce_form_field().
 	 *
-	 * Used by the server-rendered My Account forms: maps select options and sets checkbox submit values.
+	 * Used by the server-rendered My Account forms: maps select options, sets checkbox submit values, and
+	 * resolves date min/max constraints into input attributes.
 	 *
 	 * @param array $form_field The woocommerce_form_field() arguments built from the field.
 	 * @return array The updated arguments.
