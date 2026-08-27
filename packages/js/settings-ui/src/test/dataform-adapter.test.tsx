@@ -165,7 +165,7 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toBe( 'See the docs.' );
 		} );
 
-		it( 'warns and maps an unknown type to a read-only field rendering nothing', () => {
+		it( 'warns and leaves the control unset for an unknown type', () => {
 			const warnSpy = jest
 				.spyOn( console, 'warn' )
 				.mockImplementation( () => undefined );
@@ -174,9 +174,10 @@ describe( 'dataform adapter', () => {
 				createOptions( [] )
 			);
 
-			expect( field.readOnly ).toBe( true );
+			expect( field.type ).toBeUndefined();
 			expect( field.Edit ).toBeUndefined();
-			expect( ( field.render as () => null )() ).toBeNull();
+			expect( field.render ).toBeUndefined();
+			expect( field.readOnly ).toBeUndefined();
 			expect( warnSpy ).toHaveBeenCalledWith(
 				expect.stringContaining(
 					'Field type "extension_defined" is not supported.'

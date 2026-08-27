@@ -162,24 +162,28 @@ export const buildDataFormField = (
 		label: settingsField.label,
 		description: createSettingsHelpElement( settingsField.description ),
 		placeholder: settingsField.placeholder,
-		type: descriptor?.type ?? 'text',
+		type: descriptor?.type,
 		elements: settingsField.options,
 		isVisible: createIsVisible( settingsField, options ),
 		isDisabled: isFieldDisabled( settingsField ),
 	};
 
 	if ( settingsField.type === 'info' ) {
+		// DataForm's regular layout skips fields whose type resolves no Edit
+		// control even when read-only, so info keeps the text type.
+		field.type = 'text';
 		field.readOnly = true;
 		field.render = createInfoRender( settingsField );
 		return field;
 	}
 
 	if ( ! descriptor ) {
+		// The renderer resolves registered type renderers before failing, so
+		// unknown types keep Edit and render unset rather than a baked
+		// fallback the adapter cannot decide on.
 		warn( `Field type "${ settingsField.type }" is not supported.`, {
 			field: settingsField,
 		} );
-		field.readOnly = true;
-		field.render = () => null;
 		return field;
 	}
 
