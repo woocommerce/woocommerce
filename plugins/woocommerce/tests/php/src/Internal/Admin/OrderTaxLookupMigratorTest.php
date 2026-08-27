@@ -256,6 +256,29 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The pending count stops at its limit rather than counting the whole table.
+	 */
+	public function test_pending_count_stops_at_its_limit(): void {
+		global $wpdb;
+
+		$table_name = TaxesDataStore::get_db_table_name();
+		$rows       = array();
+
+		for ( $order_id = 1; $order_id <= OrderTaxLookupMigrator::PENDING_COUNT_LIMIT + 10; $order_id++ ) {
+			$rows[] = "({$order_id}, 0, 0, '2023-02-10 10:00:00', 0, 1, 1)";
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is not user input, and the values are order ids counted out above.
+		$wpdb->query( "INSERT INTO {$table_name} (order_id, tax_rate_id, order_item_id, date_created, shipping_tax, order_tax, total_tax) VALUES " . implode( ', ', $rows ) );
+
+		$this->assertSame(
+			OrderTaxLookupMigrator::PENDING_COUNT_LIMIT,
+			$this->sut->get_total_pending_count(),
+			'Nothing indexes the column the count reads, so it should stop counting once it has enough to report.'
+		);
+	}
+
+	/**
 	 * Make the next write to the lookup table fail, the way a database error mid-rebuild would.
 	 *
 	 * @return callable Removes the filter again.

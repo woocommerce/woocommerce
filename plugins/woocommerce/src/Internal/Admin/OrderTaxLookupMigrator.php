@@ -44,6 +44,18 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	const CURSOR_OPTION = 'woocommerce_order_tax_lookup_migration_last_order_id';
 
 	/**
+	 * How far `get_total_pending_count()` counts before it reports "this many or more".
+	 *
+	 * Nothing indexes the tax order item column, so counting every order left to rebuild reads the
+	 * lookup table end to end, and Status > Tools runs that count on every render. The tool only
+	 * has to say whether there is work left and roughly how much of it, so stop counting once
+	 * there is enough to report.
+	 *
+	 * @var int
+	 */
+	const PENDING_COUNT_LIMIT = 1000;
+
+	/**
 	 * Register this class instance to the appropriate hooks.
 	 *
 	 * @return void
@@ -72,22 +84,27 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 
 	/**
 	 * Get the number of orders still holding rows in the shape that predates the tax order item
-	 * column.
+	 * column, up to PENDING_COUNT_LIMIT.
 	 *
 	 * Deliberately blind to the cursor, unlike the batch itself: an order a pass could not rebuild
 	 * is still an order in the old shape, and the tool has to be able to say so and offer another
 	 * run. `BatchProcessingController` decides when a processor is finished from
 	 * `get_next_batch_to_process()`, not from this count, so it cannot be kept alive by one.
 	 *
-	 * @return int Number of orders pending processing.
+	 * @return int Number of orders pending processing, at most PENDING_COUNT_LIMIT.
 	 */
 	public function get_total_pending_count(): int {
 		global $wpdb;
 
 		$table_name = TaxesDataStore::get_db_table_name();
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-		return (int) $wpdb->get_var( "SELECT COUNT( DISTINCT order_id ) FROM {$table_name} WHERE order_item_id = 0" );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT COUNT(*) FROM ( SELECT DISTINCT order_id FROM {$table_name} WHERE order_item_id = 0 LIMIT %d ) AS pending",
+				self::PENDING_COUNT_LIMIT
+			)
+		);
 	}
 
 	/**
@@ -187,6 +204,13 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		$pending_count   = $this->get_total_pending_count();
 
+		// The count stops at PENDING_COUNT_LIMIT, so say "or more" rather than a number the store
+		// has already gone past.
+		$pending_label = $pending_count < self::PENDING_COUNT_LIMIT
+			? number_format_i18n( $pending_count )
+			/* translators: %s: number of orders, where there are at least that many. */
+			: sprintf( __( '%s+', 'woocommerce' ), number_format_i18n( self::PENDING_COUNT_LIMIT ) );
+
 		if ( 0 === $pending_count ) {
 			$tools['rebuild_analytics_tax_data'] = array(
 				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
@@ -199,14 +223,14 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'name'     => __( 'Stop rebuilding analytics tax data', 'woocommerce' ),
 				'button'   => __( 'Stop rebuilding', 'woocommerce' ),
 				'desc'     => sprintf(
-					/* translators: %d: number of orders still to rebuild. */
+					/* translators: %s: number of orders still to rebuild. */
 					_n(
-						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There is currently %d order left to rebuild.',
-						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There are currently %d orders left to rebuild.',
+						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There is currently %s order left to rebuild.',
+						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There are currently %s orders left to rebuild.',
 						$pending_count,
 						'woocommerce'
 					),
-					$pending_count
+					$pending_label
 				),
 				'callback' => array( $this, 'dequeue' ),
 			);
@@ -215,14 +239,14 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
 				'button'   => __( 'Rebuild', 'woocommerce' ),
 				'desc'     => sprintf(
-					/* translators: %d: number of orders to rebuild. */
+					/* translators: %s: number of orders to rebuild. */
 					_n(
-						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There is currently %d order to rebuild.',
-						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There are currently %d orders to rebuild.',
+						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There is currently %s order to rebuild.',
+						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There are currently %s orders to rebuild.',
 						$pending_count,
 						'woocommerce'
 					),
-					$pending_count
+					$pending_label
 				),
 				'callback' => array( $this, 'enqueue' ),
 			);
