@@ -2797,6 +2797,103 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Priming happens per batch, not once for the whole backlog.
+	 */
+	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
+		// The point of the change: a backlog larger than one batch must never be primed in
+		// full, or the run dies before its first save on the stores this exists for. Checked
+		// from inside the run, because by the end every batch has been primed and released.
+		$ids = array();
+
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+			$ids[] = $product->get_id();
+		}
+
+		$queued = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			static function ( $product_ids ) use ( &$queued ) {
+				$queued = $product_ids;
+			}
+		);
+
+		// Sampled on the first save, while the run is still inside its first batch.
+		$last_primed_during_first_save = null;
+		add_action(
+			'woocommerce_update_product',
+			static function () use ( &$queued, &$last_primed_during_first_save ) {
+				if ( null !== $last_primed_during_first_save || ! $queued ) {
+					return;
+				}
+
+				$last_primed_during_first_save = false !== wp_cache_get( (int) end( $queued ), 'posts' );
+			}
+		);
+
+		// Creating the fixtures warmed every one of them, which a real cron request would
+		// not have. Without this the probe reads leftover fixture state, not the priming.
+		wp_cache_flush();
+
+		wc_scheduled_sales();
+
+		$this->assertCount( 51, $queued, 'Fixture precondition: the backlog must exceed one batch.' );
+		$this->assertFalse(
+			$last_primed_during_first_save,
+			'The last product in the queue must not be primed while the first batch is still processing.'
+		);
+	}
+
+	/**
+	 * @testdox An external object cache keeps the persistent-capable groups out of the release.
+	 */
+	public function test_wc_scheduled_sales_leaves_shared_groups_alone_on_an_external_cache(): void {
+		// products and term-queries are persistent-capable, so the loop releases them only
+		// when the cache lives in this request. Under an external cache they must survive,
+		// or the run evicts entries other requests are using.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wp_cache_set( 'sentinel', 'keep me', 'products' );
+		wp_cache_set( 'sentinel', 'keep me', 'term-queries' );
+
+		$was_external = wp_using_ext_object_cache( true );
+
+		try {
+			wc_scheduled_sales();
+		} finally {
+			wp_using_ext_object_cache( $was_external );
+		}
+
+		$this->assertSame(
+			'keep me',
+			wp_cache_get( 'sentinel', 'products' ),
+			'The products group must survive when an external object cache is in use.'
+		);
+		$this->assertSame(
+			'keep me',
+			wp_cache_get( 'sentinel', 'term-queries' ),
+			'The term-queries group must survive when an external object cache is in use.'
+		);
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'The product must still settle with the shared groups left alone.'
+		);
+	}
+
+	/**
 	 * @testdox A batch holding both a product and a variation leaves no term relationship cached.
 	 */
 	public function test_wc_scheduled_sales_releases_term_caches_for_a_mixed_batch(): void {
