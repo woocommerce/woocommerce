@@ -88,6 +88,10 @@ trait CheckoutTrait {
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
 
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
+		WC()->session->save_data();
+
 		try {
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
