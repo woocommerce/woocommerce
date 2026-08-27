@@ -675,7 +675,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$current_status = $order->get_status( 'edit' );
 			$order->set_status( $status );
 			$order_data_store_cpt->update( $order );
-			$order->set_status( 'checkout-draft' ); // Revert back to draft.
+			$order->set_status( 'checkout-draft' );
+			// Revert back to draft.
 			$order->save();
 			$this->assertEquals(
 				$k + 1,
