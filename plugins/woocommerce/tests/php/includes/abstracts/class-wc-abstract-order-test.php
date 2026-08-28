@@ -1692,9 +1692,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @testdox Should preserve replacement items with a legacy custom data store lacking ID snapshot and deletion methods.
 	 */
 	public function test_remove_order_items_preserves_replacements_with_custom_data_store_fallback() {
-		$order          = WC_Helper_Order::create_order();
-		$original_items = $order->get_items();
-		$product        = current( $original_items )->get_product();
+		$order             = WC_Helper_Order::create_order();
+		$original_items    = $order->get_items();
+		$original_item_ids = array_merge( array_keys( $original_items ), array_keys( $order->get_items( 'shipping' ) ) );
+		$product           = current( $original_items )->get_product();
 
 		$original_data_store = $order->get_data_store();
 		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
@@ -1707,7 +1708,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function has_callable( string $method ): bool {
-				return in_array( $method, array( 'get_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
+				return in_array( $method, array( 'delete_items', 'get_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
 			}
 
 			public function update( &$data ) {
@@ -1715,7 +1716,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function get_current_class_name() {
-				return $this->delegate->get_current_class_name();
+				return get_class( $this );
 			}
 
 			public function __call( $method, $parameters ) {
@@ -1729,6 +1730,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$reflection->setValue( $order, $custom_data_store );
 
 		$order->remove_order_items();
+
+		foreach ( $original_item_ids as $item_id ) {
+			$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items should remain persisted until save().' );
+		}
 
 		$early_saved_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
 		$early_saved_item->add_meta_data( '_fallback_test', 'preserved', true );

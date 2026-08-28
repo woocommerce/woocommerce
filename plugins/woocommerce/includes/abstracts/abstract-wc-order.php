@@ -369,7 +369,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @var WC_Data_Store $data_store
 		 */
-		$data_store       = $this->data_store;
+		$data_store = $this->data_store;
+
+		if ( ! $data_store->has_callable( 'delete_items' ) ) {
+			return false;
+		}
+
 		$data_store_class = $data_store->get_current_class_name();
 
 		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
