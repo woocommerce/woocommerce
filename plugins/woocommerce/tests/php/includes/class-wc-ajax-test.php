@@ -399,6 +399,44 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
+	 */
+	public function test_add_coupon_discount_uses_manually_edited_line_total() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '10off-edited' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals();
+		$order->save();
+
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount(
+			array(
+				'order_id' => $order->get_id(),
+				'coupon'   => $coupon->get_code(),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$item  = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'The edited line total should become the new pre-discount price' );
+		$this->assertEquals( 45, $item->get_total(), 'The discount should be taken off the edited price' );
+		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
@@ -722,6 +760,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		global $wpdb;
 
 		$this->_setRole( 'administrator' );
+		$this->setExpectedDeprecated( 'woocommerce_after_single_product_ordering' );
 
 		// Attach a listener to force the legacy branching path.
 		$legacy_hook = function () {};
@@ -806,6 +845,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_product_ordering_fires_after_product_ordering_action(): void {
 		$this->_setRole( 'administrator' );
+		$this->setExpectedDeprecated( 'woocommerce_after_product_ordering' );
 
 		$products = array();
 		for ( $i = 1; $i <= 2; ++$i ) {
@@ -856,6 +896,81 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		foreach ( $product_ids as $product_id ) {
 			$products[ $product_id ]->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' (fast path) fires the process_moved and process_reindexed hooks with correct payloads.
+	 */
+	public function test_product_ordering_fires_fast_path_hooks(): void {
+		$this->_setRole( 'administrator' );
+
+		$setup    = array(
+			'Alpha' => 1,
+			'Beta'  => 2,
+			'Gamma' => 3,
+			'Delta' => 0,
+			'Echo'  => 0,
+		);
+		$ids      = array();
+		$products = array();
+		foreach ( $setup as $name => $menu_order ) {
+			$product = new \WC_Product_Simple();
+			$product->set_name( $name );
+			$product->set_menu_order( $menu_order );
+			$product->save();
+			$ids[ $name ]                   = $product->get_id();
+			$products[ $product->get_id() ] = $product;
+		}
+
+		$moved_captured     = array();
+		$reindexed_captured = array();
+		$moved_hook         = function ( $sorting_id, $moved ) use ( &$moved_captured ) {
+			$moved_captured = array(
+				'sorting_id' => $sorting_id,
+				'moved'      => $moved,
+			);
+		};
+		$reindexed_hook     = function ( $sorting_id, $reindexed ) use ( &$reindexed_captured ) {
+			$reindexed_captured = array(
+				'sorting_id' => $sorting_id,
+				'reindexed'  => $reindexed,
+			);
+		};
+		add_action( 'woocommerce_product_ordering_process_moved_products', $moved_hook, 10, 2 );
+		add_action( 'woocommerce_product_ordering_process_reindexed_products', $reindexed_hook, 10, 2 );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $ids['Gamma'];
+		$_POST['previd']   = $ids['Delta'];
+		$_POST['nextid']   = $ids['Echo'];
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_product_ordering_process_moved_products', $moved_hook, 10 );
+		remove_action( 'woocommerce_product_ordering_process_reindexed_products', $reindexed_hook, 10 );
+
+		$this->assertSame(
+			array(
+				'sorting_id' => $ids['Gamma'],
+				'reindexed'  => array( $ids['Delta'] => 1 ),
+			),
+			$reindexed_captured
+		);
+		$this->assertSame(
+			array(
+				'sorting_id' => $ids['Gamma'],
+				'moved'      => array(
+					$ids['Gamma'] => 2,
+					$ids['Echo']  => 3,
+					$ids['Alpha'] => 4,
+					$ids['Beta']  => 5,
+				),
+			),
+			$moved_captured
+		);
+
+		array_walk( $products, static fn( $p ) => $p->delete( true ) );
 	}
 
 	/**

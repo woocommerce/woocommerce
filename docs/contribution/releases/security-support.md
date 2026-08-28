@@ -26,4 +26,4 @@ Security vulnerabilities must be reported privately through Automattic's HackerO
 
 ## Keeping this page current
 
-The release run-book's publish steps include moving the supported-version floor forward when the stable release of a new major version ships.
+When the stable release of a new major version is published, an automated workflow opens a pull request that bumps the minimum supported version on this page. The release DRI reviews and merges it as part of the post-release tasks.

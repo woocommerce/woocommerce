@@ -9,39 +9,42 @@ import createSelector from 'rememo';
 import { getResourceName } from '../utils';
 import { getTotalCountResourceName } from './utils';
 
-import { ItemType, ItemsState, Query, ItemInfer } from './types';
+import { ItemType, ItemsState, Query, ItemIDOf, ItemInfer } from './types';
 
 export type getItemsType = < T extends ItemType >(
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< number, ItemInfer< T > | undefined >
-) => Map< number, ItemInfer< T > | undefined >;
+	defaultValue?: Map< ItemIDOf< T >, ItemInfer< T > | undefined >
+) => Map< ItemIDOf< T >, ItemInfer< T > | undefined >;
 
 type getItemsSelectorType = < T extends ItemType >(
 	state: ItemsState,
 	itemType: T,
 	query: Query,
-	defaultValue?: Map< number, ItemInfer< T > | undefined >
-) => Map< number, Map< number, ItemInfer< T > | undefined > >;
+	defaultValue?: Map< ItemIDOf< T >, ItemInfer< T > | undefined >
+) => Map< ItemIDOf< T >, ItemInfer< T > | undefined >;
 
 export const getItems = createSelector< getItemsSelectorType >(
 	( state, itemType, query, defaultValue = new Map() ) => {
 		const resourceName = getResourceName( itemType, query );
 
-		let ids;
+		let entries;
 		if (
 			state.items[ resourceName ] &&
 			typeof state.items[ resourceName ] === 'object'
 		) {
-			ids = ( state.items[ resourceName ] as Record< string, number[] > )
-				.data;
+			entries = state.items[ resourceName ].data;
 		}
 
-		if ( ! ids ) {
+		if ( ! entries ) {
 			return defaultValue;
 		}
-		return ids.reduce( ( map, id: number ) => {
-			map.set( id, state.data[ itemType ]?.[ id ] );
+		return entries.reduce( ( map, entry ) => {
+			const isCachedItem = typeof entry === 'object';
+			const item = isCachedItem
+				? entry
+				: state.data[ itemType ]?.[ entry ];
+			map.set( isCachedItem ? entry.id : entry, item );
 			return map;
 		}, new Map() );
 	},

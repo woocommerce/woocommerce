@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\TermCount;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -45,8 +46,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
-use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -340,8 +339,6 @@ final class WooCommerce {
 		add_action( 'load-post-new.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
-		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
-		add_action( 'init', array( $this, 'init_email_unsubscribes' ), 1 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
@@ -381,6 +378,7 @@ final class WooCommerce {
 		$container->get( ProductDownloadDirectories::class );
 		$container->get( DownloadPermissionsAdjuster::class );
 		$container->get( AssignDefaultCategory::class );
+		$container->get( TermCount::class );
 		$container->get( DataRegenerator::class );
 		$container->get( LookupDataStore::class );
 		$container->get( MatchImageBySKU::class );
@@ -410,11 +408,6 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 
-		// Feature flags.
-		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			$container->get( StockNotifications::class );
-		}
-
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
@@ -432,12 +425,12 @@ final class WooCommerce {
 		$container->get( EmailLogger::class )->register();
 		$container->get( VisualAttributeTermAdmin::class )->register();
 		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 
@@ -1046,44 +1039,6 @@ final class WooCommerce {
 		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
 		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
 		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
-	}
-
-	/**
-	 * Resolve the AbandonedCartRecovery services when the `abandoned_cart_recovery`
-	 * feature flag is on. Hooked to `init` priority 1 from `init_hooks()`
-	 * so the order-edit action listener is registered before
-	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
-	 *
-	 * @since 11.0.0
-	 * @internal
-	 */
-	public function maybe_init_abandoned_cart_recovery(): void {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'abandoned_cart_recovery' ) ) {
-			return;
-		}
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
-	}
-
-	/**
-	 * Resolve the generic email-unsubscribe services unconditionally.
-	 *
-	 * The `wc_email_unsubscribes` table can contain rows for any email kind
-	 * — current and future — and is installed via `WC_Install::get_schema()`
-	 * regardless of any feature flag. Registering the storage's privacy eraser
-	 * and the public unsubscribe endpoint from a feature-gated init point
-	 * would mean a site that later turns off `abandoned_cart_recovery` would
-	 * lose the GDPR eraser coverage and the existing unsubscribe links would
-	 * stop working. Both consequences are wrong, so this method runs even
-	 * when no specific email kind that uses it is currently active.
-	 *
-	 * @since 11.0.0
-	 * @internal
-	 */
-	public function init_email_unsubscribes(): void {
-		$container = wc_get_container();
-		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
-		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::class );
 	}
 
 	/**

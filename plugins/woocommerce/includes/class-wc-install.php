@@ -347,6 +347,13 @@ class WC_Install {
 			'wc_update_1110_cleanup_block_email_posts',
 			'wc_update_1110_flush_product_count_cache',
 		),
+		'11.1.0-1' => array(
+			'wc_update_11101_remove_deprecated_variation_gallery_option',
+		),
+		'11.2.0'   => array(
+			'wc_update_1120_remove_abandoned_cart_recovery',
+			'wc_update_1120_migrate_stock_notifications_alpha_constant',
+		),
 	);
 
 	/**
@@ -1787,9 +1794,7 @@ class WC_Install {
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
 
-		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
-		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
-		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
+		$order_stats_table_schema = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -2135,7 +2140,6 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
-$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2175,6 +2179,12 @@ $email_unsubscribes_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+
+			/*
+			 * No longer created: the abandoned cart recovery feature that owned this table was
+			 * removed in 11.2.0. It stays listed here so that a site which uninstalls before the
+			 * removal migration has run is not left with an orphaned table.
+			 */
 			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
@@ -3178,17 +3188,13 @@ EOT;
 <!-- /wp:woocommerce/filled-cart-block -->
 
 <!-- wp:woocommerce/empty-cart-block -->
-<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
-<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
 <!-- wp:separator {"className":"is-style-dots"} -->
 <hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
 <!-- /wp:separator -->
 
-<!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
 <!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>

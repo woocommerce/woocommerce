@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { allSettings } from '@woocommerce/settings';
 import { Currency } from '@woocommerce/types';
 
@@ -29,7 +29,7 @@ export default {
 	},
 } as Meta< TotalsFooterItemProps >;
 
-const Template: Story< TotalsFooterItemProps > = ( args ) => (
+const Template: StoryFn< TotalsFooterItemProps > = ( args ) => (
 	<FooterItem { ...args } />
 );
 
