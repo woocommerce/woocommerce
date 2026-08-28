@@ -247,6 +247,179 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A field whose rules reference another field with $data is registered.
+	 */
+	public function test_field_with_data_reference_rule_is_registered() {
+		$this->register_stay_dates();
+
+		$this->assertArrayHasKey( 'plugin-namespace/check-out', $this->controller->get_additional_fields(), 'A $data reference in a validation rule should not be rejected as an invalid schema.' );
+	}
+
+	/**
+	 * @testdox A $data rule orders one date field against another.
+	 *
+	 * @testWith ["2026-05-01", "2026-05-04", true]
+	 *           ["2026-05-01", "2026-05-02", true]
+	 *           ["2026-05-01", "2026-05-01", false]
+	 *           ["2026-05-04", "2026-05-01", false]
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @param bool   $is_valid  Whether the pair should pass validation.
+	 */
+	public function test_data_reference_rule_compares_two_date_fields( string $check_in, string $check_out, bool $is_valid ) {
+		$this->register_stay_dates();
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertSame(
+			$is_valid,
+			true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ),
+			sprintf( 'Check-out %s against check-in %s was not judged as expected.', $check_out, $check_in )
+		);
+	}
+
+	/**
+	 * @testdox Leaving the field that carries the rule blank skips the comparison, when the rule allows null.
+	 *
+	 * @testWith ["2026-05-01", ""]
+	 *           ["", ""]
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 */
+	public function test_a_blank_value_skips_its_own_ordering_rule( string $check_in, string $check_out ) {
+		$this->register_stay_dates( array( 'integer', 'null' ) );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertTrue(
+			true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ),
+			'A numeric keyword should not apply to a blank date.'
+		);
+	}
+
+	/**
+	 * @testdox A blank value fails a rule that requires an integer, so allowing blanks is the rule author's choice.
+	 */
+	public function test_blank_value_fails_a_non_nullable_rule() {
+		$this->register_stay_dates( 'integer' );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertInstanceOf( \WP_Error::class, $this->controller->is_valid_field( $field, $this->stay_document_object( '2026-05-01', '' ) ) );
+	}
+
+	/**
+	 * @testdox A filled in date is rejected while the date it references is still blank.
+	 *
+	 * Opis reports "Invalid $data" whenever a $data pointer resolves to something that is not a
+	 * number, so a blank check-in fails the check-out field rather than being skipped. Allowing
+	 * null in the rule does not change this, because the pointer, not the value, is what fails.
+	 */
+	public function test_a_blank_referenced_date_fails_the_field_that_references_it() {
+		$this->register_stay_dates( array( 'integer', 'null' ) );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertInstanceOf( \WP_Error::class, $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-04' ) ) );
+	}
+
+	/**
+	 * @testdox Values are converted for the document object according to their field type.
+	 */
+	public function test_prepare_values_for_document_object() {
+		$prepared = $this->controller->prepare_values_for_document_object(
+			array(
+				'plugin-namespace/delivery-date' => '2026-05-04',
+				'plugin-namespace/gov-id'        => 'AB123456',
+				'unregistered/key'               => '2026-05-04',
+			)
+		);
+
+		$this->assertSame( 20260504, $prepared['plugin-namespace/delivery-date'] );
+		$this->assertSame( 'AB123456', $prepared['plugin-namespace/gov-id'] );
+		$this->assertSame( '2026-05-04', $prepared['unregistered/key'] );
+	}
+
+	/**
+	 * @testdox An empty set of values stays an object, so it serializes as one rather than as an empty array.
+	 */
+	public function test_prepare_values_for_document_object_keeps_object_shape() {
+		$this->assertIsObject( $this->controller->prepare_values_for_document_object( (object) array() ) );
+	}
+
+	/**
+	 * @testdox Each field type contributes its own keywords to the REST API value schema.
+	 */
+	public function test_prepare_field_value_schema() {
+		$fields = $this->controller->get_additional_fields();
+
+		$date = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/delivery-date'] );
+		$this->assertSame( '^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))?$', $date['pattern'] );
+
+		$checkbox = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/leave-on-porch'] );
+		$this->assertSame( 'boolean', $checkbox['type'] );
+
+		$select = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/job-function'] );
+		$this->assertSame( array( 'director', 'engineering', 'customer-support', 'other' ), $select['enum'] );
+
+		$text = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/gov-id'] );
+		$this->assertSame( array( 'type' => 'string' ), $text, 'A type with no keywords of its own should leave the schema alone.' );
+	}
+
+	/**
+	 * Registers a pair of date fields where the second must fall after the first.
+	 *
+	 * @param string|array $rule_type The type the ordering rule accepts.
+	 */
+	private function register_stay_dates( $rule_type = 'integer' ) {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/check-in',
+				'label'    => 'Check-in',
+				'location' => 'order',
+				'type'     => 'date',
+			)
+		);
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => array(
+					'type'             => $rule_type,
+					'exclusiveMinimum' => array( '$data' => '1/plugin-namespace~1check-in' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Builds a document object holding the two stay dates as they reach rule evaluation.
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @return DocumentObject
+	 */
+	private function stay_document_object( string $check_in, string $check_out ): DocumentObject {
+		$document_object = new DocumentObject(
+			array(
+				'checkout' => array(
+					'additional_fields' => array(
+						'plugin-namespace/check-in'  => $check_in,
+						'plugin-namespace/check-out' => $check_out,
+					),
+				),
+			)
+		);
+		$document_object->set_customer( new \WC_Customer( 0 ) );
+
+		return $document_object;
+	}
+
+	/**
 	 * Registering a field before after_setup_theme warns the developer.
 	 */
 	public function test_registering_before_after_setup_theme_triggers_notice() {

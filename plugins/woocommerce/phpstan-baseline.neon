@@ -52906,12 +52906,6 @@ parameters:
 			path: src/Blocks/Domain/Services/CheckoutFieldsSchema/DocumentObject.php
 
 		-
-			message: '#^Static property Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFieldsSchema\\Validation\:\:\$meta_schema_json \(string\) does not accept string\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFieldsSchema/Validation.php
-
-		-
 			message: '#^Call to an undefined method WC_Session\:\:has_session\(\)\.$#'
 			identifier: method.notFound
 			count: 1

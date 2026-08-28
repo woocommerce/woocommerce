@@ -206,9 +206,15 @@ class Validation {
 	 *
 	 * @return string The meta schema as JSON.
 	 */
-	private static function build_meta_schema() {
+	private static function build_meta_schema(): string {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$meta_schema = json_decode( file_get_contents( __DIR__ . '/json-schema-draft-07.json' ), true );
+		$draft_07    = (string) file_get_contents( __DIR__ . '/json-schema-draft-07.json' );
+		$meta_schema = json_decode( $draft_07, true );
+
+		// Fall back to the pristine meta schema rather than none at all, so rules are still checked.
+		if ( ! is_array( $meta_schema ) ) {
+			return $draft_07;
+		}
 
 		$meta_schema['definitions']['dataRef'] = [
 			'type'                 => 'object',
@@ -226,6 +232,8 @@ class Validation {
 			];
 		}
 
-		return wp_json_encode( $meta_schema );
+		$widened = wp_json_encode( $meta_schema );
+
+		return is_string( $widened ) ? $widened : $draft_07;
 	}
 }
