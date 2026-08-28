@@ -589,7 +589,7 @@ class Cli {
 	 * Both kinds go together on purpose. A partial teardown would leave the shim registered
 	 * for one link kind and silently dead for the other.
 	 *
-	 * Writes by direct SQL, like `BulkNotificationWriter`: going through the CRUD layer
+	 * Writes by direct SQL, like `DbWriter`: going through the CRUD layer
 	 * would bump `date_modified_gmt` on every migrated row, rewriting merchant-visible
 	 * history for what is only a marker cleanup.
 	 *
