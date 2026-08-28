@@ -724,7 +724,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_value' prefills shipping fields from the saved address when the session copy is the billing address.
 	 */
-	public function test_get_value_uses_the_saved_shipping_address_when_the_session_copy_matches_billing() {
+	public function test_get_value_uses_the_saved_shipping_address_when_the_session_copy_matches_billing(): void {
 		list( $billing, $shipping ) = $this->get_separate_saved_addresses();
 		$this->create_logged_in_customer( $billing, $shipping );
 		$this->copy_billing_over_shipping_in_session();
@@ -751,7 +751,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_value' leaves logged out customers reading the session.
 	 */
-	public function test_get_value_keeps_the_session_shipping_address_for_logged_out_customers() {
+	public function test_get_value_keeps_the_session_shipping_address_for_logged_out_customers(): void {
 		list( $billing, $shipping ) = $this->get_separate_saved_addresses();
 		$this->create_logged_in_customer( $billing, $shipping );
 		$this->copy_billing_over_shipping_in_session();
@@ -764,7 +764,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_value' keeps a shipping address the customer entered during the session.
 	 */
-	public function test_get_value_keeps_a_shipping_address_entered_during_the_session() {
+	public function test_get_value_keeps_a_shipping_address_entered_during_the_session(): void {
 		list( $billing, $shipping ) = $this->get_separate_saved_addresses();
 		$this->create_logged_in_customer( $billing, $shipping );
 
@@ -780,7 +780,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_value' keeps the session shipping address when the saved one can't be used to calculate rates.
 	 */
-	public function test_get_value_keeps_the_session_shipping_address_when_the_saved_one_is_incomplete() {
+	public function test_get_value_keeps_the_session_shipping_address_when_the_saved_one_is_incomplete(): void {
 		list( $billing ) = $this->get_separate_saved_addresses();
 		$this->create_logged_in_customer( $billing, array( 'country' => 'US' ) );
 		$this->copy_billing_over_shipping_in_session();
@@ -792,7 +792,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_value' reads custom shipping fields from the session.
 	 */
-	public function test_get_value_reads_custom_shipping_fields_from_the_session() {
+	public function test_get_value_reads_custom_shipping_fields_from_the_session(): void {
 		list( $billing, $shipping ) = $this->get_separate_saved_addresses();
 		$this->create_logged_in_customer( $billing, $shipping );
 

@@ -1354,43 +1354,51 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox 'update_order_review' copies the billing address into the shipping address.
+	 *
 	 * The classic checkout posts the billing address in the s_* fields while "Ship to a different
 	 * address?" is unticked, so that rates and taxes match where the order will really go. Which
 	 * shipping fields that copy covers decides which ones WC_Checkout::get_value() can't trust to
 	 * prefill from. @see issue #30258.
 	 */
-	public function test_update_order_review_copies_billing_into_the_shipping_address() {
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id() );
-
-		WC()->customer->set_shipping_first_name( 'Saved' );
-		WC()->customer->set_shipping_company( 'Saved Company' );
-		WC()->customer->set_shipping_phone( '555-0100' );
-		WC()->customer->set_shipping_address_1( '2 Shipping Avenue' );
-		WC()->customer->save();
-
+	public function test_update_order_review_copies_billing_into_the_shipping_address(): void {
 		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
-		$_POST         = array(
-			'security'    => wp_create_nonce( 'update-order-review' ),
-			'country'     => 'US',
-			'state'       => 'CA',
-			'postcode'    => '94103',
-			'city'        => 'San Francisco',
-			'address'     => '1 Billing Street',
-			'address_2'   => 'Apt 1',
-			's_country'   => 'US',
-			's_state'     => 'CA',
-			's_postcode'  => '94103',
-			's_city'      => 'San Francisco',
-			's_address'   => '1 Billing Street',
-			's_address_2' => 'Apt 1',
-		);
 
 		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id() );
+
+			WC()->customer->set_shipping_first_name( 'Saved' );
+			WC()->customer->set_shipping_company( 'Saved Company' );
+			WC()->customer->set_shipping_phone( '555-0100' );
+			WC()->customer->set_shipping_address_1( '2 Shipping Avenue' );
+			WC()->customer->save();
+
+			$_POST = array(
+				'security'    => wp_create_nonce( 'update-order-review' ),
+				'country'     => 'US',
+				'state'       => 'CA',
+				'postcode'    => '94103',
+				'city'        => 'San Francisco',
+				'address'     => '1 Billing Street',
+				'address_2'   => 'Apt 1',
+				's_country'   => 'US',
+				's_state'     => 'CA',
+				's_postcode'  => '94103',
+				's_city'      => 'San Francisco',
+				's_address'   => '1 Billing Street',
+				's_address_2' => 'Apt 1',
+			);
+
 			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$shipping = WC()->customer->get_shipping();
 		} finally {
+			// This class extends WP_Ajax_UnitTestCase, so nothing resets the WooCommerce singletons for us.
 			$_POST = $original_post;
 			WC()->cart->empty_cart();
+			WC()->session->set( 'customer', null );
+			WC()->customer = new WC_Customer( get_current_user_id(), true );
 		}
 
 		$expected_copied = array(
@@ -1405,14 +1413,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		foreach ( $expected_copied as $field => $expected ) {
 			$this->assertSame(
 				$expected,
-				WC()->customer->{"get_shipping_$field"}(),
+				$shipping[ $field ],
 				"Shipping {$field} should have been replaced with the billing value."
 			);
 		}
 
-		$this->assertSame( 'Saved', WC()->customer->get_shipping_first_name(), 'The shipping first name should be left alone.' );
-		$this->assertSame( 'Saved Company', WC()->customer->get_shipping_company(), 'The shipping company should be left alone.' );
-		$this->assertSame( '555-0100', WC()->customer->get_shipping_phone(), 'The shipping phone should be left alone.' );
+		$this->assertSame( 'Saved', $shipping['first_name'], 'The shipping first name should be left alone.' );
+		$this->assertSame( 'Saved Company', $shipping['company'], 'The shipping company should be left alone.' );
+		$this->assertSame( '555-0100', $shipping['phone'], 'The shipping phone should be left alone.' );
 	}
 
 	/**
