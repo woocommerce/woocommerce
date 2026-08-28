@@ -674,13 +674,13 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', bool $is_cacheabl
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $is_cacheable | bool | The list of script dependencies. |
+| $is_cacheable | bool | Whether the product grid is cacheable. True to enable cache, false to disable. |
 | $query_args | array | Query args for the products query passed to BlocksWpQuery. |
 
 ### Returns
 
 
-`array` True to enable cache, false to disable cache.
+`bool` True to enable cache, false to disable cache.
 
 ### Source
 
