@@ -831,15 +831,13 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/9",
-						"--shard=2/9",
-						"--shard=3/9",
-						"--shard=4/9",
-						"--shard=5/9",
-						"--shard=6/9",
-						"--shard=7/9",
-						"--shard=8/9",
-						"--shard=9/9"
+						"--shard=1/7",
+						"--shard=2/7",
+						"--shard=3/7",
+						"--shard=4/7",
+						"--shard=5/7",
+						"--shard=6/7",
+						"--shard=7/7"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -887,15 +885,13 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:unified-editor-assets",
 					"shardingArguments": [
-						"--shard=1/9",
-						"--shard=2/9",
-						"--shard=3/9",
-						"--shard=4/9",
-						"--shard=5/9",
-						"--shard=6/9",
-						"--shard=7/9",
-						"--shard=8/9",
-						"--shard=9/9"
+						"--shard=1/7",
+						"--shard=2/7",
+						"--shard=3/7",
+						"--shard=4/7",
+						"--shard=5/7",
+						"--shard=6/7",
+						"--shard=7/7"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -939,15 +935,13 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/9",
-						"--shard=2/9",
-						"--shard=3/9",
-						"--shard=4/9",
-						"--shard=5/9",
-						"--shard=6/9",
-						"--shard=7/9",
-						"--shard=8/9",
-						"--shard=9/9"
+						"--shard=1/7",
+						"--shard=2/7",
+						"--shard=3/7",
+						"--shard=4/7",
+						"--shard=5/7",
+						"--shard=6/7",
+						"--shard=7/7"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
@@ -989,15 +983,13 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/9",
-						"--shard=2/9",
-						"--shard=3/9",
-						"--shard=4/9",
-						"--shard=5/9",
-						"--shard=6/9",
-						"--shard=7/9",
-						"--shard=8/9",
-						"--shard=9/9"
+						"--shard=1/7",
+						"--shard=2/7",
+						"--shard=3/7",
+						"--shard=4/7",
+						"--shard=5/7",
+						"--shard=6/7",
+						"--shard=7/7"
 					],
 					"changes": [
 						"sample-data/sample_products.xml",
