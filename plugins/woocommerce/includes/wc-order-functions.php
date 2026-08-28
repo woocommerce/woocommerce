@@ -580,7 +580,6 @@ function wc_create_refund( $args = array() ) {
 		$refund_item_count           = 0;
 		$refund                      = new WC_Order_Refund( $args['refund_id'] );
 		$refunded_order_and_products = array();
-		$refund_quantities           = array();
 
 		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
 			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
@@ -628,8 +627,6 @@ function wc_create_refund( $args = array() ) {
 						'order_id'   => $order->get_id(),
 						'product_id' => $item->get_product_id(),
 					);
-
-					$refund_quantities[ $item_id ] = abs( (float) $qty );
 				}
 
 				$class         = get_class( $item );
@@ -657,23 +654,6 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
-		// Determine which refunded products still have unrefunded quantity left on the order,
-		// so download permissions are only revoked once no purchased quantity remains (#67008).
-		// The refund is not saved yet, so get_qty_refunded_for_item() covers previous refunds only;
-		// the quantities of the refund being created are added from $refund_quantities.
-		$products_with_remaining_qty = array();
-		if ( ! empty( $refunded_order_and_products ) ) {
-			foreach ( $order->get_items() as $order_item_id => $order_item ) {
-				$remaining_qty = $order_item->get_quantity()
-					- abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) )
-					- ( isset( $refund_quantities[ $order_item_id ] ) ? $refund_quantities[ $order_item_id ] : 0 );
-
-				if ( $remaining_qty > 0 ) {
-					$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
-				}
-			}
-		}
-
 		$refund->update_taxes();
 		$refund->calculate_totals( false );
 		$refund->set_total( $args['amount'] * -1 );
@@ -690,6 +670,33 @@ function wc_create_refund( $args = array() ) {
 		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
+
+		// Determine which refunded products still have unrefunded quantity left on the order,
+		// so download permissions are only revoked once no purchased quantity remains (#67008).
+		// The quantities are read from the refund object because a 'woocommerce_create_refund'
+		// callback may have adjusted them; the refund is not saved yet, so
+		// get_qty_refunded_for_item() still covers previous refunds only.
+		$products_with_remaining_qty = array();
+		if ( ! empty( $refunded_order_and_products ) ) {
+			$refund_quantities = array();
+			foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
+				$refunded_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				if ( $refunded_item_id ) {
+					$current_qty                            = isset( $refund_quantities[ $refunded_item_id ] ) ? $refund_quantities[ $refunded_item_id ] : 0;
+					$refund_quantities[ $refunded_item_id ] = $current_qty + abs( (float) $refunded_item->get_quantity() );
+				}
+			}
+
+			foreach ( $order->get_items() as $order_item_id => $order_item ) {
+				$remaining_qty = $order_item->get_quantity()
+					- abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) )
+					- ( isset( $refund_quantities[ $order_item_id ] ) ? $refund_quantities[ $order_item_id ] : 0 );
+
+				if ( $remaining_qty > 0 ) {
+					$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
+				}
+			}
+		}
 
 		if ( $refund->save() ) {
 			if ( $args['refund_payment'] ) {

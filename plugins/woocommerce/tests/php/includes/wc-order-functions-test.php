@@ -781,4 +781,46 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			'The permission must be kept while another line item of the same product retains quantity.'
 		);
 	}
+
+	/**
+	 * Test that a 'woocommerce_create_refund' callback raising the refunded quantity to the
+	 * full amount is respected when revoking download permissions.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/67008
+	 */
+	public function test_create_refund_hook_changing_quantity_is_respected_for_download_permissions() {
+		$env   = $this->create_order_with_downloadable_product_permission( 2 );
+		$order = $env['order'];
+		$item  = $order->get_items( 'line_item' )[ $env['item_id'] ];
+
+		// Turn the partial refund into a full-quantity refund from a hook callback.
+		$raise_quantity = function ( $refund ) {
+			foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
+				$refunded_item->set_quantity( -2 );
+			}
+		};
+		add_action( 'woocommerce_create_refund', $raise_quantity );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$env['item_id'] => array(
+						'qty'          => 1,
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+
+		remove_action( 'woocommerce_create_refund', $raise_quantity );
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+		$this->assertCount(
+			0,
+			$this->get_download_permissions( $order, $env['product'] ),
+			'A hook callback refunding the full quantity must lead to the permission being revoked.'
+		);
+	}
 }
