@@ -127,7 +127,7 @@ class MigrationController implements RegisterHooksInterface {
 		}
 
 		wp_admin_notice(
-			__( 'WooCommerce Back In Stock Notifications is still active and some of its subscribers have already been migrated to the built-in Customer stock notifications feature. While both are active, a restock can send duplicate emails to the same customer. Finish the migration, then deactivate the legacy plugin.', 'woocommerce' ),
+			__( 'WooCommerce Back In Stock Notifications is still active and some of its subscribers have already been migrated to the built-in Customer stock notifications feature. While both are active, a restock can send duplicate emails to the same customer. Deactivate WooCommerce Back In Stock Notifications once the migration is complete.', 'woocommerce' ),
 			array(
 				'id'          => 'wc-bis-migration-double-send',
 				'type'        => 'warning',
