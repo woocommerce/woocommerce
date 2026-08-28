@@ -135,10 +135,26 @@ class DateMapperTests extends WC_Unit_Test_Case {
 			array(
 				'subscribe_date' => $subscribe_date,
 				'create_date'    => self::MIGRATION_TIMESTAMP - 9000,
-			)
+			),
+			NotificationStatus::ACTIVE
 		);
 
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', $subscribe_date ), $result );
+	}
+
+	/**
+	 * @testdox date_confirmed_gmt should be null for a pending row, which was never confirmed.
+	 */
+	public function test_date_confirmed_gmt_is_null_for_pending(): void {
+		$result = $this->sut->date_confirmed_gmt(
+			array(
+				'subscribe_date' => self::MIGRATION_TIMESTAMP - 500,
+				'create_date'    => self::MIGRATION_TIMESTAMP - 9000,
+			),
+			NotificationStatus::PENDING
+		);
+
+		$this->assertNull( $result );
 	}
 
 	/**
@@ -151,7 +167,8 @@ class DateMapperTests extends WC_Unit_Test_Case {
 			array(
 				'subscribe_date' => 0,
 				'create_date'    => $create_date,
-			)
+			),
+			NotificationStatus::ACTIVE
 		);
 
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', $create_date ), $result );
@@ -307,7 +324,8 @@ class DateMapperTests extends WC_Unit_Test_Case {
 			array(
 				'subscribe_date' => 0,
 				'create_date'    => 0,
-			)
+			),
+			NotificationStatus::ACTIVE
 		);
 
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );
@@ -321,7 +339,8 @@ class DateMapperTests extends WC_Unit_Test_Case {
 			array(
 				'subscribe_date' => 0,
 				'create_date'    => 1000000000,
-			)
+			),
+			NotificationStatus::ACTIVE
 		);
 
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );

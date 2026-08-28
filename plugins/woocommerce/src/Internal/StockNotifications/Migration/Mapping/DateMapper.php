@@ -104,10 +104,18 @@ class DateMapper {
 	 * so it falls back to the mapped creation date in that case, which screens out a
 	 * corrupt `create_date` instead of confirming the row in 1970.
 	 *
-	 * @param array $legacy_row Row from `woocommerce_bis_notifications`.
-	 * @return string GMT datetime string.
+	 * A row that never completed double opt-in has nothing to confirm, so `pending` maps
+	 * to null rather than to a date the shopper never reached.
+	 *
+	 * @param array  $legacy_row Row from `woocommerce_bis_notifications`.
+	 * @param string $status     Mapped Core status for this row.
+	 * @return string|null GMT datetime string, or null when the row is still pending.
 	 */
-	public function date_confirmed_gmt( array $legacy_row ): string {
+	public function date_confirmed_gmt( array $legacy_row, string $status ): ?string {
+		if ( NotificationStatus::PENDING === $status ) {
+			return null;
+		}
+
 		$subscribe_date = (int) ( $legacy_row['subscribe_date'] ?? 0 );
 
 		if ( $subscribe_date > 0 ) {
