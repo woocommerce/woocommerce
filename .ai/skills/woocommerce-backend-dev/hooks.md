@@ -40,23 +40,23 @@ If you modify a line that fires a hook without a docblock:
 /**
  * Fires after an order has been processed.
  *
+ * @since 8.2.0
+ *
  * @param int $order_id The processed order ID.
  * @param array $order_data The order data.
- *
- * @since 8.2.0
  */
 do_action( 'woocommerce_order_processed', $order_id, $order_data );
 ```
 
 ## Hook Documentation Requirements
 
-All hooks must have docblocks that include:
+All hooks must have docblocks that include, in this order:
 
 - Description of when the hook fires
-- `@param` tags for each parameter passed to the hook
-- `@since` annotation with the version number (last line, with blank line before)
+- `@since` annotation with the version number, right after the description and before the `@param` tags, with a blank comment line on either side, as in [WordPress's inline documentation standards](https://developer.wordpress.org/coding-standards/inline-documentation-standards/php/#4-hooks-actions-and-filters)
     - For new hooks: Use the version from `includes/class-woocommerce.php` on trunk, removing `-dev` suffix
     - For existing hooks: Use `git log -S "hook_name"` to find when it was introduced
+- `@param` tags for each parameter passed to the hook
 
 **Action hook example:**
 
@@ -64,10 +64,10 @@ All hooks must have docblocks that include:
 /**
  * Fires after a product is saved.
  *
+ * @since 9.5.0
+ *
  * @param int        $product_id The product ID.
  * @param WC_Product $product    The product object.
- *
- * @since 9.5.0
  */
 do_action( 'woocommerce_product_saved', $product_id, $product );
 ```
@@ -78,10 +78,10 @@ do_action( 'woocommerce_product_saved', $product_id, $product );
 /**
  * Filters the product price before display.
  *
+ * @since 9.5.0
+ *
  * @param string     $price   The formatted price.
  * @param WC_Product $product The product object.
- *
- * @since 9.5.0
  */
 $price = apply_filters( 'woocommerce_product_price', $price, $product );
 ```

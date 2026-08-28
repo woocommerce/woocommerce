@@ -94,12 +94,14 @@ Add concise docblocks to all hooks and methods. One line is ideal. The descripti
 
 Must include a `@since` annotation with the next WooCommerce version number.
 
-The `@since` annotation must be:
+Place it where [WordPress's inline documentation standards](https://developer.wordpress.org/coding-standards/inline-documentation-standards/php/) put it:
 
-- The last line in the docblock
-- Preceded by a blank comment line
+- Directly after the description, separated by a blank comment line
+- Before `@param` and `@return`, separated from them by a blank comment line
 - Use the version from `includes/class-woocommerce.php` on trunk, removing the `-dev` suffix
   (e.g., if trunk shows `10.4.0-dev`, use `@since 10.4.0`)
+
+Some older docblocks put `@since` last instead. Leave those alone; reordering them on its own is just diff noise.
 
 **Good - Concise:**
 
@@ -107,19 +109,19 @@ The `@since` annotation must be:
 /**
  * Process the order and update status.
  *
+ * @since 9.5.0
+ *
  * @param int $order_id The order ID.
  * @return bool True if successful.
- *
- * @since 9.5.0
  */
 public function process_order( int $order_id ) { }
 
 /**
  * Fires after an order is processed.
  *
- * @param int $order_id The order ID.
- *
  * @since 9.5.0
+ *
+ * @param int $order_id The order ID.
  */
 do_action( 'woocommerce_order_processed', $order_id );
 ```
@@ -132,10 +134,10 @@ do_action( 'woocommerce_order_processed', $order_id );
  * checking inventory levels, processing payment, and then updating
  * the order status to reflect the successful processing.
  *
+ * @since 9.5.0
+ *
  * @param int $order_id The unique identifier for the order that needs to be processed.
  * @return bool Returns true if the order was processed successfully, false otherwise.
- *
- * @since 9.5.0
  */
 ```
 
