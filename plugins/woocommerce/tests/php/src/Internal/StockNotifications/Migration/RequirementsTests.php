@@ -81,6 +81,24 @@ class RequirementsTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a similarly named table should not make an existing legacy table look missing.
+	 */
+	public function test_a_colliding_table_name_does_not_hide_an_existing_table(): void {
+		global $wpdb;
+
+		// `SHOW TABLES LIKE` treats `_` as a wildcard, and this name sorts before the real
+		// one, so an unescaped pattern gets this back as the first match.
+		$collider = $wpdb->prefix . 'woocommerce_bisXnotifications';
+		$wpdb->query( "CREATE TABLE {$collider} ( id BIGINT UNSIGNED NOT NULL )" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- fixture table built from $wpdb->prefix, never user input.
+
+		try {
+			$this->assertTrue( $this->requirements->check() );
+		} finally {
+			$wpdb->query( "DROP TABLE IF EXISTS {$collider}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixture cleanup.
+		}
+	}
+
+	/**
 	 * @testdox the queued-row count should be zero while the legacy extension is inactive.
 	 */
 	public function test_queued_rows_are_ignored_without_the_legacy_extension(): void {

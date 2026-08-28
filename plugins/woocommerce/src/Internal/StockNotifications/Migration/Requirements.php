@@ -164,7 +164,10 @@ class Requirements {
 		foreach ( $tables as $table ) {
 			$table_name = $needs_prefix ? $wpdb->prefix . $table : $table;
 
-			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+			// Escaped as a LIKE pattern: an unescaped `_` matches any character, so a
+			// similarly named table can come back instead and the exact comparison below
+			// would then report this one as missing.
+			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) );
 
 			if ( $found !== $table_name ) {
 				return $table_name;
