@@ -89,7 +89,7 @@ if ( process.env.CI ) {
 	] );
 }
 
-export const setupProjects = [
+export const coreSetupProjects = [
 	{
 		name: 'install wc',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
@@ -107,12 +107,13 @@ export const setupProjects = [
 		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
-	{
-		name: 'blocks setup',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'blocks-setup.ts',
-	},
 ];
+
+const blocksSetupProject = {
+	name: 'blocks setup',
+	testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+	testMatch: 'blocks-setup.ts',
+};
 
 /**
  * Spec folders that must run serially in `core-serial` (they mutate global
@@ -234,7 +235,8 @@ export default defineConfig( {
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 
 	projects: [
-		...setupProjects,
+		...coreSetupProjects,
+		blocksSetupProject,
 		{
 			name: 'core-serial',
 			testMatch: serialRunSpecs,
