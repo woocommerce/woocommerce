@@ -264,6 +264,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		frontendUtils,
 		templateCompiler,
 	} ) => {
+		await page.clock.install();
 		const template = await templateCompiler.compile();
 		const productTitles = page.locator(
 			'.wp-block-woocommerce-product-template .wp-block-post-title'
@@ -307,19 +308,40 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		} );
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
+		const deferredMaxPriceInput = page.getByRole( 'textbox', {
+			name: 'Filter products by maximum price',
+		} );
+		await expect( deferredMaxPriceInput ).toBeVisible();
+		await page.clock.pauseAt(
+			( await page.evaluate( () => Date.now() ) ) + 1_000
+		);
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
 		expect( deferredBaseline ).not.toHaveLength( 0 );
 		const deferredUrl = page.url();
 
-		const deferredMaxPriceInput = page.getByRole( 'textbox', {
-			name: 'Filter products by maximum price',
-		} );
-
 		await deferredMaxPriceInput.dblclick();
 		await deferredMaxPriceInput.fill( '$5' );
-
+		await page.clock.runFor( 1_001 );
+		await page.evaluate(
+			() =>
+				new Promise< void >( ( resolve ) => {
+					const channel = new MessageChannel();
+					channel.port1.addEventListener(
+						'message',
+						() => {
+							channel.port1.close();
+							channel.port2.close();
+							resolve();
+						},
+						{ once: true }
+					);
+					channel.port1.start();
+					channel.port2.postMessage( null );
+				} )
+		);
+		await expect( deferredMaxPriceInput ).toHaveValue( '$5' );
 		const resetPriceFilterButton = page.getByRole( 'button', {
 			name: 'Reset price filter',
 		} );
@@ -329,9 +351,29 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		} );
 		await expect( applyButton ).toBeVisible();
 		await expect( applyButton ).toBeEnabled();
+
+		await page.clock.runFor( 501 );
+		await page.evaluate(
+			() =>
+				new Promise< void >( ( resolve ) => {
+					const channel = new MessageChannel();
+					channel.port1.addEventListener(
+						'message',
+						() => {
+							channel.port1.close();
+							channel.port2.close();
+							resolve();
+						},
+						{ once: true }
+					);
+					channel.port1.start();
+					channel.port2.postMessage( null );
+				} )
+		);
 		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 
+		await page.clock.resume();
 		await applyButton.click();
 
 		await expect( page ).toHaveURL(

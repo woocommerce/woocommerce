@@ -172,6 +172,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		editor,
 		templateCompiler,
 	} ) => {
+		await page.clock.install();
 		const attributeId = await getSizeAttributeId();
 		const template = await templateCompiler.compile( { attributeId } );
 		const productTitles = getProductCollectionTitles( page );
@@ -209,14 +210,36 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
+		const smallCheckbox = page.getByRole( 'checkbox', { name: 'Small' } );
+		await expect( smallCheckbox ).toBeVisible();
+		await page.clock.pauseAt(
+			( await page.evaluate( () => Date.now() ) ) + 1_000
+		);
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
 		expect( deferredBaseline ).not.toHaveLength( 0 );
 		const deferredUrl = page.url();
 
-		const smallCheckbox = page.getByRole( 'checkbox', { name: 'Small' } );
 		await smallCheckbox.click();
+		await page.clock.runFor( 501 );
+		await page.evaluate(
+			() =>
+				new Promise< void >( ( resolve ) => {
+					const channel = new MessageChannel();
+					channel.port1.addEventListener(
+						'message',
+						() => {
+							channel.port1.close();
+							channel.port2.close();
+							resolve();
+						},
+						{ once: true }
+					);
+					channel.port1.start();
+					channel.port2.postMessage( null );
+				} )
+		);
 		await expect( smallCheckbox ).toBeChecked();
 		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
 		await expect( applyButton ).toBeVisible();
@@ -224,6 +247,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 
+		await page.clock.resume();
 		await applyButton.click();
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )

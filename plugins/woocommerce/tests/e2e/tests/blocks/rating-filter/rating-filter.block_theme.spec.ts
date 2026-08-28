@@ -85,6 +85,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		editor,
 		templateCompiler,
 	} ) => {
+		await page.clock.install();
 		const template = await templateCompiler.compile();
 		const productTitles = page.locator(
 			'.wp-block-woocommerce-product-template .wp-block-post-title'
@@ -125,22 +126,47 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await expect( productTitles.first() ).toBeVisible();
+		const oneStarFilter = page.getByRole( 'checkbox', {
+			name: 'Rated 1 out of 5',
+		} );
+		await expect( oneStarFilter ).toBeVisible();
+		await page.clock.pauseAt(
+			( await page.evaluate( () => Date.now() ) ) + 1_000
+		);
 		const deferredBaseline = ( await productTitles.allTextContents() ).map(
 			( title ) => title.trim()
 		);
 		expect( deferredBaseline ).not.toHaveLength( 0 );
+		const deferredUrl = page.url();
 
-		const oneStarFilter = page.getByRole( 'checkbox', {
-			name: 'Rated 1 out of 5',
-		} );
 		await oneStarFilter.click();
-		await expect( oneStarFilter ).toBeChecked();
-		await expect( page ).not.toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+		await page.clock.runFor( 501 );
+		await page.evaluate(
+			() =>
+				new Promise< void >( ( resolve ) => {
+					const channel = new MessageChannel();
+					channel.port1.addEventListener(
+						'message',
+						() => {
+							channel.port1.close();
+							channel.port2.close();
+							resolve();
+						},
+						{ once: true }
+					);
+					channel.port1.start();
+					channel.port2.postMessage( null );
+				} )
 		);
+		await expect( oneStarFilter ).toBeChecked();
+		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
+		await expect( applyButton ).toBeVisible();
+		await expect( applyButton ).toBeEnabled();
+		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
+		await page.clock.resume();
+		await applyButton.click();
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
