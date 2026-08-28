@@ -50,8 +50,9 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"css/**/*.scss",
-					"js/**/*.js",
+					"css/*.scss",
+					"js/admin/*.js",
+					"js/frontend/*.js",
 					".stylelintrc"
 				]
 			},
