@@ -43,8 +43,8 @@ class NotificationsMigrator implements MigratorInterface {
 	/**
 	 * Legacy meta keys read for a batch in one query, and the whole meta bag any
 	 * re-derivation of a row's expected state is allowed to see. `Runners\Cli`'s verify
-	 * and rollback read it too: a mapper handed a wider bag than the write path had would
-	 * derive a different status and report a row as drifted when nothing drifted.
+	 * reads it too: a mapper handed a wider bag than the write path had would derive a
+	 * different status and report a row as drifted when nothing drifted.
 	 *
 	 * @var string[]
 	 */
@@ -76,8 +76,8 @@ class NotificationsMigrator implements MigratorInterface {
 	 * Marker meta carrying the legacy id, written only when a legacy row adopts a
 	 * pre-existing Core notification instead of being inserted. Inserted alongside
 	 * `_wc_bis_legacy_id`, never updated; a Core row adopted by several legacy rows
-	 * carries one pair per legacy id. This is what lets `rollback` tell an adopted row
-	 * — never deleted — apart from one this migration inserted.
+	 * carries one pair per legacy id. Nothing reads it: it is kept as the only record
+	 * telling an adopted row apart from one this migration inserted.
 	 *
 	 * @var string
 	 */
@@ -565,8 +565,8 @@ class NotificationsMigrator implements MigratorInterface {
 	 * secrets are present, the legacy unsubscribe token. Never reconciles status, dates,
 	 * or any other meta onto the target — the Core row is the merchant's.
 	 *
-	 * The adoption marker is what lets `rollback` remove only this legacy id's markers
-	 * from the target row instead of deleting a row the migration did not create.
+	 * The adoption marker is a record, not an input: nothing reads it back, but it is the
+	 * only way to tell later that this row predates the migration.
 	 *
 	 * @param int                 $target_id  Core notification id being adopted.
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
