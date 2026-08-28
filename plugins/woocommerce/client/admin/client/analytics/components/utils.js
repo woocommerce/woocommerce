@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { usesServerSideSearch } from '@woocommerce/data';
 
 /**
@@ -29,23 +30,26 @@ export function hasEmptySearchResults( query, limitBy ) {
 }
 
 /**
- * Whether an empty report is better explained by the search than by the date range.
- *
- * A report that resolves the search server side gets the same empty response whether the term
- * matched nothing or matched items with no data in the period, so the search is the closest
- * explanation it has. A report that resolves the search itself knows which of the two it is.
+ * Returns the message explaining why a report has nothing to show.
  *
  * @param {Object} query   Current query object.
- * @param {Array}  limitBy Properties used to limit the results.
- * @return {boolean} True when an empty report should be attributed to the search.
+ * @param {Array}  limitBy Properties used to limit the results, search subject first.
+ * @return {string} Message to render in place of the report.
  */
-export function isEmptyDueToSearch( query, limitBy ) {
-	if ( ! query.search ) {
-		return false;
+export function getEmptyMessage( query, limitBy ) {
+	if ( hasEmptySearchResults( query, limitBy ) ) {
+		// The client resolved the search itself, so it knows the term is what matched nothing.
+		return __( 'No data for the current search', 'woocommerce' );
 	}
 
-	return (
-		usesServerSideSearch( limitBy ) ||
-		hasEmptySearchResults( query, limitBy )
-	);
+	if ( query.search && usesServerSideSearch( limitBy ) ) {
+		// The endpoint answers the same way whether the term matched nothing or matched items
+		// without data in the period, so name both rather than blame the wrong one.
+		return __(
+			'No data for the current search in the selected date range',
+			'woocommerce'
+		);
+	}
+
+	return __( 'No data for the selected date range', 'woocommerce' );
 }

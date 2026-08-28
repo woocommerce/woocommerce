@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
@@ -33,7 +32,7 @@ import {
 	createDateFormatter,
 	buildChartData,
 } from './utils';
-import { hasEmptySearchResults, isEmptyDueToSearch } from '../utils';
+import { getEmptyMessage, hasEmptySearchResults } from '../utils';
 
 /**
  * Component that renders the chart in reports.
@@ -149,12 +148,10 @@ export class ReportChart extends Component {
 			primaryData.data.intervals.length,
 			{ type: 'php' }
 		);
-		const emptyMessage = isEmptyDueToSearch(
+		const emptyMessage = getEmptyMessage(
 			query,
 			limitProperties || [ endpoint ]
-		)
-			? __( 'No data for the current search', 'woocommerce' )
-			: __( 'No data for the selected date range', 'woocommerce' );
+		);
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return (
 			<Chart

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { hasEmptySearchResults, isEmptyDueToSearch } from '../utils';
+import { getEmptyMessage, hasEmptySearchResults } from '../utils';
 
 describe( 'hasEmptySearchResults', () => {
 	it( 'returns false when there is no search', () => {
@@ -61,42 +61,48 @@ describe( 'hasEmptySearchResults', () => {
 	} );
 } );
 
-describe( 'isEmptyDueToSearch', () => {
-	it( 'returns false when there is no search', () => {
-		expect( isEmptyDueToSearch( {}, [ 'products' ] ) ).toBe( false );
+describe( 'getEmptyMessage', () => {
+	const searchMessage = 'No data for the current search';
+	const dateRangeMessage = 'No data for the selected date range';
+	const bothMessage =
+		'No data for the current search in the selected date range';
+
+	it( 'blames the date range when there is no search', () => {
+		expect( getEmptyMessage( {}, [ 'products' ] ) ).toBe(
+			dateRangeMessage
+		);
 	} );
 
-	it( 'returns true for an endpoint that resolves the search itself', () => {
-		// The API answers the same way whether the term matched no product or matched
-		// products without sales in the period, so the search is the best explanation.
-		expect(
-			isEmptyDueToSearch( { search: 'kingston' }, [ 'products' ] )
-		).toBe( true );
+	it( 'blames the search when a client resolved search matched nothing', () => {
+		expect( getEmptyMessage( { search: 'kingston' }, [ 'coupons' ] ) ).toBe(
+			searchMessage
+		);
 	} );
 
-	it( 'returns true when a client resolved search matched nothing', () => {
-		expect(
-			isEmptyDueToSearch( { search: 'kingston' }, [ 'coupons' ] )
-		).toBe( true );
-	} );
-
-	it( 'returns false when a client resolved search produced IDs', () => {
+	it( 'blames the date range when a client resolved search produced IDs', () => {
 		// The search matched, so an empty report is down to the date range.
 		expect(
-			isEmptyDueToSearch( { search: 'kingston', coupons: '1,2,3' }, [
+			getEmptyMessage( { search: 'kingston', coupons: '1,2,3' }, [
 				'coupons',
 			] )
-		).toBe( false );
+		).toBe( dateRangeMessage );
 	} );
 
-	it( 'returns true for a product request that also carries a category', () => {
-		// The single category view resolves the search server side, so an empty report
-		// during a search is attributed to the term.
+	it( 'names both when the endpoint resolves the search itself', () => {
+		// The API answers the same way whether the term matched no product or matched
+		// products without sales in the period, so neither one can be blamed on its own.
 		expect(
-			isEmptyDueToSearch(
+			getEmptyMessage( { search: 'kingston' }, [ 'products' ] )
+		).toBe( bothMessage );
+	} );
+
+	it( 'names both for a product request that also carries a category', () => {
+		// The single category view resolves the search server side too.
+		expect(
+			getEmptyMessage(
 				{ search: 'kingston', products: '1,2', categories: '5' },
 				[ 'products', 'categories' ]
 			)
-		).toBe( true );
+		).toBe( bothMessage );
 	} );
 } );
