@@ -193,15 +193,20 @@ class Cli {
 	 * Register the `wp wc bis-migrate` command and its subcommands.
 	 *
 	 * Runs on `after_wp_load`, which fires for every `wp` invocation that boots WordPress, so
-	 * it stops after two autoloaded option reads on a store with nothing to migrate.
+	 * it stops after two autoloaded option reads on a store with nothing to migrate, and the
+	 * command object is only built once those reads pass.
 	 *
 	 * Needs the Customer stock notifications feature on, since with it off there is nothing to
 	 * migrate into, and needs the legacy extension to have been installed, since otherwise
 	 * there is nothing to migrate from. The feature option is read directly rather than
 	 * through `FeaturesUtil::feature_is_enabled()`, which builds translated feature
 	 * definitions before `init` has loaded translations.
+	 *
+	 * Static on purpose: `WP_CLI::add_command()` turns every public non-static method of the
+	 * command object into a subcommand, so as an instance method this would show up as
+	 * `wp wc bis-migrate register` alongside the real ones.
 	 */
-	public function register(): void {
+	public static function register(): void {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 			return;
 		}
@@ -215,7 +220,7 @@ class Cli {
 		}
 
 		// @phpstan-ignore-next-line -- WP_CLI is only defined in a CLI context.
-		WP_CLI::add_command( 'wc bis-migrate', $this );
+		WP_CLI::add_command( 'wc bis-migrate', wc_get_container()->get( self::class ) );
 	}
 
 	/**
