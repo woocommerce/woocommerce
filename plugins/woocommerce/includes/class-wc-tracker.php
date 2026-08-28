@@ -39,6 +39,15 @@ class WC_Tracker {
 	private static $api_url = 'https://tracking.woocommerce.com/v1/';
 
 	/**
+	 * Consecutive failed deliveries after which the current snapshot is abandoned.
+	 *
+	 * Retries happen on the daily tracker action, so this bounds retrying to a few days.
+	 *
+	 * @var int
+	 */
+	private const MAX_CONSECUTIVE_SEND_FAILURES = 3;
+
+	/**
 	 * Hook into cron event.
 	 */
 	public static function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
@@ -75,23 +84,78 @@ class WC_Tracker {
 			}
 		}
 
-		// Update time first before sending to ensure it is set.
-		update_option( 'woocommerce_tracker_last_send', time() );
+		$body = wp_json_encode( self::get_tracking_data() );
+		if ( false === $body ) {
+			return;
+		}
 
-		$params = self::get_tracking_data();
-		wp_safe_remote_post(
+		$response = wp_safe_remote_post(
 			self::$api_url,
 			array(
 				'method'      => 'POST',
-				'timeout'     => 45,
+				'timeout'     => 10,
 				'redirection' => 5,
 				'httpversion' => '1.0',
-				'blocking'    => false,
+				'blocking'    => true,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-				'body'        => wp_json_encode( $params ),
+				'body'        => $body,
 				'cookies'     => array(),
 			)
 		);
+
+		self::record_send_result( $response );
+	}
+
+	/**
+	 * Record the outcome of a delivery attempt.
+	 *
+	 * The send time is only recorded once the snapshot is accepted, so a transient failure
+	 * leaves it pending and the next scheduled run retries it. Consecutive failures are
+	 * counted so a persistent outage does not retry forever.
+	 *
+	 * @param array|WP_Error $response Response from wp_safe_remote_post().
+	 */
+	private static function record_send_result( $response ): void {
+		$status = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
+
+		if ( 200 <= $status && 300 > $status ) {
+			update_option( 'woocommerce_tracker_last_send', time() );
+			delete_option( 'woocommerce_tracker_send_failures' );
+			return;
+		}
+
+		$failures = (int) get_option( 'woocommerce_tracker_send_failures', 0 ) + 1;
+		$give_up  = ! self::is_retryable_status( $status ) || self::MAX_CONSECUTIVE_SEND_FAILURES <= $failures;
+
+		if ( $give_up ) {
+			update_option( 'woocommerce_tracker_last_send', time() );
+			delete_option( 'woocommerce_tracker_send_failures' );
+		} else {
+			update_option( 'woocommerce_tracker_send_failures', $failures, false );
+		}
+
+		wc_get_logger()->warning(
+			$give_up ? 'WooCommerce tracker snapshot delivery failed; giving up until the next interval.' : 'WooCommerce tracker snapshot delivery failed; it will be retried on the next run.',
+			array(
+				'source'      => 'woocommerce-tracker',
+				'http_status' => $status,
+				'error_code'  => is_wp_error( $response ) ? $response->get_error_code() : '',
+				'failures'    => $failures,
+			)
+		);
+	}
+
+	/**
+	 * Whether a delivery failure with the given status is worth retrying.
+	 *
+	 * Transport failures (status 0), rate limiting, timeouts and server errors are retried;
+	 * other client errors mean the snapshot itself was rejected.
+	 *
+	 * @param int $status HTTP status code, 0 for a transport failure.
+	 * @return bool
+	 */
+	private static function is_retryable_status( $status ) {
+		return 0 === $status || in_array( $status, array( 408, 425, 429 ), true ) || 500 <= $status;
 	}
 
 	/**

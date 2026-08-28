@@ -99,6 +99,178 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send a blocking request with a short timeout so the response can be inspected.
+	 */
+	public function test_send_tracking_data_uses_blocking_request(): void {
+		$request_args = null;
+		$this->fake_tracker_response( 200, $request_args );
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertTrue( $request_args['blocking'], 'The tracker request must be blocking to read the response.' );
+		$this->assertSame( 10, $request_args['timeout'], 'The tracker request timeout should be short.' );
+	}
+
+	/**
+	 * @testdox Should record the send time and clear the failure counter after a successful delivery.
+	 */
+	public function test_successful_send_records_last_send_and_clears_failures(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+		$this->fake_tracker_response( 204 );
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'A 2xx response should record the send time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'A 2xx response should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should not record the send time and should count the failure when delivery fails with a retryable error.
+	 *
+	 * @testWith [500]
+	 *           [503]
+	 *           [429]
+	 *           [408]
+	 *           [425]
+	 *           ["wp_error"]
+	 *
+	 * @param int|string $status HTTP status, or "wp_error" for a transport failure.
+	 */
+	public function test_retryable_failure_keeps_snapshot_pending( $status ): void {
+		update_option( 'woocommerce_tracker_last_send', strtotime( '-2 weeks' ) );
+		$this->fake_tracker_response( $status );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( strtotime( '-2 weeks' ), (int) get_option( 'woocommerce_tracker_last_send' ), 'A retryable failure must leave the last send time unchanged so the next daily run retries.' );
+		$this->assertSame( 1, (int) get_option( 'woocommerce_tracker_send_failures' ), 'A retryable failure should increment the failure counter.' );
+		$this->assertCount( 1, $logger->warnings, 'A failed delivery should be logged as a warning.' );
+		$this->assertSame( 'woocommerce-tracker', $logger->warnings[0]['source'] );
+	}
+
+	/**
+	 * @testdox Should give up on the snapshot when the server rejects it with a non-retryable status.
+	 *
+	 * @testWith [400]
+	 *           [403]
+	 *           [404]
+	 *           [410]
+	 *
+	 * @param int $status HTTP status.
+	 */
+	public function test_non_retryable_failure_records_last_send( int $status ): void {
+		update_option( 'woocommerce_tracker_send_failures', 1 );
+		$this->fake_tracker_response( $status );
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'A non-retryable failure should record the send time so the snapshot is not retried.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should give up on the snapshot after the maximum number of consecutive failures.
+	 */
+	public function test_max_consecutive_failures_records_last_send(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+		$this->fake_tracker_response( 503 );
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'The third consecutive failure should record the send time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should retry on the next daily run after a failed delivery without waiting for the weekly interval.
+	 */
+	public function test_failed_send_is_retried_on_next_run(): void {
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return 1 === $requests ? new WP_Error( 'http_request_failed', 'Timed out' ) : array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( 2, $requests, 'The second run should retry because the first delivery did not record a send time.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5 );
+	}
+
+	/**
+	 * Fake the tracker HTTP response.
+	 *
+	 * @param int|string $status       HTTP status code, or "wp_error" for a transport failure.
+	 * @param array|null $request_args Receives the request arguments by reference.
+	 */
+	private function fake_tracker_response( $status, &$request_args = null ): void {
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args ) use ( $status, &$request_args ) {
+				$request_args = $args;
+				if ( 'wp_error' === $status ) {
+					return new WP_Error( 'http_request_failed', 'Timed out' );
+				}
+				return array(
+					'headers'  => array(),
+					'body'     => '',
+					'response' => array(
+						'code'    => $status,
+						'message' => '',
+					),
+				);
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Inject a fake logger that records warning contexts.
+	 *
+	 * @return object Fake logger with a public `warnings` array of contexts.
+	 */
+	private function expect_tracker_warning() {
+		$logger = new class() implements WC_Logger_Interface {
+			/**
+			 * Recorded warning contexts.
+			 *
+			 * @var array
+			 */
+			public $warnings = array();
+
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {}
+			public function log( $level, $message, $context = array() ) {}
+			public function emergency( $message, $context = array() ) {}
+			public function alert( $message, $context = array() ) {}
+			public function critical( $message, $context = array() ) {}
+			public function error( $message, $context = array() ) {}
+			public function warning( $message, $context = array() ) {
+				$this->warnings[] = $context;
+			}
+			public function notice( $message, $context = array() ) {}
+			public function info( $message, $context = array() ) {}
+			public function debug( $message, $context = array() ) {}
+			// phpcs:enable
+		};
+		add_filter(
+			'woocommerce_logging_class',
+			static function () use ( $logger ) {
+				return $logger;
+			}
+		);
+		return $logger;
+	}
+	/**
 	 * @testDox Test the features compatibility data for plugin tracking data.
 	 */
 	public function test_get_tracking_data_plugin_feature_compatibility() {

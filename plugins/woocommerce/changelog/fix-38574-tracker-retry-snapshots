@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Retry failed usage-tracking snapshot deliveries on the next scheduled run instead of silently dropping them for a week.
