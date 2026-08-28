@@ -3073,7 +3073,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Core screens the posts group through _validate_cache_id(), which reports the
 		// malformed rows. That notice is the expected outcome, not a failure.
-		$this->setExpectedIncorrectUsage( '_get_non_cached_ids' );
+		// No setExpectedIncorrectUsage here on purpose: the malformed rows are screened out
+		// before priming, so core never sees them and never reports the usage. Adding the
+		// expectation back would fail, which is the point.
 
 		wc_scheduled_sales();
 

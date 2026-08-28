@@ -878,12 +878,12 @@ function wc_scheduled_sales() {
 		for ( $offset = 0; $offset < $total; $offset += $batch_size ) {
 			$chunk = array_slice( $product_ids, $offset, $batch_size );
 
-			_prime_post_caches( $chunk );
-
-			// _validate_cache_id()'s rule, which gated the posts prime. A replaced data store
-			// can return anything, and these become array keys below. The meta and term primes
-			// intval() the raw chunk instead, so a malformed row leaves those two behind.
-			$release_ids = array_values(
+			// _validate_cache_id()'s rule. A replaced data store can return anything, and
+			// priming reaches three caches that disagree about what an ID is: only the posts
+			// prime screens on this rule, while the meta and term primes intval() whatever
+			// they are handed. Screening up front and using one list throughout is what makes
+			// the release cover exactly what the prime wrote.
+			$batch_ids = array_values(
 				array_map(
 					'intval',
 					array_filter(
@@ -893,11 +893,17 @@ function wc_scheduled_sales() {
 				)
 			);
 
+			if ( ! $batch_ids ) {
+				continue;
+			}
+
+			_prime_post_caches( $batch_ids );
+
 			// Priming caches every ID against the union of these types' taxonomies, so only
 			// the same union clears it. Must be read here: the save loop evicts what it reads.
-			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $release_ids ) ) ) );
+			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $batch_ids ) ) ) );
 
-			foreach ( $chunk as $product_id ) {
+			foreach ( $batch_ids as $product_id ) {
 				$product = wc_get_product( $product_id );
 
 				if ( $product ) {
@@ -911,8 +917,8 @@ function wc_scheduled_sales() {
 
 			// posts and post_meta are shared with every other job in this WP-Cron request,
 			// so delete this batch's own IDs rather than flushing the groups whole.
-			wp_cache_delete_multiple( $release_ids, 'posts' );
-			wp_cache_delete_multiple( $release_ids, 'post_meta' );
+			wp_cache_delete_multiple( $batch_ids, 'posts' );
+			wp_cache_delete_multiple( $batch_ids, 'post_meta' );
 			// Deleted directly rather than through clean_object_term_cache(), which pairs one
 			// type with whatever IDs it is handed and fires that pairing on a public action.
 			// Any call here mislabels part of the batch, and save() already fired it per
@@ -925,7 +931,7 @@ function wc_scheduled_sales() {
 			}
 
 			foreach ( array_unique( $release_taxonomies ) as $release_taxonomy ) {
-				wp_cache_delete_multiple( $release_ids, "{$release_taxonomy}_relationships" );
+				wp_cache_delete_multiple( $batch_ids, "{$release_taxonomy}_relationships" );
 			}
 
 			// Saving releases a product's own entry; this catches the ones only read. The
