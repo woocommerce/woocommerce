@@ -17,8 +17,9 @@ const path = require( 'path' );
 const { assignReviewers, undot, matchesAny } = require( './assign.js' );
 
 const workspace = fs.mkdtempSync( path.join( os.tmpdir(), 'assign-reviewers-' ) );
+let configs = 0;
 const configFile = ( contents ) => {
-	const file = path.join( workspace, `config-${ Object.keys( contents ).join( '' ).length }.json` );
+	const file = path.join( workspace, `config-${ ( configs += 1 ) }.json` );
 	fs.writeFileSync( file, JSON.stringify( contents ) );
 
 	return file;
@@ -84,7 +85,7 @@ check( 'the shipped configs still parse and name reviewers', () => {
 
 /* Requesting the reviews. */
 
-const run = async ( { config, mode = 'changed-files', changed = [], requestReviewers } ) => {
+const run = async ( { config, mode = 'changed-files', changed = [], requestReviewers, membership = {} } ) => {
 	const calls = [], warnings = [];
 	let failed = null;
 
@@ -102,6 +103,19 @@ const run = async ( { config, mode = 'changed-files', changed = [], requestRevie
 					if ( requestReviewers ) {
 						await requestReviewers( body );
 					}
+				},
+			},
+			teams: {
+				// `membership` maps a team slug to the state the API reports, or to a
+				// status code the lookup should fail with. An absent slug is a 404.
+				getMembershipForUserInOrg: async ( { team_slug: team } ) => {
+					const state = membership[ team ];
+
+					if ( typeof state !== 'string' ) {
+						reject( state ?? 404, `lookup says ${ state ?? 404 }` );
+					}
+
+					return { data: { state } };
 				},
 			},
 		},
@@ -185,6 +199,43 @@ check( 'a batch failure that is not a rejected reviewer is not asked again', asy
 	);
 
 	assert.strictEqual( attempts, 1, 'only the batch is attempted' );
+} );
+
+const teamRouting = configFile( { rubik: 'rubik', ballade: 'ballade' } );
+
+check( 'author-team asks the teams the author belongs to', async () => {
+	const { calls, failed } = await run( {
+		config: teamRouting,
+		mode: 'author-team',
+		membership: { rubik: 'active' },
+	} );
+
+	assert.deepStrictEqual( calls, [ { reviewers: [], team_reviewers: [ 'rubik' ] } ] );
+	assert.strictEqual( failed, null );
+} );
+
+check( 'a pending team membership is not a membership', async () => {
+	const { calls, failed } = await run( {
+		config: teamRouting,
+		mode: 'author-team',
+		membership: { rubik: 'pending' },
+	} );
+
+	assert.strictEqual( calls.length, 0 );
+	assert.strictEqual( failed, null );
+} );
+
+check( 'a membership lookup that fails for any other reason fails the job', async () => {
+	// An expired token answers 401 to every team, which used to look exactly
+	// like an author who is on none of them.
+	const { calls, failed } = await run( {
+		config: teamRouting,
+		mode: 'author-team',
+		membership: { rubik: 401, ballade: 401 },
+	} );
+
+	assert.strictEqual( calls.length, 0 );
+	assert.match( failed, /Could not read alice's membership/ );
 } );
 
 check( 'a config that is not an object map is refused', async () => {

@@ -42,7 +42,8 @@ jobs:
               with:
                   script: |
                       await github.rest.issues.addLabels( {
-                          ...context.issue,
+                          ...context.repo,
+                          issue_number: context.issue.number,
                           labels: [ 'type: community contribution' ],
                       } );
 

@@ -120,8 +120,13 @@ const assignReviewers = async ( { github, context, core } ) => {
 				const message = `Could not read ${ author }'s membership of ${ team }: ${ error.message }`;
 
 				// 404 just means "not a member". Anything else means the lookup
-				// failed, and the routing below is quietly missing a team.
-				error.status === 404 ? core.info( message ) : core.warning( message );
+				// failed, so the routing below would quietly miss a team. Say so
+				// rather than assigning nobody on a green run.
+				if ( error.status === 404 ) {
+					core.info( message );
+				} else {
+					core.setFailed( message );
+				}
 
 				return false;
 			}
