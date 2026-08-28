@@ -217,14 +217,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_posted_data' skips the required check for fields hidden via the country locale.
+	 * @testdox 'validate_posted_data' skips the required check only for fields whose locale hidden flag is exactly true.
 	 *
-	 * @testWith [true]
-	 *           [false]
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           ["yes", true]
+	 *           [1, true]
 	 *
-	 * @param bool $hidden Whether the locale marks the postcode field as hidden.
+	 * @param mixed $hidden                Value of the locale's hidden flag for the postcode field.
+	 * @param bool  $expect_required_error Whether a required-field error is expected.
 	 */
-	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden ) {
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden, $expect_required_error ) {
 		$locale_filter = function ( $locale ) use ( $hidden ) {
 			$locale['ES']['postcode']['hidden'] = $hidden;
 			return $locale;
@@ -243,10 +246,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->sut->validate_posted_data( $data, $errors );
 
 		$required_error = $errors->get_error_message( 'billing_postcode_required' );
-		if ( $hidden ) {
-			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
+		if ( $expect_required_error ) {
+			$this->assertNotEmpty( $required_error, 'Fields not hidden with exactly true should still trigger a required-field error.' );
 		} else {
-			$this->assertNotEmpty( $required_error, 'Visible required fields should still trigger a required-field error.' );
+			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
 		}
 	}
 

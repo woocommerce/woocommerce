@@ -291,6 +291,8 @@ RevenueReportTable.contextType = CurrencyContext;
  * @param {boolean} isRequesting
  * @param {Object}  tableQuery
  * @param {Object}  revenueData
+ * @param {string}  dateType
+ * @param {Object}  filteredTableQuery The query the data was fetched with, including report filter params.
  * @return {Object} formatted tableData prop
  */
 const formatProps = memoize(
@@ -306,11 +308,18 @@ const formatProps = memoize(
 		},
 		dateType,
 	} ),
-	( isError, isRequesting, tableQuery, revenueData, dateType ) =>
+	(
+		isError,
+		isRequesting,
+		tableQuery,
+		revenueData,
+		dateType,
+		filteredTableQuery
+	) =>
 		[
 			isError,
 			isRequesting,
-			stringify( tableQuery ),
+			stringify( filteredTableQuery ),
 			get( revenueData, [ 'totalResults' ], 0 ),
 			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
 			dateType,
@@ -390,7 +399,8 @@ export default compose(
 			isRequesting,
 			tableQuery,
 			revenueData,
-			dateType
+			dateType,
+			filteredTableQuery
 		);
 	} )
 )( RevenueReportTable );

@@ -781,6 +781,132 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Get persisted order item IDs, optionally limited to an item type.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param string|null $type Order item type, or null for every type.
+	 * @throws Exception If the database query fails.
+	 * @return int[]
+	 */
+	public function get_item_ids( $order, $type = null ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() ) {
+			return array();
+		}
+
+		if ( null === $type ) {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+					$order->get_id()
+				)
+			);
+		} else {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s",
+					$order->get_id(),
+					$type
+				)
+			);
+		}
+
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->error(
+				'Failed to retrieve persisted order item IDs.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to retrieve persisted order item IDs.', 'woocommerce' ) );
+		}
+
+		return array_map( 'intval', $item_ids );
+	}
+
+	/**
+	 * Delete selected order items by ID.
+	 *
+	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param int[]    $ids   Order item IDs to delete.
+	 * @throws Exception If the database query fails.
+	 * @return void
+	 */
+	public function delete_items_by_ids( $order, $ids ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() || empty( $ids ) ) {
+			return;
+		}
+
+		$sanitized_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( 'intval', (array) $ids ),
+					static fn( $id ) => $id > 0
+				)
+			)
+		);
+		if ( empty( $sanitized_ids ) ) {
+			return;
+		}
+
+		$ids_placeholders = implode( ', ', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+		if ( false === $result ) {
+			wc_get_logger()->error(
+				'Failed to delete order item metadata.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order item metadata.', 'woocommerce' ) );
+		}
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+		if ( false === $result ) {
+			wc_get_logger()->error(
+				'Failed to delete order items.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order items.', 'woocommerce' ) );
+		}
+
+		foreach ( $sanitized_ids as $item_id ) {
+			wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		}
+
+		$this->clear_caches( $order );
+	}
+
+	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
 	 * @param WC_Order $order Order object.
