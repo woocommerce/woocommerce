@@ -30,6 +30,65 @@ class BulkNotificationWriterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox meta must follow its own row when the generated ids are not consecutive.
+	 *
+	 * `wc_stock_notifications` takes live writes: a shopper can sign up for a restock alert
+	 * while the migration runs. Under `innodb_autoinc_lock_mode = 2` — the default on MySQL 8
+	 * and MariaDB — that insert can take an id from inside the block this chunk is being
+	 * given, so ids derived by arithmetic from `$wpdb->insert_id` shift and stamp the legacy
+	 * marker onto the wrong subscriber. A single statement cannot be interleaved from one
+	 * thread, so the same non-consecutive layout is produced with the session increment.
+	 */
+	public function test_meta_follows_its_own_row_when_ids_are_not_consecutive(): void {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( 'SET SESSION auto_increment_increment = 3' );
+
+		try {
+			( new BulkNotificationWriter() )->insert_notifications(
+				array(
+					$this->build_row( 'first@example.com', array( array( '_wc_bis_legacy_id', 101 ) ) ),
+					$this->build_row( 'second@example.com', array( array( '_wc_bis_legacy_id', 102 ) ) ),
+					$this->build_row( 'third@example.com', array( array( '_wc_bis_legacy_id', 103 ) ) ),
+				)
+			);
+		} finally {
+			$wpdb->query( 'SET SESSION auto_increment_increment = 1' );
+		}
+
+		$ids = $wpdb->get_col( "SELECT id FROM {$table} ORDER BY id ASC" );
+
+		$this->assertCount( 3, $ids );
+		$this->assertNotSame(
+			array( (int) $ids[0], (int) $ids[0] + 1, (int) $ids[0] + 2 ),
+			array_map( 'intval', $ids ),
+			'This test is only meaningful while the generated ids are non-consecutive.'
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$expected = array(
+			'first@example.com'  => '101',
+			'second@example.com' => '102',
+			'third@example.com'  => '103',
+		);
+
+		foreach ( $expected as $email => $legacy_id ) {
+			$stored = $wpdb->get_var( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are $wpdb->prefix-based, never user input.
+					"SELECT m.meta_value FROM {$wpdb->prefix}wc_stock_notificationmeta m INNER JOIN {$table} n ON n.id = m.notification_id WHERE n.user_email = %s AND m.meta_key = '_wc_bis_legacy_id'",
+					$email
+				)
+			);
+
+			$this->assertSame( $legacy_id, $stored, "The marker for {$email} must sit on that subscriber's own row." );
+		}
+	}
+
+	/**
 	 * @testdox a null date column should be written as SQL NULL, not a zero date.
 	 */
 	public function test_null_dates_are_written_as_null(): void {

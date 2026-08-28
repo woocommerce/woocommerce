@@ -59,13 +59,6 @@ class BulkNotificationWriter {
 	private int $chunk_size;
 
 	/**
-	 * Cached `@@auto_increment_increment` for this session.
-	 *
-	 * @var int|null
-	 */
-	private ?int $auto_increment_increment = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param int $chunk_size Maximum number of notification rows per multi-row INSERT and
@@ -100,6 +93,7 @@ class BulkNotificationWriter {
 	 *
 	 * @param array $chunk Rows for this chunk, at most `$this->chunk_size` entries.
 	 * @throws \Exception If either statement fails.
+	 * @throws \RuntimeException If the inserted rows cannot be mapped to the chunk one to one.
 	 * @return int Number of notifications written.
 	 */
 	private function write_chunk( array $chunk ): int {
@@ -114,7 +108,14 @@ class BulkNotificationWriter {
 			$written  = $this->insert_notification_rows( $table, $chunk );
 			$first_id = (int) $wpdb->insert_id;
 
-			$meta_rows = $this->build_meta_rows( $chunk, $first_id );
+			if ( count( $chunk ) !== $written ) {
+				throw new \RuntimeException(
+					sprintf( 'Inserted %d of %d stock notification rows; refusing to attach meta.', $written, count( $chunk ) )
+				);
+			}
+
+			$ids       = $this->resolve_inserted_ids( $table, $chunk, $first_id );
+			$meta_rows = $this->build_meta_rows( $chunk, $ids );
 
 			if ( ! empty( $meta_rows ) ) {
 				$this->insert_meta_rows( $meta_table, $meta_rows );
@@ -185,23 +186,89 @@ class BulkNotificationWriter {
 	}
 
 	/**
-	 * Expand each row's meta list into meta table records against a just-inserted id block.
+	 * Resolve the id each row in the chunk was actually inserted with.
 	 *
-	 * A multi-row insert steps its generated ids by `@@auto_increment_increment`, which is
-	 * greater than one on a multi-primary cluster. Stepping by one there would attach every
-	 * marker after the first — `_wc_bis_legacy_id` included — to the wrong notification or
-	 * to an id that does not exist.
+	 * Never derived from `$wpdb->insert_id` by arithmetic. That would assume the generated
+	 * ids are contiguous, which InnoDB does not promise: under
+	 * `innodb_autoinc_lock_mode = 2` (interleaved, the default on MySQL 8.0 and MariaDB) a
+	 * concurrent insert into the same table can take an id from the middle of our block.
+	 * `wc_stock_notifications` has exactly such a writer — a shopper signing up for a restock
+	 * alert while a migration runs — and one interleaved id would shift every later row of the
+	 * chunk, stamping `_wc_bis_legacy_id` onto the shopper's notification and leaving ours
+	 * unmarked for the next run to migrate again. Duplicate restock emails cannot be recalled,
+	 * so the ids are read back instead of assumed.
 	 *
-	 * @param array $chunk    Rows for this chunk, in insertion order.
-	 * @param int   $first_id First id of the block `$wpdb->insert_id` returned.
+	 * Rows are matched on `product_id` and `user_email`, ordered by id: ids rise in insertion
+	 * order within one statement, so the nth of our rows is the nth match. Anything that does
+	 * not resolve to exactly one id per chunk row throws, and the caller's transaction rolls
+	 * the whole chunk back rather than writing meta against a guess.
+	 *
+	 * @param string $table    Notifications table name.
+	 * @param array  $chunk    Rows for this chunk, in insertion order.
+	 * @param int    $first_id First id `$wpdb->insert_id` reported for the statement.
+	 * @throws \RuntimeException When the inserted rows cannot be mapped one to one.
+	 * @return int[] Notification ids, in the same order as $chunk.
+	 */
+	private function resolve_inserted_ids( string $table, array $chunk, int $first_id ): array {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $table is a fixed internal name; $first_id is cast to int.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, product_id, user_email FROM {$table} WHERE id >= %d ORDER BY id ASC",
+				$first_id
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$available = array();
+
+		foreach ( (array) $rows as $row ) {
+			$available[ $this->natural_key( (int) $row['product_id'], (string) $row['user_email'] ) ][] = (int) $row['id'];
+		}
+
+		$ids = array();
+
+		foreach ( $chunk as $offset => $row ) {
+			$columns = $row['columns'];
+			$key     = $this->natural_key( (int) $columns['product_id'], (string) $columns['user_email'] );
+
+			if ( empty( $available[ $key ] ) ) {
+				throw new \RuntimeException(
+					sprintf( 'Could not resolve the inserted id for chunk row %d; rolling the chunk back.', (int) $offset ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an integer offset, not output.
+				);
+			}
+
+			$ids[] = array_shift( $available[ $key ] );
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * The key a chunk row and its inserted database row are matched on.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param string $user_email Subscriber email.
+	 * @return string
+	 */
+	private function natural_key( int $product_id, string $user_email ): string {
+		return $product_id . "\0" . strtolower( $user_email );
+	}
+
+	/**
+	 * Expand each row's meta list into meta table records against the ids it was inserted with.
+	 *
+	 * @param array $chunk Rows for this chunk, in insertion order.
+	 * @param int[] $ids   Notification ids resolved by `resolve_inserted_ids()`, same order.
 	 * @return array List of `array{0:int,1:string,2:mixed}` notification_id/key/value rows.
 	 */
-	private function build_meta_rows( array $chunk, int $first_id ): array {
+	private function build_meta_rows( array $chunk, array $ids ): array {
 		$meta_rows = array();
-		$increment = $this->auto_increment_increment();
 
 		foreach ( array_values( $chunk ) as $offset => $row ) {
-			$notification_id = $first_id + ( $offset * $increment );
+			$notification_id = $ids[ $offset ];
 
 			foreach ( $row['meta'] as $meta ) {
 				$meta_rows[] = array( $notification_id, $meta[0], $meta[1] );
@@ -209,22 +276,6 @@ class BulkNotificationWriter {
 		}
 
 		return $meta_rows;
-	}
-
-	/**
-	 * The step between ids generated by one multi-row insert, read once per instance.
-	 *
-	 * @return int Always at least 1, so a session that reports something unusable still
-	 *             produces consecutive ids rather than collapsing every row onto one id.
-	 */
-	private function auto_increment_increment(): int {
-		global $wpdb;
-
-		if ( null === $this->auto_increment_increment ) {
-			$this->auto_increment_increment = max( 1, (int) $wpdb->get_var( 'SELECT @@auto_increment_increment' ) );
-		}
-
-		return $this->auto_increment_increment;
 	}
 
 	/**
