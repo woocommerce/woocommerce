@@ -313,6 +313,17 @@ describe( 'installPlugins error message', () => {
 		expect( error?.message ).toBe( 'Could not install a. {"a":[null]}' );
 	} );
 
+	it( 'ignores entries for plugins this call did not request', () => {
+		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: [ 'Reason A.' ], other: [ 'Not ours.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe( 'Could not install a. Reason A.' );
+	} );
+
 	it( 'reports the step that failed on the error', () => {
 		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
 			data: { installed: [], results: {} },

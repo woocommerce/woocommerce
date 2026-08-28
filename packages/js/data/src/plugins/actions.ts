@@ -201,14 +201,18 @@ function* handlePluginAPIError(
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
 		// Read them defensively: this is a parsed HTTP response, and a plugin filtering it
 		// can put anything here. Anything that is not a message is dropped.
+		// Only the plugins this call asked about; the predicate above matches when any one
+		// of them is present, so the payload may carry entries we never requested.
+		const requested = new Set< string >( plugins as string[] );
 		const failures = Object.entries( error )
+			.filter( ( [ slug ] ) => requested.has( slug ) )
 			.map(
 				( [ slug, value ] ) =>
 					[
 						slug,
 						( Array.isArray( value ) ? value : [ value ] ).filter(
 							( message ): message is string =>
-								'string' === typeof message && '' !== message
+								typeof message === 'string' && message !== ''
 						),
 					] as const
 			)
