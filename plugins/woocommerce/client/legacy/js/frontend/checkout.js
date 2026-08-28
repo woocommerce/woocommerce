@@ -582,7 +582,24 @@ jQuery( function ( $ ) {
 				if ( validate_phone ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
-					if ( 0 < $this.val().replace( pattern, '' ).length ) {
+					// Mirrors wc_remove_non_displayable_chars(). A paste can carry characters
+					// that render as nothing, and the server strips them before validating, so
+					// flagging the field here would blame the customer for something invisible.
+					var invisible = new RegExp(
+						'[\\u{00AD}\\u{034F}\\u{061C}\\u{115F}\\u{1160}\\u{17B4}\\u{17B5}\\u{180B}-\\u{180F}' +
+							'\\u{200B}-\\u{200F}\\u{202A}-\\u{202E}\\u{2060}-\\u{206F}\\u{3164}' +
+							'\\u{FE00}-\\u{FE0F}\\u{FEFF}\\u{FFA0}\\u{FFF0}-\\u{FFFB}' +
+							'\\u{1BCA0}-\\u{1BCA3}\\u{1D173}-\\u{1D17A}\\u{E0000}-\\u{E0FFF}]',
+						'gu'
+					);
+
+					if (
+						0 <
+						$this
+							.val()
+							.replace( invisible, '' )
+							.replace( pattern, '' ).length
+					) {
 						$this.attr( 'aria-invalid', 'true' );
 						$parent
 							.removeClass( 'woocommerce-validated' )
