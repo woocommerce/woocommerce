@@ -12,7 +12,8 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for the general settings section, where nothing carries a per-row marker and the
- * fingerprint is the only thing standing between a re-run and a merchant's own edits.
+ * `MigrationState` write-once record is the only thing standing between a re-run and an
+ * infinite rewrite loop.
  */
 class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 
@@ -82,61 +83,29 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox an option this migration wrote should be rewritten only when the legacy source changed.
+	 * @testdox a second run must not re-migrate or rewrite anything already migrated.
 	 */
-	public function test_unchanged_option_is_rewritten_only_when_the_source_changes(): void {
+	public function test_second_run_finds_nothing_outstanding_and_writes_nothing(): void {
 		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
 		$this->migrate();
+
+		// Simulate a merchant edit after the first run to prove it is left alone.
+		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
 
 		$migrator = $this->build_migrator();
-		$this->assertSame( array(), $migrator->get_batch( 0, 10 ), 'Nothing changed, so nothing is outstanding.' );
 
-		update_option( self::LEGACY_ALLOW_SIGNUPS, 'yes' );
+		$this->assertSame( array(), $migrator->get_batch( 0, 10 ), 'A migrated key must never come back as outstanding.' );
 
-		$this->assertContains( self::LEGACY_ALLOW_SIGNUPS, $this->build_migrator()->get_batch( 0, 10 ) );
+		$counts = $migrator->migrate_batch( array( self::LEGACY_ALLOW_SIGNUPS ), new DbWriter() );
 
-		$this->migrate();
-		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ) );
+		$this->assertSame( array(), $counts, 'migrate_batch() was only exercised here to prove get_batch() already returned nothing.' );
+		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'A second run must never overwrite a value it already migrated once.' );
 	}
 
 	/**
-	 * @testdox a merchant-edited option should be left alone and reported once.
+	 * @testdox an integer option should round-trip and settle after one migration.
 	 */
-	public function test_merchant_edited_option_is_skipped_and_reported_once(): void {
-		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
-		$this->migrate();
-
-		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
-
-		$counts = $this->migrate();
-
-		$this->assertSame( 1, $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 );
-		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'The merchant\'s value must survive.' );
-
-		// Reported once: the skip is recorded, so the option stops being outstanding.
-		$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 10 ) );
-	}
-
-	/**
-	 * @testdox force should overwrite only a merchant-edited option.
-	 */
-	public function test_force_overwrites_only_the_merchant_edited_case(): void {
-		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
-		$this->migrate();
-
-		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
-		$this->migrate();
-
-		$counts = $this->migrate( true );
-
-		$this->assertSame( 1, $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 );
-		$this->assertSame( 'no', get_option( self::CORE_ALLOW_SIGNUPS ), 'Force writes the legacy value over the edit.' );
-	}
-
-	/**
-	 * @testdox an integer option should round-trip without reporting itself as edited.
-	 */
-	public function test_integer_option_round_trips_without_a_false_edit(): void {
+	public function test_integer_option_round_trips_and_settles(): void {
 		update_option( self::LEGACY_THRESHOLD, 30 );
 
 		$this->migrate();
@@ -147,7 +116,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(),
 			$this->build_migrator()->get_batch( 0, 10 ),
-			'A value that reads back as a string must not look like a merchant edit.'
+			'A key that has been migrated once must not stay outstanding.'
 		);
 	}
 
@@ -175,17 +144,16 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 		}
 
 		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ) );
-		$this->assertNull( $this->state->get_option_fingerprint( self::CORE_ALLOW_SIGNUPS ) );
+		$this->assertFalse( $this->state->is_option_migrated( self::CORE_ALLOW_SIGNUPS ) );
 	}
 
 	/**
 	 * Run the settings section to completion.
 	 *
-	 * @param bool $force Whether to overwrite merchant-edited options.
 	 * @return array<string,int> Outcome counts from the last batch.
 	 */
-	private function migrate( bool $force = false ): array {
-		$migrator = $this->build_migrator( $force );
+	private function migrate(): array {
+		$migrator = $this->build_migrator();
 		$counts   = array();
 		$batches  = 0;
 
@@ -210,11 +178,10 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	/**
 	 * Build a migrator sharing this test's state.
 	 *
-	 * @param bool $force Whether to overwrite merchant-edited options.
 	 * @return SettingsMigrator
 	 */
-	private function build_migrator( bool $force = false ): SettingsMigrator {
-		return new SettingsMigrator( $this->state, new Reporter(), $force );
+	private function build_migrator(): SettingsMigrator {
+		return new SettingsMigrator( $this->state, new Reporter() );
 	}
 
 	/**

@@ -93,7 +93,7 @@ class SettingsMigrator implements MigratorInterface {
 	private const OUTCOME_NO_CORE_HOME = 'no_core_home';
 
 	/**
-	 * Migration run state, used for fingerprint bookkeeping.
+	 * Migration run state, used to track which options have already been migrated.
 	 *
 	 * @var MigrationState
 	 */
@@ -105,13 +105,6 @@ class SettingsMigrator implements MigratorInterface {
 	 * @var Reporter
 	 */
 	private Reporter $reporter;
-
-	/**
-	 * Whether to overwrite an option the merchant has already edited.
-	 *
-	 * @var bool
-	 */
-	private bool $force;
 
 	/**
 	 * Whether the known-losses count has already been reported this run.
@@ -134,12 +127,10 @@ class SettingsMigrator implements MigratorInterface {
 	 *
 	 * @param MigrationState $state    Migration run state.
 	 * @param Reporter       $reporter Outcome reporter.
-	 * @param bool           $force    Whether to overwrite merchant-edited options. CLI only.
 	 */
-	public function __construct( MigrationState $state, Reporter $reporter, bool $force = false ) {
+	public function __construct( MigrationState $state, Reporter $reporter ) {
 		$this->state    = $state;
 		$this->reporter = $reporter;
-		$this->force    = $force;
 	}
 
 	/**
@@ -160,7 +151,9 @@ class SettingsMigrator implements MigratorInterface {
 		$count = 0;
 
 		foreach ( array_keys( self::OPTION_MAP ) as $legacy_key ) {
-			if ( MigrationState::OPTION_ACTION_WRITE === $this->decide( $legacy_key ) ) {
+			$core_key = self::OPTION_MAP[ $legacy_key ]['core'];
+
+			if ( ! $this->state->is_option_migrated( $core_key ) ) {
 				++$count;
 			}
 		}
@@ -171,10 +164,9 @@ class SettingsMigrator implements MigratorInterface {
 	/**
 	 * Fetch the outstanding legacy option keys, capped at $size.
 	 *
-	 * Includes options that need a write and options the merchant has edited, since the
-	 * latter still need to be visited so migrate_batch() can report them. Excludes
-	 * options already migrated and unchanged since. This section is small and finite, so
-	 * $cursor is not used as a keyset: the same outstanding list is returned every call.
+	 * A key is outstanding until it has been migrated once. This section is small and
+	 * finite, so $cursor is not used as a keyset: the same outstanding list is returned
+	 * every call.
 	 *
 	 * @param int $cursor Unused; this section never needs more than one pass.
 	 * @param int $size   Maximum number of option keys to return.
@@ -188,9 +180,9 @@ class SettingsMigrator implements MigratorInterface {
 				continue;
 			}
 
-			$action = $this->decide( $legacy_key );
+			$core_key = self::OPTION_MAP[ $legacy_key ]['core'];
 
-			if ( MigrationState::OPTION_ACTION_SKIP_UNCHANGED !== $action ) {
+			if ( ! $this->state->is_option_migrated( $core_key ) ) {
 				$outstanding[] = $legacy_key;
 			}
 		}
@@ -207,49 +199,28 @@ class SettingsMigrator implements MigratorInterface {
 	 */
 	public function migrate_batch( array $ids, WriterInterface $writer ): array {
 		$counts = array();
-		$row_id = 0;
 
 		foreach ( $ids as $legacy_key ) {
 			if ( ! isset( self::OPTION_MAP[ $legacy_key ] ) ) {
 				continue;
 			}
 
-			++$row_id;
-
-			$mapping     = self::OPTION_MAP[ $legacy_key ];
-			$core_key    = $mapping['core'];
-			$value       = get_option( $legacy_key, $mapping['default'] );
-			$source_hash = $this->state->fingerprint_value( $value );
-			$action      = $this->decide( $legacy_key );
+			$mapping  = self::OPTION_MAP[ $legacy_key ];
+			$core_key = $mapping['core'];
+			$value    = get_option( $legacy_key, $mapping['default'] );
 
 			$this->handled[ $legacy_key ] = true;
 
-			if ( MigrationState::OPTION_ACTION_SKIP_USER_MODIFIED === $action ) {
-				$this->reporter->record( self::SLUG, Reporter::OUTCOME_SKIPPED_USER_MODIFIED, $row_id );
-				$counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] = ( $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 ) + 1;
-
-				if ( ! $writer->is_dry_run() ) {
-					// Record what the merchant's value is now, so it reports once rather than
-					// staying outstanding on every later run.
-					$current_target_hash = $this->state->fingerprint_value( get_option( $core_key, $mapping['default'] ) );
-					$this->state->record_option_fingerprint( $core_key, $source_hash, $current_target_hash, true );
-				}
-
-				continue;
-			}
-
-			if ( MigrationState::OPTION_ACTION_WRITE !== $action ) {
+			// Guard the write as well as the selection, so an id that reaches this method
+			// from anywhere but `get_batch()` still only ever writes once.
+			if ( $this->state->is_option_migrated( $core_key ) ) {
 				continue;
 			}
 
 			$writer->write_option( $core_key, $value );
 
 			if ( ! $writer->is_dry_run() ) {
-				// Fingerprint the value as it reads back, not as it was handed over: options
-				// round-trip through the database as strings, so an int written here would
-				// never match its own stored form and would report as merchant-edited.
-				$stored_hash = $this->state->fingerprint_value( get_option( $core_key, $mapping['default'] ) );
-				$this->state->record_option_fingerprint( $core_key, $source_hash, $stored_hash );
+				$this->state->mark_option_migrated( $core_key );
 			}
 
 			$counts[ Reporter::OUTCOME_MIGRATED ] = ( $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 ) + 1;
@@ -258,24 +229,6 @@ class SettingsMigrator implements MigratorInterface {
 		$this->report_known_losses();
 
 		return $counts;
-	}
-
-	/**
-	 * Decide what to do with one mapped legacy option.
-	 *
-	 * @param string $legacy_key Legacy option name, a key of OPTION_MAP.
-	 * @return string One of the MigrationState::OPTION_ACTION_* constants.
-	 */
-	private function decide( string $legacy_key ): string {
-		$mapping     = self::OPTION_MAP[ $legacy_key ];
-		$core_key    = $mapping['core'];
-		$value       = get_option( $legacy_key, $mapping['default'] );
-		$source_hash = $this->state->fingerprint_value( $value );
-
-		$current_target_value = get_option( $core_key, $mapping['default'] );
-		$current_target_hash  = $this->state->fingerprint_value( $current_target_value );
-
-		return $this->state->decide_option_action( $core_key, $source_hash, $current_target_hash, $this->force );
 	}
 
 	/**

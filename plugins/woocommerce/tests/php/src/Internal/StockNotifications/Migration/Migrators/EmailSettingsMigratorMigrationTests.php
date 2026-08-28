@@ -70,15 +70,11 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 		$core['heading'] = 'Merchant heading';
 		update_option( 'woocommerce_customer_stock_notification_settings', $core );
 
-		$legacy            = (array) get_option( 'woocommerce_bis_notification_received_settings' );
-		$legacy['subject'] = 'New legacy subject';
-		update_option( 'woocommerce_bis_notification_received_settings', $legacy );
-
 		$this->migrate();
 
 		$core = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
 
-		$this->assertSame( 'New legacy subject', $core['subject'], 'A changed source must still move.' );
+		$this->assertSame( 'Legacy subject', $core['subject'], 'A migrated sub-key must keep the value it was given.' );
 		$this->assertSame( 'Merchant heading', $core['heading'], 'A hand-edited sibling must survive.' );
 	}
 
@@ -100,29 +96,7 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a merchant-edited sub-key should be reported once and then stop being outstanding.
-	 */
-	public function test_merchant_edited_sub_key_is_reported_once(): void {
-		update_option( 'woocommerce_bis_notification_verify_settings', array( 'subject' => 'Legacy subject' ) );
-		$this->migrate();
-
-		$core            = (array) get_option( 'woocommerce_customer_stock_notification_verify_settings' );
-		$core['subject'] = 'Merchant subject';
-		update_option( 'woocommerce_customer_stock_notification_verify_settings', $core );
-
-		$counts = $this->migrate();
-
-		$this->assertGreaterThanOrEqual( 1, $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 );
-		$this->assertSame(
-			'Merchant subject',
-			( (array) get_option( 'woocommerce_customer_stock_notification_verify_settings' ) )['subject']
-		);
-
-		$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 50 ), 'The skip is recorded, so nothing stays outstanding.' );
-	}
-
-	/**
-	 * @testdox a write that does not land should be reported and retried, not fingerprinted.
+	 * @testdox a write that does not land should be reported and retried, not marked migrated.
 	 */
 	public function test_a_write_that_did_not_land_is_retried(): void {
 		update_option(
@@ -146,12 +120,19 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 		};
 
 		$migrator = $this->build_migrator();
-		$counts   = $migrator->migrate_batch( $migrator->get_batch( 0, 50 ), $silent );
+		$batch    = $migrator->get_batch( 0, 50 );
+		$counts   = $migrator->migrate_batch( $batch, $silent );
 
 		$this->assertGreaterThan( 0, $counts[ Reporter::OUTCOME_FAILED ] ?? 0, 'A write that did not land is a failure.' );
-		$this->assertNull( $this->state->get_option_fingerprint( 'woocommerce_customer_stock_notification_settings::subject' ) );
 
-		// Nothing was recorded, so the next run writes again rather than settling.
+		// Nothing was marked migrated, so the sub-key is still outstanding.
+		$this->assertContains(
+			'woocommerce_bis_notification_received_settings::woocommerce_customer_stock_notification_settings::subject',
+			$this->build_migrator()->get_batch( 0, 50 ),
+			'A write that did not land must stay outstanding.'
+		);
+
+		// The next run writes again rather than settling on the value that never landed.
 		$this->migrate();
 
 		$stored = (array) get_option( 'woocommerce_customer_stock_notification_settings', array() );
@@ -159,13 +140,33 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a completed run should leave nothing outstanding and write nothing on a second pass.
+	 */
+	public function test_a_completed_run_does_not_repeat_writes(): void {
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'subject' => 'Legacy subject' )
+		);
+
+		$this->migrate();
+
+		$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 50 ), 'Nothing should remain outstanding after a completed run.' );
+
+		$writer = $this->getMockBuilder( DbWriter::class )->onlyMethods( array( 'write_option' ) )->getMock();
+		$writer->expects( $this->never() )->method( 'write_option' );
+
+		$counts = $this->build_migrator()->migrate_batch( $this->build_migrator()->get_batch( 0, 50 ), $writer );
+
+		$this->assertSame( array(), $counts, 'A second run should report nothing.' );
+	}
+
+	/**
 	 * Run the email section to completion.
 	 *
-	 * @param bool $force Whether to overwrite merchant-edited values.
 	 * @return array<string,int> Accumulated outcome counts.
 	 */
-	private function migrate( bool $force = false ): array {
-		$migrator = $this->build_migrator( $force );
+	private function migrate(): array {
+		$migrator = $this->build_migrator();
 		$counts   = array();
 		$batches  = 0;
 
@@ -190,11 +191,10 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	/**
 	 * Build a migrator sharing this test's state.
 	 *
-	 * @param bool $force Whether to overwrite merchant-edited values.
 	 * @return EmailSettingsMigrator
 	 */
-	private function build_migrator( bool $force = false ): EmailSettingsMigrator {
-		return new EmailSettingsMigrator( $this->state, new Reporter(), $force );
+	private function build_migrator(): EmailSettingsMigrator {
+		return new EmailSettingsMigrator( $this->state, new Reporter() );
 	}
 
 	/**
