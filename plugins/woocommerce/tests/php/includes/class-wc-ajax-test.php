@@ -399,7 +399,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Test tax rate JSON search supports searching rate details and location codes.
+	 * @testdox Should paginate tax rate search results and find rates by location code.
 	 */
 	public function test_json_search_tax_rates_supports_pagination_and_location_search(): void {
 		global $wpdb;
@@ -493,7 +493,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Test tax rate JSON search supports searching visible tax class labels.
+	 * @testdox Should find tax rates by their visible tax class labels.
 	 */
 	public function test_json_search_tax_rates_supports_tax_class_label_search(): void {
 		global $wpdb;
@@ -577,8 +577,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Test tax rate JSON search matches the values the modal actually displays, such as the
-	 * formatted rate percentage and the derived rate code.
+	 * @testdox Should find tax rates by displayed percentages, rate codes, and fallback labels.
 	 */
 	public function test_json_search_tax_rates_supports_displayed_value_search(): void {
 		global $wpdb;
@@ -657,7 +656,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Test tax rate JSON search returns every rate, paginated, when no term is given.
+	 * @testdox Should return each tax rate once when listing results without a search term.
 	 */
 	public function test_json_search_tax_rates_without_a_term_lists_all_rates(): void {
 		global $wpdb;
