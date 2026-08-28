@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyLinkShim;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationController;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
@@ -174,7 +174,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 
 		foreach ( $wp_filter['template_redirect']->callbacks as $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof LegacyUnsubscribeShim ) {
+				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof LegacyLinkShim ) {
 					return true;
 				}
 			}

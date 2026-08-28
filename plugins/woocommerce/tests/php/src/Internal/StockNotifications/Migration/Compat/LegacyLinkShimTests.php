@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Com
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyLinkShim;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
@@ -16,13 +16,16 @@ use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\L
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the shim that keeps legacy `bis_unsub` email links working after migration.
+ * Tests for the shim that keeps legacy `bis_unsub` and `bis_ver` email links working after
+ * migration.
  *
- * Links are built the way the legacy extension built them - the token is the sha256 of an
- * AES-256-CBC encryption of `{id}-{product}-{create_date}`, base64-encoded into the query
- * string - so these exercise the real URL shape rather than a hand-made one.
+ * Links are built the way the legacy extension built them - the unsubscribe token is the
+ * sha256 of an AES-256-CBC encryption of `{id}-{product}-{create_date}`, the verification
+ * token the sha256 of the same encryption over the row's verification code, each
+ * base64-encoded into the query string - so these exercise the real URL shape rather than a
+ * hand-made one.
  */
-class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
+class LegacyLinkShimTests extends WC_Unit_Test_Case {
 
 	use LoggerSpyTrait;
 
@@ -50,9 +53,9 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 	/**
 	 * Shim under test.
 	 *
-	 * @var LegacyUnsubscribeShim
+	 * @var LegacyLinkShim
 	 */
-	private LegacyUnsubscribeShim $shim;
+	private LegacyLinkShim $shim;
 
 	/**
 	 * A published simple product the seeded rows point at.
@@ -74,7 +77,7 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
 
-		$this->shim       = wc_get_container()->get( LegacyUnsubscribeShim::class );
+		$this->shim       = wc_get_container()->get( LegacyLinkShim::class );
 		$this->product_id = $this->create_product();
 
 		wc_clear_notices();
@@ -84,7 +87,7 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 	 * Clear the request state, the legacy tables and the options.
 	 */
 	public function tearDown(): void {
-		unset( $_GET['bis_unsub'], $_GET['bis_unsub_id'], $_GET['bis_unsub_ref'] );
+		unset( $_GET['bis_unsub'], $_GET['bis_unsub_id'], $_GET['bis_unsub_ref'], $_GET['bis_ver'], $_GET['bis_ver_id'], $_GET['bis_ver_code'] );
 
 		wc_clear_notices();
 		LegacyStore::drop_tables();
@@ -554,7 +557,7 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 		add_filter( 'wp_redirect', $catcher );
 
 		try {
-			$this->shim->maybe_process_legacy_unsubscribe();
+			$this->shim->maybe_process_legacy_link();
 		} catch ( \RuntimeException $exception ) {
 			$redirected = 'redirected' === $exception->getMessage();
 		} finally {
@@ -562,6 +565,101 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 		}
 
 		return $redirected;
+	}
+
+	/**
+	 * Seed an unverified legacy row with its verification secrets, so it migrates as pending.
+	 *
+	 * @param string $email      Subscriber email.
+	 * @param int    $created_at Timestamp the verification data was created at.
+	 * @param string $code       Verification code.
+	 * @return int Legacy notification id.
+	 */
+	private function seed_pending_legacy_row( string $email, int $created_at, string $code = 'a-verification-code' ): int {
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'user_email'  => $email,
+				'create_date' => self::CREATE_DATE,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+
+		LegacyStore::add_meta( $legacy_id, '_hash_key', self::HASH_KEY );
+		LegacyStore::add_meta( $legacy_id, '_hash_iv', self::HASH_IV );
+		LegacyStore::add_verification_data( $legacy_id, $code, $created_at );
+
+		return $legacy_id;
+	}
+
+	/**
+	 * Reproduce the legacy extension's `WC_BIS_Notification_Data::get_verification_hash()`.
+	 *
+	 * @param string $code Verification code the row was seeded with.
+	 * @return string
+	 */
+	private function legacy_verification_token( string $code = 'a-verification-code' ): string {
+		return hash( 'sha256', openssl_encrypt( $code, 'AES-256-CBC', LegacyStore::VERIFICATION_KEY, 0, LegacyStore::VERIFICATION_IV ) );
+	}
+
+	/**
+	 * Drive one legacy verification request, base64-encoding the token as the link does.
+	 *
+	 * @param int    $legacy_id Value for `bis_ver_id`; 0 omits the parameter entirely.
+	 * @param string $token     Raw legacy verification token.
+	 * @param string $code      Value for `bis_ver_code`; '' omits the parameter entirely.
+	 * @return bool True when the shim redirected, which every terminal outcome does.
+	 */
+	private function verify_request( int $legacy_id, string $token, string $code = '' ): bool {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- reproducing the legacy link format.
+		$_GET['bis_ver'] = base64_encode( $token );
+
+		if ( $legacy_id > 0 ) {
+			$_GET['bis_ver_id'] = (string) $legacy_id;
+		} else {
+			unset( $_GET['bis_ver_id'] );
+		}
+
+		if ( '' !== $code ) {
+			$_GET['bis_ver_code'] = $code;
+		} else {
+			unset( $_GET['bis_ver_code'] );
+		}
+
+		$redirected = false;
+
+		$catcher = static function () {
+			throw new \RuntimeException( 'redirected' );
+		};
+
+		add_filter( 'wp_redirect', $catcher );
+
+		try {
+			$this->shim->maybe_process_legacy_link();
+		} catch ( \RuntimeException $exception ) {
+			$redirected = 'redirected' === $exception->getMessage();
+		} finally {
+			remove_filter( 'wp_redirect', $catcher );
+		}
+
+		return $redirected;
+	}
+
+	/**
+	 * Assert the uniform stale-verification-link notice was added.
+	 *
+	 * @return void
+	 */
+	private function assert_stale_verify_notice(): void {
+		$notices = wc_get_notices();
+		$texts   = wp_list_pluck( $notices['notice'] ?? array(), 'notice' );
+
+		$this->assertContains(
+			'This verification link is invalid or has expired.',
+			$texts,
+			'Every unresolvable verification link must read the same, so the endpoint cannot be used to enumerate sign-ups.'
+		);
 	}
 
 	/**
@@ -600,6 +698,204 @@ class LegacyUnsubscribeShimTests extends WC_Unit_Test_Case {
 			$texts,
 			'The stale-link message belongs under the notice type, not success.'
 		);
+	}
+
+	/**
+	 * @testdox a legacy verification link should activate its migrated pending row and spend the token.
+	 */
+	public function test_legacy_verification_link_activates_the_pending_row(): void {
+		$legacy_id = $this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		$this->assertSame( NotificationStatus::PENDING, LegacyStore::get_core_rows()[0]['status'] );
+
+		$this->assertTrue( $this->verify_request( $legacy_id, $this->legacy_verification_token() ) );
+
+		$row = LegacyStore::get_core_rows()[0];
+
+		$this->assertSame( NotificationStatus::ACTIVE, $row['status'] );
+		$this->assertNotNull( $row['date_confirmed_gmt'] );
+		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ), 'A verification token is single use.' );
+	}
+
+	/**
+	 * @testdox a second click on a spent verification link should change nothing.
+	 */
+	public function test_a_second_verification_click_changes_nothing(): void {
+		$legacy_id = $this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		$this->verify_request( $legacy_id, $this->legacy_verification_token() );
+
+		$before = LegacyStore::get_core_rows();
+		wc_clear_notices();
+
+		$this->assertTrue( $this->verify_request( $legacy_id, $this->legacy_verification_token() ) );
+
+		$this->assert_stale_verify_notice();
+		$this->assertSame( $before, LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox an expired verification link should get the generic notice and change nothing.
+	 */
+	public function test_an_expired_verification_link_changes_nothing(): void {
+		// Written by the migration while still live, then aged past its baked-in expiry.
+		$legacy_id = $this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		$this->age_the_verification_meta( 2 * HOUR_IN_SECONDS );
+		wc_clear_notices();
+
+		$this->assertTrue( $this->verify_request( $legacy_id, $this->legacy_verification_token() ) );
+
+		$this->assert_stale_verify_notice();
+		$this->assertSame( NotificationStatus::PENDING, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * @testdox every unresolvable verification link should read exactly the same.
+	 * @dataProvider provider_unresolvable_verification_links
+	 *
+	 * @param string $shape Which unresolvable shape to drive.
+	 */
+	public function test_every_unresolvable_verification_link_reads_the_same( string $shape ): void {
+		$legacy_id = $this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		wc_clear_notices();
+
+		switch ( $shape ) {
+			case 'tampered token':
+				$this->assertTrue( $this->verify_request( $legacy_id, hash( 'sha256', 'not-the-token' ) ) );
+				break;
+			case 'unknown id':
+				$this->assertTrue( $this->verify_request( $legacy_id + 1000, $this->legacy_verification_token() ) );
+				break;
+			default:
+				$this->assertTrue( $this->verify_request( 0, $this->legacy_verification_token() ) );
+				break;
+		}
+
+		$this->assert_stale_verify_notice();
+		$this->assertSame( NotificationStatus::PENDING, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * The unresolvable verification link shapes that must be indistinguishable.
+	 *
+	 * @return array
+	 */
+	public function provider_unresolvable_verification_links(): array {
+		return array(
+			'tampered token' => array( 'tampered token' ),
+			'unknown id'     => array( 'unknown id' ),
+			'missing id'     => array( 'missing id' ),
+		);
+	}
+
+	/**
+	 * @testdox bis_ver_code should make no difference either way.
+	 * @dataProvider provider_verification_codes
+	 *
+	 * @param string $code Value for `bis_ver_code`.
+	 */
+	public function test_bis_ver_code_is_ignored( string $code ): void {
+		$legacy_id = $this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		$this->assertTrue( $this->verify_request( $legacy_id, $this->legacy_verification_token(), $code ) );
+
+		$this->assertSame( NotificationStatus::ACTIVE, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * `bis_ver_code` values the shim must treat alike: legacy recomputed the hash from it,
+	 * this shim compares against a stored digest instead.
+	 *
+	 * @return array
+	 */
+	public function provider_verification_codes(): array {
+		return array(
+			'absent'     => array( '' ),
+			'correct'    => array( 'a-verification-code' ),
+			'mismatched' => array( 'some-other-code' ),
+		);
+	}
+
+	/**
+	 * @testdox a Core row adopted by two legacy ids should only spend the digest that matched.
+	 */
+	public function test_only_the_matched_verification_digest_is_deleted(): void {
+		$first  = $this->seed_pending_legacy_row( 'shopper@example.com', time(), 'code-one' );
+		$second = $this->seed_pending_legacy_row( 'shopper@example.com', time(), 'code-two' );
+
+		// One row per batch, so the second row adopts the Core row the first one inserted.
+		$this->migrate( 1 );
+
+		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
+
+		$this->assertCount( 2, reset( $stored ), 'Both legacy rows resolve to one adopted Core row.' );
+
+		$this->assertTrue( $this->verify_request( $first, $this->legacy_verification_token( 'code-one' ) ) );
+
+		$remaining = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
+		$values    = reset( $remaining );
+
+		$this->assertCount( 1, $values );
+
+		$parsed = LegacyHash::parse( $values[0] );
+
+		$this->assertNotNull( $parsed );
+		$this->assertSame( $second, $parsed[0], 'The unmatched legacy id keeps its own digest.' );
+	}
+
+	/**
+	 * @testdox a request carrying neither legacy query argument should be a no-op.
+	 */
+	public function test_a_request_with_neither_query_arg_is_a_no_op(): void {
+		$this->seed_pending_legacy_row( 'shopper@example.com', time() );
+		$this->migrate();
+
+		unset( $_GET['bis_unsub'], $_GET['bis_ver'] );
+
+		$this->shim->maybe_process_legacy_link();
+
+		$this->assertSame( array(), wc_get_notices() );
+		$this->assertSame( NotificationStatus::PENDING, LegacyStore::get_core_rows()[0]['status'] );
+	}
+
+	/**
+	 * Age every stored verification digest by rewriting its baked-in expiry into the past.
+	 *
+	 * @param int $seconds How far past the expiry to move.
+	 * @return void
+	 */
+	private function age_the_verification_meta( int $seconds ): void {
+		global $wpdb;
+
+		foreach ( LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) as $notification_id => $values ) {
+			foreach ( $values as $value ) {
+				$parsed = LegacyHash::parse( $value );
+
+				if ( null === $parsed || null === $parsed[2] ) {
+					continue;
+				}
+
+				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					$wpdb->prefix . 'wc_stock_notificationmeta',
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Column name in the notification meta table, not a query argument.
+					array( 'meta_value' => $parsed[0] . ':' . ( time() - $seconds ) . ':' . $parsed[1] ),
+					array(
+						'notification_id' => $notification_id,
+						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Column name in the notification meta table, not a query argument.
+						'meta_key'        => '_wc_bis_legacy_verify_hash',
+						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- As above.
+						'meta_value'      => $value,
+					)
+				);
+			}
+		}
 	}
 
 	/**

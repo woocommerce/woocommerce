@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyLinkShim;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\ToolsRegistrar;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
@@ -19,13 +19,13 @@ defined( 'ABSPATH' ) || exit;
  *
  * This is the only class in `Migration\` autoloaded on a normal request. Every decision below
  * reads an option that is already autoloaded and in memory, so registration itself never runs a
- * query. Everything else - the Tools entry, the CLI commands, the unsubscribe shim - is resolved
+ * query. Everything else - the Tools entry, the CLI commands, the legacy link shim - is resolved
  * from the container lazily, inside the callback that actually needs it, so nothing beyond this
  * class is autoloaded until one of those callbacks fires.
  *
  * Registration needs both the Customer stock notifications feature to be on and the legacy
  * extension to have been installed here. With the feature off there is nothing to migrate into:
- * the `stock_notification` data store is not registered, so the unsubscribe shim could not load
+ * the `stock_notification` data store is not registered, so the legacy link shim could not load
  * a notification, and Core sends nothing, so the double-send notice would have nothing to warn
  * about. The CLI command is deliberately not gated this way - it registers from `WC_CLI` and
  * reports the disabled feature as an error the merchant can act on, which is more use than a
@@ -43,16 +43,16 @@ class MigrationController implements RegisterHooksInterface {
 
 	/**
 	 * Autoloaded flag the notifications migrator sets the first time it writes a row carrying a
-	 * legacy unsubscribe token. Answers "are there live legacy links", and gates only the
-	 * unsubscribe shim's registration - it is not a general "migrated rows exist" signal, since a
-	 * store whose legacy rows all lack `_hash_key`/`_hash_iv` never sets it. See
+	 * legacy token, of either kind - unsubscribe or verification. Answers "are there live legacy
+	 * links", and guards only the legacy link shim's registration - it is not a general "migrated
+	 * rows exist" signal, since a store whose rows carry neither kind of token never sets it. See
 	 * OPTION_HAS_MIGRATED_ROWS for that broader question.
 	 */
 	private const OPTION_HAS_LEGACY_LINKS = Constants::HAS_LEGACY_LINKS_OPTION;
 
 	/**
 	 * Autoloaded flag the notifications migrator sets the first time it migrates any row,
-	 * inserted or adopted, regardless of whether it carries a legacy unsubscribe token. Answers
+	 * inserted or adopted, regardless of whether it carries a legacy token. Answers
 	 * "have any rows been migrated" for the double-send admin notice below.
 	 */
 	private const OPTION_HAS_MIGRATED_ROWS = Constants::HAS_MIGRATED_ROWS_OPTION;
@@ -82,7 +82,7 @@ class MigrationController implements RegisterHooksInterface {
 		if ( get_option( self::OPTION_HAS_LEGACY_LINKS ) ) {
 			// The shim hooks itself in its constructor; resolving it from the container is
 			// the registration.
-			wc_get_container()->get( LegacyUnsubscribeShim::class );
+			wc_get_container()->get( LegacyLinkShim::class );
 		}
 	}
 
@@ -106,9 +106,9 @@ class MigrationController implements RegisterHooksInterface {
 	 * restock in that state emails from both the legacy queue and Core.
 	 *
 	 * Reads `wc_bis_migration_has_migrated_rows`, set the first time any row is migrated
-	 * regardless of whether it carries a legacy unsubscribe token. `wc_bis_migration_has_legacy_links`
-	 * would under-report this: a store whose legacy rows all lack `_hash_key`/`_hash_iv` never
-	 * sets it, even with migrated rows present. Never auto-deactivates the extension; this is a
+	 * regardless of whether it carries a legacy token. `wc_bis_migration_has_legacy_links` would
+	 * under-report this: a store whose rows carry no legacy token never sets it, even with
+	 * migrated rows present. Never auto-deactivates the extension; this is a
 	 * notice only.
 	 *
 	 * @internal
