@@ -7,10 +7,26 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Form_Handler tests.
  */
 class WC_Form_Handler_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Original GET data.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $original_get = array();
+
+	/**
+	 * Original request URI.
+	 *
+	 * @var string|null
+	 */
+	private ?string $original_request_uri = null;
 
 	/**
 	 * Original POST data.
@@ -39,6 +55,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+
+		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_session = WC()->session;
@@ -57,6 +76,12 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
+		$_GET = $this->original_get;
+		if ( null === $this->original_request_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		}
 		$_POST    = $this->original_post;
 		$_REQUEST = $this->original_request;
 
@@ -76,6 +101,88 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function intercept_redirect( string $location ): void {
 		throw new RuntimeException( esc_url_raw( $location ) );
+	}
+
+	/**
+	 * @testdox cancel_order() redirects to a clean endpoint when no custom redirect is provided.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_redirects_to_clean_endpoint_without_custom_redirect(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The order should be cancelled before the clean redirect.' );
+	}
+
+	/**
+	 * @testdox cancel_order() preserves a filtered cancel URL base when it removes request arguments.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_preserves_filtered_cancel_url_base(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order             = WC_Helper_Order::create_order( $user_id );
+		$filtered_endpoint = wc_get_page_permalink( 'myaccount' );
+		$filter            = static function ( string $url ) use ( $filtered_endpoint ): string {
+			$query = wp_parse_url( $url, PHP_URL_QUERY );
+			return $filtered_endpoint . '?' . $query;
+		};
+
+		add_filter( 'woocommerce_get_cancel_order_url_raw', $filter );
+		$this->prepare_cancel_order_request( $order );
+		remove_filter( 'woocommerce_get_cancel_order_url_raw', $filter );
+
+		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $filtered_endpoint ) );
+	}
+
+	/**
+	 * @testdox cancel_order() preserves a custom redirect.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_preserves_custom_redirect(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order       = WC_Helper_Order::create_order( $user_id );
+		$redirect_to = wc_get_page_permalink( 'myaccount' );
+
+		$this->prepare_cancel_order_request( $order, $redirect_to );
+		$this->dispatch_cancel_order_expecting_redirect( $redirect_to );
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The order should be cancelled before the custom redirect.' );
+	}
+
+	/**
+	 * @testdox cancel_order() redirects safely when the order ID belongs to a refund.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_redirects_safely_for_refund_id(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order  = WC_Helper_Order::create_order( $user_id );
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 1,
+				'order_id' => $order->get_id(),
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The test requires a refund order.' );
+		$this->prepare_cancel_order_request( $order );
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+		$_GET['order_id']       = (string) $refund->get_id();
+		$_SERVER['REQUEST_URI'] = add_query_arg( 'order_id', $refund->get_id(), $request_uri );
+
+		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
 	}
 
 	/**
@@ -248,6 +355,35 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_REQUEST = array(
 			'save-account-details-nonce' => $nonce,
 		);
+	}
+
+	/**
+	 * Prepares a cancel-order request from the public order URL.
+	 *
+	 * @param WC_Order $order    Order to cancel.
+	 * @param string   $redirect Optional redirect URL.
+	 */
+	private function prepare_cancel_order_request( WC_Order $order, string $redirect = '' ): void {
+		$url   = $order->get_cancel_order_url_raw( $redirect );
+		$query = wp_parse_url( $url, PHP_URL_QUERY );
+		parse_str( (string) $query, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The test builds a signed cancellation request.
+		$_SERVER['REQUEST_URI'] = wp_make_link_relative( $url );
+	}
+
+	/**
+	 * Dispatches the cancel-order handler and expects a redirect.
+	 *
+	 * @param string $expected_redirect Expected redirect URL.
+	 */
+	private function dispatch_cancel_order_expecting_redirect( string $expected_redirect ): void {
+		try {
+			WC_Form_Handler::cancel_order();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( $expected_redirect, $e->getMessage(), 'The cancellation request should redirect to a clean URL.' );
+			return;
+		}
+
+		$this->fail( 'Expected cancel_order() to redirect after handling the request.' );
 	}
 
 	/**

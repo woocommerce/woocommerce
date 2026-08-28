@@ -898,10 +898,9 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $redirect ) {
-				wp_safe_redirect( $redirect );
-				exit;
-			}
+			$redirect = $redirect ? $redirect : remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ) );
+			wp_safe_redirect( $redirect );
+			exit;
 		}
 	}
 
