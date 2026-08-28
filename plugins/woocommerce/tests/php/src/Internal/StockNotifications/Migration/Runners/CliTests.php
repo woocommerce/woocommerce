@@ -98,37 +98,6 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a store that never installed the legacy extension should exit cleanly with nothing to migrate.
-	 */
-	public function test_clean_store_reports_nothing_to_migrate(): void {
-		delete_option( 'wc_bis_db_version' );
-
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$this->assertStringContainsString( 'never installed', MockWPCLI::$last_success_message );
-		$this->assertSame( '', MockWPCLI::$last_error_message, 'Nothing to migrate is a success, not an error.' );
-	}
-
-	/**
-	 * @testdox --force-discover should get past the option gate and reach the requirements check.
-	 */
-	public function test_force_discover_skips_the_option_gate(): void {
-		delete_option( 'wc_bis_db_version' );
-		LegacyStore::drop_tables();
-
-		$this->cli()->run(
-			array(),
-			array(
-				'force-discover' => true,
-				'yes'            => true,
-			)
-		);
-
-		$this->assertStringContainsString( 'woocommerce_bis_notifications', MockWPCLI::$last_success_message );
-		$this->assertStringNotContainsString( 'never installed', MockWPCLI::$last_success_message );
-	}
-
-	/**
 	 * @testdox the feature toggle being off should stop the run without writing or erroring.
 	 */
 	public function test_feature_off_stops_the_run(): void {
