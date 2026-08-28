@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Store API: advertise the correct extensions sub-schema for cart item and order item schemas, instead of the product endpoint's.
+Store API: advertise the correct extensions sub-schema for cart item schemas, instead of the product endpoint's.

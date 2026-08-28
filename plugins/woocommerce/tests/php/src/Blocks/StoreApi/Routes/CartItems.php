@@ -413,9 +413,8 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
-	 * The published schema must advertise the extension schema registered against the cart-item
-	 * endpoint. ItemSchema is abstract, so an unqualified self:: there resolves to the inherited
-	 * ProductSchema identifier and advertises the product endpoint's extensions instead.
+	 * The cart item schema must advertise cart-item extensions. It inherits the property from
+	 * ItemSchema, which sits below ProductSchema and so can pick up the wrong identifier.
 	 */
 	public function test_get_item_schema_advertises_cart_item_extensions() {
 		$this->mock_extend->register_endpoint_data(
