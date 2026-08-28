@@ -86,6 +86,7 @@ class WC_Tracker {
 
 		$body = wp_json_encode( self::get_tracking_data() );
 		if ( false === $body ) {
+			self::record_send_failure( false, 0, 'json_encode_failure', 0 );
 			return;
 		}
 
@@ -113,8 +114,7 @@ class WC_Tracker {
 	 * Record the outcome of a delivery attempt.
 	 *
 	 * The send time is only recorded once the snapshot is accepted, so a transient failure
-	 * leaves it pending and the next scheduled run retries it. Consecutive failures are
-	 * counted so a persistent outage does not retry forever.
+	 * leaves it pending and the next scheduled run retries it.
 	 *
 	 * @param array|WP_Error $response   Response from wp_safe_remote_post().
 	 * @param int            $body_bytes Size of the posted snapshot.
@@ -128,18 +128,37 @@ class WC_Tracker {
 			return;
 		}
 
+		self::record_send_failure( self::is_retryable_status( $status ), $status, is_wp_error( $response ) ? (string) $response->get_error_code() : '', $body_bytes );
+	}
+
+	/**
+	 * Record a failed delivery attempt.
+	 *
+	 * Consecutive retryable failures are counted so a persistent outage does not retry forever;
+	 * a non-retryable failure or the last allowed attempt gives up on the current snapshot.
+	 * Retry state is only kept while tracking is still enabled, since opting out may have
+	 * happened while the request was in flight.
+	 *
+	 * @param bool   $retryable  Whether the next scheduled run should try again.
+	 * @param int    $status     HTTP status code, 0 when no response was received.
+	 * @param string $error_code Error code when no response was received.
+	 * @param int    $body_bytes Size of the snapshot.
+	 */
+	private static function record_send_failure( $retryable, $status, $error_code, $body_bytes ): void {
 		$failures = (int) get_option( 'woocommerce_tracker_send_failures', 0 ) + 1;
-		$give_up  = ! self::is_retryable_status( $status ) || self::MAX_CONSECUTIVE_SEND_FAILURES <= $failures;
+		$give_up  = ! $retryable || self::MAX_CONSECUTIVE_SEND_FAILURES <= $failures;
 
 		if ( $give_up ) {
 			update_option( 'woocommerce_tracker_last_send', time() );
 			delete_option( 'woocommerce_tracker_send_failures' );
-		} else {
+		} elseif ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
 			update_option( 'woocommerce_tracker_send_failures', $failures, false );
 		}
 
 		if ( 413 === $status ) {
 			$message = 'WooCommerce tracker snapshot delivery failed; the snapshot is too large for the service and will not be retried.';
+		} elseif ( 'json_encode_failure' === $error_code ) {
+			$message = 'WooCommerce tracker snapshot could not be encoded and will not be retried.';
 		} elseif ( $give_up ) {
 			$message = 'WooCommerce tracker snapshot delivery failed; giving up until the next interval.';
 		} else {
@@ -151,7 +170,7 @@ class WC_Tracker {
 			array(
 				'source'      => 'woocommerce-tracker',
 				'http_status' => $status,
-				'error_code'  => is_wp_error( $response ) ? $response->get_error_code() : '',
+				'error_code'  => $error_code,
 				'failures'    => $failures,
 				'body_bytes'  => $body_bytes,
 			)

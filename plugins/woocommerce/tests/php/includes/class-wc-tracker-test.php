@@ -137,6 +137,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @param int|string $status HTTP status, or "wp_error" for a transport failure.
 	 */
 	public function test_retryable_failure_keeps_snapshot_pending( $status ): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		update_option( 'woocommerce_tracker_last_send', strtotime( '-2 weeks' ) );
 		$this->fake_tracker_response( $status );
 		$logger = $this->expect_tracker_warning();
@@ -262,6 +263,55 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		WC()->handle_tracking_setting_change( 'yes', 'no' );
 
 		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Opting out should discard pending retry state.' );
+	}
+
+	/**
+	 * @testdox Should treat a snapshot that cannot be encoded as a non-retryable failure.
+	 */
+	public function test_unencodable_snapshot_is_logged_and_not_retried(): void {
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		add_filter(
+			'woocommerce_tracker_data',
+			function ( $data ) {
+				$data['unencodable'] = INF;
+				return $data;
+			}
+		);
+		update_option( 'woocommerce_tracker_send_failures', 1 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertSame( 0, $requests, 'An unencodable snapshot must not be posted.' );
+		$this->assertSame( 'json_encode_failure', $logger->warnings[0]['error_code'] );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'An unencodable snapshot should not be retried daily.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should not record retry state when tracking was turned off while the request was in flight.
+	 */
+	public function test_retry_state_is_not_recorded_after_opt_out_during_request(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		add_filter(
+			'pre_http_request',
+			function () {
+				update_option( 'woocommerce_allow_tracking', 'no' );
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Retry state must not be created once tracking is off.' );
 	}
 
 	/**
