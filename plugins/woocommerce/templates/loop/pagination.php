@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.2.0
+ * @version 9.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,30 +27,32 @@ $format  = isset( $format ) ? $format : '';
 if ( $total <= 1 ) {
 	return;
 }
-
-/**
- * Filters the pagination arguments for the product loop.
- *
- * @param array $args Pagination arguments.
- *
- * @since 2.0.0
- */
-$pagination_args = apply_filters(
-	'woocommerce_pagination_args',
-	array(
-		'base'      => $base,
-		'format'    => $format,
-		'add_args'  => false,
-		'current'   => max( 1, $current ),
-		'total'     => $total,
-		'prev_text' => is_rtl() ? '&rarr;' : '&larr;',
-		'next_text' => is_rtl() ? '&larr;' : '&rarr;',
-		'type'      => 'list',
-		'end_size'  => 3,
-		'mid_size'  => 3,
-	)
-);
 ?>
 <nav class="woocommerce-pagination" aria-label="<?php esc_attr_e( 'Product Pagination', 'woocommerce' ); ?>">
-	<?php echo paginate_links( $pagination_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress generates the pagination markup after applying the public arguments filter. ?>
+	<?php
+	echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress generates the pagination markup after applying the public arguments filter.
+		/**
+		 * Filters the pagination arguments for the product loop.
+		 *
+		 * @param array $args Pagination arguments.
+		 *
+		 * @since 2.0.0
+		 */
+		apply_filters(
+			'woocommerce_pagination_args',
+			array(
+				'base'      => $base,
+				'format'    => $format,
+				'add_args'  => false,
+				'current'   => max( 1, $current ),
+				'total'     => $total,
+				'prev_text' => is_rtl() ? '&rarr;' : '&larr;',
+				'next_text' => is_rtl() ? '&larr;' : '&rarr;',
+				'type'      => 'list',
+				'end_size'  => 3,
+				'mid_size'  => 3,
+			)
+		)
+	);
+	?>
 </nav>
