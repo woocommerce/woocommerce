@@ -221,6 +221,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			$this->cart_controller->load_cart();
 			$this->cart_controller->normalize_cart();
 		} catch ( \Throwable $error ) {
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
 			// Do not let later Store API batch requests use and persist a partially loaded cart.
 			// @phpstan-ignore-next-line assign.propertyType (The cart is deliberately invalidated after a failed load.).
 			WC()->cart = null;

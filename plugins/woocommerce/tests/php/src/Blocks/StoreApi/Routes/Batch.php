@@ -181,6 +181,7 @@ class Batch extends ControllerTestCase {
 			$this->assertSame( 500, $response_data['responses'][1]['status'], 'Later cart requests should not use a partially loaded cart.' );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			WC()->cart->set_cart_contents( $cart_contents_backup );
 			if ( null === $load_action_count ) {

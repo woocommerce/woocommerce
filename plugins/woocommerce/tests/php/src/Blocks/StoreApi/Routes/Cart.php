@@ -1572,6 +1572,7 @@ class Cart extends ControllerTestCase {
 			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			if ( null === $load_action_count ) {
 				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
@@ -1608,6 +1609,7 @@ class Cart extends ControllerTestCase {
 			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
 		} finally {
 			remove_filter( 'woocommerce_session_handler', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			if ( null === $load_action_count ) {
 				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );

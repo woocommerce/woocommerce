@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class WC_Cart_Session {
 
 	/**
+	 * Carts whose session updates have been disabled.
+	 *
+	 * @var WeakReference<WC_Cart>[]
+	 */
+	private static $carts_with_disabled_updates = array();
+
+	/**
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
@@ -302,6 +309,25 @@ final class WC_Cart_Session {
 		if ( $order_again ) {
 			wp_safe_redirect( wc_get_cart_url() );
 			exit;
+		}
+	}
+
+	/**
+	 * Enables or disables session updates for a cart.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @param WC_Cart $cart    Cart object.
+	 * @param bool    $enabled Whether session updates should be enabled.
+	 */
+	public static function set_updates_enabled_for_cart( WC_Cart $cart, $enabled ): void {
+		$cart_id = spl_object_id( $cart );
+
+		if ( $enabled ) {
+			unset( self::$carts_with_disabled_updates[ $cart_id ] );
+		} else {
+			self::$carts_with_disabled_updates[ $cart_id ] = WeakReference::create( $cart );
 		}
 	}
 
@@ -734,14 +760,24 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Checks whether session updates should be skipped for an inactive Store API cart.
-	 *
-	 * A failed cart load clears WC()->cart, but registered callbacks can retain the failed cart and overwrite valid session data.
+	 * Checks whether session updates have been disabled for this cart.
 	 *
 	 * @return bool
 	 */
 	private function should_skip_session_updates() {
-		return 'store-api' === $this->cart->cart_context && WC()->cart !== $this->cart;
+		$cart_id = spl_object_id( $this->cart );
+
+		if ( ! isset( self::$carts_with_disabled_updates[ $cart_id ] ) ) {
+			return false;
+		}
+
+		$disabled_cart = self::$carts_with_disabled_updates[ $cart_id ]->get();
+		if ( null === $disabled_cart ) {
+			unset( self::$carts_with_disabled_updates[ $cart_id ] );
+			return false;
+		}
+
+		return $disabled_cart === $this->cart;
 	}
 
 	/**
