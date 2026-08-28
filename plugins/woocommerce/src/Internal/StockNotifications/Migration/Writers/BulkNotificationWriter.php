@@ -15,13 +15,14 @@ defined( 'ABSPATH' ) || exit;
  * Bulk-inserts legacy Back In Stock Notifications rows into the Core notification tables.
  *
  * Never routes through `Notification` + `save()`. Per chunk this does one multi-row INSERT
- * into `wc_stock_notifications`, captures the contiguous id block from `$wpdb->insert_id` and
- * the affected row count, then does one multi-row INSERT of the meta rows against that block.
- * Both statements run inside a single transaction: a failure between them would leave Core
- * rows with no `_wc_bis_legacy_id` marker, invisible to the candidate predicate and
- * re-inserted on the next run. The contiguous-id-block assumption holds only for a single
- * multi-row statement, so a batch larger than the chunk size is split into several chunks,
- * each with its own transaction and id capture.
+ * into `wc_stock_notifications`, reads back the id each row was given, then does one
+ * multi-row INSERT of the meta rows against those ids. Both statements run inside a single
+ * transaction: a failure between them would leave Core rows with no `_wc_bis_legacy_id`
+ * marker, invisible to the candidate predicate and re-inserted on the next run.
+ *
+ * The ids are read back rather than derived from `$wpdb->insert_id`, because a generated id
+ * block is not guaranteed to be contiguous; see `resolve_inserted_ids()` for what goes wrong
+ * when it is assumed to be.
  */
 class BulkNotificationWriter {
 
