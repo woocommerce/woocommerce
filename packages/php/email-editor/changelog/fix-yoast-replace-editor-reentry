@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the email editor HTML only once per request — a plugin calling WP_Screen::get() from admin_enqueue_scripts (e.g. Yoast SEO Premium) re-fires the replace_editor filter mid-render and echoed a second editor container that broke the editor
