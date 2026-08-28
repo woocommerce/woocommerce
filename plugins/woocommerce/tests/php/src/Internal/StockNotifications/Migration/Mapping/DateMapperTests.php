@@ -158,20 +158,6 @@ class DateMapperTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox date_confirmed_gmt should fall back to the epoch when both dates are 0.
-	 */
-	public function test_date_confirmed_gmt_falls_back_to_epoch_when_both_zero(): void {
-		$result = $this->sut->date_confirmed_gmt(
-			array(
-				'subscribe_date' => 0,
-				'create_date'    => 0,
-			)
-		);
-
-		$this->assertSame( gmdate( 'Y-m-d H:i:s', 0 ), $result );
-	}
-
-	/**
 	 * @testdox date_last_attempt_gmt should be null when last_notified_date is 0.
 	 */
 	public function test_date_last_attempt_gmt_is_null_when_zero(): void {
@@ -311,5 +297,65 @@ class DateMapperTests extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', $create_date ), $result );
+	}
+
+	/**
+	 * @testdox date_confirmed_gmt should not confirm a row in 1970 when both dates are unset.
+	 */
+	public function test_date_confirmed_gmt_rejects_a_zero_create_date(): void {
+		$result = $this->sut->date_confirmed_gmt(
+			array(
+				'subscribe_date' => 0,
+				'create_date'    => 0,
+			)
+		);
+
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );
+	}
+
+	/**
+	 * @testdox date_confirmed_gmt should reject a pre-2015 create_date the same way date_created_gmt does.
+	 */
+	public function test_date_confirmed_gmt_rejects_a_pre_2015_create_date(): void {
+		$result = $this->sut->date_confirmed_gmt(
+			array(
+				'subscribe_date' => 0,
+				'create_date'    => 1000000000,
+			)
+		);
+
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );
+	}
+
+	/**
+	 * @testdox date_cancelled_gmt should not cancel a row in 1970 when every date is unset.
+	 */
+	public function test_date_cancelled_gmt_rejects_a_zero_create_date(): void {
+		$result = $this->sut->date_cancelled_gmt(
+			array(
+				'last_notified_date' => 0,
+				'create_date'        => 0,
+			),
+			NotificationStatus::CANCELLED,
+			null
+		);
+
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );
+	}
+
+	/**
+	 * @testdox date_cancelled_gmt should reject a pre-2015 create_date the same way date_created_gmt does.
+	 */
+	public function test_date_cancelled_gmt_rejects_a_pre_2015_create_date(): void {
+		$result = $this->sut->date_cancelled_gmt(
+			array(
+				'last_notified_date' => 0,
+				'create_date'        => 1000000000,
+			),
+			NotificationStatus::CANCELLED,
+			null
+		);
+
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', self::MIGRATION_TIMESTAMP ), $result );
 	}
 }

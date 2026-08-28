@@ -101,7 +101,8 @@ class DateMapper {
 	 *
 	 * `subscribe_date` is legacy's activation date. `subscribe_date = 0` is normal —
 	 * legacy leaves it unset when the signup happened while the product was in stock —
-	 * so it falls back to `create_date` in that case.
+	 * so it falls back to the mapped creation date in that case, which screens out a
+	 * corrupt `create_date` instead of confirming the row in 1970.
 	 *
 	 * @param array $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @return string GMT datetime string.
@@ -113,9 +114,7 @@ class DateMapper {
 			return gmdate( self::FORMAT, $subscribe_date );
 		}
 
-		$create_date = (int) ( $legacy_row['create_date'] ?? 0 );
-
-		return gmdate( self::FORMAT, $create_date );
+		return $this->date_created_gmt( $legacy_row );
 	}
 
 	/**
@@ -163,7 +162,7 @@ class DateMapper {
 	 *
 	 * Only populated when the row's mapped status is `cancelled`. Prefers the latest
 	 * `unsubscribed`/`deactivated` activity date mined from `woocommerce_bis_activity`,
-	 * then falls back to `last_notified_date`, then `create_date`.
+	 * then falls back to `last_notified_date`, then to the mapped creation date.
 	 *
 	 * @param array    $legacy_row            Row from `woocommerce_bis_notifications`.
 	 * @param string   $status                Status already resolved by `StatusMapper::map()`.
@@ -185,9 +184,7 @@ class DateMapper {
 			return gmdate( self::FORMAT, $last_notified_date );
 		}
 
-		$create_date = (int) ( $legacy_row['create_date'] ?? 0 );
-
-		return gmdate( self::FORMAT, $create_date );
+		return $this->date_created_gmt( $legacy_row );
 	}
 
 	/**
