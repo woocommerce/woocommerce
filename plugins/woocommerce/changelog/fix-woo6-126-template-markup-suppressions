@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Normalize shipping method label targets and document intentional template markup contracts.
+Fix the shipping method label's for attribute so it matches the input ID when a shipping package uses a non-numeric key.

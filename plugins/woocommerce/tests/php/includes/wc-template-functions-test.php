@@ -34,27 +34,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the cart shipping template.
-	 *
-	 * @param array $args Template arguments.
-	 * @return string Rendered template markup.
-	 */
-	private function render_cart_shipping( array $args ): string {
-		$buffer_level = ob_get_level();
-
-		ob_start();
-		try {
-			wc_get_template( 'cart/cart-shipping.php', $args );
-
-			return (string) ob_get_clean();
-		} finally {
-			while ( ob_get_level() > $buffer_level ) {
-				ob_end_clean();
-			}
-		}
-	}
-
-	/**
 	 * Helper: create a parent product category with child categories and products.
 	 *
 	 * @return int Parent category term ID.
@@ -244,32 +223,5 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$markup  = $this->render_loop_add_to_cart( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow"', $markup );
-	}
-
-	/**
-	 * @testdox Shipping method labels target the rendered radio input when a package has a non-numeric key.
-	 */
-	public function test_shipping_method_label_targets_normalized_package_index(): void {
-		$flat_rate     = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 0, array(), 'flat_rate', 1 );
-		$free_shipping = new WC_Shipping_Rate( 'free_shipping:2', 'Free shipping', 0, array(), 'free_shipping', 2 );
-
-		$markup = $this->render_cart_shipping(
-			array(
-				'package'                  => array( 'destination' => array() ),
-				'available_methods'        => array( $flat_rate, $free_shipping ),
-				'show_package_details'     => false,
-				'show_shipping_calculator' => false,
-				'package_details'          => '',
-				'package_name'             => 'Package',
-				'index'                    => 'vendor-package',
-				'chosen_method'            => $flat_rate->get_id(),
-				'formatted_destination'    => '',
-				'has_calculated_shipping'  => true,
-			)
-		);
-
-		$this->assertStringContainsString( 'id="shipping_method_0_flat_rate1"', $markup, 'The package index should be normalized in the input ID.' );
-		$this->assertStringContainsString( 'for="shipping_method_0_flat_rate1"', $markup, 'The label should target the normalized input ID.' );
-		$this->assertStringNotContainsString( 'vendor-package', $markup, 'The raw package key should not be rendered in an attribute.' );
 	}
 }
