@@ -192,7 +192,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->assertSame( 2, $this->migrator->count_remaining(), 'A dry run must leave every row outstanding.' );
 
 		$real_migrator = new NotificationsMigrator( new Reporter() );
-		$real_outcomes = $real_migrator->migrate_batch( $ids, new DbWriter() );
+		$real_outcomes = $real_migrator->migrate_batch( $ids, wc_get_container()->get( DbWriter::class ) );
 
 		$this->assertSame( $dry_outcomes, $real_outcomes, 'The dry run report must be shape-identical to the real one.' );
 	}
@@ -320,7 +320,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$admitted = $this->migrator->get_batch( 0, 100 );
 		$this->assertCount( 5, $admitted );
 
-		$outcomes = $this->migrator->migrate_batch( $admitted, new DbWriter() );
+		$outcomes = $this->migrator->migrate_batch( $admitted, wc_get_container()->get( DbWriter::class ) );
 
 		$accounted = ( $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0 )
 			+ ( $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 )
@@ -359,7 +359,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'query', $counter );
-		$this->migrator->migrate_batch( $batch, new DbWriter() );
+		$this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
 		remove_filter( 'query', $counter );
 
 		$this->assertSame( 1, $queries, 'Legacy meta must be fetched once for the whole batch.' );
@@ -390,7 +390,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 	 * @return array<string,int> Outcome counts.
 	 */
 	private function migrate_all(): array {
-		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), new DbWriter() );
+		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( DbWriter::class ) );
 	}
 
 	/**

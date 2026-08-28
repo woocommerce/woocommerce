@@ -96,7 +96,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $migrator->get_batch( 0, 10 ), 'A migrated key must never come back as outstanding.' );
 
-		$counts = $migrator->migrate_batch( array( self::LEGACY_ALLOW_SIGNUPS ), new DbWriter() );
+		$counts = $migrator->migrate_batch( array( self::LEGACY_ALLOW_SIGNUPS ), wc_get_container()->get( DbWriter::class ) );
 
 		$this->assertSame( array(), $counts, 'migrate_batch() was only exercised here to prove get_batch() already returned nothing.' );
 		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'A second run must never overwrite a value it already migrated once.' );
@@ -164,7 +164,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			foreach ( $migrator->migrate_batch( $batch, new DbWriter() ) as $outcome => $count ) {
+			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) ) as $outcome => $count ) {
 				$counts[ $outcome ] = ( $counts[ $outcome ] ?? 0 ) + $count;
 			}
 

@@ -184,7 +184,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			$migrator->migrate_batch( $batch, new DbWriter() );
+			$migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
 			$cursor = (int) end( $batch );
 
 			++$batches;

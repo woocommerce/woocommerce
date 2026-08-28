@@ -103,7 +103,7 @@ class ReporterTests extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'query', $thrower );
-		$migrator->migrate_batch( $batch, new DbWriter() );
+		$migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
 		remove_filter( 'query', $thrower );
 
 		$this->assertNotEmpty( $this->logged, 'The run should have logged something.' );

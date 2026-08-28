@@ -281,7 +281,7 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			$this->migrator->migrate_batch( $batch, new DbWriter() );
+			$this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
 			$cursor = (int) end( $batch );
 		}
 
@@ -418,7 +418,7 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 	 * @return array<string,int> Outcome counts.
 	 */
 	private function migrate_all(): array {
-		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), new DbWriter() );
+		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( DbWriter::class ) );
 	}
 
 	/**
