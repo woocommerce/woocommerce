@@ -300,8 +300,11 @@ class PluginsHelper {
 				continue;
 			}
 
-			$parts = array( $candidate->get_error_message() );
-			$data  = $candidate->get_error_data();
+			// Both come from WP_Error::add(), which stores whatever a filter callback passed in.
+			$message = $candidate->get_error_message();
+			$data    = $candidate->get_error_data();
+
+			$parts = is_string( $message ) ? array( $message ) : array();
 			if ( is_string( $data ) && ! in_array( $candidate->get_error_code(), self::OPAQUE_ERROR_DATA_CODES, true ) ) {
 				$parts[] = $data;
 			}

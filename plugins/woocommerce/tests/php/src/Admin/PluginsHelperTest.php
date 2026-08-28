@@ -32,6 +32,16 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should skip a message that is not a string instead of failing on it.
+	 */
+	public function test_get_error_reason_ignores_non_string_message(): void {
+		// WP_Error::add() stores whatever a filter callback passed, so the message can be anything.
+		$error = new WP_Error( 'custom', array( 'not', 'a', 'message' ), 'Detail sentence.' );
+
+		$this->assertSame( 'Detail sentence.', PluginsHelper::get_error_reason( $error ) );
+	}
+
+	/**
 	 * @testdox Should return only the message when the error data is not a string.
 	 */
 	public function test_get_error_reason_ignores_non_string_data(): void {
