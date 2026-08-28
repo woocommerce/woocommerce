@@ -104,8 +104,8 @@ Nothing in CI checks these files, so a skipped run leaves the published referenc
 Points to keep in mind:
 
 - Never hand-edit `actions.md` or `filters.md`. Fix the source docblock and regenerate.
-- Only hooks in `src/Blocks` and `src/StoreApi` reach the docs, so a hook elsewhere needs no regeneration. The generator scans all of `plugins/woocommerce/src` and subtracts the `extra.wp-hooks.ignore-files` list in `plugins/woocommerce/client/blocks/composer.json`.
-- That list names what to skip, not what to include. Add a new directory under `plugins/woocommerce/src` to it, or its hooks start showing up in the published reference.
+- Only hooks in `src/Blocks` and `src/StoreApi` reach the docs, so a hook elsewhere needs no regeneration.
+- Keeping it that way takes maintenance. The generator scans all of `plugins/woocommerce/src` except the directories listed under `extra.wp-hooks.ignore-files` in `plugins/woocommerce/client/blocks/composer.json`. When you add a new top-level directory to `src/`, add it to that list as well — otherwise the next `build:docs` run stops with an error the first time it finds a documented hook there.
 - The command also refreshes `docs/block-development/reference/block-references.md`, which is the one generated file CI does validate.
 - Docblock text lands in the docs as Markdown. Wrap literal angle-bracket placeholders in backticks (`` `<hook-name>` ``) so markdownlint doesn't read them as inline HTML.
 - A hook with no docblock at the call site is skipped by the generator, and `internal_`-prefixed hooks are filtered out on purpose.
