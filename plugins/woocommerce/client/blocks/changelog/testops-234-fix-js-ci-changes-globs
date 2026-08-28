@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix the JavaScript CI job changes globs so edits under tests/integration and tests/utils trigger the test run.
+
