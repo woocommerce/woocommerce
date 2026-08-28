@@ -135,38 +135,58 @@ class Cli {
 	private const ORACLE_BATCH_SIZE = 500;
 
 	/**
-	 * Verifies whether a run may start or continue.
+	 * Verifies whether a run may start or continue. Resolved on first use; see `state()`.
 	 *
-	 * @var Requirements
+	 * @var Requirements|null
 	 */
-	private Requirements $requirements;
+	private ?Requirements $requirements = null;
 
 	/**
-	 * Used only to read whether the background processor is currently enqueued.
+	 * Used only to read whether the background processor is currently enqueued. Resolved on
+	 * first use; see `state()`.
 	 *
-	 * @var BatchProcessingController
+	 * @var BatchProcessingController|null
 	 */
-	private BatchProcessingController $batch_processing_controller;
+	private ?BatchProcessingController $batch_processing_controller = null;
 
 	/**
-	 * Migration run state: the CLI lock, per-section cursors and cached counts.
+	 * Migration run state: the CLI lock, per-section cursors and cached counts. Built on
+	 * first use; see `state()`.
 	 *
-	 * @var MigrationState
+	 * @var MigrationState|null
 	 */
-	private MigrationState $state;
+	private ?MigrationState $state = null;
 
 	/**
-	 * Constructor. Resolves its dependencies from the container directly rather than via
-	 * autowired parameters, matching `ProductAttributesLookup\CLIRunner`: whatever registers
-	 * this class with `WP_CLI::add_command()` may pass either a bare `new self()` or a
-	 * container-resolved instance, and both must work.
+	 * Migration run state, built on first use.
+	 *
+	 * Every dependency here is resolved lazily rather than in a constructor. The command is
+	 * registered on `after_wp_load`, which fires for every `wp` invocation that boots
+	 * WordPress, so building these up front would cost three container resolutions on
+	 * `wp plugin list` and every other unrelated command.
+	 *
+	 * @return MigrationState
 	 */
-	public function __construct() {
-		$container = wc_get_container();
+	private function state(): MigrationState {
+		return $this->state ??= new MigrationState();
+	}
 
-		$this->requirements                = $container->get( Requirements::class );
-		$this->batch_processing_controller = $container->get( BatchProcessingController::class );
-		$this->state                       = new MigrationState();
+	/**
+	 * Requirements checker, resolved on first use.
+	 *
+	 * @return Requirements
+	 */
+	private function requirements(): Requirements {
+		return $this->requirements ??= wc_get_container()->get( Requirements::class );
+	}
+
+	/**
+	 * Batch processing controller, resolved on first use.
+	 *
+	 * @return BatchProcessingController
+	 */
+	private function batch_processing_controller(): BatchProcessingController {
+		return $this->batch_processing_controller ??= wc_get_container()->get( BatchProcessingController::class );
 	}
 
 	/**
@@ -201,7 +221,7 @@ class Cli {
 	 * @param array $assoc_args Associative arguments (unused).
 	 */
 	public function status( $args, $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- standard WP-CLI command signature.
-		$check = $this->requirements->check();
+		$check = $this->requirements()->check();
 
 		if ( is_wp_error( $check ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -211,7 +231,7 @@ class Cli {
 		$reporter = new Reporter();
 
 		foreach ( self::SECTION_ORDER as $slug ) {
-			$cached = $this->state->get_count( $slug );
+			$cached = $this->state()->get_count( $slug );
 
 			if ( null === $cached ) {
 				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -230,9 +250,9 @@ class Cli {
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 		WP_CLI::log( sprintf( 'Background run enqueued: %s', $this->is_processor_enqueued() ? 'yes' : 'no' ) );
 
-		$lock = $this->state->get_lock();
+		$lock = $this->state()->get_lock();
 
-		if ( $this->state->is_lock_held() && null !== $lock ) {
+		if ( $this->state()->is_lock_held() && null !== $lock ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 			WP_CLI::log(
 				sprintf(
@@ -328,7 +348,7 @@ class Cli {
 			return;
 		}
 
-		$check = $this->requirements->check();
+		$check = $this->requirements()->check();
 
 		if ( is_wp_error( $check ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -352,7 +372,7 @@ class Cli {
 		$max_batches  = isset( $assoc_args['max-batches'] ) ? max( 1, (int) $assoc_args['max-batches'] ) : null;
 
 		if ( in_array( 'notifications', $sections, true ) ) {
-			$queued = $this->requirements->count_legacy_queued_rows();
+			$queued = $this->requirements()->count_legacy_queued_rows();
 
 			if ( $queued > 0 && ! $force ) {
 				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -399,7 +419,7 @@ class Cli {
 			// `MigrationBatchProcessor` only ever advances cursors, never resets them, so this
 			// invariant is enforced only at run-start entry points — this one and the Tools
 			// start callback — not inside the processor itself.
-			$this->state->reset_all_cursors();
+			$this->state()->reset_all_cursors();
 
 			$reporter               = new Reporter();
 			$notifications_migrator = new NotificationsMigrator( $reporter );
@@ -411,7 +431,7 @@ class Cli {
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
-			$processor->init( $this->requirements );
+			$processor->init( $this->requirements() );
 			$processor->configure_run( $migrators, $writer, $batch_size );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
@@ -419,14 +439,14 @@ class Cli {
 			$total_estimate = 0;
 			foreach ( $sections as $slug ) {
 				$remaining = $migrators[ $slug ]->count_remaining();
-				$this->state->set_count( $slug, $remaining );
+				$this->state()->set_count( $slug, $remaining );
 				$total_estimate += $remaining;
 			}
 
 			if ( in_array( 'notifications', $sections, true ) ) {
 				// One COUNT(*) per skipped population, run once here and cached: `status` and
 				// the Tools description report these from the cache and never compute them.
-				$this->state->set_losses( $reporter->collect_known_losses( $notifications_migrator ) );
+				$this->state()->set_losses( $reporter->collect_known_losses( $notifications_migrator ) );
 			}
 
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -447,7 +467,7 @@ class Cli {
 
 			$progress->finish();
 
-			$check = $this->requirements->check();
+			$check = $this->requirements()->check();
 
 			if ( is_wp_error( $check ) ) {
 				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -456,14 +476,14 @@ class Cli {
 				// --max-batches stopped the run before any section drained, and draining is
 				// where the processor refreshes a cached count, so refresh them here instead.
 				foreach ( $sections as $slug ) {
-					$this->state->set_count( $slug, $migrators[ $slug ]->count_remaining() );
+					$this->state()->set_count( $slug, $migrators[ $slug ]->count_remaining() );
 				}
 			}
 
 			if ( in_array( 'notifications', $sections, true ) ) {
-				$cached = $this->state->get_losses();
+				$cached = $this->state()->get_losses();
 				$values = is_array( $cached['values'] ?? null ) ? $cached['values'] : array();
-				$this->state->set_losses( $reporter->with_run_losses( $values, $notifications_migrator ) );
+				$this->state()->set_losses( $reporter->with_run_losses( $values, $notifications_migrator ) );
 			}
 
 			$this->print_report( $reporter );
@@ -495,7 +515,7 @@ class Cli {
 	 * @param array $assoc_args Associative arguments (unused).
 	 */
 	public function verify( $args, $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- standard WP-CLI command signature.
-		$check = $this->requirements->check();
+		$check = $this->requirements()->check();
 
 		if ( is_wp_error( $check ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -567,7 +587,7 @@ class Cli {
 	 * @param array $assoc_args Associative arguments (options).
 	 */
 	public function rollback( $args, $assoc_args ): void {
-		$check = $this->requirements->check();
+		$check = $this->requirements()->check();
 
 		if ( is_wp_error( $check ) ) {
 			if ( 'legacy_tables_missing' === $check->get_error_code() ) {
@@ -711,9 +731,9 @@ class Cli {
 	private function build_migrators( Reporter $reporter, bool $force, ?NotificationsMigrator $notifications = null ): array {
 		return array(
 			'notifications' => $notifications ?? new NotificationsMigrator( $reporter ),
-			'product-meta'  => new ProductMetaMigrator( $reporter, $this->state, $force ),
-			'emails'        => new EmailSettingsMigrator( $this->state, $reporter, $force ),
-			'settings'      => new SettingsMigrator( $this->state, $reporter, $force ),
+			'product-meta'  => new ProductMetaMigrator( $reporter, $this->state(), $force ),
+			'emails'        => new EmailSettingsMigrator( $this->state(), $reporter, $force ),
+			'settings'      => new SettingsMigrator( $this->state(), $reporter, $force ),
 		);
 	}
 
@@ -752,7 +772,7 @@ class Cli {
 	 * @return bool
 	 */
 	private function is_processor_enqueued(): bool {
-		return $this->batch_processing_controller->is_enqueued( MigrationBatchProcessor::class );
+		return $this->batch_processing_controller()->is_enqueued( MigrationBatchProcessor::class );
 	}
 
 	/**
@@ -763,7 +783,7 @@ class Cli {
 	 * @return bool True when acquired.
 	 */
 	private function acquire_lock( string $context ): bool {
-		return $this->state->acquire_lock( sprintf( '%s (pid %d)', $context, getmypid() ) );
+		return $this->state()->acquire_lock( sprintf( '%s (pid %d)', $context, getmypid() ) );
 	}
 
 	/**
@@ -774,7 +794,7 @@ class Cli {
 	 * @return void
 	 */
 	private function release_lock(): void {
-		$this->state->release_lock();
+		$this->state()->release_lock();
 	}
 
 	/**
@@ -1200,7 +1220,7 @@ class Cli {
 	 * @return void
 	 */
 	private function print_known_losses( Reporter $reporter ): void {
-		$cached = $this->state->get_losses();
+		$cached = $this->state()->get_losses();
 
 		if ( null === $cached ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
