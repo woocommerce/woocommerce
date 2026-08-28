@@ -942,12 +942,14 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		global $post; // Set $post global so its available, like within the admin screens.
+		global $post;
+		// Set $post global so its available, like within the admin screens.
 
-		$product_id       = intval( $_POST['post_id'] );
+		$product_id     = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id ); // phpcs:ignore
-		$loop             = intval( $_POST['loop'] );
-		$product_object   = wc_get_product_object( ProductType::VARIABLE, $product_id ); // Forces type to variable in case product is unsaved.
+		$loop           = intval( $_POST['loop'] );
+		$product_object = wc_get_product_object( ProductType::VARIABLE, $product_id );
+		// Forces type to variable in case product is unsaved.
 		$variation_object = wc_get_product_object( ProductType::VARIATION );
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
@@ -1257,7 +1259,8 @@ class WC_AJAX {
 				'notes_html' => $notes_html,
 			);
 		} catch ( Exception $e ) {
-			throw $e; // Forward exception to caller.
+			throw $e;
+			// Forward exception to caller.
 		}
 	}
 
@@ -2031,6 +2034,12 @@ class WC_AJAX {
 		if ( ! empty( $_GET['limit'] ) ) {
 			$limit = absint( $_GET['limit'] );
 		} else {
+			/**
+			 * Filters the number of results returned by the JSON search endpoints.
+			 *
+			 * @since 3.5.0
+			 * @param int $limit Maximum number of results to return.
+			 */
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
@@ -2132,6 +2141,12 @@ class WC_AJAX {
 		if ( ! empty( $_GET['limit'] ) ) {
 			$limit = absint( $_GET['limit'] );
 		} else {
+			/**
+					 * Filters the number of results returned by the JSON search endpoints.
+					 *
+					 * @since 3.5.0
+					 * @param int $limit Maximum number of results to return.
+					 */
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
@@ -4517,7 +4532,8 @@ class WC_AJAX {
 	private static function render_variation_html( WC_Product $product_object, WC_Product $variation_object, $loop, ?float $base_cost ) {
 		$variation_id   = $variation_object->get_id();
 		$variation      = get_post( $variation_id );
-		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) ); // kept for BW compatibility.
+		$variation_data = array_merge( get_post_custom( $variation_id ), wc_get_product_variation_attributes( $variation_id ) );
+		// kept for BW compatibility.
 		include __DIR__ . '/admin/meta-boxes/views/html-variation-admin.php';
 	}
 	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
