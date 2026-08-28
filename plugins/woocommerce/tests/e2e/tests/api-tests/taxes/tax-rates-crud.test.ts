@@ -3,7 +3,9 @@ import { expect, test } from '../../../fixtures/api-tests-fixtures';
 /* eslint-disable playwright/no-conditional-in-test, playwright/no-conditional-expect -- Failure-safe cleanup must preserve primary and cleanup errors independently. */
 
 const { BASE_URL } = process.env;
-const shouldSkipDeletedRateRead = BASE_URL !== undefined;
+const shouldSkipDeletedRateRead = ! /^https?:\/\/localhost/.test(
+	BASE_URL ?? ''
+);
 
 test.describe( 'Tax Classes and Rates API tests', () => {
 	test( 'can round-trip a tax class and rate through authenticated installed V3 HTTP', async ( {
