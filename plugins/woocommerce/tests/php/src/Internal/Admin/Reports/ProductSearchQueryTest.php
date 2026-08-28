@@ -391,6 +391,98 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let a query run from one of its own filters return its results.
+	 *
+	 * A plugin can run a query while working out how to filter this one, and short circuiting
+	 * every query for the duration would hand it an empty result to decide on.
+	 */
+	public function test_get_ids_subquery_does_not_short_circuit_a_query_run_from_a_filter(): void {
+		$product = $this->create_product( 'Kingston Widget' );
+		$nested  = null;
+		$running = false;
+
+		$run_nested_query = function ( $where ) use ( &$nested, &$running ) {
+			if ( $running ) {
+				return $where;
+			}
+
+			$running = true;
+			$nested  = ( new \WP_Query(
+				array(
+					'post_type'      => 'product',
+					'post_status'    => 'any',
+					'fields'         => 'ids',
+					'posts_per_page' => -1,
+					'no_found_rows'  => true,
+				)
+			) )->posts;
+			$running = false;
+
+			return $where;
+		};
+
+		add_filter( 'posts_where', $run_nested_query );
+		ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) );
+		remove_filter( 'posts_where', $run_nested_query );
+
+		$this->assertContains( $product, (array) $nested, 'A query run from a filter should still return its own rows' );
+	}
+
+	/**
+	 * @testdox Should detach its filters even when the query throws.
+	 */
+	public function test_get_ids_subquery_detaches_its_filters_when_the_query_throws(): void {
+		$product = $this->create_product( 'Kingston Widget' );
+		$boom    = function () {
+			throw new \RuntimeException( 'Thrown from pre_get_posts' );
+		};
+
+		add_action( 'pre_get_posts', $boom );
+		try {
+			ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) );
+			$this->fail( 'The exception should have propagated' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Thrown from pre_get_posts', $e->getMessage() );
+		} finally {
+			remove_action( 'pre_get_posts', $boom );
+		}
+
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+			)
+		);
+
+		$this->assertContains( $product, $query->posts, 'A left behind filter would empty every later query' );
+	}
+
+	/**
+	 * @testdox Should return null when there is nothing to search for, and the matches otherwise.
+	 */
+	public function test_get_ids_tells_an_absent_search_apart_from_one_that_matched_nothing(): void {
+		$product = $this->create_product( 'Kingston Widget' );
+
+		$this->assertNull( ProductSearchQuery::get_ids( array() ), 'No search is not the same as a search that matched nothing' );
+		$this->assertSame( array(), ProductSearchQuery::get_ids( array( 'nothing matches this' ) ) );
+		$this->assertSame( array( $product ), ProductSearchQuery::get_ids( array( 'Kingston' ) ) );
+	}
+
+	/**
+	 * @testdox Should intersect the matches with the given product IDs.
+	 */
+	public function test_get_ids_intersects_with_the_given_product_ids(): void {
+		$kept = $this->create_product( 'Kingston Widget' );
+		$this->create_product( 'Kingston Gadget' );
+
+		$this->assertSame( array( $kept ), ProductSearchQuery::get_ids( array( 'Kingston' ), array( $kept ) ) );
+		$this->assertSame( array(), ProductSearchQuery::get_ids( array( 'Kingston' ), array( '-1' ) ) );
+	}
+
+	/**
 	 * Runs a statement built by the system under test and returns the product IDs it yields.
 	 *
 	 * @param string $sql SQL statement.

@@ -123,6 +123,31 @@ class ProductSearchQuery {
 	}
 
 	/**
+	 * Returns the product IDs the given search terms resolve to.
+	 *
+	 * For callers that need the matches themselves rather than a statement to compose with.
+	 * An empty list means the terms matched nothing, which is not the same as `null`, meaning
+	 * there was nothing to search for.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string|string[] $terms           Search terms. A product matches if it matches any term.
+	 * @param int[]           $restrict_to_ids Optional. Product IDs to intersect the results with.
+	 * @return int[]|null Matching product IDs, or null when there is nothing to search for.
+	 */
+	public static function get_ids( $terms, $restrict_to_ids = array() ) {
+		global $wpdb;
+
+		$subquery = self::get_ids_subquery( $terms, $restrict_to_ids );
+		if ( '' === $subquery ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $subquery is built from prepared fragments; the containing report is what caches.
+		return array_map( 'intval', $wpdb->get_col( $subquery ) );
+	}
+
+	/**
 	 * Adds the SKU lookup table to a product search query.
 	 *
 	 * @internal Hooked on `posts_join` for the duration of the search query.
@@ -185,6 +210,24 @@ class ProductSearchQuery {
 	}
 
 	/**
+	 * Skips running a product search query, which is built for its statement rather than its rows.
+	 *
+	 * Only the search query itself is skipped. A query another plugin runs from one of the filters
+	 * above, to work out how to filter this one, still has to return its own results.
+	 *
+	 * @internal Hooked on `posts_pre_query` for the duration of the search query.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array|null $posts    Posts to return instead of running the query, or null to run it.
+	 * @param WP_Query   $wp_query Query being built.
+	 * @return array|null Posts to return instead of running the query, or null to run it.
+	 */
+	public static function skip_wp_query_results( $posts, $wp_query ) {
+		return $wp_query->get( self::TERMS_QUERY_VAR ) ? array() : $posts;
+	}
+
+	/**
 	 * Returns the statement WP_Query builds for the given arguments, without running it.
 	 *
 	 * The search composes into the report query, so the statement is what is needed rather than the
@@ -197,16 +240,19 @@ class ProductSearchQuery {
 	private static function build_statement( array $args ): string {
 		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
-		// WP_Query builds the statement before it runs it, so short-circuit the results.
-		add_filter( 'posts_pre_query', '__return_empty_array' );
+		add_filter( 'posts_pre_query', array( __CLASS__, 'skip_wp_query_results' ), 10, 2 );
 
-		$query = new WP_Query();
-		$query->query( $args );
+		try {
+			$query = new WP_Query();
+			$query->query( $args );
 
-		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
-		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
-
-		return $query->request;
+			return $query->request;
+		} finally {
+			// A filter left behind would follow every later query in the request, so drop them
+			// even when the query above threw.
+			remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
+			remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+			remove_filter( 'posts_pre_query', array( __CLASS__, 'skip_wp_query_results' ), 10 );
+		}
 	}
 }
