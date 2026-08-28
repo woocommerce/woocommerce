@@ -64,25 +64,15 @@ class Cli {
 	private const DB_VERSION_OPTION = Constants::DB_VERSION_OPTION;
 
 	/**
-	 * Autoloaded flag gating the legacy unsubscribe shim's registration. Narrower than
-	 * HAS_MIGRATED_ROWS_OPTION below: only set when a migrated row carries a legacy
-	 * unsubscribe token.
+	 * Autoloaded flag gating the legacy unsubscribe shim's registration. Only set when a
+	 * migrated row carries a legacy unsubscribe token.
 	 *
 	 * @var string
 	 */
 	private const HAS_LEGACY_LINKS_OPTION = Constants::HAS_LEGACY_LINKS_OPTION;
 
 	/**
-	 * Autoloaded flag set the first time any row is migrated, inserted or adopted. Backs
-	 * the double-send admin notice in MigrationController.
-	 *
-	 * @var string
-	 */
-	private const HAS_MIGRATED_ROWS_OPTION = Constants::HAS_MIGRATED_ROWS_OPTION;
-
-	/**
-	 * Legacy meta key recording a permanent per-row failure. Cleared by `--retry-failed`
-	 * and by `rollback`.
+	 * Legacy meta key recording a permanent per-row failure. Cleared by `--retry-failed`.
 	 *
 	 * @var string
 	 */
@@ -111,15 +101,6 @@ class Cli {
 	private const LEGACY_UNSUB_HASH_META_KEY = Constants::LEGACY_UNSUB_HASH_META_KEY;
 
 	/**
-	 * Marker meta written only when a legacy row adopted a pre-existing Core notification
-	 * instead of being inserted. Distinguishes the two so `rollback` never deletes an
-	 * adopted row - only inserted rows are deleted.
-	 *
-	 * @var string
-	 */
-	private const ADOPTED_MARKER_META_KEY = Constants::ADOPTED_MARKER_META_KEY;
-
-	/**
 	 * Default batch size for a CLI run. Raised by `--batch-size`; scheduled runs use their
 	 * own, smaller default from `get_default_batch_size()`.
 	 *
@@ -128,7 +109,7 @@ class Cli {
 	private const DEFAULT_BATCH_SIZE = 500;
 
 	/**
-	 * Row count used to page through Core notifications in `verify` and `rollback`.
+	 * Row count used to page through Core notifications in `verify`.
 	 *
 	 * @var int
 	 */
@@ -561,112 +542,13 @@ class Cli {
 	}
 
 	/**
-	 * Undo the migration's writes for rows a merchant has not touched since.
-	 *
-	 * Splits by how a row entered Core. A row this migration *inserted* is deleted outright,
-	 * gated on the "untouched" test below. A row it only *adopted* - a pre-existing Core row
-	 * that already belonged to the merchant - is never deleted: only the markers this
-	 * migration added for that legacy id (`_wc_bis_legacy_id`, `_wc_bis_legacy_adopted`, and
-	 * the matching `_wc_bis_legacy_unsub_hash` row) are removed, leaving status, dates and
-	 * every other meta untouched.
-	 *
-	 * "Untouched" (for an inserted row) is tested by status equality against what
-	 * `StatusMapper` re-derives from the row's legacy source, never by `date_modified_gmt`:
-	 * any meta write bumps that column, which would refuse every row. Requires the legacy
-	 * tables to still exist, since they are the oracle that test reads from; refuses up front
-	 * with that reason rather than silently reporting zero rows, which would look identical
-	 * to success.
-	 *
-	 * ## OPTIONS
-	 *
-	 * [--yes]
-	 * : Skip the confirmation prompt.
-	 *
-	 * [--dry-run]
-	 * : Report what would be rolled back without deleting anything.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     wp wc bis-migrate rollback --dry-run
-	 *     wp wc bis-migrate rollback --yes
-	 *
-	 * @param array $args       Positional arguments (unused).
-	 * @param array $assoc_args Associative arguments (options).
-	 */
-	public function rollback( $args, $assoc_args ): void {
-		$check = $this->requirements()->check();
-
-		if ( is_wp_error( $check ) ) {
-			if ( 'legacy_tables_missing' === $check->get_error_code() ) {
-				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-				WP_CLI::error( sprintf( 'Refusing to roll back: %s', $check->get_error_message() ) );
-				return;
-			}
-
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
-			return;
-		}
-
-		if ( $this->is_processor_enqueued() ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::error(
-				'A migration run is in progress in the background (WooCommerce → Status → Tools). Stop it before rolling back.'
-			);
-			return;
-		}
-
-		$dry_run = isset( $assoc_args['dry-run'] );
-
-		if ( ! $dry_run ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::confirm( 'This will permanently delete migrated Stock Notifications rows. Continue?', $assoc_args );
-		}
-
-		if ( ! $this->acquire_lock( 'rollback' ) ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::error( 'Could not acquire the migration CLI lock. Another CLI run may already be in progress.' );
-			return;
-		}
-
-		try {
-			list( $deleted, $markers_cleared, $skipped ) = $this->rollback_notifications( $dry_run );
-
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::log(
-				sprintf(
-					'%d inserted row(s) %s, %d adopted row(s) %s, %d row(s) left untouched (status changed since migration).',
-					$deleted,
-					$dry_run ? 'would be deleted' : 'deleted',
-					$markers_cleared,
-					$dry_run ? 'would have their migration markers cleared' : 'had their migration markers cleared',
-					$skipped
-				)
-			);
-
-			if ( ! $dry_run ) {
-				$cleared = $this->clear_failed_markers();
-				delete_option( self::HAS_LEGACY_LINKS_OPTION );
-				delete_option( self::HAS_MIGRATED_ROWS_OPTION );
-				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-				WP_CLI::log( sprintf( 'Cleared the failed marker on %d row(s) and the legacy-links/migrated-rows flags.', $cleared ) );
-			}
-
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( $dry_run ? 'Dry run complete.' : 'Rollback complete.' );
-		} finally {
-			$this->release_lock();
-		}
-	}
-
-	/**
 	 * Remove the legacy unsubscribe shim's remaining footprint: the per-notification token
 	 * hash and the flag that gates the shim's registration. `_wc_bis_legacy_id` survives —
 	 * it is the idempotency marker, not shim-specific.
 	 *
 	 * Writes by direct SQL, like `BulkNotificationWriter`: going through the CRUD layer
-	 * would bump `date_modified_gmt` on every migrated row and break `rollback`'s status
-	 * equality test.
+	 * would bump `date_modified_gmt` on every migrated row, rewriting merchant-visible
+	 * history for what is only a marker cleanup.
 	 *
 	 * ## OPTIONS
 	 *
@@ -822,7 +704,7 @@ class Cli {
 
 	/**
 	 * Clear the permanent-failure marker from every legacy row that carries it, re-admitting
-	 * those rows to the candidate set. Used by `--retry-failed` and by `rollback`.
+	 * those rows to the candidate set. Used by `--retry-failed`.
 	 *
 	 * @return int Number of marker rows removed.
 	 */
@@ -890,130 +772,6 @@ class Cli {
 	}
 
 	/**
-	 * Roll back the migration's writes, one legacy-id marker at a time.
-	 *
-	 * An inserted row (no `_wc_bis_legacy_adopted` counterpart for that legacy id) is
-	 * deleted outright when its status still equals what `StatusMapper` re-derives from its
-	 * legacy source, paging through by marker id. An adopted row is never deleted: only that
-	 * legacy id's markers are removed via `remove_adoption_markers()`. A row inserted by this
-	 * migration and later also adopted by a duplicate legacy row carries both kinds of
-	 * marker; once its insert marker triggers deletion, its other markers are skipped since
-	 * the row itself is already gone.
-	 *
-	 * @param bool $dry_run When true, count what would happen without writing anything.
-	 * @return array{0: int, 1: int, 2: int} Tuple of [rows deleted, rows with markers cleared, rows left untouched].
-	 */
-	private function rollback_notifications( bool $dry_run ): array {
-		global $wpdb;
-
-		$core_table      = Tables::core_notifications();
-		$core_meta_table = Tables::core_meta();
-
-		$deleted                  = 0;
-		$markers_cleared          = 0;
-		$skipped                  = 0;
-		$deleted_notification_ids = array();
-
-		foreach ( $this->each_legacy_id_marker_page() as $page ) {
-			$sources = $this->fetch_legacy_sources( array_column( $page, 'legacy_id' ) );
-
-			foreach ( $page as $marker ) {
-				$notification_id = (int) $marker['notification_id'];
-
-				if ( isset( $deleted_notification_ids[ $notification_id ] ) ) {
-					// Already deleted for its insert marker this run; its other markers went with it.
-					continue;
-				}
-
-				$source = $sources[ (int) $marker['legacy_id'] ] ?? null;
-
-				if ( null === $source ) {
-					++$skipped;
-					continue;
-				}
-
-				if ( ! empty( $marker['is_adopted'] ) ) {
-					++$markers_cleared;
-
-					if ( ! $dry_run ) {
-						$this->remove_adoption_markers( $notification_id, (int) $marker['legacy_id'] );
-					}
-
-					continue;
-				}
-
-				if ( StatusMapper::map( $source[0], $source[1] ) !== $marker['status'] ) {
-					++$skipped;
-					continue;
-				}
-
-				++$deleted;
-				$deleted_notification_ids[ $notification_id ] = true;
-
-				if ( $dry_run ) {
-					continue;
-				}
-
-				// Deletes meta first, matching Core's own delete() cascade order, so a failure
-				// between the two statements never leaves an orphaned notification row without
-				// its meta already gone.
-				$wpdb->delete( $core_meta_table, array( 'notification_id' => $notification_id ), array( '%d' ) );
-				$wpdb->delete( $core_table, array( 'id' => $notification_id ), array( '%d' ) );
-			}
-		}
-
-		return array( $deleted, $markers_cleared, $skipped );
-	}
-
-	/**
-	 * Remove only the markers this migration added for one adopted legacy id, leaving the
-	 * Core notification itself, and every marker belonging to any other legacy id, untouched.
-	 *
-	 * @param int $notification_id Core notification id the marker was written onto.
-	 * @param int $legacy_id       Legacy notification id whose markers are being removed.
-	 * @return void
-	 */
-	private function remove_adoption_markers( int $notification_id, int $legacy_id ): void {
-		global $wpdb;
-
-		$core_meta_table = Tables::core_meta();
-
-		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$wpdb->delete(
-			$core_meta_table,
-			array(
-				'notification_id' => $notification_id,
-				'meta_key'        => self::LEGACY_ID_META_KEY,
-				'meta_value'      => (string) $legacy_id,
-			),
-			array( '%d', '%s', '%s' )
-		);
-
-		$wpdb->delete(
-			$core_meta_table,
-			array(
-				'notification_id' => $notification_id,
-				'meta_key'        => self::ADOPTED_MARKER_META_KEY,
-				'meta_value'      => (string) $legacy_id,
-			),
-			array( '%d', '%s', '%s' )
-		);
-		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-
-		// $core_meta_table is $wpdb->prefix-based, never user input; the LIKE prefix is built
-		// with $wpdb->esc_like() and bound via $wpdb->prepare() below.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql = $wpdb->prepare(
-			"DELETE FROM {$core_meta_table} WHERE notification_id = %d AND meta_key = %s AND meta_value LIKE %s",
-			$notification_id,
-			self::LEGACY_UNSUB_HASH_META_KEY,
-			$wpdb->esc_like( $legacy_id . ':' ) . '%'
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
-	}
-
-	/**
 	 * Yield every Core notification carrying a `_wc_bis_legacy_id` marker, one row per
 	 * notification id with its lowest associated legacy id, a page at a time, paging by
 	 * keyset on id. Pages rather than rows, so the caller can fetch a whole page's legacy
@@ -1057,64 +815,6 @@ class Cli {
 
 			foreach ( $rows as $row ) {
 				$cursor = max( $cursor, (int) $row['id'] );
-			}
-
-			if ( ! empty( $rows ) ) {
-				yield $rows;
-			}
-		} while ( self::ORACLE_BATCH_SIZE === $rows_count );
-	}
-
-	/**
-	 * Yield every `_wc_bis_legacy_id` marker on a Core notification, one row per legacy id,
-	 * a page at a time, paging by keyset on the marker's own meta id. Used only by
-	 * `rollback`, which needs every legacy id a row carries - unlike
-	 * `each_migrated_notification_page()`, which collapses a row to a single representative
-	 * legacy id for `verify`.
-	 *
-	 * `is_adopted` is true when a `_wc_bis_legacy_adopted` marker with the same legacy id
-	 * exists on the same notification: that legacy id adopted a pre-existing row rather than
-	 * having been inserted by this migration.
-	 *
-	 * @return \Generator<array<int, array{notification_id: string, status: string, legacy_id: string, is_adopted: string|int}>>
-	 */
-	private function each_legacy_id_marker_page(): \Generator {
-		global $wpdb;
-
-		$core_table      = Tables::core_notifications();
-		$core_meta_table = Tables::core_meta();
-
-		$cursor = 0;
-
-		do {
-			// Table names are $wpdb->prefix-based, never user input; the meta keys and the
-			// cursor/limit bounds are passed through $wpdb->prepare() below.
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-			$sql = $wpdb->prepare(
-				"SELECT lm.id AS marker_id, n.id AS notification_id, n.status,
-					CAST( lm.meta_value AS UNSIGNED ) AS legacy_id,
-					( am.id IS NOT NULL ) AS is_adopted
-				FROM {$core_meta_table} lm
-				INNER JOIN {$core_table} n ON n.id = lm.notification_id
-				LEFT JOIN {$core_meta_table} am
-				       ON am.notification_id = lm.notification_id
-				      AND am.meta_key = %s
-				      AND am.meta_value = lm.meta_value
-				WHERE lm.meta_key = %s AND lm.id > %d
-				ORDER BY lm.id ASC
-				LIMIT %d",
-				self::ADOPTED_MARKER_META_KEY,
-				self::LEGACY_ID_META_KEY,
-				$cursor,
-				self::ORACLE_BATCH_SIZE
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
-			$rows       = (array) $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
-			$rows_count = count( $rows );
-
-			foreach ( $rows as $row ) {
-				$cursor = max( $cursor, (int) $row['marker_id'] );
 			}
 
 			if ( ! empty( $rows ) ) {
