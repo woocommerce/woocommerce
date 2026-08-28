@@ -878,20 +878,29 @@ function wc_scheduled_sales() {
 		for ( $offset = 0; $offset < $total; $offset += $batch_size ) {
 			$chunk = array_slice( $product_ids, $offset, $batch_size );
 
-			// _validate_cache_id()'s rule. A replaced data store can return anything, and
-			// priming reaches three caches that disagree about what an ID is: only the posts
-			// prime screens on this rule, while the meta and term primes intval() whatever
-			// they are handed. Screening up front and using one list throughout is what makes
-			// the release cover exactly what the prime wrote.
-			$batch_ids = array_values(
-				array_map(
-					'intval',
-					array_filter(
-						$chunk,
-						static fn( $id ) => is_int( $id ) || ( is_string( $id ) && (string) (int) $id === $id )
-					)
-				)
-			);
+			// A replaced data store can return anything, and priming reaches three caches that
+			// disagree about what an ID is: only the posts prime validates, while the meta and
+			// term primes intval() whatever they are handed. Resolving to one int list up
+			// front and using it throughout is what makes the release cover exactly what the
+			// prime wrote. Resolved on the same terms wc_get_product() accepts, so nothing it
+			// would have processed before this loop was batched gets dropped here.
+			$batch_ids = array();
+
+			foreach ( $chunk as $chunk_entry ) {
+				if ( $chunk_entry instanceof WC_Product ) {
+					$batch_id = $chunk_entry->get_id();
+				} elseif ( is_object( $chunk_entry ) ) {
+					$batch_id = empty( $chunk_entry->ID ) ? 0 : (int) $chunk_entry->ID;
+				} else {
+					$batch_id = is_numeric( $chunk_entry ) ? (int) $chunk_entry : 0;
+				}
+
+				if ( $batch_id > 0 ) {
+					$batch_ids[] = $batch_id;
+				}
+			}
+
+			$batch_ids = array_values( array_unique( $batch_ids ) );
 
 			if ( ! $batch_ids ) {
 				continue;
