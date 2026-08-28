@@ -29,10 +29,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * `wp wc bis-migrate` — the CLI entry point for the Back In Stock Notifications migration.
  *
- * Registers unconditionally under `WP_CLI`, never gated on `wc_bis_db_version`: gating it on
- * that option would make `--force-discover` unreachable in exactly the situation it exists for.
- * On a store with nothing to migrate every subcommand still runs, reports "nothing to migrate",
- * and exits `0`.
+ * Registers only on a store that has the Customer stock notifications feature on and once had
+ * the legacy extension installed. Anywhere else the command does not exist, so an unrelated
+ * `wp` invocation costs two autoloaded option reads and nothing more.
  *
  * `run` pumps `MigrationBatchProcessor`, the same class Action Scheduler drives, so the
  * section order, cursors and pass-reset probe have one implementation. The CLI-only knobs
@@ -58,7 +57,7 @@ class Cli {
 
 	/**
 	 * Option recording that Back In Stock Notifications was ever installed. Absent means
-	 * there is nothing to migrate; `--force-discover` is the only way past this gate.
+	 * there is nothing to migrate, and the command is not registered at all.
 	 *
 	 * @var string
 	 */
@@ -194,13 +193,13 @@ class Cli {
 	 * Register the `wp wc bis-migrate` command and its subcommands.
 	 *
 	 * Runs on `after_wp_load`, which fires for every `wp` invocation that boots WordPress, so
-	 * on a store with nothing to migrate this costs one autoloaded option read and stops.
+	 * it stops after two autoloaded option reads on a store with nothing to migrate.
 	 *
-	 * Gated on the Customer stock notifications feature being on: with it off there is nothing
-	 * to migrate into and every subcommand would refuse anyway. Deliberately *not* gated on
-	 * `wc_bis_db_version`, so `--force-discover` stays reachable on a store whose option was
-	 * deleted by hand. The option is read directly rather than through
-	 * `FeaturesUtil::feature_is_enabled()`, which builds translated feature definitions.
+	 * Needs the Customer stock notifications feature on, since with it off there is nothing to
+	 * migrate into, and needs the legacy extension to have been installed, since otherwise
+	 * there is nothing to migrate from. The feature option is read directly rather than
+	 * through `FeaturesUtil::feature_is_enabled()`, which builds translated feature
+	 * definitions before `init` has loaded translations.
 	 */
 	public function register(): void {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
@@ -208,6 +207,10 @@ class Cli {
 		}
 
 		if ( 'yes' !== get_option( StockNotifications::ENABLE_OPTION_NAME, 'no' ) ) {
+			return;
+		}
+
+		if ( ! get_option( self::DB_VERSION_OPTION ) ) {
 			return;
 		}
 
@@ -326,10 +329,6 @@ class Cli {
 	 * [--max-batches=<n>]
 	 * : Stop after this many batches, across all sections. Debugging aid only.
 	 *
-	 * [--force-discover]
-	 * : Skip the wc_bis_db_version option gate and go straight to Requirements::check(). The
-	 * one path that reaches a store whose option was deleted by hand.
-	 *
 	 * [--yes]
 	 * : Skip the confirmation prompt.
 	 *
@@ -348,14 +347,6 @@ class Cli {
 		if ( $force && ! isset( $assoc_args['yes'] ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 			WP_CLI::error( '--force requires --yes.' );
-			return;
-		}
-
-		$force_discover = isset( $assoc_args['force-discover'] );
-
-		if ( ! $force_discover && ! get_option( self::DB_VERSION_OPTION ) ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( 'Nothing to migrate: Back In Stock Notifications was never installed on this store.' );
 			return;
 		}
 
