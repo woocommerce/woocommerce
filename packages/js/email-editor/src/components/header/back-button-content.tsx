@@ -21,10 +21,8 @@ import { BackButton } from '../../private-apis';
 import { recordEvent } from '../../events';
 import { storeName } from '../../store';
 
-// The WordPress 7.1+ header reserves a compact 32px slot for the back button
-// and renders it as a plain chevron; older versions reserve a 64px slot filled
-// with a fullscreen-style logo button. The slot width is what our button must
-// fit into, so detect it instead of the WordPress version.
+// We measure the header column while it is still empty. WordPress 7.1 lets it
+// shrink to 0px there, while older versions always keep it 64px wide.
 const COMPACT_SLOT_MAX_WIDTH = 48;
 
 const toggleHomeIconVariants = {
@@ -166,9 +164,10 @@ const DefaultBackButtonContent = () => {
 		const slot = measureRef.current?.closest< HTMLElement >(
 			'.editor-header__back-button'
 		);
-		const slotWidth = slot?.getBoundingClientRect().width ?? 0;
+		const reservedWidth = slot?.getBoundingClientRect().width;
 		setIsCompactSlot(
-			slotWidth > 0 && slotWidth <= COMPACT_SLOT_MAX_WIDTH
+			reservedWidth !== undefined &&
+				reservedWidth <= COMPACT_SLOT_MAX_WIDTH
 		);
 	}, [] );
 

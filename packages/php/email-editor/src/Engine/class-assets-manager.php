@@ -251,6 +251,10 @@ class Assets_Manager {
 		 */
 		$routes = apply_filters( 'woocommerce_email_editor_preload_rest_api_routes', $routes, $post_type, $post_id );
 
+		if ( ! is_array( $routes ) ) {
+			$routes = array();
+		}
+
 		$preload_data = array_reduce(
 			$routes,
 			'rest_preload_api_request',
