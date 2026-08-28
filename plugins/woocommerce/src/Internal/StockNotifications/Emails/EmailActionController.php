@@ -197,10 +197,7 @@ class EmailActionController {
 	 */
 	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_unsubscribe_key( $action_key ) ) {
-			$notification->set_status( NotificationStatus::CANCELLED );
-			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( time() );
-			$notification->save();
+			$this->unsubscribe( $notification );
 
 			// We need a cookie-based session for notices to work on frontend pages.
 			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
@@ -224,6 +221,44 @@ class EmailActionController {
 			wp_safe_redirect( $url );
 			exit;
 		}
+	}
+
+	/**
+	 * Cancel a notification, if it is still eligible to be cancelled.
+	 *
+	 * Acts only on a `pending` or `active` notification, so calling this again on an
+	 * already-cancelled or already-sent row is a no-op.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param Notification $notification The notification to cancel.
+	 * @return bool True if the notification was cancelled, false if it was left unchanged.
+	 */
+	public function unsubscribe( Notification $notification ): bool {
+		if ( ! in_array( $notification->get_status(), array( NotificationStatus::PENDING, NotificationStatus::ACTIVE ), true ) ) {
+			return false;
+		}
+
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$notification->set_cancellation_source( NotificationCancellationSource::USER );
+		$notification->set_date_cancelled( time() );
+		$notification->save();
+
+		/**
+		 * Action: woocommerce_customer_stock_notifications_cancelled
+		 *
+		 * Fires after a shopper cancels a stock notification from an email link. Mirrors
+		 * `woocommerce_customer_stock_notifications_signup`. Does not fire for a row that
+		 * was already cancelled, or for a cancellation the store made on the shopper's
+		 * behalf.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param Notification $notification The notification.
+		 */
+		do_action( 'woocommerce_customer_stock_notifications_cancelled', $notification );
+
+		return true;
 	}
 
 	/**
