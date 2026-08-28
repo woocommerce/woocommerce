@@ -884,7 +884,8 @@ jQuery( function ( $ ) {
 						if ( typeof callback === 'function' ) {
 							callback( response );
 						}
-
+					},
+					complete: function () {
 						wc_meta_boxes_product_variations_ajax.unblock();
 					},
 				} );
