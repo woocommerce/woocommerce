@@ -247,6 +247,28 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Date values that are not a real calendar date are displayed as stored.
+	 *
+	 * @testWith ["2026-02-31"]
+	 *           ["2026-13-01"]
+	 *           ["not-a-date"]
+	 *           [""]
+	 *
+	 * @param string $value The stored value.
+	 */
+	public function test_invalid_date_field_value_is_not_reformatted( string $value ) {
+		update_option( 'date_format', 'F j, Y' );
+
+		$fields = $this->controller->get_additional_fields();
+
+		$this->assertSame(
+			$value,
+			$this->controller->format_additional_field_value( $value, $fields['plugin-namespace/delivery-date'] ),
+			'A value that is not a real date should be shown as stored rather than rolled forward.'
+		);
+	}
+
+	/**
 	 * Registering a field before after_setup_theme warns the developer.
 	 */
 	public function test_registering_before_after_setup_theme_triggers_notice() {

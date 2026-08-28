@@ -311,6 +311,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				$field_schema['type'] = 'boolean';
 			}
 
+			if ( 'date' === $field['type'] ) {
+				$field_schema['pattern'] = '^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))?$';
+			}
+
 			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
