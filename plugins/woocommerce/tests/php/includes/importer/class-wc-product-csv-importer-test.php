@@ -129,16 +129,19 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Resolved original IDs are reused consistently without repeated lookups
 	 */
 	public function test_original_id_mapping_is_reused_within_an_import() {
-		$original_id = 987654321;
-		$importer    = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
-		$query_count = 0;
-		$count_query = static function ( $query ) use ( &$query_count ) {
+		$original_id      = 987654321;
+		$importer         = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+		$existing_product = WC_Helper_Product::create_simple_product();
+		$query_count      = 0;
+		$count_query      = static function ( $query ) use ( &$query_count ) {
 			if ( false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, "meta_key = '_original_id'" ) ) {
 				++$query_count;
 			}
 
 			return $query;
 		};
+
+		$referenced_product_id = 0;
 
 		add_filter( 'query', $count_query );
 
@@ -147,22 +150,22 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			$row_product_id        = $importer->parse_id_field( (string) $original_id );
 			$duplicate_product_id  = $importer->parse_id_field( (string) $original_id );
 
-			$existing_product          = WC_Helper_Product::create_simple_product();
 			$first_existing_product_id = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
 			$next_existing_product_id  = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
+
+			$this->assertGreaterThan( 0, $referenced_product_id );
+			$this->assertSame( $referenced_product_id, $row_product_id );
+			$this->assertSame( $referenced_product_id, $duplicate_product_id );
+			$this->assertSame( $existing_product->get_id(), $first_existing_product_id );
+			$this->assertSame( $existing_product->get_id(), $next_existing_product_id );
+			$this->assertSame( 3, $query_count, 'Only mappings backed by _original_id meta are cached; references to existing products still query.' );
 		} finally {
 			remove_filter( 'query', $count_query );
+			WC_Helper_Product::delete_product( $existing_product->get_id() );
+			if ( $referenced_product_id ) {
+				WC_Helper_Product::delete_product( $referenced_product_id );
+			}
 		}
-
-		$this->assertGreaterThan( 0, $referenced_product_id );
-		$this->assertSame( $referenced_product_id, $row_product_id );
-		$this->assertSame( $referenced_product_id, $duplicate_product_id );
-		$this->assertSame( $existing_product->get_id(), $first_existing_product_id );
-		$this->assertSame( $existing_product->get_id(), $next_existing_product_id );
-		$this->assertSame( 3, $query_count, 'Only mappings backed by _original_id meta are cached; references to existing products still query.' );
-
-		WC_Helper_Product::delete_product( $referenced_product_id );
-		WC_Helper_Product::delete_product( $existing_product->get_id() );
 	}
 
 	/**
@@ -208,9 +211,11 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->add_meta_data( '_original_id', $original_id, true );
 		$product->save();
 
-		$this->assertSame( $product->get_id(), $importer->parse_id_field( (string) $original_id ) );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
+		try {
+			$this->assertSame( $product->get_id(), $importer->parse_id_field( (string) $original_id ) );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
 	}
 
 	/**
