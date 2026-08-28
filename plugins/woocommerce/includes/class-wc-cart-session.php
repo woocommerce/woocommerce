@@ -311,6 +311,10 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function destroy_cart_session() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		$wc_session = WC()->session;
 
 		$wc_session->set( 'cart', null );
@@ -335,7 +339,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function maybe_set_cart_cookies() {
-		if ( headers_sent() || ! did_action( 'wp_loaded' ) ) {
+		if ( $this->should_skip_session_updates() || headers_sent() || ! did_action( 'wp_loaded' ) ) {
 			return;
 		}
 		if ( ! $this->cart->is_empty() ) {
@@ -402,6 +406,10 @@ final class WC_Cart_Session {
 	 * Sets the php session data for the cart and coupons.
 	 */
 	public function set_session() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		$wc_session = WC()->session;
 
 		$cart                       = $this->get_cart_for_session();
@@ -458,6 +466,10 @@ final class WC_Cart_Session {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		/**
 		 * Filters whether the persistent cart is enabled.
 		 *
@@ -722,11 +734,26 @@ final class WC_Cart_Session {
 	}
 
 	/**
+	 * Checks whether session updates should be skipped for an inactive Store API cart.
+	 *
+	 * A failed cart load clears WC()->cart, but registered callbacks can retain the failed cart and overwrite valid session data.
+	 *
+	 * @return bool
+	 */
+	private function should_skip_session_updates() {
+		return 'store-api' === $this->cart->cart_context && WC()->cart !== $this->cart;
+	}
+
+	/**
 	 * Removes items from the removed cart contents on next user initiated request.
 	 *
 	 * @return void
 	 */
 	public function clean_up_removed_cart_contents() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		// Limit to page requests initiated by the user.
 		$is_page = is_singular() || is_archive() || is_search();
 

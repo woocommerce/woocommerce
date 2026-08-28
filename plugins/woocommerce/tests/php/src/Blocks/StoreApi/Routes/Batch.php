@@ -173,8 +173,11 @@ class Batch extends ControllerTestCase {
 			$response      = rest_get_server()->dispatch( $request );
 			$response_data = $response->get_data();
 
+			// A failed cart remains referenced by its registered callbacks after WC()->cart is cleared.
+			do_action( 'woocommerce_removed_coupon', 'synthetic-coupon' );
+
 			$this->assertSame( 500, $response_data['responses'][0]['status'], 'The request that fails to load the cart should return an error.' );
-			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The stored session cart should remain unchanged.' );
+			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The stored session cart should remain unchanged after callbacks from the failed cart run.' );
 			$this->assertSame( 500, $response_data['responses'][1]['status'], 'Later cart requests should not use a partially loaded cart.' );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );

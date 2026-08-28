@@ -3217,6 +3217,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		// The route restores the cart only when this action has not run yet, so reset
 		// the counter to put the process back into the state a REST request starts in.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
 		$cart_backup = WC()->cart;
@@ -3230,6 +3231,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
 			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
 		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );

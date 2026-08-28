@@ -34,13 +34,6 @@ class Cart extends ControllerTestCase {
 	private static $coupon_id;
 
 	/**
-	 * Cart instance restored after a cart session failure.
-	 *
-	 * @var \WC_Cart|null
-	 */
-	private $cart_backup = null;
-
-	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -1566,10 +1559,11 @@ class Cart extends ControllerTestCase {
 
 		// The route restores the cart only when this action has not run yet, so reset
 		// the counter to put the process back into the state a REST request starts in.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
-		$this->cart_backup = WC()->cart;
-		$callback          = static function () {
+		$cart_backup = WC()->cart;
+		$callback    = static function () {
 			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
 		};
 		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
@@ -1578,6 +1572,13 @@ class Cart extends ControllerTestCase {
 			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
 		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
@@ -1590,34 +1591,32 @@ class Cart extends ControllerTestCase {
 	public function test_cart_session_failure_before_restore_returns_error_response() {
 		// This filter runs before `get_cart_from_session()` fires its action, so nothing
 		// stops the response headers attempting a second load of the failed cart.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
 		// A REST request never runs `initialize_cart()`, so the route starts with no
 		// cart at all. The test bootstrap leaves one behind.
-		$this->cart_backup = WC()->cart;
-		WC()->cart         = null;
+		$cart_backup = WC()->cart;
+		WC()->cart   = null;
 
-		add_filter(
-			'woocommerce_session_handler',
-			static function () {
-				throw new \RuntimeException( 'Synthetic session handler failure.' );
+		$callback = static function () {
+			throw new \RuntimeException( 'Synthetic session handler failure.' );
+		};
+		add_filter( 'woocommerce_session_handler', $callback );
+
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_session_handler', $callback );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
 			}
-		);
-
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
-
-		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
-	}
-
-	/**
-	 * Restore the cart instance removed by the cart session failure tests.
-	 */
-	public function tearDown(): void {
-		if ( $this->cart_backup instanceof \WC_Cart ) {
-			WC()->cart         = $this->cart_backup;
-			$this->cart_backup = null;
 		}
 
-		parent::tearDown();
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 	}
 }
