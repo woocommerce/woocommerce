@@ -76,6 +76,16 @@ describe( 'ProductCardFooter rating', () => {
 		).toBe( '' );
 	} );
 
+	it( 'renders no rating when the rating is zero', () => {
+		const { container } = renderFooter( 0 );
+
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__rating'
+			)?.textContent
+		).toBe( '' );
+	} );
+
 	it( 'renders no rating when the API omits the rating', () => {
 		const { container } = renderFooter( undefined );
 
