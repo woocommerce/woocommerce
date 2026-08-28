@@ -78,9 +78,8 @@ interface WriterInterface {
 	/**
 	 * Write several meta values onto one product through the CRUD layer, in one save.
 	 *
-	 * A product's value and the fingerprint recording it always land together, and each
-	 * `write_product_meta()` call is a product load plus a full save pipeline, so they go
-	 * through here instead.
+	 * Each `write_product_meta()` call is a product load plus a full save pipeline, so a
+	 * caller with more than one key to write goes through here instead.
 	 *
 	 * @param int   $product_id Product id.
 	 * @param array $meta       List of `array{0:string,1:mixed}` key/value pairs.

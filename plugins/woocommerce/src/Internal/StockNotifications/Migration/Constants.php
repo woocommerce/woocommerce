@@ -81,11 +81,6 @@ final class Constants {
 	public const PRODUCT_LEGACY_META_KEY = '_wc_bis_disabled';
 
 	/**
-	 * Product meta holding the product-meta section's per-product fingerprint.
-	 */
-	public const PRODUCT_FINGERPRINT_META_KEY = '_wc_bis_migration_signups_written';
-
-	/**
 	 * Product meta marking a product the product-meta section can never settle.
 	 */
 	public const PRODUCT_FAILED_META_KEY = '_wc_bis_migration_signups_failed';

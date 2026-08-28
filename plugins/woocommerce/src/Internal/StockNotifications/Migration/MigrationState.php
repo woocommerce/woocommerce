@@ -13,9 +13,9 @@ defined( 'ABSPATH' ) || exit;
  * Reads and writes `wc_bis_migration_state`, the run state for the BIS migration.
  *
  * The option is written with autoload off: it changes on every batch, and nothing
- * outside a migration run needs it in memory. It holds four top-level keys: the CLI
- * run `lock`, the per-section `cursor`, cached display-only `counts`, and per-option
- * migration `fingerprints`.
+ * outside a migration run needs it in memory. It holds the CLI run `lock`, the
+ * per-section `cursor`, cached display-only `counts`, the known-`losses` snapshot, and
+ * the set of `options` already migrated.
  *
  * State here is an optimization, never authority. What has actually been migrated is
  * recorded by the markers the migrators write onto legacy and Core rows
@@ -39,23 +39,6 @@ class MigrationState {
 	 * to prevent.
 	 */
 	private const STALE_LOCK_SECONDS = HOUR_IN_SECONDS;
-
-	/**
-	 * Decision: no fingerprint is on record for this option, write it.
-	 */
-	public const OPTION_ACTION_WRITE = 'write';
-
-	/**
-	 * Decision: the option matches what we last wrote and its source has not changed
-	 * since, nothing to do.
-	 */
-	public const OPTION_ACTION_SKIP_UNCHANGED = 'skip_unchanged';
-
-	/**
-	 * Decision: the option no longer matches what we last wrote, a merchant edited it.
-	 * Leave it alone unless the caller forces the write.
-	 */
-	public const OPTION_ACTION_SKIP_USER_MODIFIED = 'skipped_user_modified';
 
 	/**
 	 * The empty state shape, used when the option does not exist yet.
@@ -293,98 +276,34 @@ class MigrationState {
 	}
 
 	/**
-	 * Get the recorded fingerprint for a migrated option key.
+	 * Whether this option key has already been migrated.
 	 *
-	 * @param string $option_key The option name.
-	 * @return array|null `written`, `hash` and `at`, or null when this option has never been migrated.
+	 * This is the settle signal for the settings and email-settings sections. They have no
+	 * per-row marker to stamp the way the notifications and product-meta migrators do, so
+	 * without it every mapped key stays outstanding, the section never drains, and the run
+	 * rewrites the same options on every batch.
+	 *
+	 * @param string $option_key The option name, or an option/sub-key pair for nested settings.
+	 * @return bool
 	 */
-	public function get_option_fingerprint( string $option_key ): ?array {
+	public function is_option_migrated( string $option_key ): bool {
 		$state = $this->get_state();
 
-		return $state['options'][ $option_key ] ?? null;
+		return ! empty( $state['options'][ $option_key ] );
 	}
 
 	/**
-	 * Record that an option was written by the migration.
+	 * Record that an option was written by the migration, so later runs leave it alone.
 	 *
-	 * @param string $option_key  The option name.
-	 * @param string $source_hash Fingerprint of the legacy source data the value was
-	 *                            derived from, used later to detect a changed source.
-	 * @param string $target_hash Fingerprint of the value actually written, used later
-	 *                            to detect a merchant edit.
-	 * @param bool   $skipped     Whether this records a merchant-modified option that was
-	 *                            reported and left alone, rather than one that was written.
-	 *                            Recording it is what drains the section: an option that
-	 *                            keeps deciding `skipped_user_modified` is otherwise
-	 *                            outstanding forever and the run never terminates.
+	 * Callers must only record this once the write has landed: a key recorded without a
+	 * successful write is never retried.
+	 *
+	 * @param string $option_key The option name, or an option/sub-key pair for nested settings.
 	 * @return void
 	 */
-	public function record_option_fingerprint( string $option_key, string $source_hash, string $target_hash, bool $skipped = false ): void {
+	public function mark_option_migrated( string $option_key ): void {
 		$state                           = $this->get_state();
-		$state['options'][ $option_key ] = array(
-			'written' => $source_hash,
-			'hash'    => $target_hash,
-			'skipped' => $skipped,
-			'at'      => time(),
-		);
+		$state['options'][ $option_key ] = true;
 		$this->save_state( $state );
-	}
-
-	/**
-	 * Fingerprint a value for comparison, stable across arrays and scalars.
-	 *
-	 * The string cast is required: maybe_serialize() returns scalars untouched, so an
-	 * integer value reaches hash() as an int and fatals on PHP 8. Casting also matches
-	 * how the value reads back out of the database, where everything is a string, and
-	 * keeps this in step with ProductMetaMigrator's SQL-side `SHA2()` comparison.
-	 *
-	 * @param mixed $value The value to fingerprint.
-	 * @return string
-	 */
-	public function fingerprint_value( $value ): string {
-		return hash( 'sha256', (string) maybe_serialize( $value ) );
-	}
-
-	/**
-	 * Decide what to do with a migrated option, per the fingerprint table:
-	 *
-	 * | Target state              | Action                                          |
-	 * |----------------------------|-------------------------------------------------|
-	 * | Absent                     | Write                                            |
-	 * | Present, hash matches      | We wrote it; rewrite only if the source changed  |
-	 * | Present, hash differs      | Merchant edited it; skip, unless $force          |
-	 *
-	 * A recorded skip keeps its own entry, so a merchant-modified option reports once and
-	 * then stops being outstanding. `$force` still overrides it: without that, an option
-	 * skipped by an earlier run could never be forced again.
-	 *
-	 * @param string $option_key         The option name.
-	 * @param string $source_hash        Fingerprint of the current legacy source data.
-	 * @param string $current_target_hash Fingerprint of the option's current stored value.
-	 * @param bool   $force              Whether to write anyway when the merchant edited it.
-	 *                                   Overrides only the "hash differs" case; a changed
-	 *                                   source already writes without it.
-	 * @return string One of the OPTION_ACTION_* constants.
-	 */
-	public function decide_option_action( string $option_key, string $source_hash, string $current_target_hash, bool $force = false ): string {
-		$fingerprint = $this->get_option_fingerprint( $option_key );
-
-		if ( null === $fingerprint ) {
-			return self::OPTION_ACTION_WRITE;
-		}
-
-		if ( $force && ! empty( $fingerprint['skipped'] ) ) {
-			return self::OPTION_ACTION_WRITE;
-		}
-
-		if ( $fingerprint['hash'] !== $current_target_hash ) {
-			return $force ? self::OPTION_ACTION_WRITE : self::OPTION_ACTION_SKIP_USER_MODIFIED;
-		}
-
-		if ( $fingerprint['written'] !== $source_hash ) {
-			return self::OPTION_ACTION_WRITE;
-		}
-
-		return self::OPTION_ACTION_SKIP_UNCHANGED;
 	}
 }
