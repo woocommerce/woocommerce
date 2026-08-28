@@ -356,50 +356,175 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that only one product is created with a unique SKU
-	 * during concurrent requests and when request is initiated via REST API.
-	 *
-	 * Throw error when two concurrent requests try to create a product with the same SKU.
+	 * during concurrent requests and when request is initiated via REST API,
+	 * and that the resulting error names the conflicting published product.
 	 *
 	 * @return void
 	 */
 	public function test_create_product_with_unique_sku_on_concurrent_requests() {
-		$this->expectException(
-			'Exception',
-		);
-		$this->expectExceptionMessage(
-			'The product with SKU (DUMMY SKU) you are trying to insert is already present in the lookup table'
-		);
-
 		// exception is only thrown during the REST API request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
-		$this->create_products_concurrently();
+
+		$default_props = array(
+			'name'          => 'Dummy Product',
+			'regular_price' => 10,
+			'price'         => 10,
+			'sku'           => 'DUMMY SKU',
+		);
+
+		// Set props on both before either is saved, so neither exists in the
+		// database yet when the SKU is assigned - the regular uniqueness check
+		// (wc_product_has_unique_sku) can't catch this, only the DB-level lock
+		// obtained during create() can, which is what this test targets.
+		$product1 = new WC_Product_Simple();
+		$product1->set_props( $default_props );
+
+		$product2 = new WC_Product_Simple();
+		$product2->set_props( $default_props );
+
+		$product1->save();
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (DUMMY SKU) is already in use by published product #%d. Use a different SKU.',
+				$product1->get_id()
+			)
+		);
+
+		$product2->save();
 	}
 
 	/**
-	 * Helper function to create products concurrently with same SKU
+	 * Test that creating a product with a SKU already held by a trashed
+	 * product names the trashed product specifically, since the regular
+	 * uniqueness check (wc_product_has_unique_sku) excludes trashed products
+	 * and would otherwise let this conflict through with no explanation.
 	 *
 	 * @return void
 	 */
-	private static function create_products_concurrently() {
-		$default_props =
+	public function test_create_product_with_sku_conflicting_with_trashed_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$trashed_product = new WC_Product_Simple();
+		$trashed_product->set_props(
 			array(
-				'name'          => 'Dummy Product',
+				'name'          => 'Trashed Product',
 				'regular_price' => 10,
 				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
-			);
+				'sku'           => 'TRASHED SKU',
+			)
+		);
+		$trashed_product->save();
+		wp_trash_post( $trashed_product->get_id() );
 
-		$product1 = new WC_Product_Simple();
-		$product2 = new WC_Product_Simple();
-		$product3 = new WC_Product_Simple();
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (TRASHED SKU) conflicts with product #%d, which is in the Trash. Use a different SKU, or restore or permanently delete that product to free it up.',
+				$trashed_product->get_id()
+			)
+		);
 
-		$product1->set_props( $default_props );
-		$product2->set_props( $default_props );
-		$product3->set_props( $default_props );
+		$new_product = new WC_Product_Simple();
+		$new_product->set_props(
+			array(
+				'name'          => 'New Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'TRASHED SKU',
+			)
+		);
+		$new_product->save();
+	}
 
-		$product1->save();
-		$product2->save();
-		$product3->save();
+	/**
+	 * Test that a concurrent-creation conflict with a draft product names it
+	 * as a draft. Props are set on both before either is saved, same as the
+	 * published-conflict test, since a draft is still caught by the regular
+	 * uniqueness check once saved - only the race case reaches this code.
+	 *
+	 * @return void
+	 */
+	public function test_create_product_with_sku_conflicting_with_draft_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$draft_product = new WC_Product_Simple();
+		$draft_product->set_props(
+			array(
+				'name'          => 'Draft Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'DRAFT SKU',
+				'status'        => 'draft',
+			)
+		);
+
+		$conflicting_product = new WC_Product_Simple();
+		$conflicting_product->set_props(
+			array(
+				'name'          => 'Conflicting Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'DRAFT SKU',
+			)
+		);
+
+		$draft_product->save();
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (DRAFT SKU) is already assigned to draft product #%d. Use a different SKU, or update the existing draft.',
+				$draft_product->get_id()
+			)
+		);
+
+		$conflicting_product->save();
+	}
+
+	/**
+	 * Test that a status with no dedicated message - private here, but equally
+	 * a scheduled product or a status added by an extension - still falls back
+	 * to naming the conflicting product rather than saying nothing useful.
+	 *
+	 * @return void
+	 */
+	public function test_create_product_with_sku_conflicting_with_other_status_product() {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$private_product = new WC_Product_Simple();
+		$private_product->set_props(
+			array(
+				'name'          => 'Private Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'PRIVATE SKU',
+				'status'        => 'private',
+			)
+		);
+
+		$conflicting_product = new WC_Product_Simple();
+		$conflicting_product->set_props(
+			array(
+				'name'          => 'Conflicting Product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'sku'           => 'PRIVATE SKU',
+			)
+		);
+
+		$private_product->save();
+
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage(
+			sprintf(
+				'The SKU (PRIVATE SKU) is already in use by product #%d. Use a different SKU.',
+				$private_product->get_id()
+			)
+		);
+
+		$conflicting_product->save();
 	}
 
 	/**
