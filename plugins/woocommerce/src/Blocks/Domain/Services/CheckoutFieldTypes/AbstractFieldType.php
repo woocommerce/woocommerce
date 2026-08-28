@@ -167,6 +167,17 @@ abstract class AbstractFieldType {
 	}
 
 	/**
+	 * Converts a value into the representation used when field rules are evaluated.
+	 *
+	 * @param mixed $value The value.
+	 * @param array $field The field.
+	 * @return mixed The value as it should appear in the document object.
+	 */
+	public function to_document_value( $value, array $field ) {
+		return $value;
+	}
+
+	/**
 	 * Formats a stored value for display based on the field type.
 	 *
 	 * @param mixed $value The stored value.
@@ -175,6 +186,27 @@ abstract class AbstractFieldType {
 	 */
 	public function format_value( $value, array $field ) {
 		return $value;
+	}
+
+	/**
+	 * Converts a stored meta value into the type the rest of checkout works with.
+	 *
+	 * @param mixed $value The stored value.
+	 * @return mixed The converted value.
+	 */
+	public function from_storage( $value ) {
+		return $value;
+	}
+
+	/**
+	 * Applies type-specific keywords to a field's REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_value_schema( array $field_schema, array $field ): array {
+		return $field_schema;
 	}
 
 	/**
