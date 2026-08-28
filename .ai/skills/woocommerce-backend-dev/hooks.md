@@ -85,3 +85,28 @@ do_action( 'woocommerce_product_saved', $product_id, $product );
  */
 $price = apply_filters( 'woocommerce_product_price', $price, $product );
 ```
+
+## Regenerating the Published Hook Docs
+
+Hooks in `plugins/woocommerce/src/Blocks` and `plugins/woocommerce/src/StoreApi` are published as a developer reference generated from their docblocks:
+
+- `plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/actions.md`
+- `plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md`
+
+After adding, removing, or editing a hook or its docblock in either directory, regenerate them and commit the result alongside the code change:
+
+```bash
+pnpm --filter=@woocommerce/block-library build:docs
+```
+
+Nothing in CI checks these files, so a skipped run leaves the published reference silently stale.
+
+Points to keep in mind:
+
+- Never hand-edit `actions.md` or `filters.md`. Fix the source docblock and regenerate.
+- Only `src/Blocks` and `src/StoreApi` are scanned. Everything else in `plugins/woocommerce/src` is excluded by `extra.wp-hooks.ignore-files` in `plugins/woocommerce/client/blocks/composer.json`, so a hook elsewhere needs no regeneration.
+- The command also refreshes `docs/block-development/reference/block-references.md`, which is the one generated file CI does validate.
+- Docblock text lands in the docs as Markdown. Wrap literal angle-bracket placeholders in backticks (`` `<hook-name>` ``) so markdownlint doesn't read them as inline HTML.
+- A hook with no docblock at the call site is skipped by the generator, and `internal_`-prefixed hooks are filtered out on purpose.
+
+See `plugins/woocommerce/client/blocks/bin/hook-docs/README.md` for how the pipeline works and how to change its scope.
