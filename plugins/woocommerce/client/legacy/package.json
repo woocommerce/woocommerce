@@ -54,6 +54,9 @@
 					"js/admin/*.js",
 					"js/frontend/*.js",
 					".stylelintrc"
+				],
+				"ignore": [
+					"css/select2.scss"
 				]
 			},
 			"tests": [
