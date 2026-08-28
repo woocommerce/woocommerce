@@ -318,9 +318,9 @@ class Cli {
 	 * : Compute and report everything without writing anything.
 	 *
 	 * [--force]
-	 * : CLI only, requires --yes. Overwrites an option or product-meta value a merchant
-	 * edited after a previous migration, and overrides the is_queued='on' pre-flight refusal.
-	 * Does not skip Requirements::check() and does not change any status mapping.
+	 * : CLI only, requires --yes. Overrides the is_queued='on' pre-flight refusal, so a run
+	 * can start while the legacy extension still has rows queued for its own sender. Does not
+	 * skip Requirements::check() and does not change any status mapping.
 	 *
 	 * [--retry-failed]
 	 * : Clear the permanent-failure marker on legacy rows so they are retried. Ignored under
@@ -425,7 +425,7 @@ class Cli {
 
 			$reporter               = new Reporter();
 			$notifications_migrator = new NotificationsMigrator( $reporter );
-			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $force, $notifications_migrator ), array_flip( $sections ) );
+			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
 			$writer                 = $dry_run ? new NullWriter() : new DbWriter();
 
 			// The loop itself - section order, cursors, the pass-reset probe, the per-batch
@@ -526,7 +526,7 @@ class Cli {
 		}
 
 		$reporter  = new Reporter();
-		$migrators = $this->build_migrators( $reporter, false );
+		$migrators = $this->build_migrators( $reporter );
 
 		foreach ( self::SECTION_ORDER as $slug ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -724,18 +724,16 @@ class Cli {
 	 * Build the four migrators, sharing one Reporter and this instance's MigrationState.
 	 *
 	 * @param Reporter                   $reporter      Outcome collector shared across every section.
-	 * @param bool                       $force         Whether `--force` was passed. Ignored by NotificationsMigrator,
-	 *                                                  which has no merchant-editable fingerprint to overwrite.
 	 * @param NotificationsMigrator|null $notifications The notifications migrator to use. Passed in by `run`, which
 	 *                                                  also reads the known-losses totals off that same instance.
 	 * @return array<string, MigratorInterface> Migrators keyed by section slug, in section order.
 	 */
-	private function build_migrators( Reporter $reporter, bool $force, ?NotificationsMigrator $notifications = null ): array {
+	private function build_migrators( Reporter $reporter, ?NotificationsMigrator $notifications = null ): array {
 		return array(
 			'notifications' => $notifications ?? new NotificationsMigrator( $reporter ),
-			'product-meta'  => new ProductMetaMigrator( $reporter, $this->state(), $force ),
-			'emails'        => new EmailSettingsMigrator( $this->state(), $reporter, $force ),
-			'settings'      => new SettingsMigrator( $this->state(), $reporter, $force ),
+			'product-meta'  => new ProductMetaMigrator( $reporter ),
+			'emails'        => new EmailSettingsMigrator( $this->state(), $reporter ),
+			'settings'      => new SettingsMigrator( $this->state(), $reporter ),
 		);
 	}
 
