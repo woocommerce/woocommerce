@@ -3,14 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch (e.g. "release/9.8" or just "9.8").'
-        required: true
-      skip_verify:
-        description: 'Skip verification steps.'
-        type: boolean
+        description: 'Branch to build (e.g. "release/9.8" or "9.8"). Non-release branches just build a ZIP.'
         required: true
       create_github_release:
-        description: 'Create GitHub release.'
+        description: 'Create GitHub release (release branches only).'
         type: boolean
         default: false
   workflow_call:
@@ -44,10 +40,12 @@ jobs:
   verify:
     name: 'Pre-build verification'
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
       branch: ${{ steps.normalize-branch.outputs.branch }}
+      is-release-branch: ${{ steps.normalize-branch.outputs.is-release-branch }}
     steps:
       - name: Normalize branch input
         id: normalize-branch
@@ -60,44 +58,69 @@ jobs:
           fi
           echo "branch=$branch" >> $GITHUB_OUTPUT
 
-      - run: |
-          echo "Building WooCommerce ZIP: branch=${{ steps.normalize-branch.outputs.branch }}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"          
+          is_release_branch=false
+          if [[ "$branch" == release/* ]]; then
+            is_release_branch=true
+          fi
+          echo "is-release-branch=$is_release_branch" >> $GITHUB_OUTPUT
+
+          # skip_verify only exists for workflow_call; manual dispatch always verifies before creating a release.
+          should_verify=false
+          if [ "$is_release_branch" = "true" ] && [ "${{ inputs.create_github_release }}" = "true" ] && [ "${{ inputs.skip_verify }}" != "true" ]; then
+            should_verify=true
+          fi
+          echo "should-verify=$should_verify" >> $GITHUB_OUTPUT
+
+      - env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+          IS_RELEASE_BRANCH: ${{ steps.normalize-branch.outputs.is-release-branch }}
+          SHOULD_VERIFY: ${{ steps.normalize-branch.outputs.should-verify }}
+          CREATE_GITHUB_RELEASE: ${{ inputs.create_github_release }}
+        run: |
+          echo "Building WooCommerce ZIP: branch=${BRANCH}, is_release_branch=${IS_RELEASE_BRANCH}, should_verify=${SHOULD_VERIFY}, create_github_release=${CREATE_GITHUB_RELEASE}"
 
       - name: Verify release branch
         env:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
           if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
-            echo "::error::Source branch '$BRANCH' does not exist."
+            error="Source branch '$BRANCH' does not exist."
+            if [[ "$BRANCH" =~ ^(release/)?([0-9]+\.[0-9]+)\..+$ ]]; then
+              minor="${BASH_REMATCH[2]}"
+              error="$error Try 'release/$minor' or '$minor' instead."
+            fi
+            echo "::error::$error"
             exit 1
           fi
 
       - name: Workflow checks
         env:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+          WORKFLOW_REF: ${{ github.ref }}
         run: |
           # No special checks when running as a reusable workflow.
           if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
             exit 0
           fi
 
-          # Write summary header.
-          options=""
-          [ "${{ inputs.skip_verify }}" = "true" ] && options="skipping verification"
-          [ "${{ inputs.create_github_release }}" = "true" ] && options="${options:+$options, }creating release"
-          [ -n "$options" ] && options=" ($options)"
-          echo "🔨 Building WooCommerce ZIP from \`${BRANCH}\`${options}." >> $GITHUB_STEP_SUMMARY
+          # Write summary header early, so it's visible even if a later check fails.
+          echo "🔨 Building WooCommerce ZIP from \`${BRANCH}\`." >> $GITHUB_STEP_SUMMARY
 
           # Must run from trunk.
-          if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
+          if [ "$WORKFLOW_REF" != "refs/heads/trunk" ]; then
             echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
             exit 1
           fi
 
-          # Can not skip verification for actual releases.
-          if [ "${{ inputs.create_github_release }}" = "true" ] && [ "${{ inputs.skip_verify }}" = "true" ]; then
-            echo "::error::Verification cannot be skipped when building for a release."
-            exit 1
+          # Non-release branches: just build, no other verification.
+          if [ "${{ steps.normalize-branch.outputs.is-release-branch }}" != "true" ]; then
+            echo "⚠️ Not a release branch — skipping checks, won't create a release." >> $GITHUB_STEP_SUMMARY
+            echo "::notice::'${BRANCH}' is not a release branch — skipping checks, won't create a release."
+            exit 0
+          fi
+
+          if [ "${{ inputs.create_github_release }}" = "true" ]; then
+            echo "Creating a GitHub release." >> $GITHUB_STEP_SUMMARY
           fi
 
         # Checkout trunk.
@@ -108,7 +131,7 @@ jobs:
           sparse-checkout: |
             /.github/workflows/scripts/release-check-db-updates.js
           sparse-checkout-cone-mode: false
-        if: ${{ ! inputs.skip_verify }}
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
 
         # Checkout branch.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -119,21 +142,25 @@ jobs:
             /plugins/woocommerce/woocommerce.php
             /plugins/woocommerce/readme.txt
           sparse-checkout-cone-mode: false
-        if: ${{ ! inputs.skip_verify }}
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
 
       - name: 'Pre-build verification'
         id: pre-build-verification
-        if: ${{ ! inputs.skip_verify }}
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' }}
         env:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # Helper to fail with console error and summary message.
+            # Helper to fail with a console error and summary message. An optional second
+            # argument adds more detail (e.g. a PR list) to the summary only.
             fail() {
               echo "::error::$1"
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "❌ Build failed. See annotations or workflow logs for details." >> $GITHUB_STEP_SUMMARY
+              echo "❌ Build failed: $1" >> $GITHUB_STEP_SUMMARY
+              if [[ -n "$2" ]]; then
+                echo "$2" >> $GITHUB_STEP_SUMMARY
+              fi
               exit 1
             }
 
@@ -178,17 +205,31 @@ jobs:
               fi
             fi
 
-            # No PRs against release branch should remain open.
-            count=$( gh pr list --search "is:open base:$BRANCH" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-              fail "There are open PRs against the release branch ($BRANCH)."
-            fi
-
-            # No PRs with same milestone as main version should remain open.
+            # No non-draft PRs against the release branch, or carrying its milestone, should remain open.
             milestone="$version_prefix.0"
-            count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-              fail "There are open PRs with milestone '$milestone'."
+            pr_query="repo:$GH_REPO is:pr is:open draft:false (base:$BRANCH OR milestone:$milestone) sort:created-asc"
+            search_result=$( gh api graphql -f query='
+              query($q: String!, $limit: Int!) {
+                search(query: $q, type: ISSUE_ADVANCED, first: $limit) {
+                  issueCount
+                  nodes { ... on PullRequest { number title url } }
+                }
+              }' -f q="$pr_query" -F limit=20 --jq '.data.search' )
+            blocking_total=$( echo "$search_result" | jq '.issueCount' )
+            blocking_prs=$( echo "$search_result" | jq '.nodes' )
+            if (( blocking_total > 0 )); then
+              details=$( {
+                echo "$blocking_prs" | jq -r '.[] | "- *[\(.title) #\(.number)](\(.url))*"'
+                if (( blocking_total > 20 )); then
+                  search_url="https://github.com/${GH_REPO}/pulls?q=$( echo -n "$pr_query" | jq -sRr @uri )"
+                  echo "- ... and $(( blocking_total - 20 )) more ([view all]($search_url))"
+                fi
+                if [[ $branch_plugin_version == *-beta* ]]; then
+                  echo ""
+                  echo "If a PR can't be merged or closed right now, temporarily marking it as a draft can be used as a workaround."
+                fi
+              } )
+              fail "There are open PRs against the release branch ($BRANCH) or with milestone '$milestone'." "$details"
             fi
 
             # Changelog section must have at least one entry.
@@ -201,7 +242,7 @@ jobs:
             echo "release_version=$branch_plugin_version" >> $GITHUB_OUTPUT
 
       - name: 'Pre-build verification: db updates'
-        if: ${{ ! inputs.skip_verify && ! contains( steps.pre-build-verification.outputs.release_version, '-dev' ) && ! contains( steps.pre-build-verification.outputs.release_version, '-beta.1' ) }}
+        if: ${{ steps.normalize-branch.outputs.should-verify == 'true' && ! contains( steps.pre-build-verification.outputs.release_version, '-dev' ) && ! contains( steps.pre-build-verification.outputs.release_version, '-beta.1' ) }}
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
@@ -211,6 +252,7 @@ jobs:
   build:
     name: Build release zip file
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 15
     needs: [ verify ]
     outputs:
       artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
@@ -262,8 +304,9 @@ jobs:
   create-release:
     name: Create GitHub release
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ build ]
-    if: ${{ inputs.create_github_release }}
+    timeout-minutes: 5
+    needs: [ verify, build ]
+    if: ${{ inputs.create_github_release && needs.verify.outputs.is-release-branch == 'true' }}
     permissions:
       contents: write
     steps:
@@ -285,7 +328,7 @@ jobs:
       - name: Create draft release
         id: create_release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || github.token }}
           GH_REPO: ${{ github.repository }}
           IS_PRERELEASE: ${{ contains( steps.get_version.outputs.version, '-dev' ) || contains( steps.get_version.outputs.version, '-beta' ) || contains( steps.get_version.outputs.version, '-rc' ) }}
         run: |

@@ -134,7 +134,7 @@ export const MobileAppModal = () => {
 	}, [ searchParams ] );
 
 	const onFinish = () => {
-		updateOptions( {
+		void updateOptions( {
 			woocommerce_admin_dismissed_mobile_app_modal: 'yes',
 		} ).then( () =>
 			invalidateResolutionForStoreSelector( 'getTaskLists' )

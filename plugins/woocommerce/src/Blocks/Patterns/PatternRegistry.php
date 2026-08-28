@@ -19,7 +19,7 @@ class PatternRegistry {
 	 */
 	private function get_category_labels() {
 		return [
-			'woo-commerce'     => __( 'WooCommerce', 'woocommerce' ),
+			'woo-commerce'     => __( 'Shop', 'woocommerce' ),
 			'intro'            => __( 'Intro', 'woocommerce' ),
 			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
 			'about'            => __( 'About', 'woocommerce' ),

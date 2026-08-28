@@ -105,6 +105,8 @@ test( 'skips mount selection when disabled but still handles user selection', as
 
 	expect( selectShippingRate ).not.toHaveBeenCalled();
 
+	// This Jest environment requires an explicit boundary for controlled radio updates.
+	// eslint-disable-next-line testing-library/no-unnecessary-act
 	await act( async () => {
 		await userEvent.click(
 			screen.getByRole( 'radio', {

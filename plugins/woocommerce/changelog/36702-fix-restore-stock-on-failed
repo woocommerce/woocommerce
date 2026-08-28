@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore reduced stock when an order transitions to failed, so inventory held by an order that reduced stock while on-hold (e.g. an accepted-but-pending SEPA/ACH payment) is released instead of staying reduced indefinitely.

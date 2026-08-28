@@ -33,6 +33,8 @@ use Automattic\WooCommerce\Vendor\GraphQL\Validator\QueryValidationContext;
  */
 class OverlappingFieldsCanBeMerged extends ValidationRule
 {
+    public const DEFAULT_MAX_COMPARISON_COUNT = 100_000;
+
     /**
      * A memoization for when two fragments are compared "between" each other for
      * conflicts. Two fragments may be compared many times, so memoizing this can
@@ -49,10 +51,20 @@ class OverlappingFieldsCanBeMerged extends ValidationRule
      */
     protected \SplObjectStorage $cachedFieldsAndFragmentNames;
 
+    protected int $comparisonCount;
+
+    protected int $comparisonLimit;
+
+    public function __construct(int $comparisonLimit = self::DEFAULT_MAX_COMPARISON_COUNT)
+    {
+        $this->comparisonLimit = $comparisonLimit;
+    }
+
     public function getVisitor(QueryValidationContext $context): array
     {
         $this->comparedFragmentPairs = new PairSet();
         $this->cachedFieldsAndFragmentNames = new \SplObjectStorage();
+        $this->comparisonCount = 0;
 
         return [
             NodeKind::SELECTION_SET => function (SelectionSetNode $selectionSet) use ($context): void {
@@ -399,6 +411,14 @@ class OverlappingFieldsCanBeMerged extends ValidationRule
         array $field1,
         array $field2
     ): ?array {
+        if (++$this->comparisonCount > $this->comparisonLimit) {
+            return [
+                [$responseName, 'Too many field comparisons, query is too complex to validate'],
+                [$field1[1]],
+                [$field2[1]],
+            ];
+        }
+
         [$parentType1, $ast1, $def1] = $field1;
         [$parentType2, $ast2, $def2] = $field2;
 

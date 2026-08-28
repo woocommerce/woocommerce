@@ -1802,7 +1802,6 @@ ul.wc_coupon_list {
 			padding: 0 0.5em;
 			background-color: #fff;
 			border: 1px solid #aaa;
-			-webkit-box-shadow: 0 1px 0 #dfdfdf;
 			box-shadow: 0 1px 0 #dfdfdf;
 
 			border-radius: 4px;
@@ -2459,10 +2458,6 @@ body.woocommerce_page_wc-orders {
 				color: $gray-900;
 				background: #f8f8f8;
 				-webkit-touch-callout: none;
-				-webkit-user-select: none;
-				-khtml-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
 				user-select: none;
 
 				&.sortable {
@@ -3223,7 +3218,7 @@ body.woocommerce_page_wc-orders {
 			border-top: 1px solid #f5f5f5;
 		}
 
-		tbody tr:hover:not(.status-trash):not(.no-link) td {
+		tbody tr:hover:not(.status-trash):not(.no-link) > :not(.check-column) {
 			cursor: pointer;
 		}
 
@@ -3554,7 +3549,7 @@ body.woocommerce_page_wc-orders {
 			width: 100%;
 		}
 
-		td.column-order_number {
+		.column-order_number {
 			.toggle-row {
 				height: 20px;
 			}
@@ -3574,7 +3569,7 @@ body.woocommerce_page_wc-orders {
 		}
 
 		tr:not(.is-expanded) {
-			td.column-order_number {
+			.column-order_number {
 				vertical-align: top;
 
 				a.order-view {
@@ -3616,6 +3611,15 @@ body.woocommerce_page_wc-orders {
 					}
 				}
 			}
+		}
+
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
 		}
 
 	}
@@ -4000,6 +4004,13 @@ mark.notice {
 	background: #fff;
 	color: $red;
 	margin: 0 0 0 10px;
+}
+
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
 }
 
 a.export_rates,
@@ -5344,7 +5355,8 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
 
@@ -5557,7 +5569,8 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
@@ -7288,7 +7301,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: $wp-admin-text-gray;
 								text-align: center;
 								box-shadow: none;
 
@@ -7726,13 +7739,9 @@ table.bar_chart {
 		height: 32px;
 		margin: 0 auto 12px;
 		background-color: $gray-400;
-		-webkit-mask-image: var(--wc-blank-state-icon);
 		mask-image: var(--wc-blank-state-icon);
-		-webkit-mask-position: center;
 		mask-position: center;
-		-webkit-mask-repeat: no-repeat;
 		mask-repeat: no-repeat;
-		-webkit-mask-size: contain;
 		mask-size: contain;
 	}
 }
@@ -7938,8 +7947,8 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.is-expanded .toggle-row {
-				top: -28px;
+			.is-expanded:has(td.column-thumb:not(.hidden)) .toggle-row {
+				top: -30px;
 			}
 		}
 	}
@@ -8029,8 +8038,32 @@ table.bar_chart {
 		min-height: 180px
 	}
 
+	// Fixed layout so a long nowrap select2 selection truncates inside the Product
+	// column instead of stretching it and pushing Quantity past the modal edge.
+	&.wc-backbone-modal-add-products table.widefat {
+		table-layout: fixed;
+
+		th:last-child {
+			width: 100px;
+		}
+	}
+
 	.select2-container {
 		width: 100% !important;
+	}
+
+	// Reserve the end of the field for the clear (x) and chevron inside modals on every WP
+	// version; the .wc-wp-version-gte-70 rule below only reaches WP 7.0+.
+	.wc-backbone-modal-content .select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-inline-end: 40px;
+		}
+
+		// Pull the clear (x) into the 40px padding zone so it sits beside the chevron
+		// rather than at the text edge.
+		.select2-selection__clear {
+			margin-inline-end: -10px;
+		}
 	}
 }
 
@@ -8488,7 +8521,15 @@ table.bar_chart {
 
 			.select2-selection__rendered {
 				line-height: 38px;
-				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
+				padding-block: 0;
+				// 12px matches WP 7.0 native input padding; 40px reserves the end for the chevron and the clear (x).
+				padding-inline: 12px 40px;
+			}
+
+			// Pull the clear (x) into the reserved zone so it sits beside the chevron
+			// rather than out at the text edge.
+			.select2-selection__clear {
+				margin-inline-end: -10px;
 			}
 
 			.select2-selection__arrow {
@@ -8523,7 +8564,8 @@ table.bar_chart {
 
 		.select2-selection__rendered {
 			line-height: 38px;
-			padding: 0 12px; // Match WP 7.0 native input padding.
+			padding-block: 0;
+			padding-inline: 12px 40px; // Match WP 7.0 native input padding, reserving the end for the icons.
 		}
 
 		.select2-selection__arrow {
@@ -8539,7 +8581,8 @@ table.bar_chart {
 
 		.select2-selection__rendered {
 			line-height: 38px;
-			padding: 0 12px;
+			padding-block: 0;
+			padding-inline: 12px 40px; // Match WP 7.0 native input padding, reserving the end for the icons.
 		}
 
 		.select2-selection__arrow {
@@ -9019,8 +9062,6 @@ table.bar_chart {
 		overflow: hidden;
 		color: #ccc;
 		width: 100%;
-		display: -webkit-inline-flex;
-		display: -ms-inline-flexbox;
 		display: inline-flex;
 
 		li {
@@ -9167,7 +9208,6 @@ table.bar_chart {
 
 			.woocommerce-importer-file-url-field-wrapper {
 				border: 1px solid #ddd;
-				-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
 				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
 				background-color: #fff;
 				color: #32373c;
@@ -9230,6 +9270,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-webkit-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
@@ -9237,6 +9278,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-moz-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
@@ -9244,6 +9286,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: var(--wp-admin-theme-color, $woocommerce);
+			-ms-transition: width 1s ease;
 			transition: width 1s ease;
 		}
 
@@ -9532,7 +9575,7 @@ table.bar_chart {
 	margin-bottom: 0px;
 
 	.wp-editor-tools {
-		background: none;
+		background: #fff;
 		padding-top: 0px;
 		width: 100%;
 	}
@@ -9550,31 +9593,30 @@ table.bar_chart {
 		margin-bottom: .1em;
 	}
 
-	.woocommerce-order-attribution-origin-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: start;
+	&:has(.woocommerce-order-attribution-details-toggle[aria-expanded="false"]) .order-attribution-origin {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.order-attribution-origin {
-		flex-grow: 1;
-	}
-
-	.woocommerce-order-attribution-details-toggle {
-		white-space: nowrap;
+		display: block;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-container {
 		display: none;
+		overflow-wrap: anywhere;
 	}
 
 	.woocommerce-order-attribution-details-toggle {
 		display: block;
+		width: fit-content;
+		margin-top: 1em;
+		white-space: nowrap;
 		text-decoration: none;
 		vertical-align: middle;
-		margin-top: -7px;
 		position: relative;
-		top: 5px;
 
 		.toggle-text {
 			text-decoration: underline;
@@ -9892,6 +9934,13 @@ body.woocommerce_page_wc-settings {
 		font-size: 17px;
 		margin-top: 0;
 		margin-bottom: 15px;
+	}
+
+	&__product-data {
+		img {
+			max-width: 100%;
+			height: auto;
+		}
 	}
 
 	&__form-field {
