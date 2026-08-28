@@ -57,7 +57,9 @@ class MigrationState {
 	 * Read the full state, filled out to the default shape.
 	 *
 	 * Shape: `lock` (array|null), `cursor` (section slug => int), `counts` and `options`
-	 * (keyed arrays). Typed loosely because the option is merchant-writable data.
+	 * (keyed arrays). Every nested field is checked, not just the option itself: this is
+	 * merchant-writable data, and a scalar where an array belongs would reach
+	 * `is_lock_fresh( ?array )` and the `?array` accessors as a TypeError.
 	 *
 	 * @return array
 	 */
@@ -68,7 +70,21 @@ class MigrationState {
 			$stored = array();
 		}
 
-		return array_merge( self::DEFAULT_STATE, $stored );
+		$state = array_merge( self::DEFAULT_STATE, $stored );
+
+		foreach ( array( 'lock', 'losses' ) as $key ) {
+			if ( null !== $state[ $key ] && ! is_array( $state[ $key ] ) ) {
+				$state[ $key ] = null;
+			}
+		}
+
+		foreach ( array( 'cursor', 'counts', 'options' ) as $key ) {
+			if ( ! is_array( $state[ $key ] ) ) {
+				$state[ $key ] = array();
+			}
+		}
+
+		return $state;
 	}
 
 	/**
@@ -230,8 +246,9 @@ class MigrationState {
 	 */
 	public function get_count( string $section ): ?array {
 		$state = $this->get_state();
+		$count = $state['counts'][ $section ] ?? null;
 
-		return $state['counts'][ $section ] ?? null;
+		return is_array( $count ) ? $count : null;
 	}
 
 	/**
