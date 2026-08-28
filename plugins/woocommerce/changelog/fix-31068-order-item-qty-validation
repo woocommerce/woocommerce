@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Show the browser validation message for negative order item quantities in the admin order editor instead of silently failing, and reject them server-side in the order items AJAX endpoints.
