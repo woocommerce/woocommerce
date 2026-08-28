@@ -2868,7 +2868,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wp_cache_set( 'sentinel', 'keep me', 'products' );
 		wp_cache_set( 'sentinel', 'keep me', 'term-queries' );
 
-		$was_external = wp_using_ext_object_cache( true );
+		// Cast: with no drop-in loaded nothing ever assigns the global, so the previous
+		// value is null, and wp_using_ext_object_cache( null ) is a read rather than a
+		// write. Restoring that verbatim would leave every later test on this process
+		// believing an external cache is in use.
+		$was_external = (bool) wp_using_ext_object_cache( true );
 
 		try {
 			wc_scheduled_sales();
@@ -2921,6 +2925,15 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$taxonomies = array_unique(
 			array_merge( get_object_taxonomies( 'product' ), get_object_taxonomies( 'product_variation' ) )
+		);
+
+		// Precondition: without this the assertions below pass just as well against a run
+		// that never primed anything.
+		wp_cache_flush();
+		_prime_post_caches( array( $parent->get_id(), $variation->get_id() ) );
+		$this->assertNotFalse(
+			wp_cache_get( $variation->get_id(), 'product_cat_relationships' ),
+			'Fixture precondition: priming must cache the product-only groups for the variation.'
 		);
 
 		wc_scheduled_sales();
