@@ -112,6 +112,36 @@ test.describe(
 			await expect( modalContent ).toBeVisible();
 		} );
 
+		test( 'the add products modal checks the implicit default quantity against the minimum', async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+
+			await page.locator( 'button.add-line-item' ).click();
+			await page.locator( 'button.add-order-item' ).click();
+
+			const modal = page.locator( '.wc-backbone-modal-add-products' );
+			const modalContent = modal.locator( '.wc-backbone-modal-content' );
+			await expect( modalContent ).toBeVisible();
+
+			// Simulate an extension raising the 'add' minimum above 1 through
+			// the woocommerce_quantity_input_min_admin filter, which renders
+			// as the input's min attribute.
+			const qtyInput = modal.locator( 'input[name="item_qty"]' ).first();
+			await qtyInput.evaluate( ( input: HTMLInputElement ) => {
+				input.min = '2';
+			} );
+
+			// The quantity is left blank; the response handler would send it
+			// as 1, so validation must treat it as 1 too.
+			await modal.locator( '#btn-ok' ).click();
+
+			await expect( modalContent ).toBeVisible();
+			await expect( qtyInput ).toHaveValue( '1' );
+		} );
+
 		test( 'the Update button shows a validation message for an invalid item quantity', async ( {
 			page,
 		} ) => {

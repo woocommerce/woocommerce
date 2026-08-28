@@ -1263,9 +1263,17 @@ jQuery( function ( $ ) {
 					return;
 				}
 
-				var qtyInputBelowMin = wc_meta_boxes_order_items.find_input_with_qty_below_min(
-					$modal[ 0 ].querySelectorAll( 'input[name="item_qty"]' )
-				);
+				var qtyInputs = $modal[ 0 ].querySelectorAll( 'input[name="item_qty"]' );
+
+				// A blank quantity is sent as 1 by the response handler; fill it
+				// in so the browser range check runs against what will be sent.
+				Array.prototype.forEach.call( qtyInputs, function( input ) {
+					if ( '' === input.value ) {
+						input.value = '1';
+					}
+				} );
+
+				var qtyInputBelowMin = wc_meta_boxes_order_items.find_input_with_qty_below_min( qtyInputs );
 
 				if ( qtyInputBelowMin ) {
 					qtyInputBelowMin.reportValidity();
