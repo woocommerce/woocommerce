@@ -3,6 +3,11 @@
 # "aligning" any of these with the preset.
 {
 	"extends": "@wordpress/stylelint-config/scss",
+
+	# Vendored upstream file; 159 violations we do not own. This is the single
+	# authoritative exclusion, so a direct `stylelint` run skips it too.
+	"ignoreFiles": [ "css/select2.scss" ],
+
 	"rules": {
 		# The icon fonts have no generic fallback by design.
 		"font-family-no-missing-generic-family-keyword": [
@@ -12,9 +17,12 @@
 			}
 		],
 
-		# The preset says "never", but several backgrounds here are base64/SVG
-		# data URIs containing spaces, quotes and "<". Unquoting those produces
-		# invalid CSS, and --fix would happily do it. Keep this as "always".
+		# The preset says "never". Several backgrounds here are base64/SVG data
+		# URIs containing spaces, quotes and "<", which cannot legally be
+		# unquoted. The rule is report-only (no "fixable" in its stylelint 14
+		# meta), so "never" would not rewrite them, it would just report 28
+		# violations we would then have to blanket-disable. "always" states the
+		# safe policy once instead.
 		"function-url-quotes": "always",
 
 		# The preset allows only px for line-height. This code uses px, em, rem
@@ -27,12 +35,25 @@
 		# wrap comment prose at a fixed column.
 		"max-line-length": null,
 
-		# Legacy-hostile rules. The selectors are a theming contract third-party
-		# themes override, and the cascade order is load-bearing, so these can't
-		# be satisfied without changing behavior.
+		# 30927 hits. Satisfying it means reordering the legacy cascade, which
+		# changes rendering. Not realistically fixable here.
 		"no-descending-specificity": null,
+
+		# 51 hits — tractable, unlike the rule above, but merging duplicate
+		# blocks moves declarations earlier in the cascade and can change
+		# rendering, so each one needs checking. Deferred, not impossible.
 		"no-duplicate-selectors": null,
+
+		# 50 hits, all deprecated global colour functions: darken (28),
+		# lighten (13), desaturate (8), adjust-hue (1). These still work because
+		# sass-embedded is pinned to 1.69.5, but Dart Sass has them slated for
+		# removal, so this is a forward-compat cliff rather than a style nit.
+		# Clearing it requires migrating to the Sass module system (sass:color)
+		# and is tracked separately — do that before bumping sass-embedded.
 		"scss/no-global-function-names": null,
+
+		# Legacy selectors are a theming contract that third-party themes
+		# override, so renaming them to match the pattern is a breaking change.
 		"selector-class-pattern": null,
 		"selector-id-pattern": null
 	}
