@@ -39,7 +39,9 @@ const isPluginResponseError = (
 	plugins: Partial< PluginNames >[],
 	error: unknown
 ): error is PluginResponseErrors =>
-	typeof error === 'object' && error !== null && plugins[ 0 ] in error;
+	typeof error === 'object' &&
+	error !== null &&
+	plugins.some( ( plugin ) => plugin in error );
 
 const formatErrorMessage = (
 	actionType: 'install' | 'activate' = 'install',
@@ -176,6 +178,8 @@ function* handlePluginAPIError(
 	error: unknown
 ) {
 	let rawErrorMessage;
+	// Name only the plugins that actually failed, not everything that was requested.
+	let failedPlugins = plugins;
 
 	// Check for plugin-management permission errors before generic handling.
 	// Match the specific code so we don't misattribute other 403s
@@ -192,7 +196,22 @@ function* handlePluginAPIError(
 		);
 	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
-		rawErrorMessage = Object.values( error ).join( ', \n' );
+		const failures = Object.entries( error );
+		failedPlugins = Object.keys( error ) as Partial< PluginNames >[];
+
+		// The reasons no longer name their own plugin, so attribute them by slug when more
+		// than one failed. A lone failure is already named by the surrounding sentence.
+		rawErrorMessage =
+			failures.length > 1
+				? failures
+						.map(
+							( [ slug, messages ] ) =>
+								`${ slug }: ${ messages.join( ' ' ) }`
+						)
+						.join( ' \n' )
+				: failures
+						.flatMap( ( [ , messages ] ) => messages )
+						.join( ' ' );
 	} else {
 		// Other error such as API connection errors.
 		rawErrorMessage =
@@ -217,7 +236,7 @@ function* handlePluginAPIError(
 	}
 
 	throw new PluginError(
-		formatErrorMessage( actionType, plugins, rawErrorMessage ),
+		formatErrorMessage( actionType, failedPlugins, rawErrorMessage ),
 		error
 	);
 }

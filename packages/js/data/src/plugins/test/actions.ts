@@ -249,7 +249,7 @@ describe( 'installPlugins error message', () => {
 		);
 	} );
 
-	it( 'uses the plural frame for several plugins', () => {
+	it( 'attributes each reason to its plugin in the plural frame', () => {
 		const error = runUntilThrow( installPlugins( [ 'a', 'b' ] ), {
 			data: { installed: [], results: {} },
 			errors: { errors: { a: [ 'Reason A.' ], b: [ 'Reason B.' ] } },
@@ -257,8 +257,20 @@ describe( 'installPlugins error message', () => {
 			message: '',
 		} );
 
+		// The reasons no longer carry their own slug, so the frame has to supply it.
 		expect( error?.message ).toBe(
-			'Could not install the following plugins: a, b. Reason A., \nReason B.'
+			'Could not install the following plugins: a, b. a: Reason A. \nb: Reason B.'
 		);
+	} );
+
+	it( 'names only the plugins that actually failed', () => {
+		const error = runUntilThrow( installPlugins( [ 'a', 'b' ] ), {
+			data: { installed: [ 'a' ], results: {} },
+			errors: { errors: { b: [ 'Reason B.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe( 'Could not install b. Reason B.' );
 	} );
 } );
