@@ -492,6 +492,13 @@
 					"fontSize": "var(--wp--preset--font-size--medium)"
 				}
 			},
+			"woocommerce/product-filter-active": {
+				"spacing": {
+					"margin": {
+						"top": "var(--wp--preset--spacing--10)"
+					}
+				}
+			},
 			"woocommerce/product-filter-attribute": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
