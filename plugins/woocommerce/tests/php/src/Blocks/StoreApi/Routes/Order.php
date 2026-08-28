@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+
 /**
  * Order Route Tests.
  *
@@ -132,6 +134,82 @@ class Order extends ControllerTestCase {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * The Order route had no schema validation, which is how the item_data mismatch went unnoticed.
+	 *
+	 * The order item is given metadata on purpose: every other fixture leaves item_data empty, and
+	 * an empty item_data exercises none of the nested schema.
+	 */
+	public function test_response_matches_schema() {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'order', 'v1' );
+		$validate   = new ValidateSchema( $controller->get_item_schema() );
+
+		$data = $response->get_data();
+		$diff = $validate->get_diff_from_object( $data );
+
+		// The order response has other schema mismatches that are out of scope here (a missing `type`
+		// and `extensions` on items, `quantity_limits` returned as a PHP array, an undeclared `fees`).
+		// Assert on item_data alone so this stays a regression test rather than a snapshot of them.
+		$item_data_diff = array_values(
+			array_filter(
+				array_merge( $diff['missing'] ?? array(), $diff['invalid_type'] ?? array(), $diff['no_schema'] ?? array() ),
+				function ( $entry ) {
+					return false !== strpos( $entry, 'item_data' );
+				}
+			)
+		);
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		$this->assertEmpty( $item_data_diff, print_r( $item_data_diff, true ) );
+
+		$item_data = (array) $data['items'][0]['item_data'];
+		$this->assertNotEmpty( $item_data, 'The fixture must produce item metadata, or the nested schema is never exercised.' );
+
+		// ValidateSchema does not recurse into additionalProperties, so pin the entry shape here.
+		$entry = (array) current( $item_data );
+		$this->assertEqualSets( array( 'key', 'value', 'display_key', 'display_value' ), array_keys( $entry ) );
+		$this->assertSame( 'Gift message', $entry['key'] );
+		$this->assertSame( 'Happy birthday', $entry['value'] );
+	}
+
+	/**
+	 * The item_data map is keyed by order item meta ID, so it serializes as a JSON object.
+	 *
+	 * Pinned because the declared schema has to keep matching it; the cart endpoint sends a list.
+	 */
+	public function test_item_data_serializes_as_a_json_object_keyed_by_meta_id() {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+		$meta_id   = current( $item->get_meta_data() )->id;
+
+		$this->assertArrayHasKey( $meta_id, (array) $item_data, 'item_data must stay keyed by order item meta ID.' );
+		$this->assertStringStartsWith( '{', wp_json_encode( $item_data ), 'item_data must serialize as a JSON object, not a list.' );
 	}
 
 	/**

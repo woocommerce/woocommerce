@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: declare the order endpoint's item_data with the shape it actually returns, instead of inheriting the cart's.

@@ -31,6 +31,60 @@ class OrderItemSchema extends ItemSchema {
 	const IDENTIFIER = 'order-item';
 
 	/**
+	 * Item schema properties.
+	 *
+	 * Order items expose the metadata that `WC_Order_Item::get_all_formatted_meta_data()` returns,
+	 * which is keyed by order item meta ID and carries different property names from the cart's
+	 * `item_data`. Redeclare `item_data` here so the published schema describes what this endpoint
+	 * actually sends, rather than inheriting the cart's shape from ItemSchema.
+	 *
+	 * @return array
+	 */
+	public function get_properties() {
+		$properties = parent::get_properties();
+
+		$properties['item_data'] = [
+			'description'          => __( 'Metadata related to the item, keyed by order item meta ID. Serialized as an empty array when the item has no metadata.', 'woocommerce' ),
+			'type'                 => [ 'object', 'array' ],
+			'context'              => [ 'view', 'edit' ],
+			'readonly'             => true,
+			'additionalProperties' => [
+				'type'       => 'object',
+				'context'    => [ 'view', 'edit' ],
+				'readonly'   => true,
+				'properties' => [
+					'key'           => [
+						'description' => __( 'Metadata key.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'value'         => [
+						'description' => __( 'Metadata value.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'display_key'   => [
+						'description' => __( 'Metadata key, formatted for display.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'display_value' => [
+						'description' => __( 'Metadata value, formatted for display.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+				],
+			],
+		];
+
+		return $properties;
+	}
+
+	/**
 	 * Get order items data.
 	 *
 	 * @param \WC_Order_Item_Product $order_item Order item instance.
