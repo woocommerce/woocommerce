@@ -3061,9 +3061,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			 * @return array
 			 */
 			public function get_ending_sales() {
-				// No object here on purpose: intval() warns on one, and _prime_post_caches()
-				// hits that before the release step, identically to trunk. That is a
-				// pre-existing priming behaviour, not what this guard covers.
+				// Objects are resolved rather than rejected now, on the same terms
+				// wc_get_product() accepts, so one here would name a real product instead of
+				// exercising the malformed path this fixture is for.
 				return array( $this->real_id, array( 9 ), true, $this->malformed, null );
 			}
 		};
@@ -3071,8 +3071,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_data_store', fn() => $store );
 		WC_Data_Store::load( 'product' );
 
-		// Core screens the posts group through _validate_cache_id(), which reports the
-		// malformed rows. That notice is the expected outcome, not a failure.
 		// No setExpectedIncorrectUsage here on purpose: the malformed rows are screened out
 		// before priming, so core never sees them and never reports the usage. Adding the
 		// expectation back would fail, which is the point.
