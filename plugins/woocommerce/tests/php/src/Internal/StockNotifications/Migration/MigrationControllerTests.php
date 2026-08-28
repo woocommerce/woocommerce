@@ -29,6 +29,10 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 
 		$this->clear_options();
 
+		// Registration needs the feature on. Set it explicitly rather than relying on the
+		// install default, so the gate below is actually exercised.
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
+
 		// The shim hooks itself in its constructor, so a cached resolution from an earlier
 		// test would make registration look like a no-op here.
 		$this->reset_container_resolutions();
@@ -84,6 +88,21 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array(), array_values( $table_probes ), 'Registration must not probe for the legacy tables.' );
+	}
+
+	/**
+	 * @testdox a store with the feature off should register nothing, legacy history or not.
+	 */
+	public function test_feature_off_registers_nothing(): void {
+		update_option( 'wc_bis_db_version', '1.2.0' );
+		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+
+		$this->controller->register();
+
+		$this->assertFalse( has_filter( 'woocommerce_debug_tools', array( $this->controller, 'handle_woocommerce_debug_tools' ) ) );
+		$this->assertFalse( has_action( 'admin_notices', array( $this->controller, 'maybe_render_double_send_notice' ) ) );
+		$this->assertFalse( $this->shim_is_hooked(), 'With the feature off there is no data store for the shim to read.' );
 	}
 
 	/**
@@ -184,6 +203,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 	private function clear_options(): void {
 		LegacyStore::drop_tables();
 
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		delete_option( 'wc_bis_db_version' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
