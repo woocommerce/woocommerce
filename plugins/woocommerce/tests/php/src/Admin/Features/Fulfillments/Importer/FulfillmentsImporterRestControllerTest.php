@@ -155,7 +155,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	 * @return mixed
 	 */
 	private function invoke( string $method, WP_REST_Request $request ) {
-		$sut = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$sut        = wc_get_container()->get( FulfillmentsImporterRestController::class );
 		$reflection = new \ReflectionClass( $sut );
 		$handler    = $reflection->getMethod( $method );
 		$handler->setAccessible( true );
@@ -552,7 +552,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $subscriber );
 		wp_set_current_user( (int) $subscriber );
 
-		$sut = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$sut        = wc_get_container()->get( FulfillmentsImporterRestController::class );
 		$reflection = new \ReflectionClass( $sut );
 		$method     = $reflection->getMethod( 'check_permission_for_fulfillments_import' );
 		$method->setAccessible( true );

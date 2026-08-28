@@ -400,8 +400,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Acquire the per-session run lock.
 	 *
-	 * add_option() checks for an existing row in PHP before inserting, so two concurrent
-	 * requests can both pass that check. The lock is taken with INSERT IGNORE instead and
+	 * The add_option() function checks for an existing row in PHP before inserting, so two
+	 * concurrent requests can both pass that check. The lock is taken with INSERT IGNORE instead and
 	 * let the unique index decide, the same way WP_Upgrader::create_lock() does. A lock
 	 * older than the takeover threshold is claimed so a fatally interrupted chunk cannot
 	 * wedge the import.

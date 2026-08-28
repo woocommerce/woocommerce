@@ -675,9 +675,9 @@ final class ImportSession {
 	/**
 	 * Persist the current payload back to its transient.
 	 *
-	 * set_transient() returns false when the stored value is unchanged, so an unchanged
-	 * payload is treated as already stored rather than as a lost write. The index pointer is
-	 * rewritten every time so its TTL slides with the payload's.
+	 * The set_transient() call returns false when the stored value is unchanged, so an
+	 * unchanged payload is treated as already stored rather than as a lost write. The index
+	 * pointer is rewritten every time so its TTL slides with the payload's.
 	 *
 	 * @return bool Whether the payload is stored.
 	 */
