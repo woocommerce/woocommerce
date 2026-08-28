@@ -236,6 +236,49 @@ class PluginsHelper {
 	private const MAX_ERROR_REASON_LENGTH = 300;
 
 	/**
+	 * Make a reason safe to show, store and transmit.
+	 *
+	 * Reasons come from WordPress and from values that reach us through filters, so they can
+	 * carry markup or be arbitrarily long. WordPress also writes some messages as multiple
+	 * paragraphs, so block boundaries become spaces first: stripping the tags would otherwise
+	 * run the last word of one paragraph into the first word of the next.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $text The raw reason.
+	 * @return string The reason, HTML-stripped, whitespace-collapsed and length-capped.
+	 */
+	private static function normalize_reason( string $text ): string {
+		$spaced = preg_replace( '#<(?:/p|/div|/li|/h[1-6]|br\s*/?)>#i', ' ', $text ) ?? $text;
+		$reason = trim( wp_strip_all_tags( $spaced, true ) );
+
+		if ( mb_strlen( $reason ) > self::MAX_ERROR_REASON_LENGTH ) {
+			$reason = trim( mb_substr( $reason, 0, self::MAX_ERROR_REASON_LENGTH ) ) . "\u{2026}";
+		}
+
+		return $reason;
+	}
+
+	/**
+	 * Read a version requirement reported by the wp.org API.
+	 *
+	 * The response passes through the `plugins_api_result` filter, so the value is not
+	 * guaranteed to be the string the API documents.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $value The raw `requires` or `requires_php` value.
+	 * @return string The version, or an empty string when the value is not one.
+	 */
+	private static function get_required_version( $value ): string {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		return trim( (string) $value );
+	}
+
+	/**
 	 * Build a merchant-readable reason from the first WP_Error among the given candidates.
 	 *
 	 * WordPress's upgrader reports the real failure (unmet PHP/WP version, filesystem, download)
@@ -263,19 +306,7 @@ class PluginsHelper {
 				$parts[] = $data;
 			}
 
-			// WordPress writes several of these messages as multiple paragraphs. Turn the
-			// block boundaries into spaces first, or stripping the tags runs the last word
-			// of one paragraph into the first word of the next.
-			$joined = implode( ' ', array_map( 'trim', $parts ) );
-			$text   = preg_replace( '#<(?:/p|/div|/li|/h[1-6]|br\s*/?)>#i', ' ', $joined ) ?? $joined;
-
-			$reason = trim( wp_strip_all_tags( $text, true ) );
-
-			if ( mb_strlen( $reason ) > self::MAX_ERROR_REASON_LENGTH ) {
-				$reason = trim( mb_substr( $reason, 0, self::MAX_ERROR_REASON_LENGTH ) ) . "\u{2026}";
-			}
-
-			return $reason;
+			return self::normalize_reason( implode( ' ', array_map( 'trim', $parts ) ) );
 		}
 
 		return '';
@@ -300,24 +331,30 @@ class PluginsHelper {
 
 		switch ( $error->get_error_code() ) {
 			case 'incompatible_php_required_version':
-				if ( empty( $api->requires_php ) ) {
+				$required_php = self::get_required_version( $api->requires_php ?? null );
+				if ( '' === $required_php ) {
 					return '';
 				}
-				return sprintf(
-					/* translators: 1: PHP version the plugin requires, 2: PHP version this site runs. */
-					__( 'It requires PHP %1$s or newer, but this site runs PHP %2$s.', 'woocommerce' ),
-					$api->requires_php,
-					PHP_VERSION
+				return self::normalize_reason(
+					sprintf(
+						/* translators: 1: PHP version the plugin requires, 2: PHP version this site runs. */
+						__( 'It requires PHP %1$s or newer, but this site runs PHP %2$s.', 'woocommerce' ),
+						$required_php,
+						PHP_VERSION
+					)
 				);
 			case 'incompatible_wp_required_version':
-				if ( empty( $api->requires ) ) {
+				$required_wp = self::get_required_version( $api->requires ?? null );
+				if ( '' === $required_wp ) {
 					return '';
 				}
-				return sprintf(
-					/* translators: 1: WordPress version the plugin requires, 2: WordPress version this site runs. */
-					__( 'It requires WordPress %1$s or newer, but this site runs WordPress %2$s.', 'woocommerce' ),
-					$api->requires,
-					get_bloginfo( 'version' )
+				return self::normalize_reason(
+					sprintf(
+						/* translators: 1: WordPress version the plugin requires, 2: WordPress version this site runs. */
+						__( 'It requires WordPress %1$s or newer, but this site runs WordPress %2$s.', 'woocommerce' ),
+						$required_wp,
+						get_bloginfo( 'version' )
+					)
 				);
 		}
 

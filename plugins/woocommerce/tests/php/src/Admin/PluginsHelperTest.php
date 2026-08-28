@@ -145,6 +145,42 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should ignore a requirement value that is not a version.
+	 */
+	public function test_get_requirements_error_reason_ignores_non_version_values(): void {
+		$error = new WP_Error( 'incompatible_php_required_version', 'x' );
+
+		// plugins_api_result is a public filter, so this value is not guaranteed to be a string.
+		$this->assertSame(
+			'',
+			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => array( '8.2' ) ) ),
+			'An array requirement must not be coerced into the sentence.'
+		);
+		$this->assertSame(
+			'',
+			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => true ) )
+		);
+	}
+
+	/**
+	 * @testdox Should strip markup and cap the length of a requirement reason.
+	 */
+	public function test_get_requirements_error_reason_is_normalized(): void {
+		$error = new WP_Error( 'incompatible_php_required_version', 'x' );
+
+		$this->assertSame(
+			'It requires PHP 8.2 or newer, but this site runs PHP ' . PHP_VERSION . '.',
+			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => '<b>8.2</b>' ) ),
+			'Markup reaching us through a filter must not survive into the reason.'
+		);
+
+		$long = PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => str_repeat( '9', 5000 ) ) );
+		$this->assertSame( 301, mb_strlen( $long ), 'A requirement reason is capped like every other reason.' );
+	}
+
+	/**
+	 * @testdox Should compose its own sentence for an unmet PHP requirement.
+	 */	/**
 	 * @testdox Should compose its own sentence for an unmet PHP requirement.
 	 */
 	public function test_get_requirements_error_reason_for_php(): void {
