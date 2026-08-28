@@ -143,7 +143,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		foreach (
 			array(
 				new NotificationsMigrator( $reporter ),
-				new ProductMetaMigrator( $reporter, $this->state ),
+				new ProductMetaMigrator( $reporter ),
 				new EmailSettingsMigrator( $this->state, $reporter ),
 				new SettingsMigrator( $this->state, $reporter ),
 			) as $migrator
