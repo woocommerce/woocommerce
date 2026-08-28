@@ -382,11 +382,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Determine whether the data store provides custom ID-based item deletion behavior.
+	 * Determine whether the data store supports optional ID-based item deletion.
 	 *
 	 * @return bool
 	 */
-	private function data_store_overrides_delete_items_by_ids(): bool {
+	private function data_store_supports_delete_items_by_ids(): bool {
 		/**
 		 * Data store wrapper.
 		 *
@@ -400,6 +400,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$data_store_class = $data_store->get_current_class_name();
 		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
+			// Standalone data stores opt in to deferred deletion by providing this optional method.
 			return true;
 		}
 
@@ -1140,7 +1141,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
 		$has_persisted_items  = $this->get_id() > 0;
-		$delete_synchronously = $this->data_store_overrides_delete_items() && ! $this->data_store_overrides_delete_items_by_ids();
+		$delete_synchronously = $this->data_store_overrides_delete_items() && ! $this->data_store_supports_delete_items_by_ids();
 
 		if ( $delete_synchronously && $has_persisted_items ) {
 			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().

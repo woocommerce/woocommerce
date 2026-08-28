@@ -1611,7 +1611,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should defer deletion when a custom data store overrides ID-based deletion.
+	 * @testdox Should defer deletion when a custom data store opts in to ID-based deletion.
 	 */
 	public function test_remove_order_items_defers_custom_data_store_id_deletion() {
 		$order               = WC_Helper_Order::create_order();
