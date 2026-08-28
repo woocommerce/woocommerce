@@ -28,6 +28,21 @@ class CancellationSourceMiner {
 	private const CANCELLING_TYPES = array( 'unsubscribed', 'deactivated' );
 
 	/**
+	 * Whether a mined entry records an actual cancelling event.
+	 *
+	 * `mine()` returns an entry for every row it was given, falling back to a `SYSTEM`
+	 * source with a null date when the activity log holds no cancelling event. Callers
+	 * that need to know whether the row was actually cancelled — rather than which source
+	 * to attribute a cancellation to — must ask this rather than test for a null entry.
+	 *
+	 * @param array|null $cancellation Entry from `mine()`, or null when the row is absent.
+	 * @return bool True when a cancelling event was found for the row.
+	 */
+	public static function has_cancelling_event( ?array $cancellation ): bool {
+		return null !== $cancellation && null !== ( $cancellation['date'] ?? null );
+	}
+
+	/**
 	 * Mine the cancellation source and date for a batch of legacy rows.
 	 *
 	 * For each row, takes the latest `unsubscribed`/`deactivated` activity event:

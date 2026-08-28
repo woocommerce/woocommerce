@@ -251,4 +251,27 @@ class CancellationSourceMinerTests extends WC_Unit_Test_Case {
 	public function test_returns_empty_array_for_empty_batch(): void {
 		$this->assertSame( array(), $this->sut->mine( array() ) );
 	}
+
+	/**
+	 * @testdox has_cancelling_event() should tell a real event apart from the seeded fallback.
+	 */
+	public function test_has_cancelling_event_distinguishes_the_seeded_fallback(): void {
+		$this->assertFalse( CancellationSourceMiner::has_cancelling_event( null ) );
+		$this->assertFalse(
+			CancellationSourceMiner::has_cancelling_event(
+				array(
+					'source' => NotificationCancellationSource::SYSTEM,
+					'date'   => null,
+				)
+			)
+		);
+		$this->assertTrue(
+			CancellationSourceMiner::has_cancelling_event(
+				array(
+					'source' => NotificationCancellationSource::USER,
+					'date'   => 1600009999,
+				)
+			)
+		);
+	}
 }
