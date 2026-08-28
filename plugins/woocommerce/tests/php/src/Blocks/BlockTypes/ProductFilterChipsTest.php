@@ -39,9 +39,9 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 		$wrapper_style = $this->get_style( $markup, 'wc-block-product-filter-chips' );
 		$item_style    = $this->get_style( $markup, 'wc-block-product-filter-chips__item' );
 
-		$this->assertStringContainsString( 'text-transform:uppercase', $wrapper_style );
-		$this->assertStringContainsString( 'border-radius:12px', $item_style );
-		$this->assertStringNotContainsString( 'border-radius', $wrapper_style );
+		$this->assertStringContainsString( 'text-transform:uppercase', $wrapper_style, 'Wrapper should have text-transform: uppercase.' );
+		$this->assertStringContainsString( 'border-radius:12px', $item_style, 'Item should have border-radius: 12px.' );
+		$this->assertStringNotContainsString( 'border-radius', $wrapper_style, 'Wrapper should not have border-radius.' );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 		$block = new \WP_Block(
 			array(
 				'blockName'    => 'woocommerce/product-filter-chips',
-				'attrs'        => $attributes,
+				'attrs'        => array_merge( $attributes, array( 'className' => 'wc-block-product-filter-chips' ) ),
 				'innerContent' => array(),
 			),
 			array(
@@ -121,7 +121,7 @@ class ProductFilterChipsTest extends WC_Unit_Test_Case {
 	 */
 	private function get_style( string $markup, string $class_name ): string {
 		$processor = new \WP_HTML_Tag_Processor( $markup );
-		$this->assertTrue( $processor->next_tag( array( 'class_name' => $class_name ) ) );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => $class_name ) ), 'Should find the first element with the given class name.' );
 
 		$style = $processor->get_attribute( 'style' );
 
