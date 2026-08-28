@@ -49,17 +49,10 @@ class Reporter {
 	 */
 	public const OUTCOME_PRODUCT_MISSING = 'product_missing';
 
-	// Rows excluded for being unverified, or for an email that is too long or does not
-	// validate, have no outcome code: the candidate predicate excludes them in SQL, so no
-	// per-row iteration ever sees one. They are counted in bulk instead, as the
-	// LOSS_UNVERIFIED_EXCLUDED, LOSS_EMAIL_TOO_LONG and LOSS_INVALID_EMAIL known losses.
-
-	/**
-	 * Cached known-losses key: unverified legacy rows excluded from the migration entirely.
-	 *
-	 * @var string
-	 */
-	private const LOSS_UNVERIFIED_EXCLUDED = 'unverified_excluded';
+	// Rows excluded for an email that is too long or does not validate have no outcome
+	// code: the candidate predicate excludes them in SQL, so no per-row iteration ever
+	// sees one. They are counted in bulk instead, as the LOSS_EMAIL_TOO_LONG and
+	// LOSS_INVALID_EMAIL known losses.
 
 	/**
 	 * Cached known-losses key: rows skipped because their email is too long for Core's column.
@@ -97,12 +90,11 @@ class Reporter {
 	private const LOSS_ROWS_WITHOUT_HASH = 'rows_without_hash';
 
 	/**
-	 * The four skip counts that together make up the lost-unsubscribe-link population.
+	 * The skip counts that together make up the lost-legacy-link population.
 	 *
 	 * @var string[]
 	 */
 	private const SKIP_LOSS_KEYS = array(
-		self::LOSS_UNVERIFIED_EXCLUDED,
 		self::LOSS_EMAIL_TOO_LONG,
 		self::LOSS_INVALID_EMAIL,
 		self::LOSS_PRODUCT_MISSING,
@@ -239,13 +231,12 @@ class Reporter {
 	 * notifications, rows missing a hash - are not outcome codes but sub-counts a migrator
 	 * derives while producing OUTCOME_MIGRATED rows.
 	 *
-	 * @param int $recurring_lost      Rows mapped to `sent` that would have re-fired on a future restock under legacy.
-	 * @param int $unverified_excluded Unverified legacy rows excluded from migration entirely.
-	 * @param int $links_lost_on_skip  Predicate skips (unverified, email_too_long, invalid_email, product_missing) whose legacy unsubscribe link stops working.
-	 * @param int $rows_without_hash   Migrated rows with no `_hash_key`/`_hash_iv`, so no Core token - not a lost link, counted separately to distinguish pre-1.2.0 data from a bug.
+	 * @param int $recurring_lost     Rows mapped to `sent` that would have re-fired on a future restock under legacy.
+	 * @param int $links_lost_on_skip Predicate skips (email_too_long, invalid_email, product_missing) whose legacy links stop working.
+	 * @param int $rows_without_hash  Migrated rows with no `_hash_key`/`_hash_iv`, so no Core token - not a lost link, counted separately to distinguish pre-1.2.0 data from a bug.
 	 * @return array<int, string> Translated summary lines, one per non-empty population.
 	 */
-	public function get_known_losses_summary( int $recurring_lost, int $unverified_excluded, int $links_lost_on_skip, int $rows_without_hash ): array {
+	public function get_known_losses_summary( int $recurring_lost, int $links_lost_on_skip, int $rows_without_hash ): array {
 		$lines = array();
 
 		if ( $recurring_lost > 0 ) {
@@ -261,25 +252,12 @@ class Reporter {
 			);
 		}
 
-		if ( $unverified_excluded > 0 ) {
-			$lines[] = sprintf(
-				/* translators: %d: number of unverified signups */
-				_n(
-					'%d unverified signup was not migrated; its verification link had already expired and Core would have deleted it under the data-retention setting.',
-					'%d unverified signups were not migrated; their verification links had already expired and Core would have deleted them under the data-retention setting.',
-					$unverified_excluded,
-					'woocommerce'
-				),
-				$unverified_excluded
-			);
-		}
-
 		if ( $links_lost_on_skip > 0 ) {
 			$lines[] = sprintf(
-				/* translators: %d: number of unsubscribe links */
+				/* translators: %d: number of legacy links */
 				_n(
-					'%d customer\'s legacy unsubscribe link will stop working, because the row it pointed to was skipped and has no Core notification.',
-					'%d customers\' legacy unsubscribe links will stop working, because the rows they pointed to were skipped and have no Core notification.',
+					'%d customer\'s legacy link will stop working, because the row it pointed to was skipped and has no Core notification.',
+					'%d customers\' legacy links will stop working, because the rows they pointed to were skipped and have no Core notification.',
 					$links_lost_on_skip,
 					'woocommerce'
 				),
@@ -315,12 +293,11 @@ class Reporter {
 	 */
 	public function collect_known_losses( NotificationsMigrator $migrator ): array {
 		return array(
-			self::LOSS_UNVERIFIED_EXCLUDED => $migrator->count_unverified_excluded(),
-			self::LOSS_EMAIL_TOO_LONG      => $migrator->count_email_too_long(),
-			self::LOSS_INVALID_EMAIL       => $migrator->count_invalid_email(),
-			self::LOSS_PRODUCT_MISSING     => $migrator->count_product_missing(),
-			self::LOSS_RECURRING           => 0,
-			self::LOSS_ROWS_WITHOUT_HASH   => 0,
+			self::LOSS_EMAIL_TOO_LONG    => $migrator->count_email_too_long(),
+			self::LOSS_INVALID_EMAIL     => $migrator->count_invalid_email(),
+			self::LOSS_PRODUCT_MISSING   => $migrator->count_product_missing(),
+			self::LOSS_RECURRING         => 0,
+			self::LOSS_ROWS_WITHOUT_HASH => 0,
 		);
 	}
 
@@ -341,8 +318,8 @@ class Reporter {
 	/**
 	 * Merchant-facing known-losses lines built from cached counts.
 	 *
-	 * Derives the lost-unsubscribe-link total from the four skip counts here, so the CLI and
-	 * the Tools description cannot disagree about which skips cost a customer their link.
+	 * Derives the lost-link total from the skip counts here, so the CLI and the Tools
+	 * description cannot disagree about which skips cost a customer their link.
 	 *
 	 * @param array<string, int> $values Known-losses counts, as cached by MigrationState.
 	 * @return array<int, string> Translated summary lines, one per non-empty population.
@@ -356,7 +333,6 @@ class Reporter {
 
 		return $this->get_known_losses_summary(
 			(int) ( $values[ self::LOSS_RECURRING ] ?? 0 ),
-			(int) ( $values[ self::LOSS_UNVERIFIED_EXCLUDED ] ?? 0 ),
 			$links_lost_on_skip,
 			(int) ( $values[ self::LOSS_ROWS_WITHOUT_HASH ] ?? 0 )
 		);

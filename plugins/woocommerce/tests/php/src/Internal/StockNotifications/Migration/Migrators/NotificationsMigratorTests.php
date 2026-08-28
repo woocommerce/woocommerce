@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Mig
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
@@ -75,15 +76,14 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 	public function test_predicate_excludes_ineligible_rows(): void {
 		$eligible = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
 
-		$unverified_by_column = LegacyStore::add_notification(
+		$unverified = LegacyStore::add_notification(
 			array(
 				'product_id'  => $this->product_id,
 				'is_verified' => 'no',
+				'is_active'   => 'off',
+				'user_email'  => 'unverified@example.com',
 			)
 		);
-
-		$unverified_by_meta = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
-		LegacyStore::add_meta( $unverified_by_meta, 'awaiting_verification', 'yes' );
 
 		$trashed_product = $this->create_product();
 		wp_trash_post( $trashed_product );
@@ -115,21 +115,48 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( $eligible ), $this->migrator->get_batch( 0, 100 ) );
-		$this->assertSame( 1, $this->migrator->count_remaining() );
+		$this->assertSame( array( $eligible, $unverified ), $this->migrator->get_batch( 0, 100 ), 'An unverified row is a candidate, not a loss.' );
+		$this->assertSame( 2, $this->migrator->count_remaining() );
 
-		$this->assertSame( 2, $this->migrator->count_unverified_excluded(), 'Both unverified rows should be counted.' );
 		$this->assertSame( 1, $this->migrator->count_email_too_long() );
 		$this->assertSame( 2, $this->migrator->count_invalid_email(), 'The empty and malformed addresses are both invalid.' );
 		$this->assertSame( 3, $this->migrator->count_product_missing(), 'Trashed, non-product and missing products all count.' );
-
-		$this->assertNotContains( $unverified_by_column, $this->migrator->get_batch( 0, 100 ) );
 	}
 
 	/**
-	 * @testdox no migrated row should land in the pending status.
+	 * @testdox the skip counts should include unverified rows, now that they are candidates.
 	 */
-	public function test_no_migrated_row_lands_in_pending(): void {
+	public function test_skip_counts_include_unverified_rows(): void {
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'user_email'  => str_repeat( 'a', 95 ) . '@example.com',
+			)
+		);
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'user_email'  => 'not-an-email',
+			)
+		);
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => 999999,
+				'is_verified' => 'no',
+			)
+		);
+
+		$this->assertSame( 1, $this->migrator->count_email_too_long() );
+		$this->assertSame( 1, $this->migrator->count_invalid_email() );
+		$this->assertSame( 1, $this->migrator->count_product_missing() );
+	}
+
+	/**
+	 * @testdox a verified row should never land in the pending status.
+	 */
+	public function test_a_verified_row_never_lands_in_pending(): void {
 		LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
 		LegacyStore::add_notification(
 			array(
@@ -382,6 +409,123 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->assertSame( array_slice( $ids, 0, 2 ), $this->migrator->get_batch( 0, 2 ) );
 		$this->assertSame( array_slice( $ids, 2, 2 ), $this->migrator->get_batch( $ids[1], 2 ) );
 		$this->assertSame( array(), $this->migrator->get_batch( end( $ids ), 2 ) );
+	}
+
+	/**
+	 * @testdox an unverified row should migrate as pending, with no confirmation date.
+	 */
+	public function test_an_unverified_row_migrates_as_pending(): void {
+		LegacyStore::add_notification(
+			array(
+				'product_id'     => $this->product_id,
+				'is_verified'    => 'no',
+				'is_active'      => 'off',
+				'subscribe_date' => 0,
+			)
+		);
+
+		$this->migrate_all();
+
+		$rows = LegacyStore::get_core_rows();
+
+		$this->assertCount( 1, $rows );
+		$this->assertSame( NotificationStatus::PENDING, $rows[0]['status'] );
+		$this->assertNull( $rows[0]['date_confirmed_gmt'], 'A row that never completed verification has nothing to confirm.' );
+	}
+
+	/**
+	 * @testdox an unverified row with a cancelling event should migrate as cancelled, not pending.
+	 */
+	public function test_an_unverified_row_with_a_deactivated_event_migrates_as_cancelled(): void {
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+		LegacyStore::add_activity( $legacy_id, 'deactivated', 1600009999 );
+
+		$this->migrate_all();
+
+		$rows = LegacyStore::get_core_rows();
+
+		$this->assertCount( 1, $rows );
+		$this->assertSame( NotificationStatus::CANCELLED, $rows[0]['status'] );
+	}
+
+	/**
+	 * @testdox a pending row should carry its legacy verification token digest, never the secrets.
+	 */
+	public function test_a_pending_row_carries_the_verification_digest_and_not_the_secrets(): void {
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+		LegacyStore::add_verification_data( $legacy_id, 'a-verification-code', time() );
+
+		$this->migrate_all();
+
+		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
+		$rows   = LegacyStore::get_core_rows();
+
+		$this->assertArrayHasKey( (int) $rows[0]['id'], $stored );
+
+		$meta_value = $stored[ (int) $rows[0]['id'] ][0];
+		$parsed     = LegacyHash::parse( $meta_value );
+
+		$this->assertNotNull( $parsed );
+		$this->assertSame( $legacy_id, $parsed[0] );
+		$this->assertNotNull( $parsed[2], 'A verification digest is stored with its expiry.' );
+
+		$token = LegacyHash::compute_verification( 'a-verification-code', LegacyStore::VERIFICATION_KEY, LegacyStore::VERIFICATION_IV );
+
+		$this->assertTrue( LegacyHash::verify( $meta_value, (string) $token ) );
+		$this->assertSame( 'yes', get_option( 'wc_bis_migration_has_legacy_links' ) );
+
+		foreach ( array( '_verification_code', '_verification_key', '_verification_iv', '_verification_created_at' ) as $secret ) {
+			$this->assertSame( array(), LegacyStore::get_core_meta( $secret ), "The legacy {$secret} secret must not reach Core meta." );
+		}
+	}
+
+	/**
+	 * @testdox the verification digest should be written only for an unexpired pending row.
+	 */
+	public function test_the_verification_digest_is_skipped_when_it_cannot_be_honoured(): void {
+		$expired_row = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+				'user_email'  => 'expired@example.com',
+			)
+		);
+		LegacyStore::add_verification_data( $expired_row, 'a-verification-code', time() - ( 2 * HOUR_IN_SECONDS ) );
+
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+				'user_email'  => 'no-secrets@example.com',
+			)
+		);
+
+		$active_row = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'active@example.com',
+			)
+		);
+		LegacyStore::add_verification_data( $active_row, 'a-verification-code', time() );
+
+		$this->migrate_all();
+
+		$this->assertCount( 3, LegacyStore::get_core_rows(), 'All three rows migrate; only the digest is withheld.' );
+		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) );
 	}
 
 	/**

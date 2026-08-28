@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
@@ -57,6 +58,22 @@ class NotificationsMigrator implements MigratorInterface {
 	);
 
 	/**
+	 * Legacy meta keys read only to reproduce the verification token for a pending row.
+	 *
+	 * Deliberately kept out of LEGACY_META_KEYS: nothing derives a row's state from these,
+	 * and they hold the legacy verification secrets, so they are read, reduced to a single
+	 * digest and discarded rather than carried into Core meta.
+	 *
+	 * @var string[]
+	 */
+	private const VERIFICATION_META_KEYS = array(
+		'_verification_code',
+		'_verification_key',
+		'_verification_iv',
+		'_verification_created_at',
+	);
+
+	/**
 	 * Migration marker recording a successful migration onto a Core notification.
 	 * Inserted, never updated; a Core row can carry several.
 	 *
@@ -71,6 +88,14 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @var string
 	 */
 	private const LEGACY_UNSUB_HASH_META_KEY = Constants::LEGACY_UNSUB_HASH_META_KEY;
+
+	/**
+	 * Meta key holding the precomputed legacy verification token digest and its expiry,
+	 * one row per legacy id. Written only for rows migrated as pending.
+	 *
+	 * @var string
+	 */
+	private const LEGACY_VERIFY_HASH_META_KEY = Constants::LEGACY_VERIFY_HASH_META_KEY;
 
 	/**
 	 * Marker meta carrying the legacy id, written only when a legacy row adopts a
@@ -92,9 +117,9 @@ class NotificationsMigrator implements MigratorInterface {
 	private const FAILED_META_KEY = Constants::LEGACY_FAILED_META_KEY;
 
 	/**
-	 * Autoloaded option that gates registration of the legacy unsubscribe link shim.
-	 * Set only when a migrated row carries a legacy unsubscribe token — narrower than,
-	 * and not a substitute for, HAS_MIGRATED_ROWS_OPTION below.
+	 * Autoloaded option guarding registration of the legacy link shim. Set only when a
+	 * migrated row carries a legacy token, of either kind — narrower than, and not a
+	 * substitute for, HAS_MIGRATED_ROWS_OPTION below.
 	 *
 	 * @var string
 	 */
@@ -147,6 +172,13 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @var int
 	 */
 	private int $rows_without_hash_count = 0;
+
+	/**
+	 * Verification link expiry threshold in seconds, resolved once on first use.
+	 *
+	 * @var int|null
+	 */
+	private ?int $verification_expiry_threshold = null;
 
 	/**
 	 * Constructor.
@@ -234,8 +266,9 @@ class NotificationsMigrator implements MigratorInterface {
 			$legacy_id = (int) $legacy_row['id'];
 
 			try {
-				$row_meta = $legacy_meta[ $legacy_id ] ?? array();
-				$status   = StatusMapper::map( $legacy_row, $row_meta );
+				$row_meta     = $legacy_meta[ $legacy_id ] ?? array();
+				$cancellation = $cancellation_sources[ $legacy_id ] ?? null;
+				$status       = StatusMapper::map( $legacy_row, $cancellation );
 
 				// Must match the stored value byte-for-byte: MetaMapper hands posted_attributes
 				// to the writer unserialized, and the writer is the sole maybe_serialize() owner,
@@ -247,16 +280,14 @@ class NotificationsMigrator implements MigratorInterface {
 				$adoption_target_id = $this->find_adoption_target( $legacy_row, (string) $posted_attributes_value );
 
 				if ( null !== $adoption_target_id ) {
-					$this->adopt( $adoption_target_id, $legacy_row, $row_meta, $writer );
+					$this->adopt( $adoption_target_id, $legacy_row, $row_meta, $status, $writer );
 					$this->record_outcome( $outcomes, Reporter::OUTCOME_ADOPTED, $legacy_id );
 					continue;
 				}
 
-				$cancellation = $cancellation_sources[ $legacy_id ] ?? null;
-
 				$insert_rows[]       = array(
 					'columns' => $this->build_columns( $legacy_row, $status, $date_mapper, $cancellation ),
-					'meta'    => $this->build_meta( $legacy_id, $legacy_row, $row_meta, $writer ),
+					'meta'    => $this->build_meta( $legacy_id, $legacy_row, $row_meta, $status, $writer ),
 				);
 				$insert_legacy_ids[] = $legacy_id;
 
@@ -308,20 +339,6 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * Count legacy rows excluded because they are unverified. Not a candidate population,
-	 * so invisible to count_remaining(); counted separately for the Known losses report.
-	 *
-	 * @return int
-	 */
-	public function count_unverified_excluded(): int {
-		global $wpdb;
-
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . " AND ( n.is_verified = 'no' OR ( av.meta_value IS NOT NULL AND av.meta_value = 'yes' ) )";
-
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
-	}
-
-	/**
 	 * Count legacy rows skipped because their email is longer than Core's column allows.
 	 *
 	 * @return int
@@ -329,7 +346,7 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_email_too_long(): int {
 		global $wpdb;
 
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause() . ' AND CHAR_LENGTH( n.user_email ) > 100';
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . ' AND CHAR_LENGTH( n.user_email ) > 100';
 
 		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
 	}
@@ -343,7 +360,7 @@ class NotificationsMigrator implements MigratorInterface {
 		global $wpdb;
 
 		// The LIKE wildcards are part of this class's own literal, not a bound value.
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql()
 			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND ( n.user_email = '' OR n.user_email NOT LIKE '%_@_%' )";
 
 		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
@@ -362,7 +379,7 @@ class NotificationsMigrator implements MigratorInterface {
 		// $posts_table is $wpdb->prefix-based, never user input; every other fragment is a
 		// fixed literal built by this class, including the LIKE wildcards.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . $this->verified_clause()
+		$sql = 'SELECT COUNT(*) ' . $this->base_sql()
 			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
 			. " AND NOT EXISTS ( SELECT 1 FROM {$posts_table} p"
 			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
@@ -387,7 +404,7 @@ class NotificationsMigrator implements MigratorInterface {
 
 		$posts_table = $wpdb->prefix . 'posts';
 
-		return $this->base_sql() . $this->verified_clause()
+		return $this->base_sql()
 			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
 			. " AND EXISTS ( SELECT 1 FROM {$posts_table} p" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_table is $wpdb->prefix-based, never user input.
 			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
@@ -415,23 +432,12 @@ class NotificationsMigrator implements MigratorInterface {
 			LEFT JOIN {$core_meta_table} mm
 			       ON mm.meta_key = '" . Constants::LEGACY_ID_META_KEY . "'
 			      AND CAST( mm.meta_value AS UNSIGNED ) = n.id
-			LEFT JOIN {$legacy_meta_table} av
-			       ON av.bis_notifications_id = n.id AND av.meta_key = 'awaiting_verification'
 			LEFT JOIN {$legacy_meta_table} fm
 			       ON fm.bis_notifications_id = n.id AND fm.meta_key = '" . Constants::LEGACY_FAILED_META_KEY . "'
 			WHERE mm.notification_id IS NULL
 			  AND fm.bis_notifications_id IS NULL
 		";
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	}
-
-	/**
-	 * The verified test shared by every predicate variant except count_unverified_excluded().
-	 *
-	 * @return string
-	 */
-	private function verified_clause(): string {
-		return " AND n.is_verified <> 'no' AND ( av.meta_value IS NULL OR av.meta_value <> 'yes' )";
 	}
 
 	/**
@@ -462,8 +468,8 @@ class NotificationsMigrator implements MigratorInterface {
 	/**
 	 * Fetch legacy meta for a batch of ids in one query, indexed by id then meta key.
 	 *
-	 * Only the keys the migration reads are fetched: posted_attributes, _customer_locale,
-	 * _customer_location_data, _hash_key, _hash_iv.
+	 * Only the keys the migration reads are fetched: LEGACY_META_KEYS, plus the
+	 * VERIFICATION_META_KEYS a pending row needs to reproduce its verification token.
 	 *
 	 * @param int[] $ids Legacy ids.
 	 * @return array<int,array<string,mixed>>
@@ -476,8 +482,9 @@ class NotificationsMigrator implements MigratorInterface {
 		}
 
 		$table            = Tables::legacy_meta();
+		$meta_keys        = array_merge( self::LEGACY_META_KEYS, self::VERIFICATION_META_KEYS );
 		$id_placeholders  = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
-		$key_placeholders = implode( ', ', array_fill( 0, count( self::LEGACY_META_KEYS ), '%s' ) );
+		$key_placeholders = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $id_placeholders/$key_placeholders
 		// are locally built %d/%s placeholder lists, bound via $wpdb->prepare() below.
@@ -485,7 +492,7 @@ class NotificationsMigrator implements MigratorInterface {
 		$sql = $wpdb->prepare(
 			"SELECT bis_notifications_id, meta_key, meta_value FROM {$table}
 			WHERE bis_notifications_id IN ( $id_placeholders ) AND meta_key IN ( $key_placeholders )",
-			array_merge( $ids, self::LEGACY_META_KEYS )
+			array_merge( $ids, $meta_keys )
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
@@ -571,11 +578,12 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @param int                 $target_id  Core notification id being adopted.
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @param array<string,mixed> $row_meta   This row's legacy meta bag.
+	 * @param string              $status     Status resolved by StatusMapper for the legacy row.
 	 * @param WriterInterface     $writer     Writer to route the marker writes through.
 	 * @return void
 	 * @throws \RuntimeException When the marker write does not persist every row.
 	 */
-	private function adopt( int $target_id, array $legacy_row, array $row_meta, WriterInterface $writer ): void {
+	private function adopt( int $target_id, array $legacy_row, array $row_meta, string $status, WriterInterface $writer ): void {
 		$legacy_id = (int) $legacy_row['id'];
 		$meta      = array(
 			array( self::LEGACY_ID_META_KEY, $legacy_id ),
@@ -585,6 +593,12 @@ class NotificationsMigrator implements MigratorInterface {
 
 		if ( null !== $token ) {
 			$meta[] = array( self::LEGACY_UNSUB_HASH_META_KEY, LegacyHash::to_meta_value( $legacy_id, $token ) );
+		}
+
+		$verify_meta_value = $this->build_verification_meta_value( $legacy_id, $row_meta, $status );
+
+		if ( null !== $verify_meta_value ) {
+			$meta[] = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
 		}
 
 		$written = $writer->insert_notification_meta( $target_id, $meta );
@@ -612,7 +626,7 @@ class NotificationsMigrator implements MigratorInterface {
 
 		$this->maybe_set_has_migrated_rows_option( $writer );
 
-		if ( null !== $token ) {
+		if ( null !== $token || null !== $verify_meta_value ) {
 			$this->maybe_set_has_legacy_links_option( $writer );
 		}
 	}
@@ -641,7 +655,7 @@ class NotificationsMigrator implements MigratorInterface {
 			'status'                => $status,
 			'date_created_gmt'      => $date_mapper->date_created_gmt( $legacy_row ),
 			'date_modified_gmt'     => $date_mapper->date_modified_gmt(),
-			'date_confirmed_gmt'    => $date_mapper->date_confirmed_gmt( $legacy_row ),
+			'date_confirmed_gmt'    => $date_mapper->date_confirmed_gmt( $legacy_row, $status ),
 			'date_last_attempt_gmt' => $date_mapper->date_last_attempt_gmt( $legacy_row ),
 			'date_notified_gmt'     => $date_mapper->date_notified_gmt( $legacy_row, $status ),
 			'date_cancelled_gmt'    => $date_mapper->date_cancelled_gmt( $legacy_row, $status, $latest_activity_date ),
@@ -656,10 +670,11 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @param int                 $legacy_id  Legacy notification id.
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @param array<string,mixed> $row_meta   This row's legacy meta bag.
+	 * @param string              $status     Status resolved by StatusMapper for this row.
 	 * @param WriterInterface     $writer     Writer, used only to set the legacy-links option.
 	 * @return array<int,array{0:string,1:mixed}>
 	 */
-	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, WriterInterface $writer ): array {
+	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status, WriterInterface $writer ): array {
 		$meta   = MetaMapper::map( $row_meta );
 		$meta[] = array( self::LEGACY_ID_META_KEY, $legacy_id );
 
@@ -670,6 +685,13 @@ class NotificationsMigrator implements MigratorInterface {
 			$this->maybe_set_has_legacy_links_option( $writer );
 		} else {
 			++$this->rows_without_hash_count;
+		}
+
+		$verify_meta_value = $this->build_verification_meta_value( $legacy_id, $row_meta, $status );
+
+		if ( null !== $verify_meta_value ) {
+			$meta[] = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
+			$this->maybe_set_has_legacy_links_option( $writer );
 		}
 
 		return $meta;
@@ -697,9 +719,73 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
+	 * Build the stored verification-token meta value for a row migrated as pending.
+	 *
+	 * Returns null for any other status, for a row whose verification secrets are missing
+	 * or unusable, and for a link that had already expired when the migration ran — there
+	 * is nothing to honour in those cases, so nothing is stored.
+	 *
+	 * @param int                 $legacy_id Legacy notification id.
+	 * @param array<string,mixed> $row_meta  This row's legacy meta bag.
+	 * @param string              $status    Status resolved by StatusMapper for this row.
+	 * @return string|null
+	 */
+	private function build_verification_meta_value( int $legacy_id, array $row_meta, string $status ): ?string {
+		if ( NotificationStatus::PENDING !== $status ) {
+			return null;
+		}
+
+		$created_at = (int) ( $row_meta['_verification_created_at'] ?? 0 );
+
+		if ( $created_at <= 0 ) {
+			return null;
+		}
+
+		$token = LegacyHash::compute_verification(
+			(string) ( $row_meta['_verification_code'] ?? '' ),
+			(string) ( $row_meta['_verification_key'] ?? '' ),
+			(string) ( $row_meta['_verification_iv'] ?? '' )
+		);
+
+		if ( null === $token ) {
+			return null;
+		}
+
+		$expires_at = $created_at + $this->verification_expiry_threshold();
+
+		if ( $expires_at <= time() ) {
+			return null;
+		}
+
+		return LegacyHash::to_meta_value( $legacy_id, $token, $expires_at );
+	}
+
+	/**
+	 * The expiry threshold legacy verification links are honoured under, in seconds.
+	 *
+	 * Prefers the legacy plugin's own filtered value, since that is the lifetime the
+	 * shopper's email actually promised and the extension is normally still active while
+	 * the migration runs. Falls back to Core's threshold when it is not loadable. Resolved
+	 * once per run and baked into each stored expiry, because at request time the shim
+	 * outlives the extension and Core's threshold is statically cached per request.
+	 *
+	 * @return int
+	 */
+	private function verification_expiry_threshold(): int {
+		if ( null === $this->verification_expiry_threshold ) {
+			$this->verification_expiry_threshold = function_exists( 'wc_bis_get_verification_expiration_time_threshold' )
+				? (int) wc_bis_get_verification_expiration_time_threshold()
+				: Config::get_verification_expiration_time_threshold();
+		}
+
+		return $this->verification_expiry_threshold;
+	}
+
+	/**
 	 * Set the autoloaded `wc_bis_migration_has_legacy_links` flag the first time a row
-	 * carrying a legacy unsubscribe token is written. Reads the option first so an
-	 * already-set flag costs nothing beyond the cached autoloaded read.
+	 * carrying a legacy token of either kind — unsubscribe or verification — is written.
+	 * Reads the option first so an already-set flag costs nothing beyond the cached
+	 * autoloaded read.
 	 *
 	 * @param WriterInterface $writer Writer to route the option write through.
 	 * @return void
