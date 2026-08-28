@@ -143,6 +143,7 @@ class DbWriter implements WriterInterface {
 	 *
 	 * @param int   $notification_id Target notification id.
 	 * @param array $meta            List of `array{0:string,1:mixed}` key/value pairs.
+	 * @throws \RuntimeException If the insert fails.
 	 * @return int Number of meta rows written.
 	 */
 	public function insert_notification_meta( int $notification_id, array $meta ): int {
@@ -150,11 +151,7 @@ class DbWriter implements WriterInterface {
 			return 0;
 		}
 
-		try {
-			$written = $this->write_notification_meta( $notification_id, $meta );
-		} catch ( \RuntimeException $e ) {
-			return 0;
-		}
+		$written = $this->write_notification_meta( $notification_id, $meta );
 
 		$this->invalidate_meta_cache( $notification_id );
 

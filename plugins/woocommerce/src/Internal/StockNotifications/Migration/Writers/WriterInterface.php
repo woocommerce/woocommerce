@@ -47,8 +47,13 @@ interface WriterInterface {
 	 * Used by natural-key adoption and by the legacy unsubscribe token. Rows are always
 	 * inserted, never updated, and written by direct SQL so no date_modified_gmt bump occurs.
 	 *
+	 * A failure is raised, not reported: an implementation that writes for real throws
+	 * rather than returning a short count, so the caller's failure marker carries the
+	 * underlying database error. `NullWriter` writes nothing and so never throws.
+	 *
 	 * @param int   $notification_id Target notification id.
 	 * @param array $meta            List of `array{0:string,1:mixed}` key/value pairs.
+	 * @throws \RuntimeException If the write fails.
 	 * @return int Number of meta rows written.
 	 */
 	public function insert_notification_meta( int $notification_id, array $meta ): int;
