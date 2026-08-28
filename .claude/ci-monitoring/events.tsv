@@ -1684,9 +1684,94 @@
 33014498055	2026-08-26T21:15:25Z	CI	fix/wc-get-orders-day-precision-timezone	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
 33015791201	2026-08-26T21:31:56Z	CI	wooplug-7509-permanent-rewrite-rules-for-shop-sub-pages-depend-on-the	pull_request	Core API tests - @woocommerce_plugin-woocommerce [api]	SAVED	dockerhub	1	-	1
 33019462420	2026-08-26T22:22:39Z	CI	33593-rows-per-table-bug	pull_request	Metrics - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	dockerhub	1	-	2
+33034484698	2026-08-27T02:49:42Z	CI	patch-2	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	2
 33035149592	2026-08-27T03:02:35Z	CI	claude/keen-mcclintock-91c434	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	2	-	1
 33035149592	2026-08-27T03:02:35Z	CI	claude/keen-mcclintock-91c434	pull_request	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
 33039234754	2026-08-27T04:22:52Z	CI	add-dismiss-whats-next-tasks	pull_request	Metrics - @woocommerce_plugin-woocommerce [performance] (optional)	LOST	unknown	2	dockerhub	1
 33040538587	2026-08-27T04:48:43Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
 33040538587	2026-08-27T04:48:43Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
 33047034708	2026-08-27T06:45:28Z	CI	add-dismiss-whats-next-tasks	pull_request	Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33050445296	2026-08-27T07:36:44Z	CI	performance/67913-cap-prices-transient-size	pull_request	Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	2	-	1
+33050445296	2026-08-27T07:36:44Z	CI	performance/67913-cap-prices-transient-size	pull_request	Core API tests - @woocommerce_plugin-woocommerce [api]	LOST	wordpress	2	workspace-eacces	1
+33050445296	2026-08-27T07:36:44Z	CI	performance/67913-cap-prices-transient-size	pull_request	Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	LOST	wordpress	2	workspace-eacces	1
+33050445296	2026-08-27T07:36:44Z	CI	performance/67913-cap-prices-transient-size	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	LOST	wordpress	2	workspace-eacces	1
+33051208139	2026-08-27T07:47:34Z	CI	trunk	push	Core e2e tests - PayPal Standard - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33051243144	2026-08-27T07:48:05Z	CI	trunk	push	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33051243144	2026-08-27T07:48:05Z	CI	trunk	push	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	2	-	1
+33051243144	2026-08-27T07:48:05Z	CI	trunk	push	PHP 8.1 WP latest [WP latest] - @woocommerce_email-editor-config [unitphp]	SAVED	dockerhub	1	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core API tests - @woocommerce_plugin-woocommerce [api]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - (HPOSoff) - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - Gutenberg stable - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - PHP 8.5 - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - PHP 8.5 - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - PHP 8.5 - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - WP L-1 - parallel [WP 7.0.4] 1_2 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - WP L-1 - parallel [WP 7.0.4] 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - WP L-1 - serial [WP 7.0.4] 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core e2e tests - WP L-1 - serial [WP 7.0.4] 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Core Performance tests (K6) - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	Metrics - unified editor assets - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	dockerhub	1	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	LOST	unknown	2	github-api	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	unknown	2	-	1
+33052913201	2026-08-27T08:11:03Z	CI	fix/remove-ie8-leftovers	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	LOST	unknown	2	github-api	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Core API tests - @woocommerce_plugin-woocommerce [api]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	Metrics - unified editor assets - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	dockerhub	1	-	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	LOST	unknown	2	github-api	1
+33052938811	2026-08-27T08:11:24Z	CI	fix/63773-scheduled-sales-memory	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	LOST	unknown	2	github-api	1
+33053362112	2026-08-27T08:17:10Z	CI	rsm-437-refine-e2e-tests-for-updated-dom	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33058985846	2026-08-27T09:31:52Z	CI	testops-234-mutation-batcher-to-component	pull_request	Core e2e tests - PayPal Standard - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33058985846	2026-08-27T09:31:52Z	CI	testops-234-mutation-batcher-to-component	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33059020115	2026-08-27T09:32:17Z	CI	tax-reports-with-automated-tax-plugins-is-broken	pull_request	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33059777207	2026-08-27T09:42:23Z	CI	fix/68084-plugin-install-error-message	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33062202678	2026-08-27T10:14:56Z	CI	fix/wooplug-7602-verbose-page-rules	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33062202678	2026-08-27T10:14:56Z	CI	fix/wooplug-7602-verbose-page-rules	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33062202678	2026-08-27T10:14:56Z	CI	fix/wooplug-7602-verbose-page-rules	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33062202678	2026-08-27T10:14:56Z	CI	fix/wooplug-7602-verbose-page-rules	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33062202678	2026-08-27T10:14:56Z	CI	fix/wooplug-7602-verbose-page-rules	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33065725965	2026-08-27T11:03:50Z	CI	trunk	push	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33066554982	2026-08-27T11:15:12Z	CI	fix/67886-product-meta-lookup-join-guard	pull_request	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33071127619	2026-08-27T12:16:55Z	CI	trunk	push	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33071241351	2026-08-27T12:18:26Z	CI	fix/37789-exact-attribute-term-search	pull_request	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33073248415	2026-08-27T12:43:37Z	CI	fix/37789-exact-attribute-term-search	pull_request	Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33075407244	2026-08-27T13:09:53Z	CI	trunk	push	Core API tests - @woocommerce_plugin-woocommerce [api]	SAVED	wordpress	2	-	1
+33082648221	2026-08-27T14:30:48Z	CI	fix/58259-legacy-date-query-fatal-guard	pull_request	Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	workspace-eacces	1
+33082732861	2026-08-27T14:31:43Z	CI	fix/68084-plugin-install-error-message	pull_request	Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33082732861	2026-08-27T14:31:43Z	CI	fix/68084-plugin-install-error-message	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33083949965	2026-08-27T14:44:52Z	CI	wooplug-7610-bis-e2e-variable-products	pull_request	Core e2e tests - WP L-1 - serial [WP 7.0.4] 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33084265741	2026-08-27T14:48:13Z	CI	fix/blocks-js-ci-changes-globs	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	2	-	1
+33091945410	2026-08-27T16:11:44Z	CI	fix/preserve-order-item-delete-overrides	pull_request	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33093108457	2026-08-27T16:25:09Z	CI	add/wooplug-5001-bis-core-migration	pull_request	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	dockerhub	1	-	1
+33093164642	2026-08-27T16:25:49Z	CI	add/filter-chips-styles	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33094191069	2026-08-27T16:37:36Z	CI	fix/preserve-order-item-delete-overrides	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33097299530	2026-08-27T17:13:29Z	CI	ainfra-2884-expose-created-and-updated-timestamps-on-the-push-tokens	pull_request	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33098506796	2026-08-27T17:27:35Z	CI	add/filter-chips-styles	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33107718488	2026-08-27T19:17:23Z	CI	trunk	push	Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33145633475	2026-08-28T05:43:40Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33145633475	2026-08-28T05:43:40Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33145633475	2026-08-28T05:43:40Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	2	-	1
+33146593039	2026-08-28T06:02:11Z	CI	fix/68084-plugin-install-error-message	pull_request	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33148115354	2026-08-28T06:30:00Z	CI	wc-67953-pagination-compatibility	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33155757615	2026-08-28T08:32:33Z	CI	fix/31068-order-item-qty-validation	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33157095382	2026-08-28T08:52:58Z	CI	testops-234-delete-redundant-blocks-e2e-tests	pull_request	Blocks e2e tests - WP latest-1 [WP 7.0.4] 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	2	-	1
+33158668067	2026-08-28T09:16:13Z	CI	fix/31068-order-item-qty-validation	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1

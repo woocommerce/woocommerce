@@ -5,11 +5,11 @@ Write prose in `.claude/ci-monitoring/analysis.md`; it is appended at the end.
 
 | | |
 |---|---|
-| Window | 2026-07-15 (retry merged, PR #66491) → 2026-08-27 |
-| Runs scanned | 4543 |
-| Last run tracked | [33049043442](https://github.com/woocommerce/woocommerce/actions/runs/33049043442) |
-| Collection cursor | 2026-08-27 |
-| Updated | 2026-08-27T07:49:40Z |
+| Window | 2026-07-15 (retry merged, PR #66491) → 2026-08-28 |
+| Runs scanned | 4752 |
+| Last run tracked | [33162261716](https://github.com/woocommerce/woocommerce/actions/runs/33162261716) |
+| Collection cursor | 2026-08-28 |
+| Updated | 2026-08-28T10:13:49Z |
 
 A job is **recovered** when it emitted a retry warning and then passed, and lost
 when it exhausted every attempt. Jobs that started cleanly first time are not
@@ -20,10 +20,10 @@ cells read *recovered / retried*.
 
 | Window | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| since 2026-07-15 | 1692 | 1134 | 67% | 279/336 | 487/487 | 187/597 | 181/272 |
+| since 2026-07-15 | 1777 | 1203 | 68% | 302/359 | 509/509 | 205/628 | 187/281 |
 
-Excluding the 259 losses this project cannot fix — a third-party outage, or a
-branch that does not build — the rate is **79%** (1134 of 1433).
+Excluding the 271 losses this project cannot fix — a third-party outage, or a
+branch that does not build — the rate is **80%** (1203 of 1506).
 
 Excluded causes: `github-api`, `plugin-code`.
 
@@ -37,17 +37,17 @@ bound.
 
 | `reason=` | Retried | Share | Recovered | Recovery Rate |
 |---|---:|---:|---:|---:|
-| `unknown` | 597 | 35% | 187 | 31% |
-| `packagist` | 487 | 29% | 487 | 100% |
-| `dockerhub` | 336 | 20% | 279 | 83% |
-| `wordpress` | 272 | 16% | 181 | 67% |
-| **All** | **1692** | **100%** | **1134** | **67%** |
+| `unknown` | 628 | 35% | 205 | 33% |
+| `packagist` | 509 | 29% | 509 | 100% |
+| `dockerhub` | 359 | 20% | 302 | 84% |
+| `wordpress` | 281 | 16% | 187 | 67% |
+| **All** | **1777** | **100%** | **1203** | **68%** |
 
 ## By month
 
 | Month | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08 | 1121 | 770 | 69% | 199/223 | 278/278 | 154/415 | 139/205 |
+| 2026-08 | 1206 | 839 | 70% | 222/246 | 300/300 | 172/446 | 145/214 |
 | 2026-07 | 571 | 364 | 64% | 80/113 | 209/209 | 33/182 | 42/67 |
 
 ## By week
@@ -56,7 +56,7 @@ Weeks start Monday, labelled by that date. Last 12.
 
 | Week of | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08-24 | 264 | 149 | 56% | 37/38 | 66/66 | 32/142 | 14/18 |
+| 2026-08-24 | 349 | 218 | 62% | 60/61 | 88/88 | 50/173 | 20/27 |
 | 2026-08-17 | 384 | 235 | 61% | 85/96 | 54/54 | 74/210 | 22/24 |
 | 2026-08-10 | 254 | 212 | 83% | 62/66 | 67/67 | 24/31 | 59/90 |
 | 2026-08-03 | 199 | 159 | 80% | 14/21 | 85/85 | 23/31 | 37/62 |
@@ -70,7 +70,8 @@ Last 30 days with activity.
 
 | Day | Retried | Recovered | Recovery Rate | `dockerhub` | `packagist` | `unknown` | `wordpress` |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| 2026-08-27 | 6 | 5 | 83% | – | 3/3 | 0/1 | 2/2 |
+| 2026-08-28 | 8 | 8 | 100% | – | 5/5 | – | 3/3 |
+| 2026-08-27 | 83 | 66 | 80% | 23/23 | 20/20 | 18/32 | 5/8 |
 | 2026-08-26 | 38 | 37 | 97% | 7/7 | 27/27 | 1/2 | 2/2 |
 | 2026-08-25 | 49 | 37 | 76% | 9/9 | 20/20 | 0/8 | 8/12 |
 | 2026-08-24 | 171 | 70 | 41% | 21/22 | 16/16 | 31/131 | 2/2 |
@@ -99,7 +100,6 @@ Last 30 days with activity.
 | 2026-08-01 | 9 | 7 | 78% | – | 4/4 | – | 3/5 |
 | 2026-07-31 | 48 | 33 | 69% | 7/9 | 17/17 | 5/16 | 4/6 |
 | 2026-07-30 | 29 | 22 | 76% | 3/7 | 13/13 | 2/4 | 4/5 |
-| 2026-07-29 | 33 | 27 | 82% | 7/11 | 17/17 | 0/2 | 3/3 |
 
 ## Types of failure
 
@@ -109,13 +109,13 @@ than infrastructure. One example per type, the most recent.
 
 | Cause | Jobs | Share | Retryable | Latest | `reason=` | Branch | Job | Run |
 |---|---:|---:|---|---|---|---|---|---|
-| `github-api` | 191 | 34% | yes | 2026-08-25 | `unknown` | `trunk` | Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 10_10 - @woocommerce_plugin-woocommerce [e2e] | [32804710861](https://github.com/woocommerce/woocommerce/actions/runs/32804710861) |
-| `wordpress-org` | 106 | 19% | yes | 2026-08-25 | `wordpress` | `11.1.0-beta.2` | Run release checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 7_10 - @woocommerce_plugin-woocommerce [e2e] | [32841372194](https://github.com/woocommerce/woocommerce/actions/runs/32841372194) |
-| `workspace-eacces` | 70 | 13% | no — the branch is broken | 2026-08-26 | `unknown` | `trunk` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [32972293435](https://github.com/woocommerce/woocommerce/actions/runs/32972293435) |
+| `github-api` | 203 | 35% | yes | 2026-08-27 | `unknown` | `fix/63773-scheduled-sales-memory` | PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp] | [33052938811](https://github.com/woocommerce/woocommerce/actions/runs/33052938811) |
+| `wordpress-org` | 106 | 18% | yes | 2026-08-25 | `wordpress` | `11.1.0-beta.2` | Run release checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 7_10 - @woocommerce_plugin-woocommerce [e2e] | [32841372194](https://github.com/woocommerce/woocommerce/actions/runs/32841372194) |
+| `workspace-eacces` | 74 | 13% | no — the branch is broken | 2026-08-27 | `unknown` | `fix/58259-legacy-date-query-fatal-guard` | Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e] | [33082648221](https://github.com/woocommerce/woocommerce/actions/runs/33082648221) |
 | `plugin-code` | 68 | 12% | no — the branch is broken | 2026-08-05 | `unknown` | `add/WOOPRD-3412-payment-partnership-updates-mastercard` | PHP 7.4 WP latest - 1 [WP 6.9.5] - @woocommerce_plugin-woocommerce [unitphp] | [30981602040](https://github.com/woocommerce/woocommerce/actions/runs/30981602040) |
 | `dockerhub` | 57 | 10% | yes | 2026-08-27 | `unknown` | `add-dismiss-whats-next-tasks` | Metrics - @woocommerce_plugin-woocommerce [performance] (optional) | [33039234754](https://github.com/woocommerce/woocommerce/actions/runs/33039234754) |
 | `composer-installer` | 29 | 5% | no — BuildKit caches the bad layer | 2026-08-25 | `unknown` | `fix/66720-scheduled-sales-churn` | Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32850482036](https://github.com/woocommerce/woocommerce/actions/runs/32850482036) |
-| `wordpress-org-ratelimit` | 20 | 4% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP latest-1 [WP 6.9.7] 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
+| `wordpress-org-ratelimit` | 20 | 3% | yes | 2026-08-17 | `unknown` | `codex/wooprd-3593-settings-schema-validation` | Blocks e2e tests - WP latest-1 [WP 6.9.7] 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32040891065](https://github.com/woocommerce/woocommerce/actions/runs/32040891065) |
 | `packagist` | 10 | 2% | yes | 2026-07-31 | `unknown` | `fix/42323-old-filters-markup-e2e-tests` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [30634563069](https://github.com/woocommerce/woocommerce/actions/runs/30634563069) |
 | `buildkit` | 6 | 1% | yes | 2026-08-19 | `unknown` | `fix/48254-admin-settings-field-name` | Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e] | [32279013084](https://github.com/woocommerce/woocommerce/actions/runs/32279013084) |
 | `docker-daemon` | 1 | 0% | yes | 2026-07-17 | `unknown` | `trunk` | Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e] | [29586056557](https://github.com/woocommerce/woocommerce/actions/runs/29586056557) |
@@ -124,21 +124,21 @@ than infrastructure. One example per type, the most recent.
 
 | Day | Cause | `reason=` | Branch | Job | Run |
 |---|---|---|---|---|---|
-| 2026-08-27 | `dockerhub` | `unknown` | `add-dismiss-whats-next-tasks` | Metrics - @woocommerce_plugin-woocommerce [performance] (optional) | [33039234754](https://github.com/woocommerce/woocommerce/actions/runs/33039234754) |
-| 2026-08-26 | `workspace-eacces` | `unknown` | `trunk` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [32972293435](https://github.com/woocommerce/woocommerce/actions/runs/32972293435) |
-| 2026-08-25 | `workspace-eacces` | `wordpress` | `fix/67709-product-term-cache-invalidation` | Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e] | [32834107290](https://github.com/woocommerce/woocommerce/actions/runs/32834107290) |
-| 2026-08-25 | `workspace-eacces` | `unknown` | `trunk` | Run nightly checks _ Blocks e2e tests - unified editor assets 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32804710861](https://github.com/woocommerce/woocommerce/actions/runs/32804710861) |
-| 2026-08-25 | `workspace-eacces` | `unknown` | `fix/66720-scheduled-sales-churn` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [32849109281](https://github.com/woocommerce/woocommerce/actions/runs/32849109281) |
-| 2026-08-25 | `workspace-eacces` | `unknown` | `fix-typos-2026` | Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e] | [32795832713](https://github.com/woocommerce/woocommerce/actions/runs/32795832713) |
-| 2026-08-25 | `wordpress-org` | `wordpress` | `fix/67323-product-permalink-radio-checked-state` | Core e2e tests - WP L-1 - parallel [WP 7.0.4] 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32812537908](https://github.com/woocommerce/woocommerce/actions/runs/32812537908) |
-| 2026-08-25 | `wordpress-org` | `wordpress` | `11.1.0-beta.2` | Run release checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 8_10 - @woocommerce_plugin-woocommerce [e2e] | [32841372194](https://github.com/woocommerce/woocommerce/actions/runs/32841372194) |
-| 2026-08-25 | `wordpress-org` | `wordpress` | `11.1.0-beta.2` | Run release checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 7_10 - @woocommerce_plugin-woocommerce [e2e] | [32841372194](https://github.com/woocommerce/woocommerce/actions/runs/32841372194) |
-| 2026-08-25 | `github-api` | `unknown` | `trunk` | Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 9_10 - @woocommerce_plugin-woocommerce [e2e] | [32804710861](https://github.com/woocommerce/woocommerce/actions/runs/32804710861) |
-| 2026-08-25 | `github-api` | `unknown` | `trunk` | Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 10_10 - @woocommerce_plugin-woocommerce [e2e] | [32804710861](https://github.com/woocommerce/woocommerce/actions/runs/32804710861) |
-| 2026-08-25 | `composer-installer` | `unknown` | `fix/blocks-hook-docs-pipeline` | Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e] | [32822698825](https://github.com/woocommerce/woocommerce/actions/runs/32822698825) |
-| 2026-08-25 | `composer-installer` | `unknown` | `fix/66720-scheduled-sales-churn` | Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32850482036](https://github.com/woocommerce/woocommerce/actions/runs/32850482036) |
-| 2026-08-25 | `composer-installer` | `unknown` | `fix/58259-legacy-order-query-fatal-guard` | Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e] | [32843026421](https://github.com/woocommerce/woocommerce/actions/runs/32843026421) |
-| 2026-08-24 | `workspace-eacces` | `unknown` | `fix/66720-scheduled-sales-churn` | Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e] | [32727561176](https://github.com/woocommerce/woocommerce/actions/runs/32727561176) |
+| 2026-08-27 | `workspace-eacces` | `wordpress` | `performance/67913-cap-prices-transient-size` | Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e] | [33050445296](https://github.com/woocommerce/woocommerce/actions/runs/33050445296) |
+| 2026-08-27 | `workspace-eacces` | `wordpress` | `performance/67913-cap-prices-transient-size` | Core e2e tests - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e] | [33050445296](https://github.com/woocommerce/woocommerce/actions/runs/33050445296) |
+| 2026-08-27 | `workspace-eacces` | `wordpress` | `performance/67913-cap-prices-transient-size` | Core API tests - @woocommerce_plugin-woocommerce [api] | [33050445296](https://github.com/woocommerce/woocommerce/actions/runs/33050445296) |
+| 2026-08-27 | `workspace-eacces` | `unknown` | `fix/58259-legacy-date-query-fatal-guard` | Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e] | [33082648221](https://github.com/woocommerce/woocommerce/actions/runs/33082648221) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Core e2e tests - WP L-1 - parallel [WP 7.0.4] 1_2 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Core e2e tests - PHP 8.5 - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Core API tests - @woocommerce_plugin-woocommerce [api] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Blocks e2e tests 4_10 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/remove-ie8-leftovers` | Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e] | [33052913201](https://github.com/woocommerce/woocommerce/actions/runs/33052913201) |
+| 2026-08-27 | `github-api` | `unknown` | `fix/63773-scheduled-sales-memory` | PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp] | [33052938811](https://github.com/woocommerce/woocommerce/actions/runs/33052938811) |
 
 Links are run-level: open the run and the failed job is the red one.
 
