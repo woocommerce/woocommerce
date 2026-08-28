@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-Remove 27 block patterns from the bundled pattern library. Existing inserted blocks are unchanged; themes and extensions referencing removed pattern slugs must update those references.
+Remove 26 block patterns from the bundled pattern library. Existing inserted blocks are unchanged; themes and extensions referencing removed pattern slugs must update those references.
