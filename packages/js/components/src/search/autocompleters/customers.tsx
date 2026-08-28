@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
+import interpolateComponents from '@automattic/interpolate-components';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -82,7 +83,37 @@ const completer: AutoCompleter = {
 		return customer.id;
 	},
 	getOptionKeywords( customer ) {
-		return [ customer.name, customer.username, customer.email ];
+		const fields = [ customer.name, customer.username, customer.email ];
+		// The API matches the search term against these fields joined together,
+		// so the joined string has to be a keyword too. Without it a term that
+		// spans two fields is matched by the API and then filtered back out.
+		return [ ...fields, fields.filter( Boolean ).join( ' ' ) ];
+	},
+	getFreeTextOptions( query ) {
+		const label = (
+			<span key="name" className="woocommerce-search__result-name">
+				{ interpolateComponents( {
+					mixedString: __(
+						'All customers matching {{query /}}',
+						'woocommerce'
+					),
+					components: {
+						query: (
+							<strong className="components-form-token-field__suggestion-match">
+								{ query }
+							</strong>
+						),
+					},
+				} ) }
+			</span>
+		);
+		const nameOption = {
+			key: 'name',
+			label,
+			value: { id: query, name: query },
+		};
+
+		return [ nameOption ];
 	},
 	getOptionLabel( customer, query ) {
 		const suggestion = getSuggestion( customer, query );

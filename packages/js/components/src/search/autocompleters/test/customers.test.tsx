@@ -62,7 +62,16 @@ describe( 'customers autocompleter', () => {
 			'Zoe Bloggs',
 			'bloggs',
 			'zoe@example.test',
+			// The API matches against the fields joined together, so a search
+			// term spanning two of them has to be a keyword as well.
+			'Zoe Bloggs bloggs zoe@example.test',
 		] );
+	} );
+
+	it( 'keeps the joined keyword usable when the customer has no name', () => {
+		expect( customers.getOptionKeywords( unnamed ) ).toContain(
+			'zoemarketing hello@zoeshop.test'
+		);
 	} );
 
 	it( 'shows the name on its own when it matches the search term', () => {
@@ -89,5 +98,24 @@ describe( 'customers autocompleter', () => {
 		render( <>{ customers.getOptionLabel( named, 'Blog' ) }</> );
 
 		expect( screen.getByText( 'Blog' ).tagName ).toBe( 'STRONG' );
+	} );
+
+	it( 'offers a free text option worded for the fields it searches', () => {
+		const getFreeTextLabel = (
+			completer: typeof customers,
+			query: string
+		) => {
+			const { container } = render(
+				<>{ completer.getFreeTextOptions?.( query )[ 0 ].label }</>
+			);
+			return container.textContent;
+		};
+
+		expect( getFreeTextLabel( customers, 'zoe' ) ).toBe(
+			'All customers matching zoe'
+		);
+		expect( getFreeTextLabel( customerNames, 'zoe' ) ).toBe(
+			'All customers with names that include zoe'
+		);
 	} );
 } );
