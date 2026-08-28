@@ -60,7 +60,8 @@ final class Constants {
 
 	/**
 	 * Core notification meta marking a legacy id that adopted a pre-existing row rather
-	 * than being inserted. Distinguishes the two so `rollback` never deletes an adopted row.
+	 * than being inserted. Recorded for support: once the legacy tables are gone, an
+	 * adopted row is otherwise indistinguishable from one this migration created.
 	 */
 	public const ADOPTED_MARKER_META_KEY = '_wc_bis_legacy_adopted';
 
@@ -71,7 +72,7 @@ final class Constants {
 
 	/**
 	 * Legacy meta key recording a permanent per-row failure. The migration's only write
-	 * into the legacy schema. Cleared by `--retry-failed` and by `rollback`.
+	 * into the legacy schema. Cleared by `--retry-failed`.
 	 */
 	public const LEGACY_FAILED_META_KEY = '_wc_bis_migration_failed';
 
