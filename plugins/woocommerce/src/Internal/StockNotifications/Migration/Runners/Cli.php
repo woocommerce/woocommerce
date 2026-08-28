@@ -565,7 +565,7 @@ class Cli {
 	 * hash and the flag that gates the shim's registration. `_wc_bis_legacy_id` survives —
 	 * it is the idempotency marker, not shim-specific.
 	 *
-	 * Writes by direct SQL, like `BulkNotificationWriter`: going through the CRUD layer
+	 * Writes by direct SQL, like `DbWriter`: going through the CRUD layer
 	 * would bump `date_modified_gmt` on every migrated row, rewriting merchant-visible
 	 * history for what is only a marker cleanup.
 	 *
