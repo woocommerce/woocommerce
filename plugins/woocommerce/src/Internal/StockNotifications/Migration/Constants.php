@@ -47,8 +47,9 @@ final class Constants {
 	public const HAS_MIGRATED_ROWS_OPTION = 'wc_bis_migration_has_migrated_rows';
 
 	/**
-	 * Autoloaded flag gating the legacy unsubscribe shim's registration. Narrower than
-	 * HAS_MIGRATED_ROWS_OPTION: only set when a migrated row carries a legacy token.
+	 * Autoloaded flag guarding the legacy link shim's registration. Narrower than
+	 * HAS_MIGRATED_ROWS_OPTION: only set when a migrated row carries a legacy token,
+	 * of either kind — unsubscribe or verification.
 	 */
 	public const HAS_LEGACY_LINKS_OPTION = 'wc_bis_migration_has_legacy_links';
 
@@ -69,6 +70,14 @@ final class Constants {
 	 * Core notification meta holding the precomputed legacy unsubscribe token digest.
 	 */
 	public const LEGACY_UNSUB_HASH_META_KEY = '_wc_bis_legacy_unsub_hash';
+
+	/**
+	 * Core notification meta holding the precomputed legacy verification token digest,
+	 * together with the expiry resolved at migration time. Written only for rows migrated
+	 * as pending whose legacy verification link had not already expired, and deleted the
+	 * first time that link is followed.
+	 */
+	public const LEGACY_VERIFY_HASH_META_KEY = '_wc_bis_legacy_verify_hash';
 
 	/**
 	 * Legacy meta key recording a permanent per-row failure. The migration's only write

@@ -46,42 +46,89 @@ final class LegacyHash {
 	}
 
 	/**
-	 * Build the `_wc_bis_legacy_unsub_hash` meta value stored for one legacy id.
+	 * Reproduce `WC_BIS_Notification_Data::get_verification_hash()` for one legacy notification.
+	 *
+	 * Same null-not-error convention as self::compute(): a row missing either secret, or one
+	 * whose encryption fails, yields null so the caller can skip it rather than store a
+	 * digest no link will ever match.
+	 *
+	 * @param string $code Legacy per-notification `_verification_code` meta value.
+	 * @param string $key  Legacy per-notification `_verification_key` meta value.
+	 * @param string $iv   Legacy per-notification `_verification_iv` meta value.
+	 * @return string|null
+	 */
+	public static function compute_verification( string $code, string $key, string $iv ): ?string {
+		if ( '' === $code || '' === $key || '' === $iv ) {
+			return null;
+		}
+
+		$encrypted = openssl_encrypt( $code, 'AES-256-CBC', $key, 0, $iv );
+
+		if ( false === $encrypted ) {
+			return null;
+		}
+
+		return hash( 'sha256', $encrypted );
+	}
+
+	/**
+	 * Build the meta value stored for one legacy id.
 	 *
 	 * The raw token is never stored: only its `wp_fast_hash()` digest, prefixed with the
 	 * legacy id so several legacy rows can adopt the same Core notification.
 	 *
-	 * @param int    $legacy_id Legacy notification id.
-	 * @param string $token     Token produced by self::compute().
+	 * Unsubscribe links never expire, so they are stored as `{legacy_id}:{digest}`.
+	 * Verification links do, so they carry the expiry resolved at migration time in the
+	 * middle field: `{legacy_id}:{expires_at}:{digest}`. `wp_fast_hash()` output contains
+	 * no colon, so the two shapes are unambiguous.
+	 *
+	 * @param int      $legacy_id  Legacy notification id.
+	 * @param string   $token      Token produced by self::compute() or self::compute_verification().
+	 * @param int|null $expires_at Absolute expiry as a Unix timestamp, or null for a link that
+	 *                             does not expire.
 	 * @return string
 	 */
-	public static function to_meta_value( int $legacy_id, string $token ): string {
-		return "{$legacy_id}:" . wp_fast_hash( $token );
+	public static function to_meta_value( int $legacy_id, string $token, ?int $expires_at = null ): string {
+		$digest = wp_fast_hash( $token );
+
+		return null === $expires_at
+			? "{$legacy_id}:{$digest}"
+			: "{$legacy_id}:{$expires_at}:{$digest}";
 	}
 
 	/**
-	 * Split a stored `_wc_bis_legacy_unsub_hash` value into its legacy id and digest.
+	 * Split a stored meta value into its legacy id, expiry and digest.
 	 *
-	 * Splits on the first colon only, so the boundary never depends on the hash
-	 * format's alphabet.
+	 * Splits on colons only, so the boundaries never depend on the hash format's alphabet.
 	 *
 	 * @param string $meta_value Stored meta value.
-	 * @return array{0:int,1:string}|null Null when the value is not in `id:hash` shape.
+	 * @return array{0:int,1:string,2:?int}|null Legacy id, digest and expiry, or null when
+	 *                                           the value is in neither stored shape.
 	 */
 	public static function parse( string $meta_value ): ?array {
-		$parts = explode( ':', $meta_value, 2 );
+		$parts = explode( ':', $meta_value, 3 );
 
-		if ( 2 !== count( $parts ) || '' === $parts[0] || '' === $parts[1] || ! ctype_digit( $parts[0] ) ) {
+		if ( count( $parts ) < 2 || '' === $parts[0] || ! ctype_digit( $parts[0] ) ) {
 			return null;
 		}
 
-		return array( (int) $parts[0], $parts[1] );
+		if ( 2 === count( $parts ) ) {
+			return '' === $parts[1] ? null : array( (int) $parts[0], $parts[1], null );
+		}
+
+		if ( '' === $parts[1] || ! ctype_digit( $parts[1] ) || '' === $parts[2] ) {
+			return null;
+		}
+
+		return array( (int) $parts[0], $parts[2], (int) $parts[1] );
 	}
 
 	/**
-	 * Verify a token presented by an incoming unsubscribe link against a stored meta value.
+	 * Verify a token presented by an incoming legacy link against a stored meta value.
 	 *
-	 * @param string $meta_value Stored `_wc_bis_legacy_unsub_hash` value.
+	 * Expiry is not checked here — the caller decides what an expired link means.
+	 *
+	 * @param string $meta_value Stored meta value.
 	 * @param string $token      Token recomputed from the link's request parameters.
 	 * @return bool
 	 */
