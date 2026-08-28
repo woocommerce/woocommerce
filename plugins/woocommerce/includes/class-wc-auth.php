@@ -290,12 +290,12 @@ class WC_Auth {
 	public function handle_auth_requests() {
 		global $wp;
 
-		if ( ! empty( $_GET['wc-auth-version'] ) ) { // WPCS: input var ok, CSRF ok.
-			$wp->query_vars['wc-auth-version'] = wc_clean( wp_unslash( $_GET['wc-auth-version'] ) ); // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['wc-auth-version'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+			$wp->query_vars['wc-auth-version'] = wc_clean( wp_unslash( $_GET['wc-auth-version'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 		}
 
-		if ( ! empty( $_GET['wc-auth-route'] ) ) { // WPCS: input var ok, CSRF ok.
-			$wp->query_vars['wc-auth-route'] = wc_clean( wp_unslash( $_GET['wc-auth-route'] ) ); // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['wc-auth-route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+			$wp->query_vars['wc-auth-route'] = wc_clean( wp_unslash( $_GET['wc-auth-route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 		}
 
 		// wc-auth endpoint requests.
@@ -405,7 +405,7 @@ class WC_Auth {
 
 			} elseif ( 'access_granted' === $route && current_user_can( 'manage_woocommerce' ) ) {
 				// Granted access endpoint.
-				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['wc_auth_nonce'] ) ), 'wc_auth_grant_access' ) ) { // WPCS: input var ok.
+				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['wc_auth_nonce'] ) ), 'wc_auth_grant_access' ) ) {
 					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}
 

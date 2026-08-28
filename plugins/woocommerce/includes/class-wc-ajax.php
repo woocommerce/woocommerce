@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -2549,8 +2550,6 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for product ordering.
 	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
-	 *
 	 * @return void
 	 */
 	public static function product_ordering() {
@@ -2562,54 +2561,114 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$sorting_id  = absint( $_POST['id'] );
-		$previd      = absint( isset( $_POST['previd'] ) ? $_POST['previd'] : 0 );
-		$nextid      = absint( isset( $_POST['nextid'] ) ? $_POST['nextid'] : 0 );
-		$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
-		$index       = 0;
+		$previous_id = absint( $_POST['previd'] ?? 0 );
+		$product_id  = absint( $_POST['id'] );
+		$next_id     = absint( $_POST['nextid'] ?? 0 );
 
-		foreach ( $menu_orders as $id => $menu_order ) {
-			$id = absint( $id );
-
-			if ( $sorting_id === $id ) {
-				continue;
+		$has_per_product_hook   = has_action( 'woocommerce_after_single_product_ordering' );
+		$has_post_ordering_hook = has_action( 'woocommerce_after_product_ordering' );
+		if ( $has_per_product_hook || $has_post_ordering_hook ) {
+			// See `clean_post_cache`, `wp_ajax_woocommerce_product_ordering`, `woocommerce_product_ordering_process_reindexed_products`
+			// and `woocommerce_product_ordering_process_moved_products` for available migration primitives.
+			if ( $has_per_product_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_single_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
 			}
-			if ( $nextid === $id ) {
+			if ( $has_post_ordering_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
+			}
+
+			// Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
+			$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
+			$index       = 0;
+
+			foreach ( $menu_orders as $id => $menu_order ) {
+				$id = absint( $id );
+
+				if ( $product_id === $id ) {
+					continue;
+				}
+				if ( $next_id === $id ) {
+					++$index;
+				}
 				++$index;
-			}
-			++$index;
-			$menu_orders[ $id ] = $index;
+				$menu_orders[ $id ] = $index;
 
-			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
-				// We only need to clean the cache if the menu order was actually modified.
-				clean_post_cache( $id );
+				if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
+					// We only need to clean the cache if the menu order was actually modified.
+					clean_post_cache( $id );
+				}
+
+				/**
+				 * When a single product has gotten its ordering updated.
+				 *
+				 * @param int $id    The product ID.
+				 * @param int $index The new sort position.
+				 *
+				 * @since 3.1.0
+				 */
+				do_action( 'woocommerce_after_single_product_ordering', $id, $index );
 			}
+
+			if ( isset( $menu_orders[ $previous_id ] ) ) {
+				$menu_orders[ $product_id ] = $menu_orders[ $previous_id ] + 1;
+			} elseif ( isset( $menu_orders[ $next_id ] ) ) {
+				$menu_orders[ $product_id ] = $menu_orders[ $next_id ] - 1;
+			} else {
+				$menu_orders[ $product_id ] = 0;
+			}
+
+			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $product_id ] ), array( 'ID' => $product_id ) ) ) {
+				// We only need to clean the cache if the menu order was actually modified.
+				clean_post_cache( $product_id );
+			}
+
+			WC_Post_Data::delete_product_query_transients();
 
 			/**
-			 * When a single product has gotten it's ordering updated.
-			 * $id The product ID
-			 * $index The new menu order
-			*/
-			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
-		}
+			 * When products ordering update completed.
+			 *
+			 * @param int            $product_id    The product ID that was repositioned.
+			 * @param array<int,int> $all_positions All product sort positions (product ID → actual menu_order value).
+			 *
+			 * @since 3.1.0
+			 */
+			do_action( 'woocommerce_after_product_ordering', $product_id, $menu_orders );
+			wp_send_json( $menu_orders );
 
-		if ( isset( $menu_orders[ $previd ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $previd ] + 1;
-		} elseif ( isset( $menu_orders[ $nextid ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $nextid ] - 1;
 		} else {
-			$menu_orders[ $sorting_id ] = 0;
+			$modifications = wc_get_container()->get( ProductsOrderingMoveService::class )->move( $previous_id, $product_id, $next_id );
+			$moved         = ! empty( $modifications->moved );
+			$reindexed     = ! empty( $modifications->reindexed );
+			if ( $moved || $reindexed ) {
+				WC_Post_Data::delete_product_query_transients();
+
+				if ( $reindexed ) {
+					/**
+					 * Fires after a full catalog reindex was triggered during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $reindexed  Reindexed product positions (product ID → menu_order), excludes moved products.
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_reindexed_products', $product_id, $modifications->reindexed );
+					unset( $modifications->reindexed );
+				}
+
+				if ( $moved ) {
+					/**
+					 * Fires after products have been repositioned during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $moved      Moved product positions (product ID → menu_order).
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_moved_products', $product_id, $modifications->moved );
+				}
+			}
+			wp_send_json( $modifications->moved );
 		}
-
-		if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) ) ) {
-			// We only need to clean the cache if the menu order was actually modified.
-			clean_post_cache( $sorting_id );
-		}
-
-		WC_Post_Data::delete_product_query_transients();
-
-		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
-		wp_send_json( $menu_orders );
 	}
 
 	/**
@@ -2670,7 +2729,8 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ) );
+				// Use is_numeric so a 0% tax amount ('0') is preserved. A callback-less array_filter would drop it as falsy, losing the 0-rate tax line (0% is a valid rate, not "no tax"). See #27118.
+				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ), 'is_numeric' );
 			}
 
 			// Create the refund object.

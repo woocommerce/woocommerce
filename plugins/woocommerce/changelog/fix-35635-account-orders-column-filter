@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add composable woocommerce_account_orders_column_content_{$column_id} filters for the My Account orders table columns and bump the myaccount/orders.php template version to 11.1.0.

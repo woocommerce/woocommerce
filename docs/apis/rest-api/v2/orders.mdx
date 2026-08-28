@@ -95,6 +95,7 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | -------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
 | `id`           | integer | Item ID. `READ-ONLY`                                                            |
 | `name`         | string  | Product name.                                                                                                 |
+| `parent_name`  | string or null | Parent product name if the product is a variation; otherwise `null`.                                      |
 | `product_id`   | integer | Product ID.                                                                                                   |
 | `variation_id` | integer | Variation ID, if applicable.                                                                                  |
 | `quantity`     | integer | Quantity ordered.                                                                                             |

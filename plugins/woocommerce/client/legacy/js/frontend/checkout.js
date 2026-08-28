@@ -1087,7 +1087,7 @@ jQuery( function ( $ ) {
 				.find(
 					'.woocommerce-error[tabindex="-1"], .wc-block-components-notice-banner.is-error[tabindex="-1"]'
 				)
-				.focus();
+				.trigger( 'focus' );
 			$( document.body ).trigger( 'checkout_error', [ error_message ] );
 		},
 		wrapMessagesInsideLink: function ( $msgs ) {
@@ -1198,7 +1198,7 @@ jQuery( function ( $ ) {
 
 			$target
 				.find( '#coupon_code' )
-				.focus()
+				.trigger( 'focus' )
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
 				.attr( 'aria-describedby', 'coupon-error-notice' );
@@ -1293,6 +1293,11 @@ jQuery( function ( $ ) {
 							self.show_coupon_error(
 								response,
 								$coupon_field.parent()
+							);
+
+							$( document.body ).trigger(
+								'errored_coupon_in_checkout',
+								[ data.coupon_code, response ]
 							);
 						}
 

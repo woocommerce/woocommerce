@@ -12,9 +12,9 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 /**
  * Internal dependencies
  */
+import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
+import type { StoreNoticesStoreDescriptor } from '@woocommerce/block-data/store-notices';
 import { noticeContexts } from '../context/event-emit/utils';
-import type { PaymentStoreDescriptor } from '../../data/payment';
-import type { StoreNoticesStoreDescriptor } from '../../data/store-notices';
 
 export const DEFAULT_ERROR_MESSAGE = __(
 	'Something went wrong. Please contact us to get assistance.',
@@ -48,7 +48,7 @@ export const createNotice = (
 		return;
 	}
 
-	dispatch( noticesStore ).createNotice( status, message, {
+	void dispatch( noticesStore ).createNotice( status, message, {
 		isDismissible: true,
 		...options,
 		context: noticeContext,
@@ -71,7 +71,7 @@ export const removeAllNotices = () => {
 
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
-			removeNotice( notice.id, container );
+			void removeNotice( notice.id, container );
 		} );
 	} );
 };
@@ -81,7 +81,7 @@ export const removeNoticesWithContext = ( context: string ) => {
 	const { getNotices } = select( noticesStore );
 
 	getNotices( context ).forEach( ( notice ) => {
-		removeNotice( notice.id, context );
+		void removeNotice( notice.id, context );
 	} );
 };
 
@@ -95,7 +95,7 @@ export const removeNoticesForField = ( id: string, context?: string ) => {
 	const { removeNotice } = dispatch( noticesStore );
 
 	if ( context ) {
-		removeNotice( id, context );
+		void removeNotice( id, context );
 		return;
 	}
 
@@ -109,7 +109,7 @@ export const removeNoticesForField = ( id: string, context?: string ) => {
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
 			if ( notice.id.startsWith( id ) ) {
-				removeNotice( notice.id, container );
+				void removeNotice( notice.id, container );
 			}
 		} );
 	} );
