@@ -57,6 +57,10 @@ const matchesAny = ( pattern, undotted ) => {
 const readConfig = ( file ) => {
 	const config = JSON.parse( fs.readFileSync( file, 'utf8' ) );
 
+	if ( ! config || typeof config !== 'object' || Array.isArray( config ) ) {
+		throw new Error( 'The reviewer config must be a JSON object.' );
+	}
+
 	const owners = ( key ) => {
 		const list = [].concat( config[ key ] );
 
@@ -167,8 +171,14 @@ const assignReviewers = async ( { github, context, core } ) => {
 
 		return;
 	} catch ( error ) {
-		// The API rejects the whole batch over a single bad entry, so ask one at
-		// a time instead of losing every reviewer to it.
+		// 422 is the API rejecting the whole batch over a single bad entry, so
+		// ask one at a time instead of losing every reviewer to it. Any other
+		// status is about the token or the rate limit, and asking again would
+		// only spend more of the rate limit on the same answer.
+		if ( error.status !== 422 ) {
+			throw error;
+		}
+
 		core.warning( `Could not request the reviews together: ${ error.message }` );
 	}
 

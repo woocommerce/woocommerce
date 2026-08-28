@@ -84,7 +84,7 @@ jobs:
 
         - name: Assign reviewers for a teams PR
           if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) && ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) }}
-          continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
+          continue-on-error: ${{ github.event.pull_request.head.repo.fork }}
           uses: ./.github/actions/assign-reviewers
           with:
               mode: author-team

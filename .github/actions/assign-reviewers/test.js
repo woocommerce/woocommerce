@@ -167,15 +167,38 @@ check( 'a reviewer the API will not accept fails the job and is named', async ()
 	assert.match( failed, /check the config/ );
 } );
 
-check( 'a 403 is the token or the rate limit, not the config', async () => {
-	const { failed } = await run( {
-		config: routing,
-		changed: [ 'b/y.js' ],
-		requestReviewers: () => reject( 403, 'rate limited' ),
-	} );
+check( 'a batch failure that is not a rejected reviewer is not asked again', async () => {
+	// Only a 422 can be narrowed down to one entry. Asking again after a 403
+	// spends the rate limit to be told the same thing once per reviewer.
+	let attempts = 0;
 
-	assert.doesNotMatch( failed, /check the config/ );
-	assert.match( failed, /anybody/ );
+	await assert.rejects(
+		() => run( {
+			config: routing,
+			changed: [ 'a/x.js', 'b/y.js' ],
+			requestReviewers: () => {
+				attempts += 1;
+				reject( 403, 'rate limited' );
+			},
+		} ),
+		/rate limited/
+	);
+
+	assert.strictEqual( attempts, 1, 'only the batch is attempted' );
+} );
+
+check( 'a config that is not an object map is refused', async () => {
+	const file = path.join( workspace, 'not-a-map.json' );
+
+	for ( const contents of [ '"rubik"', '[ "rubik" ]', 'null', '42' ] ) {
+		fs.writeFileSync( file, contents );
+
+		await assert.rejects(
+			() => run( { config: file, changed: [ 'a/x.js' ] } ),
+			/must be a JSON object/,
+			`${ contents } should be rejected`
+		);
+	}
 } );
 
 check( 'a malformed config value names the offending key', async () => {
