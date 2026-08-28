@@ -72,6 +72,7 @@ const ReportTable = ( props ) => {
 		compareBy,
 		compareParam = 'filter',
 		searchBy,
+		searchType = searchBy,
 		labels = {},
 		...tableProps
 	} = props;
@@ -437,7 +438,7 @@ const ReportTable = ( props ) => {
 							}
 							selected={ searchedLabels }
 							showClearButton={ true }
-							type={ searchBy }
+							type={ searchType }
 							disabled={ ! downloadable }
 						/>
 					),
@@ -548,6 +549,12 @@ ReportTable.propTypes = {
 	 * The string to use as a query parameter when searching row items.
 	 */
 	searchBy: PropTypes.string,
+	/**
+	 * The Search component type used to look up row items. Defaults to `searchBy`,
+	 * which is the query parameter name rather than a search type, so reports whose
+	 * two differ need to set this explicitly.
+	 */
+	searchType: PropTypes.string,
 	/**
 	 * List of fields used for summary numbers. (Reduces queries)
 	 */
