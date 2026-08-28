@@ -26,6 +26,7 @@ import {
 	installJetpackAndConnect,
 	connectToJetpackWithFailureRedirect,
 	installPlugins,
+	activatePlugins,
 } from '../actions';
 import { STORE_NAME } from '../constants';
 
@@ -272,5 +273,41 @@ describe( 'installPlugins error message', () => {
 		} );
 
 		expect( error?.message ).toBe( 'Could not install b. Reason B.' );
+	} );
+
+	it( 'reports the step that failed on the error', () => {
+		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: [ 'Reason A.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( ( error as { actionType?: string } )?.actionType ).toBe(
+			'install'
+		);
+	} );
+} );
+
+describe( 'activatePlugins error message', () => {
+	beforeEach( () => {
+		( apiFetch as jest.Mock ).mockReset();
+		( apiFetch as jest.Mock ).mockImplementation( () => ( {
+			type: 'API_FETCH',
+		} ) );
+	} );
+
+	it( 'reports activate as the failed step so callers do not infer it from stale status', () => {
+		const error = runUntilThrow( activatePlugins( [ 'a' ] ), {
+			data: { activated: [], active: [] },
+			errors: { errors: { a: [ 'Reason A.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe( 'Could not activate a. Reason A.' );
+		expect( ( error as { actionType?: string } )?.actionType ).toBe(
+			'activate'
+		);
 	} );
 } );

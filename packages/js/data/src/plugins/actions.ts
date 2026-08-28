@@ -27,7 +27,10 @@ import {
 class PluginError extends Error {
 	constructor(
 		message: string,
-		public data: unknown
+		public data: unknown,
+		// The step that actually failed. installAndActivatePlugins runs install then
+		// activate, so callers cannot infer this from the status they saw beforehand.
+		public actionType: 'install' | 'activate'
 	) {
 		super( message );
 	}
@@ -237,7 +240,8 @@ function* handlePluginAPIError(
 
 	throw new PluginError(
 		formatErrorMessage( actionType, failedPlugins, rawErrorMessage ),
-		error
+		error,
+		actionType
 	);
 }
 

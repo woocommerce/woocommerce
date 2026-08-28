@@ -431,6 +431,31 @@ export const removeOriginFromURL = ( url: string ) => {
 };
 
 /**
+ * Resolve which step of an install-and-activate run actually failed.
+ *
+ * `installAndActivatePlugins` installs and then activates, so an install that succeeded can
+ * still fail on activation. The rejection reports the step it failed on; the plugin status
+ * read before the request only says which step we expected to fail.
+ *
+ * @param error           The rejection value from installAndActivatePlugins.
+ * @param requestedAction The step implied by the plugin status before the request.
+ * @return The step that failed.
+ */
+export const getFailedPluginAction = (
+	error: unknown,
+	requestedAction: 'install' | 'activate'
+): 'install' | 'activate' => {
+	const reportedAction =
+		typeof error === 'object' && error !== null && 'actionType' in error
+			? ( error as { actionType: unknown } ).actionType
+			: undefined;
+
+	return reportedAction === 'install' || reportedAction === 'activate'
+		? reportedAction
+		: requestedAction;
+};
+
+/**
  * Build the notice text for a failed provider extension install or activation.
  *
  * `@woocommerce/data` frames errors with the plugin slug and only exposes the finished

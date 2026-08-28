@@ -43,6 +43,7 @@ import {
 	recordPaymentsEvent,
 	recordPaymentsOnboardingEvent,
 	getPluginActionErrorMessage,
+	getFailedPluginAction,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -423,10 +424,12 @@ export const SettingsPaymentsMain = () => {
 					}
 				} )
 				.catch( ( error: unknown ) => {
-					const actionType =
+					const actionType = getFailedPluginAction(
+						error,
 						paymentsEntity.plugin.status === 'not_installed'
 							? 'install'
-							: 'activate';
+							: 'activate'
+					);
 					recordPaymentsEvent(
 						actionType === 'install'
 							? 'provider_extension_installation_failed'

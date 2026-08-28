@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPluginActionErrorMessage } from '../utils';
+import { getPluginActionErrorMessage, getFailedPluginAction } from '../utils';
 
 describe( 'getPluginActionErrorMessage', () => {
 	const reason =
@@ -89,5 +89,30 @@ describe( 'getPluginActionErrorMessage', () => {
 		expect(
 			getPluginActionErrorMessage( 'install', 'Foo', 'foo', undefined )
 		).toBe( 'Could not install Foo.' );
+	} );
+} );
+
+describe( 'getFailedPluginAction', () => {
+	it( 'prefers the step the rejection reports over the requested one', () => {
+		// Install succeeded, activation failed: the pre-request status still says
+		// 'not_installed', so only the rejection knows the notice needs "activate".
+		expect(
+			getFailedPluginAction( { actionType: 'activate' }, 'install' )
+		).toBe( 'activate' );
+	} );
+
+	it( 'falls back to the requested step when the rejection reports none', () => {
+		expect(
+			getFailedPluginAction( new Error( 'Failed to fetch' ), 'install' )
+		).toBe( 'install' );
+		expect( getFailedPluginAction( undefined, 'activate' ) ).toBe(
+			'activate'
+		);
+	} );
+
+	it( 'ignores an unrecognised reported step', () => {
+		expect(
+			getFailedPluginAction( { actionType: 'nope' }, 'activate' )
+		).toBe( 'activate' );
 	} );
 } );
