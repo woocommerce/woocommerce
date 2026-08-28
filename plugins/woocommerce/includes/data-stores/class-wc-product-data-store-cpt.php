@@ -696,6 +696,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Update meta data in, or delete it from, the database.
+	 *
+	 * Avoids storing meta when it's either an empty string or empty array.
+	 * Other empty values such as numeric 0 and null should still be stored.
+	 * Data-stores can force meta to exist using `must_exist_meta_keys`.
+	 *
+	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param WC_Data $product    The WP_Data object (product).
+	 * @param string  $meta_key   Meta key to update.
+	 * @param mixed   $meta_value Value to save.
+	 *
+	 * @return bool
+	 */
+	protected function update_or_delete_post_meta( $product, $meta_key, $meta_value ) {
+		// Performance note: overrides \WC_Data_Store_WP::update_or_delete_post_meta — adds metadata_exists() guard to skip DELETE when meta is absent.
+		$product_id = $product->get_id();
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = metadata_exists( 'post', $product_id, $meta_key ) && delete_post_meta( $product_id, $meta_key );
+		} else {
+			$updated = update_post_meta( $product_id, $meta_key, $meta_value );
+		}
+
+		return (bool) $updated;
+	}
+
+	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
 	 * @param WC_Product $product Product object.
@@ -1132,16 +1161,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Make sure we store the product type and version (to track data changes).
 	 *
-	 * @param WC_Product $product Product object.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the stored product type term already matches to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product Product object.
 	 * @return void
 	 */
 	protected function update_version_and_type( &$product ) {
-		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
-		$new_type = $product->get_type();
+		$product_id        = $product->get_id();
+		$old_type          = \WC_Product_Factory::get_product_type( $product_id );
+		$new_type          = $product->get_type();
+		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
+		$stored_type_slug  = ! empty( $stored_type_terms ) && is_array( $stored_type_terms ) ? $stored_type_terms[0]->slug : null;
 
-		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
+		// Skip wp_set_object_terms() when the stored term already matches — it always clears the term cache even on no-op writes.
+		if ( $stored_type_slug !== $new_type ) {
+			wp_set_object_terms( $product_id, $new_type, 'product_type' );
+		}
+
+		update_post_meta( $product_id, '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
@@ -1400,11 +1438,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns an array of IDs of products that have sales starting soon.
 	 *
+	 * Sales that have already ended are excluded, otherwise get_ending_sales() would undo
+	 * them on the same run and the product would qualify again on every run after that.
+	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
+	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
+	 *
+	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
+	 * but materially slower on MySQL.
+	 *
 	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_starting_sales() {
 		global $wpdb;
+
+		$now = time();
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_col(
@@ -1417,14 +1465,33 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta_3.meta_key = '_sale_price'
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
-					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				time()
+					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND NOT EXISTS (
+						SELECT 1 FROM {$wpdb->postmeta} as ended
+						WHERE ended.post_id = postmeta.post_id
+							AND ended.meta_key = '_sale_price_dates_to'
+							AND ended.meta_value > 0
+							AND ended.meta_value < %s
+					)",
+				$now,
+				$now
 			)
 		);
 	}
 
 	/**
 	 * Returns an array of IDs of products that have sales which are due to end.
+	 *
+	 * Paired with get_starting_sales(), which excludes on this same `_sale_price_dates_to`
+	 * test, so keep the two identical: narrowing this alone strands a product in neither
+	 * queue, broadening it alone brings the daily churn back. `> 0` compares numerically,
+	 * which is what makes '' and '0000-00-00' read as "no end date"; `< %s` compares as
+	 * strings. Do not bind one as %d.
+	 *
+	 * The two do not share a timestamp: each reads the clock when it runs. What makes that
+	 * safe is the order, not the text. wc_scheduled_sales() runs starting first, so this
+	 * query's `now` is the later one, and anything already ended there is still ended here.
+	 * Reversing that order would strand exactly what the pairing is meant to prevent.
 	 *
 	 * @since 3.0.0
 	 * @return array

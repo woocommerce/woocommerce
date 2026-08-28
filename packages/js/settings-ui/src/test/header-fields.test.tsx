@@ -6,22 +6,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
-// Jest stubs CSS modules, so the real Badge renders nothing that reveals its intent.
-jest.mock( '@wordpress/ui', () => ( {
-	...jest.requireActual( '@wordpress/ui' ),
-	Badge: ( {
-		intent,
-		children,
-	}: {
-		intent?: string;
-		children: ReactNode;
-	} ) => (
-		<span data-testid="shell-badge" data-intent={ intent }>
-			{ children }
-		</span>
-	),
-} ) );
-
 // Mirror the real admin-ui NavigableRegion, which wraps the shell in a labeled region.
 jest.mock( '@wordpress/admin-ui', () => ( {
 	NavigableRegion: ( {
@@ -112,29 +96,39 @@ describe( 'settings UI shell header fields', () => {
 		container.remove();
 	} );
 
-	it( 'maps schema intents to Badge intents', () => {
+	it( 'maps schema intents to badge classes', () => {
+		const badgeIntents = [
+			{ label: 'Neutral', intent: 'default' as const },
+			{ label: 'Information', intent: 'info' as const },
+			{ label: 'Active', intent: 'success' as const },
+			{ label: 'Attention', intent: 'warning' as const },
+			{ label: 'Failed', intent: 'error' as const },
+		];
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
 					header: 'visible',
 					title: 'Test page',
-					badges: [
-						{ label: 'Active', intent: 'success' },
-						{ label: 'Beta' },
-					],
+					badges: [ ...badgeIntents, { label: 'Default' } ],
 				} ) }
 				page="test_page"
 			/>
 		);
 
 		const badges = container.querySelectorAll(
-			'[data-testid="shell-badge"]'
+			'.wc-settings-ui-shell__badge'
 		);
-		expect( badges ).toHaveLength( 2 );
-		expect( badges[ 0 ].textContent ).toBe( 'Active' );
-		expect( badges[ 0 ].getAttribute( 'data-intent' ) ).toBe( 'stable' );
+		expect( badges ).toHaveLength( 6 );
+		badgeIntents.forEach( ( badge, index ) => {
+			expect( badges[ index ] ).toHaveTextContent( badge.label );
+			expect( badges[ index ] ).toHaveClass(
+				`wc-settings-ui-shell__badge--${ badge.intent }`
+			);
+		} );
 		// Defaults to the neutral intent when none is provided.
-		expect( badges[ 1 ].getAttribute( 'data-intent' ) ).toBe( 'draft' );
+		expect( badges[ 5 ] ).toHaveClass(
+			'wc-settings-ui-shell__badge--default'
+		);
 
 		act( () => root.unmount() );
 		container.remove();
@@ -159,9 +153,9 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		const badge = container.querySelector( '[data-testid="shell-badge"]' );
+		const badge = container.querySelector( '.wc-settings-ui-shell__badge' );
 		expect( badge ).not.toBeNull();
-		expect( badge?.getAttribute( 'data-intent' ) ).toBe( 'draft' );
+		expect( badge ).toHaveClass( 'wc-settings-ui-shell__badge--default' );
 
 		act( () => root.unmount() );
 		container.remove();

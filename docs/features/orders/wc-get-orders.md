@@ -75,7 +75,7 @@ Query parameters/arguments that can be used with these functions are described b
 
 | Parameter | Description |
 | --- | --- |
-| **status** | Accepts an array of strings: by default is set to the keys of `wc_get_order_statuses()`. |
+| **status** | Accepts an array of strings: by default is set to the keys of `wc_get_order_statuses()`. Both `wc-`-prefixed (`'wc-processing'`) and unprefixed (`'processing'`) values are accepted. See the [OrderInternalStatus](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/OrderInternalStatus.php) and [OrderStatus](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/OrderStatus.php) constant classes. |
 | **type** | Accepts a string: `'shop_order'`, `'shop_order_refund'`, or a custom order type. |
 | **version** | Accepts a string: WooCommerce version number the order was created in. |
 | **created_via** | Accepts a string: 'checkout', 'rest-api', or a custom creation method slug. |
@@ -111,6 +111,17 @@ $orders = wc_get_orders( array( 'return' => 'ids' ) );
 // Get orders processing and on-hold.
 $args = array(
     'status' => array( 'wc-processing', 'wc-on-hold' ),
+);
+$orders = wc_get_orders( $args );
+```
+
+```php
+// Using constant classes for status.
+$args = array(
+    'status' => array(
+        \Automattic\WooCommerce\Enums\OrderInternalStatus::PROCESSING,
+        \Automattic\WooCommerce\Enums\OrderInternalStatus::ON_HOLD,
+    ),
 );
 $orders = wc_get_orders( $args );
 ```

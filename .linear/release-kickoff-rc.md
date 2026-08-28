@@ -12,10 +12,10 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Release readiness review
 
-Go through this with the Product DRI (named on the parent tracking issue) before starting the build. The goal is a deliberate "this RC is ready to go out" call, with the evidence in one place. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
+Go through this checklist together with the Product DRIs named on the parent tracking issue before starting the build - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. The goal is a deliberate "this RC is ready to go out" call, with the evidence in one place. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
 
-- [ ] Review the QIT compatibility regression sweep report for this prerelease. Every introduced issue has a verdict: blocking or not.
-- [ ] Every open finding against this release (bug reports, testing threads, monitoring alerts) has a linked issue and a verdict: release-blocking / fix in a point release / not a bug.
+- [ ] Review the QIT compatibility regression sweep report for this prerelease. Every introduced issue has a verdict: blocking or not; non-blocking findings get their full verdict in the next item.
+- [ ] Every open finding against this release (bug reports, testing threads, monitoring alerts, non-blocking QIT sweep findings) has a linked issue and a verdict per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/): release-blocking / fix in a point release / next release / not a bug.
 - [ ] The rollback path for this release is known: who reverts, how, and what revert means for this version (see the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)).
 - [ ] Comms are ready: the changelog is in shape and there's a known-issues list if the verdicts above left anything open.
 

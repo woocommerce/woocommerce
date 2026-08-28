@@ -1757,6 +1757,23 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox sync_price correctly writes child prices to the parent when no price meta existed before (CREATE path).
+	 */
+	public function test_sync_price_writes_prices_when_parent_has_no_prior_price_meta(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		delete_post_meta( $product_id, '_price' );
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_price' ) );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_price( $product );
+
+		$this->assertTrue( metadata_exists( 'post', $product_id, '_price' ) );
+
+		$product->delete();
+	}
+
+	/**
 	 * @dataProvider provider_lookup_table_generating
 	 * @testdox sync_stock_status sets instock when at least one child is in stock.
 	 *
@@ -1911,6 +1928,67 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$sizes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product )['pa_size'];
 
 		$this->assertSame( array( 'small', 'large', 'huge' ), $sizes );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox read_price_data prunes the transient when hash buckets exceed the size cap.
+	 */
+	public function test_read_price_data_prunes_unbound_transient(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$version    = WC_Cache_Helper::get_transient_version( 'product' );
+
+		// Compute the current price hash so we can place it first in the seeded transient.
+		$data_store   = new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function __construct() { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				$this->prices_array = array();
+			}
+
+			public function get_price_hash( &$product, $for_display = false ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		$current_hash = $data_store->get_price_hash( $product, false );
+
+		// Seed an unbound transient with the current hash near the head to verify pruning moves it to the tail.
+		$entry = array(
+			'price'         => array(),
+			'regular_price' => array(),
+			'sale_price'    => array(),
+			'version'       => $version,
+		);
+		foreach ( $product->get_children() as $child_id ) {
+			$entry['price'][ $child_id ]         = '10.00';
+			$entry['regular_price'][ $child_id ] = '15.00';
+			$entry['sale_price'][ $child_id ]    = '10.00';
+		}
+
+		$unbound                        = array();
+		$unbound[ md5( 'hash_first' ) ] = $entry;
+		$unbound[ $current_hash ]       = $entry;
+		for ( $i = 0; $i < 38; $i++ ) {
+			$unbound[ md5( 'hash_' . $i ) ] = $entry;
+		}
+		$stored = wp_json_encode( $unbound );
+		set_transient( 'wc_var_prices_' . $product_id, $stored, DAY_IN_SECONDS * 30 );
+
+		// Before pruning: 40 buckets, exceeds 8KB, current hash is near the head (position 2).
+		$this->assertSame( 40, count( $unbound ), 'Seeded transient should contain 40 hash buckets before pruning.' );
+		$this->assertGreaterThan( 8192, strlen( $stored ), 'Seeded transient JSON should exceed 8KB before pruning.' );
+
+		// Enable taxes so the missing opposite hash triggers recalculation + pruning.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$display_hash = $data_store->get_price_hash( $product, true );
+		$data_store->read_price_data( $product, true );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// After pruning: fewer buckets, under 8KB, both hashes moved from head to tail.
+		$stored = json_decode( (string) get_transient( 'wc_var_prices_' . $product_id ), true );
+		$this->assertLessThan( count( $unbound ), count( $stored ), 'Unbound transient should be pruned to fewer hash buckets.' );
+		$this->assertLessThanOrEqual( 8192, strlen( wp_json_encode( $stored ) ), 'Pruned transient JSON should not exceed 8KB.' );
+		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
 
 		$product->delete( true );
 	}
