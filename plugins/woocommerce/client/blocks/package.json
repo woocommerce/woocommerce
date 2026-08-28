@@ -312,7 +312,8 @@
 						"assets/**/*.{js,ts,tsx,scss}",
 						"packages/**/*.{js,ts,tsx,scss}",
 						"tests/js/**/*.{js,ts,tsx,scss,json}",
-						"tests/utils/**/.{js,ts,tsx,scss,json}"
+						"tests/integration/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/*.{js,ts,tsx,scss,json}"
 					],
 					"events": [
 						"pull_request",

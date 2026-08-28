@@ -3,8 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -678,6 +680,61 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should not duplicate a guest customer without an email address.
+	 */
+	public function test_cpt_fallback_does_not_duplicate_guest_without_email(): void {
+		global $wpdb;
+
+		$this->use_cpt_orders();
+		$this->assertFalse( OrderUtil::custom_orders_table_usage_is_enabled(), 'Test should use CPT order storage.' );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_first_name( 'Guest' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( '' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		$this->assertSame( '', $order->get_billing_email( 'edit' ), 'Test order should not have a billing email.' );
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		$new_customer_fired = 0;
+		$callback           = static function () use ( &$new_customer_fired ) {
+			++$new_customer_fired;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		try {
+			ob_start();
+			try {
+				$this->sut->output( $order );
+				$output = (string) ob_get_contents();
+			} finally {
+				ob_end_clean();
+			}
+
+			$customer_lookup_table = CustomersDataStore::get_db_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
+			$customers_after_render     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
+			$new_customers_after_render = $new_customer_fired;
+
+			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
+			$customers_after_import = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
+		} finally {
+			remove_action( 'woocommerce_analytics_new_customer', $callback );
+		}
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template.' );
+		$this->assertSame( 0, $customers_after_render, 'Rendering customer history should not create an analytics customer.' );
+		$this->assertSame( 0, $new_customers_after_render, 'Rendering customer history should not fire the new-customer action.' );
+		$this->assertSame( 1, $customers_after_import, 'Importing the order should create one analytics customer.' );
+		$this->assertSame( 1, $new_customer_fired, 'Importing the order should fire the new-customer action once.' );
 	}
 
 	/**
