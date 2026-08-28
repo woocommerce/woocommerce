@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass the include/exclude parameters through to the downloadable product search so the Grant access field on the order edit screen no longer lists products that are already selected.

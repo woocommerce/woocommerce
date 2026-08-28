@@ -1206,6 +1206,38 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * The Grant access product search must honor the exclude parameter so
+	 * already-granted products do not reappear in the results.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68101
+	 */
+	public function test_json_search_downloadable_products_honors_exclude(): void {
+		$product_one = WC_Helper_Product::create_simple_product();
+		$product_one->set_name( 'Exclusit Download One' );
+		$product_one->set_downloadable( true );
+		$product_one->save();
+
+		$product_two = WC_Helper_Product::create_simple_product();
+		$product_two->set_name( 'Exclusit Download Two' );
+		$product_two->set_downloadable( true );
+		$product_two->save();
+
+		$this->_setRole( 'administrator' );
+
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['term']     = 'Exclusit Download';
+		$_GET['exclude']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		unset( $_GET['security'], $_GET['term'], $_GET['exclude'] );
+
+		$this->assertIsArray( $response, 'The search should return a result set.' );
+		$this->assertArrayHasKey( $product_two->get_id(), $response, 'The non-excluded product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_one->get_id(), $response, 'An excluded (already granted) product must not reappear in the results.' );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
