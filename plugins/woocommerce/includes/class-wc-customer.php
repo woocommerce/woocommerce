@@ -278,8 +278,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * This method uses the current country's locale to determine if a field is required, or falls back to the default
 	 * locale if there's no country-specific setting for that field.
 	 *
-	 * This method is only used internally by StoreAPI, and not by the classic/shortcode checkout.
-	 *
 	 * @since 9.8.0
 	 * @return bool Whether the customer has a full shipping address (city, state, postcode, country).
 	 * Only required fields are checked based on the country locale.
