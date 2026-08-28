@@ -1295,6 +1295,7 @@ jQuery( function ( $ ) {
 						: wc_enhanced_select_params.i18n_loading_tax_rates;
 
 				modal.data( 'wc-tax-rate-request-id', request_id );
+				table_body.css( 'height', table_body.height() );
 
 				// Replacing the rows drops any selected rate, so re-evaluate the Add button
 				// before the request starts rather than leaving it enabled with no selection.
@@ -1331,6 +1332,7 @@ jQuery( function ( $ ) {
 								wc_enhanced_select_params.i18n_ajax_error
 							)
 						);
+						table_body.css( 'height', '' );
 						wc_meta_boxes_order_items.backbone.announce_tax_rate_status( wc_enhanced_select_params.i18n_ajax_error );
 						wc_meta_boxes_order_items.backbone.reset_tax_rate_pagination( pagination );
 					}
@@ -1479,6 +1481,8 @@ jQuery( function ( $ ) {
 					} );
 					announcement = meta.displaying_num || '';
 				}
+
+				table_body.css( 'height', '' );
 
 				pagination.data( 'page', current_page );
 				pagination.data( 'total-pages', total_pages );
