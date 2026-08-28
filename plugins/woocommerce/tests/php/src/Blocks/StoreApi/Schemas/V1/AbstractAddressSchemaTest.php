@@ -114,6 +114,50 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should strip invisible characters from the phone number it returns.
+	 *
+	 * Sanitizing rather than validating is what makes the cleaned number the one that gets
+	 * stored. Validation used to strip a copy and discard it, so the number saved against the
+	 * order kept characters the customer could not see.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/58000
+	 */
+	public function test_strips_invisible_characters_from_phone(): void {
+		$address = $this->make_address( array( 'phone' => "+1\u{FE0D}-555-123-4567" ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( '+1-555-123-4567', $result['phone'] );
+	}
+
+	/**
+	 * @testdox Should leave a phone number without invisible characters alone.
+	 */
+	public function test_does_not_alter_a_clean_phone(): void {
+		$address = $this->make_address( array( 'phone' => '+1 (800) 123-4567' ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( '+1 (800) 123-4567', $result['phone'] );
+	}
+
+	/**
+	 * @testdox Should not fatal on a non-string phone.
+	 *
+	 * The cart/update-customer route registers neither a sanitize nor a validate callback of
+	 * its own, so it calls this method with whatever the request body contained.
+	 */
+	public function test_handles_non_string_phone(): void {
+		foreach ( array( null, 42 ) as $phone ) {
+			$address = $this->make_address( array( 'phone' => $phone ) );
+
+			$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+			$this->assertArrayHasKey( 'phone', $result );
+		}
+	}
+
+	/**
 	 * @testdox Should not texturize billing email addresses in API responses.
 	 */
 	public function test_get_item_response_does_not_texturize_billing_email_address(): void {
