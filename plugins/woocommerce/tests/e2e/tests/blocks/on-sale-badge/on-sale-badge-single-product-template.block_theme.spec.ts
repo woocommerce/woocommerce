@@ -1,115 +1,57 @@
 /**
  * External dependencies
  */
-import {
-	test as base,
-	expect,
-	Editor,
-	FrontendUtils,
-	BLOCK_THEME_SLUG,
-} from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import type { FrameLocator, Page } from '@playwright/test';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/product-sale-badge',
-	mainClass: '.wp-block-woocommerce-product-sale-badge',
-	selectors: {
-		frontend: {
-			badge: '.wc-block-components-product-sale-badge',
-			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
-		},
-		editor: {
-			badge: '.wc-block-components-product-sale-badge',
-			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
-		},
-	},
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
 
+const badgeSelector = '.wc-block-components-product-sale-badge';
+const badgeContainerSelector = '.wp-block-woocommerce-product-sale-badge';
+
 type SaleBadgeAlignment = 'left' | 'center' | 'right';
 
-class BlockUtils {
-	editor: Editor;
-	frontendUtils: FrontendUtils;
+const getAlignmentDelta = async (
+	root: Page | FrameLocator,
+	alignment: SaleBadgeAlignment
+): Promise< number > =>
+	root
+		.locator( badgeContainerSelector )
+		.first()
+		.evaluate(
+			( container, evaluation ) => {
+				const badge = container.querySelector(
+					evaluation.badgeSelector
+				);
 
-	constructor( {
-		editor,
-		frontendUtils,
-	}: {
-		editor: Editor;
-		frontendUtils: FrontendUtils;
-	} ) {
-		this.editor = editor;
-		this.frontendUtils = frontendUtils;
-	}
+				if ( ! badge ) {
+					return Number.POSITIVE_INFINITY;
+				}
 
-	async getSaleBadgeBoundingClientRect( isFrontend: boolean ): Promise< {
-		badge: DOMRect;
-		badgeContainer: DOMRect;
-	} > {
-		const page = isFrontend ? this.frontendUtils.page : this.editor.canvas;
-		return {
-			badge: await page
-				.locator(
-					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-						.badge
-				)
-				.first()
-				.evaluate( ( el ) => el.getBoundingClientRect() ),
-			badgeContainer: await page
-				.locator(
-					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-						.badgeContainer
-				)
-				.first()
-				.evaluate( ( el ) => el.getBoundingClientRect() ),
-		};
-	}
+				const badgeRect = badge.getBoundingClientRect();
+				const containerRect = container.getBoundingClientRect();
 
-	async getAlignmentDelta(
-		alignment: SaleBadgeAlignment,
-		isFrontend: boolean
-	): Promise< number > {
-		const { badge, badgeContainer } =
-			await this.getSaleBadgeBoundingClientRect( isFrontend );
+				if ( evaluation.alignment === 'left' ) {
+					return Math.abs( badgeRect.left - containerRect.left );
+				}
 
-		if ( alignment === 'left' ) {
-			return Math.abs( badge.left - badgeContainer.left );
-		}
+				if ( evaluation.alignment === 'center' ) {
+					const badgeMidpoint =
+						( badgeRect.left + badgeRect.right ) / 2;
+					const containerMidpoint =
+						( containerRect.left + containerRect.right ) / 2;
 
-		if ( alignment === 'center' ) {
-			const badgeMidpoint = ( badge.left + badge.right ) / 2;
-			const containerMidpoint =
-				( badgeContainer.left + badgeContainer.right ) / 2;
-			return Math.abs( badgeMidpoint - containerMidpoint );
-		}
+					return Math.abs( badgeMidpoint - containerMidpoint );
+				}
 
-		return Math.abs( badgeContainer.right - badge.right );
-	}
-}
-
-const test = base.extend< {
-	pageObject: ProductGalleryPage;
-	blockUtils: BlockUtils;
-} >( {
-	pageObject: async ( { page, editor, frontendUtils }, use ) => {
-		await use(
-			new ProductGalleryPage( {
-				page,
-				editor,
-				frontendUtils,
-			} )
+				return Math.abs( containerRect.right - badgeRect.right );
+			},
+			{ alignment, badgeSelector }
 		);
-	},
-	blockUtils: async ( { editor, frontendUtils }, use ) => {
-		await use( new BlockUtils( { editor, frontendUtils } ) );
-	},
-} );
 
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
@@ -123,47 +65,46 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 
 		test( 'renders and aligns the sale badge in editor and frontend', async ( {
-			admin,
 			editor,
-			frontendUtils,
 			page,
-			pageObject,
-			blockUtils,
 		} ) => {
+			const context = page.context();
+			const baselinePageCount = context.pages().length;
+			const frontendPage = await context.newPage();
+
 			try {
+				expect( context.pages() ).toHaveLength( baselinePageCount + 1 );
+
 				await editor.openDocumentSettingsSidebar();
 				await editor.insertBlock( {
 					name: 'woocommerce/product-gallery',
 				} );
-				await pageObject.toggleFullScreenOnClickSetting( false );
+				await page
+					.getByRole( 'checkbox', {
+						name: 'Open pop-up when clicked',
+						exact: true,
+					} )
+					.uncheck();
 
 				let block = await editor.getBlockByName( blockData.name );
 				await expect( block ).toBeVisible();
 				await expect
-					.poll( () =>
-						blockUtils.getAlignmentDelta( 'right', false )
-					)
+					.poll( () => getAlignmentDelta( editor.canvas, 'right' ) )
 					.toBeLessThanOrEqual( 1 );
 
 				await editor.saveSiteEditorEntities( {
 					isOnlyCurrentEntityDirty: true,
 				} );
 
-				await page.goto( blockData.productPage );
-
-				block = await frontendUtils.getBlockByName( blockData.name );
-				await expect( block.first() ).toBeVisible();
+				await frontendPage.goto( blockData.productPage );
+				await expect(
+					frontendPage.locator( badgeSelector ).first()
+				).toBeVisible();
 				await expect
-					.poll( () => blockUtils.getAlignmentDelta( 'right', true ) )
+					.poll( () => getAlignmentDelta( frontendPage, 'right' ) )
 					.toBeLessThanOrEqual( 1 );
 
 				for ( const alignment of [ 'left', 'center' ] as const ) {
-					await admin.visitSiteEditor( {
-						postId: `${ BLOCK_THEME_SLUG }//${ blockData.slug }`,
-						postType: 'wp_template',
-						canvas: 'edit',
-					} );
-
 					block = await editor.getBlockByName( blockData.name );
 					await block.click();
 					await page.getByRole( 'button', { name: 'Align' } ).click();
@@ -175,32 +116,27 @@ test.describe( `${ blockData.name }`, () => {
 
 					await expect
 						.poll( () =>
-							blockUtils.getAlignmentDelta( alignment, false )
+							getAlignmentDelta( editor.canvas, alignment )
 						)
 						.toBeLessThanOrEqual( 1 );
 
 					await editor.saveSiteEditorEntities( {
 						isOnlyCurrentEntityDirty: true,
 					} );
-					await page.goto( blockData.productPage );
 
-					block = await frontendUtils.getBlockByName(
-						blockData.name
-					);
-					await expect( block.first() ).toBeVisible();
+					await frontendPage.goto( blockData.productPage );
+					await expect(
+						frontendPage.locator( badgeSelector ).first()
+					).toBeVisible();
 					await expect
 						.poll( () =>
-							blockUtils.getAlignmentDelta( alignment, true )
+							getAlignmentDelta( frontendPage, alignment )
 						)
 						.toBeLessThanOrEqual( 1 );
 				}
 			} finally {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
-				} );
-				await editor.revertTemplate( {
-					templateName: 'Single Product',
-				} );
+				await frontendPage.close();
+				expect( context.pages() ).toHaveLength( baselinePageCount );
 			}
 		} );
 	} );

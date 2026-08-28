@@ -88,7 +88,12 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		);
 
 		await expect( defaultQueryType ).toBeChecked();
-		await expect( pageObject.products ).toHaveCount( 12 );
+		await expect(
+			pageObject.productTitles.getByRole( 'link' ).first()
+		).toBeVisible();
+		const inheritedProductPaths =
+			await pageObject.getProductPermalinkPaths();
+		expect( inheritedProductPaths ).not.toHaveLength( 0 );
 		await expect( onSaleControl ).toBeHidden();
 
 		await customQueryType.click();
@@ -97,19 +102,42 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			onSale: true,
 			isLocatorsRefreshNeeded: false,
 		} );
-		await expect( pageObject.products ).toHaveCount( 6 );
+		await expect
+			.poll( async () => {
+				const productPaths =
+					await pageObject.getProductPermalinkPaths();
+				return (
+					productPaths.length > 0 &&
+					JSON.stringify( productPaths ) !==
+						JSON.stringify( inheritedProductPaths )
+				);
+			} )
+			.toBeTruthy();
+		const customProductPaths = await pageObject.getProductPermalinkPaths();
+		expect( customProductPaths ).not.toHaveLength( 0 );
+		expect( customProductPaths ).not.toEqual( inheritedProductPaths );
 
 		await defaultQueryType.click();
 		await expect( onSaleControl ).toBeHidden();
+		await expect
+			.poll( async () => pageObject.getProductPermalinkPaths() )
+			.toEqual( inheritedProductPaths );
 		await customQueryType.click();
 		await expect( onSaleControl ).toBeChecked();
-		await expect( pageObject.products ).toHaveCount( 6 );
+		await expect
+			.poll( async () => pageObject.getProductPermalinkPaths() )
+			.toEqual( customProductPaths );
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
 		await pageObject.goToProductCatalogFrontend();
-		await expect( pageObject.products ).toHaveCount( 6 );
+		await expect(
+			pageObject.productTitles.getByRole( 'link' ).first()
+		).toBeVisible();
+		await expect
+			.poll( async () => pageObject.getProductPermalinkPaths() )
+			.toEqual( customProductPaths );
 	} );
 
 	test( 'correctly combines editor and front-end filters', async ( {

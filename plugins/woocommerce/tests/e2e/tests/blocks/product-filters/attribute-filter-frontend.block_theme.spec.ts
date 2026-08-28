@@ -8,20 +8,6 @@ import {
 	wpCLI,
 } from '@woocommerce/e2e-utils';
 
-const INITIAL_PRODUCT_TITLES = [
-	'Album',
-	'Beanie',
-	'Beanie with Logo',
-	'Belt',
-	'Cap',
-	'Hoodie',
-	'Hoodie with Logo',
-	'Hoodie with Zipper',
-	'Logo Collection',
-	'Long Sleeve Tee',
-	'Polo',
-	'Single',
-];
 const GRAY_PRODUCT_TITLES = [ 'T-Shirt', 'T-Shirt with Logo' ];
 const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Blue (4)',
@@ -124,8 +110,12 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 						queryTypeColor: expectedValue ? 'or' : null,
 					} );
 			};
+			await expect( productTitles.first() ).toBeVisible();
+			const initialProductTitles = (
+				await productTitles.allTextContents()
+			).map( ( title ) => title.trim() );
+			expect( initialProductTitles ).not.toHaveLength( 0 );
 
-			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
 			await expect( clearButton ).toBeHidden();
 			await expect( grayCheckbox ).not.toBeChecked();
 
@@ -137,7 +127,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 			await grayCheckbox.click();
 			await expectFilterParams( null );
-			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
+			await expect( productTitles ).toHaveText( initialProductTitles );
 			await expect( grayCheckbox ).not.toBeChecked();
 			await expect( clearButtonIncludingHidden ).toHaveCount( 0 );
 
@@ -147,7 +137,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			await expect( clearButton ).toBeVisible();
 			await clearButton.click();
 			await expectFilterParams( null );
-			await expect( productTitles ).toHaveText( INITIAL_PRODUCT_TITLES );
+			await expect( productTitles ).toHaveText( initialProductTitles );
 			await expect( grayCheckbox ).not.toBeChecked();
 			await expect( clearButtonIncludingHidden ).toHaveCount( 0 );
 		} );

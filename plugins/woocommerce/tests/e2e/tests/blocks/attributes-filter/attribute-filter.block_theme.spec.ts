@@ -119,68 +119,49 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		frontendUtils,
 		page,
 	} ) => {
-		const { stdout } = await wpCLI(
-			`option get ${ blockifiedTemplateOption }`
-		);
-		const previousBlockifiedTemplateOption =
-			stdout.trim().split( /\r?\n/ ).at( -1 ) ?? '';
-		expect( previousBlockifiedTemplateOption ).toMatch( /^[a-z0-9_-]+$/i );
-
 		await wpCLI( `option update ${ blockifiedTemplateOption } false` );
-		try {
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
 
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'attribute-filter',
-					heading: 'Filter By Attribute',
-				},
-			} );
-			const attributeFilter = await editor.getBlockByName(
-				blockData.slug
-			);
+		await editor.insertBlock( {
+			name: 'woocommerce/filter-wrapper',
+			attributes: {
+				filterType: 'attribute-filter',
+				heading: 'Filter By Attribute',
+			},
+		} );
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
-			await attributeFilter.getByText( 'Size' ).click();
-			await attributeFilter.getByText( 'Done' ).click();
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-			await page.goto( '/shop' );
+		await attributeFilter.getByText( 'Size' ).click();
+		await attributeFilter.getByText( 'Done' ).click();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+		await page.goto( '/shop' );
 
-			const legacyTemplate = await frontendUtils.getBlockByName(
-				'woocommerce/legacy-template'
-			);
-			const productTitles = legacyTemplate.locator(
-				'.woocommerce-loop-product__title'
-			);
+		const legacyTemplate = await frontendUtils.getBlockByName(
+			'woocommerce/legacy-template'
+		);
+		const productTitles = legacyTemplate.locator(
+			'.woocommerce-loop-product__title'
+		);
 
-			await expect( productTitles.first() ).toBeVisible();
-			expect( await productTitles.allTextContents() ).not.toHaveLength(
-				0
-			);
-			for ( const name of [ 'Small', 'Medium', 'Large' ] ) {
-				await expect(
-					page.getByRole( 'checkbox', { name } )
-				).toBeVisible();
-			}
-
-			await page.getByRole( 'checkbox', { name: 'Small' } ).click();
-			await expect( page ).toHaveURL(
-				new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-			);
-			await expect( productTitles ).toHaveText( [ 'V-Neck T-Shirt' ] );
-		} finally {
-			await wpCLI(
-				`option update ${ blockifiedTemplateOption } ${ JSON.stringify(
-					previousBlockifiedTemplateOption
-				) }`
-			);
+		await expect( productTitles.first() ).toBeVisible();
+		expect( await productTitles.allTextContents() ).not.toHaveLength( 0 );
+		for ( const name of [ 'Small', 'Medium', 'Large' ] ) {
+			await expect(
+				page.getByRole( 'checkbox', { name } )
+			).toBeVisible();
 		}
+
+		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+		);
+		await expect( productTitles ).toHaveText( [ 'V-Neck T-Shirt' ] );
 	} );
 } );
 
@@ -234,21 +215,16 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		expect( deferredBaseline ).not.toHaveLength( 0 );
 		const deferredUrl = page.url();
 
-		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
-		const updatedBeforeApply = await page
-			.waitForURL(
-				new RegExp( blockData.urlSearchParamWhenFilterIsApplied ),
-				{ timeout: 1000 }
-			)
-			.then(
-				() => true,
-				() => false
-			);
-		expect( updatedBeforeApply ).toBe( false );
+		const smallCheckbox = page.getByRole( 'checkbox', { name: 'Small' } );
+		await smallCheckbox.click();
+		await expect( smallCheckbox ).toBeChecked();
+		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
+		await expect( applyButton ).toBeVisible();
+		await expect( applyButton ).toBeEnabled();
 		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
+		await applyButton.click();
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);

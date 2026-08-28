@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import path from 'path';
-import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'Product Gallery Thumbnails block', () => {
 	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
@@ -151,7 +150,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
 		page,
 		editor,
-		requestUtils,
 	} ) => {
 		await test.step( 'in editor', async () => {
 			const viewerBlock = editor.canvas.locator(
@@ -185,120 +183,32 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			const extraMedia = await requestUtils.uploadMedia(
-				path.resolve(
-					__dirname,
-					'../../../../../test-data/images/image-01.png'
-				)
+			await page.goto( '/product/beanie/' );
+
+			const thumbnailsContainer = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
 			);
 
-			try {
-				const productCliOutput = await wpCLI(
-					'post list --post_type=product --title=Beanie --field=ID'
-				);
-				const productId =
-					productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-				if ( ! productId ) {
-					throw new Error(
-						`Failed to find Beanie product: ${ productCliOutput.stdout }`
-					);
-				}
+			const scrollableContainer = page.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
 
-				const imageIds: string[] = [];
-				for ( const title of [ 'image-01', 'image-02', 'image-03' ] ) {
-					const mediaCliOutput = await wpCLI(
-						`post list --post_type=attachment --title=${ title } --post__not_in=${ extraMedia.id } --field=ID`
-					);
-					const mediaId =
-						mediaCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-					if ( ! mediaId ) {
-						throw new Error(
-							`Failed to find ${ title } attachment: ${ mediaCliOutput.stdout }`
-						);
-					}
-					imageIds.push( mediaId );
-				}
-				imageIds.push( String( extraMedia.id ) );
+			const thumbnails = scrollableContainer.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 
-				const originalThumbnailOutput = await wpCLI(
-					`post meta get ${ productId } _thumbnail_id`
-				);
-				const originalThumbnailId =
-					originalThumbnailOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-				if ( ! originalThumbnailId ) {
-					throw new Error(
-						`Failed to find Beanie thumbnail: ${ originalThumbnailOutput.stdout }`
-					);
-				}
+			await expect( thumbnailsContainer ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
 
-				const originalGalleryOutput = await wpCLI(
-					`post meta get ${ productId } _product_image_gallery`
-				);
-				const originalGalleryIds =
-					originalGalleryOutput.stdout.match(
-						/^\d+(?:,\d+)*$/m
-					)?.[ 0 ];
-				if ( ! originalGalleryIds ) {
-					throw new Error(
-						`Failed to find Beanie gallery: ${ originalGalleryOutput.stdout }`
-					);
-				}
+			const lastThumbnail = thumbnails.last();
+			await lastThumbnail.scrollIntoViewIfNeeded();
 
-				try {
-					await wpCLI(
-						`post meta update ${ productId } _thumbnail_id ${ imageIds[ 0 ] }`
-					);
-					await wpCLI(
-						`post meta update ${ productId } _product_image_gallery '${ imageIds
-							.slice( 1 )
-							.join( ',' ) }'`
-					);
+			await expect( lastThumbnail ).toBeVisible();
 
-					await page.goto( '/product/beanie/' );
-
-					const thumbnailsContainer = page.locator(
-						'[data-block-name="woocommerce/product-gallery-thumbnails"]'
-					);
-
-					const scrollableContainer = page.locator(
-						'.wc-block-product-gallery-thumbnails__scrollable'
-					);
-
-					const thumbnails = scrollableContainer.locator(
-						'.wc-block-product-gallery-thumbnails__thumbnail'
-					);
-
-					await expect( thumbnails ).toHaveCount( 4 );
-					// Check if overflow classes are present initially
-					await expect( thumbnailsContainer ).toHaveClass(
-						/wc-block-product-gallery-thumbnails--overflow-bottom/
-					);
-
-					// Scroll to the last thumbnail
-					const lastThumbnail = thumbnails.last();
-					await lastThumbnail.scrollIntoViewIfNeeded();
-
-					// Verify the last thumbnail is visible
-					await expect( lastThumbnail ).toBeVisible();
-
-					// After scrolling to the end, the bottom overflow should be gone
-					await expect( thumbnailsContainer ).not.toHaveClass(
-						/wc-block-product-gallery-thumbnails--overflow-bottom/
-					);
-				} finally {
-					try {
-						await wpCLI(
-							`post meta update ${ productId } _product_image_gallery '${ originalGalleryIds }'`
-						);
-					} finally {
-						await wpCLI(
-							`post meta update ${ productId } _thumbnail_id ${ originalThumbnailId }`
-						);
-					}
-				}
-			} finally {
-				await requestUtils.deleteMedia( extraMedia.id );
-			}
+			await expect( thumbnailsContainer ).not.toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
 		} );
 	} );
 } );

@@ -21,7 +21,6 @@ const saveLocalPickupSettings = async ( page: Page ) => {
 
 test.describe( 'Merchant → Local Pickup Settings', () => {
 	test.beforeEach( async ( { page, localPickupUtils } ) => {
-		await localPickupUtils.deleteLocations();
 		await localPickupUtils.disableLocalPickupCosts();
 		await localPickupUtils.enableLocalPickup();
 		if (

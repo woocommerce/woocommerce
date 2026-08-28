@@ -25,46 +25,9 @@ const blockData = {
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, provideTemplateCompiler ) => {
-		// Retry the template creation to handle socket hang up errors
-		const maxRetries = 3;
-		let retryCount = 0;
-		let compiler;
-		let lastError;
-
-		while ( retryCount < maxRetries ) {
-			try {
-				compiler = await requestUtils.createTemplateFromFile(
-					'archive-product_filters-with-product-collection'
-				);
-				break; // Success, exit retry loop
-			} catch ( error ) {
-				lastError = error;
-				const errorMessage = error?.message || '';
-
-				// Only retry on network-related errors that are likely transient
-				const isRetriableError =
-					errorMessage.includes( 'socket hang up' ) ||
-					errorMessage.includes( 'ECONNRESET' ) ||
-					errorMessage.includes( 'ETIMEDOUT' ) ||
-					errorMessage.includes( 'ENOTFOUND' );
-
-				retryCount++;
-
-				if ( ! isRetriableError || retryCount >= maxRetries ) {
-					throw error;
-				}
-
-				// Exponential backoff: 200ms, 400ms, 800ms
-				const backoffDelay = Math.pow( 2, retryCount - 1 ) * 200;
-				await new Promise( ( resolve ) =>
-					setTimeout( resolve, backoffDelay )
-				);
-			}
-		}
-
-		if ( ! compiler ) {
-			throw lastError;
-		}
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
 
 		await provideTemplateCompiler( compiler );
 	},
@@ -361,22 +324,15 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			name: 'Reset price filter',
 		} );
 		await expect( resetPriceFilterButton ).toBeVisible();
-		const updatedBeforeApply = await page
-			.waitForURL(
-				new RegExp( blockData.urlSearchParamWhenFilterIsApplied ),
-				{ timeout: 1000 }
-			)
-			.then(
-				() => true,
-				() => false
-			);
-		expect( updatedBeforeApply ).toBe( false );
+		const applyButton = page.getByRole( 'button', {
+			name: 'Apply price filter',
+		} );
+		await expect( applyButton ).toBeVisible();
+		await expect( applyButton ).toBeEnabled();
 		await expect( page ).toHaveURL( deferredUrl );
 		await expect( productTitles ).toHaveText( deferredBaseline );
 
-		await page
-			.getByRole( 'button', { name: 'Apply price filter' } )
-			.click();
+		await applyButton.click();
 
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )

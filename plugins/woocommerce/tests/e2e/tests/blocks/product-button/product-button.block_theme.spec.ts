@@ -54,40 +54,32 @@ test.describe( `${ blockData.name } Block`, () => {
 			isChecked: true,
 		} );
 
-		try {
-			await frontendUtils.goToShop();
+		await frontendUtils.goToShop();
 
-			const blocks = await frontendUtils.getBlockByName( blockData.slug );
-			const block = blocks.first();
-			const button = block.getByRole( 'link' );
+		const blocks = await frontendUtils.getBlockByName( blockData.slug );
+		const block = blocks.first();
+		const button = block.getByRole( 'link' );
 
-			const productId = await button.getAttribute( 'data-product_id' );
+		const productId = await button.getAttribute( 'data-product_id' );
 
-			const productNameLocator = page.locator(
-				`li.post-${ productId } h2`
-			);
-			await expect( productNameLocator ).not.toBeEmpty();
+		const productNameLocator = page.locator( `li.post-${ productId } h2` );
+		await expect( productNameLocator ).not.toBeEmpty();
 
-			const productName =
-				( await productNameLocator.textContent() ) as string;
+		const productName =
+			( await productNameLocator.textContent() ) as string;
 
-			await block.click();
+		await block.click();
 
-			await expect(
-				page.locator( `a[href*="cart=${ productId }"]` )
-			).toBeVisible();
+		await expect(
+			page.locator( `a[href*="cart=${ productId }"]` )
+		).toBeVisible();
 
-			await frontendUtils.goToCheckout();
+		await frontendUtils.goToCheckout();
 
-			const productElement = page.getByText( productName, {
-				exact: true,
-			} );
+		const productElement = page.getByText( productName, {
+			exact: true,
+		} );
 
-			await expect( productElement ).toBeVisible();
-		} finally {
-			await handleAddToCartAjaxSetting( admin, page, {
-				isChecked: false,
-			} );
-		}
+		await expect( productElement ).toBeVisible();
 	} );
 } );

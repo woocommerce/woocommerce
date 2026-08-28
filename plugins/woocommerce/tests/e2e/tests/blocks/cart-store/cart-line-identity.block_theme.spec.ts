@@ -1,18 +1,46 @@
 /**
  * External dependencies
  */
-import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
+import { expect, guestFile, test } from '@woocommerce/e2e-utils';
+import type { Locator, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
  */
-import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
 import {
 	CART_LINE_IDENTITY_PLUGIN,
 	PRODUCT_X,
 	readCartLineQuantities,
 	seedMetaLine,
 } from './utils';
+
+async function clickAndWaitForAddItemBatch( page: Page, button: Locator ) {
+	const [ response ] = await Promise.all( [
+		page.waitForResponse( ( candidate ) => {
+			if (
+				candidate.request().method() !== 'POST' ||
+				! candidate.url().includes( '/wp-json/wc/store/v1/batch' )
+			) {
+				return false;
+			}
+
+			const batch = candidate.request().postDataJSON() as {
+				requests?: Array< { method?: string; path?: string } >;
+			};
+
+			return (
+				batch.requests?.some(
+					( request ) =>
+						request.method === 'POST' &&
+						request.path === '/wc/store/v1/cart/add-item'
+				) === true
+			);
+		} ),
+		button.click(),
+	] );
+
+	expect( response.ok() ).toBe( true );
+}
 
 /**
  * E2E flows for "Block add-to-cart action respects cart-line identity".
@@ -39,14 +67,6 @@ import {
  * store/consumer unit level. The cart-outcome substrate remains represented
  * here by the meta-only keyless-add canary.
  */
-
-const test = base.extend< {
-	addToCartWithOptionsPage: AddToCartWithOptionsPage;
-} >( {
-	addToCartWithOptionsPage: async ( { page, admin, editor }, use ) => {
-		await use( new AddToCartWithOptionsPage( { page, admin, editor } ) );
-	},
-} );
 
 test.describe( 'Add to cart respects cart-line identity', () => {
 	test.describe( 'with a meta-differentiated line present', () => {
@@ -94,15 +114,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 	test.describe( 'variation handling (Add to Cart with Options)', () => {
 		test( 'Re-adding a variation increments its line; adding a different variation creates a new line', async ( {
 			page,
-			editor,
 			frontendUtils,
-			addToCartWithOptionsPage,
+			requestUtils,
 		} ) => {
-			// Swap the single-product template's legacy Add to Cart form for the
-			// Add to Cart with Options block, then visit the variable product.
-			await addToCartWithOptionsPage.updateSingleProductTemplate();
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			await requestUtils.createTemplate( 'wp_template', {
+				slug: 'single-product',
+				title: 'Cart line identity',
+				content: '<!-- wp:woocommerce/add-to-cart-with-options /-->',
 			} );
 
 			await page.goto( '/product/v-neck-t-shirt/' );
@@ -110,15 +128,24 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const addToCartBlock = page.locator(
 				'.wp-block-add-to-cart-with-options'
 			);
-			const colorBlueOption = addToCartBlock
-				.getByRole( 'radiogroup', { name: 'Color' } )
-				.getByRole( 'radio', { name: 'Blue', exact: true } );
-			const colorRedOption = addToCartBlock
-				.getByRole( 'radiogroup', { name: 'Color' } )
-				.getByRole( 'radio', { name: 'Red', exact: true } );
-			const sizeLargeOption = addToCartBlock
-				.getByRole( 'radiogroup', { name: 'Size' } )
-				.getByRole( 'radio', { name: 'Large', exact: true } );
+			const colorOptions = addToCartBlock.getByRole( 'radiogroup', {
+				name: 'Color',
+			} );
+			const sizeOptions = addToCartBlock.getByRole( 'radiogroup', {
+				name: 'Size',
+			} );
+			const colorBlueOption = colorOptions.getByRole( 'radio', {
+				name: 'Blue',
+				exact: true,
+			} );
+			const colorRedOption = colorOptions.getByRole( 'radio', {
+				name: 'Red',
+				exact: true,
+			} );
+			const sizeLargeOption = sizeOptions.getByRole( 'radio', {
+				name: 'Large',
+				exact: true,
+			} );
 			// Scope to the Add to Cart + Options block (so we don't pick the
 			// Related Products block's button) and target the submit button by
 			// its stable class: its accessible name changes from "Add to cart"
@@ -127,16 +154,19 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const addToCartButton = addToCartBlock.locator(
 				'.single_add_to_cart_button'
 			);
+			await expect( colorOptions ).toBeVisible();
+			await expect( sizeOptions ).toBeVisible();
+			await expect( addToCartButton ).toBeVisible();
 
 			// Select variation V (Blue, Large) and add it: creates V's line.
 			await colorBlueOption.click();
 			await sizeLargeOption.click();
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
-			await addToCartButton.click();
+			await clickAndWaitForAddItemBatch( page, addToCartButton );
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Add V again: increments V's existing line (no second V line).
-			await addToCartButton.click();
+			await clickAndWaitForAddItemBatch( page, addToCartButton );
 			await expect( addToCartButton ).toHaveText( '2 in cart' );
 
 			// Select a different variation W (Red, Large), not in the cart: the
@@ -145,7 +175,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
 			// Add W: creates a new, separate line for W.
-			await addToCartButton.click();
+			await clickAndWaitForAddItemBatch( page, addToCartButton );
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Persisted cart: V incremented to 2 and W added as a distinct line,

@@ -13,8 +13,6 @@ import {
  */
 import { CheckoutPage } from './checkout.page';
 import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
-import { request } from '../../../fixtures/fixtures';
-import { setOption } from '../../../utils/options';
 
 const blockData: BlockData = {
 	name: 'Checkout',
@@ -37,14 +35,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 		await use( pageObject );
 	},
 } );
-
-const getBaseURL = ( baseURL: string | undefined ): string => {
-	if ( ! baseURL ) {
-		throw new Error( 'Expected baseURL to be configured.' );
-	}
-
-	return baseURL;
-};
 
 test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
@@ -107,156 +97,135 @@ test.describe( 'Merchant → Checkout', () => {
 	test( 'Merchant must accept T&S before checkout', async ( {
 		frontendUtils,
 		checkoutPageObject,
-		admin,
 		editor,
 	} ) => {
-		try {
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-terms-block"]'
-			);
-			const requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
-				name: 'Require checkbox',
-				exact: true,
-			} );
-			await requireTermsCheckbox.check();
-			await editor.saveSiteEditorEntities();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-terms-block"]'
+		);
+		const requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
+			name: 'Require checkbox',
+			exact: true,
+		} );
+		await requireTermsCheckbox.check();
+		await editor.saveSiteEditorEntities();
 
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.placeOrder( false );
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder( false );
 
-			const checkboxWithError = frontendUtils.page.getByLabel(
-				'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
-			);
-			await expect( checkboxWithError ).toHaveAttribute(
-				'aria-invalid',
-				'true'
-			);
-			await checkboxWithError.check();
+		const checkboxWithError = frontendUtils.page.getByLabel(
+			'You must accept our Terms and Conditions and Privacy Policy to continue with your purchase.'
+		);
+		await expect( checkboxWithError ).toHaveAttribute(
+			'aria-invalid',
+			'true'
+		);
+		await checkboxWithError.check();
 
-			await checkoutPageObject.placeOrder();
-			await expect(
-				frontendUtils.page.getByText(
-					'Thank you. Your order has been received'
-				)
-			).toBeVisible();
-		} finally {
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-terms-block"]'
-			);
-			const requireTermsCheckbox = editor.page.getByRole( 'checkbox', {
-				name: 'Require checkbox',
-				exact: true,
-			} );
-			await requireTermsCheckbox.uncheck();
-			await editor.saveSiteEditorEntities();
-		}
+		await checkoutPageObject.placeOrder();
+		await expect(
+			frontendUtils.page.getByText(
+				'Thank you. Your order has been received'
+			)
+		).toBeVisible();
 	} );
 
 	test( 'Merchant can persist a required Company field', async ( {
-		baseURL,
 		frontendUtils,
 		admin,
 		editor,
+		requestUtils,
 	} ) => {
-		const url = getBaseURL( baseURL );
-		const companyOption = 'woocommerce_checkout_company_field';
-		await setOption( request, url, companyOption, 'hidden' );
+		await requestUtils.rest( {
+			method: 'POST',
+			path: 'e2e-options/update',
+			data: {
+				option_name: 'woocommerce_checkout_company_field',
+				option_value: 'hidden',
+			},
+		} );
 
-		try {
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
 
-			const shippingAddressBlock = await editor.getBlockByName(
-				'woocommerce/checkout-shipping-address-block'
-			);
-			const shippingCompanyInput =
-				shippingAddressBlock.getByLabel( 'Company' );
-			const shippingCompanyToggle = editor.page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			const companyRequirement = editor.page.locator(
-				'.wc-block-components-require-company-field'
-			);
+		const shippingAddressBlock = await editor.getBlockByName(
+			'woocommerce/checkout-shipping-address-block'
+		);
+		const shippingCompanyInput =
+			shippingAddressBlock.getByLabel( 'Company' );
+		const shippingCompanyToggle = editor.page.getByRole( 'checkbox', {
+			name: 'Company',
+			exact: true,
+		} );
+		const companyRequirement = editor.page.locator(
+			'.wc-block-components-require-company-field'
+		);
 
-			await expect( shippingCompanyToggle ).not.toBeChecked();
-			await expect( shippingCompanyInput ).toBeHidden();
-			await expect( async () => {
-				await shippingCompanyToggle.check();
-			} ).toPass();
-			await expect( shippingCompanyInput ).toBeVisible();
-			await expect(
-				companyRequirement.getByRole( 'radio', { name: 'Optional' } )
-			).toBeChecked();
-			await expect( shippingCompanyInput ).not.toHaveAttribute(
-				'required'
-			);
+		await expect( shippingCompanyToggle ).not.toBeChecked();
+		await expect( shippingCompanyInput ).toBeHidden();
+		await expect( async () => {
+			await shippingCompanyToggle.check();
+		} ).toPass();
+		await expect( shippingCompanyInput ).toBeVisible();
+		await expect(
+			companyRequirement.getByRole( 'radio', { name: 'Optional' } )
+		).toBeChecked();
+		await expect( shippingCompanyInput ).not.toHaveAttribute( 'required' );
 
-			const requiredCompany = companyRequirement.getByRole( 'radio', {
-				name: 'Required',
-			} );
-			await expect( async () => {
-				await requiredCompany.check();
-			} ).toPass();
-			await expect( requiredCompany ).toBeChecked();
-			await expect( shippingCompanyInput ).toHaveAttribute( 'required' );
-			await editor.saveSiteEditorEntities();
+		const requiredCompany = companyRequirement.getByRole( 'radio', {
+			name: 'Required',
+		} );
+		await expect( async () => {
+			await requiredCompany.check();
+		} ).toPass();
+		await expect( requiredCompany ).toBeChecked();
+		await expect( shippingCompanyInput ).toHaveAttribute( 'required' );
+		await editor.saveSiteEditorEntities();
 
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
-			await expect(
-				editor.page
-					.locator( '.wc-block-components-require-company-field' )
-					.getByRole( 'radio', { name: 'Required' } )
-			).toBeChecked();
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
+		await expect(
+			editor.page
+				.locator( '.wc-block-components-require-company-field' )
+				.getByRole( 'radio', { name: 'Required' } )
+		).toBeChecked();
 
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
 
-			const shippingCompany = frontendUtils.page
-				.getByRole( 'group', { name: 'Shipping address' } )
-				.getByLabel( 'Company' );
-			await expect( shippingCompany ).toBeVisible();
-			await expect( shippingCompany ).toHaveAttribute( 'required' );
+		const shippingCompany = frontendUtils.page
+			.getByRole( 'group', { name: 'Shipping address' } )
+			.getByLabel( 'Company' );
+		await expect( shippingCompany ).toBeVisible();
+		await expect( shippingCompany ).toHaveAttribute( 'required' );
 
-			await frontendUtils.page
-				.getByLabel( 'Use same address for billing' )
-				.uncheck();
-			const billingCompany = frontendUtils.page
-				.getByRole( 'group', { name: 'Billing address' } )
-				.getByLabel( 'Company' );
-			await expect( billingCompany ).toBeVisible();
-			await expect( billingCompany ).toHaveAttribute( 'required' );
-		} finally {
-			await setOption( request, url, companyOption, 'hidden' );
-		}
+		await frontendUtils.page
+			.getByLabel( 'Use same address for billing' )
+			.uncheck();
+		const billingCompany = frontendUtils.page
+			.getByRole( 'group', { name: 'Billing address' } )
+			.getByLabel( 'Company' );
+		await expect( billingCompany ).toBeVisible();
+		await expect( billingCompany ).toHaveAttribute( 'required' );
 	} );
 } );

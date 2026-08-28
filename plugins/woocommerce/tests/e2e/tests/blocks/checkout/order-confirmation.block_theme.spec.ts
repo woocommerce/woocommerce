@@ -83,17 +83,11 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await page.goto( wrongKeyURL.toString() );
 		await checkoutPageObject.verifyOrderConfirmationDetails( false );
 
-		try {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-order-confirmation-filters'
-			);
-			await page.goto( orderReceivedURL );
-			await checkoutPageObject.verifyOrderConfirmationDetails();
-		} finally {
-			await requestUtils.deactivatePlugin(
-				'woocommerce-blocks-test-order-confirmation-filters'
-			);
-		}
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-order-confirmation-filters'
+		);
+		await page.goto( orderReceivedURL );
+		await checkoutPageObject.verifyOrderConfirmationDetails();
 	} );
 } );
 

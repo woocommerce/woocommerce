@@ -61,17 +61,23 @@ test.describe( 'Product Collection: Collections', () => {
 
 		await pageObject.refreshLocators( 'editor' );
 		await expect( pageObject.products.first() ).toBeVisible();
-		const editorTitles = await pageObject.productTitles.allTextContents();
-		expect( editorTitles ).not.toHaveLength( 0 );
+		await expect(
+			pageObject.productTitles.getByRole( 'link' ).first()
+		).toBeVisible();
+		const editorProductPaths = await pageObject.getProductPermalinkPaths();
+		expect( editorProductPaths ).not.toHaveLength( 0 );
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
 		await pageObject.goToProductCatalogFrontend();
 		await expect( pageObject.products.first() ).toBeVisible();
+		await expect(
+			pageObject.productTitles.getByRole( 'link' ).first()
+		).toBeVisible();
 		await expect
-			.poll( async () => pageObject.productTitles.allTextContents() )
-			.toEqual( editorTitles );
+			.poll( async () => pageObject.getProductPermalinkPaths() )
+			.toEqual( editorProductPaths );
 	} );
 
 	test.describe( 'Related Products collection', () => {

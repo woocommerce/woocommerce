@@ -32,7 +32,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Local pickup', () => {
 	test.beforeEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.deleteLocations();
 		await localPickupUtils.enableLocalPickup();
 		await localPickupUtils.addPickupLocation( {
 			location: {
@@ -196,48 +195,36 @@ test.describe( 'Shopper → Store shipping disabled', () => {
 		frontendUtils,
 		localPickupUtils,
 		page,
-		requestUtils,
 	} ) => {
-		try {
-			await localPickupUtils.disableLocalPickup();
+		await localPickupUtils.disableLocalPickup();
 
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await frontendUtils.goToCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
 
-			await expect(
-				page.getByText( 'Delivery', { exact: true } )
-			).toBeHidden();
+		await expect(
+			page.getByText( 'Delivery', { exact: true } )
+		).toBeHidden();
 
-			await frontendUtils.goToCheckout();
+		await frontendUtils.goToCheckout();
 
-			// Delivery total in the sidebar.
-			await expect(
-				page.getByText( 'Delivery', { exact: true } )
-			).toBeHidden();
+		// Delivery total in the sidebar.
+		await expect(
+			page.getByText( 'Delivery', { exact: true } )
+		).toBeHidden();
 
-			// Ship/Pickup method selector.
-			await expect(
-				page.getByText( 'Ship', { exact: true } )
-			).toBeHidden();
-			await expect(
-				page.getByText( 'Pickup', { exact: true } )
-			).toBeHidden();
+		// Ship/Pickup method selector.
+		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
+		await expect(
+			page.getByText( 'Pickup', { exact: true } )
+		).toBeHidden();
 
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.placeOrder();
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
 
-			await expect(
-				page.getByText( 'Thank you. Your order has been received.' )
-			).toBeVisible();
-		} finally {
-			await requestUtils.rest( {
-				method: 'PUT',
-				path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
-				data: { value: 'all' },
-			} );
-			await localPickupUtils.enableLocalPickup();
-		}
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
 	} );
 } );
 
