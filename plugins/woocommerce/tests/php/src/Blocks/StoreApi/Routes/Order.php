@@ -251,6 +251,67 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * A misbehaving callback should cost the endpoint its metadata, not its response. Before the
+	 * container was reshaped this returned whatever the callback produced; now it degrades to no
+	 * metadata rather than failing the request.
+	 *
+	 * @testdox Order endpoint survives a callback that returns a non-array.
+	 */
+	public function test_item_data_survives_a_hostile_filter(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function () {
+				return 'not-an-array';
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'A bad callback must not fail the request.' );
+		$this->assertSame( [], $response->get_data()['items'][0]['item_data'] );
+	}
+
+	/**
+	 * @testdox Order item_data skips metadata entries that are not objects or arrays.
+	 */
+	public function test_item_data_skips_non_object_entries(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[999] = 'scalar-entry';
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 1, $item_data, 'The scalar entry must be skipped, the real one kept.' );
+		$this->assertSame( 'Gift message', $item_data[0]['key'] );
+	}
+
+	/**
 	 * Test that a guest can access a guest order with valid order key and billing email.
 	 */
 	public function test_guest_can_access_guest_order_with_valid_credentials() {

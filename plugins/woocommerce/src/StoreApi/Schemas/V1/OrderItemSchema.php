@@ -99,12 +99,22 @@ class OrderItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	private function get_item_data( $order_item ) {
-		$item_data = [];
+		$formatted_meta_data = $order_item->get_all_formatted_meta_data();
+		$item_data           = [];
 
-		foreach ( $order_item->get_all_formatted_meta_data() as $meta_id => $meta ) {
-			// Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields,
-			// which the endpoint has always passed through. Keep them, but let the row ID win so `id`
-			// always identifies the meta row.
+		// `woocommerce_order_item_get_formatted_meta_data` callbacks can return anything, and a bad
+		// one must not take the whole endpoint down. Fall back to no metadata instead.
+		if ( ! is_array( $formatted_meta_data ) ) {
+			return $item_data;
+		}
+
+		foreach ( $formatted_meta_data as $meta_id => $meta ) {
+			if ( ! is_object( $meta ) && ! is_array( $meta ) ) {
+				continue;
+			}
+
+			// Keep the fields callbacks added, which the endpoint has always passed through, but let
+			// the row ID win so `id` always identifies the meta row.
 			$item_data[] = [ 'id' => $meta_id ] + (array) $meta;
 		}
 
