@@ -103,6 +103,10 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		/**
 		 * Fires when cart is loaded from session.
 		 *
@@ -517,6 +521,10 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
+		if ( $this->should_skip_session_updates() ) {
+			return;
+		}
+
 		/**
 		 * Filters whether the persistent cart is enabled.
 		 *
