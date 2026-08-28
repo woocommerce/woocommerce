@@ -116,15 +116,21 @@
 		}
 	}
 
-	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
-	// The visible icon is our own so that we can control its position freely.
-	input[type="date"]::-webkit-calendar-picker-indicator {
+	// Shared by the invisible native indicator (the click target) and the visible icon, which must
+	// sit exactly on top of each other.
+	@mixin date-icon-position {
 		position: absolute;
 		top: 25px;
 		inset-inline-end: $gap-small;
 		transform: translateY(-50%);
 		width: 24px;
 		height: 24px;
+	}
+
+	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
+	// The visible icon is our own so that we can control its position freely.
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		@include date-icon-position;
 		margin: 0;
 		padding: 0;
 		opacity: 0;
@@ -165,12 +171,7 @@
 	}
 
 	.wc-block-components-text-input__date-icon {
-		position: absolute;
-		top: 25px;
-		inset-inline-end: $gap-small;
-		transform: translateY(-50%);
-		width: 24px;
-		height: 24px;
+		@include date-icon-position;
 		// The icon is decorative only, and clicks should pass through to the native hidden calendar button.
 		pointer-events: none;
 		color: $input-text-light;

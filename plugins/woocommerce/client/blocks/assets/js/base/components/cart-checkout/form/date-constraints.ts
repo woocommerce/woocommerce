@@ -5,35 +5,11 @@ import { date as formatDate } from '@wordpress/date';
 import * as DurationFns from 'temporal-polyfill/fns/Duration';
 import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate';
 
-// Remove once TypeScript's lib ships Temporal types.
-/* eslint-disable @typescript-eslint/naming-convention -- Temporal's own class names. */
-declare const Temporal:
-	| {
-			PlainDate: {
-				from: ( date: string ) => {
-					add: ( duration: unknown ) => { toString: () => string };
-				};
-			};
-			Duration: { from: ( duration: string ) => unknown };
-	  }
-	| undefined;
-/* eslint-enable @typescript-eslint/naming-convention */
-
 /**
  * Resolves an ISO 8601-2 duration to a date relative to today.
  * We use the store timezone (from wp.date.date) so dates match between server and client.
- *
- * Uses native `Temporal` where available, falling back to the polyfill.
  */
-const resolveDuration = ( duration: string ): string => {
-	const today = formatDate( 'Y-m-d', new Date() );
-
-	if ( typeof Temporal !== 'undefined' ) {
-		return Temporal.PlainDate.from( today )
-			.add( Temporal.Duration.from( duration ) )
-			.toString();
-	}
-
+const resolveDuration = ( duration: string, today: string ): string => {
 	const [ year, month, day ] = today.split( '-' ).map( Number );
 
 	return PlainDateFns.toString(
@@ -43,6 +19,10 @@ const resolveDuration = ( duration: string ): string => {
 		)
 	);
 };
+
+// Constraints are re-resolved on every checkout render, so results are memoized. Today's date is
+// part of the key so a session crossing midnight still follows the clock.
+const resolvedDurations = new Map< string, string | undefined >();
 
 /**
  * Resolves a date field's min/max constraint to a YYYY-MM-DD value for a date input.
@@ -67,9 +47,20 @@ export const resolveDateConstraint = (
 		return value;
 	}
 
-	try {
-		return resolveDuration( value );
-	} catch {
-		return undefined;
+	const today = formatDate( 'Y-m-d', new Date() );
+	const cacheKey = `${ value }|${ today }`;
+
+	if ( ! resolvedDurations.has( cacheKey ) ) {
+		let resolved: string | undefined;
+
+		try {
+			resolved = resolveDuration( value, today );
+		} catch {
+			resolved = undefined;
+		}
+
+		resolvedDurations.set( cacheKey, resolved );
 	}
+
+	return resolvedDurations.get( cacheKey );
 };
