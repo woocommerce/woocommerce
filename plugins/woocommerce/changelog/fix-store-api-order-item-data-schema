@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: fix
 
-Store API: declare the order endpoint's item_data with the shape it actually returns, instead of inheriting the cart's.
+Store API: the order endpoint now returns item_data as a list, matching the cart endpoint and its own documented schema. The order item meta ID moves into a new `id` property.

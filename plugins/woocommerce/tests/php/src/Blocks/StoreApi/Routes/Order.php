@@ -178,22 +178,21 @@ class Order extends ControllerTestCase {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $item_data_diff, print_r( $item_data_diff, true ) );
 
-		$item_data = (array) $data['items'][0]['item_data'];
+		$item_data = $data['items'][0]['item_data'];
 		$this->assertNotEmpty( $item_data, 'The fixture must produce item metadata, or the nested schema is never exercised.' );
 
-		// ValidateSchema does not recurse into additionalProperties, so pin the entry shape here.
-		$entry = (array) current( $item_data );
-		$this->assertEqualSets( array( 'key', 'value', 'display_key', 'display_value' ), array_keys( $entry ) );
+		// ValidateSchema does not recurse into list items, so pin the entry shape here.
+		$entry = $item_data[0];
+		$this->assertEqualSets( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $entry ) );
 		$this->assertSame( 'Gift message', $entry['key'] );
 		$this->assertSame( 'Happy birthday', $entry['value'] );
 	}
 
 	/**
-	 * The item_data map is keyed by order item meta ID, so it serializes as a JSON object.
-	 *
-	 * Pinned because the declared schema has to keep matching it; the cart endpoint sends a list.
+	 * item_data must serialize as a JSON list, matching the cart endpoint, with the meta row ID
+	 * carried in `id` rather than used as the key.
 	 */
-	public function test_item_data_serializes_as_a_json_object_keyed_by_meta_id() {
+	public function test_item_data_serializes_as_a_json_list_carrying_the_meta_id() {
 		$order = $this->create_guest_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
@@ -208,8 +207,9 @@ class Order extends ControllerTestCase {
 		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
 		$meta_id   = current( $item->get_meta_data() )->id;
 
-		$this->assertArrayHasKey( $meta_id, (array) $item_data, 'item_data must stay keyed by order item meta ID.' );
-		$this->assertStringStartsWith( '{', wp_json_encode( $item_data ), 'item_data must serialize as a JSON object, not a list.' );
+		$this->assertSame( array( 0 ), array_keys( $item_data ), 'item_data must be a list, not keyed by meta ID.' );
+		$this->assertStringStartsWith( '[', wp_json_encode( $item_data ), 'item_data must serialize as a JSON list, not an object.' );
+		$this->assertSame( $meta_id, $item_data[0]['id'], 'The meta row ID must survive as `id`.' );
 	}
 
 	/**

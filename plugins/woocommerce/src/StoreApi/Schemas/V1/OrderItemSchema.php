@@ -33,10 +33,9 @@ class OrderItemSchema extends ItemSchema {
 	/**
 	 * Item schema properties.
 	 *
-	 * Order items expose the metadata that `WC_Order_Item::get_all_formatted_meta_data()` returns,
-	 * which is keyed by order item meta ID and carries different property names from the cart's
-	 * `item_data`. Redeclare `item_data` here so the published schema describes what this endpoint
-	 * actually sends, rather than inheriting the cart's shape from ItemSchema.
+	 * Order items expose persisted order item metadata, which is a different source from the cart's
+	 * `item_data` and carries a real meta row ID plus a separate display key. Redeclare `item_data`
+	 * here so the published schema describes what this endpoint sends.
 	 *
 	 * @return array
 	 */
@@ -44,15 +43,19 @@ class OrderItemSchema extends ItemSchema {
 		$properties = parent::get_properties();
 
 		$properties['item_data'] = [
-			'description'          => __( 'Metadata related to the item, keyed by order item meta ID. Serialized as an empty array when the item has no metadata.', 'woocommerce' ),
-			'type'                 => [ 'object', 'array' ],
-			'context'              => [ 'view', 'edit' ],
-			'readonly'             => true,
-			'additionalProperties' => [
+			'description' => __( 'Metadata related to the item.', 'woocommerce' ),
+			'type'        => 'array',
+			'context'     => [ 'view', 'edit' ],
+			'readonly'    => true,
+			'items'       => [
 				'type'       => 'object',
-				'context'    => [ 'view', 'edit' ],
-				'readonly'   => true,
 				'properties' => [
+					'id'            => [
+						'description' => __( 'Order item metadata ID.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
 					'key'           => [
 						'description' => __( 'Metadata key.', 'woocommerce' ),
 						'type'        => 'string',
@@ -82,6 +85,31 @@ class OrderItemSchema extends ItemSchema {
 		];
 
 		return $properties;
+	}
+
+	/**
+	 * Get order item metadata as a list.
+	 *
+	 * `get_all_formatted_meta_data()` keys its return by meta row ID. The Store API sends a list, so
+	 * the ID moves into an `id` property rather than being lost.
+	 *
+	 * @param \WC_Order_Item $order_item Order item instance.
+	 * @return array
+	 */
+	protected function get_item_data( $order_item ) {
+		$item_data = [];
+
+		foreach ( $order_item->get_all_formatted_meta_data() as $meta_id => $meta ) {
+			$item_data[] = [
+				'id'            => $meta_id,
+				'key'           => $meta->key,
+				'value'         => $meta->value,
+				'display_key'   => $meta->display_key,
+				'display_value' => $meta->display_value,
+			];
+		}
+
+		return $item_data;
 	}
 
 	/**
@@ -164,7 +192,7 @@ class OrderItemSchema extends ItemSchema {
 			'permalink'            => $product_properties['permalink'],
 			'images'               => $product_properties['images'],
 			'variation'            => $product_properties['variation'],
-			'item_data'            => $order_item->get_all_formatted_meta_data(),
+			'item_data'            => $this->get_item_data( $order_item ),
 			'prices'               => (object) $product_properties['prices'],
 			'totals'               => (object) $this->prepare_currency_response( $this->get_totals( $order_item ) ),
 			'catalog_visibility'   => $product_properties['catalog_visibility'],
