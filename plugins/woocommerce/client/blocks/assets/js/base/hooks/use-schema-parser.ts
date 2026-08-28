@@ -4,9 +4,11 @@
 import { useRef, useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { snakeCaseKeys } from '@woocommerce/base-utils';
+import { defaultFields } from '@woocommerce/settings';
 import type {
 	OrderFormValues,
 	AddressFormValues,
+	FormFields,
 	FormType,
 	ContactFormValues,
 } from '@woocommerce/settings';
@@ -21,6 +23,28 @@ import {
 	paymentStore,
 } from '@woocommerce/block-data';
 import type Ajv from 'ajv';
+
+const dateFieldKeys = Object.keys( defaultFields ).filter(
+	( key ) => defaultFields[ key as keyof FormFields ]?.type === 'date'
+);
+
+/**
+ * Converts date field values to the YYYYMMDD integers rules are compared against.
+ */
+const prepareValues = < T extends object >( values: T ): T => {
+	if ( ! dateFieldKeys.some( ( key ) => key in values ) ) {
+		return values;
+	}
+
+	return Object.fromEntries(
+		Object.entries( values ).map( ( [ key, value ] ) => [
+			key,
+			dateFieldKeys.includes( key )
+				? Number( String( value ).replace( /-/g, '' ) ) || null
+				: value,
+		] )
+	) as T;
+};
 
 const useDocumentObject = < T extends FormType | 'global' >(
 	formType: T
@@ -68,6 +92,10 @@ const useDocumentObject = < T extends FormType | 'global' >(
 			extensions,
 		} = cartData;
 
+		const preparedBilling = prepareValues( billingAddress );
+		const preparedShipping = prepareValues( shippingAddress );
+		const preparedAdditionalFields = prepareValues( additionalFields );
+
 		const documentObject = {
 			cart: {
 				coupons: coupons.map( ( coupon ) => coupon.code ),
@@ -106,44 +134,34 @@ const useDocumentObject = < T extends FormType | 'global' >(
 			checkout: {
 				createAccount: shouldCreateAccount,
 				customerNote: orderNotes,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
+				additionalFields: Object.fromEntries(
+					Object.entries( preparedAdditionalFields ).filter(
+						( [ key ] ) =>
 							ORDER_FORM_KEYS.includes(
 								key as keyof OrderFormValues
 							)
-						) {
-							acc[ key as keyof OrderFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as OrderFormValues
-				),
+					)
+				) as OrderFormValues,
 				paymentMethod: activePaymentMethod,
 			},
 			customer: {
 				id: customerId,
-				billingAddress,
-				shippingAddress,
-				additionalFields: Object.entries( additionalFields ).reduce(
-					( acc, [ key, value ] ) => {
-						if (
+				billingAddress: preparedBilling,
+				shippingAddress: preparedShipping,
+				additionalFields: Object.fromEntries(
+					Object.entries( preparedAdditionalFields ).filter(
+						( [ key ] ) =>
 							CONTACT_FORM_KEYS.includes(
 								key as keyof ContactFormValues
 							)
-						) {
-							acc[ key as keyof ContactFormValues ] = value;
-						}
-						return acc;
-					},
-					{} as ContactFormValues
-				),
+					)
+				) as ContactFormValues,
 				...( formType === 'billing' || formType === 'shipping'
 					? {
 							address:
 								formType === 'billing'
-									? billingAddress
-									: shippingAddress,
+									? preparedBilling
+									: preparedShipping,
 					  }
 					: {} ),
 			},

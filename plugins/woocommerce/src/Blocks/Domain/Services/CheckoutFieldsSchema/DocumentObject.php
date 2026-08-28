@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use WC_Cart;
 use WC_Customer;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
@@ -76,6 +78,14 @@ class DocumentObject {
 	protected $request_data = [];
 
 	/**
+	 * Memoized result of get_data(). Rule evaluation calls get_data() once per rule, so the
+	 * assembled data is cached until the cart, customer, or context changes.
+	 *
+	 * @var array|null
+	 */
+	protected $data = null;
+
+	/**
 	 * The constructor.
 	 *
 	 * @param array $request_data Data that overrides the default values.
@@ -84,6 +94,16 @@ class DocumentObject {
 		$this->cart_controller   = new CartController();
 		$this->schema_controller = StoreApi::container()->get( SchemaController::class );
 		$this->request_data      = $request_data;
+	}
+
+	/**
+	 * Converts additional field values into their document object representation.
+	 *
+	 * @param mixed $values Key value pairs of field values, keyed by field ID.
+	 * @return mixed The converted values.
+	 */
+	protected function prepare_additional_fields( $values ) {
+		return Package::container()->get( CheckoutFields::class )->prepare_values_for_document_object( $values );
 	}
 
 	/**
@@ -96,6 +116,7 @@ class DocumentObject {
 			return;
 		}
 		$this->context = $context;
+		$this->data    = null;
 	}
 
 	/**
@@ -105,6 +126,7 @@ class DocumentObject {
 	 */
 	public function set_customer( WC_Customer $customer ) {
 		$this->customer = $customer;
+		$this->data     = null;
 	}
 
 	/**
@@ -114,6 +136,7 @@ class DocumentObject {
 	 */
 	public function set_cart( WC_Cart $cart ) {
 		$this->cart = $cart;
+		$this->data = null;
 	}
 
 	/**
@@ -167,7 +190,13 @@ class DocumentObject {
 	 * @return array Checkout data context.
 	 */
 	protected function get_checkout_data() {
-		return $this->request_data['checkout'] ?? [];
+		$checkout_data = $this->request_data['checkout'] ?? [];
+
+		if ( isset( $checkout_data['additional_fields'] ) ) {
+			$checkout_data['additional_fields'] = $this->prepare_additional_fields( $checkout_data['additional_fields'] );
+		}
+
+		return $checkout_data;
 	}
 
 	/**
@@ -189,6 +218,11 @@ class DocumentObject {
 			'additional_fields' => $this->request_data['customer']['additional_fields'] ?? (object) [],
 		];
 
+		// Address locations keep their additional fields inside the address itself.
+		foreach ( [ 'shipping_address', 'billing_address', 'additional_fields' ] as $key ) {
+			$customer_data[ $key ] = $this->prepare_additional_fields( $customer_data[ $key ] );
+		}
+
 		if ( 'shipping_address' === $this->context ) {
 			$customer_data['address'] = $customer_data['shipping_address'];
 		}
@@ -208,6 +242,10 @@ class DocumentObject {
 	 * @return array The data for the document object.
 	 */
 	public function get_data() {
+		if ( ! is_null( $this->data ) ) {
+			return $this->data;
+		}
+
 		// Get cart and customer objects before returning data if they are null.
 		if ( is_null( $this->cart ) ) {
 			$this->cart = $this->cart_controller->get_cart_for_response();
@@ -217,11 +255,13 @@ class DocumentObject {
 			$this->customer = ! empty( WC()->customer ) ? WC()->customer : new WC_Customer();
 		}
 
-		return [
+		$this->data = [
 			'cart'     => $this->get_cart_data(),
 			'customer' => $this->get_customer_data(),
 			'checkout' => $this->get_checkout_data(),
 		];
+
+		return $this->data;
 	}
 
 	/**
