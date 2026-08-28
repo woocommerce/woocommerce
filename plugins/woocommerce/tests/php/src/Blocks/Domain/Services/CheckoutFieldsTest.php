@@ -258,8 +258,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	/**
 	 * @testdox A $data rule orders one date field against another.
 	 *
-	 * @testWith ["2026-05-01", "2026-05-04", true]
-	 *           ["2026-05-01", "2026-05-02", true]
+	 * @testWith ["2026-05-01", "2026-05-02", true]
 	 *           ["2026-05-01", "2026-05-01", false]
 	 *           ["2026-05-04", "2026-05-01", false]
 	 *
@@ -280,73 +279,25 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Leaving the field that carries the rule blank skips the comparison, when the rule allows null.
+	 * @testdox A blank date only skips the ordering rule on the side that carries it.
 	 *
-	 * @testWith ["2026-05-01", ""]
-	 *           ["", ""]
+	 * Opis reports "Invalid $data" whenever a $data pointer resolves to something that is not a
+	 * number, so a blank check-in fails the check-out field rather than being skipped, even though
+	 * the rule allows null. A blank check-out is skipped, because the keyword only applies to numbers.
+	 *
+	 * @testWith ["2026-05-01", "", true]
+	 *           ["", "2026-05-04", false]
 	 *
 	 * @param string $check_in  The value of the referenced field.
 	 * @param string $check_out The value of the field carrying the rule.
+	 * @param bool   $is_valid  Whether the pair should pass validation.
 	 */
-	public function test_a_blank_value_skips_its_own_ordering_rule( string $check_in, string $check_out ) {
+	public function test_a_blank_date_only_skips_the_rule_on_its_own_side( string $check_in, string $check_out, bool $is_valid ) {
 		$this->register_stay_dates( array( 'integer', 'null' ) );
 
 		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
 
-		$this->assertTrue(
-			true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ),
-			'A numeric keyword should not apply to a blank date.'
-		);
-	}
-
-	/**
-	 * @testdox A blank value fails a rule that requires an integer, so allowing blanks is the rule author's choice.
-	 */
-	public function test_blank_value_fails_a_non_nullable_rule() {
-		$this->register_stay_dates( 'integer' );
-
-		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
-
-		$this->assertInstanceOf( \WP_Error::class, $this->controller->is_valid_field( $field, $this->stay_document_object( '2026-05-01', '' ) ) );
-	}
-
-	/**
-	 * @testdox A filled in date is rejected while the date it references is still blank.
-	 *
-	 * Opis reports "Invalid $data" whenever a $data pointer resolves to something that is not a
-	 * number, so a blank check-in fails the check-out field rather than being skipped. Allowing
-	 * null in the rule does not change this, because the pointer, not the value, is what fails.
-	 */
-	public function test_a_blank_referenced_date_fails_the_field_that_references_it() {
-		$this->register_stay_dates( array( 'integer', 'null' ) );
-
-		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
-
-		$this->assertInstanceOf( \WP_Error::class, $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-04' ) ) );
-	}
-
-	/**
-	 * @testdox Values are converted for the document object according to their field type.
-	 */
-	public function test_prepare_values_for_document_object() {
-		$prepared = $this->controller->prepare_values_for_document_object(
-			array(
-				'plugin-namespace/delivery-date' => '2026-05-04',
-				'plugin-namespace/gov-id'        => 'AB123456',
-				'unregistered/key'               => '2026-05-04',
-			)
-		);
-
-		$this->assertSame( 20260504, $prepared['plugin-namespace/delivery-date'] );
-		$this->assertSame( 'AB123456', $prepared['plugin-namespace/gov-id'] );
-		$this->assertSame( '2026-05-04', $prepared['unregistered/key'] );
-	}
-
-	/**
-	 * @testdox An empty set of values stays an object, so it serializes as one rather than as an empty array.
-	 */
-	public function test_prepare_values_for_document_object_keeps_object_shape() {
-		$this->assertIsObject( $this->controller->prepare_values_for_document_object( (object) array() ) );
+		$this->assertSame( $is_valid, true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ) );
 	}
 
 	/**

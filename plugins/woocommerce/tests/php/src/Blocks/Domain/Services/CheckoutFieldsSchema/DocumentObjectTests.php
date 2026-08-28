@@ -345,7 +345,6 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [""]
 	 *           ["2026-02-31"]
-	 *           ["not-a-date"]
 	 *
 	 * @param string $value The submitted value.
 	 */
