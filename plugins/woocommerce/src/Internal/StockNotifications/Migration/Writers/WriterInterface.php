@@ -14,6 +14,15 @@ defined( 'ABSPATH' ) || exit;
  *
  * A dry run swaps DbWriter for NullWriter, so the migrators themselves carry no
  * dry-run branching and both modes produce the same report shape.
+ *
+ * The boolean the write methods return means only that the write was issued without error.
+ * It is not a change indicator, and the two implementations reach it differently: `NullWriter`
+ * returns true unconditionally, while `DbWriter` passes through WordPress functions that
+ * report false for a value already equal to the one being written. A caller must therefore
+ * never read `false` as "the store does not hold this value", and never read `true` as
+ * "a row changed". Code that needs proof a value landed reads it back and compares — see
+ * `EmailSettingsMigrator::migrate_batch()`, which does exactly that before recording a
+ * sub-key as migrated.
  */
 interface WriterInterface {
 
@@ -52,7 +61,8 @@ interface WriterInterface {
 	 * @param int    $legacy_id  Legacy notification id.
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
-	 * @return bool
+	 * @return bool True when the write was issued without error. Not a change indicator; see
+	 *              the note on this interface about what the boolean does and does not mean.
 	 */
 	public function write_legacy_meta( int $legacy_id, string $meta_key, $meta_value ): bool;
 
@@ -61,7 +71,8 @@ interface WriterInterface {
 	 *
 	 * @param string $option Option name.
 	 * @param mixed  $value  Option value.
-	 * @return bool
+	 * @return bool True when the write was issued without error. Not a change indicator; see
+	 *              the note on this interface about what the boolean does and does not mean.
 	 */
 	public function write_option( string $option, $value ): bool;
 
@@ -71,7 +82,8 @@ interface WriterInterface {
 	 * @param int    $product_id Product id.
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
-	 * @return bool
+	 * @return bool True when the write was issued without error. Not a change indicator; see
+	 *              the note on this interface about what the boolean does and does not mean.
 	 */
 	public function write_product_meta( int $product_id, string $meta_key, $meta_value ): bool;
 
@@ -83,7 +95,8 @@ interface WriterInterface {
 	 *
 	 * @param int   $product_id Product id.
 	 * @param array $meta       List of `array{0:string,1:mixed}` key/value pairs.
-	 * @return bool
+	 * @return bool True when the write was issued without error. Not a change indicator; see
+	 *              the note on this interface about what the boolean does and does not mean.
 	 */
 	public function write_product_meta_pairs( int $product_id, array $meta ): bool;
 }
