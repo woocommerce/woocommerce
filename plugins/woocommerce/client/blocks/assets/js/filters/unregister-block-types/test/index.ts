@@ -43,14 +43,22 @@ describe( 'unregister block types', () => {
 		( adminPage ) => {
 			loadFilter( adminPage, [
 				'woocommerce/breadcrumbs',
+				'woocommerce/catalog-sorting',
+				'woocommerce/product-results-count',
 				'woocommerce/product-reviews',
 				'woocommerce/product-search',
 				'myplugin/client-only',
 			] );
 
-			expect( unregisterBlockType ).toHaveBeenCalledTimes( 2 );
+			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/breadcrumbs'
+			);
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/catalog-sorting'
+			);
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/product-results-count'
 			);
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/product-reviews'
@@ -75,6 +83,7 @@ describe( 'unregister block types', () => {
 				[
 					'woocommerce/product-search',
 					'woocommerce/product-filters',
+					'woocommerce/cart',
 					'woocommerce/checkout',
 					'woocommerce/order-confirmation-status',
 					'woocommerce/new-widget-compatible-block',
@@ -83,7 +92,10 @@ describe( 'unregister block types', () => {
 				pageNow
 			);
 
-			expect( unregisterBlockType ).toHaveBeenCalledTimes( 3 );
+			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/cart'
+			);
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/checkout'
 			);
