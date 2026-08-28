@@ -458,33 +458,20 @@ export const getFailedPluginAction = (
 /**
  * Build the notice text for a failed provider extension install or activation.
  *
- * `@woocommerce/data` frames errors with the plugin slug and only exposes the finished
- * sentence. Re-frame with the provider title the merchant clicked, taking the reason from
- * the original rejection kept in `error.data`: the per-plugin server response, a plugin
- * permission error, or any other error carrying a message. Keep the already-framed
- * message only when none of those is available.
+ * `@woocommerce/data` frames its message with the plugin slug. Re-frame with the provider
+ * title the merchant clicked, using the unframed reason the rejection carries. Keep the
+ * already-framed message only when the rejection has no reason at all.
  *
  * @param actionType Whether the extension was being installed or activated.
  * @param title      The provider title shown in the UI.
- * @param slug       The extension slug.
  * @param error      The rejection value from installAndActivatePlugins.
  * @return The notice text.
  */
 export const getPluginActionErrorMessage = (
 	actionType: 'install' | 'activate',
 	title: string,
-	slug: string,
 	error: unknown
 ): string => {
-	const data =
-		typeof error === 'object' && error !== null && 'data' in error
-			? ( error as { data: unknown } ).data
-			: undefined;
-	const perPlugin =
-		typeof data === 'object' && data !== null && slug in data
-			? ( data as Record< string, unknown > )[ slug ]
-			: undefined;
-
 	const frame =
 		actionType === 'install'
 			? sprintf(
@@ -498,39 +485,17 @@ export const getPluginActionErrorMessage = (
 					title
 			  );
 
-	if ( Array.isArray( perPlugin ) && perPlugin.length ) {
-		return `${ frame } ${ perPlugin.join( ' ' ) }`;
-	}
-
-	const restError =
-		typeof data === 'object' && data !== null
-			? ( data as {
-					code?: unknown;
-					message?: unknown;
-					data?: { status?: unknown };
-			  } )
+	const rejection =
+		typeof error === 'object' && error !== null
+			? ( error as { reason?: unknown; message?: unknown } )
 			: undefined;
 
-	// Same check as @woocommerce/data's handlePluginAPIError, whose copy this repeats
-	// because that package only exposes it glued to the slug-framed message.
-	if (
-		restError?.code === 'woocommerce_rest_cannot_update' &&
-		restError.data?.status === 403
-	) {
-		return `${ frame } ${ __(
-			'You do not have permissions to manage plugins. Please contact your site administrator.',
-			'woocommerce'
-		) }`;
-	}
-
-	if ( typeof restError?.message === 'string' && restError.message ) {
-		return `${ frame } ${ restError.message }`;
+	if ( typeof rejection?.reason === 'string' && rejection.reason ) {
+		return `${ frame } ${ rejection.reason }`;
 	}
 
 	const message =
-		typeof error === 'object' && error !== null && 'message' in error
-			? String( ( error as { message: unknown } ).message )
-			: '';
+		typeof rejection?.message === 'string' ? rejection.message : '';
 
 	return message || frame;
 };

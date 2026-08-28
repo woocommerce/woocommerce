@@ -328,6 +328,17 @@ describe( 'installPlugins error message', () => {
 		);
 	} );
 
+	it( 'exposes the unframed reason on the error', () => {
+		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: [ 'Reason A.' ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( ( error as { reason?: string } )?.reason ).toBe( 'Reason A.' );
+	} );
+
 	it( 'reports the step that failed on the error', () => {
 		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
 			data: { installed: [], results: {} },

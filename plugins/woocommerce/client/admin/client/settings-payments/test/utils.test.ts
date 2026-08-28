@@ -7,15 +7,14 @@ describe( 'getPluginActionErrorMessage', () => {
 	const reason =
 		'The package could not be installed. The PHP version on your server is 8.1.34, however the uploaded plugin requires 8.2.0.';
 
-	it( 'names the provider by title and appends the server reason', () => {
+	it( 'names the provider by title and appends the reason the rejection carries', () => {
 		const message = getPluginActionErrorMessage(
 			'install',
 			'Visa Acceptance Solutions',
-			'visa-acceptance-solutions',
 			{
 				message:
 					'Could not install visa-acceptance-solutions. ' + reason,
-				data: { 'visa-acceptance-solutions': [ reason ] },
+				reason,
 			}
 		);
 
@@ -24,54 +23,16 @@ describe( 'getPluginActionErrorMessage', () => {
 		);
 	} );
 
-	it( 'joins several server reasons with a space', () => {
-		const message = getPluginActionErrorMessage( 'activate', 'Foo', 'foo', {
-			message: 'x',
-			data: { foo: [ 'One.', 'Two.' ] },
-		} );
-
-		expect( message ).toBe( 'Could not activate Foo. One. Two.' );
-	} );
-
-	it( 'names the provider by title on a permission error', () => {
+	it( 'uses the activate frame for a failed activation', () => {
 		expect(
-			getPluginActionErrorMessage(
-				'install',
-				'Visa Acceptance Solutions',
-				'visa-acceptance-solutions',
-				{
-					message:
-						'Could not install visa-acceptance-solutions. You do not have permissions to manage plugins. Please contact your site administrator.',
-					data: {
-						code: 'woocommerce_rest_cannot_update',
-						message: 'Sorry, you cannot manage plugins.',
-						data: { status: 403 },
-					},
-				}
-			)
-		).toBe(
-			'Could not install Visa Acceptance Solutions. You do not have permissions to manage plugins. Please contact your site administrator.'
-		);
+			getPluginActionErrorMessage( 'activate', 'Foo', {
+				message: 'x',
+				reason: 'One. Two.',
+			} )
+		).toBe( 'Could not activate Foo. One. Two.' );
 	} );
 
-	it( 'names the provider by title and appends the underlying message on other errors', () => {
-		expect(
-			getPluginActionErrorMessage(
-				'install',
-				'Visa Acceptance Solutions',
-				'visa-acceptance-solutions',
-				{
-					message:
-						'Could not install visa-acceptance-solutions. Failed to fetch',
-					data: new TypeError( 'Failed to fetch' ),
-				}
-			)
-		).toBe(
-			'Could not install Visa Acceptance Solutions. Failed to fetch'
-		);
-	} );
-
-	it( 'falls back to the framed message when the rejection carries no usable data', () => {
+	it( 'falls back to the framed message when the rejection carries no reason', () => {
 		const framed =
 			'Could not install visa-acceptance-solutions. Something.';
 
@@ -79,15 +40,24 @@ describe( 'getPluginActionErrorMessage', () => {
 			getPluginActionErrorMessage(
 				'install',
 				'Visa Acceptance Solutions',
-				'visa-acceptance-solutions',
-				{ message: framed, data: undefined }
+				{
+					message: framed,
+					reason: '',
+				}
+			)
+		).toBe( framed );
+		expect(
+			getPluginActionErrorMessage(
+				'install',
+				'Visa Acceptance Solutions',
+				new Error( framed )
 			)
 		).toBe( framed );
 	} );
 
-	it( 'falls back to a generic sentence when the error carries no message', () => {
+	it( 'falls back to the frame alone when the error carries no message', () => {
 		expect(
-			getPluginActionErrorMessage( 'install', 'Foo', 'foo', undefined )
+			getPluginActionErrorMessage( 'install', 'Foo', undefined )
 		).toBe( 'Could not install Foo.' );
 	} );
 } );

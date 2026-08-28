@@ -449,7 +449,6 @@ export const SettingsPaymentsMain = () => {
 						getPluginActionErrorMessage(
 							actionType,
 							paymentsEntity.title,
-							paymentsEntity.plugin.slug,
 							error
 						)
 					);

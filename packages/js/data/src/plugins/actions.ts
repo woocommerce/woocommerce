@@ -30,7 +30,10 @@ class PluginError extends Error {
 		public data: unknown,
 		// The step that actually failed. installAndActivatePlugins runs install then
 		// activate, so callers cannot infer this from the status they saw beforehand.
-		public actionType: 'install' | 'activate'
+		public actionType: 'install' | 'activate',
+		// The reason without the plugin-naming frame, for callers that frame it
+		// themselves (for example with a display title instead of the slug).
+		public reason: string
 	) {
 		super( message );
 	}
@@ -261,7 +264,8 @@ function* handlePluginAPIError(
 	throw new PluginError(
 		formatErrorMessage( actionType, failedPlugins, rawErrorMessage ),
 		error,
-		actionType
+		actionType,
+		rawErrorMessage
 	);
 }
 
