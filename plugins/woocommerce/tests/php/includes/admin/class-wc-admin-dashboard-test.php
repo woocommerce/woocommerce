@@ -436,7 +436,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			$this->sut->status_widget_content();
 			$html = ob_get_clean();
 
-			$this->assertIsString( $html );
 			$this->assertStringContainsString( '<strong>Unsafe &lt;script&gt;alert(&quot;dashboard&quot;)&lt;/script&gt; &amp; title</strong> (2 sales)', $html );
 			$this->assertStringNotContainsString( '<script>', $html );
 		} finally {

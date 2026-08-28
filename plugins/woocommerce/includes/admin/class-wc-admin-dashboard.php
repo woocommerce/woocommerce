@@ -243,7 +243,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity sold */
-							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
+							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', (int) $top_seller->qty, 'woocommerce' ) ),
 							'<strong>' . esc_html( get_the_title( $top_seller->product_id ) ) . '</strong>',
 							(int) $top_seller->qty
 						);
