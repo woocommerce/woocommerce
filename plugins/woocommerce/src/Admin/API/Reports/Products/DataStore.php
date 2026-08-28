@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use Automattic\WooCommerce\Internal\Admin\Reports\ProductIdFilter;
 use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
@@ -215,7 +214,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->add_order_by_sql_params( $query_args );
 
 		$included_products = $this->get_included_products_array( $query_args );
-		$product_id_filter = ProductIdFilter::get_condition(
+		$product_id_filter = ProductSearchQuery::get_id_condition(
 			"{$order_product_lookup_table}.product_id",
 			$this->get_search_subquery( $query_args, $included_products ),
 			$included_products

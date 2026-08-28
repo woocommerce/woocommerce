@@ -12,7 +12,8 @@ use WP_Query;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Builds the SQL that resolves a free-text product search to product IDs.
+ * Builds the SQL that resolves a free-text product search to product IDs, and the condition
+ * restricting a products report to the products its filters resolve to.
  *
  * @internal
  *
@@ -120,6 +121,33 @@ class ProductSearchQuery {
 		// A plugin filtering `posts_fields` can add columns, so name the one this returns.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WP_Query prepares the statement it builds.
 		return "SELECT DISTINCT ID AS product_id FROM ( {$statement} ) AS wc_analytics_product_search_results";
+	}
+
+	/**
+	 * Returns the condition restricting a report to a set of products.
+	 *
+	 * A search resolves to a subquery, the `categories` and `products` filters to an ID list. The
+	 * subquery already covers those filters, since it is built restricted to the same IDs.
+	 *
+	 * Not a data store method: both products data stores need it and one extends the other, so it
+	 * would become part of what extensions inherit.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $column            Product ID column to compare, qualified with its table name.
+	 * @param string $search_subquery   Statement the `search` argument resolves to, from
+	 *                                  `get_ids_subquery()`. Empty when the report carries no search.
+	 * @param array  $included_products Product IDs the `categories` and `products` filters resolve to.
+	 * @return string SQL condition, or an empty string when the report is not restricted.
+	 */
+	public static function get_id_condition( string $column, string $search_subquery, array $included_products ): string {
+		if ( '' !== $search_subquery ) {
+			return "{$column} IN ( {$search_subquery} )";
+		}
+
+		$id_list = implode( ',', $included_products );
+
+		return $id_list ? "{$column} IN ( {$id_list} )" : '';
 	}
 
 	/**
