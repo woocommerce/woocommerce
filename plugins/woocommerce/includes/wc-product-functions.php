@@ -913,10 +913,19 @@ function wc_scheduled_sales() {
 			// so delete this batch's own IDs rather than flushing the groups whole.
 			wp_cache_delete_multiple( $release_ids, 'posts' );
 			wp_cache_delete_multiple( $release_ids, 'post_meta' );
-			// One type per call, though the function takes the whole list: it forwards the
-			// value to a public action typed string, where an array would fatal a listener.
+			// Deleted directly rather than through clean_object_term_cache(), which pairs one
+			// type with whatever IDs it is handed and fires that pairing on a public action.
+			// Any call here mislabels part of the batch, and save() already fired it per
+			// product with that product's own type. This also skips the site-wide terms salt
+			// bump the helper performs, which is wider than anything this loop primed.
+			$release_taxonomies = array();
+
 			foreach ( $release_types as $release_type ) {
-				clean_object_term_cache( $release_ids, $release_type );
+				$release_taxonomies = array_merge( $release_taxonomies, get_object_taxonomies( $release_type ) );
+			}
+
+			foreach ( array_unique( $release_taxonomies ) as $release_taxonomy ) {
+				wp_cache_delete_multiple( $release_ids, "{$release_taxonomy}_relationships" );
 			}
 
 			// Saving releases a product's own entry; this catches the ones only read. The
@@ -927,8 +936,9 @@ function wc_scheduled_sales() {
 			}
 
 			// Persistent-capable, so released only when the cache is request-local. Whole
-			// groups because their keys carry a random prefix. terms is left alone on
-			// purpose: it keys by term ID, so it is bounded by the taxonomy, not the backlog.
+			// groups because products keys carry a random prefix, and term-queries is keyed
+			// by a salt this loop cannot recompute. terms is left alone on purpose: it keys
+			// by term ID, so it is bounded by the taxonomy, not the backlog.
 			if ( $flush_shared_groups ) {
 				wp_cache_flush_group( 'products' );
 				wp_cache_flush_group( 'term-queries' );
