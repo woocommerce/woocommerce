@@ -154,6 +154,6 @@ class RetentionInteractionTests extends WC_Unit_Test_Case {
 	 */
 	private function migrate(): void {
 		$migrator = new NotificationsMigrator( new Reporter() );
-		$migrator->migrate_batch( $migrator->get_batch( 0, 100 ), new DbWriter() );
+		$migrator->migrate_batch( $migrator->get_batch( 0, 100 ), wc_get_container()->get( DbWriter::class ) );
 	}
 }

@@ -57,7 +57,7 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$requirements->init( wc_get_container()->get( StockNotificationsDataStore::class ) );
 
 		$this->processor = new MigrationBatchProcessor();
-		$this->processor->init( $requirements );
+		$this->processor->init( $requirements, wc_get_container()->get( DbWriter::class ) );
 
 		$this->state      = new MigrationState();
 		$this->product_id = $this->create_product();
@@ -383,7 +383,7 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 			}
 		};
 
-		$this->processor->configure_run( array( 'notifications' => $stuck ), new DbWriter(), 50 );
+		$this->processor->configure_run( array( 'notifications' => $stuck ), wc_get_container()->get( DbWriter::class ), 50 );
 
 		$batches = $this->run_to_completion( 50 );
 
