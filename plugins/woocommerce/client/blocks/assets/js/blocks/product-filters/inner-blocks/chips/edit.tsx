@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
 import { Disabled } from '@wordpress/components';
 import clsx from 'clsx';
 import { decodeHtmlEntities } from '@woocommerce/utils';
@@ -35,6 +34,17 @@ import {
 	getVisualAttributeTermStyle,
 	isVisualAttributeTermEmpty,
 } from '../../../../base/utils/visual-attribute-terms';
+
+const LOADING_WIDTHS = [
+	'42%',
+	'67%',
+	'31%',
+	'55%',
+	'73%',
+	'28%',
+	'48%',
+	'61%',
+];
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
@@ -76,14 +86,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const colorVars = getColorVars( attributes );
 	const borderProps = useBorderProps( attributes );
 	const spacingProps = useSpacingProps( attributes );
-	const chipItemClassName = clsx(
-		'wc-block-product-filter-chips__item',
-		! hasVisualSwatches && borderProps.className,
-		! hasVisualSwatches && spacingProps.className
-	);
-	const chipItemStyle = hasVisualSwatches
-		? undefined
-		: { ...borderProps.style, ...spacingProps.style };
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -104,14 +106,22 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		},
 	} );
 
-	const loadingWidths = useMemo(
-		() =>
-			[ ...Array( 10 ) ].map(
-				() => Math.floor( Math.random() * ( 100 - 25 ) ) + '%'
-			),
-		[]
+	if ( ! items ) {
+		return <></>;
+	}
+
+	const threshold = 15;
+	const isLongList = items.length > threshold;
+
+	const chipItemClassName = clsx(
+		'wc-block-product-filter-chips__item',
+		! hasVisualSwatches && borderProps.className,
+		! hasVisualSwatches && spacingProps.className
 	);
-	const loadingState = loadingWidths.map( ( width, i ) => (
+	const chipItemStyle = hasVisualSwatches
+		? undefined
+		: { ...borderProps.style, ...spacingProps.style };
+	const loadingState = LOADING_WIDTHS.map( ( width, i ) => (
 		<div
 			className={ chipItemClassName }
 			key={ i }
@@ -124,13 +134,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 			&nbsp;
 		</div>
 	) );
-
-	if ( ! items ) {
-		return <></>;
-	}
-
-	const threshold = 15;
-	const isLongList = items.length > threshold;
 
 	return (
 		<>
