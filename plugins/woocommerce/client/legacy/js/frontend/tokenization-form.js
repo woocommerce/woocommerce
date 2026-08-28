@@ -110,15 +110,16 @@ jQuery( function( $ ) {
 	function initForms() {
 		$( 'ul.woocommerce-SavedPaymentMethods' ).each( function() {
 			if ( ! $( this ).data( 'wc-tokenization-form' ) ) {
-				$( this ).data( 'wc-tokenization-form', true ).wc_tokenization_form();
+				$( this ).data( 'wc-tokenization-form', true );
+				$( this ).wc_tokenization_form();
 			}
 		} );
 	}
 
-	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
-		$( 'ul.woocommerce-SavedPaymentMethods' ).data( 'wc-tokenization-form', null );
-		initForms();
-	} );
+	$( document.body ).on(
+		'updated_checkout wc-credit-card-form-init',
+		initForms
+	);
 
 	initForms();
 } );
