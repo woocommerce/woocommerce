@@ -69,7 +69,7 @@ test.describe( 'Update propagation — core flows', () => {
 	 * surface a customized core update, the review drawer applies one explicit
 	 * core choice, and the merged content is persisted.
 	 */
-	test( 'Review drawer: pick per-conflict yours vs core and apply', async ( {
+	test( '@pr Review drawer: pick per-conflict yours vs core and apply', async ( {
 		page,
 	} ) => {
 		const oldHtml =
