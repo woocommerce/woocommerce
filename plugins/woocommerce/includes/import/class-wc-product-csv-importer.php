@@ -282,7 +282,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The importer requires a fresh indexed ID lookup that may include newly created placeholders.
 
 			if ( $existing_id ) {
-				$this->remember_original_id_mapping( $id, $existing_id );
 				return absint( $existing_id );
 			}
 
@@ -357,7 +356,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// If row has a SKU, make sure placeholder was not made already.
 			if ( $id_from_sku ) {
-				$this->remember_original_id_mapping( $original_id, $id_from_sku );
 				return $id_from_sku;
 			}
 

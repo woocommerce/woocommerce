@@ -159,10 +159,37 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $referenced_product_id, $duplicate_product_id );
 		$this->assertSame( $existing_product->get_id(), $first_existing_product_id );
 		$this->assertSame( $existing_product->get_id(), $next_existing_product_id );
-		$this->assertSame( 2, $query_count, 'Each resolved CSV ID should query the original-ID mapping at most once.' );
+		$this->assertSame( 3, $query_count, 'Only mappings backed by _original_id meta are cached; references to existing products still query.' );
 
 		WC_Helper_Product::delete_product( $referenced_product_id );
 		WC_Helper_Product::delete_product( $existing_product->get_id() );
+	}
+
+	/**
+	 * @testdox A reference to an existing product does not map a later row with the same ID onto that product
+	 */
+	public function test_reference_to_existing_product_does_not_map_later_row_with_same_id() {
+		$existing_product = WC_Helper_Product::create_simple_product();
+		$existing_id      = $existing_product->get_id();
+		$importer         = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'update_existing' => false ) );
+		$placeholder_id   = 0;
+
+		try {
+			$this->assertSame( $existing_id, $importer->parse_relative_field( 'id:' . $existing_id ) );
+
+			$placeholder_id = $importer->parse_id_field( (string) $existing_id );
+			$placeholder    = wc_get_product( $placeholder_id );
+
+			$this->assertNotSame( $existing_id, $placeholder_id );
+			$this->assertSame( 'importing', $placeholder->get_status() );
+			$this->assertEquals( $existing_id, $placeholder->get_meta( '_original_id' ) );
+			$this->assertSame( $placeholder_id, $importer->parse_relative_field( 'id:' . $existing_id ) );
+		} finally {
+			WC_Helper_Product::delete_product( $existing_id );
+			if ( $placeholder_id ) {
+				WC_Helper_Product::delete_product( $placeholder_id );
+			}
+		}
 	}
 
 	/**
