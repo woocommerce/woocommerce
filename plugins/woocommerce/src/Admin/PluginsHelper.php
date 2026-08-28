@@ -260,14 +260,14 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Read a version requirement reported by the wp.org API.
+	 * Read a version requirement from plugin header data.
 	 *
-	 * The response passes through the `plugins_api_result` filter, so the value is not
-	 * guaranteed to be the string the API documents.
+	 * The headers come from `get_plugin_data()` on the unpacked package, whose values pass
+	 * through filters, so the value is not guaranteed to be a string.
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param mixed $value The raw `requires` or `requires_php` value.
+	 * @param mixed $value The raw `RequiresPHP` or `RequiresWP` value.
 	 * @return string The version, or an empty string when the value is not one.
 	 */
 	private static function get_required_version( $value ): string {
@@ -319,22 +319,23 @@ class PluginsHelper {
 	 * Compose a reason for an install that failed an unmet PHP or WordPress version requirement.
 	 *
 	 * WordPress reports these with copy written for the zip-upload flow ("the uploaded plugin requires"),
-	 * so build our own sentence from the versions the wp.org API and the runtime already provide.
+	 * so build our own sentence from the versions it actually checked: the package headers it read
+	 * in `Plugin_Upgrader::check_package()`, which can differ from the wp.org listing metadata.
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param mixed $error The WP_Error from the upgrader skin, or any non-error value.
-	 * @param mixed $api   The plugins_api() response for the plugin being installed (an object on success).
+	 * @param mixed $error       The WP_Error from the upgrader skin, or any non-error value.
+	 * @param mixed $plugin_data The headers of the package that failed, as `Plugin_Upgrader::$new_plugin_data` holds them.
 	 * @return string The reason, or an empty string when the error is not a requirement failure.
 	 */
-	public static function get_requirements_error_reason( $error, $api ): string {
-		if ( ! is_wp_error( $error ) || ! is_object( $api ) ) {
+	public static function get_requirements_error_reason( $error, $plugin_data ): string {
+		if ( ! is_wp_error( $error ) || ! is_array( $plugin_data ) ) {
 			return '';
 		}
 
 		switch ( $error->get_error_code() ) {
 			case 'incompatible_php_required_version':
-				$required_php = self::get_required_version( $api->requires_php ?? null );
+				$required_php = self::get_required_version( $plugin_data['RequiresPHP'] ?? null );
 				if ( '' === $required_php ) {
 					return '';
 				}
@@ -347,7 +348,7 @@ class PluginsHelper {
 					)
 				);
 			case 'incompatible_wp_required_version':
-				$required_wp = self::get_required_version( $api->requires ?? null );
+				$required_wp = self::get_required_version( $plugin_data['RequiresWP'] ?? null );
 				if ( '' === $required_wp ) {
 					return '';
 				}
@@ -502,7 +503,7 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
-				$install_error_message = self::get_requirements_error_reason( $upgrader->skin->result, $api );
+				$install_error_message = self::get_requirements_error_reason( $upgrader->skin->result, $upgrader->new_plugin_data );
 				if ( '' === $install_error_message ) {
 					$install_error_message = self::get_error_reason( $upgrader->skin->result, $result );
 				}

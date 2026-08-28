@@ -160,15 +160,15 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	public function test_get_requirements_error_reason_ignores_non_version_values(): void {
 		$error = new WP_Error( 'incompatible_php_required_version', 'x' );
 
-		// plugins_api_result is a public filter, so this value is not guaranteed to be a string.
+		// Header values pass through filters, so this value is not guaranteed to be a string.
 		$this->assertSame(
 			'',
-			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => array( '8.2' ) ) ),
+			PluginsHelper::get_requirements_error_reason( $error, array( 'RequiresPHP' => array( '8.2' ) ) ),
 			'An array requirement must not be coerced into the sentence.'
 		);
 		$this->assertSame(
 			'',
-			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => true ) )
+			PluginsHelper::get_requirements_error_reason( $error, array( 'RequiresPHP' => true ) )
 		);
 	}
 
@@ -180,11 +180,11 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			'It requires PHP 8.2 or newer, but this site runs PHP ' . PHP_VERSION . '.',
-			PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => '<b>8.2</b>' ) ),
+			PluginsHelper::get_requirements_error_reason( $error, array( 'RequiresPHP' => '<b>8.2</b>' ) ),
 			'Markup reaching us through a filter must not survive into the reason.'
 		);
 
-		$long = PluginsHelper::get_requirements_error_reason( $error, (object) array( 'requires_php' => str_repeat( '9', 5000 ) ) );
+		$long = PluginsHelper::get_requirements_error_reason( $error, array( 'RequiresPHP' => str_repeat( '9', 5000 ) ) );
 		$this->assertSame( 301, mb_strlen( $long ), 'A requirement reason is capped like every other reason.' );
 	}
 
@@ -192,12 +192,12 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	 * @testdox Should compose its own sentence for an unmet PHP requirement.
 	 */
 	public function test_get_requirements_error_reason_for_php(): void {
-		$error = new WP_Error( 'incompatible_php_required_version', 'The package could not be installed.', 'core detail' );
-		$api   = (object) array( 'requires_php' => '8.2.0' );
+		$error   = new WP_Error( 'incompatible_php_required_version', 'The package could not be installed.', 'core detail' );
+		$headers = array( 'RequiresPHP' => '8.2.0' );
 
 		$this->assertSame(
 			sprintf( 'It requires PHP 8.2.0 or newer, but this site runs PHP %s.', PHP_VERSION ),
-			PluginsHelper::get_requirements_error_reason( $error, $api )
+			PluginsHelper::get_requirements_error_reason( $error, $headers )
 		);
 	}
 
@@ -205,12 +205,12 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	 * @testdox Should compose its own sentence for an unmet WordPress requirement.
 	 */
 	public function test_get_requirements_error_reason_for_wordpress(): void {
-		$error = new WP_Error( 'incompatible_wp_required_version', 'The package could not be installed.', 'core detail' );
-		$api   = (object) array( 'requires' => '9.9' );
+		$error   = new WP_Error( 'incompatible_wp_required_version', 'The package could not be installed.', 'core detail' );
+		$headers = array( 'RequiresWP' => '9.9' );
 
 		$this->assertSame(
 			sprintf( 'It requires WordPress 9.9 or newer, but this site runs WordPress %s.', get_bloginfo( 'version' ) ),
-			PluginsHelper::get_requirements_error_reason( $error, $api )
+			PluginsHelper::get_requirements_error_reason( $error, $headers )
 		);
 	}
 
@@ -218,14 +218,79 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	 * @testdox Should return an empty string for other error codes, non-errors, or a missing requirement value.
 	 */
 	public function test_get_requirements_error_reason_returns_empty_otherwise(): void {
-		$api = (object) array( 'requires_php' => '8.2.0' );
+		$headers = array( 'RequiresPHP' => '8.2.0' );
 
-		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( new WP_Error( 'download_failed', 'x' ), $api ) );
-		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( null, $api ) );
+		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( new WP_Error( 'download_failed', 'x' ), $headers ) );
+		$this->assertSame( '', PluginsHelper::get_requirements_error_reason( null, $headers ) );
 		$this->assertSame(
 			'',
-			PluginsHelper::get_requirements_error_reason( new WP_Error( 'incompatible_php_required_version', 'x' ), (object) array() ),
-			'Without the required version from the API there is nothing accurate to say.'
+			PluginsHelper::get_requirements_error_reason( new WP_Error( 'incompatible_php_required_version', 'x' ), array() ),
+			'Without the required version from the package header there is nothing accurate to say.'
+		);
+	}
+
+	/**
+	 * Close the output buffer the upgrader skin leaves open on its error path.
+	 *
+	 * WP_Upgrader_Skin::error() calls header() again because Automatic_Upgrader_Skin::header()
+	 * never marks the header as done, so a failed install opens one more buffer than it closes.
+	 *
+	 * @param int $level The buffer level to return to.
+	 */
+	private function close_upgrader_output_buffers( int $level ): void {
+		while ( ob_get_level() > $level ) {
+			ob_end_clean();
+		}
+	}
+
+	/**
+	 * Short-circuit plugins_api() with a fixed response and point the upgrader at a package.
+	 *
+	 * @param string $download_link The package the upgrader should install.
+	 * @return callable The filter callback, so the caller can remove it.
+	 */
+	private function short_circuit_plugins_api( string $download_link ): callable {
+		$callback = function () use ( $download_link ) {
+			return (object) array(
+				'name'          => 'Foo',
+				'slug'          => 'foo',
+				'version'       => '1.0.0',
+				'download_link' => $download_link,
+			);
+		};
+		add_filter( 'plugins_api', $callback );
+		return $callback;
+	}
+
+	/**
+	 * @testdox Should build the requirement reason from the version in the package header, which is what WordPress checked.
+	 */
+	public function test_install_plugins_reports_requirement_from_package_header(): void {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			$this->markTestSkipped( 'ZipArchive is required to build the test package.' );
+		}
+
+		$package = wp_tempnam( 'foo.zip' );
+		$zip     = new \ZipArchive();
+		$zip->open( $package, \ZipArchive::OVERWRITE );
+		$zip->addFromString( 'foo/foo.php', "<?php\n/**\n * Plugin Name: Foo\n * Requires PHP: 99.0\n */\n" );
+		$zip->close();
+
+		$api = $this->short_circuit_plugins_api( $package );
+
+		$ob_level = ob_get_level();
+		try {
+			$data = PluginsHelper::install_plugins( array( 'foo' ) );
+		} finally {
+			remove_filter( 'plugins_api', $api );
+			wp_delete_file( $package );
+			$this->close_upgrader_output_buffers( $ob_level );
+		}
+
+		$this->assertSame( array(), $data['installed'] );
+		$this->assertSame(
+			sprintf( 'It requires PHP 99.0 or newer, but this site runs PHP %s.', PHP_VERSION ),
+			$data['errors']->get_error_message( 'foo' )
 		);
 	}
 }
