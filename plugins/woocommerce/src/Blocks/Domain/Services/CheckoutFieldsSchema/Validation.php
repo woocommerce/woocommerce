@@ -22,6 +22,29 @@ class Validation {
 	private static $meta_schema_json = '';
 
 	/**
+	 * Keywords that may hold a `$data` reference instead of a literal value, because
+	 * the base document schema we have doesn't include those.
+	 */
+	private const DATA_REF_KEYWORDS = [
+		'multipleOf',
+		'maximum',
+		'exclusiveMaximum',
+		'minimum',
+		'exclusiveMinimum',
+		'maxLength',
+		'minLength',
+		'pattern',
+		'maxItems',
+		'minItems',
+		'uniqueItems',
+		'maxProperties',
+		'minProperties',
+		'required',
+		'enum',
+		'format',
+	];
+
+	/**
 	 * Get the field schema with context.
 	 *
 	 * @param string $field_id The field ID.
@@ -153,8 +176,7 @@ class Validation {
 		}
 
 		if ( empty( self::$meta_schema_json ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			self::$meta_schema_json = file_get_contents( __DIR__ . '/json-schema-draft-07.json' );
+			self::$meta_schema_json = self::build_meta_schema();
 		}
 
 		$validator = new Validator();
@@ -177,5 +199,33 @@ class Validation {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Extend the meta draft-07 schema so include $data support in keywords that support it.
+	 *
+	 * @return string The meta schema as JSON.
+	 */
+	private static function build_meta_schema() {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$meta_schema = json_decode( file_get_contents( __DIR__ . '/json-schema-draft-07.json' ), true );
+
+		$meta_schema['definitions']['dataRef'] = [
+			'type'                 => 'object',
+			'required'             => [ '$data' ],
+			'properties'           => [ '$data' => [ 'type' => 'string' ] ],
+			'additionalProperties' => false,
+		];
+
+		foreach ( self::DATA_REF_KEYWORDS as $keyword ) {
+			$meta_schema['properties'][ $keyword ] = [
+				'anyOf' => [
+					$meta_schema['properties'][ $keyword ],
+					[ '$ref' => '#/definitions/dataRef' ],
+				],
+			];
+		}
+
+		return wp_json_encode( $meta_schema );
 	}
 }
