@@ -106,6 +106,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $temp_item_id_counter = 0;
 
 	/**
+	 * Whether the data store supports deferred item deletion.
+	 *
+	 * @var bool|null Null until first checked.
+	 */
+	private $data_store_supports_deferred_item_deletion = null;
+
+	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
 	 * Populated by remove_order_items() with a specific item type and processed by
@@ -359,11 +366,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Determine whether the data store provides custom item deletion behavior.
+	 * Determine whether the data store supports deferred item deletion.
 	 *
 	 * @return bool
 	 */
-	private function data_store_overrides_delete_items(): bool {
+	private function data_store_supports_deferred_item_deletion(): bool {
+		if ( null !== $this->data_store_supports_deferred_item_deletion ) {
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
 		/**
 		 * Data store wrapper.
 		 *
@@ -372,46 +383,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$data_store = $this->data_store;
 
 		if ( ! $data_store->has_callable( 'delete_items' ) ) {
-			return false;
-		}
-
-		$data_store_class = $data_store->get_current_class_name();
-
-		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
+			$this->data_store_supports_deferred_item_deletion = true;
 			return true;
 		}
 
-		$method = new ReflectionMethod( $data_store_class, 'delete_items' );
+		$data_store_class = $data_store->get_current_class_name();
+		$is_cpt_store     = is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true );
 
-		return Abstract_WC_Order_Data_Store_CPT::class !== $method->getDeclaringClass()->getName();
-	}
+		if ( ! $is_cpt_store ) {
+			// Standalone data stores opt in to deferred deletion by providing this optional method.
+			$this->data_store_supports_deferred_item_deletion = $data_store->has_callable( 'delete_items_by_ids' );
+			return $this->data_store_supports_deferred_item_deletion;
+		}
 
-	/**
-	 * Determine whether the data store opts in to deferred item deletion.
-	 *
-	 * @return bool
-	 */
-	private function data_store_opts_in_to_deferred_item_deletion(): bool {
-		/**
-		 * Data store wrapper.
-		 *
-		 * @var WC_Data_Store $data_store
-		 */
-		$data_store = $this->data_store;
+		$delete_items_method = new ReflectionMethod( $data_store_class, 'delete_items' );
+		if ( Abstract_WC_Order_Data_Store_CPT::class === $delete_items_method->getDeclaringClass()->getName() ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
 
 		if ( ! $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			$this->data_store_supports_deferred_item_deletion = false;
 			return false;
 		}
 
-		$data_store_class = $data_store->get_current_class_name();
-		if ( ! is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true ) ) {
-			// Standalone data stores opt in to deferred deletion by providing this optional method.
-			return true;
-		}
+		$delete_items_by_ids_method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
 
-		$method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
-
-		return Abstract_WC_Order_Data_Store_CPT::class !== $method->getDeclaringClass()->getName();
+		$this->data_store_supports_deferred_item_deletion = Abstract_WC_Order_Data_Store_CPT::class !== $delete_items_by_ids_method->getDeclaringClass()->getName();
+		return $this->data_store_supports_deferred_item_deletion;
 	}
 
 	/**
@@ -1146,7 +1145,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
 		$has_persisted_items  = $this->get_id() > 0;
-		$delete_synchronously = $this->data_store_overrides_delete_items() && ! $this->data_store_opts_in_to_deferred_item_deletion();
+		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
 
 		if ( $delete_synchronously && $has_persisted_items ) {
 			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
