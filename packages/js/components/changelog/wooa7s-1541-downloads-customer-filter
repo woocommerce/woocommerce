@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Search: the `customers` type now matches on name, username or email. Its previous name-only behaviour is available as the new `customerNames` type.

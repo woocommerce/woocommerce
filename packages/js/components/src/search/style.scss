@@ -121,4 +121,7 @@
 
 .woocommerce-search__result-name {
 	text-decoration: underline; // @todo Not actually a link, should underline?
+	// Emails and usernames have no break opportunities, so let them wrap anywhere
+	// rather than overflow the results list.
+	overflow-wrap: anywhere;
 }

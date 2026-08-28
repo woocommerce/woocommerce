@@ -67,7 +67,9 @@ export const getCustomerLabels = getRequestByIdString(
 	NAMESPACE + '/customers',
 	( customer ) => ( {
 		key: customer.id,
-		label: customer.name,
+		// Customers can be registered without a first or last name, so fall back
+		// to the fields that are always set.
+		label: customer.name || customer.username || customer.email,
 	} )
 );
 

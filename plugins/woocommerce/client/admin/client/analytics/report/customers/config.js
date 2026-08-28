@@ -127,7 +127,7 @@ export const advancedFilters = applyFilters(
 				],
 				input: {
 					component: 'Search',
-					type: 'customers',
+					type: 'customerNames',
 					getLabels: getRequestByIdString(
 						NAMESPACE + '/customers',
 						( customer ) => ( {

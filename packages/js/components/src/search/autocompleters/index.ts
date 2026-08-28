@@ -5,6 +5,7 @@ export { default as attributes } from './attributes';
 export { default as productCategory } from './categories';
 export { default as countries } from './countries';
 export { default as coupons } from './coupons';
+export { default as customerNames } from './customer-names';
 export { default as customers } from './customers';
 export { default as downloadIps } from './download-ips';
 export { default as emails } from './emails';
