@@ -78,8 +78,8 @@ class WC_Tracker {
 			}
 		} else {
 			// Make sure there is at least a 1 hour delay between override sends, we don't want duplicate calls due to double clicking links.
-			$last_send = self::get_last_send_time();
-			if ( $last_send && $last_send > strtotime( '-1 hours' ) ) {
+			$last_attempt = max( (int) self::get_last_send_time(), (int) get_option( 'woocommerce_tracker_last_attempt', 0 ) );
+			if ( $last_attempt > strtotime( '-1 hours' ) ) {
 				return;
 			}
 		}
@@ -88,6 +88,9 @@ class WC_Tracker {
 		if ( false === $body ) {
 			return;
 		}
+
+		// Recorded before sending so overlapping override sends are still suppressed.
+		update_option( 'woocommerce_tracker_last_attempt', time(), false );
 
 		$response = wp_safe_remote_post(
 			self::$api_url,
@@ -103,7 +106,7 @@ class WC_Tracker {
 			)
 		);
 
-		self::record_send_result( $response );
+		self::record_send_result( $response, strlen( $body ) );
 	}
 
 	/**
@@ -113,9 +116,10 @@ class WC_Tracker {
 	 * leaves it pending and the next scheduled run retries it. Consecutive failures are
 	 * counted so a persistent outage does not retry forever.
 	 *
-	 * @param array|WP_Error $response Response from wp_safe_remote_post().
+	 * @param array|WP_Error $response   Response from wp_safe_remote_post().
+	 * @param int            $body_bytes Size of the posted snapshot.
 	 */
-	private static function record_send_result( $response ): void {
+	private static function record_send_result( $response, $body_bytes ): void {
 		$status = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
 
 		if ( 200 <= $status && 300 > $status ) {
@@ -134,13 +138,22 @@ class WC_Tracker {
 			update_option( 'woocommerce_tracker_send_failures', $failures, false );
 		}
 
+		if ( 413 === $status ) {
+			$message = 'WooCommerce tracker snapshot delivery failed; the snapshot is too large for the service and will not be retried.';
+		} elseif ( $give_up ) {
+			$message = 'WooCommerce tracker snapshot delivery failed; giving up until the next interval.';
+		} else {
+			$message = 'WooCommerce tracker snapshot delivery failed; it will be retried on the next run.';
+		}
+
 		wc_get_logger()->warning(
-			$give_up ? 'WooCommerce tracker snapshot delivery failed; giving up until the next interval.' : 'WooCommerce tracker snapshot delivery failed; it will be retried on the next run.',
+			$message,
 			array(
 				'source'      => 'woocommerce-tracker',
 				'http_status' => $status,
 				'error_code'  => is_wp_error( $response ) ? $response->get_error_code() : '',
 				'failures'    => $failures,
+				'body_bytes'  => $body_bytes,
 			)
 		);
 	}

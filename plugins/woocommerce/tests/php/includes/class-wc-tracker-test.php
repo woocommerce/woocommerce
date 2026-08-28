@@ -206,6 +206,65 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should suppress a second override send within an hour of a failed attempt.
+	 */
+	public function test_override_send_is_suppressed_within_an_hour_of_a_failed_attempt(): void {
+		$request_args = null;
+		$requests     = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return new WP_Error( 'http_request_failed', 'Timed out' );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertSame( 1, $requests, 'A failed override send must still block a second override send within the hour.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_attempt' ), 5, 'Every attempt should record its time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_last_send' ), 'A failed attempt must not record a send time.' );
+	}
+
+	/**
+	 * @testdox Should include the payload size in the failure log.
+	 */
+	public function test_failure_log_includes_payload_size(): void {
+		$this->fake_tracker_response( 503 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertGreaterThan( 0, $logger->warnings[0]['body_bytes'], 'The failure log should report the payload size.' );
+	}
+
+	/**
+	 * @testdox Should report a rejected oversized snapshot distinctly.
+	 */
+	public function test_too_large_snapshot_is_logged_as_such(): void {
+		$this->fake_tracker_response( 413 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertStringContainsString( 'too large', $logger->messages[0] );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'An oversized snapshot is not retried.' );
+	}
+
+	/**
+	 * @testdox Should clear the failure counter when tracking is turned off.
+	 */
+	public function test_opting_out_clears_failure_counter(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+
+		WC()->handle_tracking_setting_change( 'yes', 'no' );
+
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Opting out should discard pending retry state.' );
+	}
+
+	/**
 	 * Fake the tracker HTTP response.
 	 *
 	 * @param int|string $status       HTTP status code, or "wp_error" for a transport failure.
@@ -236,7 +295,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Inject a fake logger that records warning contexts.
 	 *
-	 * @return object Fake logger with a public `warnings` array of contexts.
+	 * @return object Fake logger with public `warnings` (contexts) and `messages` arrays.
 	 */
 	private function expect_tracker_warning() {
 		$logger = new class() implements WC_Logger_Interface {
@@ -247,6 +306,13 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			 */
 			public $warnings = array();
 
+			/**
+			 * Recorded warning messages.
+			 *
+			 * @var array
+			 */
+			public $messages = array();
+
 			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {}
 			public function log( $level, $message, $context = array() ) {}
@@ -256,6 +322,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			public function error( $message, $context = array() ) {}
 			public function warning( $message, $context = array() ) {
 				$this->warnings[] = $context;
+				$this->messages[] = $message;
 			}
 			public function notice( $message, $context = array() ) {}
 			public function info( $message, $context = array() ) {}
