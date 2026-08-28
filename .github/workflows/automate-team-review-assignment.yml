@@ -67,20 +67,31 @@ jobs:
               } );
               core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
 
+        - name: Check out the composite action and the reviewer configs
+          if: ${{ github.event.pull_request.draft == false }}
+          uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+          with:
+              # Never the pull request head: the configs decide who gets write-scoped review requests.
+              ref: ${{ github.sha }}
+              sparse-checkout: .github
+              persist-credentials: false
+
         - name: Assign reviewers for a community PR
           if: ${{ steps.check.outputs.contributor == 'yes' && github.event.pull_request.draft == false }}
-          uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
+          uses: ./.github/actions/assign-reviewers
           with:
-              config: '.github/project-community-pr-assigner.yml'
-              token: ${{ secrets.PR_ASSIGN_TOKEN }}
+              mode: changed-files
+              config: .github/project-community-pr-assigner.json
+              github-token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
         - name: Assign reviewers for a teams PR
           if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) && ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) }}
           continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
-          uses: acq688/Request-Reviewer-For-Team-Action@fca1c60fd0504aef59bdc925f3902c8a2d8bce62 # v1.1
+          uses: ./.github/actions/assign-reviewers
           with:
-              config: '.github/automate-team-review-assignment-config.yml'
-              GITHUB_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+              mode: author-team
+              config: .github/automate-team-review-assignment-config.json
+              github-token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
     add-testing-instructions-review-comment:
       name: Remind reviewers to also review the testing instructions and test coverage

@@ -1,0 +1,187 @@
+name: 'Assign reviewers'
+description: 'Request reviews on a pull request, either from the owners of the files it changes or from the teams its author belongs to. Expects a Linux runner: glob matching follows the runner platform, and is case-insensitive on macOS and Windows.'
+
+inputs:
+  mode:
+    description: 'How to pick reviewers: `changed-files` matches the config keys as globs against the changed files, `author-team` matches them as team slugs against the author.'
+    required: true
+  config:
+    description: 'Path to the reviewer config, relative to the repository root. A JSON object mapping each key to a reviewer, or a list of them: a team slug, or `@login` for a person.'
+    required: true
+  github-token:
+    description: 'Token used to look up teams and request reviews. Needs to be able to request team reviews.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Request the reviews
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        CONFIG_FILE: ${{ inputs.config }}
+        MODE: ${{ inputs.mode }}
+      with:
+        github-token: ${{ inputs.github-token }}
+        retries: 2
+        script: |
+          const config = JSON.parse( require( 'fs' ).readFileSync( process.env.CONFIG_FILE, 'utf8' ) );
+          const author = context.payload.pull_request.user.login;
+          const owners = ( key ) => {
+              const list = [].concat( config[ key ] );
+
+              if ( ! list.length || list.some( ( owner ) => typeof owner !== 'string' || ! owner ) ) {
+                  throw new Error( `Config key '${ key }' does not name a reviewer.` );
+              }
+
+              return list;
+          };
+
+          Object.keys( config ).forEach( owners );
+          const pull = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+          };
+
+          // Both routers return the config values of the keys they matched. Every match
+          // counts, so a pull request spanning several areas collects every owner.
+          const byChangedFiles = async () => {
+              const path = require( 'path' );
+
+              // path.matchesGlob() has no `dot` option, so a leaf such as
+              // `packages/js/components/.npmrc` would never match `**/*`. Renaming every
+              // segment-leading dot on both sides makes those segments ordinary again.
+              // The one case this cannot reproduce is a wildcard matching the empty
+              // string before a literal dot, so a file named exactly `.js` does not match
+              // `*{.js,.ts}`. Beware too when testing a pattern locally: path.matchesGlob()
+              // is case-insensitive on macOS and Windows, and case-sensitive on Linux.
+              const undot = ( value ) => value.replace( /(^|\/)\./g, '$1__dot__' );
+
+              // Whether a dot inside `{...}` starts a segment depends on where the group
+              // sits, so expand the groups first and rename each result on its own.
+              const expand = ( pattern ) => {
+                  const group = pattern.match( /\{([^{}]*)\}/ );
+
+                  if ( ! group ) {
+                      return [ undot( pattern ) ];
+                  }
+
+                  return group[ 1 ].split( ',' ).flatMap( ( alternative ) => expand(
+                      pattern.slice( 0, group.index ) + alternative + pattern.slice( group.index + group[ 0 ].length )
+                  ) );
+              };
+
+              const files = await github.paginate( github.rest.pulls.listFiles, { ...pull, per_page: 100 } );
+              const changed = files.map( ( file ) => undot( file.filename ) );
+
+              return Object.keys( config )
+                  .filter( ( pattern ) => {
+                      const globs = expand( pattern );
+
+                      return changed.some( ( file ) => globs.some( ( glob ) => path.matchesGlob( file, glob ) ) );
+                  } )
+                  .flatMap( owners );
+          };
+
+          const byAuthorTeam = async () => {
+              // A membership lookup that fails is treated as "not a member", so a pull
+              // request is never blocked by a transient API error.
+              const isOnTeam = async ( team ) => {
+                  try {
+                      const { data } = await github.rest.teams.getMembershipForUserInOrg( {
+                          org: context.repo.owner,
+                          team_slug: team,
+                          username: author,
+                      } );
+
+                      return data.state !== 'pending';
+                  } catch ( error ) {
+                      const message = `Could not read ${ author }'s membership of ${ team }: ${ error.message }`;
+
+                      // 404 just means "not a member". Anything else means the lookup
+                      // failed, and the routing below is quietly missing a team.
+                      error.status === 404 ? core.info( message ) : core.warning( message );
+
+                      return false;
+                  }
+              };
+
+              const matched = [];
+
+              for ( const team of Object.keys( config ) ) {
+                  if ( await isOnTeam( team ) ) {
+                      matched.push( ...owners( team ) );
+                  }
+              }
+
+              return matched;
+          };
+
+          const routers = { 'changed-files': byChangedFiles, 'author-team': byAuthorTeam };
+          const mode = process.env.MODE;
+
+          if ( ! Object.hasOwn( routers, mode ) ) {
+              throw new Error( `Unknown mode '${ mode }'.` );
+          }
+
+          const reviewers = new Set();
+          const teams = new Set();
+
+          for ( const owner of await routers[ mode ]() ) {
+              if ( ! owner.startsWith( '@' ) ) {
+                  teams.add( owner );
+              } else if ( owner.slice( 1 ).toLowerCase() !== author.toLowerCase() ) {
+                  reviewers.add( owner.slice( 1 ) );
+              }
+          }
+
+          const matched = [ ...teams, ...[ ...reviewers ].map( ( reviewer ) => `@${ reviewer }` ) ];
+
+          core.info( `Matched reviewers: ${ matched.join( ', ' ) || 'nobody' }.` );
+
+          if ( ! reviewers.size && ! teams.size ) {
+              return;
+          }
+
+          const request = ( body ) => github.rest.pulls.requestReviewers( { ...pull, ...body } );
+
+          try {
+              await request( { reviewers: [ ...reviewers ], team_reviewers: [ ...teams ] } );
+
+              return;
+          } catch ( error ) {
+              // The API rejects the whole batch over a single bad entry, so ask one at a
+              // time instead of losing every reviewer to it.
+              core.warning( `Could not request the reviews together: ${ error.message }` );
+          }
+
+          let requested = 0;
+          const rejected = [];
+
+          const alone = async ( body, name ) => request( body ).then(
+              () => { requested += 1; },
+              ( error ) => {
+                  // 422 is the API saying it will not accept this reviewer, which means
+                  // the config names somebody who no longer exists or lost access. Every
+                  // other status is about the token or the rate limit, not the config.
+                  if ( error.status === 422 ) {
+                      rejected.push( name );
+                  }
+
+                  core.warning( `Could not request a review from ${ name }: ${ error.message }` );
+              }
+          );
+
+          for ( const team of teams ) {
+              await alone( { team_reviewers: [ team ] }, team );
+          }
+
+          for ( const reviewer of reviewers ) {
+              await alone( { reviewers: [ reviewer ] }, reviewer );
+          }
+
+          if ( rejected.length ) {
+              core.setFailed( `The API rejected these reviewers, check the config: ${ rejected.join( ', ' ) }.` );
+          } else if ( ! requested ) {
+              core.setFailed( 'Could not request a review from anybody.' );
+          }
