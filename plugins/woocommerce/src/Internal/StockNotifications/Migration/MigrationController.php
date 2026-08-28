@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyUnsubscribeShim;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\ToolsRegistrar;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,6 +22,14 @@ defined( 'ABSPATH' ) || exit;
  * query. Everything else - the Tools entry, the CLI commands, the unsubscribe shim - is resolved
  * from the container lazily, inside the callback that actually needs it, so nothing beyond this
  * class is autoloaded until one of those callbacks fires.
+ *
+ * Registration needs both the Customer stock notifications feature to be on and the legacy
+ * extension to have been installed here. With the feature off there is nothing to migrate into:
+ * the `stock_notification` data store is not registered, so the unsubscribe shim could not load
+ * a notification, and Core sends nothing, so the double-send notice would have nothing to warn
+ * about. The CLI command is deliberately not gated this way - it registers from `WC_CLI` and
+ * reports the disabled feature as an error the merchant can act on, which is more use than a
+ * command that silently does not exist.
  */
 class MigrationController implements RegisterHooksInterface {
 
@@ -63,7 +72,7 @@ class MigrationController implements RegisterHooksInterface {
 		// The `wp wc bis-migrate` command registers itself from WC_CLI, on `after_wp_load`,
 		// like every other WooCommerce command. Registering here would resolve it out of the
 		// container on every `wp` invocation, `wp help` included.
-		if ( ! $this->extension_was_ever_installed() ) {
+		if ( ! $this->feature_is_enabled() || ! $this->extension_was_ever_installed() ) {
 			return;
 		}
 
@@ -134,5 +143,19 @@ class MigrationController implements RegisterHooksInterface {
 	 */
 	private function extension_was_ever_installed(): bool {
 		return false !== get_option( self::OPTION_LEGACY_DB_VERSION, false );
+	}
+
+	/**
+	 * Whether the Customer stock notifications feature is on.
+	 *
+	 * Reads the option directly rather than through `FeaturesUtil::feature_is_enabled()`,
+	 * which builds translated feature definitions: this runs while the plugin loads, before
+	 * `init`, so translations are not available yet. `StockNotifications::register_data_stores()`
+	 * reads it the same way, for the same reason.
+	 *
+	 * @return bool
+	 */
+	private function feature_is_enabled(): bool {
+		return 'yes' === get_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
 	}
 }
