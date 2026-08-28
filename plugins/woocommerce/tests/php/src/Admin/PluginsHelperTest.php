@@ -263,6 +263,29 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the reason for a failed download, which the upgrader only exposes through its skin.
+	 */
+	public function test_install_plugins_reports_download_failure_reason(): void {
+		$api      = $this->short_circuit_plugins_api( 'https://example.com/foo.zip' );
+		$download = function () {
+			return new WP_Error( 'download_failed', 'Download failed.', 'The site is unreachable.' );
+		};
+		add_filter( 'upgrader_pre_download', $download );
+
+		$ob_level = ob_get_level();
+		try {
+			$data = PluginsHelper::install_plugins( array( 'foo' ) );
+		} finally {
+			remove_filter( 'plugins_api', $api );
+			remove_filter( 'upgrader_pre_download', $download );
+			$this->close_upgrader_output_buffers( $ob_level );
+		}
+
+		$this->assertSame( array(), $data['installed'], 'A plugin whose download failed must not be reported as installed.' );
+		$this->assertSame( 'Download failed. The site is unreachable.', $data['errors']->get_error_message( 'foo' ) );
+	}
+
+	/**
 	 * @testdox Should build the requirement reason from the version in the package header, which is what WordPress checked.
 	 */
 	public function test_install_plugins_reports_requirement_from_package_header(): void {

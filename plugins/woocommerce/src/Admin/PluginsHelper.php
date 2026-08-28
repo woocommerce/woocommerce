@@ -467,7 +467,31 @@ class PluginsHelper {
 			 */
 			do_action( 'woocommerce_plugins_install_before', $slug, $source );
 
-			$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
+			// Plugin_Upgrader::install() only returns errors raised once the package is unpacked.
+			// A failed filesystem connection, download or unpack is only reported to the skin, so
+			// keep it there for the reason below.
+			$skin = new class() extends Automatic_Upgrader_Skin {
+				/**
+				 * The last error the upgrader reported.
+				 *
+				 * @var WP_Error|null
+				 */
+				public $last_error = null;
+
+				/**
+				 * Record the error before passing it on.
+				 *
+				 * @param string|WP_Error $errors The error the upgrader reports.
+				 */
+				public function error( $errors ): void {
+					if ( is_wp_error( $errors ) ) {
+						$this->last_error = $errors;
+					}
+					parent::error( $errors );
+				}
+			};
+
+			$upgrader = new Plugin_Upgrader( $skin );
 			$result   = $upgrader->install( $api->download_link );
 			// result can be false or WP_Error.
 			$results[ $plugin ] = $result;
@@ -503,9 +527,9 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
-				$install_error_message = self::get_requirements_error_reason( $upgrader->skin->result, $upgrader->new_plugin_data );
+				$install_error_message = self::get_requirements_error_reason( $skin->result, $upgrader->new_plugin_data );
 				if ( '' === $install_error_message ) {
-					$install_error_message = self::get_error_reason( $upgrader->skin->result, $result );
+					$install_error_message = self::get_error_reason( $skin->result, $result, $skin->last_error );
 				}
 				if ( '' === $install_error_message ) {
 					$install_error_message = __( 'Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' );
