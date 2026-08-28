@@ -9,7 +9,6 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
-import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 
 const randomNum = faker.string.alphanumeric( 10 );
 const customer = {
@@ -105,7 +104,6 @@ test.describe(
 				}
 			);
 
-			await acceptClassicCheckoutTerms( page );
 			await page.locator( '#place_order' ).click();
 
 			await expect(

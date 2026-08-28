@@ -21,7 +21,6 @@ import {
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
-import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
 import {
 	assertTaxCalculationEnabled,
@@ -87,14 +86,11 @@ async function addProductToCartAndProceedToCheckout(
 }
 
 async function placeOrder( page: Page ) {
-	if ( isClassicCheckout( page ) ) {
-		await acceptClassicCheckoutTerms( page );
-	} else {
-		await page.getByLabel( 'Add a note to your order' ).check();
-		// this helps with flakiness on clicking the Place order button
+	if ( ! isClassicCheckout( page ) ) {
+		await page.getByLabel( 'Add a note to your order' ).click();
 		await page
 			.getByPlaceholder( 'Notes about your order' )
-			.fill( 'This order was created by an end-to-end test.' );
+			.fill( 'Test note' );
 	}
 
 	await page.getByRole( 'button', { name: 'Place order' } ).click();

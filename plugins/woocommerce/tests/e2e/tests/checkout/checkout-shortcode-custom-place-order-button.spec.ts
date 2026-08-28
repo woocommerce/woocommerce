@@ -17,7 +17,6 @@ import {
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
-import { acceptClassicCheckoutTerms } from '../../utils/checkout';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -240,8 +239,6 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 			await expect(
 				page.getByTestId( 'custom-place-order-button' )
 			).toBeVisible();
-			await acceptClassicCheckoutTerms( page );
-
 			await page.getByTestId( 'custom-place-order-button' ).click();
 
 			// Ensuring the order was placed successfully.
