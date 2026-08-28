@@ -30,9 +30,9 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	 * @testdox compute() should reproduce the legacy get_hash() token for a fixture row.
 	 */
 	public function test_compute_matches_legacy_get_hash_fixture(): void {
-		// @todo Replace this fixture with a token captured from a real delivered legacy
-		// email before merge. In the absence of a real legacy install to capture one from,
-		// this reimplements `WC_BIS_Notification_Data::get_hash()`'s exact inputs
+		// This fixture is reproduced rather than captured: there is no legacy install here
+		// to take a real delivered token from. It reimplements
+		// `WC_BIS_Notification_Data::get_hash()`'s exact inputs
 		// (`{id}-{product_id}-{create_date}`, AES-256-CBC via openssl_encrypt(), then a
 		// sha256 digest) independently here, so the test does not simply call
 		// LegacyHash::compute() and compare it to itself.
