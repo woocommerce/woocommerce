@@ -38628,7 +38628,7 @@ parameters:
 		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 12
+			count: 10
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
@@ -38729,30 +38729,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:create_products_permission_check\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|bool but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\|WP_REST_Response\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
@@ -38884,30 +38860,6 @@ parameters:
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_snooze_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
@@ -39004,12 +38956,6 @@ parameters:
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:get_tasks\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
@@ -39041,12 +38987,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:snooze_task_permissions_check\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
