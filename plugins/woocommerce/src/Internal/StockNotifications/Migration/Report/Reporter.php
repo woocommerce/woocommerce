@@ -49,10 +49,19 @@ class Reporter {
 	 */
 	public const OUTCOME_PRODUCT_MISSING = 'product_missing';
 
-	// Rows excluded for an email that is too long or does not validate have no outcome
-	// code: the candidate predicate excludes them in SQL, so no per-row iteration ever
-	// sees one. They are counted in bulk instead, as the LOSS_EMAIL_TOO_LONG and
-	// LOSS_INVALID_EMAIL known losses.
+	/**
+	 * Outcome code for a row skipped because its address is longer than Core's column allows.
+	 *
+	 * @var string
+	 */
+	public const OUTCOME_EMAIL_TOO_LONG = 'email_too_long';
+
+	/**
+	 * Outcome code for a row skipped because its address cannot be an address.
+	 *
+	 * @var string
+	 */
+	public const OUTCOME_INVALID_EMAIL = 'invalid_email';
 
 	/**
 	 * Cached known-losses key: rows skipped because their email is too long for Core's column.
@@ -282,37 +291,27 @@ class Reporter {
 	}
 
 	/**
-	 * Count the skipped populations a run start caches, ready to hand to MigrationState.
+	 * The known losses this run has accumulated so far.
 	 *
-	 * The four counts are one `COUNT(*)` each and are computed only here, at run start, never
-	 * on a page load. The two accumulator keys start at zero: they are totals a run adds up as
-	 * it migrates, and are filled in afterwards by with_run_losses().
+	 * Every count comes from the run itself: the three skip populations are per-row outcomes
+	 * the notifications section recorded as it walked its rows, the other two are totals the
+	 * migrator adds up while producing OUTCOME_MIGRATED rows. Nothing here queries, so this
+	 * is safe to call on a page load - but it only describes what has been visited so far,
+	 * and is complete only once a run has walked the whole legacy table.
 	 *
-	 * @param NotificationsMigrator $migrator The notifications migrator these counts come from.
+	 * @param NotificationsMigrator $migrator The notifications migrator that produced these counts.
 	 * @return array<string, int> Known-losses counts, keyed by name.
 	 */
-	public function collect_known_losses( NotificationsMigrator $migrator ): array {
+	public function with_run_losses( NotificationsMigrator $migrator ): array {
+		$section = $this->counts[ $migrator->get_slug() ] ?? array();
+
 		return array(
-			self::LOSS_EMAIL_TOO_LONG    => $migrator->count_email_too_long(),
-			self::LOSS_INVALID_EMAIL     => $migrator->count_invalid_email(),
-			self::LOSS_PRODUCT_MISSING   => $migrator->count_product_missing(),
-			self::LOSS_RECURRING         => 0,
-			self::LOSS_ROWS_WITHOUT_HASH => 0,
+			self::LOSS_EMAIL_TOO_LONG    => (int) ( $section[ self::OUTCOME_EMAIL_TOO_LONG ] ?? 0 ),
+			self::LOSS_INVALID_EMAIL     => (int) ( $section[ self::OUTCOME_INVALID_EMAIL ] ?? 0 ),
+			self::LOSS_PRODUCT_MISSING   => (int) ( $section[ self::OUTCOME_PRODUCT_MISSING ] ?? 0 ),
+			self::LOSS_RECURRING         => $migrator->get_recurring_lost_count(),
+			self::LOSS_ROWS_WITHOUT_HASH => $migrator->get_rows_without_hash_count(),
 		);
-	}
-
-	/**
-	 * Fill in the two totals a finished run accumulated, leaving the cached skip counts alone.
-	 *
-	 * @param array<string, int>    $values   Known-losses counts cached at run start.
-	 * @param NotificationsMigrator $migrator The notifications migrator that just ran.
-	 * @return array<string, int> The counts, with the run's accumulated totals merged in.
-	 */
-	public function with_run_losses( array $values, NotificationsMigrator $migrator ): array {
-		$values[ self::LOSS_RECURRING ]         = $migrator->get_recurring_lost_count();
-		$values[ self::LOSS_ROWS_WITHOUT_HASH ] = $migrator->get_rows_without_hash_count();
-
-		return $values;
 	}
 
 	/**

@@ -29,12 +29,15 @@ interface MigratorInterface {
 	/**
 	 * Count the rows this section still has to migrate.
 	 *
-	 * This is the section's candidate predicate expressed as a COUNT(*). It is display
-	 * only and never drives the batch loop.
+	 * Display only; it never drives the batch loop. A section that scans by keyset counts
+	 * only the rows above the cursor it is given, since everything below it has already
+	 * been visited; the sections whose candidacy is a value predicate ignore the cursor,
+	 * because a settled row stops matching their predicate on its own.
 	 *
+	 * @param int $cursor Last identifier handled, or 0 to count from the start.
 	 * @return int
 	 */
-	public function count_remaining(): int;
+	public function count_remaining( int $cursor = 0 ): int;
 
 	/**
 	 * Fetch the next batch of candidate identifiers after the given keyset cursor.

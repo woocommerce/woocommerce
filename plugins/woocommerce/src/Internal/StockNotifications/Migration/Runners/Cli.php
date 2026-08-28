@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
  * `wp` invocation costs two autoloaded option reads and nothing more.
  *
  * `run` pumps `MigrationBatchProcessor`, the same class Action Scheduler drives, so the
- * section order, cursors and pass-reset probe have one implementation. The CLI-only knobs
+ * section order and cursors have one implementation. The CLI-only knobs
  * (`--dry-run`, `--force`, `--section`, `--batch-size`) reach it through
  * `configure_run()`, and `--retry-failed` and `--max-batches` stay here, on either side of
  * the loop. Both entry points share the same state — `MigrationState` cursors/counts and
@@ -309,15 +309,16 @@ class Cli {
 	 * Run the migration.
 	 *
 	 * Drives the requested sections, in the fixed order (notifications, product-meta, emails,
-	 * settings — load-bearing, never reordered by `--section`), each with its own cursor
-	 * reset pass: when a section's query comes back empty, its cursor resets and the query
-	 * runs again, and the section is only considered drained when a query immediately after a
-	 * reset also comes back empty.
+	 * settings — load-bearing, never reordered by `--section`), each from the cursor the
+	 * previous run left behind. A section is drained once its cursor reaches the end of what
+	 * it has to visit.
 	 *
-	 * `--max-batches` bounds this CLI loop only. It is a debugging aid, not a throughput
-	 * mode: a run always re-walks the whole candidate range from the start of each section
-	 * (cursors are reset at the top of every run), so repeated small invocations pay that
-	 * re-scan every time.
+	 * Cursors persist across runs, so a second run over a settled store costs almost nothing.
+	 * `--force` and `--retry-failed` reset them, since both put rows back into play below
+	 * wherever the cursor stands.
+	 *
+	 * `--max-batches` bounds this CLI loop only, and is a debugging aid rather than a
+	 * throughput mode; repeated small invocations now resume where the last one stopped.
 	 *
 	 * ## OPTIONS
 	 *
@@ -430,39 +431,36 @@ class Cli {
 				WP_CLI::log( sprintf( 'Cleared the failed marker on %d row(s); they will be retried.', $cleared ) );
 			}
 
-			// A run always starts from zero: cursors left behind by a previous run cannot be
-			// trusted (a row deleted in Core mid-run re-enters the candidate set below them).
-			// `MigrationBatchProcessor` only ever advances cursors, never resets them, so this
-			// invariant is enforced only at run-start entry points — this one and the Tools
-			// start callback — not inside the processor itself.
-			$this->state()->reset_all_cursors();
+			// Cursors are kept between runs: a scan that re-walks the whole legacy table on a
+			// settled store is the migration's most expensive thing to repeat, and the
+			// per-batch already-migrated lookup means a stale cursor costs a re-scan rather
+			// than correctness. `--force` and `--retry-failed` are the two flags that put rows
+			// back into play below the cursor, so they reset it; `MigrationBatchProcessor`
+			// itself only ever advances one.
+			if ( $force || $retry_failed ) {
+				$this->state()->reset_all_cursors();
+			}
 
 			$reporter               = new Reporter();
 			$notifications_migrator = new NotificationsMigrator( $reporter );
 			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
 			$writer                 = $dry_run ? new NullWriter() : $this->db_writer();
 
-			// The loop itself - section order, cursors, the pass-reset probe, the per-batch
+			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
 			$processor->init( $this->requirements(), $this->db_writer() );
-			$processor->configure_run( $migrators, $writer, $batch_size );
+			$processor->configure_run( $migrators, $writer, $batch_size, $reporter );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
 			// drain — never computed live outside a run.
 			$total_estimate = 0;
 			foreach ( $sections as $slug ) {
-				$remaining = $migrators[ $slug ]->count_remaining();
+				$remaining = $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) );
 				$this->state()->set_count( $slug, $remaining );
 				$total_estimate += $remaining;
-			}
-
-			if ( in_array( 'notifications', $sections, true ) ) {
-				// One COUNT(*) per skipped population, run once here and cached: `status` and
-				// the Tools description report these from the cache and never compute them.
-				$this->state()->set_losses( $reporter->collect_known_losses( $notifications_migrator ) );
 			}
 
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -492,14 +490,14 @@ class Cli {
 				// --max-batches stopped the run before any section drained, and draining is
 				// where the processor refreshes a cached count, so refresh them here instead.
 				foreach ( $sections as $slug ) {
-					$this->state()->set_count( $slug, $migrators[ $slug ]->count_remaining() );
+					$this->state()->set_count( $slug, $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) ) );
 				}
 			}
 
 			if ( in_array( 'notifications', $sections, true ) ) {
-				$cached = $this->state()->get_losses();
-				$values = is_array( $cached['values'] ?? null ) ? $cached['values'] : array();
-				$this->state()->set_losses( $reporter->with_run_losses( $values, $notifications_migrator ) );
+				// What this run found while walking its rows, not a pre-run census: complete
+				// only once the run has reached the end of the legacy table.
+				$this->state()->set_losses( $reporter->with_run_losses( $notifications_migrator ) );
 			}
 
 			$this->print_report( $reporter );
@@ -544,7 +542,7 @@ class Cli {
 
 		foreach ( self::SECTION_ORDER as $slug ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::log( sprintf( '%-14s %d row(s) still outstanding.', $slug, $migrators[ $slug ]->count_remaining() ) );
+			WP_CLI::log( sprintf( '%-14s %d row(s) still outstanding.', $slug, $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) ) ) );
 		}
 
 		list( $verified, $mismatched, $drifted ) = $this->verify_notification_statuses();
@@ -950,10 +948,11 @@ class Cli {
 	}
 
 	/**
-	 * Print the known-losses summary from the counts cached at run start.
+	 * Print the known-losses summary from the counts the last run accumulated.
 	 *
 	 * Reads the cache rather than counting, so `status` stays cheap; a run that has not
-	 * happened yet says so instead of reporting zeroes as if they were measured.
+	 * happened yet says so instead of reporting zeroes as if they were measured. The counts
+	 * describe the rows a run has walked, so they are complete only once one has finished.
 	 *
 	 * @param Reporter $reporter Used to turn the cached counts into merchant-facing lines.
 	 * @return void
@@ -963,7 +962,7 @@ class Cli {
 
 		if ( null === $cached ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::log( 'Skipped and lost populations: not yet counted; they are counted when a run starts.' );
+			WP_CLI::log( 'Skipped and lost populations: nothing recorded yet; a run records them as it walks its rows.' );
 			return;
 		}
 

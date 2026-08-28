@@ -169,13 +169,13 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox starting a run should reset every section cursor.
+	 * @testdox starting a run should keep the cursor a previous run left behind.
 	 */
-	public function test_start_resets_the_cursors(): void {
+	public function test_start_keeps_the_cursors(): void {
 		$this->state->set_cursor( 'notifications', 42 );
 
 		$this->registrar->start();
 
-		$this->assertSame( 0, $this->state->get_cursor( 'notifications' ) );
+		$this->assertSame( 42, $this->state->get_cursor( 'notifications' ), 'Re-walking the whole legacy table is what a kept cursor avoids.' );
 	}
 }

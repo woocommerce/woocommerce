@@ -280,6 +280,29 @@ class LegacyStore {
 	}
 
 	/**
+	 * Insert one Core meta row directly, for a target the migration will consider adopting.
+	 *
+	 * @param int    $notification_id Core notification id.
+	 * @param string $meta_key        Meta key.
+	 * @param string $meta_value      Stored value, already serialized if it needs to be.
+	 * @return void
+	 */
+	public static function add_core_meta( int $notification_id, string $meta_key, string $meta_value ): void {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.SlowDBQuery -- Column names of the meta table this inserts into, not query args.
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prefix . 'wc_stock_notificationmeta',
+			array(
+				'notification_id' => $notification_id,
+				'meta_key'        => $meta_key,
+				'meta_value'      => $meta_value,
+			)
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
+	}
+
+	/**
 	 * Read every Core notification row, ascending by id.
 	 *
 	 * @return array<int,array<string,mixed>>

@@ -91,11 +91,20 @@ class ReporterTests extends WC_Unit_Test_Case {
 			)
 		);
 
+		// The failing row adopts a pre-existing Core row, so its write happens inside the
+		// per-row try/catch rather than in the batch's bulk insert.
+		LegacyStore::add_core_notification(
+			array(
+				'product_id' => $product->get_id(),
+				'user_email' => 'failing@example.com',
+			)
+		);
+
 		$migrator = new NotificationsMigrator( new Reporter() );
 		$batch    = $migrator->get_batch( 0, 10 );
 
 		$thrower = static function ( $query ) {
-			if ( false !== strpos( $query, 'failing@example.com' ) ) {
+			if ( false !== strpos( $query, '_wc_bis_legacy_adopted' ) ) {
 				throw new \RuntimeException( 'forced row failure' );
 			}
 

@@ -112,9 +112,9 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a multi-batch run should migrate every row and end with an empty probe.
+	 * @testdox a multi-batch run should migrate every row and end once the cursor reaches the last id.
 	 */
-	public function test_multi_batch_run_terminates_with_an_empty_probe(): void {
+	public function test_multi_batch_run_terminates_when_the_cursor_drains(): void {
 		$this->seed_notifications( 7 );
 
 		$batches = $this->run_to_completion( 2 );
@@ -139,9 +139,19 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox deleting migrated rows should re-admit exactly those rows on the next run.
+	 * @testdox a re-run over a settled store should not process a single batch.
 	 */
-	public function test_deleted_rows_return_on_the_next_run(): void {
+	public function test_a_second_run_processes_no_batches(): void {
+		$this->seed_notifications( 4 );
+
+		$this->assertGreaterThan( 0, $this->run_to_completion( 2 ) );
+		$this->assertSame( 0, $this->run_to_completion( 2 ), 'The cursor is kept, so a settled store has nothing left to visit.' );
+	}
+
+	/**
+	 * @testdox deleting migrated rows should re-admit exactly those rows once the cursor is reset.
+	 */
+	public function test_deleted_rows_return_when_the_cursor_is_reset(): void {
 		$legacy_ids = $this->seed_notifications( 4 );
 
 		$this->run_to_completion( 50 );
@@ -149,18 +159,29 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$deleted = array( $legacy_ids[0], $legacy_ids[2] );
 		$this->delete_core_rows_for( $deleted );
 
-		$this->assertSame( $deleted, $this->raw_batch( 50 ), 'Only the deleted rows should be outstanding.' );
+		// The cursor is past them, and it is kept between runs: re-walking the whole legacy
+		// table on the off-chance a Core row was deleted is the cost this migration cannot
+		// pay. `--force` and `--retry-failed` are what put those rows back into play.
+		$this->assertSame( array(), $this->processor->get_next_batch_to_process( 50 ) );
+
+		$this->state->reset_all_cursors();
+
+		$this->assertSame( $legacy_ids, $this->raw_batch( 50 ), 'A reset scan serves every row again.' );
 
 		$this->run_to_completion( 50 );
 
-		$this->assertCount( 4, LegacyStore::get_core_rows() );
+		$this->assertCount( 4, LegacyStore::get_core_rows(), 'Only the deleted rows are re-migrated.' );
 		$this->assertSame( array(), $this->processor->get_next_batch_to_process( 50 ) );
+
+		foreach ( LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) as $values ) {
+			$this->assertCount( 1, $values, 'A row the markers already cover must not be migrated twice.' );
+		}
 	}
 
 	/**
-	 * @testdox a row deleted behind an in-flight cursor should be picked up by the pass reset.
+	 * @testdox a row deleted behind an in-flight cursor should be left for a cursor reset.
 	 */
-	public function test_row_deleted_behind_the_cursor_is_picked_up(): void {
+	public function test_row_deleted_behind_the_cursor_waits_for_a_reset(): void {
 		$legacy_ids = $this->seed_notifications( 4 );
 
 		// Migrate the first two rows, leaving the cursor part-way through the section.
@@ -170,8 +191,11 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 
 		$this->delete_core_rows_for( array( $legacy_ids[0] ) );
 
-		// The remaining rows are ahead of the cursor, so they drain first; only then does the
-		// probe restart the pass and find the row that fell back in behind it.
+		$this->run_to_completion( 2 );
+
+		$this->assertCount( 3, LegacyStore::get_core_rows(), 'The cursor only moves forward, so the deleted row is left behind.' );
+
+		$this->state->reset_all_cursors();
 		$this->run_to_completion( 2 );
 
 		$this->assertCount( 4, LegacyStore::get_core_rows() );
@@ -281,10 +305,18 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$legacy_ids = $this->seed_notifications( 3 );
 		$failing_id = $legacy_ids[1];
 
-		$thrower = function ( $query ) use ( $failing_id ) {
-			// The adoption lookup is the only per-row query, so failing it is the cleanest way
-			// to simulate a row that cannot be mapped.
-			if ( false !== strpos( $query, "shopper{$failing_id}@example.com" ) ) {
+		// Give the middle row a Core row to adopt, so it takes the one write that happens
+		// inside the per-row try/catch. The bulk insert the other rows take is a whole-batch
+		// write, so failing that would fail the batch rather than the row.
+		LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => "shopper{$failing_id}@example.com",
+			)
+		);
+
+		$thrower = function ( $query ) {
+			if ( false !== strpos( (string) $query, '_wc_bis_legacy_adopted' ) ) {
 				throw new \RuntimeException( 'forced row failure' );
 			}
 
@@ -295,13 +327,13 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$this->run_to_completion( 50 );
 		remove_filter( 'query', $thrower );
 
-		$this->assertCount( 2, LegacyStore::get_core_rows() );
+		$this->assertCount( 3, LegacyStore::get_core_rows(), 'The other two rows migrate alongside the adoption target.' );
 
 		$marker = LegacyStore::get_legacy_meta( $failing_id, '_wc_bis_migration_failed' );
 		$this->assertCount( 1, $marker );
 		$this->assertSame( 'exception', $marker[0]['reason'] );
 
-		$this->assertSame( array(), $this->processor->get_next_batch_to_process( 50 ), 'A failed row leaves the candidate set.' );
+		$this->assertSame( array(), $this->processor->get_next_batch_to_process( 50 ), 'A failed row does not hold the run up.' );
 	}
 
 	/**
@@ -336,11 +368,12 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a section that keeps serving rows it cannot settle should be abandoned.
+	 * @testdox a section that settles nothing should still terminate, because the cursor advances.
 	 */
-	public function test_a_section_that_cannot_settle_its_rows_is_abandoned(): void {
-		// A section whose rows never leave its candidate set: the pass-reset probe would
-		// serve them again on every pass, and the run would never end.
+	public function test_a_section_that_cannot_settle_its_rows_still_terminates(): void {
+		// A section whose rows never leave its candidate set. Under a monotonic cursor that
+		// cannot loop: the rows are served once, the cursor moves past them, and the section
+		// drains whether or not anything settled.
 		$stuck = new class() implements MigratorInterface {
 			/**
 			 * Section slug.
@@ -354,9 +387,10 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 			/**
 			 * Remaining candidates.
 			 *
+			 * @param int $cursor Keyset cursor. Ignored.
 			 * @return int
 			 */
-			public function count_remaining(): int {
+			public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface.
 				return 2;
 			}
 
@@ -387,7 +421,7 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 
 		$batches = $this->run_to_completion( 50 );
 
-		$this->assertSame( 2, $batches, 'The first pass and one probe, then the section is abandoned.' );
+		$this->assertSame( 1, $batches, 'The rows are served once and the cursor moves past them.' );
 	}
 
 	/**

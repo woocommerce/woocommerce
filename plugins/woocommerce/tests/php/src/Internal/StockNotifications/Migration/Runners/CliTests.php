@@ -421,10 +421,17 @@ class CliTests extends WC_Unit_Test_Case {
 		$legacy_ids = $this->seed_notifications( 2 );
 		$failing_id = $legacy_ids[1];
 
-		// The adoption lookup is the only per-row query, so failing it is the cleanest way to
-		// simulate a row that cannot be mapped.
-		$thrower = static function ( $query ) use ( $failing_id ) {
-			if ( false !== strpos( $query, "shopper{$failing_id}@example.com" ) ) {
+		// Give the failing row a Core row to adopt: its marker write is the one write that
+		// happens inside the per-row try/catch, so failing it fails that row alone.
+		LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => "shopper{$failing_id}@example.com",
+			)
+		);
+
+		$thrower = static function ( $query ) {
+			if ( false !== strpos( $query, '_wc_bis_legacy_adopted' ) ) {
 				throw new \RuntimeException( 'forced row failure' );
 			}
 

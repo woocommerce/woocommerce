@@ -145,9 +145,11 @@ class SettingsMigrator implements MigratorInterface {
 	/**
 	 * Count the options that still need a write. Display only.
 	 *
+	 * @param int $cursor Ignored: this section identifies its items by option key, not by a
+	 *                    sequential id, so it never reads a cursor.
 	 * @return int
 	 */
-	public function count_remaining(): int {
+	public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
 		$count = 0;
 
 		foreach ( array_keys( self::OPTION_MAP ) as $legacy_key ) {

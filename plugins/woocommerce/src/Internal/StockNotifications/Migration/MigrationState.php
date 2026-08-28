@@ -21,8 +21,10 @@ defined( 'ABSPATH' ) || exit;
  * recorded by the markers the migrators write onto legacy and Core rows
  * (`_wc_bis_legacy_id`, `_wc_bis_migration_failed`), not by anything in this option.
  * Deleting `wc_bis_migration_state` mid-run and re-running the migration must produce
- * an identical result: cursors and counts are cheaply re-derivable from the markers,
- * so losing them costs a re-scan, never correctness.
+ * an identical result: every row a lost cursor hands out again is recognised as already
+ * migrated and skipped, so losing a cursor costs a re-scan, never correctness. The
+ * re-scan is of the whole legacy notifications table, which is why cursors are kept
+ * between runs rather than reset at the start of each one.
  */
 class MigrationState {
 
@@ -237,8 +239,9 @@ class MigrationState {
 	/**
 	 * Clear every section's cursor.
 	 *
-	 * Called at the start of a run: a run always starts from zero, so nothing a
-	 * previous run left behind can strand rows below a stale cursor.
+	 * Called only by the CLI's `--force` and `--retry-failed`, the two flags that put rows
+	 * back into play below wherever the cursor stands. An ordinary run resumes from the
+	 * cursor it was left at.
 	 *
 	 * @return void
 	 */

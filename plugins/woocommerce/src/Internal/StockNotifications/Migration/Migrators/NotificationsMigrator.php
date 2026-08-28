@@ -25,12 +25,16 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Migrates `woocommerce_bis_notifications` rows to Core `wc_stock_notifications` rows.
  *
- * The candidate predicate in `predicate_sql()` is authoritative: `get_batch()` and
- * `count_remaining()` both express it, and nothing downstream may skip a row it admits
- * without writing `_wc_bis_migration_failed`. `get_batch()` returns identifiers only and
- * is side-effect free; `migrate_batch()` re-fetches the full rows for those identifiers
- * and does the actual work. Legacy meta and cancellation sources are fetched once per
- * batch, never per row.
+ * `get_batch()` is a plain keyset scan over the legacy table: it walks ids in order and
+ * knows nothing about candidacy, so it stays constant-cost however much of the table has
+ * already been migrated. Candidacy is decided in `migrate_batch()` instead, in PHP, from
+ * a handful of batched indexed lookups. Every row the scan serves therefore leaves the
+ * batch either migrated, adopted, failed, or with a recorded skip outcome - a row that
+ * records nothing would be dropped silently while the run reported success.
+ *
+ * `get_batch()` returns identifiers only and is side-effect free; `migrate_batch()`
+ * fetches the full rows for those identifiers. Legacy meta, cancellation sources and
+ * adoption targets are all resolved once per batch, never per row.
  */
 class NotificationsMigrator implements MigratorInterface {
 
@@ -141,6 +145,21 @@ class NotificationsMigrator implements MigratorInterface {
 	private const FAILURE_REASON_EXCEPTION = 'exception';
 
 	/**
+	 * Longest address Core's `user_email` column holds. A legacy row above it is a loss:
+	 * the address cannot be stored, so the row cannot be migrated.
+	 *
+	 * @var int
+	 */
+	private const MAX_EMAIL_LENGTH = 100;
+
+	/**
+	 * Core statuses a legacy row may adopt, in the order they are preferred.
+	 *
+	 * @var string[]
+	 */
+	private const ADOPTABLE_STATUSES = array( NotificationStatus::ACTIVE, NotificationStatus::PENDING );
+
+	/**
 	 * Mines `woocommerce_bis_activity` for cancellation source and date, once per batch.
 	 *
 	 * @var CancellationSourceMiner
@@ -200,23 +219,34 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * Count candidate rows still outstanding. Same predicate as get_batch(), as COUNT(*).
+	 * Count the legacy rows this section has still to visit, above the given cursor.
 	 *
+	 * "Left to visit", not "left to migrate": the scan does not know which of those rows
+	 * are candidates, so this counts every row above the cursor, including ones a batch
+	 * will skip as already migrated or as a recorded loss. Display only.
+	 *
+	 * @param int $cursor Last legacy id handled, or 0 to count the whole table.
 	 * @return int
 	 */
-	public function count_remaining(): int {
+	public function count_remaining( int $cursor = 0 ): int {
 		global $wpdb;
 
-		$sql = 'SELECT COUNT(*) ' . $this->predicate_sql();
+		$table = Tables::legacy_notifications();
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
+		// $table is $wpdb->prefix-based, never user input; the cursor is bound below.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE id > %d", $cursor );
+
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
 	}
 
 	/**
-	 * Fetch the next batch of candidate legacy ids after the given keyset cursor.
+	 * Fetch the next batch of legacy ids after the given keyset cursor.
 	 *
-	 * Side-effect free: calling this twice with the same cursor returns the same ids.
-	 * The cursor itself is owned and advanced by the caller, on successful migrate_batch().
+	 * A plain walk of the primary key: no predicate, no joins, so its cost does not grow
+	 * as the migrated set does. Side-effect free - calling this twice with the same cursor
+	 * returns the same ids. The cursor itself is owned and advanced by the caller, on
+	 * successful migrate_batch().
 	 *
 	 * @param int $cursor Last legacy id handled in the current pass, or 0 to start a pass.
 	 * @param int $size   Maximum number of ids to return.
@@ -225,21 +255,24 @@ class NotificationsMigrator implements MigratorInterface {
 	public function get_batch( int $cursor, int $size ): array {
 		global $wpdb;
 
-		// predicate_sql() returns a fixed literal built by this class, never user input; only
-		// the cursor and size are bound, so only that tail goes through $wpdb->prepare().
-		$sql = 'SELECT n.id ' . $this->predicate_sql() . $wpdb->prepare( ' AND n.id > %d ORDER BY n.id ASC LIMIT %d', $cursor, $size );
+		$table = Tables::legacy_notifications();
 
-		return array_map( 'intval', (array) $wpdb->get_col( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- see above.
+		// $table is $wpdb->prefix-based, never user input; the cursor and size are bound below.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id > %d ORDER BY id ASC LIMIT %d", $cursor, $size );
+
+		return array_map( 'intval', (array) $wpdb->get_col( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
 	}
 
 	/**
 	 * Migrate the given legacy ids.
 	 *
-	 * Fetches full rows and batched meta for the given ids, resolves natural-key
-	 * adoption per row, and bulk-inserts everything that did not adopt. Per-row failures
-	 * are caught, marked with `_wc_bis_migration_failed`, and reported rather than
-	 * thrown; only a whole-batch write failure (from the writer) propagates, since that
-	 * is the one condition a retry can fix.
+	 * Fetches full rows for the given ids, drops the ones that are not candidates - and
+	 * records an outcome for every drop that is a loss - then fetches batched meta and
+	 * adoption targets for the survivors and bulk-inserts everything that did not adopt.
+	 * Per-row failures are caught, marked with `_wc_bis_migration_failed`, and reported
+	 * rather than thrown; only a whole-batch write failure (from the writer) propagates,
+	 * since that is the one condition a retry can fix.
 	 *
 	 * @param array           $ids    Legacy ids returned by get_batch().
 	 * @param WriterInterface $writer Writer to route all persistence through.
@@ -252,10 +285,34 @@ class NotificationsMigrator implements MigratorInterface {
 			return $outcomes;
 		}
 
-		$legacy_rows          = $this->fetch_legacy_rows( $ids );
-		$legacy_meta          = $this->fetch_legacy_meta( $ids );
+		$ids         = array_values( array_unique( array_map( 'intval', $ids ) ) );
+		$legacy_rows = $this->select_candidates( $this->fetch_legacy_rows( $ids ), $outcomes );
+
+		if ( empty( $legacy_rows ) ) {
+			$this->reporter->report_batch( self::SLUG, count( $ids ) );
+
+			return $outcomes;
+		}
+
+		$candidate_ids        = array_map( 'intval', array_column( $legacy_rows, 'id' ) );
+		$legacy_meta          = $this->fetch_legacy_meta( $candidate_ids );
 		$cancellation_sources = $this->cancellation_source_miner->mine( $legacy_rows );
 		$date_mapper          = new DateMapper( time() );
+
+		// Must match the stored value byte-for-byte: MetaMapper hands posted_attributes to
+		// the writer unserialized, and the writer is the sole maybe_serialize() owner, so
+		// this local serialize (for comparison only) has to mirror that exactly.
+		$posted_attributes = array();
+
+		foreach ( $candidate_ids as $candidate_id ) {
+			$row_meta = $legacy_meta[ $candidate_id ] ?? array();
+
+			$posted_attributes[ $candidate_id ] = array_key_exists( 'posted_attributes', $row_meta )
+				? (string) maybe_serialize( $row_meta['posted_attributes'] )
+				: '';
+		}
+
+		$adoption_targets = $this->find_adoption_targets( $legacy_rows, $posted_attributes );
 
 		$insert_rows       = array();
 		$insert_legacy_ids = array();
@@ -268,14 +325,7 @@ class NotificationsMigrator implements MigratorInterface {
 				$cancellation = $cancellation_sources[ $legacy_id ] ?? null;
 				$status       = StatusMapper::map( $legacy_row, $cancellation );
 
-				// Must match the stored value byte-for-byte: MetaMapper hands posted_attributes
-				// to the writer unserialized, and the writer is the sole maybe_serialize() owner,
-				// so this local serialize (for comparison only) has to mirror that exactly.
-				$posted_attributes_value = array_key_exists( 'posted_attributes', $row_meta )
-					? maybe_serialize( $row_meta['posted_attributes'] )
-					: '';
-
-				$adoption_target_id = $this->find_adoption_target( $legacy_row, (string) $posted_attributes_value );
+				$adoption_target_id = $adoption_targets[ $legacy_id ] ?? null;
 
 				if ( null !== $adoption_target_id ) {
 					$this->adopt( $adoption_target_id, $legacy_row, $row_meta, $status, $writer );
@@ -337,105 +387,154 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * Count legacy rows skipped because their email is longer than Core's column allows.
+	 * Drop every row in a fetched batch that is not a candidate, recording an outcome for
+	 * each drop that costs a customer their notification.
 	 *
-	 * @return int
+	 * Four exclusions, each one batched indexed lookup rather than a join in the scan:
+	 * already migrated and already failed leave quietly, since they are settled rows the
+	 * scan simply walked past again; an over-long address, an address that cannot be an
+	 * address, and a product that is gone are losses, and each records its outcome.
+	 *
+	 * @param array<int,array<string,mixed>> $rows     Full legacy rows for the batch.
+	 * @param array                          $outcomes Outcome counts for this batch, by reference.
+	 * @return array<int,array<string,mixed>> The rows that are still candidates.
 	 */
-	public function count_email_too_long(): int {
-		global $wpdb;
+	private function select_candidates( array $rows, array &$outcomes ): array {
+		if ( empty( $rows ) ) {
+			return array();
+		}
 
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql() . ' AND CHAR_LENGTH( n.user_email ) > 100';
+		$ids      = array_map( 'intval', array_column( $rows, 'id' ) );
+		$migrated = $this->fetch_migrated_legacy_ids( $ids );
+		$failed   = $this->fetch_failed_legacy_ids( $ids );
+		$products = $this->fetch_existing_product_ids( array_map( 'intval', array_column( $rows, 'product_id' ) ) );
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
+		$candidates = array();
+
+		foreach ( $rows as $row ) {
+			$legacy_id = (int) $row['id'];
+
+			if ( isset( $migrated[ $legacy_id ] ) || isset( $failed[ $legacy_id ] ) ) {
+				continue;
+			}
+
+			$email = (string) ( $row['user_email'] ?? '' );
+
+			if ( mb_strlen( $email ) > self::MAX_EMAIL_LENGTH ) {
+				$this->record_outcome( $outcomes, Reporter::OUTCOME_EMAIL_TOO_LONG, $legacy_id );
+				continue;
+			}
+
+			// The legacy `LIKE '%_@_%'` this replaces: an `@` with at least one character on
+			// either side. Deliberately not is_email(), which would newly reject addresses
+			// earlier runs of this migration admitted.
+			if ( ! preg_match( '/.@./s', $email ) ) {
+				$this->record_outcome( $outcomes, Reporter::OUTCOME_INVALID_EMAIL, $legacy_id );
+				continue;
+			}
+
+			if ( ! isset( $products[ (int) ( $row['product_id'] ?? 0 ) ] ) ) {
+				$this->record_outcome( $outcomes, Reporter::OUTCOME_PRODUCT_MISSING, $legacy_id );
+				continue;
+			}
+
+			$candidates[] = $row;
+		}
+
+		return $candidates;
 	}
 
 	/**
-	 * Count legacy rows skipped because their email does not validate.
+	 * The subset of the given legacy ids that already carry a Core migration marker.
 	 *
-	 * @return int
+	 * @param int[] $ids Legacy ids.
+	 * @return array<int,true> Legacy ids as keys.
 	 */
-	public function count_invalid_email(): int {
+	private function fetch_migrated_legacy_ids( array $ids ): array {
 		global $wpdb;
 
-		// The LIKE wildcards are part of this class's own literal, not a bound value.
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND ( n.user_email = '' OR n.user_email NOT LIKE '%_@_%' )";
+		$table        = Tables::core_meta();
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%s' ) );
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
+		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
+		// %s placeholder list, bound via $wpdb->prepare() below. The ids are bound as strings
+		// because meta_value is a text column: comparing it to a number would cast the whole
+		// column and lose the meta_key index.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$sql = $wpdb->prepare(
+			"SELECT meta_value FROM {$table} WHERE meta_key = %s AND meta_value IN ( $placeholders )",
+			array_merge( array( self::LEGACY_ID_META_KEY ), array_map( 'strval', $ids ) )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		$values = (array) $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+
+		return array_fill_keys( array_map( 'intval', $values ), true );
 	}
 
 	/**
-	 * Count legacy rows skipped because their product is missing, trashed, or not a product.
+	 * The subset of the given legacy ids marked as permanently failed.
 	 *
-	 * @return int
+	 * @param int[] $ids Legacy ids.
+	 * @return array<int,true> Legacy ids as keys.
 	 */
-	public function count_product_missing(): int {
+	private function fetch_failed_legacy_ids( array $ids ): array {
 		global $wpdb;
 
-		$posts_table = $wpdb->prefix . 'posts';
+		$table        = Tables::legacy_meta();
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
-		// $posts_table is $wpdb->prefix-based, never user input; every other fragment is a
-		// fixed literal built by this class, including the LIKE wildcards.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql = 'SELECT COUNT(*) ' . $this->base_sql()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
-			. " AND NOT EXISTS ( SELECT 1 FROM {$posts_table} p"
-			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
+		// %d placeholder list, bound via $wpdb->prepare() below.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$sql = $wpdb->prepare(
+			"SELECT bis_notifications_id FROM {$table}
+			WHERE bis_notifications_id IN ( $placeholders ) AND meta_key = %s",
+			array_merge( $ids, array( self::FAILED_META_KEY ) )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is a fixed literal built by this class, never user input.
+		$values = (array) $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+
+		return array_fill_keys( array_map( 'intval', $values ), true );
 	}
 
 	/**
-	 * The candidate predicate: FROM/JOIN/WHERE, matching the migration plan's SQL
-	 * verbatim in shape. Reused by count_remaining() and get_batch(), which append
-	 * only a cursor bound and a LIMIT.
+	 * The subset of the given product ids that still exist as a product or variation and
+	 * are not trashed.
 	 *
-	 * Never passed through $wpdb->prepare(): it binds no values, and prepare() on a
-	 * placeholder-free query is a `_doing_it_wrong()` notice. Callers that do bind
-	 * values prepare only their own tail and concatenate it onto this fragment.
+	 * Read straight from `posts` rather than through wc_get_product(), which would be one
+	 * query and one hydrated object per row.
 	 *
-	 * @return string
+	 * @param int[] $product_ids Product ids referenced by the batch.
+	 * @return array<int,true> Product ids as keys.
 	 */
-	private function predicate_sql(): string {
+	private function fetch_existing_product_ids( array $product_ids ): array {
 		global $wpdb;
 
-		$posts_table = $wpdb->prefix . 'posts';
+		$product_ids = array_values( array_unique( array_filter( $product_ids ) ) );
 
-		return $this->base_sql()
-			. " AND CHAR_LENGTH( n.user_email ) <= 100 AND n.user_email <> '' AND n.user_email LIKE '%_@_%'"
-			. " AND EXISTS ( SELECT 1 FROM {$posts_table} p" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $posts_table is $wpdb->prefix-based, never user input.
-			. " WHERE p.ID = n.product_id AND p.post_type IN ( 'product', 'product_variation' ) AND p.post_status <> 'trash' )";
-	}
+		if ( empty( $product_ids ) ) {
+			return array();
+		}
 
-	/**
-	 * The shared FROM/JOIN/WHERE base every predicate variant starts from: the two
-	 * anti-joins against the migrated set and the permanently-failed set. Callers append
-	 * their own conditions. Binds no values; see predicate_sql() on why it is never
-	 * passed through $wpdb->prepare().
-	 *
-	 * @return string
-	 */
-	private function base_sql(): string {
-		global $wpdb;
+		$placeholders = implode( ', ', array_fill( 0, count( $product_ids ), '%d' ) );
 
-		$notifications_table = Tables::legacy_notifications();
-		$core_meta_table     = Tables::core_meta();
-		$legacy_meta_table   = Tables::legacy_meta();
+		// $wpdb->posts is a $wpdb->prefix-based table name, never user input; $placeholders is
+		// a locally built %d placeholder list, bound via $wpdb->prepare() below.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$sql = $wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID IN ( $placeholders )
+			  AND post_type IN ( 'product', 'product_variation' )
+			  AND post_status <> 'trash'",
+			$product_ids
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-		// Table names are $wpdb->prefix-based, never user input.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return "
-			FROM {$notifications_table} n
-			LEFT JOIN {$core_meta_table} mm
-			       ON mm.meta_key = '" . Constants::LEGACY_ID_META_KEY . "'
-			      AND CAST( mm.meta_value AS UNSIGNED ) = n.id
-			LEFT JOIN {$legacy_meta_table} fm
-			       ON fm.bis_notifications_id = n.id AND fm.meta_key = '" . Constants::LEGACY_FAILED_META_KEY . "'
-			WHERE mm.notification_id IS NULL
-			  AND fm.bis_notifications_id IS NULL
-		";
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$values = (array) $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+
+		return array_fill_keys( array_map( 'intval', $values ), true );
 	}
 
 	/**
@@ -507,61 +606,264 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * Find an existing Core notification carrying this legacy row's natural key, if any.
+	 * Resolve the Core notification each legacy row in the batch adopts, if any.
 	 *
 	 * Natural key: product_id, plus user_id when non-zero and, for a guest row, a zero
 	 * user_id with a matching user_email (lowercased, trimmed), plus posted_attributes in
 	 * maybe_serialize() form. A guest row and a registered row never adopt each other, in
-	 * either direction. Restricted to
-	 * `active` and `pending` targets, ordered active before pending then by ascending id,
-	 * so the same legacy row adopts the same target on every run.
+	 * either direction.
 	 *
-	 * @param array<string,mixed> $legacy_row               Row from `woocommerce_bis_notifications`.
-	 * @param string              $posted_attributes_value Normalised posted_attributes value for this row.
-	 * @return int|null Target notification id, or null when no target matches.
+	 * Resolved for the whole batch in two indexed lookups - one per branch, each a row
+	 * constructor list against `user_lookup` / `email_lookup` - plus one lookup for the
+	 * candidates' posted_attributes. The email is bound as a bare column comparison: any
+	 * function on `user_email` loses the index, and `=` already matches on case and on a
+	 * trailing space under the column's collation.
+	 *
+	 * Candidates are ranked in PHP, active before pending then by ascending id, so a
+	 * legacy row adopts the same target on every run.
+	 *
+	 * @param array<int,array<string,mixed>> $legacy_rows       Candidate rows from `woocommerce_bis_notifications`.
+	 * @param array<int,string>              $posted_attributes Normalised posted_attributes value, by legacy id.
+	 * @return array<int,int> Target notification id, by legacy id. Rows that adopt nothing are absent.
 	 */
-	private function find_adoption_target( array $legacy_row, string $posted_attributes_value ): ?int {
-		global $wpdb;
+	private function find_adoption_targets( array $legacy_rows, array $posted_attributes ): array {
+		$registered_pairs = array();
+		$guest_pairs      = array();
+		$keys             = array();
 
-		$table      = Tables::core_notifications();
-		$meta_table = Tables::core_meta();
-		$user_id    = (int) ( $legacy_row['user_id'] ?? 0 );
+		foreach ( $legacy_rows as $legacy_row ) {
+			$legacy_id  = (int) $legacy_row['id'];
+			$product_id = (int) ( $legacy_row['product_id'] ?? 0 );
+			$user_id    = (int) ( $legacy_row['user_id'] ?? 0 );
 
-		$conditions = array( 'n.product_id = %d' );
-		$params     = array( (int) ( $legacy_row['product_id'] ?? 0 ) );
+			if ( $user_id > 0 ) {
+				$key                      = $this->registered_key( $product_id, $user_id );
+				$registered_pairs[ $key ] = array( $product_id, $user_id );
+			} else {
+				$email               = strtolower( trim( (string) ( $legacy_row['user_email'] ?? '' ) ) );
+				$key                 = $this->guest_key( $product_id, $email );
+				$guest_pairs[ $key ] = array( $product_id, $email );
+			}
 
-		if ( $user_id > 0 ) {
-			$conditions[] = 'n.user_id = %d';
-			$params[]     = $user_id;
-		} else {
-			// A guest legacy row only ever adopts a guest Core row. Matching a registered
-			// Core row on the address alone would hand one person's subscription to a row
-			// that belongs to their account, which is a different subscription.
-			$conditions[] = 'n.user_id = 0';
-			$conditions[] = 'LOWER( TRIM( n.user_email ) ) = %s';
-			$params[]     = strtolower( trim( (string) ( $legacy_row['user_email'] ?? '' ) ) );
+			$keys[ $legacy_id ] = $key;
 		}
 
-		$conditions[] = "COALESCE( pm.meta_value, '' ) = %s";
-		$params[]     = $posted_attributes_value;
+		$candidates = $this->fetch_adoption_candidates( $registered_pairs, $guest_pairs );
 
-		// $table/$meta_table are $wpdb->prefix-based, never user input; $conditions is a
-		// locally built list of %d/%s placeholder fragments, bound via $wpdb->prepare() below.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		if ( empty( $candidates ) ) {
+			return array();
+		}
+
+		$candidate_ids = array();
+
+		foreach ( $candidates as $group ) {
+			foreach ( $group as $candidate ) {
+				$candidate_ids[] = $candidate['id'];
+			}
+		}
+
+		$candidate_attributes = $this->fetch_candidate_posted_attributes( $candidate_ids );
+
+		$targets = array();
+
+		foreach ( $legacy_rows as $legacy_row ) {
+			$legacy_id = (int) $legacy_row['id'];
+			$wanted    = $posted_attributes[ $legacy_id ] ?? '';
+
+			foreach ( $candidates[ $keys[ $legacy_id ] ] ?? array() as $candidate ) {
+				$stored = $candidate_attributes[ $candidate['id'] ] ?? array( '' );
+
+				if ( in_array( $wanted, $stored, true ) ) {
+					$targets[ $legacy_id ] = $candidate['id'];
+					break;
+				}
+			}
+		}
+
+		return $targets;
+	}
+
+	/**
+	 * Fetch every adoptable Core notification matching one of the batch's natural keys,
+	 * grouped by that key and ranked active before pending, then by ascending id.
+	 *
+	 * @param array<string,array{0:int,1:int}>    $registered_pairs Product/user pairs, keyed by natural key.
+	 * @param array<string,array{0:int,1:string}> $guest_pairs      Product/email pairs, keyed by natural key.
+	 * @return array<string,array<int,array{id:int,status:string}>> Candidates by natural key.
+	 */
+	private function fetch_adoption_candidates( array $registered_pairs, array $guest_pairs ): array {
+		$grouped = array();
+
+		foreach ( $this->query_registered_candidates( $registered_pairs ) as $row ) {
+			$key               = $this->registered_key( (int) $row['product_id'], (int) $row['user_id'] );
+			$grouped[ $key ][] = array(
+				'id'     => (int) $row['id'],
+				'status' => (string) $row['status'],
+			);
+		}
+
+		foreach ( $this->query_guest_candidates( $guest_pairs ) as $row ) {
+			$key               = $this->guest_key( (int) $row['product_id'], strtolower( trim( (string) $row['user_email'] ) ) );
+			$grouped[ $key ][] = array(
+				'id'     => (int) $row['id'],
+				'status' => (string) $row['status'],
+			);
+		}
+
+		foreach ( $grouped as $key => $candidates ) {
+			usort(
+				$candidates,
+				static function ( array $left, array $right ): int {
+					$left_rank  = array_search( $left['status'], self::ADOPTABLE_STATUSES, true );
+					$right_rank = array_search( $right['status'], self::ADOPTABLE_STATUSES, true );
+
+					return $left_rank === $right_rank ? $left['id'] <=> $right['id'] : $left_rank <=> $right_rank;
+				}
+			);
+
+			$grouped[ $key ] = $candidates;
+		}
+
+		return $grouped;
+	}
+
+	/**
+	 * Query the adoptable Core rows for the batch's registered natural keys.
+	 *
+	 * @param array<string,array{0:int,1:int}> $pairs Product/user pairs, keyed by natural key.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function query_registered_candidates( array $pairs ): array {
+		global $wpdb;
+
+		if ( empty( $pairs ) ) {
+			return array();
+		}
+
+		$table        = Tables::core_notifications();
+		$placeholders = implode( ', ', array_fill( 0, count( $pairs ), '( %d, %d )' ) );
+		$params       = self::ADOPTABLE_STATUSES;
+
+		foreach ( $pairs as $pair ) {
+			$params[] = $pair[0];
+			$params[] = $pair[1];
+		}
+
+		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
+		// row-constructor placeholder list, bound via $wpdb->prepare() below.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$sql = $wpdb->prepare(
-			"SELECT n.id FROM {$table} n
-			LEFT JOIN {$meta_table} pm ON pm.notification_id = n.id AND pm.meta_key = 'posted_attributes'
-			WHERE n.status IN ( 'active', 'pending' )
-			  AND " . implode( ' AND ', $conditions ) . '
-			ORDER BY FIELD( n.status, \'active\', \'pending\' ), n.id ASC
-			LIMIT 1',
+			"SELECT id, status, product_id, user_id FROM {$table}
+			WHERE status IN ( %s, %s ) AND ( product_id, user_id ) IN ( $placeholders )",
 			$params
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		$target_id = $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		return (array) $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+	}
 
-		return null === $target_id ? null : (int) $target_id;
+	/**
+	 * Query the adoptable Core rows for the batch's guest natural keys.
+	 *
+	 * A guest legacy row only ever adopts a guest Core row. Matching a registered Core row
+	 * on the address alone would hand one person's subscription to a row that belongs to
+	 * their account, which is a different subscription.
+	 *
+	 * @param array<string,array{0:int,1:string}> $pairs Product/email pairs, keyed by natural key.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function query_guest_candidates( array $pairs ): array {
+		global $wpdb;
+
+		if ( empty( $pairs ) ) {
+			return array();
+		}
+
+		$table        = Tables::core_notifications();
+		$placeholders = implode( ', ', array_fill( 0, count( $pairs ), '( %d, %s )' ) );
+		$params       = self::ADOPTABLE_STATUSES;
+
+		foreach ( $pairs as $pair ) {
+			$params[] = $pair[0];
+			$params[] = $pair[1];
+		}
+
+		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
+		// row-constructor placeholder list, bound via $wpdb->prepare() below.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$sql = $wpdb->prepare(
+			"SELECT id, status, product_id, user_email FROM {$table}
+			WHERE status IN ( %s, %s ) AND user_id = 0 AND ( product_id, user_email ) IN ( $placeholders )",
+			$params
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return (array) $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+	}
+
+	/**
+	 * Fetch the stored posted_attributes values of the batch's adoption candidates.
+	 *
+	 * A candidate with no such meta is absent from the result; the caller reads that as a
+	 * single empty value, which is what an unserialized empty posted_attributes compares
+	 * against.
+	 *
+	 * @param int[] $notification_ids Candidate notification ids.
+	 * @return array<int,string[]> Stored values, by notification id.
+	 */
+	private function fetch_candidate_posted_attributes( array $notification_ids ): array {
+		global $wpdb;
+
+		$notification_ids = array_values( array_unique( array_map( 'intval', $notification_ids ) ) );
+
+		if ( empty( $notification_ids ) ) {
+			return array();
+		}
+
+		$table        = Tables::core_meta();
+		$placeholders = implode( ', ', array_fill( 0, count( $notification_ids ), '%d' ) );
+
+		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
+		// %d placeholder list, bound via $wpdb->prepare() below.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$sql = $wpdb->prepare(
+			"SELECT notification_id, meta_value FROM {$table}
+			WHERE meta_key = 'posted_attributes' AND notification_id IN ( $placeholders )
+			ORDER BY id ASC",
+			$notification_ids
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		$rows   = (array) $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		$values = array();
+
+		foreach ( $rows as $row ) {
+			$values[ (int) $row['notification_id'] ][] = (string) $row['meta_value'];
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Natural key of a registered legacy row or Core notification.
+	 *
+	 * @param int $product_id Product id.
+	 * @param int $user_id    Registered user id.
+	 * @return string
+	 */
+	private function registered_key( int $product_id, int $user_id ): string {
+		return 'user:' . $product_id . ':' . $user_id;
+	}
+
+	/**
+	 * Natural key of a guest legacy row or Core notification.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param string $email      Address, lowercased and trimmed.
+	 * @return string
+	 */
+	private function guest_key( int $product_id, string $email ): string {
+		return 'guest:' . $product_id . ':' . $email;
 	}
 
 	/**

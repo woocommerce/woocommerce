@@ -34,8 +34,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * The CLI drives the same instance through `configure_run()`, which swaps in its own
  * migrators (built with `--force`, restricted to `--section`), its writer (`NullWriter`
- * under `--dry-run`) and its batch size, so the section order, cursor handling and
- * pass-reset probe live here only.
+ * under `--dry-run`) and its batch size, so the section order and cursor handling live
+ * here only.
  *
  * There is no abort state. Every way a run can end - the feature toggled off, the
  * legacy tables gone, a CLI lock held, a killed worker - is expressed as an empty
@@ -66,23 +66,6 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private int $batch_size = self::DEFAULT_BATCH_SIZE;
 
 	/**
-	 * The rows the last pass-reset probe served per section, recorded once they have
-	 * actually been processed, so a probe that serves exactly the same rows again - rows
-	 * the section cannot settle - ends the section instead of looping on them.
-	 *
-	 * @var array<string, array>
-	 */
-	private array $last_probe = array();
-
-	/**
-	 * The probe result a section is currently holding out, promoted into `$last_probe`
-	 * once `process_batch()` has been through it.
-	 *
-	 * @var array<string, array>
-	 */
-	private array $pending_probe = array();
-
-	/**
 	 * Sections whose cached count this instance has already refreshed on drain, so a
 	 * request that keeps passing over a drained section does not re-run the migration's
 	 * most expensive query each time.
@@ -97,6 +80,14 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @var Requirements
 	 */
 	private Requirements $requirements;
+
+	/**
+	 * Outcome collector shared by this run's migrators, kept so the notifications
+	 * section's known losses can be cached when it drains.
+	 *
+	 * @var Reporter
+	 */
+	private Reporter $reporter;
 
 	/**
 	 * Run state: the CLI lock, per-section cursors, and cached pending counts.
@@ -139,7 +130,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$this->state        = new MigrationState();
 		$this->writer       = $writer;
 
-		$reporter = new Reporter();
+		$reporter       = new Reporter();
+		$this->reporter = $reporter;
 
 		foreach (
 			array(
@@ -158,18 +150,24 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 *
 	 * The CLI needs migrators that share one `Reporter` and carry `--force`, a
 	 * `NullWriter` under `--dry-run`, and only the sections `--section` asked for. It
-	 * still runs the loop through this class, so the section order, the cursor and the
-	 * pass-reset probe have a single implementation.
+	 * still runs the loop through this class, so the section order and the cursor have a
+	 * single implementation.
 	 *
 	 * @param array<string, MigratorInterface> $migrators  Migrators keyed by slug, in section order.
 	 * @param WriterInterface                  $writer     Writer every migrator routes persistence through.
 	 * @param int                              $batch_size Batch size the caller will request.
+	 * @param Reporter|null                    $reporter   The reporter those migrators share, so the known
+	 *                                                     losses cached on drain are this run's own.
 	 * @return void
 	 */
-	public function configure_run( array $migrators, WriterInterface $writer, int $batch_size ): void {
+	public function configure_run( array $migrators, WriterInterface $writer, int $batch_size, ?Reporter $reporter = null ): void {
 		$this->migrators  = $migrators;
 		$this->writer     = $writer;
 		$this->batch_size = max( 1, $batch_size );
+
+		if ( null !== $reporter ) {
+			$this->reporter = $reporter;
+		}
 	}
 
 	/**
@@ -194,9 +192,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * Sum of every section's cached remaining count.
 	 *
 	 * Display only; it never drives the batch loop. The counts are computed at run start
-	 * and after each migrated batch, cached in `wc_bis_migration_state`, and only read
-	 * here - never a live query, so a Tools page load never triggers one. A section
-	 * whose count has never been cached contributes zero.
+	 * and on section drain, cached in `wc_bis_migration_state`, and only read here - never
+	 * a live query, so a Tools page load never triggers one. A section whose count has
+	 * never been cached contributes zero. For the notifications section the cached number
+	 * is rows left to visit, not rows left to migrate: its scan does not know which of
+	 * them are candidates.
 	 *
 	 * @return int Number of items pending processing.
 	 */
@@ -214,10 +214,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	/**
 	 * Returns the next batch of items that need to be processed.
 	 *
-	 * Serves the first section, in fixed order, that still has work; only moves past a
-	 * section once a query run from the start of a new pass also comes back empty. Never
-	 * writes a cursor, so calling it twice in a row returns the same batch; the one write
-	 * it does make is the drained section's cached count, once per section per instance.
+	 * Serves the first section, in fixed order, that still has work, and moves past a
+	 * section as soon as its query comes back empty. Never writes a cursor, so calling it
+	 * twice in a row returns the same batch; the one write it does make is the drained
+	 * section's cached count, once per section per instance.
 	 *
 	 * Runs only while the run's lock is held, and releases it once there is nothing left
 	 * to do - an empty batch is what tells the controller the run is over, so it is also
@@ -284,10 +284,6 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			$migrator->migrate_batch( $raw_ids, $this->writer );
 			$this->state->refresh_lock();
 			$this->store_cursor( $slug, $raw_ids );
-
-			if ( isset( $this->pending_probe[ $slug ] ) && $this->pending_probe[ $slug ] === $raw_ids ) {
-				$this->last_probe[ $slug ] = $raw_ids;
-			}
 		}
 	}
 
@@ -301,19 +297,15 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Fetch one section's next batch, taking its cursor-pass reset into account.
+	 * Fetch one section's next batch, from its stored cursor.
 	 *
-	 * An empty query at the stored cursor does not by itself prove the section is
-	 * drained: a row deleted mid-run can re-enter the candidate set at an id the cursor
-	 * already passed. Query once more from the start of a pass; the section is drained
-	 * only when that query is also empty. The reset is only computed here, never
-	 * persisted - `process_batch()` writes the cursor once the batch has migrated, so
-	 * this method performs no writes and repeated calls return the same batch.
+	 * A section is drained once its cursor has reached the last identifier it has to
+	 * visit. Nothing re-walks from the start of a pass: every section's cursor only
+	 * advances, and a row a batch cannot settle is left behind with a marker rather than
+	 * served again, so the same rows can never be handed out twice.
 	 *
-	 * A dry run never gets the probe: nothing is written, so no row leaves the candidate
-	 * set and a pass from the start would serve the same rows forever. A real run has the
-	 * same failure mode whenever a section cannot settle a row it admits, so a probe that
-	 * returns exactly what the previous probe returned ends the section instead.
+	 * Performs no writes - `process_batch()` writes the cursor once the batch has
+	 * migrated - so repeated calls return the same batch.
 	 *
 	 * @param string            $slug     Section slug.
 	 * @param MigratorInterface $migrator Section migrator.
@@ -321,38 +313,12 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @return array List of raw identifiers, ascending, or empty when drained.
 	 */
 	private function get_section_batch( string $slug, MigratorInterface $migrator, int $size ): array {
-		$cursor = $this->state->get_cursor( $slug );
-		$batch  = $migrator->get_batch( $cursor, $size );
-
-		if ( ! empty( $batch ) || 0 === $cursor || $this->writer->is_dry_run() ) {
-			return $batch;
-		}
-
-		$probe = $migrator->get_batch( 0, $size );
-
-		if ( ! empty( $probe ) && isset( $this->last_probe[ $slug ] ) && $this->last_probe[ $slug ] === $probe ) {
-			// Shares Reporter::LOG_SOURCE's value; this is a run-level condition, not a
-			// per-row outcome.
-			wc_get_logger()->warning(
-				sprintf( 'section %s served the same rows twice without settling them; moving on', $slug ),
-				array( 'source' => 'bis-migration' )
-			);
-
-			return array();
-		}
-
-		$this->pending_probe[ $slug ] = $probe;
-
-		return $probe;
+		return $migrator->get_batch( $this->state->get_cursor( $slug ), $size );
 	}
 
 	/**
 	 * Store a section's cursor at the highest identifier in a successfully migrated
 	 * batch, when that section uses a keyset cursor at all.
-	 *
-	 * The new value can be lower than the stored one: that is a batch the probe fetched
-	 * from the start of a new pass, and writing it here is what persists that pass
-	 * reset.
 	 *
 	 * The emails and settings sections identify their outstanding items by option key,
 	 * not by a sequential id, and never read the cursor; their raw ids are never
@@ -375,10 +341,13 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	/**
 	 * Refresh a section's cached count the first time this instance finds it drained.
 	 *
-	 * `count_remaining()` is the migration's most expensive query, so the cached count is
-	 * written at run start and here, on drain - never per batch. Once refreshed the
-	 * section is not counted again by this instance, so the sections a run has already
-	 * passed cost nothing on every later batch.
+	 * The cached count is written at run start and here, on drain - never per batch. Once
+	 * refreshed the section is not counted again by this instance, so the sections a run
+	 * has already passed cost nothing on every later batch.
+	 *
+	 * The notifications section also caches its known losses here: they are what this run
+	 * accumulated per row, so they are only complete once its scan has reached the end of
+	 * the legacy table, which is exactly this point.
 	 *
 	 * @param string            $slug     Section slug.
 	 * @param MigratorInterface $migrator Section migrator.
@@ -391,7 +360,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 
 		$this->counted_on_drain[ $slug ] = true;
 
-		$this->state->set_count( $slug, $migrator->count_remaining() );
+		$this->state->set_count( $slug, $migrator->count_remaining( $this->state->get_cursor( $slug ) ) );
+
+		if ( $migrator instanceof NotificationsMigrator ) {
+			$this->state->set_losses( $this->reporter->with_run_losses( $migrator ) );
+		}
 	}
 
 	/**

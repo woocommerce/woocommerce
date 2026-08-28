@@ -96,11 +96,14 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Count the rows this section still has to migrate.
 	 *
-	 * Same predicate as get_batch(), without the cursor, expressed as a COUNT(*).
+	 * Same predicate as get_batch(), without the cursor, expressed as a COUNT(*). The
+	 * cursor is ignored: a migrated product stops matching the predicate on its own, so
+	 * counting from the start already excludes everything below the cursor.
 	 *
+	 * @param int $cursor Last product id handled. Ignored; see above.
 	 * @return int
 	 */
-	public function count_remaining(): int {
+	public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
 		global $wpdb;
 
 		$sql = $this->candidate_sql( 'COUNT( DISTINCT p.ID )', '', array() );

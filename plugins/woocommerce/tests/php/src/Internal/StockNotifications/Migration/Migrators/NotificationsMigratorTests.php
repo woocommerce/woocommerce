@@ -71,9 +71,9 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox the candidate predicate should exclude every row that cannot be migrated.
+	 * @testdox every row that cannot be migrated should be skipped with a recorded outcome.
 	 */
-	public function test_predicate_excludes_ineligible_rows(): void {
+	public function test_ineligible_rows_are_skipped_with_a_recorded_outcome(): void {
 		$eligible = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
 
 		$unverified = LegacyStore::add_notification(
@@ -115,18 +115,57 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( $eligible, $unverified ), $this->migrator->get_batch( 0, 100 ), 'An unverified row is a candidate, not a loss.' );
-		$this->assertSame( 2, $this->migrator->count_remaining() );
+		$batch = $this->migrator->get_batch( 0, 100 );
 
-		$this->assertSame( 1, $this->migrator->count_email_too_long() );
-		$this->assertSame( 2, $this->migrator->count_invalid_email(), 'The empty and malformed addresses are both invalid.' );
-		$this->assertSame( 3, $this->migrator->count_product_missing(), 'Trashed, non-product and missing products all count.' );
+		$this->assertCount( 8, $batch, 'The scan serves every row; candidacy is decided in migrate_batch().' );
+
+		$outcomes = $this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+
+		$this->assertSame( 2, $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0, 'An unverified row is a candidate, not a loss.' );
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_EMAIL_TOO_LONG ] ?? 0 );
+		$this->assertSame( 2, $outcomes[ Reporter::OUTCOME_INVALID_EMAIL ] ?? 0, 'The empty and malformed addresses are both invalid.' );
+		$this->assertSame( 3, $outcomes[ Reporter::OUTCOME_PRODUCT_MISSING ] ?? 0, 'Trashed, non-product and missing products all count.' );
+		$this->assertSame( count( $batch ), array_sum( $outcomes ), 'Every row the scan serves has to leave the batch with an outcome.' );
+
+		$this->assertCount( 2, LegacyStore::get_core_rows(), 'Only the two eligible rows are inserted.' );
+		$this->assertSame(
+			array( (string) $eligible, (string) $unverified ),
+			array_merge( ...array_values( LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) ) )
+		);
 	}
 
 	/**
-	 * @testdox the skip counts should include unverified rows, now that they are candidates.
+	 * @testdox an already migrated row should be skipped again on a re-run, without an outcome.
 	 */
-	public function test_skip_counts_include_unverified_rows(): void {
+	public function test_an_already_migrated_row_is_skipped_without_an_outcome(): void {
+		$legacy_id = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
+
+		$this->migrate_all();
+		$this->assertCount( 1, LegacyStore::get_core_rows() );
+
+		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( DbWriter::class ) );
+
+		$this->assertSame( array(), $outcomes, 'A settled row is not a loss, so it records nothing.' );
+		$this->assertCount( 1, LegacyStore::get_core_rows(), 'A re-run must not insert the row again.' );
+	}
+
+	/**
+	 * @testdox a row marked permanently failed should be skipped again, without an outcome.
+	 */
+	public function test_a_failed_row_is_skipped_without_an_outcome(): void {
+		$legacy_id = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
+		LegacyStore::add_meta( $legacy_id, '_wc_bis_migration_failed', array( 'reason' => 'exception' ) );
+
+		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( DbWriter::class ) );
+
+		$this->assertSame( array(), $outcomes );
+		$this->assertSame( array(), LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox the skip outcomes should include unverified rows, now that they are candidates.
+	 */
+	public function test_skip_outcomes_include_unverified_rows(): void {
 		LegacyStore::add_notification(
 			array(
 				'product_id'  => $this->product_id,
@@ -148,9 +187,12 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 1, $this->migrator->count_email_too_long() );
-		$this->assertSame( 1, $this->migrator->count_invalid_email() );
-		$this->assertSame( 1, $this->migrator->count_product_missing() );
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_EMAIL_TOO_LONG ] ?? 0 );
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_INVALID_EMAIL ] ?? 0 );
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_PRODUCT_MISSING ] ?? 0 );
+		$this->assertSame( array(), LegacyStore::get_core_rows() );
 	}
 
 	/**
@@ -195,6 +237,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->assertSame( array( $first, $second ), $this->migrator->get_batch( 0, 100 ) );
 		$this->assertSame( array( $first, $second ), $this->migrator->get_batch( 0, 100 ) );
 		$this->assertSame( 2, $this->migrator->count_remaining() );
+		$this->assertSame( 0, $this->migrator->count_remaining( $second ), 'The count is of rows above the cursor.' );
 	}
 
 	/**
@@ -216,7 +259,8 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), LegacyStore::get_core_rows(), 'A dry run must not insert Core rows.' );
 		$this->assertFalse( get_option( 'wc_bis_migration_has_migrated_rows' ), 'A dry run must not write options.' );
-		$this->assertSame( 2, $this->migrator->count_remaining(), 'A dry run must leave every row outstanding.' );
+		$this->assertSame( array( $ids[0], $ids[1] ), $this->migrator->get_batch( 0, 100 ), 'A dry run must leave every row outstanding.' );
+		$this->assertSame( 2, $this->migrator->count_remaining() );
 
 		$real_migrator = new NotificationsMigrator( new Reporter() );
 		$real_outcomes = $real_migrator->migrate_batch( $ids, wc_get_container()->get( DbWriter::class ) );
@@ -354,11 +398,11 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 			+ ( $outcomes[ Reporter::OUTCOME_FAILED ] ?? 0 );
 
 		$this->assertSame( count( $admitted ), $accounted, 'No row may leave a batch by a third route.' );
-		$this->assertSame( 0, $this->migrator->count_remaining() );
+		$this->assertSame( 0, $this->migrator->count_remaining( (int) max( $admitted ) ) );
 	}
 
 	/**
-	 * @testdox legacy meta should be read with one query per batch, not one per row.
+	 * @testdox the legacy meta table should be read a fixed number of times per batch, not once per row.
 	 */
 	public function test_legacy_meta_is_read_once_per_batch(): void {
 		for ( $i = 0; $i < 5; $i++ ) {
@@ -389,7 +433,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
 		remove_filter( 'query', $counter );
 
-		$this->assertSame( 1, $queries, 'Legacy meta must be fetched once for the whole batch.' );
+		$this->assertSame( 2, $queries, 'One failure-marker lookup and one meta fetch, both for the whole batch.' );
 	}
 
 	/**

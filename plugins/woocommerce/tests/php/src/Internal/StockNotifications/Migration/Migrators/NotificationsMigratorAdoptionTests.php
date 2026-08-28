@@ -409,8 +409,210 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 		$this->assertCount( 1, LegacyStore::get_legacy_meta( $legacy_id, '_wc_bis_migration_failed' ) );
 		$this->assertArrayNotHasKey( $existing, LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
 
-		// The failure marker is what keeps the row from being re-tried forever.
-		$this->assertSame( array(), $this->migrator->get_batch( 0, 500 ) );
+		// The failure marker is what keeps the row from being re-tried forever: the scan still
+		// serves it, and the batch drops it before it can adopt anything.
+		$this->assertSame( array( $legacy_id ), $this->migrator->get_batch( 0, 500 ) );
+		$this->assertSame( array(), $this->migrate_all() );
+		$this->assertArrayNotHasKey( $existing, LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
+	}
+
+	/**
+	 * @testdox adoption should match a Core address that differs only in case.
+	 */
+	public function test_address_case_is_not_part_of_the_natural_key(): void {
+		$existing = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => ' Shopper@Example.com ',
+			)
+		);
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertSame( array( (string) $legacy_id ), LegacyStore::get_core_meta( '_wc_bis_legacy_id' )[ $existing ] );
+	}
+
+	/**
+	 * @testdox a lower-case legacy address should adopt a Core row stored in mixed case.
+	 */
+	public function test_a_mixed_case_core_address_is_adopted(): void {
+		$existing = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'Shopper@Example.com',
+			)
+		);
+
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertSame( array( (string) $legacy_id ), LegacyStore::get_core_meta( '_wc_bis_legacy_id' )[ $existing ] );
+	}
+
+	/**
+	 * @testdox an active target should win over a lower-id pending one, on every run.
+	 */
+	public function test_the_active_target_wins_whatever_the_ids_are(): void {
+		$pending = $this->create_core_notification( 'shopper@example.com', NotificationStatus::PENDING );
+		$active  = $this->create_core_notification( 'shopper@example.com', NotificationStatus::ACTIVE );
+
+		$this->assertLessThan( $active, $pending, 'The pending target has to hold the lower id for this to mean anything.' );
+
+		$first_id  = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+		$second_id = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+
+		$this->migrate_all();
+
+		$this->assertSame(
+			array( (string) $first_id, (string) $second_id ),
+			LegacyStore::get_core_meta( '_wc_bis_legacy_id' )[ $active ],
+			'Both rows adopt the active target, not the older pending one.'
+		);
+		$this->assertArrayNotHasKey( $pending, LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
+	}
+
+	/**
+	 * @testdox a variation row should adopt only on a byte-identical posted_attributes.
+	 */
+	public function test_a_variation_row_adopts_only_on_identical_posted_attributes(): void {
+		$attributes = array( 'attribute_pa_color' => 'blue' );
+
+		$matching = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'match@example.com',
+			)
+		);
+		LegacyStore::add_core_meta( $matching, 'posted_attributes', maybe_serialize( $attributes ) );
+
+		$other = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'other@example.com',
+			)
+		);
+		LegacyStore::add_core_meta( $other, 'posted_attributes', maybe_serialize( array( 'attribute_pa_color' => 'red' ) ) );
+
+		$adopting = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'match@example.com',
+			)
+		);
+		LegacyStore::add_meta( $adopting, 'posted_attributes', $attributes );
+
+		$inserting = LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'other@example.com',
+			)
+		);
+		LegacyStore::add_meta( $inserting, 'posted_attributes', $attributes );
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0 );
+
+		$markers = LegacyStore::get_core_meta( '_wc_bis_legacy_id' );
+
+		$this->assertSame( array( (string) $adopting ), $markers[ $matching ] );
+		$this->assertArrayNotHasKey( $other, $markers, 'A different variation choice is a different signup.' );
+	}
+
+	/**
+	 * @testdox a legacy row with no posted_attributes should not adopt a row that has some.
+	 */
+	public function test_a_row_without_posted_attributes_does_not_adopt_one_with_them(): void {
+		$existing = LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+		LegacyStore::add_core_meta( $existing, 'posted_attributes', maybe_serialize( array( 'attribute_pa_color' => 'blue' ) ) );
+
+		LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => 'shopper@example.com',
+			)
+		);
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0 );
+		$this->assertCount( 2, LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox adoption should resolve a whole batch in a fixed number of queries.
+	 */
+	public function test_adoption_resolves_a_batch_in_a_fixed_number_of_queries(): void {
+		$user_id = $this->factory()->user->create();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->create_core_notification( "guest{$i}@example.com", NotificationStatus::ACTIVE );
+			LegacyStore::add_notification(
+				array(
+					'product_id' => $this->product_id,
+					'user_email' => "guest{$i}@example.com",
+				)
+			);
+		}
+
+		$this->create_core_notification( 'registered@example.com', NotificationStatus::ACTIVE, $user_id );
+		LegacyStore::add_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_id'    => $user_id,
+				'user_email' => 'registered@example.com',
+			)
+		);
+
+		global $wpdb;
+		$table   = $wpdb->prefix . 'wc_stock_notifications ';
+		$queries = array();
+
+		$counter = function ( $query ) use ( &$queries, $table ) {
+			if ( false !== strpos( $query, $table ) && 0 === stripos( ltrim( $query ), 'SELECT' ) ) {
+				$queries[] = $query;
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $counter );
+		$outcomes = $this->migrate_all();
+		remove_filter( 'query', $counter );
+
+		$this->assertSame( 4, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertLessThanOrEqual( 2, count( $queries ), 'One lookup per branch for the whole batch, never one per row.' );
 	}
 
 	/**
