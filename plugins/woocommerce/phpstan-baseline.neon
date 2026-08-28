@@ -66661,12 +66661,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Access to property \$id on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Email\.$#'
 			identifier: class.notFound
 			count: 1

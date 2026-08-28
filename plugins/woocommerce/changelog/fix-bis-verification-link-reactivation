@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop a stock notification verification link from reactivating a sign-up that was cancelled after the link was sent.
