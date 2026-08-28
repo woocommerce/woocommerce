@@ -87,6 +87,21 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		await skipOnboardingWizard();
 	} );
 
+	await setup.step( 'dismiss email improvements prompts', async () => {
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_admin_dismissed_email_improvements_modal',
+			'yes'
+		);
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_admin_dismissed_try_email_improvements_modal',
+			'yes'
+		);
+	} );
+
 	await setup.step( 'determine if multisite', async () => {
 		const response = await restApi.get( `${ WC_API_PATH }/system_status` );
 		const { environment } = response.data;

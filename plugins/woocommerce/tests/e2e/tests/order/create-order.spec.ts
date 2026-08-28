@@ -37,12 +37,11 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page
-		.getByRole( 'combobox', { name: 'Search for a product…' } )
-		.click();
-	await page
-		.locator( '.select2-container--open input.select2-search__field' )
-		.fill( product.name );
+	const productSearch = page.locator(
+		'.select2-container--open input.select2-search__field'
+	);
+	await expect( productSearch ).toBeVisible();
+	await productSearch.fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 
 	const quantityField = page

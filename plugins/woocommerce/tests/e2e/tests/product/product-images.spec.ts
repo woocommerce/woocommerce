@@ -192,6 +192,14 @@ test.describe( 'Products > Product Images', () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
+			const setProductImage = page
+				.locator( '#postimagediv' )
+				.getByRole( 'link', { name: 'Set product image' } )
+				.or(
+					page
+						.locator( '#postimagediv' )
+						.getByRole( 'button', { name: 'Set product image' } )
+				);
 			await page
 				.getByRole( 'link', { name: 'Remove product image' } )
 				.or(
@@ -200,6 +208,7 @@ test.describe( 'Products > Product Images', () => {
 					} )
 				)
 				.click();
+			await expect( setProductImage ).toBeVisible();
 			await page
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
@@ -209,13 +218,7 @@ test.describe( 'Products > Product Images', () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			await expect(
-				page.getByRole( 'link', { name: 'Set product image' } ).or(
-					page.getByRole( 'button', {
-						name: 'Set product image',
-					} )
-				)
-			).toBeVisible();
+			await expect( setProductImage ).toBeVisible();
 
 			await page.goto( product.permalink );
 			await expect(
