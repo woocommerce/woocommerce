@@ -1584,6 +1584,8 @@ class Cart extends ControllerTestCase {
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+		$this->assertArrayNotHasKey( 'Cart-Token', $response->get_headers(), 'A failed cart response should not include a cart token.' );
+		$this->assertArrayNotHasKey( 'Cart-Hash', $response->get_headers(), 'A failed cart response should not include a cart hash.' );
 	}
 
 	/**

@@ -132,9 +132,12 @@ class Batch extends ControllerTestCase {
 
 	/**
 	 * @testdox Should preserve the session cart when loading it fails in a batch sub-request.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_cart_session_failure_does_not_clear_session_cart(): void {
 		WC()->cart->add_to_cart( $this->products[0]->get_id() );
+		WC()->cart->add_to_cart( $this->products[1]->get_id() );
 
 		global $wp_query;
 
@@ -146,14 +149,25 @@ class Batch extends ControllerTestCase {
 		$is_singular_backup       = $wp_query->is_singular;
 		$is_archive_backup        = $wp_query->is_archive;
 		$is_search_backup         = $wp_query->is_search;
-		$session_failure_callback = static function () {
-			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+		$restored_item_count      = 0;
+		$session_failure_callback = static function ( $session_data ) use ( &$restored_item_count ) {
+			++$restored_item_count;
+			if ( 2 === $restored_item_count ) {
+				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+			}
+			return $session_data;
+		};
+		$cookie_update_count      = 0;
+		$cookie_update_callback   = static function () use ( &$cookie_update_count ) {
+			++$cookie_update_count;
+			return false;
 		};
 
 		WC()->session->set( 'cart', $stored_cart );
 		WC()->cart->set_cart_contents( array() );
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 		add_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
+		add_filter( 'woocommerce_set_cookie_enabled', $cookie_update_callback, 10, 0 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
 		$request->set_body_params(
@@ -171,6 +185,10 @@ class Batch extends ControllerTestCase {
 						'body'    => array(),
 						'headers' => array( 'Nonce' => wp_create_nonce( 'wc_store_api' ) ),
 					),
+					array(
+						'method' => 'GET',
+						'path'   => '/wc/store/v1/products',
+					),
 				),
 			)
 		);
@@ -181,6 +199,10 @@ class Batch extends ControllerTestCase {
 
 			$this->assertSame( 500, $response_data['responses'][0]['status'], 'The request that fails to load the cart should return an error.' );
 			$this->assertSame( 500, $response_data['responses'][1]['status'], 'Later cart requests should not use a partially loaded cart.' );
+			$this->assertSame( 200, $response_data['responses'][2]['status'], 'Later non-cart requests should remain available.' );
+			$this->assertCount( 1, $cart_backup->get_cart_contents(), 'The synthetic failure should occur after partially restoring the cart.' );
+			$this->assertArrayNotHasKey( 'Cart-Token', $response_data['responses'][0]['headers'], 'A failed cart response should not include a cart token.' );
+			$this->assertArrayNotHasKey( 'Cart-Hash', $response_data['responses'][0]['headers'], 'A failed cart response should not include a cart hash.' );
 
 			// A failed cart remains referenced by its registered callbacks after WC()->cart is cleared.
 			do_action( 'woocommerce_removed_coupon', 'synthetic-coupon' );
@@ -206,8 +228,13 @@ class Batch extends ControllerTestCase {
 			$wp_query->is_search   = false;
 			$failed_cart_session->clean_up_removed_cart_contents();
 			$this->assertSame( $stored_removed_cart_contents, WC()->session->get( 'removed_cart_contents' ), 'The failed cart should not clean up removed cart contents.' );
+
+			$this->assertFalse( headers_sent(), 'Cookie behavior can only be verified before headers are sent.' );
+			$failed_cart_session->maybe_set_cart_cookies();
+			$this->assertSame( 0, $cookie_update_count, 'The failed cart should not update cart cookies.' );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
+			remove_filter( 'woocommerce_set_cookie_enabled', $cookie_update_callback );
 			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			WC()->cart->set_cart_contents( $cart_contents_backup );
@@ -221,6 +248,36 @@ class Batch extends ControllerTestCase {
 				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
 				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
 			}
+		}
+	}
+
+	/**
+	 * @testdox Disabling cart-session updates only affects the exact marked cart.
+	 */
+	public function test_cart_session_update_registry_is_scoped_to_the_marked_cart(): void {
+		$marked_cart         = WC()->cart;
+		$unmarked_clone      = clone $marked_cart;
+		$marked_session      = new \WC_Cart_Session( $marked_cart );
+		$unmarked_session    = new \WC_Cart_Session( $unmarked_clone );
+		$stored_session_cart = $marked_cart->get_cart_for_session();
+
+		try {
+			\WC_Cart_Session::set_updates_enabled_for_cart( $marked_cart, false );
+
+			WC()->session->set( 'cart', $stored_session_cart );
+			$marked_session->destroy_cart_session();
+			$this->assertSame( $stored_session_cart, WC()->session->get( 'cart' ), 'The marked cart should not destroy session data.' );
+
+			$unmarked_session->destroy_cart_session();
+			$this->assertNull( WC()->session->get( 'cart' ), 'An unmarked clone should continue updating session data.' );
+
+			WC()->session->set( 'cart', $stored_session_cart );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $marked_cart, true );
+			$marked_session->destroy_cart_session();
+			$this->assertNull( WC()->session->get( 'cart' ), 'Re-enabled carts should resume updating session data.' );
+		} finally {
+			\WC_Cart_Session::set_updates_enabled_for_cart( $marked_cart, true );
+			WC()->session->set( 'cart', $stored_session_cart );
 		}
 	}
 
