@@ -180,8 +180,6 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should compose its own sentence for an unmet PHP requirement.
-	 */	/**
-	 * @testdox Should compose its own sentence for an unmet PHP requirement.
 	 */
 	public function test_get_requirements_error_reason_for_php(): void {
 		$error = new WP_Error( 'incompatible_php_required_version', 'The package could not be installed.', 'core detail' );
