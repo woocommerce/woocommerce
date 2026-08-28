@@ -259,6 +259,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 
 			const response = await fetchHandler( endpoint, {
 				method: 'POST',
+				keepalive: true,
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,

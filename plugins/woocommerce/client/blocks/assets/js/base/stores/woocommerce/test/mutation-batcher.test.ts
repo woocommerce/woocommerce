@@ -103,6 +103,7 @@ describe( 'createMutationQueue', () => {
 
 			// Should have made exactly ONE fetch call with all 3 requests
 			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
+			expect( mockFetch.mock.calls[ 0 ][ 1 ].keepalive ).toBe( true );
 			const requestBody = JSON.parse(
 				mockFetch.mock.calls[ 0 ][ 1 ].body
 			);
