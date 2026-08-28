@@ -68,15 +68,10 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		icon: arrowRight,
 		hiddenBlocks: [
 			'coupons/amount',
-			'coupons/orders_count',
 			'downloads/download_count',
 			'taxes/order_tax',
 			'taxes/total_tax',
 			'taxes/shipping_tax',
-			'revenue/shipping',
-			'orders/avg_order_value',
-			'revenue/refunds',
-			'revenue/gross_sales',
 		],
 	},
 	{
