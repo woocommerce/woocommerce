@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as Product
 use Automattic\WooCommerce\Internal\Integrations\WPPostsImporter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Runner;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\Cli as StockNotificationsMigrationCLI;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,6 +76,10 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
 		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
+		// Resolved inside the hook: the command is registered unconditionally, so that
+		// `--force-discover` stays reachable, and nothing should be built for `wp help`.
+		// @phpstan-ignore-next-line class.notFound -- WP_CLI is only defined in a CLI context.
+		WP_CLI::add_hook( 'after_wp_load', fn() => wc_get_container()->get( StockNotificationsMigrationCLI::class )->register() );
 	}
 
 	/**
