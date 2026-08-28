@@ -68,7 +68,8 @@ function _wc_beta_tester_bootstrap() {
 
 		register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 
-		add_action( 'admin_init', array( 'WC_Beta_Tester', 'instance' ) );
+		// Initialize immediately so update filters are registered for cron/CLI.
+		WC_Beta_Tester::instance();
 	}
 
 	// Load admin.

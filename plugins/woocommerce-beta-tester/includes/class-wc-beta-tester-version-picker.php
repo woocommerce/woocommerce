@@ -69,10 +69,20 @@ class WC_Beta_Tester_Version_Picker {
 			// Try to reactivate.
 			activate_plugin( $plugin, '', is_network_admin(), true );
 
-			if ( is_wp_error( $skin->result ) ) {
+			if ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			} elseif ( is_wp_error( $skin->result ) ) {
 				throw new Exception( $skin->result->get_error_message() );
 			} elseif ( false === $result ) {
 				throw new Exception( __( 'Update failed', 'woocommerce-beta-tester' ) );
+			}
+
+			// Store the nightly asset timestamp so we can detect future updates.
+			if ( 'nightly' === $version ) {
+				$nightly_timestamp = WC_Beta_Tester::instance()->get_nightly_asset_timestamp();
+				if ( $nightly_timestamp ) {
+					WC_Beta_Tester::instance()->set_nightly_installed_timestamp( $nightly_timestamp );
+				}
 			}
 
 			wp_safe_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );
@@ -139,6 +149,20 @@ class WC_Beta_Tester_Version_Picker {
 		$versions_html        .= '<ul class="wcbt-version-list">';
 		$plugin_data           = WC_Beta_Tester::instance()->get_plugin_data();
 		$this->current_version = $plugin_data['Version'];
+
+		// Add nightly option at the top.
+		// Nightly builds have version strings ending in '-dev' (e.g., '10.9.0-dev').
+		$is_nightly     = strpos( $this->current_version, '-dev' ) !== false;
+		$versions_html .= '<li class="wcbt-version-li">';
+		$versions_html .= '<label><input type="radio" ' . checked( $is_nightly, true, false ) . ' value="nightly" name="wcbt_switch_to_version">nightly';
+		$versions_html .= ' <em>(' . esc_html__( 'Unstable - latest trunk build from GitHub', 'woocommerce-beta-tester' ) . ')</em>';
+
+		if ( $is_nightly ) {
+			$versions_html .= '<span class="wcbt-current-version"><strong>' . esc_html__( '&nbsp;Installed Version', 'woocommerce-beta-tester' ) . '</strong></span>';
+		}
+
+		$versions_html .= '</label>';
+		$versions_html .= '</li>';
 
 		// Loop through versions and output in a radio list.
 		foreach ( $tags as $tag_version ) {

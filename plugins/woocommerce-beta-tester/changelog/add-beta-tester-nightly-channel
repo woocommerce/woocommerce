@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add nightly channel option to install WooCommerce trunk builds from GitHub via settings and version picker
