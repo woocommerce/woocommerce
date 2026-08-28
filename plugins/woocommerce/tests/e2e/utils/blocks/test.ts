@@ -22,6 +22,7 @@ import {
  * Internal dependencies
  */
 import { restoreBlocksDatabase } from './wp-cli';
+import { createControlRequestContext } from './request-utils/control-context';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -134,25 +135,11 @@ const test = base.extend<
 
 		await use( page );
 
-		// Clear local storage after each test.
-		try {
-			await page.evaluate( () => {
-				window.localStorage.clear();
-			} );
-		} catch ( error ) {
-			// Ignore errors if page is already closed/navigated away
-			// eslint-disable-next-line no-console
-			console.log( 'Failed to clear localStorage:', error.message );
-		}
-
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
-		// Navigate away before resetting the DB so the page stops issuing
-		// Store API requests against a half-dropped database. Otherwise late
-		// in-flight fetches are served the WordPress install page (HTTP 200,
-		// text/html) and surface as "The response is not a valid JSON
-		// response." console noise.
+		// Stop new browser-owned work before the database coordinator waits for
+		// already-admitted PHP requests and owns the snapshot restore.
 		try {
 			await page.goto( 'about:blank' );
 		} catch ( error ) {
@@ -186,18 +173,31 @@ const test = base.extend<
 		await use( new MiniCartUtils( page, frontendUtils ) );
 	},
 	requestUtils: [
-		async ( {}, use, workerInfo ) => {
-			const requestUtils = await RequestUtils.setup( {
-				baseURL: workerInfo.project.use.baseURL as string,
-				storageStatePath: STORAGE_STATE_PATH,
-			} );
+		async ( { playwright }, provideRequestUtils, workerInfo ) => {
+			const baseURL = workerInfo.project.use.baseURL as string;
+			const { requestContext, storageState } =
+				await createControlRequestContext( {
+					apiRequest: playwright.request,
+					baseURL,
+					storageStatePath: STORAGE_STATE_PATH,
+				} );
 
-			await use( requestUtils );
+			try {
+				const requestUtils = new RequestUtils( requestContext, {
+					baseURL,
+					storageState,
+					storageStatePath: STORAGE_STATE_PATH,
+				} );
+
+				await provideRequestUtils( requestUtils );
+			} finally {
+				await requestContext.dispose();
+			}
 		},
 		{ scope: 'worker', auto: true },
 	],
 	wpCoreVersion: [
-		async ( {}, use ) => {
+		async ( { browserName }, use ) => {
 			const output = await wpCLI( 'core version' );
 			const version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
 
@@ -207,7 +207,7 @@ const test = base.extend<
 
 			if ( Number.isNaN( parsedVersion ) ) {
 				throw new Error(
-					`Failed to parse WordPress version: ${ version }`
+					`Failed to parse WordPress version for ${ browserName }: ${ version }`
 				);
 			}
 

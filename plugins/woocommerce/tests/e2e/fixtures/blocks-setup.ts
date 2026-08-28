@@ -3,10 +3,12 @@
 /**
  * External dependencies
  */
-import { test as setup, chromium, request } from '@playwright/test';
+import { test as setup, chromium } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
+	exportBlocksDatabase,
+	importBlocksDatabase,
 	wpCLI,
 	customerFile,
 	BLOCK_THEME_SLUG,
@@ -19,6 +21,7 @@ import {
  */
 import { customer, admin } from '../test-data/blocks/data/data';
 import { BASE_URL } from '../utils/blocks/constants';
+import { createControlRequestContext } from '../utils/blocks/request-utils/control-context';
 
 const prepareAttributes = async () => {
 	const browser = await chromium.launch();
@@ -68,7 +71,7 @@ setup( 'blocks setup', async () => {
 	let databaseImported = false;
 
 	try {
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await importBlocksDatabase( DB_EXPORT_FILE );
 		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {
@@ -83,32 +86,34 @@ setup( 'blocks setup', async () => {
 		console.log( '├ Database snapshot not found, running full setup…' );
 	}
 
-	const requestContext = await request.newContext( {
+	const { requestContext } = await createControlRequestContext( {
 		baseURL: BASE_URL,
 	} );
 
-	console.log( '├ Pre-authenticating users…' );
-	await new RequestUtils( requestContext, {
-		user: customer,
-		storageStatePath: customerFile,
-	} ).setupRest();
-	const requestUtils = new RequestUtils( requestContext, {
-		user: admin,
-		storageStatePath: adminFile,
-	} );
-	await requestUtils.setupRest();
+	try {
+		console.log( '├ Pre-authenticating users…' );
+		await new RequestUtils( requestContext, {
+			user: customer,
+			storageStatePath: customerFile,
+		} ).setupRest();
+		const requestUtils = new RequestUtils( requestContext, {
+			user: admin,
+			storageStatePath: adminFile,
+		} );
+		await requestUtils.setupRest();
 
-	if ( ! databaseImported ) {
-		console.log( '├ Activating default theme…' );
-		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+		if ( ! databaseImported ) {
+			console.log( '├ Activating default theme…' );
+			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 
-		console.log( '├ Preparing product attributes…' );
-		await prepareAttributes();
+			console.log( '├ Preparing product attributes…' );
+			await prepareAttributes();
+		}
+
+		console.log( '├ Exporting database snapshot…' );
+		await exportBlocksDatabase( DB_EXPORT_FILE );
+	} finally {
+		await requestContext.dispose();
 	}
-
-	console.log( '├ Exporting database snapshot…' );
-	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
-
-	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );
 } );
