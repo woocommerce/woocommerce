@@ -34,7 +34,7 @@ interface WriterInterface {
 	public function is_dry_run(): bool;
 
 	/**
-	 * Insert notifications together with their meta, in chunks, one transaction per chunk.
+	 * Insert notifications together with their meta, inside a single transaction.
 	 *
 	 * @param array $rows List of rows, each `array{ columns: array<string,mixed>, meta: array<int,array{0:string,1:mixed}> }`.
 	 * @return int Number of notifications written.
