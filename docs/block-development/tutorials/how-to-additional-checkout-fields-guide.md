@@ -180,7 +180,7 @@ woocommerce_register_additional_checkout_field(
 );
 ```
 
-The field will render the browser default date picker. The value is stored in `Y-m-d` format and rendered using the site rendering format in emails and other places.
+The field input value will follows the shopper's browser and OS locale. The value is always stored as `YYYY-MM-DD`, and it is displayed using the site's date format (**Settings → General**) in emails, order screens, and other places the value is rendered.
 
 ## Adding Field Attributes
 

@@ -254,7 +254,7 @@ Text fields don't have any additional options beyond the general options listed 
 
 Date fields don't have any additional options beyond the general options listed above.
 
-The rendered value will follow the site’s date format, set in **Settings → General**.
+The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
 #### Options for `select` fields
 

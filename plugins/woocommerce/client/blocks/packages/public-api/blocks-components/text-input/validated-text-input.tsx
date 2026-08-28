@@ -315,7 +315,11 @@ const ValidatedTextInput = forwardRef<
 					}
 				} }
 				onBlur={ () => {
-					const isEmpty = ! inputRef.current?.value.trim();
+					// A value the browser can't parse reads back as an empty `value`, but the shopper did
+					// enter something, so it gets the same immediate error as any other invalid entry.
+					const isEmpty =
+						! inputRef.current?.value.trim() &&
+						! inputRef.current?.validity?.badInput;
 
 					if ( isEmpty ) {
 						// If the error was already shown (e.g. after form

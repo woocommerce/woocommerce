@@ -1525,7 +1525,9 @@ class CheckoutFields {
 			// Parsed in the site timezone so the stored calendar date cannot shift a day when it is formatted.
 			$date = \DateTime::createFromFormat( '!Y-m-d', $value, wp_timezone() );
 
-			if ( $date ) {
+			// The round trip check keeps a value PHP would roll forward, such as 2026-02-31, displayed as
+			// stored rather than silently turned into a different date.
+			if ( $date && $date->format( 'Y-m-d' ) === $value ) {
 				$value = wp_date( wc_date_format(), $date->getTimestamp() );
 			}
 		}

@@ -133,9 +133,13 @@
 
 	// Firefox paints its native calendar icon with currentColor and exposes no pseudo-element to hide it,
 	// so we make the color transparent (hiding the icon) and repaint the text via -webkit-text-fill-color.
-	// The focus border also uses currentColor, so it gets an explicit color instead.
+	// Both borders derive from currentColor too, so they get explicit colors instead.
 	@supports (-moz-appearance: none) {
 		input[type="date"] {
+			// $universal-border-strong is derived from currentColor, so the resting border needs its own
+			// explicit color. The dark variant already has one.
+			border-color: color-mix(in srgb, $input-text-light 80%, transparent);
+
 			&,
 			&:focus {
 				color: transparent;
