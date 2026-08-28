@@ -717,6 +717,9 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
 			wp_set_current_user( 0 );
 		}
+	}
+
+	/**
 	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
 	 */
 	public function test_add_coupon_discount_uses_manually_edited_line_total() {
