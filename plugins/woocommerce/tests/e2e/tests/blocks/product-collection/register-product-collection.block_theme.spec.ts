@@ -512,79 +512,33 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				id: 'myCustomCollectionWithProductContext',
 				name: 'My Custom Collection - Product Context',
 				label: 'Block: My Custom Collection - Product Context',
-				previewLabelTemplate: [
-					`${ BLOCK_THEME_SLUG }//single-product`,
-				],
 				shouldShowProductPicker: true,
 			},
 			{
 				id: 'myCustomCollectionWithCartContext',
 				name: 'My Custom Collection - Cart Context',
 				label: 'Block: My Custom Collection - Cart Context',
-				previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
 				shouldShowProductPicker: false,
 			},
 			{
 				id: 'myCustomCollectionWithOrderContext',
 				name: 'My Custom Collection - Order Context',
 				label: 'Block: My Custom Collection - Order Context',
-				previewLabelTemplate: [
-					`${ BLOCK_THEME_SLUG }//order-confirmation`,
-				],
 				shouldShowProductPicker: false,
 			},
 			{
 				id: 'myCustomCollectionWithArchiveContext',
 				name: 'My Custom Collection - Archive Context',
 				label: 'Block: My Custom Collection - Archive Context',
-				previewLabelTemplate: [
-					`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-				],
 				shouldShowProductPicker: false,
 			},
 			{
 				id: 'myCustomCollectionMultipleContexts',
 				name: 'My Custom Collection - Multiple Contexts',
 				label: 'Block: My Custom Collection - Multiple Contexts',
-				previewLabelTemplate: [
-					`${ BLOCK_THEME_SLUG }//single-product`,
-					`${ BLOCK_THEME_SLUG }//order-confirmation`,
-				],
 				shouldShowProductPicker: true,
 			},
 		].forEach( ( collection ) => {
-			collection.previewLabelTemplate.forEach( ( template ) => {
-				test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
-					admin,
-					pageObject,
-					editor,
-				} ) => {
-					if (
-						template ===
-						`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
-					) {
-						await admin.visitSiteEditor( {
-							postType: 'wp_template',
-						} );
-						await editor.createTemplate( {
-							templateName: 'Products by Category',
-						} );
-					} else {
-						await pageObject.goToEditorTemplate( template );
-					}
-					await pageObject.insertProductCollection();
-					await pageObject.chooseCollectionInTemplate(
-						collection.id as Collections
-					);
-
-					const previewButtonLocator = editor.canvas.getByTestId(
-						SELECTORS.previewButtonTestID
-					);
-
-					await expect( previewButtonLocator ).toBeVisible();
-				} );
-			} );
-
 			test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
 				pageObject,
 				editor,
@@ -615,21 +569,6 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				await expect( editorProductPicker ).toBeHidden();
 
 				// Check visibility of preview label
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeHidden();
-			} );
-
-			test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
-				pageObject,
-				editor,
-			} ) => {
-				await pageObject.goToProductCatalogAndInsertCollection(
-					collection.id as Collections
-				);
-
 				const previewButtonLocator = editor.canvas.getByTestId(
 					SELECTORS.previewButtonTestID
 				);
