@@ -114,9 +114,16 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	}
 
 	if ( strlen( $page_content ) > 0 ) {
-		// Search for an existing page with the specified page content (typically a shortcode).
-		$shortcode        = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
-		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$shortcode}%" ) );
+		// Search for an existing page with the specified page content. For classic content the
+		// needle is the shortcode without its block wrappers. Full block markup is too fragile to
+		// match verbatim (any customization or markup update breaks it and a duplicate page would
+		// be created — see #68099), so the first WooCommerce block opener is used as the stable
+		// needle instead.
+		$content_needle = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
+		if ( preg_match( '#<!-- wp:woocommerce/[a-z0-9-]+#', $page_content, $matches ) ) {
+			$content_needle = $matches[0];
+		}
+		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$content_needle}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug.
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );
@@ -135,8 +142,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 
 	// Search for a matching valid trashed page.
 	if ( strlen( $page_content ) > 0 ) {
-		// Search for an existing page with the specified page content (typically a shortcode).
-		$trashed_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status = 'trash' AND post_content LIKE %s LIMIT 1;", "%{$page_content}%" ) );
+		// Search for an existing trashed page using the same stable needle as above.
+		$trashed_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status = 'trash' AND post_content LIKE %s LIMIT 1;", "%{$content_needle}%" ) );
 	} else {
 		// Search for an existing page with the specified page slug.
 		$trashed_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status = 'trash' AND post_name = %s LIMIT 1;", $slug ) );

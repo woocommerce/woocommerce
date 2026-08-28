@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Match existing block-based default pages by their WooCommerce block instead of the full markup, so wc_create_page() adopts a customized Cart/Checkout page instead of creating a duplicate when the page option is empty.
