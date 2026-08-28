@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxesStatsDataStore;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
@@ -352,6 +353,14 @@ class Segmenter {
 					$terms              = get_term_by( 'id', $category_id, 'product_cat' );
 					$args['category'][] = $terms->slug;
 				}
+			}
+
+			// A search restricts the report, so it has to restrict this list too. Otherwise every
+			// product the term does not match comes back as a segment zeroed across every interval.
+			$search_ids = ProductSearchQuery::get_ids( $this->query_args['search'] ?? array(), $args['include'] ?? array() );
+			if ( null !== $search_ids ) {
+				// An empty `include` reads as no restriction, so name an ID no product can have.
+				$args['include'] = empty( $search_ids ) ? array( 0 ) : $search_ids;
 			}
 
 			$segment_objects = wc_get_products( $args );

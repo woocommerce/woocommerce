@@ -224,6 +224,107 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should segment by the products matching the `search` param, and no others.
+	 *
+	 * The segment list is filled in with a zeroed entry per product it covers, so leaving the
+	 * search out of it puts every product in the store in the response.
+	 */
+	public function test_get_reports_search_param_narrows_the_product_segments() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		$time     = time();
+		$products = array();
+
+		foreach ( array( 'Kingston Widget', 'Kingston Gadget', 'Unrelated Thing' ) as $name ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( $name );
+			$product->set_regular_price( 25 );
+			$product->save();
+
+			$products[ $name ] = $product->get_id();
+		}
+
+		$order = WC_Helper_Order::create_order( 1, wc_get_product( $products['Kingston Widget'] ) );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'    => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'     => gmdate( 'Y-m-d 00:00:00', $time ),
+				'interval'  => 'day',
+				'search'    => 'Kingston',
+				'segmentby' => 'product',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$segment_ids = wp_list_pluck( $reports['totals']['segments'], 'segment_id' );
+		sort( $segment_ids );
+
+		$expected = array( $products['Kingston Gadget'], $products['Kingston Widget'] );
+		sort( $expected );
+
+		$this->assertEquals(
+			$expected,
+			$segment_ids,
+			'A product the search does not match should not come back as a segment'
+		);
+	}
+
+	/**
+	 * @testdox Should report no product segments when the `search` param matches nothing.
+	 */
+	public function test_get_reports_search_param_with_no_match_has_no_product_segments() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		$time = time();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Kingston Widget' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'    => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'     => gmdate( 'Y-m-d 00:00:00', $time ),
+				'interval'  => 'day',
+				'search'    => 'nothing matches this',
+				'segmentby' => 'product',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame(
+			array(),
+			$reports['totals']['segments'],
+			'An empty set of matches should not read as no restriction at all'
+		);
+	}
+
+	/**
 	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
