@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\CustomerOrderWithdrawalRequestedEmail;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
@@ -922,6 +924,61 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Specific items only', $review_rows['Withdrawing'], 'The review rows should include the withdrawal type label.' );
 		$this->assertSame( 'Line item 1', $review_rows['Additional details'], 'The review rows should include additional details.' );
 		$this->assertSame( 'https://example.test/account/withdraw-order/', $args['form_action_url'], 'The view should expose the form action URL.' );
+	}
+
+	/**
+	 * @testdox Customer order withdrawal email should reject malformed trigger data.
+	 */
+	public function test_customer_order_withdrawal_email_rejects_malformed_trigger_data(): void {
+		$email   = new CustomerOrderWithdrawalRequestedEmail();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$result = $email->trigger(
+				array_merge(
+					$this->get_valid_form_data(),
+					array(
+						OrderWithdrawalFormProcessor::FIELD_EMAIL           => 'not-an-email',
+						OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => array( OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_FULL ),
+					)
+				),
+				time()
+			);
+
+			$this->assertFalse( $result, 'Malformed trigger data should prevent the customer email from sending.' );
+			$this->assertCount( 0, $capture['captures'], 'Malformed trigger data should not call wp_mail().' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Merchant order withdrawal email should reject malformed trigger data.
+	 */
+	public function test_merchant_order_withdrawal_email_rejects_malformed_trigger_data(): void {
+		$email   = new OrderWithdrawalRequestedEmail();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$result = $email->trigger(
+				array_merge(
+					$this->get_valid_form_data(),
+					array(
+						OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER    => '',
+						OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => array( OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_FULL ),
+					)
+				),
+				null,
+				time(),
+				false,
+				''
+			);
+
+			$this->assertFalse( $result, 'Malformed trigger data should prevent the merchant email from sending.' );
+			$this->assertCount( 0, $capture['captures'], 'Malformed trigger data should not call wp_mail().' );
+		} finally {
+			$capture['remove']();
+		}
 	}
 
 	/**

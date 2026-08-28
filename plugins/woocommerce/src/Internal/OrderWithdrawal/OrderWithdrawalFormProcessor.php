@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\CustomerOrderWithdrawalRequestedEmail;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailDataFormatter;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Throwable;
@@ -46,6 +49,13 @@ final class OrderWithdrawalFormProcessor {
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
 	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
+
+	/**
+	 * Data formatter used by email and note content.
+	 *
+	 * @var OrderWithdrawalEmailDataFormatter|null
+	 */
+	private ?OrderWithdrawalEmailDataFormatter $email_data_formatter = null;
 
 	/**
 	 * Process the current order withdrawal request.
@@ -462,7 +472,7 @@ final class OrderWithdrawalFormProcessor {
 		$note = sprintf(
 			/* translators: %s: withdrawal type label. */
 			__( 'Order withdrawal requested. Withdrawal type: %s.', 'woocommerce' ),
-			$this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] )
+			$this->get_email_data_formatter()->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] ?? '' )
 		);
 
 		try {
@@ -634,17 +644,17 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at Unix timestamp for the submission.
 	 */
 	private function send_customer_order_withdrawal_email( array $data, int $submitted_at ): bool {
-		$subject = __( 'We received your withdrawal request', 'woocommerce' );
-		$heading = __( 'We received your withdrawal request', 'woocommerce' );
-		$body    = '<p>' . esc_html__( 'We have received your request to withdraw from the order below.', 'woocommerce' ) . '</p>';
-		$body   .= $this->get_email_details_html( $data, $submitted_at );
-		$body   .= '<p>' . esc_html__( 'We will review your request and contact you about next steps, including any refund due.', 'woocommerce' ) . '</p>';
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Order_Withdrawal_Requested'] ?? new CustomerOrderWithdrawalRequestedEmail();
 
-		return wc_mail(
-			$data[ self::FIELD_EMAIL ],
-			$subject,
-			$this->wrap_email_message( $heading, $body )
-		);
+		if ( ! $email instanceof CustomerOrderWithdrawalRequestedEmail ) {
+			return false;
+		}
+
+		if ( ! $email->is_enabled() ) {
+			return true;
+		}
+
+		return $email->trigger( $data, $submitted_at );
 	}
 
 	/**
@@ -655,150 +665,34 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at  Unix timestamp for the submission.
 	 */
 	private function send_merchant_order_withdrawal_email( array $data, ?WC_Order $matched_order, int $submitted_at ): bool {
-		$recipient = sanitize_email( (string) get_option( 'admin_email' ) );
+		$email = WC()->mailer()->get_emails()['WC_Email_Order_Withdrawal_Requested'] ?? new OrderWithdrawalRequestedEmail();
 
-		if ( '' === $recipient || ! is_email( $recipient ) ) {
+		if ( ! $email instanceof OrderWithdrawalRequestedEmail ) {
 			return false;
 		}
 
-		$subject = sprintf(
-			/* translators: %s: order number. */
-			__( 'Order withdrawal request for order %s', 'woocommerce' ),
-			$data[ self::FIELD_ORDER_NUMBER ]
-		);
-		$heading = __( 'Order withdrawal request received', 'woocommerce' );
-		$body    = '<p>' . esc_html__( 'A customer submitted an order withdrawal request.', 'woocommerce' ) . '</p>';
-
-		if ( $matched_order instanceof WC_Order ) {
-			$body .= '<p>' . esc_html__( 'WooCommerce matched this request to an order and added an order note.', 'woocommerce' ) . '</p>';
-		} else {
-			$body .= '<p>' . esc_html__( 'WooCommerce could not match this request to an order automatically, so no order note was added.', 'woocommerce' ) . '</p>';
+		if ( ! $email->is_enabled() ) {
+			return true;
 		}
 
-		$body .= $this->get_email_details_html( $data, $submitted_at );
-
-		if ( $matched_order instanceof WC_Order ) {
-			$order_url = $matched_order->get_edit_order_url();
-
-			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
-				$body .= '<p>' . esc_html( $this->get_withdrawal_window_warning_message() ) . '</p>';
-			}
-
-			$body .= sprintf(
-				'<p>%s</p>',
-				sprintf(
-					/* translators: %d: order ID. */
-					esc_html__( 'Matched order ID: %d', 'woocommerce' ),
-					$matched_order->get_id()
-				)
-			);
-
-			if ( '' !== $order_url ) {
-				$body .= sprintf(
-					'<p><a href="%1$s">%2$s</a></p>',
-					esc_url( $order_url ),
-					esc_html__( 'View matched order', 'woocommerce' )
-				);
-			}
-		}
-
-		return wc_mail(
-			$recipient,
-			$subject,
-			$this->wrap_email_message( $heading, $body ),
-			$this->get_merchant_email_headers( $data )
+		return $email->trigger(
+			$data,
+			$matched_order,
+			$submitted_at,
+			$matched_order instanceof WC_Order && $this->is_order_outside_withdrawal_window( $matched_order ),
+			$matched_order instanceof WC_Order ? $this->get_withdrawal_window_warning_message() : ''
 		);
 	}
 
 	/**
-	 * Get merchant email headers.
-	 *
-	 * @param array<string,string> $data Form data.
-	 * @return string
+	 * Get the order withdrawal email data formatter.
 	 */
-	private function get_merchant_email_headers( array $data ): string {
-		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
-		$name    = $this->get_customer_name( $data );
-		$email   = $data[ self::FIELD_EMAIL ];
-
-		if ( '' !== $name && is_email( $email ) ) {
-			$headers[] = sprintf( 'Reply-To: %1$s <%2$s>', $name, $email );
+	private function get_email_data_formatter(): OrderWithdrawalEmailDataFormatter {
+		if ( null === $this->email_data_formatter ) {
+			$this->email_data_formatter = new OrderWithdrawalEmailDataFormatter();
 		}
 
-		return implode( "\r\n", $headers );
-	}
-
-	/**
-	 * Wrap an email body in the WooCommerce email template.
-	 *
-	 * @param string $heading Email heading.
-	 * @param string $body    Email body.
-	 */
-	private function wrap_email_message( string $heading, string $body ): string {
-		return WC()->mailer()->wrap_message( $heading, $body );
-	}
-
-	/**
-	 * Get the email details list.
-	 *
-	 * @param array<string,string> $data         Form data.
-	 * @param int                  $submitted_at Unix timestamp for the submission.
-	 */
-	private function get_email_details_html( array $data, int $submitted_at ): string {
-		$date_format        = (string) get_option( 'date_format' );
-		$time_format        = (string) get_option( 'time_format' );
-		$additional_details = '' === $data[ self::FIELD_ADDITIONAL_DETAILS ] ? __( 'None provided', 'woocommerce' ) : $data[ self::FIELD_ADDITIONAL_DETAILS ];
-		$submitted_at_text  = wp_date( trim( $date_format . ' ' . $time_format ), $submitted_at );
-
-		if ( false === $submitted_at_text ) {
-			$submitted_at_text = '';
-		}
-
-		$rows = array(
-			__( 'Submitted', 'woocommerce' )          => $submitted_at_text,
-			__( 'Name', 'woocommerce' )               => $this->get_customer_name( $data ),
-			__( 'Email address', 'woocommerce' )      => $data[ self::FIELD_EMAIL ],
-			__( 'Order number', 'woocommerce' )       => $data[ self::FIELD_ORDER_NUMBER ],
-			__( 'Withdrawing', 'woocommerce' )        => $this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] ),
-			__( 'Additional details', 'woocommerce' ) => $additional_details,
-		);
-
-		$html = '<ul>';
-
-		foreach ( $rows as $label => $value ) {
-			$html .= sprintf(
-				'<li><strong>%1$s:</strong> %2$s</li>',
-				esc_html( $label ),
-				nl2br( esc_html( $value ) )
-			);
-		}
-
-		$html .= '</ul>';
-
-		return $html;
-	}
-
-	/**
-	 * Get the customer's full name for display.
-	 *
-	 * @param array<string,string> $data Form data.
-	 */
-	private function get_customer_name( array $data ): string {
-		return trim( $data[ self::FIELD_FIRST_NAME ] . ' ' . $data[ self::FIELD_LAST_NAME ] );
-	}
-
-	/**
-	 * Get the label for a withdrawal type value.
-	 *
-	 * @param string $withdrawal_type Withdrawal type value.
-	 */
-	private function get_withdrawal_type_label( string $withdrawal_type ): string {
-		$options = array(
-			self::WITHDRAWAL_TYPE_FULL     => __( 'The full order', 'woocommerce' ),
-			self::WITHDRAWAL_TYPE_SPECIFIC => __( 'Specific items only', 'woocommerce' ),
-		);
-
-		return $options[ $withdrawal_type ] ?? '';
+		return $this->email_data_formatter;
 	}
 
 	/**
