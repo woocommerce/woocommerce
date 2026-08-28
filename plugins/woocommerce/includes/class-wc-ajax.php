@@ -2142,11 +2142,11 @@ class WC_AJAX {
 			$limit = absint( $_GET['limit'] );
 		} else {
 			/**
-					 * Filters the number of results returned by the JSON search endpoints.
-					 *
-					 * @since 3.5.0
-					 * @param int $limit Maximum number of results to return.
-					 */
+			 * Filters the number of results returned by the JSON search endpoints.
+			 *
+			 * @since 3.5.0
+			 * @param int $limit Maximum number of results to return.
+			 */
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
