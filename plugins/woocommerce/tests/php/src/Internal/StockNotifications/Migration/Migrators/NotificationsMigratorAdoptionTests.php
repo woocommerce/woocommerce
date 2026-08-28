@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Migrators;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
@@ -410,6 +411,38 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 
 		// The failure marker is what keeps the row from being re-tried forever.
 		$this->assertSame( array(), $this->migrator->get_batch( 0, 500 ) );
+	}
+
+	/**
+	 * @testdox an unverified legacy row adopting a pending Core row should carry its verification digest.
+	 */
+	public function test_unverified_row_adopting_a_pending_core_row_writes_the_verification_digest(): void {
+		$existing = $this->create_core_notification( 'shopper@example.com', NotificationStatus::PENDING );
+
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'user_email'  => 'shopper@example.com',
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+		LegacyStore::add_verification_data( $legacy_id, 'a-verification-code', time() );
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertSame( array( (string) $legacy_id ), LegacyStore::get_core_meta( '_wc_bis_legacy_id' )[ $existing ] );
+		$this->assertSame( array( (string) $legacy_id ), LegacyStore::get_core_meta( '_wc_bis_legacy_adopted' )[ $existing ] );
+
+		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
+
+		$this->assertArrayHasKey( $existing, $stored );
+
+		$token = LegacyHash::compute_verification( 'a-verification-code', LegacyStore::VERIFICATION_KEY, LegacyStore::VERIFICATION_IV );
+
+		$this->assertTrue( LegacyHash::verify( $stored[ $existing ][0], (string) $token ) );
+		$this->assertSame( 'yes', get_option( 'wc_bis_migration_has_legacy_links' ) );
 	}
 
 	/**

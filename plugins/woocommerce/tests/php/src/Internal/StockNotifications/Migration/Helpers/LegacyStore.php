@@ -14,6 +14,20 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Hel
 class LegacyStore {
 
 	/**
+	 * Verification key seeded by add_verification_data() unless a test says otherwise.
+	 *
+	 * @var string
+	 */
+	public const VERIFICATION_KEY = 'this-is-a-32-byte-verify-key-ab';
+
+	/**
+	 * Verification iv seeded by add_verification_data() unless a test says otherwise.
+	 *
+	 * @var string
+	 */
+	public const VERIFICATION_IV = 'verify-iv-16-byt';
+
+	/**
 	 * Create the three legacy tables, dropping any left over from a previous test.
 	 *
 	 * @return void
@@ -183,6 +197,27 @@ class LegacyStore {
 				'bis_notifications_id' => $legacy_id,
 			)
 		);
+	}
+
+	/**
+	 * Seed the legacy verification secrets a pending row carries.
+	 *
+	 * Mirrors `WC_BIS_Notification_Data::setup_verification_data()`: a code plus the
+	 * per-row AES key and iv the verification hash is built from, and the timestamp the
+	 * link's expiry is measured from.
+	 *
+	 * @param int    $legacy_id  Legacy notification id.
+	 * @param string $code       Verification code.
+	 * @param int    $created_at Timestamp the verification data was created at.
+	 * @param string $key        Verification key.
+	 * @param string $iv         Verification iv.
+	 * @return void
+	 */
+	public static function add_verification_data( int $legacy_id, string $code, int $created_at, string $key = self::VERIFICATION_KEY, string $iv = self::VERIFICATION_IV ): void {
+		self::add_meta( $legacy_id, '_verification_code', $code );
+		self::add_meta( $legacy_id, '_verification_key', $key );
+		self::add_meta( $legacy_id, '_verification_iv', $iv );
+		self::add_meta( $legacy_id, '_verification_created_at', $created_at );
 	}
 
 	/**
