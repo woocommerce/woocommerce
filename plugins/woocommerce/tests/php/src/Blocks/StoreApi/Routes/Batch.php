@@ -136,18 +136,24 @@ class Batch extends ControllerTestCase {
 	public function test_cart_session_failure_does_not_clear_session_cart(): void {
 		WC()->cart->add_to_cart( $this->products[0]->get_id() );
 
-		$stored_cart          = WC()->cart->get_cart_for_session();
-		$cart_contents_backup = WC()->cart->get_cart_contents();
-		$cart_backup          = WC()->cart;
-		$load_action_count    = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
-		$callback             = static function () {
+		global $wp_query;
+
+		$stored_cart              = WC()->cart->get_cart_for_session();
+		$cart_contents_backup     = WC()->cart->get_cart_contents();
+		$cart_backup              = WC()->cart;
+		$load_action_count        = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
+		$current_user_id          = get_current_user_id();
+		$is_singular_backup       = $wp_query->is_singular;
+		$is_archive_backup        = $wp_query->is_archive;
+		$is_search_backup         = $wp_query->is_search;
+		$session_failure_callback = static function () {
 			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
 		};
 
 		WC()->session->set( 'cart', $stored_cart );
 		WC()->cart->set_cart_contents( array() );
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
-		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
+		add_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
 		$request->set_body_params(
@@ -173,17 +179,42 @@ class Batch extends ControllerTestCase {
 			$response      = rest_get_server()->dispatch( $request );
 			$response_data = $response->get_data();
 
+			$this->assertSame( 500, $response_data['responses'][0]['status'], 'The request that fails to load the cart should return an error.' );
+			$this->assertSame( 500, $response_data['responses'][1]['status'], 'Later cart requests should not use a partially loaded cart.' );
+
 			// A failed cart remains referenced by its registered callbacks after WC()->cart is cleared.
 			do_action( 'woocommerce_removed_coupon', 'synthetic-coupon' );
+			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The failed cart should not update the session.' );
 
-			$this->assertSame( 500, $response_data['responses'][0]['status'], 'The request that fails to load the cart should return an error.' );
-			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The stored session cart should remain unchanged after callbacks from the failed cart run.' );
-			$this->assertSame( 500, $response_data['responses'][1]['status'], 'Later cart requests should not use a partially loaded cart.' );
+			do_action( 'woocommerce_cart_emptied' );
+			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The failed cart should not destroy the session.' );
+
+			$failed_cart_session = new \WC_Cart_Session( $cart_backup );
+
+			$user_id                = self::factory()->user->create();
+			$persistent_cart_key    = '_woocommerce_persistent_cart_' . get_current_blog_id();
+			$stored_persistent_cart = array( 'cart' => $stored_cart );
+			wp_set_current_user( $user_id );
+			update_user_meta( $user_id, $persistent_cart_key, $stored_persistent_cart );
+			do_action( 'woocommerce_cart_item_set_quantity', 'synthetic-item', 2, $cart_backup );
+			$this->assertSame( $stored_persistent_cart, get_user_meta( $user_id, $persistent_cart_key, true ), 'The failed cart should not update the persistent cart.' );
+
+			$stored_removed_cart_contents = array( 'synthetic-item' => array( 'quantity' => 1 ) );
+			WC()->session->set( 'removed_cart_contents', $stored_removed_cart_contents );
+			$wp_query->is_singular = true;
+			$wp_query->is_archive  = false;
+			$wp_query->is_search   = false;
+			$failed_cart_session->clean_up_removed_cart_contents();
+			$this->assertSame( $stored_removed_cart_contents, WC()->session->get( 'removed_cart_contents' ), 'The failed cart should not clean up removed cart contents.' );
 		} finally {
-			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			remove_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
 			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			WC()->cart->set_cart_contents( $cart_contents_backup );
+			wp_set_current_user( $current_user_id );
+			$wp_query->is_singular = $is_singular_backup;
+			$wp_query->is_archive  = $is_archive_backup;
+			$wp_query->is_search   = $is_search_backup;
 			if ( null === $load_action_count ) {
 				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 			} else {
