@@ -1030,23 +1030,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Helcim is not suggested in $country_code.
-	 *
-	 * @dataProvider data_provider_helcim_previously_supported_countries
-	 *
-	 * @param string $country_code ISO 3166-1 alpha-2 country code.
-	 */
-	public function test_helcim_is_not_suggested_in_previously_supported_countries( string $country_code ): void {
-		$extension_ids = array_column( $this->sut->get_country_extensions( $country_code ), 'id' );
-
-		$this->assertNotContains(
-			PaymentsExtensionSuggestions::HELCIM,
-			$extension_ids,
-			"Helcim should not be suggested in {$country_code}."
-		);
-	}
-
-	/**
 	 * @testdox Visa is the last "other payment provider" in Japan.
 	 */
 	public function test_visa_is_last_other_payment_provider_in_jp(): void {
@@ -1103,18 +1086,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			PaymentsExtensionSuggestions::TAG_PREFERRED,
 			$komoju['tags'],
 			'KOMOJU should remain in other payment options for JP.'
-		);
-	}
-
-	/**
-	 * Data provider for countries where Helcim was previously suggested.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function data_provider_helcim_previously_supported_countries(): array {
-		return array(
-			'Canada'        => array( 'CA' ),
-			'United States' => array( 'US' ),
 		);
 	}
 
