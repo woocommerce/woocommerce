@@ -15,7 +15,7 @@ use WC_Unit_Test_Case;
 /**
  * Tests for `wp wc bis-migrate`: the gates every subcommand passes through, the concurrency
  * refusals in both directions, the CLI-only run knobs, and the two commands that only exist
- * here - `rollback` and `disable-legacy-links`.
+ * here - `disable-legacy-links`.
  */
 class CliTests extends WC_Unit_Test_Case {
 
@@ -147,17 +147,6 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox rollback should refuse while a background run is enqueued.
-	 */
-	public function test_rollback_refuses_while_the_processor_is_enqueued(): void {
-		$this->set_processor_enqueued( true );
-
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$this->assertStringContainsString( 'in progress in the background', MockWPCLI::$last_error_message );
-	}
-
-	/**
 	 * @testdox disable-legacy-links should refuse while a background run is enqueued.
 	 */
 	public function test_disable_legacy_links_refuses_while_the_processor_is_enqueued(): void {
@@ -180,9 +169,6 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->cli()->run( array(), array( 'yes' => true ) );
 		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
 
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
-
 		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
 		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
 	}
@@ -195,14 +181,13 @@ class CliTests extends WC_Unit_Test_Case {
 		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
 
 		$this->cli()->run( array(), array() );
-		$this->cli()->rollback( array(), array() );
 		$this->cli()->disable_legacy_links( array(), array() );
 
-		$this->assertCount( 3, MockWPCLI::$prompted_confirmations );
+		$this->assertCount( 2, MockWPCLI::$prompted_confirmations );
 	}
 
 	/**
-	 * @testdox a held CLI lock should stop run, rollback and disable-legacy-links alike.
+	 * @testdox a held CLI lock should stop run and disable-legacy-links alike.
 	 */
 	public function test_a_held_lock_stops_every_writing_command(): void {
 		$this->seed_notifications( 1 );
@@ -212,10 +197,6 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->cli()->run( array(), array( 'yes' => true ) );
 		$this->assertStringContainsString( 'Could not acquire the migration CLI lock', MockWPCLI::$last_error_message );
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-		$this->assertStringContainsString( 'Could not acquire the migration CLI lock', MockWPCLI::$last_error_message );
 
 		MockWPCLI::reset();
 		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
@@ -521,25 +502,7 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox rollback should read each page's legacy sources in one round trip, not per row.
-	 */
-	public function test_rollback_reads_legacy_sources_per_page(): void {
-		$this->seed_notifications( 6, true );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		MockWPCLI::reset();
-		$queries = $this->record_legacy_reads(
-			function () {
-				$this->cli()->rollback( array(), array( 'yes' => true ) );
-			}
-		);
-
-		$this->assertLessThanOrEqual( 2, count( $queries ), 'Legacy sources must be fetched a page at a time.' );
-		$this->assertSame( array(), LegacyStore::get_core_rows() );
-	}
-
-	/**
-	 * @testdox a legacy flag the write path never read should not make verify or rollback drift.
+	 * @testdox a legacy flag the write path never read should not make verify drift.
 	 */
 	public function test_a_legacy_key_outside_the_write_path_is_ignored(): void {
 		$legacy_ids = $this->seed_notifications( 1 );
@@ -553,107 +516,6 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->cli()->verify( array(), array() );
 
 		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$this->assertSame( array(), LegacyStore::get_core_rows(), 'Rollback must still remove the row it inserted.' );
-	}
-
-	/**
-	 * @testdox rollback should delete the rows it inserted and clear the migration flags.
-	 */
-	public function test_rollback_deletes_inserted_rows(): void {
-		$this->seed_notifications( 2 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$this->assertCount( 2, LegacyStore::get_core_rows() );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$this->assertSame( array(), LegacyStore::get_core_rows() );
-		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
-		$this->assertFalse( get_option( 'wc_bis_migration_has_legacy_links' ) );
-		$this->assertFalse( get_option( 'wc_bis_migration_has_migrated_rows' ) );
-		$this->assertSame( 'Rollback complete.', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox rollback --dry-run should report what it would do without deleting anything.
-	 */
-	public function test_rollback_dry_run_deletes_nothing(): void {
-		$this->seed_notifications( 2 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'dry-run' => true ) );
-
-		$this->assertCount( 2, LegacyStore::get_core_rows() );
-		$this->assertStringContainsString( 'would be deleted', implode( ' ', MockWPCLI::$all_log_messages ) );
-		$this->assertSame( 'Dry run complete.', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox rollback should leave a row whose status a merchant changed after migrating.
-	 */
-	public function test_rollback_refuses_a_merchant_changed_row(): void {
-		$this->seed_notifications( 2 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$rows = LegacyStore::get_core_rows();
-		$this->set_core_status( $rows[0]['id'], NotificationStatus::CANCELLED );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$remaining = LegacyStore::get_core_rows();
-		$this->assertCount( 1, $remaining );
-		$this->assertSame( (string) $rows[0]['id'], (string) $remaining[0]['id'] );
-		$this->assertStringContainsString( '1 row(s) left untouched', implode( ' ', MockWPCLI::$all_log_messages ) );
-	}
-
-	/**
-	 * @testdox rollback should keep an adopted row and only remove the markers it added to it.
-	 */
-	public function test_rollback_keeps_an_adopted_row(): void {
-		$legacy_ids = $this->seed_notifications( 1 );
-
-		$adopted_id = LegacyStore::add_core_notification(
-			array(
-				'product_id' => $this->product_id,
-				'user_email' => "shopper{$legacy_ids[0]}@example.com",
-				'status'     => NotificationStatus::ACTIVE,
-			)
-		);
-
-		$this->cli()->run( array(), array( 'yes' => true ) );
-		$this->assertCount( 1, LegacyStore::get_core_rows(), 'The legacy row should have adopted the existing Core row.' );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$rows = LegacyStore::get_core_rows();
-		$this->assertCount( 1, $rows );
-		$this->assertSame( (string) $adopted_id, (string) $rows[0]['id'] );
-		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
-		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_adopted' ) );
-	}
-
-	/**
-	 * @testdox rollback should refuse outright once the legacy tables are gone, rather than report zero.
-	 */
-	public function test_rollback_refuses_without_the_legacy_tables(): void {
-		$this->seed_notifications( 1 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		LegacyStore::drop_tables();
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$this->assertStringContainsString( 'Refusing to roll back', MockWPCLI::$last_error_message );
-		$this->assertCount( 1, LegacyStore::get_core_rows() );
 	}
 
 	/**
@@ -675,9 +537,9 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a run after disable-legacy-links should still write nothing, and rollback should still work.
+	 * @testdox a run after disable-legacy-links should still write nothing.
 	 */
-	public function test_rollback_still_works_after_disable_legacy_links(): void {
+	public function test_a_run_after_disable_legacy_links_writes_nothing(): void {
 		$this->seed_notifications( 2, true );
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
@@ -686,11 +548,6 @@ class CliTests extends WC_Unit_Test_Case {
 		MockWPCLI::reset();
 		$this->cli()->run( array(), array( 'yes' => true ) );
 		$this->assertCount( 2, LegacyStore::get_core_rows(), 'The legacy id marker still makes the run idempotent.' );
-
-		MockWPCLI::reset();
-		$this->cli()->rollback( array(), array( 'yes' => true ) );
-
-		$this->assertSame( array(), LegacyStore::get_core_rows() );
 	}
 
 	/**
