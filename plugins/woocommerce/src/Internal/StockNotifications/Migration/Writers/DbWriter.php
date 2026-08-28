@@ -31,13 +31,18 @@ class DbWriter implements WriterInterface {
 	private BulkNotificationWriter $bulk_writer;
 
 	/**
-	 * Constructor.
+	 * Initialize the class instance.
 	 *
-	 * @param BulkNotificationWriter|null $bulk_writer Bulk insert engine to use. Defaults to a
-	 *                                                  new instance with the writer's default chunk size.
+	 * Resolve this writer from the container rather than constructing it directly: built with
+	 * `new`, `$bulk_writer` is never set and the first insert fails on an uninitialized
+	 * typed property.
+	 *
+	 * @internal
+	 * @param BulkNotificationWriter $bulk_writer Bulk insert engine for the notifications table.
+	 * @return void
 	 */
-	public function __construct( ?BulkNotificationWriter $bulk_writer = null ) {
-		$this->bulk_writer = $bulk_writer ?? new BulkNotificationWriter();
+	final public function init( BulkNotificationWriter $bulk_writer ): void {
+		$this->bulk_writer = $bulk_writer;
 	}
 
 	/**
