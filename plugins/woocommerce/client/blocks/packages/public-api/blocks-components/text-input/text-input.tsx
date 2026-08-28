@@ -62,7 +62,8 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		// empty `value`, so the input is asked directly. Focus and blur both re-render, which is when this
 		// can have changed while the field is not active.
 		const input = typeof ref === 'object' ? ref?.current : null;
-		const isFieldActive = isActive || !! value || !! input?.validity?.badInput;
+		const isFieldActive =
+			isActive || !! value || !! input?.validity?.badInput;
 
 		const inputWithLabel = (
 			<>
