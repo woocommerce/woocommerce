@@ -20,7 +20,6 @@ import { CurrencyContext } from '@woocommerce/currency';
 import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
 import ReportTable from '../../components/report-table';
-import { hasEmptySearchResults } from '../../components/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 import './style.scss';
@@ -373,15 +372,9 @@ ProductsReportTable.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query, isRequesting, limitProperties } = props;
+		const { isRequesting } = props;
 
-		// No rows to label, so nothing to look up. A report endpoint that resolves the
-		// search itself never puts the matching IDs in the query, so it is never in this
-		// state and its categories are fetched as usual.
-		if (
-			isRequesting ||
-			hasEmptySearchResults( query, limitProperties || [ 'products' ] )
-		) {
+		if ( isRequesting ) {
 			return {};
 		}
 

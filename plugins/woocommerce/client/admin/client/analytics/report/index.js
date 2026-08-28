@@ -131,19 +131,17 @@ export default compose(
 
 		const report = getReportParam( props );
 
-		// Every request on the Products Report is limited by products alone, so the report
-		// endpoints resolve the search themselves and there is nothing to hydrate. Other
-		// reports still need the search turned into a list of matching IDs. The Categories
-		// Report is one of them: its single category view limits by category as well.
-		if ( usesServerSideSearch( [ report ] ) ) {
-			return {};
-		}
-
 		// Single category view in Categories Report uses the products endpoint, so search must also.
 		const mappedReport =
 			report === 'categories' && query.filter === 'single_category'
 				? 'products'
 				: report;
+
+		// Nothing to hydrate when the report endpoint resolves the search itself. The rest still
+		// need the term turned into a list of matching IDs, which is what caps them at 100.
+		if ( usesServerSideSearch( [ mappedReport ] ) ) {
+			return {};
+		}
 
 		const itemsSelector = select( itemsStore );
 

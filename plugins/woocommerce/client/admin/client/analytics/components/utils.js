@@ -10,7 +10,7 @@ import { usesServerSideSearch } from '@woocommerce/data';
  * matching item IDs, so an active search without any means nothing matched.
  *
  * @param {Object} query   Current query object.
- * @param {Array}  limitBy Properties used to limit the results.
+ * @param {Array}  limitBy Properties used to limit the results, search subject first.
  * @return {boolean} True when the search is known to have matched nothing.
  */
 export function hasEmptySearchResults( query, limitBy ) {
@@ -18,7 +18,14 @@ export function hasEmptySearchResults( query, limitBy ) {
 		return false;
 	}
 
-	return ! limitBy.every( ( item ) => query[ item ] && query[ item ].length );
+	// The resolved IDs land on the search subject. Any further limit property is an
+	// independent filter and says nothing about whether the term matched.
+	const [ searchSubject ] = limitBy;
+	if ( ! searchSubject ) {
+		return false;
+	}
+
+	return ! ( query[ searchSubject ] && query[ searchSubject ].length );
 }
 
 /**

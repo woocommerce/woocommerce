@@ -19,17 +19,23 @@ const filterQuery = ( options: Partial< FilterQueryOptions > ) =>
 	getFilterQuery( options as FilterQueryOptions );
 
 describe( 'usesServerSideSearch', () => {
-	it( 'should be true when products are the only thing limiting the report', () => {
+	it( 'should be true when the search resolves to products', () => {
 		expect( usesServerSideSearch( [ 'products' ] ) ).toBe( true );
 	} );
 
-	it( 'should be false when something else limits the report as well', () => {
+	it( 'should be true when another filter limits the report as well', () => {
+		// The single category view searches products and limits the request to the
+		// category. The endpoint intersects the two.
 		expect( usesServerSideSearch( [ 'products', 'categories' ] ) ).toBe(
-			false
+			true
 		);
 	} );
 
-	it( 'should be false for endpoints that do not resolve a search themselves', () => {
+	it( 'should be false when the search resolves to something else', () => {
+		// The Categories report list view searches category names, not products.
+		expect( usesServerSideSearch( [ 'categories', 'products' ] ) ).toBe(
+			false
+		);
 		expect( usesServerSideSearch( [ 'categories' ] ) ).toBe( false );
 		expect( usesServerSideSearch( [ 'coupons' ] ) ).toBe( false );
 	} );
@@ -99,14 +105,32 @@ describe( 'getFilterQuery', () => {
 		).toEqual( { search: [ 'widget, large' ] } );
 	} );
 
-	it( 'should keep sending resolved IDs when the report is limited by more than products', () => {
+	it( 'should send the search term alongside the other limits of a product request', () => {
+		// The single category view. The endpoint intersects the term with the category,
+		// instead of the client capping the search at one page of resolved IDs.
 		expect(
 			filterQuery( {
 				endpoint: 'products',
 				query: { search: 'widget', products: '1,2', categories: '5' },
 				limitBy: [ 'products', 'categories' ],
 			} )
-		).toEqual( { products: '1,2', categories: '5' } );
+		).toEqual( {
+			search: [ 'widget' ],
+			products: '1,2',
+			categories: '5',
+		} );
+	} );
+
+	it( 'should keep sending resolved IDs when the search resolves to something else', () => {
+		// The Categories report list view searches category names against the products
+		// endpoint, so the term is not the product search the endpoint would run.
+		expect(
+			filterQuery( {
+				endpoint: 'products',
+				query: { search: 'clothing', categories: '5,6' },
+				limitBy: [ 'categories' ],
+			} )
+		).toEqual( { categories: '5,6' } );
 	} );
 
 	it( 'should keep sending resolved IDs for endpoints that do not resolve the search', () => {

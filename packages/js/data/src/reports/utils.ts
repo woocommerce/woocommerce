@@ -170,11 +170,11 @@ const serverSideSearchItemTypes = [ 'products' ];
 /**
  * Whether a report request can pass its search term straight to the API.
  *
- * Only true when the search subject is the single thing the request is limited by. A request
- * limited by more than one property (the Categories report limits its product requests by both
- * `products` and `categories`) still needs the resolved ID list to express the other limits.
+ * The first limit property is what the search resolves to: the Products report searches
+ * products, the Categories report searches categories, and its single category view searches
+ * products again. Any further property is a filter the endpoint applies on top of the term.
  *
- * @param {Array} limitProperties Properties used to limit the results.
+ * @param {Array} limitProperties Properties used to limit the results, search subject first.
  * @return {boolean} True when the search can be resolved server-side.
  */
 export function usesServerSideSearch( limitProperties: string[] ) {
@@ -182,10 +182,7 @@ export function usesServerSideSearch( limitProperties: string[] ) {
 		return false;
 	}
 
-	return (
-		limitProperties.length === 1 &&
-		includes( serverSideSearchItemTypes, limitProperties[ 0 ] )
-	);
+	return includes( serverSideSearchItemTypes, limitProperties[ 0 ] );
 }
 
 /**
@@ -215,17 +212,20 @@ export function getFilterQuery(
 		const limitProperties = limitBy || [ endpoint ];
 
 		if ( usesServerSideSearch( limitProperties ) ) {
-			const [ limitProperty ] = limitProperties;
-
 			// A filter can still be active alongside the search, since picking one does not
-			// clear the term. Sending both keeps the comparison or the single item selection,
-			// which the endpoint intersects with what the term matches.
-			return {
-				search: getSearchWords( query ),
-				...( query[ limitProperty ]
-					? { [ limitProperty ]: query[ limitProperty ] }
-					: {} ),
-			};
+			// clear the term. Sending both keeps the comparison, the single item selection or
+			// the category, which the endpoint intersects with what the term matches.
+			return limitProperties.reduce<
+				Record< string, string | string[] >
+			>(
+				( result, limitProperty ) => {
+					if ( query[ limitProperty ] ) {
+						result[ limitProperty ] = query[ limitProperty ];
+					}
+					return result;
+				},
+				{ search: getSearchWords( query ) }
+			);
 		}
 
 		return limitProperties.reduce< Record< string, string > >(

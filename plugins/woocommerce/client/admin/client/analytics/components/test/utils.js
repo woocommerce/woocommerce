@@ -30,33 +30,26 @@ describe( 'hasEmptySearchResults', () => {
 		).toBe( false );
 	} );
 
-	it( 'returns true when a request limited by several properties matched nothing', () => {
-		// The Categories report limits its product requests by both properties, so it
-		// still resolves the search to IDs even though `products` is one of them.
+	it( 'returns false when the endpoint resolves the search under another limit too', () => {
+		// The Categories report single category view sends the term and the category,
+		// so the API is still the one deciding what matched.
 		expect(
 			hasEmptySearchResults( { search: 'kingston' }, [
 				'products',
 				'categories',
 			] )
-		).toBe( true );
+		).toBe( false );
 	} );
 
-	it( 'returns true when the searched property is empty but another one has a value', () => {
+	it( 'ignores limit properties other than the search subject', () => {
+		// The resolved IDs land on the first property. A filter carried alongside says
+		// nothing about whether the term matched.
 		expect(
-			hasEmptySearchResults( { search: 'kingston', categories: '5' }, [
-				'products',
+			hasEmptySearchResults( { search: 'clothing', products: '1,2' }, [
 				'categories',
+				'products',
 			] )
 		).toBe( true );
-	} );
-
-	it( 'returns false when every limit property has a value', () => {
-		expect(
-			hasEmptySearchResults(
-				{ search: 'kingston', products: '1,2', categories: '5' },
-				[ 'products', 'categories' ]
-			)
-		).toBe( false );
 	} );
 
 	it( 'returns true when the limit property is present but empty', () => {
@@ -96,12 +89,14 @@ describe( 'isEmptyDueToSearch', () => {
 		).toBe( false );
 	} );
 
-	it( 'returns false when every property of a multi property limit has a value', () => {
+	it( 'returns true for a product request that also carries a category', () => {
+		// The single category view resolves the search server side, so an empty report
+		// during a search is attributed to the term.
 		expect(
 			isEmptyDueToSearch(
 				{ search: 'kingston', products: '1,2', categories: '5' },
 				[ 'products', 'categories' ]
 			)
-		).toBe( false );
+		).toBe( true );
 	} );
 } );
