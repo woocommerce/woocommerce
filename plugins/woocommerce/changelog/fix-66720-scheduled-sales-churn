@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the daily scheduled-sales cron reprocessing every completed scheduled sale as both a starting and an ending sale. Developer note: on a store whose only matches were completed sales, all four of wc_before/after_products_starting_sales and wc_before/after_products_ending_sales stop firing rather than firing with a shorter list, and the daily `wc_products_onsale` transient delete and product transient-version bump stop with them. All of these still run whenever a sale genuinely starts or ends.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix oversized heading on the offline payment settings pages by setting the header font size explicitly instead of relying on the floating-header-scoped rule.

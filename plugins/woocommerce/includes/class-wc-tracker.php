@@ -50,6 +50,15 @@ class WC_Tracker {
 	 */
 	private const MAX_SEND_ATTEMPT = 4;
 
+	/**
+	 * Queue priority for tracker delivery attempts.
+	 *
+	 * A value higher than Action Scheduler's default 10 lets commerce work run first.
+	 *
+	 * @var int
+	 */
+	private const SEND_ATTEMPT_PRIORITY = 50;
+
 
 	// phpcs:enable
 	/**
@@ -63,7 +72,7 @@ class WC_Tracker {
 	 * Hook into cron event.
 	 */
 	public static function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
-		add_action( 'woocommerce_tracker_send_event', array( __CLASS__, 'send_tracking_data' ) );
+		add_action( 'woocommerce_tracker_send_event', array( __CLASS__, 'send_tracking_data' ), 10, 2 );
 	}
 
 	/**
@@ -72,12 +81,11 @@ class WC_Tracker {
 	 * @param boolean $override Should override?.
 	 */
 	public static function send_tracking_data( $override = false ) {
+		// Read WooCommerce's internal opt-in dynamically to preserve the public method signature for subclasses.
+		$response_aware = 1 < func_num_args() && true === func_get_arg( 1 );
+
 		// Don't trigger this on AJAX Requests.
 		if ( Constants::is_true( 'DOING_AJAX' ) ) {
-			return;
-		}
-
-		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
 			return;
 		}
 
@@ -100,10 +108,40 @@ class WC_Tracker {
 			}
 		}
 
+		if ( ! $response_aware ) {
+			// Preserve the legacy direct-call contract for external callers.
+			update_option( 'woocommerce_tracker_last_send', time() );
+
+			$params = self::get_tracking_data();
+			wp_safe_remote_post(
+				self::$api_url,
+				array(
+					'method'      => 'POST',
+					'timeout'     => 45,
+					'redirection' => 5,
+					'httpversion' => '1.0',
+					'blocking'    => false,
+					'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
+					'body'        => wp_json_encode( $params ),
+					'cookies'     => array(),
+				)
+			);
+			return;
+		}
+
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
+		if ( as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, null, self::SEND_ATTEMPT_GROUP ) ) {
+			update_option( 'woocommerce_tracker_last_send', time() );
+			return;
+		}
+
 		$attempt_args = array( 'attempt' => 0 );
 		try {
-			$action_id = as_enqueue_async_action( self::SEND_ATTEMPT_HOOK, $attempt_args, self::SEND_ATTEMPT_GROUP, true );
-			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, null, self::SEND_ATTEMPT_GROUP ) ) {
+			$action_id = as_enqueue_async_action( self::SEND_ATTEMPT_HOOK, $attempt_args, self::SEND_ATTEMPT_GROUP, true, self::SEND_ATTEMPT_PRIORITY );
+			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, $attempt_args, self::SEND_ATTEMPT_GROUP ) ) {
 				update_option( 'woocommerce_tracker_last_send', time() );
 			} else {
 				self::log_send_failure( 0, array( 'error_code' => 'initial_scheduling_failure' ) );
@@ -117,7 +155,7 @@ class WC_Tracker {
 	 * Send a current tracking snapshot and schedule a retry for transient failures.
 	 *
 	 * @internal
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 *
 	 * @param int $attempt Zero-based attempt number.
 	 * @return void
@@ -138,7 +176,7 @@ class WC_Tracker {
 			self::$api_url,
 			array(
 				'method'      => 'POST',
-				'timeout'     => 45,
+				'timeout'     => 15,
 				'redirection' => 5,
 				'httpversion' => '1.0',
 				'blocking'    => true,
@@ -221,17 +259,22 @@ class WC_Tracker {
 	 * @return void
 	 */
 	private static function schedule_retry( $attempt, $retry_after_delay = 0 ) {
-		if ( self::MAX_SEND_ATTEMPT <= $attempt ) {
+		if ( self::MAX_SEND_ATTEMPT <= $attempt || 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
 			return;
 		}
 
 		$next_attempt      = $attempt + 1;
 		$args              = array( 'attempt' => $next_attempt );
 		$exponential_delay = 900 * ( 2 ** ( $next_attempt - 1 ) );
-		$delay             = max( $exponential_delay, $retry_after_delay );
+		$minimum_delay     = max( $exponential_delay, $retry_after_delay );
+		if ( DAY_IN_SECONDS < $minimum_delay ) {
+			return;
+		}
+		$maximum_jitter = min( (int) ceil( $minimum_delay * 0.1 ), 5 * MINUTE_IN_SECONDS, DAY_IN_SECONDS - $minimum_delay );
+		$delay          = $minimum_delay + ( 0 < $maximum_jitter ? wp_rand( 1, $maximum_jitter ) : 0 );
 
 		try {
-			$action_id = as_schedule_single_action( time() + $delay, self::SEND_ATTEMPT_HOOK, $args, self::SEND_ATTEMPT_GROUP, true );
+			$action_id = as_schedule_single_action( time() + $delay, self::SEND_ATTEMPT_HOOK, $args, self::SEND_ATTEMPT_GROUP, true, self::SEND_ATTEMPT_PRIORITY );
 			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, $args, self::SEND_ATTEMPT_GROUP ) ) {
 				return;
 			}

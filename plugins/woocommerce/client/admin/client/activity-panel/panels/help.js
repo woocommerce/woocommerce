@@ -137,8 +137,8 @@ function getPaymentGatewaySuggestions( props ) {
 			link: 'https://woocommerce.com/document/woocommerce-square/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.kco && {
-			title: __( 'Klarna - Introduction', 'woocommerce' ),
-			link: 'https://woocommerce.com/document/klarna-checkout/?utm_source=help_panel&utm_medium=product',
+			title: __( 'Kustom - Introduction', 'woocommerce' ),
+			link: 'https://woocommerce.com/document/kustom-checkout/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.klarna_payments && {
 			title: __( 'Klarna - Introduction', 'woocommerce' ),

@@ -642,40 +642,30 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 	test.describe( 'with "scope" argument', () => {
 		test( 'Collection with only `inserter` scope should not be displayed in Collection Chooser', async ( {
 			pageObject,
-			editor,
 			admin,
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollection();
 
-			const placeholderSelector = editor.canvas.locator(
-				SELECTORS.collectionPlaceholder
-			);
-
-			const collectionButton = placeholderSelector.getByRole( 'button', {
-				name: 'My Custom Collection - With Inserter Scope',
-				exact: true,
-			} );
+			const collectionButton =
+				await pageObject.locateCollectionButtonInEditor(
+					'myCustomCollectionWithInserterScope'
+				);
 
 			await expect( collectionButton ).toBeHidden();
 		} );
 
 		test( 'Collection with only `block` scope should be displayed in Collection Chooser', async ( {
 			pageObject,
-			editor,
 			admin,
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollection();
 
-			const placeholderSelector = editor.canvas.locator(
-				SELECTORS.collectionPlaceholder
-			);
-
-			const collectionButton = placeholderSelector.getByRole( 'button', {
-				name: 'My Custom Collection - With Block Scope',
-				exact: true,
-			} );
+			const collectionButton =
+				await pageObject.locateCollectionButtonInEditor(
+					'myCustomCollectionWithBlockScope'
+				);
 
 			await expect( collectionButton ).toBeVisible();
 		} );

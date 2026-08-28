@@ -1121,7 +1121,9 @@ WHERE
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -1485,14 +1487,24 @@ WHERE
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 
 		/*
-		 * Defensive last-resort guard. The meta data should always arrive as an array of complete
-		 * meta-row objects, but a corrupt persistent object cache entry can surface as a scalar, an
-		 * object, a well-formed array whose elements are not meta rows, or an array of objects that
-		 * are missing required columns. Any of these would otherwise fatal or silently load wrong
-		 * values downstream (array_filter()/array_diff() on a non-array, $meta->meta_key on a
-		 * non-object element, or a real key hydrated with a null value from a partial row). A row is
-		 * only usable when it carries meta_id, meta_key and meta_value - the same completeness check
-		 * OrdersTableDataStoreMeta::is_valid_cached_meta() applies at the HPOS cache boundary. Drop
+		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
+		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object, a
+		 * well-formed array whose elements are not meta rows, or an array of objects that are missing
+		 * required columns. Any of these would otherwise fatal or silently load wrong values
+		 * downstream (array_filter()/array_diff() on a non-array, $meta->meta_key on a non-object
+		 * element, or a real key hydrated with a null value from a partial row).
+		 *
+		 * A row is usable when it carries meta_key and meta_value - the fields init_meta_data() reads
+		 * as data. meta_id is intentionally NOT required here: unlike OrdersTableDataStoreMeta::
+		 * is_valid_cached_meta(), which validates raw database rows at the HPOS 'orders_meta'
+		 * boundary (those always have a meta_id), this guard also runs against the post-filter output
+		 * that WC_Data::read_meta_data() caches and re-validates on a cache hit. That output can
+		 * legitimately include virtual rows injected by extensions via the
+		 * woocommerce_data_store_wp_post_read_meta filter (orders use the 'post' meta type), which
+		 * carry meta_key and meta_value but no meta_id (init_meta_data() reads such a row's id as 0).
+		 * Requiring meta_id would reclassify those legitimate rows as corrupt and churn the cache -
+		 * purging it and re-logging on every read - so we only treat a missing meta_key or meta_value
+		 * as corruption. Drop
 		 * anything that is not a usable meta row so the order still loads, and when corruption is
 		 * detected invalidate the cached entries so the next read self-heals from the database.
 		 */
@@ -1501,7 +1513,6 @@ WHERE
 			$valid_meta_data = array_filter(
 				$raw_meta_data,
 				static fn( $meta ) => is_object( $meta )
-					&& property_exists( $meta, 'meta_id' )
 					&& property_exists( $meta, 'meta_key' )
 					&& property_exists( $meta, 'meta_value' )
 			);
@@ -2699,6 +2710,18 @@ FROM $order_meta_table
 	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
 		global $wpdb;
 
+		// Notes are the order's own data, not the backup post's, so they shouldn't wait on a deferred post record.
+		$comments = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d",
+				$order_id
+			)
+		);
+
+		foreach ( $comments as $comment_id ) {
+			wp_delete_comment( $comment_id, true );
+		}
+
 		$post_type = $wpdb->get_var(
 			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
 		);
@@ -3380,9 +3403,10 @@ FROM $order_meta_table
 	 */
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
+		return $wpdb->prepare( "{$orders_table} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -3408,17 +3432,15 @@ FROM $order_meta_table
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list      = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table = self::get_orders_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
-				FROM %i
+			"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM {$orders_table}
 				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
-				GROUP BY parent_order_id",
-				self::get_orders_table_name()
-			)
+				GROUP BY parent_order_id"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 

@@ -37,7 +37,6 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 		$this->clear_scheduled_actions();
 
 		// Ensure recurring actions are scheduled.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'action_scheduler_ensure_recurring_actions' );
 
 		$this->assertTrue(
@@ -97,7 +96,6 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 			'Tracker send event wrapper should not be scheduled'
 		);
 		// Validate the wrapper is not scheduled when ensure_recurring_actions is called with tracking disabled.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'action_scheduler_ensure_recurring_actions' );
 		$this->assertFalse(
 			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
@@ -126,20 +124,74 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The response-aware tracker attempt callback is registered with one accepted argument.
+	 * @testdox The response-aware tracker callback forwards the scheduled attempt number.
 	 */
-	public function test_tracker_attempt_callback_is_registered(): void {
-		global $wp_filter;
-
+	public function test_tracker_attempt_callback_forwards_attempt_number(): void {
+		$http_calls = 0;
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		WC()->add_recurring_action_wrappers();
-
-		$callback_id = _wp_filter_build_unique_id(
-			'woocommerce_tracker_send_event_attempt',
-			array( WC(), 'add_woocommerce_tracker_send_event_attempt' ),
-			10
+		add_filter(
+			'woocommerce_tracker_data',
+			function () {
+				return array( 'snapshot' => 'current' );
+			}
 		);
-		$this->assertArrayHasKey( $callback_id, $wp_filter['woocommerce_tracker_send_event_attempt']->callbacks[10] );
-		$this->assertSame( 1, $wp_filter['woocommerce_tracker_send_event_attempt']->callbacks[10][ $callback_id ]['accepted_args'] );
+		add_filter(
+			'pre_http_request',
+			function () use ( &$http_calls ) {
+				++$http_calls;
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+
+		do_action( 'woocommerce_tracker_send_event_attempt', 3 );
+
+		$this->assertSame( 1, $http_calls );
+		$this->assertTrue( as_has_scheduled_action( 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 4 ), 'woocommerce-tracker' ) );
+	}
+
+	/**
+	 * @testdox The recurring tracker hook preserves its legacy first argument when appending the response-aware flag.
+	 */
+	public function test_tracker_wrapper_preserves_legacy_hook_argument(): void {
+		$hook_args = null;
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( 'woocommerce_tracker_last_send' );
+		WC()->add_recurring_action_wrappers();
+		add_action(
+			'woocommerce_tracker_send_event',
+			function () use ( &$hook_args ) {
+				$hook_args = func_get_args();
+			},
+			20,
+			2
+		);
+
+		do_action( 'woocommerce_tracker_send_event_wrapper' );
+
+		$this->assertSame( array( '', true ), $hook_args );
+	}
+
+	/**
+	 * @testdox The recurring wrapper requests response-aware delivery without posting inline.
+	 */
+	public function test_tracker_wrapper_enqueues_response_aware_delivery(): void {
+		$http_calls = 0;
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( 'woocommerce_tracker_last_send' );
+		WC()->add_recurring_action_wrappers();
+		add_filter(
+			'pre_http_request',
+			function () use ( &$http_calls ) {
+				++$http_calls;
+				return array( 'response' => array( 'code' => 204 ) );
+			}
+		);
+
+		do_action( 'woocommerce_tracker_send_event_wrapper' );
+
+		$this->assertSame( 0, $http_calls );
+		$this->assertTrue( as_has_scheduled_action( 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 0 ), 'woocommerce-tracker' ) );
 	}
 
 	/**

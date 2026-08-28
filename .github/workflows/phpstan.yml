@@ -30,6 +30,7 @@ jobs:
     phpstan:
         name: 'PHPStan Analysis'
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         steps:
             - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
               name: 'Checkout'
@@ -58,7 +59,18 @@ jobs:
               run: |
                   set +e  # Don't exit immediately on error
                   set -o pipefail  # But do capture pipeline exit codes
-                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 | tee /tmp/phpstan-output.txt
+                  # PHPStan detects GitHub Actions and emits '::error file=,line=,col=::' workflow
+                  # commands on its own, but its paths are relative to this working directory while
+                  # GitHub resolves annotation paths from the repo root. Without this rewrite the
+                  # annotations are emitted and then silently dropped, never showing up on the diff.
+                  #
+                  # The pattern is anchored so it only ever touches the path of a file-scoped error.
+                  # PHPStan's other two output shapes - '::error ::message' for errors that belong to
+                  # no file, and '::warning ::message' - carry no path, and a stray 'file=' inside one
+                  # of their messages must not be rewritten into a bogus path.
+                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 \
+                      | sed -u 's|^::error file=|::error file=plugins/woocommerce/|' \
+                      | tee /tmp/phpstan-output.txt
                   PHPSTAN_EXIT=${PIPESTATUS[0]}
                   if [[ $PHPSTAN_EXIT -ne 0 ]]; then
                       if grep -q "was not matched in reported errors" /tmp/phpstan-output.txt; then

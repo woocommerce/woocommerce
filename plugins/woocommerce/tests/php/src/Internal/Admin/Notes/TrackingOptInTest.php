@@ -32,7 +32,7 @@ class TrackingOptInTest extends WC_Unit_Test_Case {
 		$this->sut = new TrackingOptIn();
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper' );
-		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+		wp_unschedule_hook( 'woocommerce_tracker_send_event' );
 	}
 
 	/**
@@ -40,7 +40,7 @@ class TrackingOptInTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper' );
-		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+		wp_unschedule_hook( 'woocommerce_tracker_send_event' );
 		delete_option( 'woocommerce_allow_tracking' );
 
 		parent::tearDown();
@@ -61,7 +61,7 @@ class TrackingOptInTest extends WC_Unit_Test_Case {
 			'The option update should schedule the callback-safe recurrence.'
 		);
 		$this->assertFalse(
-			wp_next_scheduled( 'woocommerce_tracker_send_event' ),
+			wp_next_scheduled( 'woocommerce_tracker_send_event', array( true ) ),
 			'The note action should not schedule the raw tracker hook in WP-Cron.'
 		);
 	}

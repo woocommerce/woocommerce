@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Restore a generic blank-state icon style so extension-supplied icon glyphs render at the refreshed 32px scale.

@@ -126,7 +126,7 @@ test.describe(
 						page.locator(
 							'.wc-block-mini-cart__empty-cart-wrapper'
 						)
-					).toContainText( 'Your cart is currently empty!' );
+					).toContainText( 'Your shopping cart is empty' );
 				} );
 			}
 		);

@@ -86,7 +86,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			3,
 			10
 		);
-		WC_Tracker::send_tracking_data_attempt();
+		WC_Tracker::send_tracking_data();
 		$tracking_data = json_decode( $posted_data['body'], true );
 
 		// Test the default case of no filter for set for woocommerce_admin_disabled.
@@ -112,7 +112,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			3,
 			10
 		);
-		WC_Tracker::send_tracking_data_attempt();
+		WC_Tracker::send_tracking_data();
 		$tracking_data = json_decode( $posted_data['body'], true );
 
 		// Test the default case of no filter for set for woocommerce_admin_disabled.
@@ -121,9 +121,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Public sends enqueue one response-aware attempt without generating or posting data inline.
+	 * @testdox Public sends preserve the legacy immediate non-blocking delivery contract by default.
 	 */
-	public function test_send_tracking_data_enqueues_one_attempt_without_inline_work(): void {
+	public function test_send_tracking_data_preserves_legacy_immediate_delivery_by_default(): void {
 		$data_filter_calls = 0;
 		$http_calls        = 0;
 		add_filter(
@@ -135,13 +135,74 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		);
 		add_filter(
 			'pre_http_request',
-			function ( $pre ) use ( &$http_calls ) {
+			function () use ( &$http_calls ) {
 				++$http_calls;
-				return $pre;
+				return array( 'response' => array( 'code' => 204 ) );
 			}
 		);
 
 		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( 0, $this->count_attempt_actions() );
+		$this->assertSame( 1, $data_filter_calls );
+		$this->assertSame( 1, $http_calls );
+		$this->assertNotFalse( get_option( 'woocommerce_tracker_last_send', false ) );
+	}
+
+	/**
+	 * @testdox The public tracker entry point retains its one-parameter subclass contract.
+	 */
+	public function test_send_tracking_data_preserves_public_method_arity(): void {
+		$method = new ReflectionMethod( WC_Tracker::class, 'send_tracking_data' );
+
+		$this->assertSame( 1, $method->getNumberOfParameters(), 'Adding an optional parameter breaks subclasses that override the legacy signature.' );
+	}
+
+	/**
+	 * @testdox The public hook requires literal true to opt into response-aware delivery.
+	 */
+	public function test_tracker_hook_requires_literal_true_response_aware_opt_in(): void {
+		$request_args = null;
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$request_args ) {
+				$request_args = $args;
+				return array( 'response' => array( 'code' => 204 ) );
+			},
+			10,
+			2
+		);
+		WC_Tracker::init();
+
+		do_action( 'woocommerce_tracker_send_event', false, 'extension-metadata' );
+
+		$this->assertSame( 0, $this->count_attempt_actions() );
+		$this->assertIsArray( $request_args );
+		$this->assertFalse( $request_args['blocking'] );
+	}
+
+	/**
+	 * @testdox Response-aware sends enqueue without generating or posting data inline.
+	 */
+	public function test_send_tracking_data_enqueues_response_aware_attempt_without_inline_work(): void {
+		$data_filter_calls = 0;
+		$http_calls        = 0;
+		add_filter(
+			'woocommerce_tracker_data',
+			function ( $data ) use ( &$data_filter_calls ) {
+				++$data_filter_calls;
+				return $data;
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function () use ( &$http_calls ) {
+				++$http_calls;
+				return array( 'response' => array( 'code' => 204 ) );
+			}
+		);
+
+		WC_Tracker::send_tracking_data( false, true );
 
 		$this->assertSame( 1, $this->count_attempt_actions( array( 'attempt' => 0 ) ) );
 		$this->assertSame( 0, $data_filter_calls );
@@ -150,13 +211,22 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Public sends do not start a cycle when usage tracking consent is disabled.
+	 * @testdox Response-aware sends evaluate the override filter but do not start a cycle without consent.
 	 */
 	public function test_send_tracking_data_does_not_enqueue_without_consent(): void {
+		$override_filter_calls = 0;
 		update_option( 'woocommerce_allow_tracking', 'no' );
+		add_filter(
+			'woocommerce_tracker_send_override',
+			function ( $override ) use ( &$override_filter_calls ) {
+				++$override_filter_calls;
+				return $override;
+			}
+		);
 
-		WC_Tracker::send_tracking_data();
+		WC_Tracker::send_tracking_data( false, true );
 
+		$this->assertSame( 1, $override_filter_calls );
 		$this->assertSame( 0, $this->count_attempt_actions() );
 		$this->assertFalse( get_option( 'woocommerce_tracker_last_send', false ) );
 	}
@@ -177,9 +247,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		);
 		add_filter(
 			'pre_http_request',
-			function ( $pre ) use ( &$http_calls ) {
+			function () use ( &$http_calls ) {
 				++$http_calls;
-				return $pre;
+				return array( 'response' => array( 'code' => 204 ) );
 			}
 		);
 
@@ -200,7 +270,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	public function test_send_tracking_data_preserves_throttling( bool $override, int $last_send_offset ): void {
 		update_option( 'woocommerce_tracker_last_send', time() - $last_send_offset );
 
-		WC_Tracker::send_tracking_data( $override );
+		WC_Tracker::send_tracking_data( $override, true );
 
 		$this->assertSame( 0, $this->count_attempt_actions() );
 	}
@@ -230,7 +300,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_logging_class', $logger_filter );
 
 		try {
-			WC_Tracker::send_tracking_data();
+			WC_Tracker::send_tracking_data( false, true );
 		} finally {
 			remove_filter( 'pre_as_enqueue_async_action', '__return_zero' );
 			remove_filter( 'woocommerce_logging_class', $logger_filter );
@@ -268,7 +338,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$caught_exception = null;
 
 		try {
-			WC_Tracker::send_tracking_data();
+			WC_Tracker::send_tracking_data( false, true );
 		} catch ( Throwable $exception ) {
 			$caught_exception = $exception;
 		} finally {
@@ -297,7 +367,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_logging_class', $logger_filter );
 
 		try {
-			WC_Tracker::send_tracking_data();
+			WC_Tracker::send_tracking_data( false, true );
 		} finally {
 			remove_filter( 'woocommerce_logging_class', $logger_filter );
 		}
@@ -305,6 +375,43 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $this->count_attempt_actions( array( 'attempt' => 0 ) ) );
 		$this->assertNotFalse( get_option( 'woocommerce_tracker_last_send', false ) );
 		$this->assertCount( 0, $warning_calls, 'An existing initial action should be treated as a confirmed cycle.' );
+	}
+
+	/**
+	 * @testdox A pending retry prevents a response-aware caller from starting an overlapping cycle.
+	 */
+	public function test_send_tracking_data_does_not_overlap_pending_retry_cycle(): void {
+		as_schedule_single_action( time() + 900, 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 1 ), 'woocommerce-tracker', false );
+
+		WC_Tracker::send_tracking_data( true, true );
+
+		$this->assertSame( 0, $this->count_attempt_actions( array( 'attempt' => 0 ) ) );
+		$this->assertSame( 1, $this->count_attempt_actions( array( 'attempt' => 1 ) ) );
+		$this->assertNotFalse( get_option( 'woocommerce_tracker_last_send', false ) );
+	}
+
+	/**
+	 * @testdox Initial tracker attempts use a lower queue priority than default commerce work.
+	 */
+	public function test_send_tracking_data_enqueues_initial_attempt_at_low_priority(): void {
+		$scheduled_priority = null;
+		$schedule_filter    = function ( $pre, $hook, $args, $group, $priority ) use ( &$scheduled_priority ) {
+			if ( 'woocommerce_tracker_send_event_attempt' === $hook ) {
+				$scheduled_priority = $priority;
+				return 123;
+			}
+
+			return $pre;
+		};
+		add_filter( 'pre_as_enqueue_async_action', $schedule_filter, 10, 5 );
+
+		try {
+			WC_Tracker::send_tracking_data( false, true );
+		} finally {
+			remove_filter( 'pre_as_enqueue_async_action', $schedule_filter );
+		}
+
+		$this->assertSame( 50, $scheduled_priority );
 	}
 
 	/**
@@ -322,15 +429,41 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Delivery attempts keep blocking HTTP work within the queue runner's time budget.
+	 */
+	public function test_send_tracking_data_attempt_uses_queue_safe_timeout(): void {
+		$request_args = null;
+		add_filter(
+			'woocommerce_tracker_data',
+			function () {
+				return array( 'snapshot' => 'current' );
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args ) use ( &$request_args ) {
+				$request_args = $args;
+				return array( 'response' => array( 'code' => 204 ) );
+			},
+			10,
+			2
+		);
+
+		WC_Tracker::send_tracking_data_attempt();
+
+		$this->assertSame( 15, $request_args['timeout'] );
+	}
+
+	/**
 	 * Successful response codes.
 	 *
 	 * @return array<string, array{int}>
 	 */
 	public static function successful_status_data(): array {
 		return array(
-			'200' => array( 200 ),
-			'204' => array( 204 ),
-			'299' => array( 299 ),
+			'status 200' => array( 200 ),
+			'status 204' => array( 204 ),
+			'status 299' => array( 299 ),
 		);
 	}
 
@@ -356,14 +489,37 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	public static function retryable_response_data(): array {
 		return array(
 			'WP_Error' => array( 'wp_error' ),
-			'0'        => array( 0 ),
-			'408'      => array( 408 ),
-			'425'      => array( 425 ),
-			'429'      => array( 429 ),
-			'500'      => array( 500 ),
-			'503'      => array( 503 ),
-			'599'      => array( 599 ),
+			'status 0'   => array( 0 ),
+			'status 408' => array( 408 ),
+			'status 425' => array( 425 ),
+			'status 429' => array( 429 ),
+			'status 500' => array( 500 ),
+			'status 503' => array( 503 ),
+			'status 599' => array( 599 ),
 		);
+	}
+
+	/**
+	 * @testdox A failed in-flight request cannot enqueue a successor after consent is revoked.
+	 */
+	public function test_send_tracking_data_attempt_rechecks_consent_before_scheduling_retry(): void {
+		add_filter(
+			'woocommerce_tracker_data',
+			function () {
+				return array( 'snapshot' => 'current' );
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function () {
+				update_option( 'woocommerce_allow_tracking', 'no' );
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+
+		WC_Tracker::send_tracking_data_attempt();
+
+		$this->assertSame( 0, $this->count_attempt_actions() );
 	}
 
 	/**
@@ -387,12 +543,12 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public static function terminal_response_data(): array {
 		return array(
-			'300' => array( 300 ),
-			'302' => array( 302 ),
-			'400' => array( 400 ),
-			'401' => array( 401 ),
-			'404' => array( 404 ),
-			'422' => array( 422 ),
+			'status 300' => array( 300 ),
+			'status 302' => array( 302 ),
+			'status 400' => array( 400 ),
+			'status 401' => array( 401 ),
+			'status 404' => array( 404 ),
+			'status 422' => array( 422 ),
 		);
 	}
 
@@ -410,9 +566,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		);
 		add_filter(
 			'pre_http_request',
-			function ( $pre ) use ( &$http_calls ) {
+			function () use ( &$http_calls ) {
 				++$http_calls;
-				return $pre;
+				return array( 'response' => array( 'code' => 204 ) );
 			}
 		);
 
@@ -423,7 +579,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Retry attempts use the exponential 15, 30, 60, and 120 minute delays.
+	 * @testdox Retry attempts add bounded positive jitter after exponential backoff.
 	 *
 	 * @dataProvider retry_timing_data
 	 * @param int $attempt        Current zero-based attempt number.
@@ -440,8 +596,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			array( 'attempt' => $attempt + 1 ),
 			'woocommerce-tracker'
 		);
+		$maximum_jitter = min( (int) ceil( $expected_delay * 0.1 ), 5 * MINUTE_IN_SECONDS );
 		$this->assertIsInt( $scheduled_at );
-		$this->assertEqualsWithDelta( $started_at + $expected_delay, $scheduled_at, 5 );
+		$this->assertGreaterThan( $started_at + $expected_delay, $scheduled_at );
+		$this->assertLessThanOrEqual( $started_at + $expected_delay + $maximum_jitter + 5, $scheduled_at );
 	}
 
 	/**
@@ -462,10 +620,19 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testdox The fifth failed attempt ends the cycle.
 	 */
 	public function test_send_tracking_data_attempt_stops_at_attempt_cap(): void {
+		$http_calls = 0;
 		$this->stub_tracker_request( 503 );
+		add_filter(
+			'pre_http_request',
+			function ( $pre ) use ( &$http_calls ) {
+				++$http_calls;
+				return $pre;
+			}
+		);
 
 		WC_Tracker::send_tracking_data_attempt( 4 );
 
+		$this->assertSame( 1, $http_calls );
 		$this->assertSame( 0, $this->count_attempt_actions() );
 	}
 
@@ -489,6 +656,31 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		remove_filter( 'pre_as_schedule_single_action', $schedule_filter );
 		$this->assertTrue( $scheduled_as_unique );
+	}
+
+	/**
+	 * @testdox Retry attempts use a lower queue priority than default commerce work.
+	 */
+	public function test_send_tracking_data_attempt_schedules_retry_at_low_priority(): void {
+		$scheduled_priority = null;
+		$schedule_filter    = function ( $pre, $timestamp, $hook, $args, $group, $priority ) use ( &$scheduled_priority ) {
+			if ( 'woocommerce_tracker_send_event_attempt' === $hook ) {
+				$scheduled_priority = $priority;
+				return 123;
+			}
+
+			return $pre;
+		};
+		add_filter( 'pre_as_schedule_single_action', $schedule_filter, 10, 6 );
+		$this->stub_tracker_request( 503 );
+
+		try {
+			WC_Tracker::send_tracking_data_attempt();
+		} finally {
+			remove_filter( 'pre_as_schedule_single_action', $schedule_filter );
+		}
+
+		$this->assertSame( 50, $scheduled_priority );
 	}
 
 	/**
@@ -610,8 +802,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			array( 'attempt' => 1 ),
 			'woocommerce-tracker'
 		);
+		$maximum_jitter = min( (int) ceil( $expected_delay * 0.1 ), 5 * MINUTE_IN_SECONDS );
 		$this->assertIsInt( $scheduled_at );
-		$this->assertEqualsWithDelta( $started_at + $expected_delay, $scheduled_at, 5 );
+		$this->assertGreaterThan( $started_at + $expected_delay, $scheduled_at );
+		$this->assertLessThanOrEqual( $started_at + $expected_delay + $maximum_jitter + 5, $scheduled_at );
 	}
 
 	/**
@@ -621,6 +815,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public static function retry_after_data(): array {
 		return array(
+			'short positive delta' => array( '60', 15 * MINUTE_IN_SECONDS ),
 			'positive delta' => array( '1800', 30 * MINUTE_IN_SECONDS ),
 			'future date'    => array( 'future-date', 40 * MINUTE_IN_SECONDS ),
 			'invalid'        => array( 'later', 15 * MINUTE_IN_SECONDS ),
@@ -672,6 +867,24 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		WC_Tracker::send_tracking_data_attempt();
 
 		$this->assertSame( 0, $this->count_attempt_actions() );
+	}
+
+	/**
+	 * @testdox A Retry-After delay of exactly 24 hours remains valid without exceeding the cap.
+	 */
+	public function test_send_tracking_data_attempt_accepts_retry_after_at_one_day_boundary(): void {
+		$this->stub_tracker_request( 429, (string) DAY_IN_SECONDS );
+		$started_at = time();
+
+		WC_Tracker::send_tracking_data_attempt();
+
+		$scheduled_at = as_next_scheduled_action(
+			'woocommerce_tracker_send_event_attempt',
+			array( 'attempt' => 1 ),
+			'woocommerce-tracker'
+		);
+		$this->assertIsInt( $scheduled_at );
+		$this->assertEqualsWithDelta( $started_at + DAY_IN_SECONDS, $scheduled_at, 5 );
 	}
 
 	/**

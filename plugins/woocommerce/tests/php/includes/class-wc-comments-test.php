@@ -148,7 +148,81 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_integrates_akismet_excluded_comment_types(): void {
 		$this->assertTrue( has_filter( 'akismet_excluded_comment_types' ) );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->assertSame( array( 'order_note' ), apply_filters( 'akismet_excluded_comment_types', array() ) );
+	}
+
+	/**
+	 * @testdox Should not increment the cached comment count for comment types excluded from the counts.
+	 *
+	 * @testWith ["action_log"]
+	 *           ["note"]
+	 *           ["order_note"]
+	 *           ["webhook_delivery"]
+	 *
+	 * @param string $comment_type Comment type that should be excluded from the counts.
+	 */
+	public function test_excluded_comment_types_do_not_increment_the_count_cache( string $comment_type ): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'A post that is not a product',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		wp_cache_set( 'wc_count_comments_unapproved', 0, 'wc_comment_counts' );
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_type'     => $comment_type,
+				'comment_approved' => '0',
+			)
+		);
+
+		$this->assertSame(
+			0,
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			"Inserting a '{$comment_type}' comment should leave the cached unapproved count untouched"
+		);
+
+		// Clean up.
+		wp_delete_comment( $comment_id, true );
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
+	 * @testdox Should still increment the cached comment count for a regular comment.
+	 *
+	 * Guards the test above: without this, the exclusion assertions could pass for the wrong reason.
+	 */
+	public function test_regular_comments_still_increment_the_count_cache(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'A post that is not a product',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		wp_cache_set( 'wc_count_comments_unapproved', 0, 'wc_comment_counts' );
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_type'     => 'comment',
+				'comment_approved' => '0',
+			)
+		);
+
+		$this->assertSame(
+			1,
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			'A regular comment should increment the cached unapproved count'
+		);
+
+		// Clean up.
+		wp_delete_comment( $comment_id, true );
+		wp_delete_post( $post_id, true );
 	}
 }
