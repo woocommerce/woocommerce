@@ -245,4 +245,25 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $counts['wc-partially-paid'] );
 		$this->assertEquals( 0, $counts[ OrderInternalStatus::PENDING ] );
 	}
+
+	/**
+	 * Test that a broken 'wc_order_statuses' filter returning a non-array does not fatal
+	 * on the warm-cache path.
+	 */
+	public function test_warm_cache_survives_non_array_order_statuses_filter(): void {
+		// Prime the cache while the statuses are valid.
+		OrderUtil::get_count_for_type( 'shop_order' );
+
+		$break_statuses = function () {
+			return null;
+		};
+		add_filter( 'wc_order_statuses', $break_statuses, 1000 );
+
+		$counts = OrderUtil::get_count_for_type( 'shop_order' );
+
+		remove_filter( 'wc_order_statuses', $break_statuses, 1000 );
+
+		$this->assertIsArray( $counts );
+		$this->assertArrayHasKey( OrderInternalStatus::PENDING, $counts );
+	}
 }
