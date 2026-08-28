@@ -293,8 +293,6 @@ This ends up resolving to a date that may not always be up to date between regis
 
 Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed, or if `min` resolves to a date later than `max`. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would fail in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
 
-The resolved bounds are set as the `min` and `max` attributes on the date input everywhere it is rendered: the Checkout block, the My Account forms, and the order edit screen in the admin. Durations are resolved each time, so the bounds follow the current date rather than the date the field was registered. Values submitted through the Store API are checked again server side, so a date outside the range is rejected even when the request bypasses the form.
-
 The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
 #### Options for `select` fields
