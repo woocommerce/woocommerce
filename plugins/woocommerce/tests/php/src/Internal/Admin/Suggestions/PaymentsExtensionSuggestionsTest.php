@@ -128,8 +128,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 11,
-			'US' => 12,
+			'CA' => 10,
+			'US' => 11,
 			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
@@ -522,8 +522,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_offline(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 11,
-			'US' => 12,
+			'CA' => 10,
+			'US' => 11,
 			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
@@ -1030,42 +1030,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Helcim is the last PSP suggestion in $country_code.
-	 *
-	 * @dataProvider data_provider_helcim_supported_countries
-	 *
-	 * @param string $country_code ISO 3166-1 alpha-2 country code.
-	 */
-	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code ): void {
-		$extensions       = $this->sut->get_country_extensions( $country_code );
-		$extensions_by_id = array_column( $extensions, null, 'id' );
-		$psp_ids          = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-		$helcim           = $extensions_by_id[ PaymentsExtensionSuggestions::HELCIM ] ?? null;
-
-		$this->assertSame(
-			PaymentsExtensionSuggestions::HELCIM,
-			end( $psp_ids ),
-			"Helcim should be the final PSP suggestion in {$country_code}."
-		);
-		$this->assertIsArray( $helcim, "Helcim should be suggested in {$country_code}." );
-		if ( ! is_array( $helcim ) ) {
-			return;
-		}
-
-		$this->assertNotContains(
-			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$helcim['tags'],
-			"Helcim should remain in other payment options for {$country_code}."
-		);
-	}
-
-	/**
 	 * @testdox Visa is the last "other payment provider" in Japan.
 	 */
 	public function test_visa_is_last_other_payment_provider_in_jp(): void {
@@ -1122,18 +1086,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			PaymentsExtensionSuggestions::TAG_PREFERRED,
 			$komoju['tags'],
 			'KOMOJU should remain in other payment options for JP.'
-		);
-	}
-
-	/**
-	 * Data provider for Helcim's supported countries.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function data_provider_helcim_supported_countries(): array {
-		return array(
-			'Canada'        => array( 'CA' ),
-			'United States' => array( 'US' ),
 		);
 	}
 
