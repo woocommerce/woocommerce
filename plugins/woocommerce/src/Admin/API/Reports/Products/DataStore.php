@@ -103,6 +103,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	private $is_search = false;
 
 	/**
+	 * Last search statement built, with the arguments it was built from.
+	 *
+	 * @var array|null
+	 */
+	private $search_subquery = null;
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
@@ -207,10 +214,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
+		$included_products = $this->get_included_products_array( $query_args );
 		$product_id_filter = ProductIdFilter::get_condition(
 			"{$order_product_lookup_table}.product_id",
-			$query_args['search'],
-			$this->get_included_products_array( $query_args )
+			$this->get_search_subquery( $query_args, $included_products ),
+			$included_products
 		);
 		if ( $product_id_filter ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
@@ -229,6 +237,35 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
+	}
+
+	/**
+	 * Returns the statement the query's `search` argument resolves to.
+	 *
+	 * Serving one report needs it twice, once for the restriction and once for the row count, and
+	 * building it runs a WP_Query, so the last one is kept for as long as the arguments match.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $query_args        Query parameters.
+	 * @param array $included_products Product IDs the `categories` and `products` filters resolve to.
+	 * @return string SQL statement, or an empty string when the query carries no search.
+	 */
+	private function get_search_subquery( $query_args, array $included_products ): string {
+		$terms = $query_args['search'] ?? array();
+
+		if ( null === $this->search_subquery
+			|| $this->search_subquery['terms'] !== $terms
+			|| $this->search_subquery['included_products'] !== $included_products
+		) {
+			$this->search_subquery = array(
+				'terms'             => $terms,
+				'included_products' => $included_products,
+				'subquery'          => ProductSearchQuery::get_ids_subquery( $terms, $included_products ),
+			);
+		}
+
+		return $this->search_subquery['subquery'];
 	}
 
 	/**
@@ -423,7 +460,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$selections        = $this->selected_columns( $query_args );
 		$included_products = $this->get_included_products_array( $query_args );
-		$search_subquery   = ProductSearchQuery::get_ids_subquery( $query_args['search'], $included_products );
+		$search_subquery   = $this->get_search_subquery( $query_args, $included_products );
 		$params            = $this->get_limit_params( $query_args );
 		$this->add_sql_query_params( $query_args );
 

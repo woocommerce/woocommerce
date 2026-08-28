@@ -998,6 +998,63 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not require a `search` argument from a caller that builds its own query arguments.
+	 *
+	 * `get_noncached_data()` is public, so an extension can call it with the arguments it put
+	 * together before the search argument existed. Reading a key that is not there would warn.
+	 */
+	public function test_get_noncached_data_without_a_search_argument() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Direct Caller Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// The defaults as they stood before `search` was added to them.
+		$args = array(
+			'per_page'          => 10,
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date',
+			'before'            => new WC_DateTime( '2100-01-01 00:00:00' ),
+			'after'             => new WC_DateTime( '2000-01-01 00:00:00' ),
+			'fields'            => '*',
+			'category_includes' => array(),
+			'product_includes'  => array(),
+			'extended_info'     => false,
+		);
+
+		$data = ( new ProductsDataStore() )->get_noncached_data( $args );
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( $product->get_id(), $data->data[0]['product_id'] );
+
+		$stats_data = (object) array(
+			'totals'    => null,
+			'intervals' => array(),
+		);
+		$stats      = ( new ProductsStatsDataStore() )->get_noncached_stats_data(
+			array_merge( $args, array( 'interval' => 'year' ) ),
+			array(
+				'per_page' => 10,
+				'offset'   => 0,
+			),
+			$stats_data,
+			1
+		);
+
+		$this->assertEquals( 1, $stats->totals->products_count, 'The stats data store should take the same arguments' );
+	}
+
+	/**
 	 * Tests the data stored in the wc_order_product_lookup table when a full refund is made.
 	 *
 	 * The full refunds here are the ones that change the order status to refunded.

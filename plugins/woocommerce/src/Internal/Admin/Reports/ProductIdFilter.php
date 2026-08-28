@@ -24,17 +24,19 @@ class ProductIdFilter {
 	/**
 	 * Returns the condition restricting a report to a set of products.
 	 *
-	 * A search resolves to a subquery, the `categories` and `products` filters to an ID list.
+	 * A search resolves to a subquery, the `categories` and `products` filters to an ID list. The
+	 * subquery already covers those filters, since it is built restricted to the same IDs.
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param string          $column            Product ID column to compare, qualified with its table name.
-	 * @param string|string[] $search_terms      Value of the `search` query argument.
-	 * @param array           $included_products Product IDs the `categories` and `products` filters resolve to.
+	 * @param string $column            Product ID column to compare, qualified with its table name.
+	 * @param string $search_subquery   Statement the `search` argument resolves to, from
+	 *                                  `ProductSearchQuery::get_ids_subquery()`. Empty when the
+	 *                                  report carries no search.
+	 * @param array  $included_products Product IDs the `categories` and `products` filters resolve to.
 	 * @return string SQL condition, or an empty string when the report is not restricted.
 	 */
-	public static function get_condition( string $column, $search_terms, array $included_products ): string {
-		$search_subquery = ProductSearchQuery::get_ids_subquery( $search_terms, $included_products );
+	public static function get_condition( string $column, string $search_subquery, array $included_products ): string {
 		if ( '' !== $search_subquery ) {
 			return "{$column} IN ( {$search_subquery} )";
 		}
