@@ -719,6 +719,27 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve a WP_Error from the filter that carries an integer error code.
+	 */
+	public function test_validate_cart_item_quantity_filter_returns_wp_error_with_integer_code(): void {
+		$cart_item = $this->get_validation_cart_item();
+		$sut       = new QuantityLimits();
+
+		add_filter(
+			'woocommerce_store_api_cart_item_quantity_validation',
+			function () {
+				return new \WP_Error( 123, 'Rejected by extension' );
+			}
+		);
+
+		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
+
+		$this->assertInstanceOf( 'WP_Error', $result, 'A WP_Error with an integer code should be passed through' );
+		$this->assertSame( 123, $result->get_error_code(), 'The integer error code should be preserved' );
+		$this->assertSame( 'Rejected by extension', $result->get_error_message(), 'The filter callback error message should be preserved' );
+	}
+
+	/**
 	 * @testdox Should return true when a woocommerce_store_api_cart_item_quantity_validation callback returns true.
 	 */
 	public function test_validate_cart_item_quantity_filter_returns_true(): void {
@@ -802,6 +823,7 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 			'empty WP_Error'     => array( new \WP_Error() ),
 			'non-string message' => array( new \WP_Error( 'custom_code', array( 'not a string' ) ) ),
 			'empty message'      => array( new \WP_Error( 'custom_code', '' ) ),
+			'zero integer code'  => array( new \WP_Error( 0, 'Rejected by extension' ) ),
 		);
 	}
 

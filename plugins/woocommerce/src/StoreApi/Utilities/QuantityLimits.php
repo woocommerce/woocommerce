@@ -327,7 +327,10 @@ final class QuantityLimits {
 			$code    = $valid->get_error_code();
 			$message = $valid->get_error_message();
 
-			if ( is_string( $code ) && '' !== $code && is_string( $message ) && '' !== $message ) {
+			// WP_Error codes can be strings or integers. Empty codes are what WP_Error itself treats as "no error".
+			$has_code = ( is_string( $code ) || is_int( $code ) ) && ! empty( $code );
+
+			if ( $has_code && is_string( $message ) && '' !== $message ) {
 				return $valid;
 			}
 		}
