@@ -70,6 +70,7 @@
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
+- [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
@@ -1708,6 +1709,41 @@ This hook allows the cart item images to be changed. This is specific to the car
 ### Source
 
 - [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
+## woocommerce_store_api_cart_item_quantity_validation
+
+
+Filters the validation result for a cart item quantity being updated via the Store API.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $valid, int|float $quantity, \WC_Product $product, array $cart_item )
+```
+
+### Description
+
+Return a \WP_Error with an informative message, or false, to reject the new quantity; return true to accept it. Any other return value is ignored and the quantity is accepted. Core validation failures (min, max, multiple_of, read-only), and cart items whose data key is not a WC_Product, return early and never reach this filter, so $valid is always true here.
+
+This does not run when a product is first added to the cart; use the woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing quantity.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $valid | true | Always true; core validation failures bypass this filter. |
+| $quantity | int, float | The new quantity, already normalized through wc_stock_amount(). |
+| $product | \WC_Product | The product object. |
+| $cart_item | array | Cart item. |
+
+### Returns
+
+
+`\WP_Error, bool`
+
+### Source
+
+- [StoreApi/Utilities/QuantityLimits.php](../../../../../../src/StoreApi/Utilities/QuantityLimits.php)
 
 ---
 
