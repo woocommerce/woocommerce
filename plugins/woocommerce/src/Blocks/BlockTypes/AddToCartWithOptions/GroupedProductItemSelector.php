@@ -59,7 +59,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				/**
 				 * Filter the placeholder shown in the quantity input.
 				 *
-				 * @since 3.10.0
+				 * @since 4.0.0
 				 * @param int         $placeholder Placeholder for the quantity input.
 				 * @param \WC_Product $product     Product object.
 				 */
