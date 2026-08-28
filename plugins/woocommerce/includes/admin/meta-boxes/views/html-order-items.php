@@ -436,20 +436,9 @@ if ( wc_tax_enabled() ) {
 								</tr>
 							</thead>
 							<?php
-								/**
-								 * This filter is documented in includes/admin/meta-boxes/views/html-order-item.php
-								 *
-								 * No product is selected yet when the modal row is rendered, so the
-								 * product argument is false.
-								 *
-								 * @since 5.8.0
-								 */
-								$add_item_min = apply_filters( 'woocommerce_quantity_input_min_admin', '0', false, 'add' );
-								$add_item_min = is_numeric( $add_item_min ) ? (string) $add_item_min : '0';
-
 								$row = '
 									<td><select class="wc-product-search" name="item_id" data-allow_clear="true" data-display_stock="true" data-exclude_type="variable" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
-									<td><input type="number" step="1" min="' . esc_attr( $add_item_min ) . '" max="9999" autocomplete="off" name="item_qty" placeholder="1" size="4" class="quantity" /></td>';
+									<td><input type="number" step="1" min="0" max="9999" autocomplete="off" name="item_qty" placeholder="1" size="4" class="quantity" /></td>';
 							?>
 							<tbody data-row="<?php echo esc_attr( $row ); ?>">
 								<tr>
