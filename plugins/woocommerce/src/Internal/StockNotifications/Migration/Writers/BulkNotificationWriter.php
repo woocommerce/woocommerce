@@ -200,9 +200,11 @@ class BulkNotificationWriter {
 	 * so the ids are read back instead of assumed.
 	 *
 	 * Rows are matched on `product_id` and `user_email`, ordered by id: ids rise in insertion
-	 * order within one statement, so the nth of our rows is the nth match. Anything that does
-	 * not resolve to exactly one id per chunk row throws, and the caller's transaction rolls
-	 * the whole chunk back rather than writing meta against a guess.
+	 * order within one statement, so the nth of our rows is the nth match. A key must answer
+	 * exactly as many times as the chunk carries it — a surplus means a row this chunk did not
+	 * insert shares the key, and the match is then ambiguous. Anything that does not resolve
+	 * one to one throws, and the caller's transaction rolls the whole chunk back rather than
+	 * writing meta against a guess.
 	 *
 	 * @param string $table    Notifications table name.
 	 * @param array  $chunk    Rows for this chunk, in insertion order.
@@ -223,25 +225,69 @@ class BulkNotificationWriter {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
+		return $this->map_inserted_ids( $chunk, (array) $rows );
+	}
+
+	/**
+	 * Match each chunk row to the id it was inserted with.
+	 *
+	 * Kept free of the database so the ambiguity rules below can be exercised directly: the
+	 * case that matters — a row this chunk did not insert taking an id inside the block — is
+	 * a race that a single-threaded test cannot stage through a real insert.
+	 *
+	 * @param array $chunk Rows for this chunk, in insertion order.
+	 * @param array $rows  `id`, `product_id` and `user_email` for every row at or above the
+	 *                     first id of the block, ordered by id.
+	 * @throws \RuntimeException When the rows cannot be matched to the chunk one to one.
+	 * @return int[] Notification ids, in the same order as $chunk.
+	 */
+	private function map_inserted_ids( array $chunk, array $rows ): array {
 		$available = array();
 
-		foreach ( (array) $rows as $row ) {
+		foreach ( $rows as $row ) {
 			$available[ $this->natural_key( (int) $row['product_id'], (string) $row['user_email'] ) ][] = (int) $row['id'];
+		}
+
+		$expected = array();
+
+		foreach ( $chunk as $row ) {
+			$columns          = $row['columns'];
+			$key              = $this->natural_key( (int) $columns['product_id'], (string) $columns['user_email'] );
+			$expected[ $key ] = ( $expected[ $key ] ?? 0 ) + 1;
+		}
+
+		// Every key must answer exactly as many times as this chunk carries it. A surplus means
+		// a row the chunk did not insert shares the key — a shopper signing up for the same
+		// product with the same address while the run is in flight — and there is then no way
+		// to tell which id is ours. Guessing would stamp the legacy marker onto the shopper's
+		// notification and leave ours unmarked for the next run to migrate again, so the chunk
+		// is rolled back and retried instead.
+		foreach ( $expected as $key => $count ) {
+			$found = count( $available[ $key ] ?? array() );
+
+			if ( $found !== $count ) {
+				throw new \RuntimeException(
+					sprintf(
+						'Expected %d inserted row(s) for one product and address, found %d; rolling the chunk back.',
+						(int) $count, // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- integers, not output.
+						(int) $found // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- integers, not output.
+					)
+				);
+			}
 		}
 
 		$ids = array();
 
-		foreach ( $chunk as $offset => $row ) {
+		foreach ( $chunk as $row ) {
 			$columns = $row['columns'];
 			$key     = $this->natural_key( (int) $columns['product_id'], (string) $columns['user_email'] );
+			$id      = array_shift( $available[ $key ] );
 
-			if ( empty( $available[ $key ] ) ) {
-				throw new \RuntimeException(
-					sprintf( 'Could not resolve the inserted id for chunk row %d; rolling the chunk back.', (int) $offset ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- an integer offset, not output.
-				);
+			if ( null === $id ) {
+				throw new \RuntimeException( 'Ran out of inserted ids while mapping a chunk; rolling the chunk back.' );
 			}
 
-			$ids[] = array_shift( $available[ $key ] );
+			$ids[] = $id;
 		}
 
 		return $ids;

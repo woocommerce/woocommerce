@@ -89,6 +89,129 @@ class BulkNotificationWriterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a concurrent signup sharing a row's product and address must fail the chunk.
+	 *
+	 * The readback matches on product and address, so a row this chunk did not insert that
+	 * answers to the same key makes the match ambiguous. Guessing would stamp the legacy
+	 * marker onto the shopper's notification and leave the migrated row unmarked, so it is
+	 * re-migrated on the next run — duplicate restock emails.
+	 *
+	 * Exercised through the mapping itself: the row has to take an id from inside the block,
+	 * which needs a second connection racing the insert, and a single-threaded test cannot
+	 * stage that against a live AUTO_INCREMENT.
+	 */
+	public function test_a_colliding_concurrent_row_fails_the_chunk(): void {
+		$chunk = array(
+			$this->build_row( 'other@example.com', array( array( '_wc_bis_legacy_id', 101 ) ) ),
+			$this->build_row( 'shopper@example.com', array( array( '_wc_bis_legacy_id', 102 ) ) ),
+		);
+
+		// Ids 5000 and 5002 are this chunk's; 5001 is the shopper's, taken mid-block, and it
+		// answers to the same product and address as the chunk's second row.
+		$rows = array(
+			array(
+				'id'         => 5000,
+				'product_id' => 1,
+				'user_email' => 'other@example.com',
+			),
+			array(
+				'id'         => 5001,
+				'product_id' => 1,
+				'user_email' => 'shopper@example.com',
+			),
+			array(
+				'id'         => 5002,
+				'product_id' => 1,
+				'user_email' => 'shopper@example.com',
+			),
+		);
+
+		$this->expectException( \RuntimeException::class );
+
+		$this->map_inserted_ids( $chunk, $rows );
+	}
+
+	/**
+	 * @testdox an unrelated concurrent signup must not disturb the mapping.
+	 */
+	public function test_an_unrelated_concurrent_row_is_ignored(): void {
+		$chunk = array( $this->build_row( 'mine@example.com' ) );
+
+		$rows = array(
+			array(
+				'id'         => 5000,
+				'product_id' => 1,
+				'user_email' => 'mine@example.com',
+			),
+			array(
+				'id'         => 5001,
+				'product_id' => 9,
+				'user_email' => 'someone-else@example.com',
+			),
+		);
+
+		$this->assertSame( array( 5000 ), $this->map_inserted_ids( $chunk, $rows ) );
+	}
+
+	/**
+	 * @testdox the mapping must follow the natural key, not the position in the block.
+	 */
+	public function test_the_mapping_follows_the_key_not_the_position(): void {
+		$chunk = array(
+			$this->build_row( 'second@example.com' ),
+			$this->build_row( 'first@example.com' ),
+		);
+
+		$rows = array(
+			array(
+				'id'         => 5000,
+				'product_id' => 1,
+				'user_email' => 'first@example.com',
+			),
+			array(
+				'id'         => 5004,
+				'product_id' => 1,
+				'user_email' => 'second@example.com',
+			),
+		);
+
+		$this->assertSame( array( 5004, 5000 ), $this->map_inserted_ids( $chunk, $rows ) );
+	}
+
+	/**
+	 * Call the writer's private id mapping directly.
+	 *
+	 * @param array $chunk Rows for the chunk.
+	 * @param array $rows  Rows as the readback would return them.
+	 * @return int[]
+	 */
+	private function map_inserted_ids( array $chunk, array $rows ): array {
+		$method = new \ReflectionMethod( BulkNotificationWriter::class, 'map_inserted_ids' );
+		$method->setAccessible( true );
+
+		return $method->invoke( new BulkNotificationWriter(), $chunk, $rows );
+	}
+
+	/**
+	 * @testdox two legacy rows sharing a product and address must each keep their own marker.
+	 */
+	public function test_two_chunk_rows_sharing_a_key_are_both_mapped(): void {
+		global $wpdb;
+
+		( new BulkNotificationWriter() )->insert_notifications(
+			array(
+				$this->build_row( 'twin@example.com', array( array( '_wc_bis_legacy_id', 201 ) ) ),
+				$this->build_row( 'twin@example.com', array( array( '_wc_bis_legacy_id', 202 ) ) ),
+			)
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$markers = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key = '_wc_bis_legacy_id' ORDER BY notification_id ASC" );
+
+		$this->assertSame( array( '201', '202' ), $markers, 'Duplicate legacy subscriptions must not collapse onto one row.' );
+	}
+
+	/**
 	 * @testdox a null date column should be written as SQL NULL, not a zero date.
 	 */
 	public function test_null_dates_are_written_as_null(): void {
