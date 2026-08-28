@@ -1270,7 +1270,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove item from the order.
 	 *
-	 * @param int|string $item_id Item ID to delete.
+	 * @param int|string $item_id Item ID or temporary item key to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {

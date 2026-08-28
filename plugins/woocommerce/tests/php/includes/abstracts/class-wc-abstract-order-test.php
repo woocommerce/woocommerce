@@ -1145,7 +1145,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should remove an unsaved item using its temporary key.
+	 * @testdox Should remove an unsaved item using its temporary key during save.
 	 */
 	public function test_remove_item_removes_unsaved_item(): void {
 		$order = new WC_Order();
@@ -1156,12 +1156,20 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$fee->set_tax_status( 'none' );
 		$order->add_item( $fee );
 
-		$item_id = array_key_first( $order->get_items( 'fee' ) );
-		$order->remove_item( $item_id );
+		$item_id             = array_key_first( $order->get_items( 'fee' ) );
+		$remove_unsaved_item = static function ( $saved_order ) use ( $item_id ) {
+			$saved_order->remove_item( $item_id );
+		};
 
-		$this->assertEmpty( $order->get_items( 'fee' ), 'The unsaved item should be removed from the order immediately.' );
+		add_action( 'woocommerce_before_order_object_save', $remove_unsaved_item );
 
-		$order->save();
+		try {
+			$order->save();
+
+			$this->assertEmpty( $order->get_items( 'fee' ), 'The unsaved item should be removed from the order during save.' );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $remove_unsaved_item );
+		}
 
 		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The removed item should not be persisted when the order is saved.' );
 	}
