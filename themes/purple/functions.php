@@ -12,7 +12,7 @@ declare( strict_types = 1 );
 
 if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 	/**
-	 * Unregister Jetpack patterns, WooCommerce patterns, and core patterns bundled in WordPress.
+	 * Unregister Jetpack patterns and core patterns bundled in WordPress.
 	 */
 	function purple_unregister_patterns() {
 		$pattern_names = array(
@@ -23,47 +23,6 @@ if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 			'registration-form',
 			'appointment-form',
 			'feedback-form',
-			// WooCommerce patterns. Keep only a curated set in the WooCommerce
-			// inserter category; everything else gets unregistered.
-			'woocommerce-blocks/banner',
-			'woocommerce-blocks/centered-content-with-image-below',
-			'woocommerce-blocks/content-right-with-image-left',
-			'woocommerce-blocks/featured-category-cover-image',
-			'woocommerce-blocks/featured-category-triple',
-			'woocommerce-blocks/footer-large',
-			'woocommerce-blocks/footer-simple-menu',
-			'woocommerce-blocks/footer-with-3-menus',
-			'woocommerce-blocks/four-image-grid-content-left',
-			'woocommerce-blocks/header-centered-menu',
-			'woocommerce-blocks/header-distraction-free',
-			'woocommerce-blocks/header-essential',
-			'woocommerce-blocks/header-large',
-			'woocommerce-blocks/header-minimal',
-			'woocommerce-blocks/heading-with-three-columns-of-content-with-link',
-			'woocommerce-blocks/hero-product-3-split',
-			'woocommerce-blocks/hero-product-chessboard',
-			'woocommerce-blocks/just-arrived-full-hero',
-			'woocommerce-blocks/product-collection-3-columns',
-			'woocommerce-blocks/product-collection-5-columns',
-			'woocommerce-blocks/product-collection-featured-products-5-columns',
-			'woocommerce-blocks/product-query-product-gallery',
-			'woocommerce-blocks/related-products',
-			'woocommerce-blocks/social-follow-us-in-social-media',
-			'woocommerce-blocks/testimonials-3-columns',
-			'woocommerce-blocks/testimonials-single',
-			'woocommerce-blocks/three-columns-with-images-and-content',
-			'woocommerce/coming-soon',
-			'woocommerce/coming-soon-entire-site',
-			'woocommerce/coming-soon-store-only',
-			'woocommerce/no-products-found',
-			'woocommerce/no-products-found-clear-filters',
-			'woocommerce/page-coming-soon-default',
-			'woocommerce/page-coming-soon-image-gallery',
-			'woocommerce/page-coming-soon-minimal-left-image',
-			'woocommerce/page-coming-soon-modern-black',
-			'woocommerce/page-coming-soon-split-right-image',
-			'woocommerce/page-coming-soon-with-header-footer',
-			'woocommerce/product-search-form',
 			// Patterns bundled in WordPress core.
 			// These would be removed by remove_theme_support( 'core-block-patterns' )
 			// if it's called on the init action with priority 9 from a plugin, not from a theme.
@@ -89,11 +48,11 @@ if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
 	/**
 	 * Hide WooCommerce template parts the theme doesn't use from the Site Editor.
 	 *
-	 * Companion to purple_unregister_patterns(): template parts have no
-	 * unregister API — WooCommerce injects them into template queries with its
-	 * own get_block_templates filter (priority 10) — so they are filtered out
-	 * of query results here instead. This only affects listings; rendering a
-	 * template part goes through get_block_file_template and is unaffected.
+	 * Template parts have no unregister API — WooCommerce injects them into
+	 * template queries with its own get_block_templates filter (priority 10) —
+	 * so they are filtered out of query results here instead. This only affects
+	 * listings; rendering a template part goes through get_block_file_template
+	 * and is unaffected.
 	 * Copies customized in the editor have the 'custom' source and are kept,
 	 * so user-edited content is never hidden.
 	 *
@@ -108,9 +67,8 @@ if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
 		}
 
 		$hidden_template_part_slugs = array(
-			// Referenced only by WooCommerce's coming-soon patterns, which
-			// purple_unregister_patterns() removes; Purple ships its own
-			// coming-soon template.
+			// Purple ships its own coming-soon template. WooCommerce's patterns
+			// can still render this part when inserted into a page.
 			'coming-soon-social-links',
 		);
 
