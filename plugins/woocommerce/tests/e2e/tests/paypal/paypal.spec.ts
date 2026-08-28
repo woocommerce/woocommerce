@@ -130,15 +130,13 @@ test.describe(
 				name: 'Enable',
 			} );
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( await enableLink.isVisible() ) {
-				await enableLink.click();
-				await expect(
-					paypalDiv
-						.getByText( 'Active' )
-						.or( paypalDiv.getByText( 'Test account' ) )
-				).toBeVisible( visibilityOptions );
-			}
+			await expect( enableLink ).toBeVisible( visibilityOptions );
+			await enableLink.click();
+			await expect(
+				paypalDiv
+					.getByText( 'Active' )
+					.or( paypalDiv.getByText( 'Test account' ) )
+			).toBeVisible( visibilityOptions );
 
 			await paypalDiv
 				.getByRole( 'button', {
@@ -204,17 +202,10 @@ test.describe(
 					await expect( paypalButtonsSetting ).toBeVisible();
 				} );
 			} finally {
-				// Clean up by reverting the title change and disabling PayPal Standard.
-				await test.step( 'Revert title change and disable PayPal Standard', async () => {
+				await test.step( 'Revert title change', async () => {
 					await page
 						.locator( '#woocommerce_paypal_title' )
 						.fill( originalPayPalTitle );
-
-					await page
-						.getByRole( 'checkbox', {
-							name: 'Enable PayPal Standard',
-						} )
-						.uncheck();
 
 					// TODO: Temporarily removing the disabled attribute from the Save changes button.
 					await enableSaveButton( page );
