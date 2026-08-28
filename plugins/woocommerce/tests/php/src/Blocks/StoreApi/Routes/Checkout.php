@@ -3102,6 +3102,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
 	 */
 	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
 		$order_id_during_payment = 0;
 		$payment_handler         = function ( $context, $payment_result ) use ( &$order_id_during_payment ) {
 			unset( $context );
@@ -3121,7 +3124,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order_id = (int) $response->get_data()['order_id'];
 		$this->assertGreaterThan( 0, $order_id, 'Checkout should create an order.' );
 		$this->assertSame( $order_id, $order_id_during_payment, 'The order should be linked to the session before payment processing starts.' );
-		$this->assertSame( $order_id, (int) WC()->session->get( 'order_awaiting_payment' ), 'Redirect payments should leave the order linked to the shopper session.' );
+		$persisted_session_data = WC()->session->get_session_data();
+		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
+		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
 	}
 
 	/**
