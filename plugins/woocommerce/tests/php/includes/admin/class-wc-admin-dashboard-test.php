@@ -424,7 +424,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 
-			$title_filter = static function ( string $title, int $post_id ) use ( $product ): string {
+			$title_filter = static function ( string $title, int $post_id ) use ( $product ) {
 				return $product->get_id() === $post_id ? 'Unsafe <script>alert("dashboard")</script> & title' : $title;
 			};
 
