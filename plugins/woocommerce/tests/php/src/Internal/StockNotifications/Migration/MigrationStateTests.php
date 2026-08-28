@@ -87,6 +87,47 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a lock timestamped in the future should be reclaimable, not permanent.
+	 */
+	public function test_a_future_lock_does_not_block_every_run_forever(): void {
+		update_option(
+			Constants::STATE_OPTION,
+			array(
+				'lock' => array(
+					'owner'       => 'a run with a bad clock',
+					'acquired_at' => PHP_INT_MAX,
+				),
+			),
+			false
+		);
+
+		$this->assertFalse( $this->sut->is_lock_held() );
+		$this->assertTrue( $this->sut->acquire_lock( 'this run' ), 'A future lock must be reclaimable.' );
+	}
+
+	/**
+	 * @testdox a non-integer acquired_at should read as stale.
+	 */
+	public function test_a_non_integer_acquired_at_reads_as_stale(): void {
+		update_option(
+			Constants::STATE_OPTION,
+			array( 'lock' => array( 'acquired_at' => 'right now' ) ),
+			false
+		);
+
+		$this->assertFalse( $this->sut->is_lock_held() );
+	}
+
+	/**
+	 * @testdox a lock acquired just now should still be held.
+	 */
+	public function test_a_fresh_lock_is_still_held(): void {
+		$this->assertTrue( $this->sut->acquire_lock( 'this run' ) );
+		$this->assertTrue( $this->sut->is_lock_held() );
+		$this->assertFalse( $this->sut->acquire_lock( 'another run' ), 'A held lock must refuse a second run.' );
+	}
+
+	/**
 	 * @testdox a scalar entry inside counts should read back as no cached count.
 	 */
 	public function test_a_scalar_count_entry_reads_back_as_null(): void {

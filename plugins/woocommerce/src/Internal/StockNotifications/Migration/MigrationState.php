@@ -182,11 +182,21 @@ class MigrationState {
 	 * @return bool
 	 */
 	private function is_lock_fresh( ?array $lock ): bool {
-		if ( null === $lock || ! isset( $lock['acquired_at'] ) ) {
+		if ( null === $lock ) {
 			return false;
 		}
 
-		return ( time() - (int) $lock['acquired_at'] ) < self::STALE_LOCK_SECONDS;
+		$acquired_at = $lock['acquired_at'] ?? null;
+
+		// A timestamp in the future makes the age below negative, which is always under the
+		// stale threshold: the lock would then read as fresh forever and refuse every run,
+		// with no way out but editing the option by hand. Clock skew on a restored or moved
+		// site is enough to produce one, so treat it as stale and let the next run reclaim it.
+		if ( ! is_int( $acquired_at ) || $acquired_at > time() ) {
+			return false;
+		}
+
+		return ( time() - $acquired_at ) < self::STALE_LOCK_SECONDS;
 	}
 
 	/**
