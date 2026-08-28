@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Migrators;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
@@ -16,8 +15,8 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for the product meta section: the polarity inversion between the legacy
- * "disabled" flag and Core's "enable signups" flag, and the per-product fingerprint that
- * stands in for a marker here.
+ * "disabled" flag and Core's "enable signups" flag, and the write-once-never-revisit
+ * candidate query.
  */
 class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 
@@ -29,20 +28,12 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	private const LEGACY_META_KEY = '_wc_bis_disabled';
 
 	/**
-	 * Run state, used by the migrator for fingerprint hashing.
-	 *
-	 * @var MigrationState
-	 */
-	private MigrationState $state;
-
-	/**
 	 * Set up a clean run state.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		delete_option( 'wc_bis_migration_state' );
-		$this->state = new MigrationState();
 	}
 
 	/**
@@ -74,7 +65,6 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$this->migrate();
 
 		$this->assertSame( '', get_post_meta( $product->get_id(), Config::get_product_signups_meta_key(), true ) );
-		$this->assertSame( '', get_post_meta( $product->get_id(), '_wc_bis_migration_signups_written', true ) );
 	}
 
 	/**
@@ -122,44 +112,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a merchant edit after migration should be reported and left alone.
-	 */
-	public function test_merchant_edit_is_skipped_and_reported(): void {
-		$product_id = $this->create_product_with_legacy_flag( 'yes' );
-
-		$this->migrate();
-
-		update_post_meta( $product_id, Config::get_product_signups_meta_key(), 'yes' );
-
-		$migrator = $this->build_migrator();
-		$batch    = $migrator->get_batch( 0, 10 );
-
-		$this->assertSame( array( $product_id ), $batch, 'A merchant edit brings the product back.' );
-
-		$outcomes = $migrator->migrate_batch( $batch, new DbWriter() );
-
-		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 );
-		$this->assertSame( 'yes', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
-		$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 10 ), 'The skip is recorded, so it reports once.' );
-	}
-
-	/**
-	 * @testdox force should overwrite a merchant edit.
-	 */
-	public function test_force_overwrites_a_merchant_edit(): void {
-		$product_id = $this->create_product_with_legacy_flag( 'yes' );
-
-		$this->migrate();
-		update_post_meta( $product_id, Config::get_product_signups_meta_key(), 'yes' );
-		$this->migrate();
-
-		$this->migrate( true );
-
-		$this->assertSame( 'no', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
-	}
-
-	/**
-	 * @testdox a product that cannot be loaded should not be retried, --force included.
+	 * @testdox a product that cannot be loaded should not be retried.
 	 */
 	public function test_a_product_that_cannot_load_is_never_retried(): void {
 		$product_id = $this->create_product_with_legacy_flag( 'yes' );
@@ -174,9 +127,9 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 
 		try {
 			$this->migrate();
-			$this->migrate( true );
+			$this->migrate();
 
-			$this->assertSame( array(), $this->build_migrator( true )->get_batch( 0, 10 ), '--force must not re-admit a row it can never settle.' );
+			$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 10 ), 'A row that can never settle must not be re-admitted.' );
 		} finally {
 			remove_filter( 'woocommerce_product_class', $as_variation, 10 );
 		}
@@ -199,7 +152,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$this->migrate();
 		remove_action( 'woocommerce_update_product', $counter );
 
-		$this->assertSame( 1, $saves, 'The value and its fingerprint belong in one save.' );
+		$this->assertSame( 1, $saves, 'The migrated value is written in one save.' );
 	}
 
 	/**
@@ -212,17 +165,15 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$migrator->migrate_batch( $migrator->get_batch( 0, 10 ), new NullWriter() );
 
 		$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
-		$this->assertSame( '', get_post_meta( $product_id, '_wc_bis_migration_signups_written', true ) );
 	}
 
 	/**
 	 * Run the product meta section to completion.
 	 *
-	 * @param bool $force Whether to overwrite merchant edits.
 	 * @return void
 	 */
-	private function migrate( bool $force = false ): void {
-		$migrator = $this->build_migrator( $force );
+	private function migrate(): void {
+		$migrator = $this->build_migrator();
 		$cursor   = 0;
 		$batches  = 0;
 
@@ -242,13 +193,12 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a migrator sharing this test's state.
+	 * Build a migrator.
 	 *
-	 * @param bool $force Whether to overwrite merchant edits.
 	 * @return ProductMetaMigrator
 	 */
-	private function build_migrator( bool $force = false ): ProductMetaMigrator {
-		return new ProductMetaMigrator( new Reporter(), $this->state, $force );
+	private function build_migrator(): ProductMetaMigrator {
+		return new ProductMetaMigrator( new Reporter() );
 	}
 
 	/**

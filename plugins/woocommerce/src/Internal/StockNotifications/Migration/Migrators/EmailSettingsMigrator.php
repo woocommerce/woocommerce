@@ -23,7 +23,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Each settings option is a `WC_Email::$settings` array. Migration merges per sub-key
  * (`subject`, `heading`, ...) rather than replacing the array, so migrating one field
- * never clobbers a hand-edited sibling.
+ * never clobbers a hand-edited sibling. Each sub-key is written once and never revisited,
+ * even if a merchant later edits it.
  */
 class EmailSettingsMigrator implements MigratorInterface {
 
@@ -81,7 +82,7 @@ class EmailSettingsMigrator implements MigratorInterface {
 	private const OUTCOME_UNKNOWN_PLACEHOLDER = 'unknown_placeholder';
 
 	/**
-	 * Migration run state, used for fingerprint bookkeeping.
+	 * Migration run state, used to track which sub-keys have already been migrated.
 	 *
 	 * @var MigrationState
 	 */
@@ -93,13 +94,6 @@ class EmailSettingsMigrator implements MigratorInterface {
 	 * @var Reporter
 	 */
 	private Reporter $reporter;
-
-	/**
-	 * Whether to overwrite a sub-key the merchant has already edited.
-	 *
-	 * @var bool
-	 */
-	private bool $force;
 
 	/**
 	 * Identifiers already visited by this instance, so they leave the outstanding list
@@ -115,12 +109,10 @@ class EmailSettingsMigrator implements MigratorInterface {
 	 *
 	 * @param MigrationState $state    Migration run state.
 	 * @param Reporter       $reporter Outcome reporter.
-	 * @param bool           $force    Whether to overwrite merchant-edited sub-keys. CLI only.
 	 */
-	public function __construct( MigrationState $state, Reporter $reporter, bool $force = false ) {
+	public function __construct( MigrationState $state, Reporter $reporter ) {
 		$this->state    = $state;
 		$this->reporter = $reporter;
-		$this->force    = $force;
 	}
 
 	/**
@@ -141,7 +133,7 @@ class EmailSettingsMigrator implements MigratorInterface {
 		$count = 0;
 
 		foreach ( $this->all_ids() as $id ) {
-			if ( MigrationState::OPTION_ACTION_WRITE === $this->decide( $id ) ) {
+			if ( ! $this->is_migrated( $id ) ) {
 				++$count;
 			}
 		}
@@ -152,10 +144,8 @@ class EmailSettingsMigrator implements MigratorInterface {
 	/**
 	 * Fetch the outstanding `core_option::sub_key` identifiers, capped at $size.
 	 *
-	 * Includes sub-keys that need a write and sub-keys the merchant has edited, since the
-	 * latter still need to be visited so migrate_batch() can report them. This section is
-	 * small and finite, so $cursor is not used as a keyset: the same outstanding list is
-	 * returned every call.
+	 * This section is small and finite, so $cursor is not used as a keyset: the same
+	 * outstanding list is returned every call.
 	 *
 	 * @param int $cursor Unused; this section never needs more than one pass.
 	 * @param int $size   Maximum number of identifiers to return.
@@ -169,7 +159,7 @@ class EmailSettingsMigrator implements MigratorInterface {
 				continue;
 			}
 
-			if ( MigrationState::OPTION_ACTION_SKIP_UNCHANGED !== $this->decide( $id ) ) {
+			if ( ! $this->is_migrated( $id ) ) {
 				$outstanding[] = $id;
 			}
 		}
@@ -202,34 +192,9 @@ class EmailSettingsMigrator implements MigratorInterface {
 			++$row_id;
 			list( $legacy_key, $core_key, $sub_key ) = $parsed;
 
-			$action = $this->decide( $id );
-
 			$this->handled[ $id ] = true;
 
-			if ( MigrationState::OPTION_ACTION_SKIP_USER_MODIFIED === $action ) {
-				$this->reporter->record( self::SLUG, Reporter::OUTCOME_SKIPPED_USER_MODIFIED, $row_id );
-				$counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] = ( $counts[ Reporter::OUTCOME_SKIPPED_USER_MODIFIED ] ?? 0 ) + 1;
-
-				if ( ! $writer->is_dry_run() ) {
-					// Record what the merchant's value is now, so it reports once rather than
-					// staying outstanding on every later run.
-					$core_settings       = (array) get_option( $core_key, array() );
-					$current_target_hash = $this->state->fingerprint_value( $core_settings[ $sub_key ] ?? '' );
-					$source_settings     = (array) get_option( $legacy_key, array() );
-					$source_hash         = $this->state->fingerprint_value( $source_settings[ $sub_key ] ?? '' );
-
-					$this->state->record_option_fingerprint(
-						$this->fingerprint_key( $core_key, $sub_key ),
-						$source_hash,
-						$current_target_hash,
-						true
-					);
-				}
-
-				continue;
-			}
-
-			if ( MigrationState::OPTION_ACTION_WRITE !== $action ) {
+			if ( $this->is_migrated( $id ) ) {
 				continue;
 			}
 
@@ -245,9 +210,8 @@ class EmailSettingsMigrator implements MigratorInterface {
 			}
 
 			$writes_by_option[ $core_key ][ $sub_key ] = array(
-				'value'       => $value,
-				'source_hash' => $this->state->fingerprint_value( $value ),
-				'row_id'      => $row_id,
+				'value'  => $value,
+				'row_id' => $row_id,
 			);
 
 			$counts[ Reporter::OUTCOME_MIGRATED ] = ( $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 ) + 1;
@@ -266,20 +230,17 @@ class EmailSettingsMigrator implements MigratorInterface {
 				continue;
 			}
 
-			// Fingerprint the value as it reads back, not as it was handed over: a write
-			// that did not land would otherwise be recorded as if it had, and the next run
-			// would report the untouched value as a merchant edit. `write_option()`'s own
-			// return is no use here - `update_option()` returns false for a value that was
-			// already what it is being set to.
+			// Confirm the value as it reads back, not as it was handed over: a write that
+			// did not land would otherwise be marked migrated, and the legacy value would
+			// never be retried. `write_option()`'s own return is no use here -
+			// `update_option()` returns false for a value that was already what it is
+			// being set to.
 			$stored = (array) get_option( $core_key, array() );
 
 			foreach ( $sub_key_writes as $sub_key => $write ) {
-				$stored_hash = $this->state->fingerprint_value( $stored[ $sub_key ] ?? '' );
-
-				if ( $stored_hash !== $this->state->fingerprint_value( $write['value'] ) ) {
-					// The value is not there, so nothing is recorded: the next run finds no
-					// fingerprint and writes again, rather than settling on a value that
-					// never landed or reporting it as a merchant edit.
+				if ( ( $stored[ $sub_key ] ?? '' ) !== $write['value'] ) {
+					// The value is not there, so nothing is marked migrated: the next run
+					// finds it still outstanding and writes again.
 					$this->reporter->record( self::SLUG, Reporter::OUTCOME_FAILED, $write['row_id'] );
 					$counts[ Reporter::OUTCOME_FAILED ]   = ( $counts[ Reporter::OUTCOME_FAILED ] ?? 0 ) + 1;
 					$counts[ Reporter::OUTCOME_MIGRATED ] = max( 0, ( $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 ) - 1 );
@@ -287,11 +248,7 @@ class EmailSettingsMigrator implements MigratorInterface {
 					continue;
 				}
 
-				$this->state->record_option_fingerprint(
-					$this->fingerprint_key( $core_key, $sub_key ),
-					$write['source_hash'],
-					$stored_hash
-				);
+				$this->state->mark_option_migrated( $this->marker_key( $core_key, $sub_key ) );
 			}
 		}
 
@@ -332,45 +289,32 @@ class EmailSettingsMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * The fingerprint key used to track one sub-key of one Core option independently.
+	 * Whether the sub-key identified by $id has already been migrated.
+	 *
+	 * @param string $id Identifier produced by all_ids().
+	 * @return bool
+	 */
+	private function is_migrated( string $id ): bool {
+		$parsed = $this->parse_id( $id );
+
+		if ( null === $parsed ) {
+			return true;
+		}
+
+		list( , $core_key, $sub_key ) = $parsed;
+
+		return $this->state->is_option_migrated( $this->marker_key( $core_key, $sub_key ) );
+	}
+
+	/**
+	 * The state marker key used to track one sub-key of one Core option independently.
 	 *
 	 * @param string $core_key Core option name.
 	 * @param string $sub_key  Settings sub-key.
 	 * @return string
 	 */
-	private function fingerprint_key( string $core_key, string $sub_key ): string {
+	private function marker_key( string $core_key, string $sub_key ): string {
 		return $core_key . self::ID_DELIMITER . $sub_key;
-	}
-
-	/**
-	 * Decide what to do with one `core_option::sub_key` identifier.
-	 *
-	 * @param string $id Identifier produced by all_ids().
-	 * @return string One of the MigrationState::OPTION_ACTION_* constants.
-	 */
-	private function decide( string $id ): string {
-		$parsed = $this->parse_id( $id );
-
-		if ( null === $parsed ) {
-			return MigrationState::OPTION_ACTION_SKIP_UNCHANGED;
-		}
-
-		list( $legacy_key, $core_key, $sub_key ) = $parsed;
-
-		$legacy_settings = (array) get_option( $legacy_key, array() );
-		$source_value    = $legacy_settings[ $sub_key ] ?? '';
-		$source_hash     = $this->state->fingerprint_value( $source_value );
-
-		$core_settings        = (array) get_option( $core_key, array() );
-		$current_target_value = $core_settings[ $sub_key ] ?? '';
-		$current_target_hash  = $this->state->fingerprint_value( $current_target_value );
-
-		return $this->state->decide_option_action(
-			$this->fingerprint_key( $core_key, $sub_key ),
-			$source_hash,
-			$current_target_hash,
-			$this->force
-		);
 	}
 
 	/**

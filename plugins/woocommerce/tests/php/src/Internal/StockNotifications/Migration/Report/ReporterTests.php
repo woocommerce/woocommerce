@@ -125,7 +125,7 @@ class ReporterTests extends WC_Unit_Test_Case {
 		$reporter = new Reporter();
 
 		$reporter->record( 'notifications', Reporter::OUTCOME_MIGRATED, 1 );
-		$reporter->record( 'notifications', Reporter::OUTCOME_SKIPPED_USER_MODIFIED, 2 );
+		$reporter->record( 'notifications', Reporter::OUTCOME_PRODUCT_MISSING, 2 );
 
 		$this->assertFalse( $reporter->has_errors(), 'A skip is a warning, not an error.' );
 
@@ -154,7 +154,7 @@ class ReporterTests extends WC_Unit_Test_Case {
 
 		$reporter->record( 'notifications', Reporter::OUTCOME_MIGRATED, 1 );
 		$reporter->record( 'notifications', Reporter::OUTCOME_MIGRATED, 2 );
-		$reporter->record( 'settings', Reporter::OUTCOME_SKIPPED_USER_MODIFIED, 1 );
+		$reporter->record( 'product-meta', Reporter::OUTCOME_PRODUCT_MISSING, 1 );
 
 		$table = $reporter->get_table();
 
@@ -168,8 +168,8 @@ class ReporterTests extends WC_Unit_Test_Case {
 		);
 		$this->assertContains(
 			array(
-				'section' => 'settings',
-				'outcome' => Reporter::OUTCOME_SKIPPED_USER_MODIFIED,
+				'section' => 'product-meta',
+				'outcome' => Reporter::OUTCOME_PRODUCT_MISSING,
 				'count'   => 1,
 			),
 			$table

@@ -55,13 +55,6 @@ class Reporter {
 	// LOSS_UNVERIFIED_EXCLUDED, LOSS_EMAIL_TOO_LONG and LOSS_INVALID_EMAIL known losses.
 
 	/**
-	 * Outcome code for an option or row left untouched because the merchant had already edited it.
-	 *
-	 * @var string
-	 */
-	public const OUTCOME_SKIPPED_USER_MODIFIED = 'skipped_user_modified';
-
-	/**
 	 * Cached known-losses key: unverified legacy rows excluded from the migration entirely.
 	 *
 	 * @var string
