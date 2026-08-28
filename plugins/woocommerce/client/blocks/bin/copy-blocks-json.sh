@@ -14,43 +14,106 @@ while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
     cd ..
 done
 
-# Set target directory
-TARGET_DIR="plugins/woocommerce/assets/client/blocks"
+node <<'NODE'
+const fs = require( 'node:fs' );
+const path = require( 'node:path' );
 
-# Create target directory if it doesn't exist
-mkdir -p "$TARGET_DIR"
+const sourceDirectory = path.resolve( 'plugins/woocommerce/client/blocks/assets/js' );
+const targetDirectory = path.resolve( 'plugins/woocommerce/assets/client/blocks' );
+const genericBlocks = new Set( [
+	'accordion-group',
+	'accordion-header',
+	'accordion-item',
+	'accordion-panel',
+] );
 
-# Define generic blocks as a space-separated string (keep in sync with webpack-entries.js)
-generic_blocks="accordion-group accordion-header accordion-item accordion-panel"
+function findFiles( directory, fileName ) {
+	return fs
+		.readdirSync( directory, { withFileTypes: true } )
+		.flatMap( ( entry ) => {
+			const entryPath = path.join( directory, entry.name );
 
-# Find all block.json files
-find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read file; do
-    # Read the block name from the JSON file
-    block_name=$(cat "$file" | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | cut -d'/' -f2)
+			if ( entry.isDirectory() ) {
+				return findFiles( entryPath, fileName );
+			}
 
-    # Function to check if a block is in the generic_blocks string
-    is_generic_block=false
-    for gb in $generic_blocks; do
-        if [ "$block_name" = "$gb" ]; then
-            is_generic_block=true
-            break
-        fi
-    done
+			return entry.isFile() && entry.name === fileName
+				? [ entryPath ]
+				: [];
+		} );
+}
 
-    # Check if it's a parent block by looking for "parent" field, but treat as regular if generic
-    if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
-        # It's an inner block
-        target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    else
-        # It's a regular block
-        target_path="$TARGET_DIR/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    fi
-done
+function removeEmptyDirectories( directory, rootDirectory ) {
+	if ( ! fs.existsSync( directory ) ) {
+		return;
+	}
+
+	for ( const entry of fs.readdirSync( directory, {
+		withFileTypes: true,
+	} ) ) {
+		if ( entry.isDirectory() ) {
+			removeEmptyDirectories(
+				path.join( directory, entry.name ),
+				rootDirectory
+			);
+		}
+	}
+
+	if (
+		directory !== rootDirectory &&
+		fs.readdirSync( directory ).length === 0
+	) {
+		fs.rmdirSync( directory );
+	}
+}
+
+if ( ! fs.existsSync( sourceDirectory ) ) {
+	throw new Error(
+		`Block metadata source directory does not exist: ${ sourceDirectory }`
+	);
+}
+
+const sourceManifests = findFiles( sourceDirectory, 'block.json' );
+if ( sourceManifests.length === 0 ) {
+	throw new Error(
+		`No block metadata manifests found in ${ sourceDirectory }`
+	);
+}
+
+fs.mkdirSync( targetDirectory, { recursive: true } );
+
+for ( const targetManifest of findFiles( targetDirectory, 'block.json' ) ) {
+	fs.unlinkSync( targetManifest );
+}
+
+const metadataCollection = path.join( targetDirectory, 'blocks-json.php' );
+if ( fs.existsSync( metadataCollection ) ) {
+	fs.unlinkSync( metadataCollection );
+}
+
+removeEmptyDirectories( targetDirectory, targetDirectory );
+
+for ( const sourceManifest of sourceManifests ) {
+	const metadata = JSON.parse(
+		fs.readFileSync( sourceManifest, 'utf8' )
+	);
+
+	if ( typeof metadata.name !== 'string' ) {
+		throw new Error( `Missing block name in ${ sourceManifest }` );
+	}
+
+	const blockName = metadata.name.split( '/' )[ 1 ];
+	if ( ! blockName ) {
+		throw new Error( `Invalid block name in ${ sourceManifest }` );
+	}
+
+	const relativeTarget =
+		metadata.parent && ! genericBlocks.has( blockName )
+			? path.join( 'inner-blocks', blockName, 'block.json' )
+			: path.join( blockName, 'block.json' );
+	const targetManifest = path.join( targetDirectory, relativeTarget );
+
+	fs.mkdirSync( path.dirname( targetManifest ), { recursive: true } );
+	fs.copyFileSync( sourceManifest, targetManifest );
+}
+NODE
