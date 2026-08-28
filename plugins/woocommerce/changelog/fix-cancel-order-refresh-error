@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a false order cancellation error after shoppers refresh the return page.
