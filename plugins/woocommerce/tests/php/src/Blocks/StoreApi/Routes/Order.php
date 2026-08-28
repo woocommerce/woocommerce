@@ -141,8 +141,10 @@ class Order extends ControllerTestCase {
 	 *
 	 * The order item is given metadata on purpose: every other fixture leaves item_data empty, and
 	 * an empty item_data exercises none of the nested schema.
+	 *
+	 * @testdox Order response matches the published schema.
 	 */
-	public function test_response_matches_schema() {
+	public function test_response_matches_schema(): void {
 		$order = $this->create_guest_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
@@ -181,7 +183,7 @@ class Order extends ControllerTestCase {
 		$item_data = $data['items'][0]['item_data'];
 		$this->assertNotEmpty( $item_data, 'The fixture must produce item metadata, or the nested schema is never exercised.' );
 
-		// ValidateSchema does not recurse into list items, so pin the entry shape here.
+		// ValidateSchema only recurses into the first entry, so pin the exact public shape here.
 		$entry = $item_data[0];
 		$this->assertEqualSets( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $entry ) );
 		$this->assertSame( 'Gift message', $entry['key'] );
@@ -191,8 +193,10 @@ class Order extends ControllerTestCase {
 	/**
 	 * item_data must serialize as a JSON list, matching the cart endpoint, with the meta row ID
 	 * carried in `id` rather than used as the key.
+	 *
+	 * @testdox Order item_data serializes as a JSON list carrying the meta row ID.
 	 */
-	public function test_item_data_serializes_as_a_json_list_carrying_the_meta_id() {
+	public function test_item_data_serializes_as_a_json_list_carrying_the_meta_id(): void {
 		$order = $this->create_guest_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
@@ -210,6 +214,40 @@ class Order extends ControllerTestCase {
 		$this->assertSame( array( 0 ), array_keys( $item_data ), 'item_data must be a list, not keyed by meta ID.' );
 		$this->assertStringStartsWith( '[', wp_json_encode( $item_data ), 'item_data must serialize as a JSON list, not an object.' );
 		$this->assertSame( $meta_id, $item_data[0]['id'], 'The meta row ID must survive as `id`.' );
+	}
+
+	/**
+	 * Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields, and the
+	 * endpoint has always sent them. Reshaping the container must not drop them.
+	 *
+	 * @testdox Order item_data keeps fields added by extensions.
+	 */
+	public function test_item_data_keeps_fields_added_by_extensions(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				foreach ( $formatted_meta as $meta ) {
+					$meta->custom_field = 'from-extension';
+				}
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$entry = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'][0];
+
+		$this->assertSame( 'from-extension', $entry['custom_field'] ?? null, 'Extension-added fields must survive.' );
+		$this->assertSame( current( $item->get_meta_data() )->id, $entry['id'], 'The row ID must win over anything a callback sets.' );
 	}
 
 	/**

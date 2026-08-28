@@ -38,6 +38,8 @@ class OrderItemSchema extends ItemSchema {
 	 * here so the published schema describes what this endpoint sends.
 	 *
 	 * @return array
+	 *
+	 * @since 11.2.0
 	 */
 	public function get_properties() {
 		$properties = parent::get_properties();
@@ -96,17 +98,14 @@ class OrderItemSchema extends ItemSchema {
 	 * @param \WC_Order_Item $order_item Order item instance.
 	 * @return array
 	 */
-	protected function get_item_data( $order_item ) {
+	private function get_item_data( $order_item ) {
 		$item_data = [];
 
 		foreach ( $order_item->get_all_formatted_meta_data() as $meta_id => $meta ) {
-			$item_data[] = [
-				'id'            => $meta_id,
-				'key'           => $meta->key,
-				'value'         => $meta->value,
-				'display_key'   => $meta->display_key,
-				'display_value' => $meta->display_value,
-			];
+			// Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields,
+			// which the endpoint has always passed through. Keep them, but let the row ID win so `id`
+			// always identifies the meta row.
+			$item_data[] = [ 'id' => $meta_id ] + (array) $meta;
 		}
 
 		return $item_data;
