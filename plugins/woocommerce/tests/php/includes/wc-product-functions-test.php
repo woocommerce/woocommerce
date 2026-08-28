@@ -3005,6 +3005,78 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Ids a replaced data store returns in any form wc_get_product() accepts still settle.
+	 */
+	public function test_wc_scheduled_sales_settles_ids_in_every_form_wc_get_product_accepts(): void {
+		// The loop resolves each row rather than screening it, because wc_get_product()
+		// accepts more than a canonical decimal string and these all named a real product
+		// before the batching went in. A row dropped here settles nothing, says nothing, and
+		// is picked up and dropped again on every later run.
+		$ids = array();
+
+		for ( $i = 0; $i < 6; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+			$ids[] = $product->get_id();
+		}
+
+		// Zero padded, leading space, signed, decimal string, float, and a WP_Post, which
+		// get_product_id() reads through ->ID.
+		$rows = array(
+			'0' . $ids[0],
+			' ' . $ids[1],
+			'+' . $ids[2],
+			$ids[3] . '.0',
+			(float) $ids[4],
+			get_post( $ids[5] ),
+		);
+
+		$store = new class( $rows ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Rows to report from the ending-sales query.
+			 *
+			 * @var array
+			 */
+			private $rows;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $rows Rows to report.
+			 */
+			public function __construct( $rows ) {
+				$this->rows = $rows;
+			}
+
+			/**
+			 * Report the rows in the forms a replaced store might return them.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				return $this->rows;
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $index => $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id}, supplied as " . wp_json_encode( $rows[ $index ] ) . ', should have settled.'
+			);
+		}
+	}
+
+	/**
 	 * @testdox A data store returning malformed IDs does not fatal the run or evict unrelated posts.
 	 */
 	public function test_wc_scheduled_sales_survives_malformed_ids_from_a_replaced_data_store(): void {
