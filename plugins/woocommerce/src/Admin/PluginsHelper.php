@@ -220,16 +220,36 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Error codes whose WP_Error data is machine output rather than a readable detail.
+	 *
+	 * `activate_plugin()` puts the plugin's whole captured output buffer in the error data,
+	 * which is never something a merchant can act on.
+	 */
+	private const OPAQUE_ERROR_DATA_CODES = array( 'unexpected_output' );
+
+	/**
+	 * Longest reason we pass on.
+	 *
+	 * Reasons reach a notice, the persisted install log option and a Tracks property, so an
+	 * upgrader payload of unknown size must never travel untrimmed.
+	 */
+	private const MAX_ERROR_REASON_LENGTH = 300;
+
+	/**
 	 * Build a merchant-readable reason from the first WP_Error among the given candidates.
 	 *
 	 * WordPress's upgrader reports the real failure (unmet PHP/WP version, filesystem, download)
 	 * as a WP_Error whose message is a short sentence and whose data is often the detail sentence.
 	 * Non-error candidates (false, null, true) are skipped.
 	 *
+	 * The data is only appended when it reads as a detail: codes listed in
+	 * OPAQUE_ERROR_DATA_CODES carry raw plugin output instead, and the result is capped at
+	 * MAX_ERROR_REASON_LENGTH because callers persist and transmit it.
+	 *
 	 * @since 11.2.0
 	 *
 	 * @param mixed ...$candidates Values that may be WP_Error instances, in order of preference.
-	 * @return string The reason, HTML-stripped and trimmed, or an empty string when none is available.
+	 * @return string The reason, HTML-stripped, trimmed and length-capped, or an empty string when none is available.
 	 */
 	public static function get_error_reason( ...$candidates ): string {
 		foreach ( $candidates as $candidate ) {
@@ -239,11 +259,17 @@ class PluginsHelper {
 
 			$parts = array( $candidate->get_error_message() );
 			$data  = $candidate->get_error_data();
-			if ( is_string( $data ) ) {
+			if ( is_string( $data ) && ! in_array( $candidate->get_error_code(), self::OPAQUE_ERROR_DATA_CODES, true ) ) {
 				$parts[] = $data;
 			}
 
-			return trim( wp_strip_all_tags( implode( ' ', array_map( 'trim', $parts ) ) ) );
+			$reason = trim( wp_strip_all_tags( implode( ' ', array_map( 'trim', $parts ) ) ) );
+
+			if ( mb_strlen( $reason ) > self::MAX_ERROR_REASON_LENGTH ) {
+				$reason = trim( mb_substr( $reason, 0, self::MAX_ERROR_REASON_LENGTH ) ) . "\u{2026}";
+			}
+
+			return $reason;
 		}
 
 		return '';

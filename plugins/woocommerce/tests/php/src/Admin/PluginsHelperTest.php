@@ -82,6 +82,36 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not append raw plugin output captured by activate_plugin().
+	 */
+	public function test_get_error_reason_omits_opaque_error_data(): void {
+		$error = new WP_Error(
+			'unexpected_output',
+			'The plugin generated unexpected output.',
+			"Warning: include(): Failed opening 'x.php' in /var/www/plugin.php on line 12"
+		);
+
+		$this->assertSame(
+			'The plugin generated unexpected output.',
+			PluginsHelper::get_error_reason( $error ),
+			'A raw output buffer is not a reason a merchant can act on and must not be surfaced.'
+		);
+	}
+
+	/**
+	 * @testdox Should cap a long reason so it stays safe to persist and transmit.
+	 */
+	public function test_get_error_reason_caps_long_reason(): void {
+		$error = new WP_Error( 'fs_error', 'Could not create directory.', str_repeat( 'a', 1000 ) );
+
+		$reason = PluginsHelper::get_error_reason( $error );
+
+		$this->assertSame( 301, mb_strlen( $reason ), 'The reason should be capped at 300 characters plus an ellipsis.' );
+		$this->assertStringEndsWith( "\u{2026}", $reason );
+		$this->assertStringStartsWith( 'Could not create directory.', $reason );
+	}
+
+	/**
 	 * @testdox Should report a not-installed plugin without repeating its slug.
 	 */
 	public function test_activate_plugins_error_does_not_contain_slug(): void {
