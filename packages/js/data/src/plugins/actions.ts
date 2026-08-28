@@ -199,22 +199,40 @@ function* handlePluginAPIError(
 		);
 	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
-		const failures = Object.entries( error );
-		failedPlugins = Object.keys( error ) as Partial< PluginNames >[];
+		// Read them defensively: this is a parsed HTTP response, and a plugin filtering it
+		// can put anything here. Anything that is not a message is dropped.
+		const failures = Object.entries( error )
+			.map(
+				( [ slug, value ] ) =>
+					[
+						slug,
+						( Array.isArray( value ) ? value : [ value ] ).filter(
+							( message ): message is string =>
+								'string' === typeof message && '' !== message
+						),
+					] as const
+			)
+			.filter( ( [ , messages ] ) => messages.length > 0 );
 
-		// The reasons no longer name their own plugin, so attribute them by slug when more
-		// than one failed. A lone failure is already named by the surrounding sentence.
-		rawErrorMessage =
-			failures.length > 1
-				? failures
-						.map(
-							( [ slug, messages ] ) =>
-								`${ slug }: ${ messages.join( ' ' ) }`
-						)
-						.join( ' \n' )
-				: failures
-						.flatMap( ( [ , messages ] ) => messages )
-						.join( ' ' );
+		if ( failures.length ) {
+			failedPlugins = failures.map(
+				( [ slug ] ) => slug
+			) as Partial< PluginNames >[];
+
+			// The reasons no longer name their own plugin, so attribute them by slug when
+			// more than one failed. A lone failure is already named by the sentence around it.
+			rawErrorMessage =
+				failures.length > 1
+					? failures
+							.map(
+								( [ slug, messages ] ) =>
+									`${ slug }: ${ messages.join( ' ' ) }`
+							)
+							.join( ' \n' )
+					: failures[ 0 ][ 1 ].join( ' ' );
+		} else {
+			rawErrorMessage = JSON.stringify( error );
+		}
 	} else {
 		// Other error such as API connection errors.
 		rawErrorMessage =

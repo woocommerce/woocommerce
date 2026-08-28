@@ -275,6 +275,44 @@ describe( 'installPlugins error message', () => {
 		expect( error?.message ).toBe( 'Could not install b. Reason B.' );
 	} );
 
+	it( 'tolerates message lists the endpoint returned as bare strings', () => {
+		// The old formatting stringified the whole object, so a non-array value never threw.
+		const error = runUntilThrow( installPlugins( [ 'a', 'b' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: 'Reason A.', b: 'Reason B.' } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe(
+			'Could not install the following plugins: a, b. a: Reason A. \nb: Reason B.'
+		);
+	} );
+
+	it( 'drops values that are not messages and keeps the ones that are', () => {
+		const error = runUntilThrow( installPlugins( [ 'a', 'b' ] ), {
+			data: { installed: [], results: {} },
+			errors: {
+				errors: { a: { inner: 'not a message' }, b: [ 'Reason B.' ] },
+			},
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe( 'Could not install b. Reason B.' );
+	} );
+
+	it( 'falls back to the raw payload when nothing readable remains', () => {
+		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
+			data: { installed: [], results: {} },
+			errors: { errors: { a: [ null ] } },
+			success: false,
+			message: '',
+		} );
+
+		expect( error?.message ).toBe( 'Could not install a. {"a":[null]}' );
+	} );
+
 	it( 'reports the step that failed on the error', () => {
 		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
 			data: { installed: [], results: {} },
