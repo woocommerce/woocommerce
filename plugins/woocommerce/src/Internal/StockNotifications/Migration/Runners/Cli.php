@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use WP_CLI;
 
 defined( 'ABSPATH' ) || exit;
@@ -192,11 +193,21 @@ class Cli {
 	/**
 	 * Register the `wp wc bis-migrate` command and its subcommands.
 	 *
-	 * Registration is unconditional under WP_CLI, so `--force-discover` stays reachable on a
-	 * store whose `wc_bis_db_version` option was deleted by hand.
+	 * Runs on `after_wp_load`, which fires for every `wp` invocation that boots WordPress, so
+	 * on a store with nothing to migrate this costs one autoloaded option read and stops.
+	 *
+	 * Gated on the Customer stock notifications feature being on: with it off there is nothing
+	 * to migrate into and every subcommand would refuse anyway. Deliberately *not* gated on
+	 * `wc_bis_db_version`, so `--force-discover` stays reachable on a store whose option was
+	 * deleted by hand. The option is read directly rather than through
+	 * `FeaturesUtil::feature_is_enabled()`, which builds translated feature definitions.
 	 */
 	public function register(): void {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+			return;
+		}
+
+		if ( 'yes' !== get_option( StockNotifications::ENABLE_OPTION_NAME, 'no' ) ) {
 			return;
 		}
 
