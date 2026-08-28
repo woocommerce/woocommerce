@@ -39,7 +39,7 @@ class Downloads extends AbstractOrderConfirmationBlock {
 			<table cellspacing="0" class="wc-block-order-confirmation-downloads__table ' . esc_attr( $classes_and_styles['classes'] ) . '" style="' . esc_attr( $classes_and_styles['styles'] ) . '">
 				<thead>
 					<tr>
-						' . $this->render_order_downloads_column_headers( $order ) . '
+						' . $this->render_order_downloads_column_headers() . '
 					</td>
 				</thead>
 				<tbody>

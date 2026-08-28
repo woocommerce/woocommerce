@@ -909,7 +909,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] ) && empty( $field['hidden'] );
+				$required    = ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
