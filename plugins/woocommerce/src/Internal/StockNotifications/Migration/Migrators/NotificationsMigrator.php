@@ -42,10 +42,8 @@ class NotificationsMigrator implements MigratorInterface {
 	private const SLUG = 'notifications';
 
 	/**
-	 * Legacy meta keys read for a batch in one query, and the whole meta bag any
-	 * re-derivation of a row's expected state is allowed to see. `Runners\Cli`'s verify
-	 * reads it too: a mapper handed a wider bag than the write path had would derive a
-	 * different status and report a row as drifted when nothing drifted.
+	 * Legacy meta keys read for a batch in one query: everything the migration carries into
+	 * Core meta, plus the two secrets the unsubscribe token is computed from.
 	 *
 	 * @var string[]
 	 */

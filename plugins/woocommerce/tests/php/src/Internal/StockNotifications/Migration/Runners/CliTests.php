@@ -450,19 +450,77 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox verify should report a status a merchant changed after migrating as a mismatch.
+	 * @testdox verify should report a status no shopper action could have produced as a mismatch.
 	 */
 	public function test_verify_reports_a_status_mismatch(): void {
 		$this->seed_notifications( 1 );
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
-		$this->set_core_status( LegacyStore::get_core_rows()[0]['id'], NotificationStatus::CANCELLED );
+		// Nothing in Core moves a live row back to pending, so this is a real disagreement
+		// rather than the row moving on.
+		$this->set_core_status( LegacyStore::get_core_rows()[0]['id'], NotificationStatus::PENDING );
 
 		MockWPCLI::reset();
 		$this->cli()->verify( array(), array() );
 
 		$this->assertStringContainsString( 'status mismatches', MockWPCLI::$last_error_message );
 		$this->assertSame( '', MockWPCLI::$last_success_message );
+	}
+
+	/**
+	 * @testdox verify should report a row the shopper moved on as drift, not as a mismatch.
+	 * @dataProvider provider_forward_transitions
+	 *
+	 * @param string $status Status the shopper's own action would leave behind.
+	 */
+	public function test_verify_reports_a_forward_transition_as_drift( string $status ): void {
+		$this->seed_notifications( 1 );
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->set_core_status( LegacyStore::get_core_rows()[0]['id'], $status );
+
+		MockWPCLI::reset();
+		$this->cli()->verify( array(), array() );
+
+		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
+		$this->assertStringContainsString( 'have moved on since the migration ran', implode( "\n", MockWPCLI::$all_log_messages ) );
+	}
+
+	/**
+	 * Statuses reachable from `active`, the status a seeded row migrates as.
+	 *
+	 * @return array
+	 */
+	public function provider_forward_transitions(): array {
+		return array(
+			'cancelled after the run' => array( NotificationStatus::CANCELLED ),
+			'notified after the run'  => array( NotificationStatus::SENT ),
+		);
+	}
+
+	/**
+	 * @testdox verify should treat a pending row verified through a legacy link as drift.
+	 */
+	public function test_verify_treats_a_verified_pending_row_as_drift(): void {
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$row = LegacyStore::get_core_rows()[0];
+
+		$this->assertSame( NotificationStatus::PENDING, $row['status'] );
+
+		$this->set_core_status( $row['id'], NotificationStatus::ACTIVE );
+
+		MockWPCLI::reset();
+		$this->cli()->verify( array(), array() );
+
+		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
 	}
 
 	/**
@@ -502,14 +560,14 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a legacy flag the write path never read should not make verify drift.
+	 * @testdox a legacy flag no mapper reads should not make verify report anything.
 	 */
 	public function test_a_legacy_key_outside_the_write_path_is_ignored(): void {
 		$legacy_ids = $this->seed_notifications( 1 );
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
-		// Set after the row migrated: StatusMapper would map the row to `pending` if it
-		// were allowed to see this key, which the write path never was.
+		// `awaiting_verification` is unreliable — legacy deletes it on verify, on cancel and
+		// on deactivate — so no mapper consults it, at write time or here.
 		LegacyStore::add_meta( $legacy_ids[0], 'awaiting_verification', 'yes' );
 
 		MockWPCLI::reset();
@@ -519,19 +577,32 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox disable-legacy-links should drop the token hashes and the flag but keep the legacy id marker.
+	 * @testdox disable-legacy-links should drop both token digests and the flag but keep the legacy id marker.
 	 */
 	public function test_disable_legacy_links_keeps_the_idempotency_marker(): void {
 		$this->seed_notifications( 1, true );
+
+		$pending = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+				'user_email'  => 'pending@example.com',
+			)
+		);
+		LegacyStore::add_verification_data( $pending, 'a-verification-code', time() );
+
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
 		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash' ) );
+		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) );
 		$this->assertSame( 'yes', get_option( 'wc_bis_migration_has_legacy_links' ) );
 
 		MockWPCLI::reset();
 		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
 
 		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash' ) );
+		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) );
 		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
 		$this->assertFalse( get_option( 'wc_bis_migration_has_legacy_links' ) );
 	}
