@@ -233,7 +233,7 @@ function ProductCardFooter( props: { product: Product } ) {
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ averageRating > 0 && (
+				{ Number.isFinite( averageRating ) && averageRating > 0 && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />

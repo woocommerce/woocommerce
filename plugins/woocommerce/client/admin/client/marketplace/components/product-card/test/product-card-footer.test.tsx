@@ -51,6 +51,19 @@ const product: Product = {
 	reviewsCount: 10,
 };
 
+function expectNoRating( container: HTMLElement ) {
+	expect(
+		container.querySelector(
+			'.woocommerce-marketplace__product-card__rating'
+		)?.textContent
+	).toBe( '' );
+	expect(
+		container.querySelector(
+			'.woocommerce-marketplace__product-card__rating-icon'
+		)
+	).toBeNull();
+}
+
 function renderFooter( averageRating: number | null | undefined ) {
 	return render(
 		<MarketplaceContext.Provider value={ context }>
@@ -69,30 +82,18 @@ describe( 'ProductCardFooter rating', () => {
 	it( 'renders no rating when the product has none', () => {
 		const { container } = renderFooter( null );
 
-		expect(
-			container.querySelector(
-				'.woocommerce-marketplace__product-card__rating'
-			)?.textContent
-		).toBe( '' );
+		expectNoRating( container );
 	} );
 
 	it( 'renders no rating when the rating is zero', () => {
 		const { container } = renderFooter( 0 );
 
-		expect(
-			container.querySelector(
-				'.woocommerce-marketplace__product-card__rating'
-			)?.textContent
-		).toBe( '' );
+		expectNoRating( container );
 	} );
 
 	it( 'renders no rating when the API omits the rating', () => {
 		const { container } = renderFooter( undefined );
 
-		expect(
-			container.querySelector(
-				'.woocommerce-marketplace__product-card__rating'
-			)?.textContent
-		).toBe( '' );
+		expectNoRating( container );
 	} );
 } );
