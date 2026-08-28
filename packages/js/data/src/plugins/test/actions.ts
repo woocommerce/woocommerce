@@ -313,15 +313,19 @@ describe( 'installPlugins error message', () => {
 		expect( error?.message ).toBe( 'Could not install a. {"a":[null]}' );
 	} );
 
-	it( 'ignores entries for plugins this call did not request', () => {
+	it( 'keeps a failure for a plugin the server added to the request', () => {
+		// woocommerce_admin_plugins_pre_install can add plugins server-side; their failures
+		// come back in the same payload and must not vanish from the notice.
 		const error = runUntilThrow( installPlugins( [ 'a' ] ), {
 			data: { installed: [], results: {} },
-			errors: { errors: { a: [ 'Reason A.' ], other: [ 'Not ours.' ] } },
+			errors: { errors: { a: [ 'Reason A.' ], added: [ 'Reason B.' ] } },
 			success: false,
 			message: '',
 		} );
 
-		expect( error?.message ).toBe( 'Could not install a. Reason A.' );
+		expect( error?.message ).toBe(
+			'Could not install the following plugins: a, added. a: Reason A. \nadded: Reason B.'
+		);
 	} );
 
 	it( 'reports the step that failed on the error', () => {
