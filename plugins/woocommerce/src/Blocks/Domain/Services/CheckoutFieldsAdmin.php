@@ -43,10 +43,6 @@ class CheckoutFieldsAdmin {
 	/**
 	 * Converts the shape of a checkout field to match whats needed in the WooCommerce meta boxes.
 	 *
-	 * The meta boxes render with the same woocommerce_wp_* helpers as the My Account forms, so the field
-	 * is passed through prepare_form_field() to pick up type-specific arguments: select option maps,
-	 * checkbox submit values, and the resolved date min/max attributes.
-	 *
 	 * @param array  $field The field to format.
 	 * @param string $key The field key. This will be used for the ID of the field when passed to the meta box.
 	 * @return array Formatted field.
