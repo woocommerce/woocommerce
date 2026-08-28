@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\MigrationBatchProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\ToolsRegistrar;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -238,7 +239,7 @@ class MultisiteTests extends WC_Unit_Test_Case {
 		$requirements->init( wc_get_container()->get( StockNotificationsDataStore::class ) );
 
 		$processor = new MigrationBatchProcessor();
-		$processor->init( $requirements );
+		$processor->init( $requirements, wc_get_container()->get( DbWriter::class ) );
 
 		$batches = 0;
 

@@ -131,6 +131,13 @@ class Cli {
 	private ?BatchProcessingController $batch_processing_controller = null;
 
 	/**
+	 * Live writer, built on first use; see `db_writer()`.
+	 *
+	 * @var DbWriter|null
+	 */
+	private ?DbWriter $db_writer = null;
+
+	/**
 	 * Migration run state: the CLI lock, per-section cursors and cached counts. Built on
 	 * first use; see `state()`.
 	 *
@@ -168,6 +175,18 @@ class Cli {
 	 */
 	private function batch_processing_controller(): BatchProcessingController {
 		return $this->batch_processing_controller ??= wc_get_container()->get( BatchProcessingController::class );
+	}
+
+	/**
+	 * Live writer, resolved on first use.
+	 *
+	 * Comes from the container rather than `new`: `DbWriter` takes its bulk insert engine
+	 * through `init()`.
+	 *
+	 * @return DbWriter
+	 */
+	private function db_writer(): DbWriter {
+		return $this->db_writer ??= wc_get_container()->get( DbWriter::class );
 	}
 
 	/**
@@ -412,14 +431,14 @@ class Cli {
 			$reporter               = new Reporter();
 			$notifications_migrator = new NotificationsMigrator( $reporter );
 			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
-			$writer                 = $dry_run ? new NullWriter() : new DbWriter();
+			$writer                 = $dry_run ? new NullWriter() : $this->db_writer();
 
 			// The loop itself - section order, cursors, the pass-reset probe, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
-			$processor->init( $this->requirements() );
+			$processor->init( $this->requirements(), $this->db_writer() );
 			$processor->configure_run( $migrators, $writer, $batch_size );
 
 			// Counts are cached, display-only, and refreshed at run start and on section

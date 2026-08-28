@@ -132,11 +132,12 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @internal
 	 *
 	 * @param Requirements $requirements Requirement checks, re-run on every batch.
+	 * @param DbWriter     $writer       Live writer used by a background run.
 	 */
-	final public function init( Requirements $requirements ): void {
+	final public function init( Requirements $requirements, DbWriter $writer ): void {
 		$this->requirements = $requirements;
 		$this->state        = new MigrationState();
-		$this->writer       = new DbWriter();
+		$this->writer       = $writer;
 
 		$reporter = new Reporter();
 
