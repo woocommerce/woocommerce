@@ -263,7 +263,13 @@ class PluginsHelper {
 				$parts[] = $data;
 			}
 
-			$reason = trim( wp_strip_all_tags( implode( ' ', array_map( 'trim', $parts ) ) ) );
+			// WordPress writes several of these messages as multiple paragraphs. Turn the
+			// block boundaries into spaces first, or stripping the tags runs the last word
+			// of one paragraph into the first word of the next.
+			$joined = implode( ' ', array_map( 'trim', $parts ) );
+			$text   = preg_replace( '#<(?:/p|/div|/li|/h[1-6]|br\s*/?)>#i', ' ', $joined ) ?? $joined;
+
+			$reason = trim( wp_strip_all_tags( $text, true ) );
 
 			if ( mb_strlen( $reason ) > self::MAX_ERROR_REASON_LENGTH ) {
 				$reason = trim( mb_substr( $reason, 0, self::MAX_ERROR_REASON_LENGTH ) ) . "\u{2026}";

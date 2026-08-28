@@ -82,6 +82,23 @@ class PluginsHelperTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a sentence boundary where a paragraph break was stripped.
+	 */
+	public function test_get_error_reason_separates_paragraphs(): void {
+		// The shape validate_plugin_requirements() really returns.
+		$error = new WP_Error(
+			'plugin_php_incompatible',
+			'<p><strong>Error:</strong> Current PHP version (8.1.34) does not meet minimum requirements for Foo. The plugin requires PHP 99.0.</p><p><a href="https://wordpress.org/support/update-php/">Learn more about updating PHP</a>.</p>'
+		);
+
+		$this->assertSame(
+			'Error: Current PHP version (8.1.34) does not meet minimum requirements for Foo. The plugin requires PHP 99.0. Learn more about updating PHP.',
+			PluginsHelper::get_error_reason( $error ),
+			'A paragraph break must not run two sentences together.'
+		);
+	}
+
+	/**
 	 * @testdox Should not append raw plugin output captured by activate_plugin().
 	 */
 	public function test_get_error_reason_omits_opaque_error_data(): void {
