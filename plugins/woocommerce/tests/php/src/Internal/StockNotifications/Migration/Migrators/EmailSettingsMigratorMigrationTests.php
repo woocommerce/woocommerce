@@ -177,7 +177,7 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			foreach ( $migrator->migrate_batch( $batch, new DbWriter() ) as $outcome => $count ) {
+			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) ) as $outcome => $count ) {
 				$counts[ $outcome ] = ( $counts[ $outcome ] ?? 0 ) + $count;
 			}
 
