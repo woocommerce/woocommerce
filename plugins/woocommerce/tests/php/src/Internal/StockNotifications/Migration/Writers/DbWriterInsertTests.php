@@ -228,6 +228,40 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a malformed row must still roll the call back.
+	 *
+	 * A row whose `columns` is not an array reaches the typed helpers as a `\TypeError`,
+	 * which is an `\Error` rather than an `\Exception`. Catching only `\Exception` would let
+	 * it escape past the ROLLBACK and leave the connection mid-transaction for the rest of
+	 * the request, with the earlier rows of the call still pending.
+	 */
+	public function test_a_malformed_row_rolls_the_call_back(): void {
+		global $wpdb;
+
+		$writer = new DbWriter();
+
+		try {
+			$writer->insert_notifications(
+				array(
+					$this->build_row( 'early@example.com', array( array( '_wc_bis_legacy_id', 51 ) ) ),
+					array(
+						'columns' => 'not-an-array',
+						'meta'    => array(),
+					),
+				)
+			);
+			$this->fail( 'The writer should have propagated the failure.' );
+		} catch ( \TypeError $error ) {
+			// Read before any cleanup: an unrolled-back transaction still shows its own
+			// pending row to this connection, so an empty table is the proof it rolled back.
+			$this->assertSame( array(), LegacyStore::get_core_rows(), 'The earlier row of the call must not still be pending.' );
+		} finally {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( 'ROLLBACK' );
+		}
+	}
+
+	/**
 	 * @testdox an empty row list should write nothing.
 	 */
 	public function test_an_empty_row_list_writes_nothing(): void {

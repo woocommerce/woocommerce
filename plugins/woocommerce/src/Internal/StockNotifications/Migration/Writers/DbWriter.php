@@ -62,7 +62,8 @@ class DbWriter implements WriterInterface {
 	 * Insert notifications together with their meta, inside a single transaction.
 	 *
 	 * @param array $rows List of rows, each `array{ columns: array<string,mixed>, meta: array<int,array{0:string,1:mixed}> }`.
-	 * @throws \Exception If any insert fails; the whole call is rolled back first.
+	 * @throws \Throwable If any insert fails, or a row is malformed; the whole call is
+	 *                    rolled back first, so the connection is never left mid-transaction.
 	 * @return int Number of notifications written.
 	 */
 	public function insert_notifications( array $rows ): int {
@@ -87,7 +88,10 @@ class DbWriter implements WriterInterface {
 
 				++$written;
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
+			// Throwable, not Exception: a malformed row reaches the typed helpers below as a
+			// \TypeError, which is an \Error. Letting that escape would skip the ROLLBACK and
+			// leave the connection mid-transaction for the rest of the request.
 			$wpdb->query( 'ROLLBACK' );
 			throw $e;
 		}
