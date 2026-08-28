@@ -1255,10 +1255,10 @@ jQuery( function ( $ ) {
 		backbone: {
 
 			/**
-			 * Veto the add products modal response when a quantity is below its
+			 * Cancel the add products modal response when a quantity is below its
 			 * minimum, reporting it on the input so the modal stays open.
 			 */
-			validate_response: function( e, target, $modal, validation ) {
+			validate_response: function( e, target, $modal ) {
 				if ( 'wc-modal-add-products' !== target || ! $modal || ! $modal.length ) {
 					return;
 				}
@@ -1269,7 +1269,7 @@ jQuery( function ( $ ) {
 
 				if ( qtyInputBelowMin ) {
 					qtyInputBelowMin.reportValidity();
-					validation.valid = false;
+					e.preventDefault();
 				}
 			},
 
