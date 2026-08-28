@@ -10,49 +10,6 @@
 
 declare( strict_types = 1 );
 
-if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
-	/**
-	 * Hide WooCommerce template parts the theme doesn't use from the Site Editor.
-	 *
-	 * Template parts have no unregister API — WooCommerce injects them into
-	 * template queries with its own get_block_templates filter (priority 10) —
-	 * so they are filtered out of query results here instead. This only affects
-	 * listings; rendering a template part goes through get_block_file_template
-	 * and is unaffected.
-	 * Copies customized in the editor have the 'custom' source and are kept,
-	 * so user-edited content is never hidden.
-	 *
-	 * @param WP_Block_Template[] $templates     Found templates.
-	 * @param array               $query         Template query arguments.
-	 * @param string              $template_type wp_template or wp_template_part.
-	 * @return WP_Block_Template[]
-	 */
-	function purple_hide_woocommerce_template_parts( array $templates, array $query, string $template_type ): array {
-		if ( 'wp_template_part' !== $template_type ) {
-			return $templates;
-		}
-
-		$hidden_template_part_slugs = array(
-			// Purple ships its own coming-soon template. WooCommerce's patterns
-			// can still render this part when inserted into a page.
-			'coming-soon-social-links',
-		);
-
-		return array_values(
-			array_filter(
-				$templates,
-				static function ( $template ) use ( $hidden_template_part_slugs ) {
-					return 'custom' === $template->source
-						|| ! in_array( $template->slug, $hidden_template_part_slugs, true );
-				}
-			)
-		);
-	}
-
-endif;
-
-add_filter( 'get_block_templates', 'purple_hide_woocommerce_template_parts', 20, 3 );
-
 if ( ! function_exists( 'purple_hide_store_templates_from_template_picker' ) ) :
 	/**
 	 * Keep store templates out of the post editor's "Change template" picker.
