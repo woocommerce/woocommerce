@@ -52,6 +52,8 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_before_trash_order', array( $this, 'update_on_order_trashed' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
+		add_action( 'activated_plugin', array( $this, 'flush_cache' ) );
+		add_action( 'deactivated_plugin', array( $this, 'flush_cache' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
@@ -90,6 +92,23 @@ class OrderCountCacheService {
 		if ( wp_using_ext_object_cache() && null === $this->order_count_cache->get( $order_type ) ) {
 			$this->order_count_cache->flush( $order_type );
 			OrderUtil::get_count_for_type( $order_type );
+		}
+	}
+
+	/**
+	 * Flush the order count cache for all order types.
+	 *
+	 * Runs on plugin (de)activation, because plugins can register custom order statuses
+	 * that a previously primed cache does not know about yet (#68009).
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public function flush_cache() {
+		foreach ( wc_get_order_types( 'order-count' ) as $order_type ) {
+			$this->order_count_cache->flush( $order_type );
 		}
 	}
 

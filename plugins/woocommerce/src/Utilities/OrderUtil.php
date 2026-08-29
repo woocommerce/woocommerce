@@ -229,17 +229,6 @@ final class OrderUtil {
 		$order_count_cache = new OrderCountCache();
 		$count_per_status  = $order_count_cache->get( $order_type );
 
-		// A status registered after the cache was primed (e.g. by a just-activated plugin) is missing
-		// from the cached set, which would hide its orders from the counts until the cache expires.
-		// Treat that as a cache miss so the counts are rebuilt with the full status list (#68009).
-		// Extra cached statuses that are not registered are kept for backward compatibility.
-		if ( null !== $count_per_status ) {
-			$registered_statuses = array_merge( array_keys( (array) wc_get_order_statuses() ), array( OrderStatus::TRASH ) );
-			if ( array_diff( $registered_statuses, array_keys( $count_per_status ) ) ) {
-				$count_per_status = null;
-			}
-		}
-
 		if ( null === $count_per_status ) {
 			if ( self::custom_orders_table_usage_is_enabled() ) {
 				$orders_table = self::get_table_for_orders();

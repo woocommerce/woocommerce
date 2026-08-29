@@ -216,23 +216,24 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
 	}
 	/**
-	 * Test that a status registered after the cache was primed invalidates the cached counts.
+	 * Test that activating a plugin which registers a custom order status flushes the
+	 * primed cache, so the status shows up in the counts right away.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/68009
 	 */
-	public function test_count_includes_status_registered_after_cache_was_primed(): void {
+	public function test_count_includes_status_registered_by_activated_plugin(): void {
 		// Prime the cache while only the default statuses are registered.
 		OrderUtil::get_count_for_type( 'shop_order' );
 
-		// Register a custom status, as a just-activated plugin would.
+		// Register a custom status and fire the activation hook, as installing
+		// and activating a plugin such as WooCommerce Deposits would.
 		$add_custom_status = function ( $statuses ) {
 			$statuses['wc-partially-paid'] = 'Partially Paid';
 			return $statuses;
 		};
 		add_filter( 'wc_order_statuses', $add_custom_status );
+		do_action( 'activated_plugin', 'custom-status-plugin/custom-status-plugin.php', false );
 
-		// Put an order into the custom status; the incremental cache updates skip
-		// unknown statuses, so the primed cache does not track this order.
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( 'partially-paid' );
 		$order->save();
@@ -247,23 +248,14 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a broken 'wc_order_statuses' filter returning a non-array does not fatal
-	 * on the warm-cache path.
+	 * Test that deactivating a plugin flushes the order count cache.
 	 */
-	public function test_warm_cache_survives_non_array_order_statuses_filter(): void {
-		// Prime the cache while the statuses are valid.
+	public function test_deactivated_plugin_flushes_cache(): void {
 		OrderUtil::get_count_for_type( 'shop_order' );
+		$this->assertNotNull( $this->order_cache->get( 'shop_order' ) );
 
-		$break_statuses = function () {
-			return null;
-		};
-		add_filter( 'wc_order_statuses', $break_statuses, 1000 );
+		do_action( 'deactivated_plugin', 'custom-status-plugin/custom-status-plugin.php', false );
 
-		$counts = OrderUtil::get_count_for_type( 'shop_order' );
-
-		remove_filter( 'wc_order_statuses', $break_statuses, 1000 );
-
-		$this->assertIsArray( $counts );
-		$this->assertArrayHasKey( OrderInternalStatus::PENDING, $counts );
+		$this->assertNull( $this->order_cache->get( 'shop_order' ) );
 	}
 }
