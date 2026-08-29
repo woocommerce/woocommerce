@@ -311,6 +311,22 @@ describe( 'Activity Panels', () => {
 			homescreenLinkTitles.forEach( ( title ) => {
 				expect( homescreen.getByText( title ) ).toBeDefined();
 			} );
+
+			const quickLinks = homescreen.container.querySelectorAll(
+				'.woocommerce-quick-links__list .woocommerce-list__item-inner'
+			);
+
+			quickLinks.forEach( ( quickLink ) => {
+				expect(
+					quickLink.querySelector( '.woocommerce-list__item-before' )
+				).toBeDefined();
+				expect(
+					quickLink.querySelector( '.components-external-link__icon' )
+				).toBeDefined();
+				expect(
+					quickLink.querySelector( '.woocommerce-list__item-after' )
+				).toBeNull();
+			} );
 		} );
 
 		describe( 'Filters', () => {

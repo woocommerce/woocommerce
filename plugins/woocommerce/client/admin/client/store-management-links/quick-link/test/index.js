@@ -29,6 +29,25 @@ describe( 'QuickLink', () => {
 		);
 	} );
 
+	it( 'uses the WordPress external link indicator for external links', () => {
+		const { container, queryByRole } = render(
+			<QuickLink
+				linkType="external"
+				title="hello world"
+				icon={ brush }
+				href="https://example.com"
+			/>
+		);
+
+		expect( queryByRole( 'link' ) ).toHaveClass(
+			'components-external-link'
+		);
+		expect(
+			container.querySelector( '.components-external-link__icon' )
+		).toBeDefined();
+		expect( container.querySelectorAll( 'svg' ) ).toHaveLength( 1 );
+	} );
+
 	it( 'attaches a click handler to the link if it is passed', () => {
 		const clickHandler = jest.fn();
 
