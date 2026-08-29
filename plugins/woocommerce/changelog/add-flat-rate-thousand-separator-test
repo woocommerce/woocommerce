@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add regression test for flat-rate shipping cost entered with a thousand separator.
