@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration;
 use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -154,6 +154,6 @@ class RetentionInteractionTests extends WC_Unit_Test_Case {
 	 */
 	private function migrate(): void {
 		$migrator = new NotificationsMigrator( new Reporter() );
-		$migrator->migrate_batch( $migrator->get_batch( 0, 100 ), wc_get_container()->get( DbWriter::class ) );
+		$migrator->migrate_batch( $migrator->get_batch( 0, 100 ), wc_get_container()->get( Writer::class ) );
 	}
 }

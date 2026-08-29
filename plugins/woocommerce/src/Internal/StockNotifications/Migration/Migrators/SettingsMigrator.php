@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -148,11 +148,11 @@ class SettingsMigrator implements MigratorInterface {
 	/**
 	 * Migrate the given legacy option keys.
 	 *
-	 * @param array           $ids    Legacy option keys returned by get_batch().
-	 * @param WriterInterface $writer Writer to route all persistence through.
+	 * @param array  $ids    Legacy option keys returned by get_batch().
+	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by outcome code.
 	 */
-	public function migrate_batch( array $ids, WriterInterface $writer ): array {
+	public function migrate_batch( array $ids, Writer $writer ): array {
 		$counts = array();
 
 		foreach ( $ids as $legacy_key ) {

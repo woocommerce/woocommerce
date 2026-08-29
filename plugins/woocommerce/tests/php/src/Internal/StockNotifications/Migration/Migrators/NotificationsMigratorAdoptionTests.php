@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
@@ -282,7 +282,7 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			$this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+			$this->migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 			$cursor = (int) end( $batch );
 		}
 
@@ -389,7 +389,7 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$writer = new class() extends DbWriter {
+		$writer = new class() extends Writer {
 			/**
 			 * Report every marker write as lost, the way a DB error does.
 			 *
@@ -653,7 +653,7 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 	 * @return array<string,int> Outcome counts.
 	 */
 	private function migrate_all(): array {
-		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( DbWriter::class ) );
+		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( Writer::class ) );
 	}
 
 	/**

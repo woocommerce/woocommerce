@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Rep
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -112,7 +112,7 @@ class ReporterTests extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'query', $thrower );
-		$migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+		$migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 		remove_filter( 'query', $thrower );
 
 		$this->assertNotEmpty( $this->logged, 'The run should have logged something.' );

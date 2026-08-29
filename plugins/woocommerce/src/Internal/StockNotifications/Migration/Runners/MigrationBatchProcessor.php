@@ -16,8 +16,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\Produ
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
  * Batch items are `{section}::{id}` strings, so a batch is self-describing in logs.
  *
  * The CLI drives the same instance through `configure_run()`, which swaps in its own
- * migrators (built with `--force`, restricted to `--section`), its writer (`NullWriter`
+ * migrators (built with `--force`, restricted to `--section`), its writer (a dry-run one
  * under `--dry-run`) and its batch size, so the section order and cursor handling live
  * here only.
  *
@@ -97,12 +96,12 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private MigrationState $state;
 
 	/**
-	 * Writer every migrator routes its persistence through. Always the live `DbWriter`
-	 * here; `NullWriter` is a CLI `--dry-run` concern only.
+	 * Writer every migrator routes its persistence through. Always a live writer here; a
+	 * dry-run one is a CLI `--dry-run` concern only.
 	 *
-	 * @var WriterInterface
+	 * @var Writer
 	 */
-	private WriterInterface $writer;
+	private Writer $writer;
 
 	/**
 	 * The four section migrators, keyed by `get_slug()` and, since PHP preserves
@@ -116,16 +115,16 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	/**
 	 * Init the service.
 	 *
-	 * Only `Requirements` is injected. Everything else is built here rather than resolved
-	 * from the container: `WriterInterface` is an interface, and the migrators take
-	 * constructor arguments, neither of which `RuntimeContainer` can reflect over.
+	 * Only `Requirements` and the writer are injected. The migrators are built here rather
+	 * than resolved from the container, since they take constructor arguments
+	 * `RuntimeContainer` cannot reflect over.
 	 *
 	 * @internal
 	 *
 	 * @param Requirements $requirements Requirement checks, re-run on every batch.
-	 * @param DbWriter     $writer       Live writer used by a background run.
+	 * @param Writer       $writer       Live writer used by a background run.
 	 */
-	final public function init( Requirements $requirements, DbWriter $writer ): void {
+	final public function init( Requirements $requirements, Writer $writer ): void {
 		$this->requirements = $requirements;
 		$this->state        = new MigrationState();
 		$this->writer       = $writer;
@@ -148,19 +147,19 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	/**
 	 * Point this processor at a CLI run's own migrators, writer and batch size.
 	 *
-	 * The CLI needs migrators that share one `Reporter` and carry `--force`, a
-	 * `NullWriter` under `--dry-run`, and only the sections `--section` asked for. It
+	 * The CLI needs migrators that share one `Reporter` and carry `--force`, a dry-run
+	 * writer under `--dry-run`, and only the sections `--section` asked for. It
 	 * still runs the loop through this class, so the section order and the cursor have a
 	 * single implementation.
 	 *
 	 * @param array<string, MigratorInterface> $migrators  Migrators keyed by slug, in section order.
-	 * @param WriterInterface                  $writer     Writer every migrator routes persistence through.
+	 * @param Writer                           $writer     Writer every migrator routes persistence through.
 	 * @param int                              $batch_size Batch size the caller will request.
 	 * @param Reporter|null                    $reporter   The reporter those migrators share, so the known
 	 *                                                     losses cached on drain are this run's own.
 	 * @return void
 	 */
-	public function configure_run( array $migrators, WriterInterface $writer, int $batch_size, ?Reporter $reporter = null ): void {
+	public function configure_run( array $migrators, Writer $writer, int $batch_size, ?Reporter $reporter = null ): void {
 		$this->migrators  = $migrators;
 		$this->writer     = $writer;
 		$this->batch_size = max( 1, $batch_size );

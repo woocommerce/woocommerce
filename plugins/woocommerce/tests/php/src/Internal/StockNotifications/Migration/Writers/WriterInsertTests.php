@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Writers;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -12,7 +12,7 @@ use WC_Unit_Test_Case;
  * Tests for the notification insert path: null handling, meta staying with its own row, and
  * the transaction that keeps a Core row from being left behind without its migration marker.
  */
-class DbWriterInsertTests extends WC_Unit_Test_Case {
+class WriterInsertTests extends WC_Unit_Test_Case {
 
 	/**
 	 * Empty the Core tables before each test.
@@ -47,7 +47,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 		$wpdb->query( 'SET SESSION auto_increment_increment = 3' );
 
 		try {
-			( new DbWriter() )->insert_notifications(
+			( new Writer() )->insert_notifications(
 				array(
 					$this->build_row( 'first@example.com', array( array( '_wc_bis_legacy_id', 101 ) ) ),
 					$this->build_row( 'second@example.com', array( array( '_wc_bis_legacy_id', 102 ) ) ),
@@ -96,7 +96,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	public function test_two_rows_sharing_a_product_and_address_each_keep_their_marker(): void {
 		global $wpdb;
 
-		( new DbWriter() )->insert_notifications(
+		( new Writer() )->insert_notifications(
 			array(
 				$this->build_row( 'twin@example.com', array( array( '_wc_bis_legacy_id', 201 ) ) ),
 				$this->build_row( 'twin@example.com', array( array( '_wc_bis_legacy_id', 202 ) ) ),
@@ -116,7 +116,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * is simply irrelevant, however close its key or its id.
 	 */
 	public function test_a_concurrent_row_sharing_a_key_is_irrelevant(): void {
-		$writer = new DbWriter();
+		$writer = new Writer();
 
 		// Stands in for the shopper signing up mid-run: same product, same address, no marker.
 		$writer->insert_notifications( array( $this->build_row( 'shopper@example.com' ) ) );
@@ -137,7 +137,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * @testdox a null date column should be written as SQL NULL, not a zero date.
 	 */
 	public function test_null_dates_are_written_as_null(): void {
-		( new DbWriter() )->insert_notifications( array( $this->build_row( 'shopper@example.com' ) ) );
+		( new Writer() )->insert_notifications( array( $this->build_row( 'shopper@example.com' ) ) );
 
 		$row = LegacyStore::get_core_rows()[0];
 
@@ -151,7 +151,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * @testdox each row's meta should land against that row.
 	 */
 	public function test_meta_lands_against_its_own_row(): void {
-		( new DbWriter() )->insert_notifications(
+		( new Writer() )->insert_notifications(
 			array(
 				$this->build_row( 'first@example.com', array( array( '_wc_bis_legacy_id', 11 ) ) ),
 				$this->build_row( 'second@example.com', array( array( '_wc_bis_legacy_id', 22 ) ) ),
@@ -169,7 +169,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * @testdox a failure between a row and its meta should roll the whole call back.
 	 */
 	public function test_a_failed_meta_insert_rolls_the_call_back(): void {
-		$writer = new DbWriter();
+		$writer = new Writer();
 		$rows   = array( $this->build_row( 'shopper@example.com', array( array( '_wc_bis_legacy_id', 11 ) ) ) );
 
 		$thrower = static function ( $query ) {
@@ -198,7 +198,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * @testdox a failure on a later row must roll back the rows already inserted by the call.
 	 */
 	public function test_a_late_failure_rolls_back_the_earlier_rows(): void {
-		$writer = new DbWriter();
+		$writer = new Writer();
 
 		$thrower = static function ( $query ) {
 			if ( false !== stripos( $query, 'late@example.com' ) ) {
@@ -238,7 +238,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	public function test_a_malformed_row_rolls_the_call_back(): void {
 		global $wpdb;
 
-		$writer = new DbWriter();
+		$writer = new Writer();
 
 		try {
 			$writer->insert_notifications(
@@ -265,7 +265,7 @@ class DbWriterInsertTests extends WC_Unit_Test_Case {
 	 * @testdox an empty row list should write nothing.
 	 */
 	public function test_an_empty_row_list_writes_nothing(): void {
-		$this->assertSame( 0, ( new DbWriter() )->insert_notifications( array() ) );
+		$this->assertSame( 0, ( new Writer() )->insert_notifications( array() ) );
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
 	}
 

@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -57,9 +57,9 @@ interface MigratorInterface {
 	 * Per-row failures are recorded and reported rather than thrown. Throw only for
 	 * transient conditions that failed the whole batch and where a retry is correct.
 	 *
-	 * @param array           $ids    Identifiers returned by get_batch().
-	 * @param WriterInterface $writer Writer to route all persistence through.
+	 * @param array  $ids    Identifiers returned by get_batch().
+	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by outcome code.
 	 */
-	public function migrate_batch( array $ids, WriterInterface $writer ): array;
+	public function migrate_batch( array $ids, Writer $writer ): array;
 }

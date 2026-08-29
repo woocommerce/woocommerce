@@ -6,8 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Mig
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 use WC_Helper_Product;
@@ -162,7 +161,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$product_id = $this->create_product_with_legacy_flag( 'yes' );
 
 		$migrator = $this->build_migrator();
-		$migrator->migrate_batch( $migrator->get_batch( 0, 10 ), new NullWriter() );
+		$migrator->migrate_batch( $migrator->get_batch( 0, 10 ), new Writer( true ) );
 
 		$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
 	}
@@ -184,7 +183,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			$migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+			$migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 			$cursor = (int) end( $batch );
 
 			++$batches;

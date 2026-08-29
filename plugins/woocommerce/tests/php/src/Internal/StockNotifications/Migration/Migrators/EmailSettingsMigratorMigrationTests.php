@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Mig
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\EmailSettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use WC_Unit_Test_Case;
 
 /**
@@ -106,7 +106,7 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 
 		// A writer that reports success without writing, the way a filtered-away
 		// update_option() looks from here.
-		$silent = new class() extends DbWriter {
+		$silent = new class() extends Writer {
 			/**
 			 * Discard the write and report success.
 			 *
@@ -152,7 +152,7 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $this->build_migrator()->get_batch( 0, 50 ), 'Nothing should remain outstanding after a completed run.' );
 
-		$writer = $this->getMockBuilder( DbWriter::class )->onlyMethods( array( 'write_option' ) )->getMock();
+		$writer = $this->getMockBuilder( Writer::class )->onlyMethods( array( 'write_option' ) )->getMock();
 		$writer->expects( $this->never() )->method( 'write_option' );
 
 		$counts = $this->build_migrator()->migrate_batch( $this->build_migrator()->get_batch( 0, 50 ), $writer );
@@ -177,7 +177,7 @@ class EmailSettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) ) as $outcome => $count ) {
+			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) ) as $outcome => $count ) {
 				$counts[ $outcome ] = ( $counts[ $outcome ] ?? 0 ) + $count;
 			}
 

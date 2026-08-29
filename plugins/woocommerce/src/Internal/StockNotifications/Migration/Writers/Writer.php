@@ -1,6 +1,6 @@
 <?php
 /**
- * DbWriter class file.
+ * Writer class file.
  */
 
 declare( strict_types = 1 );
@@ -13,7 +13,18 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Live writer for the Back In Stock Notifications migration.
+ * Every persistent write the migration performs goes through this class.
+ *
+ * A dry run constructs it with `$dry_run = true`: each write method then returns the count or
+ * flag a successful live write would have reported, without touching the store, so the
+ * migrators carry no dry-run branching and both modes produce the same report shape.
+ *
+ * The boolean the write methods return means only that the write was issued without error. It
+ * is not a change indicator: a live write passes through WordPress functions that report false
+ * for a value already equal to the one being written, while a dry run returns true
+ * unconditionally. A caller must therefore never read `false` as "the store does not hold this
+ * value", and never read `true` as "a row changed". Code that needs proof a value landed reads
+ * it back and compares.
  *
  * Notifications are never routed through `Notification` + `save()`. Each row is inserted on
  * its own so the id it was given comes straight back from `$wpdb->insert_id`, then its meta
@@ -28,7 +39,7 @@ defined( 'ABSPATH' ) || exit;
  * touch. `write_product_meta()` is the one exception, going through the product CRUD layer
  * per the plan.
  */
-class DbWriter implements WriterInterface {
+class Writer {
 
 	/**
 	 * Columns accepted on `wc_stock_notifications`, mapped to their `$wpdb->prepare()` format.
@@ -50,12 +61,31 @@ class DbWriter implements WriterInterface {
 	);
 
 	/**
-	 * This writer performs real writes.
+	 * Whether this writer discards its writes.
+	 *
+	 * @var bool
+	 */
+	private bool $dry_run;
+
+	/**
+	 * Constructor.
+	 *
+	 * The argument is optional so the container can resolve a live writer by reflection; a dry
+	 * run builds its own instance with `new Writer( true )`.
+	 *
+	 * @param bool $dry_run Whether to discard every write.
+	 */
+	public function __construct( bool $dry_run = false ) {
+		$this->dry_run = $dry_run;
+	}
+
+	/**
+	 * Whether this writer discards its writes.
 	 *
 	 * @return bool
 	 */
 	public function is_dry_run(): bool {
-		return false;
+		return $this->dry_run;
 	}
 
 	/**
@@ -71,6 +101,10 @@ class DbWriter implements WriterInterface {
 
 		if ( empty( $rows ) ) {
 			return 0;
+		}
+
+		if ( $this->dry_run ) {
+			return count( $rows );
 		}
 
 		$written = 0;
@@ -155,6 +189,10 @@ class DbWriter implements WriterInterface {
 			return 0;
 		}
 
+		if ( $this->dry_run ) {
+			return count( $meta );
+		}
+
 		$written = $this->write_notification_meta( $notification_id, $meta );
 
 		$this->invalidate_meta_cache( $notification_id );
@@ -215,6 +253,10 @@ class DbWriter implements WriterInterface {
 	public function write_legacy_meta( int $legacy_id, string $meta_key, $meta_value ): bool {
 		global $wpdb;
 
+		if ( $this->dry_run ) {
+			return true;
+		}
+
 		$table = Tables::legacy_meta();
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
@@ -240,6 +282,10 @@ class DbWriter implements WriterInterface {
 	 * @return bool
 	 */
 	public function write_option( string $option, $value ): bool {
+		if ( $this->dry_run ) {
+			return true;
+		}
+
 		return update_option( $option, $value );
 	}
 
@@ -263,7 +309,7 @@ class DbWriter implements WriterInterface {
 	 * @return bool
 	 */
 	public function write_product_meta_pairs( int $product_id, array $meta ): bool {
-		if ( empty( $meta ) ) {
+		if ( empty( $meta ) || $this->dry_run ) {
 			return true;
 		}
 

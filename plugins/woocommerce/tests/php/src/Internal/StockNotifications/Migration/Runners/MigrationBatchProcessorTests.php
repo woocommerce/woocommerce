@@ -8,8 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\MigrationBatchProcessor;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -57,7 +56,7 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$requirements->init( wc_get_container()->get( StockNotificationsDataStore::class ) );
 
 		$this->processor = new MigrationBatchProcessor();
-		$this->processor->init( $requirements, wc_get_container()->get( DbWriter::class ) );
+		$this->processor->init( $requirements, wc_get_container()->get( Writer::class ) );
 
 		$this->state      = new MigrationState();
 		$this->product_id = $this->create_product();
@@ -408,16 +407,16 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 			/**
 			 * Settles nothing.
 			 *
-			 * @param array           $ids    Row ids.
-			 * @param WriterInterface $writer Writer.
+			 * @param array  $ids    Row ids.
+			 * @param Writer $writer Writer.
 			 * @return array
 			 */
-			public function migrate_batch( array $ids, WriterInterface $writer ): array {
+			public function migrate_batch( array $ids, Writer $writer ): array {
 				return array();
 			}
 		};
 
-		$this->processor->configure_run( array( 'notifications' => $stuck ), wc_get_container()->get( DbWriter::class ), 50 );
+		$this->processor->configure_run( array( 'notifications' => $stuck ), wc_get_container()->get( Writer::class ), 50 );
 
 		$batches = $this->run_to_completion( 50 );
 

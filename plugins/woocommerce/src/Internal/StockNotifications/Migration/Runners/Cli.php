@@ -21,8 +21,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use WP_CLI;
 
@@ -140,11 +139,11 @@ class Cli {
 	private ?BatchProcessingController $batch_processing_controller = null;
 
 	/**
-	 * Live writer, built on first use; see `db_writer()`.
+	 * Live writer, built on first use; see `live_writer()`.
 	 *
-	 * @var DbWriter|null
+	 * @var Writer|null
 	 */
-	private ?DbWriter $db_writer = null;
+	private ?Writer $live_writer = null;
 
 	/**
 	 * Migration run state: the CLI lock, per-section cursors and cached counts. Built on
@@ -189,13 +188,13 @@ class Cli {
 	/**
 	 * Live writer, resolved on first use.
 	 *
-	 * Comes from the container rather than `new`: `DbWriter` takes its bulk insert engine
-	 * through `init()`.
+	 * Comes from the container so a run shares the one live instance; a dry run builds its
+	 * own with `new Writer( true )`.
 	 *
-	 * @return DbWriter
+	 * @return Writer
 	 */
-	private function db_writer(): DbWriter {
-		return $this->db_writer ??= wc_get_container()->get( DbWriter::class );
+	private function live_writer(): Writer {
+		return $this->live_writer ??= wc_get_container()->get( Writer::class );
 	}
 
 	/**
@@ -444,14 +443,14 @@ class Cli {
 			$reporter               = new Reporter();
 			$notifications_migrator = new NotificationsMigrator( $reporter );
 			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
-			$writer                 = $dry_run ? new NullWriter() : $this->db_writer();
+			$writer                 = $dry_run ? new Writer( true ) : $this->live_writer();
 
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
-			$processor->init( $this->requirements(), $this->db_writer() );
+			$processor->init( $this->requirements(), $this->live_writer() );
 			$processor->configure_run( $migrators, $writer, $batch_size, $reporter );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
@@ -593,7 +592,7 @@ class Cli {
 	 * Both kinds go together on purpose. A partial teardown would leave the shim registered
 	 * for one link kind and silently dead for the other.
 	 *
-	 * Writes by direct SQL, like `DbWriter`: going through the CRUD layer
+	 * Writes by direct SQL, like `Writer`: going through the CRUD layer
 	 * would bump `date_modified_gmt` on every migrated row, rewriting merchant-visible
 	 * history for what is only a marker cleanup.
 	 *

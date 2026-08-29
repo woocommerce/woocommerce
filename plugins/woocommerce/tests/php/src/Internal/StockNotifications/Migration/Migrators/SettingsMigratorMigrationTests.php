@@ -5,8 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Mig
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use WC_Unit_Test_Case;
 
 /**
@@ -95,7 +94,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $migrator->get_batch( 0, 10 ), 'A migrated key must never come back as outstanding.' );
 
-		$counts = $migrator->migrate_batch( array( self::LEGACY_ALLOW_SIGNUPS ), wc_get_container()->get( DbWriter::class ) );
+		$counts = $migrator->migrate_batch( array( self::LEGACY_ALLOW_SIGNUPS ), wc_get_container()->get( Writer::class ) );
 
 		$this->assertSame( array(), $counts, 'migrate_batch() was only exercised here to prove get_batch() already returned nothing.' );
 		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'A second run must never overwrite a value it already migrated once.' );
@@ -126,7 +125,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
 
 		$migrator = $this->build_migrator();
-		$writer   = new NullWriter();
+		$writer   = new Writer( true );
 
 		$batches = 0;
 		while ( true ) {
@@ -163,7 +162,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) ) as $outcome => $count ) {
+			foreach ( $migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) ) as $outcome => $count ) {
 				$counts[ $outcome ] = ( $counts[ $outcome ] ?? 0 ) + $count;
 			}
 

@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -191,11 +191,11 @@ class ProductMetaMigrator implements MigratorInterface {
 	 *
 	 * Per-row failures are recorded and reported rather than thrown.
 	 *
-	 * @param array           $ids    Product ids returned by get_batch().
-	 * @param WriterInterface $writer Writer to route all persistence through.
+	 * @param array  $ids    Product ids returned by get_batch().
+	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by outcome code.
 	 */
-	public function migrate_batch( array $ids, WriterInterface $writer ): array {
+	public function migrate_batch( array $ids, Writer $writer ): array {
 		$outcomes = array();
 
 		foreach ( $ids as $product_id ) {
@@ -214,11 +214,11 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Migrate a single product.
 	 *
-	 * @param int             $product_id Product id.
-	 * @param WriterInterface $writer     Writer to route all persistence through.
+	 * @param int    $product_id Product id.
+	 * @param Writer $writer     Writer to route all persistence through.
 	 * @return string One of the Reporter::OUTCOME_* constants.
 	 */
-	private function migrate_one( int $product_id, WriterInterface $writer ): string {
+	private function migrate_one( int $product_id, Writer $writer ): string {
 		$product = wc_get_product( $product_id );
 
 		if ( ! $product instanceof WC_Product ) {
@@ -247,11 +247,11 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Settle a row that can never be migrated, so it stops being a candidate.
 	 *
-	 * @param int             $product_id Product id.
-	 * @param WriterInterface $writer     Writer to persist through.
+	 * @param int    $product_id Product id.
+	 * @param Writer $writer     Writer to persist through.
 	 * @return void
 	 */
-	private function mark_terminal_failure( int $product_id, WriterInterface $writer ): void {
+	private function mark_terminal_failure( int $product_id, Writer $writer ): void {
 		$writer->write_product_meta( $product_id, self::FAILED_META_KEY, (string) time() );
 	}
 }

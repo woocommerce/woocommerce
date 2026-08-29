@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyLi
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
@@ -511,7 +511,7 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 				break;
 			}
 
-			$migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+			$migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 			$cursor = (int) end( $batch );
 		}
 	}

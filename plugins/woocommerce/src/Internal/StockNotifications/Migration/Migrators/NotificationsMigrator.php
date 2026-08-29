@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\MetaMap
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\StatusMapper;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -266,11 +266,11 @@ class NotificationsMigrator implements MigratorInterface {
 	 * rather than thrown; only a whole-batch write failure (from the writer) propagates,
 	 * since that is the one condition a retry can fix.
 	 *
-	 * @param array           $ids    Legacy ids returned by get_batch().
-	 * @param WriterInterface $writer Writer to route all persistence through.
+	 * @param array  $ids    Legacy ids returned by get_batch().
+	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by Reporter::OUTCOME_* code.
 	 */
-	public function migrate_batch( array $ids, WriterInterface $writer ): array {
+	public function migrate_batch( array $ids, Writer $writer ): array {
 		$outcomes = array();
 
 		if ( empty( $ids ) ) {
@@ -857,11 +857,11 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @param array<string,mixed> $row_meta   This row's legacy meta bag.
 	 * @param string              $status     Status resolved by StatusMapper for the legacy row.
-	 * @param WriterInterface     $writer     Writer to route the marker writes through.
+	 * @param Writer              $writer     Writer to route the marker writes through.
 	 * @return void
 	 * @throws \RuntimeException When the marker write does not persist every row.
 	 */
-	private function adopt( int $target_id, array $legacy_row, array $row_meta, string $status, WriterInterface $writer ): void {
+	private function adopt( int $target_id, array $legacy_row, array $row_meta, string $status, Writer $writer ): void {
 		$legacy_id = (int) $legacy_row['id'];
 		$meta      = array(
 			array( self::LEGACY_ID_META_KEY, $legacy_id ),
@@ -949,10 +949,10 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @param array<string,mixed> $row_meta   This row's legacy meta bag.
 	 * @param string              $status     Status resolved by StatusMapper for this row.
-	 * @param WriterInterface     $writer     Writer, used only to set the legacy-links option.
+	 * @param Writer              $writer     Writer, used only to set the legacy-links option.
 	 * @return array<int,array{0:string,1:mixed}>
 	 */
-	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status, WriterInterface $writer ): array {
+	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status, Writer $writer ): array {
 		$meta   = MetaMapper::map( $row_meta );
 		$meta[] = array( self::LEGACY_ID_META_KEY, $legacy_id );
 
@@ -1065,10 +1065,10 @@ class NotificationsMigrator implements MigratorInterface {
 	 * Reads the option first so an already-set flag costs nothing beyond the cached
 	 * autoloaded read.
 	 *
-	 * @param WriterInterface $writer Writer to route the option write through.
+	 * @param Writer $writer Writer to route the option write through.
 	 * @return void
 	 */
-	private function maybe_set_has_legacy_links_option( WriterInterface $writer ): void {
+	private function maybe_set_has_legacy_links_option( Writer $writer ): void {
 		if ( 'yes' !== get_option( self::HAS_LEGACY_LINKS_OPTION ) ) {
 			$writer->write_option( self::HAS_LEGACY_LINKS_OPTION, 'yes' );
 		}
@@ -1079,10 +1079,10 @@ class NotificationsMigrator implements MigratorInterface {
 	 * is migrated, inserted or adopted. Reads the option first so an already-set flag
 	 * costs nothing beyond the cached autoloaded read.
 	 *
-	 * @param WriterInterface $writer Writer to route the option write through.
+	 * @param Writer $writer Writer to route the option write through.
 	 * @return void
 	 */
-	private function maybe_set_has_migrated_rows_option( WriterInterface $writer ): void {
+	private function maybe_set_has_migrated_rows_option( Writer $writer ): void {
 		if ( 'yes' !== get_option( self::HAS_MIGRATED_ROWS_OPTION ) ) {
 			$writer->write_option( self::HAS_MIGRATED_ROWS_OPTION, 'yes' );
 		}
@@ -1091,11 +1091,11 @@ class NotificationsMigrator implements MigratorInterface {
 	/**
 	 * Mark a legacy row as permanently failed and leave it out of the candidate set.
 	 *
-	 * @param int             $legacy_id Legacy notification id.
-	 * @param WriterInterface $writer    Writer to route the marker write through.
+	 * @param int    $legacy_id Legacy notification id.
+	 * @param Writer $writer    Writer to route the marker write through.
 	 * @return void
 	 */
-	private function fail_row( int $legacy_id, WriterInterface $writer ): void {
+	private function fail_row( int $legacy_id, Writer $writer ): void {
 		$writer->write_legacy_meta(
 			$legacy_id,
 			self::FAILED_META_KEY,

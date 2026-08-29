@@ -8,8 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -119,7 +118,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertCount( 8, $batch, 'The scan serves every row; candidacy is decided in migrate_batch().' );
 
-		$outcomes = $this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+		$outcomes = $this->migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 
 		$this->assertSame( 2, $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0, 'An unverified row is a candidate, not a loss.' );
 		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_EMAIL_TOO_LONG ] ?? 0 );
@@ -143,7 +142,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->migrate_all();
 		$this->assertCount( 1, LegacyStore::get_core_rows() );
 
-		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( DbWriter::class ) );
+		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( Writer::class ) );
 
 		$this->assertSame( array(), $outcomes, 'A settled row is not a loss, so it records nothing.' );
 		$this->assertCount( 1, LegacyStore::get_core_rows(), 'A re-run must not insert the row again.' );
@@ -156,7 +155,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$legacy_id = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
 		LegacyStore::add_meta( $legacy_id, '_wc_bis_migration_failed', array( 'reason' => 'exception' ) );
 
-		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( DbWriter::class ) );
+		$outcomes = $this->migrator->migrate_batch( array( $legacy_id ), wc_get_container()->get( Writer::class ) );
 
 		$this->assertSame( array(), $outcomes );
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
@@ -255,7 +254,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 			),
 		);
 
-		$dry_outcomes = $this->migrator->migrate_batch( $ids, new NullWriter() );
+		$dry_outcomes = $this->migrator->migrate_batch( $ids, new Writer( true ) );
 
 		$this->assertSame( array(), LegacyStore::get_core_rows(), 'A dry run must not insert Core rows.' );
 		$this->assertFalse( get_option( 'wc_bis_migration_has_migrated_rows' ), 'A dry run must not write options.' );
@@ -263,7 +262,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->assertSame( 2, $this->migrator->count_remaining() );
 
 		$real_migrator = new NotificationsMigrator( new Reporter() );
-		$real_outcomes = $real_migrator->migrate_batch( $ids, wc_get_container()->get( DbWriter::class ) );
+		$real_outcomes = $real_migrator->migrate_batch( $ids, wc_get_container()->get( Writer::class ) );
 
 		$this->assertSame( $dry_outcomes, $real_outcomes, 'The dry run report must be shape-identical to the real one.' );
 	}
@@ -390,7 +389,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$admitted = $this->migrator->get_batch( 0, 100 );
 		$this->assertCount( 5, $admitted );
 
-		$outcomes = $this->migrator->migrate_batch( $admitted, wc_get_container()->get( DbWriter::class ) );
+		$outcomes = $this->migrator->migrate_batch( $admitted, wc_get_container()->get( Writer::class ) );
 
 		$accounted = ( $outcomes[ Reporter::OUTCOME_MIGRATED ] ?? 0 )
 			+ ( $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 )
@@ -429,7 +428,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'query', $counter );
-		$this->migrator->migrate_batch( $batch, wc_get_container()->get( DbWriter::class ) );
+		$this->migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
 		remove_filter( 'query', $counter );
 
 		$this->assertSame( 2, $queries, 'One failure-marker lookup and one meta fetch, both for the whole batch.' );
@@ -577,7 +576,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 	 * @return array<string,int> Outcome counts.
 	 */
 	private function migrate_all(): array {
-		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( DbWriter::class ) );
+		return $this->migrator->migrate_batch( $this->migrator->get_batch( 0, 500 ), wc_get_container()->get( Writer::class ) );
 	}
 
 	/**

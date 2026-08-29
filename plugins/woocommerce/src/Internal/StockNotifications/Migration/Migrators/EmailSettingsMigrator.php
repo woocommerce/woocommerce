@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\WriterInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -175,11 +175,11 @@ class EmailSettingsMigrator implements MigratorInterface {
 	 * Sub-key writes are grouped by option so each option is written once per batch, with
 	 * every other sub-key it already holds left untouched.
 	 *
-	 * @param array           $ids    Identifiers returned by get_batch().
-	 * @param WriterInterface $writer Writer to route all persistence through.
+	 * @param array  $ids    Identifiers returned by get_batch().
+	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by outcome code.
 	 */
-	public function migrate_batch( array $ids, WriterInterface $writer ): array {
+	public function migrate_batch( array $ids, Writer $writer ): array {
 		$counts = array();
 		$row_id = 0;
 

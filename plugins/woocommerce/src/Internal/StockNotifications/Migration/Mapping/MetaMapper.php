@@ -35,7 +35,7 @@ final class MetaMapper {
 	 * here too would double-serialize the value once it reaches the writer.
 	 *
 	 * @param array<string,mixed> $legacy_meta Legacy meta bag, keyed by meta key.
-	 * @return array<int,array{0:string,1:mixed}> Meta rows in WriterInterface shape.
+	 * @return array<int,array{0:string,1:mixed}> Meta rows in Writer shape.
 	 */
 	public static function map( array $legacy_meta ): array {
 		$rows = array();
