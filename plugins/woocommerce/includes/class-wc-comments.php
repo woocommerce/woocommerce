@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
+use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,6 +83,9 @@ class WC_Comments {
 
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
+
+		// Backfill "verified owner" status for a product's reviews off-hours, in one query.
+		wc_get_container()->get( ReviewVerificationService::class )->register();
 
 		// Set comment type.
 		add_action( 'preprocess_comment', array( __CLASS__, 'update_comment_type' ), 1 );
