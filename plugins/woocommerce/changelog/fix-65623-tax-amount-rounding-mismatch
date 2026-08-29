@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax amount increasing after order placement. WC_Abstract_Order::update_taxes() now applies the same final rounding step as WC_Cart_Totals::calculate_totals(), so order tax totals match the value shown at checkout when per-rate sums land on a 0.5 boundary.
