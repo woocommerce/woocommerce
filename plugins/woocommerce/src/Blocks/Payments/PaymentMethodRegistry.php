@@ -50,6 +50,31 @@ final class PaymentMethodRegistry extends IntegrationRegistry {
 	}
 
 	/**
+	 * Gets all style handles registered by active payment methods that support styles.
+	 *
+	 * @return string[]
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_all_active_payment_method_style_handles() {
+		$style_handles   = [];
+		$payment_methods = $this->get_all_active_registered();
+
+		foreach ( $payment_methods as $payment_method ) {
+			if ( ! $payment_method instanceof PaymentMethodTypeStyleInterface ) {
+				continue;
+			}
+
+			$style_handles = array_merge(
+				$style_handles,
+				is_admin() ? $payment_method->get_payment_method_style_handles_for_admin() : $payment_method->get_payment_method_style_handles()
+			);
+		}
+
+		return array_values( array_unique( array_filter( $style_handles ) ) );
+	}
+
+	/**
 	 * Gets an array of all registered payment method script data, but only for active payment methods.
 	 *
 	 * @return array

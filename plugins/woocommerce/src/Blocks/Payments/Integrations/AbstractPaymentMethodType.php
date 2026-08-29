@@ -1,14 +1,14 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
-use Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeInterface;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeStyleInterface;
 
 /**
  * AbstractPaymentMethodType class.
  *
  * @since 2.6.0
  */
-abstract class AbstractPaymentMethodType implements PaymentMethodTypeInterface {
+abstract class AbstractPaymentMethodType implements PaymentMethodTypeStyleInterface {
 	/**
 	 * Payment method name defined by payment methods extending this class.
 	 *
@@ -42,7 +42,7 @@ abstract class AbstractPaymentMethodType implements PaymentMethodTypeInterface {
 	}
 
 	/**
-	 * Returns if this payment method should be active. If false, the scripts will not be enqueued.
+	 * Returns if this payment method should be active. If false, the scripts and styles will not be enqueued.
 	 *
 	 * @return boolean
 	 */
@@ -68,6 +68,28 @@ abstract class AbstractPaymentMethodType implements PaymentMethodTypeInterface {
 	 */
 	public function get_payment_method_script_handles_for_admin() {
 		return $this->get_payment_method_script_handles();
+	}
+
+	/**
+	 * Returns an array of style handles to enqueue for this payment method in the frontend context.
+	 *
+	 * @return string[]
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_payment_method_style_handles() {
+		return [];
+	}
+
+	/**
+	 * Returns an array of style handles to enqueue for this payment method in the admin context.
+	 *
+	 * @return string[]
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_payment_method_style_handles_for_admin() {
+		return $this->get_payment_method_style_handles();
 	}
 
 	/**
