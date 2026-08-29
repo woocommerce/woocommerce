@@ -9,15 +9,11 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use WP_CLI;
 
@@ -99,13 +95,6 @@ class Cli {
 	private ?BatchProcessingController $batch_processing_controller = null;
 
 	/**
-	 * Live writer, built on first use; see `live_writer()`.
-	 *
-	 * @var Writer|null
-	 */
-	private ?Writer $live_writer = null;
-
-	/**
 	 * Migration run state: the CLI lock, per-section cursors and cached counts. Built on
 	 * first use; see `state()`.
 	 *
@@ -143,18 +132,6 @@ class Cli {
 	 */
 	private function batch_processing_controller(): BatchProcessingController {
 		return $this->batch_processing_controller ??= wc_get_container()->get( BatchProcessingController::class );
-	}
-
-	/**
-	 * Live writer, resolved on first use.
-	 *
-	 * Comes from the container so a run shares the one live instance; a dry run builds its
-	 * own with `new Writer( true )`.
-	 *
-	 * @return Writer
-	 */
-	private function live_writer(): Writer {
-		return $this->live_writer ??= wc_get_container()->get( Writer::class );
 	}
 
 	/**
@@ -215,7 +192,8 @@ class Cli {
 			WP_CLI::log( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
 		}
 
-		$reporter = new Reporter();
+		$run      = new MigrationRun();
+		$reporter = $run->get_reporter();
 
 		foreach ( self::SECTION_ORDER as $slug ) {
 			$cached = $this->state()->get_count( $slug );
@@ -237,7 +215,7 @@ class Cli {
 			sprintf(
 				'%-14s %s',
 				'settings',
-				( new OptionsMigrator( $reporter ) )->is_done() ? 'imported' : 'not imported yet'
+				$run->build_options_migrator()->is_done() ? 'imported' : 'not imported yet'
 			)
 		);
 
@@ -352,7 +330,8 @@ class Cli {
 			return;
 		}
 
-		$sections     = $this->resolve_sections( $assoc_args );
+		$run          = new MigrationRun();
+		$sections     = $this->resolve_sections( $run, $assoc_args );
 		$dry_run      = isset( $assoc_args['dry-run'] );
 		$retry_failed = isset( $assoc_args['retry-failed'] );
 		$batch_size   = isset( $assoc_args['batch-size'] ) ? max( 1, (int) $assoc_args['batch-size'] ) : self::DEFAULT_BATCH_SIZE;
@@ -415,21 +394,21 @@ class Cli {
 				$run_state->reset_all_cursors();
 			}
 
-			$reporter               = new Reporter();
-			$notifications_migrator = new NotificationsMigrator( $reporter );
-			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
-			$writer                 = $dry_run ? new Writer( true ) : $this->live_writer();
+			$reporter               = $run->get_reporter();
+			$notifications_migrator = $run->get_notifications_migrator();
+			$migrators              = array_intersect_key( $run->build_migrators(), array_flip( $sections ) );
+			$writer                 = $run->build_writer( $dry_run );
 
 			// Settings are not a section: the processor writes them on every batch, whatever
 			// `--section` asked for, since there is nothing about them to scan or restrict.
-			$options = new OptionsMigrator( $reporter );
+			$options = $run->build_options_migrator();
 
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
-			$processor->init( $this->requirements(), $this->live_writer() );
+			$processor->init( $this->requirements(), $run->build_writer( false ) );
 			$processor->configure_run( $migrators, $writer, $batch_size, $reporter, $options );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
@@ -502,34 +481,18 @@ class Cli {
 	}
 
 	/**
-	 * Build the section migrators, sharing one Reporter.
+	 * Resolve and validate the `--section` option, refusing a slug that names no section.
 	 *
-	 * @param Reporter                   $reporter      Outcome collector shared across every section.
-	 * @param NotificationsMigrator|null $notifications The notifications migrator to use. Passed in by `run`, which
-	 *                                                  also reads the known-losses totals off that same instance.
-	 * @return array<string, MigratorInterface> Migrators keyed by section slug, in section order.
-	 */
-	private function build_migrators( Reporter $reporter, ?NotificationsMigrator $notifications = null ): array {
-		return array(
-			'notifications' => $notifications ?? new NotificationsMigrator( $reporter ),
-			'product-meta'  => new ProductMetaMigrator( $reporter ),
-		);
-	}
-
-	/**
-	 * Resolve and validate the `--section` option, preserving the canonical section order
-	 * regardless of the order requested.
-	 *
-	 * @param array $assoc_args Associative arguments.
+	 * @param MigrationRun $run        The run whose sections these are.
+	 * @param array        $assoc_args Associative arguments.
 	 * @return string[] Section slugs, in canonical order.
 	 */
-	private function resolve_sections( array $assoc_args ): array {
-		if ( empty( $assoc_args['section'] ) ) {
-			return self::SECTION_ORDER;
-		}
+	private function resolve_sections( MigrationRun $run, array $assoc_args ): array {
+		$requested = empty( $assoc_args['section'] )
+			? array()
+			: array_map( 'trim', explode( ',', (string) $assoc_args['section'] ) );
 
-		$requested = array_map( 'trim', explode( ',', (string) $assoc_args['section'] ) );
-		$invalid   = array_diff( $requested, self::SECTION_ORDER );
+		$invalid = $run->unknown_sections( $requested );
 
 		if ( ! empty( $invalid ) ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -542,7 +505,7 @@ class Cli {
 			);
 		}
 
-		return array_values( array_intersect( self::SECTION_ORDER, $requested ) );
+		return $run->resolve_sections( $requested );
 	}
 
 	/**

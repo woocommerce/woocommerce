@@ -8,11 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 
@@ -119,13 +116,13 @@ class ToolsRegistrar {
 		// per-batch already-migrated lookup means resuming behind it costs a re-scan rather
 		// than correctness. Re-walking the whole legacy table is what this migration cannot
 		// afford to repeat, so a run that has nothing left to visit does nothing at all.
-		$notifications_migrator = new NotificationsMigrator( new Reporter() );
+		$run = new MigrationRun();
 
-		$this->refresh_cached_counts( $migration_state, $notifications_migrator );
+		$this->refresh_cached_counts( $migration_state, $run );
 
 		// The denominator the Tools screen shows progress against: how many legacy rows this
 		// run has to walk, whatever the cursor has already been past.
-		$migration_state->set_total( 'notifications', $notifications_migrator->count_remaining() );
+		$migration_state->set_total( 'notifications', $run->get_notifications_migrator()->count_remaining() );
 
 		// Taken once for the whole run rather than per batch, and last of all so nothing after
 		// it can bail and leave the lock behind. It is handed back when the last batch drains,
@@ -152,33 +149,14 @@ class ToolsRegistrar {
 	 * "computed at run start" half of that contract has to happen here, in the callback
 	 * that actually starts a run.
 	 *
-	 * @param MigrationState        $migration_state        Run state to write the refreshed counts into.
-	 * @param NotificationsMigrator $notifications_migrator The notifications section, built by the caller.
+	 * @param MigrationState $migration_state Run state to write the refreshed counts into.
+	 * @param MigrationRun   $run             The run whose migrators are counted.
 	 * @return void
 	 */
-	private function refresh_cached_counts( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): void {
-		foreach ( $this->build_migrators( $notifications_migrator ) as $migrator ) {
-			$slug = $migrator->get_slug();
-
+	private function refresh_cached_counts( MigrationState $migration_state, MigrationRun $run ): void {
+		foreach ( $run->build_migrators() as $slug => $migrator ) {
 			$migration_state->set_count( $slug, $migrator->count_remaining( $migration_state->get_cursor( $slug ) ) );
 		}
-	}
-
-	/**
-	 * Build the section migrators.
-	 *
-	 * Built here rather than resolved from the container, which cannot reflect over their
-	 * constructor arguments - the same reason `MigrationBatchProcessor` builds its own.
-	 *
-	 * @param NotificationsMigrator $notifications_migrator The notifications section, built by the caller
-	 *                                                       so its run-level counters are shared.
-	 * @return MigratorInterface[]
-	 */
-	private function build_migrators( NotificationsMigrator $notifications_migrator ): array {
-		return array(
-			$notifications_migrator,
-			new ProductMetaMigrator( new Reporter() ),
-		);
 	}
 
 	/**
@@ -341,7 +319,7 @@ class ToolsRegistrar {
 			$outstanding[] = __( 'product settings', 'woocommerce' );
 		}
 
-		if ( ! ( new OptionsMigrator( new Reporter() ) )->is_done() ) {
+		if ( ! ( new MigrationRun() )->build_options_migrator()->is_done() ) {
 			$outstanding[] = __( 'store settings', 'woocommerce' );
 		}
 

@@ -8,11 +8,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
@@ -122,9 +122,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	/**
 	 * Init the service.
 	 *
-	 * Only `Requirements` and the writer are injected. The migrators are built here rather
-	 * than resolved from the container, since they take constructor arguments
-	 * `RuntimeContainer` cannot reflect over.
+	 * Only `Requirements` and the writer are injected; `MigrationRun` assembles the rest, the
+	 * same way the CLI and the Tools screen do.
 	 *
 	 * @internal
 	 *
@@ -136,18 +135,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$this->state        = new MigrationState();
 		$this->writer       = $writer;
 
-		$reporter       = new Reporter();
-		$this->reporter = $reporter;
-		$this->options  = new OptionsMigrator( $reporter );
+		$run = new MigrationRun();
 
-		foreach (
-			array(
-				new NotificationsMigrator( $reporter ),
-				new ProductMetaMigrator( $reporter ),
-			) as $migrator
-		) {
-			$this->migrators[ $migrator->get_slug() ] = $migrator;
-		}
+		$this->reporter  = $run->get_reporter();
+		$this->options   = $run->build_options_migrator();
+		$this->migrators = $run->build_migrators();
 	}
 
 	/**
