@@ -254,8 +254,8 @@ class LegacyLinkShim {
 	 *
 	 * A Core row adopted by several legacy rows carries one digest per legacy id, and only
 	 * the one this request used is spent. Written by direct SQL rather than through the CRUD
-	 * layer, for the same reason `disable-legacy-links` is: a CRUD save would bump
-	 * `date_modified_gmt` on a row the shopper only followed a link on.
+	 * layer: a CRUD save would bump `date_modified_gmt` on a row the shopper only followed a
+	 * link on.
 	 *
 	 * @param int    $notification_id Core notification id.
 	 * @param string $meta_key        Meta key the digest is stored under.

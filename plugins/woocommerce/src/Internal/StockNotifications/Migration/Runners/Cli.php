@@ -9,9 +9,6 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\CancellationSourceMiner;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\StatusMapper;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\StatusTransitions;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\EmailSettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
@@ -65,14 +62,6 @@ class Cli {
 	private const DB_VERSION_OPTION = Constants::DB_VERSION_OPTION;
 
 	/**
-	 * Autoloaded flag gating the legacy unsubscribe shim's registration. Only set when a
-	 * migrated row carries a legacy unsubscribe token.
-	 *
-	 * @var string
-	 */
-	private const HAS_LEGACY_LINKS_OPTION = Constants::HAS_LEGACY_LINKS_OPTION;
-
-	/**
 	 * Legacy meta key recording a permanent per-row failure. Cleared by `--retry-failed`.
 	 *
 	 * @var string
@@ -88,40 +77,12 @@ class Cli {
 	private const PRODUCT_META_FAILED_KEY = Constants::PRODUCT_FAILED_META_KEY;
 
 	/**
-	 * Migration marker recording a successful migration onto a Core notification.
-	 *
-	 * @var string
-	 */
-	private const LEGACY_ID_META_KEY = Constants::LEGACY_ID_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy unsubscribe token digest.
-	 *
-	 * @var string
-	 */
-	private const LEGACY_UNSUB_HASH_META_KEY = Constants::LEGACY_UNSUB_HASH_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy verification token digest and its expiry.
-	 *
-	 * @var string
-	 */
-	private const LEGACY_VERIFY_HASH_META_KEY = Constants::LEGACY_VERIFY_HASH_META_KEY;
-
-	/**
 	 * Default batch size for a CLI run. Raised by `--batch-size`; scheduled runs use their
 	 * own, smaller default from `get_default_batch_size()`.
 	 *
 	 * @var int
 	 */
 	private const DEFAULT_BATCH_SIZE = 500;
-
-	/**
-	 * Row count used to page through Core notifications in `verify`.
-	 *
-	 * @var int
-	 */
-	private const ORACLE_BATCH_SIZE = 500;
 
 	/**
 	 * Verifies whether a run may start or continue. Resolved on first use; see `state()`.
@@ -527,141 +488,6 @@ class Cli {
 	}
 
 	/**
-	 * Read-only verification: re-derive expected state via the mappers and diff it against
-	 * what is actually stored. Never writes anything.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     wp wc bis-migrate verify
-	 *
-	 * @param array $args       Positional arguments (unused).
-	 * @param array $assoc_args Associative arguments (unused).
-	 */
-	public function verify( $args, $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- standard WP-CLI command signature.
-		$check = $this->requirements()->check();
-
-		if ( is_wp_error( $check ) ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
-			return;
-		}
-
-		$reporter  = new Reporter();
-		$migrators = $this->build_migrators( $reporter );
-
-		foreach ( self::SECTION_ORDER as $slug ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::log( sprintf( '%-14s %d row(s) still outstanding.', $slug, $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) ) ) );
-		}
-
-		list( $verified, $mismatched, $drifted ) = $this->verify_notification_statuses();
-
-		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::log(
-			sprintf(
-				'%-14s %d migrated row(s) checked against their legacy source; %d status mismatch(es).',
-				'notifications',
-				$verified,
-				$mismatched
-			)
-		);
-
-		if ( $drifted > 0 ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::log(
-				sprintf(
-					'%-14s %d row(s) have moved on since the migration ran (verified, cancelled or notified). Not a mismatch.',
-					'notifications',
-					$drifted
-				)
-			);
-		}
-
-		if ( $mismatched > 0 ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::error( 'Verification found status mismatches. See above.' );
-			return;
-		}
-
-		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::success( 'Verified: current state matches what the mappers derive from the legacy source.' );
-	}
-
-	/**
-	 * Remove the legacy link shim's remaining footprint: both per-notification token
-	 * digests — unsubscribe and verification — and the flag that guards the shim's
-	 * registration. `_wc_bis_legacy_id` survives: it is the idempotency marker, not
-	 * shim-specific.
-	 *
-	 * Both kinds go together on purpose. A partial teardown would leave the shim registered
-	 * for one link kind and silently dead for the other.
-	 *
-	 * Writes by direct SQL, like `Writer`: going through the CRUD layer
-	 * would bump `date_modified_gmt` on every migrated row, rewriting merchant-visible
-	 * history for what is only a marker cleanup.
-	 *
-	 * ## OPTIONS
-	 *
-	 * [--yes]
-	 * : Skip the confirmation prompt.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     wp wc bis-migrate disable-legacy-links --yes
-	 *
-	 * @subcommand disable-legacy-links
-	 *
-	 * @param array $args       Positional arguments (unused).
-	 * @param array $assoc_args Associative arguments (options).
-	 */
-	public function disable_legacy_links( $args, $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- standard WP-CLI command signature.
-		if ( $this->is_processor_enqueued() ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::error(
-				'A migration run is in progress in the background (WooCommerce → Status → Tools). Stop it before continuing.'
-			);
-			return;
-		}
-
-		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::confirm( 'This will permanently remove legacy unsubscribe and verification links. Continue?', $assoc_args );
-
-		if ( ! $this->acquire_lock( 'disable-legacy-links' ) ) {
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::error( 'Could not acquire the migration CLI lock. Another CLI run may already be in progress.' );
-			return;
-		}
-
-		try {
-			global $wpdb;
-
-			$core_meta_table = Tables::core_meta();
-
-			// $core_meta_table is $wpdb->prefix-based, never user input.
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare(
-				"DELETE FROM {$core_meta_table} WHERE meta_key IN ( %s, %s )",
-				self::LEGACY_UNSUB_HASH_META_KEY,
-				self::LEGACY_VERIFY_HASH_META_KEY
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$deleted = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
-
-			delete_option( self::HAS_LEGACY_LINKS_OPTION );
-
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success(
-				sprintf(
-					'Removed %d legacy link token(s) and cleared the legacy-links flag.',
-					false === $deleted ? 0 : (int) $deleted
-				)
-			);
-		} finally {
-			$this->release_lock();
-		}
-	}
-
-	/**
 	 * Build the four migrators, sharing one Reporter and this instance's MigrationState.
 	 *
 	 * @param Reporter                   $reporter      Outcome collector shared across every section.
@@ -790,151 +616,6 @@ class Cli {
 		$result = $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => self::PRODUCT_META_FAILED_KEY ), array( '%s' ) );
 
 		return false === $result ? 0 : (int) $result;
-	}
-
-	/**
-	 * Re-derive the expected status of every migrated Core notification from its legacy
-	 * source and diff it against the status actually stored, paging through by notification
-	 * id. Read-only.
-	 *
-	 * A row whose stored status is reachable from the derived one is counted as drift rather
-	 * than a mismatch: the shopper verified, cancelled or was notified after the run, and the
-	 * legacy source cannot know that. Only an unreachable difference is a real disagreement.
-	 * Timestamps cannot tell the two apart — `date_modified_gmt` is the run time for every
-	 * migrated row, so there is no per-row baseline to compare against.
-	 *
-	 * @return array{0: int, 1: int, 2: int} Tuple of [rows checked, mismatches found, rows that moved on].
-	 */
-	private function verify_notification_statuses(): array {
-		$verified   = 0;
-		$mismatched = 0;
-		$drifted    = 0;
-		$miner      = new CancellationSourceMiner();
-
-		foreach ( $this->each_migrated_notification_page() as $page ) {
-			$sources = $this->fetch_legacy_sources( array_column( $page, 'legacy_id' ) );
-
-			// One query per page, matching what the write path mined per batch.
-			$cancellations = $miner->mine( array_values( $sources ) );
-
-			foreach ( $page as $row ) {
-				$legacy_id = (int) $row['legacy_id'];
-				$source    = $sources[ $legacy_id ] ?? null;
-
-				if ( null === $source ) {
-					// Legacy row is gone; nothing to re-derive against.
-					continue;
-				}
-
-				++$verified;
-
-				$derived = StatusMapper::map( $source, $cancellations[ $legacy_id ] ?? null );
-
-				if ( $derived === $row['status'] ) {
-					continue;
-				}
-
-				if ( StatusTransitions::is_forward( $derived, (string) $row['status'] ) ) {
-					++$drifted;
-					continue;
-				}
-
-				++$mismatched;
-			}
-		}
-
-		return array( $verified, $mismatched, $drifted );
-	}
-
-	/**
-	 * Yield every Core notification carrying a `_wc_bis_legacy_id` marker, one row per
-	 * notification id with its lowest associated legacy id, a page at a time, paging by
-	 * keyset on id. Pages rather than rows, so the caller can fetch a whole page's legacy
-	 * sources in one round trip instead of two queries per row.
-	 *
-	 * The lowest legacy id is used as "the" legacy source for a row that was inserted by the
-	 * migration; a row later adopted by additional legacy rows accumulates further markers
-	 * that this deliberately ignores, since adoption never reconciled status onto the target
-	 * in the first place.
-	 *
-	 * @return \Generator<array<int, array{id: string, status: string, legacy_id: string}>>
-	 */
-	private function each_migrated_notification_page(): \Generator {
-		global $wpdb;
-
-		$core_table      = Tables::core_notifications();
-		$core_meta_table = Tables::core_meta();
-
-		$cursor = 0;
-
-		do {
-			// Table names are $wpdb->prefix-based, never user input; the meta key and the
-			// cursor/limit bounds are passed through $wpdb->prepare() below.
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-			$sql = $wpdb->prepare(
-				"SELECT n.id, n.status, MIN( CAST( m.meta_value AS UNSIGNED ) ) AS legacy_id
-				FROM {$core_table} n
-				INNER JOIN {$core_meta_table} m ON m.notification_id = n.id AND m.meta_key = %s
-				WHERE n.id > %d
-				GROUP BY n.id, n.status
-				ORDER BY n.id ASC
-				LIMIT %d",
-				self::LEGACY_ID_META_KEY,
-				$cursor,
-				self::ORACLE_BATCH_SIZE
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
-			$rows       = (array) $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
-			$rows_count = count( $rows );
-
-			foreach ( $rows as $row ) {
-				$cursor = max( $cursor, (int) $row['id'] );
-			}
-
-			if ( ! empty( $rows ) ) {
-				yield $rows;
-			}
-		} while ( self::ORACLE_BATCH_SIZE === $rows_count );
-	}
-
-	/**
-	 * Fetch a page of legacy rows in one query, regardless of how many ids are asked for.
-	 *
-	 * A legacy id with no row left in the legacy table is absent from the result, which is
-	 * how the caller recognises a source that is gone. No legacy meta is read: `StatusMapper`
-	 * derives status from the columns and the activity log alone.
-	 *
-	 * @param array $legacy_ids Legacy notification ids.
-	 * @return array<int, array<string,mixed>> Legacy rows, keyed by legacy id.
-	 */
-	private function fetch_legacy_sources( array $legacy_ids ): array {
-		global $wpdb;
-
-		$legacy_ids = array_values( array_unique( array_map( 'intval', $legacy_ids ) ) );
-
-		if ( empty( $legacy_ids ) ) {
-			return array();
-		}
-
-		$table        = Tables::legacy_notifications();
-		$placeholders = implode( ', ', array_fill( 0, count( $legacy_ids ), '%d' ) );
-
-		// Table names are $wpdb->prefix-based, never user input; every id is bound below.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$rows = (array) $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id IN ( {$placeholders} )", $legacy_ids ),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-
-		$sources = array();
-
-		foreach ( $rows as $row ) {
-			$sources[ (int) $row['id'] ] = $row;
-		}
-
-		return $sources;
 	}
 
 	/**

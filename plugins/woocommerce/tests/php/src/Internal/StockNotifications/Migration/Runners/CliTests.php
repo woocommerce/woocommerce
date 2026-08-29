@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\Cli;
@@ -14,8 +13,7 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for `wp wc bis-migrate`: the gates every subcommand passes through, the concurrency
- * refusals in both directions, the CLI-only run knobs, and the two commands that only exist
- * here - `disable-legacy-links`.
+ * refusals in both directions, and the CLI-only run knobs.
  */
 class CliTests extends WC_Unit_Test_Case {
 
@@ -147,60 +145,39 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox disable-legacy-links should refuse while a background run is enqueued.
-	 */
-	public function test_disable_legacy_links_refuses_while_the_processor_is_enqueued(): void {
-		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
-		$this->set_processor_enqueued( true );
-
-		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
-
-		$this->assertStringContainsString( 'in progress in the background', MockWPCLI::$last_error_message );
-		$this->assertSame( 'yes', get_option( 'wc_bis_migration_has_legacy_links' ) );
-	}
-
-	/**
-	 * @testdox --yes should skip the confirmation prompt on every command that writes.
+	 * @testdox --yes should skip the confirmation prompt on a run that writes.
 	 */
 	public function test_yes_skips_the_confirmation_prompt(): void {
 		$this->seed_notifications( 1 );
-		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
 
 		$this->cli()->run( array(), array( 'yes' => true ) );
-		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
 
-		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
 		$this->assertSame( array(), MockWPCLI::$prompted_confirmations );
 	}
 
 	/**
-	 * @testdox every writing command should still confirm when --yes is absent.
+	 * @testdox a run should still confirm when --yes is absent.
 	 */
-	public function test_every_writing_command_confirms_without_yes(): void {
+	public function test_a_run_confirms_without_yes(): void {
 		$this->seed_notifications( 1 );
-		update_option( 'wc_bis_migration_has_legacy_links', 'yes' );
 
 		$this->cli()->run( array(), array() );
-		$this->cli()->disable_legacy_links( array(), array() );
 
-		$this->assertCount( 2, MockWPCLI::$prompted_confirmations );
+		$this->assertCount( 1, MockWPCLI::$prompted_confirmations );
 	}
 
 	/**
-	 * @testdox a held CLI lock should stop run and disable-legacy-links alike.
+	 * @testdox a held CLI lock should stop a run.
 	 */
-	public function test_a_held_lock_stops_every_writing_command(): void {
+	public function test_a_held_lock_stops_a_run(): void {
 		$this->seed_notifications( 1 );
 
 		$this->state->acquire_lock( 'another run (pid 1)' );
 
 		$this->cli()->run( array(), array( 'yes' => true ) );
+
 		$this->assertStringContainsString( 'Could not acquire the migration CLI lock', MockWPCLI::$last_error_message );
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
-
-		MockWPCLI::reset();
-		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
-		$this->assertStringContainsString( 'Could not acquire the migration CLI lock', MockWPCLI::$last_error_message );
 	}
 
 	/**
@@ -457,178 +434,6 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox verify should report a status no shopper action could have produced as a mismatch.
-	 */
-	public function test_verify_reports_a_status_mismatch(): void {
-		$this->seed_notifications( 1 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		// Nothing in Core moves a live row back to pending, so this is a real disagreement
-		// rather than the row moving on.
-		$this->set_core_status( LegacyStore::get_core_rows()[0]['id'], NotificationStatus::PENDING );
-
-		MockWPCLI::reset();
-		$this->cli()->verify( array(), array() );
-
-		$this->assertStringContainsString( 'status mismatches', MockWPCLI::$last_error_message );
-		$this->assertSame( '', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox verify should report a row the shopper moved on as drift, not as a mismatch.
-	 * @dataProvider provider_forward_transitions
-	 *
-	 * @param string $status Status the shopper's own action would leave behind.
-	 */
-	public function test_verify_reports_a_forward_transition_as_drift( string $status ): void {
-		$this->seed_notifications( 1 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$this->set_core_status( LegacyStore::get_core_rows()[0]['id'], $status );
-
-		MockWPCLI::reset();
-		$this->cli()->verify( array(), array() );
-
-		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-		$this->assertStringContainsString( 'have moved on since the migration ran', implode( "\n", MockWPCLI::$all_log_messages ) );
-	}
-
-	/**
-	 * Statuses reachable from `active`, the status a seeded row migrates as.
-	 *
-	 * @return array
-	 */
-	public function provider_forward_transitions(): array {
-		return array(
-			'cancelled after the run' => array( NotificationStatus::CANCELLED ),
-			'notified after the run'  => array( NotificationStatus::SENT ),
-		);
-	}
-
-	/**
-	 * @testdox verify should treat a pending row verified through a legacy link as drift.
-	 */
-	public function test_verify_treats_a_verified_pending_row_as_drift(): void {
-		LegacyStore::add_notification(
-			array(
-				'product_id'  => $this->product_id,
-				'is_verified' => 'no',
-				'is_active'   => 'off',
-			)
-		);
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$row = LegacyStore::get_core_rows()[0];
-
-		$this->assertSame( NotificationStatus::PENDING, $row['status'] );
-
-		$this->set_core_status( $row['id'], NotificationStatus::ACTIVE );
-
-		MockWPCLI::reset();
-		$this->cli()->verify( array(), array() );
-
-		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox verify should pass on an untouched migration and write nothing.
-	 */
-	public function test_verify_passes_on_an_untouched_migration(): void {
-		$this->seed_notifications( 2 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$before = LegacyStore::get_core_rows();
-
-		MockWPCLI::reset();
-		$this->cli()->verify( array(), array() );
-
-		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-		$this->assertSame( $before, LegacyStore::get_core_rows() );
-	}
-
-	/**
-	 * @testdox verify should read each page's legacy sources in one round trip, not per row.
-	 */
-	public function test_verify_reads_legacy_sources_per_page(): void {
-		$this->seed_notifications( 6, true );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		MockWPCLI::reset();
-		$queries = $this->record_legacy_reads(
-			function () {
-				$this->cli()->verify( array(), array() );
-			}
-		);
-
-		// One page of markers, so one row query and one meta query for the whole page. The
-		// per-row version issued two per row.
-		$this->assertLessThanOrEqual( 2, count( $queries ), 'Legacy sources must be fetched a page at a time.' );
-		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox a legacy flag no mapper reads should not make verify report anything.
-	 */
-	public function test_a_legacy_key_outside_the_write_path_is_ignored(): void {
-		$legacy_ids = $this->seed_notifications( 1 );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		// `awaiting_verification` is unreliable — legacy deletes it on verify, on cancel and
-		// on deactivate — so no mapper consults it, at write time or here.
-		LegacyStore::add_meta( $legacy_ids[0], 'awaiting_verification', 'yes' );
-
-		MockWPCLI::reset();
-		$this->cli()->verify( array(), array() );
-
-		$this->assertStringContainsString( 'Verified', MockWPCLI::$last_success_message );
-	}
-
-	/**
-	 * @testdox disable-legacy-links should drop both token digests and the flag but keep the legacy id marker.
-	 */
-	public function test_disable_legacy_links_keeps_the_idempotency_marker(): void {
-		$this->seed_notifications( 1, true );
-
-		$pending = LegacyStore::add_notification(
-			array(
-				'product_id'  => $this->product_id,
-				'is_verified' => 'no',
-				'is_active'   => 'off',
-				'user_email'  => 'pending@example.com',
-			)
-		);
-		LegacyStore::add_verification_data( $pending, 'a-verification-code', time() );
-
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash' ) );
-		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) );
-		$this->assertSame( 'yes', get_option( 'wc_bis_migration_has_legacy_links' ) );
-
-		MockWPCLI::reset();
-		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
-
-		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash' ) );
-		$this->assertSame( array(), LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) );
-		$this->assertNotEmpty( LegacyStore::get_core_meta( '_wc_bis_legacy_id' ) );
-		$this->assertFalse( get_option( 'wc_bis_migration_has_legacy_links' ) );
-	}
-
-	/**
-	 * @testdox a run after disable-legacy-links should still write nothing.
-	 */
-	public function test_a_run_after_disable_legacy_links_writes_nothing(): void {
-		$this->seed_notifications( 2, true );
-		$this->cli()->run( array(), array( 'yes' => true ) );
-
-		$this->cli()->disable_legacy_links( array(), array( 'yes' => true ) );
-
-		MockWPCLI::reset();
-		$this->cli()->run( array(), array( 'yes' => true ) );
-		$this->assertCount( 2, LegacyStore::get_core_rows(), 'The legacy id marker still makes the run idempotent.' );
-	}
-
-	/**
 	 * @testdox a second run should write nothing and report nothing outstanding.
 	 */
 	public function test_a_second_run_writes_nothing(): void {
@@ -667,42 +472,6 @@ class CliTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', $recorder );
 
 		$this->assertSame( array(), $counted, 'status must read the cached counts, never compute them.' );
-	}
-
-	/**
-	 * Run a callback and collect the reads it makes against the legacy tables while
-	 * re-deriving a row's expected state. Aggregates are left out: both commands report a
-	 * section's outstanding count, which is one COUNT(*) regardless of row count.
-	 *
-	 * @param callable $callback Callback to run.
-	 * @return string[] The recorded queries.
-	 */
-	private function record_legacy_reads( callable $callback ): array {
-		global $wpdb;
-
-		$queries = array();
-		$tables  = array( $wpdb->prefix . 'woocommerce_bis_notifications ', $wpdb->prefix . 'woocommerce_bis_notificationsmeta ' );
-
-		$recorder = function ( $query ) use ( &$queries, $tables ) {
-			if ( 0 !== stripos( ltrim( (string) $query ), 'SELECT' ) || false !== stripos( (string) $query, 'COUNT(' ) ) {
-				return $query;
-			}
-
-			foreach ( $tables as $table ) {
-				if ( false !== stripos( (string) $query, ' ' . $table ) ) {
-					$queries[] = (string) $query;
-					break;
-				}
-			}
-
-			return $query;
-		};
-
-		add_filter( 'query', $recorder );
-		$callback();
-		remove_filter( 'query', $recorder );
-
-		return $queries;
 	}
 
 	/**
@@ -753,23 +522,6 @@ class CliTests extends WC_Unit_Test_Case {
 		$state['lock']['acquired_at'] = time() - $seconds;
 
 		update_option( 'wc_bis_migration_state', $state );
-	}
-
-	/**
-	 * Set a Core notification's status by direct SQL, as a merchant edit in admin would.
-	 *
-	 * @param int|string $notification_id Core notification id.
-	 * @param string     $status          New status.
-	 * @return void
-	 */
-	private function set_core_status( $notification_id, string $status ): void {
-		global $wpdb;
-
-		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prefix . 'wc_stock_notifications',
-			array( 'status' => $status ),
-			array( 'id' => (int) $notification_id )
-		);
 	}
 
 	/**
