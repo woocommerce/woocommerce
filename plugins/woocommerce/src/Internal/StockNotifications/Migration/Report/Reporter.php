@@ -260,8 +260,8 @@ class Reporter {
 			$lines[] = sprintf(
 				/* translators: %d: number of migrated sign-ups that never had an unsubscribe link */
 				_n(
-					'%d sign-up moved without an unsubscribe link, because it never had one in a delivered email. Nothing is lost.',
-					'%d sign-ups moved without an unsubscribe link, because they never had one in a delivered email. Nothing is lost.',
+					'%d sign-up moved without an unsubscribe link, because it never had one in a delivered email.',
+					'%d sign-ups moved without an unsubscribe link, because they never had one in a delivered email.',
 					$rows_without_hash,
 					'woocommerce'
 				),

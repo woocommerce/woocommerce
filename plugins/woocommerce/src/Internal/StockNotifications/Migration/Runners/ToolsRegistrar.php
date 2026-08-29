@@ -184,7 +184,7 @@ class ToolsRegistrar {
 			$notifications_migrator,
 			new ProductMetaMigrator( $reporter ),
 			new EmailSettingsMigrator( $migration_state, $reporter ),
-			new SettingsMigrator( $migration_state, $reporter ),
+			new SettingsMigrator( $migration_state ),
 		);
 	}
 

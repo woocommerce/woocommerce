@@ -671,7 +671,7 @@ class Cli {
 			'notifications' => $notifications ?? new NotificationsMigrator( $reporter ),
 			'product-meta'  => new ProductMetaMigrator( $reporter ),
 			'emails'        => new EmailSettingsMigrator( $this->state(), $reporter ),
-			'settings'      => new SettingsMigrator( $this->state(), $reporter ),
+			'settings'      => new SettingsMigrator( $this->state() ),
 		);
 	}
 

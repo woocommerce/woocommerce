@@ -62,56 +62,11 @@ class SettingsMigrator implements MigratorInterface {
 	);
 
 	/**
-	 * Legacy options with no Core `Config` equivalent, counted and reported but never
-	 * written. See the plan's "Known losses" section.
-	 *
-	 * @var string[]
-	 */
-	private const KNOWN_LOSS_OPTIONS = array(
-		'wc_bis_stock_threshold',
-		'wc_bis_opt_in_required',
-		'wc_bis_show_product_registrations_count',
-		'wc_bis_loop_signup_prompt_status',
-		'wc_bis_create_new_account_optin_text',
-		'wc_bis_product_registrations_text',
-		'wc_bis_product_registrations_plural_text',
-		'wc_bis_form_header_text',
-		'wc_bis_form_header_signed_up_text',
-		'wc_bis_form_header_signed_up_link_text',
-		'wc_bis_form_button_text',
-		'wc_bis_loop_signup_prompt_text',
-		'wc_bis_loop_signup_prompt_link_text',
-		'wc_bis_loop_signup_prompt_signed_up_text',
-		'wc_bis_loop_signup_prompt_signed_up_link_text',
-	);
-
-	/**
-	 * Outcome code for an option with no Core home, counted but never written.
-	 *
-	 * @var string
-	 */
-	private const OUTCOME_NO_CORE_HOME = 'no_core_home';
-
-	/**
 	 * Migration run state, used to track which options have already been migrated.
 	 *
 	 * @var MigrationState
 	 */
 	private MigrationState $state;
-
-	/**
-	 * Outcome reporter.
-	 *
-	 * @var Reporter
-	 */
-	private Reporter $reporter;
-
-	/**
-	 * Whether the known-losses count has already been reported this run.
-	 *
-	 * @var bool
-	 */
-	private bool $known_losses_reported = false;
 
 	/**
 	 * Legacy option keys already visited by this instance, so they leave the outstanding
@@ -125,12 +80,10 @@ class SettingsMigrator implements MigratorInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @param MigrationState $state    Migration run state.
-	 * @param Reporter       $reporter Outcome reporter.
+	 * @param MigrationState $state Migration run state.
 	 */
-	public function __construct( MigrationState $state, Reporter $reporter ) {
-		$this->state    = $state;
-		$this->reporter = $reporter;
+	public function __construct( MigrationState $state ) {
+		$this->state = $state;
 	}
 
 	/**
@@ -228,34 +181,6 @@ class SettingsMigrator implements MigratorInterface {
 			$counts[ Reporter::OUTCOME_MIGRATED ] = ( $counts[ Reporter::OUTCOME_MIGRATED ] ?? 0 ) + 1;
 		}
 
-		$this->report_known_losses();
-
 		return $counts;
-	}
-
-	/**
-	 * Count and report the legacy options that have no Core home, once per run.
-	 *
-	 * These options are never written; they are reported so the merchant sees them as a
-	 * stated decision rather than an unexplained gap.
-	 *
-	 * @return void
-	 */
-	private function report_known_losses(): void {
-		if ( $this->known_losses_reported ) {
-			return;
-		}
-
-		$this->known_losses_reported = true;
-		$row_id                      = 0;
-
-		foreach ( self::KNOWN_LOSS_OPTIONS as $legacy_key ) {
-			if ( null === get_option( $legacy_key, null ) ) {
-				continue;
-			}
-
-			++$row_id;
-			$this->reporter->record( self::SLUG, self::OUTCOME_NO_CORE_HOME, $row_id );
-		}
 	}
 }

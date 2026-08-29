@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Mig
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\DbWriter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\NullWriter;
 use WC_Unit_Test_Case;
@@ -181,7 +180,7 @@ class SettingsMigratorMigrationTests extends WC_Unit_Test_Case {
 	 * @return SettingsMigrator
 	 */
 	private function build_migrator(): SettingsMigrator {
-		return new SettingsMigrator( $this->state, new Reporter() );
+		return new SettingsMigrator( $this->state );
 	}
 
 	/**

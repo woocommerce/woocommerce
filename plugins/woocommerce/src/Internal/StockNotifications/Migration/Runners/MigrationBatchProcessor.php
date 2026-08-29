@@ -138,7 +138,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 				new NotificationsMigrator( $reporter ),
 				new ProductMetaMigrator( $reporter ),
 				new EmailSettingsMigrator( $this->state, $reporter ),
-				new SettingsMigrator( $this->state, $reporter ),
+				new SettingsMigrator( $this->state ),
 			) as $migrator
 		) {
 			$this->migrators[ $migrator->get_slug() ] = $migrator;
