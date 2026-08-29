@@ -3142,10 +3142,56 @@ body.woocommerce_page_wc-orders {
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
 	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
-	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
-	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
-		max-width: 1200px;
-		margin-inline: auto;
+	&.woocommerce-feature-enabled-order-detail-redesign {
+		// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
+		.wrap:has(#poststuff) {
+			max-width: 1200px;
+			margin-inline: auto;
+			// Anchor for the absolutely-positioned prev/next nav below.
+			position: relative;
+		}
+
+		// Prev/next order navigation in the H1 row. Absolutely positioned so
+		// it sits on the opposite side of the title + "Add new" action and
+		// stays vertically centered with the H1 text regardless of H1 height.
+		// `right: 20px` matches WP admin's standard right gutter so the nav
+		// aligns with the right edge of the postbox column (not the .wrap edge).
+		.woocommerce-order-list-nav {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+			position: absolute;
+			right: 20px;
+			top: 24px;
+			transform: translateY(-50%);
+		}
+
+		// Layout-only overrides on top of .components-button.is-tertiary.
+		// Color, hover, focus ring, padding, font, and radius all come from
+		// the design system; we only keep what the component doesn't supply.
+		.woocommerce-order-list-nav__button {
+			gap: 2px;
+			text-decoration: none;
+
+			&[aria-disabled="true"] {
+				// .components-button.is-tertiary's disabled handling only
+				// fires on the real :disabled pseudo-class. The inactive
+				// nav variant renders as <span aria-disabled="true">, so we
+				// still need to mute color and lock interactions here.
+				color: var(--wpds-color-fg-interactive-neutral-disabled, #757575);
+				cursor: default;
+				pointer-events: none;
+			}
+
+			svg {
+				flex-shrink: 0;
+			}
+		}
+
+		// Mirror the chevrons in RTL contexts so "Prev" still points to older orders.
+		html[dir="rtl"] & .woocommerce-order-list-nav__button svg {
+			transform: scaleX(-1);
+		}
 	}
 
 	.tablenav .one-page .displaying-num {
