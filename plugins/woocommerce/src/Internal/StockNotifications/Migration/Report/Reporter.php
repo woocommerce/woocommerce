@@ -85,13 +85,6 @@ class Reporter {
 	private const LOSS_PRODUCT_MISSING = 'product_missing';
 
 	/**
-	 * Cached known-losses key: migrated rows that lose their eventual legacy re-fire.
-	 *
-	 * @var string
-	 */
-	private const LOSS_RECURRING = 'recurring_lost';
-
-	/**
 	 * Cached known-losses key: migrated rows with no legacy unsubscribe secret to preserve.
 	 *
 	 * @var string
@@ -236,30 +229,19 @@ class Reporter {
 	 *
 	 * Each line is translated and carries its own count, so a zero-count loss can be omitted by
 	 * the caller rather than presented as if it happened. Counts are supplied by the caller
-	 * rather than read from $this->counts, since some of these populations - recurring
-	 * notifications, rows missing a hash - are not outcome codes but sub-counts a migrator
-	 * derives while producing OUTCOME_MIGRATED rows.
+	 * rather than read from $this->counts, since rows missing a hash are not an outcome code
+	 * but a sub-count a migrator derives while producing OUTCOME_MIGRATED rows.
 	 *
-	 * @param int $recurring_lost     Rows mapped to `sent`, which legacy would have notified again on the next restock and Core will not.
+	 * A row delivered under legacy is not a loss: the extension deactivates a notification once
+	 * it sends it, and its only type is one-time, so Core's terminal `sent` is the same state.
+	 * A customer who wants the next restock signs up again, which Core allows for a sent row.
+	 *
 	 * @param int $links_lost_on_skip Skipped rows (email_too_long, invalid_email, product_missing) whose already-sent links stop working.
 	 * @param int $rows_without_hash  Migrated rows with no `_hash_key`/`_hash_iv`, so no Core token - not a lost link, counted separately to distinguish pre-1.2.0 data from a bug.
 	 * @return array<int, string> Translated summary lines, one per non-empty population.
 	 */
-	public function get_known_losses_summary( int $recurring_lost, int $links_lost_on_skip, int $rows_without_hash ): array {
+	public function get_known_losses_summary( int $links_lost_on_skip, int $rows_without_hash ): array {
 		$lines = array();
-
-		if ( $recurring_lost > 0 ) {
-			$lines[] = sprintf(
-				/* translators: %d: number of subscribers who were already notified */
-				_n(
-					'%d subscriber was already notified and would have been notified again on the next restock. That no longer happens: they need to sign up again.',
-					'%d subscribers were already notified and would have been notified again on the next restock. That no longer happens: they need to sign up again.',
-					$recurring_lost,
-					'woocommerce'
-				),
-				$recurring_lost
-			);
-		}
 
 		if ( $links_lost_on_skip > 0 ) {
 			$lines[] = sprintf(
@@ -309,7 +291,6 @@ class Reporter {
 			self::LOSS_EMAIL_TOO_LONG    => (int) ( $section[ self::OUTCOME_EMAIL_TOO_LONG ] ?? 0 ),
 			self::LOSS_INVALID_EMAIL     => (int) ( $section[ self::OUTCOME_INVALID_EMAIL ] ?? 0 ),
 			self::LOSS_PRODUCT_MISSING   => (int) ( $section[ self::OUTCOME_PRODUCT_MISSING ] ?? 0 ),
-			self::LOSS_RECURRING         => $migrator->get_recurring_lost_count(),
 			self::LOSS_ROWS_WITHOUT_HASH => $migrator->get_rows_without_hash_count(),
 		);
 	}
@@ -331,7 +312,6 @@ class Reporter {
 		}
 
 		return $this->get_known_losses_summary(
-			(int) ( $values[ self::LOSS_RECURRING ] ?? 0 ),
 			$links_lost_on_skip,
 			(int) ( $values[ self::LOSS_ROWS_WITHOUT_HASH ] ?? 0 )
 		);

@@ -333,7 +333,6 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$this->assertSame( NotificationStatus::SENT, $row['status'] );
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', 1600000200 ), $row['date_notified_gmt'] );
 		$this->assertSame( gmdate( 'Y-m-d H:i:s', 1600000200 ), $row['date_last_attempt_gmt'] );
-		$this->assertSame( 1, $this->migrator->get_recurring_lost_count() );
 	}
 
 	/**

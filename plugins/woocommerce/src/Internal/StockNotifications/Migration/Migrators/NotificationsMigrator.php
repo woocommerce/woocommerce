@@ -174,14 +174,6 @@ class NotificationsMigrator implements MigratorInterface {
 	private Reporter $reporter;
 
 	/**
-	 * Running count of migrated rows mapped to `sent`, which lose their eventual
-	 * legacy re-fire under Core's terminal `sent` status. See Known losses.
-	 *
-	 * @var int
-	 */
-	private int $recurring_lost_count = 0;
-
-	/**
 	 * Running count of migrated or adopted rows with no `_hash_key`/`_hash_iv`, so no
 	 * legacy unsubscribe token could be computed. Not a lost link: legacy mints these
 	 * lazily, so a row without them never had one.
@@ -338,10 +330,6 @@ class NotificationsMigrator implements MigratorInterface {
 					'meta'    => $this->build_meta( $legacy_id, $legacy_row, $row_meta, $status, $writer ),
 				);
 				$insert_legacy_ids[] = $legacy_id;
-
-				if ( NotificationStatus::SENT === $status ) {
-					++$this->recurring_lost_count;
-				}
 			} catch ( \Throwable $e ) {
 				$this->fail_row( $legacy_id, $writer );
 				$this->record_outcome( $outcomes, Reporter::OUTCOME_FAILED, $legacy_id );
@@ -374,16 +362,6 @@ class NotificationsMigrator implements MigratorInterface {
 	 */
 	public function get_rows_without_hash_count(): int {
 		return $this->rows_without_hash_count;
-	}
-
-	/**
-	 * Rows mapped to `sent` that lose their eventual legacy re-fire, accumulated across
-	 * every migrate_batch() call on this instance. See Known losses.
-	 *
-	 * @return int
-	 */
-	public function get_recurring_lost_count(): int {
-		return $this->recurring_lost_count;
 	}
 
 	/**
