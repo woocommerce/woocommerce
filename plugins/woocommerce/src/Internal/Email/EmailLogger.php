@@ -130,6 +130,14 @@ class EmailLogger implements RegisterHooksInterface {
 			$message = sprintf( '%s "%s"%s failed to send%s', $type_label, $email_id, $object_label, $reason );
 		}
 
+		// Opt delivery failures into remote logging so proactive support can detect
+		// silently-broken transactional email (e.g. order confirmations / invoices)
+		// without the merchant noticing. Consumed by RemoteLogger::should_handle().
+		// The recipient is already redacted above; successful sends are not shipped.
+		if ( ! $success ) {
+			$context['remote-logging'] = true;
+		}
+
 		$level = $success ? WC_Log_Levels::INFO : WC_Log_Levels::WARNING;
 		wc_get_logger()->log( $level, $message, $context );
 

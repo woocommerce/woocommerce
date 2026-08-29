@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Opt transactional email send failures into remote logging so proactive support can detect silently-broken order emails. Recipient remains redacted; successful sends are not shipped.
