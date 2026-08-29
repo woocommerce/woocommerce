@@ -38,13 +38,6 @@ class ToolsRegistrar {
 	private const SUBSCRIBERS_SECTION = 'notifications';
 
 	/**
-	 * Cells in the text progress bar. Text rather than markup: the Tools description is run
-	 * through `wp_kses_post()`, and a bar built from characters cannot be filtered away or
-	 * misrender against a merchant's admin colour scheme.
-	 */
-	private const PROGRESS_BAR_CELLS = 20;
-
-	/**
 	 * Add the migration's start/stop entry to the Tools list.
 	 *
 	 * @internal
@@ -267,7 +260,7 @@ class ToolsRegistrar {
 
 		$as_of     = wc_get_container()->get( Reporter::class )->format_site_time( (int) $cached['at'] );
 		$remaining = (int) $cached['count'];
-		$progress  = $this->get_progress_bar( $migration_state, $remaining );
+		$progress  = $this->get_progress( $migration_state, $remaining );
 
 		if ( 0 === $remaining ) {
 			$headline = sprintf(
@@ -307,18 +300,18 @@ class ToolsRegistrar {
 	}
 
 	/**
-	 * A text progress bar for the subscriber section, against the total the last run started
-	 * from.
+	 * How far through the subscriber section a run has got, against the total the last run
+	 * started from.
 	 *
-	 * Empty while no run has recorded a total, since a bar with no denominator would have to
-	 * invent one. Progress is clamped: legacy rows added after a run started can push the
+	 * Empty while no run has recorded a total, since a percentage with no denominator would
+	 * have to invent one. Clamped: legacy rows added after a run started can push the
 	 * remaining count above the total, and a merchant reading "-3%" learns nothing.
 	 *
 	 * @param MigrationState $migration_state Run state holding the cached total.
 	 * @param int            $remaining       Subscriber rows left to check.
 	 * @return string
 	 */
-	private function get_progress_bar( MigrationState $migration_state, int $remaining ): string {
+	private function get_progress( MigrationState $migration_state, int $remaining ): string {
 		$total = $migration_state->get_total( self::SUBSCRIBERS_SECTION );
 
 		if ( null === $total || $total <= 0 ) {
@@ -326,16 +319,13 @@ class ToolsRegistrar {
 		}
 
 		$checked = max( 0, min( $total, $total - $remaining ) );
-		$percent = (int) floor( ( $checked / $total ) * 100 );
-		$filled  = (int) round( ( $percent / 100 ) * self::PROGRESS_BAR_CELLS );
 
 		return sprintf(
-			/* translators: 1: text progress bar, 2: percentage checked, 3: number of subscribers checked, 4: total number of subscribers */
-			__( '%1$s %2$d%% (%3$s of %4$s checked).', 'woocommerce' ),
-			str_repeat( '▮', $filled ) . str_repeat( '▯', self::PROGRESS_BAR_CELLS - $filled ),
-			$percent,
+			/* translators: 1: number of subscribers checked, 2: total number of subscribers, 3: percentage checked */
+			__( '%1$s of %2$s checked (%3$d%%).', 'woocommerce' ),
 			number_format_i18n( $checked ),
-			number_format_i18n( $total )
+			number_format_i18n( $total ),
+			(int) floor( ( $checked / $total ) * 100 )
 		);
 	}
 

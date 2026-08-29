@@ -240,8 +240,8 @@ class Reporter {
 	 * notifications, rows missing a hash - are not outcome codes but sub-counts a migrator
 	 * derives while producing OUTCOME_MIGRATED rows.
 	 *
-	 * @param int $recurring_lost     Rows mapped to `sent` that would have re-fired on a future restock under legacy.
-	 * @param int $links_lost_on_skip Predicate skips (email_too_long, invalid_email, product_missing) whose legacy links stop working.
+	 * @param int $recurring_lost     Rows mapped to `sent`, which legacy would have notified again on the next restock and Core will not.
+	 * @param int $links_lost_on_skip Skipped rows (email_too_long, invalid_email, product_missing) whose already-sent links stop working.
 	 * @param int $rows_without_hash  Migrated rows with no `_hash_key`/`_hash_iv`, so no Core token - not a lost link, counted separately to distinguish pre-1.2.0 data from a bug.
 	 * @return array<int, string> Translated summary lines, one per non-empty population.
 	 */
@@ -250,10 +250,10 @@ class Reporter {
 
 		if ( $recurring_lost > 0 ) {
 			$lines[] = sprintf(
-				/* translators: %d: number of notifications */
+				/* translators: %d: number of subscribers who were already notified */
 				_n(
-					'%d notification that would have re-fired on a future restock will not re-fire under Core.',
-					'%d notifications that would have re-fired on a future restock will not re-fire under Core.',
+					'%d subscriber was already notified and would have been notified again on the next restock. That no longer happens: they need to sign up again.',
+					'%d subscribers were already notified and would have been notified again on the next restock. That no longer happens: they need to sign up again.',
 					$recurring_lost,
 					'woocommerce'
 				),
@@ -263,10 +263,10 @@ class Reporter {
 
 		if ( $links_lost_on_skip > 0 ) {
 			$lines[] = sprintf(
-				/* translators: %d: number of legacy links */
+				/* translators: %d: number of skipped sign-ups whose old links stop working */
 				_n(
-					'%d customer\'s legacy link will stop working, because the row it pointed to was skipped and has no Core notification.',
-					'%d customers\' legacy links will stop working, because the rows they pointed to were skipped and have no Core notification.',
+					'%d sign-up could not be moved, so the links in the emails it already sent stop working.',
+					'%d sign-ups could not be moved, so the links in the emails they already sent stop working.',
 					$links_lost_on_skip,
 					'woocommerce'
 				),
@@ -276,10 +276,10 @@ class Reporter {
 
 		if ( $rows_without_hash > 0 ) {
 			$lines[] = sprintf(
-				/* translators: %d: number of migrated rows without a legacy unsubscribe hash */
+				/* translators: %d: number of migrated sign-ups that never had an unsubscribe link */
 				_n(
-					'%d migrated row had no legacy unsubscribe secret to preserve; it never had a link in a delivered email.',
-					'%d migrated rows had no legacy unsubscribe secret to preserve; they never had a link in a delivered email.',
+					'%d sign-up moved without an unsubscribe link, because it never had one in a delivered email. Nothing is lost.',
+					'%d sign-ups moved without an unsubscribe link, because they never had one in a delivered email. Nothing is lost.',
 					$rows_without_hash,
 					'woocommerce'
 				),

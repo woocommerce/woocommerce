@@ -229,8 +229,7 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 
 		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
 
-		$this->assertStringContainsString( '60% (6 of 10 checked)', $desc );
-		$this->assertStringContainsString( '▮▮▮▮▮▮▮▮▮▮▮▮▯▯▯▯▯▯▯▯', $desc );
+		$this->assertStringContainsString( '6 of 10 checked (60%)', $desc );
 	}
 
 	/**
@@ -242,7 +241,7 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
 
 		$this->assertStringContainsString( '4 subscribers left to check', $desc );
-		$this->assertStringNotContainsString( 'checked)', $desc, 'A bar with no denominator would have to invent one.' );
+		$this->assertStringNotContainsString( 'checked', $desc, 'A percentage with no denominator would have to invent one.' );
 	}
 
 	/**
