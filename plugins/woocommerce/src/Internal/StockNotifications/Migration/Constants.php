@@ -26,12 +26,13 @@ final class Constants {
 	public const LEGACY_NOTIFICATIONS_TABLE = 'woocommerce_bis_notifications';
 
 	/**
-	 * The migration's sections, in the order they must run: settings land last, so a run cut
-	 * short never leaves Core reading settings for data that has not migrated yet.
+	 * The migration's batched sections, in the order they run. Settings are not among them:
+	 * they are a fixed set of values `OptionsMigrator` writes on every batch, not something
+	 * to scan through.
 	 *
 	 * @var string[]
 	 */
-	public const SECTION_ORDER = array( 'notifications', 'product-meta', 'emails', 'settings' );
+	public const SECTION_ORDER = array( 'notifications', 'product-meta' );
 
 	/**
 	 * Legacy notifications meta table, unprefixed.

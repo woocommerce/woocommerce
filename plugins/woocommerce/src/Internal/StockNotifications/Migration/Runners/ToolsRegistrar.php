@@ -8,13 +8,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\EmailSettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 
@@ -159,7 +157,7 @@ class ToolsRegistrar {
 	 * @return void
 	 */
 	private function refresh_cached_counts( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): void {
-		foreach ( $this->build_migrators( $migration_state, $notifications_migrator ) as $migrator ) {
+		foreach ( $this->build_migrators( $notifications_migrator ) as $migrator ) {
 			$slug = $migrator->get_slug();
 
 			$migration_state->set_count( $slug, $migrator->count_remaining( $migration_state->get_cursor( $slug ) ) );
@@ -167,24 +165,19 @@ class ToolsRegistrar {
 	}
 
 	/**
-	 * Build the four section migrators.
+	 * Build the section migrators.
 	 *
 	 * Built here rather than resolved from the container, which cannot reflect over their
 	 * constructor arguments - the same reason `MigrationBatchProcessor` builds its own.
 	 *
-	 * @param MigrationState        $migration_state        Run state the option-backed sections read.
 	 * @param NotificationsMigrator $notifications_migrator The notifications section, built by the caller
 	 *                                                       so its run-level counters are shared.
 	 * @return MigratorInterface[]
 	 */
-	private function build_migrators( MigrationState $migration_state, NotificationsMigrator $notifications_migrator ): array {
-		$reporter = new Reporter();
-
+	private function build_migrators( NotificationsMigrator $notifications_migrator ): array {
 		return array(
 			$notifications_migrator,
-			new ProductMetaMigrator( $reporter ),
-			new EmailSettingsMigrator( $migration_state, $reporter ),
-			new SettingsMigrator( $migration_state ),
+			new ProductMetaMigrator( new Reporter() ),
 		);
 	}
 
@@ -219,10 +212,10 @@ class ToolsRegistrar {
 	 * Build the tool's description: what it does, where the migration stands, and what it has
 	 * skipped so far.
 	 *
-	 * Reads only `MigrationState`'s cached values - written at run start and on section drain,
-	 * never here - so rendering the Tools screen never runs a count query. Every number is
-	 * therefore as of the moment it was cached, and is shown with that timestamp once rather
-	 * than being presented as current.
+	 * Every number comes from `MigrationState`'s cached values - written at run start and on
+	 * section drain, never here - so rendering the Tools screen never runs a count query, and
+	 * every number is shown with the timestamp it was taken at rather than as current. The one
+	 * live read is whether the store settings have landed, which is a handful of option reads.
 	 *
 	 * @param bool $is_running Whether a background run is enqueued right now.
 	 * @return string
@@ -240,12 +233,12 @@ class ToolsRegistrar {
 	}
 
 	/**
-	 * The progress line: where the subscriber migration stands, then whether the three
-	 * settings sections have been imported.
+	 * The progress line: where the subscriber migration stands, then whether product and
+	 * store settings have been imported.
 	 *
-	 * Only subscribers carry a number. The other three sections are a handful of options and
-	 * product flags each, so a count of them tells a merchant nothing they would act on -
-	 * whether they have been imported does.
+	 * Only subscribers carry a number. The rest is a handful of options and product flags, so
+	 * a count of them tells a merchant nothing they would act on - whether they have been
+	 * imported does.
 	 *
 	 * @param bool $is_running Whether a background run is enqueued right now.
 	 * @return string
@@ -330,35 +323,34 @@ class ToolsRegistrar {
 	}
 
 	/**
-	 * Whether the three settings sections have been imported, named rather than counted.
+	 * Whether the settings have been imported, named rather than counted.
 	 *
-	 * A section that has never been counted reads as outstanding: an absent count is the
-	 * absence of a measurement, not a measurement of nothing.
+	 * Product settings read from the cached count, since they are a scan like subscribers are:
+	 * a section that has never been counted reads as outstanding, because an absent count is
+	 * the absence of a measurement, not a measurement of nothing. Store settings are a fixed
+	 * set of options `OptionsMigrator` can just look at.
 	 *
 	 * @param MigrationState $migration_state Run state holding the cached counts.
 	 * @return string
 	 */
 	private function get_settings_sections_line( MigrationState $migration_state ): string {
 		$outstanding = array();
+		$cached      = $migration_state->get_count( 'product-meta' );
 
-		foreach ( Constants::SECTION_ORDER as $section ) {
-			if ( self::SUBSCRIBERS_SECTION === $section ) {
-				continue;
-			}
+		if ( null === $cached || (int) $cached['count'] > 0 ) {
+			$outstanding[] = __( 'product settings', 'woocommerce' );
+		}
 
-			$cached = $migration_state->get_count( $section );
-
-			if ( null === $cached || (int) $cached['count'] > 0 ) {
-				$outstanding[] = $this->get_section_label( $section );
-			}
+		if ( ! ( new OptionsMigrator( new Reporter() ) )->is_done() ) {
+			$outstanding[] = __( 'store settings', 'woocommerce' );
 		}
 
 		if ( empty( $outstanding ) ) {
-			return __( 'Product settings, email settings and general settings have been imported.', 'woocommerce' );
+			return __( 'Product settings and store settings have been imported.', 'woocommerce' );
 		}
 
 		return sprintf(
-			/* translators: %s: comma-separated list of the settings still to import, e.g. "email settings, general settings" */
+			/* translators: %s: comma-separated list of the settings still to import, e.g. "product settings, store settings" */
 			__( 'Still to import: %s.', 'woocommerce' ),
 			implode( ', ', $outstanding )
 		);
@@ -391,24 +383,5 @@ class ToolsRegistrar {
 			__( 'Skipped so far, as of %s:', 'woocommerce' ),
 			$reporter->format_site_time( (int) $cached_losses['at'] )
 		) . ' ' . implode( ' ', $loss_lines );
-	}
-
-	/**
-	 * The merchant-facing name of one settings section, worded to sit mid-sentence. The slugs
-	 * themselves are internal: `product-meta` names a database column, not anything a merchant
-	 * configured.
-	 *
-	 * @param string $section Section slug.
-	 * @return string
-	 */
-	private function get_section_label( string $section ): string {
-		switch ( $section ) {
-			case 'product-meta':
-				return __( 'product settings', 'woocommerce' );
-			case 'emails':
-				return __( 'email settings', 'woocommerce' );
-			default:
-				return __( 'general settings', 'woocommerce' );
-		}
 	}
 }

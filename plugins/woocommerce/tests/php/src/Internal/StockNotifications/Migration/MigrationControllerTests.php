@@ -212,7 +212,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 
 		$state = new MigrationState();
 
-		foreach ( array( 'notifications', 'product-meta', 'emails', 'settings' ) as $section ) {
+		foreach ( array( 'notifications', 'product-meta' ) as $section ) {
 			$state->set_count( $section, 0 );
 		}
 

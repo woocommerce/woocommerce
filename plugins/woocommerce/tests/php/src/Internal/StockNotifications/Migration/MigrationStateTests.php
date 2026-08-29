@@ -55,7 +55,7 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 		$this->assertNull( $state['lock'] );
 		$this->assertSame( array(), $state['cursor'] );
 		$this->assertSame( array(), $state['counts'] );
-		$this->assertSame( array(), $state['options'] );
+		$this->assertSame( array(), $state['totals'] );
 		$this->assertNull( $state['losses'] );
 	}
 

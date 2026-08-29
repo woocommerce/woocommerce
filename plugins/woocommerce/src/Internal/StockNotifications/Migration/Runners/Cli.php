@@ -9,11 +9,10 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\EmailSettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
@@ -197,9 +196,9 @@ class Cli {
 	 *
 	 * There is no run-status field to report: a run is either holding the CLI lock or it is
 	 * not, and what has migrated is recorded by markers rather than by a status. This reports
-	 * the facts that replace it: per-section cached counts with their timestamp, whether a
-	 * background run is enqueued, whether the CLI lock is held, and how many rows carry the
-	 * permanent-failure marker.
+	 * the facts that replace it: per-section cached counts with their timestamp, whether the
+	 * settings have landed, whether a background run is enqueued, whether the CLI lock is
+	 * held, and how many rows carry the permanent-failure marker.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -232,6 +231,15 @@ class Cli {
 				sprintf( '%-14s %s', $slug, $reporter->format_cached_count( $cached['count'], $cached['at'] ) )
 			);
 		}
+
+		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+		WP_CLI::log(
+			sprintf(
+				'%-14s %s',
+				'settings',
+				( new OptionsMigrator( $reporter ) )->is_done() ? 'imported' : 'not imported yet'
+			)
+		);
 
 		$this->print_known_losses( $reporter );
 
@@ -268,10 +276,13 @@ class Cli {
 	/**
 	 * Run the migration.
 	 *
-	 * Drives the requested sections, in the fixed order (notifications, product-meta, emails,
-	 * settings — load-bearing, never reordered by `--section`), each from the cursor the
-	 * previous run left behind. A section is drained once its cursor reaches the end of what
-	 * it has to visit.
+	 * Drives the requested sections, in the fixed order (notifications, then product-meta,
+	 * never reordered by `--section`), each from the cursor the previous run left behind. A
+	 * section is drained once its cursor reaches the end of what it has to visit.
+	 *
+	 * Settings migrate on every run, whatever `--section` asked for: they are a fixed set of
+	 * values with nothing to scan, so restricting them to a section of their own would only
+	 * let a run finish with Core reading settings that never moved.
 	 *
 	 * Cursors persist across runs, so a second run over a settled store costs almost nothing.
 	 * `--force` and `--retry-failed` reset them, since both put rows back into play below
@@ -283,8 +294,7 @@ class Cli {
 	 * ## OPTIONS
 	 *
 	 * [--section=<sections>]
-	 * : Comma-separated sections to run. Defaults to all four: notifications, product-meta,
-	 * emails, settings.
+	 * : Comma-separated sections to run. Defaults to both: notifications, product-meta.
 	 *
 	 * [--batch-size=<size>]
 	 * : Maximum rows fetched per batch. Default 500.
@@ -410,13 +420,17 @@ class Cli {
 			$migrators              = array_intersect_key( $this->build_migrators( $reporter, $notifications_migrator ), array_flip( $sections ) );
 			$writer                 = $dry_run ? new Writer( true ) : $this->live_writer();
 
+			// Settings are not a section: the processor writes them on every batch, whatever
+			// `--section` asked for, since there is nothing about them to scan or restrict.
+			$options = new OptionsMigrator( $reporter );
+
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
 			// hands it the knobs the BatchProcessorInterface contract has no room for and then
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
 			$processor->init( $this->requirements(), $this->live_writer() );
-			$processor->configure_run( $migrators, $writer, $batch_size, $reporter );
+			$processor->configure_run( $migrators, $writer, $batch_size, $reporter, $options );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
 			// drain — never computed live outside a run.
@@ -488,7 +502,7 @@ class Cli {
 	}
 
 	/**
-	 * Build the four migrators, sharing one Reporter and this instance's MigrationState.
+	 * Build the section migrators, sharing one Reporter.
 	 *
 	 * @param Reporter                   $reporter      Outcome collector shared across every section.
 	 * @param NotificationsMigrator|null $notifications The notifications migrator to use. Passed in by `run`, which
@@ -499,8 +513,6 @@ class Cli {
 		return array(
 			'notifications' => $notifications ?? new NotificationsMigrator( $reporter ),
 			'product-meta'  => new ProductMetaMigrator( $reporter ),
-			'emails'        => new EmailSettingsMigrator( $this->state(), $reporter ),
-			'settings'      => new SettingsMigrator( $this->state() ),
 		);
 	}
 

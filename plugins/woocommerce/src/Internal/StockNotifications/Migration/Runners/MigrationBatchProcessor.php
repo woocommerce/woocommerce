@@ -9,11 +9,10 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\EmailSettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\SettingsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
@@ -22,14 +21,15 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Drives the whole legacy Back In Stock Notifications migration as a single
- * `BatchProcessorInterface`, across four sections: notifications, product-meta, emails,
- * settings, in that fixed order.
+ * `BatchProcessorInterface`, across two batched sections: notifications, then product-meta.
  *
- * The order is load-bearing (settings must land last, see the plan's Idempotency
- * section), so this is one processor rather than four independently-enqueued ones.
  * `get_next_batch_to_process()` serves the first section with pending work and only
  * moves on once that section is drained; a returned batch never spans two sections.
  * Batch items are `{section}::{id}` strings, so a batch is self-describing in logs.
+ *
+ * Settings are not a section. They are a fixed set of values with nothing to scan, so
+ * `OptionsMigrator::migrate()` runs at the top of every batch instead — inside the same
+ * retry and requirement checks the sections get.
  *
  * The CLI drives the same instance through `configure_run()`, which swaps in its own
  * migrators (built with `--force`, restricted to `--section`), its writer (a dry-run one
@@ -104,13 +104,20 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private Writer $writer;
 
 	/**
-	 * The four section migrators, keyed by `get_slug()` and, since PHP preserves
-	 * insertion order on associative arrays, ordered notifications, product-meta,
-	 * emails, settings. That order is the section order the whole class runs on.
+	 * The section migrators, keyed by `get_slug()` and, since PHP preserves insertion order
+	 * on associative arrays, ordered notifications then product-meta. That order is the
+	 * section order the whole class runs on.
 	 *
 	 * @var array<string, MigratorInterface>
 	 */
 	private array $migrators = array();
+
+	/**
+	 * The settings migrator, run at the top of every batch rather than as a section.
+	 *
+	 * @var OptionsMigrator
+	 */
+	private OptionsMigrator $options;
 
 	/**
 	 * Init the service.
@@ -131,13 +138,12 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 
 		$reporter       = new Reporter();
 		$this->reporter = $reporter;
+		$this->options  = new OptionsMigrator( $reporter );
 
 		foreach (
 			array(
 				new NotificationsMigrator( $reporter ),
 				new ProductMetaMigrator( $reporter ),
-				new EmailSettingsMigrator( $this->state, $reporter ),
-				new SettingsMigrator( $this->state ),
 			) as $migrator
 		) {
 			$this->migrators[ $migrator->get_slug() ] = $migrator;
@@ -162,9 +168,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @param int                              $batch_size Batch size the caller will request.
 	 * @param Reporter|null                    $reporter   The reporter those migrators share, so the known
 	 *                                                     losses cached on drain are this run's own.
+	 * @param OptionsMigrator|null             $options    The settings migrator this run shares, so its
+	 *                                                     outcomes land on the same reporter.
 	 * @return void
 	 */
-	public function configure_run( array $migrators, Writer $writer, int $batch_size, ?Reporter $reporter = null ): void {
+	public function configure_run( array $migrators, Writer $writer, int $batch_size, ?Reporter $reporter = null, ?OptionsMigrator $options = null ): void {
 		$this->migrators  = $migrators;
 		$this->writer     = $writer;
 		$this->batch_size = max( 1, $batch_size );
@@ -173,6 +181,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 
 		if ( null !== $reporter ) {
 			$this->reporter = $reporter;
+		}
+
+		if ( null !== $options ) {
+			$this->options = $options;
 		}
 	}
 
@@ -262,7 +274,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * Process data for the supplied batch.
 	 *
 	 * The batch is expected to hold identifiers for a single section, as produced by
-	 * `get_next_batch_to_process()`. Each section's `migrate_batch()` already catches
+	 * `get_next_batch_to_process()`. Settings migrate first, then the section's own rows.
+	 * Each section's `migrate_batch()` already catches
 	 * and marks per-row failures; only a whole-batch transient failure (a DB error, a
 	 * lost connection) is allowed to propagate here, so the controller can retry it -
 	 * safely, since rows that already succeeded wrote their own markers and left the
@@ -284,6 +297,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		if ( ! $this->state->is_lock_held() || ! $this->requirements_met() ) {
 			return;
 		}
+
+		// Settings are cheap, idempotent and not worth a section of their own, so they go in
+		// on every batch: a run stopped part-way still leaves them written.
+		$this->options->migrate( $this->writer );
 
 		foreach ( $this->group_by_section( $batch ) as $slug => $raw_ids ) {
 			$migrator = $this->migrators[ $slug ];
@@ -333,12 +350,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Store a section's cursor at the highest identifier in a successfully migrated
-	 * batch, when that section uses a keyset cursor at all.
-	 *
-	 * The emails and settings sections identify their outstanding items by option key,
-	 * not by a sequential id, and never read the cursor; their raw ids are never
-	 * numeric, so this is a no-op for them.
+	 * Store a section's cursor at the highest identifier in a successfully migrated batch.
 	 *
 	 * @param string $slug     Section slug.
 	 * @param array  $raw_ids Raw identifiers migrate_batch() was just called with.

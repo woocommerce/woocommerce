@@ -14,8 +14,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * The option is written with autoload off: it changes on every batch, and nothing
  * outside a migration run needs it in memory. It holds the CLI run `lock`, the
- * per-section `cursor`, cached display-only `counts` and `totals`, the known-`losses`
- * snapshot, and the set of `options` already migrated.
+ * per-section `cursor`, cached display-only `counts` and `totals`, and the known-`losses`
+ * snapshot.
  *
  * State here is an optimization, never authority. What has actually been migrated is
  * recorded by the markers the migrators write onto legacy and Core rows
@@ -55,12 +55,11 @@ class MigrationState {
 	 * @var array
 	 */
 	private const DEFAULT_STATE = array(
-		'lock'    => null,
-		'cursor'  => array(),
-		'counts'  => array(),
-		'options' => array(),
-		'losses'  => null,
-		'totals'  => array(),
+		'lock'   => null,
+		'cursor' => array(),
+		'counts' => array(),
+		'losses' => null,
+		'totals' => array(),
 	);
 
 	/**
@@ -90,7 +89,7 @@ class MigrationState {
 	/**
 	 * Read the full state, filled out to the default shape.
 	 *
-	 * Shape: `lock` (array|null), `cursor` (section slug => int), `counts` and `options`
+	 * Shape: `lock` (array|null), `cursor` (section slug => int), `counts` and `totals`
 	 * (keyed arrays). Every nested field is checked, not just the option itself: this is
 	 * merchant-writable data, and a scalar where an array belongs would reach
 	 * `is_lock_fresh( ?array )` and the `?array` accessors as a TypeError.
@@ -125,7 +124,7 @@ class MigrationState {
 			}
 		}
 
-		foreach ( array( 'cursor', 'counts', 'options', 'totals' ) as $key ) {
+		foreach ( array( 'cursor', 'counts', 'totals' ) as $key ) {
 			if ( ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = array();
 			}
@@ -381,38 +380,6 @@ class MigrationState {
 			'values' => $values,
 			'at'     => time(),
 		);
-		$this->save_state( $state );
-	}
-
-	/**
-	 * Whether this option key has already been migrated.
-	 *
-	 * This is the settle signal for the settings and email-settings sections. They have no
-	 * per-row marker to stamp the way the notifications and product-meta migrators do, so
-	 * without it every mapped key stays outstanding, the section never drains, and the run
-	 * rewrites the same options on every batch.
-	 *
-	 * @param string $option_key The option name, or an option/sub-key pair for nested settings.
-	 * @return bool
-	 */
-	public function is_option_migrated( string $option_key ): bool {
-		$state = $this->get_state();
-
-		return ! empty( $state['options'][ $option_key ] );
-	}
-
-	/**
-	 * Record that an option was written by the migration, so later runs leave it alone.
-	 *
-	 * Callers must only record this once the write has landed: a key recorded without a
-	 * successful write is never retried.
-	 *
-	 * @param string $option_key The option name, or an option/sub-key pair for nested settings.
-	 * @return void
-	 */
-	public function mark_option_migrated( string $option_key ): void {
-		$state                           = $this->get_state();
-		$state['options'][ $option_key ] = true;
 		$this->save_state( $state );
 	}
 }

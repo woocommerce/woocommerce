@@ -291,7 +291,7 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->cli()->run(
 			array(),
 			array(
-				'section' => 'settings',
+				'section' => 'product-meta',
 				'yes'     => true,
 			)
 		);

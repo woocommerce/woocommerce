@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Run
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\MigrationBatchProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\ToolsRegistrar;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
@@ -210,14 +213,18 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 	 * @testdox the description should read as finished once every section has drained.
 	 */
 	public function test_the_description_reads_as_finished_once_everything_is_checked(): void {
-		foreach ( array( 'notifications', 'product-meta', 'emails', 'settings' ) as $section ) {
+		foreach ( array( 'notifications', 'product-meta' ) as $section ) {
 			$this->state->set_count( $section, 0 );
 		}
+
+		// Store settings are not a section with a cached count: the line reads them straight
+		// off the options, so they have to actually be there.
+		( new OptionsMigrator( new Reporter() ) )->migrate( wc_get_container()->get( Writer::class ) );
 
 		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
 
 		$this->assertStringContainsString( 'Every subscriber has been checked', $desc );
-		$this->assertStringContainsString( 'Product settings, email settings and general settings have been imported.', $desc );
+		$this->assertStringContainsString( 'Product settings and store settings have been imported.', $desc );
 	}
 
 	/**
