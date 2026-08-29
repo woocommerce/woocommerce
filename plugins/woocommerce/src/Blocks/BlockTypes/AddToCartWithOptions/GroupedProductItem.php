@@ -58,6 +58,13 @@ class GroupedProductItem extends AbstractBlock {
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
+		if ( ! $product instanceof \WC_Product || ! $post instanceof \WP_Post ) {
+			$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$product = $previous_product;
+
+			return '';
+		}
+
 		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ), 10, 2 );
 
 		// Create new block with custom context.
@@ -71,6 +78,18 @@ class GroupedProductItem extends AbstractBlock {
 
 		// Render with dynamic set to false to prevent calling render_callback.
 		$block_content = $new_block->render( array( 'dynamic' => false ) );
+
+		$block_content = sprintf(
+			'<div data-wp-interactive="woocommerce/products" %1$s>%2$s</div>',
+			wp_interactivity_data_wp_context(
+				array(
+					'productId'   => $product->get_id(),
+					'variationId' => null,
+				),
+				'woocommerce/products'
+			),
+			$block_content
+		);
 
 		remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ) );
 

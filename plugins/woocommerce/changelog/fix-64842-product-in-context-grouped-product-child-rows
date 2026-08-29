@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Wrap each grouped product child row in a woocommerce/products interactivity context so that state.productInContext resolves to the child product in all rendering contexts, not just the Single Product Template.
