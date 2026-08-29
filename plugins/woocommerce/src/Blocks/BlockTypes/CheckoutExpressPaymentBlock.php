@@ -8,6 +8,8 @@ use Exception;
  * CheckoutExpressPaymentBlock class.
  */
 class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
