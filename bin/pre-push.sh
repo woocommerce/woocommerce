@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
+# Git passes the remote name as $1 and the remote URL as $2 to the pre-push hook.
+REMOTE_URL="$2"
+
+# Only prompt when pushing to the canonical repo, forks have nothing to protect.
+IS_CANONICAL_REMOTE=1
+if [ -n "$REMOTE_URL" ] && ! echo "$REMOTE_URL" | grep -qiE 'github\.com[:/]woocommerce/woocommerce(\.git)?/?$'; then
+	IS_CANONICAL_REMOTE=0
+fi
+
 PROTECTED_BRANCH="trunk"
 CURRENT_BRANCH=$(git branch --show-current)
-if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
+if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ] && [ $IS_CANONICAL_REMOTE = 1 ]; then
 	if [ "$TERM" = "dumb" ]; then
 		>&2 echo "Sorry, you are unable to push to $PROTECTED_BRANCH using a GUI client! Please use git CLI."
 		exit 1
