@@ -56,7 +56,7 @@ export type SidebarMachineContext = {
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
 	tasklist?: LYSAugmentedTaskListType;
 	hasWooPayments?: boolean;
-	testOrderCount: number;
+	hasTestOrders?: boolean;
 	removeTestOrders?: boolean;
 	launchStoreAttemptTimestamp?: number;
 	launchStoreError?: {
@@ -96,13 +96,13 @@ const launchStoreAction = async () => {
 	throw new Error( JSON.stringify( results ) );
 };
 
-const getTestOrderCount = async () => {
+const hasTestOrders = async () => {
 	const result = ( await apiFetch( {
-		path: '/wc-admin/launch-your-store/woopayments/test-orders/count',
+		path: '/wc-admin/launch-your-store/woopayments/test-orders/has',
 		method: 'GET',
-	} ) ) as { count: number };
+	} ) ) as { has_orders: boolean };
 
-	return result.count;
+	return result.has_orders;
 };
 
 export const pageHasComingSoonMetaTag = async ( {
@@ -348,6 +348,9 @@ export const sidebarMachine = setup( {
 		hasWooPayments: ( { context } ) => {
 			return !! context.hasWooPayments;
 		},
+		hasTestOrders: ( { context } ) => {
+			return !! context.hasTestOrders;
+		},
 		siteIsShowingCachedContent: ( { context } ) => {
 			return !! context.siteIsShowingCachedContent;
 		},
@@ -355,7 +358,7 @@ export const sidebarMachine = setup( {
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
-		getTestOrderCount: fromPromise( getTestOrderCount ),
+		hasTestOrders: fromPromise( hasTestOrders ),
 		getSiteCachedStatus: fromPromise( getSiteCachedStatus ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 		deleteTestOrders: fromPromise( deleteTestOrders ),
@@ -367,7 +370,6 @@ export const sidebarMachine = setup( {
 	initial: 'navigate',
 	context: ( { input } ) => ( {
 		externalUrl: null,
-		testOrderCount: 0,
 		mainContentMachineRef: input.mainContentMachineRef,
 	} ),
 	invoke: {
@@ -430,34 +432,40 @@ export const sidebarMachine = setup( {
 							actions: assign( {
 								hasWooPayments: ( { event } ) => event.output,
 							} ),
-							target: 'maybeCountTestOrders',
+							target: 'maybeCheckTestOrders',
 						},
 						onError: {
-							target: 'maybeCountTestOrders',
+							target: 'maybeCheckTestOrders',
 						},
 					},
 				},
-				maybeCountTestOrders: {
+				maybeCheckTestOrders: {
 					always: [
 						{
 							guard: 'hasWooPayments',
-							target: 'countTestOrders',
+							target: 'hasTestOrders',
 						},
 						{
+							actions: assign( {
+								hasTestOrders: false,
+							} ),
 							target: 'launchYourStoreHub',
 						},
 					],
 				},
-				countTestOrders: {
+				hasTestOrders: {
 					invoke: {
-						src: 'getTestOrderCount',
+						src: 'hasTestOrders',
 						onDone: {
 							actions: assign( {
-								testOrderCount: ( { event } ) => event.output,
+								hasTestOrders: ( { event } ) => event.output,
 							} ),
 							target: 'launchYourStoreHub',
 						},
 						onError: {
+							actions: assign( {
+								hasTestOrders: false,
+							} ),
 							target: 'launchYourStoreHub',
 						},
 					},
@@ -525,10 +533,10 @@ export const sidebarMachine = setup( {
 							actions: assign( {
 								hasWooPayments: ( { event } ) => event.output,
 							} ),
-							target: 'backgroundMaybeCountTestOrders',
+							target: 'backgroundMaybeCheckTestOrders',
 						},
 						onError: {
-							target: 'backgroundMaybeCountTestOrders',
+							target: 'backgroundMaybeCheckTestOrders',
 						},
 					},
 					on: {
@@ -540,7 +548,7 @@ export const sidebarMachine = setup( {
 						},
 					},
 				},
-				backgroundMaybeCountTestOrders: {
+				backgroundMaybeCheckTestOrders: {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
@@ -549,28 +557,34 @@ export const sidebarMachine = setup( {
 					always: [
 						{
 							guard: 'hasWooPayments',
-							target: 'backgroundCountTestOrders',
+							target: 'backgroundHasTestOrders',
 						},
 						{
+							actions: assign( {
+								hasTestOrders: false,
+							} ),
 							target: 'launchYourStoreHub',
 						},
 					],
 				},
-				backgroundCountTestOrders: {
+				backgroundHasTestOrders: {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
 						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: {
-						src: 'getTestOrderCount',
+						src: 'hasTestOrders',
 						onDone: {
 							actions: assign( {
-								testOrderCount: ( { event } ) => event.output,
+								hasTestOrders: ( { event } ) => event.output,
 							} ),
 							target: 'launchYourStoreHub',
 						},
 						onError: {
+							actions: assign( {
+								hasTestOrders: false,
+							} ),
 							target: 'launchYourStoreHub',
 						},
 					},
