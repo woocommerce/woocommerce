@@ -174,12 +174,10 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 
 			$meta_id_placeholders = implode( ',', array_fill( 0, count( $meta_ids ), '%d' ) );
 
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$clauses[] = $wpdb->prepare(
-				"( %i = {$entity_id_placeholder} AND %i IN ({$meta_id_placeholders}) )",
-				$entity_id_column,
+				"( {$entity_id_column} = {$entity_id_placeholder} AND {$meta_id_column} IN ({$meta_id_placeholders}) )",
 				$entity_id,
-				$meta_id_column,
 				...$meta_ids
 			);
 			// phpcs:enable
