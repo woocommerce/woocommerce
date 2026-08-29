@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide the stray ": " label on the actions column of the My Account payment methods table on mobile, fixing the lone colon and misalignment.
