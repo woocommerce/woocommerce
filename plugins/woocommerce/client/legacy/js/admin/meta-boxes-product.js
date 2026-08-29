@@ -472,20 +472,6 @@ jQuery( function ( $ ) {
 	// Set up attributes, if current page has the attributes list.
 	const $product_attributes = $( '.product_attributes' );
 	if ( $product_attributes.length === 1 ) {
-		// When the attributes tab is shown, add an empty attribute to be filled out by the user.
-		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function () {
-			remove_blank_custom_attribute_if_no_other_attributes();
-
-			const woocommerce_attribute_items = $product_attributes
-				.find( '.woocommerce_attribute' )
-				.get();
-
-			// If the product has no attributes, add an empty attribute to be filled out by the user.
-			if ( woocommerce_attribute_items.length === 0 ) {
-				add_custom_attribute_to_list();
-			}
-		} );
-
 		const woocommerce_attribute_items = $product_attributes
 			.find( '.woocommerce_attribute' )
 			.get();
