@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix parent review auto-approval when replying to an unapproved review from the admin product reviews screen.
