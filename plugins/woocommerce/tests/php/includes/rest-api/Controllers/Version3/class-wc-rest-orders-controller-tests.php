@@ -873,6 +873,64 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A line item read back from an order whose product was deleted can be sent straight back in an update.
+	 */
+	public function test_order_update_accepts_round_tripped_line_item_for_deleted_product(): void {
+		$order      = WC_Helper_Order::create_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		/* Resolve the product first so a helper change cannot point this deletion at an unrelated record. */
+		$product = $line_item->get_product();
+		$this->assertInstanceOf( WC_Product::class, $product );
+
+		wp_delete_post( $product->get_id(), true );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$this->assertEquals( 200, $response->get_status() );
+
+		/*
+		 * With the product gone, the controller reports these as null. The schema has to
+		 * allow that, or the response cannot be sent back to the update endpoint.
+		 */
+		$line_item_data = $response->get_data()['line_items'][0];
+		$this->assertNull( $line_item_data['sku'] );
+		$this->assertNull( $line_item_data['global_unique_id'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array( $line_item_data ),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
+	}
+
+	/**
+	 * @testdox The order schema allows a null line item sku and global_unique_id.
+	 */
+	public function test_line_item_product_identifier_schema_allows_null(): void {
+		$line_item_properties = $this->endpoint->get_item_schema()['properties']['line_items']['items']['properties'];
+
+		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['sku']['type'] );
+		$this->assertEquals( array( 'string', 'null' ), $line_item_properties['global_unique_id']['type'] );
+
+		/* Widening the type must not make either field writable. */
+		$this->assertTrue( $line_item_properties['sku']['readonly'] );
+		$this->assertTrue( $line_item_properties['global_unique_id']['readonly'] );
+	}
+
+	/**
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
 	 *          only be updated when the order is set to certain statuses.
 	 */
