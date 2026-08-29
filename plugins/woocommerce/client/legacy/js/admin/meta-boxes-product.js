@@ -1,4 +1,121 @@
-/*global woocommerce_admin_meta_boxes, _ */
+/*global woocommerce_admin_meta_boxes, _, module */
+
+const shortDescriptionEditor = ( function () {
+	let wasTextMode = null;
+	let textModeRestorePending = false;
+
+	function teardown() {
+		const editor = window.tinymce && window.tinymce.get( 'excerpt' );
+
+		if ( ! editor ) {
+			return;
+		}
+
+		const textarea = editor.getElement();
+		wasTextMode = textModeRestorePending || editor.isHidden();
+		const textModeContent = wasTextMode ? textarea.value : null;
+
+		window.tinymce.execCommand( 'mceRemoveEditor', false, 'excerpt' );
+
+		if ( wasTextMode ) {
+			// The hidden editor contains stale content while Text mode is active.
+			textarea.value = textModeContent;
+		} else {
+			textarea.removeAttribute( 'aria-hidden' );
+		}
+	}
+
+	function restore() {
+		if ( null === wasTextMode ) {
+			return;
+		}
+
+		const restoreTextMode = wasTextMode;
+		wasTextMode = null;
+
+		if ( restoreTextMode ) {
+			textModeRestorePending = true;
+		}
+
+		const initializedEditors = window.tinymce.init(
+			window.tinyMCEPreInit.mceInit.excerpt
+		);
+
+		if ( ! restoreTextMode ) {
+			return initializedEditors;
+		}
+
+		return initializedEditors.then( function ( editors ) {
+			const editor = editors[ 0 ];
+
+			if ( ! editor || window.tinymce.get( 'excerpt' ) !== editor ) {
+				return editors;
+			}
+
+			const textarea = editor.getElement();
+			const content = textarea.value;
+
+			window.switchEditors.go( 'excerpt', 'html' );
+			textarea.value = content;
+			textModeRestorePending = false;
+
+			return editors;
+		} );
+	}
+
+	function bindPostboxEvents( $ ) {
+		const eventNamespace = '.shortDescriptionEditor';
+		const orderButtonSelector =
+			'#postexcerpt .handle-order-higher, #postexcerpt .handle-order-lower';
+		const $poststuff = $( '#poststuff' );
+		const handleOrderButtonClick = function ( event ) {
+			const button =
+				event.target.closest &&
+				event.target.closest( orderButtonSelector );
+
+			// Buttons on the first/last position are a no-op in core.
+			if ( button && 'true' !== button.getAttribute( 'aria-disabled' ) ) {
+				teardown();
+				window.setTimeout( restore );
+			}
+		};
+
+		document.addEventListener( 'click', handleOrderButtonClick, true );
+
+		// jQuery UI sortable events bubble up from the metabox containers.
+		$poststuff
+			.on( 'sortstart' + eventNamespace, function ( event, ui ) {
+				if ( ui.item.is( '#postexcerpt' ) ) {
+					teardown();
+				}
+			} )
+			.on( 'sortstop' + eventNamespace, function ( event, ui ) {
+				if ( ui.item.is( '#postexcerpt' ) ) {
+					restore();
+				}
+			} );
+
+		return function () {
+			document.removeEventListener(
+				'click',
+				handleOrderButtonClick,
+				true
+			);
+			$poststuff.off( eventNamespace );
+		};
+	}
+
+	return {
+		teardown,
+		restore,
+		bindPostboxEvents,
+	};
+}() );
+
+if ( typeof module !== 'undefined' && module.exports ) {
+	module.exports = shortDescriptionEditor;
+}
+
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -1647,4 +1764,6 @@ jQuery( function ( $ ) {
 			.insertAfter( addProductImagesLink )
 			.tipTip( tooltipData );
 	}
+
+	shortDescriptionEditor.bindPostboxEvents( $ );
 } );
