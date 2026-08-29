@@ -149,38 +149,44 @@ class MigrationController implements RegisterHooksInterface {
 	/**
 	 * The double-send notice's text, in the state the migration is actually in.
 	 *
-	 * A finished migration is asked to deactivate the extension; an unfinished one is asked to
-	 * finish first, since deactivating mid-migration strands whatever has not moved yet.
+	 * Two sentences: what is happening, and what to do about it. A finished migration is asked
+	 * to deactivate the extension; an unfinished one is asked to finish first, since
+	 * deactivating mid-migration strands whatever has not moved yet.
 	 *
 	 * @return string
 	 */
 	private function double_send_notice_message(): string {
-		$tools_link   = sprintf(
+		$status_link = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ),
 			esc_html__( 'View migration status', 'woocommerce' )
-		);
-		$plugins_link = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( admin_url( 'plugins.php?plugin_status=active' ) ),
-			esc_html__( 'go to Plugins', 'woocommerce' )
 		);
 
 		if ( $this->migration_is_drained() ) {
 			return sprintf(
 				/* translators: 1: link to the plugins screen, 2: link to the migration's entry on the Status → Tools screen */
-				esc_html__( 'Every Back In Stock Notifications subscriber has moved to the built-in customer stock notifications. Deactivate Back In Stock Notifications now: while both are active, a restock emails the same customer twice. %1$s or %2$s.', 'woocommerce' ),
-				$plugins_link,
-				$tools_link
+				esc_html__( 'All subscribers have moved to the built-in stock notifications. Deactivate Back In Stock Notifications to stop duplicate restock emails. %1$s or %2$s.', 'woocommerce' ),
+				$this->plugins_link( esc_html__( 'Manage plugins', 'woocommerce' ) ),
+				$status_link
 			);
 		}
 
 		return sprintf(
 			/* translators: 1: link to the migration's entry on the Status → Tools screen, 2: link to the plugins screen */
-			esc_html__( 'Some Back In Stock Notifications subscribers have moved to the built-in customer stock notifications and some have not. A restock emails the ones that have moved twice, until you finish the migration and deactivate Back In Stock Notifications. %1$s or %2$s.', 'woocommerce' ),
-			$tools_link,
-			$plugins_link
+			esc_html__( 'Back In Stock Notifications is still active, so migrated customers can get two emails per restock. Finish the migration, then deactivate the extension. %1$s or %2$s.', 'woocommerce' ),
+			$status_link,
+			$this->plugins_link( esc_html__( 'manage plugins', 'woocommerce' ) )
 		);
+	}
+
+	/**
+	 * A link to the active plugins list, under the label the sentence needs.
+	 *
+	 * @param string $label Link text, already escaped.
+	 * @return string
+	 */
+	private function plugins_link( string $label ): string {
+		return sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'plugins.php?plugin_status=active' ) ), $label );
 	}
 
 	/**

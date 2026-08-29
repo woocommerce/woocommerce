@@ -200,7 +200,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 		$state = new MigrationState();
 		$state->set_count( 'notifications', 12 );
 
-		$this->assertStringContainsString( 'and some have not', $this->render_double_send_notice() );
+		$this->assertStringContainsString( 'Finish the migration, then deactivate the extension.', $this->render_double_send_notice() );
 	}
 
 	/**
@@ -216,7 +216,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 			$state->set_count( $section, 0 );
 		}
 
-		$this->assertStringContainsString( 'Every Back In Stock Notifications subscriber has moved', $this->render_double_send_notice() );
+		$this->assertStringContainsString( 'All subscribers have moved', $this->render_double_send_notice() );
 	}
 
 	/**

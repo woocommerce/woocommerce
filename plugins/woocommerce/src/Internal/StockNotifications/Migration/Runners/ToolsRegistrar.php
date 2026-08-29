@@ -115,8 +115,8 @@ class ToolsRegistrar {
 			return sprintf(
 				/* translators: %d: number of legacy rows still queued by the Back In Stock Notifications extension */
 				_n(
-					'Cannot start: %d legacy row is still queued for sending by the active Back In Stock Notifications extension, so migrating now risks sending the same notification twice. Let the legacy queue drain, then start again. This cannot be overridden here; run `wp wc bis-migrate run --force --yes` if you have to override it.',
-					'Cannot start: %d legacy rows are still queued for sending by the active Back In Stock Notifications extension, so migrating now risks sending the same notification twice. Let the legacy queue drain, then start again. This cannot be overridden here; run `wp wc bis-migrate run --force --yes` if you have to override it.',
+					'Cannot start yet: Back In Stock Notifications still has %d notification queued to send, and migrating now could send it twice. Let the queue drain, then start again. To override, run `wp wc bis-migrate run --force --yes`.',
+					'Cannot start yet: Back In Stock Notifications still has %d notifications queued to send, and migrating now could send them twice. Let the queue drain, then start again. To override, run `wp wc bis-migrate run --force --yes`.',
 					$queued,
 					'woocommerce'
 				),
@@ -144,7 +144,7 @@ class ToolsRegistrar {
 
 			return sprintf(
 				/* translators: %s: identifier of the process holding the migration lock */
-				__( 'A migration run is already in progress via WP-CLI (%s). Stop it there before starting a run here — starting one here does not override it.', 'woocommerce' ),
+				__( 'A migration is already running via WP-CLI (%s). Stop it there first; starting one here does not override it.', 'woocommerce' ),
 				$lock['owner'] ?? __( 'unknown', 'woocommerce' )
 			);
 		}
@@ -219,7 +219,7 @@ class ToolsRegistrar {
 		$batch_processor->remove_processor( MigrationBatchProcessor::class );
 		wc_get_container()->get( MigrationState::class )->release_lock();
 
-		return __( 'Migration stopped. Rows already migrated are untouched; the outstanding count above will still be there next time you start it.', 'woocommerce' );
+		return __( 'Migration stopped. Subscribers already moved stay put, and the next run picks up where this one left off.', 'woocommerce' );
 	}
 
 	/**
@@ -235,7 +235,7 @@ class ToolsRegistrar {
 	 * @return string
 	 */
 	private function get_description( bool $is_running ): string {
-		$lines = array( __( 'Moves subscribers, product settings and email settings from the Back In Stock Notifications extension into the built-in customer stock notifications. Runs in the background, a batch at a time.', 'woocommerce' ) );
+		$lines = array( __( 'Moves subscribers and settings from Back In Stock Notifications into the built-in stock notifications. Runs in the background, a batch at a time.', 'woocommerce' ) );
 
 		foreach ( array( $this->get_progress_line( $is_running ), $this->get_losses_line() ) as $line ) {
 			if ( '' !== $line ) {
