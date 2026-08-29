@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use WP_CLI;
 
@@ -547,7 +546,7 @@ class Cli {
 	private function count_failed_rows(): int {
 		global $wpdb;
 
-		$table = Tables::legacy_meta();
+		$table = Constants::legacy_meta();
 
 		// $table is $wpdb->prefix-based, never user input.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -566,7 +565,7 @@ class Cli {
 	private function clear_failed_markers(): int {
 		global $wpdb;
 
-		$table = Tables::legacy_meta();
+		$table = Constants::legacy_meta();
 
 		// $table is $wpdb->prefix-based, never user input.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

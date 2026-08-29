@@ -14,10 +14,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\CancellationSourceMiner;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\DateMapper;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\MetaMapper;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\StatusMapper;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
 defined( 'ABSPATH' ) || exit;
@@ -223,7 +221,7 @@ class NotificationsMigrator implements MigratorInterface {
 	public function count_remaining( int $cursor = 0 ): int {
 		global $wpdb;
 
-		$table = Tables::legacy_notifications();
+		$table = Constants::legacy_notifications();
 
 		// $table is $wpdb->prefix-based, never user input; the cursor is bound below.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -247,7 +245,7 @@ class NotificationsMigrator implements MigratorInterface {
 	public function get_batch( int $cursor, int $size ): array {
 		global $wpdb;
 
-		$table = Tables::legacy_notifications();
+		$table = Constants::legacy_notifications();
 
 		// $table is $wpdb->prefix-based, never user input; the cursor and size are bound below.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -291,7 +289,7 @@ class NotificationsMigrator implements MigratorInterface {
 		$cancellation_sources = $this->cancellation_source_miner->mine( $legacy_rows );
 		$date_mapper          = new DateMapper( time() );
 
-		// Must match the stored value byte-for-byte: MetaMapper hands posted_attributes to
+		// Must match the stored value byte-for-byte: map_legacy_meta() hands posted_attributes to
 		// the writer unserialized, and the writer is the sole maybe_serialize() owner, so
 		// this local serialize (for comparison only) has to mirror that exactly.
 		$posted_attributes = array();
@@ -431,7 +429,7 @@ class NotificationsMigrator implements MigratorInterface {
 	private function fetch_migrated_legacy_ids( array $ids ): array {
 		global $wpdb;
 
-		$table        = Tables::core_meta();
+		$table        = Constants::core_meta();
 		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%s' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
@@ -459,7 +457,7 @@ class NotificationsMigrator implements MigratorInterface {
 	private function fetch_failed_legacy_ids( array $ids ): array {
 		global $wpdb;
 
-		$table        = Tables::legacy_meta();
+		$table        = Constants::legacy_meta();
 		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
@@ -528,7 +526,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return array();
 		}
 
-		$table        = Tables::legacy_notifications();
+		$table        = Constants::legacy_notifications();
 		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
@@ -556,7 +554,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return array();
 		}
 
-		$table            = Tables::legacy_meta();
+		$table            = Constants::legacy_meta();
 		$meta_keys        = array_merge( self::LEGACY_META_KEYS, self::VERIFICATION_META_KEYS );
 		$id_placeholders  = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 		$key_placeholders = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
@@ -718,7 +716,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return array();
 		}
 
-		$table        = Tables::core_notifications();
+		$table        = Constants::core_notifications();
 		$placeholders = implode( ', ', array_fill( 0, count( $pairs ), '( %d, %d )' ) );
 		$params       = self::ADOPTABLE_STATUSES;
 
@@ -757,7 +755,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return array();
 		}
 
-		$table        = Tables::core_notifications();
+		$table        = Constants::core_notifications();
 		$placeholders = implode( ', ', array_fill( 0, count( $pairs ), '( %d, %s )' ) );
 		$params       = self::ADOPTABLE_STATUSES;
 
@@ -798,7 +796,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return array();
 		}
 
-		$table        = Tables::core_meta();
+		$table        = Constants::core_meta();
 		$placeholders = implode( ', ', array_fill( 0, count( $notification_ids ), '%d' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
@@ -942,6 +940,30 @@ class NotificationsMigrator implements MigratorInterface {
 	}
 
 	/**
+	 * Map a legacy notification's meta bag to the Core meta rows to write.
+	 *
+	 * Carries `_customer_locale`, `_customer_location_data` and `posted_attributes` across
+	 * unchanged (unserialized), and drops `_hash_key`, `_hash_iv`, `awaiting_verification`
+	 * and `_verification_*` along with any other legacy key. The writer is the sole owner of
+	 * `maybe_serialize()`; serializing here too would double-serialize the value once it
+	 * reaches the writer. Migration markers are added by `build_meta()`, not here.
+	 *
+	 * @param array<string,mixed> $legacy_meta Legacy meta bag, keyed by meta key.
+	 * @return array<int,array{0:string,1:mixed}> Meta rows in Writer shape.
+	 */
+	private function map_legacy_meta( array $legacy_meta ): array {
+		$rows = array();
+
+		foreach ( array( '_customer_locale', '_customer_location_data', 'posted_attributes' ) as $key ) {
+			if ( array_key_exists( $key, $legacy_meta ) ) {
+				$rows[] = array( $key, $legacy_meta[ $key ] );
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
 	 * Build the Core meta rows for a new notification row: the mapped legacy meta bag,
 	 * the legacy id marker, and the legacy unsubscribe token when both hash secrets exist.
 	 *
@@ -953,7 +975,7 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @return array<int,array{0:string,1:mixed}>
 	 */
 	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status, Writer $writer ): array {
-		$meta   = MetaMapper::map( $row_meta );
+		$meta   = $this->map_legacy_meta( $row_meta );
 		$meta[] = array( self::LEGACY_ID_META_KEY, $legacy_id );
 
 		$token = $this->compute_token( $legacy_id, $legacy_row, $row_meta );

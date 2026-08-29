@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration;
 
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * Every one of these is a contract between two or more classes: a marker one class writes
  * and another selects on, an option one class sets and another gates on. Declared once
  * here so a rename cannot desync the two sides, following the `src/Enums/` convention of
- * a final class of constants with no behaviour. Table names live in `Tables`, which has
- * to prefix them.
+ * a final class of constants, with the four accessors the migration's SQL needs to reach a
+ * table by its prefixed name.
  */
 final class Constants {
 
@@ -103,4 +105,56 @@ final class Constants {
 	 * Product meta marking a product the product-meta section can never settle.
 	 */
 	public const PRODUCT_FAILED_META_KEY = '_wc_bis_migration_signups_failed';
+
+	/**
+	 * Prefixed legacy notifications table.
+	 *
+	 * @return string
+	 */
+	public static function legacy_notifications(): string {
+		global $wpdb;
+
+		return $wpdb->prefix . self::LEGACY_NOTIFICATIONS_TABLE;
+	}
+
+	/**
+	 * Prefixed legacy notifications meta table.
+	 *
+	 * @return string
+	 */
+	public static function legacy_meta(): string {
+		global $wpdb;
+
+		return $wpdb->prefix . self::LEGACY_META_TABLE;
+	}
+
+	/**
+	 * Prefixed Core notifications table.
+	 *
+	 * Comes from the data store that owns it rather than being spelled out again here, so the
+	 * migration cannot drift from the schema it writes into.
+	 *
+	 * @return string
+	 */
+	public static function core_notifications(): string {
+		return self::data_store()->get_table_name();
+	}
+
+	/**
+	 * Prefixed Core notifications meta table.
+	 *
+	 * @return string
+	 */
+	public static function core_meta(): string {
+		return self::data_store()->get_meta_table_name();
+	}
+
+	/**
+	 * The data store that owns the Core tables.
+	 *
+	 * @return StockNotificationsDataStore
+	 */
+	private static function data_store(): StockNotificationsDataStore {
+		return wc_get_container()->get( StockNotificationsDataStore::class );
+	}
 }

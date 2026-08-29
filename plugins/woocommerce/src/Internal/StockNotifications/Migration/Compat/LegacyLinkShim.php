@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailActionControl
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Mapping\LegacyHash;
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
@@ -266,7 +265,7 @@ class LegacyLinkShim {
 		global $wpdb;
 
 		$wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- deliberate direct write; see the docblock.
-			Tables::core_meta(),
+			Constants::core_meta(),
 			array(
 				'notification_id' => $notification_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Column name in the notification meta table, not a query argument.
@@ -343,7 +342,7 @@ class LegacyLinkShim {
 	private function find_notification_id( int $legacy_id ): ?int {
 		global $wpdb;
 
-		$meta_table = Tables::core_meta();
+		$meta_table = Constants::core_meta();
 
 		$notification_id = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -382,7 +381,7 @@ class LegacyLinkShim {
 	private function match_digest( int $notification_id, string $meta_key, int $legacy_id, string $token ): ?string {
 		global $wpdb;
 
-		$meta_table = Tables::core_meta();
+		$meta_table = Constants::core_meta();
 
 		$hash_values = $wpdb->get_col(
 			$wpdb->prepare(

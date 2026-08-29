@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Migration\Tables;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 
 defined( 'ABSPATH' ) || exit;
@@ -158,7 +158,7 @@ class Writer {
 			$formats[]       = $format;
 		}
 
-		$result = $wpdb->insert( Tables::core_notifications(), $data, $formats );
+		$result = $wpdb->insert( Constants::core_notifications(), $data, $formats );
 
 		if ( false === $result ) {
 			throw new \RuntimeException( 'Failed to insert stock notification row: ' . $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -211,14 +211,14 @@ class Writer {
 	private function write_notification_meta( int $notification_id, array $meta ): int {
 		global $wpdb;
 
-		$meta_table = Tables::core_meta();
+		$meta_table = Constants::core_meta();
 		$values     = array();
 
 		foreach ( $meta as $pair ) {
 			$values[] = $notification_id;
 			$values[] = $pair[0];
-			// This writer is the sole owner of maybe_serialize() for meta values; callers
-			// (e.g. MetaMapper) must hand over unserialized values, or this double-serializes.
+			// This writer is the sole owner of maybe_serialize() for meta values; callers must
+			// hand over unserialized values, or this double-serializes.
 			$values[] = maybe_serialize( $pair[1] );
 		}
 
@@ -257,7 +257,7 @@ class Writer {
 			return true;
 		}
 
-		$table = Tables::legacy_meta();
+		$table = Constants::legacy_meta();
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		$result = $wpdb->insert(
