@@ -1116,6 +1116,51 @@ Display a "thank you" message, or a sentence regarding the current order status.
 - **Supports:** align (full, wide), color (background, gradients, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
+## Cancelled order status - woocommerce/order-confirmation-status-cancelled
+
+Contains the message shown for cancelled orders.
+
+- **Name:** woocommerce/order-confirmation-status-cancelled
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
+## Completed order status - woocommerce/order-confirmation-status-completed
+
+Contains the message shown for completed orders.
+
+- **Name:** woocommerce/order-confirmation-status-completed
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
+## Failed order status - woocommerce/order-confirmation-status-failed
+
+Contains the message shown for failed orders.
+
+- **Name:** woocommerce/order-confirmation-status-failed
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
+## Order received - woocommerce/order-confirmation-status-order-received
+
+Contains the message shown for processing and on-hold orders.
+
+- **Name:** woocommerce/order-confirmation-status-order-received
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
+## Refunded order status - woocommerce/order-confirmation-status-refunded
+
+Contains the message shown for refunded orders.
+
+- **Name:** woocommerce/order-confirmation-status-refunded
+- **Category:** woocommerce
+- **Parent:** woocommerce/order-confirmation-status
+- **Supports:** ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+
 ## Order Summary - woocommerce/order-confirmation-summary
 
 Display the order summary on the order confirmation page.

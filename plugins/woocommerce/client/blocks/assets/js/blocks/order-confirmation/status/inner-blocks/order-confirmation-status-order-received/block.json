@@ -1,0 +1,19 @@
+{
+	"name": "woocommerce/order-confirmation-status-order-received",
+	"version": "1.0.0",
+	"title": "Order received",
+	"description": "Contains the message shown for processing and on-hold orders.",
+	"category": "woocommerce",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false
+	},
+	"parent": [ "woocommerce/order-confirmation-status" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
