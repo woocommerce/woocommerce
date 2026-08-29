@@ -25,6 +25,13 @@ defined( 'ABSPATH' ) || exit;
  * migrated and skipped, so losing a cursor costs a re-scan, never correctness. The
  * re-scan is of the whole legacy notifications table, which is why cursors are kept
  * between runs rather than reset at the start of each one.
+ *
+ * A dry run builds this with `$persist = false`: the run then reads the stored state once
+ * and keeps every change to itself, so a rehearsal can advance its own cursor batch after
+ * batch — which is what ends the run — without moving the cursor a later live run starts
+ * from, or caching counts for work it only pretended to do. The run lock is the exception:
+ * it is cross-process mutual exclusion rather than run state, so it is always read from and
+ * written to the stored option.
  */
 class MigrationState {
 
@@ -57,6 +64,30 @@ class MigrationState {
 	);
 
 	/**
+	 * Whether this instance persists what it writes.
+	 *
+	 * @var bool
+	 */
+	private bool $persist;
+
+	/**
+	 * In-memory state for a non-persisting instance, seeded from the stored option on the
+	 * first read. Null until then.
+	 *
+	 * @var array|null
+	 */
+	private ?array $scratch = null;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param bool $persist Whether to write changes to the option. False for a dry run.
+	 */
+	public function __construct( bool $persist = true ) {
+		$this->persist = $persist;
+	}
+
+	/**
 	 * Read the full state, filled out to the default shape.
 	 *
 	 * Shape: `lock` (array|null), `cursor` (section slug => int), `counts` and `options`
@@ -67,6 +98,19 @@ class MigrationState {
 	 * @return array
 	 */
 	public function get_state(): array {
+		if ( $this->persist ) {
+			return $this->read_stored_state();
+		}
+
+		return $this->scratch ??= $this->read_stored_state();
+	}
+
+	/**
+	 * Read the stored state, filled out to the default shape.
+	 *
+	 * @return array
+	 */
+	private function read_stored_state(): array {
 		$stored = get_option( self::OPTION_NAME, array() );
 
 		if ( ! is_array( $stored ) ) {
@@ -91,12 +135,28 @@ class MigrationState {
 	}
 
 	/**
-	 * Persist the full state, with autoload off.
+	 * Record the full state, persisting it unless this is a dry run's instance.
 	 *
 	 * @param array $state The full state, as returned by get_state().
 	 * @return void
 	 */
 	private function save_state( array $state ): void {
+		if ( ! $this->persist ) {
+			$this->scratch = $state;
+
+			return;
+		}
+
+		$this->write_stored_state( $state );
+	}
+
+	/**
+	 * Persist the full state, with autoload off.
+	 *
+	 * @param array $state The full state, as returned by get_state().
+	 * @return void
+	 */
+	private function write_stored_state( array $state ): void {
 		update_option( self::OPTION_NAME, $state, false );
 	}
 
@@ -109,7 +169,7 @@ class MigrationState {
 	 *              a lock that is not yet stale.
 	 */
 	public function acquire_lock( string $owner ): bool {
-		$state = $this->get_state();
+		$state = $this->read_stored_state();
 
 		if ( $this->is_lock_fresh( $state['lock'] ) ) {
 			return false;
@@ -120,7 +180,7 @@ class MigrationState {
 			'acquired_at' => time(),
 		);
 
-		$this->save_state( $state );
+		$this->write_stored_state( $state );
 
 		return true;
 	}
@@ -131,9 +191,9 @@ class MigrationState {
 	 * @return void
 	 */
 	public function release_lock(): void {
-		$state         = $this->get_state();
+		$state         = $this->read_stored_state();
 		$state['lock'] = null;
-		$this->save_state( $state );
+		$this->write_stored_state( $state );
 	}
 
 	/**
@@ -146,7 +206,7 @@ class MigrationState {
 	 * @return void
 	 */
 	public function refresh_lock(): void {
-		$state = $this->get_state();
+		$state = $this->read_stored_state();
 
 		if ( null === $state['lock'] ) {
 			return;
@@ -154,7 +214,7 @@ class MigrationState {
 
 		$state['lock']['acquired_at'] = time();
 
-		$this->save_state( $state );
+		$this->write_stored_state( $state );
 	}
 
 	/**
@@ -163,7 +223,7 @@ class MigrationState {
 	 * @return bool
 	 */
 	public function is_lock_held(): bool {
-		return $this->is_lock_fresh( $this->get_state()['lock'] );
+		return $this->is_lock_fresh( $this->read_stored_state()['lock'] );
 	}
 
 	/**
@@ -175,7 +235,7 @@ class MigrationState {
 	 * @return array|null `owner` and `acquired_at` when a lock entry is present.
 	 */
 	public function get_lock(): ?array {
-		return $this->get_state()['lock'];
+		return $this->read_stored_state()['lock'];
 	}
 
 	/**
@@ -225,16 +285,6 @@ class MigrationState {
 		$state                       = $this->get_state();
 		$state['cursor'][ $section ] = $cursor;
 		$this->save_state( $state );
-	}
-
-	/**
-	 * Reset a single section's cursor to the start of a pass.
-	 *
-	 * @param string $section Migrator section slug.
-	 * @return void
-	 */
-	public function reset_cursor( string $section ): void {
-		$this->set_cursor( $section, 0 );
 	}
 
 	/**

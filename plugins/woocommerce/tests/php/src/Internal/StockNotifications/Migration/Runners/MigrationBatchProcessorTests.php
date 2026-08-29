@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Run
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\MigrationBatchProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
@@ -421,6 +423,120 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$batches = $this->run_to_completion( 50 );
 
 		$this->assertSame( 1, $batches, 'The rows are served once and the cursor moves past them.' );
+	}
+
+	/**
+	 * @testdox a dry run should terminate without leaving a cursor a later live run would start above.
+	 */
+	public function test_a_dry_run_leaves_the_stored_state_untouched(): void {
+		$legacy_ids = $this->seed_notifications( 5 );
+		$reporter   = new Reporter();
+
+		$this->processor->configure_run(
+			array( 'notifications' => new NotificationsMigrator( $reporter ) ),
+			new Writer( true ),
+			2,
+			$reporter
+		);
+
+		$this->assertGreaterThan( 1, $this->run_to_completion( 2 ), 'A dry run advances its own cursor, so it ends.' );
+
+		$this->assertSame( array(), LegacyStore::get_core_rows(), 'A dry run must write no rows.' );
+		$this->assertSame( 0, $this->state->get_cursor( 'notifications' ), 'A dry run must leave the stored cursor at the start.' );
+		$this->assertNull( $this->state->get_count( 'notifications' ), 'A dry run must cache no count.' );
+
+		// The bug this pins: a rehearsal that stored its cursor left the next live run
+		// starting above every row it had walked, migrating none of them.
+		$this->processor->configure_run(
+			array( 'notifications' => new NotificationsMigrator( new Reporter() ) ),
+			wc_get_container()->get( Writer::class ),
+			2
+		);
+
+		$this->run_to_completion( 2 );
+
+		$markers             = LegacyStore::get_core_meta( '_wc_bis_legacy_id' );
+		$migrated_legacy_ids = array_map( 'intval', array_merge( ...array_values( $markers ) ) );
+		sort( $migrated_legacy_ids );
+
+		$this->assertSame( $legacy_ids, $migrated_legacy_ids, 'The live run after a dry run migrates every row.' );
+	}
+
+	/**
+	 * @testdox a whole-batch failure should be reported, hold the cursor, and still propagate.
+	 */
+	public function test_a_whole_batch_failure_is_reported_and_rethrown(): void {
+		$this->seed_notifications( 2 );
+
+		$reporter = new Reporter();
+		$failing  = new class() implements MigratorInterface {
+
+			/**
+			 * Section slug.
+			 *
+			 * @return string
+			 */
+			public function get_slug(): string {
+				return 'notifications';
+			}
+
+			/**
+			 * Remaining candidates.
+			 *
+			 * @param int $cursor Keyset cursor. Ignored.
+			 * @return int
+			 */
+			public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface.
+				return 1;
+			}
+
+			/**
+			 * One row at the start of a pass.
+			 *
+			 * @param int $cursor Keyset cursor.
+			 * @param int $size   Batch size.
+			 * @return array
+			 */
+			public function get_batch( int $cursor, int $size ): array {
+				return 0 === $cursor ? array( 1 ) : array();
+			}
+
+			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn -- the method exists to throw.
+			/**
+			 * Fails the whole batch, the way a lost connection would.
+			 *
+			 * @param array  $ids    Row ids.
+			 * @param Writer $writer Writer.
+			 * @throws \RuntimeException Always.
+			 * @return array Never returns.
+			 */
+			public function migrate_batch( array $ids, Writer $writer ): array {
+				throw new \RuntimeException( 'lost connection' );
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+		};
+
+		$this->processor->configure_run(
+			array( 'notifications' => $failing ),
+			wc_get_container()->get( Writer::class ),
+			50,
+			$reporter
+		);
+
+		$batch = $this->processor->get_next_batch_to_process( 50 );
+		$this->assertNotEmpty( $batch );
+
+		$thrown = null;
+
+		try {
+			$this->processor->process_batch( $batch );
+		} catch ( \RuntimeException $e ) {
+			$thrown = $e;
+		}
+
+		$this->assertNotNull( $thrown, 'The batch must still propagate so the controller retries it.' );
+		$this->assertTrue( $reporter->has_errors(), 'A failed batch must not leave the run reporting success.' );
+		$this->assertSame( 0, $this->state->get_cursor( 'notifications' ), 'A failed batch must not advance the cursor.' );
 	}
 
 	/**

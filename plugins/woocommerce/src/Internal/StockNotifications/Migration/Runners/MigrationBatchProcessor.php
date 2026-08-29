@@ -152,6 +152,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * still runs the loop through this class, so the section order and the cursor have a
 	 * single implementation.
 	 *
+	 * The run state is rebuilt here, non-persisting when the writer is a dry-run one. The
+	 * cursor still advances batch by batch — nothing would ever end the run otherwise — but
+	 * only in memory, so a rehearsal cannot leave a later live run starting above rows it
+	 * never migrated, and cannot cache counts for work it only pretended to do.
+	 *
 	 * @param array<string, MigratorInterface> $migrators  Migrators keyed by slug, in section order.
 	 * @param Writer                           $writer     Writer every migrator routes persistence through.
 	 * @param int                              $batch_size Batch size the caller will request.
@@ -163,6 +168,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$this->migrators  = $migrators;
 		$this->writer     = $writer;
 		$this->batch_size = max( 1, $batch_size );
+
+		$this->state = new MigrationState( ! $writer->is_dry_run() );
 
 		if ( null !== $reporter ) {
 			$this->reporter = $reporter;
@@ -267,6 +274,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * batch lands so a long run is never mistaken for an abandoned one.
 	 *
 	 * @param array $batch Batch to process, as returned by 'get_next_batch_to_process'.
+	 * @throws \Throwable A whole-batch failure, after recording it, so the controller retries.
 	 */
 	public function process_batch( array $batch ): void {
 		if ( empty( $batch ) ) {
@@ -280,7 +288,16 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		foreach ( $this->group_by_section( $batch ) as $slug => $raw_ids ) {
 			$migrator = $this->migrators[ $slug ];
 
-			$migrator->migrate_batch( $raw_ids, $this->writer );
+			try {
+				$migrator->migrate_batch( $raw_ids, $this->writer );
+			} catch ( \Throwable $e ) {
+				// Recorded, then re-thrown so the controller still retries the batch: without
+				// this the run would end reporting no errors at all.
+				$this->reporter->report_exception( $slug, $e );
+
+				throw $e;
+			}
+
 			$this->state->refresh_lock();
 			$this->store_cursor( $slug, $raw_ids );
 		}

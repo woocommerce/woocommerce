@@ -414,6 +414,10 @@ class Cli {
 			return;
 		}
 
+		// A dry run keeps its cursors and counts to itself, so a rehearsal never moves the
+		// point a later live run starts from. The lock is still the real one, taken above.
+		$run_state = $dry_run ? new MigrationState( false ) : $this->state();
+
 		try {
 			if ( $retry_failed && ! $dry_run ) {
 				$cleared = 0;
@@ -437,7 +441,7 @@ class Cli {
 			// back into play below the cursor, so they reset it; `MigrationBatchProcessor`
 			// itself only ever advances one.
 			if ( $force || $retry_failed ) {
-				$this->state()->reset_all_cursors();
+				$run_state->reset_all_cursors();
 			}
 
 			$reporter               = new Reporter();
@@ -457,15 +461,15 @@ class Cli {
 			// drain — never computed live outside a run.
 			$total_estimate = 0;
 			foreach ( $sections as $slug ) {
-				$remaining = $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) );
-				$this->state()->set_count( $slug, $remaining );
+				$remaining = $migrators[ $slug ]->count_remaining( $run_state->get_cursor( $slug ) );
+				$run_state->set_count( $slug, $remaining );
 				$total_estimate += $remaining;
 			}
 
 			if ( in_array( 'notifications', $sections, true ) ) {
 				// The denominator the Tools screen shows progress against: the whole legacy
 				// table, whatever the cursor has already been past.
-				$this->state()->set_total( 'notifications', $notifications_migrator->count_remaining() );
+				$run_state->set_total( 'notifications', $notifications_migrator->count_remaining() );
 			}
 
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -495,14 +499,14 @@ class Cli {
 				// --max-batches stopped the run before any section drained, and draining is
 				// where the processor refreshes a cached count, so refresh them here instead.
 				foreach ( $sections as $slug ) {
-					$this->state()->set_count( $slug, $migrators[ $slug ]->count_remaining( $this->state()->get_cursor( $slug ) ) );
+					$run_state->set_count( $slug, $migrators[ $slug ]->count_remaining( $run_state->get_cursor( $slug ) ) );
 				}
 			}
 
 			if ( in_array( 'notifications', $sections, true ) ) {
 				// What this run found while walking its rows, not a pre-run census: complete
 				// only once the run has reached the end of the legacy table.
-				$this->state()->set_losses( $reporter->with_run_losses( $notifications_migrator ) );
+				$run_state->set_losses( $reporter->with_run_losses( $notifications_migrator ) );
 			}
 
 			$this->print_report( $reporter );
