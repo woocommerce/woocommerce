@@ -23,9 +23,11 @@ defined( 'ABSPATH' ) || exit;
  *
  * Idempotency is read-back-and-compare rather than a stored marker: a value whose Core home
  * already holds it is left alone, and a value that is written is confirmed by reading it back
- * before it counts as migrated. A key this instance has settled is not looked at again for the
- * rest of the run, so a merchant editing a setting mid-run cannot have it overwritten by a
- * later batch.
+ * before it counts as migrated. A key this instance has already visited is not looked at again
+ * for the rest of the run, whether or not the write landed. That is what bounds the run: a
+ * value that cannot be written would otherwise keep the run from ever draining, and it also
+ * means a merchant editing a setting mid-run cannot have it overwritten by a later batch. A
+ * write that did not land is retried by the next run, which starts a new instance.
  *
  * Two mappings that are easy to get backwards:
  *
@@ -121,6 +123,11 @@ class OptionsMigrator {
 	private const OUTCOME_UNKNOWN_PLACEHOLDER = 'unknown_placeholder';
 
 	/**
+	 * Delimiter joining a Core option name and a sub-key into one marker.
+	 */
+	private const MARKER_DELIMITER = '::';
+
+	/**
 	 * Outcome reporter.
 	 *
 	 * @var Reporter
@@ -128,13 +135,13 @@ class OptionsMigrator {
 	private Reporter $reporter;
 
 	/**
-	 * Values this instance has settled, so a run that calls `migrate()` once per batch only
-	 * looks at each of them once. A value that failed to land is left out, so the next batch
-	 * tries it again.
+	 * Values this instance has already attempted, so a run that calls `migrate()` once per
+	 * batch only looks at each of them once, and so a value that cannot be written cannot
+	 * keep the run from draining.
 	 *
 	 * @var array<string, true>
 	 */
-	private array $settled = array();
+	private array $visited = array();
 
 	/**
 	 * Constructor.
@@ -163,9 +170,41 @@ class OptionsMigrator {
 	 * @return bool
 	 */
 	public function is_done(): bool {
+		return empty( $this->outstanding( false ) );
+	}
+
+	/**
+	 * Whether this run still has settings to attempt.
+	 *
+	 * What tells `MigrationBatchProcessor` a run is not over yet: with both batched sections
+	 * drained, this is the only thing left that can still need a batch. Unlike `is_done()` it
+	 * ignores values this instance has already been through, so a value that cannot be
+	 * written ends the run rather than being served forever.
+	 *
+	 * @return bool
+	 */
+	public function has_pending(): bool {
+		return ! empty( $this->outstanding( true ) );
+	}
+
+	/**
+	 * The markers of every value that is not in its Core home.
+	 *
+	 * @param bool $skip_visited Whether to ignore values this instance has already attempted.
+	 * @return string[] Markers, as `migrate()` records them.
+	 */
+	private function outstanding( bool $skip_visited ): array {
+		$markers = array();
+
 		foreach ( self::GENERAL_MAP as $legacy_key => $mapping ) {
-			if ( ! $this->values_match( get_option( $mapping['core'] ), get_option( $legacy_key, $mapping['default'] ) ) ) {
-				return false;
+			$marker = $mapping['core'];
+
+			if ( $skip_visited && isset( $this->visited[ $marker ] ) ) {
+				continue;
+			}
+
+			if ( ! $this->values_match( get_option( $marker ), get_option( $legacy_key, $mapping['default'] ) ) ) {
+				$markers[] = $marker;
 			}
 		}
 
@@ -174,13 +213,19 @@ class OptionsMigrator {
 			$core_settings   = (array) get_option( $core_key, array() );
 
 			foreach ( self::SUB_KEYS as $sub_key ) {
+				$marker = $core_key . self::MARKER_DELIMITER . $sub_key;
+
+				if ( $skip_visited && isset( $this->visited[ $marker ] ) ) {
+					continue;
+				}
+
 				if ( ! $this->values_match( $core_settings[ $sub_key ] ?? null, $legacy_settings[ $sub_key ] ?? '' ) ) {
-					return false;
+					$markers[] = $marker;
 				}
 			}
 		}
 
-		return true;
+		return $markers;
 	}
 
 	/**
@@ -198,16 +243,16 @@ class OptionsMigrator {
 
 			$core_key = $mapping['core'];
 
-			if ( isset( $this->settled[ $core_key ] ) ) {
+			if ( isset( $this->visited[ $core_key ] ) ) {
 				continue;
 			}
+
+			$this->visited[ $core_key ] = true;
 
 			$value  = get_option( $legacy_key, $mapping['default'] );
 			$before = get_option( $core_key );
 
 			if ( $this->values_match( $before, $value ) ) {
-				$this->settled[ $core_key ] = true;
-
 				continue;
 			}
 
@@ -217,14 +262,9 @@ class OptionsMigrator {
 			// not land must stay outstanding so the next batch tries it again.
 			// `write_option()`'s own return is no use here — `update_option()` returns false
 			// for a value that was already what it is being set to.
-			$after  = $writer->is_dry_run() ? $value : get_option( $core_key );
-			$landed = $this->values_match( $after, $value );
+			$after = $writer->is_dry_run() ? $value : get_option( $core_key );
 
-			if ( $landed ) {
-				$this->settled[ $core_key ] = true;
-			}
-
-			$this->record( $counts, $landed ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $row_id );
+			$this->record( $counts, $this->values_match( $after, $value ) ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $row_id );
 		}
 
 		foreach ( self::EMAIL_MAP as $legacy_key => $core_key ) {
@@ -252,17 +292,17 @@ class OptionsMigrator {
 		foreach ( self::SUB_KEYS as $sub_key ) {
 			++$row_id;
 
-			$marker = $core_key . '::' . $sub_key;
+			$marker = $core_key . self::MARKER_DELIMITER . $sub_key;
 
-			if ( isset( $this->settled[ $marker ] ) ) {
+			if ( isset( $this->visited[ $marker ] ) ) {
 				continue;
 			}
+
+			$this->visited[ $marker ] = true;
 
 			$value = $legacy_settings[ $sub_key ] ?? '';
 
 			if ( $this->values_match( $core_settings[ $sub_key ] ?? null, $value ) ) {
-				$this->settled[ $marker ] = true;
-
 				continue;
 			}
 
@@ -284,10 +324,6 @@ class OptionsMigrator {
 
 		foreach ( $pending as $sub_key => $sub_row_id ) {
 			$landed = $this->values_match( $stored[ $sub_key ] ?? null, $core_settings[ $sub_key ] );
-
-			if ( $landed ) {
-				$this->settled[ $core_key . '::' . $sub_key ] = true;
-			}
 
 			$this->record( $counts, $landed ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $sub_row_id );
 		}

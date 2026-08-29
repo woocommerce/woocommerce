@@ -540,6 +540,38 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a run should migrate the settings even when no section has a row to move.
+	 */
+	public function test_settings_migrate_on_a_store_with_no_rows_left(): void {
+		update_option( 'wc_bis_allow_signups', 'no' );
+
+		// No legacy notifications and no product meta: every section is drained from the
+		// first call, so the settings are the only thing a batch can still be served for.
+		$this->assertSame( array(), LegacyStore::get_core_rows() );
+
+		$this->run_to_completion( 50 );
+
+		$this->assertSame(
+			'no',
+			get_option( 'woocommerce_customer_stock_notifications_allow_signups' ),
+			'Settings must migrate on a store whose sections have nothing left to move.'
+		);
+	}
+
+	/**
+	 * @testdox settings should migrate alongside a section's rows.
+	 */
+	public function test_settings_migrate_alongside_a_sections_rows(): void {
+		update_option( 'wc_bis_allow_signups', 'no' );
+		$this->seed_notifications( 2 );
+
+		$this->run_to_completion( 50 );
+
+		$this->assertCount( 2, LegacyStore::get_core_rows() );
+		$this->assertSame( 'no', get_option( 'woocommerce_customer_stock_notifications_allow_signups' ) );
+	}
+
+	/**
 	 * Run the processor until it reports an empty batch.
 	 *
 	 * @param int $size Batch size to request.
@@ -644,6 +676,8 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	 */
 	private function clear_migration_options(): void {
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_allow_signups' );
+		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
 	}

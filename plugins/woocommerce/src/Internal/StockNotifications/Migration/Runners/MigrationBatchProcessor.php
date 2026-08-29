@@ -51,6 +51,16 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private const SECTION_DELIMITER = '::';
 
 	/**
+	 * The single batch item that stands for "the settings still need a pass".
+	 *
+	 * Settings are not a section, so they have no ids to hand out. Without an item of their
+	 * own a store whose batched sections are already drained — or that never had a row in
+	 * them — would never get a non-empty batch, `process_batch()` would never run, and its
+	 * settings would never migrate at all.
+	 */
+	private const OPTIONS_ITEM = 'options' . self::SECTION_DELIMITER . 'pending';
+
+	/**
 	 * Default batch size for scheduled (Action Scheduler) runs. The CLI raises this for
 	 * its own runs via `--batch-size`.
 	 */
@@ -150,8 +160,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * still runs the loop through this class, so the section order and the cursor have a
 	 * single implementation.
 	 *
-	 * The run state is rebuilt here, non-persisting when the writer is a dry-run one. The
-	 * cursor still advances batch by batch — nothing would ever end the run otherwise — but
+	 * The run state is replaced here too. A caller with a state of its own passes it, so a
+	 * dry run's in-memory cursors are the same ones the caller resets and reports on; without
+	 * one, a state matching the writer's mode is built. Either way the cursor still advances
+	 * batch by batch — nothing would ever end the run otherwise — but a dry run's advances
 	 * only in memory, so a rehearsal cannot leave a later live run starting above rows it
 	 * never migrated, and cannot cache counts for work it only pretended to do.
 	 *
@@ -162,14 +174,16 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 *                                                     losses cached on drain are this run's own.
 	 * @param OptionsMigrator|null             $options    The settings migrator this run shares, so its
 	 *                                                     outcomes land on the same reporter.
+	 * @param MigrationState|null              $state      The run state this run shares, or null to build
+	 *                                                     one matching the writer's mode.
 	 * @return void
 	 */
-	public function configure_run( array $migrators, Writer $writer, int $batch_size, ?Reporter $reporter = null, ?OptionsMigrator $options = null ): void {
+	public function configure_run( array $migrators, Writer $writer, int $batch_size, ?Reporter $reporter = null, ?OptionsMigrator $options = null, ?MigrationState $state = null ): void {
 		$this->migrators  = $migrators;
 		$this->writer     = $writer;
 		$this->batch_size = max( 1, $batch_size );
 
-		$this->state = new MigrationState( ! $writer->is_dry_run() );
+		$this->state = $state ?? new MigrationState( ! $writer->is_dry_run() );
 
 		if ( null !== $reporter ) {
 			$this->reporter = $reporter;
@@ -225,9 +239,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * Returns the next batch of items that need to be processed.
 	 *
 	 * Serves the first section, in fixed order, that still has work, and moves past a
-	 * section as soon as its query comes back empty. Never writes a cursor, so calling it
-	 * twice in a row returns the same batch; the one write it does make is the drained
-	 * section's cached count, once per section per instance.
+	 * section as soon as its query comes back empty. Once both are drained it serves one
+	 * settings item, if this run has not been through the settings yet. Never writes a
+	 * cursor, so calling it twice in a row returns the same batch; the one write it does
+	 * make is the drained section's cached count, once per section per instance.
 	 *
 	 * Runs only while the run's lock is held, and releases it once there is nothing left
 	 * to do - an empty batch is what tells the controller the run is over, so it is also
@@ -257,6 +272,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			$this->refresh_count_on_drain( $slug, $migrator );
 		}
 
+		if ( $this->options->has_pending() ) {
+			return array( self::OPTIONS_ITEM );
+		}
+
 		$this->state->release_lock();
 
 		return array();
@@ -279,7 +298,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * batch lands so a long run is never mistaken for an abandoned one.
 	 *
 	 * @param array $batch Batch to process, as returned by 'get_next_batch_to_process'.
-	 * @throws \Throwable A whole-batch failure, after recording it, so the controller retries.
+	 * @throws \Throwable A whole-batch failure, after recording it. `BatchProcessingController`
+	 *                    catches `\Exception` and reschedules with backoff; an `\Error` escapes
+	 *                    it to the action runner, which is why this records before rethrowing
+	 *                    rather than leaving the reporting to the controller.
 	 */
 	public function process_batch( array $batch ): void {
 		if ( empty( $batch ) ) {
@@ -300,8 +322,9 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			try {
 				$migrator->migrate_batch( $raw_ids, $this->writer );
 			} catch ( \Throwable $e ) {
-				// Recorded, then re-thrown so the controller still retries the batch: without
-				// this the run would end reporting no errors at all.
+				// Throwable, not Exception: an \Error would otherwise pass through unrecorded,
+				// and it is the one kind of failure `BatchProcessingController` does not catch
+				// either. Re-thrown so a retryable failure still reaches the controller.
 				$this->reporter->report_exception( $slug, $e );
 
 				throw $e;

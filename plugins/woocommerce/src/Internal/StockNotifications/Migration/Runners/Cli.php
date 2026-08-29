@@ -364,8 +364,10 @@ class Cli {
 		}
 
 		// A dry run keeps its cursors and counts to itself, so a rehearsal never moves the
-		// point a later live run starts from. The lock is still the real one, taken above.
-		$run_state = $dry_run ? new MigrationState( false ) : $this->state();
+		// point a later live run starts from. The processor is handed this same instance
+		// below, or a `--dry-run --force` would reset a cursor the batch loop never reads.
+		// The lock is still the real one, taken above.
+		$run_state = $run->build_state( $dry_run );
 
 		try {
 			if ( $retry_failed && ! $dry_run ) {
@@ -408,7 +410,7 @@ class Cli {
 			// pumps it, so both entry points run the same state machine.
 			$processor = new MigrationBatchProcessor();
 			$processor->init( $this->requirements(), $run->build_writer( false ) );
-			$processor->configure_run( $migrators, $writer, $batch_size, $reporter, $options );
+			$processor->configure_run( $migrators, $writer, $batch_size, $reporter, $options, $run_state );
 
 			// Counts are cached, display-only, and refreshed at run start and on section
 			// drain — never computed live outside a run.

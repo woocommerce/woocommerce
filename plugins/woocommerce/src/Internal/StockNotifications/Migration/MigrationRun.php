@@ -52,6 +52,13 @@ class MigrationRun {
 	private ?OptionsMigrator $options = null;
 
 	/**
+	 * The run state, built on first use.
+	 *
+	 * @var MigrationState|null
+	 */
+	private ?MigrationState $state = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Reporter|null $reporter Outcome collector to share, or null to start a fresh one.
@@ -88,6 +95,22 @@ class MigrationRun {
 	 */
 	public function build_options_migrator(): OptionsMigrator {
 		return $this->options ??= new OptionsMigrator( $this->reporter );
+	}
+
+	/**
+	 * The run state this run's cursors, counts and losses go through.
+	 *
+	 * One instance for the whole run, since a dry run's state lives only in memory: two
+	 * non-persisting instances would each keep their own copy, and a cursor reset on one
+	 * would be invisible to the loop reading the other.
+	 *
+	 * The flag is read on the first call only — a run does not change mode part-way.
+	 *
+	 * @param bool $dry_run Whether the run should keep its state to itself.
+	 * @return MigrationState
+	 */
+	public function build_state( bool $dry_run ): MigrationState {
+		return $this->state ??= new MigrationState( ! $dry_run );
 	}
 
 	/**

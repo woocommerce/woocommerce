@@ -247,12 +247,61 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertGreaterThan( 0, $counts[ Reporter::OUTCOME_FAILED ] ?? 0, 'A write that did not land is a failure.' );
 		$this->assertFalse( $migrator->is_done(), 'A write that did not land must stay outstanding.' );
+		$this->assertFalse( $migrator->has_pending(), 'The failed value is not served again by this run, or the run could not drain.' );
 
-		// The same instance writes again rather than settling on a value that never landed.
-		$migrator->migrate( wc_get_container()->get( Writer::class ) );
+		// The next run starts a new instance, which writes again rather than settling on a
+		// value that never landed.
+		$this->migrate();
 
 		$stored = (array) get_option( 'woocommerce_customer_stock_notification_settings', array() );
 		$this->assertSame( 'Legacy subject', $stored['subject'] ?? '' );
+	}
+
+	/**
+	 * @testdox a general option whose write does not land should be reported and left outstanding.
+	 */
+	public function test_a_general_option_write_that_did_not_land_is_reported(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+
+		$silent = new class() extends Writer {
+			/**
+			 * Discard the write and report success.
+			 *
+			 * @param string $option Option name.
+			 * @param mixed  $value  Option value.
+			 * @return bool
+			 */
+			public function write_option( string $option, $value ): bool {
+				return true;
+			}
+		};
+
+		$migrator = $this->build_migrator();
+		$counts   = $migrator->migrate( $silent );
+
+		$this->assertGreaterThan( 0, $counts[ Reporter::OUTCOME_FAILED ] ?? 0 );
+		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ) );
+		$this->assertFalse( $migrator->is_done() );
+
+		$this->migrate();
+
+		$this->assertSame( 'no', get_option( self::CORE_ALLOW_SIGNUPS ), 'The next run writes the value that never landed.' );
+	}
+
+	/**
+	 * @testdox has_pending should be false once a run has been through every value.
+	 */
+	public function test_has_pending_clears_once_a_run_has_been_through_everything(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+
+		$migrator = $this->build_migrator();
+
+		$this->assertTrue( $migrator->has_pending(), 'A store with settings to move has a pass outstanding.' );
+
+		$migrator->migrate( wc_get_container()->get( Writer::class ) );
+
+		$this->assertFalse( $migrator->has_pending(), 'A run that has been through the settings must be able to drain.' );
+		$this->assertTrue( $migrator->is_done() );
 	}
 
 	/**
@@ -270,6 +319,7 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $migrator->migrate( $writer ), 'A dry run reports what a live run would have written.' );
 		$this->assertSame( array(), $migrator->migrate( $writer ), 'A dry run must not report the same values on every batch.' );
+		$this->assertFalse( $migrator->has_pending(), 'A dry run must be able to drain.' );
 
 		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ) );
 		$this->assertFalse( get_option( 'woocommerce_customer_stock_notification_settings' ) );
