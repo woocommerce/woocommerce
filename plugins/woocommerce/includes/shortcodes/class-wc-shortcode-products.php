@@ -637,7 +637,7 @@ class WC_Shortcode_Products {
 				)
 			);
 
-			$original_post = $GLOBALS['post'];
+			$original_post = $GLOBALS['post'] ?? null;
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
@@ -669,7 +669,11 @@ class WC_Shortcode_Products {
 				}
 			}
 
-			$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			if ( null !== $original_post ) {
+				$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			} else {
+				unset( $GLOBALS['post'] );
+			}
 			woocommerce_product_loop_end();
 
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
