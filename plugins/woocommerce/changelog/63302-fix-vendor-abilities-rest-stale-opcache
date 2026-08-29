@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error on WordPress 6.9+ caused by stale PHP opcache from an updated wordpress/abilities-api vendor package. Suppress the redundant vendor REST endpoint registration when WordPress core already provides the same abilities REST routes.
