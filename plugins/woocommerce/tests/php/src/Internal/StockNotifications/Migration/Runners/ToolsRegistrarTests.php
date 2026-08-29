@@ -165,7 +165,84 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', $counter );
 
 		$this->assertSame( 0, $counting_queries, 'The Tools screen must render from the cached counts.' );
-		$this->assertStringContainsString( 'notifications: 3', $tools['stop_bis_migration']['desc'] );
+		$this->assertStringContainsString( '3 subscribers left to check', $tools['stop_bis_migration']['desc'] );
+		$this->assertStringContainsString( '0 of 3 checked', $tools['stop_bis_migration']['desc'] );
+		$this->assertStringNotContainsString( 'product-meta', $tools['stop_bis_migration']['desc'], 'Section slugs are internal names.' );
+	}
+
+	/**
+	 * @testdox the description should say the migration has not started when nothing is cached.
+	 */
+	public function test_the_description_reads_as_not_started_without_cached_counts(): void {
+		$tools = $this->registrar->handle_woocommerce_debug_tools( array() );
+
+		$this->assertStringContainsString( 'Not started yet', $tools['start_bis_migration']['desc'] );
+	}
+
+	/**
+	 * @testdox the description should read as running while a background run is enqueued.
+	 */
+	public function test_the_description_reads_as_running_while_enqueued(): void {
+		$product = new \WC_Product_Simple();
+		$product->save();
+		LegacyStore::add_notification( array( 'product_id' => $product->get_id() ) );
+
+		$this->registrar->start();
+
+		$tools = $this->registrar->handle_woocommerce_debug_tools( array() );
+
+		$this->assertStringContainsString( 'Running now.', $tools['stop_bis_migration']['desc'] );
+	}
+
+	/**
+	 * @testdox the description should read as paused when work is left and no run is enqueued.
+	 */
+	public function test_the_description_reads_as_paused_between_runs(): void {
+		$this->state->set_count( 'notifications', 5 );
+
+		$tools = $this->registrar->handle_woocommerce_debug_tools( array() );
+
+		$this->assertStringContainsString( 'Paused.', $tools['start_bis_migration']['desc'] );
+		$this->assertStringContainsString( '5 subscribers left to check', $tools['start_bis_migration']['desc'] );
+	}
+
+	/**
+	 * @testdox the description should read as finished once every section has drained.
+	 */
+	public function test_the_description_reads_as_finished_once_everything_is_checked(): void {
+		foreach ( array( 'notifications', 'product-meta', 'emails', 'settings' ) as $section ) {
+			$this->state->set_count( $section, 0 );
+		}
+
+		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
+
+		$this->assertStringContainsString( 'Every subscriber has been checked', $desc );
+		$this->assertStringContainsString( 'Product settings, email settings and general settings have been imported.', $desc );
+	}
+
+	/**
+	 * @testdox the description should show subscriber progress against the total a run started from.
+	 */
+	public function test_the_description_shows_progress_against_the_run_total(): void {
+		$this->state->set_total( 'notifications', 10 );
+		$this->state->set_count( 'notifications', 4 );
+
+		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
+
+		$this->assertStringContainsString( '60% (6 of 10 checked)', $desc );
+		$this->assertStringContainsString( '▮▮▮▮▮▮▮▮▮▮▮▮▯▯▯▯▯▯▯▯', $desc );
+	}
+
+	/**
+	 * @testdox subscriber progress should be left out until a run has recorded a total.
+	 */
+	public function test_the_description_omits_progress_without_a_total(): void {
+		$this->state->set_count( 'notifications', 4 );
+
+		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
+
+		$this->assertStringContainsString( '4 subscribers left to check', $desc );
+		$this->assertStringNotContainsString( 'checked)', $desc, 'A bar with no denominator would have to invent one.' );
 	}
 
 	/**

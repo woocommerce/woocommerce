@@ -463,6 +463,12 @@ class Cli {
 				$total_estimate += $remaining;
 			}
 
+			if ( in_array( 'notifications', $sections, true ) ) {
+				// The denominator the Tools screen shows progress against: the whole legacy
+				// table, whatever the cursor has already been past.
+				$this->state()->set_total( 'notifications', $notifications_migrator->count_remaining() );
+			}
+
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 			$progress    = WP_CLI\Utils\make_progress_bar( 'BIS migration', max( 1, $total_estimate ) );
 			$batches_run = 0;

@@ -14,8 +14,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * The option is written with autoload off: it changes on every batch, and nothing
  * outside a migration run needs it in memory. It holds the CLI run `lock`, the
- * per-section `cursor`, cached display-only `counts`, the known-`losses` snapshot, and
- * the set of `options` already migrated.
+ * per-section `cursor`, cached display-only `counts` and `totals`, the known-`losses`
+ * snapshot, and the set of `options` already migrated.
  *
  * State here is an optimization, never authority. What has actually been migrated is
  * recorded by the markers the migrators write onto legacy and Core rows
@@ -53,6 +53,7 @@ class MigrationState {
 		'counts'  => array(),
 		'options' => array(),
 		'losses'  => null,
+		'totals'  => array(),
 	);
 
 	/**
@@ -80,7 +81,7 @@ class MigrationState {
 			}
 		}
 
-		foreach ( array( 'cursor', 'counts', 'options' ) as $key ) {
+		foreach ( array( 'cursor', 'counts', 'options', 'totals' ) as $key ) {
 			if ( ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = array();
 			}
@@ -277,6 +278,34 @@ class MigrationState {
 			'count' => $count,
 			'at'    => time(),
 		);
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Get a section's cached total: how many rows it had to visit when a run last started.
+	 *
+	 * The denominator the Tools screen shows progress against. Written at run start and left
+	 * alone while the run works, so progress moves in one direction.
+	 *
+	 * @param string $section Migrator section slug.
+	 * @return int|null Null when no run has recorded a total yet.
+	 */
+	public function get_total( string $section ): ?int {
+		$total = $this->get_state()['totals'][ $section ] ?? null;
+
+		return is_numeric( $total ) ? (int) $total : null;
+	}
+
+	/**
+	 * Record a section's total at run start.
+	 *
+	 * @param string $section Migrator section slug.
+	 * @param int    $total   Rows the section had to visit when the run started.
+	 * @return void
+	 */
+	public function set_total( string $section, int $total ): void {
+		$state                       = $this->get_state();
+		$state['totals'][ $section ] = $total;
 		$this->save_state( $state );
 	}
 
