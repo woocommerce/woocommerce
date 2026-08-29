@@ -26,6 +26,14 @@ final class Constants {
 	public const LEGACY_NOTIFICATIONS_TABLE = 'woocommerce_bis_notifications';
 
 	/**
+	 * The migration's sections, in the order they must run: settings land last, so a run cut
+	 * short never leaves Core reading settings for data that has not migrated yet.
+	 *
+	 * @var string[]
+	 */
+	public const SECTION_ORDER = array( 'notifications', 'product-meta', 'emails', 'settings' );
+
+	/**
 	 * Legacy notifications meta table, unprefixed.
 	 */
 	public const LEGACY_META_TABLE = 'woocommerce_bis_notificationsmeta';

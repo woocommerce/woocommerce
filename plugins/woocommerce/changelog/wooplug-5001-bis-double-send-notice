@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Scopes the Back In Stock Notifications double-send notice to the screens a merchant can act from, links it to the migration status and the plugins list, and words it for the migration state it is actually in. Reachable only while the migration feature is on.

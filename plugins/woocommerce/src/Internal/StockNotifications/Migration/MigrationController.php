@@ -64,6 +64,13 @@ class MigrationController implements RegisterHooksInterface {
 	private const LEGACY_PLUGIN_BASENAME = 'woocommerce-back-in-stock-notifications/woocommerce-back-in-stock-notifications.php';
 
 	/**
+	 * Screens the double-send notice renders on, beyond WooCommerce's own: the plugins list,
+	 * where the merchant deactivates the extension. Everywhere else the notice is a warning
+	 * they cannot act on from where they are standing.
+	 */
+	private const EXTRA_NOTICE_SCREENS = array( 'plugins', 'plugins-network' );
+
+	/**
 	 * Register the migration's hooks, gated per the rules above.
 	 *
 	 * @internal
@@ -108,13 +115,16 @@ class MigrationController implements RegisterHooksInterface {
 	 * Reads `wc_bis_migration_has_migrated_rows`, set the first time any row is migrated
 	 * regardless of whether it carries a legacy token. `wc_bis_migration_has_legacy_links` would
 	 * under-report this: a store whose rows carry no legacy token never sets it, even with
-	 * migrated rows present. Never auto-deactivates the extension; this is a
-	 * notice only.
+	 * migrated rows present.
+	 *
+	 * Rendered on WooCommerce's own screens and on the plugins list, the places the merchant
+	 * can act from, and never dismissible: the cost of silencing it is a customer receiving the
+	 * same restock email twice. Never auto-deactivates the extension; this is a notice only.
 	 *
 	 * @internal
 	 */
 	public function maybe_render_double_send_notice(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! $this->is_notice_screen() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
@@ -127,13 +137,92 @@ class MigrationController implements RegisterHooksInterface {
 		}
 
 		wp_admin_notice(
-			__( 'WooCommerce Back In Stock Notifications is still active and some of its subscribers have already been migrated to the built-in Customer stock notifications feature. While both are active, a restock can send duplicate emails to the same customer. Deactivate WooCommerce Back In Stock Notifications once the migration is complete.', 'woocommerce' ),
+			$this->double_send_notice_message(),
 			array(
 				'id'          => 'wc-bis-migration-double-send',
 				'type'        => 'warning',
 				'dismissible' => false,
 			)
 		);
+	}
+
+	/**
+	 * The double-send notice's text, in the state the migration is actually in.
+	 *
+	 * A finished migration is asked to deactivate the extension; an unfinished one is asked to
+	 * finish first, since deactivating mid-migration strands whatever has not moved yet.
+	 *
+	 * @return string
+	 */
+	private function double_send_notice_message(): string {
+		$tools_link   = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ),
+			esc_html__( 'View migration status', 'woocommerce' )
+		);
+		$plugins_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'plugins.php?plugin_status=active' ) ),
+			esc_html__( 'go to Plugins', 'woocommerce' )
+		);
+
+		if ( $this->migration_is_drained() ) {
+			return sprintf(
+				/* translators: 1: link to the plugins screen, 2: link to the migration's entry on the Status → Tools screen */
+				esc_html__( 'Every Back In Stock Notifications subscriber has moved to the built-in customer stock notifications. Deactivate Back In Stock Notifications now: while both are active, a restock emails the same customer twice. %1$s or %2$s.', 'woocommerce' ),
+				$plugins_link,
+				$tools_link
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: link to the migration's entry on the Status → Tools screen, 2: link to the plugins screen */
+			esc_html__( 'Some Back In Stock Notifications subscribers have moved to the built-in customer stock notifications and some have not. A restock emails the ones that have moved twice, until you finish the migration and deactivate Back In Stock Notifications. %1$s or %2$s.', 'woocommerce' ),
+			$tools_link,
+			$plugins_link
+		);
+	}
+
+	/**
+	 * Whether every section of the migration has run out of rows to visit.
+	 *
+	 * Reads the counts cached in `wc_bis_migration_state`, which a run refreshes when a
+	 * section drains, so this is one option read and never a count query. A section that has
+	 * never been counted is treated as unfinished: nothing has proved otherwise.
+	 *
+	 * @return bool
+	 */
+	private function migration_is_drained(): bool {
+		$state = wc_get_container()->get( MigrationState::class );
+
+		foreach ( Constants::SECTION_ORDER as $section ) {
+			$cached = $state->get_count( $section );
+
+			if ( null === $cached || (int) $cached['count'] > 0 ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the current admin screen is one the double-send notice belongs on.
+	 *
+	 * @return bool
+	 */
+	private function is_notice_screen(): bool {
+		if ( ! function_exists( 'get_current_screen' ) || ! function_exists( 'wc_get_screen_ids' ) ) {
+			return false;
+		}
+
+		$screen = get_current_screen();
+
+		if ( null === $screen ) {
+			return false;
+		}
+
+		return in_array( $screen->id, array_merge( wc_get_screen_ids(), self::EXTRA_NOTICE_SCREENS ), true );
 	}
 
 	/**

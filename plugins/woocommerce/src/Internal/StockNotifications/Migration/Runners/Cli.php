@@ -55,7 +55,7 @@ class Cli {
 	 *
 	 * @var string[]
 	 */
-	private const SECTION_ORDER = array( 'notifications', 'product-meta', 'emails', 'settings' );
+	private const SECTION_ORDER = Constants::SECTION_ORDER;
 
 	/**
 	 * Option recording that Back In Stock Notifications was ever installed. Absent means

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Compat\LegacyLinkShim;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationController;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -49,6 +50,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 		remove_all_actions( 'template_redirect' );
 
 		$this->clear_options();
+		set_current_screen( 'front' );
 
 		parent::tearDown();
 	}
@@ -149,12 +151,72 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 	 */
 	public function test_double_send_notice_needs_the_capability_and_migrated_rows(): void {
 		update_option( 'wc_bis_db_version', '1.2.0' );
+		set_current_screen( 'plugins' );
 
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'customer' ) ) );
 		$this->assertSame( '', $this->render_double_send_notice() );
 
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->assertSame( '', $this->render_double_send_notice(), 'Nothing migrated yet, so nothing to warn about.' );
+	}
+
+	/**
+	 * @testdox the double-send notice should render only where the merchant can act on it.
+	 */
+	public function test_double_send_notice_is_scoped_to_actionable_screens(): void {
+		$this->arrange_double_send_conditions();
+
+		set_current_screen( 'dashboard' );
+		$this->assertSame( '', $this->render_double_send_notice(), 'The dashboard is not a screen this can be acted on from.' );
+
+		set_current_screen( 'plugins' );
+		$this->assertStringContainsString( 'Back In Stock Notifications', $this->render_double_send_notice() );
+
+		set_current_screen( 'woocommerce_page_wc-status' );
+		$this->assertStringContainsString( 'Back In Stock Notifications', $this->render_double_send_notice() );
+	}
+
+	/**
+	 * @testdox the double-send notice should not be dismissible and should link to both screens.
+	 */
+	public function test_double_send_notice_carries_its_actions(): void {
+		$this->arrange_double_send_conditions();
+		set_current_screen( 'plugins' );
+
+		$notice = $this->render_double_send_notice();
+
+		$this->assertStringNotContainsString( 'is-dismissible', $notice, 'A silenced warning is a duplicate email nobody saw coming.' );
+		$this->assertStringContainsString( 'page=wc-status&amp;tab=tools', $notice );
+		$this->assertStringContainsString( 'plugins.php', $notice );
+	}
+
+	/**
+	 * @testdox the double-send notice should ask for the migration to finish before deactivation.
+	 */
+	public function test_double_send_notice_asks_to_finish_an_unfinished_migration(): void {
+		$this->arrange_double_send_conditions();
+		set_current_screen( 'plugins' );
+
+		$state = new MigrationState();
+		$state->set_count( 'notifications', 12 );
+
+		$this->assertStringContainsString( 'and some have not', $this->render_double_send_notice() );
+	}
+
+	/**
+	 * @testdox the double-send notice should ask for deactivation once every section has drained.
+	 */
+	public function test_double_send_notice_asks_for_deactivation_once_drained(): void {
+		$this->arrange_double_send_conditions();
+		set_current_screen( 'plugins' );
+
+		$state = new MigrationState();
+
+		foreach ( array( 'notifications', 'product-meta', 'emails', 'settings' ) as $section ) {
+			$state->set_count( $section, 0 );
+		}
+
+		$this->assertStringContainsString( 'Every Back In Stock Notifications subscriber has moved', $this->render_double_send_notice() );
 	}
 
 	/**
@@ -184,6 +246,22 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Put the store in the state the double-send notice warns about: an admin user, migrated
+	 * rows, and the legacy extension still active.
+	 *
+	 * @return void
+	 */
+	private function arrange_double_send_conditions(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		update_option( 'wc_bis_db_version', '1.2.0' );
+		update_option( 'wc_bis_migration_has_migrated_rows', 'yes' );
+		update_option( 'active_plugins', array( 'woocommerce-back-in-stock-notifications/woocommerce-back-in-stock-notifications.php' ) );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+	}
+
+	/**
 	 * Capture whatever the double-send notice renders.
 	 *
 	 * @return string
@@ -207,5 +285,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 		delete_option( 'wc_bis_db_version' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
+		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'active_plugins' );
 	}
 }
