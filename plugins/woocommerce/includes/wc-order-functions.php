@@ -432,6 +432,9 @@ function wc_orders_count( $status, string $type = '' ) {
 function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1, $item = null ) {
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
+		if ( ! $product ) {
+			return false;
+		}
 	}
 	$download = new WC_Customer_Download();
 	$download->set_download_id( $download_id );
