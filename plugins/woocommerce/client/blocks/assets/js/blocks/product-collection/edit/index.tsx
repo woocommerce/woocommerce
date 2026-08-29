@@ -179,6 +179,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					clientId={ clientId }
 					attributes={ attributes }
 					tracksLocation={ tracksLocation }
+					setAttributes={ props.setAttributes }
 					closePatternSelectionModal={ () =>
 						setIsSelectionModalOpen( false )
 					}

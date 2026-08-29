@@ -18,7 +18,11 @@ import {
 /**
  * Internal dependencies
  */
-import { type CollectionName, CoreCollectionNames } from '../types';
+import {
+	type CollectionName,
+	type ProductCollectionAttributes,
+	CoreCollectionNames,
+} from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
 import { getDefaultProductCollection } from '../utils';
@@ -39,8 +43,12 @@ type CollectionOptionsProps = {
 
 export const applyCollection = (
 	collectionName: CollectionName,
-	clientId: string,
-	replaceBlock: ( clientId: string, block: BlockInstance ) => void
+	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void,
+	replaceInnerBlocks: (
+		clientId: string,
+		innerBlocks: BlockInstance[]
+	) => void,
+	clientId: string
 ) => {
 	const collection = getCollectionByName( collectionName );
 
@@ -48,6 +56,14 @@ export const applyCollection = (
 		return;
 	}
 
+	// `createBlock` merges the collection's attribute overrides with the
+	// block type's registered defaults, guaranteeing a clean, fully-populated
+	// attributes object. This matters because collection variations only
+	// declare the attributes they override (e.g. "By Category" doesn't
+	// declare a `query` key at all) — spreading `collection.attributes`
+	// directly onto `setAttributes` would leave any attribute the new
+	// collection doesn't mention (e.g. a previous collection's
+	// `query.woocommerceHandPickedProducts`) untouched instead of reset.
 	const newBlock =
 		collection.name === CoreCollectionNames.PRODUCT_CATALOG
 			? getDefaultProductCollection()
@@ -59,7 +75,16 @@ export const applyCollection = (
 					)
 			  );
 
-	replaceBlock( clientId, newBlock );
+	// Update the block's attributes and inner blocks in place (instead of
+	// calling replaceBlock, which swaps in an entirely new block instance)
+	// so the change reads as a targeted patch rather than a full block
+	// delete + insert.
+	setAttributes( {
+		...newBlock.attributes,
+		collection: collectionName,
+	} as Partial< ProductCollectionAttributes > );
+
+	replaceInnerBlocks( clientId, newBlock.innerBlocks );
 };
 
 const CollectionButton = ( {
