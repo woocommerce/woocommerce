@@ -155,8 +155,8 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 					'readonly'             => true,
 					'additionalProperties' => $driver_flags,
 				),
-				'active_driver'     => array(
-					'description' => __( 'The driver currently used to deliver notifications, or null when none are available.', 'woocommerce' ),
+				'preferred_driver'  => array(
+					'description' => __( 'The driver the site prefers, being the first available one in precedence order, or null when none are available. Not a statement about what is delivering notifications to a given app.', 'woocommerce' ),
 					'type'        => array( 'string', 'null' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -166,7 +166,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Return the installed push notification drivers and the enabled one.
+	 * Return the installed push notification drivers and the preferred one.
 	 *
 	 * @since 11.2.0
 	 *

@@ -51,6 +51,8 @@ trait AuthorizesPushNotificationRequests {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool|WP_Error
+	 *
+	 * @since 11.2.0
 	 */
 	public function authorize_as_authenticated_ignoring_enablement( WP_REST_Request $request ) {
 		if ( ! get_current_user_id() ) {

@@ -186,9 +186,9 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The remote proxy is the active driver when available, taking precedence over Jetpack Sync.
+	 * @testdox The remote proxy is the preferred driver when available, taking precedence over Jetpack Sync.
 	 */
-	public function test_active_driver_prefers_remote_proxy() {
+	public function test_preferred_driver_prefers_remote_proxy() {
 		$status = $this->make_service(
 			array(
 				'sync_installed' => true,
@@ -199,13 +199,13 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 			)
 		)->get_status();
 
-		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $status['active_driver'] );
+		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $status['preferred_driver'] );
 	}
 
 	/**
-	 * @testdox Jetpack Sync is the active driver when the remote proxy is unavailable.
+	 * @testdox Jetpack Sync is the preferred driver when the remote proxy is unavailable.
 	 */
-	public function test_active_driver_falls_back_to_jetpack_sync() {
+	public function test_preferred_driver_falls_back_to_jetpack_sync() {
 		$status = $this->make_service(
 			array(
 				'sync_installed' => true,
@@ -216,13 +216,13 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 			)
 		)->get_status();
 
-		$this->assertSame( DriverAvailabilityService::DRIVER_JETPACK_SYNC, $status['active_driver'] );
+		$this->assertSame( DriverAvailabilityService::DRIVER_JETPACK_SYNC, $status['preferred_driver'] );
 	}
 
 	/**
-	 * @testdox The active driver is null when no driver is available.
+	 * @testdox The preferred driver is null when no driver is available.
 	 */
-	public function test_active_driver_null_when_none_available() {
+	public function test_preferred_driver_null_when_none_available() {
 		$status = $this->make_service(
 			array(
 				'sync_installed' => true,
@@ -233,7 +233,7 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 			)
 		)->get_status();
 
-		$this->assertNull( $status['active_driver'] );
+		$this->assertNull( $status['preferred_driver'] );
 	}
 
 	/**

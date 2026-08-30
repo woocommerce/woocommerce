@@ -21,8 +21,8 @@ use WC_Logger_Interface;
  * notifications: the legacy Jetpack Sync flow, or the remote push notification
  * proxy provided by this module. For each driver this resolves the dependencies
  * it needs (Jetpack connection, feature flag, Jetpack Sync state) into
- * `connected`, `enabled`, and `available` flags, and determines which driver is
- * active.
+ * `connected`, `enabled`, and `available` flags, and determines which driver the
+ * site prefers.
  *
  * @since 11.2.0
  */
@@ -54,7 +54,7 @@ class DriverAvailabilityService {
 	const JETPACK_PLUGIN_CLASS = 'Jetpack';
 
 	/**
-	 * Drivers in precedence order: the first available one becomes the active
+	 * Drivers in precedence order: the first available one is the preferred
 	 * driver. The remote proxy is preferred over Jetpack Sync when both are
 	 * available.
 	 */
@@ -106,7 +106,7 @@ class DriverAvailabilityService {
 
 	/**
 	 * Builds the driver status: the installed drivers with their connected,
-	 * enabled, and available flags, and which driver is currently active.
+	 * enabled, and available flags, and which driver the site prefers.
 	 *
 	 * Property names are snake_case per REST convention; the driver identifiers
 	 * used as keys within `installed_drivers` are kebab-case slugs.
@@ -114,7 +114,7 @@ class DriverAvailabilityService {
 	 * A flag is null when its check could not be performed, as distinct from false
 	 * meaning the check ran and answered no.
 	 *
-	 * @return array{installed_drivers: array<string, array{connected: bool|null, enabled: bool|null, available: bool}>, active_driver: string|null}
+	 * @return array{installed_drivers: array<string, array{connected: bool|null, enabled: bool|null, available: bool}>, preferred_driver: string|null}
 	 *
 	 * @since 11.2.0
 	 */
@@ -138,7 +138,7 @@ class DriverAvailabilityService {
 
 		return array(
 			'installed_drivers' => $installed_drivers,
-			'active_driver'     => $this->get_active_driver( $installed_drivers ),
+			'preferred_driver'  => $this->get_preferred_driver( $installed_drivers ),
 		);
 	}
 
@@ -191,13 +191,17 @@ class DriverAvailabilityService {
 	}
 
 	/**
-	 * Determines which driver is currently active: the first available driver in
+	 * Determines which driver the site prefers: the first available driver in
 	 * {@see self::DRIVER_PRECEDENCE} order (remote proxy before Jetpack Sync).
 	 *
+	 * This is the site's preference, not a statement about what is delivering
+	 * notifications to a given app. That depends on the app version and on
+	 * whether its token registered successfully, neither of which is known here.
+	 *
 	 * @param array<string, array{connected: bool|null, enabled: bool|null, available: bool}> $installed_drivers The installed drivers.
-	 * @return string|null The active driver id, or null when none are available.
+	 * @return string|null The preferred driver id, or null when none are available.
 	 */
-	private function get_active_driver( array $installed_drivers ): ?string {
+	private function get_preferred_driver( array $installed_drivers ): ?string {
 		foreach ( self::DRIVER_PRECEDENCE as $driver ) {
 			if ( ! empty( $installed_drivers[ $driver ]['available'] ) ) {
 				return $driver;

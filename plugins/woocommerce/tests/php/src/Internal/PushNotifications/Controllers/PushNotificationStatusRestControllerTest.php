@@ -152,7 +152,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $proxy['connected'] );
 		$this->assertTrue( $proxy['enabled'] );
 		$this->assertTrue( $proxy['available'] );
-		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $data['active_driver'] );
+		$this->assertSame( DriverAvailabilityService::DRIVER_REMOTE_PROXY, $data['preferred_driver'] );
 	}
 
 	/**
@@ -176,7 +176,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $proxy['connected'] );
 		$this->assertFalse( $proxy['enabled'] );
 		$this->assertFalse( $proxy['available'] );
-		$this->assertNull( $data['active_driver'] );
+		$this->assertNull( $data['preferred_driver'] );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $proxy['connected'] );
 		$this->assertTrue( $proxy['enabled'] );
 		$this->assertFalse( $proxy['available'] );
-		$this->assertNull( $data['active_driver'] );
+		$this->assertNull( $data['preferred_driver'] );
 	}
 
 	/**
@@ -239,7 +239,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'schema', $data, 'The schema was not promoted into the route options.' );
 		$this->assertSame( 'push_notification_status', $data['schema']['title'] );
 		$this->assertArrayHasKey( 'installed_drivers', $data['schema']['properties'] );
-		$this->assertArrayHasKey( 'active_driver', $data['schema']['properties'] );
+		$this->assertArrayHasKey( 'preferred_driver', $data['schema']['properties'] );
 
 		$driver_flags = $data['schema']['properties']['installed_drivers']['additionalProperties']['properties'];
 		$this->assertSame( array( 'boolean', 'null' ), $driver_flags['connected']['type'], 'connected must allow null for an undetermined check.' );
