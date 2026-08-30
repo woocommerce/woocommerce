@@ -41,6 +41,56 @@ test.describe(
 			}
 		} );
 
+		test( 'Allows mobile zoom without automatic input focus zoom', async ( {
+			page,
+		} ) => {
+			test.skip(
+				!! process.env.IS_MULTISITE,
+				'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
+			);
+			await page.setViewportSize( { width: 390, height: 844 } );
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+			);
+
+			await expect(
+				page.locator( 'meta[name="viewport"]' )
+			).toHaveAttribute(
+				'content',
+				'width=device-width, initial-scale=1.0'
+			);
+			await page
+				.getByRole( 'button', { name: 'Set up my store' } )
+				.click();
+			await page
+				.getByRole( 'radio' )
+				.filter( { hasText: 'just starting my business' } )
+				.click();
+			await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Tell us a bit about your store',
+				} )
+			).toBeVisible();
+			await expect(
+				page.getByPlaceholder( 'Ex. My awesome store' )
+			).toHaveCSS( 'font-size', '16px' );
+			await expect(
+				page.getByPlaceholder( 'wordpress@example.com' )
+			).toHaveCSS( 'font-size', '16px' );
+			await expect(
+				page.locator(
+					'.woocommerce-profiler-select-control__industry .woocommerce-select-control__control-input'
+				)
+			).toHaveCSS( 'font-size', '16px' );
+			await expect(
+				page.locator(
+					'.woocommerce-profiler-select-control__country .woocommerce-select-control__control-input'
+				)
+			).toHaveCSS( 'font-size', '16px' );
+		} );
+
 		test( 'Can complete the core profiler skipping extension install', async ( {
 			page,
 		} ) => {
