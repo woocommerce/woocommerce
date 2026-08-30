@@ -119,9 +119,9 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox GET should reject users without a push-notifications role.
+	 * @testdox GET should accept a logged in user who holds no push-notifications role.
 	 */
-	public function test_get_status_rejects_users_without_role() {
+	public function test_get_status_accepts_users_without_role() {
 		wp_set_current_user( $this->subscriber_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
 		$this->register_routes();
@@ -129,7 +129,30 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+	}
+
+	/**
+	 * WPCOM signs its requests with the Jetpack blog token, which identifies no
+	 * user, so the endpoint has to authorize them without one.
+	 *
+	 * @testdox GET should accept a blog token signed request that carries no user.
+	 */
+	public function test_get_status_accepts_a_blog_token_signed_request_without_a_user() {
+		wp_set_current_user( 0 );
+
+		$controller = new class() extends PushNotificationStatusRestController {
+			/**
+			 * Stands in for a request WPCOM signed with the Jetpack blog token.
+			 *
+			 * @return bool
+			 */
+			protected function is_signed_with_blog_token(): bool {
+				return true;
+			}
+		};
+
+		$this->assertTrue( $controller->authorize_as_from_wpcom_or_logged_in_user() );
 	}
 
 	/**

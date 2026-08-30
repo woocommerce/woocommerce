@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Traits;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Connection\Rest_Authentication;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use WP_Error;
 use WP_REST_Request;
@@ -28,33 +29,6 @@ trait AuthorizesPushNotificationRequests {
 	 * @return bool|WP_Error
 	 */
 	public function authorize_as_authenticated( WP_REST_Request $request ) {
-		$authorized = $this->authorize_as_authenticated_ignoring_enablement( $request );
-
-		if ( true !== $authorized ) {
-			return $authorized;
-		}
-
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Checks the user is authenticated and holds at least one role allowed to
-	 * interact with push notifications, without requiring the module to be
-	 * enabled. Used by endpoints (e.g. status) that must stay reachable when
-	 * push notifications are disabled so clients can discover the state and
-	 * fall back.
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 *
-	 * @since 11.2.0
-	 */
-	public function authorize_as_authenticated_ignoring_enablement( WP_REST_Request $request ) {
 		if ( ! get_current_user_id() ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_view',
@@ -69,6 +43,47 @@ trait AuthorizesPushNotificationRequests {
 			false
 		);
 
-		return $has_valid_role ? true : false;
+		if ( ! $has_valid_role ) {
+			return false;
+		}
+
+		return wc_get_container()->get( PushNotifications::class )->should_be_enabled();
+	}
+
+	/**
+	 * Checks the caller is either WPCOM or a logged in user, with no role
+	 * requirement and without requiring the module to be enabled.
+	 *
+	 * WPCOM reads this endpoint to decide how to reach a store, and signs those
+	 * requests with the Jetpack blog token, which identifies no user. Requiring a
+	 * role would reject them. The response describes driver configuration only,
+	 * so it carries nothing specific to the calling user or to the merchant.
+	 *
+	 * @return bool|WP_Error
+	 *
+	 * @since 11.2.0
+	 */
+	public function authorize_as_from_wpcom_or_logged_in_user() {
+		if ( $this->is_signed_with_blog_token() || get_current_user_id() ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'woocommerce_rest_cannot_view',
+			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
+	 * Determines whether the request is signed with the Jetpack blog token, which
+	 * only WPCOM holds.
+	 *
+	 * @return bool
+	 *
+	 * @since 11.2.0
+	 */
+	protected function is_signed_with_blog_token(): bool {
+		return class_exists( Rest_Authentication::class ) && Rest_Authentication::is_signed_with_blog_token();
 	}
 }
