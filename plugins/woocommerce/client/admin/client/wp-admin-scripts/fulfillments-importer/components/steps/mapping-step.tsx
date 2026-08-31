@@ -47,6 +47,15 @@ const MAPPING_OPTIONS: Array< {
 	{ value: 'skip', label: __( 'Do not import', 'woocommerce' ) },
 ];
 
+// An unassigned column reads as excluded, except while a required field is
+// missing: then it stays blank so it can be flagged as a candidate.
+function displayedMapping(
+	mapped: MappingChoice,
+	hasMissingRequired: boolean
+): MappingChoice {
+	return mapped === '' && ! hasMissingRequired ? 'skip' : mapped;
+}
+
 const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const continueDisabled = ! hasAllRequiredColumns( state.mapping );
 
@@ -205,18 +214,10 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 														</>
 													) : undefined
 												}
-												value={
-													// While nothing required is
-													// missing, an unassigned
-													// column reads as excluded;
-													// the blank state is shown
-													// only when it may hold a
-													// missing required field.
-													row.mapped === '' &&
-													! hasMissingRequired
-														? 'skip'
-														: row.mapped
-												}
+												value={ displayedMapping(
+													row.mapped,
+													hasMissingRequired
+												) }
 												options={ MAPPING_OPTIONS }
 												onChange={ ( value: string ) =>
 													setMapping(
@@ -240,9 +241,8 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 						</tbody>
 					</table>
 
-					{ /* Lives here rather than on upload: this is the last screen
-					     before anything is saved, and sending customer emails is the
-					     one thing in this flow that cannot be undone. */ }
+					{ /* Last screen before anything is saved, and sending
+					     customer emails cannot be undone. */ }
 					<CheckboxControl
 						__nextHasNoMarginBottom
 						label={ __(
