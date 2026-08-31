@@ -38,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
  * Do not "fix" that with an explicit priority.
  *
  * Removal is a release decision, not a runtime one: a later release drops this class, along
- * with the `_wc_bis_legacy_unsub_hash` and `_wc_bis_legacy_verify_hash` meta keys and the
+ * with the `_wc_bis_legacy_unsub_hash_*` and `_wc_bis_legacy_verify_hash_*` meta keys and the
  * `wc_bis_migration_has_legacy_links` flag, and replaces it with a minimal permanent
  * responder that keeps giving old links the same generic notice without doing any
  * resolution or sweeping.
@@ -46,19 +46,9 @@ defined( 'ABSPATH' ) || exit;
 class LegacyLinkShim {
 
 	/**
-	 * Meta key holding the legacy notification id a Core row was migrated from.
+	 * Prefix of the meta key holding the legacy notification id a Core row was migrated from.
 	 */
-	private const META_KEY_LEGACY_ID = Constants::LEGACY_ID_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy unsubscribe token digest.
-	 */
-	private const META_KEY_LEGACY_UNSUB_HASH = Constants::LEGACY_UNSUB_HASH_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy verification token digest and its expiry.
-	 */
-	private const META_KEY_LEGACY_VERIFY_HASH = Constants::LEGACY_VERIFY_HASH_META_KEY;
+	private const META_KEY_PREFIX_LEGACY_ID = Constants::LEGACY_ID_META_KEY_PREFIX;
 
 	/**
 	 * `bis_unsub_ref` value used by the legacy "back in stock" confirmation email.
@@ -183,17 +173,14 @@ class LegacyLinkShim {
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- decoding legacy's own token encoding, not obfuscating output.
 		$token = urldecode( base64_decode( $token_raw ) );
 
-		$matched = null;
+		$meta_key = Constants::legacy_verify_hash_meta_key( $legacy_id );
 
 		try {
-			$notification_id = $this->find_notification_id( $legacy_id );
-			$notification    = null;
-			$matched         = null === $notification_id
-				? null
-				: $this->match_digest( $notification_id, self::META_KEY_LEGACY_VERIFY_HASH, $legacy_id, $token );
+			$matched      = $this->match_link( $meta_key, $legacy_id, $token );
+			$notification = null;
 
-			if ( null !== $matched && $this->is_unexpired( $matched, $legacy_id ) ) {
-				$notification = $this->load_notification( (int) $notification_id, $legacy_id );
+			if ( null !== $matched && $this->is_unexpired( $matched[1], $legacy_id ) ) {
+				$notification = $this->load_notification( $matched[0], $legacy_id );
 			}
 		} catch ( \Throwable $exception ) {
 			// Same reasoning as the unsubscribe branch: the data store is unregistered when
@@ -220,7 +207,7 @@ class LegacyLinkShim {
 
 		// Single use, matching legacy's own invalidate_verification_data(). Deleted whether
 		// or not the row was still pending, so a link cannot be replayed.
-		$this->delete_matched_meta( $notification->get_id(), self::META_KEY_LEGACY_VERIFY_HASH, (string) $matched );
+		$this->delete_matched_meta( $notification->get_id(), $meta_key );
 
 		$this->verify_and_respond( $notification );
 	}
@@ -236,7 +223,7 @@ class LegacyLinkShim {
 	private function is_unexpired( string $meta_value, int $legacy_id ): bool {
 		$parsed = LegacyHash::parse( $meta_value );
 
-		if ( null === $parsed || null === $parsed[2] || $parsed[2] <= time() ) {
+		if ( null === $parsed || null === $parsed[1] || $parsed[1] <= time() ) {
 			wc_get_logger()->warning(
 				sprintf( 'Legacy BIS link: verification link expired for legacy id %d.', $legacy_id ),
 				array( 'source' => 'stock-notifications' )
@@ -249,19 +236,18 @@ class LegacyLinkShim {
 	}
 
 	/**
-	 * Delete one stored digest, scoped to the exact value that matched.
+	 * Delete the stored digest this request spent.
 	 *
-	 * A Core row adopted by several legacy rows carries one digest per legacy id, and only
-	 * the one this request used is spent. Written by direct SQL rather than through the CRUD
-	 * layer: a CRUD save would bump `date_modified_gmt` on a row the shopper only followed a
-	 * link on.
+	 * A Core row adopted by several legacy rows carries one digest per legacy id, each under
+	 * its own key, so deleting by key spends only the one this request used. Written by
+	 * direct SQL rather than through the CRUD layer: a CRUD save would bump
+	 * `date_modified_gmt` on a row the shopper only followed a link on.
 	 *
 	 * @param int    $notification_id Core notification id.
 	 * @param string $meta_key        Meta key the digest is stored under.
-	 * @param string $meta_value      The exact stored value that matched.
 	 * @return void
 	 */
-	private function delete_matched_meta( int $notification_id, string $meta_key, string $meta_value ): void {
+	private function delete_matched_meta( int $notification_id, string $meta_key ): void {
 		global $wpdb;
 
 		$wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- deliberate direct write; see the docblock.
@@ -270,10 +256,8 @@ class LegacyLinkShim {
 				'notification_id' => $notification_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Column name in the notification meta table, not a query argument.
 				'meta_key'        => $meta_key,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- As above.
-				'meta_value'      => $meta_value,
 			),
-			array( '%d', '%s', '%s' )
+			array( '%d', '%s' )
 		);
 	}
 
@@ -318,98 +302,64 @@ class LegacyLinkShim {
 	 * @return Notification|null Null when nothing resolved or the token did not verify.
 	 */
 	private function resolve_notification( int $legacy_id, string $token ): ?Notification {
-		$notification_id = $this->find_notification_id( $legacy_id );
-
-		if ( null === $notification_id ) {
-			return null;
-		}
-
-		$matched = $this->match_digest( $notification_id, self::META_KEY_LEGACY_UNSUB_HASH, $legacy_id, $token );
+		$matched = $this->match_link( Constants::legacy_unsub_hash_meta_key( $legacy_id ), $legacy_id, $token );
 
 		if ( null === $matched ) {
 			return null;
 		}
 
-		return $this->load_notification( $notification_id, $legacy_id );
+		return $this->load_notification( $matched[0], $legacy_id );
 	}
 
 	/**
-	 * Find the Core notification carrying a given legacy id marker.
+	 * Find the digest stored for one legacy id, and check the presented token against it.
 	 *
-	 * @param int $legacy_id Legacy notification id from the request.
-	 * @return int|null Null when no migrated row carries the marker.
+	 * The legacy id is part of the meta key, so this is a single equality match on the
+	 * indexed `meta_key` column that yields both the notification the link points at and the
+	 * digest to check it against. A Core row adopted by several legacy rows carries one
+	 * digest per legacy id, each under its own key, so no disambiguation is needed here.
+	 *
+	 * @param string $meta_key  Meta key holding this legacy id's digest for this link kind.
+	 * @param int    $legacy_id Legacy notification id from the request, for the log lines only.
+	 * @param string $token     Decoded token from the request.
+	 * @return array{0:int,1:string}|null Core notification id and the stored meta value, or
+	 *                                    null when nothing resolved or the token did not verify.
 	 */
-	private function find_notification_id( int $legacy_id ): ?int {
+	private function match_link( string $meta_key, int $legacy_id, string $token ): ?array {
 		global $wpdb;
 
 		$meta_table = Constants::core_meta();
 
-		$notification_id = (int) $wpdb->get_var(
+		$row = $wpdb->get_row(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from $wpdb->prefix, not from user input.
-				"SELECT notification_id FROM {$meta_table} WHERE meta_key = %s AND CAST( meta_value AS UNSIGNED ) = %d LIMIT 1",
-				self::META_KEY_LEGACY_ID,
-				$legacy_id
-			)
+				"SELECT notification_id, meta_value FROM {$meta_table} WHERE meta_key = %s LIMIT 1",
+				$meta_key
+			),
+			ARRAY_A
 		);
 
-		if ( ! $notification_id ) {
+		if ( ! $row ) {
 			wc_get_logger()->warning(
-				sprintf( 'Legacy BIS link: no notification found for legacy id %d.', $legacy_id ),
+				sprintf( 'Legacy BIS link: no stored token found for legacy id %d.', $legacy_id ),
 				array( 'source' => 'stock-notifications' )
 			);
 
 			return null;
 		}
 
-		return $notification_id;
-	}
+		$meta_value = (string) $row['meta_value'];
 
-	/**
-	 * Find the stored digest recorded for one legacy id and check the presented token
-	 * against it.
-	 *
-	 * A Core row adopted by several legacy rows carries one digest per legacy id, so the
-	 * value is matched on the id before it is verified.
-	 *
-	 * @param int    $notification_id Core notification id.
-	 * @param string $meta_key        Meta key holding the digests for this link kind.
-	 * @param int    $legacy_id       Legacy notification id from the request.
-	 * @param string $token           Decoded token from the request.
-	 * @return string|null The matched stored meta value, or null when nothing verified.
-	 */
-	private function match_digest( int $notification_id, string $meta_key, int $legacy_id, string $token ): ?string {
-		global $wpdb;
+		if ( ! LegacyHash::verify( $meta_value, $token ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Legacy BIS link: token did not verify for legacy id %d.', $legacy_id ),
+				array( 'source' => 'stock-notifications' )
+			);
 
-		$meta_table = Constants::core_meta();
-
-		$hash_values = $wpdb->get_col(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from $wpdb->prefix, not from user input.
-				"SELECT meta_value FROM {$meta_table} WHERE notification_id = %d AND meta_key = %s",
-				$notification_id,
-				$meta_key
-			)
-		);
-
-		foreach ( $hash_values as $hash_value ) {
-			$parsed = LegacyHash::parse( (string) $hash_value );
-
-			if ( $parsed && $legacy_id === $parsed[0] ) {
-				if ( LegacyHash::verify( (string) $hash_value, $token ) ) {
-					return (string) $hash_value;
-				}
-
-				break;
-			}
+			return null;
 		}
 
-		wc_get_logger()->warning(
-			sprintf( 'Legacy BIS link: token did not verify for legacy id %d.', $legacy_id ),
-			array( 'source' => 'stock-notifications' )
-		);
-
-		return null;
+		return array( (int) $row['notification_id'], $meta_value );
 	}
 
 	/**
@@ -499,11 +449,11 @@ class LegacyLinkShim {
 	/**
 	 * Cancel every candidate that still carries the legacy migration marker.
 	 *
-	 * Scoping to `_wc_bis_legacy_id` keeps an old link's authority bounded to the data it
-	 * was issued against: notifications signed up natively in Core after the migration
-	 * carry their own working unsubscribe link and must not be swept in here. Delegates
-	 * the actual cancellation to `EmailActionController::unsubscribe()`, which is a no-op
-	 * for a row that is not `pending` or `active`.
+	 * Scoping to the `_wc_bis_legacy_id_*` marker keeps an old link's authority bounded to
+	 * the data it was issued against: notifications signed up natively in Core after the
+	 * migration carry their own working unsubscribe link and must not be swept in here.
+	 * Delegates the actual cancellation to `EmailActionController::unsubscribe()`, which is
+	 * a no-op for a row that is not `pending` or `active`.
 	 *
 	 * @param Notification[] $notifications Candidate notifications.
 	 * @return int Number of rows actually cancelled.
@@ -516,7 +466,7 @@ class LegacyLinkShim {
 				continue;
 			}
 
-			if ( '' === (string) $notification->get_meta( self::META_KEY_LEGACY_ID ) ) {
+			if ( ! $this->is_migrated_row( $notification ) ) {
 				continue;
 			}
 
@@ -526,6 +476,25 @@ class LegacyLinkShim {
 		}
 
 		return $cancelled;
+	}
+
+	/**
+	 * Whether a notification carries a legacy id marker, whichever legacy id it came from.
+	 *
+	 * The marker key ends in the legacy id, which this caller does not know, so the already
+	 * loaded meta is scanned by prefix rather than asked for one exact key.
+	 *
+	 * @param Notification $notification Candidate notification.
+	 * @return bool
+	 */
+	private function is_migrated_row( Notification $notification ): bool {
+		foreach ( $notification->get_meta_data() as $meta ) {
+			if ( 0 === strpos( (string) $meta->key, self::META_KEY_PREFIX_LEGACY_ID ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -626,7 +595,7 @@ class LegacyLinkShim {
 	 * Deliberately identical wording and redirect target for every cause: `bis_unsub_id` is
 	 * a sequential integer on a public, unauthenticated endpoint, so distinguishing the
 	 * causes would let the endpoint be used to enumerate how many signups the store had.
-	 * The specific cause is logged separately in resolve_notification().
+	 * The specific cause is logged separately in match_link().
 	 */
 	private function respond_generic_stale_link(): void {
 		$this->start_session();

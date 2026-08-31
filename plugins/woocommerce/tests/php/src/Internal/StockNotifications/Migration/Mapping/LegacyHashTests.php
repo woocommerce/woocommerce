@@ -128,10 +128,9 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	 */
 	public function test_to_meta_value_stores_hashed_form_not_raw_token(): void {
 		$token      = hash( 'sha256', 'some-encrypted-legacy-payload' );
-		$meta_value = LegacyHash::to_meta_value( 17, $token );
+		$meta_value = LegacyHash::to_meta_value( $token );
 
-		$this->assertStringStartsWith( '17:', $meta_value );
-		$this->assertNotSame( $token, substr( $meta_value, 3 ), 'The raw token must never be the stored value.' );
+		$this->assertNotSame( $token, $meta_value, 'The raw token must never be the stored value.' );
 		$this->assertStringNotContainsString( $token, $meta_value, 'The stored meta value must not contain the raw token.' );
 	}
 
@@ -139,14 +138,13 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	 * @testdox to_meta_value()/parse()/verify() should round-trip a token end to end.
 	 */
 	public function test_round_trips_through_parse_and_verify(): void {
-		$legacy_id  = 99;
 		$token      = hash( 'sha256', 'another-encrypted-legacy-payload' );
-		$meta_value = LegacyHash::to_meta_value( $legacy_id, $token );
+		$meta_value = LegacyHash::to_meta_value( $token );
 
 		$parsed = LegacyHash::parse( $meta_value );
 
 		$this->assertNotNull( $parsed );
-		$this->assertSame( $legacy_id, $parsed[0] );
+		$this->assertSame( $meta_value, $parsed[0] );
 
 		$this->assertTrue( LegacyHash::verify( $meta_value, $token ) );
 		$this->assertFalse( LegacyHash::verify( $meta_value, hash( 'sha256', 'a-different-token' ) ) );
@@ -163,17 +161,16 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Malformed `_wc_bis_legacy_unsub_hash` values that parse() must reject.
+	 * Malformed `_wc_bis_legacy_*_hash_*` values that parse() must reject.
 	 *
 	 * @return array
 	 */
 	public function provider_malformed_meta_values(): array {
 		return array(
-			'no colon'         => array( 'abcdef123456' ),
-			'empty id'         => array( ':abcdef123456' ),
-			'empty digest'     => array( '17:' ),
-			'non numeric id'   => array( 'seventeen:abcdef123456' ),
-			'completely empty' => array( '' ),
+			'empty expiry'       => array( ':abcdef123456' ),
+			'empty digest'       => array( '1700003600:' ),
+			'non numeric expiry' => array( 'soon:abcdef123456' ),
+			'completely empty'   => array( '' ),
 		);
 	}
 
@@ -188,19 +185,18 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	 * @testdox to_meta_value()/parse()/verify() should round-trip an expiring token end to end.
 	 */
 	public function test_round_trips_an_expiring_token(): void {
-		$legacy_id  = 77;
 		$expires_at = 1700003600;
 		$token      = hash( 'sha256', 'an-encrypted-verification-payload' );
-		$meta_value = LegacyHash::to_meta_value( $legacy_id, $token, $expires_at );
+		$meta_value = LegacyHash::to_meta_value( $token, $expires_at );
 
-		$this->assertStringStartsWith( "77:{$expires_at}:", $meta_value );
+		$this->assertStringStartsWith( "{$expires_at}:", $meta_value );
 		$this->assertStringNotContainsString( $token, $meta_value, 'The stored meta value must not contain the raw token.' );
 
 		$parsed = LegacyHash::parse( $meta_value );
 
 		$this->assertNotNull( $parsed );
-		$this->assertSame( $legacy_id, $parsed[0] );
-		$this->assertSame( $expires_at, $parsed[2] );
+		$this->assertSame( substr( $meta_value, strlen( "{$expires_at}:" ) ), $parsed[0] );
+		$this->assertSame( $expires_at, $parsed[1] );
 
 		$this->assertTrue( LegacyHash::verify( $meta_value, $token ) );
 		$this->assertFalse( LegacyHash::verify( $meta_value, hash( 'sha256', 'a-different-token' ) ) );
@@ -209,20 +205,11 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	/**
 	 * @testdox parse() should report a non-expiring token's expiry as null.
 	 */
-	public function test_parse_reports_a_null_expiry_for_the_two_part_shape(): void {
-		$parsed = LegacyHash::parse( LegacyHash::to_meta_value( 5, hash( 'sha256', 'payload' ) ) );
+	public function test_parse_reports_a_null_expiry_for_the_bare_digest_shape(): void {
+		$parsed = LegacyHash::parse( LegacyHash::to_meta_value( hash( 'sha256', 'payload' ) ) );
 
 		$this->assertNotNull( $parsed );
-		$this->assertNull( $parsed[2] );
-	}
-
-	/**
-	 * @testdox parse() should reject a three-part value whose middle field is not a timestamp.
-	 */
-	public function test_parse_rejects_a_three_part_value_with_a_non_numeric_expiry(): void {
-		$this->assertNull( LegacyHash::parse( '17:soon:abcdef123456' ) );
-		$this->assertNull( LegacyHash::parse( '17::abcdef123456' ) );
-		$this->assertNull( LegacyHash::parse( '17:1700003600:' ) );
+		$this->assertNull( $parsed[1] );
 	}
 
 	/**
@@ -231,9 +218,9 @@ class LegacyHashTests extends WC_Unit_Test_Case {
 	public function test_verify_does_not_confuse_the_two_shapes(): void {
 		$token = hash( 'sha256', 'payload' );
 
-		// The two-part reader would take `1700003600` as the digest; the three-part reader
-		// would take the digest as the expiry. Neither shape may verify as the other.
-		$this->assertFalse( LegacyHash::verify( '17:' . wp_fast_hash( $token ) . ':1700003600', $token ) );
-		$this->assertFalse( LegacyHash::verify( '17:1700003600', $token ) );
+		// Read as the expiring shape, this value's digest field is the timestamp and its
+		// expiry field is the digest. Neither shape may verify as the other.
+		$this->assertFalse( LegacyHash::verify( wp_fast_hash( $token ) . ':1700003600', $token ) );
+		$this->assertFalse( LegacyHash::verify( '1700003600', $token ) );
 	}
 }

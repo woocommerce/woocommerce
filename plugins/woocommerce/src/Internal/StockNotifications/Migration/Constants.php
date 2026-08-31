@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * Every one of these is a contract between two or more classes: a marker one class writes
  * and another selects on, an option one class sets and another gates on. Declared once
  * here so a rename cannot desync the two sides, following the `src/Enums/` convention of
- * a final class of constants, with the four accessors the migration's SQL needs to reach a
- * table by its prefixed name.
+ * a final class of constants, with the accessors the migration's SQL needs to reach a table
+ * by its prefixed name and to build a per-legacy-id meta key.
  */
 final class Constants {
 
@@ -65,30 +65,36 @@ final class Constants {
 	public const HAS_LEGACY_LINKS_OPTION = 'wc_bis_migration_has_legacy_links';
 
 	/**
-	 * Core notification meta marking the legacy id a row was migrated from. Inserted,
-	 * never updated; a Core row can carry several.
+	 * Prefix of the Core notification meta marking the legacy id a row was migrated from.
+	 * Inserted, never updated; a Core row can carry several.
+	 *
+	 * The legacy id lives in the meta key rather than the meta value, so every lookup is an
+	 * equality match on the indexed `meta_key` column. `meta_value` is an unindexed
+	 * `longtext`, and the one key these markers used to share was carried by every migrated
+	 * row, so selecting on the value meant scanning the whole migrated population.
 	 */
-	public const LEGACY_ID_META_KEY = '_wc_bis_legacy_id';
+	public const LEGACY_ID_META_KEY_PREFIX = '_wc_bis_legacy_id_';
 
 	/**
-	 * Core notification meta marking a legacy id that adopted a pre-existing row rather
-	 * than being inserted. Recorded for support: once the legacy tables are gone, an
-	 * adopted row is otherwise indistinguishable from one this migration created.
+	 * Prefix of the Core notification meta marking a legacy id that adopted a pre-existing
+	 * row rather than being inserted. Recorded for support: once the legacy tables are gone,
+	 * an adopted row is otherwise indistinguishable from one this migration created.
 	 */
-	public const ADOPTED_MARKER_META_KEY = '_wc_bis_legacy_adopted';
+	public const ADOPTED_MARKER_META_KEY_PREFIX = '_wc_bis_legacy_adopted_';
 
 	/**
-	 * Core notification meta holding the precomputed legacy unsubscribe token digest.
+	 * Prefix of the Core notification meta holding the precomputed legacy unsubscribe token
+	 * digest.
 	 */
-	public const LEGACY_UNSUB_HASH_META_KEY = '_wc_bis_legacy_unsub_hash';
+	public const LEGACY_UNSUB_HASH_META_KEY_PREFIX = '_wc_bis_legacy_unsub_hash_';
 
 	/**
-	 * Core notification meta holding the precomputed legacy verification token digest,
-	 * together with the expiry resolved at migration time. Written only for rows migrated
-	 * as pending whose legacy verification link had not already expired, and deleted the
-	 * first time that link is followed.
+	 * Prefix of the Core notification meta holding the precomputed legacy verification token
+	 * digest, together with the expiry resolved at migration time. Written only for rows
+	 * migrated as pending whose legacy verification link had not already expired, and deleted
+	 * the first time that link is followed.
 	 */
-	public const LEGACY_VERIFY_HASH_META_KEY = '_wc_bis_legacy_verify_hash';
+	public const LEGACY_VERIFY_HASH_META_KEY_PREFIX = '_wc_bis_legacy_verify_hash_';
 
 	/**
 	 * Legacy meta key recording a permanent per-row failure. The migration's only write
@@ -105,6 +111,46 @@ final class Constants {
 	 * Product meta marking a product the product-meta section can never settle.
 	 */
 	public const PRODUCT_FAILED_META_KEY = '_wc_bis_migration_signups_failed';
+
+	/**
+	 * Core notification meta key marking one legacy id.
+	 *
+	 * @param int $legacy_id Legacy notification id.
+	 * @return string
+	 */
+	public static function legacy_id_meta_key( int $legacy_id ): string {
+		return self::LEGACY_ID_META_KEY_PREFIX . $legacy_id;
+	}
+
+	/**
+	 * Core notification meta key marking one legacy id as having adopted the row.
+	 *
+	 * @param int $legacy_id Legacy notification id.
+	 * @return string
+	 */
+	public static function adopted_marker_meta_key( int $legacy_id ): string {
+		return self::ADOPTED_MARKER_META_KEY_PREFIX . $legacy_id;
+	}
+
+	/**
+	 * Core notification meta key holding one legacy id's unsubscribe token digest.
+	 *
+	 * @param int $legacy_id Legacy notification id.
+	 * @return string
+	 */
+	public static function legacy_unsub_hash_meta_key( int $legacy_id ): string {
+		return self::LEGACY_UNSUB_HASH_META_KEY_PREFIX . $legacy_id;
+	}
+
+	/**
+	 * Core notification meta key holding one legacy id's verification token digest.
+	 *
+	 * @param int $legacy_id Legacy notification id.
+	 * @return string
+	 */
+	public static function legacy_verify_hash_meta_key( int $legacy_id ): string {
+		return self::LEGACY_VERIFY_HASH_META_KEY_PREFIX . $legacy_id;
+	}
 
 	/**
 	 * Prefixed legacy notifications table.

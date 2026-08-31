@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * State here is an optimization, never authority. What has actually been migrated is
  * recorded by the markers the migrators write onto legacy and Core rows
- * (`_wc_bis_legacy_id`, `_wc_bis_migration_failed`), not by anything in this option.
+ * (`_wc_bis_legacy_id_*`, `_wc_bis_migration_failed`), not by anything in this option.
  * Deleting `wc_bis_migration_state` mid-run and re-running the migration must produce
  * an identical result: every row a lost cursor hands out again is recognised as already
  * migrated and skipped, so losing a cursor costs a re-scan, never correctness. The

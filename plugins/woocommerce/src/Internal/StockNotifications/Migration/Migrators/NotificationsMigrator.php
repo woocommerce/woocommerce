@@ -74,39 +74,14 @@ class NotificationsMigrator implements MigratorInterface {
 	);
 
 	/**
-	 * Migration marker recording a successful migration onto a Core notification.
-	 * Inserted, never updated; a Core row can carry several.
+	 * Prefix of the migration marker recording a successful migration onto a Core
+	 * notification. Inserted, never updated; a Core row can carry several. The legacy id
+	 * completes the key, so `fetch_migrated_legacy_ids()` selects on the indexed `meta_key`
+	 * column instead of the unindexed `meta_value` one.
 	 *
 	 * @var string
 	 */
-	private const LEGACY_ID_META_KEY = Constants::LEGACY_ID_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy unsubscribe token digest, one row per
-	 * legacy id.
-	 *
-	 * @var string
-	 */
-	private const LEGACY_UNSUB_HASH_META_KEY = Constants::LEGACY_UNSUB_HASH_META_KEY;
-
-	/**
-	 * Meta key holding the precomputed legacy verification token digest and its expiry,
-	 * one row per legacy id. Written only for rows migrated as pending.
-	 *
-	 * @var string
-	 */
-	private const LEGACY_VERIFY_HASH_META_KEY = Constants::LEGACY_VERIFY_HASH_META_KEY;
-
-	/**
-	 * Marker meta carrying the legacy id, written only when a legacy row adopts a
-	 * pre-existing Core notification instead of being inserted. Inserted alongside
-	 * `_wc_bis_legacy_id`, never updated; a Core row adopted by several legacy rows
-	 * carries one pair per legacy id. Nothing reads it: it is kept as the only record
-	 * telling an adopted row apart from one this migration inserted.
-	 *
-	 * @var string
-	 */
-	private const ADOPTED_MARKER_META_KEY = Constants::ADOPTED_MARKER_META_KEY;
+	private const LEGACY_ID_META_KEY_PREFIX = Constants::LEGACY_ID_META_KEY_PREFIX;
 
 	/**
 	 * Legacy meta key recording a permanent per-row failure. The migration's only write
@@ -461,22 +436,29 @@ class NotificationsMigrator implements MigratorInterface {
 		global $wpdb;
 
 		$table        = Constants::core_meta();
-		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%s' ) );
+		$keys         = array_map( array( Constants::class, 'legacy_id_meta_key' ), array_map( 'intval', $ids ) );
+		$placeholders = implode( ', ', array_fill( 0, count( $keys ), '%s' ) );
 
 		// $table is $wpdb->prefix-based, never user input; $placeholders is a locally built
-		// %s placeholder list, bound via $wpdb->prepare() below. The ids are bound as strings
-		// because meta_value is a text column: comparing it to a number would cast the whole
-		// column and lose the meta_key index.
+		// %s placeholder list, bound via $wpdb->prepare() below. The markers are matched on
+		// meta_key, the indexed column: meta_value is an unindexed longtext, so selecting the
+		// legacy id there would scan every migrated row on every batch.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$sql = $wpdb->prepare(
-			"SELECT meta_value FROM {$table} WHERE meta_key = %s AND meta_value IN ( $placeholders )",
-			array_merge( array( self::LEGACY_ID_META_KEY ), array_map( 'strval', $ids ) )
+			"SELECT meta_key FROM {$table} WHERE meta_key IN ( $placeholders )",
+			$keys
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-		$values = (array) $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+		$found = (array) $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
 
-		return array_fill_keys( array_map( 'intval', $values ), true );
+		$migrated = array();
+
+		foreach ( $found as $meta_key ) {
+			$migrated[ (int) substr( (string) $meta_key, strlen( self::LEGACY_ID_META_KEY_PREFIX ) ) ] = true;
+		}
+
+		return $migrated;
 	}
 
 	/**
@@ -907,19 +889,19 @@ class NotificationsMigrator implements MigratorInterface {
 	private function adopt( int $target_id, array $legacy_row, array $row_meta, string $status, Writer $writer ): void {
 		$legacy_id = (int) $legacy_row['id'];
 		$meta      = array(
-			array( self::LEGACY_ID_META_KEY, $legacy_id ),
-			array( self::ADOPTED_MARKER_META_KEY, $legacy_id ),
+			array( Constants::legacy_id_meta_key( $legacy_id ), $legacy_id ),
+			array( Constants::adopted_marker_meta_key( $legacy_id ), $legacy_id ),
 		);
 		$token     = $this->compute_token( $legacy_id, $legacy_row, $row_meta );
 
 		if ( null !== $token ) {
-			$meta[] = array( self::LEGACY_UNSUB_HASH_META_KEY, LegacyHash::to_meta_value( $legacy_id, $token ) );
+			$meta[] = array( Constants::legacy_unsub_hash_meta_key( $legacy_id ), LegacyHash::to_meta_value( $token ) );
 		}
 
-		$verify_meta_value = $this->build_verification_meta_value( $legacy_id, $row_meta, $status );
+		$verify_meta_value = $this->build_verification_meta_value( $row_meta, $status );
 
 		if ( null !== $verify_meta_value ) {
-			$meta[] = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
+			$meta[] = array( Constants::legacy_verify_hash_meta_key( $legacy_id ), $verify_meta_value );
 		}
 
 		$written = $writer->insert_notification_meta( $target_id, $meta );
@@ -1020,21 +1002,21 @@ class NotificationsMigrator implements MigratorInterface {
 	 */
 	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status ): array {
 		$meta   = $this->map_legacy_meta( $row_meta );
-		$meta[] = array( self::LEGACY_ID_META_KEY, $legacy_id );
+		$meta[] = array( Constants::legacy_id_meta_key( $legacy_id ), $legacy_id );
 
 		$token = $this->compute_token( $legacy_id, $legacy_row, $row_meta );
 
 		if ( null !== $token ) {
-			$meta[]                           = array( self::LEGACY_UNSUB_HASH_META_KEY, LegacyHash::to_meta_value( $legacy_id, $token ) );
+			$meta[]                           = array( Constants::legacy_unsub_hash_meta_key( $legacy_id ), LegacyHash::to_meta_value( $token ) );
 			$this->batch_carries_legacy_links = true;
 		} else {
 			++$this->rows_without_hash_count;
 		}
 
-		$verify_meta_value = $this->build_verification_meta_value( $legacy_id, $row_meta, $status );
+		$verify_meta_value = $this->build_verification_meta_value( $row_meta, $status );
 
 		if ( null !== $verify_meta_value ) {
-			$meta[]                           = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
+			$meta[]                           = array( Constants::legacy_verify_hash_meta_key( $legacy_id ), $verify_meta_value );
 			$this->batch_carries_legacy_links = true;
 		}
 
@@ -1069,12 +1051,11 @@ class NotificationsMigrator implements MigratorInterface {
 	 * or unusable, and for a link that had already expired when the migration ran — there
 	 * is nothing to honour in those cases, so nothing is stored.
 	 *
-	 * @param int                 $legacy_id Legacy notification id.
-	 * @param array<string,mixed> $row_meta  This row's legacy meta bag.
-	 * @param string              $status    Status resolved by StatusMapper for this row.
+	 * @param array<string,mixed> $row_meta This row's legacy meta bag.
+	 * @param string              $status   Status resolved by StatusMapper for this row.
 	 * @return string|null
 	 */
-	private function build_verification_meta_value( int $legacy_id, array $row_meta, string $status ): ?string {
+	private function build_verification_meta_value( array $row_meta, string $status ): ?string {
 		if ( NotificationStatus::PENDING !== $status ) {
 			return null;
 		}
@@ -1101,7 +1082,7 @@ class NotificationsMigrator implements MigratorInterface {
 			return null;
 		}
 
-		return LegacyHash::to_meta_value( $legacy_id, $token, $expires_at );
+		return LegacyHash::to_meta_value( $token, $expires_at );
 	}
 
 	/**

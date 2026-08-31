@@ -511,7 +511,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->migrate_all();
 
-		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
+		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash_' . $legacy_id );
 		$rows   = LegacyStore::get_core_rows();
 
 		$this->assertArrayHasKey( (int) $rows[0]['id'], $stored );
@@ -520,8 +520,7 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 		$parsed     = LegacyHash::parse( $meta_value );
 
 		$this->assertNotNull( $parsed );
-		$this->assertSame( $legacy_id, $parsed[0] );
-		$this->assertNotNull( $parsed[2], 'A verification digest is stored with its expiry.' );
+		$this->assertNotNull( $parsed[1], 'A verification digest is stored with its expiry.' );
 
 		$token = LegacyHash::compute_verification( 'a-verification-code', LegacyStore::VERIFICATION_KEY, LegacyStore::VERIFICATION_IV );
 

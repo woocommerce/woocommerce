@@ -120,12 +120,11 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 		$this->migrate();
 
 		$token  = $this->legacy_token( $legacy_id );
-		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash' );
+		$stored = LegacyStore::get_core_meta( '_wc_bis_legacy_unsub_hash_' . $legacy_id );
 		$value  = reset( $stored )[0];
 
-		$this->assertStringStartsWith( $legacy_id . ':', $value );
 		$this->assertStringNotContainsString( $token, $value, 'The raw token must never be stored.' );
-		$this->assertTrue( wp_verify_fast_hash( $token, substr( $value, strlen( $legacy_id . ':' ) ) ) );
+		$this->assertTrue( wp_verify_fast_hash( $token, $value ) );
 	}
 
 	/**
@@ -388,7 +387,7 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 			array(
 				'notification_id' => $notification_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_key'        => '_wc_bis_legacy_id',
+				'meta_key'        => '_wc_bis_legacy_id_' . $legacy_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				'meta_value'      => (string) $legacy_id,
 			)
@@ -398,9 +397,9 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 			array(
 				'notification_id' => $notification_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_key'        => '_wc_bis_legacy_unsub_hash',
+				'meta_key'        => '_wc_bis_legacy_unsub_hash_' . $legacy_id,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				'meta_value'      => LegacyHash::to_meta_value( $legacy_id, $token ),
+				'meta_value'      => LegacyHash::to_meta_value( $token ),
 			)
 		);
 
@@ -442,7 +441,7 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-		$wpdb->delete( $wpdb->prefix . 'wc_stock_notificationmeta', array( 'meta_key' => '_wc_bis_legacy_unsub_hash' ) );
+		$wpdb->delete( $wpdb->prefix . 'wc_stock_notificationmeta', array( 'meta_key' => '_wc_bis_legacy_unsub_hash_' . $legacy_id ) );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 
 		$this->assertTrue( $this->request( $legacy_id, $this->legacy_token( $legacy_id ), 'notification' ) );
@@ -839,15 +838,11 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->verify_request( $first, $this->legacy_verification_token( 'code-one' ) ) );
 
-		$remaining = LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' );
-		$values    = reset( $remaining );
-
-		$this->assertCount( 1, $values );
-
-		$parsed = LegacyHash::parse( $values[0] );
-
-		$this->assertNotNull( $parsed );
-		$this->assertSame( $second, $parsed[0], 'The unmatched legacy id keeps its own digest.' );
+		$this->assertSame(
+			array( '_wc_bis_legacy_verify_hash_' . $second ),
+			LegacyStore::get_core_meta_keys( '_wc_bis_legacy_verify_hash_' ),
+			'The unmatched legacy id keeps its own digest.'
+		);
 	}
 
 	/**
@@ -874,22 +869,20 @@ class LegacyLinkShimTests extends WC_Unit_Test_Case {
 	private function age_the_verification_meta( int $seconds ): void {
 		global $wpdb;
 
-		foreach ( LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash' ) as $notification_id => $values ) {
+		foreach ( LegacyStore::get_core_meta( '_wc_bis_legacy_verify_hash_' ) as $notification_id => $values ) {
 			foreach ( $values as $value ) {
 				$parsed = LegacyHash::parse( $value );
 
-				if ( null === $parsed || null === $parsed[2] ) {
+				if ( null === $parsed || null === $parsed[1] ) {
 					continue;
 				}
 
 				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					$wpdb->prefix . 'wc_stock_notificationmeta',
 					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Column name in the notification meta table, not a query argument.
-					array( 'meta_value' => $parsed[0] . ':' . ( time() - $seconds ) . ':' . $parsed[1] ),
+					array( 'meta_value' => ( time() - $seconds ) . ':' . $parsed[0] ),
 					array(
 						'notification_id' => $notification_id,
-						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Column name in the notification meta table, not a query argument.
-						'meta_key'        => '_wc_bis_legacy_verify_hash',
 						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- As above.
 						'meta_value'      => $value,
 					)

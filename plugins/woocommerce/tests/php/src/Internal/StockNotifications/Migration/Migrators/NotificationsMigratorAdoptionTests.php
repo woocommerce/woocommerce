@@ -368,12 +368,12 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 		// Load the target into memory first: the marker is written by direct SQL, so a stale
 		// meta cache would hide it from every later read in the same request.
 		$loaded = new Notification( $existing );
-		$this->assertSame( '', (string) $loaded->get_meta( '_wc_bis_legacy_id' ) );
+		$this->assertSame( '', (string) $loaded->get_meta( '_wc_bis_legacy_id_' . $legacy_id ) );
 
 		$this->migrate_all();
 
 		$reloaded = new Notification( $existing );
-		$this->assertSame( (string) $legacy_id, (string) $reloaded->get_meta( '_wc_bis_legacy_id' ) );
+		$this->assertSame( (string) $legacy_id, (string) $reloaded->get_meta( '_wc_bis_legacy_id_' . $legacy_id ) );
 	}
 
 	/**

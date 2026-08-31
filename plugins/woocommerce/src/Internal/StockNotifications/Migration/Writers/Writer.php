@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
  * its own so the id it was given comes straight back from `$wpdb->insert_id`, then its meta
  * goes in with one multi-row statement against that id. The whole call runs inside a single
  * transaction: a failure between a row and its meta would leave a Core row with no
- * `_wc_bis_legacy_id` marker, invisible to the candidate predicate and re-inserted on the
+ * `_wc_bis_legacy_id_*` marker, invisible to the candidate predicate and re-inserted on the
  * next run.
  *
  * Meta written onto an existing notification — natural-key adoption markers and legacy

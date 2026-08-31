@@ -806,9 +806,8 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 			$notification_id = (int) $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT notification_id FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key = %s AND meta_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					'_wc_bis_legacy_id',
-					(string) $legacy_id
+					"SELECT notification_id FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					'_wc_bis_legacy_id_' . $legacy_id
 				)
 			);
 

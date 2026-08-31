@@ -74,53 +74,47 @@ final class LegacyHash {
 	/**
 	 * Build the meta value stored for one legacy id.
 	 *
-	 * The raw token is never stored: only its `wp_fast_hash()` digest, prefixed with the
-	 * legacy id so several legacy rows can adopt the same Core notification.
+	 * The raw token is never stored: only its `wp_fast_hash()` digest. The legacy id is not
+	 * in here — it is in the meta key (see `Constants`), which is the indexed column every
+	 * lookup matches on.
 	 *
-	 * Unsubscribe links never expire, so they are stored as `{legacy_id}:{digest}`.
-	 * Verification links do, so they carry the expiry resolved at migration time in the
-	 * middle field: `{legacy_id}:{expires_at}:{digest}`. `wp_fast_hash()` output contains
-	 * no colon, so the two shapes are unambiguous.
+	 * Unsubscribe links never expire, so they are stored as the bare `{digest}`. Verification
+	 * links do, so they carry the expiry resolved at migration time in front of it:
+	 * `{expires_at}:{digest}`. `wp_fast_hash()` output contains no colon, so the two shapes
+	 * are unambiguous.
 	 *
-	 * @param int      $legacy_id  Legacy notification id.
 	 * @param string   $token      Token produced by self::compute() or self::compute_verification().
 	 * @param int|null $expires_at Absolute expiry as a Unix timestamp, or null for a link that
 	 *                             does not expire.
 	 * @return string
 	 */
-	public static function to_meta_value( int $legacy_id, string $token, ?int $expires_at = null ): string {
+	public static function to_meta_value( string $token, ?int $expires_at = null ): string {
 		$digest = wp_fast_hash( $token );
 
-		return null === $expires_at
-			? "{$legacy_id}:{$digest}"
-			: "{$legacy_id}:{$expires_at}:{$digest}";
+		return null === $expires_at ? $digest : "{$expires_at}:{$digest}";
 	}
 
 	/**
-	 * Split a stored meta value into its legacy id, expiry and digest.
+	 * Split a stored meta value into its digest and expiry.
 	 *
-	 * Splits on colons only, so the boundaries never depend on the hash format's alphabet.
+	 * Splits on the colon only, so the boundary never depends on the hash format's alphabet.
 	 *
 	 * @param string $meta_value Stored meta value.
-	 * @return array{0:int,1:string,2:?int}|null Legacy id, digest and expiry, or null when
-	 *                                           the value is in neither stored shape.
+	 * @return array{0:string,1:?int}|null Digest and expiry, or null when the value is in
+	 *                                     neither stored shape.
 	 */
 	public static function parse( string $meta_value ): ?array {
-		$parts = explode( ':', $meta_value, 3 );
+		$parts = explode( ':', $meta_value, 2 );
 
-		if ( count( $parts ) < 2 || '' === $parts[0] || ! ctype_digit( $parts[0] ) ) {
+		if ( 1 === count( $parts ) ) {
+			return '' === $parts[0] ? null : array( $parts[0], null );
+		}
+
+		if ( '' === $parts[0] || ! ctype_digit( $parts[0] ) || '' === $parts[1] ) {
 			return null;
 		}
 
-		if ( 2 === count( $parts ) ) {
-			return '' === $parts[1] ? null : array( (int) $parts[0], $parts[1], null );
-		}
-
-		if ( '' === $parts[1] || ! ctype_digit( $parts[1] ) || '' === $parts[2] ) {
-			return null;
-		}
-
-		return array( (int) $parts[0], $parts[2], (int) $parts[1] );
+		return array( $parts[1], (int) $parts[0] );
 	}
 
 	/**
@@ -139,6 +133,6 @@ final class LegacyHash {
 			return false;
 		}
 
-		return wp_verify_fast_hash( $token, $parsed[1] );
+		return wp_verify_fast_hash( $token, $parsed[0] );
 	}
 }

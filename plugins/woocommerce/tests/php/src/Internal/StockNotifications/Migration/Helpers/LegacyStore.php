@@ -318,7 +318,10 @@ class LegacyStore {
 	/**
 	 * Read the Core meta values stored under one key, keyed by notification id.
 	 *
-	 * @param string $meta_key Meta key.
+	 * Matches on a prefix, because the migration's own markers end in the legacy id they
+	 * were written for. Passing a whole key still works: it is its own prefix.
+	 *
+	 * @param string $meta_key Meta key, or the prefix shared by a family of them.
 	 * @return array<int,array<int,string>> Values per notification id.
 	 */
 	public static function get_core_meta( string $meta_key ): array {
@@ -328,8 +331,8 @@ class LegacyStore {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 		$rows = (array) $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT notification_id, meta_value FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key = %s ORDER BY id ASC",
-				$meta_key
+				"SELECT notification_id, meta_value FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key LIKE %s ORDER BY id ASC",
+				$wpdb->esc_like( $meta_key ) . '%'
 			),
 			ARRAY_A
 		);
@@ -342,6 +345,28 @@ class LegacyStore {
 		}
 
 		return $indexed;
+	}
+
+	/**
+	 * Read the Core meta keys beginning with one prefix, in insertion order.
+	 *
+	 * @param string $prefix Meta key prefix.
+	 * @return string[]
+	 */
+	public static function get_core_meta_keys( string $prefix ): array {
+		global $wpdb;
+
+		// Table name is $wpdb->prefix-based, never user input.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+		$keys = (array) $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT meta_key FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE meta_key LIKE %s ORDER BY id ASC",
+				$wpdb->esc_like( $prefix ) . '%'
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+
+		return array_map( 'strval', $keys );
 	}
 
 	/**
