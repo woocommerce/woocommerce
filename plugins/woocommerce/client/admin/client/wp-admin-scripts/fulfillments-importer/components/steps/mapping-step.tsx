@@ -184,7 +184,18 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 													),
 													row.header
 												) }
-												value={ row.mapped }
+												value={
+													// While nothing required is
+													// missing, an unassigned
+													// column reads as excluded;
+													// the blank state is shown
+													// only when it may hold a
+													// missing required field.
+													row.mapped === '' &&
+													! hasMissingRequired
+														? 'skip'
+														: row.mapped
+												}
 												options={ MAPPING_OPTIONS }
 												onChange={ ( value: string ) =>
 													setMapping(

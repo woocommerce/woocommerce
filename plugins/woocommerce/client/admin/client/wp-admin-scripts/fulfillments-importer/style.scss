@@ -87,6 +87,10 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		color: $gray-900;
 	}
 
+	&__header-action.components-button.is-link {
+		text-decoration: none;
+	}
+
 	&__body {
 		flex: 1 1 auto;
 		min-height: 0;
