@@ -445,6 +445,7 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer::class )->register();
 
 		// Code+GraphQL API.
 		Automattic\WooCommerce\Api\Infrastructure\Main::register();

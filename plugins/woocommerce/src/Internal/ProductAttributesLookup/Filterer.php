@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Helper class for filtering products using the product attributes lookup table.
  */
-class Filterer {
+class Filterer implements RegisterHooksInterface {
 
 	/**
 	 * The product attributes lookup data store to use.
@@ -39,7 +40,14 @@ class Filterer {
 	final public function init( LookupDataStore $data_store ) {
 		$this->data_store        = $data_store;
 		$this->lookup_table_name = $data_store->get_lookup_table_name();
+	}
 
+	/**
+	 * Register this class instance to the appropriate hooks.
+	 *
+	 * @return void
+	 */
+	public function register() {
 		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
 		add_action( 'before_delete_post', array( $this, 'handle_before_delete_post' ), 10, 2 );
 	}
