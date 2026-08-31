@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename the default Payment method option on the order screen from "N/A" to "All methods available", so it says what the customer will actually be offered.
