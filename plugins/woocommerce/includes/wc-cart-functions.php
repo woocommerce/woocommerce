@@ -177,12 +177,13 @@ function wc_clear_cart_after_payment() {
 
 	$should_clear_cart_after_payment = false;
 	$after_payment                   = false;
+	$order                           = null;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
-		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Raw referer is sanitized and validated by its consumers.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
@@ -208,6 +209,11 @@ function wc_clear_cart_after_payment() {
 	// If it doesn't look like a payment happened, bail early.
 	if ( ! $after_payment ) {
 		return;
+	}
+
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
 	}
 
 	/**
@@ -511,6 +517,25 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 				$default = $rate_key;
 				break;
 			}
+		}
+
+		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
+		// Without this, pickup gets silently selected because it's the only remaining rate after filtering.
+		if (
+			'' === $default
+			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
+			&& WC()->customer instanceof \WC_Customer
+			&& ! WC()->customer->has_full_shipping_address()
+		) {
+			/**
+			 * Filters the default shipping method for a package.
+			 *
+			 * @since 3.2.0
+			 * @param string $default Default shipping method.
+			 * @param array  $rates   Shipping rates.
+			 * @param string $chosen_method Chosen method id.
+			 */
+			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 		}
 	}
 

@@ -10,6 +10,8 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeItemTemplateEdit from './edit';
 import AttributeItemTemplateSave from './save';
+import deprecated from './deprecated';
+import './style.scss';
 
 registerBlockType( metadata, {
 	edit: AttributeItemTemplateEdit,
@@ -22,4 +24,5 @@ registerBlockType( metadata, {
 		),
 	},
 	save: AttributeItemTemplateSave,
+	deprecated,
 } );

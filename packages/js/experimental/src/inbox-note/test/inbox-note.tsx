@@ -59,8 +59,6 @@ describe( 'InboxNoteCard', () => {
 				url: 'http://test.com',
 			},
 		],
-		layout: 'plain',
-		image: '',
 		date_created_gmt: '2020-05-10T16:57:31',
 		is_deleted: false,
 		is_read: false,
@@ -150,15 +148,6 @@ describe( 'InboxNoteCard', () => {
 			<InboxNoteCard key={ note.id } note={ note } />
 		);
 		expect( queryByText( 'Dismiss' ) ).toBeInTheDocument();
-	} );
-
-	it( 'should render a notification type thumbnail', () => {
-		const thumbnailNote = { ...note, layout: 'thumbnail' };
-		const { container } = render(
-			<InboxNoteCard key={ thumbnailNote.id } note={ thumbnailNote } />
-		);
-		const listNoteWithThumbnail = container.querySelector( '.thumbnail' );
-		expect( listNoteWithThumbnail ).not.toBeNull();
 	} );
 
 	it( 'should render a read notification', () => {

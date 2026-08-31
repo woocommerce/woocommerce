@@ -106,4 +106,42 @@ final class OrderStatus {
 		self::FAILED,
 		self::CANCELLED,
 	);
+
+	/**
+	 * Returns every order status value defined by this enum, as a flat list of unprefixed slugs.
+	 *
+	 * It differs from the statuses WooCommerce registers in both directions. It carries
+	 * self::TRASH, self::NEW, self::AUTO_DRAFT and self::DRAFT, which wc_get_order_statuses() does
+	 * not return by default, and it cannot carry statuses an extension registers.
+	 * WC_Abstract_Order::set_status() accepts self::TRASH and self::AUTO_DRAFT even so, exempting
+	 * them from its own validation.
+	 *
+	 * self::CHECKOUT_DRAFT sits on the helper's side of that line: WooCommerce adds it through the
+	 * `wc_order_statuses` filter, and the Store API assigns it to live orders during checkout.
+	 *
+	 * For the registered statuses, use wc_get_order_statuses(). It returns a value => label map
+	 * keyed on the `wc-` prefixed slug, so comparing its keys with this enum's values needs
+	 * OrderUtil::remove_status_prefix(). OrderInternalStatus lists the seven core statuses in
+	 * prefixed form.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::PENDING,
+			self::FAILED,
+			self::ON_HOLD,
+			self::COMPLETED,
+			self::PROCESSING,
+			self::REFUNDED,
+			self::CANCELLED,
+			self::TRASH,
+			self::NEW,
+			self::AUTO_DRAFT,
+			self::DRAFT,
+			self::CHECKOUT_DRAFT,
+		);
+	}
 }

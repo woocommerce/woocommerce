@@ -101,7 +101,7 @@ class LegacyDataCleanupTests extends \WC_Unit_Test_Case {
 		$this->assertNotEquals( 0, $this->sut->get_total_pending_count() );
 
 		// Let the batch processing controller process the rest and confirm.
-		do_action( $batch_processing::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle -- this is a test
+		do_action( $batch_processing::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) );
 		$this->assertEquals( 0, $this->sut->get_total_pending_count() );
 		$this->assertFalse( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
 	}

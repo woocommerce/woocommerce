@@ -14,9 +14,7 @@
 
 /* Brand description widget */
 .widget_brand_description img {
-	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-	box-sizing: border-box;         /* Opera/IE 8+ */
+	box-sizing: border-box;
 	width: 100%;
 	max-width: none;
 	height: auto;
@@ -24,20 +22,23 @@
 }
 
 /* Brand thumbnails widget */
-ul.brand-thumbnails {
+ul.brand-thumbnails,
+:where(.brand-thumbnails-description) {
 	margin-left: 0;
 	margin-bottom: 0;
 	clear: both;
 	list-style: none;
 }
 
-ul.brand-thumbnails:before {
+ul.brand-thumbnails:before,
+:where(.brand-thumbnails-description)::before {
 	clear: both;
 	content: "";
 	display: table;
 }
 
-ul.brand-thumbnails:after {
+ul.brand-thumbnails:after,
+:where(.brand-thumbnails-description)::after {
 	clear: both;
 	content: "";
 	display: table;
@@ -55,7 +56,8 @@ ul.brand-thumbnails.fluid-columns li {
 	width: auto;
 }
 
-ul.brand-thumbnails:not(.fluid-columns) li.first {
+ul.brand-thumbnails:not(.fluid-columns) li.first,
+:where(.brand-thumbnails-description li.first) {
 	clear: both;
 }
 
@@ -85,9 +87,7 @@ ul.brand-thumbnails.columns-6 li {
 }
 
 .brand-thumbnails li img {
-	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-	box-sizing: border-box;         /* Opera/IE 8+ */
+	box-sizing: border-box;
 	width: 100%;
 	max-width: none;
 	height: auto;
@@ -117,15 +117,25 @@ ul.brand-thumbnails.columns-6 li {
 }
 
 /* Brand thumbnails description */
-.brand-thumbnails-description li {
+:where(.brand-thumbnails-description li) {
+	float: left;
+	margin: 0 2% 1em 0;
+	padding: 0;
+	position: relative;
 	text-align: center;
 }
 
-.brand-thumbnails-description li .term-thumbnail img {
+:where(.brand-thumbnails-description li.last),
+:where(.brand-thumbnails-description.columns-1 li) {
+	margin-right: 0;
+}
+
+:where(.brand-thumbnails-description li .term-thumbnail img) {
+	width: 100%;
 	display: inline;
 }
 
-.brand-thumbnails-description li .term-description {
+:where(.brand-thumbnails-description li .term-description) {
 	margin-top: 1em;
 	text-align: left;
 }

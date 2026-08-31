@@ -71,7 +71,7 @@ The above code would result in `$price_response` being set to:
 
 ## MoneyFormatter
 
-The [`MoneyFormatter`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/Formatters/MoneyFormatter.php) class can be used to format a monetary value using the store settings. The store settings may be overridden by passing options to this formatter's `format` method.
+The [`MoneyFormatter`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/Formatters/MoneyFormatter.php) class can be used to format a monetary value using the store settings. The store settings may be overridden by passing options to this formatter's `format` method.
 
 Values are returned in cents to avoid floating point rounding errors, so when using this formatter you'll most likely also be returning the currency data using the [`CurrencyFormatter`](#currencyformatter) alongside it. This will allow the consumer of the API to display the value in the intended format.
 

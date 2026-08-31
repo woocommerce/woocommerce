@@ -3,6 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useCallback } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import {
+	getValueFromVariable,
+	getPresetVariableFromValue,
+} from '@wordpress/global-styles-engine';
 import {
 	FontSizePicker,
 	__experimentalToolsPanel as ToolsPanel, // eslint-disable-line
@@ -25,16 +30,22 @@ import {
 	__experimentalTextDecorationControl as TextDecorationControl, // eslint-disable-line
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
 	__experimentalTextTransformControl as TextTransformControl, // eslint-disable-line
+	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients, // eslint-disable-line
 } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { useEmailStyles } from '../../../hooks';
+import { useEmailStyles, setImmutably } from '../../../hooks';
+import { storeName } from '../../../store';
 import { getElementStyles } from '../utils';
+import { useHasTextColorInTypographyPanel } from '../hooks';
+import { ColorDropdownItem } from './color-dropdown-item';
 import { recordEvent, debouncedRecordEvent } from '../../../events';
 
 export const DEFAULT_CONTROLS = {
+	textColor: true,
 	fontFamily: true,
 	fontSize: true,
 	fontAppearance: true,
@@ -62,7 +73,14 @@ export function TypographyElementPanel( {
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
-	const { styles, defaultStyles, updateStyleProp } = useEmailStyles();
+	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+	// Text color renders here only when the running WordPress no longer offers
+	// it in the Colors screen (WordPress 7.1 moved it to the typography panel).
+	const showTextColor =
+		useHasTextColorInTypographyPanel() && element === 'text';
+	const { styles, defaultStyles, userStyles, updateStyleProp, updateStyles } =
+		useEmailStyles();
 	const elementStyles = getElementStyles( styles, element, headingLevel );
 	const defaultElementStyles = getElementStyles(
 		defaultStyles,
@@ -91,6 +109,24 @@ export function TypographyElementPanel( {
 		textTransform: defaultTextTransform,
 	} = defaultElementStyles.typography;
 
+	// The text color renders only for the `text` element, whose styles live at
+	// the root of the styles object.
+	const userTextColor = userStyles?.color?.text;
+	const defaultTextColor = defaultElementStyles.color?.text;
+	const decodedTextColor = getValueFromVariable(
+		{ settings: theme?.settings },
+		'',
+		elementStyles.color?.text
+	);
+	const decodedUserTextColor = userTextColor
+		? getValueFromVariable(
+				{ settings: theme?.settings },
+				'',
+				userTextColor
+		  )
+		: undefined;
+
+	const hasTextColor = () => !! userTextColor;
 	const hasFontFamily = () => fontFamily !== defaultFontFamily;
 	const hasFontSize = () => fontSize !== defaultFontSize;
 	const hasFontAppearance = () =>
@@ -117,6 +153,29 @@ export function TypographyElementPanel( {
 		},
 		[ element, updateStyleProp, headingLevel ]
 	);
+
+	const setTextColor = ( newValue ) => {
+		// Store palette colors as preset references so later palette changes
+		// propagate, matching how the core ColorPanel writes them.
+		const encodedValue =
+			newValue === undefined
+				? undefined
+				: getPresetVariableFromValue(
+						theme?.settings,
+						undefined,
+						'color.text',
+						newValue
+				  );
+		updateElementStyleProp( [ 'color', 'text' ], encodedValue );
+		debouncedRecordEvent(
+			'styles_sidebar_screen_typography_element_panel_set_text_color',
+			{
+				element,
+				newValue,
+				selectedDefaultTextColor: encodedValue === defaultTextColor,
+			}
+		);
+	};
 
 	const setLetterSpacing = ( newValue ) => {
 		updateElementStyleProp( [ 'typography', 'letterSpacing' ], newValue );
@@ -211,7 +270,23 @@ export function TypographyElementPanel( {
 	};
 
 	const resetAll = () => {
-		updateElementStyleProp( [ 'typography' ], {} );
+		if ( showTextColor ) {
+			// Single update — a second updateStyleProp call in the same
+			// handler would work from a stale userTheme and clobber this edit.
+			updateStyles(
+				setImmutably(
+					setImmutably(
+						userStyles ?? {},
+						[ 'color', 'text' ],
+						undefined
+					),
+					[ 'typography' ],
+					{}
+				)
+			);
+		} else {
+			updateElementStyleProp( [ 'typography' ], {} );
+		}
 		recordEvent(
 			'styles_sidebar_screen_typography_element_panel_reset_all_styles_selected',
 			{
@@ -223,11 +298,23 @@ export function TypographyElementPanel( {
 
 	return (
 		<ToolsPanel
-			label={ __( 'Typography', 'woocommerce' ) }
+			label={ __( 'Typography', __i18n_text_domain__ ) }
 			resetAll={ resetAll }
 		>
+			{ showTextColor && (
+				<ColorDropdownItem
+					label={ __( 'Color', __i18n_text_domain__ ) }
+					hasValue={ hasTextColor }
+					resetValue={ () => setTextColor( undefined ) }
+					isShownByDefault={ defaultControls.textColor }
+					inheritedValue={ decodedTextColor }
+					userValue={ decodedUserTextColor }
+					setValue={ setTextColor }
+					colorGradientControlSettings={ colorGradientSettings }
+				/>
+			) }
 			<ToolsPanelItem
-				label={ __( 'Font family', 'woocommerce' ) }
+				label={ __( 'Font family', __i18n_text_domain__ ) }
 				hasValue={ hasFontFamily }
 				onDeselect={ () => setFontFamily( undefined ) }
 				isShownByDefault={ defaultControls.fontFamily }
@@ -242,7 +329,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			{ showToolFontSize && (
 				<ToolsPanelItem
-					label={ __( 'Font size', 'woocommerce' ) }
+					label={ __( 'Font size', __i18n_text_domain__ ) }
 					hasValue={ hasFontSize }
 					onDeselect={ () => setFontSize( undefined ) }
 					isShownByDefault={ defaultControls.fontSize }
@@ -261,7 +348,7 @@ export function TypographyElementPanel( {
 			) }
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Appearance', 'woocommerce' ) }
+				label={ __( 'Appearance', __i18n_text_domain__ ) }
 				hasValue={ hasFontAppearance }
 				onDeselect={ () => {
 					setFontAppearance( {
@@ -284,7 +371,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Line height', 'woocommerce' ) }
+				label={ __( 'Line height', __i18n_text_domain__ ) }
 				hasValue={ hasLineHeight }
 				onDeselect={ () => setLineHeight( undefined ) }
 				isShownByDefault={ defaultControls.lineHeight }
@@ -299,7 +386,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Letter spacing', 'woocommerce' ) }
+				label={ __( 'Letter spacing', __i18n_text_domain__ ) }
 				hasValue={ hasLetterSpacing }
 				onDeselect={ () => setLetterSpacing( undefined ) }
 				isShownByDefault={ defaultControls.letterSpacing }
@@ -313,7 +400,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Text decoration', 'woocommerce' ) }
+				label={ __( 'Text decoration', __i18n_text_domain__ ) }
 				hasValue={ hasTextDecoration }
 				onDeselect={ () => setTextDecoration( undefined ) }
 				isShownByDefault={ defaultControls.textDecoration }
@@ -326,7 +413,7 @@ export function TypographyElementPanel( {
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
-				label={ __( 'Letter case', 'woocommerce' ) }
+				label={ __( 'Letter case', __i18n_text_domain__ ) }
 				hasValue={ hasTextTransform }
 				onDeselect={ () => setTextTransform( defaultTextTransform ) }
 				isShownByDefault={ defaultControls.textTransform }

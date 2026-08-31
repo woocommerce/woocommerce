@@ -133,7 +133,9 @@ final class WC_Cart_Session {
 
 		if ( ! empty( $cart ) ) {
 			// Prime caches to reduce future queries.
-			_prime_post_caches( wp_list_pluck( $cart, 'product_id' ) );
+			$product_ids    = array_filter( array_column( $cart, 'product_id' ) );
+			$variations_ids = array_filter( array_column( $cart, 'variation_id' ) );
+			_prime_post_caches( array_merge( $product_ids, $variations_ids ) );
 		}
 
 		$cart_contents = array();
@@ -338,7 +340,7 @@ final class WC_Cart_Session {
 		}
 		if ( ! $this->cart->is_empty() ) {
 			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 			$this->set_cart_cookies( false );
 		}
 		$this->dedupe_cookies();

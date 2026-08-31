@@ -64,7 +64,7 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 	 */
 	public function get_permission_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -132,11 +132,19 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 		$layout_def  = array(
 			'type'       => 'object',
 			'properties' => array(
-				'image'    => array(
+				'image'       => array(
 					'type'        => 'string',
 					'description' => '',
 				),
-				'features' => $feature_def,
+				'image_label' => array(
+					'type'        => 'string',
+					'description' => '',
+				),
+				'description' => array(
+					'type'        => 'string',
+					'description' => '',
+				),
+				'features'    => $feature_def,
 			),
 		);
 

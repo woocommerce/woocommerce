@@ -43,7 +43,7 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 							size="small"
 							aria-label={ __(
 								'Navigate to the previous view',
-								'woocommerce'
+								__i18n_text_domain__
 							) }
 							onClick={ onBack }
 						/>

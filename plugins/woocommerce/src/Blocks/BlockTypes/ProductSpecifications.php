@@ -53,42 +53,23 @@ class ProductSpecifications extends AbstractBlock {
 
 		if ( $show_weight && $product->has_weight() ) {
 			$product_data['weight'] = array(
-				'label' => __( 'Weight', 'woocommerce' ),
-				'value' => wc_format_weight( $product->get_weight() ),
+				'label'     => __( 'Weight', 'woocommerce' ),
+				'value'     => wc_format_weight( $product->get_weight() ),
+				'api_field' => 'formatted_weight',
 			);
 		}
 
 		if ( $show_dimensions && $product->has_dimensions() ) {
 			$product_data['dimensions'] = array(
-				'label' => __( 'Dimensions', 'woocommerce' ),
-				'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
+				'label'     => __( 'Dimensions', 'woocommerce' ),
+				'value'     => wc_format_dimensions( $product->get_dimensions( false ) ),
+				'api_field' => 'formatted_dimensions',
 			);
 		}
 
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
-			$variations                = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'weight'     => wc_format_weight( $variation->get_weight() ),
-					'dimensions' => html_entity_decode( wc_format_dimensions( $variation->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-				);
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'weight'     => $product_data['weight']['value'] ?? '',
-							'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),
-							'variations' => $formatted_variations_data,
-						),
-					),
-				)
-			);
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 		}
 
@@ -148,8 +129,8 @@ class ProductSpecifications extends AbstractBlock {
 							<th scope="row" class="wp-block-product-specifications-item__label">
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
-							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'weight', 'dimensions' ), true ) ) : ?>
-								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>">
+							<?php if ( $is_interactive && isset( $product_attribute['api_field'] ) ) : ?>
+								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.<?php echo esc_attr( $product_attribute['api_field'] ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
 							<?php else : ?>	

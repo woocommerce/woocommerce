@@ -46,7 +46,7 @@ export function SendButton() {
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
-		__( 'Send', 'woocommerce' )
+		__( 'Send', __i18n_text_domain__ )
 	) as string;
 
 	return (

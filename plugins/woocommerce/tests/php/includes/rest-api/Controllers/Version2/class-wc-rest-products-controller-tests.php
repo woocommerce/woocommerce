@@ -21,6 +21,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		for ( $i = 1; $i <= 4; $i++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
@@ -30,6 +31,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$product->add_meta_data( 'test2', 'test2', true );
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -38,9 +40,11 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -407,9 +411,13 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		foreach ( $skus_and_names as $sku => $name ) {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_name( $name );
-			$product->set_sku( $sku );
+			$product = WC_Helper_Product::create_simple_product(
+				false,
+				array(
+					'name' => $name,
+					'sku'  => $sku,
+				)
+			);
 			$product->save();
 		}
 
@@ -441,5 +449,21 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating a variation through the products endpoint returns the existing variation endpoint error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
 }

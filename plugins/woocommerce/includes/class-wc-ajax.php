@@ -11,10 +11,13 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -617,6 +620,10 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		if ( ! $variable_product->is_viewable() ) {
+			wp_die();
+		}
+
 		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
@@ -763,17 +770,32 @@ class WC_AJAX {
 						)
 					);
 				} else {
+					VisualAttributeTermMeta::save_term_visual_from_request( (int) $result['term_id'], $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
-					wp_send_json(
-						array(
-							'term_id' => $term->term_id,
-							'name'    => $term->name,
-							'slug'    => $term->slug,
-						)
+
+					if ( ! $term ) {
+						wp_send_json(
+							array(
+								'error' => __( 'Term not found', 'woocommerce' ),
+							)
+						);
+					}
+
+					$response = array(
+						'term_id' => $term->term_id,
+						'name'    => $term->name,
+						'slug'    => $term->slug,
 					);
-				}
-			}
-		}
+
+					if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+						$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+					}
+
+					wp_send_json( $response );
+				}//end if
+			}//end if
+		}//end if
 		wp_die( -1 );
 	}
 
@@ -1017,6 +1039,18 @@ class WC_AJAX {
 		$data  = array();
 		$items = $order->get_items();
 
+		/**
+		 * Customer download data store.
+		 *
+		 * @var WC_Customer_Download_Data_Store $data_store
+		 */
+		$data_store               = WC_Data_Store::load( 'customer-download' );
+		$existing_download_access = array();
+
+		foreach ( $data_store->get_downloads( array( 'order_id' => $order_id ) ) as $download ) {
+			$existing_download_access[ $download->get_product_id() . '|' . $download->get_download_id() ] = true;
+		}
+
 		// Check against order items first.
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
@@ -1045,8 +1079,15 @@ class WC_AJAX {
 
 			if ( ! empty( $download_data['files'] ) ) {
 				foreach ( $download_data['files'] as $download_id => $file ) {
+					$download_access_key = $product_id . '|' . $download_id;
+
+					if ( isset( $existing_download_access[ $download_access_key ] ) ) {
+						continue;
+					}
+
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
+						$existing_download_access[ $download_access_key ] = true;
 						$download = new WC_Customer_Download( $inserted_id );
 						++$loop;
 						++$file_counter;
@@ -1127,10 +1168,10 @@ class WC_AJAX {
 
 		try {
 			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
-			wp_send_json_success( $response );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1147,13 +1188,17 @@ class WC_AJAX {
 		try {
 			$order = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
+			// Unsaved edits from the items panel ride along with the add request;
+			// validate and save them first so they are neither lost nor able to
+			// bypass the quantity minimum.
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1174,14 +1219,23 @@ class WC_AJAX {
 				}
 				if ( ProductType::VARIABLE === $product->get_type() ) {
 					/* translators: %s product name */
-					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+					$message = sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
+
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( (float) $qty, $product );
+
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
 					/* translators: %s: error message */
-					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
+					$message = sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
 				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
@@ -1194,7 +1248,7 @@ class WC_AJAX {
 			}
 
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
@@ -1472,7 +1526,7 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
@@ -1497,6 +1551,7 @@ class WC_AJAX {
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1516,10 +1571,10 @@ class WC_AJAX {
 
 						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 							/* translators: %1$s: item name %2$s: stock change */
-							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), 0, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 						} else {
 							/* translators: %s item name. */
-							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 						}
 					}
 
@@ -1637,6 +1692,16 @@ class WC_AJAX {
 			$items = array();
 			parse_str( wp_unslash( $_POST['items'] ), $items ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+			$order = wc_get_order( $order_id );
+
+			try {
+				if ( $order instanceof WC_Order ) {
+					wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $items );
+				}
+			} catch ( Exception $e ) {
+				wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			}
+
 			// Save order items.
 			wc_save_order_items( $order_id, $items );
 
@@ -1705,31 +1770,48 @@ class WC_AJAX {
 			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
 			$note       = wc_get_order_note( $comment_id );
 
+			if ( ! $note ) {
+				wp_die();
+			}
+
 			$note_classes   = array( 'note' );
 			$note_classes[] = $is_customer_note ? 'customer-note' : '';
 			$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
-					<?php
-					$content = wc_wptexturize_order_note( $note->content );
-					echo wp_kses_post( wpautop( make_clickable( $content ) ) );
-					?>
+					<?php if ( $is_customer_note ) : ?>
+						<div class="note_header"><?php esc_html_e( 'Sent to customer', 'woocommerce' ); ?></div>
+					<?php endif; ?>
+					<div class="note_body">
+						<?php
+						$content = wc_wptexturize_order_note( $note->content );
+						echo wp_kses_post( wpautop( make_clickable( $content ) ) );
+						?>
+					</div>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">
 						<?php
-						/* translators: $1: Date created, $2 Time created */
-						printf( esc_html__( 'added on %1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
+						/* translators: %1$s: order note date, %2$s: order note time */
+						printf( esc_html__( '%1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
 						?>
 					</abbr>
 					<?php
 					if ( 'system' !== $note->added_by ) :
-						/* translators: %s: note author */
+						/* translators: %s: order note author */
 						printf( ' ' . esc_html__( 'by %s', 'woocommerce' ), esc_html( $note->added_by ) );
 					endif;
 					?>
-					<a href="#" class="delete_note" role="button"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></a>
+					<?php
+					$note_date_label   = $note->date_created->date_i18n( wc_date_format() );
+					$delete_aria_label = 'system' === $note->added_by
+						/* translators: %s: order note date */
+						? sprintf( __( 'Delete system note from %s', 'woocommerce' ), $note_date_label )
+						/* translators: %1$s: order note author, %2$s: order note date */
+						: sprintf( __( 'Delete note from %1$s on %2$s', 'woocommerce' ), $note->added_by, $note_date_label );
+					?>
+					<a href="#" class="delete_note" role="button" aria-label="<?php echo esc_attr( $delete_aria_label ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 				</p>
 			</li>
 			<?php
@@ -1811,7 +1893,7 @@ class WC_AJAX {
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
 
-			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+			if ( ! $product_object || ! wc_products_array_filter_readable( $product_object ) ) {
 				continue;
 			}
 
@@ -1822,13 +1904,35 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$stock_amount = $product_object->get_stock_quantity();
-				/* Translators: %d stock amount */
-				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
-			}
+			if ( ! empty( $_GET['display_stock'] ) ) {
+				$stock_parts = array();
 
-			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
+				if ( $managing_stock ) {
+					$stock_amount = $product_object->get_stock_quantity();
+					/* Translators: %s stock amount */
+					$stock_parts[] = sprintf( __( 'Stock: %s', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+				}
+
+				$stock_status = $product_object->get_stock_status();
+				if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+					$stock_parts[] = __( 'Out of stock', 'woocommerce' );
+				} elseif ( ProductStockStatus::ON_BACKORDER === $stock_status ) {
+					$stock_parts[] = __( 'On backorder', 'woocommerce' );
+				}
+
+				if ( ! empty( $stock_parts ) ) {
+					$formatted_name .= ' (' . implode( ' – ', $stock_parts ) . ')';
+				}
+
+				$product_status = $product_object->get_status();
+				if ( ProductStatus::PRIVATE === $product_status ) {
+					$formatted_name .= ' (' . __( 'Disabled', 'woocommerce' ) . ')';
+				} elseif ( ProductStatus::DRAFT === $product_status ) {
+					$formatted_name .= ' (' . __( 'Draft', 'woocommerce' ) . ')';
+				}
+			}//end if
+
+			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
@@ -1873,7 +1977,7 @@ class WC_AJAX {
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $product_object->get_formatted_name() ) );
+			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $product_object->get_formatted_name() ) );
 		}
 
 		wp_send_json( $products );
@@ -2012,9 +2116,13 @@ class WC_AJAX {
 	/**
 	 * Search for categories and return json.
 	 *
+	 * @deprecated 10.9.0 This callback was used by the removed async product editor category field.
+	 *
 	 * @return void
 	 */
 	public static function json_search_categories_tree() {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
+
 		ob_start();
 
 		check_ajax_referer( 'search-categories', 'security' );
@@ -2255,8 +2363,6 @@ class WC_AJAX {
 	/**
 	 * Ajax request handling for product ordering.
 	 *
-	 * Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
-	 *
 	 * @return void
 	 */
 	public static function product_ordering() {
@@ -2268,54 +2374,114 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$sorting_id  = absint( $_POST['id'] );
-		$previd      = absint( isset( $_POST['previd'] ) ? $_POST['previd'] : 0 );
-		$nextid      = absint( isset( $_POST['nextid'] ) ? $_POST['nextid'] : 0 );
-		$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
-		$index       = 0;
+		$previous_id = absint( $_POST['previd'] ?? 0 );
+		$product_id  = absint( $_POST['id'] );
+		$next_id     = absint( $_POST['nextid'] ?? 0 );
 
-		foreach ( $menu_orders as $id => $menu_order ) {
-			$id = absint( $id );
-
-			if ( $sorting_id === $id ) {
-				continue;
+		$has_per_product_hook   = has_action( 'woocommerce_after_single_product_ordering' );
+		$has_post_ordering_hook = has_action( 'woocommerce_after_product_ordering' );
+		if ( $has_per_product_hook || $has_post_ordering_hook ) {
+			// See `clean_post_cache`, `wp_ajax_woocommerce_product_ordering`, `woocommerce_product_ordering_process_reindexed_products`
+			// and `woocommerce_product_ordering_process_moved_products` for available migration primitives.
+			if ( $has_per_product_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_single_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
 			}
-			if ( $nextid === $id ) {
+			if ( $has_post_ordering_hook ) {
+				wc_deprecated_hook( 'woocommerce_after_product_ordering', '11.2', null, 'Using this hook forces a non-optimized reordering path which causes performance issues on larger catalogs.' );
+			}
+
+			// Based on Simple Page Ordering by 10up (https://wordpress.org/plugins/simple-page-ordering/).
+			$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
+			$index       = 0;
+
+			foreach ( $menu_orders as $id => $menu_order ) {
+				$id = absint( $id );
+
+				if ( $product_id === $id ) {
+					continue;
+				}
+				if ( $next_id === $id ) {
+					++$index;
+				}
 				++$index;
-			}
-			++$index;
-			$menu_orders[ $id ] = $index;
+				$menu_orders[ $id ] = $index;
 
-			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
-				// We only need to clean the cache if the menu order was actually modified.
-				clean_post_cache( $id );
+				if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
+					// We only need to clean the cache if the menu order was actually modified.
+					clean_post_cache( $id );
+				}
+
+				/**
+				 * When a single product has gotten its ordering updated.
+				 *
+				 * @param int $id    The product ID.
+				 * @param int $index The new sort position.
+				 *
+				 * @since 3.1.0
+				 */
+				do_action( 'woocommerce_after_single_product_ordering', $id, $index );
 			}
+
+			if ( isset( $menu_orders[ $previous_id ] ) ) {
+				$menu_orders[ $product_id ] = $menu_orders[ $previous_id ] + 1;
+			} elseif ( isset( $menu_orders[ $next_id ] ) ) {
+				$menu_orders[ $product_id ] = $menu_orders[ $next_id ] - 1;
+			} else {
+				$menu_orders[ $product_id ] = 0;
+			}
+
+			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $product_id ] ), array( 'ID' => $product_id ) ) ) {
+				// We only need to clean the cache if the menu order was actually modified.
+				clean_post_cache( $product_id );
+			}
+
+			WC_Post_Data::delete_product_query_transients();
 
 			/**
-			 * When a single product has gotten it's ordering updated.
-			 * $id The product ID
-			 * $index The new menu order
-			*/
-			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
-		}
+			 * When products ordering update completed.
+			 *
+			 * @param int            $product_id    The product ID that was repositioned.
+			 * @param array<int,int> $all_positions All product sort positions (product ID → actual menu_order value).
+			 *
+			 * @since 3.1.0
+			 */
+			do_action( 'woocommerce_after_product_ordering', $product_id, $menu_orders );
+			wp_send_json( $menu_orders );
 
-		if ( isset( $menu_orders[ $previd ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $previd ] + 1;
-		} elseif ( isset( $menu_orders[ $nextid ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $nextid ] - 1;
 		} else {
-			$menu_orders[ $sorting_id ] = 0;
+			$modifications = wc_get_container()->get( ProductsOrderingMoveService::class )->move( $previous_id, $product_id, $next_id );
+			$moved         = ! empty( $modifications->moved );
+			$reindexed     = ! empty( $modifications->reindexed );
+			if ( $moved || $reindexed ) {
+				WC_Post_Data::delete_product_query_transients();
+
+				if ( $reindexed ) {
+					/**
+					 * Fires after a full catalog reindex was triggered during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $reindexed  Reindexed product positions (product ID → menu_order), excludes moved products.
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_reindexed_products', $product_id, $modifications->reindexed );
+					unset( $modifications->reindexed );
+				}
+
+				if ( $moved ) {
+					/**
+					 * Fires after products have been repositioned during product ordering.
+					 *
+					 * @param int            $product_id The product ID that was repositioned.
+					 * @param array<int,int> $moved      Moved product positions (product ID → menu_order).
+					 *
+					 * @since 11.2.0
+					 */
+					do_action( 'woocommerce_product_ordering_process_moved_products', $product_id, $modifications->moved );
+				}
+			}
+			wp_send_json( $modifications->moved );
 		}
-
-		if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) ) ) {
-			// We only need to clean the cache if the menu order was actually modified.
-			clean_post_cache( $sorting_id );
-		}
-
-		WC_Post_Data::delete_product_query_transients();
-
-		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
-		wp_send_json( $menu_orders );
 	}
 
 	/**
@@ -2376,7 +2542,8 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ) );
+				// Use is_numeric so a 0% tax amount ('0') is preserved. A callback-less array_filter would drop it as falsy, losing the 0-rate tax line (0% is a valid rate, not "no tax"). See #27118.
+				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ), 'is_numeric' );
 			}
 
 			// Create the refund object.
@@ -2544,7 +2711,7 @@ class WC_AJAX {
 				$response['consumer_key']    = $consumer_key;
 				$response['consumer_secret'] = $consumer_secret;
 				$response['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
-				$response['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
+				$response['revoke_url']      = '<a style="color: var(--wc-destructive, #cc1818); text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
@@ -2947,16 +3114,19 @@ class WC_AJAX {
 			return;
 		}
 
+		$date_from = isset( $data['date_from'] ) ? wc_clean( $data['date_from'] ) : false;
+		$date_to   = isset( $data['date_to'] ) ? wc_clean( $data['date_to'] ) : false;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_from && 'false' !== $date_from ) {
+				$date_on_sale_from = '' === $date_from ? null : date( 'Y-m-d 00:00:00', strtotime( $date_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_to && 'false' !== $date_to ) {
+				$date_on_sale_to = '' === $date_to ? null : date( 'Y-m-d 23:59:59', strtotime( $date_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 
@@ -3348,7 +3518,7 @@ class WC_AJAX {
 		do_action( 'woocommerce_update_options' );
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
+				'zones' => WC_Shipping_Zones::get_zones_with_order_conflict_warnings( 'json' ),
 			)
 		);
 	}

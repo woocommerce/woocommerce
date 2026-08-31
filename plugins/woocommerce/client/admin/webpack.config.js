@@ -6,18 +6,18 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * Internal dependencies
  */
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-style-build' );
+} = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -35,6 +35,56 @@ const getSubdirectoriesAt = ( searchPath ) => {
 
 const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
+const SETTINGS_UI_PACKAGE_DIR = path.resolve(
+	__dirname,
+	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
+);
+
+const resolvePackageDirectory = ( packageName, fromDirectory ) =>
+	path.dirname(
+		require.resolve( `${ packageName }/package.json`, {
+			paths: [ fromDirectory ],
+		} )
+	);
+
+const dataViewsPackageDirectory = resolvePackageDirectory(
+	'@wordpress/dataviews',
+	SETTINGS_UI_PACKAGE_DIR
+);
+const dataViewsUiPackageDirectory = resolvePackageDirectory(
+	'@wordpress/ui',
+	dataViewsPackageDirectory
+);
+const dataViewsBundledPackageDirectories = [
+	dataViewsPackageDirectory,
+	resolvePackageDirectory(
+		'@wordpress/components',
+		dataViewsPackageDirectory
+	),
+	resolvePackageDirectory( '@wordpress/compose', dataViewsPackageDirectory ),
+	resolvePackageDirectory( '@wordpress/data', dataViewsPackageDirectory ),
+	dataViewsUiPackageDirectory,
+	resolvePackageDirectory( '@wordpress/theme', dataViewsUiPackageDirectory ),
+];
+const dataViewsBundledDependencyRoots = [
+	...new Set(
+		dataViewsBundledPackageDirectories.map( ( packageDirectory ) =>
+			path.resolve( packageDirectory, '../..' )
+		)
+	),
+];
+const dataViewsWpEntry = require.resolve( '@wordpress/dataviews/wp', {
+	paths: [ SETTINGS_UI_PACKAGE_DIR ],
+} );
+const settingsUIDataFormRuntimeEntry = path.resolve(
+	SETTINGS_UI_PACKAGE_DIR,
+	'src/dataform-runtime.ts'
+);
+
+// Admin writes directly to the plugin's `assets/client/admin/` so PHP can
+// enqueue without an intermediate copy step. The JS config and every composed
+// package CSS config use this constant for `output.path`.
+const BUILD_DIR = path.resolve( __dirname, '../../assets/client/admin' );
 
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
@@ -47,7 +97,6 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
-	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -56,22 +105,61 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
-	'block-templates',
-	'product-editor',
 	'sanitize',
-	'settings-editor',
+	'settings-ui',
 	'remote-logging',
 	'email-editor',
 ];
+
+// Resolve each entry to the package's `wc-source` export as an absolute path.
+// Using the package name (`@woocommerce/<name>`) as the entry request would
+// match WooCommerceDependencyExtractionWebpackPlugin's externals list and
+// collapse the entry into a `window.wc.<name>` shim that re-exports itself.
+// Pointing entries at the filesystem dodges that match while still letting
+// transitive `@woocommerce/*` imports inside the bundle externalize normally.
+const resolvePackageSourceEntry = ( name ) => {
+	const pkgJsonPath = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/package.json`
+	);
+	const pkgJson = require( pkgJsonPath );
+	const source = pkgJson.exports?.[ '.' ]?.[ 'wc-source' ];
+	if ( ! source ) {
+		throw new Error(
+			`Package @woocommerce/${ name } has no exports["."]["wc-source"] entry in ${ pkgJsonPath }`
+		);
+	}
+	return path.resolve( path.dirname( pkgJsonPath ), source );
+};
+
+// Packages opt into having admin bundle their stylesheet by exporting a
+// `src/style.scss` next to `src/index.ts`. The file isn't imported from
+// `src/index.ts` (consumers historically relied on a separate `style.css`
+// asset), so we add it as a second entry tuple. Webpack bundles both into
+// the same chunk and MiniCssExtractPlugin emits `<pkg>/style.css`.
+const resolvePackageStyleEntry = ( name ) => {
+	const styleScss = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/src/style.scss`
+	);
+	return fs.existsSync( styleScss ) ? styleScss : null;
+};
 
 const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
-		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;
+		const source = resolvePackageSourceEntry( name );
+		const style = resolvePackageStyleEntry( name );
+		const privateRuntime =
+			name === 'settings-ui' ? settingsUIDataFormRuntimeEntry : null;
+		// Order matters: webpack uses the last item in an array entry as the
+		// chunk's export source. Private runtime and stylesheet entries come
+		// first so only `src/index.ts` exports land on `window.wc.<name>`.
+		const entries = [ style, privateRuntime, source ].filter( Boolean );
+		entryPoints[ name ] = entries.length === 1 ? source : entries;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
@@ -82,7 +170,8 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-const webpackConfig = {
+const jsConfig = {
+	name: 'admin-js',
 	mode: NODE_ENV,
 	performance: {
 		hints: false,
@@ -94,7 +183,7 @@ const webpackConfig = {
 					type: 'filesystem',
 					cacheDirectory: path.resolve(
 						__dirname,
-						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }-source`
 					),
 					buildDependencies: {
 						config: [
@@ -107,7 +196,7 @@ const webpackConfig = {
 								'@woocommerce/dependency-extraction-webpack-plugin'
 							),
 							require.resolve(
-								'@woocommerce/internal-style-build'
+								'@woocommerce/internal-build/style-build'
 							),
 						],
 					},
@@ -122,7 +211,7 @@ const webpackConfig = {
 				: `[name]/index${ outputSuffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
-		path: path.join( __dirname, '/build' ),
+		path: BUILD_DIR,
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],
@@ -134,6 +223,27 @@ const webpackConfig = {
 	module: {
 		parser: styleConfig.parser,
 		rules: [
+			{
+				// The DataForm runtime is a private entry until WOOPRD-3596 imports
+				// it from the renderer. Keep it in production builds without
+				// re-exporting it through window.wc.settingsUi.
+				include: settingsUIDataFormRuntimeEntry,
+				sideEffects: true,
+			},
+			{
+				// DataViews' /wp build inlines WordPress packages but leaves their
+				// third-party imports external. Resolve those imports from the exact
+				// package graph bundled into this entry under pnpm's strict layout.
+				// Keep this private runtime even while no public package export uses it.
+				include: dataViewsWpEntry,
+				sideEffects: true,
+				resolve: {
+					modules: [
+						...dataViewsBundledDependencyRoots,
+						'node_modules',
+					],
+				},
+			},
 			{
 				test: /\.(t|j)sx?$/,
 				parser: {
@@ -171,6 +281,14 @@ const webpackConfig = {
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
+				// @wordpress/theme declares sideEffects: false, which would
+				// tree-shake bare imports of its design tokens stylesheet.
+				// TODO: remove this rule when bumping @wordpress/theme past
+				// 0.17.0; newer releases fix the tree-shaking upstream.
+				test: /@wordpress[\/\\]theme[\/\\].*\.css$/,
+				sideEffects: true,
+			},
+			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
 			},
@@ -187,6 +305,14 @@ const webpackConfig = {
 			path: false,
 		},
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
+		// Activate the `"wc-source"` conditional export declared in each
+		// `packages/js/*` package.json. Webpack walks the package's exports map
+		// and picks `./src/index.ts` directly — no per-package alias is
+		// required, and transitive `@woocommerce/*` imports resolve to source
+		// through the same mechanism. The condition is namespaced (`wc-` prefix)
+		// so it never collides with third-party packages that publish their own
+		// `"source"` conditional export. `'...'` extends the default list.
+		conditionNames: [ 'wc-source', '...' ],
 		alias: {
 			'~': path.resolve( __dirname + '/client' ),
 			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
@@ -195,8 +321,12 @@ const webpackConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
-		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -209,31 +339,6 @@ const webpackConfig = {
 				}
 				return outputPath;
 			},
-		} ),
-		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
-		new CopyWebpackPlugin( {
-			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				// Copy css and style.asset.php files.
-				from: `../../../../packages/js/${ packageName }/build-style/*.{css,php}`,
-				to: `./${ packageName }/[name][ext]`,
-				noErrorOnMissing: true,
-				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.
-				// This is required for @woocommerce/component to use @automattic/* packages because scss styles from @automattic/* packages will be automatically generated by mini-css-extract-plugin with the same output name.
-				force: true,
-			} ) ),
-		} ),
-
-		// Get all product editor blocks so they can be loaded via JSON.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: path.join(
-						__dirname,
-						'../../../../packages/js/product-editor/build/blocks'
-					),
-					to: './product-editor/blocks',
-				},
-			],
 		} ),
 
 		// React Fast Refresh.
@@ -254,6 +359,15 @@ const webpackConfig = {
 							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
 							// For backward compatibility reasons we need to skip requesting to external here.
 							return null;
+						case 'react-dom/client':
+							// React 18 split createRoot/hydrateRoot into
+							// react-dom/client. WordPress's wp-react-dom UMD
+							// aggregates both entrypoints onto the same
+							// window.ReactDOM global. DEWP's default mapper
+							// doesn't know about the subpath yet
+							// (https://github.com/WordPress/gutenberg/pull/77326),
+							// so map it here.
+							return 'ReactDOM';
 						case '@wordpress/global-styles-engine':
 							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
 							// so we need to bundle it instead of treating it as an external.
@@ -292,6 +406,9 @@ const webpackConfig = {
 					if ( request === 'moment-timezone' ) {
 						return 'moment';
 					}
+					if ( request === 'react-dom/client' ) {
+						return 'react-dom';
+					}
 				},
 			} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
@@ -314,12 +431,12 @@ const webpackConfig = {
 };
 if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	// Set default sourcemap mode if it wasn't set by WP_DEVTOOL.
-	webpackConfig.devtool = webpackConfig.devtool || 'source-map';
+	jsConfig.devtool = jsConfig.devtool || 'source-map';
 
 	if ( isHot ) {
 		// Add dev server config
 		// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
-		webpackConfig.devServer = {
+		jsConfig.devServer = {
 			devMiddleware: {
 				writeToDisk: true,
 			},
@@ -327,9 +444,9 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 			host: 'localhost',
 			port: 8887,
 			proxy: {
-				'/build': {
+				'/assets/client/admin': {
 					pathRewrite: {
-						'^/build': '',
+						'^/assets/client/admin': '',
 					},
 				},
 			},
@@ -337,4 +454,4 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	}
 }
 
-module.exports = webpackConfig;
+module.exports = jsConfig;

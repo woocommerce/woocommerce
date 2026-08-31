@@ -13,8 +13,7 @@
 1. **Environment Setup**:
 
    ```bash
-   # From repository root
-   nvm use
+   # From repository root (PNPM uses the pinned Node version automatically)
    pnpm install
    pnpm --filter='@woocommerce/plugin-woocommerce' build
    cd plugins/woocommerce
@@ -70,7 +69,7 @@ test.describe('WooCommerce Email Editor', () => {
 
 ### 2. Test Organization
 
-- Place tests in `tests/e2e-pw/tests/email-editor/`
+- Place tests in `tests/e2e/tests/email-editor/`
 - Use descriptive file names with `.spec.js` extension
 - Group related tests using `test.describe()`
 - Use helper functions for common operations

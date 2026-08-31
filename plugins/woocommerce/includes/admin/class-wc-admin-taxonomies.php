@@ -53,7 +53,7 @@ class WC_Admin_Taxonomies {
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
 		add_action(
 			'delete_product_cat',
-			function() {
+			function () {
 				wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 			}
 		);
@@ -80,14 +80,15 @@ class WC_Admin_Taxonomies {
 
 		if ( ! empty( $attribute_taxonomies ) ) {
 			foreach ( $attribute_taxonomies as $attribute ) {
-				add_action( 'pa_' . $attribute->attribute_name . '_pre_add_form', array( $this, 'product_attribute_description' ) );
+				$taxonomy = 'pa_' . $attribute->attribute_name;
+				add_action( $taxonomy . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 			}
 		}
 
 		// Maintain hierarchy of terms.
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
 
-		// Admin footer scripts for this product categories admin screen.
+		// Admin footer scripts for taxonomy screens.
 		add_action( 'admin_footer', array( $this, 'scripts_at_product_cat_screen_footer' ) );
 	}
 
@@ -313,11 +314,13 @@ class WC_Admin_Taxonomies {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
+		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow verifies the nonce before firing this hook.
+			$display_type = is_string( $_POST['display_type'] ) ? sanitize_key( $_POST['display_type'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow verifies the nonce before firing this hook.
+
+			update_term_meta( $term_id, 'display_type', $display_type );
 		}
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow supplies authorization checks; IDs are cast.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Core term-edit flow supplies authorization checks; IDs are cast.
 		}
 	}
 
@@ -413,10 +416,11 @@ class WC_Admin_Taxonomies {
 	 * Handle custom row actions.
 	 */
 	public function handle_product_cat_row_actions() {
-		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) { // WPCS: CSRF ok, input var ok.
-			$make_default_id = absint( $_GET['tag_ID'] ); // WPCS: Input var ok.
+		if ( isset( $_GET['action'], $_GET['tag_ID'], $_GET['_wpnonce'] ) && 'make_default' === $_GET['action'] ) {
+			$make_default_id = absint( $_GET['tag_ID'] );
 
-			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) { // WPCS: Sanitization ok, input var ok, CSRF ok.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wp_verify_nonce() validates the raw nonce value.
+			if ( wp_verify_nonce( $_GET['_wpnonce'], 'make_default_' . $make_default_id ) && current_user_can( 'edit_term', $make_default_id ) ) {
 				update_option( 'default_product_cat', $make_default_id );
 			}
 		}
@@ -477,29 +481,31 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function scripts_at_product_cat_screen_footer() {
-		if ( ! isset( $_GET['taxonomy'] ) || 'product_cat' !== $_GET['taxonomy'] ) { // WPCS: CSRF ok, input var ok.
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'product_cat' !== $taxonomy ) {
 			return;
 		}
 
-		// Ensure the tooltip is displayed when the image column is disabled on product categories.
 		$handle = 'wc-admin-taxonomies';
 		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
+
+		// Ensure the tooltip is displayed when the image column is disabled on product categories.
 		wp_add_inline_script(
 			$handle,
 			sprintf(
 				"(function() {
-                    'use strict';
-                    const product_cat = document.getElementById('tag-%d');
-                    if (product_cat) {
-                        const th = product_cat.querySelector('th');
-                        const thumbSpan = product_cat.querySelector('td.thumb span');
-                        if (th && thumbSpan) {
-                            th.innerHTML = '';
-                            th.appendChild(thumbSpan);
-                        }
-                    }
-                })();",
+					'use strict';
+					const product_cat = document.getElementById('tag-%d');
+					if (product_cat) {
+						const th = product_cat.querySelector('th');
+						const thumbSpan = product_cat.querySelector('td.thumb span');
+						if (th && thumbSpan) {
+							th.innerHTML = '';
+							th.appendChild(thumbSpan);
+						}
+					}
+				})();",
 				absint( $this->default_cat_id )
 			)
 		);

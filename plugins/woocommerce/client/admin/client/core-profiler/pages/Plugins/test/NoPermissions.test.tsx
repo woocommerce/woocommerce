@@ -71,7 +71,7 @@ describe( 'NoPermissions', () => {
 
 		expect(
 			screen.getByText(
-				'You do not have permissions to install plugins. Please contact your site administrator.'
+				'You do not have permissions to manage plugins. Please contact your site administrator.'
 			)
 		).toBeInTheDocument();
 	} );

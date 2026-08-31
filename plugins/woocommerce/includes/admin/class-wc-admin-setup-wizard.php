@@ -223,7 +223,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
-		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
+		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing; step is constrained with sanitize_key().
 			return;
 		}
 		$default_steps = array(
@@ -285,7 +285,7 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$this->steps = apply_filters( 'woocommerce_setup_wizard_steps', $default_steps );
-		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // WPCS: CSRF ok, input var ok.
+		$this->step  = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : current( array_keys( $this->steps ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing; step is constrained with sanitize_key().
 
 		// @codingStandardsIgnoreStart
 		if ( ! empty( $_POST['save_step'] ) && isset( $this->steps[ $this->step ]['handler'] ) ) {
@@ -654,7 +654,7 @@ class WC_Admin_Setup_Wizard {
 							</p>
 						</article>
 						<footer>
-							<div class="inner">
+							<div class="wc-backbone-modal-buttons">
 								<button class="button button-primary button-large" id="wc_tracker_submit" aria-label="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 							</div>
 						</footer>
@@ -1416,10 +1416,10 @@ class WC_Admin_Setup_Wizard {
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
 			'https://woocommerce.com/products/woocommerce-gateway-paypal-checkout/'
 		) . '</p>';
-		$klarna_checkout_description = '<p>' . sprintf(
+		$kustom_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
-			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woocommerce.com/products/klarna-checkout/'
+			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Kustom</a>.', 'woocommerce' ),
+			'https://woocommerce.com/products/kustom-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
 			/* translators: %s: URL */
@@ -1499,9 +1499,9 @@ class WC_Admin_Setup_Wizard {
 				),
 			),
 			'klarna_checkout'     => array(
-				'name'        => __( 'Klarna Checkout for WooCommerce', 'woocommerce' ),
-				'description' => $klarna_checkout_description,
-				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
+				'name'        => __( 'Kustom Checkout for WooCommerce', 'woocommerce' ),
+				'description' => $kustom_checkout_description,
+				'image'       => WC()->plugin_url() . '/assets/images/onboarding/icons/kustom-checkout.svg',
 				'enabled'     => true,
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',

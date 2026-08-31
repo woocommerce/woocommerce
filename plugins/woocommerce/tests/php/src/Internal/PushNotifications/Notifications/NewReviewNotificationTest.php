@@ -27,6 +27,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'resource_id', $payload );
 		$this->assertArrayHasKey( 'title', $payload );
 		$this->assertArrayHasKey( 'format', $payload['title'] );
+		$this->assertArrayHasKey( 'args', $payload['title'] );
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
 		$this->assertArrayHasKey( 'args', $payload['message'] );
@@ -54,10 +55,10 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include the reviewer name, product name, and review
-	 * content in the message args.
+	 * @testdox Should include the reviewer name and product name in the title args,
+	 * and the review content in the message args.
 	 */
-	public function test_to_payload_message_args_contains_expected_values(): void {
+	public function test_to_payload_splits_review_details_between_title_and_message(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 		$comment    = get_comment( $comment_id );
@@ -65,14 +66,14 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( $comment->comment_author, $payload['message']['args'][0] );
-		$this->assertSame( $product->get_name(), $payload['message']['args'][1] );
-		$this->assertSame( $comment->comment_content, $payload['message']['args'][2] );
+		$this->assertSame( $comment->comment_author, $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
+		$this->assertSame( $comment->comment_content, $payload['message']['args'][0] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * reviewer name in message args.
+	 * reviewer name in title args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_author(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -90,12 +91,12 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Evil Author', $payload['message']['args'][0] );
+		$this->assertSame( 'Evil Author', $payload['title']['args'][0] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * review content in message args.
+	 * review content in the message args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_content(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -113,7 +114,37 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Great product!', $payload['message']['args'][2] );
+		$this->assertSame( 'Great product!', $payload['message']['args'][0] );
+	}
+
+	/**
+	 * @testdox Should preserve percent signs in review content so downstream
+	 * sprintf-style formatting doesn't break.
+	 */
+	public function test_to_payload_preserves_percent_signs_in_review_content(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$content    = 'Works 100% great %1$s';
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Reviewer',
+				'comment_author_email' => 'test@test.local',
+				'comment_content'      => $content,
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+			)
+		);
+
+		$notification = new NewReviewNotification( $comment_id );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( $content, $payload['message']['args'][0] );
+		$this->assertSame(
+			$content,
+			vsprintf( $payload['message']['format'], $payload['message']['args'] )
+		);
+		$this->assertSame( 'Reviewer', $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
 	}
 
 	/**
@@ -123,5 +154,159 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when rating is below max_rating.
+	 */
+	public function test_should_send_to_user_when_rating_below_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 4,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when rating equals max_rating.
+	 */
+	public function test_should_send_to_user_when_rating_equals_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when rating is above max_rating.
+	 */
+	public function test_should_not_send_to_user_when_rating_above_max(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when max_rating key is missing (backwards compat).
+	 */
+	public function test_should_send_to_user_when_max_rating_missing(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user( array( 'enabled' => true ) )
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when max_rating is null (threshold disabled).
+	 */
+	public function test_should_send_to_user_when_max_rating_null(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when notification is disabled, regardless of rating.
+	 */
+	public function test_should_not_send_to_user_when_disabled(): void {
+		$comment_id = $this->create_review_with_rating( 1 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => false,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return false when the comment no longer exists.
+	 */
+	public function test_should_not_send_to_user_when_comment_deleted(): void {
+		$notification = new NewReviewNotification( 999999 );
+
+		$this->assertFalse(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox should_send_to_user should return true when the review has no rating meta.
+	 */
+	public function test_should_send_to_user_when_no_rating_meta(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+
+		// Ensure no rating meta is present, in case the helper changes to set one by default.
+		delete_comment_meta( $comment_id, 'rating' );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertTrue(
+			$notification->should_send_to_user(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Creates a product review with a specific rating stored in comment meta.
+	 *
+	 * @param int $rating The star rating (1–5).
+	 * @return int The new comment ID.
+	 */
+	private function create_review_with_rating( int $rating ): int {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+		update_comment_meta( $comment_id, 'rating', $rating );
+		return (int) $comment_id;
 	}
 }

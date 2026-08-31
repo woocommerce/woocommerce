@@ -1,14 +1,19 @@
 @import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
-	&__menu-item span {
-		white-space: normal;
+	// Connected-user avatar in the floating-header toggle — locked to 18px
+	// so the User button matches every other tab in the bar regardless of
+	// sign-in state.
+	&__header-account-avatar {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		display: block;
+		object-fit: cover;
 	}
 
-	&__menu-avatar-image {
-		border-radius: 50%;
-		height: $grid-unit-30;
-		width: $grid-unit-30;
+	&__menu-item span {
+		white-space: normal;
 	}
 
 	&__menu-icon {
@@ -34,6 +39,42 @@
 
 		&__header-account-modal-text {
 			margin-bottom: $grid-unit-10;
+		}
+	}
+
+	// HeaderAccount renders in two places — the WC Home floating-header
+	// activity-panel tab strip, and the Marketplace page's own header
+	// next to a search input. The default toggle structure doesn't
+	// stretch / centre vertically on its own, so we explicitly handle
+	// both contexts:
+	// - Floating header (inside `.woocommerce-layout__activity-panel-tabs`):
+	//   wrapper stretches to the 60px bar height so the User tab aligns
+	//   with its neighbours (bell / store / display / help).
+	// - Marketplace page (inside `.woocommerce-marketplace__header`):
+	//   wrapper sits at 40px to match the WP 7.0-height search input
+	//   beside it.
+	// Both rules scope to their parent container rather than styling
+	// `__user-menu` unconditionally, otherwise the Home rule would leak
+	// onto Marketplace (and vice versa).
+	.woocommerce-layout__activity-panel-tabs &__user-menu {
+		display: flex;
+		align-items: stretch;
+		height: $header-height;
+	}
+
+	&__header &__user-menu {
+		// Inner toggle button is 40px to match the WP 7.0-height search
+		// input next to it. The 7px top offset compensates for the
+		// difference between the search input's `margin-top: 15px` (in
+		// search.scss) and the `padding-top: 8px` already on the parent
+		// `__header-meta` — without it, the User toggle visually sits
+		// ~7px higher than the search input. Previously masked by the
+		// removed `.activity-panel-tab` class overflowing the 60px grid
+		// cell.
+		margin-top: 7px;
+
+		> button.components-dropdown-menu__toggle {
+			height: 40px;
 		}
 	}
 

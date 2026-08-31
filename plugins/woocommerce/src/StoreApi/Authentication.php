@@ -52,8 +52,7 @@ class Authentication {
 			return $handler;
 		}
 
-		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
-		$cart_token = is_string( $cart_token ) ? $cart_token : '';
+		$cart_token = CartTokenUtils::get_request_cart_token();
 		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
 			return SessionHandler::class;
 		}
@@ -145,11 +144,11 @@ class Authentication {
 	/**
 	 * Gets the cart token from the request header.
 	 *
-	 * @param \WP_REST_Request $request The REST request instance.
+	 * @param \WP_REST_Request $request Deprecated since 11.1.0. Unused; kept for subclasses.
 	 * @return string
 	 */
-	protected function get_cart_token( \WP_REST_Request $request ) {
-		return wc_clean( wp_unslash( $request->get_header( 'Cart-Token' ) ?? '' ) );
+	protected function get_cart_token( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature kept for backwards compatibility.
+		return CartTokenUtils::get_request_cart_token();
 	}
 
 	/**

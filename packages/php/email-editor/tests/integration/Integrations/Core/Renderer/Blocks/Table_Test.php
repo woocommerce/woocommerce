@@ -128,6 +128,39 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it uses RTL default wrapper and cell alignment when alignment is absent.
+	 */
+	public function testItRendersTableWithRtlDefaultAlignment(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_table     = $this->parsed_table;
+		unset( $parsed_table['attrs']['textAlign'] );
+		$parsed_table['innerHTML'] = $this->table_content;
+
+		$rendered = $this->table_renderer->render( $this->table_content, $parsed_table, $rtl_context );
+
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it preserves explicit table cell alignment in RTL.
+	 */
+	public function testItPreservesExplicitCellAlignmentInRtl(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_table     = $this->parsed_table;
+		unset( $parsed_table['attrs']['textAlign'] );
+		$content                   = '<table><tbody><tr><td data-align="left">Cell</td><td class="has-text-align-center">Cell 2</td></tr></tbody></table>';
+		$parsed_table['innerHTML'] = $content;
+
+		$rendered = $this->table_renderer->render( $content, $parsed_table, $rtl_context );
+
+		$this->assertStringContainsString( 'text-align: left', $rendered );
+		$this->assertStringContainsString( 'text-align: center', $rendered );
+	}
+
+	/**
 	 * Test it extracts table from figure wrapper
 	 */
 	public function testItExtractsTableFromFigureWrapper(): void {
@@ -596,6 +629,46 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		// Check that alignments are applied from data-align attributes.
 		$this->assertStringContainsString( 'text-align: center;', $rendered );
 		$this->assertStringContainsString( 'text-align: right;', $rendered );
+	}
+
+	/**
+	 * Test it centers header cells without alignment, like the editor does, while body cells stay left.
+	 */
+	public function testItCentersHeaderCellsWithoutExplicitAlignment(): void {
+		$parsed_table = $this->parsed_table;
+		unset( $parsed_table['attrs']['textAlign'] );
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
+		$this->assertStringContainsString( 'text-align: center;', (string) $html->get_attribute( 'style' ) );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TD' ) ) );
+		$this->assertStringContainsString( 'text-align: left;', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Test it keeps explicit header cell alignment instead of the centered fallback.
+	 */
+	public function testItPreservesExplicitHeaderCellAlignment(): void {
+		$content = '<table><thead><tr><th class="has-text-align-right">Header</th><th data-align="left">Header 2</th></tr></thead></table>';
+
+		$parsed_table = $this->parsed_table;
+		unset( $parsed_table['attrs']['textAlign'] );
+		$parsed_table['innerHTML'] = $content;
+
+		$rendered = $this->table_renderer->render( $content, $parsed_table, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
+		$this->assertStringContainsString( 'text-align: right;', (string) $html->get_attribute( 'style' ) );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
+		$this->assertStringContainsString( 'text-align: left;', (string) $html->get_attribute( 'style' ) );
 	}
 
 	/**

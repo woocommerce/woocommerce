@@ -378,6 +378,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$post_status = 'wc-' . $post_status;
 		}
 
+		// The status column holds at most 20 characters, so a longer key can't be stored.
+		if ( strlen( $post_status ) > 20 ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'Order status "%s" is longer than the storage limit of 20 characters and cannot be stored.',
+					esc_html( $order_status )
+				),
+				'11.0.0'
+			);
+		}
+
 		return $post_status;
 	}
 
@@ -705,7 +717,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
-			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order_id;
 		}
 
 		$non_cached_ids = array();
@@ -738,16 +750,15 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			)
 		);
 
-		$order_refunds = array();
+		$order_refund_ids = array_fill_keys( $non_cached_ids, array() );
 		foreach ( $refunds as $refund ) {
-			if ( $refund instanceof \WC_Order_Refund ) {
-				$order_refunds[ $refund->get_parent_id() ][] = $refund;
+			if ( $refund instanceof \WC_Order_Refund && isset( $order_refund_ids[ $refund->get_parent_id() ] ) ) {
+				$order_refund_ids[ $refund->get_parent_id() ][] = $refund->get_id();
 			}
 		}
 
 		foreach ( $non_cached_ids as $order_id ) {
-			$cached_refunds = isset( $order_refunds[ $order_id ] ) ? $order_refunds[ $order_id ] : array();
-			wp_cache_set( $cache_keys_mapping[ $order_id ], $cached_refunds, 'orders' );
+			wp_cache_set( $cache_keys_mapping[ $order_id ], $order_refund_ids[ $order_id ], 'orders' );
 		}
 	}
 
@@ -767,6 +778,132 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @return void
 	 */
 	protected function prime_needs_processing_transients( $order_ids, $query_vars ) {
+	}
+
+	/**
+	 * Get persisted order item IDs, optionally limited to an item type.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param string|null $type Order item type, or null for every type.
+	 * @throws Exception If the database query fails.
+	 * @return int[]
+	 */
+	public function get_item_ids( $order, $type = null ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() ) {
+			return array();
+		}
+
+		if ( null === $type ) {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+					$order->get_id()
+				)
+			);
+		} else {
+			$item_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s",
+					$order->get_id(),
+					$type
+				)
+			);
+		}
+
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->error(
+				'Failed to retrieve persisted order item IDs.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to retrieve persisted order item IDs.', 'woocommerce' ) );
+		}
+
+		return array_map( 'intval', $item_ids );
+	}
+
+	/**
+	 * Delete selected order items by ID.
+	 *
+	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param int[]    $ids   Order item IDs to delete.
+	 * @throws Exception If the database query fails.
+	 * @return void
+	 */
+	public function delete_items_by_ids( $order, $ids ) {
+		global $wpdb;
+
+		if ( ! $order->get_id() || empty( $ids ) ) {
+			return;
+		}
+
+		$sanitized_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map( 'intval', (array) $ids ),
+					static fn( $id ) => $id > 0
+				)
+			)
+		);
+		if ( empty( $sanitized_ids ) ) {
+			return;
+		}
+
+		$ids_placeholders = implode( ', ', array_fill( 0, count( $sanitized_ids ), '%d' ) );
+
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+		if ( false === $result ) {
+			wc_get_logger()->error(
+				'Failed to delete order item metadata.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order item metadata.', 'woocommerce' ) );
+		}
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
+				"DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_id IN ($ids_placeholders)",
+				array_merge( array( $order->get_id() ), $sanitized_ids )
+			)
+		);
+		if ( false === $result ) {
+			wc_get_logger()->error(
+				'Failed to delete order items.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order items.', 'woocommerce' ) );
+		}
+
+		foreach ( $sanitized_ids as $item_id ) {
+			wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		}
+
+		$this->clear_caches( $order );
 	}
 
 	/**
@@ -965,7 +1102,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )', $wpdb->posts, 'shop_order_refund', $order_id );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $wpdb->prepare( "{$wpdb->posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -981,8 +1119,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
 		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", $wpdb->posts, 'shop_order_refund' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
+		return $wpdb->prepare( "{$wpdb->posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -1011,18 +1149,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table names.
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
-				FROM %i AS postmeta
-				INNER JOIN %i AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
+			"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
+				FROM {$wpdb->postmeta} AS postmeta
+				INNER JOIN {$wpdb->posts} AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
 				WHERE postmeta.meta_key = '_refund_amount'
 				AND postmeta.post_id = posts.ID
-				GROUP BY posts.post_parent",
-				$wpdb->postmeta,
-				$wpdb->posts
-			)
+				GROUP BY posts.post_parent"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -1048,19 +1182,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$refund_join      = $this->get_refund_orders_join_clause( $order->get_id() );
 		$meta_placeholder = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
+		$order_itemmeta   = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$order_items      = $wpdb->prefix . 'woocommerce_order_items';
 
 		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared; trusted table names.
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $meta_keys is splatted.
 			$wpdb->prepare(
 				"SELECT SUM( order_itemmeta.meta_value )
-				FROM %i AS order_itemmeta
+				FROM {$order_itemmeta} AS order_itemmeta
 				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
+				INNER JOIN {$order_items} AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ( $meta_placeholder )",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items',
 				$item_type,
 				...$meta_keys,
 			)
@@ -1148,22 +1282,20 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		// Batch query: total tax refunded per order.
-		$refund_join = $this->get_refund_orders_batch_join_clause( $non_cached_ids );
-		$parent_col  = $this->get_refund_parent_column();
+		$refund_join    = $this->get_refund_orders_batch_join_clause( $non_cached_ids );
+		$parent_col     = $this->get_refund_parent_column();
+		$order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$order_items    = $wpdb->prefix . 'woocommerce_order_items';
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared, $parent_col is hardcoded.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared, $parent_col is hardcoded, trusted table names.
 		$tax_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT $parent_col AS order_id, SUM( order_itemmeta.meta_value ) AS total
-				FROM %i AS order_itemmeta
+			"SELECT $parent_col AS order_id, SUM( order_itemmeta.meta_value ) AS total
+				FROM {$order_itemmeta} AS order_itemmeta
 				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
+				INNER JOIN {$order_items} AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-				GROUP BY $parent_col",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items'
-			)
+				GROUP BY $parent_col"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -1173,6 +1305,117 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 		foreach ( $non_cached_ids as $order_id ) {
 			wp_cache_set( $tax_keys[ $order_id ], $tax_by_order[ $order_id ] ?? 0.0, 'orders' );
+		}
+	}
+
+	/**
+	 * Temporarily neutralizes the WC_Emails transactional dispatch listeners
+	 * (send_transactional_email and queue_transactional_email) so that restoring an order
+	 * from the trash does not re-notify the customer about an order they were already
+	 * emailed about.
+	 *
+	 * The listeners are left in their original WP_Hook slots: the action, priority,
+	 * accepted-args count and position are all kept, and only the callback function is
+	 * wrapped to suppress dispatches for the restored order. This preserves the relative
+	 * ordering of every other listener on those actions, so third-party integrations are
+	 * unaffected. Pass the returned snapshot to {@see restore_transactional_email_dispatch()}
+	 * to undo this.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $restored_order_id The ID of the order being restored.
+	 * @return list<array{0: string, 1: int, 2: string, 3: callable}> Snapshot of neutralized listeners.
+	 */
+	protected function suspend_transactional_email_dispatch( int $restored_order_id ): array {
+		global $wp_filter;
+
+		$suspended           = array();
+		$dispatch_method_set = array( 'send_transactional_email', 'queue_transactional_email' );
+
+		foreach ( $wp_filter as $action => $hook ) {
+			if ( ! is_string( $action ) || ! $hook instanceof WP_Hook ) {
+				continue;
+			}
+			foreach ( $hook->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $key => $cb ) {
+					$function = $cb['function'] ?? null;
+					if ( ! is_array( $function ) || ! isset( $function[0], $function[1] ) ) {
+						continue;
+					}
+					if ( ! is_callable( $function ) ) {
+						continue;
+					}
+					$class  = is_object( $function[0] ) ? get_class( $function[0] ) : $function[0];
+					$method = $function[1];
+					if ( ! is_string( $class ) || ! is_string( $method ) ) {
+						continue;
+					}
+					if ( 'WC_Emails' !== $class || ! in_array( $method, $dispatch_method_set, true ) ) {
+						continue;
+					}
+					$suspended[]                                      = array( $action, (int) $priority, (string) $key, $function );
+					$hook->callbacks[ $priority ][ $key ]['function'] = function ( ...$args ) use ( $action, $function, $restored_order_id ) {
+						if ( $this->should_suppress_transactional_email_dispatch( $action, $restored_order_id, $args ) ) {
+							return null;
+						}
+
+						return call_user_func_array( $function, $args );
+					};
+				}
+			}
+		}
+
+		return $suspended;
+	}
+
+	/**
+	 * Checks whether a transactional email dispatch belongs to the restored order.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $action            The action being dispatched.
+	 * @param int    $restored_order_id The ID of the order being restored.
+	 * @param array  $args              The runtime action arguments.
+	 * @return bool
+	 */
+	private function should_suppress_transactional_email_dispatch( string $action, int $restored_order_id, array $args ): bool {
+		if ( 0 !== strpos( $action, 'woocommerce_order_status_' ) ) {
+			return false;
+		}
+
+		$order = $args[1] ?? null;
+		if ( $order instanceof WC_Order ) {
+			return $restored_order_id === $order->get_id();
+		}
+
+		$order_id = $args[0] ?? null;
+		return is_numeric( $order_id ) && $restored_order_id === (int) $order_id;
+	}
+
+	/**
+	 * Restores the transactional email dispatch listeners previously neutralized by
+	 * {@see suspend_transactional_email_dispatch()} to their original callbacks.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param list<array{0: string, 1: int, 2: string, 3: callable}> $suspended Snapshot returned by suspend_transactional_email_dispatch().
+	 *
+	 * @return void
+	 */
+	protected function restore_transactional_email_dispatch( array $suspended ): void {
+		global $wp_filter;
+
+		foreach ( $suspended as $entry ) {
+			list( $action, $priority, $key, $function ) = $entry;
+			if ( ! isset( $wp_filter[ $action ] ) || ! $wp_filter[ $action ] instanceof WP_Hook ) {
+				continue;
+			}
+			// Only restore the slot if it still exists; if it was removed during the
+			// suspended window we must not resurrect it.
+			if ( ! isset( $wp_filter[ $action ]->callbacks[ $priority ][ $key ] ) ) {
+				continue;
+			}
+			$wp_filter[ $action ]->callbacks[ $priority ][ $key ]['function'] = $function;
 		}
 	}
 }

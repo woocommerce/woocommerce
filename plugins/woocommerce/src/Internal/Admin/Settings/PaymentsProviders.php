@@ -11,9 +11,12 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Eway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Helcim;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KustomCheckout;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mastercard;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
@@ -81,6 +84,12 @@ class PaymentsProviders {
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
 
+	private const GATEWAY_DETAILS_REQUEST_CACHE_GROUP = 'woocommerce_payment_gateway_details';
+	private const GATEWAY_DETAILS_REQUEST_CACHE_KEY   = 'gateway_details';
+
+	public const PROVIDER_LISTS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
+	public const PROVIDER_LISTS_REQUEST_CACHE_KEY   = 'provider_lists';
+
 	/*
 	 * The provider link types.
 	 *
@@ -108,6 +117,9 @@ class PaymentsProviders {
 		'stripe_*'                    => Stripe::class,
 		'mollie'                      => Mollie::class,
 		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
+		'komoju'                      => Komoju::class,
+		// Target all the per-method KOMOJU gateways.
+		'komoju_*'                    => Komoju::class,
 		'amazon_payments_advanced*'   => AmazonPay::class,
 		'woo-mercado-pago-*'          => MercadoPago::class,
 		'affirm'                      => Affirm::class,
@@ -126,13 +138,15 @@ class PaymentsProviders {
 		'airwallex_*'                 => Airwallex::class,
 		'vivawallet*'                 => Vivacom::class,
 		'tilopay'                     => Tilopay::class,
+		'helcimjs'                    => Helcim::class,
 		'helio'                       => HelioPay::class,
 		'paytrail'                    => Paytrail::class,
 		'monei'                       => Monei::class,
 		'monei_*'                     => Monei::class,
 		'gocardless'                  => GoCardless::class,
-		'kco'                         => KlarnaCheckout::class,
+		'kco'                         => KustomCheckout::class,
 		'visa_acceptance_solutions_*' => Visa::class,
+		'mastercard_merchant_cloud'   => Mastercard::class,
 		'eway'                        => Eway::class,
 		'dibs_easy'                   => NexiCheckout::class,
 	);
@@ -166,12 +180,14 @@ class PaymentsProviders {
 		ExtensionSuggestions::AIRWALLEX         => Airwallex::class,
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
+		ExtensionSuggestions::HELCIM            => Helcim::class,
 		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
-		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::KUSTOM_CHECKOUT   => KustomCheckout::class,
 		ExtensionSuggestions::VISA              => Visa::class,
+		ExtensionSuggestions::MASTERCARD        => Mastercard::class,
 		ExtensionSuggestions::EWAY              => Eway::class,
 		ExtensionSuggestions::NEXI_CHECKOUT     => NexiCheckout::class,
 	);
@@ -184,20 +200,20 @@ class PaymentsProviders {
 	private array $instances = array();
 
 	/**
-	 * The memoized payment gateways to avoid computing the list multiple times during a request.
+	 * The cached payment gateways, used to avoid computing the list multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_memo = array();
+	private array $payment_gateways_cache = array();
 
 	/**
-	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
+	 * The cached payment gateways for display, used to avoid computing the list multiple times during a request.
 	 *
 	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_for_display_memo = array();
+	private array $payment_gateways_for_display_cache = array();
 
 	/**
 	 * The payment extension suggestions service.
@@ -224,6 +240,8 @@ class PaymentsProviders {
 	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
+
+		wp_cache_add_non_persistent_groups( array( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
@@ -247,8 +265,8 @@ class PaymentsProviders {
 
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
-				return $this->payment_gateways_for_display_memo[ $country_code ];
+			if ( isset( $this->payment_gateways_for_display_cache[ $country_code ] ) ) {
+				return $this->payment_gateways_for_display_cache[ $country_code ];
 			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
@@ -273,14 +291,14 @@ class PaymentsProviders {
 			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways, $country_code );
 
 			// Store the entire payment gateways list for display for later use.
-			$this->payment_gateways_for_display_memo[ $country_code ] = $payment_gateways;
+			$this->payment_gateways_for_display_cache[ $country_code ] = $payment_gateways;
 
 			return $payment_gateways;
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
-			return $this->payment_gateways_memo[ $country_code ];
+		if ( isset( $this->payment_gateways_cache[ $country_code ] ) ) {
+			return $this->payment_gateways_cache[ $country_code ];
 		}
 
 		// Get all payment gateways, ordered by the user.
@@ -290,7 +308,7 @@ class PaymentsProviders {
 		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 		// Store the entire payment gateways list for later use.
-		$this->payment_gateways_memo[ $country_code ] = $payment_gateways;
+		$this->payment_gateways_cache[ $country_code ] = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -479,11 +497,27 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		return $this->enhance_payment_gateway_details(
-			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
-			$payment_gateway,
-			$country_code
-		);
+		$cache_key              = get_current_user_id() . '__' . $payment_gateway->id . '__' . $country_code;
+		$cached_gateway_details = wp_cache_get( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		if ( is_array( $cached_gateway_details ) && isset( $cached_gateway_details[ $cache_key ] ) && is_array( $cached_gateway_details[ $cache_key ] ) ) {
+			$details = $cached_gateway_details[ $cache_key ];
+		} else {
+			$details = $this->enhance_payment_gateway_details(
+				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
+				$payment_gateway,
+				$country_code
+			);
+
+			if ( ! is_array( $cached_gateway_details ) ) {
+				$cached_gateway_details = array();
+			}
+			$cached_gateway_details[ $cache_key ] = $details;
+			wp_cache_set( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, $cached_gateway_details, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		}
+
+		$details['_order'] = $payment_gateway_order;
+
+		return $details;
 	}
 
 	/**
@@ -1225,14 +1259,37 @@ class PaymentsProviders {
 	}
 
 	/**
-	 * Reset the memoized data. Useful for testing purposes.
+	 * Clear cached payment gateway data, including the provider lists the
+	 * Payments service derives from it.
+	 *
+	 * Call after changing gateway registration, settings, or account state during a request.
+	 * Also useful for testing purposes.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->payment_gateways_cache             = array();
+		$this->payment_gateways_for_display_cache = array();
+		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
+		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
+	}
+
+	/**
+	 * Reset cached payment gateway data.
+	 *
+	 * @deprecated 11.1.0 Use clear_cache() instead.
 	 *
 	 * @internal
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo             = array();
-		$this->payment_gateways_for_display_memo = array();
+		wc_deprecated_function( __METHOD__, '11.1.0', 'clear_cache' );
+
+		$this->clear_cache();
 	}
 
 	/**

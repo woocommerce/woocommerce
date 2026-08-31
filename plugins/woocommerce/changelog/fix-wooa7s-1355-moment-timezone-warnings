@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix moment-timezone console errors in WooCommerce Admin by using WordPress core's bundled moment-timezone instead of a stripped copy

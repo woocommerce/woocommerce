@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Harden password visibility toggle markup handling.

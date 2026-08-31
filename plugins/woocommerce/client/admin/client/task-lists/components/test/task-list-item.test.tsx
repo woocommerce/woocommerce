@@ -5,9 +5,11 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useSlot } from '@woocommerce/experimental';
+import { TaskItem, useSlot } from '@woocommerce/experimental';
+import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { TaskType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -68,9 +70,27 @@ jest.mock( '@woocommerce/experimental', () => {
 		TaskItem: jest
 			.fn()
 			.mockImplementation(
-				( { title, onSnooze, onDismiss, onClick } ) => (
-					<div>
+				( {
+					title,
+					onSnooze,
+					onDismiss,
+					onClick,
+					secondaryAction,
+				} ) => (
+					// ExperimentalListItem gives the row a button role that
+					// treats Enter as a click, so the mock does the same to
+					// keep keyboard coverage meaningful.
+					<div
+						role="button"
+						tabIndex={ 0 }
+						onKeyDown={ ( event: React.KeyboardEvent ) => {
+							if ( event.key === 'Enter' ) {
+								onClick?.( event );
+							}
+						} }
+					>
 						<button onClick={ onClick }>{ title }</button>
+						{ secondaryAction }
 						{ onSnooze && (
 							<button onClick={ onSnooze } name="Snooze">
 								Snooze
@@ -122,6 +142,7 @@ const task: TaskType = {
 describe( 'TaskListItem', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockDispatch.dismissTask.mockResolvedValue( undefined );
 	} );
 
 	it( 'should render the default task list item', () => {
@@ -208,6 +229,49 @@ describe( 'TaskListItem', () => {
 		} );
 	} );
 
+	it( 'should call trackClick when clicking tasklist item', () => {
+		const trackClick = jest.fn();
+		render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				trackClick={ trackClick }
+			/>
+		);
+
+		act( () => {
+			userEvent.click( screen.getByText( task.title ) );
+		} );
+
+		expect( trackClick ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'should call trackClick before expanding expandable tasklist item', () => {
+		const trackClick = jest.fn();
+		const setExpandedTask = jest.fn();
+		render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ true }
+				isExpanded={ false }
+				setExpandedTask={ setExpandedTask }
+				trackClick={ trackClick }
+			/>
+		);
+
+		act( () => {
+			userEvent.click( screen.getByText( task.title ) );
+		} );
+
+		expect( trackClick ).toHaveBeenCalledTimes( 1 );
+		expect( setExpandedTask ).toHaveBeenCalledWith( task.id );
+		expect( trackClick.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
+			setExpandedTask.mock.invocationCallOrder[ 0 ]
+		);
+	} );
+
 	it( 'should not call dismissTask when isDismissable is set to false', () => {
 		const { queryByRole } = render(
 			<TaskListItem
@@ -220,6 +284,66 @@ describe( 'TaskListItem', () => {
 		expect(
 			queryByRole( 'button', { name: 'Dismiss' } )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should request a task skip through the parent callback', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const { getByRole } = render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				showSkipAction={ true }
+				onTaskSkip={ onTaskSkip }
+			/>
+		);
+
+		await userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
+
+		expect( onTaskSkip ).toHaveBeenCalledWith( task );
+		expect( mockDispatch.dismissTask ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should not navigate to the task when Skip is activated with Enter', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const { getByRole } = render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				showSkipAction={ true }
+				onTaskSkip={ onTaskSkip }
+			/>
+		);
+
+		getByRole( 'button', { name: 'Skip' } ).focus();
+		await userEvent.keyboard( '{Enter}' );
+
+		expect( onTaskSkip ).toHaveBeenCalledWith( task );
+		expect( navigateTo ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should disable Skip while a task request is pending', async () => {
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const { getByRole } = render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				showSkipAction={ true }
+				isSkipDisabled={ true }
+				onTaskSkip={ onTaskSkip }
+			/>
+		);
+
+		const skipButton = getByRole( 'button', { name: 'Skip' } );
+		expect( skipButton ).toBeDisabled();
+		await userEvent.click( skipButton );
+
+		expect( onTaskSkip ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should call snoozeTask and trigger a notice when snoozing a task', () => {
@@ -273,5 +397,37 @@ describe( 'TaskListItem', () => {
 			</SlotFillProvider>
 		);
 		expect( queryByText( task.title ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should hand the skip action to a fill that composes its own TaskItem', async () => {
+		( useSlot as jest.Mock ).mockReturnValue( { fills: [ 'test' ] } );
+		const onTaskSkip = jest.fn().mockResolvedValue( undefined );
+		const extendedTask = { ...task, id: 'test' };
+
+		const { getByRole, queryByRole } = render(
+			<SlotFillProvider>
+				<WooOnboardingTaskListItem id="test">
+					{ (
+						fillProps: React.ComponentProps< typeof TaskItem >
+					) => <TaskItem { ...fillProps } title={ task.title } /> }
+				</WooOnboardingTaskListItem>
+				<TaskListItem
+					task={ extendedTask }
+					isExpandable={ false }
+					isExpanded={ false }
+					setExpandedTask={ () => {} }
+					showSkipAction={ true }
+					onTaskSkip={ onTaskSkip }
+				/>
+			</SlotFillProvider>
+		);
+
+		// Extended lists drop Dismiss, so the fill has to receive Skip in its
+		// place rather than losing both actions.
+		expect( queryByRole( 'button', { name: 'Dismiss' } ) ).toBeNull();
+
+		await userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
+
+		expect( onTaskSkip ).toHaveBeenCalledWith( extendedTask );
 	} );
 } );

@@ -61,6 +61,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'taxes_stats';
 
 	/**
+	 * Constructor.
+	 *
+	 * Report on the date type configured in Analytics settings (default `date_paid`),
+	 * matching the Orders and Revenue reports. The reporting period and intervals are
+	 * filtered against the chosen column on `wc_order_stats` so the Taxes report
+	 * reconciles with them.
+	 *
+	 * @override ReportsDataStore::__construct()
+	 */
+	public function __construct() {
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
+		parent::__construct();
+	}
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
@@ -72,6 +87,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'total_tax'    => 'SUM(total_tax) AS total_tax',
 			'order_tax'    => 'SUM(order_tax) as order_tax',
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
+			// parent_id stays unqualified: wc_order_stats is the only joined table carrying it, and
+			// this string is carried by the public woocommerce_admin_report_columns filter, so it must
+			// match the released form for extension callbacks that inspect or rewrite it.
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
 	}
@@ -86,8 +104,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		$order_tax_lookup_table = self::get_db_table_name();
+		$order_stats_table      = $wpdb->prefix . 'wc_order_stats';
 
-		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
+		// Filter the reporting period against the configured date type on wc_order_stats
+		// (date_paid by default) rather than the lookup's date_created, so the Taxes report
+		// reconciles with the Orders and Revenue reports.
+		$this->add_time_period_sql_params( $query_args, $order_stats_table );
 		$taxes_where_clause  = '';
 		$order_status_filter = $this->get_status_subquery( $query_args );
 
@@ -104,7 +126,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->total_query->add_sql_clause( 'where', $taxes_where_clause );
 
-		$this->add_intervals_sql_params( $query_args, $order_tax_lookup_table );
+		$this->add_intervals_sql_params( $query_args, $order_stats_table );
 		$this->interval_query->add_sql_clause( 'where', $taxes_where_clause );
 		$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
 		$this->interval_query->add_sql_clause( 'where_time', $this->get_sql_clause( 'where_time' ) );
@@ -134,7 +156,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$query           .= $wpdb->prepare( " WHERE tax_rate_id IN ({$tax_placeholders})", $args['include'] );
 			/* phpcs:enable */
 		}
-		return $wpdb->get_results( $query, ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- This data store intentionally reads current tax-rate settings; identifiers are trusted and optional IDs are prepared.
 	}
 
 	/**
@@ -170,7 +192,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
+		$table_name        = self::get_db_table_name();
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
 
 		$this->initialize_queries();
 
@@ -200,7 +223,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo remove these assignements when refactoring segmenter classes to use query objects.
+		// @todo remove these assignments when refactoring segmenter classes to use query objects.
 		$totals_query          = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $this->total_query->get_sql_clause( 'where_time' ),
@@ -215,13 +238,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$segmenter             = new Segmenter( $query_args, $this->report_columns );
 		$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
-		$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
+		$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $order_stats_table );
 
 		if ( '' !== $selections ) {
 			$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 		}
 
-		$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
+		$this->interval_query->add_sql_clause( 'select', ", MAX({$order_stats_table}.{$this->date_column_name}) AS datetime_anchor" );
 		$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 

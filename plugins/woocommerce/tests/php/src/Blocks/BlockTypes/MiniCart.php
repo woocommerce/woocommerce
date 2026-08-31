@@ -92,6 +92,19 @@ class MiniCart extends \WP_UnitTestCase {
 						<img class="wp-image-block" src="https://example.com/image.jpg" alt="Example Image" />
 					<!-- /wp:image -->
 				</div>
+				<!-- /wp:woocommerce/mini-cart-title-block -->
+
+				<!-- wp:woocommerce/mini-cart-footer-block -->
+				<div class="wp-block-woocommerce-mini-cart-footer-block">
+					<!-- wp:woocommerce/mini-cart-cart-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-cart-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-cart-button-block -->
+
+					<!-- wp:woocommerce/mini-cart-checkout-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-checkout-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-checkout-button-block -->
+				</div>
+				<!-- /wp:woocommerce/mini-cart-footer-block -->
 			</div>
 			<!-- /wp:woocommerce/filled-mini-cart-contents-block -->
 		</div>
@@ -236,6 +249,55 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should process legacy wrappers while preserving the pattern rendering lifecycle.
+	 */
+	public function test_render_pattern_backed_template(): void {
+		$pattern_name = 'woocommerce-tests/mini-cart-template-part';
+		register_block_pattern(
+			$pattern_name,
+			array(
+				'title'   => 'Mini Cart template part',
+				'content' => $this->current_template_with_user_edits,
+			)
+		);
+
+		$pattern_filter_calls = 0;
+		$pattern_filter       = static function ( $content ) use ( &$pattern_filter_calls ) {
+			++$pattern_filter_calls;
+			return $content . '<span data-pattern-filter-ran></span>';
+		};
+
+		add_filter( 'render_block_core/pattern', $pattern_filter, 10, 1 );
+
+		try {
+			$method = new \ReflectionMethod( MiniCartBlock::class, 'render_template_part_contents' );
+			$method->setAccessible( true );
+			$rendered_template = $method->invoke(
+				$this->mock,
+				'<!-- wp:pattern {"slug":"' . $pattern_name . '"} /-->'
+			);
+		} finally {
+			remove_filter( 'render_block_core/pattern', $pattern_filter, 10 );
+			unregister_block_pattern( $pattern_name );
+		}
+
+		$this->assertSame( 1, $pattern_filter_calls, 'The core pattern render filter should run exactly once.' );
+		$this->assertStringContainsString(
+			'data-pattern-filter-ran',
+			$rendered_template,
+			'The filtered pattern output should be preserved.'
+		);
+
+		$p                    = new \WP_HTML_Tag_Processor( $rendered_template );
+		$footer_wrapper_count = 0;
+		while ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-mini-cart-footer-block' ) ) ) {
+			++$footer_wrapper_count;
+		}
+
+		$this->assertSame( 1, $footer_wrapper_count, 'The rendered template should contain exactly one footer wrapper.' );
+	}
+
+	/**
 	 * Checks that process_template_contents removes the wrapper divs from the
 	 * current template with user edits, but preserves the user edits.
 	 *
@@ -377,6 +439,60 @@ class MiniCart extends \WP_UnitTestCase {
 
 		// Mini-cart should render (non-empty output).
 		$this->assertNotEmpty( $output, 'Mini-cart should render for logged-out users when coming soon mode is disabled.' );
+	}
+
+	/**
+	 * Test that the product count badge includes the configured product count color in its inline style.
+	 *
+	 * @return void
+	 */
+	public function test_badge_contains_configured_product_count_color() {
+		$color = '#ff0000';
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountColor":{"color":"' . $color . '"}} /-->' );
+		$output = render_block( $block[0] );
+
+		$processor = new \WP_HTML_Tag_Processor( $output );
+
+		$badge_found = false;
+		while ( $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
+		) ) {
+			$badge_found = true;
+			$style       = $processor->get_attribute( 'style' );
+			$this->assertStringContainsString( 'background:' . $color, $style, 'Badge inline style should apply the configured color to the background property.' );
+		}
+
+		$this->assertTrue( $badge_found, 'Badge element should be present in the rendered output.' );
+	}
+
+	/**
+	 * Test that the product count badge does not include a background color when no color is configured.
+	 *
+	 * @return void
+	 */
+	public function test_badge_has_no_background_color_when_not_configured() {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$processor = new \WP_HTML_Tag_Processor( $output );
+
+		$badge_found = false;
+		while ( $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
+		) ) {
+			$badge_found = true;
+			$style       = $processor->get_attribute( 'style' );
+			$this->assertStringNotContainsString( 'background:', $style, 'Badge inline style should not contain a background color when none is configured.' );
+		}
+
+		$this->assertTrue( $badge_found, 'Badge element should be present in the rendered output.' );
 	}
 
 	/**

@@ -23,7 +23,7 @@ const packageCache: { [ key: string ]: PackageJSON } = {};
  * @return {Object} The package file's contents.
  */
 export function loadPackage( packagePath: string ): PackageJSON {
-	// Use normalized paths to accomodate any path tokens.
+	// Use normalized paths to accommodate any path tokens.
 	packagePath = path.normalize( packagePath );
 	if ( packageCache[ packagePath ] ) {
 		return packageCache[ packagePath ];

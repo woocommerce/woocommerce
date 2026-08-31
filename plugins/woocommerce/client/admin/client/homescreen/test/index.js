@@ -8,6 +8,7 @@ import { useUserPreferences } from '@woocommerce/data';
  * Internal dependencies
  */
 import { Layout } from '../layout';
+import { isFeatureEnabled } from '~/utils/features';
 
 jest.mock( '../stats-overview', () =>
 	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
@@ -32,6 +33,10 @@ jest.mock( '@woocommerce/data', () => ( {
 	useUserPreferences: jest.fn().mockReturnValue( {} ),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn().mockReturnValue( true ),
+} ) );
+
 jest.mock( '@wordpress/element', () => {
 	return {
 		...jest.requireActual( '@wordpress/element' ),
@@ -42,6 +47,10 @@ jest.mock( '@wordpress/element', () => {
 } );
 
 describe( 'Homescreen Layout', () => {
+	beforeEach( () => {
+		isFeatureEnabled.mockReturnValue( true );
+	} );
+
 	it( 'should show TaskList inline', () => {
 		const { container } = render(
 			<Layout

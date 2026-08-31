@@ -1,4 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group -- mocks must be imported first */
 /**
  * External dependencies
  */
@@ -19,18 +18,20 @@ jest.mock( '@wordpress/data', () => {
 		jest.requireActual< typeof import('@wordpress/data') >(
 			'@wordpress/data'
 		);
-	return {
-		...actual,
-		use: jest.fn(
-			(
-				plugin: ( registry: {
-					select: ( namespace: string ) => unknown;
-				} ) => { select: ( namespace: string ) => unknown }
-			) => {
-				capturedPlugin = plugin;
-			}
-		),
-	};
+
+	return Object.create( actual, {
+		use: {
+			value: jest.fn(
+				(
+					plugin: ( registry: {
+						select: ( namespace: string ) => unknown;
+					} ) => { select: ( namespace: string ) => unknown }
+				) => {
+					capturedPlugin = plugin;
+				}
+			),
+		},
+	} );
 } );
 
 jest.mock( '@wordpress/notices', () => ( {
@@ -141,6 +142,55 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const result = selectors.getNotices();
 
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+	} );
+
+	it( 'transforms an editor-save notice with "Post published." content', () => {
+		// Emitted when an integration's save button publishes the post in the
+		// background (lazy post creation) instead of a plain update.
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Post published.',
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+	} );
+
+	it( 'leaves an editor-save notice with "Draft saved." content unchanged', () => {
+		// A saved draft is not used for sending; rewriting the notice to
+		// "Email saved." would suggest the opposite.
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Draft saved.',
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Draft saved.' );
+	} );
+
+	it( 'leaves an editor-save notice with unrelated content unchanged', () => {
+		const originalNotice = makeNotice( {
+			id: 'editor-save',
+			content: 'Saving failed.',
+		} );
+		const { pluginResult } = buildSelectOverride( [ originalNotice ] );
+
+		const selectors = pluginResult.select( 'core/notices' ) as {
+			getNotices: () => Notice[];
+		};
+		const result = selectors.getNotices();
+
+		expect( result[ 0 ].content ).toBe( 'Saving failed.' );
 	} );
 
 	it( 'transforms site-editor-save-success notice and removes actions', () => {

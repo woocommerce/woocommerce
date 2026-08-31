@@ -1,7 +1,7 @@
 ---
 post_title: WooCommerce performance best practices
 sidebar_label: Performance best practices
-
+description: Best practices for optimizing the performance of WooCommerce stores and extensions.
 ---
 
 # Performance best practices for WooCommerce extensions
