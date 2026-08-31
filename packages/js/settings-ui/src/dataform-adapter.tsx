@@ -169,6 +169,10 @@ export const buildDataFormField = (
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
+		// DataForm turns on its closed elements rule whenever elements are
+		// set, but stored settings values can predate the current options
+		// (deleted pages, uninstalled gateways) and must not block saving.
+		isValid: { elements: false },
 		isVisible: createIsVisible( settingsField, options ),
 		isDisabled: isFieldDisabled( settingsField ),
 	};

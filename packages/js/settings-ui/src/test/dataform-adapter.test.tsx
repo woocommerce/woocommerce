@@ -476,6 +476,24 @@ describe( 'dataform adapter', () => {
 		} );
 	} );
 
+	describe( 'validation rules', () => {
+		it( 'keeps the closed elements rule opt-in for option fields', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'select',
+					options: [
+						{ label: 'One', value: 'one' },
+						{ label: 'Two', value: 'two' },
+					],
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.elements ).toBe( false );
+		} );
+	} );
+
 	describe( 'disabled state', () => {
 		it( 'honours a disabled custom attribute with presence semantics', () => {
 			const attributeDisabled = buildDataFormField(
