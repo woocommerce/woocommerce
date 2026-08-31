@@ -18,6 +18,8 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use DateTime;
 use DateTimeZone;
+use WC_Customer_Download;
+use WC_Data_Store;
 use WC_Helper_Order;
 use WC_Helper_Payment_Token;
 use WC_Helper_Product;
@@ -2691,6 +2693,50 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->delete( true );
 
 		$this->assert_no_order_records_or_deletion_records_exist( $order_id, $refund_id, false );
+	}
+
+	/**
+	 * @testdox When the orders table is authoritative and a non-placeholder order is deleted, its downloadable product permissions are deleted immediately, regardless of whether sync is enabled or disabled.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $sync_enabled_at_deletion True to delete the order with sync enabled, false to delete it with sync disabled.
+	 */
+	public function test_downloadable_permissions_deleted_when_non_placeholder_order_deleted( bool $sync_enabled_at_deletion ) {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		$this->assertNotEquals( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order_id ) );
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( $order->get_customer_id() );
+		$download->set_user_email( $order->get_billing_email() );
+		$download->set_order_id( $order_id );
+		$download->set_download_id( 'test-download' );
+		$download->set_access_granted( time() );
+		$download->save();
+
+		if ( ! $sync_enabled_at_deletion ) {
+			$this->disable_cot_sync();
+		}
+
+		$order->delete( true );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$this->assertEmpty( $download_data_store->get_downloads( array( 'order_id' => $order_id ) ), 'Downloadable permission should have been deleted.' );
+
+		if ( $sync_enabled_at_deletion ) {
+			$this->assertNull( get_post( $order_id ), 'Backup post record should have been deleted immediately.' );
+		} else {
+			$this->assertNotNull( get_post( $order_id ), 'Backup post record should still exist, pending sync.' );
+			$this->assert_deletion_record_existence( $order_id, true, true );
+		}
 	}
 
 	/**

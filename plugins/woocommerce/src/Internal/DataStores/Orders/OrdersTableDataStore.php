@@ -19,6 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
+use WC_Post_Data;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -2634,6 +2635,13 @@ FROM $order_meta_table
 				do_action( 'woocommerce_before_delete_order', $order_id, $order );
 			}
 
+			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+			if ( $orders_table_is_authoritative ) {
+				// Must run before delete_order_data_from_custom_order_tables() removes the row is_order() checks.
+				WC_Post_Data::delete_order_downloadable_permissions( $order_id );
+			}
+
 			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
 			$this->delete_items( $order );
@@ -2646,8 +2654,6 @@ FROM $order_meta_table
 			 *
 			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 			 */
-			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
-
 			if ( $orders_table_is_authoritative ) {
 				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 				if ( $data_synchronizer->data_sync_is_enabled() ) {

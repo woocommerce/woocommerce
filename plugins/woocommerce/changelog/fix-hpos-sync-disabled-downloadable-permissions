@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Delete downloadable file permissions immediately when an order is deleted with HPOS authoritative and sync disabled.
