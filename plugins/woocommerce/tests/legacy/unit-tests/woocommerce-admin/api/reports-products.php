@@ -308,6 +308,34 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should break a tie on the sorting column by numeric ID, not by ID as text.
+	 *
+	 * The virtual table the report joins its filtered IDs through types that column as text, so
+	 * without a cast product 100 sorts before product 99 and a page boundary lands mid-run.
+	 */
+	public function test_get_reports_breaks_ties_by_numeric_product_id() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Rows come from the filtered ID list, so these do not have to be products that exist. They
+		// straddle a digit boundary, which is where a text sort and a numeric one disagree.
+		$response = $this->dispatch_report(
+			array(
+				'products' => '1000001,999998,1000000,999999,999997',
+				'per_page' => 10,
+				'orderby'  => 'items_sold',
+				'order'    => 'desc',
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array( 999997, 999998, 999999, 1000000, 1000001 ),
+			array_column( $response->get_data(), 'product_id' )
+		);
+	}
+
+	/**
 	 * @testdox Should match products by SKU as well as by title.
 	 */
 	public function test_get_reports_search_param_matches_sku() {

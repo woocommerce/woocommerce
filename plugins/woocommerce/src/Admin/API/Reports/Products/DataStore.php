@@ -500,9 +500,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			// The database is free to resolve a tie differently for each page, so a product comes
 			// back on two of them while another is never reached. A product without sales ties on
 			// every column the report can order by, and a filtered report is mostly those.
+			// `get_ids_table()` types its column as text, so cast it or 100 would sort before 99.
 			$order_by = $this->get_sql_clause( 'order_by' );
 			$this->clear_sql_clause( 'order_by' );
-			$this->add_sql_clause( 'order_by', "{$order_by}, default_results.product_id" );
+			$this->add_sql_clause( 'order_by', "{$order_by}, CAST( default_results.product_id AS SIGNED )" );
 
 			$products_query = $this->get_query_statement();
 		} else {
