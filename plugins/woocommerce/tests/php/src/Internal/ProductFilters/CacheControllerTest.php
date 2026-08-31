@@ -13,14 +13,13 @@ use WP_Post;
  */
 class CacheControllerTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Filter data created after registration is invalidated by $event.
+	 * @testdox Filter data created after registration is invalidated by $hook.
 	 * @dataProvider cache_event_provider
 	 *
-	 * @param string $event         Event to trigger.
-	 * @param string $hook          WordPress hook name.
-	 * @param string $handler       Cache controller handler name.
+	 * @param string $hook    WordPress hook name.
+	 * @param string $handler Cache controller handler name.
 	 */
-	public function test_cache_event_hooks_handle_cache_created_later_in_same_request( string $event, string $hook, string $handler ): void {
+	public function test_cache_event_hooks_handle_cache_created_later_in_same_request( string $hook, string $handler ): void {
 		$controller = wc_get_container()->get( CacheController::class );
 		$post       = $this->factory->post->create_and_get(
 			array(
@@ -36,7 +35,7 @@ class CacheControllerTest extends WC_Unit_Test_Case {
 		WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
 
-		if ( 'status transition' === $event ) {
+		if ( 'transition_post_status' === $hook ) {
 			wp_update_post(
 				array(
 					'ID'          => $post->ID,
@@ -53,12 +52,12 @@ class CacheControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for cache events that can occur after registration.
 	 *
-	 * @return array<string, array{string, string, string}>
+	 * @return array<string, array{string, string}>
 	 */
 	public static function cache_event_provider(): array {
 		return array(
-			'status transition'  => array( 'status transition', 'transition_post_status', 'handle_transition_post_status' ),
-			'permanent deletion' => array( 'permanent deletion', 'before_delete_post', 'handle_before_delete_post' ),
+			'status transition'  => array( 'transition_post_status', 'handle_transition_post_status' ),
+			'permanent deletion' => array( 'before_delete_post', 'handle_before_delete_post' ),
 		);
 	}
 

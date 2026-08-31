@@ -579,14 +579,14 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a variable product whose variation matches its Color terms.
+	 * Create a variable product with a single Color variation.
 	 *
-	 * @param array $colors Color terms configured on the parent.
-	 * @param bool  $match_any Whether the variation matches any configured color.
-	 * @param array $other_attributes Non-variation attributes configured on the parent.
+	 * @param array       $colors Color terms configured on the parent.
+	 * @param string|null $defining_color The variation's defining Color term, or null for an "Any Color" variation.
+	 * @param array       $other_attributes Non-variation attributes configured on the parent.
 	 * @return array Product and variation IDs.
 	 */
-	private function create_variable_product_with_color_variation( $colors, $match_any = false, $other_attributes = array() ) {
+	private function create_variable_product_with_color_variation( $colors, $defining_color = null, $other_attributes = array() ) {
 		return $this->create_variable_product(
 			array(
 				'variation_attributes'     => array( 'Color' => $colors ),
@@ -594,11 +594,31 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				'variations'               => array(
 					array(
 						'in_stock'            => true,
-						'defining_attributes' => array( 'Color' => $match_any ? null : $colors[0] ),
+						'defining_attributes' => array( 'Color' => $defining_color ),
 					),
 				),
 			)
 		);
+	}
+
+	/**
+	 * Create two published Red variable products and prime the cached layered nav counts from them.
+	 *
+	 * @return array The created products.
+	 */
+	private function create_red_products_and_prime_counts() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+		$products = array(
+			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
+			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
+		);
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$this->do_product_request( array() );
+		$this->assert_counters( 'Color', array( 'Red' ), 'and', 2 );
+
+		return $products;
 	}
 
 	/**
@@ -627,16 +647,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @testdox Private variations are excluded from lookup filtering and cached layered-nav counts.
 	 */
 	public function test_lookup_filtering_and_counts_exclude_private_variations() {
-		$this->set_use_lookup_table( true );
-		$this->create_product_attribute( 'Color', array( 'Red' ) );
-		$products = array(
-			$this->create_variable_product_with_color_variation( array( 'Red' ) ),
-			$this->create_variable_product_with_color_variation( array( 'Red' ) ),
-		);
-		\WC_Cache_Helper::delete_transients_on_shutdown();
-
-		$this->do_product_request( array() );
-		$this->assert_counters( 'Color', array( 'Red' ), 'and', 2 );
+		$products = $this->create_red_products_and_prime_counts();
 
 		wp_update_post(
 			array(
@@ -657,16 +668,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @testdox Permanently deleting a published variation invalidates cached layered-nav counts.
 	 */
 	public function test_deleting_published_variation_invalidates_cached_counts() {
-		$this->set_use_lookup_table( true );
-		$this->create_product_attribute( 'Color', array( 'Red' ) );
-		$products = array(
-			$this->create_variable_product_with_color_variation( array( 'Red' ) ),
-			$this->create_variable_product_with_color_variation( array( 'Red' ) ),
-		);
-		\WC_Cache_Helper::delete_transients_on_shutdown();
-
-		$this->do_product_request( array() );
-		$this->assert_counters( 'Color', array( 'Red' ), 'and', 2 );
+		$products = $this->create_red_products_and_prime_counts();
 
 		$variation = wc_get_product( $products[0]['variation_ids'][0] );
 		$this->assertInstanceOf( \WC_Product_Variation::class, $variation );
@@ -685,8 +687,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
 		$this->create_product_attribute( 'Features', array( 'Washable' ) );
 		$products = array(
-			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), true, array( 'Features' => array( 'Washable' ) ) ),
-			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), true, array( 'Features' => array( 'Washable' ) ) ),
+			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
+			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
 		);
 
 		wp_update_post(
