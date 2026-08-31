@@ -148,6 +148,33 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Get the attribute taxonomies recorded in the lookup table for a product and its variations.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param int $product_or_parent_id Product ID, or the parent product ID for a variation.
+	 * @return string[] Taxonomy names.
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_taxonomies_for_product( int $product_or_parent_id ): array {
+		global $wpdb;
+
+		if ( ! $this->check_lookup_table_exists() ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The lookup table is the source of truth for which taxonomies a product contributes to.
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup table name is owned by this class.
+				"SELECT DISTINCT taxonomy FROM {$this->lookup_table_name} WHERE product_or_parent_id = %d",
+				$product_or_parent_id
+			)
+		);
+	}
+
+	/**
 	 * Check if the last lookup data creation operation failed.
 	 *
 	 * @return bool True if the last lookup data creation operation failed.

@@ -31,6 +31,13 @@ class Filterer implements RegisterHooksInterface {
 	private $lookup_table_name;
 
 	/**
+	 * Invalidations already performed in this request, keyed by product ID and the change that triggered them.
+	 *
+	 * @var array<string, true>
+	 */
+	private $performed_invalidations = array();
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
@@ -64,18 +71,12 @@ class Filterer implements RegisterHooksInterface {
 	 * @since 11.2.0
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
 		$was_published = ProductStatus::PUBLISH === $old_status;
 		$is_published  = ProductStatus::PUBLISH === $new_status;
 
-		if ( $was_published === $is_published ) {
-			return;
+		if ( $was_published !== $is_published ) {
+			$this->maybe_invalidate_attribute_count_for_post( $post, "{$old_status}:{$new_status}" );
 		}
-
-		$this->invalidate_attribute_count_for_post( $post );
 	}
 
 	/**
@@ -89,20 +90,23 @@ class Filterer implements RegisterHooksInterface {
 	 * @since 11.2.0
 	 */
 	public function handle_before_delete_post( $post_id, $post ): void {
-		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
-		$this->invalidate_attribute_count_for_post( $post );
+		$this->maybe_invalidate_attribute_count_for_post( $post, 'delete' );
 	}
 
 	/**
-	 * Invalidate layered navigation counts for taxonomies used by a product or variation.
+	 * Invalidate layered navigation counts for the taxonomies a product or variation contributes to.
 	 *
-	 * @param \WP_Post $post Product or variation post object.
+	 * One change to a variable product reaches this method once for the parent and once per variation, which all
+	 * resolve to the same parent. Repeats of the same change are skipped so the parent is only looked up once,
+	 * while a later, different change to the same product still invalidates.
+	 *
+	 * @param mixed  $post  Post object.
+	 * @param string $event The change being handled.
 	 */
-	private function invalidate_attribute_count_for_post( \WP_Post $post ): void {
-		global $wpdb;
+	private function maybe_invalidate_attribute_count_for_post( $post, string $event ): void {
+		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
 
 		$product_or_parent_id = 'product_variation' === $post->post_type ? (int) $post->post_parent : (int) $post->ID;
 
@@ -110,16 +114,15 @@ class Filterer implements RegisterHooksInterface {
 			return;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The lookup table is the source for the taxonomy-specific cache keys to invalidate.
-		$taxonomies = $wpdb->get_col(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup table name comes from the internal data store.
-				"SELECT DISTINCT taxonomy FROM {$this->lookup_table_name} WHERE product_or_parent_id = %d",
-				$product_or_parent_id
-			)
-		);
+		$invalidation_key = $product_or_parent_id . ':' . $event;
 
-		\WC_Cache_Helper::invalidate_attribute_count( $taxonomies );
+		if ( isset( $this->performed_invalidations[ $invalidation_key ] ) ) {
+			return;
+		}
+
+		$this->performed_invalidations[ $invalidation_key ] = true;
+
+		\WC_Cache_Helper::invalidate_attribute_count( $this->data_store->get_taxonomies_for_product( $product_or_parent_id ) );
 	}
 
 	/**
