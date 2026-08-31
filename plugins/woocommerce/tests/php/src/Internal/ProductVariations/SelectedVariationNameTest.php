@@ -69,7 +69,6 @@ class SelectedVariationNameTest extends WC_Unit_Test_Case {
 			$this->assertSame( $stored_name, $variation->get_name(), 'The contextual name must not mutate the variation object.' );
 			$this->assertSame( $stored_name, wc_get_product( $variation->get_id() )->get_name(), 'The contextual name must not change the persisted variation.' );
 		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $option_filter );
 			$variation->delete( true );
 			$product->delete( true );
 		}

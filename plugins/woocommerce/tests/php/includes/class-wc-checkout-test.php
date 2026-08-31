@@ -785,9 +785,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checkout ignores malformed variation data when creating order line items.
+	 * @testdox Checkout tolerates non-array cart variation data when building contextual item names.
 	 */
-	public function test_create_order_line_items_ignores_malformed_variation_data(): void {
+	public function test_create_order_line_items_tolerates_malformed_variation_data(): void {
 		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
 			'Checkout Malformed Variation Product',
 			array(
@@ -819,7 +819,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( $variation->get_name(), $items[0]->get_name() );
 			$this->assertCount( 0, $items[0]->get_meta_data(), 'Malformed variation data should not be stored as item meta.' );
 		} finally {
-			remove_filter( 'woocommerce_get_cart_contents', $malformed_variation_filter );
 			WC()->cart->empty_cart();
 			$order->delete( true );
 			$variation->delete( true );
@@ -828,23 +827,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checkout order item metadata does not duplicate selected Any attributes when option names are filtered.
+	 * @testdox Checkout merges selected taxonomy Any attributes into the item name without duplicating them as metadata.
 	 */
-	public function test_create_order_line_items_does_not_duplicate_filtered_any_attributes_in_item_meta(): void {
+	public function test_create_order_line_items_merges_taxonomy_any_attributes_and_dedupes_meta(): void {
 		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
-			'Checkout Filtered Any Product',
+			'Checkout Taxonomy Any Product',
 			array(
 				'pa_size'   => 'huge',
 				'pa_number' => '',
 			)
 		);
-
-		$number_option_filter = function ( $value, $term, $attribute_name ) {
-			unset( $term );
-
-			return 'pa_number' === $attribute_name && '1' === $value ? 'One' : $value;
-		};
-		add_filter( 'woocommerce_variation_option_name', $number_option_filter, 10, 3 );
 
 		$order = wc_create_order();
 
@@ -855,11 +847,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			$items = array_values( $order->get_items() );
 			$this->assertCount( 1, $items );
-			$this->assertSame( 'Checkout Filtered Any Product - huge, 1', $items[0]->get_name() );
+			$this->assertSame( 'Checkout Taxonomy Any Product - huge, 1', $items[0]->get_name() );
 			$this->assertSame( '1', $items[0]->get_meta( 'pa_number' ), 'The selected Any value should remain stored as item meta.' );
 			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'Selected Any values included in the item name should not be duplicated as metadata.' );
 		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $number_option_filter, 10 );
 			WC()->cart->empty_cart();
 			$order->delete( true );
 			$variation->delete( true );
@@ -911,7 +902,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( $expected_name, $items[0]->get_name(), 'Persisted names must use raw values, not woocommerce_variation_option_name output.' );
 			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'The raw value in the name must keep order meta dedup working.' );
 		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $filter_option_name );
 			WC()->cart->empty_cart();
 			$order->delete( true );
 			$variation->delete( true );

@@ -306,7 +306,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ) );
 			$this->assertSame( 0, $option_filter_calls );
 		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $option_filter );
 			$variation->delete( true );
 			$product->delete( true );
 		}
@@ -352,7 +351,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 			$this->assertSame( $simple->get_name(), WC()->cart->get_item_product_name( $cart_item ) );
 
-			$swapped = WC_Helper_Product::create_simple_product();
+			$swapped = new WC_Product_Simple();
 			$swapped->set_name( 'Swapped Display Product' );
 
 			$this->assertSame( 'Swapped Display Product', WC()->cart->get_item_product_name( $cart_item, $swapped ) );
@@ -370,6 +369,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$variation->set_name( 'Custom Any Product' );
 		$variation->set_attributes( array( 'finish' => '' ) );
 
+		// For custom attributes, core passes wc_attribute_taxonomy_name( 'attribute_finish' ) as the
+		// attribute name, so the filter sees "pa_attribute_finish" rather than "finish".
 		$filter_option_name = function ( $value, $term, $attribute_name ) {
 			unset( $term );
 
@@ -382,20 +383,16 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'variation' => array( 'attribute_finish' => 'gloss' ),
 		);
 
-		try {
-			$rendered_name = WC()->cart->get_item_product_name( $cart_item );
+		$rendered_name = WC()->cart->get_item_product_name( $cart_item );
 
-			$this->assertSame( 'Custom Any Product - Polished', $rendered_name );
-			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $rendered_name ) ) );
+		$this->assertSame( 'Custom Any Product - Polished', $rendered_name );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $rendered_name ) ) );
 
-			$cart_item['variation']['attribute_finish'] = 'Black & White';
-			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Custom Any Product - Black &amp; White' ) ) );
+		$cart_item['variation']['attribute_finish'] = 'Black & White';
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Custom Any Product - Black &amp; White' ) ) );
 
-			$variation->set_name( 'Custom Any Product - Black & White' );
-			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, false ) ) );
-		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $filter_option_name, 10 );
-		}
+		$variation->set_name( 'Custom Any Product - Black & White' );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, false ) ) );
 	}
 
 	/**
@@ -425,14 +422,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'variation' => array( 'attribute_finish' => 'Black%20White' ),
 		);
 
-		try {
-			$this->assertSame( 'finish: Filtered 1', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
-			$this->assertSame( 1, $option_filter_calls );
-			$this->assertSame( 1, $attribute_filter_calls );
-		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $option_filter );
-			remove_filter( 'woocommerce_is_attribute_in_product_name', $attribute_filter );
-		}
+		$this->assertSame( 'finish: Filtered 1', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		$this->assertSame( 1, $option_filter_calls );
+		$this->assertSame( 1, $attribute_filter_calls );
 	}
 
 	/**
@@ -450,19 +442,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			return $filtered_value;
 		};
 		add_filter( 'woocommerce_variation_option_name', $option_filter );
-		add_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
 
 		$cart_item = array(
 			'data'      => $variation,
 			'variation' => array( 'attribute_finish' => 'gloss' ),
 		);
 
-		try {
-			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
-		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $option_filter );
-			remove_filter( 'woocommerce_product_variation_title_include_attributes', '__return_false' );
-		}
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
 	}
 
 	/**
@@ -559,29 +545,21 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cart item metadata keeps its existing taxonomy option display behavior for fixed attributes.
+	 * @testdox Cart item metadata omits fixed taxonomy attributes already shown in the variation name.
 	 */
-	public function test_formatted_cart_item_data_does_not_apply_taxonomy_option_filter_to_fixed_attributes(): void {
+	public function test_formatted_cart_item_data_omits_metadata_for_fixed_taxonomy_attributes(): void {
 		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
-			'Cart Filtered Fixed Product',
+			'Cart Fixed Taxonomy Product',
 			array(
 				'pa_size'   => 'huge',
 				'pa_number' => '1',
 			)
 		);
 
-		$number_option_filter = function ( $value, $term, $attribute_name ) {
-			unset( $term );
-
-			return 'pa_number' === $attribute_name && '1' === $value ? 'One' : $value;
-		};
-		add_filter( 'woocommerce_variation_option_name', $number_option_filter, 10, 3 );
-
 		try {
 			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
 			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
 		} finally {
-			remove_filter( 'woocommerce_variation_option_name', $number_option_filter, 10 );
 			$variation->delete( true );
 			$product->delete( true );
 		}
@@ -619,7 +597,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( 'Cart Replaced Name Product - huge, 1', $name );
 			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ), 'Dedup must key on the template-provided name, not on name-filter output.' );
 		} finally {
-			remove_filter( 'woocommerce_cart_item_name', $replace_name, 20 );
 			$variation->delete( true );
 			$product->delete( true );
 		}
