@@ -137,7 +137,7 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * The Order route had no schema validation, which is how the item_data mismatch went unnoticed.
+	 * The Order route has no other schema validation coverage.
 	 *
 	 * The order item is given metadata on purpose: every other fixture leaves item_data empty, and
 	 * an empty item_data exercises none of the nested schema.
@@ -217,8 +217,8 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields, and the
-	 * endpoint has always sent them. Reshaping the container must not drop them.
+	 * Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields, which
+	 * the endpoint sends. Reshaping the container must not drop them.
 	 *
 	 * @testdox Order item_data keeps fields added by extensions.
 	 */
@@ -251,9 +251,7 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * A misbehaving callback should cost the endpoint its metadata, not its response. Before the
-	 * container was reshaped this returned whatever the callback produced; now it degrades to no
-	 * metadata rather than failing the request.
+	 * A misbehaving callback should cost the endpoint its metadata, not its response.
 	 *
 	 * @testdox Order endpoint survives a callback that returns a non-array.
 	 */

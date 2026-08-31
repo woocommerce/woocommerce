@@ -33,9 +33,8 @@ class OrderItemSchema extends ItemSchema {
 	/**
 	 * Item schema properties.
 	 *
-	 * Order items expose persisted order item metadata, which is a different source from the cart's
-	 * `item_data` and carries a real meta row ID plus a separate display key. Redeclare `item_data`
-	 * here so the published schema describes what this endpoint sends.
+	 * Order item metadata carries a meta row ID and a display key, unlike the cart's `item_data`,
+	 * so the inherited schema does not describe it.
 	 *
 	 * @return array
 	 *
@@ -92,8 +91,8 @@ class OrderItemSchema extends ItemSchema {
 	/**
 	 * Get order item metadata as a list.
 	 *
-	 * `get_all_formatted_meta_data()` keys its return by meta row ID. The Store API sends a list, so
-	 * the ID moves into an `id` property rather than being lost.
+	 * `get_all_formatted_meta_data()` keys by meta row ID. The Store API sends a list, so the ID
+	 * moves into an `id` property rather than being lost.
 	 *
 	 * @param \WC_Order_Item $order_item Order item instance.
 	 * @return array
@@ -103,20 +102,20 @@ class OrderItemSchema extends ItemSchema {
 		$item_data           = [];
 
 		// `woocommerce_order_item_get_formatted_meta_data` callbacks can return anything, and a bad
-		// one must not take the whole endpoint down. Fall back to no metadata instead.
+		// one must not take the endpoint down.
 		if ( ! is_array( $formatted_meta_data ) ) {
 			return $item_data;
 		}
 
 		foreach ( $formatted_meta_data as $meta_id => $meta ) {
-			// A callback can key an entry by something other than a meta row ID. Skip those rather
-			// than publish an `id` that is not the integer the schema promises.
+			// A callback can key an entry by something other than a meta row ID, which would
+			// publish an `id` that is not the integer the schema promises.
 			if ( ! is_int( $meta_id ) || ( ! is_object( $meta ) && ! is_array( $meta ) ) ) {
 				continue;
 			}
 
-			// Keep the fields callbacks added, which the endpoint has always passed through, but let
-			// the row ID win so `id` always identifies the meta row.
+			// Union keeps the left operand on a key collision, so a callback's own `id` cannot
+			// shadow the row ID.
 			$item_data[] = [ 'id' => $meta_id ] + (array) $meta;
 		}
 
