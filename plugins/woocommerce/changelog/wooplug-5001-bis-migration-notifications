@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Adds the subscriber section of the Back In Stock Notifications migration: the legacy value mapping for statuses, dates, cancellation sources and verification tokens, and the migrator that walks the legacy table by keyset, adopts rows Core already holds, and reports the sign-ups it cannot carry over. Reachable only from the WP-CLI runner until the Tools entry lands.

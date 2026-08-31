@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\ProductMetaMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
@@ -39,6 +40,11 @@ class MigrationRun {
 	private Reporter $reporter;
 
 	/**
+	 * The notifications migrator, built on first use.
+	 *
+	 * @var NotificationsMigrator|null
+	 */
+	private ?NotificationsMigrator $notifications = null;
 
 	/**
 	 * The settings migrator, built on first use.
@@ -73,6 +79,15 @@ class MigrationRun {
 	}
 
 	/**
+	 * The notifications migrator this run uses.
+	 *
+	 * Exposed separately because it is the one migrator a caller reads back from: the known
+	 * losses a run reports are counters it accumulated while walking its rows.
+	 *
+	 * @return NotificationsMigrator
+	 */
+	public function get_notifications_migrator(): NotificationsMigrator {
+		return $this->notifications ??= new NotificationsMigrator( $this->reporter );
 	}
 
 	/**
@@ -110,9 +125,11 @@ class MigrationRun {
 	 */
 	public function build_migrators( bool $dry_run = false ): array {
 		return array(
+			// Memoized: it counts this run's known losses, so every caller needs the same one.
+			'notifications' => $this->get_notifications_migrator(),
 			// Not memoized: it holds the shared Reporter and a mode flag fixed for the run, so
 			// two instances behave identically and neither holds anything the other would miss.
-			'product-meta' => new ProductMetaMigrator( $this->reporter, $dry_run ),
+			'product-meta'  => new ProductMetaMigrator( $this->reporter, $dry_run ),
 		);
 	}
 
