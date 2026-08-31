@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Harden order line meta value handling in the REST API.
