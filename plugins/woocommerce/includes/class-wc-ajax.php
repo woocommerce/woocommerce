@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -1167,10 +1168,10 @@ class WC_AJAX {
 
 		try {
 			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
-			wp_send_json_success( $response );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1187,13 +1188,17 @@ class WC_AJAX {
 		try {
 			$order = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
+			// Unsaved edits from the items panel ride along with the add request;
+			// validate and save them first so they are neither lost nor able to
+			// bypass the quantity minimum.
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1214,14 +1219,23 @@ class WC_AJAX {
 				}
 				if ( ProductType::VARIABLE === $product->get_type() ) {
 					/* translators: %s product name */
-					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+					$message = sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
+
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( (float) $qty, $product );
+
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
 				if ( $validation_error->get_error_code() ) {
 					/* translators: %s: error message */
-					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
+					$message = sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() );
+
+					// The message is shown in a JS alert, not rendered as HTML.
+					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
 				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
@@ -1234,7 +1248,7 @@ class WC_AJAX {
 			}
 
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
@@ -1512,7 +1526,7 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
@@ -1537,6 +1551,7 @@ class WC_AJAX {
 			if ( ! empty( $items ) ) {
 				$save_items = array();
 				parse_str( $items, $save_items );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
@@ -1556,10 +1571,10 @@ class WC_AJAX {
 
 						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 							/* translators: %1$s: item name %2$s: stock change */
-							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), 0, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 						} else {
 							/* translators: %s item name. */
-							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 						}
 					}
 
@@ -1676,6 +1691,16 @@ class WC_AJAX {
 			// Parse the jQuery serialized items.
 			$items = array();
 			parse_str( wp_unslash( $_POST['items'] ), $items ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$order = wc_get_order( $order_id );
+
+			try {
+				if ( $order instanceof WC_Order ) {
+					wc_get_container()->get( ItemQuantityLimits::class )->validate_posted_item_quantities( $order, $items );
+				}
+			} catch ( Exception $e ) {
+				wp_send_json_error( array( 'error' => $e->getMessage() ) );
+			}
 
 			// Save order items.
 			wc_save_order_items( $order_id, $items );
@@ -1896,7 +1921,7 @@ class WC_AJAX {
 				}
 
 				if ( ! empty( $stock_parts ) ) {
-					$formatted_name .= ' (' . implode( ' &ndash; ', $stock_parts ) . ')';
+					$formatted_name .= ' (' . implode( ' – ', $stock_parts ) . ')';
 				}
 
 				$product_status = $product_object->get_status();
@@ -1907,7 +1932,7 @@ class WC_AJAX {
 				}
 			}//end if
 
-			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
+			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
@@ -1952,7 +1977,7 @@ class WC_AJAX {
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $product_object->get_formatted_name() ) );
+			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $product_object->get_formatted_name() ) );
 		}
 
 		wp_send_json( $products );

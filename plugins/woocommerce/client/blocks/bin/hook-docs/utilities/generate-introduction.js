@@ -14,8 +14,9 @@ const getHookFunction = ( hookType ) => {
 const generateIntroduction = ( hook ) => {
 	const hookName = hook.name;
 	const hookType = hook.type;
+	const hookDocs = hook.doc || {};
 	const hookFunction = getHookFunction( hookType );
-	const tags = hook.doc.tags || [];
+	const tags = hookDocs.tags || [];
 
 	const deprecated =
 		tags.filter( ( { name: tagName } ) => tagName === 'deprecated' )[ 0 ] ||
@@ -40,7 +41,7 @@ const generateIntroduction = ( hook ) => {
 		: '';
 
 	return [
-		{ p: hook.doc.description },
+		{ p: hookDocs.description },
 		{
 			code: {
 				language: 'php',
