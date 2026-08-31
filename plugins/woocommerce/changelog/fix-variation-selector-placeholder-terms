@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Variation Selector block from querying the Store API for its editor placeholder attributes, which could apply unrelated store terms to the preview.
