@@ -15,6 +15,7 @@ export type SearchType =
 	| 'emails'
 	| 'orders'
 	| 'products'
+	| 'registeredCustomers'
 	| 'taxes'
 	| 'usernames'
 	| 'variableProducts'

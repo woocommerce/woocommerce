@@ -11,6 +11,7 @@ import { createElement } from '@wordpress/element';
  */
 import customerNames from '../customer-names';
 import customers from '../customers';
+import registeredCustomers from '../registered-customers';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
@@ -55,6 +56,14 @@ describe( 'customers autocompleter', () => {
 		expect(
 			getQueryArg( mockedApiFetch.mock.calls[ 0 ][ 0 ].path, 'searchby' )
 		).toBe( 'name' );
+	} );
+
+	it( 'excludes guests from the registered-only completer', () => {
+		registeredCustomers.options( 'zoe' );
+		const path = mockedApiFetch.mock.calls[ 0 ][ 0 ].path;
+
+		expect( getQueryArg( path, 'searchby' ) ).toBe( 'all' );
+		expect( getQueryArg( path, 'user_type' ) ).toBe( 'registered' );
 	} );
 
 	it( 'matches customers on their name, username and email', () => {

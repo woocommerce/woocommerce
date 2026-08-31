@@ -21,6 +21,7 @@ import {
 	orders,
 	product,
 	productCategory,
+	registeredCustomers,
 	taxes,
 	usernames,
 	variableProduct,
@@ -78,6 +79,8 @@ export class Search extends Component< SearchProps, SearchState > {
 				return orders;
 			case 'products':
 				return product;
+			case 'registeredCustomers':
+				return registeredCustomers;
 			case 'taxes':
 				return taxes;
 			case 'usernames':

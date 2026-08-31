@@ -138,7 +138,10 @@ export const advancedFilters = applyFilters(
 				],
 				input: {
 					component: 'Search',
-					type: 'customers',
+					// The report matches customers to downloads through their
+					// user id, which guests don't have, so only registered
+					// customers can be offered.
+					type: 'registeredCustomers',
 					getLabels: getCustomerLabels,
 				},
 			},

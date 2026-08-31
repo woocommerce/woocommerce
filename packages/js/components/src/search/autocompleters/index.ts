@@ -11,6 +11,7 @@ export { default as downloadIps } from './download-ips';
 export { default as emails } from './emails';
 export { default as orders } from './orders';
 export { default as product } from './product';
+export { default as registeredCustomers } from './registered-customers';
 export { default as taxes } from './taxes';
 export { default as usernames } from './usernames';
 export { default as variableProduct } from './variable-product';
