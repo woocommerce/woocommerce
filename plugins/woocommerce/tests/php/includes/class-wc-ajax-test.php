@@ -1706,6 +1706,154 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox add_order_item rejects a negative quantity with a JSON error and adds nothing to the order.
+	 */
+	public function test_add_order_item_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '-2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count, $order->get_items() );
+	}
+
+	/**
+	 * @testdox add_order_item still accepts a positive quantity.
+	 */
+	public function test_add_order_item_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count + 1, $order->get_items() );
+	}
+
+	/**
+	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
+	 */
+	public function test_save_order_items_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox save_order_items accepts a valid positive quantity change.
+	 */
+	public function test_save_order_items_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order   = \WC_Helper_Order::create_order();
+		$items   = array_values( $order->get_items() );
+		$item    = $items[0];
+		$item_id = $item->get_id();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '3' ),
+				'line_total'     => array( $item_id => '30' ),
+				'line_subtotal'  => array( $item_id => '30' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertTrue( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( 3, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox remove_order_item rejects a negative quantity passed through the pre-delete save and deletes nothing.
+	 */
+	public function test_remove_order_item_rejects_negative_quantity_in_passthrough() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id']       = $order->get_id();
+		$_POST['security']       = wp_create_nonce( 'order-item' );
+		$_POST['order_item_ids'] = array( $item_id );
+		$_POST['items']          = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_remove_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

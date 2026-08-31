@@ -217,14 +217,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_posted_data' skips the required check for fields hidden via the country locale.
+	 * @testdox 'validate_posted_data' skips the required check only for fields whose locale hidden flag is exactly true.
 	 *
-	 * @testWith [true]
-	 *           [false]
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           ["yes", true]
+	 *           [1, true]
 	 *
-	 * @param bool $hidden Whether the locale marks the postcode field as hidden.
+	 * @param mixed $hidden                Value of the locale's hidden flag for the postcode field.
+	 * @param bool  $expect_required_error Whether a required-field error is expected.
 	 */
-	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden ) {
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden, $expect_required_error ) {
 		$locale_filter = function ( $locale ) use ( $hidden ) {
 			$locale['ES']['postcode']['hidden'] = $hidden;
 			return $locale;
@@ -243,10 +246,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->sut->validate_posted_data( $data, $errors );
 
 		$required_error = $errors->get_error_message( 'billing_postcode_required' );
-		if ( $hidden ) {
-			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
+		if ( $expect_required_error ) {
+			$this->assertNotEmpty( $required_error, 'Fields not hidden with exactly true should still trigger a required-field error.' );
 		} else {
-			$this->assertNotEmpty( $required_error, 'Visible required fields should still trigger a required-field error.' );
+			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
 		}
 	}
 
@@ -687,6 +690,42 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'VAT', $tax_item->get_label() );
 		$this->assertFalse( $tax_item->get_compound() );
 		$this->assertSame( 19.0, $tax_item->get_rate_percent() );
+	}
+
+	/**
+	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
+	 *
+	 * @testWith [true, "taxable", ""]
+	 *           [false, "none", ""]
+	 *
+	 * @param bool   $taxable Whether the cart fee is taxable.
+	 * @param string $expected_tax_status The expected tax status for the created fee order item.
+	 * @param string $expected_tax_class The expected tax class for the created fee order item.
+	 */
+	public function test_create_order_fee_lines_sets_correct_tax_status( $taxable, $expected_tax_status, $expected_tax_class ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$add_fee = static function ( $cart ) use ( $taxable ) {
+			$cart->add_fee( 'Test fee', 10, $taxable );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			WC()->cart->calculate_totals();
+			$order = wc_get_order( $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) ) );
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$fee_items = $order->get_fees();
+
+		$this->assertCount( 1, $fee_items );
+
+		/** @var WC_Order_Item_Fee $fee_item */
+		$fee_item = array_values( $fee_items )[0];
+		$this->assertSame( $expected_tax_status, $fee_item->get_tax_status() );
+		$this->assertSame( $expected_tax_class, $fee_item->get_tax_class() );
 	}
 
 	/**

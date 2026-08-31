@@ -1777,8 +1777,21 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 		);
 
 		if ( ! wc_get_loop_prop( 'is_shortcode' ) ) {
-			$args['format'] = '';
-			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+			global $wp_rewrite;
+
+			$args['base'] = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+
+			if ( $wp_rewrite->using_permalinks() ) {
+				$args['format'] = user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' );
+
+				if ( ! $wp_rewrite->use_trailing_slashes ) {
+					$args['format'] = '/' . ltrim( $args['format'], '/' );
+				}
+			} else {
+				$args['format'] = false !== strpos( $args['base'], '?paged=%#%' ) ? '?paged=%#%' : '&paged=%#%';
+			}
+
+			$args['base'] = str_replace( $args['format'], '%_%', $args['base'] );
 		}
 
 		wc_get_template( 'loop/pagination.php', $args );
