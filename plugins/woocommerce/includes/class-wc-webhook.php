@@ -210,16 +210,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
-		// Only deliver deleted/restored event for coupons, orders, and products.
-		if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
-			return false;
-		}
+		$post_type_to_resource = array(
+			'product'     => 'product',
+			'shop_coupon' => 'coupon',
+			'shop_order'  => 'order',
+		);
+		$post_type             = get_post_type( absint( $arg ) );
 
-		// Check if is delivering for the correct resource.
-		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
-			return false;
-		}
-		return true;
+		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
 	}
 
 	/**

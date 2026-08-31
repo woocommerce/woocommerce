@@ -9,6 +9,80 @@
 class WC_Webhook_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Check that post-action validation uses the affected post ID.
+	 *
+	 * @dataProvider post_action_validation_provider
+	 *
+	 * @param string|null $post_type       Post type to create, or null for ID 0.
+	 * @param string      $topic           Webhook topic.
+	 * @param string|null $global_post_type Existing global post type, or null to unset it.
+	 * @param bool        $expected        Expected validation result.
+	 */
+	public function test_is_valid_post_action_uses_post_id( $post_type, $topic, $global_post_type, $expected ): void {
+		$had_global_post_type = array_key_exists( 'post_type', $GLOBALS );
+		$original_post_type   = $GLOBALS['post_type'] ?? null;
+		if ( null === $global_post_type ) {
+			unset( $GLOBALS['post_type'] );
+		} else {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test isolates arbitrary global request state.
+			$GLOBALS['post_type'] = $global_post_type;
+		}
+
+		try {
+			$post_id = null === $post_type ? 0 : $this->factory->post->create(
+				array(
+					'post_type'   => $post_type,
+					'post_status' => 'publish',
+				)
+			);
+			$webhook = new WC_Webhook();
+			$webhook->set_topic( $topic );
+			$this->assertSame( $expected, $this->call_is_valid_post_action( $webhook, $post_id ) );
+		} finally {
+			if ( $had_global_post_type ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global request state changed for this test.
+				$GLOBALS['post_type'] = $original_post_type;
+			} else {
+				unset( $GLOBALS['post_type'] );
+			}
+		}
+	}
+
+	/**
+	 * Call the private post-action validator.
+	 *
+	 * @param WC_Webhook $webhook Webhook to validate.
+	 * @param mixed      $arg     Hook argument.
+	 * @return bool Validation result.
+	 */
+	private function call_is_valid_post_action( WC_Webhook $webhook, $arg ): bool {
+		$call_is_valid_function = function ( $arg ) {
+			return $this->is_valid_post_action( $arg );
+		};
+
+		return $call_is_valid_function->call( $webhook, $arg );
+	}
+
+	/**
+	 * Data provider for test_is_valid_post_action_uses_post_id().
+	 *
+	 * @return array<string, array{string|null, string, string|null, bool}> Test cases.
+	 */
+	public function post_action_validation_provider() {
+		return array(
+			'matching product without global'         => array( 'product', 'product.deleted', null, true ),
+			'matching coupon without global'          => array( 'shop_coupon', 'coupon.deleted', null, true ),
+			'matching order without global'           => array( 'shop_order', 'order.deleted', null, true ),
+			'product resource with coupon ID'         => array( 'shop_coupon', 'product.deleted', null, false ),
+			'coupon resource with product ID'         => array( 'product', 'coupon.deleted', null, false ),
+			'product resource with unrelated post ID' => array( 'post', 'product.deleted', null, false ),
+			'product resource with missing ID'        => array( null, 'product.deleted', null, false ),
+			'matching product with stale global'      => array( 'product', 'product.deleted', 'page', true ),
+			'product resource with stale global'      => array( 'shop_coupon', 'product.deleted', 'product', false ),
+		);
+	}
+
+	/**
 	 * @testDox Check if valid resource is true when both arg and topic are valid.
 	 */
 	public function test_is_valid_resource() {
