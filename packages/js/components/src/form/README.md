@@ -80,6 +80,7 @@ To see the properties available within `useFormContext()`, check out the [`FormC
 
 -   `setValue( name, value )` reports exactly one entry: the top-level key it wrote. For a flat name that is the name you passed. Sibling fields are never reported, even when the form holds other values.
 -   A nested write, in dot or bracket notation, is reported under its top-level key with the updated subtree. With `dimensions: { width: 1, height: 2 }` in the form, `setValue( 'dimensions.width', 5 )` reports `{ name: 'dimensions', value: { width: 5, height: 2 } }`. Paths resolve the way lodash `set` resolves them, so a form that holds a literal key such as `'a.b'` has that key written and reported as is.
+-   `setValue( name, value )` is a no-op when the path steps through `__proto__`, `constructor` or `prototype`. lodash refuses to write those keys, so the state does not change and nothing is reported. A literal key that merely contains one of them, such as `'a.constructor'`, is written normally, since lodash writes an existing literal key in place rather than as a path.
 -   `setValues( patch )` shallow-merges `patch` into the form state and reports the patch's keys in JavaScript key order.
 -   `resetForm()` replaces the state silently and reports nothing.
 -   Every call is a distinct logical change. Repeated writes to one field, and writes that set a field to the value it already holds, are each reported in call order. Values are never compared for equality and changes are never deduplicated.

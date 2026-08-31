@@ -42,6 +42,9 @@ function isChangeEvent< T >(
 	return ( value as ChangeEvent< HTMLInputElement > ).target !== undefined;
 }
 
+// Path segments lodash refuses to write through.
+const UNWRITABLE_KEYS = [ '__proto__', 'constructor', 'prototype' ];
+
 /**
  * A form component to handle form state and provide input helper props.
  */
@@ -173,6 +176,26 @@ function FormComponent< Values extends Record< string, any > = any >(
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: keyof Values, value: any ) => {
+			// lodash writes an existing literal key such as 'a.b' in place rather
+			// than as a path, so only split a name the form does not already hold.
+			const segments = Object.prototype.hasOwnProperty.call(
+				pendingValuesRef.current,
+				name
+			)
+				? [ String( name ) ]
+				: _toPath( name );
+
+			// lodash drops a write whose path steps through one of these keys.
+			// Drop it here too: otherwise the entry picked below reads an
+			// inherited value and setValues adds it to the form as an own key.
+			if (
+				segments.some( ( segment ) =>
+					UNWRITABLE_KEYS.includes( segment )
+				)
+			) {
+				return;
+			}
+
 			const newValues = _setWith(
 				{ ...pendingValuesRef.current },
 				name,
@@ -180,11 +203,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 				_clone
 			);
 			// Hand setValues only the entry this write touched so it reports one
-			// change. lodash writes an existing literal key such as 'a.b' in place
-			// rather than as a path, so mirror that when picking the entry.
-			const key = Object.prototype.hasOwnProperty.call( newValues, name )
-				? name
-				: _toPath( name )[ 0 ];
+			// change: a literal key is its own only segment, and a path reports
+			// under its top-level key.
+			const key = segments[ 0 ];
 			setValues( { [ key ]: newValues[ key ] } as Values );
 		},
 		[ setValues ]

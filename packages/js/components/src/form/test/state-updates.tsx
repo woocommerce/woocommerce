@@ -477,4 +477,55 @@ describe( 'Form state updates', () => {
 			[ [ { name: 'enabled', value: false } ], disabledValues, true ],
 		] );
 	} );
+
+	it( 'writes a literal key holding a segment lodash refuses in a path', () => {
+		const { onChange, onChanges } = renderForm(
+			{ 'a.constructor': 1, other: 2 },
+			( { setValue } ) => (
+				<button onClick={ () => setValue( 'a.constructor', 2 ) }>
+					Update literal key
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Update literal key' } )
+		);
+
+		const nextValues = { 'a.constructor': 2, other: 2 };
+		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+		expect( onChange.mock.calls ).toEqual( [
+			[ { name: 'a.constructor', value: 2 }, nextValues, true ],
+		] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [ { name: 'a.constructor', value: 2 } ], nextValues, true ],
+		] );
+	} );
+
+	it.each( [ 'constructor', 'prototype', '__proto__', 'a.constructor' ] )(
+		'drops a %s write that lodash refuses to make',
+		( name ) => {
+			const initialValues: Record< string, unknown > = {
+				a: { b: 1 },
+				other: 2,
+			};
+			const { validate, onChange, onChanges } = renderForm(
+				initialValues,
+				( { setValue } ) => (
+					<button onClick={ () => setValue( name, 'Updated' ) }>
+						Write refused key
+					</button>
+				)
+			);
+
+			userEvent.click(
+				screen.getByRole( 'button', { name: 'Write refused key' } )
+			);
+
+			expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
+			expect( validate ).not.toHaveBeenCalled();
+			expect( onChange ).not.toHaveBeenCalled();
+			expect( onChanges ).not.toHaveBeenCalled();
+		}
+	);
 } );
