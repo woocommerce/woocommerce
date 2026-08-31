@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ProductVariations;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use WC_Data_Store;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,7 +42,19 @@ class SelectedVariationName {
 		$product_name       = $product->get_name();
 		$product_attributes = (array) $product->get_attributes();
 
-		if ( ! in_array( '', $product_attributes, true ) || ! $this->should_include_selected_variation_attributes_in_name( $product, $product_attributes ) ) {
+		if ( ! in_array( '', $product_attributes, true ) ) {
+			return $product_name;
+		}
+
+		$data_store = $product->get_data_store();
+
+		// Stores without the shared title policy keep the stored variation name.
+		if ( ! $data_store instanceof WC_Data_Store || ! $data_store->has_callable( 'should_include_attributes_in_title' ) ) {
+			return $product_name;
+		}
+
+		// @phpstan-ignore method.notFound (the call is proxied by WC_Data_Store::__call() and guarded by has_callable() above)
+		if ( ! $data_store->should_include_attributes_in_title( $product ) ) {
 			return $product_name;
 		}
 
@@ -122,38 +135,5 @@ class SelectedVariationName {
 		}
 
 		return $product_name . $separator . $missing_values;
-	}
-
-	/**
-	 * Checks whether selected variation attributes should be included in the product name.
-	 *
-	 * Mirrors the title policy in WC_Product_Variation_Data_Store_CPT::generate_product_title()
-	 * (including its two filters) so contextual names follow the same rules as stored
-	 * variation titles. Keep the two implementations in sync.
-	 *
-	 * @param WC_Product           $product    Product object.
-	 * @param array<string, mixed> $attributes Product attributes.
-	 * @return bool
-	 */
-	private function should_include_selected_variation_attributes_in_name( WC_Product $product, array $attributes ): bool {
-		$should_include_attributes = count( $attributes ) < 3;
-
-		if ( $should_include_attributes && 1 < count( $attributes ) ) {
-			foreach ( array_keys( $attributes ) as $name ) {
-				if ( false !== strpos( (string) $name, '-' ) ) {
-					$should_include_attributes = false;
-					break;
-				}
-			}
-		}
-
-		/**
-		 * Filters whether variation product titles should include attributes.
-		 *
-		 * @since 3.0.0
-		 * @param bool       $should_include_attributes Whether attributes should be included.
-		 * @param WC_Product $product Variation product object.
-		 */
-		return (bool) apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
 	}
 }

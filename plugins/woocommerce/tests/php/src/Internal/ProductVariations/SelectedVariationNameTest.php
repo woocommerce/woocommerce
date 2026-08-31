@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductVariations;
 
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use WC_Data_Store;
 use WC_Helper_Product;
 use WC_Product_Variation;
 use WC_Unit_Test_Case;
@@ -72,6 +73,21 @@ class SelectedVariationNameTest extends WC_Unit_Test_Case {
 			$variation->delete( true );
 			$product->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Data stores without the shared title policy keep the stored variation name.
+	 */
+	public function test_get_product_name_keeps_stored_name_without_data_store_title_policy(): void {
+		$data_store = $this->getMockBuilder( WC_Data_Store::class )->disableOriginalConstructor()->onlyMethods( array( 'has_callable' ) )->getMock();
+		$data_store->method( 'has_callable' )->with( 'should_include_attributes_in_title' )->willReturn( false );
+
+		$variation = $this->getMockBuilder( WC_Product_Variation::class )->onlyMethods( array( 'get_data_store' ) )->getMock();
+		$variation->method( 'get_data_store' )->willReturn( $data_store );
+		$variation->set_name( 'Legacy Store Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		$this->assertSame( 'Legacy Store Product', $this->sut->get_product_name( $variation, array( 'attribute_finish' => 'gloss' ) ) );
 	}
 
 	/**
