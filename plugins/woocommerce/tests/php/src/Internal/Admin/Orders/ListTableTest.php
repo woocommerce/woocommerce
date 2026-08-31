@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -491,5 +492,141 @@ class ListTableTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'date_created', $query_args, 'An invalid date should not produce a date filter' );
 		$this->assertCount( 2, $items, 'An invalid date filter should be ignored and all orders shown' );
+	}
+
+	/**
+	 * Seeds one order in each of the given statuses, from a clean slate.
+	 *
+	 * `clear_hpos_orders()` issues raw DELETEs and does not invalidate the order
+	 * count cache that `get_views()` reads through `OrderUtil::get_count_for_type()`,
+	 * so the cache has to be flushed alongside it or stale counts leak in.
+	 *
+	 * @param string[] $statuses Unprefixed order statuses.
+	 */
+	private function seed_one_order_per_status( array $statuses ): void {
+		self::clear_hpos_orders();
+		( new OrderCountCache() )->flush();
+
+		foreach ( $statuses as $status ) {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( $status );
+			$order->save();
+		}
+	}
+
+	/**
+	 * Asserts that a rendered view link carries the given order count.
+	 *
+	 * Strips the markup rather than matching it, so the assertion survives a
+	 * change to the tags `get_view_link()` emits, and compares against
+	 * `number_format_i18n()` so it still holds in locales that group thousands.
+	 *
+	 * @param int    $expected Expected order count.
+	 * @param string $link     Rendered view link.
+	 * @param string $message  Optional failure message.
+	 */
+	private function assert_view_link_count( int $expected, string $link, string $message = '' ): void {
+		$this->assertStringEndsWith(
+			'(' . number_format_i18n( $expected ) . ')',
+			trim( wp_strip_all_tags( $link ) ),
+			$message
+		);
+	}
+
+	/**
+	 * @testdox get_views() renders a view link for every order status that has orders, carrying that status and its count.
+	 */
+	public function test_get_views_renders_a_link_for_every_status_with_orders(): void {
+		$statuses = array(
+			OrderStatus::PENDING,
+			OrderStatus::PROCESSING,
+			OrderStatus::ON_HOLD,
+			OrderStatus::COMPLETED,
+			OrderStatus::CANCELLED,
+			OrderStatus::REFUNDED,
+			OrderStatus::FAILED,
+		);
+
+		$this->seed_one_order_per_status( $statuses );
+
+		$views = $this->sut->get_views();
+
+		foreach ( $statuses as $status ) {
+			$slug = 'wc-' . $status;
+
+			$this->assertArrayHasKey( $slug, $views, "No view link for the $status status." );
+			$this->assertStringContainsString( "status=$slug", $views[ $slug ] );
+			$this->assert_view_link_count( 1, $views[ $slug ], "Wrong count on the $status view link." );
+		}
+
+		// Every WooCommerce status sets show_in_admin_all_list, so "All" totals them.
+		$this->assertArrayHasKey( 'all', $views );
+		$this->assert_view_link_count( count( $statuses ), $views['all'] );
+	}
+
+	/**
+	 * @testdox get_views() omits statuses that have no orders, so an empty status shows no link.
+	 */
+	public function test_get_views_omits_statuses_without_orders(): void {
+		$this->seed_one_order_per_status( array( OrderStatus::PROCESSING ) );
+
+		$views = $this->sut->get_views();
+
+		$this->assertArrayHasKey( 'wc-' . OrderStatus::PROCESSING, $views );
+		$this->assertArrayNotHasKey( 'wc-' . OrderStatus::REFUNDED, $views );
+		$this->assertArrayNotHasKey( 'wc-' . OrderStatus::FAILED, $views );
+	}
+
+	/**
+	 * @testdox Filtering the list table by a status returns only the orders in that status.
+	 */
+	public function test_prepare_items_filters_by_status(): void {
+		$statuses = array(
+			OrderStatus::PENDING,
+			OrderStatus::PROCESSING,
+			OrderStatus::ON_HOLD,
+			OrderStatus::COMPLETED,
+			OrderStatus::CANCELLED,
+			OrderStatus::REFUNDED,
+			OrderStatus::FAILED,
+		);
+
+		$this->seed_one_order_per_status( $statuses );
+
+		$get_items = function () {
+			return $this->items;
+		};
+
+		foreach ( $statuses as $status ) {
+			$_REQUEST['status'] = 'wc-' . $status;
+
+			$this->sut->prepare_items();
+			$items = $get_items->call( $this->sut );
+
+			$this->assertCount( 1, $items, "Filtering by $status should return only the order in that status." );
+			$this->assertSame( $status, $items[0]->get_status(), "Filtering by $status returned an order in another status." );
+		}
+
+		unset( $_REQUEST['status'] );
+	}
+
+	/**
+	 * @testdox get_views() marks only the status currently being filtered on as the current view.
+	 */
+	public function test_get_views_marks_only_the_filtered_status_as_current(): void {
+		$this->seed_one_order_per_status(
+			array( OrderStatus::PROCESSING, OrderStatus::COMPLETED )
+		);
+
+		$set_status = function ( string $status ) {
+			$this->request['status'] = $status;
+		};
+		$set_status->call( $this->sut, 'wc-' . OrderStatus::PROCESSING );
+
+		$views = $this->sut->get_views();
+
+		$this->assertStringContainsString( 'class="current"', $views[ 'wc-' . OrderStatus::PROCESSING ] );
+		$this->assertStringNotContainsString( 'class="current"', $views[ 'wc-' . OrderStatus::COMPLETED ] );
+		$this->assertStringNotContainsString( 'class="current"', $views['all'] );
 	}
 }
