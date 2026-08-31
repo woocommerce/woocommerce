@@ -758,6 +758,52 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Product search decodes URL-encoded characters before returning plain text names.
+	 * @dataProvider product_search_name_provider
+	 *
+	 * @param string $search_term          Product search term.
+	 * @param string $product_name         Product name.
+	 * @param string $expected_result_name Expected product name in the response.
+	 */
+	public function test_json_search_products_returns_plain_text_names( string $search_term, string $product_name, string $expected_result_name ): void {
+		$this->_setRole( 'administrator' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$_GET['term']     = $search_term;
+		$_GET['include']  = array( $product->get_id() );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+
+		try {
+			$response = $this->do_ajax( 'woocommerce_json_search_products' );
+		} finally {
+			unset( $_GET['term'], $_GET['include'], $_GET['security'] );
+		}
+
+		$this->assertSame(
+			sprintf( '%s (%s)', $expected_result_name, $product->get_sku() ),
+			$response[ $product->get_id() ],
+			'Product search should return a stripped, plain text product name.'
+		);
+	}
+
+	/**
+	 * Product names used to verify AJAX search response formatting.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_search_name_provider(): array {
+		return array(
+			'plain punctuation'    => array( 'Ben', "Ben & Jerry's", "Ben & Jerry's" ),
+			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee Mug' ),
+			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text inside' ),
+			'HTML tag'             => array( 'Text', 'Text <span>inside</span>', 'Text inside' ),
+		);
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
