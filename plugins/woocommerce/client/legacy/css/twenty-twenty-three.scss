@@ -16,8 +16,7 @@
 .woocommerce-page {
 
 	main {
-		// This is to allow .woocommerce div to have width of 1000px on styles
-		// with full width layout (such as Pitch).
+		// This is to allow .woocommerce div to have width of 1000px on styles with full width layout (such as Pitch).
 		max-width: calc(1000px + var(--wp--style--root--padding-right) + var(--wp--style--root--padding-left));
 		margin-left: auto;
 		margin-right: auto;
@@ -90,8 +89,7 @@
 		display: none;
 	}
 
-	// Make sure breadcrumbs are not overlapping with Sale badge on the
-	// Single product page, etc.
+	// Make sure breadcrumbs are not overlapping with Sale badge on the Single product page, etc.
 	.woocommerce-breadcrumb {
 		margin-bottom: 1rem;
 	}
@@ -149,8 +147,7 @@
 		margin-right: 0.25rem;
 	}
 
-	// The 'order by' dropdown on the Shop page is rather tiny unless the
-	// font size is increased.
+	// The 'order by' dropdown on the Shop page is rather tiny unless the font size is increased.
 	select.orderby {
 		font-size: var(--wp--preset--font-size--medium);
 	}
@@ -214,8 +211,7 @@
 		}
 	}
 
-	// Position page numbers under list of products horizontally in the
-	// centre of the page.
+	// Position page numbers under list of products horizontally in the centre of the page.
 	ul.page-numbers {
 		text-align: center;
 	}
@@ -701,8 +697,7 @@ ul.wc-tabs {
 		}
 	}
 
-	// Style the payment gateway selection input--improve the size of the
-	// click target, etc
+	// Style the payment gateway selection input--improve the size of the click target, etc
 	input[type="radio"][name="payment_method"],
 	input[type="radio"].shipping_method {
 		display: none;
@@ -854,8 +849,7 @@ ul.wc-tabs {
 		}
 	}
 
-	// Hide the dot to the left of list items as we style the checkboxes:
-	// Shipping method and Payment method selection.
+	// Hide the dot to the left of list items as we style the checkboxes: Shipping method and Payment method selection.
 	ul.wc_payment_methods,
 	ul.woocommerce-shipping-methods {
 		margin-top: 0;
@@ -872,8 +866,7 @@ ul.wc-tabs {
 		}
 	}
 
-	// PayPal logo in payment list on classic checkout page, more specific
-	// selector for precedence over general theme styles.
+	// PayPal logo in payment list on classic checkout page, more specific selector for precedence over general theme styles.
 	ul.wc_payment_methods li.payment_method_paypal img {
 		max-height: 24px;
 		vertical-align: middle;
@@ -990,8 +983,7 @@ ul.wc-tabs {
 		margin-bottom: var(--wp--style--block-gap);
 	}
 
-	// Bottom section of the Thank you page---customer details: align, add
-	// border, make it look nice.
+	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
 
 		address {
@@ -1021,8 +1013,7 @@ ul.wc-tabs {
 		}
 	}
 
-	// Better styling for Order line items on the Thank you page: create a
-	// table and align it to the left side.
+	// Better styling for Order line items on the Thank you page: create a table and align it to the left side.
 	.woocommerce-table--order-details {
 		border: 1px solid var(--wp--preset--color--black);
 
@@ -1055,8 +1046,7 @@ ul.wc-tabs {
 
 .woocommerce-account {
 
-	// Make sure the floated content of My Account section doesn't overlap
-	// with the footer.
+	// Make sure the floated content of My Account section doesn't overlap with the footer.
 	.woocommerce {
 		overflow: auto;
 
@@ -1127,8 +1117,7 @@ ul.wc-tabs {
 }
 
 /*
-Notice messages (like 'Added to cart', 'Billing address needs to be filled
-in', etc.
+Notice messages (like 'Added to cart', 'Billing address needs to be filled in', etc.
 */
 .woocommerce-message,
 .woocommerce-error,

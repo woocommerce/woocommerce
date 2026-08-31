@@ -5,8 +5,7 @@
 body:has(.woocommerce-coming-soon-entire-site) {
 	margin: 0;
 	background-color: var(--woocommerce-coming-soon-color);
-	// This is default font family when no font family is selected. Users can
-	// override this in the block settings.
+	// This is default font family when no font family is selected. Users can override this in the block settings.
 	font-family:
 		-apple-system,
 		BlinkMacSystemFont,
