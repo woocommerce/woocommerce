@@ -16,6 +16,7 @@ import type {
 	SettingsUIField,
 	SettingsUISchema,
 	SettingsValues,
+	SettingsVisibilityPredicate,
 } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -302,6 +303,26 @@ describe( 'dataform adapter', () => {
 			expect( field.isVisible?.( { toggle: 'on' } ) ).toBe( true );
 		} );
 
+		it( 'coerces loose predicate results to strict booleans', () => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				fieldVisibility: {
+					// Third-party predicates are not held to the typed
+					// boolean return.
+					test_field: ( ( { values }: { values: SettingsValues } ) =>
+						values.other === 'show' ||
+						undefined ) as SettingsVisibilityPredicate,
+				},
+			} );
+			const field = buildDataFormField(
+				textField,
+				createOptions( [ textField ] )
+			);
+
+			expect( field.isVisible?.( { other: 'show' } ) ).toBe( true );
+			expect( field.isVisible?.( { other: 'hide' } ) ).toBe( false );
+		} );
+
 		it( 'applies a predicate registered after the field is built', () => {
 			const field = buildDataFormField(
 				textField,
@@ -405,6 +426,23 @@ describe( 'dataform adapter', () => {
 
 			const hidden = adapter.getForm( { show: 'no', toggle: 'off' } );
 			expect( hidden.fields ).toEqual( [] );
+		} );
+
+		it( 'drops a group whose only field is hidden by a loose predicate', () => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				fieldVisibility: {
+					test_field: ( () =>
+						undefined ) as unknown as SettingsVisibilityPredicate,
+				},
+			} );
+			const adapter = createDataFormAdapter(
+				createOptions( [ textField ] )
+			);
+
+			// DataForm's layout hides the field, so keeping the group would
+			// leave an empty titled card behind.
+			expect( adapter.getForm( {} ).fields ).toEqual( [] );
 		} );
 
 		it( 'fails open and logs an error when a group predicate throws', () => {

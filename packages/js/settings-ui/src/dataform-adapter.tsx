@@ -79,12 +79,17 @@ const runVisibilityPredicate = (
 	options: DataFormAdapterOptions
 ) => {
 	try {
-		return predicate( {
-			values,
-			initialValues: options.initialValues,
-			context: options.context,
-			schema: options.schema,
-		} );
+		// Coerce with the truthiness DataForm's layout applies, so a loose
+		// predicate result cannot make the form filter and the layout
+		// disagree about a field.
+		return Boolean(
+			predicate( {
+				values,
+				initialValues: options.initialValues,
+				context: options.context,
+				schema: options.schema,
+			} )
+		);
 	} catch ( predicateError ) {
 		error(
 			`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
@@ -214,8 +219,9 @@ export const createDataFormAdapter = (
 		fields.map( ( field ) => [ field.id, field ] )
 	);
 
+	// A field without an isVisible callback is shown, matching DataForm.
 	const isFieldVisible = ( fieldId: string, values: SettingsValues ) =>
-		fieldsById.get( fieldId )?.isVisible?.( values ) !== false;
+		Boolean( fieldsById.get( fieldId )?.isVisible?.( values ) ?? true );
 
 	const isGroupVisible = (
 		group: SettingsUIGroup,
