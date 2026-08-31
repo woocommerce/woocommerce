@@ -69,6 +69,14 @@ class Reporter {
 	public const OUTCOME_PRODUCT_MISSING = 'product_missing';
 
 	/**
+	 * Outcome code for a post skipped because it is a variation: neither side reads a
+	 * variation's own flag, so there is nothing to write, only a row to settle.
+	 *
+	 * @var string
+	 */
+	public const OUTCOME_VARIATION_SKIPPED = 'variation_skipped';
+
+	/**
 	 * Outcome code for a row skipped because its address is longer than Core's column allows.
 	 *
 	 * @var string

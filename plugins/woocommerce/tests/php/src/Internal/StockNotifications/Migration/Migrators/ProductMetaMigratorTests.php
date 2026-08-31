@@ -72,7 +72,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	 * @testdox a product that becomes a candidate below an advanced cursor should still migrate.
 	 */
 	public function test_a_candidate_below_the_cursor_still_migrates(): void {
-		$first  = $this->create_product_with_legacy_flag( 'yes' );
+		$first  = WC_Helper_Product::create_simple_product()->get_id();
 		$second = $this->create_product_with_legacy_flag( 'yes' );
 
 		$this->assertGreaterThan( $first, $second, 'The fixture assumes ascending product ids.' );
@@ -84,10 +84,11 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$this->migrate();
 		$this->assertSame( 0, $migrator->count_remaining(), 'The section should be drained.' );
 
-		// Now a product below that high-water mark becomes a candidate.
-		update_post_meta( $first, Config::get_product_signups_meta_key(), 'yes' );
+		// Now the merchant disables sign-ups on a product below that high-water mark, which
+		// is the legacy extension's own flag and can happen at any point during the run.
+		update_post_meta( $first, self::LEGACY_META_KEY, 'yes' );
 
-		$this->assertSame( 1, $migrator->count_remaining(), 'The re-flagged product is outstanding again.' );
+		$this->assertSame( 1, $migrator->count_remaining(), 'The newly flagged product is outstanding.' );
 
 		$batch = $migrator->get_batch( $second, 10 );
 
@@ -97,6 +98,84 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, $migrator->count_remaining(), 'The section must be able to drain again.' );
 		$this->assertSame( 'no', get_post_meta( $first, Config::get_product_signups_meta_key(), true ) );
+	}
+
+	/**
+	 * Core only ever flips a value that is already there, so the target key exists solely
+	 * because something deliberately wrote it. Treating its presence as "handled" is what
+	 * lets a merchant re-enable sign-ups on a migrated product mid-run without the next
+	 * pass overwriting them.
+	 *
+	 * @testdox a product whose Core flag already exists should be left alone.
+	 */
+	public function test_a_product_with_an_existing_core_flag_is_left_alone(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		update_post_meta( $product_id, Config::get_product_signups_meta_key(), 'yes' );
+
+		$migrator = $this->build_migrator();
+
+		$this->assertSame( 0, $migrator->count_remaining() );
+		$this->assertSame( array(), $migrator->get_batch( 0, 10 ) );
+
+		$this->migrate();
+
+		$this->assertSame(
+			'yes',
+			get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ),
+			'A deliberate Core value must not be overwritten by the migration.'
+		);
+	}
+
+	/**
+	 * Nothing revisits a drained section, so a trashed product left behind now would come
+	 * back from the trash with sign-ups silently re-enabled.
+	 *
+	 * @testdox a trashed product should migrate like any other.
+	 */
+	public function test_a_trashed_product_migrates(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		wp_trash_post( $product_id );
+
+		$this->migrate();
+
+		$this->assertSame( 'no', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
+	}
+
+	/**
+	 * Neither side reads a variation's own flag, so there is nothing to write — but the row
+	 * still has to leave the candidate set, or this cursorless section serves it forever.
+	 *
+	 * @testdox a variation carrying the legacy flag should be settled without being written.
+	 */
+	public function test_a_variation_is_settled_without_being_written(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = current( $variable->get_children() );
+
+		update_post_meta( $variation, self::LEGACY_META_KEY, 'yes' );
+
+		$migrator = $this->build_migrator();
+		$outcomes = $migrator->migrate_batch( $migrator->get_batch( 0, 10 ), wc_get_container()->get( Writer::class ) );
+
+		$this->assertSame( array( Reporter::OUTCOME_VARIATION_SKIPPED => 1 ), $outcomes );
+		$this->assertSame(
+			'',
+			get_post_meta( $variation, Config::get_product_signups_meta_key(), true ),
+			'A variation must not be written to.'
+		);
+		$this->assertSame( array(), $migrator->get_batch( 0, 10 ), 'The row must still be settled.' );
+	}
+
+	/**
+	 * @testdox duplicate legacy meta rows should serve one id, not one per row.
+	 */
+	public function test_duplicate_legacy_rows_serve_one_id(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		add_post_meta( $product_id, self::LEGACY_META_KEY, 'yes' );
+
+		$migrator = $this->build_migrator();
+
+		$this->assertSame( array( $product_id ), $migrator->get_batch( 0, 10 ) );
+		$this->assertSame( 1, $migrator->count_remaining() );
 	}
 
 	/**
