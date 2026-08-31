@@ -402,6 +402,10 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		border-bottom: 1px solid $gray-100;
 	}
 
+	&__load-more {
+		margin-block-start: 16px;
+	}
+
 	.woocommerce-pill {
 		&.is-status-created,
 		&.is-status-updated {
