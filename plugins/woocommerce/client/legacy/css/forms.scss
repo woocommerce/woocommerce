@@ -1,7 +1,8 @@
 .woocommerce {
 
 	/**
-	 * Generic forms styles used in places such as my account and the shortcode based checkout.
+	 * Generic forms styles used in places such as my account and the shortcode
+	 * based checkout.
 	 */
 	form .form-row {
 		padding: 3px;
@@ -89,7 +90,8 @@
 		select {
 			cursor: pointer;
 
-			/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
+			/* We hide the default chevron because it cannot be directly modified.
+			Instead, we add a custom chevron using a background image. */
 			appearance: none;
 			padding-right: 3em;
 			background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=");

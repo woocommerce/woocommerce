@@ -31,9 +31,23 @@
 		# change and belongs in its own PR.
 		"declaration-property-unit-allowed-list": null,
 
-		# The preset applies this to comments only, and AGENTS.md tells us not to
-		# wrap comment prose at a fixed column.
-		"max-line-length": null,
+		# Kept on, with one addition to the preset's ignore list. The preset
+		# applies this to comments only and already exempts URLs. A
+		# stylelint-disable directive cannot be wrapped, and the longest rule
+		# name we suppress makes the directive 80 characters before its "--"
+		# justification even starts, so those lines can never fit. Repeating
+		# the preset's pattern is required: ignorePattern replaces it rather
+		# than extending it.
+		"max-line-length": [
+			80,
+			{
+				"ignore": "non-comments",
+				"ignorePattern": [
+					"/(https?://[0-9,a-z]*.*)|(^description\\:.+)|(^tags\\:.+)/i",
+					"/stylelint-disable/"
+				]
+			}
+		],
 
 		# 30927 hits. Satisfying it means reordering the legacy cascade, which
 		# changes rendering. Not realistically fixable here.

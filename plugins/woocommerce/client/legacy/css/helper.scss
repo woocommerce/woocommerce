@@ -1040,7 +1040,8 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 }
 
-// Classes for toggle state before action is complete (updating plugin or something)
+// Classes for toggle state before action is complete (updating plugin or
+// something)
 .form-toggle.is-toggling {
 
 	+ .form-toggle__label .form-toggle__switch {

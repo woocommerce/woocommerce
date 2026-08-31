@@ -1,6 +1,7 @@
 /**
  * woocommerce.scss
- * Governs the general look and feel of WooCommerce sections of stores using themes that do not
+ * Governs the general look and feel of WooCommerce sections of stores using
+ * themes that do not
  * integrate with WooCommerce specifically.
  */
 
@@ -485,7 +486,9 @@ p.demo_store,
 					display: inline-block;
 					margin-right: 1em;
 
-					/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
+					/* We hide the default chevron because it cannot be directly
+					modified. Instead, we add a custom chevron using a background
+					image. */
 					appearance: none;
 					-webkit-appearance: none;
 					-moz-appearance: none;
@@ -2207,7 +2210,8 @@ p.demo_store,
 				}
 			}
 
-			// PayPal logo in payment methods list on classic checkout page, more specific selector for precedence over general theme styles.
+			// PayPal logo in payment methods list on classic checkout page, more
+			// specific selector for precedence over general theme styles.
 			li.payment_method_paypal {
 
 				img {
@@ -2605,7 +2609,8 @@ body:not(.search-results) .twentysixteen .entry-summary {
 }
 
 /**
- * Hides default button when a gateway with custom "place order" button is selected.
+ * Hides default button when a gateway with custom "place order" button is
+ * selected.
  * This applies to checkout, order-pay, and add-payment-method pages.
  *
  * @since 10.6.0
