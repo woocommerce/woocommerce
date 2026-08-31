@@ -329,6 +329,7 @@ class NotificationsMigrator implements MigratorInterface {
 				$insert_legacy_ids[] = $legacy_id;
 			} catch ( \Throwable $e ) {
 				$this->fail_row( $legacy_id, $writer );
+				$this->reporter->report_row_exception( self::SLUG, $legacy_id, $e );
 				$this->record_outcome( $outcomes, Reporter::OUTCOME_FAILED, $legacy_id );
 			}
 		}

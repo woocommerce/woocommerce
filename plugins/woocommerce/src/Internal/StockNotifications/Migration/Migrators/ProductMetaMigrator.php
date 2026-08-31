@@ -220,6 +220,8 @@ class ProductMetaMigrator implements MigratorInterface {
 				// batch, and the controller would retry it, hit the same product, and
 				// eventually drop the processor — stalling the notifications section too,
 				// since both share one. Settle the row instead and carry on.
+				$this->reporter->report_row_exception( self::SLUG, $product_id, $e );
+
 				$outcome = $this->mark_terminal_failure( $product_id, $writer )
 					? Reporter::OUTCOME_FAILED
 					: Reporter::OUTCOME_UNSETTLED;

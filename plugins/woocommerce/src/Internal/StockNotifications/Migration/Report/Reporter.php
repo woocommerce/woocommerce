@@ -219,6 +219,26 @@ class Reporter {
 	}
 
 	/**
+	 * Log one `error` entry for an exception that failed a single row.
+	 *
+	 * The row itself is settled and counted through record(); this adds the class and
+	 * message, which are otherwise discarded at the only point they exist. Identifiers
+	 * only, never the row, so the log stays free of subscriber data.
+	 *
+	 * @param string     $section Section slug.
+	 * @param int        $id      Legacy row identifier. Never a full row.
+	 * @param \Throwable $error   The exception that failed the row.
+	 * @return void
+	 */
+	public function report_row_exception( string $section, int $id, \Throwable $error ): void {
+		$this->has_errors = true;
+		wc_get_logger()->error(
+			sprintf( 'section=%s id=%d row failed: %s: %s', $section, $id, get_class( $error ), $error->getMessage() ),
+			array( 'source' => self::LOG_SOURCE )
+		);
+	}
+
+	/**
 	 * Log one `error` entry for a section the run has stopped serving.
 	 *
 	 * Distinct from a failed batch: nothing threw, the section simply cannot settle any of
