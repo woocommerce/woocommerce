@@ -4,6 +4,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
@@ -639,6 +641,34 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		sort( $migrated_legacy_ids );
 
 		$this->assertSame( $legacy_ids, $migrated_legacy_ids, 'The live run after a dry run migrates every row.' );
+	}
+
+	/**
+	 * The product-meta section normally drains because each write drops the row out of its
+	 * own candidate query. A dry run makes no writes, so without a cursor to page by, the
+	 * processor is handed the same batch forever and `wp wc bis-migrate run --dry-run` never
+	 * returns on any store with a legacy-disabled product. Built through MigrationRun rather
+	 * than by hand, so the wiring the CLI relies on is what is under test.
+	 *
+	 * @testdox a dry run of the product meta section should terminate and write nothing.
+	 */
+	public function test_a_dry_run_of_the_product_meta_section_terminates(): void {
+		$product_ids = array( $this->create_product(), $this->create_product() );
+
+		foreach ( $product_ids as $product_id ) {
+			update_post_meta( $product_id, '_wc_bis_disabled', 'yes' );
+		}
+
+		$run       = new MigrationRun();
+		$migrators = array( 'product-meta' => $run->build_migrators( true )['product-meta'] );
+
+		$this->processor->configure_run( $migrators, new Writer( true ), 1, $run->get_reporter() );
+
+		$this->assertGreaterThan( 1, $this->run_to_completion( 1 ), 'A dry run pages through the section rather than stopping at one batch.' );
+
+		foreach ( $product_ids as $product_id ) {
+			$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ), 'A dry run must write no product meta.' );
+		}
 	}
 
 	/**

@@ -118,15 +118,18 @@ class MigrationRun {
 	/**
 	 * The batched section migrators, keyed by slug and in the order they must run.
 	 *
+	 * @param bool $dry_run Whether the run discards its writes. The product-meta section needs
+	 *                      to know: it normally leans on its own writes to shrink the candidate
+	 *                      set, and pages by cursor instead when there are none.
 	 * @return array<string, MigratorInterface>
 	 */
-	public function build_migrators(): array {
+	public function build_migrators( bool $dry_run = false ): array {
 		return array(
 			// Memoized: it counts this run's known losses, so every caller needs the same one.
 			'notifications' => $this->get_notifications_migrator(),
-			// Not memoized: its only field is the shared Reporter, so two instances behave
-			// identically and neither holds anything the other would miss.
-			'product-meta'  => new ProductMetaMigrator( $this->reporter ),
+			// Not memoized: it holds the shared Reporter and a mode flag fixed for the run, so
+			// two instances behave identically and neither holds anything the other would miss.
+			'product-meta'  => new ProductMetaMigrator( $this->reporter, $dry_run ),
 		);
 	}
 

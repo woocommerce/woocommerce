@@ -84,12 +84,23 @@ class ProductMetaMigrator implements MigratorInterface {
 	private Reporter $reporter;
 
 	/**
+	 * Whether get_batch() pages through the candidates with a cursor instead of relying on
+	 * the writes themselves to shrink the candidate set.
+	 *
+	 * @var bool
+	 */
+	private bool $paginate;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Reporter $reporter Reporter to record outcomes through.
+	 * @param bool     $paginate Whether get_batch() should page by cursor. True for a dry run,
+	 *                           which writes nothing for the predicate to exclude; see get_batch().
 	 */
-	public function __construct( Reporter $reporter ) {
+	public function __construct( Reporter $reporter, bool $paginate = false ) {
 		$this->reporter = $reporter;
+		$this->paginate = $paginate;
 	}
 
 	/**
@@ -104,10 +115,13 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Count the rows this section still has to migrate.
 	 *
-	 * Exactly the predicate get_batch() serves from, expressed as a COUNT(*). Neither uses
-	 * a cursor, so the two cannot disagree about what is left.
+	 * Exactly the predicate get_batch() serves from, expressed as a COUNT(*), so the two
+	 * cannot disagree about what is left. Counted from the start of the table whatever the
+	 * cursor says, which is what a rehearsal wants: a dry run pages through the candidates
+	 * without settling any of them, and a count that shrank as it paged would report work as
+	 * done that the store has not had.
 	 *
-	 * @param int $cursor Last product id handled. Ignored; this section keeps no cursor.
+	 * @param int $cursor Last product id handled. Ignored; see above.
 	 * @return int
 	 */
 	public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
@@ -122,29 +136,50 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Fetch the next batch of candidate product ids.
 	 *
-	 * Side-effect free: reads only. Deliberately keyset-free, unlike the notifications
+	 * Side-effect free: reads only. A live run is keyset-free, unlike the notifications
 	 * section: the predicate is self-terminating — a post leaves the candidate set the
 	 * moment it carries either key this migrator writes — so re-reading from the start each
-	 * time cannot serve a settled row twice, and the section still drains. A cursor here would strand any product that becomes a candidate below
-	 * it, which is an ordinary thing to happen: a merchant can toggle "disable sign-ups"
-	 * on an existing product while the legacy extension is still running. That row would
-	 * never be served, yet would keep being counted, and the section would never drain.
+	 * time cannot serve a settled row twice, and the section still drains. A cursor there
+	 * would strand any product that becomes a candidate below it, which is an ordinary thing
+	 * to happen: a merchant can toggle "disable sign-ups" on an existing product while the
+	 * legacy extension is still running. That row would never be served, yet would keep being
+	 * counted, and the section would never drain.
 	 *
-	 * @param int $cursor Last product id handled. Ignored; see above.
+	 * A dry run pages by cursor instead, because that self-terminating predicate depends on
+	 * a write it does not make: nothing ever leaves the candidate set, so the same batch
+	 * would come back on every pass and the run would never end. What the cursor strands
+	 * there costs nothing — a rehearsal reports on the store as it was when the run started,
+	 * and a row that becomes a candidate mid-rehearsal is the next run's to migrate anyway.
+	 *
+	 * @param int $cursor Last product id handled. Read only when paging; see above.
 	 * @param int $size   Maximum number of ids to return.
-	 * @return array List of product ids, ascending. Ordered in PHP; see below for why.
+	 * @return array List of product ids, ascending.
 	 */
-	public function get_batch( int $cursor, int $size ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
+	public function get_batch( int $cursor, int $size ): array {
 		global $wpdb;
+
+		if ( $this->paginate ) {
+			// Ordered in SQL, not in PHP: the caller advances the cursor to the highest id in
+			// the batch, so an unordered `LIMIT` would strand every candidate below it.
+			$sql = $this->candidate_sql(
+				'DISTINCT legacy_meta.post_id',
+				'AND legacy_meta.post_id > %d ORDER BY legacy_meta.post_id ASC LIMIT %d',
+				array( $cursor, $size )
+			);
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was prepared by candidate_sql(); table names are fixed internal names, never user input.
+			return array_map( 'intval', $wpdb->get_col( $sql ) );
+		}
 
 		$sql = $this->candidate_sql( 'DISTINCT legacy_meta.post_id', 'LIMIT %d', array( $size ) );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was prepared by candidate_sql(); table names are fixed internal names, never user input.
 		$ids = array_map( 'intval', $wpdb->get_col( $sql ) );
 
-		// Sorted here rather than in SQL: an `ORDER BY post_id` next to the `LIMIT` makes
-		// MySQL drop the `meta_key` index and walk the `post_id` index instead, filtering as
-		// it goes until it has a batch — a full scan of `wp_postmeta` on any real store.
+		// Sorted here rather than in SQL: with no cursor to range-scan from, an `ORDER BY
+		// post_id` next to the `LIMIT` makes MySQL drop the `meta_key` index and walk the
+		// `post_id` index instead, filtering as it goes until it has a batch — a full scan of
+		// `wp_postmeta` on any real store. The paging query above has that range to scan.
 		sort( $ids );
 
 		return $ids;
@@ -161,8 +196,8 @@ class ProductMetaMigrator implements MigratorInterface {
 	 * The `'yes'` test belongs here rather than in PHP. `meta_value` is not indexed, but the
 	 * `meta_key` index is not covering either, so the row is read either way and the test is
 	 * free — while leaving it out would hand back rows holding any other value, which need
-	 * no write and would therefore never settle. This section has no cursor to move past
-	 * them, so they would be re-served every pass until the processor parked the section.
+	 * no write and would therefore never settle. A live run has no cursor to move past them,
+	 * so they would be re-served every pass until the processor parked the section.
 	 *
 	 * @param string $select      Select list. A fixed internal string, never user input.
 	 * @param string $suffix      Extra conditions and clauses. A fixed internal string, never user input.
@@ -268,13 +303,39 @@ class ProductMetaMigrator implements MigratorInterface {
 			self::TARGET_DISABLED_VALUE
 		);
 
-		if ( ! $written ) {
+		if ( ! $this->settled( $product_id, $written, $writer ) ) {
 			return $this->mark_terminal_failure( $product_id, $writer )
 				? Reporter::OUTCOME_FAILED
 				: Reporter::OUTCOME_UNSETTLED;
 		}
 
 		return Reporter::OUTCOME_MIGRATED;
+	}
+
+	/**
+	 * Whether the target meta key is now on the product, so the row leaves the candidate set.
+	 *
+	 * The writer's boolean is not enough on its own: its contract says it means only that the
+	 * write was issued. `write_product_meta()` goes through `$product->save()`, and a
+	 * `woocommerce_update_product` callback can drop the meta after that returns — leaving a
+	 * row this section would report as migrated, keep serving, and never drain.
+	 *
+	 * Existence is the test, not the value, matching what candidate_sql() excludes on. A
+	 * merchant who re-enables sign-ups on the product mid-run has still settled the row.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param bool   $written    What the writer reported.
+	 * @param Writer $writer     Writer the value was persisted through.
+	 * @return bool
+	 */
+	private function settled( int $product_id, bool $written, Writer $writer ): bool {
+		if ( $writer->is_dry_run() ) {
+			// Nothing was written, so there is nothing to read back. Reporting the row as
+			// unmigrated here would mark every candidate as failed in the rehearsal's report.
+			return $written;
+		}
+
+		return '' !== (string) get_post_meta( $product_id, Config::get_product_signups_meta_key(), true );
 	}
 
 	/**

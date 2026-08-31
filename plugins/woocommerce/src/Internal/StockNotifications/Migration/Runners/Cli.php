@@ -415,7 +415,7 @@ class Cli {
 
 			$reporter               = $run->get_reporter();
 			$notifications_migrator = $run->get_notifications_migrator();
-			$migrators              = array_intersect_key( $run->build_migrators(), array_flip( $sections ) );
+			$migrators              = array_intersect_key( $run->build_migrators( $dry_run ), array_flip( $sections ) );
 			$writer                 = $run->build_writer( $dry_run );
 
 			// Settings are not a section: the processor writes them on every batch, whatever

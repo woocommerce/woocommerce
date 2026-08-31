@@ -440,6 +440,82 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A live run leans on its own writes to shrink the candidate set: a row leaves it as soon
+	 * as it carries the target key or the failure marker. A dry run writes neither, so the
+	 * same batch would be served on every pass and the rehearsal would never end. It pages by
+	 * cursor instead, which is also what lets it report on every candidate rather than on the
+	 * first batch it happened to be handed.
+	 *
+	 * @testdox a dry run should page through every candidate and terminate.
+	 */
+	public function test_a_dry_run_pages_through_every_candidate(): void {
+		$expected = array(
+			$this->create_product_with_legacy_flag( 'yes' ),
+			$this->create_product_with_legacy_flag( 'yes' ),
+			$this->create_product_with_legacy_flag( 'yes' ),
+		);
+		sort( $expected );
+
+		$migrator = new ProductMetaMigrator( new Reporter(), true );
+		$writer   = new Writer( true );
+		$cursor   = 0;
+		$batches  = 0;
+		$visited  = array();
+
+		while ( true ) {
+			$batch = $migrator->get_batch( $cursor, 1 );
+
+			if ( empty( $batch ) ) {
+				break;
+			}
+
+			$migrator->migrate_batch( $batch, $writer );
+
+			$visited = array_merge( $visited, $batch );
+			$cursor  = (int) max( $batch );
+
+			++$batches;
+			$this->assertLessThan( 10, $batches, 'The dry run failed to terminate.' );
+		}
+
+		$this->assertSame( $expected, $visited, 'A dry run must walk every candidate exactly once.' );
+
+		foreach ( $expected as $product_id ) {
+			$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
+			$this->assertSame( '', get_post_meta( $product_id, self::FAILED_META_KEY, true ) );
+		}
+	}
+
+	/**
+	 * The payload write goes through `$product->save()`, and a `woocommerce_update_product`
+	 * callback runs after it. One that drops the meta again leaves a row the writer reported
+	 * as written, so trusting that boolean would report the row as migrated while leaving it
+	 * a candidate — served again on the very next pass, forever. The value is read back
+	 * instead, and a row that did not land is settled with the failure marker.
+	 *
+	 * @testdox a save hook that drops the written meta should settle the row rather than re-serve it.
+	 */
+	public function test_a_save_that_drops_the_meta_settles_the_row(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+
+		$dropper = static function ( $id ) {
+			delete_post_meta( (int) $id, Config::get_product_signups_meta_key() );
+		};
+
+		add_action( 'woocommerce_update_product', $dropper );
+
+		try {
+			$this->migrate();
+		} finally {
+			remove_action( 'woocommerce_update_product', $dropper );
+		}
+
+		$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ), 'The callback dropped the value.' );
+		$this->assertNotSame( '', get_post_meta( $product_id, self::FAILED_META_KEY, true ), 'The row is settled with the failure marker.' );
+		$this->assertSame( 0, $this->build_migrator()->count_remaining(), 'The section is drained.' );
+	}
+
+	/**
 	 * Run the product meta section to completion.
 	 *
 	 * @return void
