@@ -157,7 +157,7 @@ jQuery( function ( $ ) {
 				.prop( 'type', 'password' );
 		}
 
-		$( this ).siblings( 'input' ).focus();
+		$( this ).siblings( 'input' ).trigger( 'focus' );
 	} );
 
 	$( 'a.coming-soon-footer-banner-dismiss' ).on( 'click', function ( e ) {

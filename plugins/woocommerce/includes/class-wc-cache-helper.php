@@ -150,37 +150,14 @@ class WC_Cache_Helper {
 	 * Used to clear layered nav counts based on passed attribute names.
 	 *
 	 * @since 3.6.0
-	 * @since 11.1.0 Advances the persistent generation before queuing transient deletion.
 	 * @param array $attribute_keys Attribute keys.
 	 */
 	public static function invalidate_attribute_count( $attribute_keys ) {
 		if ( $attribute_keys ) {
 			foreach ( $attribute_keys as $attribute_key ) {
-				self::get_attribute_count_generation( $attribute_key, true );
 				self::queue_delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 			}
 		}
-	}
-
-	/**
-	 * Get the persistent cache generation for a layered navigation attribute count.
-	 *
-	 * @since 11.1.0
-	 *
-	 * @param string $attribute_key Attribute taxonomy key.
-	 * @param bool   $refresh       Whether to generate and persist a new generation.
-	 * @return string Persistent generation token.
-	 */
-	public static function get_attribute_count_generation( $attribute_key, $refresh = false ) {
-		$transient_name = 'wc_layered_nav_count_generation_' . sanitize_title( $attribute_key );
-		$generation     = get_transient( $transient_name );
-
-		if ( false === $generation || true === $refresh ) {
-			$generation = time() . '-' . wp_generate_uuid4();
-			set_transient( $transient_name, $generation, DAY_IN_SECONDS );
-		}
-
-		return $generation;
 	}
 
 	/**
@@ -217,14 +194,14 @@ class WC_Cache_Helper {
 	public static function geolocation_ajax_redirect() {
 		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_robots() && ! wp_doing_ajax() && empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$location_hash = self::geolocation_ajax_get_location_hash();
-			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
+			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Hash is cleaned; same-site redirect uses esc_url_raw() and wp_safe_redirect().
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
 				global $wp;
 
 				$redirect_url = trailingslashit( home_url( $wp->request ) );
 
-				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) { // WPCS: Input var ok.
-					$redirect_url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ); // WPCS: sanitization ok, Input var ok.
+				if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
+					$redirect_url = add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Hash is cleaned; same-site redirect uses esc_url_raw() and wp_safe_redirect().
 				}
 
 				if ( ! get_option( 'permalink_structure' ) ) {
@@ -266,7 +243,7 @@ class WC_Cache_Helper {
 	 * delete transients manually.
 	 *
 	 * With external cache however, this isn't possible. Instead, this function is used
-	 * to append a unique string (based on time()) to each transient. When transients
+	 * to append a unique string (based on microtime()) to each transient. When transients
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
 	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
@@ -274,14 +251,14 @@ class WC_Cache_Helper {
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate.
 	 * @param  boolean $refresh true to force a new version.
-	 * @return string transient version based on time(), 10 digits.
+	 * @return string transient version.
 	 */
 	public static function get_transient_version( $group, $refresh = false ) {
 		$transient_name  = $group . '-transient-version';
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			$transient_value = (string) time();
+			$transient_value = sprintf( '%.6F', microtime( true ) );
 
 			set_transient( $transient_name, $transient_value );
 		}
@@ -373,7 +350,7 @@ class WC_Cache_Helper {
 				return;
 			}
 
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct deletion is required for bounded transient cleanup; caching a DELETE is not applicable.
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
 			if ( $affected === $limit ) {

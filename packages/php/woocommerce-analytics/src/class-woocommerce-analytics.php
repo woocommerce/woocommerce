@@ -90,7 +90,7 @@ class Woocommerce_Analytics {
 		 *
 		 * This action is documented in https://docs.woocommerce.com/document/create-a-plugin
 		 */
-		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+		if ( ! defined( 'WC_PLUGIN_FILE' ) || ! is_plugin_active( plugin_basename( WC_PLUGIN_FILE ) ) ) {
 			return false;
 		}
 		// Ensure the WooCommerce class exists and is a valid version.

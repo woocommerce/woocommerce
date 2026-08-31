@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 
@@ -39,6 +41,7 @@ class Filterer {
 		$this->lookup_table_name = $data_store->get_lookup_table_name();
 
 		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
+		add_action( 'before_delete_post', array( $this, 'handle_before_delete_post' ), 10, 2 );
 	}
 
 	/**
@@ -46,25 +49,52 @@ class Filterer {
 	 *
 	 * @internal
 	 *
-	 * @param string   $new_status New post status.
-	 * @param string   $old_status Old post status.
-	 * @param \WP_Post $post       Post object.
+	 * @param string $new_status New post status.
+	 * @param string $old_status Old post status.
+	 * @param mixed  $post       Post object.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		global $wpdb;
-
 		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			return;
 		}
 
-		$was_published = 'publish' === $old_status;
-		$is_published  = 'publish' === $new_status;
+		$was_published = ProductStatus::PUBLISH === $old_status;
+		$is_published  = ProductStatus::PUBLISH === $new_status;
 
 		if ( $was_published === $is_published ) {
 			return;
 		}
+
+		$this->invalidate_attribute_count_for_post( $post );
+	}
+
+	/**
+	 * Invalidate affected layered navigation counts before a product is permanently deleted.
+	 *
+	 * @internal
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param mixed $post    Post object.
+	 *
+	 * @since 11.2.0
+	 */
+	public function handle_before_delete_post( $post_id, $post ): void {
+		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
+		$this->invalidate_attribute_count_for_post( $post );
+	}
+
+	/**
+	 * Invalidate layered navigation counts for taxonomies used by a product or variation.
+	 *
+	 * @param \WP_Post $post Product or variation post object.
+	 */
+	private function invalidate_attribute_count_for_post( \WP_Post $post ): void {
+		global $wpdb;
 
 		$product_or_parent_id = 'product_variation' === $post->post_type ? (int) $post->post_parent : (int) $post->ID;
 
@@ -75,8 +105,8 @@ class Filterer {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The lookup table is the source for the taxonomy-specific cache keys to invalidate.
 		$taxonomies = $wpdb->get_col(
 			$wpdb->prepare(
-				'SELECT DISTINCT taxonomy FROM %i WHERE product_or_parent_id = %d',
-				$this->lookup_table_name,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup table name comes from the internal data store.
+				"SELECT DISTINCT taxonomy FROM {$this->lookup_table_name} WHERE product_or_parent_id = %d",
 				$product_or_parent_id
 			)
 		);
@@ -246,23 +276,21 @@ class Filterer {
 		$query     = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query_sql = implode( ' ', $query );
 
+		// We have a query - let's see if cached results of this query already exist.
+		$query_hash = md5( $query_sql );
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
-			$cache_generation = \WC_Cache_Helper::get_attribute_count_generation( $taxonomy );
-			$query_hash       = md5( $query_sql . '|' . $cache_generation );
-			$cached_counts    = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
+			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
-			$cache_generation = null;
-			$query_hash       = md5( $query_sql );
-			$cached_counts    = array();
+			$cached_counts = array();
 		}
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results                      = $wpdb->get_results( $query_sql, ARRAY_A );
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
-			if ( true === $cache && \WC_Cache_Helper::get_attribute_count_generation( $taxonomy ) === $cache_generation ) {
+			if ( true === $cache ) {
 				$cached_counts = self::limit_layered_nav_count_cache_entries( $cached_counts, $query_hash );
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}

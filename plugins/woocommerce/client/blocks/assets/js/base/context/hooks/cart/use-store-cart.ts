@@ -84,7 +84,7 @@ const decodeValues = <
 		| Record< string, unknown >
 		| CartResponseBillingAddress
 		| CartResponseShippingAddress
-		| CartShippingPackageShippingRate
+		| CartShippingPackageShippingRate,
 >(
 	object: T
 ): T => {
@@ -98,7 +98,7 @@ const decodeValues = <
 
 // Normalize address fields to ensure they are always in the same format and update the ref to track the latest value.
 const normalizeAddress = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T,
 	addressRef: React.MutableRefObject< T >

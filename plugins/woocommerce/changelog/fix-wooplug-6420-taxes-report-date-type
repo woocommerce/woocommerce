@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: report the Taxes report period by the configured date type (default date paid) so its order counts and tax totals reconcile with the Orders and Revenue reports.

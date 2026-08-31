@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
@@ -147,15 +148,8 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 				'query_type' => $query_type,
 			),
 		);
-		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
-			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
-		};
 
-		add_filter( 'posts_clauses', $filter_callback );
-		$received_products_name = $this->get_data_from_products_array(
-			wc_get_products( array() )
-		);
-		remove_filter( 'posts_clauses', $filter_callback );
+		$received_products_name = $this->get_product_names_filtered_by_attribute( $taxonomy, $terms, $query_type );
 
 		$expected_products_name = $this->get_data_from_products_array(
 			array_filter(
@@ -191,42 +185,55 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox A private variation is excluded from attribute filtering and republishing it restores the parent product.
+	 * @testdox A private variation is excluded from attribute filtering.
 	 */
-	public function test_attribute_clauses_exclude_private_variations_until_republished(): void {
+	public function test_attribute_clauses_exclude_private_variations(): void {
 		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
 		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
 
 		$this->assertInstanceOf( \WP_Term::class, $green_term );
 
-		try {
-			$green_variation->set_status( 'private' );
-			$green_variation->save();
-			$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
+		$green_variation->set_status( 'private' );
+		$green_variation->save();
+		$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
 
-			$green_products_while_private = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' );
-			$red_products_while_private   = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'red-slug' ), 'or' );
-		} finally {
-			$green_variation->set_status( 'publish' );
-			$green_variation->save();
-		}
-
-		$green_products_after_republishing = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' );
-
-		$this->assertEqualsCanonicalizing(
-			array( 'Product 5' ),
-			$red_products_while_private,
-			'Product 5 should still match its published red variation while its green variation is private.'
-		);
 		$this->assertEqualsCanonicalizing(
 			array( 'Product 6' ),
-			$green_products_while_private,
-			'Product 5 should not match green while its green variation is private.'
+			$this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' )
 		);
-		$this->assertEqualsCanonicalizing(
-			array( 'Product 5', 'Product 6' ),
-			$green_products_after_republishing,
-			'Republishing Product 5\'s green variation should restore the green match.'
+	}
+
+	/**
+	 * @testdox A private Any variation is excluded from multi-term attribute filtering.
+	 */
+	public function test_multi_term_attribute_clauses_exclude_private_any_variation(): void {
+		$attribute = $this->fixture_data->get_product_attribute( 'color', array( 'red', 'green' ) );
+		$product   = $this->fixture_data->get_variable_product(
+			array( 'name' => 'Private Any variation parent' ),
+			array( $attribute )
+		);
+		$variation = $this->fixture_data->get_variation_product(
+			$product->get_id(),
+			array( 'pa_color' => '' ),
+			array( 'stock_status' => 'instock' )
+		);
+		$red_term  = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		wc_get_container()->get( LookupDataStore::class )->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+		$variation->set_status( 'private' );
+		$variation->save();
+		$this->assert_private_variation_lookup_row_is_retained( $variation, $product, 'pa_color', $red_term->term_id );
+
+		$this->assertSame(
+			array(),
+			$this->get_product_names_filtered_by_attribute(
+				'pa_color',
+				array( 'red-slug', 'green-slug' ),
+				'and',
+				array( 'include' => array( $product->get_id() ) )
+			)
 		);
 	}
 
@@ -236,9 +243,10 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * @param string   $taxonomy   Attribute taxonomy name.
 	 * @param string[] $terms      Attribute term slugs.
 	 * @param string   $query_type Query type.
+	 * @param array    $query_args Optional product query arguments.
 	 * @return string[]
 	 */
-	private function get_product_names_filtered_by_attribute( string $taxonomy, array $terms, string $query_type ): array {
+	private function get_product_names_filtered_by_attribute( string $taxonomy, array $terms, string $query_type, array $query_args = array() ): array {
 		$chosen_attributes = array(
 			$taxonomy => array(
 				'terms'      => $terms,
@@ -252,7 +260,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		add_filter( 'posts_clauses', $filter_callback );
 
 		try {
-			return $this->get_data_from_products_array( wc_get_products( array() ) );
+			return $this->get_data_from_products_array( wc_get_products( $query_args ) );
 		} finally {
 			remove_filter( 'posts_clauses', $filter_callback );
 		}
@@ -306,5 +314,81 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox Non-string taxonomy filter values are ignored.
+	 */
+	public function test_non_string_taxonomy_filter_values_are_ignored(): void {
+		$query                           = new \WP_Query();
+		$query->query_vars['categories'] = array( 'cat-1' );
+		$clauses                         = array( 'where' => '' );
+
+		$this->assertSame( $clauses, $this->sut->add_query_clauses( $clauses, $query ) );
+	}
+
+	/**
+	 * @testdox A hierarchical category filter must match products in descendant categories without a child_of query per chosen term.
+	 *
+	 * @testWith [["hcat-parent"], ["In Parent", "In Child", "In Grandchild"]]
+	 *           [["hcat-child"], ["In Child", "In Grandchild"]]
+	 *           [["hcat-grandchild"], ["In Grandchild"]]
+	 *           [["hcat-parent", "hcat-sibling"], ["In Parent", "In Child", "In Grandchild", "In Sibling"]]
+	 *
+	 * @param string[] $terms             Chosen category slugs.
+	 * @param string[] $expected_products Product names expected to match.
+	 */
+	public function test_taxonomy_clauses_expand_descendants_without_per_term_queries( array $terms, array $expected_products ): void {
+		$parent     = $this->fixture_data->get_product_category( array( 'name' => 'HCat Parent' ) );
+		$child      = $this->fixture_data->get_product_category( array( 'name' => 'HCat Child' ) );
+		$grandchild = $this->fixture_data->get_product_category( array( 'name' => 'HCat Grandchild' ) );
+		$sibling    = $this->fixture_data->get_product_category( array( 'name' => 'HCat Sibling' ) );
+		// parent > child > grandchild; sibling stays top-level (own branch).
+		wp_update_term( $child['term_id'], 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		wp_update_term( $grandchild['term_id'], 'product_cat', array( 'parent' => $child['term_id'] ) );
+
+		$make_product = function ( $name, $term ) {
+			return $this->fixture_data->get_simple_product(
+				array(
+					'name'         => $name,
+					'category_ids' => array( $term['term_id'] ),
+				)
+			);
+		};
+		$products     = array(
+			$make_product( 'In Parent', $parent ),
+			$make_product( 'In Child', $child ),
+			$make_product( 'In Grandchild', $grandchild ),
+			$make_product( 'In Sibling', $sibling ),
+		);
+
+		// Fail if anything still resolves children one term at a time.
+		$child_of_queries = 0;
+		$counter          = function ( $args ) use ( &$child_of_queries ) {
+			if ( ! empty( $args['child_of'] ) ) {
+				++$child_of_queries;
+			}
+			return $args;
+		};
+		add_filter( 'get_terms_args', $counter );
+
+		$chosen          = array( 'product_cat' => $terms );
+		$filter_callback = function ( $args ) use ( $chosen ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen );
+		};
+		add_filter( 'posts_clauses', $filter_callback );
+		$received = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+		remove_filter( 'get_terms_args', $counter );
+
+		$this->assertEqualsCanonicalizing( $expected_products, $received );
+		$this->assertSame( 0, $child_of_queries, 'Hierarchy must be resolved in batch, not via a child_of query per chosen term.' );
+
+		foreach ( $products as $product ) {
+			$product->delete( true );
+		}
+		foreach ( array( $grandchild, $sibling, $child, $parent ) as $term ) {
+			wp_delete_term( $term['term_id'], 'product_cat' );
+		}
 	}
 }

@@ -19,7 +19,7 @@ export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG = `${ CLASSIC_TH
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part-support`;
 export const BASE_URL =
 	process.env.BASE_URL ||
-	'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+	'http://localhost:' + ( process.env.WP_ENV_PORT || '8086' );
 
 export const WP_ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH ||

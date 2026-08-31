@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add billing and shipping phone columns to the Analytics Customers report, its REST API, and CSV export.

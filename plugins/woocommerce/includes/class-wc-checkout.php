@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
@@ -615,12 +616,13 @@ class WC_Checkout {
 			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
-					'name'      => $fee->name,
-					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-					'amount'    => $fee->amount,
-					'total'     => $fee->total,
-					'total_tax' => $fee->tax,
-					'taxes'     => array(
+					'name'       => $fee->name,
+					'tax_class'  => $fee->taxable ? $fee->tax_class : '',
+					'tax_status' => $fee->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE,
+					'amount'     => $fee->amount,
+					'total'      => $fee->total,
+					'total_tax'  => $fee->tax,
+					'taxes'      => array(
 						'total' => $fee->tax_data,
 					),
 				)
@@ -859,6 +861,37 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Get the country to validate a fieldset's fields against.
+	 *
+	 * Uses the posted country when the fieldset has one. Only 'billing' and 'shipping' have a customer
+	 * country to fall back on, and only once the customer object is set up, so every other fieldset,
+	 * including those registered through the 'woocommerce_checkout_fields' filter, is validated without
+	 * country specific rules instead of fataling on an undefined method.
+	 *
+	 * @param  string $fieldset_key Fieldset key.
+	 * @param  array  $data         An array of posted data.
+	 * @return string Country code, or an empty string when it can't be determined.
+	 */
+	private function get_fieldset_country( $fieldset_key, $data ) {
+		if ( isset( $data[ $fieldset_key . '_country' ] ) ) {
+			return $data[ $fieldset_key . '_country' ];
+		}
+
+		if ( ! WC()->customer instanceof WC_Customer ) {
+			return '';
+		}
+
+		switch ( $fieldset_key ) {
+			case 'shipping':
+				return WC()->customer->get_shipping_country();
+			case 'billing':
+				return WC()->customer->get_billing_country();
+			default:
+				return '';
+		}
+	}
+
+	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
 	 * @since  3.0.0
@@ -876,7 +909,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] );
+				$required    = ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
@@ -899,7 +932,7 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'postcode', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $this->get_fieldset_country( $fieldset_key, $data );
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
@@ -917,7 +950,7 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$country = $data[ $fieldset_key . '_country' ] ?? WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country = $this->get_fieldset_country( $fieldset_key, $data );
 					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
 					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
@@ -939,7 +972,7 @@ class WC_Checkout {
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $this->get_fieldset_country( $fieldset_key, $data );
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && count( $valid_states ) > 0 ) {

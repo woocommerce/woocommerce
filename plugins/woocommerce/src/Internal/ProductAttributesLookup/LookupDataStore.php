@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -115,28 +116,35 @@ class LookupDataStore {
 	 *
 	 * @param string $lookup_table_alias Lookup table alias.
 	 * @return string SQL condition.
+	 * @throws \InvalidArgumentException When the lookup table alias is not a valid SQL identifier.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_filterable_attribute_where_clause( string $lookup_table_alias ): string {
 		global $wpdb;
 
-		return $wpdb->prepare(
+		if ( 1 !== preg_match( '/\A[A-Za-z0-9_]+\z/', $lookup_table_alias ) ) {
+			throw new \InvalidArgumentException( 'The lookup table alias must be a valid SQL identifier.' );
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup alias has been validated as an SQL identifier.
+		$where_clause = $wpdb->prepare(
 			"(
-				%i.is_variation_attribute = 0
+				{$lookup_table_alias}.is_variation_attribute = 0
 				OR EXISTS (
 					SELECT 1
 					FROM {$wpdb->posts}
-					WHERE {$wpdb->posts}.ID = %i.product_id
+					WHERE {$wpdb->posts}.ID = {$lookup_table_alias}.product_id
 						AND {$wpdb->posts}.post_type = %s
 						AND {$wpdb->posts}.post_status = %s
 				)
 			)",
-			$lookup_table_alias,
-			$lookup_table_alias,
 			'product_variation',
-			'publish'
+			ProductStatus::PUBLISH
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $where_clause;
 	}
 
 	/**
@@ -163,6 +171,12 @@ class LookupDataStore {
 
 		if ( ! is_a( $product, \WC_Product::class ) ) {
 			$product = WC()->call_function( 'wc_get_product', $product );
+		}
+
+		// A deferred caller can pass the id of a product that has been deleted in the meantime.
+		// The deletion has already scheduled the removal of the lookup data, so there's nothing to do.
+		if ( ! $product ) {
+			return;
 		}
 
 		$action = $this->get_update_action( $changeset );
@@ -332,16 +346,28 @@ class LookupDataStore {
 	 * the information is created for all of its variations.
 	 * This method is intended to be called from the data regenerator.
 	 *
-	 * @param int|WC_Product $product Product object or id.
-	 * @param bool           $use_optimized_db_access Use direct database access for data retrieval if possible.
+	 * If a product id is passed and it no longer resolves to a product, any stale lookup
+	 * data for that id is removed and the operation is not considered failed
+	 * (see 'get_last_create_operation_failed'). Product objects are used as-is.
+	 *
+	 * @param int|\WC_Product $product Product object or id.
+	 * @param bool            $use_optimized_db_access Use direct database access for data retrieval if possible.
 	 */
 	public function create_data_for_product( $product, $use_optimized_db_access = false ) {
+		$product_id = intval( ( $product instanceof \WC_Product ) ? $product->get_id() : $product );
+
 		if ( $use_optimized_db_access ) {
-			$product_id = intval( ( $product instanceof \WC_Product ) ? $product->get_id() : $product );
 			$this->create_data_for_product_cpt( $product_id );
 		} else {
-			if ( ! is_a( $product, \WC_Product::class ) ) {
+			if ( ! $product instanceof \WC_Product ) {
 				$product = WC()->call_function( 'wc_get_product', $product );
+			}
+
+			// A product can be deleted after its lookup table update has been scheduled.
+			if ( ! $product ) {
+				$this->delete_data_for( $product_id );
+				$this->last_create_operation_failed = false;
+				return;
 			}
 
 			$this->delete_data_for( $product->get_id() );
@@ -919,6 +945,12 @@ class LookupDataStore {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
+		if ( empty( $product_ids_with_stock_status ) ) {
+			// The product has been deleted. The DELETE above only covers rows keyed by parent id,
+			// delete_data_for also removes the rows of a deleted variation (keyed by product_id).
+			$this->delete_data_for( $product_id );
+			return;
+		}
 
 		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => ProductType::VARIATION !== $item['product_type'] );
 		$is_variation     = empty( $main_product_row );

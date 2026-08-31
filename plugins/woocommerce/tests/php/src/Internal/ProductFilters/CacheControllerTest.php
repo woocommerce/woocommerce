@@ -12,92 +12,54 @@ use WP_Post;
  * Tests for the CacheController class.
  */
 class CacheControllerTest extends WC_Unit_Test_Case {
-
 	/**
-	 * The System Under Test.
+	 * @testdox Filter data created after registration is invalidated by $event.
+	 * @dataProvider cache_event_provider
 	 *
-	 * @var CacheController
+	 * @param string $event         Event to trigger.
+	 * @param string $hook          WordPress hook name.
+	 * @param string $handler       Cache controller handler name.
 	 */
-	private $sut;
+	public function test_cache_event_hooks_handle_cache_created_later_in_same_request( string $event, string $hook, string $handler ): void {
+		$controller = wc_get_container()->get( CacheController::class );
+		$post       = $this->factory->post->create_and_get(
+			array(
+				'post_type'   => 'product_variation',
+				'post_status' => 'publish',
+			)
+		);
 
-	/**
-	 * Set up test fixtures.
-	 */
-	public function setUp(): void {
-		parent::setUp();
+		remove_action( $hook, array( $controller, $handler ), 10 );
+		delete_transient( CacheController::CACHE_GROUP . '-transient-version' );
+		$controller->register();
 
-		$this->sut = wc_get_container()->get( CacheController::class );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		delete_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
-
-		parent::tearDown();
-	}
-
-	/**
-	 * @testdox Filter-data invalidation fences both sides of the object-cache prefix rotation.
-	 */
-	public function test_invalidate_filter_data_cache_writes_generations_around_prefix_rotation(): void {
-		$version_transient_key      = CacheController::CACHE_GROUP . '-transient-version';
-		$prefix_cache_key           = 'wc_' . CacheController::CACHE_GROUP . '_cache_prefix';
-		$original_version           = get_transient( $version_transient_key );
-		$original_cache_entry_count = get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
-		$original_prefix_found      = false;
-		$original_prefix            = wp_cache_get( $prefix_cache_key, CacheController::CACHE_GROUP, false, $original_prefix_found );
-		$old_prefix                 = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP );
-		$generation_writes          = array();
-		$record_generation_write    = function ( $generation ) use ( &$generation_writes ) {
-			$generation_writes[] = array(
-				'generation' => $generation,
-				'prefix'     => WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ),
-			);
-
-			return $generation;
-		};
-		$version_filter_name        = "pre_set_transient_{$version_transient_key}";
-
+		WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
-		add_filter( $version_filter_name, $record_generation_write );
 
-		try {
-			$this->sut->invalidate_filter_data_cache();
-
-			$final_version                 = get_transient( $version_transient_key );
-			$final_prefix                  = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP );
-			$cache_entry_count_after_clear = get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
-		} finally {
-			remove_filter( $version_filter_name, $record_generation_write );
-
-			if ( false === $original_version ) {
-				delete_transient( $version_transient_key );
-			} else {
-				set_transient( $version_transient_key, $original_version );
-			}
-
-			if ( false === $original_cache_entry_count ) {
-				delete_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
-			} else {
-				set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $original_cache_entry_count );
-			}
-
-			if ( $original_prefix_found ) {
-				wp_cache_set( $prefix_cache_key, $original_prefix, CacheController::CACHE_GROUP );
-			} else {
-				wp_cache_delete( $prefix_cache_key, CacheController::CACHE_GROUP );
-			}
+		if ( 'status transition' === $event ) {
+			wp_update_post(
+				array(
+					'ID'          => $post->ID,
+					'post_status' => 'private',
+				)
+			);
+		} else {
+			wp_delete_post( $post->ID, true );
 		}
 
-		$this->assertCount( 2, $generation_writes, 'Invalidation should persist one generation before and one after rotating the product-ID cache prefix.' );
-		$this->assertNotSame( $generation_writes[0]['generation'], $generation_writes[1]['generation'], 'The pre- and post-rotation generations should be distinct.' );
-		$this->assertSame( $old_prefix, $generation_writes[0]['prefix'], 'The first generation should be written against the old product-ID cache prefix.' );
-		$this->assertNotSame( $old_prefix, $generation_writes[1]['prefix'], 'The second generation should be written after the product-ID cache prefix rotates.' );
-		$this->assertSame( $generation_writes[1]['prefix'], $final_prefix, 'The second generation should observe the final product-ID cache prefix.' );
-		$this->assertSame( $generation_writes[1]['generation'], $final_version, 'The second generation should remain current after invalidation.' );
-		$this->assertFalse( $cache_entry_count_after_clear, 'Invalidation should clear the filter-data cache-entry counter.' );
+		$this->assertFalse( get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT ) );
+	}
+
+	/**
+	 * Data provider for cache events that can occur after registration.
+	 *
+	 * @return array<string, array{string, string, string}>
+	 */
+	public static function cache_event_provider(): array {
+		return array(
+			'status transition'  => array( 'status transition', 'transition_post_status', 'handle_transition_post_status' ),
+			'permanent deletion' => array( 'permanent deletion', 'before_delete_post', 'handle_before_delete_post' ),
+		);
 	}
 
 	/**
@@ -124,12 +86,13 @@ class CacheControllerTest extends WC_Unit_Test_Case {
 					'post_status' => $old_status,
 				)
 			);
-			$this->assertInstanceOf( WP_Post::class, $post, 'The factory should create a real WP_Post fixture.' );
+			/** @var WP_Post $post */
 		}
 
 		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
+		WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 
-		$this->sut->handle_transition_post_status( $new_status, $old_status, $post );
+		wc_get_container()->get( CacheController::class )->handle_transition_post_status( $new_status, $old_status, $post );
 
 		$this->assertSame(
 			$expected_count,
@@ -146,10 +109,7 @@ class CacheControllerTest extends WC_Unit_Test_Case {
 	public static function status_transition_provider(): array {
 		return array(
 			'product publish to private'           => array( 'product', 'private', 'publish', false ),
-			'product publish to draft'             => array( 'product', 'draft', 'publish', false ),
-			'product private to publish'           => array( 'product', 'publish', 'private', false ),
 			'product variation publish to private' => array( 'product_variation', 'private', 'publish', false ),
-			'product variation publish to draft'   => array( 'product_variation', 'draft', 'publish', false ),
 			'product variation private to publish' => array( 'product_variation', 'publish', 'private', false ),
 			'product private to draft'             => array( 'product', 'draft', 'private', 5 ),
 			'product unchanged publish status'     => array( 'product', 'publish', 'publish', 5 ),

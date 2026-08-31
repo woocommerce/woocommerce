@@ -1,3 +1,7 @@
+/*
+ * @jest-environment-options {"url": "http://woo.local/"}
+ */
+
 /**
  * External dependencies
  */
@@ -11,22 +15,29 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { server } from '@woocommerce/test-utils/msw';
+import { allSettings } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { allSettings } from '../../../settings/shared/settings-init';
 import Block from '../block';
 import { Attributes } from '../types';
 
 const setWindowUrl = ( { url }: { url: string } ) => {
-	Object.defineProperty( window, 'location', {
-		value: {
-			href: url,
-		},
-		writable: true,
-	} );
+	/*
+	 * jsdom (>= 21) makes `window.location` non-configurable, so navigate via
+	 * the History API instead of replacing the object. Same-origin only (see
+	 * the `@jest-environment-options` url above).
+	 */
+	window.history.replaceState( {}, '', url );
 };
+
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
+afterEach( () => {
+	window.history.replaceState( {}, '', initialUrl );
+} );
 
 const mockResults = {
 	stock_status_counts: [

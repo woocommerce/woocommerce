@@ -5,33 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for CheckoutLink.
  */
-class CheckoutLinkTest extends TestCase {
-	/**
-	 * Setup the test environment.
-	 */
-	protected function setUp(): void {
-		parent::setUp();
-		$_GET = [];
-		// Reset global cart/session if needed.
-		$GLOBALS['added_to_cart']   = [];
-		$GLOBALS['applied_coupons'] = [];
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	protected function tearDown(): void {
-		$_GET                       = [];
-		$GLOBALS['added_to_cart']   = [];
-		$GLOBALS['applied_coupons'] = [];
-		parent::tearDown();
-	}
-
+class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test that products and coupon are added and token in url.
 	 */

@@ -23,6 +23,7 @@ export const DEFAULT_ORDER_STATUSES = [
 	'on-hold',
 ];
 export const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
+export const DEFAULT_DATE_TYPE = 'date_paid';
 export const SCHEDULED_IMPORT_SETTING_NAME =
 	'woocommerce_analytics_scheduled_import';
 
@@ -152,6 +153,7 @@ const baseConfig = {
 			'Database date field considered for Revenue and Orders reports',
 			'woocommerce'
 		),
+		defaultValue: DEFAULT_DATE_TYPE,
 	},
 };
 

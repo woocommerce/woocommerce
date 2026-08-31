@@ -47,22 +47,23 @@ const generateIntroduction = ( hook ) => {
 				content: `${ hookFunction }( '${ hookName }'${ formattedHookParams } )`,
 			},
 		},
+		// Bold the label only — a fully-emphasized paragraph trips markdownlint's MD036.
 		deprecated
 			? {
-					p: `**Deprecated: ${
+					p: `**Deprecated:** ${
 						deprecated.content
 							? deprecated.content
 							: 'This hook is deprecated and will be removed'
-					}**`,
+					}`,
 			  }
 			: null,
 		internal
 			? {
-					p: `**Note: ${
+					p: `**Note:** ${
 						internal.content
 							? internal.content
 							: 'This hook is for internal use only'
-					}**`,
+					}`,
 			  }
 			: null,
 	];

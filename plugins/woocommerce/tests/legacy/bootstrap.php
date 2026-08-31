@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -70,6 +71,9 @@ class WC_Unit_Tests_Bootstrap {
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
+		// Keep the shared DB update queue clean outside the variation gallery package tests.
+		tests_add_filter( 'init', array( $this, 'cancel_variation_gallery_migration_action' ), 21 );
+
 		// Speed things up by turning down the password hashing cost.
 		tests_add_filter(
 			'wp_hash_password_options',
@@ -88,7 +92,7 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-		$this->maybe_announce_skipped_graphql_infra_tests();
+		$this->maybe_announce_skipped_graphql_tests();
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
@@ -180,37 +184,42 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Echo "Not running GraphQL …" messages when the current invocation
-	 * does not include the `wc-phpunit-graphql-infra` and/or
-	 * `wc-phpunit-graphql-api` suites, mirroring the "Not running ajax
-	 * tests" line printed by WP's own bootstrap for the `ajax`, `ms-files`
-	 * and `external-http` groups.
+	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
+	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
+	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
+	 * `ms-files` and `external-http` groups.
 	 *
-	 * Both GraphQL suites live in their own suites because they require
-	 * PHP 8.1+ and are excluded from the default suite.
+	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
+	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
+	 * only. A default run (no `--testsuite` filter) runs the full suite list,
+	 * which includes the GraphQL suite, so there is nothing to announce. The
+	 * `--testsuite` value may be a comma-joined suite list, hence the substring
+	 * match rather than an exact comparison.
 	 */
-	private function maybe_announce_skipped_graphql_infra_tests() {
-		$argv          = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
-		$running_infra = false;
-		$running_api   = false;
+	private function maybe_announce_skipped_graphql_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+
+		$has_testsuite_filter = false;
+		$running_graphql      = false;
 		foreach ( $argv as $arg ) {
-			if ( 'wc-phpunit-full' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
-				return;
+			if ( ! is_string( $arg ) ) {
+				continue;
 			}
-			if ( 'wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-graphql-infra' === $arg ) {
-				$running_infra = true;
+			if ( false !== strpos( $arg, '--testsuite' ) ) {
+				$has_testsuite_filter = true;
 			}
-			if ( 'wc-phpunit-graphql-api' === $arg || '--testsuite=wc-phpunit-graphql-api' === $arg ) {
-				$running_api = true;
+			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
+				$running_graphql = true;
 			}
 		}
 
-		if ( ! $running_infra ) {
-			echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+		// Without an explicit --testsuite filter the default suite list runs,
+		// which already includes the GraphQL suite: nothing is skipped.
+		if ( ! $has_testsuite_filter || $running_graphql ) {
+			return;
 		}
-		if ( ! $running_api ) {
-			echo 'Not running GraphQL API command tests. To execute these, use --testsuite=wc-phpunit-graphql-api or wc-phpunit-full.' . PHP_EOL;
-		}
+
+		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**
@@ -251,12 +260,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Default Back In Stock alpha to enabled during tests when no
-		// per-suite override has been set.
-		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		}
-
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -291,6 +294,11 @@ class WC_Unit_Tests_Bootstrap {
 		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
 		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
 
+		// Enable Back In Stock Notifications during tests. Set here rather than in load_wc()
+		// because install_wc() includes uninstall.php, which deletes every 'woocommerce_%'
+		// option. This still runs on `setup_theme`, in time for the `init` feature check.
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
+
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
@@ -300,6 +308,20 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
+	}
+
+	/**
+	 * Cancel the variation gallery migration scheduled during test bootstrap.
+	 *
+	 * The package scheduler is covered directly by its own tests. Leaving its
+	 * bootstrap action pending leaks into unrelated tests of the shared DB update queue.
+	 */
+	public function cancel_variation_gallery_migration_action(): void {
+		WC()->queue()->cancel_all(
+			'woocommerce_run_update_callback',
+			array( 'update_callback' => array( VariationGalleryMigration::class, 'run' ) ),
+			'woocommerce-db-updates'
+		);
 	}
 
 	/**
@@ -344,6 +366,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
 	}
 
 	/**

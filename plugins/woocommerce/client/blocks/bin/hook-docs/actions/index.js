@@ -45,7 +45,7 @@ const generate = ( hooks ) => {
 				...generateHookName( hook ),
 				...generateIntroduction( hook ),
 				...contentWithHeading(
-					hook.doc.long_description_html,
+					hook.doc.long_description,
 					'Description'
 				),
 				...sectionWithHeading( params( hookDocs ), 'Parameters' ),

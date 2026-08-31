@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve replacement order items saved by extensions during deferred checkout item deletion.

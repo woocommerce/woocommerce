@@ -104,6 +104,37 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Convert a failure during cart session loading into a client-safe error response.
+	 *
+	 * The original error is logged rather than returned, so nothing internal reaches the client.
+	 *
+	 * @param  \Throwable $error The error that occurred while loading the cart session.
+	 * @return \WP_REST_Response The error response to return to the client.
+	 */
+	protected function get_cart_session_error_response( \Throwable $error ) {
+		wc_get_logger()->error(
+			sprintf(
+				'Store API could not load the cart session: %1$s in %2$s:%3$d',
+				$error->getMessage(),
+				$error->getFile(),
+				$error->getLine()
+			),
+			array(
+				'source'    => 'store-api',
+				'exception' => $error,
+			)
+		);
+
+		return $this->error_to_response(
+			$this->get_route_error_response(
+				'woocommerce_rest_unknown_server_error',
+				__( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
+				500
+			)
+		);
+	}
+
+	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -111,7 +142,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
+		try {
+			$this->load_cart_session( $request );
+		} catch ( \Throwable $error ) {
+			return $this->add_response_headers( $this->get_cart_session_error_response( $error ) );
+		}
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -156,9 +191,12 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'Nonce', $nonce );
 		$response->header( 'Nonce-Timestamp', time() );
 		$response->header( 'User-ID', get_current_user_id() );
-		$response->header( 'Cart-Token', $this->get_cart_token() );
-		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 		$response->header( 'Cache-Control', 'no-store' );
+
+		if ( WC()->cart instanceof \WC_Cart ) {
+			$response->header( 'Cart-Token', $this->get_cart_token() );
+			$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
+		}
 
 		return $response;
 	}
@@ -204,12 +242,14 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Checks if the request has a valid cart token.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * Reads the outer HTTP header, not `$request` one, to avoid conflicting cart tokens on a batch request.
+	 *
+	 * @param \WP_REST_Request $request Request object. Unused here; kept for subclasses.
 	 * @return bool
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = CartTokenUtils::validate_cart_token( $request->get_header( 'Cart-Token' ) ?? '' );
+			$this->has_cart_token = CartTokenUtils::validate_cart_token( CartTokenUtils::get_request_cart_token() );
 		}
 		return $this->has_cart_token;
 	}

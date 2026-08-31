@@ -105,6 +105,9 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Runs before each test.
+	 *
+	 * `parent::setUp()` is reached through `set_up_test_case()`, which exists so subclasses
+	 * can control where the per-test transaction starts relative to fixture creation.
 	 */
 	public function setUp(): void {
 		$this->set_up_test_case();
@@ -500,33 +503,18 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 		global $wpdb;
 
-		$lookup_row = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT product_id, product_or_parent_id, taxonomy, term_id, is_variation_attribute FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND product_or_parent_id = %d AND taxonomy = %s AND term_id = %d AND is_variation_attribute = 1",
-				$variation->get_id(),
-				$parent_product->get_id(),
-				$taxonomy,
-				$term_id
-			),
-			ARRAY_A
-		);
-
-		$this->assertIsArray( $lookup_row, 'The private variation should retain its exact attribute lookup row.' );
 		$this->assertSame(
-			array(
-				'product_id'             => $variation->get_id(),
-				'product_or_parent_id'   => $parent_product->get_id(),
-				'taxonomy'               => $taxonomy,
-				'term_id'                => $term_id,
-				'is_variation_attribute' => 1,
+			1,
+			(int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND product_or_parent_id = %d AND taxonomy = %s AND term_id = %d AND is_variation_attribute = 1",
+					$variation->get_id(),
+					$parent_product->get_id(),
+					$taxonomy,
+					$term_id
+				)
 			),
-			array(
-				'product_id'             => (int) $lookup_row['product_id'],
-				'product_or_parent_id'   => (int) $lookup_row['product_or_parent_id'],
-				'taxonomy'               => $lookup_row['taxonomy'],
-				'term_id'                => (int) $lookup_row['term_id'],
-				'is_variation_attribute' => (int) $lookup_row['is_variation_attribute'],
-			)
+			'The private variation should retain its exact attribute lookup row.'
 		);
 	}
 

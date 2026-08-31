@@ -171,7 +171,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_subtotal_amount_to_display(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
@@ -417,7 +417,7 @@ if ( wc_tax_enabled() ) {
 <?php endif; ?>
 
 <script type="text/template" id="tmpl-wc-modal-add-products">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-add-products">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
