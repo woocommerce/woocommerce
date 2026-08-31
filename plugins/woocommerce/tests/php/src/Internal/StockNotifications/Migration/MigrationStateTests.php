@@ -41,6 +41,7 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( Constants::STATE_OPTION );
 		delete_option( Constants::LOCK_OPTION );
+		delete_option( Constants::BATCH_LOCK_OPTION );
 
 		parent::tearDown();
 	}
@@ -210,6 +211,43 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $this->sut->get_parked_sections() );
 		$this->assertFalse( $this->sut->is_section_parked( 'product-meta' ) );
+	}
+
+	/**
+	 * @testdox the batch lock should refuse a second holder until it is released.
+	 */
+	public function test_the_batch_lock_admits_one_holder_at_a_time(): void {
+		$other = new MigrationState();
+
+		$this->assertTrue( $this->sut->acquire_batch_lock() );
+		$this->assertFalse( $other->acquire_batch_lock(), 'A held batch lock must refuse a second batch.' );
+
+		$this->sut->release_batch_lock();
+
+		$this->assertTrue( $other->acquire_batch_lock(), 'A released batch lock must be available again.' );
+
+		$other->release_batch_lock();
+	}
+
+	/**
+	 * @testdox releasing a batch lock a later worker took over should leave it in place.
+	 */
+	public function test_releasing_a_taken_over_batch_lock_leaves_it_alone(): void {
+		$overrunning = new MigrationState();
+		$this->assertTrue( $overrunning->acquire_batch_lock() );
+
+		// The overrunning worker's batch outlives the stale threshold, so the next one reclaims
+		// the lock while that worker is still going.
+		update_option( Constants::BATCH_LOCK_OPTION, sprintf( '%010d|%s', time() - ( 6 * MINUTE_IN_SECONDS ), 'the overrunning batch' ), false );
+		$this->assertTrue( $this->sut->acquire_batch_lock() );
+
+		$overrunning->release_batch_lock();
+
+		$this->assertNotFalse( get_option( Constants::BATCH_LOCK_OPTION ), "The new holder's batch lock must survive." );
+
+		$this->sut->release_batch_lock();
+
+		$this->assertFalse( get_option( Constants::BATCH_LOCK_OPTION ) );
 	}
 
 	/**

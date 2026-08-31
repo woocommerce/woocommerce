@@ -48,6 +48,11 @@ class MigrationState {
 	private const LOCK_OPTION_NAME = Constants::LOCK_OPTION;
 
 	/**
+	 * The option row holding the batch lock.
+	 */
+	private const BATCH_LOCK_OPTION_NAME = Constants::BATCH_LOCK_OPTION;
+
+	/**
 	 * Digits the lock's acquisition timestamp is zero-padded to in the stored value.
 	 *
 	 * Fixed width is what lets the database compare stored values as plain strings, without
@@ -64,6 +69,16 @@ class MigrationState {
 	 * to prevent.
 	 */
 	private const STALE_LOCK_SECONDS = HOUR_IN_SECONDS;
+
+	/**
+	 * A batch lock older than this is treated as abandoned and reclaimed.
+	 *
+	 * Minutes, not the hour the run lock gets: this one is held for a single batch, which
+	 * `BatchProcessingController` keeps well inside an action runner's time limit, so a lock
+	 * still held after this long belongs to a worker that was killed mid-batch. Until it is
+	 * reclaimed the run makes no progress, which is why it is not longer.
+	 */
+	private const STALE_BATCH_LOCK_SECONDS = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * The empty state shape, used when the option does not exist yet.
@@ -93,6 +108,14 @@ class MigrationState {
 	 * @var array|null
 	 */
 	private ?array $scratch = null;
+
+	/**
+	 * The batch lock value this instance claimed, so it releases its own claim and not one a
+	 * later worker took over. Null when this instance holds no batch lock.
+	 *
+	 * @var string|null
+	 */
+	private ?string $batch_lock_value = null;
 
 	/**
 	 * Constructor.
@@ -193,50 +216,7 @@ class MigrationState {
 	 *              a lock that is not yet stale.
 	 */
 	public function acquire_lock( string $owner ): bool {
-		global $wpdb;
-
-		$now   = time();
-		$claim = $this->encode_lock( $now, $owner );
-
-		// A contended INSERT fails on the duplicate key by design, so keep that expected
-		// failure from spamming the log in debug mode; restore the prior setting after.
-		$suppress = $wpdb->suppress_errors( true );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$acquired = $wpdb->insert(
-			$wpdb->options,
-			array(
-				'option_name'  => self::LOCK_OPTION_NAME,
-				'option_value' => $claim,
-				'autoload'     => 'no',
-			),
-			array( '%s', '%s', '%s' )
-		);
-
-		$wpdb->suppress_errors( $suppress );
-		$this->flush_lock_cache();
-
-		if ( $acquired ) {
-			return true;
-		}
-
-		// A value at or past `$now + 1` was stamped by a clock ahead of this one. Left alone it
-		// would never age into staleness and would refuse every run forever, with no way out but
-		// editing the option by hand, so it is taken over the same way an abandoned lock is.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$stolen = $wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND ( option_value < %s OR option_value >= %s )",
-				$claim,
-				self::LOCK_OPTION_NAME,
-				$this->encode_lock( $now - self::STALE_LOCK_SECONDS, '' ),
-				$this->encode_lock( $now + 1, '' )
-			)
-		);
-
-		$this->flush_lock_cache();
-
-		return (bool) $stolen;
+		return null !== $this->claim( self::LOCK_OPTION_NAME, $owner, self::STALE_LOCK_SECONDS );
 	}
 
 	/**
@@ -245,12 +225,7 @@ class MigrationState {
 	 * @return void
 	 */
 	public function release_lock(): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( $wpdb->options, array( 'option_name' => self::LOCK_OPTION_NAME ), array( '%s' ) );
-
-		$this->flush_lock_cache();
+		$this->delete_lock_row( self::LOCK_OPTION_NAME );
 	}
 
 	/**
@@ -286,7 +261,7 @@ class MigrationState {
 			array( '%s', '%s' )
 		);
 
-		$this->flush_lock_cache();
+		$this->flush_lock_cache( self::LOCK_OPTION_NAME );
 
 		return (bool) $deleted;
 	}
@@ -321,7 +296,72 @@ class MigrationState {
 			)
 		);
 
-		$this->flush_lock_cache();
+		$this->flush_lock_cache( self::LOCK_OPTION_NAME );
+	}
+
+	/**
+	 * Attempt to acquire the batch lock, held for the length of one batch.
+	 *
+	 * The run lock is mutual exclusion between runs; this is mutual exclusion between two
+	 * batches of the same run, which the run lock does not give. `BatchProcessingController`
+	 * can have two batch actions in flight for one processor - its watchdog schedules a new
+	 * one whenever none is *scheduled*, and an action already running does not count as
+	 * scheduled - and two batches that overlap read the same cursor, walk the same rows, and
+	 * both insert.
+	 *
+	 * Deliberately not taken while a batch is being *served*: an empty batch is what tells the
+	 * controller a run is over, so a caller that returned empty because it lost this lock would
+	 * have its migration dequeued part-way. The loser of a claim does no work and leaves the
+	 * batch for the next scheduled action instead.
+	 *
+	 * @return bool True when the lock was acquired and the caller may process a batch.
+	 */
+	public function acquire_batch_lock(): bool {
+		// The token, not just the pid: two claims a second apart from one worker would otherwise
+		// store the same value, and release_batch_lock() compares on the value to tell its own
+		// claim from a later one.
+		$claimed = $this->claim(
+			self::BATCH_LOCK_OPTION_NAME,
+			sprintf( 'batch (pid %d, %s)', getmypid(), uniqid() ),
+			self::STALE_BATCH_LOCK_SECONDS
+		);
+
+		if ( null === $claimed ) {
+			return false;
+		}
+
+		$this->batch_lock_value = $claimed;
+
+		return true;
+	}
+
+	/**
+	 * Release the batch lock, if this instance still holds the claim it made.
+	 *
+	 * @return void
+	 */
+	public function release_batch_lock(): void {
+		global $wpdb;
+
+		if ( null === $this->batch_lock_value ) {
+			return;
+		}
+
+		// Delete this instance's own claim: a batch that overran the stale threshold has had
+		// its lock taken over, and the worker now holding it must keep it.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete(
+			$wpdb->options,
+			array(
+				'option_name'  => self::BATCH_LOCK_OPTION_NAME,
+				'option_value' => $this->batch_lock_value,
+			),
+			array( '%s', '%s' )
+		);
+
+		$this->flush_lock_cache( self::BATCH_LOCK_OPTION_NAME );
+
+		$this->batch_lock_value = null;
 	}
 
 	/**
@@ -400,16 +440,96 @@ class MigrationState {
 	}
 
 	/**
-	 * Drop the cached copy of the lock row after writing it directly.
+	 * Claim a lock row.
 	 *
-	 * This class never reads the lock through `get_option()`, but the object cache does not
+	 * The claim is an atomic INSERT, which the unique `option_name` key turns into a mutex.
+	 * A read-then-write claim would hand the same lock to two callers that start at the same
+	 * moment, and nothing downstream catches what follows: two runs walk the same rows, both
+	 * find no migration marker, and both insert - leaving the shopper subscribed twice and
+	 * emailed twice on restock. A lock that has gone stale, or one stamped in the future by
+	 * a skewed clock, is taken over by the conditional UPDATE instead. Modeled on
+	 * `WC_Install::create_lock()`.
+	 *
+	 * @param string $option      Option row to claim.
+	 * @param string $owner       Identifier of the claiming process, for reporting.
+	 * @param int    $stale_after Seconds after which a held lock is treated as abandoned.
+	 * @return string|null The claimed value, for a later compare-and-delete, or null when the
+	 *                     lock could not be claimed.
+	 */
+	private function claim( string $option, string $owner, int $stale_after ): ?string {
+		global $wpdb;
+
+		$now   = time();
+		$claim = $this->encode_lock( $now, $owner );
+
+		// A contended INSERT fails on the duplicate key by design, so keep that expected
+		// failure from spamming the log in debug mode; restore the prior setting after.
+		$suppress = $wpdb->suppress_errors( true );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$acquired = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $option,
+				'option_value' => $claim,
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$wpdb->suppress_errors( $suppress );
+		$this->flush_lock_cache( $option );
+
+		if ( $acquired ) {
+			return $claim;
+		}
+
+		// A value at or past `$now + 1` was stamped by a clock ahead of this one. Left alone it
+		// would never age into staleness and would refuse every run forever, with no way out but
+		// editing the option by hand, so it is taken over the same way an abandoned lock is.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$stolen = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND ( option_value < %s OR option_value >= %s )",
+				$claim,
+				$option,
+				$this->encode_lock( $now - $stale_after, '' ),
+				$this->encode_lock( $now + 1, '' )
+			)
+		);
+
+		$this->flush_lock_cache( $option );
+
+		return $stolen ? $claim : null;
+	}
+
+	/**
+	 * Delete a lock row, whoever holds it.
+	 *
+	 * @param string $option Option row to delete.
+	 * @return void
+	 */
+	private function delete_lock_row( string $option ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete( $wpdb->options, array( 'option_name' => $option ), array( '%s' ) );
+
+		$this->flush_lock_cache( $option );
+	}
+
+	/**
+	 * Drop the cached copy of a lock row after writing it directly.
+	 *
+	 * This class never reads a lock through `get_option()`, but the object cache does not
 	 * know that: a direct write leaves whatever `get_option()` last cached in place, and a
 	 * stale `notoptions` entry would keep hiding a row this process just created.
 	 *
+	 * @param string $option Option row that was written.
 	 * @return void
 	 */
-	private function flush_lock_cache(): void {
-		wp_cache_delete( self::LOCK_OPTION_NAME, 'options' );
+	private function flush_lock_cache( string $option ): void {
+		wp_cache_delete( $option, 'options' );
 		wp_cache_delete( 'notoptions', 'options' );
 	}
 

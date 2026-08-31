@@ -59,6 +59,12 @@ final class Constants {
 	public const LOCK_OPTION = 'wc_bis_migration_lock';
 
 	/**
+	 * Option holding the batch lock: mutual exclusion between two batches of the same run,
+	 * which the run lock does not cover.
+	 */
+	public const BATCH_LOCK_OPTION = 'wc_bis_migration_batch_lock';
+
+	/**
 	 * Autoloaded flag set the first time any row is migrated, inserted or adopted.
 	 */
 	public const HAS_MIGRATED_ROWS_OPTION = 'wc_bis_migration_has_migrated_rows';

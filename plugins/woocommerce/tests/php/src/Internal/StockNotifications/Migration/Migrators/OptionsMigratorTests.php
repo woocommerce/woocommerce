@@ -421,6 +421,7 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 	private function clear_options(): void {
 		delete_option( 'wc_bis_migration_state' );
 		delete_option( 'wc_bis_migration_lock' );
+		delete_option( 'wc_bis_migration_batch_lock' );
 
 		foreach ( self::EMAIL_MAP as $legacy_key => $core_key ) {
 			delete_option( $legacy_key );

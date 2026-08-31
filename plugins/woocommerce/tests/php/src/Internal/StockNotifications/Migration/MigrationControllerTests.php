@@ -287,6 +287,7 @@ class MigrationControllerTests extends WC_Unit_Test_Case {
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
 		delete_option( 'wc_bis_migration_state' );
 		delete_option( 'wc_bis_migration_lock' );
+		delete_option( 'wc_bis_migration_batch_lock' );
 		delete_option( 'active_plugins' );
 	}
 }

@@ -220,6 +220,45 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a batch that loses the batch lock should write nothing and leave its rows.
+	 */
+	public function test_a_batch_that_loses_the_batch_lock_writes_nothing(): void {
+		$this->seed_notifications( 3 );
+
+		// `BatchProcessingController` can have two batch actions in flight for one processor,
+		// and both read the same cursor. The second one must not walk the same rows.
+		$concurrent_batch = new MigrationState();
+		$this->assertTrue( $concurrent_batch->acquire_batch_lock() );
+
+		$batch = $this->processor->get_next_batch_to_process( 50 );
+		$this->assertNotEmpty( $batch );
+		$this->processor->process_batch( $batch );
+
+		$this->assertSame( array(), LegacyStore::get_core_rows(), 'The losing batch must migrate nothing.' );
+		$this->assertSame( 0, $this->state->get_cursor( 'notifications' ), 'The losing batch must not move the cursor.' );
+
+		$concurrent_batch->release_batch_lock();
+
+		// The rows are still candidates, so the next scheduled batch picks them up.
+		$this->run_to_completion( 50 );
+
+		$this->assertCount( 3, LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox a finished batch should hand the batch lock back.
+	 */
+	public function test_the_batch_lock_is_released_after_a_batch(): void {
+		$this->seed_notifications( 2 );
+
+		$this->processor->process_batch( $this->processor->get_next_batch_to_process( 50 ) );
+
+		$next_batch = new MigrationState();
+		$this->assertTrue( $next_batch->acquire_batch_lock(), 'A finished batch must release the lock.' );
+		$next_batch->release_batch_lock();
+	}
+
+	/**
 	 * @testdox a stopped run should process nothing, even with a batch already in hand.
 	 */
 	public function test_a_run_without_the_lock_processes_nothing(): void {
@@ -686,6 +725,10 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$this->assertNotNull( $failure, 'A throwing batch must record why it stopped.' );
 		$this->assertSame( 'notifications', $failure['section'] );
 		$this->assertSame( 'lost connection', $failure['message'] );
+
+		$next_batch = new MigrationState();
+		$this->assertTrue( $next_batch->acquire_batch_lock(), 'A thrown batch must still hand the batch lock back.' );
+		$next_batch->release_batch_lock();
 	}
 
 	/**
@@ -825,6 +868,7 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	private function clear_migration_options(): void {
 		delete_option( 'wc_bis_migration_state' );
 		delete_option( 'wc_bis_migration_lock' );
+		delete_option( 'wc_bis_migration_batch_lock' );
 		delete_option( 'wc_bis_allow_signups' );
 		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );

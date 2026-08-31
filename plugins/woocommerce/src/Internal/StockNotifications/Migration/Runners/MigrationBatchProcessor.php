@@ -317,7 +317,11 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * class that persists a cursor.
 	 *
 	 * Processes only while the run's lock is held, and refreshes it as each section's
-	 * batch lands so a long run is never mistaken for an abandoned one.
+	 * batch lands so a long run is never mistaken for an abandoned one. The batch lock taken
+	 * here is a second, narrower one: the run lock lets a run in, this keeps two batches of
+	 * that run - which `BatchProcessingController` can have in flight at once - from walking
+	 * the same rows and inserting both times. A batch that loses the claim does nothing and
+	 * leaves its rows for the next scheduled action.
 	 *
 	 * @param array $batch Batch to process, as returned by 'get_next_batch_to_process'.
 	 * @throws \Throwable A whole-batch failure, after recording it. `BatchProcessingController`
@@ -334,40 +338,48 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		// Settings are cheap, idempotent and not worth a section of their own, so they go in
-		// on every batch: a run stopped part-way still leaves them written.
-		$this->options->migrate( $this->writer );
-
-		foreach ( $this->group_by_section( $batch ) as $slug => $raw_ids ) {
-			$migrator = $this->migrators[ $slug ];
-
-			try {
-				$outcomes = $migrator->migrate_batch( $raw_ids, $this->writer );
-			} catch ( \Throwable $e ) {
-				// Throwable, not Exception: an \Error would otherwise pass through unrecorded,
-				// and it is the one kind of failure `BatchProcessingController` does not catch
-				// either. Re-thrown so a retryable failure still reaches the controller.
-				$this->reporter->report_exception( $slug, $e );
-
-				// The controller retries this batch and, if it keeps throwing, drops the
-				// processor without telling us. Leave a note behind first, so the Tools
-				// screen can tell a killed run from a merchant who pressed Stop.
-				$this->state->set_failure( $slug, $e->getMessage() );
-
-				throw $e;
-			}
-
-			$this->state->refresh_lock();
-			$this->park_if_stuck( $slug, $raw_ids, $outcomes );
-			$this->store_cursor( $slug, $raw_ids );
-
-			if ( $migrator instanceof NotificationsMigrator ) {
-				$this->accumulate_losses( $migrator );
-			}
+		if ( ! $this->state->acquire_batch_lock() ) {
+			return;
 		}
 
-		// The batch landed, so whatever the last one failed on is no longer the run's state.
-		$this->state->clear_failure();
+		try {
+			// Settings are cheap, idempotent and not worth a section of their own, so they go in
+			// on every batch: a run stopped part-way still leaves them written.
+			$this->options->migrate( $this->writer );
+
+			foreach ( $this->group_by_section( $batch ) as $slug => $raw_ids ) {
+				$migrator = $this->migrators[ $slug ];
+
+				try {
+					$outcomes = $migrator->migrate_batch( $raw_ids, $this->writer );
+				} catch ( \Throwable $e ) {
+					// Throwable, not Exception: an \Error would otherwise pass through unrecorded,
+					// and it is the one kind of failure `BatchProcessingController` does not catch
+					// either. Re-thrown so a retryable failure still reaches the controller.
+					$this->reporter->report_exception( $slug, $e );
+
+					// The controller retries this batch and, if it keeps throwing, drops the
+					// processor without telling us. Leave a note behind first, so the Tools
+					// screen can tell a killed run from a merchant who pressed Stop.
+					$this->state->set_failure( $slug, $e->getMessage() );
+
+					throw $e;
+				}
+
+				$this->state->refresh_lock();
+				$this->park_if_stuck( $slug, $raw_ids, $outcomes );
+				$this->store_cursor( $slug, $raw_ids );
+
+				if ( $migrator instanceof NotificationsMigrator ) {
+					$this->accumulate_losses( $migrator );
+				}
+			}
+
+			// The batch landed, so whatever the last one failed on is no longer the run's state.
+			$this->state->clear_failure();
+		} finally {
+			$this->state->release_batch_lock();
+		}
 	}
 
 	/**
