@@ -2137,7 +2137,7 @@ class WC_AJAX {
 				}
 			}//end if
 
-			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $formatted_name ) );
+			$products[ $product_object->get_id() ] = wp_strip_all_tags( rawurldecode( $formatted_name ) );
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_products', $products ) );
@@ -2188,7 +2188,7 @@ class WC_AJAX {
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = esc_html( wp_strip_all_tags( $product_object->get_formatted_name() ) );
+			$products[ $product_object->get_id() ] = wp_strip_all_tags( rawurldecode( $product_object->get_formatted_name() ) );
 		}
 
 		wp_send_json( $products );
