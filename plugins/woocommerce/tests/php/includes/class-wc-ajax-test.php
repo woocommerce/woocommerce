@@ -758,7 +758,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Product search returns plain text names without decoding URL-encoded characters.
+	 * @testdox Product search decodes URL-encoded characters before returning plain text names.
 	 * @dataProvider product_search_name_provider
 	 *
 	 * @param string $search_term          Product search term.
@@ -797,8 +797,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	public function product_search_name_provider(): array {
 		return array(
 			'plain punctuation'    => array( 'Ben', "Ben & Jerry's", "Ben & Jerry's" ),
-			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee%20Mug' ),
-			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text %3Cspan%3Einside%3C/span%3E' ),
+			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee Mug' ),
+			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text inside' ),
 			'HTML tag'             => array( 'Text', 'Text <span>inside</span>', 'Text inside' ),
 		);
 	}
