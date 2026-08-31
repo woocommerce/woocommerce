@@ -7,6 +7,12 @@ $wp-admin-bar-height-mobile: 46px;
 $wp-admin-sidebar-width: 160px;
 $wp-admin-sidebar-width-collapsed: 36px;
 
+// Breathing room after the adjacent "Add order" action so the two buttons
+// do not read as one control.
+.wc-fulfillment-import-trigger.page-title-action {
+	margin-inline-start: 8px;
+}
+
 // Full-screen overlay sits next to the WP sidebar and below the admin bar.
 .woocommerce-fulfillment-importer-overlay {
 	&.components-modal__screen-overlay {
