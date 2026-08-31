@@ -30,8 +30,7 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 	const failedRows = summary?.rows.filter(
 		( row ) => row.status === 'failed'
 	);
-	// Row details can be absent even when the failed counter is not (they
-	// arrive per chunk, the counters via the summary).
+	// Row details arrive per chunk, so they can be absent while the counter is not.
 	const canDownloadFailedRows = Boolean( state.file && failedRows?.length );
 
 	// Most failures are problems with the file the warehouse sent, so the

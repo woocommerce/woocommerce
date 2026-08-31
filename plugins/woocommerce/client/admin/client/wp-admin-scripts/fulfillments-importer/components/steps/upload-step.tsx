@@ -119,8 +119,7 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				text: await state.file.text(),
 			} );
 		} catch ( error ) {
-			// Leave a breadcrumb: a later export failure is hard to trace
-			// back to a read that failed here.
+			// Breadcrumb for a later export failure.
 			window.console?.warn?.(
 				'Fulfillments importer: could not cache the file content.',
 				error
@@ -257,9 +256,7 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 
 			<Card className="woocommerce-fulfillment-importer-step__card">
 				<CardBody>
-					{ /* Button inside the heading, not the reverse: a button
-					     strips its descendants' roles, which would drop the
-					     heading from the accessibility tree. */ }
+					{ /* A heading inside a button loses its role, not the reverse. */ }
 					<h2 className="woocommerce-fulfillment-importer-advanced-toggle">
 						<button
 							type="button"

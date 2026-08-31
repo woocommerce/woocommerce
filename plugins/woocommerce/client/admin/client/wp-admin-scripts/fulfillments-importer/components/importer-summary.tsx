@@ -142,8 +142,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	}
 
 	return (
-		// The counters carry their own live region; a second one here would
-		// double up announcements.
+		// The counters carry the live region.
 		<div className="woocommerce-fulfillment-importer-summary">
 			<ImporterCounters
 				counts={ { created, updated, skipped, failed, notified } }

@@ -197,10 +197,7 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 													isUnassignedCandidate
 												}
 												help={
-													// The help prop wires up
-													// aria-describedby, which the
-													// component ignores when
-													// passed directly.
+													// help wires up aria-describedby.
 													isUnassignedCandidate ? (
 														<>
 															<Icon
