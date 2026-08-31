@@ -7,6 +7,7 @@ import type {
 	FieldTypeName,
 	Form,
 	FormField,
+	Rules,
 } from '@wordpress/dataviews';
 
 /**
@@ -143,17 +144,95 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 	};
 };
 
-// Classic settings disable fields through custom_attributes with HTML
-// presence semantics, so any defined value except boolean false disables.
-const isFieldDisabled = ( settingsField: SettingsUIField ) => {
-	if ( settingsField.disabled ) {
-		return true;
+// HTML boolean attributes use presence semantics: disabled="false" still
+// disables, while a boolean false stays unset.
+const isAttributeSet = ( value: string | number | boolean | undefined ) =>
+	typeof value !== 'undefined' && value !== false;
+
+const isFieldDisabled = ( settingsField: SettingsUIField ) =>
+	Boolean( settingsField.disabled ) ||
+	isAttributeSet( settingsField.customAttributes?.disabled );
+
+// Range constraints only validate against matching value types: numbers for
+// number fields, date strings for date fields. Other types have no range
+// rule slot in DataForm.
+const toRangeConstraint = (
+	value: string | number | boolean | undefined,
+	type: FieldTypeName | undefined
+) => {
+	if (
+		typeof value === 'boolean' ||
+		typeof value === 'undefined' ||
+		value === ''
+	) {
+		return undefined;
 	}
 
-	const disabledAttribute = settingsField.customAttributes?.disabled;
-	return (
-		typeof disabledAttribute !== 'undefined' && disabledAttribute !== false
-	);
+	if ( type === 'number' ) {
+		const numeric = Number( value );
+		return Number.isFinite( numeric ) ? numeric : undefined;
+	}
+
+	if ( type === 'date' || type === 'datetime' ) {
+		return String( value );
+	}
+
+	return undefined;
+};
+
+const toLengthConstraint = ( value: string | number | boolean | undefined ) => {
+	if (
+		typeof value === 'boolean' ||
+		typeof value === 'undefined' ||
+		value === ''
+	) {
+		return undefined;
+	}
+
+	const numeric = Number( value );
+	return Number.isFinite( numeric ) ? numeric : undefined;
+};
+
+// Classic settings express constraints as HTML custom_attributes; map the
+// ones with DataForm rule slots. The closed elements rule stays off because
+// stored values can predate the current options, and step stays unmapped
+// because DataForm derives it from format.decimals rather than a rule.
+const buildValidationRules = (
+	settingsField: SettingsUIField,
+	descriptor: SettingsTypeDescriptor | undefined
+): Rules< SettingsValues > => {
+	const attributes = settingsField.customAttributes ?? {};
+	const rules: Rules< SettingsValues > = { elements: false };
+
+	if ( isAttributeSet( attributes.required ) ) {
+		rules.required = true;
+	}
+
+	const min = toRangeConstraint( attributes.min, descriptor?.type );
+	if ( typeof min !== 'undefined' ) {
+		rules.min = min;
+	}
+
+	const max = toRangeConstraint( attributes.max, descriptor?.type );
+	if ( typeof max !== 'undefined' ) {
+		rules.max = max;
+	}
+
+	const minLength = toLengthConstraint( attributes.minlength );
+	if ( typeof minLength !== 'undefined' ) {
+		rules.minLength = minLength;
+	}
+
+	const maxLength = toLengthConstraint( attributes.maxlength );
+	if ( typeof maxLength !== 'undefined' ) {
+		rules.maxLength = maxLength;
+	}
+
+	if ( typeof attributes.pattern === 'string' && attributes.pattern !== '' ) {
+		rules.pattern = attributes.pattern;
+	}
+
+	return rules;
 };
 
 export const buildDataFormField = (
@@ -169,10 +248,7 @@ export const buildDataFormField = (
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
-		// DataForm turns on its closed elements rule whenever elements are
-		// set, but stored settings values can predate the current options
-		// (deleted pages, uninstalled gateways) and must not block saving.
-		isValid: { elements: false },
+		isValid: buildValidationRules( settingsField, descriptor ),
 		isVisible: createIsVisible( settingsField, options ),
 		isDisabled: isFieldDisabled( settingsField ),
 	};

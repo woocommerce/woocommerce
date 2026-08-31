@@ -492,6 +492,79 @@ describe( 'dataform adapter', () => {
 
 			expect( field.isValid?.elements ).toBe( false );
 		} );
+
+		it( 'maps number range attributes to numeric constraints', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'number',
+					customAttributes: { min: '0', max: 100 },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( 0 );
+			expect( field.isValid?.max ).toBe( 100 );
+		} );
+
+		it( 'maps date range attributes as strings', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'date',
+					customAttributes: { min: '2026-01-01', max: '2026-12-31' },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( '2026-01-01' );
+			expect( field.isValid?.max ).toBe( '2026-12-31' );
+		} );
+
+		it( 'ignores range attributes on types without a range rule', () => {
+			const field = buildDataFormField(
+				{ ...textField, customAttributes: { min: '5', max: '10' } },
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBeUndefined();
+			expect( field.isValid?.max ).toBeUndefined();
+		} );
+
+		it( 'maps length and pattern attributes', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					customAttributes: {
+						minlength: 2,
+						maxlength: '10',
+						pattern: '[a-z]+',
+					},
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.minLength ).toBe( 2 );
+			expect( field.isValid?.maxLength ).toBe( 10 );
+			expect( field.isValid?.pattern ).toBe( '[a-z]+' );
+		} );
+
+		it( 'honours a required attribute with presence semantics', () => {
+			const present = buildDataFormField(
+				{ ...textField, customAttributes: { required: 'required' } },
+				createOptions( [] )
+			);
+			expect( present.isValid?.required ).toBe( true );
+
+			const booleanFalse = buildDataFormField(
+				{ ...textField, customAttributes: { required: false } },
+				createOptions( [] )
+			);
+			expect( booleanFalse.isValid?.required ).toBeUndefined();
+
+			const absent = buildDataFormField( textField, createOptions( [] ) );
+			expect( absent.isValid?.required ).toBeUndefined();
+		} );
 	} );
 
 	describe( 'disabled state', () => {
