@@ -1,7 +1,11 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_Admin_Dashboard class.
@@ -13,6 +17,24 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * WC_Admin_Dashboard_Test
  */
 class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure the HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * The system under test.
@@ -366,6 +388,75 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Awaiting processing <strong>0 orders</strong>', $html );
 		$this->assertStringContainsString( 'On-hold <strong>0 orders</strong>', $html );
+	}
+
+	/**
+	 * @testdox The top-seller title is escaped without removing dashboard markup under legacy and HPOS storage.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_status_widget_escapes_top_seller_title_for_each_order_storage( bool $hpos_enabled ): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$product = null;
+		$order   = null;
+
+		$reports_filter = static function ( array $reports ): array {
+			$reports['get_sales_sparkline'] = static fn() => array(
+				'total' => 0,
+				'data'  => array(),
+			);
+
+			return $reports;
+		};
+
+		try {
+			$this->toggle_cot_authoritative( $hpos_enabled );
+
+			$product = WC_Helper_Product::create_simple_product();
+			$order   = wc_create_order();
+			$order->add_product( $product, 2 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+
+			$title_filter = static function ( string $title, int $post_id ) use ( $product ) {
+				return $product->get_id() === $post_id ? 'Unsafe <script>alert("dashboard")</script> & title' : $title;
+			};
+
+			add_filter( 'woocommerce_admin_disabled', '__return_true' );
+			add_filter( 'woocommerce_dashboard_status_widget_reports', $reports_filter );
+			add_filter( 'the_title', $title_filter, 10, 2 );
+
+			ob_start();
+			$this->sut->status_widget_content();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( '<strong>Unsafe &lt;script&gt;alert(&quot;dashboard&quot;)&lt;/script&gt; &amp; title</strong> (2 sales)', $html );
+			$this->assertStringNotContainsString( '<script>', $html );
+		} finally {
+			remove_filter( 'woocommerce_admin_disabled', '__return_true' );
+			remove_filter( 'woocommerce_dashboard_status_widget_reports', $reports_filter );
+			if ( isset( $title_filter ) ) {
+				remove_filter( 'the_title', $title_filter, 10 );
+			}
+			if ( $order instanceof WC_Order ) {
+				$order->delete( true );
+			}
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				$this->toggle_cot_authoritative( $previous_hpos_state );
+			}
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
 	}
 
 	/**
