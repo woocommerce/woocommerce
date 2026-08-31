@@ -6,8 +6,11 @@
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
-import { __experimentalImageEditor as GutenbergImageEditor } from '@wordpress/block-editor';
-import type { ComponentType, Dispatch, RefObject, SetStateAction } from 'react';
+import {
+	__experimentalImageEditingProvider as ImageEditingProvider,
+	__experimentalImageEditor as GutenbergImageEditor,
+} from '@wordpress/block-editor';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
  * Internal dependencies
@@ -47,7 +50,8 @@ interface ImageEditorProps {
 	backgroundImageId: number;
 	backgroundImageSize: MediaSize;
 	backgroundImageSrc: string;
-	containerRef: RefObject< HTMLDivElement >;
+	containerRef: React.RefObject< HTMLDivElement >;
+	isEditingImage: boolean;
 	setAttributes: ( attrs: MediaAttributes ) => void;
 	setIsEditingImage: ( value: boolean ) => void;
 }
@@ -55,7 +59,7 @@ interface ImageEditorProps {
 // Adapted from:
 // https://github.com/WordPress/gutenberg/blob/v15.6.1/packages/block-library/src/image/use-client-width.js
 function useClientWidth(
-	ref: RefObject< HTMLDivElement >,
+	ref: React.RefObject< HTMLDivElement >,
 	dependencies: string[]
 ) {
 	const [ clientWidth, setClientWidth ]: [
@@ -96,10 +100,43 @@ export const ImageEditor = ( {
 	backgroundImageSize,
 	backgroundImageSrc,
 	containerRef,
+	isEditingImage,
 	setAttributes,
 	setIsEditingImage,
 }: ImageEditorProps ) => {
 	const clientWidth = useClientWidth( containerRef, [ align ] );
+
+	// Fallback for WP 6.1 or lower. In WP 6.2. ImageEditingProvider was merged
+	// with ImageEditor, see: https://github.com/WordPress/gutenberg/pull/47171
+	if ( typeof ImageEditingProvider === 'function' ) {
+		return (
+			<ImageEditingProvider
+				id={ backgroundImageId }
+				url={ backgroundImageSrc }
+				naturalHeight={
+					backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
+				}
+				naturalWidth={
+					backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
+				}
+				onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
+					setAttributes( { mediaId: id, mediaSrc: url } );
+				} }
+				isEditing={ isEditingImage }
+				onFinishEditing={ () => setIsEditingImage( false ) }
+			>
+				<GutenbergImageEditor
+					url={ backgroundImageSrc }
+					height={
+						backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
+					}
+					width={
+						backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
+					}
+				/>
+			</ImageEditingProvider>
+		);
+	}
 
 	return (
 		<GutenbergImageEditor
@@ -107,12 +144,8 @@ export const ImageEditor = ( {
 			url={ backgroundImageSrc }
 			height={ backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height }
 			width={ backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width }
-			naturalHeight={
-				backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
-			}
-			naturalWidth={
-				backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
-			}
+			naturalHeight={ backgroundImageSize.height }
+			naturalWidth={ backgroundImageSize.width }
 			onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
 				setAttributes( { mediaId: id, mediaSrc: url } );
 			} }
@@ -152,6 +185,7 @@ export const withImageEditor =
 						backgroundImageSize={ backgroundImageSize }
 						backgroundImageSrc={ backgroundImageSrc }
 						containerRef={ ref }
+						isEditingImage={ isEditingImage }
 						setAttributes={ setAttributes }
 						setIsEditingImage={ setIsEditingImage }
 					/>

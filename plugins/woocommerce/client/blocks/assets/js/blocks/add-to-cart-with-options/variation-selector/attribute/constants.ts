@@ -64,9 +64,9 @@ export const DEFAULT_ATTRIBUTES = [
 		name: __( 'Size', 'woocommerce' ),
 		has_variations: true,
 		terms: [
-			{ id: -4, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
-			{ id: -5, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
-			{ id: -6, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
+			{ id: 1, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
+			{ id: 2, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
+			{ id: 3, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
 		],
 	},
 ] as const;
