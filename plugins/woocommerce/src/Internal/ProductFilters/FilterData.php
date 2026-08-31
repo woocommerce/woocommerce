@@ -52,6 +52,17 @@ class FilterData {
 	}
 
 	/**
+	 * Whether out of stock products are hidden from the catalog.
+	 *
+	 * The filter data caches are keyed on this, so a change to the setting can't serve stale counts.
+	 *
+	 * @return bool
+	 */
+	private function hide_out_of_stock_items(): bool {
+		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+	}
+
+	/**
 	 * Get price data for current products.
 	 *
 	 * @param array $query_vars The WP_Query arguments.
@@ -267,13 +278,7 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key(
-			$query_vars,
-			'attribute',
-			array(
-				'taxonomy' => $attribute_to_count,
-			)
-		);
+		$transient_key = $this->get_transient_key( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
 		$cached_data   = $this->get_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
@@ -287,29 +292,26 @@ class FilterData {
 			global $wpdb;
 
 			$lookup_table_name                      = $this->lookup_data_store->get_lookup_table_name();
-			$taxonomy_escaped                       = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			$taxonomy_sql                           = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
 			$filterable_attribute_where_clause      = $this->lookup_data_store->get_filterable_attribute_where_clause( 'attribute_lookup' );
-			$attribute_lookup_in_stock_where_clause = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? 'AND attribute_lookup.in_stock = 1' : '';
+			$attribute_lookup_in_stock_where_clause = $this->hide_out_of_stock_items() ? 'AND attribute_lookup.in_stock = 1' : '';
 
 			// Aggregate the indexed lookup rows directly; the cached parent IDs already represent the filtered product set.
+			// $taxonomy_sql is already quoted by $wpdb->prepare(), so it is used without surrounding quotes here.
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup table name comes from the internal data store.
 			$attribute_count_sql = "
 				SELECT COUNT( DISTINCT attribute_lookup.product_or_parent_id ) as term_count, attribute_lookup.term_id as term_count_id
 				FROM {$lookup_table_name} AS attribute_lookup
 				WHERE attribute_lookup.product_or_parent_id IN ( {$product_ids} )
-				AND attribute_lookup.taxonomy = {$taxonomy_escaped}
+				AND attribute_lookup.taxonomy = {$taxonomy_sql}
 				AND {$filterable_attribute_where_clause}
 				{$attribute_lookup_in_stock_where_clause}
 				GROUP BY attribute_lookup.term_id
 			";
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			/**
-			 * We can't use $wpdb->prepare() here because using %s with
-			 * $wpdb->prepare() for a subquery won't work as it will escape the
-			 * SQL query.
-			 * We're using the query as is, same as Core does.
-			 */
+			// $product_ids is a comma-separated list of IDs the database already returned, so the statement as a
+			// whole can't go through $wpdb->prepare() -- it would escape the list into a single string.
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = $wpdb->get_results( $attribute_count_sql );
 			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
@@ -509,7 +511,7 @@ class FilterData {
 						'query_vars'              => $this->normalize_query_vars( $query_vars ),
 						'extra'                   => $extra,
 						'filter_type'             => $filter_type,
-						'hide_out_of_stock_items' => 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ),
+						'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
 					)
 				)
 			)
@@ -663,7 +665,7 @@ class FilterData {
 			wp_json_encode(
 				array(
 					'query_vars'              => $this->normalize_query_vars( $query_vars ),
-					'hide_out_of_stock_items' => 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ),
+					'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
 				)
 			)
 		);
