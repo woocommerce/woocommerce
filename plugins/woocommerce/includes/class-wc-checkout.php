@@ -268,18 +268,27 @@ class WC_Checkout {
 				'shipping_'
 			),
 			'account'  => array(),
-			'order'    => array(
-				'order_comments' => array(
-					'type'        => 'textarea',
-					'class'       => array( 'notes' ),
-					'label'       => __( 'Order notes', 'woocommerce' ),
-					'placeholder' => esc_attr__(
-						'Notes about your order, e.g. special notes for delivery.',
-						'woocommerce'
-					),
-				),
-			),
+			'order'    => array(),
 		);
+
+		/**
+		 * Controls whether the order notes field is added to the checkout.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enabled Whether the order notes field is enabled.
+		 */
+		if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+			$this->fields['order']['order_comments'] = array(
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order notes', 'woocommerce' ),
+				'placeholder' => esc_attr__(
+					'Notes about your order, e.g. special notes for delivery.',
+					'woocommerce'
+				),
+			);
+		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(

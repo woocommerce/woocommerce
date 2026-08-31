@@ -50,14 +50,7 @@ defined( 'ABSPATH' ) || exit;
 <div class="woocommerce-additional-fields">
 	<?php do_action( 'woocommerce_before_order_notes', $checkout ); ?>
 
-	<?php
-	$order_fields = $checkout->get_checkout_fields( 'order' );
-
-	// Remove the order note field from the form if it's set as disabled.
-	if ( ! apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
-		unset( $order_fields['order_comments'] );
-	}
-	?>
+	<?php $order_fields = $checkout->get_checkout_fields( 'order' ); ?>
 
 	<?php if ( ! empty( $order_fields ) ) : ?>
 
