@@ -20,7 +20,7 @@
 		# The preset says "never". Several backgrounds here are base64/SVG data
 		# URIs containing spaces, quotes and "<", which cannot legally be
 		# unquoted. The rule is report-only (no "fixable" in its stylelint 14
-		# meta), so "never" would not rewrite them, it would just report 28
+		# meta), so "never" would not rewrite them, it would just report 41
 		# violations we would then have to blanket-disable. "always" states the
 		# safe policy once instead.
 		"function-url-quotes": "always",
