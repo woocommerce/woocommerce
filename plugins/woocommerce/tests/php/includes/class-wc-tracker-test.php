@@ -186,6 +186,39 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should bound consecutive failures for any truthy value of the tracking option.
+	 *
+	 * @testWith ["yes"]
+	 *           ["1"]
+	 *
+	 * @param string $allow_tracking Stored value of the tracking option.
+	 */
+	public function test_consecutive_failures_are_bounded_for_any_truthy_tracking_value( string $allow_tracking ): void {
+		update_option( 'woocommerce_allow_tracking', $allow_tracking );
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+		$this->assertSame( 1, (int) get_option( 'woocommerce_tracker_send_failures' ), 'The first failure should persist a count of one.' );
+
+		WC_Tracker::send_tracking_data();
+		$this->assertSame( 2, (int) get_option( 'woocommerce_tracker_send_failures' ), 'The second failure should persist a count of two.' );
+
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( 3, $requests, 'Each daily run should retry while the snapshot is still pending.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'The third consecutive failure should record the send time so the snapshot is abandoned.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
 	 * @testdox Should retry on the next daily run after a failed delivery without waiting for the weekly interval.
 	 */
 	public function test_failed_send_is_retried_on_next_run(): void {

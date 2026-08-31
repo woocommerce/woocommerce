@@ -151,7 +151,7 @@ class WC_Tracker {
 		if ( $give_up ) {
 			update_option( 'woocommerce_tracker_last_send', time() );
 			delete_option( 'woocommerce_tracker_send_failures' );
-		} elseif ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+		} elseif ( true === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
 			update_option( 'woocommerce_tracker_send_failures', $failures, false );
 		}
 
