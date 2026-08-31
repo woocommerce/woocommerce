@@ -37,3 +37,26 @@ On this page, we will share some guidelines to help you assess the impact degree
 ## My PR is High-Impact. What's next?
 
 If your PR is High-Impact, be sure to label it with `impact: high` and the WooCommerce Core team will keep special considerations for testing it.
+
+## Review requirements
+
+Pull requests against `trunk` require an approving review before merge. That is the default for every change, because an independent reviewer brings experience, product knowledge, and assumptions that the author does not have. AI tooling working from the author's context does not add that independence.
+
+The impact assessment above is also the reference for when that requirement can be relaxed and when it must not be.
+
+### When a PR may be merged without a formal approval
+
+Contributors with permission to bypass the review requirement may use their judgment to merge a PR without a formal approval when it clearly fits the "should not mark as High-Impact" list above: documentation, changelog, or typo changes; updates to automated tests; and tooling or infrastructure changes not shipped in the release package.
+
+Bypassing the requirement is an exception for low-risk changes, not an alternative default. If you are unsure whether your change qualifies, request a review.
+
+### When an independent human review is always required
+
+A PR matching anything in the High-Impact list above must receive an independent human review before merge, no matter who (or what) authored it. The same applies to any change affecting security, privacy, data integrity, backward compatibility, or performance-sensitive paths.
+
+Two things do not count as an independent human review:
+
+- **The author's own review of AI-generated code.** The author drives the agent, provides its context, and shapes its solution. The author and the agent are a single workflow, not two reviewers. A single workflow can produce a convincing implementation of the wrong approach and not notice.
+- **An AI review requested by the author.** AI reviews are encouraged as an additional safety net, but they complement an independent human review rather than replace it.
+
+Community PRs always require a review and should only be merged with an approval.
