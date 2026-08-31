@@ -184,6 +184,27 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 													),
 													row.header
 												) }
+												aria-invalid={
+													isUnassignedCandidate
+												}
+												help={
+													// The help prop wires up
+													// aria-describedby, which the
+													// component ignores when
+													// passed directly.
+													isUnassignedCandidate ? (
+														<>
+															<Icon
+																icon={ caution }
+																size={ 16 }
+															/>
+															{ __(
+																'Not mapped.',
+																'woocommerce'
+															) }
+														</>
+													) : undefined
+												}
 												value={
 													// While nothing required is
 													// missing, an unassigned
@@ -204,18 +225,6 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 													)
 												}
 											/>
-											{ isUnassignedCandidate ? (
-												<p className="woocommerce-fulfillment-importer-mapping-table__error">
-													<Icon
-														icon={ caution }
-														size={ 16 }
-													/>
-													{ __(
-														'Not mapped.',
-														'woocommerce'
-													) }
-												</p>
-											) : null }
 											{ row.mapped === 'items' ? (
 												<p className="woocommerce-fulfillment-importer-mapping-help">
 													{ __(

@@ -319,7 +319,8 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		border-color: $alert-red;
 	}
 
-	&__error {
+	// The error message renders through the control's help slot.
+	td.is-error .components-base-control__help {
 		display: flex;
 		align-items: center;
 		gap: 4px;

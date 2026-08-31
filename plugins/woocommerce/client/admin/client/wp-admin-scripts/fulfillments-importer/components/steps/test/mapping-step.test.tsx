@@ -135,6 +135,56 @@ describe( 'MappingStep', () => {
 		expect( flagged[ 0 ]?.closest( 'tr' ) ).toHaveTextContent( 'Carrier' );
 	} );
 
+	it( 'exposes the flagged column error state to assistive tech', () => {
+		const state = buildStateWithHeaders( {
+			0: 'order_number',
+			1: '',
+			2: 'shipment_provider',
+		} );
+
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ jest.fn() }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		const select = screen.getByLabelText( 'Map column Tracking' );
+		expect( select ).toHaveAttribute( 'aria-invalid', 'true' );
+		const describedBy = select.getAttribute( 'aria-describedby' );
+		expect( describedBy ).toBeTruthy();
+		expect(
+			document.getElementById( describedBy as string )
+		).toHaveTextContent( 'Not mapped.' );
+	} );
+
+	it( 'shows unassigned columns as "Do not import" once nothing required is missing', () => {
+		const state = buildStateWithHeaders(
+			{
+				0: 'order_number',
+				1: 'tracking_number',
+				2: 'shipment_provider',
+				3: '',
+			},
+			[ 'Order ID', 'Tracking', 'Carrier', 'Note' ]
+		);
+		state.sample = [ '12345', 'TRK-1', 'UPS', 'hello' ];
+
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ jest.fn() }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		expect( screen.getByLabelText( 'Map column Note' ) ).toHaveValue(
+			'skip'
+		);
+		expect( document.querySelectorAll( 'td.is-error' ) ).toHaveLength( 0 );
+	} );
+
 	it( 'flags no columns when all required columns are mapped', () => {
 		const state = buildStateWithHeaders( {
 			0: 'order_number',
