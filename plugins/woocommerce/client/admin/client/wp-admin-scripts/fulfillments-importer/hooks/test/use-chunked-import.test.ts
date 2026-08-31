@@ -93,6 +93,39 @@ describe( 'useChunkedImport', () => {
 		expect( onError ).not.toHaveBeenCalled();
 	} );
 
+	it( 'honors a chunk size localized as a string', async () => {
+		// wp_localize_script casts scalars to strings.
+		window.wcFulfillmentsImporterSettings = {
+			importRoute: '/wc/v3/fulfillments/import',
+			chunkSize: '500',
+			maxRows: '5000',
+			providers: [],
+		};
+		mockedRunChunk.mockResolvedValueOnce( buildResponse( 2, 2, true ) );
+
+		const { result } = renderHook( () =>
+			useChunkedImport( {
+				token: 'tok',
+				total: 2,
+				mapping: { 0: 'order_number' },
+				notifyCustomer: false,
+				updateExisting: true,
+				onChunk: jest.fn(),
+				onFinish: jest.fn(),
+				onError: jest.fn(),
+			} )
+		);
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledWith(
+			expect.objectContaining( { limit: 500 } )
+		);
+		delete window.wcFulfillmentsImporterSettings;
+	} );
+
 	it( 'retries a transient chunk failure with backoff before succeeding', async () => {
 		mockedRunChunk
 			.mockRejectedValueOnce( new Error( 'flaky network' ) )

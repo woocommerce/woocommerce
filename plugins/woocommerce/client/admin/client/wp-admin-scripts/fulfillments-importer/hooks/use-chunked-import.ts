@@ -33,11 +33,13 @@ const RETRY_BACKOFFS_MS = [ 250, 1000 ];
 
 /**
  * Coerce a chunk size to an integer the /run route accepts, falling back to
- * the default when the value is missing or not a positive number.
+ * the default when the value is missing or not a positive number. Accepts
+ * numeric strings because wp_localize_script casts scalars to strings.
  */
 function normalizeChunkSize( value: unknown ): number {
-	if ( typeof value === 'number' && value > 0 ) {
-		return Math.min( MAX_CHUNK_SIZE, Math.max( 1, Math.floor( value ) ) );
+	const size = Number( value );
+	if ( Number.isFinite( size ) && size > 0 ) {
+		return Math.min( MAX_CHUNK_SIZE, Math.max( 1, Math.floor( size ) ) );
 	}
 	return FALLBACK_CHUNK_SIZE;
 }
