@@ -1,5 +1,5 @@
 /*global wc_tokenization_form_params */
-jQuery( function( $ ) {
+( function( $ ) {
 
 	/**
 	 * WCTokenizationForm class.
@@ -104,22 +104,20 @@ jQuery( function( $ ) {
 	};
 
 	/**
-	 * Initialize tokenization forms for all saved payment method lists in the DOM.
-	 * Guards against double-initialization on the same element.
+	 * Initialize.
+	 *
+	 * Register the listener synchronously (outside jQuery(fn)) so it is bound before
+	 * any DOM-ready callback runs. With this script loaded in the footer with a
+	 * defer strategy, wc-credit-card-form-init is fired from another script's
+	 * DOM-ready callback and would otherwise be missed if we deferred registration
+	 * until our own DOM-ready callback ran later in the queue.
 	 */
-	function initForms() {
-		$( 'ul.woocommerce-SavedPaymentMethods' ).each( function() {
-			if ( ! $( this ).data( 'wc-tokenization-form' ) ) {
-				$( this ).data( 'wc-tokenization-form', true );
-				$( this ).wc_tokenization_form();
-			}
+	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
+		// Loop over gateways with saved payment methods
+		var $saved_payment_methods = $( 'ul.woocommerce-SavedPaymentMethods' );
+
+		$saved_payment_methods.each( function() {
+			$( this ).wc_tokenization_form();
 		} );
-	}
-
-	$( document.body ).on(
-		'updated_checkout wc-credit-card-form-init',
-		initForms
-	);
-
-	initForms();
-} );
+	} );
+} )( jQuery );
