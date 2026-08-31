@@ -947,7 +947,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * stored variation name are appended so the name matches fully defined
 	 * variations. The stored product and variation names are not modified.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @param array           $cart_item Cart item.
 	 * @param WC_Product|null $product   Optional product object to use as the name source,
 	 *                                   e.g. the result of the `woocommerce_cart_item_product` filter.

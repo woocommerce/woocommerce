@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class SelectedVariationName {
 
@@ -31,7 +31,7 @@ class SelectedVariationName {
 	 * @param bool                 $filter_custom_attributes Whether to filter custom attribute values for cart display.
 	 * @return string
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_product_name( WC_Product $product, array $variation_attributes, bool $filter_custom_attributes = false ): string {
 		if ( ! $product->is_type( ProductType::VARIATION ) || empty( $variation_attributes ) ) {
@@ -107,7 +107,7 @@ class SelectedVariationName {
 			/**
 			 * Filters the separator used between a variation product title and its attributes.
 			 *
-			 * @since 3.0.0
+			 * @since 3.0.2
 			 * @param string     $separator Separator between the product title and attributes.
 			 * @param WC_Product $product Variation product object.
 			 */

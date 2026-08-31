@@ -4519,7 +4519,7 @@ function wc_get_theme_slug_for_templates() {
  * Gets and formats a list of cart item data + variations for display on the frontend.
  *
  * @since 3.3.0
- * @since 11.1.0 Added the `$product_name` parameter.
+ * @since 11.2.0 Added the `$product_name` parameter.
  * @param array       $cart_item   Cart item object.
  * @param bool        $flat        Should the data be returned flat or in a list.
  * @param string|null $product_name Product name displayed for the cart item, used to avoid
