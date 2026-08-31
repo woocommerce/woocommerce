@@ -9,6 +9,7 @@ import { Modal } from '@wordpress/components';
  * Internal dependencies
  */
 import ModalHeader from './modal-header';
+import Stepper from './stepper';
 import UploadStep from './steps/upload-step';
 import MappingStep from './steps/mapping-step';
 import ImportStep from './steps/import-step';
@@ -100,6 +101,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 					canClose={ canClose }
 				/>
 				<div className="woocommerce-fulfillment-importer-modal__body">
+					<Stepper currentStep={ state.step } />
 					<StepComponent
 						state={ state }
 						dispatch={ dispatch }

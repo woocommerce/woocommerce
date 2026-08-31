@@ -4,52 +4,46 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { closeSmall, chevronLeft } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import Stepper from './stepper';
 import type { ImporterStep } from '../hooks/use-importer-state';
 
 interface ModalHeaderProps {
 	currentStep: ImporterStep;
 	title: string;
-	onBack?: () => void;
 	onClose: () => void;
 	canClose: boolean;
 }
 
+/**
+ * Slim wizard header: title on the left, a text action on the right. The
+ * action reads "Close import" once results are shown, "Cancel" before, and
+ * disappears while the import is running so a half-finished import is not
+ * easy to walk away from by accident.
+ */
 const ModalHeader: React.FC< ModalHeaderProps > = ( {
 	currentStep,
 	title,
-	onBack,
 	onClose,
 	canClose,
 } ) => (
 	<header className="woocommerce-fulfillment-importer-modal__header">
-		<div className="woocommerce-fulfillment-importer-modal__header-row">
-			<div className="woocommerce-fulfillment-importer-modal__header-leading">
-				{ onBack ? (
-					<Button
-						icon={ chevronLeft }
-						label={ __( 'Back', 'woocommerce' ) }
-						onClick={ onBack }
-					/>
-				) : null }
-				<h2 className="woocommerce-fulfillment-importer-modal__title">
-					{ title }
-				</h2>
-			</div>
+		<span className="woocommerce-fulfillment-importer-modal__title">
+			{ title }
+		</span>
+		{ canClose ? (
 			<Button
-				icon={ closeSmall }
-				label={ __( 'Close', 'woocommerce' ) }
+				variant="link"
+				className="woocommerce-fulfillment-importer-modal__header-action"
 				onClick={ onClose }
-				disabled={ ! canClose }
-				accessibleWhenDisabled
-			/>
-		</div>
-		<Stepper currentStep={ currentStep } />
+			>
+				{ currentStep === 'done'
+					? __( 'Close import', 'woocommerce' )
+					: __( 'Cancel', 'woocommerce' ) }
+			</Button>
+		) : null }
 	</header>
 );
 

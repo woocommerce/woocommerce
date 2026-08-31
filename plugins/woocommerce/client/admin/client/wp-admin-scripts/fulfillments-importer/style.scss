@@ -64,30 +64,21 @@ $wp-admin-sidebar-width-collapsed: 36px;
 
 	&__header {
 		flex-shrink: 0;
-		border-bottom: 1px solid $gray-200;
-		padding: 16px 24px;
-		background: $white;
-	}
-
-	&__header-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
-		margin-bottom: 12px;
-	}
-
-	&__header-leading {
-		display: flex;
-		align-items: center;
-		gap: 8px;
+		border-bottom: 1px solid $gray-200;
+		padding: 18px 24px;
+		background: $white;
 	}
 
 	&__title {
 		margin: 0;
-		font-size: 20px;
-		line-height: 1.4;
-		font-weight: 600;
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: 500;
+		color: $gray-900;
 	}
 
 	&__body {
@@ -95,6 +86,10 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		min-height: 0;
 		overflow-y: auto;
 		padding: 24px;
+	}
+
+	&__body > .woocommerce-fulfillment-importer-stepper {
+		margin: 8px 0 32px;
 	}
 }
 
@@ -152,22 +147,40 @@ $wp-admin-sidebar-width-collapsed: 36px;
 .woocommerce-fulfillment-importer-step {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-	max-width: 720px;
+	gap: 24px;
+	max-width: 700px;
 	margin: 0 auto;
 
 	h2 {
-		font-size: 18px;
+		font-size: 16px;
+		line-height: 24px;
 		margin: 0;
+	}
+
+	// Step content sits in cards; the action buttons sit below them, aligned
+	// with the card's end edge.
+	&__card.components-card {
+		border: 1px solid $gray-100;
+		border-radius: 8px;
+		box-shadow: none;
+	}
+
+	&__card .components-card__body {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 24px;
+
+		> p {
+			margin: 0;
+		}
 	}
 
 	&__footer {
 		display: flex;
 		justify-content: flex-end;
+		align-items: center;
 		gap: 8px;
-		padding-top: 16px;
-		border-top: 1px solid $gray-200;
-		margin-top: 8px;
 	}
 }
 
