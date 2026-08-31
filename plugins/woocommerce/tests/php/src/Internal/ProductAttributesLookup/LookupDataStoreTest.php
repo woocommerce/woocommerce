@@ -121,6 +121,15 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Published variation SQL rejects invalid identifiers.
+	 */
+	public function test_published_variation_exists_clause_rejects_invalid_identifier(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->get_published_variation_exists_clause( 'lookup; DROP TABLE posts' );
+	}
+
+	/**
 	 * @testdox `create_data_for_product` creates the appropriate entries for simple products, skipping custom product attributes.
 	 *
 	 * @testWith [true, true]

@@ -110,41 +110,66 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Get the SQL condition for filterable attribute lookup rows.
+	 * Get the SQL condition that limits variation attribute lookup rows to published variations.
+	 *
+	 * Rows are kept for variations that leave the published state so that filtering reflects the change right
+	 * away, rather than waiting for the lookup table update to be processed. Readers exclude them instead.
+	 *
+	 * Use this in queries that already pin `is_variation_attribute` to 1. Queries that can return both product
+	 * and variation attribute rows want get_filterable_attribute_where_clause() instead, and queries pinned to
+	 * product attribute rows need neither.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
-	 * @param string $lookup_table_alias Lookup table alias.
+	 * @param string $lookup_table_reference The lookup table name or alias, as spelled in the query being built.
 	 * @return string SQL condition.
-	 * @throws \InvalidArgumentException When the lookup table alias is not a valid SQL identifier.
+	 * @throws \InvalidArgumentException When the lookup table reference is not a valid SQL identifier.
 	 *
 	 * @since 11.2.0
 	 */
-	public function get_filterable_attribute_where_clause( string $lookup_table_alias ): string {
+	public function get_published_variation_exists_clause( string $lookup_table_reference ): string {
 		global $wpdb;
 
-		if ( 1 !== preg_match( '/\A[A-Za-z0-9_]+\z/', $lookup_table_alias ) ) {
-			throw new \InvalidArgumentException( 'The lookup table alias must be a valid SQL identifier.' );
+		if ( 1 !== preg_match( '/\A[A-Za-z0-9_]+\z/', $lookup_table_reference ) ) {
+			throw new \InvalidArgumentException( 'The lookup table reference must be a valid SQL identifier.' );
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup alias has been validated as an SQL identifier.
-		$where_clause = $wpdb->prepare(
-			"(
-				{$lookup_table_alias}.is_variation_attribute = 0
-				OR EXISTS (
-					SELECT 1
-					FROM {$wpdb->posts}
-					WHERE {$wpdb->posts}.ID = {$lookup_table_alias}.product_id
-						AND {$wpdb->posts}.post_type = %s
-						AND {$wpdb->posts}.post_status = %s
-				)
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table reference has been validated as an SQL identifier.
+		$exists_clause = $wpdb->prepare(
+			"EXISTS (
+				SELECT 1
+				FROM {$wpdb->posts}
+				WHERE {$wpdb->posts}.ID = {$lookup_table_reference}.product_id
+					AND {$wpdb->posts}.post_type = %s
+					AND {$wpdb->posts}.post_status = %s
 			)",
 			'product_variation',
 			ProductStatus::PUBLISH
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		return $where_clause;
+		return $exists_clause;
+	}
+
+	/**
+	 * Get the SQL condition for filterable attribute lookup rows.
+	 *
+	 * Product attribute rows are always filterable; variation attribute rows are only filterable while the
+	 * variation is published.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param string $lookup_table_reference The lookup table name or alias, as spelled in the query being built.
+	 * @return string SQL condition.
+	 * @throws \InvalidArgumentException When the lookup table reference is not a valid SQL identifier.
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_filterable_attribute_where_clause( string $lookup_table_reference ): string {
+		$published_variation_exists = $this->get_published_variation_exists_clause( $lookup_table_reference );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table reference was validated by the call above.
+		return "( {$lookup_table_reference}.is_variation_attribute = 0 OR {$published_variation_exists} )";
 	}
 
 	/**

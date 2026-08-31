@@ -211,12 +211,12 @@ class Filterer implements RegisterHooksInterface {
 		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
 			$count                      = count( $attribute_ids_for_and_filtering );
 			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
+			$published_variation_exists = $this->data_store->get_published_variation_exists_clause( 'lt' );
 			$clauses[]                  = "
 				{$clause_root}
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=0
-				AND {$filterable_attribute_where_clause}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_id
@@ -225,7 +225,7 @@ class Filterer implements RegisterHooksInterface {
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=1
-				AND {$filterable_attribute_where_clause}
+				AND {$published_variation_exists}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_or_parent_id
@@ -371,10 +371,9 @@ class Filterer implements RegisterHooksInterface {
 		 *
 		 * @since 9.5.0.
 		 */
-		$hide_out_of_stock                           = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-		$in_stock_clause                             = $hide_out_of_stock ? ' AND in_stock = 1' : '';
-		$filterable_attribute_where_clause           = $this->data_store->get_filterable_attribute_where_clause( $this->lookup_table_name );
-		$filterable_attribute_where_clause_for_alias = $this->data_store->get_filterable_attribute_where_clause( 'lt' );
+		$hide_out_of_stock                 = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$in_stock_clause                   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
+		$filterable_attribute_where_clause = $this->data_store->get_filterable_attribute_where_clause( $this->lookup_table_name );
 
 		$query           = array();
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
@@ -411,8 +410,9 @@ class Filterer implements RegisterHooksInterface {
 				}
 
 				if ( ! empty( $and_term_ids ) ) {
-					$terms_count   = count( $and_term_ids );
-					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
+					$terms_count                = count( $and_term_ids );
+					$term_ids_list              = '(' . join( ',', $and_term_ids ) . ')';
+					$published_variation_exists = $this->data_store->get_published_variation_exists_clause( 'lt' );
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 					// (causes the filtering subquery to be executed only once).
 					$query['where'] .= "
@@ -420,7 +420,6 @@ class Filterer implements RegisterHooksInterface {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=0
-							AND {$filterable_attribute_where_clause_for_alias}
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 							GROUP BY product_id
@@ -429,7 +428,7 @@ class Filterer implements RegisterHooksInterface {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=1
-							AND {$filterable_attribute_where_clause_for_alias}
+							AND {$published_variation_exists}
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 							GROUP BY product_or_parent_id
