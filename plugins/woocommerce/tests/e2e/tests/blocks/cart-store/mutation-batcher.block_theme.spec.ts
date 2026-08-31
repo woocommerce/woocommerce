@@ -146,6 +146,32 @@ test.describe( 'Mutation Batcher', () => {
 	} ) => {
 		await frontendUtils.goToShop();
 
+		// This project reuses one authenticated user's persistent cart across
+		// every test in the file (not a fresh guest cart per test), so empty
+		// it first. The assertions below count from an empty cart, and this
+		// runs before the batch route is installed so the cleanup requests are
+		// not intercepted.
+		await page.evaluate( async () => {
+			const { store } = await import( '@wordpress/interactivity' );
+			const unlockKey =
+				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+			await import( '@woocommerce/stores/woocommerce/cart' );
+			const { actions, state } = store(
+				'woocommerce',
+				{},
+				{ lock: unlockKey }
+			);
+
+			await actions.refreshCartItems();
+			const existingKeys = state.cart.items.map(
+				( item: { key: string } ) => item.key
+			);
+			for ( const key of existingKeys ) {
+				await actions.removeCartItem( key );
+			}
+		} );
+
 		const productButtonBlock = page
 			.locator( '.wc-block-components-product-button' )
 			.first();
