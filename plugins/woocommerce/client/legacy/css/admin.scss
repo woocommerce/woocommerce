@@ -3254,9 +3254,8 @@ body.woocommerce_page_wc-orders {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
-	// Gated behind the `order-detail-redesign` feature flag (body class added
-	// by OrderDetailRedesign\Init). `:has(#poststuff)` excludes the orders
-	// list screen (which doesn't render #poststuff).
+	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
+	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
 	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
 		max-width: 1200px;
 		margin-inline: auto;
@@ -3741,8 +3740,7 @@ body.woocommerce_page_wc-orders {
 			}
 		}
 
-		// Hide the small-screen date/status copies when the corresponding column
-		// is hidden via Screen Options.
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
 		&:has(thead th.column-order_date.hidden) .order_date.small-screen-only {
 			display: none;
 		}
@@ -6510,8 +6508,7 @@ img.help_tip {
 			}
 		}
 
-		/* Warning asterisk (indicates if there is a problem with a downloadable
-		file). */
+		/* Warning asterisk (indicates if there is a problem with a downloadable file). */
 		span.disabled {
 			color: var(--wc-red);
 		}
@@ -8314,9 +8311,8 @@ table.bar_chart {
 		width: 100% !important;
 	}
 
-	// Reserve the end of the field for the clear (x) and chevron inside modals
-	// on every WP version; the .wc-wp-version-gte-70 rule below only reaches
-	// WP 7.0+.
+	// Reserve the end of the field for the clear (x) and chevron inside modals on every WP
+	// version; the .wc-wp-version-gte-70 rule below only reaches WP 7.0+.
 	.wc-backbone-modal-content .select2-container .select2-selection--single {
 
 		.select2-selection__rendered {
@@ -8876,8 +8872,7 @@ table.bar_chart {
 			.select2-selection__rendered {
 				line-height: 38px;
 				padding-block: 0;
-				// 12px matches WP 7.0 native input padding; 40px reserves the end
-				// for the chevron and the clear (x).
+				// 12px matches WP 7.0 native input padding; 40px reserves the end for the chevron and the clear (x).
 				padding-inline: 12px 40px;
 			}
 
@@ -8913,8 +8908,7 @@ table.bar_chart {
 	// Order edit address Select2: escape legacy 32px override at admin.scss:2019
 	// so Country/State selects match the 40px WP 7.0 input height of their sibling
 	// fields. Selector mirrors the legacy structure exactly (#order_data
-	// .order_data_column div.edit_address ...) to outrank it on specificity
-	// (1,5,1).
+	// .order_data_column div.edit_address ...) to outrank it on specificity (1,5,1).
 	#order_data .order_data_column div.edit_address .select2-container .select2-selection--single {
 		height: 40px;
 
@@ -8988,8 +8982,7 @@ table.bar_chart {
 	}
 
 
-	// Order actions reload button: icon line-height must match WP 7.0 button
-	// height.
+	// Order actions reload button: icon line-height must match WP 7.0 button height.
 	.button.wc-reload {
 
 		&::after {
@@ -9002,8 +8995,7 @@ table.bar_chart {
 		margin: 0;
 	}
 
-	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls
-	// inward.
+	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls inward.
 	#order_data .order_data_column .form-field-wide {
 
 		input.hour,
@@ -9012,9 +9004,8 @@ table.bar_chart {
 		}
 	}
 
-	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is
-	// present. Revert to block + float to stack copy/trash links on the left,
-	// button on the right.
+	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is present.
+	// Revert to block + float to stack copy/trash links on the left, button on the right.
 	#major-publishing-actions {
 		display: block;
 		overflow: hidden;
@@ -9056,8 +9047,7 @@ table.bar_chart {
 		height: 50px;
 	}
 
-	// Variable product low stock row: clear preceding floats to prevent
-	// vertical stretching.
+	// Variable product low stock row: clear preceding floats to prevent vertical stretching.
 	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
 		clear: both;
 	}
@@ -9091,8 +9081,7 @@ table.bar_chart {
 
 	// Action button rows wrap/stack at ~1200px viewports.
 	@media screen and (max-width: 1200px) {
-		// Order items meta box: reduce button padding to prevent wrapping
-		// prematurely.
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
 		#woocommerce-order-items .wc-order-data-row {
 
 			.button {
@@ -9101,8 +9090,7 @@ table.bar_chart {
 			}
 		}
 
-		// Refund action buttons: switch to flex layout so long labels wrap
-		// gracefully.
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
 		#woocommerce-order-items .refund-actions {
 			display: flex;
 			flex-wrap: wrap;
@@ -9130,8 +9118,7 @@ table.bar_chart {
 		}
 	}
 
-	// Current page in pagination gets smaller than surrounding buttons at
-	// 782px breakpoint.
+	// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
 	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
 	&.woocommerce_page_wc-orders .tablenav,
 	&.post-type-product .tablenav,
@@ -9145,8 +9132,7 @@ table.bar_chart {
 		}
 	}
 
-	// .woocommerce-embed-page sets notice padding to 1px 12px, which is too
-	// small for WP 7.0's dismiss button positioning.
+	// .woocommerce-embed-page sets notice padding to 1px 12px, which is too small for WP 7.0's dismiss button positioning.
 	// Restore WP 7.0's padding so the dismiss button aligns correctly.
 	&.woocommerce-embed-page .notice {
 		padding: 8px 12px;
@@ -9191,10 +9177,9 @@ table.bar_chart {
 	}
 
 	// Align the product description editor with the meta boxes below it.
-	// #normal-sortables adds 4px of padding around postboxes, which
-	// #post-body-content doesn't, so the description editor ends up 8px wider
-	// than neighbouring postboxes on WP 7.0 (where the radius makes the
-	// misalignment visible).
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
 	&.post-type-product #postdivrich.woocommerce-product-description {
 		margin-left: 4px;
 		margin-right: 4px;
@@ -9298,8 +9283,7 @@ table.bar_chart {
 		}
 	}
 
-	// Shipping zone name input: ID selector in the base rule outranks the
-	// form-table override above.
+	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
 	.wc-shipping-zone-settings #zone_name {
 		padding: 0 12px;
 	}
@@ -9317,16 +9301,14 @@ table.bar_chart {
 		line-height: 40px;
 	}
 
-	// Help-tip icon: vertical-align middle aligns to text baseline, not
-	// line-box middle, so it lands near the top of the 40px row. Push down to
-	// visual centre — but skip checkbox/radio rows, whose inputs are still
-	// ~16px and don't need the offset.
+	// Help-tip icon: vertical-align middle aligns to text baseline, not line-box middle,
+	// so it lands near the top of the 40px row. Push down to visual centre — but
+	// skip checkbox/radio rows, whose inputs are still ~16px and don't need the offset.
 	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) .woocommerce-help-tip {
 		margin-top: 12px;
 	}
 
-	// Checkbox/radio rows: small nudge so the help-tip visually centres with
-	// the control.
+	// Checkbox/radio rows: small nudge so the help-tip visually centres with the control.
 	.woocommerce_options_panel .form-field:has(input[type="checkbox"], input[type="radio"]) .woocommerce-help-tip {
 		margin-bottom: 3px;
 	}
@@ -10432,8 +10414,7 @@ body.woocommerce-admin-full-screen {
 }
 
 /**
- * Fixes for offline payment methods pages rendered in legacy mode (not
- * Reactified).
+ * Fixes for offline payment methods pages rendered in legacy mode (not Reactified).
  */
 body.woocommerce-settings-payments-section_legacy {
 

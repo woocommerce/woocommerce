@@ -31,23 +31,16 @@
 		# change and belongs in its own PR.
 		"declaration-property-unit-allowed-list": null,
 
-		# Kept on, with one addition to the preset's ignore list. The preset
-		# applies this to comments only and already exempts URLs. A
-		# stylelint-disable directive cannot be wrapped, and the longest rule
-		# name we suppress makes the directive 80 characters before its "--"
-		# justification even starts, so those lines can never fit. Repeating
-		# the preset's pattern is required: ignorePattern replaces it rather
-		# than extending it.
-		"max-line-length": [
-			80,
-			{
-				"ignore": "non-comments",
-				"ignorePattern": [
-					"/(https?://[0-9,a-z]*.*)|(^description\\:.+)|(^tags\\:.+)/i",
-					"/stylelint-disable/"
-				]
-			}
-		],
+		# 57 hits, all comments; the preset only checks those and already
+		# ignores URLs. Off because the rule is on its way out and nothing else
+		# here enforces a column limit: stylelint 16 deleted it with the rest
+		# of the stylistic rules (client/blocks is already there), client/admin
+		# and packages/js/email-editor both switch it off, .markdownlint.json
+		# sets MD013 to 9999, and there is no PHPCS LineLength override. Two of
+		# the hits could not comply anyway: a stylelint-disable directive has to
+		# stay on one line, and our longest suppressed rule name puts it at 80
+		# characters before the "--" justification starts.
+		"max-line-length": null,
 
 		# 30927 hits. Satisfying it means reordering the legacy cascade, which
 		# changes rendering. Not realistically fixable here.

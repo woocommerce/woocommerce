@@ -11,9 +11,8 @@ $blue:          	#2ea2cc !default;
 $primary:           #720eec !default;                                  // Primary color for buttons (alt)
 $primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color background.
 
-// In the past, the secondary color was derived from the WooCommerce purple
-// (the primary color). However, since it was used in many places in the
-// frontend, we decided not to modify it
+// In the past, the secondary color was derived from the WooCommerce purple (the primary color).
+// However, since it was used in many places in the frontend, we decided not to modify it
 // after the WooCommerce rebranding.
 // See: https://github.com/woocommerce/woocommerce/issues/55165.
 $secondary:         #e9e6ed !default;                                  // Secondary color for buttons, backgrounds, etc.
@@ -38,8 +37,7 @@ $wp-alert-red:      #cc1818 !default;
 // Border radius tokens — mirrors WP Design System naming.
 $radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
 
-// Grayscale tokens — mirror @wordpress/base-styles/_colors.scss for WP 7.0
-// alignment.
+// Grayscale tokens — mirror @wordpress/base-styles/_colors.scss for WP 7.0 alignment.
 // Adjacent work in #64280 adds $gray-700 and $gray-900 — coordinate on merge.
 $gray-100:          #f6f7f7 !default;                                  // Subtle backgrounds.
 $gray-200:          #dcdcde !default;                                  // Borders, dividers.

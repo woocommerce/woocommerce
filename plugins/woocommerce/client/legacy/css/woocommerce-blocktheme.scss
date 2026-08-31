@@ -1,7 +1,6 @@
 /**
 * woocommerce-blocktheme.scss
-* Block theme default styles to ensure WooCommerce looks better out of the box
-* with block themes that are not optimised for WooCommerce specifically.
+* Block theme default styles to ensure WooCommerce looks better out of the box with block themes that are not optimised for WooCommerce specifically.
 */
 @import "fonts";
 @import "variables";
@@ -456,8 +455,7 @@ a.added_to_cart {
 	}
 
 	.addresses .title .edit {
-		// Align "Add" and "Edit" buttons when title is too long
-		// (/my-account/edit-address/).
+		// Align "Add" and "Edit" buttons when title is too long (/my-account/edit-address/).
 		display: block;
 		margin-bottom: 1em;
 	}
@@ -485,8 +483,7 @@ a.added_to_cart {
 * My account - Login form
 */
 .woocommerce-page {
-	// For block themes we increase the padding of the input fields across
-	// classic checkout and my account pages.
+	// For block themes we increase the padding of the input fields across classic checkout and my account pages.
 	form .form-row {
 
 		select,
