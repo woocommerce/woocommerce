@@ -53,6 +53,7 @@
 					"css/*.scss",
 					"js/admin/*.js",
 					"js/frontend/*.js",
+					"Gruntfile.js",
 					".stylelintrc"
 				],
 				"ignore": [
