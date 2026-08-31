@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Runners;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Runners\Cli;
@@ -552,10 +553,13 @@ class CliTests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private function age_the_lock( int $seconds ): void {
-		$state                        = get_option( 'wc_bis_migration_state' );
-		$state['lock']['acquired_at'] = time() - $seconds;
+		$lock = ( new MigrationState() )->get_lock();
 
-		update_option( 'wc_bis_migration_state', $state );
+		update_option(
+			Constants::LOCK_OPTION,
+			sprintf( '%010d|%s', time() - $seconds, $lock['owner'] ),
+			false
+		);
 	}
 
 	/**
@@ -599,6 +603,7 @@ class CliTests extends WC_Unit_Test_Case {
 	 */
 	private function clear_migration_options(): void {
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
 	}

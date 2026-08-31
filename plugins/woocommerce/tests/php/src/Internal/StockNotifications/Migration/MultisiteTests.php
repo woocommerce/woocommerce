@@ -302,6 +302,7 @@ class MultisiteTests extends WC_Unit_Test_Case {
 	 */
 	private function clear_migration_options(): void {
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
 	}

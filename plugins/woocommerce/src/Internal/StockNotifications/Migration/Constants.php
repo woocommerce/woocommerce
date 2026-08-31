@@ -48,9 +48,15 @@ final class Constants {
 	public const DB_VERSION_OPTION = 'wc_bis_db_version';
 
 	/**
-	 * Option holding the migration's run state: lock, cursors, cached counts.
+	 * Option holding the migration's run state: cursors, cached counts.
 	 */
 	public const STATE_OPTION = 'wc_bis_migration_state';
+
+	/**
+	 * Option holding the run lock. Its own row rather than a field of STATE_OPTION, so it
+	 * can be claimed with an atomic INSERT instead of a read-then-write.
+	 */
+	public const LOCK_OPTION = 'wc_bis_migration_lock';
 
 	/**
 	 * Autoloaded flag set the first time any row is migrated, inserted or adopted.

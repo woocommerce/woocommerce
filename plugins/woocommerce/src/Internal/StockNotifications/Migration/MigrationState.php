@@ -13,9 +13,11 @@ defined( 'ABSPATH' ) || exit;
  * Reads and writes `wc_bis_migration_state`, the run state for the BIS migration.
  *
  * The option is written with autoload off: it changes on every batch, and nothing
- * outside a migration run needs it in memory. It holds the CLI run `lock`, the
- * per-section `cursor`, cached display-only `counts` and `totals`, and the known-`losses`
- * snapshot.
+ * outside a migration run needs it in memory. It holds the per-section `cursor`, cached
+ * display-only `counts` and `totals`, and the known-`losses` snapshot. The run lock is not
+ * among them: it lives in its own `wc_bis_migration_lock` row, claimed by an atomic INSERT,
+ * because a lock read out of this option and written back could be handed to two runs at
+ * once. This class owns both.
  *
  * State here is an optimization, never authority. What has actually been migrated is
  * recorded by the markers the migrators write onto legacy and Core rows
@@ -31,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  * batch — which is what ends the run — without moving the cursor a later live run starts
  * from, or caching counts for work it only pretended to do. The run lock is the exception:
  * it is cross-process mutual exclusion rather than run state, so it is always read from and
- * written to the stored option.
+ * written to its own row, dry run or not.
  */
 class MigrationState {
 
@@ -39,6 +41,20 @@ class MigrationState {
 	 * The option name this class reads and writes.
 	 */
 	private const OPTION_NAME = Constants::STATE_OPTION;
+
+	/**
+	 * The option row holding the run lock.
+	 */
+	private const LOCK_OPTION_NAME = Constants::LOCK_OPTION;
+
+	/**
+	 * Digits the lock's acquisition timestamp is zero-padded to in the stored value.
+	 *
+	 * Fixed width is what lets the database compare stored values as plain strings, without
+	 * a numeric cast: for any timestamp this side of the year 2286 the padded form is ten
+	 * digits, so lexical order matches chronological order.
+	 */
+	private const LOCK_TIME_DIGITS = 10;
 
 	/**
 	 * A CLI lock older than this is treated as abandoned and reclaimed.
@@ -55,7 +71,6 @@ class MigrationState {
 	 * @var array
 	 */
 	private const DEFAULT_STATE = array(
-		'lock'    => null,
 		'cursor'  => array(),
 		'counts'  => array(),
 		'losses'  => null,
@@ -120,7 +135,7 @@ class MigrationState {
 
 		$state = array_merge( self::DEFAULT_STATE, $stored );
 
-		foreach ( array( 'lock', 'losses', 'failure' ) as $key ) {
+		foreach ( array( 'losses', 'failure' ) as $key ) {
 			if ( null !== $state[ $key ] && ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = null;
 			}
@@ -162,7 +177,15 @@ class MigrationState {
 	}
 
 	/**
-	 * Attempt to acquire the CLI run lock.
+	 * Attempt to acquire the run lock.
+	 *
+	 * The claim is an atomic INSERT, which the unique `option_name` key turns into a mutex.
+	 * A read-then-write claim would hand the lock to both a CLI run and the Tools screen when
+	 * they start at the same moment, and nothing downstream catches what follows: the two runs
+	 * walk the same rows, both find no migration marker, and both insert - leaving the shopper
+	 * subscribed twice and emailed twice on restock. A lock that has gone stale, or one stamped
+	 * in the future by a skewed clock, is taken over by the conditional UPDATE instead. Modeled
+	 * on `WC_Install::create_lock()`.
 	 *
 	 * @param string $owner Identifier for the process acquiring the lock, used only for
 	 *                      reporting who holds it.
@@ -170,31 +193,64 @@ class MigrationState {
 	 *              a lock that is not yet stale.
 	 */
 	public function acquire_lock( string $owner ): bool {
-		$state = $this->read_stored_state();
+		global $wpdb;
 
-		if ( $this->is_lock_fresh( $state['lock'] ) ) {
-			return false;
-		}
+		$now   = time();
+		$claim = $this->encode_lock( $now, $owner );
 
-		$state['lock'] = array(
-			'owner'       => $owner,
-			'acquired_at' => time(),
+		// A contended INSERT fails on the duplicate key by design, so keep that expected
+		// failure from spamming the log in debug mode; restore the prior setting after.
+		$suppress = $wpdb->suppress_errors( true );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$acquired = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => self::LOCK_OPTION_NAME,
+				'option_value' => $claim,
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
 		);
 
-		$this->write_stored_state( $state );
+		$wpdb->suppress_errors( $suppress );
+		$this->flush_lock_cache();
 
-		return true;
+		if ( $acquired ) {
+			return true;
+		}
+
+		// A value at or past `$now + 1` was stamped by a clock ahead of this one. Left alone it
+		// would never age into staleness and would refuse every run forever, with no way out but
+		// editing the option by hand, so it is taken over the same way an abandoned lock is.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$stolen = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND ( option_value < %s OR option_value >= %s )",
+				$claim,
+				self::LOCK_OPTION_NAME,
+				$this->encode_lock( $now - self::STALE_LOCK_SECONDS, '' ),
+				$this->encode_lock( $now + 1, '' )
+			)
+		);
+
+		$this->flush_lock_cache();
+
+		return (bool) $stolen;
 	}
 
 	/**
-	 * Release the CLI run lock, whoever holds it.
+	 * Release the run lock, whoever holds it.
 	 *
 	 * @return void
 	 */
 	public function release_lock(): void {
-		$state         = $this->read_stored_state();
-		$state['lock'] = null;
-		$this->write_stored_state( $state );
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->delete( $wpdb->options, array( 'option_name' => self::LOCK_OPTION_NAME ), array( '%s' ) );
+
+		$this->flush_lock_cache();
 	}
 
 	/**
@@ -210,16 +266,29 @@ class MigrationState {
 	 * @return bool True when a lock owned by $owner was released.
 	 */
 	public function release_lock_owned_by( string $owner ): bool {
-		$state = $this->read_stored_state();
+		global $wpdb;
 
-		if ( null === $state['lock'] || ( $state['lock']['owner'] ?? null ) !== $owner ) {
+		$stored = $this->read_stored_lock();
+
+		if ( null === $stored || $stored['owner'] !== $owner ) {
 			return false;
 		}
 
-		$state['lock'] = null;
-		$this->write_stored_state( $state );
+		// Delete the exact value that was read, so a lock a third process has taken over in
+		// the meantime is left where it is.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->delete(
+			$wpdb->options,
+			array(
+				'option_name'  => self::LOCK_OPTION_NAME,
+				'option_value' => $stored['value'],
+			),
+			array( '%s', '%s' )
+		);
 
-		return true;
+		$this->flush_lock_cache();
+
+		return (bool) $deleted;
 	}
 
 	/**
@@ -232,24 +301,36 @@ class MigrationState {
 	 * @return void
 	 */
 	public function refresh_lock(): void {
-		$state = $this->read_stored_state();
+		global $wpdb;
 
-		if ( null === $state['lock'] ) {
+		$stored = $this->read_stored_lock();
+
+		if ( null === $stored ) {
 			return;
 		}
 
-		$state['lock']['acquired_at'] = time();
+		// Match on the value that was read: a run whose lock has already been taken over must
+		// not stamp its own time onto the new holder's row.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s",
+				$this->encode_lock( time(), $stored['owner'] ),
+				self::LOCK_OPTION_NAME,
+				$stored['value']
+			)
+		);
 
-		$this->write_stored_state( $state );
+		$this->flush_lock_cache();
 	}
 
 	/**
-	 * Whether a CLI run lock is currently held and not stale.
+	 * Whether a run lock is currently held and not stale.
 	 *
 	 * @return bool
 	 */
 	public function is_lock_held(): bool {
-		return $this->is_lock_fresh( $this->read_stored_state()['lock'] );
+		return $this->is_lock_fresh( $this->get_lock() );
 	}
 
 	/**
@@ -258,16 +339,84 @@ class MigrationState {
 	 * Returns the lock even when stale; callers that need "is it actually held" should
 	 * use is_lock_held() instead.
 	 *
-	 * @return array|null `owner` and `acquired_at` when a lock entry is present.
+	 * @return array|null `owner` and `acquired_at` when a lock row is present and readable.
 	 */
 	public function get_lock(): ?array {
-		return $this->read_stored_state()['lock'];
+		$stored = $this->read_stored_lock();
+
+		if ( null === $stored ) {
+			return null;
+		}
+
+		return array(
+			'owner'       => $stored['owner'],
+			'acquired_at' => $stored['acquired_at'],
+		);
+	}
+
+	/**
+	 * Read the lock row, parsed into its parts.
+	 *
+	 * Read straight from the database rather than through `get_option()`: the claim and the
+	 * takeover are direct writes, so a cached copy could report a lock that a concurrent
+	 * request has already released or stolen. A value that does not parse - a row a merchant
+	 * or an older build wrote by hand - reads as no lock at all, and `acquire_lock()` takes
+	 * it over.
+	 *
+	 * @return array|null `value` (the stored string, for compare-and-set), `owner` and
+	 *                    `acquired_at`, or null when there is no readable lock.
+	 */
+	private function read_stored_lock(): ?array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+				self::LOCK_OPTION_NAME
+			)
+		);
+
+		if ( ! is_string( $value ) || ! preg_match( '/^(\d+)\|(.*)$/s', $value, $matches ) ) {
+			return null;
+		}
+
+		return array(
+			'value'       => $value,
+			'owner'       => $matches[2],
+			'acquired_at' => (int) $matches[1],
+		);
+	}
+
+	/**
+	 * Build the stored form of a lock: its acquisition time, then its owner.
+	 *
+	 * @param int    $acquired_at Acquisition time, as a Unix timestamp.
+	 * @param string $owner       Identifier of the process holding the lock.
+	 * @return string
+	 */
+	private function encode_lock( int $acquired_at, string $owner ): string {
+		return sprintf( '%0' . self::LOCK_TIME_DIGITS . 'd|%s', max( 0, $acquired_at ), $owner );
+	}
+
+	/**
+	 * Drop the cached copy of the lock row after writing it directly.
+	 *
+	 * This class never reads the lock through `get_option()`, but the object cache does not
+	 * know that: a direct write leaves whatever `get_option()` last cached in place, and a
+	 * stale `notoptions` entry would keep hiding a row this process just created.
+	 *
+	 * @return void
+	 */
+	private function flush_lock_cache(): void {
+		wp_cache_delete( self::LOCK_OPTION_NAME, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
 	 * Whether a lock entry is present and within the stale threshold.
 	 *
-	 * @param array|null $lock The lock entry from state.
+	 * @param array|null $lock The lock entry, as returned by get_lock().
 	 * @return bool
 	 */
 	private function is_lock_fresh( ?array $lock ): bool {
@@ -275,13 +424,13 @@ class MigrationState {
 			return false;
 		}
 
-		$acquired_at = $lock['acquired_at'] ?? null;
+		$acquired_at = $lock['acquired_at'];
 
 		// A timestamp in the future makes the age below negative, which is always under the
 		// stale threshold: the lock would then read as fresh forever and refuse every run,
 		// with no way out but editing the option by hand. Clock skew on a restored or moved
 		// site is enough to produce one, so treat it as stale and let the next run reclaim it.
-		if ( ! is_int( $acquired_at ) || $acquired_at > time() ) {
+		if ( $acquired_at > time() ) {
 			return false;
 		}
 

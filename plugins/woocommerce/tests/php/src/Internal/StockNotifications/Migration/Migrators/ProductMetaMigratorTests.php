@@ -40,6 +40,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 	}
 
 	/**
@@ -47,6 +48,7 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 
 		parent::tearDown();
 	}

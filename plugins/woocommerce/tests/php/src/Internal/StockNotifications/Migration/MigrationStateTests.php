@@ -40,6 +40,7 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( Constants::STATE_OPTION );
+		delete_option( Constants::LOCK_OPTION );
 
 		parent::tearDown();
 	}
@@ -52,7 +53,6 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 
 		$state = $this->sut->get_state();
 
-		$this->assertNull( $state['lock'] );
 		$this->assertSame( array(), $state['cursor'] );
 		$this->assertSame( array(), $state['counts'] );
 		$this->assertSame( array(), $state['totals'] );
@@ -60,13 +60,14 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a scalar lock should not reach the lock freshness check as a TypeError.
+	 * @testdox an unreadable lock row should read as no lock, not fatal or block a run.
 	 */
-	public function test_a_scalar_lock_does_not_fatal(): void {
-		update_option( Constants::STATE_OPTION, array( 'lock' => 'held' ), false );
+	public function test_an_unreadable_lock_row_does_not_block_a_run(): void {
+		update_option( Constants::LOCK_OPTION, 'held', false );
 
 		$this->assertFalse( $this->sut->is_lock_held() );
 		$this->assertNull( $this->sut->get_lock() );
+		$this->assertTrue( $this->sut->acquire_lock( 'this run' ), 'An unreadable lock must be reclaimable.' );
 	}
 
 	/**
@@ -90,32 +91,63 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	 * @testdox a lock timestamped in the future should be reclaimable, not permanent.
 	 */
 	public function test_a_future_lock_does_not_block_every_run_forever(): void {
-		update_option(
-			Constants::STATE_OPTION,
-			array(
-				'lock' => array(
-					'owner'       => 'a run with a bad clock',
-					'acquired_at' => PHP_INT_MAX,
-				),
-			),
-			false
-		);
+		$this->write_lock( PHP_INT_MAX, 'a run with a bad clock' );
 
 		$this->assertFalse( $this->sut->is_lock_held() );
 		$this->assertTrue( $this->sut->acquire_lock( 'this run' ), 'A future lock must be reclaimable.' );
+		$this->assertSame( 'this run', $this->sut->get_lock()['owner'] );
 	}
 
 	/**
-	 * @testdox a non-integer acquired_at should read as stale.
+	 * @testdox a lock older than the stale threshold should be taken over by the next run.
 	 */
-	public function test_a_non_integer_acquired_at_reads_as_stale(): void {
-		update_option(
-			Constants::STATE_OPTION,
-			array( 'lock' => array( 'acquired_at' => 'right now' ) ),
-			false
-		);
+	public function test_a_stale_lock_is_taken_over(): void {
+		$this->write_lock( time() - ( HOUR_IN_SECONDS + 60 ), 'an abandoned run' );
 
 		$this->assertFalse( $this->sut->is_lock_held() );
+		$this->assertTrue( $this->sut->acquire_lock( 'this run' ) );
+		$this->assertSame( 'this run', $this->sut->get_lock()['owner'] );
+	}
+
+	/**
+	 * @testdox refreshing a lock another run has taken over should not stamp it.
+	 */
+	public function test_refreshing_a_stolen_lock_leaves_the_new_holder_alone(): void {
+		$this->write_lock( time() - ( HOUR_IN_SECONDS + 60 ), 'an abandoned run' );
+
+		// The abandoned run's own instance, still going, and unaware it lost the lock.
+		$abandoned = new MigrationState();
+
+		$this->assertTrue( $this->sut->acquire_lock( 'the new run' ) );
+
+		$abandoned->refresh_lock();
+
+		$this->assertSame( 'the new run', $this->sut->get_lock()['owner'] );
+	}
+
+	/**
+	 * @testdox releasing by owner should leave a lock a later run took over in place.
+	 */
+	public function test_releasing_by_owner_leaves_a_reclaimed_lock_alone(): void {
+		$this->write_lock( time() - ( HOUR_IN_SECONDS + 60 ), 'an abandoned run' );
+
+		$this->assertTrue( $this->sut->acquire_lock( 'the new run' ) );
+		$this->assertFalse( $this->sut->release_lock_owned_by( 'an abandoned run' ) );
+		$this->assertTrue( $this->sut->is_lock_held() );
+	}
+
+	/**
+	 * @testdox the lock should live in its own option row, not in the run state.
+	 */
+	public function test_the_lock_is_not_stored_in_the_run_state(): void {
+		$this->assertTrue( $this->sut->acquire_lock( 'this run' ) );
+
+		$this->assertArrayNotHasKey( 'lock', $this->sut->get_state() );
+		$this->assertNotFalse( get_option( Constants::LOCK_OPTION ) );
+
+		$this->sut->release_lock();
+
+		$this->assertFalse( get_option( Constants::LOCK_OPTION ) );
 	}
 
 	/**
@@ -178,5 +210,16 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $this->sut->get_parked_sections() );
 		$this->assertFalse( $this->sut->is_section_parked( 'product-meta' ) );
+	}
+
+	/**
+	 * Write a lock row directly, in the stored format.
+	 *
+	 * @param int    $acquired_at Acquisition time, as a Unix timestamp.
+	 * @param string $owner       Identifier of the process holding the lock.
+	 * @return void
+	 */
+	private function write_lock( int $acquired_at, string $owner ): void {
+		update_option( Constants::LOCK_OPTION, sprintf( '%010d|%s', $acquired_at, $owner ), false );
 	}
 }

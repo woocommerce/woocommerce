@@ -44,6 +44,7 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 		LegacyStore::create_tables();
 		LegacyStore::truncate_all();
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 
 		$this->registrar = wc_get_container()->get( ToolsRegistrar::class );
 		$this->state     = new MigrationState();
@@ -59,6 +60,7 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 
 		LegacyStore::drop_tables();
 		delete_option( 'wc_bis_migration_state' );
+		delete_option( 'wc_bis_migration_lock' );
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		wp_set_current_user( 0 );
 
