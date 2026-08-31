@@ -12,7 +12,7 @@ jest.mock( '../../../data/api', () => ( {
  * Internal dependencies
  */
 import { prepare } from '../../../data/api';
-import UploadStep from '../upload-step';
+import UploadStep, { isCsvLikeFile } from '../upload-step';
 import {
 	createInitialState,
 	type ImporterAction,
@@ -43,9 +43,12 @@ describe( 'UploadStep', () => {
 
 	it( 'calls prepare and dispatches PREPARE_OK on success', async () => {
 		const state = createInitialState();
-		state.file = new File( [ 'a,b,c\n1,2,3' ], 'a.csv', {
-			type: 'text/csv',
-		} );
+		// jsdom's File lacks text(), so stub the parts the step uses.
+		state.file = {
+			name: 'a.csv',
+			size: 11,
+			text: () => Promise.resolve( 'a,b,c\n1,2,3' ),
+		} as unknown as File;
 
 		mockedPrepare.mockResolvedValue( {
 			token: 'tok',
@@ -81,6 +84,34 @@ describe( 'UploadStep', () => {
 				dispatched.find( ( a ) => a.type === 'PREPARE_OK' )
 			).toBeTruthy();
 		} );
+
+		// The file content is cached for the failed-rows export.
+		const fileText = dispatched.find(
+			( a ) => a.type === 'SET_FILE_TEXT'
+		) as Extract< ImporterAction, { type: 'SET_FILE_TEXT' } > | undefined;
+		expect( fileText?.text ).toBe( 'a,b,c\n1,2,3' );
+	} );
+
+	it( 'accepts CSV-like files for drag and drop and rejects other types', () => {
+		expect(
+			isCsvLikeFile( new File( [ '' ], 'drop.csv', { type: '' } ) )
+		).toBe( true );
+		expect(
+			isCsvLikeFile( new File( [ '' ], 'notes.txt', { type: '' } ) )
+		).toBe( true );
+		expect(
+			isCsvLikeFile( new File( [ '' ], 'export', { type: 'text/csv' } ) )
+		).toBe( true );
+		expect(
+			isCsvLikeFile(
+				new File( [ '' ], 'image.png', { type: 'image/png' } )
+			)
+		).toBe( false );
+		expect(
+			isCsvLikeFile(
+				new File( [ '' ], 'doc.pdf', { type: 'application/pdf' } )
+			)
+		).toBe( false );
 	} );
 
 	it( 'surfaces the server error message from an apiFetch rejection', async () => {

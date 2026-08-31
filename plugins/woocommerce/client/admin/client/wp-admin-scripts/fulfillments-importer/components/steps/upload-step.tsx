@@ -51,6 +51,17 @@ function downloadSampleCsv(): void {
 	downloadCsv( 'fulfillments-sample.csv', SAMPLE_CSV );
 }
 
+/**
+ * The server validates thoroughly; this only keeps obvious non-CSV drops
+ * (images, PDFs) from being staged.
+ */
+export function isCsvLikeFile( file: File ): boolean {
+	return (
+		/\.(csv|txt)$/i.test( file.name ) ||
+		[ 'text/csv', 'text/plain', 'application/csv' ].includes( file.type )
+	);
+}
+
 const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const [ localError, setLocalError ] = useState< string | null >( null );
 	const [ showAdvanced, setShowAdvanced ] = useState( false );
@@ -81,14 +92,7 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			if ( ! next ) {
 				return;
 			}
-			// The server validates thoroughly; this only keeps obvious
-			// non-CSV drops (images, PDFs) from being staged.
-			const looksLikeCsv =
-				/\.(csv|txt)$/i.test( next.name ) ||
-				[ 'text/csv', 'text/plain', 'application/csv' ].includes(
-					next.type
-				);
-			if ( ! looksLikeCsv ) {
+			if ( ! isCsvLikeFile( next ) ) {
 				setLocalError( __( 'Please drop a CSV file.', 'woocommerce' ) );
 				return;
 			}
@@ -114,7 +118,13 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				type: 'SET_FILE_TEXT',
 				text: await state.file.text(),
 			} );
-		} catch {
+		} catch ( error ) {
+			// Leave a breadcrumb: a later export failure is hard to trace
+			// back to a read that failed here.
+			window.console?.warn?.(
+				'Fulfillments importer: could not cache the file content.',
+				error
+			);
 			dispatch( { type: 'SET_FILE_TEXT', text: null } );
 		}
 		try {
