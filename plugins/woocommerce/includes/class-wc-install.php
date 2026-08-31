@@ -2290,11 +2290,26 @@ $stock_notifications_table_schema;
 		_x( 'Customer', 'User role', 'woocommerce' );
 		/* translators: user role */
 		_x( 'Shop manager', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'POS staff', 'User role', 'woocommerce' );
 
 		// Customer role.
 		add_role(
 			'customer',
 			'Customer',
+			array(
+				'read' => true,
+			)
+		);
+
+		// POS Staff role. Registered unconditionally: the role graduates as the
+		// point_of_sale_staff flag is removed (they land together), so there is no
+		// lasting flag to gate it on. Inert while the feature is off — it grants only
+		// `read`, the subscriber shape. Production defers this role and defaults new
+		// POS-only accounts to `subscriber`.
+		add_role(
+			'pos_staff',
+			'POS staff',
 			array(
 				'read' => true,
 			)
@@ -2429,6 +2444,7 @@ $stock_notifications_table_schema;
 
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
+		remove_role( 'pos_staff' );
 	}
 
 	/**
