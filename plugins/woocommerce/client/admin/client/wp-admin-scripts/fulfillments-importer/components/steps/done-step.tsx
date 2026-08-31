@@ -39,7 +39,9 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 			return;
 		}
 		try {
-			const text = await state.file.text();
+			// Prefer the copy read at upload time; the File handle fails if
+			// the on-disk file changed since it was chosen.
+			const text = state.fileText ?? ( await state.file.text() );
 			downloadCsv(
 				failedRowsFilename( state.file.name ),
 				buildFailedRowsCsv( text, state.delimiter, failedRows )
@@ -47,7 +49,7 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 		} catch ( error ) {
 			dispatch( { type: 'ERROR', message: errorMessage( error ) } );
 		}
-	}, [ state.file, state.delimiter, failedRows, dispatch ] );
+	}, [ state.file, state.fileText, state.delimiter, failedRows, dispatch ] );
 
 	// The server deletes the session when a run finishes, so returning to
 	// mapping re-stages the kept file for a fresh token; the reducer keeps

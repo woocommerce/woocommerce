@@ -22,6 +22,10 @@ export interface ImporterState {
 	step: ImporterStep;
 	// Upload step.
 	file: File | null;
+	// Content of the staged file, read at upload time. The File handle only
+	// references the on-disk file, so reading it later fails if the file was
+	// moved or edited; the failed-rows export works from this copy instead.
+	fileText: string | null;
 	delimiter: string;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
@@ -52,6 +56,7 @@ export interface ImporterState {
 
 export type ImporterAction =
 	| { type: 'SET_FILE'; file: File | null }
+	| { type: 'SET_FILE_TEXT'; text: string | null }
 	| { type: 'SET_DELIMITER'; delimiter: string }
 	| { type: 'SET_NOTIFY'; value: boolean }
 	| { type: 'SET_UPDATE_EXISTING'; value: boolean }
@@ -95,6 +100,7 @@ export function createInitialState(): ImporterState {
 	return {
 		step: 'upload',
 		file: null,
+		fileText: null,
 		delimiter: ',',
 		notifyCustomer: false,
 		updateExisting: true,
@@ -188,7 +194,9 @@ export function importerReducer(
 ): ImporterState {
 	switch ( action.type ) {
 		case 'SET_FILE':
-			return { ...state, file: action.file, error: null };
+			return { ...state, file: action.file, fileText: null, error: null };
+		case 'SET_FILE_TEXT':
+			return { ...state, fileText: action.text };
 		case 'SET_DELIMITER':
 			return { ...state, delimiter: action.delimiter };
 		case 'SET_NOTIFY':

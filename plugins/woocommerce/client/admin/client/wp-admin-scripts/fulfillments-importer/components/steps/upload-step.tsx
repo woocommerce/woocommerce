@@ -55,8 +55,10 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const [ localError, setLocalError ] = useState< string | null >( null );
 	const [ showAdvanced, setShowAdvanced ] = useState( false );
 
+	// wp_localize_script casts scalars to strings, so coerce before formatting.
 	const maxRows =
-		window.wcFulfillmentsImporterSettings?.maxRows ?? FALLBACK_MAX_ROWS;
+		Number( window.wcFulfillmentsImporterSettings?.maxRows ) ||
+		FALLBACK_MAX_ROWS;
 
 	const setFile = useCallback(
 		( next: File | null ) => {
@@ -104,6 +106,17 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		}
 		setLocalError( null );
 		dispatch( { type: 'SET_BUSY', value: true } );
+		// Keep a copy of the content: the File handle references the on-disk
+		// file, so a later read fails if it was moved or edited, and the
+		// summary's failed-rows export needs the bytes that were uploaded.
+		try {
+			dispatch( {
+				type: 'SET_FILE_TEXT',
+				text: await state.file.text(),
+			} );
+		} catch {
+			dispatch( { type: 'SET_FILE_TEXT', text: null } );
+		}
 		try {
 			const response = await prepare( {
 				file: state.file,
