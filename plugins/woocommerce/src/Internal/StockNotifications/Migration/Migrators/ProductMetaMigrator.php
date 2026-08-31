@@ -262,11 +262,27 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Settle a row that can never be migrated, so it stops being a candidate.
 	 *
+	 * Deliberately not `write_product_meta()`: this is the recovery path, and it runs from
+	 * inside migrate_batch()'s catch, so it must not repeat the `$product->save()` that just
+	 * threw. The marker is read back only by candidate_sql(), never off a product object, so
+	 * the raw write costs nothing.
+	 *
+	 * Swallowing a throw here keeps migrate_batch()'s contract that a per-row failure is
+	 * reported rather than thrown. `update_post_meta()` fires its own hooks, so a
+	 * third-party callback can throw from this path too; those fire after the row is
+	 * written, so the marker is normally in place by then, and the batch carries on either
+	 * way rather than failing on a row it has already given up on.
+	 *
 	 * @param int    $product_id Product id.
 	 * @param Writer $writer     Writer to persist through.
 	 * @return void
 	 */
 	private function mark_terminal_failure( int $product_id, Writer $writer ): void {
-		$writer->write_product_meta( $product_id, self::FAILED_META_KEY, (string) time() );
+		try {
+			$writer->write_product_marker( $product_id, self::FAILED_META_KEY, (string) time() );
+		} catch ( \Throwable $e ) {
+			// The caller records the row's outcome either way; there is nothing to add here.
+			return;
+		}
 	}
 }

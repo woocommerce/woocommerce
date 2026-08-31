@@ -484,6 +484,31 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `--retry-failed` clears the product-meta markers as well as the legacy ones, so status
+	 * has to say how many of each a retry would put back in play. Counting only the legacy
+	 * rows leaves a product killed by a throwing third-party save hook invisible.
+	 *
+	 * @testdox status should count products marked permanently failed, not only legacy rows.
+	 */
+	public function test_status_counts_failed_products(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_bis_migration_signups_failed', (string) time() );
+
+		MockWPCLI::reset();
+		$this->cli()->status( array(), array() );
+
+		$reported = '';
+
+		foreach ( MockWPCLI::$all_log_messages as $message ) {
+			if ( 0 === strpos( $message, 'Rows marked permanently failed:' ) ) {
+				$reported = $message;
+			}
+		}
+
+		$this->assertSame( 'Rows marked permanently failed: 1 (notifications: 0, product-meta: 1)', $reported );
+	}
+
+	/**
 	 * Build a command instance against the current container replacements.
 	 *
 	 * @return Cli

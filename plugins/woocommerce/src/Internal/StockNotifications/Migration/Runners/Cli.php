@@ -239,12 +239,23 @@ class Cli {
 			WP_CLI::log( 'CLI lock held: no' );
 		}
 
-		$failed = is_wp_error( $check ) && 'legacy_tables_missing' === $check->get_error_code()
+		// The legacy count reads a legacy table, so it is only available while those tables
+		// stand; the product-meta count reads postmeta and is always available.
+		$failed_notifications = is_wp_error( $check ) && 'legacy_tables_missing' === $check->get_error_code()
 			? 0
 			: $this->count_failed_rows();
 
+		$failed_products = $this->count_failed_products();
+
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::log( sprintf( 'Rows marked permanently failed: %d', $failed ) );
+		WP_CLI::log(
+			sprintf(
+				'Rows marked permanently failed: %d (notifications: %d, product-meta: %d)',
+				$failed_notifications + $failed_products,
+				$failed_notifications,
+				$failed_products
+			)
+		);
 
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 		WP_CLI::success( 'Status reported.' );
@@ -566,6 +577,23 @@ class Cli {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+	}
+
+	/**
+	 * Count products currently carrying the product-meta section's permanent-failure marker.
+	 *
+	 * Counted separately from the legacy rows: `--retry-failed` clears both marker sets, so
+	 * both belong on the status surface that says how much a retry would put back in play.
+	 *
+	 * @return int
+	 */
+	private function count_failed_products(): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s", self::PRODUCT_META_FAILED_KEY );
+
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- $sql was built with $wpdb->prepare() above.
 	}
 
 	/**

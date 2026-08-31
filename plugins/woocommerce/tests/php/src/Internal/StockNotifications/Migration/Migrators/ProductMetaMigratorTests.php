@@ -27,6 +27,13 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	private const LEGACY_META_KEY = '_wc_bis_disabled';
 
 	/**
+	 * Product meta key marking a product the section can never settle.
+	 *
+	 * @var string
+	 */
+	private const FAILED_META_KEY = '_wc_bis_migration_signups_failed';
+
+	/**
 	 * Set up a clean run state.
 	 */
 	public function setUp(): void {
@@ -217,6 +224,98 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 		$migrator->migrate_batch( $migrator->get_batch( 0, 10 ), new Writer( true ) );
 
 		$this->assertSame( '', get_post_meta( $product_id, Config::get_product_signups_meta_key(), true ) );
+	}
+
+	/**
+	 * A `woocommerce_update_product` callback belonging to some other extension can throw,
+	 * and the migrator's payload write goes through `$product->save()`, which fires it. The
+	 * failure marker must still land: recovery writes it raw rather than through the CRUD
+	 * layer, so it does not repeat the save that just threw.
+	 *
+	 * @testdox a throwing product save hook settles the row instead of failing the batch.
+	 */
+	public function test_a_throwing_save_hook_settles_the_row(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		$migrator   = $this->build_migrator();
+		$batch      = $migrator->get_batch( 0, 10 );
+
+		$fired   = 0;
+		$thrower = static function () use ( &$fired ) {
+			++$fired;
+			throw new \RuntimeException( 'third-party callback' );
+		};
+		add_action( 'woocommerce_update_product', $thrower );
+
+		try {
+			$outcomes = $migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
+		} finally {
+			remove_action( 'woocommerce_update_product', $thrower );
+		}
+
+		$this->assertSame( array( Reporter::OUTCOME_FAILED => 1 ), $outcomes );
+		$this->assertSame(
+			1,
+			$fired,
+			'Recovery must not repeat the save that just threw: only the payload write may reach the CRUD layer.'
+		);
+		$this->assertNotSame(
+			'',
+			get_post_meta( $product_id, self::FAILED_META_KEY, true ),
+			'The failure marker must land, or the row is served again on every pass.'
+		);
+		$this->assertSame(
+			array(),
+			$migrator->get_batch( 0, 10 ),
+			'A settled row must leave the candidate set.'
+		);
+	}
+
+	/**
+	 * The marker write fires its own meta hooks, so a callback can throw from the recovery
+	 * path too. There is nothing left to fall back to, but the batch must still not throw:
+	 * migrate_batch() reports per-row failures rather than propagating them.
+	 *
+	 * @testdox a throw from the recovery write is still not propagated out of the batch.
+	 */
+	public function test_a_throw_from_the_recovery_write_does_not_fail_the_batch(): void {
+		$this->create_product_with_legacy_flag( 'yes' );
+		$migrator = $this->build_migrator();
+		$batch    = $migrator->get_batch( 0, 10 );
+
+		$save_thrower = static function () {
+			throw new \RuntimeException( 'third-party callback' );
+		};
+		$meta_thrower = static function ( $meta_id, $object_id, $meta_key ) {
+			if ( self::FAILED_META_KEY === $meta_key ) {
+				throw new \RuntimeException( 'third-party meta callback' );
+			}
+		};
+
+		add_action( 'woocommerce_update_product', $save_thrower );
+		add_action( 'added_post_meta', $meta_thrower, 10, 3 );
+
+		try {
+			$outcomes = $migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
+		} finally {
+			remove_action( 'woocommerce_update_product', $save_thrower );
+			remove_action( 'added_post_meta', $meta_thrower, 10 );
+		}
+
+		$this->assertSame( array( Reporter::OUTCOME_FAILED => 1 ), $outcomes );
+	}
+
+	/**
+	 * @testdox a dry run writes no failure marker.
+	 */
+	public function test_a_dry_run_writes_no_failure_marker(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		$migrator   = $this->build_migrator();
+
+		wp_delete_post( $product_id, true );
+
+		$migrator->migrate_batch( array( $product_id ), new Writer( true ) );
+
+		$this->assertSame( '', get_post_meta( $product_id, self::FAILED_META_KEY, true ) );
 	}
 
 	/**

@@ -37,7 +37,9 @@ defined( 'ABSPATH' ) || exit;
  * unsubscribe tokens — is always inserted, never updated, and goes through direct SQL rather
  * than `add_meta_data()`, which would bump `date_modified_gmt` on a row the merchant did not
  * touch. `write_product_meta()` is the one exception, going through the product CRUD layer
- * per the plan; see that method for what the exception costs and why it is accepted.
+ * per the plan; see that method for what the exception costs and why it is accepted. The
+ * bookkeeping markers the migrators write alongside it stay on direct SQL, in
+ * `write_product_marker()`.
  */
 class Writer {
 
@@ -313,7 +315,9 @@ class Writer {
 		$product = wc_get_product( $product_id );
 
 		// A post that is typed as a product but will not resolve to one still needs its
-		// migration marker written, or it stays a candidate forever and stalls the section.
+		// value written, or it stays a candidate forever and stalls the section. Writing it
+		// raw leaves no stale read behind: `wc_get_product()` just failed, so there is no
+		// product object anywhere holding the old value.
 		if ( ! $product ) {
 			return false !== update_post_meta( $product_id, $meta_key, $meta_value );
 		}
@@ -321,6 +325,31 @@ class Writer {
 		$product->update_meta_data( $meta_key, $meta_value );
 
 		return false !== $product->save();
+	}
+
+	/**
+	 * Write a migration bookkeeping marker onto a product, bypassing the CRUD layer.
+	 *
+	 * Markers are read back only by the migrators' own SQL, never off a `WC_Product`, so
+	 * they do not need the save `write_product_meta()` pays for. Skipping it is the point:
+	 * this is what failure recovery writes, and recovery must not run the save that a
+	 * `woocommerce_update_product` callback can throw from.
+	 *
+	 * Markers only. A value that is read back through a product object must go through
+	 * `write_product_meta()` instead: this method leaves the `products` cache group alone,
+	 * so an already-loaded product would keep serving the old value.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 * @return bool
+	 */
+	public function write_product_marker( int $product_id, string $meta_key, $meta_value ): bool {
+		if ( $this->dry_run ) {
+			return true;
+		}
+
+		return false !== update_post_meta( $product_id, $meta_key, $meta_value );
 	}
 
 	/**
