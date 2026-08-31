@@ -740,6 +740,8 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Test Taxonomy attribute term order is preserved after save and read for simple products.
 	 */
 	public function test_taxonomy_attribute_term_order_is_preserved_for_simple_product() {
+		$product   = null;
+		$attribute = null;
 		try {
 			// Create attribute with terms in non-alphabetical order: S, XL, M.
 			$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'XL', 'M' ) );
@@ -767,7 +769,9 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $product ) {
 				$product->delete( true );
 			}
-			WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
 		}
 	}
 
@@ -775,6 +779,8 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Test Taxonomy attribute term order is preserved after multiple saves.
 	 */
 	public function test_taxonomy_attribute_term_order_is_preserved_after_multiple_saves() {
+		$product   = null;
+		$attribute = null;
 		try {
 			$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'XL', 'S', 'M', 'L' ) );
 			$expected_order = $attribute->get_options();
@@ -799,12 +805,15 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $product ) {
 				$product->delete( true );
 			}
-			WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
 		}
 	}
 
 	public function test_rest_api_term_names_are_resolved_correctly() {
-		$product = null;
+		$product   = null;
+		$attribute = null;
 		try {
 			$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'M', 'L' ) );
 
@@ -835,7 +844,9 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $product ) {
 				$product->delete( true );
 			}
-			WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
 		}
 	}
 }
