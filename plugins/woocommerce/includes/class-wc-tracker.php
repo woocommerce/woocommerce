@@ -84,14 +84,14 @@ class WC_Tracker {
 			}
 		}
 
+		// Recorded before building the snapshot so overlapping override sends are still suppressed.
+		update_option( 'woocommerce_tracker_last_attempt', time(), false );
+
 		$body = wp_json_encode( self::get_tracking_data() );
 		if ( false === $body ) {
 			self::record_send_failure( false, 0, 'json_encode_failure', 0 );
 			return;
 		}
-
-		// Recorded before sending so overlapping override sends are still suppressed.
-		update_option( 'woocommerce_tracker_last_attempt', time(), false );
 
 		$response = wp_safe_remote_post(
 			self::$api_url,
