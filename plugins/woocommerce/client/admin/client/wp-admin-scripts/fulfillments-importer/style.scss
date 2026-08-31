@@ -124,8 +124,8 @@ $wp-admin-sidebar-width-collapsed: 36px;
 			font-weight: 600;
 		}
 
-		// Completed steps stay neutral (check in an outlined circle), matching
-		// the upcoming admin stepper design rather than turning green.
+		// Completed steps stay neutral (check in an outlined circle) instead
+		// of turning green.
 		&.is-completed {
 			color: $gray-900;
 		}

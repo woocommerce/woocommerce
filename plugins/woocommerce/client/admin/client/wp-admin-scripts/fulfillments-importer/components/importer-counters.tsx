@@ -18,9 +18,8 @@ interface Props {
 
 /**
  * The five result counters, shared by the import and summary steps so the
- * numbers settle in place instead of the layout and wording changing between
- * the two screens. Zeros are always shown: "0 customers notified" after
- * ticking the box is exactly what a merchant needs to see.
+ * numbers settle in place instead of the layout changing between the two
+ * screens. Zeros are shown deliberately; a zero count is meaningful.
  */
 const ImporterCounters: React.FC< Props > = ( { counts } ) => {
 	const items: Array< { key: string; value: number; label: string } > = [

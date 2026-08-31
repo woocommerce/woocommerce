@@ -3,8 +3,9 @@ export interface ImporterRowResult {
 	status: 'created' | 'updated' | 'skipped' | 'failed';
 	message: string;
 	/**
-	 * Raw order number value from the CSV, present for every row so failed
-	 * rows can still name the order the file referred to.
+	 * Raw order number value from the CSV, so failed rows can still name the
+	 * order the file referred to. Current servers send it for every row;
+	 * optional for rows from before the field existed.
 	 */
 	order_number?: string;
 	/** Stable failure code, present on failed rows only. */
@@ -25,10 +26,14 @@ export interface ImporterSummary {
 	rows: ImporterRowResult[];
 }
 
+/**
+ * Values arrive through wp_localize_script, which casts scalars to strings,
+ * so numeric fields must be coerced before use.
+ */
 export interface ImporterSettings {
 	importRoute: string;
-	chunkSize: number;
-	maxRows: number;
+	chunkSize: number | string;
+	maxRows: number | string;
 	providers: Array< { key: string; label: string } >;
 }
 
