@@ -78,10 +78,10 @@ class Status extends AbstractOrderConfirmationBlock {
 					/**
 					 * Filter the title shown after a checkout is complete.
 					 *
-					 * @since 9.6.0
+					 * @since 9.7.0
 					 *
-					 * @param string         $title The title.
-					 * @param WC_Order|false $order The order created during checkout, or false if order data is not available.
+					 * @param string          $title The title.
+					 * @param \WC_Order|false $order The order created during checkout, or false if order data is not available.
 					 */
 					apply_filters(
 						'woocommerce_thankyou_order_received_title',
