@@ -148,7 +148,10 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 				const isValid = ! Object.keys( newErrors || {} ).length;
 				const nameValuePairs = [];
-				for ( const key in valuesToSet ) {
+				// Report the keys the merge above actually took, which is the
+				// own enumerable ones. A `for...in` here would also walk the
+				// prototype chain and report fields the form never stored.
+				for ( const key of Object.keys( valuesToSet ) ) {
 					const nameValuePair = {
 						name: key,
 						value: valuesToSet[ key ],

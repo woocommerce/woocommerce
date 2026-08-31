@@ -552,4 +552,32 @@ describe( 'Form state updates', () => {
 			expect( onChanges ).not.toHaveBeenCalled();
 		}
 	);
+
+	it( 'reports only the own keys a setValues patch merges', () => {
+		// The merge takes own keys only, so an inherited one must stay unreported.
+		const patch = Object.create( {
+			inherited: 'From the prototype',
+		} ) as NameValues;
+		patch.firstName = 'Updated';
+
+		const { onChange, onChanges } = renderForm(
+			initialNameValues(),
+			( { setValues } ) => (
+				<button onClick={ () => setValues( patch ) }>
+					Apply patch
+				</button>
+			)
+		);
+
+		userEvent.click( screen.getByRole( 'button', { name: 'Apply patch' } ) );
+
+		const nextValues = { ...initialNameValues(), firstName: 'Updated' };
+		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+		expect( onChange.mock.calls ).toEqual( [
+			[ { name: 'firstName', value: 'Updated' }, nextValues, true ],
+		] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [ { name: 'firstName', value: 'Updated' } ], nextValues, true ],
+		] );
+	} );
 } );
