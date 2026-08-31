@@ -35,6 +35,44 @@ const localState = {
 };
 
 /**
+ * Gets the dirty address props that should be validated before a push.
+ *
+ * State and postcode are cleared when the country changes because their
+ * previous values may not be valid for the new country. Allow those empty
+ * dependent fields to be pushed while continuing to validate all other
+ * dirty fields.
+ */
+const getDirtyPropsForValidation = () => {
+	const getAddressDirtyPropsForValidation = (
+		dirtyProps: BaseAddressKey[],
+		address: CartBillingAddress | CartShippingAddress
+	) => {
+		if ( ! dirtyProps.includes( 'country' ) ) {
+			return dirtyProps;
+		}
+
+		return dirtyProps.filter( ( key ) => {
+			const isEmptyCountryDependentField =
+				( key === 'state' || key === 'postcode' ) &&
+				address[ key ] === '';
+
+			return ! isEmptyCountryDependentField;
+		} );
+	};
+
+	return {
+		billingAddress: getAddressDirtyPropsForValidation(
+			localState.dirtyProps.billingAddress,
+			localState.customerData.billingAddress
+		),
+		shippingAddress: getAddressDirtyPropsForValidation(
+			localState.dirtyProps.shippingAddress,
+			localState.customerData.shippingAddress
+		),
+	};
+};
+
+/**
  * Initializes the customer data cache on the first run.
  */
 const initialize = () => {
@@ -131,7 +169,7 @@ const updateCustomerData = (): void => {
 	}
 
 	// Check props are valid, or abort.
-	if ( ! validateDirtyProps( localState.dirtyProps ) ) {
+	if ( ! validateDirtyProps( getDirtyPropsForValidation() ) ) {
 		localState.doingPush = false;
 		return;
 	}
