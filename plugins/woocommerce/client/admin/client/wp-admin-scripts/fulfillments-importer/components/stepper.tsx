@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { __ } from '@wordpress/i18n';
+import { Icon, check } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -22,7 +23,7 @@ const STEPS: StepDescriptor[] = [
 	{ id: 'upload', label: __( 'Upload', 'woocommerce' ) },
 	{ id: 'mapping', label: __( 'Mapping', 'woocommerce' ) },
 	{ id: 'import', label: __( 'Import', 'woocommerce' ) },
-	{ id: 'done', label: __( 'Done', 'woocommerce' ) },
+	{ id: 'done', label: __( 'Summary', 'woocommerce' ) },
 ];
 
 function statusFor(
@@ -54,7 +55,11 @@ const Stepper: React.FC< StepperProps > = ( { currentStep } ) => (
 					aria-current={ status === 'current' ? 'step' : undefined }
 				>
 					<span className="woocommerce-fulfillment-importer-stepper__bullet">
-						{ index + 1 }
+						{ status === 'completed' ? (
+							<Icon icon={ check } size={ 16 } />
+						) : (
+							index + 1
+						) }
 					</span>
 					<span className="woocommerce-fulfillment-importer-stepper__label">
 						{ step.label }

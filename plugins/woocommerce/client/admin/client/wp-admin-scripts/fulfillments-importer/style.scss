@@ -101,7 +101,8 @@ $wp-admin-sidebar-width-collapsed: 36px;
 .woocommerce-fulfillment-importer-stepper {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16px;
+	justify-content: center;
+	gap: 32px;
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -110,7 +111,7 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		color: $gray-700;
+		color: $gray-600;
 		font-size: 13px;
 
 		&.is-current {
@@ -118,8 +119,10 @@ $wp-admin-sidebar-width-collapsed: 36px;
 			font-weight: 600;
 		}
 
+		// Completed steps stay neutral (check in an outlined circle), matching
+		// the upcoming admin stepper design rather than turning green.
 		&.is-completed {
-			color: $studio-green-50;
+			color: $gray-900;
 		}
 	}
 
@@ -133,12 +136,16 @@ $wp-admin-sidebar-width-collapsed: 36px;
 		border: 1px solid currentColor;
 		font-size: 12px;
 		font-weight: 600;
+
+		svg {
+			fill: currentColor;
+		}
 	}
 
-	&__step.is-completed &__bullet {
-		background: $studio-green-50;
+	&__step.is-current &__bullet {
+		background: $gray-900;
+		border-color: $gray-900;
 		color: $white;
-		border-color: $studio-green-50;
 	}
 }
 
