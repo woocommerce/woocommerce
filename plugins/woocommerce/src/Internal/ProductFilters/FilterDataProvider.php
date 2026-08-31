@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
@@ -33,16 +34,25 @@ class FilterDataProvider {
 	private $taxonomy_hierarchy_data;
 
 	/**
+	 * Instance of LookupDataStore.
+	 *
+	 * @var LookupDataStore
+	 */
+	private $lookup_data_store;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
+	 * @param LookupDataStore       $lookup_data_store Instance of LookupDataStore.
 	 *
 	 * @return void
 	 */
-	final public function init( TaxonomyHierarchyData $taxonomy_hierarchy_data ): void {
+	final public function init( TaxonomyHierarchyData $taxonomy_hierarchy_data, LookupDataStore $lookup_data_store ): void {
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+		$this->lookup_data_store       = $lookup_data_store;
 	}
 
 	/**
@@ -54,7 +64,7 @@ class FilterDataProvider {
 		$class_name = get_class( $query_clauses_generator );
 
 		if ( ! isset( $this->providers[ $class_name ] ) ) {
-			$this->providers[ $class_name ] = new FilterData( $query_clauses_generator, $this->taxonomy_hierarchy_data );
+			$this->providers[ $class_name ] = new FilterData( $query_clauses_generator, $this->taxonomy_hierarchy_data, $this->lookup_data_store );
 		}
 
 		return $this->providers[ $class_name ];

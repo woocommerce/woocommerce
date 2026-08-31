@@ -30,14 +30,23 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	private $params;
 
 	/**
+	 * Hold the attribute lookup data store.
+	 *
+	 * @var LookupDataStore
+	 */
+	private $lookup_data_store;
+
+	/**
 	 * Initialize the query clauses.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @param Params $params The filter params.
+	 * @param Params          $params The filter params.
+	 * @param LookupDataStore $lookup_data_store The attribute lookup data store.
 	 * @return void
 	 */
-	final public function init( Params $params ): void {
-		$this->params = $params;
+	final public function init( Params $params, LookupDataStore $lookup_data_store ): void {
+		$this->params            = $params;
+		$this->lookup_data_store = $lookup_data_store;
 	}
 
 	/**
@@ -215,7 +224,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
 
-		$filterable_attribute_where_clause = wc_get_container()->get( LookupDataStore::class )->get_filterable_attribute_where_clause( 'lt' );
+		$filterable_attribute_where_clause = $this->lookup_data_store->get_filterable_attribute_where_clause( 'lt' );
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
@@ -598,6 +607,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function get_lookup_table_name(): string {
-		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+		return $this->lookup_data_store->get_lookup_table_name();
 	}
 }

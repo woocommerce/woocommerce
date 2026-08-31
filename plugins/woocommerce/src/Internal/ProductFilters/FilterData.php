@@ -32,14 +32,23 @@ class FilterData {
 	private $taxonomy_hierarchy_data;
 
 	/**
+	 * Instance of LookupDataStore.
+	 *
+	 * @var LookupDataStore
+	 */
+	private $lookup_data_store;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
+	 * @param LookupDataStore       $lookup_data_store Instance of LookupDataStore.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data, LookupDataStore $lookup_data_store ) {
 		$this->query_clauses           = $query_clauses;
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+		$this->lookup_data_store       = $lookup_data_store;
 	}
 
 	/**
@@ -277,10 +286,9 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$lookup_data_store                      = wc_get_container()->get( LookupDataStore::class );
-			$lookup_table_name                      = $lookup_data_store->get_lookup_table_name();
+			$lookup_table_name                      = $this->lookup_data_store->get_lookup_table_name();
 			$taxonomy_escaped                       = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			$filterable_attribute_where_clause      = $lookup_data_store->get_filterable_attribute_where_clause( 'attribute_lookup' );
+			$filterable_attribute_where_clause      = $this->lookup_data_store->get_filterable_attribute_where_clause( 'attribute_lookup' );
 			$attribute_lookup_in_stock_where_clause = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? 'AND attribute_lookup.in_stock = 1' : '';
 
 			// Aggregate the indexed lookup rows directly; the cached parent IDs already represent the filtered product set.
