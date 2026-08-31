@@ -282,6 +282,63 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should segment by the products the `search` param matches inside the category.
+	 *
+	 * This is the Categories report's single category view, which segments by product. The term and
+	 * the category narrow each other, so a product only one of them covers is not a segment.
+	 */
+	public function test_get_reports_search_param_narrows_the_product_segments_within_a_category() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		$time     = time();
+		$category = wp_insert_term( 'Widgets', 'product_cat' );
+		$products = array();
+
+		foreach ( array( 'Kingston Widget', 'Kingston Gadget', 'Unrelated Widget' ) as $name ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( $name );
+			$product->set_regular_price( 25 );
+			$product->save();
+
+			$products[ $name ] = $product->get_id();
+		}
+
+		// Everything but the gadget is in the category, so only the widget satisfies both.
+		wp_set_object_terms( $products['Kingston Widget'], array( $category['term_id'] ), 'product_cat' );
+		wp_set_object_terms( $products['Unrelated Widget'], array( $category['term_id'] ), 'product_cat' );
+
+		$order = WC_Helper_Order::create_order( 1, wc_get_product( $products['Kingston Widget'] ) );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'     => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'      => gmdate( 'Y-m-d 00:00:00', $time ),
+				'interval'   => 'day',
+				'search'     => 'Kingston',
+				'categories' => (string) $category['term_id'],
+				'segmentby'  => 'product',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array( $products['Kingston Widget'] ),
+			wp_list_pluck( $reports['totals']['segments'], 'segment_id' ),
+			'Only a product both the search and the category cover should come back as a segment'
+		);
+	}
+
+	/**
 	 * @testdox Should report no product segments when the `search` param matches nothing.
 	 */
 	public function test_get_reports_search_param_with_no_match_has_no_product_segments() {
