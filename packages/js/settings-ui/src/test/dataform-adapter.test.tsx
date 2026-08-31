@@ -139,15 +139,18 @@ describe( 'dataform adapter', () => {
 
 			const Render = field.render as ( props: {
 				item: SettingsValues;
+				field: typeof field;
 			} ) => JSX.Element;
-			const { container } = renderElement( <Render item={ {} } /> );
+			const { container } = renderElement(
+				<Render item={ {} } field={ field } />
+			);
 			expect(
 				container.querySelector( '.wc-settings-ui__info' )
 			).not.toBeNull();
-			expect( container.textContent ).toContain( 'Useful information.' );
 			expect( container.querySelector( 'script' ) ).toBeNull();
-			// DataForm owns the label for read-only fields.
-			expect( container.textContent ).not.toContain( 'Read this' );
+			// DataForm owns the label for read-only fields, so the render
+			// contributes the description and nothing else.
+			expect( container.textContent ).toBe( 'Useful information.' );
 		} );
 
 		it( 'maps field descriptions to sanitized help elements', () => {

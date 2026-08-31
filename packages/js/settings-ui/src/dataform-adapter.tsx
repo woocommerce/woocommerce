@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, RawHTML } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
@@ -14,7 +14,7 @@ import type {
  * Internal dependencies
  */
 import { error, warn } from './diagnostics';
-import { createSettingsHelpElement, sanitizeSettingsHtml } from './html';
+import { createSettingsHelpElement } from './html';
 import {
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
@@ -132,18 +132,6 @@ const createIsVisible = (
 	};
 };
 
-// DataForm renders the label for read-only fields itself, so the info
-// renderer paints only the sanitized description.
-const createInfoRender = ( settingsField: SettingsUIField ) => {
-	return function InfoSettingsField() {
-		return settingsField.description ? (
-			<RawHTML className="wc-settings-ui__info">
-				{ sanitizeSettingsHtml( settingsField.description ) }
-			</RawHTML>
-		) : null;
-	};
-};
-
 // HTML boolean attributes use presence semantics: disabled="false" still
 // disables, while a boolean false stays unset.
 const isAttributeSet = ( value: string | number | boolean | undefined ) =>
@@ -258,7 +246,15 @@ export const buildDataFormField = (
 		// control even when read-only, so info keeps the text type.
 		field.type = 'text';
 		field.readOnly = true;
-		field.render = createInfoRender( settingsField );
+		// DataForm paints the label for a read-only field and drops its
+		// description, so info shows the sanitized element the field already
+		// carries rather than sanitizing the same string again per render.
+		field.render = ( { field: normalizedField } ) =>
+			normalizedField.description ? (
+				<div className="wc-settings-ui__info">
+					{ normalizedField.description }
+				</div>
+			) : null;
 		return field;
 	}
 
