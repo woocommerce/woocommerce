@@ -312,6 +312,44 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * `id` is declared as an integer, so an entry a callback keyed by something else has no row ID
+	 * to report and must not be published with a string in its place.
+	 *
+	 * @testdox Order item_data skips metadata entries not keyed by a meta row ID.
+	 */
+	public function test_item_data_skips_entries_not_keyed_by_a_meta_row_id(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta['not-a-row-id'] = (object) array(
+					'key'           => 'Injected',
+					'value'         => 'value',
+					'display_key'   => 'Injected',
+					'display_value' => 'value',
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 1, $item_data, 'The entry without a meta row ID must be skipped.' );
+		$this->assertSame( 'Gift message', $item_data[0]['key'] );
+		$this->assertIsInt( $item_data[0]['id'] );
+	}
+
+	/**
 	 * Test that a guest can access a guest order with valid order key and billing email.
 	 */
 	public function test_guest_can_access_guest_order_with_valid_credentials() {

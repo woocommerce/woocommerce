@@ -109,7 +109,9 @@ class OrderItemSchema extends ItemSchema {
 		}
 
 		foreach ( $formatted_meta_data as $meta_id => $meta ) {
-			if ( ! is_object( $meta ) && ! is_array( $meta ) ) {
+			// A callback can key an entry by something other than a meta row ID. Skip those rather
+			// than publish an `id` that is not the integer the schema promises.
+			if ( ! is_int( $meta_id ) || ( ! is_object( $meta ) && ! is_array( $meta ) ) ) {
 				continue;
 			}
 
