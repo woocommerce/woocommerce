@@ -84,6 +84,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'city'             => 'city',
 			'state'            => 'state',
 			'postcode'         => 'postcode',
+			'billing_phone'    => 'billing_phone',
+			'shipping_phone'   => 'shipping_phone',
 			'date_registered'  => 'date_registered',
 			// Use single quotes for string literals to ensure compatibility with sql_mode=ANSI_QUOTES.
 			'date_last_active' => "IF( date_last_active <= '0000-00-00 00:00:00', NULL, date_last_active ) AS date_last_active",
@@ -736,9 +738,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
+			'billing_phone'    => $order->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $order->get_shipping_phone( 'edit' ),
 			'date_last_active' => $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : null,
 		);
 		$format = array(
+			'%s',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -867,6 +873,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Retrieve the oldest orders made by a customer.
 	 *
+	 * Refunds share the customer of the order they refund, but they are not orders of that
+	 * customer and must not be returned here. They are the only rows written with a NULL
+	 * returning_customer, and they always carry the ID of the refunded order in parent_id;
+	 * both are required so that an order given a parent through set_parent_id() keeps
+	 * counting as one of the customer's orders.
+	 *
 	 * @param int $customer_id Customer ID.
 	 * @return array Orders.
 	 */
@@ -876,14 +888,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$excluded_statuses           = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
 		$excluded_statuses_condition = '';
 		if ( ! empty( $excluded_statuses ) ) {
-			$excluded_statuses_str       = implode( "','", $excluded_statuses );
+			$excluded_statuses_str       = implode( "','", array_map( 'esc_sql', $excluded_statuses ) );
 			$excluded_statuses_condition = "AND status NOT IN ('{$excluded_statuses_str}')";
 		}
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d AND ( parent_id = 0 OR returning_customer IS NOT NULL ) {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
 				$customer_id
 			)
 		);
@@ -953,11 +965,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
+			'billing_phone'    => $customer->get_billing_phone( 'edit' ),
+			'shipping_phone'   => $customer->get_shipping_phone( 'edit' ),
 			'date_registered'  => $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null,
 			'date_last_active' => $last_active ? gmdate( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -1120,7 +1135,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						country = '',
 						postcode = %s,
 						city = %s,
-						state = %s
+						state = %s,
+						billing_phone = %s,
+						shipping_phone = %s
 					WHERE
 						customer_id = %d",
 				array(
@@ -1128,6 +1145,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$deleted_text,
 					$deleted_text,
 					'deleted@site.invalid',
+					$deleted_text,
+					$deleted_text,
 					$deleted_text,
 					$deleted_text,
 					$deleted_text,

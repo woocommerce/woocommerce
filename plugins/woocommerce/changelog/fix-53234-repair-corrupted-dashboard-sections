@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the Analytics dashboard and repair the stored preference when the woocommerce_admin_dashboard_sections user meta is corrupted.

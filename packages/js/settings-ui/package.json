@@ -39,21 +39,23 @@
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/dataviews": "17.1.0",
 		"@wordpress/element": "catalog:wp-min",
-		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/ui": "catalog:wp-bundled"
+		"@wordpress/i18n": "catalog:wp-min"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"

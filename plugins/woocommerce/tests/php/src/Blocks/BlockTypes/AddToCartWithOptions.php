@@ -471,6 +471,27 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the stepper buttons render in visual DOM order (− input +),
+	 * so keyboard focus and screen-reader reading order are logical.
+	 */
+	public function test_stepper_buttons_render_in_visual_dom_order() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 10 );
+		$product_id = $simple_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		// The minus button must precede the quantity input, which must precede the plus button.
+		$this->assertMatchesRegularExpression(
+			'/quantity-selector__button--minus.*id="quantity_.*quantity-selector__button--plus/s',
+			$markup,
+			'Stepper buttons should render in − input + DOM order.'
+		);
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */
@@ -501,6 +522,47 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
+		}
+	}
+
+	/**
+	 * Tests that the Quantity Selector block outputs configured border radius styles.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::render
+	 */
+	public function test_quantity_selector_renders_border_radius_styles() {
+		global $product;
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$linked_markup = do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"style":{"border":{"radius":"12px"}}} /--><!-- /wp:woocommerce/single-product -->'
+		);
+
+		$this->assertStringContainsString(
+			'border-radius:12px',
+			$linked_markup,
+			'The quantity selector wrapper includes the configured border radius.'
+		);
+
+		$unlinked_markup = do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"style":{"border":{"radius":{"topLeft":"4px","topRight":"8px","bottomRight":"16px","bottomLeft":"2px"}}}} /--><!-- /wp:woocommerce/single-product -->'
+		);
+
+		foreach (
+			array(
+				'border-top-left-radius:4px',
+				'border-top-right-radius:8px',
+				'border-bottom-right-radius:16px',
+				'border-bottom-left-radius:2px',
+			) as $border_radius
+		) {
+			$this->assertStringContainsString(
+				$border_radius,
+				$unlinked_markup,
+				"The quantity selector wrapper includes the configured {$border_radius}."
+			);
 		}
 	}
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a value-interception extension point to the Personalizer.

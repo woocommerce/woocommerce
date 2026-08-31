@@ -25,7 +25,16 @@ import {
 } from './types';
 
 class PluginError extends Error {
-	constructor( message: string, public data: unknown ) {
+	constructor(
+		message: string,
+		public data: unknown,
+		// The step that actually failed. installAndActivatePlugins runs install then
+		// activate, so callers cannot infer this from the status they saw beforehand.
+		public actionType: 'install' | 'activate',
+		// The reason without the plugin-naming frame, for callers that frame it
+		// themselves (for example with a display title instead of the slug).
+		public reason: string
+	) {
 		super( message );
 	}
 }
@@ -36,7 +45,9 @@ const isPluginResponseError = (
 	plugins: Partial< PluginNames >[],
 	error: unknown
 ): error is PluginResponseErrors =>
-	typeof error === 'object' && error !== null && plugins[ 0 ] in error;
+	typeof error === 'object' &&
+	error !== null &&
+	plugins.some( ( plugin ) => plugin in error );
 
 const formatErrorMessage = (
 	actionType: 'install' | 'activate' = 'install',
@@ -44,10 +55,10 @@ const formatErrorMessage = (
 	rawErrorMessage: string
 ) => {
 	return sprintf(
-		/* translators: %(actionType): install or activate (the plugin). %(pluginName): a plugin slug (e.g. woocommerce-services). %(error): a single error message or in plural a comma separated error message list.*/
+		/* translators: %(actionType)s: install or activate (the plugin). %(pluginName)s: a plugin slug (e.g. woocommerce-services) or, in plural, a comma separated list of slugs. %(error)s: a complete sentence describing the reason, or in plural a comma separated list of such sentences. */
 		_n(
-			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
-			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
+			'Could not %(actionType)s %(pluginName)s. %(error)s',
+			'Could not %(actionType)s the following plugins: %(pluginName)s. %(error)s',
 			Object.keys( plugins ).length || 1,
 			'woocommerce'
 		),
@@ -173,6 +184,8 @@ function* handlePluginAPIError(
 	error: unknown
 ) {
 	let rawErrorMessage;
+	// Name only the plugins that actually failed, not everything that was requested.
+	let failedPlugins = plugins;
 
 	// Check for plugin-management permission errors before generic handling.
 	// Match the specific code so we don't misattribute other 403s
@@ -189,7 +202,42 @@ function* handlePluginAPIError(
 		);
 	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
-		rawErrorMessage = Object.values( error ).join( ', \n' );
+		// Read them defensively: this is a parsed HTTP response, and a plugin filtering it
+		// can put anything here. Anything that is not a message is dropped.
+		// Every entry is a real failure, including plugins a server-side filter added to
+		// the request, so none of them is filtered out by the list this call asked for.
+		const failures = Object.entries( error )
+			.map(
+				( [ slug, value ] ) =>
+					[
+						slug,
+						( Array.isArray( value ) ? value : [ value ] ).filter(
+							( message ): message is string =>
+								typeof message === 'string' && message !== ''
+						),
+					] as const
+			)
+			.filter( ( [ , messages ] ) => messages.length > 0 );
+
+		if ( failures.length ) {
+			failedPlugins = failures.map(
+				( [ slug ] ) => slug
+			) as Partial< PluginNames >[];
+
+			// The reasons no longer name their own plugin, so attribute them by slug when
+			// more than one failed. A lone failure is already named by the sentence around it.
+			rawErrorMessage =
+				failures.length > 1
+					? failures
+							.map(
+								( [ slug, messages ] ) =>
+									`${ slug }: ${ messages.join( ' ' ) }`
+							)
+							.join( ' \n' )
+					: failures[ 0 ][ 1 ].join( ' ' );
+		} else {
+			rawErrorMessage = JSON.stringify( error );
+		}
 	} else {
 		// Other error such as API connection errors.
 		rawErrorMessage =
@@ -214,8 +262,10 @@ function* handlePluginAPIError(
 	}
 
 	throw new PluginError(
-		formatErrorMessage( actionType, plugins, rawErrorMessage ),
-		error
+		formatErrorMessage( actionType, failedPlugins, rawErrorMessage ),
+		error,
+		actionType,
+		rawErrorMessage
 	);
 }
 

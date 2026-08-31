@@ -215,7 +215,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function get_order_item_data( $item ) {
 		$data           = $item->get_data();
-		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -928,6 +928,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -935,14 +936,62 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Product
+	 * @throws WC_Data_Exception Invalid product data.
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id( $posted, $action ) );
+		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
+		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
+		$current_product_id   = $product_item ? (int) $product_item->get_product_id( 'edit' ) : 0;
+		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
+		// set_product() clears a variation when given its parent. REST partial updates restore it only
+		// when the posted parent and SKU-resolved product still identify the current item.
+		// An explicit variation_id of 0 still demotes the item.
+		$same_product_update  = 'update' === $action
+			&& array_key_exists( 'product_id', $posted )
+			&& $product instanceof WC_Product
+			&& (int) $posted['product_id'] === $current_product_id
+			&& in_array( $product->get_id(), array( $current_product_id, $current_variation_id ), true );
+		$restore_variation_id = $same_product_update
+			&& $current_variation_id
+			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id );
+		$clear_variation_id   = $same_product_update
+			&& $current_variation_id
+			&& array_key_exists( 'variation_id', $posted )
+			&& 0 === (int) $posted['variation_id'];
+
+		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
+			$product = wc_get_product( $current_product_id );
+		}
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
+			if ( $restore_variation_id && $product_item ) {
+				try {
+					$product_item->set_variation_id( $current_variation_id );
+				} catch ( WC_Data_Exception $e ) {
+					if (
+						'order_item_product_invalid_variation_id' !== $e->getErrorCode()
+						|| 'product_variation' === get_post_type( $current_variation_id )
+					) {
+						throw $e;
+					}
+					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
+					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
+					// get_class() check) would revive the 400 on every store substituting order item classes.
+					wc_get_logger()->warning(
+						sprintf(
+							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
+							$product_item->get_id(),
+							$product_item->get_order_id(),
+							$current_variation_id
+						),
+						array( 'source' => 'rest-api' )
+					);
+				}
+			}
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
@@ -951,12 +1000,17 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$item->set_subtotal( $total );
 			}
 		}
+		if ( $clear_variation_id && $product_item ) {
+			$product_item->set_variation_id( 0 );
+		}
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.

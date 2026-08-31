@@ -193,7 +193,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 
 		$this->set_wc_emails_deferred_queue( $this->sut );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Test-only hooks.
 		add_action( 'woocommerce_deferred_email_test_unknown_object', array( \WC_Emails::class, 'queue_transactional_email' ) );
 		add_action(
 			'woocommerce_deferred_email_test_unknown_object_notification',
@@ -203,7 +202,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		);
 
 		do_action( 'woocommerce_deferred_email_test_unknown_object', $object );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->sut->dispatch();
 
@@ -222,7 +220,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 
 		$this->set_wc_emails_deferred_queue( $this->sut );
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Test-only hooks.
 		add_action( 'woocommerce_deferred_email_test_unsaved_product', array( \WC_Emails::class, 'queue_transactional_email' ) );
 		add_action(
 			'woocommerce_deferred_email_test_unsaved_product_notification',
@@ -232,7 +229,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		);
 
 		do_action( 'woocommerce_deferred_email_test_unsaved_product', $product );
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$this->sut->dispatch();
 
