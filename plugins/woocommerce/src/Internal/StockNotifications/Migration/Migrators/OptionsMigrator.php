@@ -39,7 +39,9 @@ defined( 'ABSPATH' ) || exit;
  *   and `verified` is the confirmation sent after it. Pinned by a unit test.
  *
  * Each email settings option is a `WC_Email::$settings` array, merged per sub-key rather than
- * replaced, so migrating one field never clobbers a hand-edited sibling.
+ * replaced, so migrating one field never clobbers a hand-edited sibling. A sub-key legacy never
+ * stored is skipped rather than migrated as an empty string, which is why a store that never
+ * saved the legacy email screens keeps its Core emails enabled.
  */
 class OptionsMigrator {
 
@@ -219,7 +221,11 @@ class OptionsMigrator {
 					continue;
 				}
 
-				if ( ! $this->values_match( $core_settings[ $sub_key ] ?? null, $legacy_settings[ $sub_key ] ?? '' ) ) {
+				if ( ! array_key_exists( $sub_key, $legacy_settings ) ) {
+					continue;
+				}
+
+				if ( ! $this->values_match( $core_settings[ $sub_key ] ?? null, $legacy_settings[ $sub_key ] ) ) {
 					$markers[] = $marker;
 				}
 			}
@@ -300,7 +306,14 @@ class OptionsMigrator {
 
 			$this->visited[ $marker ] = true;
 
-			$value = $legacy_settings[ $sub_key ] ?? '';
+			// A sub-key legacy never stored is not a legacy empty string: writing one would
+			// override the Core value, or the form field default that stands in for it. That
+			// default is what keeps an email enabled on a store that never saved the screen.
+			if ( ! array_key_exists( $sub_key, $legacy_settings ) ) {
+				continue;
+			}
+
+			$value = $legacy_settings[ $sub_key ];
 
 			if ( $this->values_match( $core_settings[ $sub_key ] ?? null, $value ) ) {
 				continue;

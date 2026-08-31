@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Migrators;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
@@ -323,6 +324,51 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ) );
 		$this->assertFalse( get_option( 'woocommerce_customer_stock_notification_settings' ) );
+	}
+
+	/**
+	 * @testdox a store with no legacy email settings row should keep its Core email enabled.
+	 */
+	public function test_an_absent_legacy_email_row_leaves_the_core_email_enabled(): void {
+		$this->assertFalse( get_option( 'woocommerce_bis_notification_received_settings' ), 'The legacy row must be absent for this test to mean anything.' );
+
+		$this->migrate();
+
+		$this->assertArrayNotHasKey(
+			'enabled',
+			(array) get_option( 'woocommerce_customer_stock_notification_settings', array() ),
+			'An absent legacy row must not write over the Core form field default.'
+		);
+		$this->assertTrue(
+			( new CustomerStockNotificationEmail() )->is_enabled(),
+			'A store that never saved the legacy email screens must keep sending back-in-stock emails.'
+		);
+		$this->assertTrue( $this->build_migrator()->is_done(), 'A legacy row that was never written leaves nothing outstanding.' );
+	}
+
+	/**
+	 * @testdox a sub-key the legacy row never stored should leave the Core value alone.
+	 */
+	public function test_a_sub_key_absent_from_the_legacy_row_is_left_alone(): void {
+		update_option(
+			'woocommerce_customer_stock_notification_settings',
+			array(
+				'enabled' => 'no',
+				'heading' => 'Merchant heading',
+			)
+		);
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'subject' => 'Legacy subject' )
+		);
+
+		$this->migrate();
+
+		$core = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
+
+		$this->assertSame( 'Legacy subject', $core['subject'], 'A sub-key the legacy row holds is migrated.' );
+		$this->assertSame( 'no', $core['enabled'], 'A sub-key the legacy row never stored must not be overwritten with an empty string.' );
+		$this->assertSame( 'Merchant heading', $core['heading'] );
 	}
 
 	/**
