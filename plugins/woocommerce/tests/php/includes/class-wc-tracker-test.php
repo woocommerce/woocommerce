@@ -138,13 +138,14 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_retryable_failure_keeps_snapshot_pending( $status ): void {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
-		update_option( 'woocommerce_tracker_last_send', strtotime( '-2 weeks' ) );
+		$last_send = strtotime( '-2 weeks' );
+		update_option( 'woocommerce_tracker_last_send', $last_send );
 		$this->fake_tracker_response( $status );
 		$logger = $this->expect_tracker_warning();
 
 		WC_Tracker::send_tracking_data();
 
-		$this->assertSame( strtotime( '-2 weeks' ), (int) get_option( 'woocommerce_tracker_last_send' ), 'A retryable failure must leave the last send time unchanged so the next daily run retries.' );
+		$this->assertSame( $last_send, (int) get_option( 'woocommerce_tracker_last_send' ), 'A retryable failure must leave the last send time unchanged so the next daily run retries.' );
 		$this->assertSame( 1, (int) get_option( 'woocommerce_tracker_send_failures' ), 'A retryable failure should increment the failure counter.' );
 		$this->assertCount( 1, $logger->warnings, 'A failed delivery should be logged as a warning.' );
 		$this->assertSame( 'woocommerce-tracker', $logger->warnings[0]['source'] );
