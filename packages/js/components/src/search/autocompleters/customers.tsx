@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+import { decodeEntities } from '@wordpress/html-entities';
 import apiFetch from '@wordpress/api-fetch';
 import interpolateComponents from '@automattic/interpolate-components';
 import { createElement } from '@wordpress/element';
@@ -117,6 +118,26 @@ const completer: AutoCompleter = {
 	},
 	getOptionLabel( customer, query ) {
 		const suggestion = getSuggestion( customer, query );
+
+		// A term can match the customer's fields joined together without
+		// appearing in any single one (see getOptionKeywords). There is no
+		// match to highlight in the suggestion then, so render it plain.
+		if (
+			! suggestion
+				.toLocaleLowerCase()
+				.includes( query.toLocaleLowerCase() )
+		) {
+			return (
+				<span
+					key="name"
+					className="woocommerce-search__result-name"
+					aria-label={ suggestion }
+				>
+					{ decodeEntities( suggestion ) }
+				</span>
+			);
+		}
+
 		const match = computeSuggestionMatch( suggestion, query );
 		return (
 			<span

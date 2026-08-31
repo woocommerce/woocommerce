@@ -100,6 +100,17 @@ describe( 'customers autocompleter', () => {
 		expect( screen.getByText( 'Blog' ).tagName ).toBe( 'STRONG' );
 	} );
 
+	it( 'skips the highlight when the match spans two fields', () => {
+		// 'Bloggs bloggs' only matches the name and username joined together,
+		// so there is no match to highlight in the suggestion.
+		const { container } = render(
+			<>{ customers.getOptionLabel( named, 'Bloggs bloggs' ) }</>
+		);
+
+		expect( container.textContent ).toBe( 'Zoe Bloggs' );
+		expect( container.querySelector( 'strong' ) ).toBeNull();
+	} );
+
 	it( 'offers a free text option worded for the fields it searches', () => {
 		const getFreeTextLabel = (
 			completer: typeof customers,
