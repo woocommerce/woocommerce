@@ -66,6 +66,105 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox verify() should activate a pending notification and report that it did.
+	 */
+	public function test_verify_activates_a_pending_notification(): void {
+		$id           = $this->arrange_notification( NotificationStatus::PENDING, 'verification_action_key', 'unused' );
+		$notification = Factory::get_notification( $id );
+
+		$this->email_manager->expects( $this->once() )->method( 'send_verified_email' );
+
+		$fired = 0;
+		add_action(
+			'woocommerce_customer_stock_notifications_verified',
+			function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+
+		$this->assertTrue( $this->sut->verify( $notification ) );
+		$this->assertSame( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
+		$this->assertNotNull( Factory::get_notification( $id )->get_date_confirmed() );
+		$this->assertSame( 1, $fired );
+
+		remove_all_actions( 'woocommerce_customer_stock_notifications_verified' );
+	}
+
+	/**
+	 * @testdox verify() should leave a notification that is not pending untouched.
+	 * @dataProvider provider_non_pending_statuses
+	 *
+	 * @param string $status Test case value.
+	 */
+	public function test_verify_leaves_a_non_pending_notification_alone( string $status ): void {
+		$id           = $this->arrange_notification( $status, 'verification_action_key', 'unused' );
+		$notification = Factory::get_notification( $id );
+
+		$this->email_manager->expects( $this->never() )->method( 'send_verified_email' );
+
+		$this->assertFalse( $this->sut->verify( $notification ) );
+		$this->assertSame( $status, Factory::get_notification( $id )->get_status() );
+	}
+
+	/**
+	 * Every status a verification link must not act on.
+	 *
+	 * @return array
+	 */
+	public function provider_non_pending_statuses(): array {
+		return array(
+			'already verified' => array( NotificationStatus::ACTIVE ),
+			'cancelled'        => array( NotificationStatus::CANCELLED ),
+			'already sent'     => array( NotificationStatus::SENT ),
+		);
+	}
+
+	/**
+	 * @testdox a verification link should not reactivate a notification cancelled after it was issued.
+	 */
+	public function test_a_verification_link_does_not_resurrect_a_cancelled_notification(): void {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
+
+		$notification = Factory::get_notification( $id );
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$notification->save();
+
+		$this->email_manager->expects( $this->never() )->method( 'send_verified_email' );
+
+		// No redirect: the request falls through exactly as a re-hit does.
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+
+		$this->assertSame( NotificationStatus::CANCELLED, Factory::get_notification( $id )->get_status() );
+	}
+
+	/**
+	 * @testdox a verification link should not fatal when the product was deleted after migration.
+	 */
+	public function test_a_verification_link_survives_a_deleted_product(): void {
+		$id           = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
+		$notification = Factory::get_notification( $id );
+
+		wp_delete_post( $notification->get_product_id(), true );
+
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
+
+		$this->assertSame( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
+	}
+
+	/**
 	 * Persist a notification with a single action-key meta entry.
 	 *
 	 * @param string $status     Initial NotificationStatus value to set on the notification.
