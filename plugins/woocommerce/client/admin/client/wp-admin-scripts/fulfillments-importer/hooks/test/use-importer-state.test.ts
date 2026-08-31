@@ -166,6 +166,39 @@ describe( 'importerReducer', () => {
 		expect( state.mapping[ 2 ] ).toBe( 'skip' );
 	} );
 
+	it( 'SET_FILE clears the cached file text', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'SET_FILE_TEXT',
+			text: 'a,b\n1,2\n',
+		} );
+		expect( state.fileText ).toBe( 'a,b\n1,2\n' );
+
+		// A newly chosen file must never export rows from the old one.
+		state = importerReducer( state, {
+			type: 'SET_FILE',
+			file: new File( [ 'x,y' ], 'other.csv' ),
+		} );
+		expect( state.fileText ).toBeNull();
+	} );
+
+	it( 'PREPARE_OK stores the delimiter the server parsed with', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: { ...prepareResponse, delimiter: ';' },
+		} );
+		expect( state.delimiter ).toBe( ';' );
+
+		// An empty delimiter in the response keeps the current one.
+		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: { ...prepareResponse, delimiter: '' },
+		} );
+		expect( state.delimiter ).toBe( ';' );
+	} );
+
 	it( 'BACK_TO_UPLOAD returns to the upload step and keeps the mapping', () => {
 		let state = createInitialState();
 		state = importerReducer( state, {
