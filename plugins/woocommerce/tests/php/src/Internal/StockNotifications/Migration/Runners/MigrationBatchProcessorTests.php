@@ -238,6 +238,62 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A background run is a fresh PHP request, and so a fresh processor and Reporter, per
+	 * batch. Reading the run's losses off one Reporter therefore only ever sees what that
+	 * one request skipped; the counts have to accumulate in the run's own state instead.
+	 *
+	 * @testdox known losses should accumulate across the separate instances a background run uses.
+	 */
+	public function test_known_losses_accumulate_across_processor_instances(): void {
+		// Two rows whose product is gone: each is a skip, and each is seen by a different
+		// processor instance, exactly as consecutive Action Scheduler ticks would.
+		LegacyStore::add_notification( array( 'product_id' => 999999 ) );
+		LegacyStore::add_notification( array( 'product_id' => 999998 ) );
+
+		$this->processor->process_batch( $this->processor->get_next_batch_to_process( 1 ) );
+
+		$this->processor = $this->new_processor();
+		$this->processor->process_batch( $this->processor->get_next_batch_to_process( 1 ) );
+
+		$losses = $this->state->get_losses();
+
+		$this->assertNotNull( $losses, 'A run that skipped rows must have cached what it skipped.' );
+		$this->assertSame(
+			2,
+			(int) $losses['values']['product_missing'],
+			'Both skips must be counted, not just the last instance\'s.'
+		);
+	}
+
+	/**
+	 * @testdox a batch that lands should not double-count a skip an earlier batch already reported.
+	 */
+	public function test_known_losses_are_not_counted_twice_by_one_instance(): void {
+		LegacyStore::add_notification( array( 'product_id' => 999999 ) );
+		$this->seed_notifications( 2 );
+
+		// One instance, several batches: the Reporter's counters are cumulative across them,
+		// so only the difference since the last batch may be added.
+		$this->run_to_completion( 1 );
+
+		$losses = $this->state->get_losses();
+
+		$this->assertSame( 1, (int) $losses['values']['product_missing'] );
+	}
+
+	/**
+	 * @testdox a batch that lands should clear a failure an earlier batch recorded.
+	 */
+	public function test_a_landed_batch_clears_a_recorded_failure(): void {
+		$this->seed_notifications( 1 );
+		$this->state->set_failure( 'notifications', 'an earlier explosion' );
+
+		$this->processor->process_batch( $this->processor->get_next_batch_to_process( 50 ) );
+
+		$this->assertNull( $this->state->get_failure(), 'A run that got going again has not failed.' );
+	}
+
+	/**
 	 * @testdox toggling the feature off mid-run should stop the run and leave it resumable.
 	 */
 	public function test_feature_toggled_off_mid_run_stops_and_resumes(): void {
@@ -537,6 +593,15 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		$this->assertNotNull( $thrown, 'The batch must still propagate so the controller retries it.' );
 		$this->assertTrue( $reporter->has_errors(), 'A failed batch must not leave the run reporting success.' );
 		$this->assertSame( 0, $this->state->get_cursor( 'notifications' ), 'A failed batch must not advance the cursor.' );
+
+		// The controller retries this batch and, once it keeps throwing, drops the processor
+		// without telling it — so the note left here is the only thing that later tells a
+		// killed run apart from a merchant who pressed Stop.
+		$failure = $this->state->get_failure();
+
+		$this->assertNotNull( $failure, 'A throwing batch must record why it stopped.' );
+		$this->assertSame( 'notifications', $failure['section'] );
+		$this->assertSame( 'lost connection', $failure['message'] );
 	}
 
 	/**
@@ -680,6 +745,25 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_customer_stock_notifications_allow_signups' );
 		delete_option( 'wc_bis_migration_has_legacy_links' );
 		delete_option( 'wc_bis_migration_has_migrated_rows' );
+	}
+
+	/**
+	 * Build a processor the way the container builds one per background request.
+	 *
+	 * Each Action Scheduler tick is its own PHP request, so it gets its own processor over
+	 * its own Reporter. Tests that care about what survives between ticks need that, rather
+	 * than pumping one long-lived instance.
+	 *
+	 * @return MigrationBatchProcessor
+	 */
+	private function new_processor(): MigrationBatchProcessor {
+		$requirements = new Requirements();
+		$requirements->init( wc_get_container()->get( StockNotificationsDataStore::class ) );
+
+		$processor = new MigrationBatchProcessor();
+		$processor->init( $requirements, wc_get_container()->get( Writer::class ) );
+
+		return $processor;
 	}
 
 	/**

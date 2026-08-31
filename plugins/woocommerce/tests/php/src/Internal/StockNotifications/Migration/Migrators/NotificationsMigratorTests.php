@@ -571,6 +571,56 @@ class NotificationsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The flag registers the legacy link shim on every front-end request, and the shim
+	 * answers legacy links itself instead of leaving them to the still-active extension. A
+	 * batch that rolled back has migrated nothing, so setting the flag from that batch would
+	 * turn the shim on with no migrated row behind it for any link to resolve to. The option
+	 * write does not join the insert's transaction, so ordering is the only thing protecting
+	 * this.
+	 *
+	 * @testdox a batch that rolls back should not leave the legacy-link shim switched on.
+	 */
+	public function test_a_rolled_back_batch_does_not_set_the_legacy_links_flag(): void {
+		$legacy_id = LegacyStore::add_notification( array( 'product_id' => $this->product_id ) );
+
+		// The secrets are what make the row carry a legacy unsubscribe token, and so what
+		// would set the flag.
+		LegacyStore::add_meta( $legacy_id, '_hash_key', str_pad( 'key', 32, '0' ) );
+		LegacyStore::add_meta( $legacy_id, '_hash_iv', str_pad( 'iv', 16, '0' ) );
+
+		$this->assertFalse( get_option( 'wc_bis_migration_has_legacy_links' ) );
+
+		// Fail the insert itself, so the whole batch rolls back after build_meta() has
+		// already seen a row carrying a legacy token.
+		$thrower = static function ( $query ) {
+			if ( false !== stripos( $query, 'INSERT INTO' ) && false !== stripos( $query, 'stock_notifications' ) ) {
+				throw new \RuntimeException( 'forced insert failure' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $thrower );
+
+		$thrown = null;
+
+		try {
+			$this->migrate_all();
+		} catch ( \Throwable $e ) {
+			$thrown = $e;
+		} finally {
+			remove_filter( 'query', $thrower );
+		}
+
+		$this->assertNotNull( $thrown, 'The batch was supposed to fail.' );
+		$this->assertSame( array(), LegacyStore::get_core_rows(), 'The batch must have rolled back.' );
+		$this->assertFalse(
+			get_option( 'wc_bis_migration_has_legacy_links' ),
+			'A batch that migrated nothing must not register the link shim.'
+		);
+	}
+
+	/**
 	 * Migrate every outstanding candidate row through the live writer.
 	 *
 	 * @return array<string,int> Outcome counts.

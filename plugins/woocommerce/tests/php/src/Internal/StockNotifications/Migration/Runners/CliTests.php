@@ -431,6 +431,15 @@ class CliTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, MockWPCLI::$last_halt_code );
 		$this->assertStringContainsString( 'error-severity outcomes', MockWPCLI::$last_warning_message );
+
+		// The halt has to happen outside the try, because WP_CLI::halt() calls exit() and PHP
+		// skips `finally` on exit. A single permanently-failed row sets has_errors(), so this
+		// is an ordinary way for a run to end — and it must not wedge the lock for an hour.
+		// MockWPCLI::halt() records instead of exiting, so only an assertion catches this.
+		$this->assertFalse(
+			( new MigrationState() )->is_lock_held(),
+			'A run that halted on an error-severity outcome must still hand its lock back.'
+		);
 	}
 
 	/**

@@ -55,11 +55,12 @@ class MigrationState {
 	 * @var array
 	 */
 	private const DEFAULT_STATE = array(
-		'lock'   => null,
-		'cursor' => array(),
-		'counts' => array(),
-		'losses' => null,
-		'totals' => array(),
+		'lock'    => null,
+		'cursor'  => array(),
+		'counts'  => array(),
+		'losses'  => null,
+		'totals'  => array(),
+		'failure' => null,
 	);
 
 	/**
@@ -118,7 +119,7 @@ class MigrationState {
 
 		$state = array_merge( self::DEFAULT_STATE, $stored );
 
-		foreach ( array( 'lock', 'losses' ) as $key ) {
+		foreach ( array( 'lock', 'losses', 'failure' ) as $key ) {
 			if ( null !== $state[ $key ] && ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = null;
 			}
@@ -193,6 +194,31 @@ class MigrationState {
 		$state         = $this->read_stored_state();
 		$state['lock'] = null;
 		$this->write_stored_state( $state );
+	}
+
+	/**
+	 * Release the lock only when the named owner still holds it.
+	 *
+	 * The background run cannot always hand its own lock back: `BatchProcessingController`
+	 * drops a consistently failing processor without telling it, so the lock outlives the
+	 * run that took it. A caller that can prove the owner is gone — the Tools screen, which
+	 * knows the processor is no longer enqueued — reclaims it here rather than making the
+	 * merchant wait out STALE_LOCK_SECONDS.
+	 *
+	 * @param string $owner Owner string the lock must carry to be released.
+	 * @return bool True when a lock owned by $owner was released.
+	 */
+	public function release_lock_owned_by( string $owner ): bool {
+		$state = $this->read_stored_state();
+
+		if ( null === $state['lock'] || ( $state['lock']['owner'] ?? null ) !== $owner ) {
+			return false;
+		}
+
+		$state['lock'] = null;
+		$this->write_stored_state( $state );
+
+		return true;
 	}
 
 	/**
@@ -298,6 +324,9 @@ class MigrationState {
 	public function reset_all_cursors(): void {
 		$state           = $this->get_state();
 		$state['cursor'] = array();
+		// Rows below the cursor come back into play, so anything they were counted as
+		// losing gets counted again on the way past. Start that tally over.
+		$state['losses'] = null;
 		$this->save_state( $state );
 	}
 
@@ -380,6 +409,101 @@ class MigrationState {
 			'values' => $values,
 			'at'     => time(),
 		);
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Add to the cached known-losses counts, timestamped now.
+	 *
+	 * Losses are counted per batch and added here rather than snapshotted at the end of a
+	 * run, because a background run is a fresh PHP request per batch: a Reporter never
+	 * survives to see the whole run, so anything read off one at drain time would be the
+	 * counts of a request that has processed nothing. Callers pass the delta since their
+	 * own last call, so their own counters are not added twice.
+	 *
+	 * @param array<string,int> $deltas Amounts to add, keyed by loss name.
+	 * @return void
+	 */
+	public function add_losses( array $deltas ): void {
+		$state  = $this->get_state();
+		$values = $state['losses']['values'] ?? array();
+
+		if ( ! is_array( $values ) ) {
+			$values = array();
+		}
+
+		foreach ( $deltas as $key => $delta ) {
+			$values[ $key ] = (int) ( $values[ $key ] ?? 0 ) + (int) $delta;
+		}
+
+		$state['losses'] = array(
+			'values' => $values,
+			'at'     => time(),
+		);
+
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Drop the cached known-losses counts.
+	 *
+	 * Counts accumulate across the runs of one migration, so the only thing that may clear
+	 * them is a reset that puts rows back into play — otherwise a re-walk would count the
+	 * same skipped sign-up twice.
+	 *
+	 * @return void
+	 */
+	public function reset_losses(): void {
+		$state           = $this->get_state();
+		$state['losses'] = null;
+		$this->save_state( $state );
+	}
+
+	/**
+	 * The failure that stopped the last background run, if one did.
+	 *
+	 * @return array|null `section`, `message` and `at`, or null when the last run did not
+	 *                    end in a failure.
+	 */
+	public function get_failure(): ?array {
+		return $this->get_state()['failure'];
+	}
+
+	/**
+	 * Record the failure a batch ended on, timestamped now.
+	 *
+	 * `BatchProcessingController` retries a throwing batch and eventually drops the
+	 * processor, logging to `wc-logger` and deleting its own state as it goes. That leaves
+	 * the Tools screen unable to tell a killed run from a deliberate stop, so the migration
+	 * keeps its own note of why the last batch failed.
+	 *
+	 * @param string $section Section slug the failure came from.
+	 * @param string $message Exception message.
+	 * @return void
+	 */
+	public function set_failure( string $section, string $message ): void {
+		$state            = $this->get_state();
+		$state['failure'] = array(
+			'section' => $section,
+			'message' => $message,
+			'at'      => time(),
+		);
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Clear the recorded failure, once a run gets going again.
+	 *
+	 * @return void
+	 */
+	public function clear_failure(): void {
+		$state = $this->get_state();
+
+		if ( null === $state['failure'] ) {
+			return;
+		}
+
+		$state['failure'] = null;
 		$this->save_state( $state );
 	}
 }

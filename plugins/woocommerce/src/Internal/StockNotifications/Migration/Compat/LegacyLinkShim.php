@@ -448,6 +448,17 @@ class LegacyLinkShim {
 	 * row (legacy sent them to a My Account endpoint Core does not register), and a guest
 	 * cancels every row for that email.
 	 *
+	 * The guest branch is the widest of the three — one click on one product's link cancels
+	 * that address's whole migrated set, on an endpoint with no nonce and no logged-in
+	 * identity — and its legacy-parity claim is asserted here but cannot be checked in this
+	 * repository, since the extension is not in it. It wants confirming against the extension
+	 * source; were legacy to have scoped narrower, this branch should scope to the link's own
+	 * product the way `confirmation` does.
+	 *
+	 * Note also that the branch is chosen by whether the address resolves to a `WP_User`, so
+	 * a guest who later registers under the same address moves to the single-row branch: the
+	 * same link does different things before and after they sign up.
+	 *
 	 * @param Notification $notification The resolved, token-verified notification.
 	 * @param string       $ref          Sanitized `bis_unsub_ref` value.
 	 */

@@ -36,6 +36,17 @@ class Reporter {
 	public const OUTCOME_ADOPTED = 'adopted';
 
 	/**
+	 * Outcome code for an active legacy row that adopted a pending Core row. Adoption writes
+	 * markers only, never status, so the subscriber stays pending: they were live in the
+	 * legacy extension and are not live in Core. Nothing is lost — the Core row is the
+	 * merchant's and predates the migration — but it is not the plain success `adopted` is,
+	 * so it carries its own code and is reported as a warning.
+	 *
+	 * @var string
+	 */
+	public const OUTCOME_ADOPTED_DOWNGRADED = 'adopted_downgraded';
+
+	/**
 	 * Outcome code for a row that failed permanently and was marked with `_wc_bis_migration_failed`.
 	 *
 	 * @var string
@@ -128,7 +139,9 @@ class Reporter {
 	 *
 	 * `migrated` and `adopted` log nothing here; per-batch totals are logged by report_batch().
 	 * Every other outcome is a skip (`warning`) except `failed`, which is an `error` since it
-	 * represents an exception the row could not recover from.
+	 * represents an exception the row could not recover from. `adopted_downgraded` is not a
+	 * skip — the row did adopt — but it warns, because the subscriber came out less live than
+	 * they went in and that is worth someone seeing.
 	 *
 	 * @param string $section Section slug, e.g. `notifications`.
 	 * @param string $outcome One of the OUTCOME_* constants.

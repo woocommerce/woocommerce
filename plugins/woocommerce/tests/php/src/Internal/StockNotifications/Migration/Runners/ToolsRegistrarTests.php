@@ -119,6 +119,77 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `BatchProcessingController` drops a consistently failing processor without telling the
+	 * processor, so the lock the background run took outlives the run itself. Left alone it
+	 * blocks the Tools screen for the full stale hour, behind a refusal naming a WP-CLI run
+	 * that never existed.
+	 *
+	 * @testdox starting should reclaim a lock left behind by a background run that is gone.
+	 */
+	public function test_start_reclaims_an_orphaned_background_lock(): void {
+		// What the watchdog leaves behind: the background owner's lock, still fresh, with
+		// nothing enqueued to hand it back.
+		$this->state->acquire_lock( 'background migration' );
+
+		$this->assertFalse(
+			wc_get_container()->get( BatchProcessingController::class )->is_enqueued( MigrationBatchProcessor::class ),
+			'The fixture stands in for a processor the watchdog already removed.'
+		);
+
+		$message = $this->registrar->start();
+
+		$this->assertStringContainsString( 'Migration started', $message, 'A dead run must not block a new one.' );
+		$this->assertTrue(
+			wc_get_container()->get( BatchProcessingController::class )->is_enqueued( MigrationBatchProcessor::class )
+		);
+	}
+
+	/**
+	 * @testdox a refusal should name the process actually holding the lock, not assume WP-CLI.
+	 */
+	public function test_a_refused_start_names_the_lock_owner(): void {
+		$this->state->acquire_lock( 'cli-run-7' );
+
+		$message = $this->registrar->start();
+
+		$this->assertStringContainsString( 'cli-run-7', $message );
+		$this->assertStringNotContainsString(
+			'via WP-CLI',
+			$message,
+			'The message must read the owner rather than assert where the run came from.'
+		);
+
+		$this->state->release_lock();
+	}
+
+	/**
+	 * @testdox the description should say a run stopped on an error rather than call it paused.
+	 */
+	public function test_the_description_reports_a_recorded_failure(): void {
+		$this->state->set_count( 'notifications', 5 );
+		$this->state->set_failure( 'notifications', 'lost connection' );
+
+		$description = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
+
+		$this->assertStringContainsString( 'stopped on an error', $description );
+		$this->assertStringContainsString( 'lost connection', $description );
+	}
+
+	/**
+	 * @testdox the description should not mention a failure once a run is going again.
+	 */
+	public function test_the_description_omits_a_cleared_failure(): void {
+		$this->state->set_count( 'notifications', 5 );
+		$this->state->set_failure( 'notifications', 'lost connection' );
+		$this->state->clear_failure();
+
+		$description = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
+
+		$this->assertStringNotContainsString( 'stopped on an error', $description );
+		$this->assertStringContainsString( 'Paused.', $description );
+	}
+
+	/**
 	 * @testdox starting twice should not enqueue twice.
 	 */
 	public function test_start_is_idempotent(): void {

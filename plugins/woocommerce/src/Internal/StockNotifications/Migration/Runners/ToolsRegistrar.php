@@ -33,6 +33,12 @@ class ToolsRegistrar {
 	private const SUBSCRIBERS_SECTION = 'notifications';
 
 	/**
+	 * Owner string a background run's lock carries. Recognising it is what lets this screen
+	 * tell its own abandoned lock from one a WP-CLI run is still holding.
+	 */
+	private const BACKGROUND_LOCK_OWNER = 'background migration';
+
+	/**
 	 * Add the migration's start/stop entry to the Tools list.
 	 *
 	 * @internal
@@ -112,6 +118,24 @@ class ToolsRegistrar {
 			);
 		}
 
+		// A lock still owned by a background run that is no longer enqueued has no holder
+		// left: `BatchProcessingController` drops a consistently failing processor without
+		// telling it, so the run that took this lock is already gone. Reclaim it rather than
+		// making the merchant wait out the stale threshold.
+		$migration_state->release_lock_owned_by( self::BACKGROUND_LOCK_OWNER );
+
+		// Before the counts below, which are the expensive part of this callback: a start
+		// refused by another process should not pay for a full pass over the legacy table.
+		if ( ! $migration_state->acquire_lock( self::BACKGROUND_LOCK_OWNER ) ) {
+			$lock = $migration_state->get_lock();
+
+			return sprintf(
+				/* translators: %s: identifier of the process holding the migration lock */
+				__( 'A migration is already running (%s). Stop it there first; starting one here does not override it.', 'woocommerce' ),
+				$lock['owner'] ?? __( 'unknown', 'woocommerce' )
+			);
+		}
+
 		// The cursor a previous run left behind is kept: it only ever advances, and the
 		// per-batch already-migrated lookup means resuming behind it costs a re-scan rather
 		// than correctness. Re-walking the whole legacy table is what this migration cannot
@@ -124,18 +148,8 @@ class ToolsRegistrar {
 		// run has to walk, whatever the cursor has already been past.
 		$migration_state->set_total( 'notifications', $run->get_notifications_migrator()->count_remaining() );
 
-		// Taken once for the whole run rather than per batch, and last of all so nothing after
-		// it can bail and leave the lock behind. It is handed back when the last batch drains,
-		// when the run is stopped, or when it goes stale.
-		if ( ! $migration_state->acquire_lock( 'background migration' ) ) {
-			$lock = $migration_state->get_lock();
-
-			return sprintf(
-				/* translators: %s: identifier of the process holding the migration lock */
-				__( 'A migration is already running via WP-CLI (%s). Stop it there first; starting one here does not override it.', 'woocommerce' ),
-				$lock['owner'] ?? __( 'unknown', 'woocommerce' )
-			);
-		}
+		// A new run supersedes whatever stopped the last one.
+		$migration_state->clear_failure();
 
 		$batch_processor->enqueue_processor( MigrationBatchProcessor::class );
 
@@ -181,7 +195,12 @@ class ToolsRegistrar {
 		}
 
 		$batch_processor->remove_processor( MigrationBatchProcessor::class );
-		wc_get_container()->get( MigrationState::class )->release_lock();
+
+		$migration_state = wc_get_container()->get( MigrationState::class );
+		$migration_state->release_lock();
+		// Stopping is a deliberate outcome, so it supersedes whatever the last batch failed
+		// on — otherwise the screen would keep reporting an error the merchant just acted on.
+		$migration_state->clear_failure();
 
 		return __( 'Migration stopped. Subscribers already moved stay put, and the next run picks up where this one left off.', 'woocommerce' );
 	}
@@ -201,13 +220,43 @@ class ToolsRegistrar {
 	private function get_description( bool $is_running ): string {
 		$lines = array( __( 'Moves subscribers and settings from Back In Stock Notifications into the built-in stock notifications. Runs in the background, a batch at a time.', 'woocommerce' ) );
 
-		foreach ( array( $this->get_progress_line( $is_running ), $this->get_losses_line() ) as $line ) {
+		foreach ( array( $this->get_progress_line( $is_running ), $this->get_failure_line( $is_running ), $this->get_losses_line() ) as $line ) {
 			if ( '' !== $line ) {
 				$lines[] = $line;
 			}
 		}
 
 		return implode( '<br />', $lines );
+	}
+
+	/**
+	 * The line that says a run stopped on an error rather than because someone stopped it.
+	 *
+	 * Without this the two look identical on this screen: `BatchProcessingController` drops a
+	 * consistently failing processor on its own, so `is_enqueued()` goes false exactly as it
+	 * would after a deliberate Stop, and the only trace is a wc-logger entry. The processor
+	 * records what it failed on before rethrowing, and that is what this reads.
+	 *
+	 * @param bool $is_running Whether a background run is enqueued right now.
+	 * @return string
+	 */
+	private function get_failure_line( bool $is_running ): string {
+		if ( $is_running ) {
+			return '';
+		}
+
+		$failure = wc_get_container()->get( MigrationState::class )->get_failure();
+
+		if ( null === $failure ) {
+			return '';
+		}
+
+		return sprintf(
+			/* translators: 1: date and time the migration last failed, 2: error message */
+			__( 'The last run stopped on an error at %1$s: %2$s. Starting again retries from the same point. If it keeps stopping, check WooCommerce &gt; Status &gt; Logs.', 'woocommerce' ),
+			wc_get_container()->get( Reporter::class )->format_site_time( (int) $failure['at'] ),
+			esc_html( (string) $failure['message'] )
+		);
 	}
 
 	/**
@@ -319,7 +368,7 @@ class ToolsRegistrar {
 			$outstanding[] = __( 'product settings', 'woocommerce' );
 		}
 
-		if ( ! ( new MigrationRun() )->build_options_migrator()->is_done() ) {
+		if ( ! ( new MigrationRun() )->get_options_migrator()->is_done() ) {
 			$outstanding[] = __( 'store settings', 'woocommerce' );
 		}
 

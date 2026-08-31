@@ -75,12 +75,57 @@ class Requirements {
 	}
 
 	/**
+	 * The result of the current batch's first check(), reused for the rest of that batch.
+	 * Null until the first check, and again after forget().
+	 *
+	 * @var true|WP_Error|null
+	 */
+	private $checked = null;
+
+	/**
 	 * Check whether a migration run may start or continue.
+	 *
+	 * Memoized until forget() is called. One batch asks three times —
+	 * `get_next_batch_to_process()`, `process_batch()`, then the controller's second
+	 * "anything left" probe — and each uncached check costs up to five `SHOW TABLES LIKE`
+	 * queries re-confirming state that cannot have changed in between.
+	 *
+	 * The per-batch re-check this method exists for is unaffected:
+	 * `MigrationBatchProcessor::get_next_batch_to_process()` calls forget() as each batch
+	 * cycle begins, so a feature turned off or a table dropped between batches still stops
+	 * the run, however many batches one instance pumps.
 	 *
 	 * @return true|WP_Error True when every requirement is met, otherwise a `WP_Error`
 	 *                       carrying a translated, merchant-facing reason.
 	 */
 	public function check() {
+		if ( null !== $this->checked ) {
+			return $this->checked;
+		}
+
+		$this->checked = $this->run_check();
+
+		return $this->checked;
+	}
+
+	/**
+	 * Drop the memoized check, so the next check() asks the database again.
+	 *
+	 * Called by a caller that pumps several batches through one instance and needs each to
+	 * see a feature turned off or a table dropped mid-run.
+	 *
+	 * @return void
+	 */
+	public function forget(): void {
+		$this->checked = null;
+	}
+
+	/**
+	 * The uncached requirement check. See check() for why the result is memoized.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function run_check() {
 		if ( ! FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ) {
 			return new WP_Error(
 				'feature_disabled',

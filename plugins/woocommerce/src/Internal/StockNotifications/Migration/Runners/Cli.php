@@ -214,7 +214,7 @@ class Cli {
 			sprintf(
 				'%-14s %s',
 				'settings',
-				$run->build_options_migrator()->is_done() ? 'imported' : 'not imported yet'
+				$run->get_options_migrator()->is_done() ? 'imported' : 'not imported yet'
 			)
 		);
 
@@ -367,7 +367,10 @@ class Cli {
 		// point a later live run starts from. The processor is handed this same instance
 		// below, or a `--dry-run --force` would reset a cursor the batch loop never reads.
 		// The lock is still the real one, taken above.
-		$run_state = $run->build_state( $dry_run );
+		$run_state = $run->get_state( $dry_run );
+
+		// Set instead of halting inside the try: see the has_errors() branch below.
+		$halt_code = null;
 
 		try {
 			if ( $retry_failed && ! $dry_run ) {
@@ -402,7 +405,7 @@ class Cli {
 
 			// Settings are not a section: the processor writes them on every batch, whatever
 			// `--section` asked for, since there is nothing about them to scan or restrict.
-			$options = $run->build_options_migrator();
+			$options = $run->get_options_migrator();
 
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
@@ -458,11 +461,9 @@ class Cli {
 				}
 			}
 
-			if ( in_array( 'notifications', $sections, true ) ) {
-				// What this run found while walking its rows, not a pre-run census: complete
-				// only once the run has reached the end of the legacy table.
-				$run_state->set_losses( $reporter->with_run_losses( $notifications_migrator ) );
-			}
+			// Known losses are added to the run's running total by the processor as each batch
+			// lands, so there is nothing to snapshot here: a total taken at the end of one
+			// command would drop what earlier runs of the same migration already found.
 
 			$this->print_report( $reporter );
 			$this->print_known_losses( $reporter );
@@ -470,14 +471,23 @@ class Cli {
 			if ( $reporter->has_errors() ) {
 				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 				WP_CLI::warning( 'Run finished with error-severity outcomes. See the table above.' );
-				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-				WP_CLI::halt( 1 );
-			}
 
-			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( $dry_run ? 'Dry run complete.' : 'Run complete.' );
+				// Halting here would exit(), and PHP skips `finally` on exit, so the lock
+				// would stay held until it went stale. A single permanently-failed row sets
+				// has_errors(), so this is an ordinary outcome, not a catastrophe. Record the
+				// code and halt below, once the lock is back.
+				$halt_code = 1;
+			} else {
+				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+				WP_CLI::success( $dry_run ? 'Dry run complete.' : 'Run complete.' );
+			}
 		} finally {
 			$this->release_lock();
+		}
+
+		if ( null !== $halt_code ) {
+			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+			WP_CLI::halt( $halt_code );
 		}
 	}
 

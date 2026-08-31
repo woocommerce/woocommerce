@@ -648,6 +648,66 @@ class NotificationsMigratorAdoptionTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Adoption writes markers only, never status, so an active legacy row landing on a
+	 * pending Core row leaves the subscriber pending: live in the extension, not live in
+	 * Core, and silent about it once the extension is deactivated. The row is the merchant's
+	 * and stays as it is — but the outcome has to say so rather than report a plain success.
+	 *
+	 * @testdox an active legacy row adopting a pending Core row should report the downgrade.
+	 */
+	public function test_an_active_row_adopting_a_pending_target_reports_a_downgrade(): void {
+		$pending = $this->create_core_notification( 'shopper@example.com', NotificationStatus::PENDING );
+
+		$legacy_id = LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'user_email'  => 'shopper@example.com',
+				'is_active'   => 'on',
+				'is_verified' => 'yes',
+			)
+		);
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame(
+			array( (string) $legacy_id ),
+			LegacyStore::get_core_meta( '_wc_bis_legacy_id' )[ $pending ],
+			'The row still adopts; nothing about the data changes.'
+		);
+		$this->assertSame(
+			1,
+			$outcomes[ Reporter::OUTCOME_ADOPTED_DOWNGRADED ] ?? 0,
+			'A subscriber who came out less live than they went in is not a plain adoption.'
+		);
+		$this->assertArrayNotHasKey(
+			Reporter::OUTCOME_ADOPTED,
+			$outcomes,
+			'The downgrade must not also be counted as an ordinary adoption.'
+		);
+	}
+
+	/**
+	 * @testdox a pending legacy row adopting a pending Core row should report a plain adoption.
+	 */
+	public function test_a_pending_row_adopting_a_pending_target_is_not_a_downgrade(): void {
+		$this->create_core_notification( 'shopper@example.com', NotificationStatus::PENDING );
+
+		LegacyStore::add_notification(
+			array(
+				'product_id'  => $this->product_id,
+				'user_email'  => 'shopper@example.com',
+				'is_verified' => 'no',
+				'is_active'   => 'off',
+			)
+		);
+
+		$outcomes = $this->migrate_all();
+
+		$this->assertSame( 1, $outcomes[ Reporter::OUTCOME_ADOPTED ] ?? 0 );
+		$this->assertArrayNotHasKey( Reporter::OUTCOME_ADOPTED_DOWNGRADED, $outcomes );
+	}
+
+	/**
 	 * Migrate every outstanding candidate row through the live writer.
 	 *
 	 * @return array<string,int> Outcome counts.

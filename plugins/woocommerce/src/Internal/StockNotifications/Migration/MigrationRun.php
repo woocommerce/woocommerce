@@ -24,9 +24,11 @@ defined( 'ABSPATH' ) || exit;
  * section list. Built here rather than resolved from the container, which cannot reflect over
  * their constructor arguments.
  *
- * Everything an entry point may need to hold on to is memoized, so asking twice returns the
- * same instance: the notifications migrator carries the run's known-loss counters, and the
- * settings migrator remembers which values it has already settled.
+ * The prefix says which you get. A `get_` method memoizes, so asking twice returns the same
+ * instance — that matters for the parts that carry state across a run: the notifications
+ * migrator holds the known-loss counters, the settings migrator remembers which values it has
+ * already settled, and the run state owns the cursors. A `build_` method constructs fresh
+ * every call; the parts it builds hold nothing worth sharing.
  */
 class MigrationRun {
 
@@ -93,7 +95,7 @@ class MigrationRun {
 	 *
 	 * @return OptionsMigrator
 	 */
-	public function build_options_migrator(): OptionsMigrator {
+	public function get_options_migrator(): OptionsMigrator {
 		return $this->options ??= new OptionsMigrator( $this->reporter );
 	}
 
@@ -109,7 +111,7 @@ class MigrationRun {
 	 * @param bool $dry_run Whether the run should keep its state to itself.
 	 * @return MigrationState
 	 */
-	public function build_state( bool $dry_run ): MigrationState {
+	public function get_state( bool $dry_run ): MigrationState {
 		return $this->state ??= new MigrationState( ! $dry_run );
 	}
 
@@ -120,7 +122,10 @@ class MigrationRun {
 	 */
 	public function build_migrators(): array {
 		return array(
+			// Memoized: it counts this run's known losses, so every caller needs the same one.
 			'notifications' => $this->get_notifications_migrator(),
+			// Not memoized: its only field is the shared Reporter, so two instances behave
+			// identically and neither holds anything the other would miss.
 			'product-meta'  => new ProductMetaMigrator( $this->reporter ),
 		);
 	}

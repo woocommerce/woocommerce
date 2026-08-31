@@ -56,6 +56,59 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A merchant can toggle "disable sign-ups" on an existing product while the legacy
+	 * extension is still running — which is the whole window this migration runs in. If the
+	 * batch query kept a keyset cursor, such a product would sit below it forever: never
+	 * served, yet still counted, so the section would report outstanding work it could never
+	 * do and the double-send notice would never clear.
+	 *
+	 * @testdox a product that becomes a candidate below an advanced cursor should still migrate.
+	 */
+	public function test_a_candidate_below_the_cursor_still_migrates(): void {
+		$first  = $this->create_product_with_legacy_flag( 'yes' );
+		$second = $this->create_product_with_legacy_flag( 'yes' );
+
+		$this->assertGreaterThan( $first, $second, 'The fixture assumes ascending product ids.' );
+
+		$migrator = $this->build_migrator();
+		$writer   = wc_get_container()->get( Writer::class );
+
+		// Drain the section, leaving any cursor a caller kept at the highest id seen.
+		$this->migrate();
+		$this->assertSame( 0, $migrator->count_remaining(), 'The section should be drained.' );
+
+		// Now a product below that high-water mark becomes a candidate.
+		update_post_meta( $first, Config::get_product_signups_meta_key(), 'yes' );
+
+		$this->assertSame( 1, $migrator->count_remaining(), 'The re-flagged product is outstanding again.' );
+
+		$batch = $migrator->get_batch( $second, 10 );
+
+		$this->assertSame( array( $first ), $batch, 'A candidate below the cursor must still be served.' );
+
+		$migrator->migrate_batch( $batch, $writer );
+
+		$this->assertSame( 0, $migrator->count_remaining(), 'The section must be able to drain again.' );
+		$this->assertSame( 'no', get_post_meta( $first, Config::get_product_signups_meta_key(), true ) );
+	}
+
+	/**
+	 * @testdox count_remaining and get_batch should agree about what is left.
+	 */
+	public function test_count_remaining_and_get_batch_agree(): void {
+		$this->create_product_with_legacy_flag( 'yes' );
+		$this->create_product_with_legacy_flag( 'yes' );
+
+		$migrator = $this->build_migrator();
+
+		$this->assertSame(
+			$migrator->count_remaining(),
+			count( $migrator->get_batch( 0, 100 ) ),
+			'A count the batch query cannot serve is a section that never drains.'
+		);
+	}
+
+	/**
 	 * @testdox a product with no legacy flag should have nothing written.
 	 */
 	public function test_absent_legacy_flag_writes_nothing(): void {

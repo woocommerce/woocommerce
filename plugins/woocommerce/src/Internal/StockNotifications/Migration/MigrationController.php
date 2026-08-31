@@ -27,9 +27,9 @@ defined( 'ABSPATH' ) || exit;
  * extension to have been installed here. With the feature off there is nothing to migrate into:
  * the `stock_notification` data store is not registered, so the legacy link shim could not load
  * a notification, and Core sends nothing, so the double-send notice would have nothing to warn
- * about. The CLI command is deliberately not gated this way - it registers from `WC_CLI` and
- * reports the disabled feature as an error the merchant can act on, which is more use than a
- * command that silently does not exist.
+ * about. The CLI command registers from `WC_CLI` rather than from here, but applies the same
+ * two conditions in `Cli::register()`, so with the feature off `wp wc bis-migrate` does not
+ * exist at all.
  */
 class MigrationController implements RegisterHooksInterface {
 

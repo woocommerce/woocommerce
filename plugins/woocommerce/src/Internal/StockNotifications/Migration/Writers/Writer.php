@@ -37,7 +37,7 @@ defined( 'ABSPATH' ) || exit;
  * unsubscribe tokens — is always inserted, never updated, and goes through direct SQL rather
  * than `add_meta_data()`, which would bump `date_modified_gmt` on a row the merchant did not
  * touch. `write_product_meta()` is the one exception, going through the product CRUD layer
- * per the plan.
+ * per the plan; see that method for what the exception costs and why it is accepted.
  */
 class Writer {
 
@@ -292,24 +292,21 @@ class Writer {
 	/**
 	 * Write product meta through the CRUD layer.
 	 *
+	 * The full `$product->save()` this costs is deliberate, and the one place this class
+	 * leaves direct SQL for the CRUD layer. The flag it writes is read back through the
+	 * product cache, so a raw meta write would leave stale reads behind it. The price is
+	 * that `WC_Product_Data_Store_CPT::update()` fires `woocommerce_update_product` on every
+	 * save whatever changed, so a large catalog produces that many hook fires — webhooks,
+	 * search indexers, third-party cache invalidation. That fan-out is accepted: only
+	 * products that carried the legacy disable-signups flag are ever written here.
+	 *
 	 * @param int    $product_id Product id.
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
 	 * @return bool
 	 */
 	public function write_product_meta( int $product_id, string $meta_key, $meta_value ): bool {
-		return $this->write_product_meta_pairs( $product_id, array( array( $meta_key, $meta_value ) ) );
-	}
-
-	/**
-	 * Write several meta values onto one product through the CRUD layer, in one save.
-	 *
-	 * @param int   $product_id Product id.
-	 * @param array $meta       List of `array{0:string,1:mixed}` key/value pairs.
-	 * @return bool
-	 */
-	public function write_product_meta_pairs( int $product_id, array $meta ): bool {
-		if ( empty( $meta ) || $this->dry_run ) {
+		if ( $this->dry_run ) {
 			return true;
 		}
 
@@ -318,18 +315,10 @@ class Writer {
 		// A post that is typed as a product but will not resolve to one still needs its
 		// migration marker written, or it stays a candidate forever and stalls the section.
 		if ( ! $product ) {
-			$written = true;
-
-			foreach ( $meta as $pair ) {
-				$written = false !== update_post_meta( $product_id, $pair[0], $pair[1] ) && $written;
-			}
-
-			return $written;
+			return false !== update_post_meta( $product_id, $meta_key, $meta_value );
 		}
 
-		foreach ( $meta as $pair ) {
-			$product->update_meta_data( $pair[0], $pair[1] );
-		}
+		$product->update_meta_data( $meta_key, $meta_value );
 
 		return false !== $product->save();
 	}

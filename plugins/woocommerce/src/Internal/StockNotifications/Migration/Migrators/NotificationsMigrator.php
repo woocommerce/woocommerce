@@ -181,6 +181,17 @@ class NotificationsMigrator implements MigratorInterface {
 	private int $rows_without_hash_count = 0;
 
 	/**
+	 * Whether the batch being assembled carries a legacy token of either kind, and so should
+	 * set HAS_LEGACY_LINKS_OPTION. Recorded while the rows are built and acted on only once
+	 * their insert has committed: the option write does not join that transaction, so setting
+	 * it any earlier survives a rolled-back batch and registers the link shim with no
+	 * migrated row behind it to resolve.
+	 *
+	 * @var bool
+	 */
+	private bool $batch_carries_legacy_links = false;
+
+	/**
 	 * Verification link expiry threshold in seconds, resolved once on first use.
 	 *
 	 * @var int|null
@@ -307,6 +318,8 @@ class NotificationsMigrator implements MigratorInterface {
 		$insert_rows       = array();
 		$insert_legacy_ids = array();
 
+		$this->batch_carries_legacy_links = false;
+
 		foreach ( $legacy_rows as $legacy_row ) {
 			$legacy_id = (int) $legacy_row['id'];
 
@@ -315,17 +328,28 @@ class NotificationsMigrator implements MigratorInterface {
 				$cancellation = $cancellation_sources[ $legacy_id ] ?? null;
 				$status       = StatusMapper::map( $legacy_row, $cancellation );
 
-				$adoption_target_id = $adoption_targets[ $legacy_id ] ?? null;
+				$adoption_target = $adoption_targets[ $legacy_id ] ?? null;
 
-				if ( null !== $adoption_target_id ) {
-					$this->adopt( $adoption_target_id, $legacy_row, $row_meta, $status, $writer );
-					$this->record_outcome( $outcomes, Reporter::OUTCOME_ADOPTED, $legacy_id );
+				if ( null !== $adoption_target ) {
+					$this->adopt( (int) $adoption_target['id'], $legacy_row, $row_meta, $status, $writer );
+
+					// Adoption writes markers only, never status, so an active legacy row that
+					// lands on a pending Core row leaves the subscriber pending. The data is the
+					// merchant's and stays as it is; the outcome says so rather than reporting a
+					// plain success, so a downgraded subscriber is a number someone can act on.
+					$this->record_outcome(
+						$outcomes,
+						NotificationStatus::ACTIVE === $status && NotificationStatus::PENDING === (string) $adoption_target['status']
+							? Reporter::OUTCOME_ADOPTED_DOWNGRADED
+							: Reporter::OUTCOME_ADOPTED,
+						$legacy_id
+					);
 					continue;
 				}
 
 				$insert_rows[]       = array(
 					'columns' => $this->build_columns( $legacy_row, $status, $date_mapper, $cancellation ),
-					'meta'    => $this->build_meta( $legacy_id, $legacy_row, $row_meta, $status, $writer ),
+					'meta'    => $this->build_meta( $legacy_id, $legacy_row, $row_meta, $status ),
 				);
 				$insert_legacy_ids[] = $legacy_id;
 			} catch ( \Throwable $e ) {
@@ -341,6 +365,13 @@ class NotificationsMigrator implements MigratorInterface {
 			// rather than replaying them.
 			$writer->insert_notifications( $insert_rows );
 			$this->maybe_set_has_migrated_rows_option( $writer );
+
+			// Only now the inserts have committed. Setting it while the rows were still being
+			// assembled would survive a rolled-back batch, leaving the shim intercepting every
+			// legacy link with no migrated row behind it to resolve.
+			if ( $this->batch_carries_legacy_links ) {
+				$this->maybe_set_has_legacy_links_option( $writer );
+			}
 
 			foreach ( $insert_legacy_ids as $legacy_id ) {
 				$this->record_outcome( $outcomes, Reporter::OUTCOME_MIGRATED, $legacy_id );
@@ -598,9 +629,23 @@ class NotificationsMigrator implements MigratorInterface {
 	 * Candidates are ranked in PHP, active before pending then by ascending id, so a
 	 * legacy row adopts the same target on every run.
 	 *
+	 * The posted_attributes comparison is byte-exact between two independently produced
+	 * `maybe_serialize()` strings, deliberately: `SignupService::is_already_signed_up()`
+	 * dedupes Core's own signups by exactly that rule, so matching any more loosely here
+	 * would adopt a row Core's signup path treats as a separate subscription. It rests on an
+	 * assumption this repository cannot check — the legacy extension is not in it — that the
+	 * legacy and Core serializations of the same attributes agree byte for byte. If they ever
+	 * disagree the mismatch is systematic rather than occasional, since the two build the
+	 * array through different code paths, and the symptom is a duplicate Core row per
+	 * variation subscription. Loosen both sides together or neither.
+	 *
+	 * The matched candidate is returned whole rather than as a bare id, because its status is
+	 * what tells `migrate_batch()` whether adopting it leaves the subscriber less live than
+	 * the legacy row was.
+	 *
 	 * @param array<int,array<string,mixed>> $legacy_rows       Candidate rows from `woocommerce_bis_notifications`.
 	 * @param array<int,string>              $posted_attributes Normalised posted_attributes value, by legacy id.
-	 * @return array<int,int> Target notification id, by legacy id. Rows that adopt nothing are absent.
+	 * @return array<int,array{id:int,status:string}> Target notification, by legacy id. Rows that adopt nothing are absent.
 	 */
 	private function find_adoption_targets( array $legacy_rows, array $posted_attributes ): array {
 		$registered_pairs = array();
@@ -650,7 +695,7 @@ class NotificationsMigrator implements MigratorInterface {
 				$stored = $candidate_attributes[ $candidate['id'] ] ?? array( '' );
 
 				if ( in_array( $wanted, $stored, true ) ) {
-					$targets[ $legacy_id ] = $candidate['id'];
+					$targets[ $legacy_id ] = $candidate;
 					break;
 				}
 			}
@@ -971,18 +1016,17 @@ class NotificationsMigrator implements MigratorInterface {
 	 * @param array<string,mixed> $legacy_row Row from `woocommerce_bis_notifications`.
 	 * @param array<string,mixed> $row_meta   This row's legacy meta bag.
 	 * @param string              $status     Status resolved by StatusMapper for this row.
-	 * @param Writer              $writer     Writer, used only to set the legacy-links option.
 	 * @return array<int,array{0:string,1:mixed}>
 	 */
-	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status, Writer $writer ): array {
+	private function build_meta( int $legacy_id, array $legacy_row, array $row_meta, string $status ): array {
 		$meta   = $this->map_legacy_meta( $row_meta );
 		$meta[] = array( self::LEGACY_ID_META_KEY, $legacy_id );
 
 		$token = $this->compute_token( $legacy_id, $legacy_row, $row_meta );
 
 		if ( null !== $token ) {
-			$meta[] = array( self::LEGACY_UNSUB_HASH_META_KEY, LegacyHash::to_meta_value( $legacy_id, $token ) );
-			$this->maybe_set_has_legacy_links_option( $writer );
+			$meta[]                           = array( self::LEGACY_UNSUB_HASH_META_KEY, LegacyHash::to_meta_value( $legacy_id, $token ) );
+			$this->batch_carries_legacy_links = true;
 		} else {
 			++$this->rows_without_hash_count;
 		}
@@ -990,8 +1034,8 @@ class NotificationsMigrator implements MigratorInterface {
 		$verify_meta_value = $this->build_verification_meta_value( $legacy_id, $row_meta, $status );
 
 		if ( null !== $verify_meta_value ) {
-			$meta[] = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
-			$this->maybe_set_has_legacy_links_option( $writer );
+			$meta[]                           = array( self::LEGACY_VERIFY_HASH_META_KEY, $verify_meta_value );
+			$this->batch_carries_legacy_links = true;
 		}
 
 		return $meta;

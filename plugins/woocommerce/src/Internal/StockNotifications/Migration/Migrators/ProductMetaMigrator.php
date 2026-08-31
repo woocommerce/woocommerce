@@ -96,11 +96,10 @@ class ProductMetaMigrator implements MigratorInterface {
 	/**
 	 * Count the rows this section still has to migrate.
 	 *
-	 * Same predicate as get_batch(), without the cursor, expressed as a COUNT(*). The
-	 * cursor is ignored: a migrated product stops matching the predicate on its own, so
-	 * counting from the start already excludes everything below the cursor.
+	 * Exactly the predicate get_batch() serves from, expressed as a COUNT(*). Neither uses
+	 * a cursor, so the two cannot disagree about what is left.
 	 *
-	 * @param int $cursor Last product id handled. Ignored; see above.
+	 * @param int $cursor Last product id handled. Ignored; this section keeps no cursor.
 	 * @return int
 	 */
 	public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
@@ -113,24 +112,29 @@ class ProductMetaMigrator implements MigratorInterface {
 	}
 
 	/**
-	 * Fetch the next batch of candidate product ids after the given keyset cursor.
+	 * Fetch the next batch of candidate product ids.
 	 *
-	 * Side-effect free: reads only. A product leaves the candidate set once the target
-	 * meta key holds the migrated value, so a settled row is never selected again.
+	 * Side-effect free: reads only. Deliberately keyset-free, unlike the notifications
+	 * section: the predicate is self-terminating — a product leaves the candidate set the
+	 * moment the target meta key holds the migrated value, or the row is marked failed — so
+	 * re-reading from the start each time cannot serve a settled row twice, and the section
+	 * still drains. A cursor here would strand any product that becomes a candidate below
+	 * it, which is an ordinary thing to happen: a merchant can toggle "disable sign-ups"
+	 * on an existing product while the legacy extension is still running. That row would
+	 * never be served, yet would keep being counted, and the section would never drain.
 	 *
-	 * @param int $cursor Last product id handled in the current pass, or 0 to start a pass.
+	 * @param int $cursor Last product id handled. Ignored; see above.
 	 * @param int $size   Maximum number of ids to return.
 	 * @return array List of product ids, ascending.
 	 */
-	public function get_batch( int $cursor, int $size ): array {
+	public function get_batch( int $cursor, int $size ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface; see above.
 		global $wpdb;
 
 		$sql = $this->candidate_sql(
 			'DISTINCT p.ID',
-			'AND p.ID > %d
-			ORDER BY p.ID ASC
+			'ORDER BY p.ID ASC
 			LIMIT %d',
-			array( $cursor, $size )
+			array( $size )
 		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was prepared by candidate_sql(); table names are fixed internal names, never user input.
@@ -200,7 +204,18 @@ class ProductMetaMigrator implements MigratorInterface {
 
 		foreach ( $ids as $product_id ) {
 			$product_id = (int) $product_id;
-			$outcome    = $this->migrate_one( $product_id, $writer );
+
+			try {
+				$outcome = $this->migrate_one( $product_id, $writer );
+			} catch ( \Throwable $e ) {
+				// migrate_one() goes through the product CRUD layer, which runs third-party
+				// code on save. Letting one product's throw out of here would fail the whole
+				// batch, and the controller would retry it, hit the same product, and
+				// eventually drop the processor — stalling the notifications section too,
+				// since both share one. Settle the row instead and carry on.
+				$this->mark_terminal_failure( $product_id, $writer );
+				$outcome = Reporter::OUTCOME_FAILED;
+			}
 
 			$outcomes[ $outcome ] = ( $outcomes[ $outcome ] ?? 0 ) + 1;
 			$this->reporter->record( self::SLUG, $outcome, $product_id );

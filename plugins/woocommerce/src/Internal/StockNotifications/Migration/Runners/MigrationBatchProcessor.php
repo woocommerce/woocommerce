@@ -84,6 +84,15 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private array $counted_on_drain = array();
 
 	/**
+	 * Known-losses counts this instance has already added to the run's running total,
+	 * keyed by loss name. Only the difference against these is ever added again, so a
+	 * process that pumps several batches does not count the same skip twice.
+	 *
+	 * @var array<string,int>
+	 */
+	private array $losses_contributed = array();
+
+	/**
 	 * Requirement checks re-run on every batch, not just at run start.
 	 *
 	 * @var Requirements
@@ -148,7 +157,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$run = new MigrationRun();
 
 		$this->reporter  = $run->get_reporter();
-		$this->options   = $run->build_options_migrator();
+		$this->options   = $run->get_options_migrator();
 		$this->migrators = $run->build_migrators();
 	}
 
@@ -252,6 +261,12 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @return array Batch of `{section}::{id}` items, containing $size or fewer items.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
+		// Serving a batch is the start of a batch cycle, and requirements are re-read once
+		// per cycle: a merchant can turn the feature off or drop a table between batches, and
+		// a run that pumps one instance through many of them has to see that. Within a cycle
+		// the answer is memoized, so `process_batch()` does not pay for the same check again.
+		$this->requirements->forget();
+
 		if ( ! $this->state->is_lock_held() ) {
 			return array();
 		}
@@ -327,12 +342,24 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 				// either. Re-thrown so a retryable failure still reaches the controller.
 				$this->reporter->report_exception( $slug, $e );
 
+				// The controller retries this batch and, if it keeps throwing, drops the
+				// processor without telling us. Leave a note behind first, so the Tools
+				// screen can tell a killed run from a merchant who pressed Stop.
+				$this->state->set_failure( $slug, $e->getMessage() );
+
 				throw $e;
 			}
 
 			$this->state->refresh_lock();
 			$this->store_cursor( $slug, $raw_ids );
+
+			if ( $migrator instanceof NotificationsMigrator ) {
+				$this->accumulate_losses( $migrator );
+			}
 		}
+
+		// The batch landed, so whatever the last one failed on is no longer the run's state.
+		$this->state->clear_failure();
 	}
 
 	/**
@@ -341,7 +368,18 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * @return int Default batch size.
 	 */
 	public function get_default_batch_size(): int {
-		return $this->batch_size;
+		/**
+		 * Filters the batch size the Back In Stock Notifications migration works in.
+		 *
+		 * The CLI sets its own through `--batch-size`, and passes it here, so a scheduled
+		 * background run is the case this is for: a constrained host may need a smaller
+		 * batch than the default, and has no command line to ask for one.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $batch_size Number of items per batch.
+		 */
+		return max( 1, (int) apply_filters( 'woocommerce_bis_migration_batch_size', $this->batch_size ) );
 	}
 
 	/**
@@ -404,9 +442,36 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$this->counted_on_drain[ $slug ] = true;
 
 		$this->state->set_count( $slug, $migrator->count_remaining( $this->state->get_cursor( $slug ) ) );
+	}
 
-		if ( $migrator instanceof NotificationsMigrator ) {
-			$this->state->set_losses( $this->reporter->with_run_losses( $migrator ) );
+	/**
+	 * Add what this instance has newly skipped to the run's running loss total.
+	 *
+	 * Called as each batch lands, not on drain: a background run is a fresh PHP request per
+	 * batch, so a Reporter read at drain time belongs to a request that has processed
+	 * nothing and reports zeros. Only the difference against what this instance has already
+	 * contributed is added, so the CLI — which pumps many batches through one Reporter —
+	 * does not count the same skip on every batch.
+	 *
+	 * @param NotificationsMigrator $migrator The section whose losses these are.
+	 * @return void
+	 */
+	private function accumulate_losses( NotificationsMigrator $migrator ): void {
+		$current = $this->reporter->with_run_losses( $migrator );
+		$deltas  = array();
+
+		foreach ( $current as $key => $value ) {
+			$delta = (int) $value - (int) ( $this->losses_contributed[ $key ] ?? 0 );
+
+			if ( $delta > 0 ) {
+				$deltas[ $key ] = $delta;
+			}
+		}
+
+		$this->losses_contributed = $current;
+
+		if ( ! empty( $deltas ) ) {
+			$this->state->add_losses( $deltas );
 		}
 	}
 
