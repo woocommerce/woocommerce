@@ -83,7 +83,7 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-config": "workspace:*",

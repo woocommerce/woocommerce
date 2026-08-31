@@ -414,8 +414,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_selection_too_long_n'       => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 					'i18n_load_more'                  => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 					'i18n_searching'                  => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+					'i18n_loading_tax_rates'          => _x( 'Loading tax rates…', 'order tax rate search status', 'woocommerce' ),
+					/* translators: %s: tax rate search term. */
+					'i18n_tax_rate_search_results'    => _x( 'Showing results for “%s”', 'order tax rate search results summary', 'woocommerce' ),
+					'i18n_clear_tax_rate_search'      => _x( 'Clear search', 'order tax rate search results action', 'woocommerce' ),
+					'i18n_no_tax_rates'               => _x( 'No tax rates have been set up yet.', 'order tax rate empty state', 'woocommerce' ),
+					'i18n_no_tax_rates_help'          => _x( 'Set up tax rates or enable automated tax calculation before adding tax to this order.', 'order tax rate empty state', 'woocommerce' ),
+					'i18n_tax_settings'               => _x( 'Go to tax settings', 'order tax rate empty state action', 'woocommerce' ),
+					/* translators: 1: tax class, 2: rate code, 3: rate percentage. */
+					'i18n_tax_rate_details'           => _x( 'Tax class: %1$s. Rate code: %2$s. Rate: %3$s.', 'tax rate option screen reader details', 'woocommerce' ),
+					'tax_rates_settings_url'          => admin_url( 'admin.php?page=wc-settings&tab=tax' ),
 					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
 					'search_products_nonce'           => wp_create_nonce( 'search-products' ),
+					'search_tax_rates_nonce'          => wp_create_nonce( 'search-tax-rates' ),
 					'search_customers_nonce'          => wp_create_nonce( 'search-customers' ),
 					'search_categories_nonce'         => wp_create_nonce( 'search-categories' ),
 					'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
@@ -519,7 +530,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Products.
 			if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version );
+				wp_enqueue_script( 'jquery-ui-datepicker' );
+				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version, false );
 
 				$params = array(
 					'strings' => array(

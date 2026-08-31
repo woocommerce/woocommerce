@@ -420,8 +420,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}
@@ -456,8 +458,10 @@ class WC_Helper_Updater {
 		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$product_id = (int) $subscription['product_id'];
+
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
 			);
 		}
@@ -638,6 +642,21 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Extract the products from a cached update-check payload.
+	 *
+	 * Used on the paths that serve the previous cache rather than a fresh
+	 * response — while rate limited, and on the rate-limited response itself.
+	 *
+	 * @param mixed $data The data retrieved from the transient, of any shape.
+	 * @return array The cached products, or an empty array when there are none.
+	 */
+	private static function get_cached_products( $data ) {
+		return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
+			? $data['products']
+			: array();
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
 	 * The call is cached based on the payload (product ids, file ids). If
@@ -660,6 +679,18 @@ class WC_Helper_Updater {
 			return $data['products'];
 		}
 
+		// If a previous update-check was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. This
+		// backoff is independent of the payload hash above, so a changed payload
+		// (or a flushed cache) can't slip past it — but clicking the Marketplace
+		// "Refresh" button bypasses and clears it. Return the last cached
+		// products, if any, rather than an empty set.
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
+			return self::get_cached_products( $data );
+		}
+
+		$cached_data = $data;
+
 		$data = array(
 			'hash'     => $hash,
 			'updated'  => time(),
@@ -668,11 +699,7 @@ class WC_Helper_Updater {
 		);
 
 		// Detect if this is a manual refresh button click.
-		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$source      = '';
-		if ( stripos( $request_uri, 'wc/v3/marketplace/refresh' ) !== false ) {
-			$source = 'refresh-button';
-		}
+		$source = WC_Helper_API_Backoff::is_refresh_request() ? 'refresh-button' : '';
 
 		$request_body = array( 'products' => $payload );
 		if ( ! empty( $source ) ) {
@@ -696,8 +723,20 @@ class WC_Helper_Updater {
 			);
 		}
 
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+		$response_code = (int) wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $response_code ) {
 			$data['errors'][] = 'http-error';
+
+			// Respect server-side rate limiting: on a 429, record the reset window so
+			// we hold off on further update-check calls until then, and return the
+			// previously cached products without touching the cache. Caching this
+			// empty result for 12 hours would outlive the reset window, and it would
+			// discard the very products the backoff branch above serves while we wait.
+			if ( 429 === $response_code && is_array( $request ) ) {
+				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+
+				return self::get_cached_products( $cached_data );
+			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 		}

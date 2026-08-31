@@ -12,19 +12,19 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Go/no-go
 
-For scheduled stable releases, hold this 24-48 hours before the release date, with the Product DRI (named on the parent tracking issue). Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
+For scheduled stable releases, hold this 24-48 hours before the release date with the Product DRIs named on the parent tracking issue - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
 
 - [ ] The readiness review is complete and its verdicts still hold.
 - [ ] No new blocking findings since the readiness review (check `#woo-core-releases` threads and the [newest issues]({repository_url}/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc)).
 - [ ] Decision recorded as a comment on this issue - **go**, **no-go**, or **go with conditions** - with the names behind it.
 
-For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go. For unscheduled point releases shipping an urgent fix, a quick go/no-go with the Product DRI in `#woo-core-releases` is enough - record the outcome here all the same.
+For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go, with verdicts per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/). For unscheduled point releases shipping an urgent fix, a quick go/no-go with `@woo-core-release` in `#woo-core-releases` is enough - record the outcome here all the same.
 
 
 ### 2. Pre-build checks
 
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
-- [ ] Verify no open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+milestone:{release_milestone}) exist against the `{release_milestone}` milestone. Ping authors as needed to merge or close.
+- [ ] Verify no open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) exist against the `{release_milestone}` milestone. Ping authors as needed to merge or close.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
@@ -32,7 +32,7 @@ For scheduled releases, the readiness review is the one in the RC sub-issue. Poi
 ### 3. Build the release package
 
 - [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_main_version}` as _Release branch_ and `stable` as _Type of version bump to perform_.
-- [ ] Review and merge the PR that was generated against the release branch. Check for remaining open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+milestone:{release_milestone}) in the `{release_milestone}` milestone.
+- [ ] Review and merge the PR that was generated against the release branch. Check for remaining open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) in the `{release_milestone}` milestone.
 - [ ] Run workflow **[Release: Compile changelog]({repository_url}/actions/workflows/release-compile-changelog.yml)**: enter `{release_main_version}` as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
 - [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both are linked in the workflow run.
 - [ ] Run workflow **[Release: Build ZIP file]({repository_url}/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter `{release_main_version}` as _Release branch_ and check _Create GitHub release_.
@@ -66,5 +66,5 @@ For scheduled releases, the readiness review is the one in the RC sub-issue. Poi
 
 ### 7. Post-release tasks
 
-- [ ] Wait at least 1 hour for all automations to complete and make sure to merge any follow-up [PRs]({repository_url}/pulls?q=is:open+is:pr+milestone:{release_milestone}) under the `{release_milestone}` milestone.
+- [ ] Wait at least 1 hour for all automations to complete and make sure to merge any follow-up [PRs]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) under the `{release_milestone}` milestone.
 - [ ] Continue monitoring for bugs related to the release for at least 3 days. See the [release monitoring guide](https://developer.woocommerce.com/docs/contribution/releases/monitoring/) for more details.

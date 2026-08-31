@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace the Grunt pipeline in @woocommerce/classic-assets with a small node build script that calls the same libraries directly. Built assets are byte-identical; full builds and watch-mode rebuilds are faster.

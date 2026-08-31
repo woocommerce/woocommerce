@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# The steps after the seed are as easy to lose as the steps inside it: a
+# silently skipped preference write or translation build is restored before
+# every test along with everything else. Fail on the first broken one.
+set -euo pipefail
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Command prefix for running wp-cli against the single-container E2E environment

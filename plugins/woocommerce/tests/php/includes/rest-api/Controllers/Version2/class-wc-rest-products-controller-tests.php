@@ -452,6 +452,22 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating a variation through the products endpoint returns the existing variation endpoint error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox Creating a product (v2) with a custom attribute using a reserved structural key name is rejected.
 	 */
 	public function test_create_product_blocks_reserved_custom_attribute_name() {

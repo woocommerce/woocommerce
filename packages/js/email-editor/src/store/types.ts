@@ -170,6 +170,20 @@ export type TemplatePreview = {
 
 export type TemplateCategory = string;
 
+/**
+ * Query used to fetch the emails shown in the "Recent" category of the
+ * template selection modal. Accepts any parameter supported by the posts
+ * REST collection endpoint.
+ */
+export type RecentEmailsQuery = {
+	per_page?: number;
+	status?: string;
+	orderby?: string;
+	order?: string;
+	exclude?: Array< number | string >;
+	[ key: string ]: unknown;
+};
+
 export type Feature =
 	| 'fullscreenMode'
 	| 'showIconLabels'

@@ -11,9 +11,12 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Eway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Helcim;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KustomCheckout;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mastercard;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
@@ -114,6 +117,9 @@ class PaymentsProviders {
 		'stripe_*'                    => Stripe::class,
 		'mollie'                      => Mollie::class,
 		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
+		'komoju'                      => Komoju::class,
+		// Target all the per-method KOMOJU gateways.
+		'komoju_*'                    => Komoju::class,
 		'amazon_payments_advanced*'   => AmazonPay::class,
 		'woo-mercado-pago-*'          => MercadoPago::class,
 		'affirm'                      => Affirm::class,
@@ -132,13 +138,15 @@ class PaymentsProviders {
 		'airwallex_*'                 => Airwallex::class,
 		'vivawallet*'                 => Vivacom::class,
 		'tilopay'                     => Tilopay::class,
+		'helcimjs'                    => Helcim::class,
 		'helio'                       => HelioPay::class,
 		'paytrail'                    => Paytrail::class,
 		'monei'                       => Monei::class,
 		'monei_*'                     => Monei::class,
 		'gocardless'                  => GoCardless::class,
-		'kco'                         => KlarnaCheckout::class,
+		'kco'                         => KustomCheckout::class,
 		'visa_acceptance_solutions_*' => Visa::class,
+		'mastercard_merchant_cloud'   => Mastercard::class,
 		'eway'                        => Eway::class,
 		'dibs_easy'                   => NexiCheckout::class,
 	);
@@ -172,12 +180,14 @@ class PaymentsProviders {
 		ExtensionSuggestions::AIRWALLEX         => Airwallex::class,
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
+		ExtensionSuggestions::HELCIM            => Helcim::class,
 		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
-		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::KUSTOM_CHECKOUT   => KustomCheckout::class,
 		ExtensionSuggestions::VISA              => Visa::class,
+		ExtensionSuggestions::MASTERCARD        => Mastercard::class,
 		ExtensionSuggestions::EWAY              => Eway::class,
 		ExtensionSuggestions::NEXI_CHECKOUT     => NexiCheckout::class,
 	);

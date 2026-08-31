@@ -11,7 +11,6 @@
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -397,27 +396,29 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_purchasable_variations() {
-		$variation_ids = $this->get_children();
-
+		/**
+		 * If you are evaluating performance, introducing a transient is not a viable solution.
+		 *
+		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
+		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
+		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
+		 */
+		$has_purchasable_variations = false;
+		$variation_ids              = $this->get_children();
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
-		}
 
-		foreach ( $variation_ids as $variation_id ) {
-
-			$variation = wc_get_product( $variation_id );
-
-			if ( ! $variation || ! $variation->is_purchasable() || ! $variation->is_in_stock() ) {
-				continue;
+			foreach ( $variation_ids as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
+					$has_purchasable_variations = true;
+					break;
+				}
 			}
-
-			// We found at least one available variation, so return true.
-			return true;
 		}
 
-		// There were either no variations, or they were hidden because of the "continues" above.
-		return false;
+		return $has_purchasable_variations;
 	}
 
 	/**
@@ -440,17 +441,13 @@ class WC_Product_Variable extends WC_Product {
 		$parent_featured_id       = (int) $this->get_image_id();
 		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
-		$variation_gallery_image_ids = array();
+		$variation_gallery_image_ids = array_values(
+			array_filter(
+				array_map( 'intval', $variation->get_gallery_image_ids() ),
+				'wp_attachment_is_image'
+			)
+		);
 		$variation_gallery_html      = '';
-
-		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_image_ids = array_values(
-				array_filter(
-					array_map( 'intval', $variation->get_gallery_image_ids() ),
-					'wp_attachment_is_image'
-				)
-			);
-		}
 
 		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_featured_valid ) {
