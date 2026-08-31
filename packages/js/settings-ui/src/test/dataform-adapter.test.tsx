@@ -208,26 +208,34 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toBe( 'See the docs.' );
 		} );
 
-		it( 'warns and leaves the control unset for an unknown type', () => {
-			const warnSpy = jest
-				.spyOn( console, 'warn' )
-				.mockImplementation( () => undefined );
-			const field = buildDataFormField(
-				{ ...textField, type: 'extension_defined' },
-				createOptions( [] )
-			);
+		it.each( [
+			'extension_defined',
+			'constructor',
+			'__proto__',
+			'toString',
+		] )(
+			'warns and leaves the control unset for unknown type "%s"',
+			( type ) => {
+				const warnSpy = jest
+					.spyOn( console, 'warn' )
+					.mockImplementation( () => undefined );
+				const field = buildDataFormField(
+					{ ...textField, type },
+					createOptions( [] )
+				);
 
-			expect( field.type ).toBeUndefined();
-			expect( field.Edit ).toBeUndefined();
-			expect( field.render ).toBeUndefined();
-			expect( field.readOnly ).toBeUndefined();
-			expect( warnSpy ).toHaveBeenCalledWith(
-				expect.stringContaining(
-					'Field type "extension_defined" is not supported.'
-				),
-				expect.any( Object )
-			);
-		} );
+				expect( field.type ).toBeUndefined();
+				expect( field.Edit ).toBeUndefined();
+				expect( field.render ).toBeUndefined();
+				expect( field.readOnly ).toBeUndefined();
+				expect( warnSpy ).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`Field type "${ type }" is not supported.`
+					),
+					expect.any( Object )
+				);
+			}
+		);
 	} );
 
 	describe( 'visibility', () => {

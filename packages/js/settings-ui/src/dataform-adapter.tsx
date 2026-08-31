@@ -237,7 +237,12 @@ export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
-	const descriptor = settingsTypeDescriptors[ settingsField.type ];
+	const descriptor = Object.prototype.hasOwnProperty.call(
+		settingsTypeDescriptors,
+		settingsField.type
+	)
+		? settingsTypeDescriptors[ settingsField.type ]
+		: undefined;
 
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
