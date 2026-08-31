@@ -161,8 +161,10 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 								return (
 									<tr key={ row.index }>
 										<th scope="row">
-											{ isRequiredMapping ||
-											isUnassignedCandidate ? (
+											{ /* Only columns mapped to a required
+											     field get the tag; an unassigned
+											     column may hold anything. */ }
+											{ isRequiredMapping ? (
 												<span className="woocommerce-fulfillment-importer-mapping-table__required">
 													{ __(
 														'Required',

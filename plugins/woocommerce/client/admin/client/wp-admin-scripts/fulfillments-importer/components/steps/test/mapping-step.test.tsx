@@ -113,6 +113,37 @@ describe( 'MappingStep', () => {
 		expect( screen.getByText( 'Not mapped.' ) ).toBeInTheDocument();
 	} );
 
+	it( 'tags only columns mapped to a required field as Required', () => {
+		const state = buildStateWithHeaders(
+			{
+				0: 'order_number',
+				1: 'shipment_provider',
+				2: 'tracking_url',
+				3: '',
+				// tracking_number is missing; the junk column is flagged as
+				// not mapped but must not read as required itself.
+			},
+			[ 'Order ID', 'Carrier', 'URL', 'ggdfgdfgdfgdfg' ]
+		);
+		state.sample = [ '12345', 'UPS', 'https://x.test', 'gggg' ];
+
+		render(
+			<MappingStep
+				state={ state }
+				dispatch={ jest.fn() }
+				onClose={ jest.fn() }
+			/>
+		);
+
+		const tags = document.querySelectorAll(
+			'.woocommerce-fulfillment-importer-mapping-table__required'
+		);
+		expect( tags ).toHaveLength( 2 );
+		const junkRow = screen.getByText( 'ggdfgdfgdfgdfg' ).closest( 'tr' );
+		expect( junkRow ).not.toHaveTextContent( 'Required' );
+		expect( junkRow?.querySelector( 'td.is-error' ) ).not.toBeNull();
+	} );
+
 	it( 'flags unassigned columns but not those set to "Do not import"', () => {
 		const state = buildStateWithHeaders( {
 			0: 'order_number',
