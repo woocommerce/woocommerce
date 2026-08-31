@@ -100,7 +100,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				break;
 			case 'refunded':
 					$content .= '<h1>' . wp_kses_post(
-						// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+						// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in src/Blocks/BlockTypes/OrderConfirmation/Status.php, Status::render_content().
 						apply_filters(
 							'woocommerce_thankyou_order_received_title',
 							esc_html__( 'Order refunded', 'woocommerce' ),
@@ -122,7 +122,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				break;
 			case 'completed':
 				$content .= '<h1>' . wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in src/Blocks/BlockTypes/OrderConfirmation/Status.php, Status::render_content().
 					apply_filters(
 						'woocommerce_thankyou_order_received_title',
 						esc_html__( 'Order completed', 'woocommerce' ),
@@ -147,7 +147,7 @@ class Status extends AbstractOrderConfirmationBlock {
 					$actions .= '<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="button">' . esc_html__( 'My account', 'woocommerce' ) . '</a> ';
 				}
 				$content .= '<h1>' . wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in src/Blocks/BlockTypes/OrderConfirmation/Status.php, Status::render_content().
 					apply_filters(
 						'woocommerce_thankyou_order_received_title',
 						esc_html__( 'Order failed', 'woocommerce' ),
@@ -161,7 +161,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				break;
 			default:
 				$content .= '<h1>' . wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in src/Blocks/BlockTypes/OrderConfirmation/Status.php, Status::render_content().
 					apply_filters(
 						'woocommerce_thankyou_order_received_title',
 						esc_html__( 'Order received', 'woocommerce' ),
