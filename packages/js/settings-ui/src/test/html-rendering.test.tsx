@@ -977,6 +977,50 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'fails closed when no renderer resolves for a field type', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'extension_defined',
+							options: [ { label: 'One', value: 'one' } ],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		// A type nothing can draw has to be as loud as a missing component,
+		// rather than dropping the field beside a live Save button.
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'select' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',

@@ -208,6 +208,21 @@ describe( 'dataform adapter', () => {
 				).toThrow( `Field type "${ type }" is not supported.` );
 			}
 		);
+
+		it( 'fails closed for an unknown type that carries options', () => {
+			// Options alone resolve DataForm's adaptiveSelect control, so an
+			// unresolved type has to fail before that fallback applies.
+			expect( () =>
+				buildDataFormField(
+					{
+						...textField,
+						type: 'extension_defined',
+						options: [ { label: 'One', value: 'one' } ],
+					},
+					createOptions( [] )
+				)
+			).toThrow( 'Field type "extension_defined" is not supported.' );
+		} );
 	} );
 
 	describe( 'descriptions and components', () => {
@@ -266,6 +281,30 @@ describe( 'dataform adapter', () => {
 			);
 
 			expect( field.Edit ).toBe( Registered );
+		} );
+
+		it( 'resolves an unknown type through a registered type renderer', () => {
+			const Registered = () => <div>Extension control</div>;
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				typeRenderers: { extension_defined: Registered },
+			} );
+
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'extension_defined',
+					options: [ { label: 'One', value: 'one' } ],
+				},
+				createOptions( [] )
+			);
+
+			expect( field.Edit ).toBe( Registered );
+			// Extension controls keep their options; only genuinely
+			// unresolvable types fail.
+			expect( field.elements ).toEqual( [
+				{ label: 'One', value: 'one' },
+			] );
 		} );
 
 		it( 'fails closed when a declared component is not registered', () => {
@@ -816,6 +855,35 @@ describe( 'dataform adapter', () => {
 
 			expect( container.querySelector( 'input' ) ).toBeNull();
 			expect( container.querySelector( 'textarea' ) ).toBeNull();
+		} );
+
+		it( 'renders a registered type renderer instead of the options fallback', () => {
+			const Registered = () => <div>Extension control</div>;
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				typeRenderers: { extension_defined: Registered },
+			} );
+			const extensionField: SettingsUIField = {
+				id: 'extension_field',
+				label: 'Extension field',
+				type: 'extension_defined',
+				options: [ { label: 'One', value: 'one' } ],
+			};
+			const options = createOptions( [ extensionField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { extension_field: 'one' };
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ () => undefined }
+				/>
+			);
+
+			expect( container.textContent ).toContain( 'Extension control' );
+			expect( container.querySelector( 'select' ) ).toBeNull();
 		} );
 
 		it( 'renders array fields as a closed multi-select', () => {
