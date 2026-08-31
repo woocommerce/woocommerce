@@ -399,6 +399,327 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should paginate tax rate search results and find rates by location code.
+	 */
+	public function test_json_search_tax_rates_supports_pagination_and_location_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Pagination fixture California rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Pagination fixture New York rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001' );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = 'Pagination fixture';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 1;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 2, $response['pagination']['total'] );
+			$this->assertSame( 2, $response['pagination']['total_pages'] );
+			$this->assertFalse( $response['pagination']['has_prev'] );
+			$this->assertTrue( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $first_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 2;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertTrue( $response['pagination']['has_prev'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 99;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = '10001';
+			$_GET['page'] = 1;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'Pagination fixture New York rate', $response['results'][0]['label'] );
+			$this->assertSame( 'US-NY-PAGINATION FIXTURE NEW YORK RATE-1', $response['results'][0]['rate_code'] );
+			$this->assertSame( '8.875%', $response['results'][0]['rate_percent'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by their visible tax class labels.
+	 */
+	public function test_json_search_tax_rates_supports_tax_class_label_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$tax_class              = WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
+		$created_tax_class_slug = is_wp_error( $tax_class ) ? null : $tax_class['slug'];
+
+		$standard_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'California base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$reduced_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '4.0000',
+				'tax_rate_name'     => 'Reduced class rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => 'reduced-rate',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$_GET['term'] = 'Standard';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $standard_rate_id, $rate_ids );
+			$standard_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $standard_rate_id ) {
+					return $standard_rate_id === $result['id'];
+				}
+			);
+			$standard_result  = current( $standard_results );
+			$this->assertIsArray( $standard_result );
+			$this->assertSame( 'Standard', $standard_result['tax_class'] );
+
+			$_GET['term'] = 'Reduced rate';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $reduced_rate_id, $rate_ids );
+			$reduced_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $reduced_rate_id ) {
+					return $reduced_rate_id === $result['id'];
+				}
+			);
+			$reduced_result  = current( $reduced_results );
+			$this->assertIsArray( $reduced_result );
+			$this->assertSame( 'Reduced rate', $reduced_result['tax_class'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $standard_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $reduced_rate_id ) );
+			if ( $created_tax_class_slug ) {
+				WC_Tax::delete_tax_class_by( 'slug', $created_tax_class_slug );
+			}
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by displayed percentages, rate codes, and fallback labels.
+	 */
+	public function test_json_search_tax_rates_supports_displayed_value_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$named_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Displayed value fixture rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$unnamed_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'ZZ',
+				'tax_rate_state'    => 'ZZ',
+				'tax_rate'          => '3.5000',
+				'tax_rate_name'     => '',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			// The results table shows "8.875%", so that string has to find the rate.
+			$_GET['term'] = '8.875%';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// The full rate code is derived from several columns and must be searchable as shown.
+			$_GET['term'] = 'US-NY-DISPLAYED VALUE FIXTURE RATE-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $named_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = 'us-ny-displayed value';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// Rates without a name are shown under the store's tax or VAT label.
+			$_GET['term'] = WC()->countries->tax_or_vat();
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $unnamed_rate_id, array_column( $response['results'], 'id' ) );
+
+			$_GET['term'] = 'ZZ-ZZ-TAX-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $unnamed_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'ZZ-ZZ-TAX-1', $response['results'][0]['rate_code'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $named_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $unnamed_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should return each tax rate once when listing results without a search term.
+	 */
+	public function test_json_search_tax_rates_without_a_term_lists_all_rates(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Unfiltered listing fixture one',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Unfiltered listing fixture two',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001,10002,10003' );
+
+		$expected_total = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" ) );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = '';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids = array_column( $response['results'], 'id' );
+
+			// A rate with several postcodes must still be counted once.
+			$this->assertSame( $expected_total, $response['pagination']['total'] );
+			$this->assertContains( $first_rate_id, $rate_ids );
+			$this->assertContains( $second_rate_id, $rate_ids );
+			$this->assertSame( count( $rate_ids ), count( array_unique( $rate_ids ) ) );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
 	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
 	 */
 	public function test_add_coupon_discount_uses_manually_edited_line_total() {
@@ -434,6 +755,52 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertEquals( 50, $item->get_subtotal(), 'The edited line total should become the new pre-discount price' );
 		$this->assertEquals( 45, $item->get_total(), 'The discount should be taken off the edited price' );
 		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox Product search decodes URL-encoded characters before returning plain text names.
+	 * @dataProvider product_search_name_provider
+	 *
+	 * @param string $search_term          Product search term.
+	 * @param string $product_name         Product name.
+	 * @param string $expected_result_name Expected product name in the response.
+	 */
+	public function test_json_search_products_returns_plain_text_names( string $search_term, string $product_name, string $expected_result_name ): void {
+		$this->_setRole( 'administrator' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$_GET['term']     = $search_term;
+		$_GET['include']  = array( $product->get_id() );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+
+		try {
+			$response = $this->do_ajax( 'woocommerce_json_search_products' );
+		} finally {
+			unset( $_GET['term'], $_GET['include'], $_GET['security'] );
+		}
+
+		$this->assertSame(
+			sprintf( '%s (%s)', $expected_result_name, $product->get_sku() ),
+			$response[ $product->get_id() ],
+			'Product search should return a stripped, plain text product name.'
+		);
+	}
+
+	/**
+	 * Product names used to verify AJAX search response formatting.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_search_name_provider(): array {
+		return array(
+			'plain punctuation'    => array( 'Ben', "Ben & Jerry's", "Ben & Jerry's" ),
+			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee Mug' ),
+			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text inside' ),
+			'HTML tag'             => array( 'Text', 'Text <span>inside</span>', 'Text inside' ),
+		);
 	}
 
 	/**
