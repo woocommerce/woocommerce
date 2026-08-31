@@ -113,8 +113,8 @@ class WC_Tracker {
 	/**
 	 * Record the outcome of a delivery attempt.
 	 *
-	 * The send time is only recorded once the snapshot is accepted, so a transient failure
-	 * leaves it pending and the next scheduled run retries it.
+	 * The send time is recorded after acceptance or permanent abandonment. A transient failure
+	 * remains pending for the next run.
 	 *
 	 * @param array|WP_Error $response   Response from wp_safe_remote_post().
 	 * @param int            $body_bytes Size of the posted snapshot.
