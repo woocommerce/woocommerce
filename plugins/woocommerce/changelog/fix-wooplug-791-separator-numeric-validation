@@ -1,4 +1,4 @@
-Significance: minor
+Significance: patch
 Type: fix
 
-Prevent numeric characters from being saved as thousand or decimal separators in WooCommerce currency settings; existing invalid values are reset to defaults on upgrade with an admin notice.
+Prevent numbers from being saved as the thousand or decimal separator in currency settings.
