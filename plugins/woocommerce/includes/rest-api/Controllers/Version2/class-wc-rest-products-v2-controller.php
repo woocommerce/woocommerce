@@ -1618,12 +1618,14 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get a WP_Error if any custom (per-product) attribute being saved uses a reserved name that
 	 * is newly introduced. Names already stored on the product are grandfathered. Shared by the
-	 * v2, v3 and v4 products controllers.
+	 * v2, v3 and v4 products controllers. See {@see ReservedAttributeNames::get_blocked_reserved_names()}
+	 * for how names are checked and grandfathered.
 	 *
-	 * @since 11.1.0
 	 * @param WC_Product_Attribute[] $attributes The attributes about to be saved on the product.
-	 * @param mixed                  $product    The product being saved, used to grandfather already-stored names.
+	 * @param WC_Product             $product    The product being saved, used to grandfather already-stored names.
 	 * @return WP_Error|null WP_Error if a reserved name is blocked, null otherwise.
+	 *
+	 * @since 11.2.0
 	 */
 	protected function check_for_reserved_attribute_names( $attributes, $product ) {
 		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
