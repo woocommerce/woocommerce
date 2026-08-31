@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Properly strip tags from product names in AJAX responses
