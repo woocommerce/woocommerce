@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.1.0-rc.1 2026-XX-XX =
+= 11.1.0-rc.1 2026-08-31 =
 
 **WooCommerce**
 
@@ -372,6 +372,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Prevent REST order updates from failing when a line item's variation is deleted mid-update and the posted product resolves to the parent product. [#67860](https://github.com/woocommerce/woocommerce/pull/67860)
 * Fix - Restore the wc_product_meta_lookup join when the Products list is filtered by "Out of stock", so posts_clauses callbacks registered after WooCommerce can still reference the alias. [#67890](https://github.com/woocommerce/woocommerce/pull/67890)
 * Fix - Suppress the customer email verification prompt when guest checkout is disabled. [#67968](https://github.com/woocommerce/woocommerce/pull/67968)
+* Fix - Correct the introductory text on the order withdrawal form. [#68125](https://github.com/woocommerce/woocommerce/pull/68125)
+* Fix - Harden password visibility toggle markup handling. [#68176](https://github.com/woocommerce/woocommerce/pull/68176)
+* Fix - Preserve custom data store cleanup when removing order items. [#68144](https://github.com/woocommerce/woocommerce/pull/68144)
+* Fix - Preserve replacement order items saved by extensions during deferred checkout item deletion. [#68103](https://github.com/woocommerce/woocommerce/pull/68103)
+* Fix - Properly strip tags from product names in AJAX responses [#68175](https://github.com/woocommerce/woocommerce/pull/68175)
+* Fix - Temporarily disable Helcim payment provider recommendations. [#68119](https://github.com/woocommerce/woocommerce/pull/68119)
 * Add - Add a "Send test email" action to the emails listing page (block email editor). [#66405](https://github.com/woocommerce/woocommerce/pull/66405)
 * Add - Add a feature-gated public order withdrawal endpoint. [#66538](https://github.com/woocommerce/woocommerce/pull/66538)
 * Add - Add a filter for product attribute taxonomy row actions in the Attributes admin table. [#66633](https://github.com/woocommerce/woocommerce/pull/66633)
@@ -422,6 +428,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update product brand taxonomy labels to clarify they apply to products. [#66725](https://github.com/woocommerce/woocommerce/pull/66725)
 * Update - Enable variation galleries for all stores and remove the experimental feature toggle. [#67915](https://github.com/woocommerce/woocommerce/pull/67915)
 * Update - Update version requirements to WordPress 7.0. [#67866](https://github.com/woocommerce/woocommerce/pull/67866)
+* Update - Update the Klarna Checkout payment recommendation to its new Kustom Checkout branding, icon, and links. [#68071](https://github.com/woocommerce/woocommerce/pull/68071)
 * Dev - Add a structured outcome to the cart store addCartItem action so consumers can read add success/failure directly instead of counting cart lines. [#66687](https://github.com/woocommerce/woocommerce/pull/66687)
 * Dev - Add deprecated compatibility shims for retired WooCommerce Admin feature flags. [#65472](https://github.com/woocommerce/woocommerce/pull/65472)
 * Dev - Add editor asset count and network transfer size performance metrics. [#66606](https://github.com/woocommerce/woocommerce/pull/66606)
