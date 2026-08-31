@@ -6,12 +6,16 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	BaseControl,
 	Button,
+	Card,
+	CardBody,
 	CheckboxControl,
-	Flex,
+	DropZone,
 	FormFileUpload,
+	Icon,
 	Notice,
 	TextControl,
 } from '@wordpress/components';
+import { chevronDown, chevronUp } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +23,14 @@ import {
 import { prepare } from '../../data/api';
 import { errorMessage } from '../../hooks/use-chunked-import';
 import type { StepComponentProps } from './types';
+
+const FALLBACK_MAX_ROWS = 5000;
+
+const SAMPLE_CSV = [
+	'order_number,tracking_number,shipment_provider,tracking_url,items',
+	'1001,1Z999AA10123456784,UPS,https://www.ups.com/track?tracknum=1Z999AA10123456784,',
+	'1002,9400100000000000000000,USPS,,',
+].join( '\n' );
 
 function formatBytes( bytes: number ): string {
 	if ( bytes < 1024 ) {
@@ -34,20 +46,60 @@ function formatBytes( bytes: number ): string {
 	return sprintf( __( '%s MB', 'woocommerce' ), ( kb / 1024 ).toFixed( 1 ) );
 }
 
-const UploadStep: React.FC< StepComponentProps > = ( {
-	state,
-	dispatch,
-	onClose,
-} ) => {
-	const [ localError, setLocalError ] = useState< string | null >( null );
+function downloadSampleCsv(): void {
+	const blob = new Blob( [ SAMPLE_CSV ], { type: 'text/csv' } );
+	const url = URL.createObjectURL( blob );
+	const link = document.createElement( 'a' );
+	link.href = url;
+	link.download = 'fulfillments-sample.csv';
+	document.body.appendChild( link );
+	link.click();
+	document.body.removeChild( link );
+	URL.revokeObjectURL( url );
+}
 
-	const onFileChosen = useCallback(
-		( event: React.ChangeEvent< HTMLInputElement > ) => {
-			const next = event.target.files?.[ 0 ] ?? null;
+const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
+	const [ localError, setLocalError ] = useState< string | null >( null );
+	const [ showAdvanced, setShowAdvanced ] = useState( false );
+
+	const maxRows =
+		window.wcFulfillmentsImporterSettings?.maxRows ?? FALLBACK_MAX_ROWS;
+
+	const setFile = useCallback(
+		( next: File | null ) => {
 			setLocalError( null );
 			dispatch( { type: 'SET_FILE', file: next } );
 		},
 		[ dispatch ]
+	);
+
+	const onFileChosen = useCallback(
+		( event: React.ChangeEvent< HTMLInputElement > ) => {
+			setFile( event.target.files?.[ 0 ] ?? null );
+		},
+		[ setFile ]
+	);
+
+	const onFilesDrop = useCallback(
+		( files: File[] ) => {
+			const next = files[ 0 ] ?? null;
+			if ( ! next ) {
+				return;
+			}
+			// The server validates thoroughly; this only keeps obvious
+			// non-CSV drops (images, PDFs) from being staged.
+			const looksLikeCsv =
+				/\.(csv|txt)$/i.test( next.name ) ||
+				[ 'text/csv', 'text/plain', 'application/csv' ].includes(
+					next.type
+				);
+			if ( ! looksLikeCsv ) {
+				setLocalError( __( 'Please drop a CSV file.', 'woocommerce' ) );
+				return;
+			}
+			setFile( next );
+		},
+		[ setFile ]
 	);
 
 	const onContinue = useCallback( async () => {
@@ -86,91 +138,142 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 
 	return (
 		<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--upload">
-			<h2>{ __( 'Upload a CSV file', 'woocommerce' ) }</h2>
-			<p>
-				{ __(
-					'Choose a CSV exported from your warehouse or 3PL. We support the common header aliases, and you can adjust the mapping in the next step.',
-					'woocommerce'
-				) }
-			</p>
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					<h2>{ __( 'Upload a CSV file', 'woocommerce' ) }</h2>
+					<p>
+						{ __(
+							'Choose a CSV exported from your warehouse or 3PL. We support the common header aliases, and you can adjust the mapping in the next step.',
+							'woocommerce'
+						) }
+					</p>
 
-			{ localError || state.error ? (
-				<Notice
-					status="error"
-					isDismissible
-					onRemove={ () => {
-						setLocalError( null );
-						dispatch( { type: 'CLEAR_ERROR' } );
-					} }
-				>
-					{ localError || state.error }
-				</Notice>
-			) : null }
+					{ localError || state.error ? (
+						<Notice
+							status="error"
+							isDismissible
+							onRemove={ () => {
+								setLocalError( null );
+								dispatch( { type: 'CLEAR_ERROR' } );
+							} }
+						>
+							{ localError || state.error }
+						</Notice>
+					) : null }
 
-			<BaseControl
-				__nextHasNoMarginBottom
-				id="wc-fulfillments-importer-file"
-				label={ __( 'CSV file', 'woocommerce' ) }
-			>
-				<Flex justify="flex-start" align="center">
-					<FormFileUpload
-						accept=".csv,text/csv,text/plain"
-						onChange={ onFileChosen }
-						__next40pxDefaultSize
+					<BaseControl
+						__nextHasNoMarginBottom
+						id="wc-fulfillments-importer-file"
+						label={ __( 'CSV file', 'woocommerce' ) }
 					>
-						{ __( 'Choose CSV file', 'woocommerce' ) }
-					</FormFileUpload>
-					<span aria-live="polite">{ fileLabel }</span>
-				</Flex>
-			</BaseControl>
+						<div className="woocommerce-fulfillment-importer-dropzone">
+							<DropZone
+								label={ __(
+									'Drop your CSV file here',
+									'woocommerce'
+								) }
+								onFilesDrop={ onFilesDrop }
+							/>
+							<span className="woocommerce-fulfillment-importer-dropzone__hint">
+								{ __( 'Drag a CSV file here', 'woocommerce' ) }
+							</span>
+							<FormFileUpload
+								accept=".csv,text/csv,text/plain"
+								onChange={ onFileChosen }
+								render={ ( { openFileDialog } ) => (
+									<Button
+										variant="secondary"
+										onClick={ openFileDialog }
+									>
+										{ __(
+											'Choose CSV file',
+											'woocommerce'
+										) }
+									</Button>
+								) }
+							/>
+						</div>
+					</BaseControl>
 
-			<TextControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				label={ __( 'CSV delimiter', 'woocommerce' ) }
-				help={ __(
-					'Single character used to separate columns in the CSV. Defaults to comma.',
-					'woocommerce'
-				) }
-				value={ state.delimiter }
-				placeholder=","
-				maxLength={ 1 }
-				onChange={ ( value: string ) =>
-					dispatch( {
-						type: 'SET_DELIMITER',
-						delimiter: value.slice( 0, 1 ),
-					} )
-				}
-			/>
+					<p
+						className="woocommerce-fulfillment-importer-file-label"
+						aria-live="polite"
+					>
+						{ fileLabel }
+					</p>
 
-			<CheckboxControl
-				__nextHasNoMarginBottom
-				label={ __(
-					'Send shipment notification emails to customers.',
-					'woocommerce'
-				) }
-				checked={ state.notifyCustomer }
-				onChange={ ( value: boolean ) =>
-					dispatch( { type: 'SET_NOTIFY', value } )
-				}
-			/>
+					<p className="woocommerce-fulfillment-importer-file-requirements">
+						{ __(
+							'Required columns: order number, tracking number, carrier. Optional: tracking URL, items.',
+							'woocommerce'
+						) }
+					</p>
 
-			<CheckboxControl
-				__nextHasNoMarginBottom
-				label={ __(
-					'Update existing fulfillments when the tracking number matches.',
-					'woocommerce'
-				) }
-				checked={ state.updateExisting }
-				onChange={ ( value: boolean ) =>
-					dispatch( { type: 'SET_UPDATE_EXISTING', value } )
-				}
-			/>
+					<div className="woocommerce-fulfillment-importer-file-meta">
+						<Button variant="link" onClick={ downloadSampleCsv }>
+							{ __(
+								'Download a sample CSV file',
+								'woocommerce'
+							) }
+						</Button>
+						<span>
+							{ sprintf(
+								/* translators: %s: maximum number of rows per file. */
+								__( 'Up to %s rows per file', 'woocommerce' ),
+								maxRows.toLocaleString()
+							) }
+						</span>
+					</div>
+
+					<CheckboxControl
+						__nextHasNoMarginBottom
+						label={ __(
+							'Update existing fulfillments when the tracking number matches.',
+							'woocommerce'
+						) }
+						checked={ state.updateExisting }
+						onChange={ ( value: boolean ) =>
+							dispatch( { type: 'SET_UPDATE_EXISTING', value } )
+						}
+					/>
+				</CardBody>
+			</Card>
+
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					<button
+						type="button"
+						className="woocommerce-fulfillment-importer-advanced-toggle"
+						aria-expanded={ showAdvanced }
+						onClick={ () => setShowAdvanced( ( v ) => ! v ) }
+					>
+						<h2>{ __( 'Advanced options', 'woocommerce' ) }</h2>
+						<Icon icon={ showAdvanced ? chevronUp : chevronDown } />
+					</button>
+					{ showAdvanced ? (
+						<TextControl
+							__next40pxDefaultSize
+							__nextHasNoMarginBottom
+							label={ __( 'CSV delimiter', 'woocommerce' ) }
+							help={ __(
+								'Single character used to separate columns in the CSV. Defaults to comma.',
+								'woocommerce'
+							) }
+							value={ state.delimiter }
+							placeholder=","
+							maxLength={ 1 }
+							onChange={ ( value: string ) =>
+								dispatch( {
+									type: 'SET_DELIMITER',
+									delimiter: value.slice( 0, 1 ),
+								} )
+							}
+						/>
+					) : null }
+				</CardBody>
+			</Card>
 
 			<footer className="woocommerce-fulfillment-importer-step__footer">
-				<Button variant="tertiary" onClick={ onClose }>
-					{ __( 'Cancel', 'woocommerce' ) }
-				</Button>
 				<Button
 					variant="primary"
 					onClick={ onContinue }

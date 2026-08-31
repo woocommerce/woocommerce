@@ -184,6 +184,70 @@ $wp-admin-sidebar-width-collapsed: 36px;
 	}
 }
 
+.woocommerce-fulfillment-importer-dropzone {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 32px 24px;
+	background: $gray-100;
+	border: 1px dashed $gray-300;
+	border-radius: 2px;
+
+	&__hint {
+		color: $gray-900;
+		font-size: 13px;
+	}
+
+	.components-button.is-secondary {
+		background: $white;
+	}
+}
+
+.woocommerce-fulfillment-importer-file-label,
+.woocommerce-fulfillment-importer-file-requirements {
+	margin: 0;
+	font-size: 13px;
+	color: $gray-700;
+}
+
+.woocommerce-fulfillment-importer-file-meta {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	font-size: 13px;
+	color: $gray-700;
+
+	.components-button.is-link {
+		font-size: 13px;
+	}
+}
+
+.woocommerce-fulfillment-importer-advanced-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+	cursor: pointer;
+	text-align: start;
+
+	h2 {
+		font-size: 16px;
+		line-height: 24px;
+		margin: 0;
+	}
+
+	svg {
+		fill: $gray-900;
+	}
+}
+
 .woocommerce-fulfillment-importer-mapping-table {
 	width: 100%;
 	border-collapse: collapse;

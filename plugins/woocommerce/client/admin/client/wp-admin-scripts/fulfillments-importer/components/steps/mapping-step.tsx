@@ -3,7 +3,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, SelectControl } from '@wordpress/components';
+import { Button, CheckboxControl, SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -188,6 +188,21 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 					} ) }
 				</tbody>
 			</table>
+
+			{ /* Lives here rather than on upload: this is the last screen
+			     before anything is saved, and sending customer emails is the
+			     one thing in this flow that cannot be undone. */ }
+			<CheckboxControl
+				__nextHasNoMarginBottom
+				label={ __(
+					'Send shipment notification emails to customers.',
+					'woocommerce'
+				) }
+				checked={ state.notifyCustomer }
+				onChange={ ( value: boolean ) =>
+					dispatch( { type: 'SET_NOTIFY', value } )
+				}
+			/>
 
 			<footer className="woocommerce-fulfillment-importer-step__footer">
 				<Button variant="tertiary" onClick={ onAutoDetect }>
