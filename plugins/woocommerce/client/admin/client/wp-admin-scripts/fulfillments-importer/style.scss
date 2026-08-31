@@ -370,32 +370,22 @@ $wp-admin-sidebar-width-collapsed: 36px;
 }
 
 .woocommerce-fulfillment-importer-summary {
-	&__counts {
-		margin-bottom: 16px;
-	}
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
 
-	&__count {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 120px;
-	}
-
-	&__count-value {
-		font-size: 20px;
+	// Match the mapping table's header treatment.
+	&__rows .woocommerce-table__header {
 		font-weight: 600;
-		line-height: 1.2;
-	}
-
-	&__count-label {
 		color: $gray-700;
 		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
-	&__empty {
-		margin: 0;
-		text-align: center;
-		color: $gray-700;
+	&__rows .woocommerce-table__item,
+	&__rows .woocommerce-table__header {
+		border-bottom: 1px solid $gray-100;
 	}
 
 	.woocommerce-pill {

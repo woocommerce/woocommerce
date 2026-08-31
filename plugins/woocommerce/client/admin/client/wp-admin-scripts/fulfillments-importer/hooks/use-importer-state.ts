@@ -214,6 +214,9 @@ export function importerReducer(
 				...state,
 				step: 'mapping',
 				token: action.payload.token,
+				// Keep the delimiter the server actually parsed with, so the
+				// failed-rows export splits the file the same way.
+				delimiter: action.payload.delimiter || state.delimiter,
 				headers: action.payload.headers,
 				sample: action.payload.sample,
 				total: action.payload.total,

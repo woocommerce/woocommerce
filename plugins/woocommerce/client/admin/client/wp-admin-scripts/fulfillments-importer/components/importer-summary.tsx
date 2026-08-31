@@ -2,13 +2,15 @@
  * External dependencies
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, Card, CardBody, Flex, FlexItem } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { Button, Flex } from '@wordpress/components';
 import { Pill, Table } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
+import ImporterCounters from './importer-counters';
 import type { ImporterRowResult, ImporterSummary } from '../data/types';
 
 interface Props {
@@ -33,16 +35,39 @@ const TABLE_HEADERS = [
 	},
 	{ key: 'order', label: __( 'Order', 'woocommerce' ), isLeftAligned: true },
 	{
-		key: 'fulfillment',
-		label: __( 'Fulfillment', 'woocommerce' ),
-		isLeftAligned: true,
-	},
-	{
 		key: 'message',
 		label: __( 'Message', 'woocommerce' ),
 		isLeftAligned: true,
 	},
 ];
+
+/**
+ * The order cell always shows the number the CSV referred to, even when the
+ * order was not found; rows that resolved an order link to its edit screen
+ * in a new tab so the summary stays put.
+ */
+function orderCell( row: ImporterRowResult ) {
+	const display =
+		row.order_number ||
+		( row.order_id !== undefined ? String( row.order_id ) : '' );
+	if ( row.order_id === undefined ) {
+		return { display, value: display };
+	}
+	return {
+		display: (
+			<a
+				href={ getAdminLink(
+					`post.php?post=${ row.order_id }&action=edit`
+				) }
+				target="_blank"
+				rel="noreferrer"
+			>
+				{ display || row.order_id }
+			</a>
+		),
+		value: row.order_id,
+	};
+}
 
 const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	const { created, updated, skipped, failed, notified, rows } = summary;
@@ -67,14 +92,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 						),
 						value: row.status,
 					},
-					{
-						display: row.order_id ?? '',
-						value: row.order_id ?? '',
-					},
-					{
-						display: row.fulfillment_id ?? '',
-						value: row.fulfillment_id ?? '',
-					},
+					orderCell( row ),
 					{ display: row.message, value: row.message },
 				];
 			} ),
@@ -82,59 +100,6 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	);
 
 	const hasMore = rows.length > visibleCount;
-
-	const counts = useMemo<
-		Array< { key: string; value: number; label: string } >
-	>(
-		() => [
-			{
-				key: 'created',
-				value: created,
-				label: _n(
-					'Fulfillment created',
-					'Fulfillments created',
-					created,
-					'woocommerce'
-				),
-			},
-			{
-				key: 'updated',
-				value: updated,
-				label: _n(
-					'Fulfillment updated',
-					'Fulfillments updated',
-					updated,
-					'woocommerce'
-				),
-			},
-			{
-				key: 'skipped',
-				value: skipped,
-				label: _n(
-					'Row skipped',
-					'Rows skipped',
-					skipped,
-					'woocommerce'
-				),
-			},
-			{
-				key: 'failed',
-				value: failed,
-				label: _n( 'Row failed', 'Rows failed', failed, 'woocommerce' ),
-			},
-			{
-				key: 'notified',
-				value: notified,
-				label: _n(
-					'Customer notified',
-					'Customers notified',
-					notified,
-					'woocommerce'
-				),
-			},
-		],
-		[ created, updated, skipped, failed, notified ]
-	);
 
 	const handleShowMore = useCallback(
 		() => setVisibleCount( ( current ) => current + ROWS_PER_PAGE ),
@@ -182,31 +147,9 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 			aria-live="polite"
 			aria-atomic="true"
 		>
-			<Flex
-				className="woocommerce-fulfillment-importer-summary__counts"
-				wrap
-				gap={ 3 }
-				justify="flex-start"
-			>
-				{ counts.map( ( item ) => (
-					<FlexItem key={ item.key }>
-						<Card size="small">
-							<CardBody>
-								<div
-									className={ `woocommerce-fulfillment-importer-summary__count is-${ item.key }` }
-								>
-									<span className="woocommerce-fulfillment-importer-summary__count-value">
-										{ item.value }
-									</span>
-									<span className="woocommerce-fulfillment-importer-summary__count-label">
-										{ item.label }
-									</span>
-								</div>
-							</CardBody>
-						</Card>
-					</FlexItem>
-				) ) }
-			</Flex>
+			<ImporterCounters
+				counts={ { created, updated, skipped, failed, notified } }
+			/>
 
 			{ resultsBlock }
 		</div>

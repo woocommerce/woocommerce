@@ -22,6 +22,7 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  */
 import { prepare } from '../../data/api';
 import { errorMessage } from '../../hooks/use-chunked-import';
+import { downloadCsv } from '../../utils/csv';
 import type { StepComponentProps } from './types';
 
 const FALLBACK_MAX_ROWS = 5000;
@@ -47,15 +48,7 @@ function formatBytes( bytes: number ): string {
 }
 
 function downloadSampleCsv(): void {
-	const blob = new Blob( [ SAMPLE_CSV ], { type: 'text/csv' } );
-	const url = URL.createObjectURL( blob );
-	const link = document.createElement( 'a' );
-	link.href = url;
-	link.download = 'fulfillments-sample.csv';
-	document.body.appendChild( link );
-	link.click();
-	document.body.removeChild( link );
-	URL.revokeObjectURL( url );
+	downloadCsv( 'fulfillments-sample.csv', SAMPLE_CSV );
 }
 
 const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
