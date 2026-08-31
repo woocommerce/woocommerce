@@ -73,10 +73,12 @@ describe( 'ImportStep', () => {
 			/>
 		);
 
+		// The design system ProgressBar renders a native <progress> element,
+		// which exposes its position through the value attribute.
 		const bar = screen.getByRole( 'progressbar', {
 			name: /import progress/i,
 		} );
-		expect( bar.getAttribute( 'aria-valuenow' ) ).toBe( '25' );
+		expect( bar.getAttribute( 'value' ) ).toBe( '25' );
 	} );
 
 	it( 'exposes a Retry button when an error is set', () => {

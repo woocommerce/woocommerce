@@ -3,11 +3,18 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Notice } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardBody,
+	Notice,
+	ProgressBar,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import ImporterCounters from '../importer-counters';
 import { useChunkedImport } from '../../hooks/use-chunked-import';
 import type { StepComponentProps } from './types';
 
@@ -60,74 +67,53 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--import"
 			aria-busy={ isRunning }
 		>
-			<h2>{ __( 'Importing fulfillments', 'woocommerce' ) }</h2>
-			<p role="status" aria-live="polite">
-				{ statusLabel }
-			</p>
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					<h2>{ __( 'Importing fulfillments', 'woocommerce' ) }</h2>
 
-			<div
-				role="progressbar"
-				aria-valuemin={ 0 }
-				aria-valuemax={ 100 }
-				aria-valuenow={ percent }
-				aria-label={ __( 'Import progress', 'woocommerce' ) }
-				className="woocommerce-fulfillment-importer-progress"
-			>
-				<div
-					className="woocommerce-fulfillment-importer-progress__bar"
-					style={ { width: `${ percent }%` } }
-				/>
-			</div>
+					<ProgressBar
+						className="woocommerce-fulfillment-importer-progress"
+						value={ percent }
+						aria-label={ __( 'Import progress', 'woocommerce' ) }
+					/>
 
-			<dl
-				className="woocommerce-fulfillment-importer-counts"
-				aria-live="polite"
-			>
-				<div>
-					<dt>{ __( 'Created', 'woocommerce' ) }</dt>
-					<dd>{ state.counts.created }</dd>
-				</div>
-				<div>
-					<dt>{ __( 'Updated', 'woocommerce' ) }</dt>
-					<dd>{ state.counts.updated }</dd>
-				</div>
-				<div>
-					<dt>{ __( 'Skipped', 'woocommerce' ) }</dt>
-					<dd>{ state.counts.skipped }</dd>
-				</div>
-				<div>
-					<dt>{ __( 'Failed', 'woocommerce' ) }</dt>
-					<dd>{ state.counts.failed }</dd>
-				</div>
-			</dl>
+					<p role="status" aria-live="polite">
+						{ statusLabel }
+					</p>
 
-			{ state.error ? (
-				<Notice status="error" isDismissible={ false }>
-					<p>{ state.error }</p>
-					{ state.sessionEnded ? (
-						// The session is gone server-side, so retrying the chunk
-						// would fail the same way. Send the user back to upload.
-						<Button
-							variant="secondary"
-							onClick={ () => dispatch( { type: 'RESET' } ) }
-						>
-							{ __( 'Start over', 'woocommerce' ) }
-						</Button>
-					) : (
-						<Button
-							variant="secondary"
-							onClick={ () => {
-								dispatch( { type: 'CLEAR_ERROR' } );
-								retry();
-							} }
-							isBusy={ isRunning }
-							disabled={ isRunning }
-						>
-							{ __( 'Retry', 'woocommerce' ) }
-						</Button>
-					) }
-				</Notice>
-			) : null }
+					<ImporterCounters counts={ state.counts } />
+
+					{ state.error ? (
+						<Notice status="error" isDismissible={ false }>
+							<p>{ state.error }</p>
+							{ state.sessionEnded ? (
+								// The session is gone server-side, so retrying the chunk
+								// would fail the same way. Send the user back to upload.
+								<Button
+									variant="secondary"
+									onClick={ () =>
+										dispatch( { type: 'RESET' } )
+									}
+								>
+									{ __( 'Start over', 'woocommerce' ) }
+								</Button>
+							) : (
+								<Button
+									variant="secondary"
+									onClick={ () => {
+										dispatch( { type: 'CLEAR_ERROR' } );
+										retry();
+									} }
+									isBusy={ isRunning }
+									disabled={ isRunning }
+								>
+									{ __( 'Retry', 'woocommerce' ) }
+								</Button>
+							) }
+						</Notice>
+					) : null }
+				</CardBody>
+			</Card>
 		</div>
 	);
 };

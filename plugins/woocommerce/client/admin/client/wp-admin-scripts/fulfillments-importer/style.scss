@@ -327,42 +327,43 @@ $wp-admin-sidebar-width-collapsed: 36px;
 	line-height: 1.4;
 }
 
-.woocommerce-fulfillment-importer-progress {
+// The design system track defaults to a fixed width; the wizard uses the
+// full card width. The extra ancestor wins over the emotion-injected style.
+.woocommerce-fulfillment-importer-step .woocommerce-fulfillment-importer-progress {
 	width: 100%;
-	height: 8px;
-	background: $gray-100;
-	border-radius: 4px;
-	overflow: hidden;
+}
 
-	&__bar {
-		height: 100%;
-		background: $studio-green-50;
-		transition: width 200ms ease-out;
-	}
+.woocommerce-fulfillment-importer-step--import p[role="status"] {
+	font-size: 13px;
+	color: $gray-900;
 }
 
 .woocommerce-fulfillment-importer-counts {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
 	gap: 12px;
 	margin: 0;
 
-	> div {
+	&__item {
+		// Value above label, keeping dt before dd in the markup.
 		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		padding: 12px;
+		flex-direction: column-reverse;
+		justify-content: flex-end;
+		gap: 4px;
+		padding: 16px;
 		border: 1px solid $gray-200;
 		border-radius: 4px;
 	}
 
 	dt {
 		font-size: 12px;
+		line-height: 16px;
 		color: $gray-700;
 	}
 
 	dd {
-		font-size: 18px;
+		font-size: 20px;
+		line-height: 24px;
 		font-weight: 600;
 		margin: 0;
 	}
