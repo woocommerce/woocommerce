@@ -48,7 +48,7 @@ interface ImageEditorProps {
 	backgroundImageSize: MediaSize;
 	backgroundImageSrc: string;
 	containerRef: RefObject< HTMLDivElement >;
-	setAttributes: ( attrs: MediaAttributes ) => void;
+	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
 	setIsEditingImage: ( value: boolean ) => void;
 }
 
