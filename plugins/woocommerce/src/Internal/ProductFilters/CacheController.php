@@ -93,18 +93,12 @@ class CacheController implements RegisterHooksInterface {
 	 * @since 11.2.0
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
 		$was_published = ProductStatus::PUBLISH === $old_status;
 		$is_published  = ProductStatus::PUBLISH === $new_status;
 
-		if ( $was_published === $is_published || ! $this->need_cleanup() ) {
-			return;
+		if ( $was_published !== $is_published ) {
+			$this->maybe_invalidate_filter_data_cache_for_post( $post );
 		}
-
-		$this->invalidate_filter_data_cache();
 	}
 
 	/**
@@ -118,7 +112,21 @@ class CacheController implements RegisterHooksInterface {
 	 * @since 11.2.0
 	 */
 	public function handle_before_delete_post( $post_id, $post ): void {
-		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) || ! $this->need_cleanup() ) {
+		$this->maybe_invalidate_filter_data_cache_for_post( $post );
+	}
+
+	/**
+	 * Invalidate the filter data cache for a product or variation post, when there is anything cached.
+	 *
+	 * These two hooks are registered before the need_cleanup() early return in register(), because the cache
+	 * can be populated later in the same request.
+	 *
+	 * @param mixed $post Post object.
+	 */
+	private function maybe_invalidate_filter_data_cache_for_post( $post ): void {
+		if ( ! $post instanceof \WP_Post
+			|| ! in_array( $post->post_type, array( 'product', 'product_variation' ), true )
+			|| ! $this->need_cleanup() ) {
 			return;
 		}
 
