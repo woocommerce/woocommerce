@@ -1,11 +1,11 @@
 /**
- * Pure, side-effect-free helpers backing the Mini-Cart product table's
- * per-entry `item_data`/`variation` rendering.
+ * Framework-free helpers backing the Mini-Cart product table's per-entry
+ * `item_data`/`variation` rendering.
  *
  * This module must stay free of top-level side effects and must not import
  * `@wordpress/interactivity` so it can be unit-tested with zero mocking.
- * `frontend.ts`'s store getters resolve the Interactivity context and
- * delegate the actual decision-making to these functions.
+ * `frontend.ts`'s store getters and callbacks resolve the Interactivity
+ * context and delegate the actual decision-making to these functions.
  */
 
 /**
@@ -172,4 +172,38 @@ export function buildCartItemDataAttr(
 			.replace( /[\s_&]+/g, '-' )
 			.toLowerCase() }`,
 	};
+}
+
+/**
+ * Writes an entry's raw field into `el` as HTML, backing the Mini-Cart's
+ * `itemDataNameInnerHTML`/`itemDataValueInnerHTML` callbacks.
+ *
+ * The raw string goes through `innerHTML` on purpose. The Store API returns
+ * `item_data` already escaped and a `display` field may carry real markup,
+ * so entities decode (`1 &lt; 2` reads as `1 < 2`) while entity-encoded tags
+ * stay inert text rather than becoming elements.
+ *
+ * Nothing is written when there is no element or no usable field value, so a
+ * malformed entry leaves the existing markup alone.
+ *
+ * @param {Element | null | undefined} el     Element to write into.
+ * @param {ItemData | undefined}       entry  Entry to read the field from.
+ * @param {'name'|'value'}             field  Which field to render. `name` is
+ *                                            suffixed with `:`.
+ * @param {Function}                   format Optional transform applied to the
+ *                                            HTML before it is written.
+ */
+export function renderEntryFieldHTML(
+	el: Element | null | undefined,
+	entry: ItemData | undefined,
+	field: 'name' | 'value',
+	format: ( html: string ) => string = ( html ) => html
+): void {
+	const raw = getEntryFieldRaw( entry, field );
+
+	if ( ! el || ! raw ) {
+		return;
+	}
+
+	el.innerHTML = format( field === 'name' ? `${ raw }:` : raw );
 }
