@@ -26,7 +26,7 @@ class ReservedAttributeNames {
 	 * (should be blocked when saving a product).
 	 *
 	 * Names already stored on the product aren't returned so existing products with an
-	 * already colliding attribute remain editable. Collisions are logged.
+	 * already colliding attribute remain editable.
 	 *
 	 * See {@see wc_check_if_attribute_name_is_reserved()} for the list of reserved names.
 	 *
@@ -53,37 +53,12 @@ class ReservedAttributeNames {
 				continue;
 			}
 
-			if ( in_array( $slug, $existing_names, true ) ) {
-				// Grandfathered: the product already has this reserved attribute, so it is kept.
-				self::log_collision( $current_product, $attribute->get_name() );
-			} else {
+			// Grandfathered: a reserved name the product already has is kept, only newly introduced ones are blocked.
+			if ( ! in_array( $slug, $existing_names, true ) ) {
 				$blocked[] = $attribute->get_name();
 			}
 		}
 
 		return $blocked;
-	}
-
-	/**
-	 * Write a log entry for a reserved-name collision found.
-	 *
-	 * @param WC_Product $product        The product being saved.
-	 * @param string     $attribute_name The colliding attribute name.
-	 */
-	private static function log_collision( WC_Product $product, string $attribute_name ): void {
-		$product_id = $product->get_id();
-
-		wc_get_logger()->warning(
-			sprintf(
-				/* translators: 1: attribute name, 2: product ID. */
-				__( 'Product #%2$d has a custom attribute named "%1$s" that collides with a reserved WooCommerce structural key. The attribute is kept for backwards compatibility, but the variation data for this product may be read incorrectly. Rename the attribute to resolve this.', 'woocommerce' ),
-				$attribute_name,
-				$product_id
-			),
-			array(
-				'source'     => 'attribute-collision',
-				'product_id' => $product_id,
-			)
-		);
 	}
 }
