@@ -586,8 +586,9 @@ class FulfillmentsCsvImporter {
 	 * @return array<string, mixed>
 	 */
 	private function process_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
-		$result                 = $this->import_row( $row, $header_map, $row_number, $seen_tracking_pairs );
-		$result['order_number'] = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
+		$order_number           = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
+		$result                 = $this->import_row( $row, $header_map, $row_number, $seen_tracking_pairs, $order_number );
+		$result['order_number'] = $order_number;
 		return $result;
 	}
 
@@ -598,11 +599,11 @@ class FulfillmentsCsvImporter {
 	 * @param array<string, int>      $header_map           Map of canonical column key => CSV column index.
 	 * @param int                     $row_number           1-based row number (header is row 1).
 	 * @param array<string, true>     $seen_tracking_pairs  Reference to in-file dedupe tracker.
+	 * @param string                  $order_number         Raw order number from the CSV.
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function import_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
-		$order_number    = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
+	private function import_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs, string $order_number ): array {
 		$tracking_number = $this->get_field( $row, $header_map, self::COL_TRACKING_NUMBER );
 		$provider        = $this->get_field( $row, $header_map, self::COL_PROVIDER );
 		$tracking_url    = $this->get_field( $row, $header_map, self::COL_TRACKING_URL );
