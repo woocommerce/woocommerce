@@ -236,25 +236,28 @@ $wp-admin-sidebar-width-collapsed: 36px;
 }
 
 .woocommerce-fulfillment-importer-advanced-toggle {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
 	margin: 0;
-	padding: 0;
-	background: none;
-	border: 0;
-	cursor: pointer;
-	text-align: start;
 
-	h2 {
+	button {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		background: none;
+		border: 0;
+		cursor: pointer;
+		text-align: start;
+		font-family: inherit;
 		font-size: 16px;
 		line-height: 24px;
-		margin: 0;
-	}
+		font-weight: 600;
+		color: $gray-900;
 
-	svg {
-		fill: $gray-900;
+		svg {
+			fill: $gray-900;
+		}
 	}
 }
 

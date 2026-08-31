@@ -247,16 +247,26 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 
 			<Card className="woocommerce-fulfillment-importer-step__card">
 				<CardBody>
-					<button
-						type="button"
-						className="woocommerce-fulfillment-importer-advanced-toggle"
-						aria-expanded={ showAdvanced }
-						onClick={ () => setShowAdvanced( ( v ) => ! v ) }
+					{ /* Button inside the heading, not the reverse: a button
+					     strips its descendants' roles, which would drop the
+					     heading from the accessibility tree. */ }
+					<h2 className="woocommerce-fulfillment-importer-advanced-toggle">
+						<button
+							type="button"
+							aria-expanded={ showAdvanced }
+							aria-controls="wc-fulfillments-importer-advanced"
+							onClick={ () => setShowAdvanced( ( v ) => ! v ) }
+						>
+							{ __( 'Advanced options', 'woocommerce' ) }
+							<Icon
+								icon={ showAdvanced ? chevronUp : chevronDown }
+							/>
+						</button>
+					</h2>
+					<div
+						id="wc-fulfillments-importer-advanced"
+						hidden={ ! showAdvanced }
 					>
-						<h2>{ __( 'Advanced options', 'woocommerce' ) }</h2>
-						<Icon icon={ showAdvanced ? chevronUp : chevronDown } />
-					</button>
-					{ showAdvanced ? (
 						<TextControl
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
@@ -275,7 +285,7 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 								} )
 							}
 						/>
-					) : null }
+					</div>
 				</CardBody>
 			</Card>
 
