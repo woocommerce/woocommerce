@@ -610,7 +610,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
 									<td class="forminp forminp-checkbox <?php echo esc_html( $tooltip_container_class ); ?>">
 										<?php if ( $has_tooltip ) : ?>
-											<span class="help-tooltip"><?php echo wc_help_tip( esc_html( $value['tooltip'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_help_tip() returns filterable help-tip markup. ?></span>
+											<span class="help-tooltip"><?php echo wc_help_tip( esc_html( $value['tooltip'] ) ); ?></span>
 										<?php endif; ?>
 										<fieldset>
 							<?php
@@ -638,7 +638,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $custom_attributes values are individually escaped before concatenation. ?>
 								/> <?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $description is sanitized with wp_kses_post(). ?>
-							</label> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Sanitized, filterable help-tip markup from get_field_description(). ?>
+							</label> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- For checkboxes, get_field_description() wraps the tip in a description paragraph sanitized with wp_kses_post(). ?>
 						<?php
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'end' === $value['checkboxgroup'] ) {
