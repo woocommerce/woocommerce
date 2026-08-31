@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the shortcode checkout dropping every other field in the order fieldset when order notes are disabled, which also left a required field there blocking checkout with no way to fill it in.
