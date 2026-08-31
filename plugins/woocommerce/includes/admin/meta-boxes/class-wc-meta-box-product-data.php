@@ -339,6 +339,7 @@ class WC_Meta_Box_Product_Data {
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
 
+		// @phpstan-ignore argument.type (get_product_classname() always returns a WC_Product subclass)
 		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
 		if ( ! empty( $blocked_attribute_names ) ) {
 			$attributes = array_values(
