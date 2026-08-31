@@ -46,27 +46,37 @@ export type DataFormAdapter = {
 
 type SettingsTypeDescriptor = {
 	type: FieldTypeName;
-	edit: string;
+	// Only named where the type alone resolves the wrong control. DataForm
+	// derives the control from the field type otherwise, so naming one here
+	// would restate its own default.
+	edit?: string;
 };
 
 const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
-	checkbox: { type: 'boolean', edit: 'checkbox' },
-	select: { type: 'text', edit: 'select' },
-	radio: { type: 'text', edit: 'radio' },
+	text: { type: 'text' },
+	password: { type: 'password' },
+	number: { type: 'number' },
+	checkbox: { type: 'boolean' },
+	email: { type: 'email' },
+	url: { type: 'url' },
+	tel: { type: 'telephone' },
+	date: { type: 'date' },
+	'datetime-local': { type: 'datetime' },
+	// DataForm has no time type, so the value rides in a text control.
+	time: { type: 'text' },
+	// Read-only display text. The type is here so DataForm resolves a control
+	// and keeps the field; the renderer paints the description over it.
+	info: { type: 'text' },
+	// DataForm has no textarea or radio type, so these name the control the
+	// schema asked for.
 	textarea: { type: 'text', edit: 'textarea' },
-	number: { type: 'number', edit: 'number' },
-	// The select control renders as a closed multi-select for array fields,
-	// matching the `select multiple` the native renderer uses.
+	radio: { type: 'text', edit: 'radio' },
+	// Closed lists name their control because DataForm only infers a select
+	// from a non-empty elements list, and these types keep their meaning when
+	// the list comes back empty. Array also has to be named because DataForm
+	// defaults it to a free-text token field.
+	select: { type: 'text', edit: 'select' },
 	array: { type: 'array', edit: 'select' },
-	text: { type: 'text', edit: 'text' },
-	password: { type: 'password', edit: 'password' },
-	'datetime-local': { type: 'datetime', edit: 'datetime' },
-	date: { type: 'date', edit: 'date' },
-	// DataForm has no time control; the plain text control carries the value.
-	time: { type: 'text', edit: 'text' },
-	email: { type: 'email', edit: 'email' },
-	url: { type: 'url', edit: 'url' },
-	tel: { type: 'telephone', edit: 'telephone' },
 };
 
 // Predicates fail open: a broken visibility callback renders the field or
@@ -242,9 +252,6 @@ export const buildDataFormField = (
 	};
 
 	if ( settingsField.type === 'info' ) {
-		// DataForm's regular layout skips fields whose type resolves no Edit
-		// control even when read-only, so info keeps the text type.
-		field.type = 'text';
 		field.readOnly = true;
 		// DataForm paints the label for a read-only field and drops its
 		// description, so info shows the sanitized element the field already
@@ -268,7 +275,9 @@ export const buildDataFormField = (
 		return field;
 	}
 
-	field.Edit = descriptor.edit;
+	if ( descriptor.edit ) {
+		field.Edit = descriptor.edit;
+	}
 
 	return field;
 };

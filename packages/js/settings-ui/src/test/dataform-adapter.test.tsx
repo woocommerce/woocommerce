@@ -78,35 +78,74 @@ describe( 'dataform adapter', () => {
 	} );
 
 	describe( 'field type mapping', () => {
-		const typeExpectations: Array< [ string, string, unknown ] > = [
-			[ 'text', 'text', 'text' ],
-			[ 'password', 'password', 'password' ],
-			[ 'datetime-local', 'datetime', 'datetime' ],
-			[ 'date', 'date', 'date' ],
-			[ 'time', 'text', 'text' ],
-			[ 'email', 'email', 'email' ],
-			[ 'url', 'url', 'url' ],
-			[ 'tel', 'telephone', 'telephone' ],
-			[ 'textarea', 'text', 'textarea' ],
-			[ 'select', 'text', 'select' ],
-			[ 'radio', 'text', 'radio' ],
-			[ 'checkbox', 'boolean', 'checkbox' ],
-			[ 'number', 'number', 'number' ],
-			[ 'array', 'array', 'select' ],
+		const typeExpectations: Array< [ string, string ] > = [
+			[ 'text', 'text' ],
+			[ 'password', 'password' ],
+			[ 'datetime-local', 'datetime' ],
+			[ 'date', 'date' ],
+			[ 'time', 'text' ],
+			[ 'info', 'text' ],
+			[ 'email', 'email' ],
+			[ 'url', 'url' ],
+			[ 'tel', 'telephone' ],
+			[ 'textarea', 'text' ],
+			[ 'select', 'text' ],
+			[ 'radio', 'text' ],
+			[ 'checkbox', 'boolean' ],
+			[ 'number', 'number' ],
+			[ 'array', 'array' ],
 		];
 
 		it.each( typeExpectations )(
-			'maps the "%s" settings type to DataForm type "%s" with the "%s" edit control',
-			( settingsType, dataFormType, editControl ) => {
+			'maps the "%s" settings type to DataForm type "%s"',
+			( settingsType, dataFormType ) => {
 				const field = buildDataFormField(
 					{ ...textField, type: settingsType },
 					createOptions( [ { ...textField, type: settingsType } ] )
 				);
 
 				expect( field.type ).toBe( dataFormType );
+			}
+		);
+
+		// Naming a control DataForm already derives from the type would
+		// restate its default, so only these types name one.
+		it.each( [
+			[ 'textarea', 'textarea' ],
+			[ 'radio', 'radio' ],
+			[ 'select', 'select' ],
+			[ 'array', 'select' ],
+		] )(
+			'names the "%s" control for the "%s" type',
+			( settingsType, editControl ) => {
+				const field = buildDataFormField(
+					{ ...textField, type: settingsType },
+					createOptions( [] )
+				);
+
 				expect( field.Edit ).toBe( editControl );
 			}
 		);
+
+		it.each( [
+			'text',
+			'password',
+			'datetime-local',
+			'date',
+			'time',
+			'email',
+			'url',
+			'tel',
+			'checkbox',
+			'number',
+		] )( 'leaves the "%s" control to DataForm', ( settingsType ) => {
+			const field = buildDataFormField(
+				{ ...textField, type: settingsType },
+				createOptions( [] )
+			);
+
+			expect( field.Edit ).toBeUndefined();
+		} );
 
 		it( 'passes options through as elements', () => {
 			const options = [
@@ -664,6 +703,69 @@ describe( 'dataform adapter', () => {
 			expect( container.textContent ).toContain( 'Useful information.' );
 		} );
 
+		it.each( [
+			[ 'text', 'text' ],
+			[ 'password', 'password' ],
+			[ 'email', 'email' ],
+			[ 'url', 'url' ],
+			[ 'tel', 'tel' ],
+			[ 'number', 'number' ],
+			[ 'checkbox', 'checkbox' ],
+		] )(
+			'lets DataForm resolve the "%s" type to input[type=%s]',
+			( settingsType, inputType ) => {
+				const field: SettingsUIField = {
+					id: 'probe_field',
+					label: 'Probe field',
+					type: settingsType,
+				};
+				const options = createOptions( [ field ] );
+				const adapter = createDataFormAdapter( options );
+				const data = { probe_field: '' };
+
+				const { container } = renderElement(
+					<DataForm
+						data={ data }
+						fields={ adapter.fields }
+						form={ adapter.getForm( data ) }
+						onChange={ () => undefined }
+					/>
+				);
+
+				expect( container.querySelector( 'input' )?.type ).toBe(
+					inputType
+				);
+			}
+		);
+
+		it( 'never degrades a closed list to free text when options are empty', () => {
+			// get_options() returns an empty list when its source is
+			// unavailable. DataForm infers a select only from a non-empty
+			// list, so leaving the control unnamed would fall back to a text
+			// input and accept any value for a closed choice.
+			const emptySelect: SettingsUIField = {
+				id: 'country',
+				label: 'Country',
+				type: 'select',
+				options: [],
+			};
+			const options = createOptions( [ emptySelect ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { country: '' };
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ () => undefined }
+				/>
+			);
+
+			expect( container.querySelector( 'input' ) ).toBeNull();
+			expect( container.querySelector( 'textarea' ) ).toBeNull();
+		} );
+
 		it( 'renders array fields as a closed multi-select', () => {
 			const arrayField: SettingsUIField = {
 				id: 'countries',
@@ -693,9 +795,7 @@ describe( 'dataform adapter', () => {
 				Array.from( select?.options ?? [] ).map( ( o ) => o.value )
 			).toEqual( [ 'FR', 'ES' ] );
 			// A closed control offers no free-text input.
-			expect(
-				container.querySelector( 'input[type="text"]' )
-			).toBeNull();
+			expect( container.querySelector( 'input' ) ).toBeNull();
 		} );
 
 		it( 'surfaces grouped validity through FieldValidity children', () => {
