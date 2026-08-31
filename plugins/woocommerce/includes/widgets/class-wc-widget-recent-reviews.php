@@ -57,7 +57,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 		ob_start();
 
 		$number   = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
-		$comments = get_comments(
+		$comments = get_comments( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The global is the legacy data contract consumed by review templates.
 			array(
 				'number'                    => $number,
 				'status'                    => 'approve',
@@ -66,14 +66,14 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 				'parent'                    => 0,
 				'update_comment_post_cache' => true,
 			)
-		); // WPCS: override ok.
+		);
 
 		if ( $comments ) {
 			$this->widget_start( $args, $instance );
 
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_review_list', '<ul class="product_list_widget">' ) );
 
-			foreach ( (array) $comments as $comment ) {
+			foreach ( (array) $comments as $comment ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Each review template consumes the current comment through this WordPress global.
 				wc_get_template(
 					'content-widget-reviews.php',
 					array(
