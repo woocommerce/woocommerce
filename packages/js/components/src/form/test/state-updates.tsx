@@ -478,6 +478,30 @@ describe( 'Form state updates', () => {
 		] );
 	} );
 
+	it( 'reports a literal dotted key as written rather than as a path', () => {
+		const { onChange, onChanges } = renderForm(
+			{ 'a.b': 1, other: 2 },
+			( { setValue } ) => (
+				<button onClick={ () => setValue( 'a.b', 2 ) }>
+					Update dotted key
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Update dotted key' } )
+		);
+
+		const nextValues = { 'a.b': 2, other: 2 };
+		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+		expect( onChange.mock.calls ).toEqual( [
+			[ { name: 'a.b', value: 2 }, nextValues, true ],
+		] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [ { name: 'a.b', value: 2 } ], nextValues, true ],
+		] );
+	} );
+
 	it( 'writes a literal key holding a segment lodash refuses in a path', () => {
 		const { onChange, onChanges } = renderForm(
 			{ 'a.constructor': 1, other: 2 },
