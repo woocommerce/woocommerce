@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Search: the `customers` type now matches on name, username or email, and its free text option is reworded to match. The previous name-only behaviour is available as the new `customerNames` type.
+Search: the `customers` type now matches on name, username or email, and its free text option is reworded to match. The previous name-only behaviour is available as the new `customerNames` type, and the new `registeredCustomers` type runs the broadened search over registered customers only.
