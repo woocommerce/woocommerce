@@ -631,11 +631,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			}
 		}
 
+		$review = $updated_review;
+
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
 			update_comment_meta( $id, 'verified', $request['verified'] );
+			$review = get_comment( $id );
 		}
-
-		$review = get_comment( $id );
 
 		/** This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, false );

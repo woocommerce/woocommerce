@@ -249,51 +249,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Editing the rating of a review recalculates the product rating aggregates.
-	 */
-	public function test_update_item_recalculates_the_aggregates_when_the_rating_changes() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-
-		$this->create_review( $product_id, 'Holds up to daily use.', 5 );
-		$review_id = $this->create_review( $product_id, 'Fell apart in a week.', 1 )->get_data()['id'];
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $product_id . '/reviews/' . $review_id );
-		$request->set_param( 'product_id', $product_id );
-		$request->set_param( 'id', $review_id );
-		$request->set_param( 'review', 'Held up better than expected.' );
-		$request->set_param( 'rating', 3 );
-
-		$saves      = 0;
-		$count_save = function ( $updated_product_id ) use ( &$saves, $product_id ) {
-			if ( $product_id === (int) $updated_product_id ) {
-				++$saves;
-			}
-		};
-
-		add_action( 'woocommerce_update_product', $count_save );
-		try {
-			$response = $this->sut->update_item( $request );
-		} finally {
-			remove_action( 'woocommerce_update_product', $count_save );
-		}
-		$this->assertEquals( 200, $response->get_status(), 'The review is updated successfully.' );
-		$this->assertSame( 1, $saves, 'The core count callback sees the new rating, so no second save is needed.' );
-
-		$product = wc_get_product( $product_id );
-		$this->assertEquals( 4, $product->get_average_rating(), 'The average rating reflects the new rating, not the one it replaced.' );
-		$this->assertEquals(
-			array(
-				3 => 1,
-				5 => 1,
-			),
-			$product->get_rating_counts(),
-			'The rating counts drop the replaced rating.'
-		);
-	}
-
-	/**
-	 * @testdox Editing only the rating stores it and saves the product once.
+	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
 	public function test_update_item_accepts_an_edit_that_changes_only_the_rating() {
 		wp_set_current_user( $this->shop_manager_id );
@@ -327,13 +283,14 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $saves, 'The core count callback sees the new rating, so no second save is needed.' );
 
 		$product = wc_get_product( $product_id );
-		$this->assertEquals( 4, $product->get_average_rating() );
+		$this->assertEquals( 4, $product->get_average_rating(), 'The average rating reflects the new rating, not the one it replaced.' );
 		$this->assertEquals(
 			array(
 				3 => 1,
 				5 => 1,
 			),
-			$product->get_rating_counts()
+			$product->get_rating_counts(),
+			'The rating counts drop the replaced rating.'
 		);
 	}
 

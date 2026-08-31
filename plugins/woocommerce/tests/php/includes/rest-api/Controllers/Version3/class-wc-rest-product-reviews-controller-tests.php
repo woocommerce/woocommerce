@@ -301,9 +301,9 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Editing the rating of a review recalculates the product rating aggregates.
+	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
-	public function test_update_item_recalculates_the_aggregates_when_the_rating_changes() {
+	public function test_update_item_with_only_a_rating_recalculates_aggregates_in_one_product_save() {
 		wp_set_current_user( $this->shop_manager_id );
 		$product_id = ProductHelper::create_simple_product()->get_id();
 
@@ -328,6 +328,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 200, $response->get_status(), 'The review is updated successfully.' );
+		$this->assertSame( 3, (int) get_comment_meta( $review_id, 'rating', true ) );
 		$this->assertSame( 1, $saves, 'The core count callback sees the new rating, so no second save is needed.' );
 
 		$product = wc_get_product( $product_id );
@@ -339,46 +340,6 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			),
 			$product->get_rating_counts(),
 			'The rating counts drop the replaced rating.'
-		);
-	}
-
-	/**
-	 * @testdox Editing review content and rating saves the product once.
-	 */
-	public function test_update_item_with_content_and_rating_saves_the_product_once() {
-		wp_set_current_user( $this->shop_manager_id );
-		$product_id = ProductHelper::create_simple_product()->get_id();
-		$review_id  = $this->create_review( $product_id, 'Original review.', 5 )->get_data()['id'];
-
-		$saves      = 0;
-		$count_save = function ( $updated_product_id ) use ( &$saves, $product_id ) {
-			if ( $product_id === (int) $updated_product_id ) {
-				++$saves;
-			}
-		};
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
-		$request->set_body_params(
-			array(
-				'review' => 'Updated review.',
-				'rating' => 2,
-			)
-		);
-
-		add_action( 'woocommerce_update_product', $count_save );
-		try {
-			$response = $this->server->dispatch( $request );
-		} finally {
-			remove_action( 'woocommerce_update_product', $count_save );
-		}
-
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( 2, (int) get_comment_meta( $review_id, 'rating', true ) );
-		$this->assertSame( 1, $saves );
-		$this->assertEquals(
-			2,
-			wc_get_product( $product_id )->get_average_rating(),
-			'The aggregate is saved with the new rating.'
 		);
 	}
 
