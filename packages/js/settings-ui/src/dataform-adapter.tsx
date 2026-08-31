@@ -192,15 +192,14 @@ const toLengthConstraint = ( value: string | number | boolean | undefined ) => {
 };
 
 // Classic settings express constraints as HTML custom_attributes; map the
-// ones with DataForm rule slots. The closed elements rule stays off because
-// stored values can predate the current options, and step stays unmapped
-// because DataForm derives it from format.decimals rather than a rule.
+// ones with DataForm rule slots. Step stays unmapped because DataForm derives
+// it from format.decimals rather than a rule.
 const buildValidationRules = (
 	settingsField: SettingsUIField,
 	descriptor: SettingsTypeDescriptor | undefined
 ): Rules< SettingsValues > => {
 	const attributes = settingsField.customAttributes ?? {};
-	const rules: Rules< SettingsValues > = { elements: false };
+	const rules: Rules< SettingsValues > = {};
 
 	if ( isAttributeSet( attributes.required ) ) {
 		rules.required = true;

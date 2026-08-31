@@ -527,7 +527,7 @@ describe( 'dataform adapter', () => {
 	} );
 
 	describe( 'validation rules', () => {
-		it( 'keeps the closed elements rule opt-in for option fields', () => {
+		it( 'leaves closed elements validation to DataForm', () => {
 			const field = buildDataFormField(
 				{
 					...textField,
@@ -540,7 +540,7 @@ describe( 'dataform adapter', () => {
 				createOptions( [] )
 			);
 
-			expect( field.isValid?.elements ).toBe( false );
+			expect( field.isValid?.elements ).toBeUndefined();
 		} );
 
 		it( 'maps number range attributes to numeric constraints', () => {
