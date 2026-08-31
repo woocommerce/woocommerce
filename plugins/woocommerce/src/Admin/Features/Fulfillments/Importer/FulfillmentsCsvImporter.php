@@ -575,7 +575,8 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Process a single CSV row.
+	 * Process a single CSV row. Every result carries the raw order number from
+	 * the CSV so the report can name the order even when it was not found.
 	 *
 	 * @param array<int, string|null> $row              Raw CSV row.
 	 * @param array<string, int>      $header_map           Map of canonical column key => CSV column index.
@@ -585,6 +586,22 @@ class FulfillmentsCsvImporter {
 	 * @return array<string, mixed>
 	 */
 	private function process_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
+		$result                 = $this->import_row( $row, $header_map, $row_number, $seen_tracking_pairs );
+		$result['order_number'] = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
+		return $result;
+	}
+
+	/**
+	 * Validate and import a single CSV row.
+	 *
+	 * @param array<int, string|null> $row              Raw CSV row.
+	 * @param array<string, int>      $header_map           Map of canonical column key => CSV column index.
+	 * @param int                     $row_number           1-based row number (header is row 1).
+	 * @param array<string, true>     $seen_tracking_pairs  Reference to in-file dedupe tracker.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function import_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
 		$order_number    = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
 		$tracking_number = $this->get_field( $row, $header_map, self::COL_TRACKING_NUMBER );
 		$provider        = $this->get_field( $row, $header_map, self::COL_PROVIDER );

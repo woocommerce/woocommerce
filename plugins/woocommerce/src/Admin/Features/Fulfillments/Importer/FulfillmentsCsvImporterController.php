@@ -154,6 +154,7 @@ class FulfillmentsCsvImporterController {
 			array(
 				'importRoute' => '/wc/v3/fulfillments/import',
 				'chunkSize'   => FulfillmentsCsvImporter::resolve_chunk_size(),
+				'maxRows'     => FulfillmentsCsvImporter::MAX_IMPORT_ROWS,
 				'providers'   => $this->get_provider_list_for_js(),
 			)
 		);

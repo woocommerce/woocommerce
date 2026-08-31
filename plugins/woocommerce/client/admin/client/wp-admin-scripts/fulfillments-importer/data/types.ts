@@ -2,6 +2,13 @@ export interface ImporterRowResult {
 	row: number;
 	status: 'created' | 'updated' | 'skipped' | 'failed';
 	message: string;
+	/**
+	 * Raw order number value from the CSV, present for every row so failed
+	 * rows can still name the order the file referred to.
+	 */
+	order_number?: string;
+	/** Stable failure code, present on failed rows only. */
+	code?: string;
 	order_id?: number;
 	fulfillment_id?: number;
 	notified?: boolean;
@@ -19,6 +26,7 @@ export interface ImporterSummary {
 export interface ImporterSettings {
 	importRoute: string;
 	chunkSize: number;
+	maxRows: number;
 	providers: Array< { key: string; label: string } >;
 }
 

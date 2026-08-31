@@ -416,6 +416,8 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $response['errors'] );
 		$this->assertSame( 1, $response['counts']['failed'] );
 		$this->assertSame( 'order_not_found', $response['errors'][0]['code'] );
+		$this->assertSame( '99999999', $response['rows'][0]['order_number'] );
+		$this->assertSame( 'order_not_found', $response['rows'][0]['code'] );
 	}
 
 	/**

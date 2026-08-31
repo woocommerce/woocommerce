@@ -234,6 +234,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'row'            => array( 'type' => 'integer' ),
 						'status'         => array( 'type' => 'string' ),
 						'message'        => array( 'type' => 'string' ),
+						'order_number'   => array( 'type' => 'string' ),
+						'code'           => array( 'type' => 'string' ),
 						'order_id'       => array( 'type' => 'integer' ),
 						'fulfillment_id' => array( 'type' => 'integer' ),
 						'notified'       => array( 'type' => 'boolean' ),
@@ -899,10 +901,14 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				continue;
 			}
 			$entry = array(
-				'row'     => (int) ( $row['row'] ?? 0 ),
-				'status'  => (string) ( $row['status'] ?? '' ),
-				'message' => (string) ( $row['message'] ?? '' ),
+				'row'          => (int) ( $row['row'] ?? 0 ),
+				'status'       => (string) ( $row['status'] ?? '' ),
+				'message'      => (string) ( $row['message'] ?? '' ),
+				'order_number' => (string) ( $row['order_number'] ?? '' ),
 			);
+			if ( isset( $row['code'] ) ) {
+				$entry['code'] = (string) $row['code'];
+			}
 			if ( isset( $row['order_id'] ) ) {
 				$entry['order_id'] = (int) $row['order_id'];
 			}
