@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Move `woocommerce-tokenization-form` script to footer with `defer` strategy to avoid render-blocking jQuery on checkout pages.
+Load `woocommerce-tokenization-form` in the footer with a `defer` strategy so the script no longer sits in the blocking `<head>` on checkout pages.
