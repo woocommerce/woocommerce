@@ -30,6 +30,9 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 	const failedRows = summary?.rows.filter(
 		( row ) => row.status === 'failed'
 	);
+	// Row details can be absent even when the failed counter is not (they
+	// arrive per chunk, the counters via the summary).
+	const canDownloadFailedRows = Boolean( state.file && failedRows?.length );
 
 	// Most failures are problems with the file the warehouse sent, so the
 	// export is the failed rows in their original columns plus a reason
@@ -108,7 +111,11 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 				>
 					{ __( 'Import another file', 'woocommerce' ) }
 				</Button>
-				<Button variant="primary" onClick={ onDownloadFailedRows }>
+				<Button
+					variant="primary"
+					onClick={ onDownloadFailedRows }
+					disabled={ ! canDownloadFailedRows }
+				>
 					{ __( 'Download failed rows', 'woocommerce' ) }
 				</Button>
 			</>
@@ -121,7 +128,11 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 				<Button variant="tertiary" onClick={ onClose }>
 					{ __( 'Done', 'woocommerce' ) }
 				</Button>
-				<Button variant="secondary" onClick={ onDownloadFailedRows }>
+				<Button
+					variant="secondary"
+					onClick={ onDownloadFailedRows }
+					disabled={ ! canDownloadFailedRows }
+				>
 					{ __( 'Download failed rows', 'woocommerce' ) }
 				</Button>
 				<Button
