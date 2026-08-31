@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\WeightUnit;
+use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -1204,26 +1205,14 @@ function wc_format_product_short_description( $content ) {
 /**
  * Validates and sanitizes currency separators when saved in settings.
  *
- * @since 10.8.0
  * @param  string $value     Option value passed through earlier filters.
  * @param  array  $option    Option data including 'id' and 'default'.
  * @param  string $raw_value Raw POST value before any processing.
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	$no_tags    = wp_kses( (string) $raw_value, array() );
-	$normalized = preg_replace( '/\s+/', ' ', $no_tags ) ?? $no_tags;
-
-	if ( false !== strpbrk( $normalized, '0123456789' ) ) {
-		WC_Admin_Settings::add_error(
-			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
-		);
-		return get_option( $option['id'], $option['default'] ?? '' );
-	}
-
-	return $normalized;
+	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $value, $option, $raw_value );
 }
-// Applied to both separator options at priority 10, before the value is persisted.
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
 
