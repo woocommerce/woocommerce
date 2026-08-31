@@ -2,78 +2,50 @@
  * External dependencies
  */
 import React, { useCallback, useMemo } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
-import { Button, CheckboxControl, SelectControl } from '@wordpress/components';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import {
+	Button,
+	Card,
+	CardBody,
+	CheckboxControl,
+	Notice,
+	SelectControl,
+} from '@wordpress/components';
+import { Icon, caution } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import type { CanonicalColumnKey, ColumnMapping } from '../../data/types';
+import type { CanonicalColumnKey, MappingChoice } from '../../data/types';
 import {
 	hasAllRequiredColumns,
 	REQUIRED_COLUMNS,
 } from '../../hooks/use-importer-state';
 import type { StepComponentProps } from './types';
 
-const CANONICAL_LABELS: Record< CanonicalColumnKey, string > = {
-	order_number: __( 'Order number (required)', 'woocommerce' ),
-	tracking_number: __( 'Tracking number (required)', 'woocommerce' ),
-	shipment_provider: __( 'Carrier / provider (required)', 'woocommerce' ),
+const FIELD_LABELS: Record< Exclude< CanonicalColumnKey, '' >, string > = {
+	order_number: __( 'Order number', 'woocommerce' ),
+	tracking_number: __( 'Tracking number', 'woocommerce' ),
+	shipment_provider: __( 'Carrier / provider', 'woocommerce' ),
 	tracking_url: __( 'Tracking URL', 'woocommerce' ),
 	items: __( 'Items', 'woocommerce' ),
-	'': __( 'Do not import', 'woocommerce' ),
 };
 
-const CANONICAL_OPTIONS: Array< {
+const MAPPING_OPTIONS: Array< {
 	label: string;
-	value: CanonicalColumnKey;
-} > = (
-	[
-		'',
-		'order_number',
-		'tracking_number',
-		'shipment_provider',
-		'tracking_url',
-		'items',
-	] as CanonicalColumnKey[]
- ).map( ( key ) => ( {
-	value: key,
-	label: CANONICAL_LABELS[ key ],
-} ) );
-
-// Accepted header aliases keyed by their normalized form. Mirrors the server-side
-// default alias table in FulfillmentsCsvImporter::get_column_aliases().
-const HEADER_ALIASES: Record< string, CanonicalColumnKey > = {
-	order_number: 'order_number',
-	order: 'order_number',
-	order_id: 'order_number',
-	order_no: 'order_number',
-	order_num: 'order_number',
-	tracking_number: 'tracking_number',
-	tracking: 'tracking_number',
-	tracking_no: 'tracking_number',
-	tracking_num: 'tracking_number',
-	shipment_provider: 'shipment_provider',
-	provider: 'shipment_provider',
-	carrier: 'shipment_provider',
-	shipping_provider: 'shipment_provider',
-	shipping_carrier: 'shipment_provider',
-	tracking_url: 'tracking_url',
-	url: 'tracking_url',
-	items: 'items',
-	line_items: 'items',
-};
-
-// Lowercase and snake_case a CSV header so "Order No", "order-no" and
-// "order_no" all resolve to the same alias entry.
-function normalizeHeader( header: string ): string {
-	return header
-		.trim()
-		.toLowerCase()
-		.split( /[\s_-]+/ )
-		.filter( Boolean )
-		.join( '_' );
-}
+	value: MappingChoice;
+	disabled?: boolean;
+} > = [
+	// Blank option shown while a column is still unassigned; picking a field
+	// or "Do not import" is the way out of it, so it cannot be re-selected.
+	{ value: '', label: '', disabled: true },
+	{ value: 'order_number', label: FIELD_LABELS.order_number },
+	{ value: 'tracking_number', label: FIELD_LABELS.tracking_number },
+	{ value: 'shipment_provider', label: FIELD_LABELS.shipment_provider },
+	{ value: 'tracking_url', label: FIELD_LABELS.tracking_url },
+	{ value: 'items', label: FIELD_LABELS.items },
+	{ value: 'skip', label: __( 'Do not import', 'woocommerce' ) },
+];
 
 const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const continueDisabled = ! hasAllRequiredColumns( state.mapping );
@@ -83,32 +55,25 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			dispatch( {
 				type: 'SET_MAPPING_FOR_COL',
 				col,
-				value: value as CanonicalColumnKey,
+				value: value as MappingChoice,
 			} );
 		},
 		[ dispatch ]
 	);
 
-	const onAutoDetect = useCallback( () => {
-		// Re-derive a best-effort mapping from sample headers using a fixed alias
-		// table that mirrors the server side, so this stays useful without an
-		// extra round-trip after manual edits.
-		const detected: ColumnMapping = {};
-		state.headers.forEach( ( header, index ) => {
-			detected[ index ] =
-				HEADER_ALIASES[ normalizeHeader( header ) ] ?? '';
-		} );
-		dispatch( { type: 'RESET_MAPPING_TO_DETECTED', mapping: detected } );
-	}, [ dispatch, state.headers ] );
-
 	const mappedValues = useMemo(
 		() => new Set( Object.values( state.mapping ).filter( Boolean ) ),
 		[ state.mapping ]
 	);
-	const hasMissingRequired = useMemo(
-		() => REQUIRED_COLUMNS.some( ( req ) => ! mappedValues.has( req ) ),
+	const missingRequired = useMemo(
+		() => REQUIRED_COLUMNS.filter( ( req ) => ! mappedValues.has( req ) ),
 		[ mappedValues ]
 	);
+	const hasMissingRequired = missingRequired.length > 0;
+
+	const missingLabels = missingRequired
+		.map( ( key ) => FIELD_LABELS[ key ] )
+		.join( ', ' );
 
 	const rows = useMemo(
 		() =>
@@ -123,90 +88,159 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 
 	return (
 		<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--mapping">
-			<h2>{ __( 'Map your columns', 'woocommerce' ) }</h2>
-			<p>
-				{ __(
-					'Required fields are marked with "(required)". Adjust any column that did not auto-detect.',
-					'woocommerce'
-				) }
-			</p>
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					<h2>{ __( 'Map your columns', 'woocommerce' ) }</h2>
 
-			<table className="woocommerce-fulfillment-importer-mapping-table">
-				<thead>
-					<tr>
-						<th>{ __( 'CSV column', 'woocommerce' ) }</th>
-						<th>{ __( 'Sample value', 'woocommerce' ) }</th>
-						<th>{ __( 'Map to field', 'woocommerce' ) }</th>
-					</tr>
-				</thead>
-				<tbody>
-					{ rows.map( ( row ) => {
-						// While a required column is unassigned, highlight only the
-						// unmapped rows: they are the candidates for the missing field.
-						const isUnmappedCandidate =
-							row.mapped === '' && hasMissingRequired;
-						return (
-							<tr
-								key={ row.index }
-								className={
-									isUnmappedCandidate
-										? 'is-required-row'
-										: undefined
-								}
-							>
-								<th scope="row">{ row.header }</th>
-								<td>{ row.sample }</td>
-								<td>
-									<SelectControl
-										__next40pxDefaultSize
-										__nextHasNoMarginBottom
-										aria-label={ sprintf(
-											/* translators: %s: CSV column header name. */
-											__(
-												'Map column %s',
-												'woocommerce'
-											),
-											row.header
-										) }
-										value={ row.mapped }
-										options={ CANONICAL_OPTIONS }
-										onChange={ ( value: string ) =>
-											setMapping( row.index, value )
-										}
-									/>
-									{ row.mapped === 'items' ? (
-										<p className="woocommerce-fulfillment-importer-mapping-help">
-											{ __(
-												'Optional. Format: "<line_item_id>:<qty>" or "sku:<SKU>:<qty>", separated by "|" or ";". Leave blank to fulfill all order items; updates keep their existing items.',
-												'woocommerce'
-											) }
-										</p>
-									) : null }
-								</td>
+					{ hasMissingRequired ? (
+						<Notice status="error" isDismissible={ false }>
+							{ sprintf(
+								/* translators: %s: names of the required fields that are not mapped. */
+								_n(
+									'%s is not mapped. Choose the column that holds it, or go back and upload a different file.',
+									'%s are not mapped. Choose the columns that hold them, or go back and upload a different file.',
+									missingRequired.length,
+									'woocommerce'
+								),
+								missingLabels
+							) }
+						</Notice>
+					) : null }
+
+					<div>
+						<p>
+							{ __(
+								'Adjust any column that did not auto-detect.',
+								'woocommerce'
+							) }
+						</p>
+						<p className="woocommerce-fulfillment-importer-rows-found">
+							{ sprintf(
+								/* translators: %d: number of data rows in the CSV. */
+								_n(
+									'%d row found.',
+									'%d rows found.',
+									state.total,
+									'woocommerce'
+								),
+								state.total
+							) }
+						</p>
+					</div>
+
+					<table className="woocommerce-fulfillment-importer-mapping-table">
+						<thead>
+							<tr>
+								<th>{ __( 'CSV column', 'woocommerce' ) }</th>
+								<th>{ __( 'Sample value', 'woocommerce' ) }</th>
+								<th>{ __( 'Map to field', 'woocommerce' ) }</th>
 							</tr>
-						);
-					} ) }
-				</tbody>
-			</table>
+						</thead>
+						<tbody>
+							{ rows.map( ( row ) => {
+								// A column is flagged only while it is genuinely
+								// unassigned and a required field is missing;
+								// columns set to "Do not import" are left alone.
+								const isUnassignedCandidate =
+									row.mapped === '' && hasMissingRequired;
+								const isRequiredMapping =
+									REQUIRED_COLUMNS.includes(
+										row.mapped as CanonicalColumnKey
+									);
+								return (
+									<tr key={ row.index }>
+										<th scope="row">
+											{ isRequiredMapping ||
+											isUnassignedCandidate ? (
+												<span className="woocommerce-fulfillment-importer-mapping-table__required">
+													{ __(
+														'Required',
+														'woocommerce'
+													) }
+												</span>
+											) : null }
+											<span className="woocommerce-fulfillment-importer-mapping-table__header-name">
+												{ row.header }
+											</span>
+										</th>
+										<td>{ row.sample }</td>
+										<td
+											className={
+												isUnassignedCandidate
+													? 'is-error'
+													: undefined
+											}
+										>
+											<SelectControl
+												__next40pxDefaultSize
+												__nextHasNoMarginBottom
+												aria-label={ sprintf(
+													/* translators: %s: CSV column header name. */
+													__(
+														'Map column %s',
+														'woocommerce'
+													),
+													row.header
+												) }
+												value={ row.mapped }
+												options={ MAPPING_OPTIONS }
+												onChange={ ( value: string ) =>
+													setMapping(
+														row.index,
+														value
+													)
+												}
+											/>
+											{ isUnassignedCandidate ? (
+												<p className="woocommerce-fulfillment-importer-mapping-table__error">
+													<Icon
+														icon={ caution }
+														size={ 16 }
+													/>
+													{ __(
+														'Not mapped.',
+														'woocommerce'
+													) }
+												</p>
+											) : null }
+											{ row.mapped === 'items' ? (
+												<p className="woocommerce-fulfillment-importer-mapping-help">
+													{ __(
+														'Optional. Format: "<line_item_id>:<qty>" or "sku:<SKU>:<qty>", separated by "|" or ";". Leave blank to fulfill all order items; updates keep their existing items.',
+														'woocommerce'
+													) }
+												</p>
+											) : null }
+										</td>
+									</tr>
+								);
+							} ) }
+						</tbody>
+					</table>
 
-			{ /* Lives here rather than on upload: this is the last screen
-			     before anything is saved, and sending customer emails is the
-			     one thing in this flow that cannot be undone. */ }
-			<CheckboxControl
-				__nextHasNoMarginBottom
-				label={ __(
-					'Send shipment notification emails to customers.',
-					'woocommerce'
-				) }
-				checked={ state.notifyCustomer }
-				onChange={ ( value: boolean ) =>
-					dispatch( { type: 'SET_NOTIFY', value } )
-				}
-			/>
+					{ /* Lives here rather than on upload: this is the last screen
+					     before anything is saved, and sending customer emails is the
+					     one thing in this flow that cannot be undone. */ }
+					<CheckboxControl
+						__nextHasNoMarginBottom
+						label={ __(
+							'Send shipment notification emails to customers.',
+							'woocommerce'
+						) }
+						checked={ state.notifyCustomer }
+						onChange={ ( value: boolean ) =>
+							dispatch( { type: 'SET_NOTIFY', value } )
+						}
+					/>
+				</CardBody>
+			</Card>
 
 			<footer className="woocommerce-fulfillment-importer-step__footer">
-				<Button variant="tertiary" onClick={ onAutoDetect }>
-					{ __( 'Auto-detect', 'woocommerce' ) }
+				<Button
+					variant="tertiary"
+					onClick={ () => dispatch( { type: 'BACK_TO_UPLOAD' } ) }
+				>
+					{ __( 'Back', 'woocommerce' ) }
 				</Button>
 				<Button
 					variant="primary"

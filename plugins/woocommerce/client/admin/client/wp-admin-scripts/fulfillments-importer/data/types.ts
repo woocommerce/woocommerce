@@ -39,9 +39,17 @@ export type CanonicalColumnKey =
 	| '';
 
 /**
- * CSV column index => canonical column key. Empty string means "do not import this column".
+ * What a CSV column can be mapped to in the UI. The empty string means the
+ * column is still unassigned; 'skip' means the merchant chose "Do not import".
+ * The distinction lets the mapping screen flag only genuinely unassigned
+ * columns when a required field is missing. Neither value is sent on the wire.
  */
-export type ColumnMapping = Record< number, CanonicalColumnKey >;
+export type MappingChoice = CanonicalColumnKey | 'skip';
+
+/**
+ * CSV column index => mapping choice.
+ */
+export type ColumnMapping = Record< number, MappingChoice >;
 
 export interface PrepareResponse {
 	token: string;

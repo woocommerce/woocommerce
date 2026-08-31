@@ -11,6 +11,7 @@ import type {
 	ColumnMapping,
 	ImporterRowResult,
 	ImporterSummary,
+	MappingChoice,
 	PrepareResponse,
 	RunChunkResponse,
 } from '../data/types';
@@ -56,8 +57,8 @@ export type ImporterAction =
 	| { type: 'SET_UPDATE_EXISTING'; value: boolean }
 	| { type: 'SET_BUSY'; value: boolean }
 	| { type: 'PREPARE_OK'; payload: PrepareResponse }
-	| { type: 'SET_MAPPING_FOR_COL'; col: number; value: CanonicalColumnKey }
-	| { type: 'RESET_MAPPING_TO_DETECTED'; mapping: ColumnMapping }
+	| { type: 'SET_MAPPING_FOR_COL'; col: number; value: MappingChoice }
+	| { type: 'BACK_TO_UPLOAD' }
 	| { type: 'GO_IMPORT' }
 	| { type: 'CHUNK_OK'; payload: RunChunkResponse }
 	| { type: 'FINISH'; summary: ImporterSummary }
@@ -79,6 +80,16 @@ const CANONICAL_COLUMN_KEYS: ReadonlySet< CanonicalColumnKey > = new Set( [
 	'tracking_url',
 	'items',
 ] );
+
+const MAPPING_CHOICES: ReadonlySet< MappingChoice > = new Set( [
+	...CANONICAL_COLUMN_KEYS,
+	'skip',
+] );
+
+// Values that do not map a column to a field, so any number of columns can hold them.
+function isNonField( value: MappingChoice ): boolean {
+	return value === '' || value === 'skip';
+}
 
 export function createInitialState(): ImporterState {
 	return {
@@ -113,14 +124,14 @@ export function createInitialState(): ImporterState {
  * column (lowest index) that maps to each field.
  */
 function uniqueMapping( mapping: ColumnMapping ): ColumnMapping {
-	const taken = new Set< CanonicalColumnKey >();
+	const taken = new Set< MappingChoice >();
 	const next: ColumnMapping = {};
 	Object.keys( mapping )
 		.map( Number )
 		.sort( ( a, b ) => a - b )
 		.forEach( ( col ) => {
 			const value = mapping[ col ];
-			if ( value !== '' && taken.has( value ) ) {
+			if ( ! isNonField( value ) && taken.has( value ) ) {
 				next[ col ] = '';
 				return;
 			}
@@ -149,21 +160,21 @@ export function hasAllRequiredColumns( mapping: ColumnMapping ): boolean {
 }
 
 /**
- * Assign a canonical field to one CSV column, keeping the mapping one-to-one:
- * any other column currently mapped to the same field is cleared, and values
- * outside the canonical set are treated as "do not import".
+ * Assign a field to one CSV column, keeping field mappings one-to-one: any
+ * other column currently mapped to the same field is cleared, and values
+ * outside the known set are treated as unassigned.
  */
 function assignMappingForCol(
 	mapping: ColumnMapping,
 	col: number,
-	value: CanonicalColumnKey
+	value: MappingChoice
 ): ColumnMapping {
-	const safeValue = CANONICAL_COLUMN_KEYS.has( value ) ? value : '';
+	const safeValue = MAPPING_CHOICES.has( value ) ? value : '';
 	const next: ColumnMapping = {};
 	Object.entries( mapping ).forEach( ( [ key, mapped ] ) => {
 		const index = Number( key );
 		next[ index ] =
-			safeValue !== '' && mapped === safeValue && index !== col
+			! isNonField( safeValue ) && mapped === safeValue && index !== col
 				? ''
 				: mapped;
 	} );
@@ -190,6 +201,15 @@ export function importerReducer(
 			const detected = normalizeMapping(
 				action.payload.detected_mapping
 			);
+			// Keep the merchant's manual mapping when they went back to the
+			// upload step and continued with a file of the same shape.
+			const sameHeaders =
+				state.headers.length > 0 &&
+				state.headers.length === action.payload.headers.length &&
+				state.headers.every(
+					( header, index ) =>
+						header === action.payload.headers[ index ]
+				);
 			return {
 				...state,
 				step: 'mapping',
@@ -197,7 +217,7 @@ export function importerReducer(
 				headers: action.payload.headers,
 				sample: action.payload.sample,
 				total: action.payload.total,
-				mapping: detected,
+				mapping: sameHeaders ? state.mapping : detected,
 				processed: 0,
 				counts: {
 					created: 0,
@@ -220,8 +240,15 @@ export function importerReducer(
 					action.value
 				),
 			};
-		case 'RESET_MAPPING_TO_DETECTED':
-			return { ...state, mapping: uniqueMapping( action.mapping ) };
+		case 'BACK_TO_UPLOAD':
+			// The staged file, delimiter and mapping are all kept so the
+			// merchant can swap the file or a setting and continue.
+			return {
+				...state,
+				step: 'upload',
+				error: null,
+				sessionEnded: false,
+			};
 		case 'GO_IMPORT':
 			if ( ! hasAllRequiredColumns( state.mapping ) ) {
 				return state;

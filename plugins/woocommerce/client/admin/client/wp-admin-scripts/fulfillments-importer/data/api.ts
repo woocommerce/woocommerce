@@ -60,7 +60,8 @@ export async function prepare( args: PrepareArgs ): Promise< PrepareResponse > {
 export async function runChunk( args: RunArgs ): Promise< RunChunkResponse > {
 	const mappingForWire: Record< string, string > = {};
 	Object.entries( args.mapping ).forEach( ( [ col, key ] ) => {
-		if ( key ) {
+		// Unassigned ('') and "Do not import" ('skip') columns stay off the wire.
+		if ( key && key !== 'skip' ) {
 			mappingForWire[ col ] = key;
 		}
 	} );

@@ -144,22 +144,69 @@ describe( 'importerReducer', () => {
 		expect( state.mapping[ 1 ] ).toBe( '' );
 	} );
 
-	it( 'RESET_MAPPING_TO_DETECTED keeps only the first column per field', () => {
+	it( 'SET_MAPPING_FOR_COL allows several columns set to "Do not import"', () => {
 		let state = createInitialState();
 		state = importerReducer( state, {
-			type: 'RESET_MAPPING_TO_DETECTED',
-			mapping: {
-				0: 'tracking_number',
-				1: 'tracking_number',
-				2: 'order_number',
-			},
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
 		} );
 
-		expect( state.mapping ).toEqual( {
-			0: 'tracking_number',
-			1: '',
-			2: 'order_number',
+		state = importerReducer( state, {
+			type: 'SET_MAPPING_FOR_COL',
+			col: 1,
+			value: 'skip',
 		} );
+		state = importerReducer( state, {
+			type: 'SET_MAPPING_FOR_COL',
+			col: 2,
+			value: 'skip',
+		} );
+
+		expect( state.mapping[ 1 ] ).toBe( 'skip' );
+		expect( state.mapping[ 2 ] ).toBe( 'skip' );
+	} );
+
+	it( 'BACK_TO_UPLOAD returns to the upload step and keeps the mapping', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
+
+		expect( state.step ).toBe( 'upload' );
+		expect( state.mapping[ 0 ] ).toBe( 'order_number' );
+	} );
+
+	it( 'PREPARE_OK keeps manual mapping edits when the headers are unchanged', () => {
+		let state = createInitialState();
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+		state = importerReducer( state, {
+			type: 'SET_MAPPING_FOR_COL',
+			col: 2,
+			value: 'skip',
+		} );
+		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+
+		expect( state.mapping[ 2 ] ).toBe( 'skip' );
+
+		// A file with different headers resets to the fresh detection.
+		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: {
+				...prepareResponse,
+				headers: [ 'Other', 'Headers', 'Here' ],
+			},
+		} );
+		expect( state.mapping[ 2 ] ).toBe( 'shipment_provider' );
 	} );
 
 	it( 'PREPARE_OK drops duplicate detected fields, first column wins', () => {
