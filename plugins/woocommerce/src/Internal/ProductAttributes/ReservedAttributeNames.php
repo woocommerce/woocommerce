@@ -17,7 +17,7 @@ use WC_Product_Attribute;
  *
  * @internal
  *
- * @since 11.1.0
+ * @since 11.2.0
  */
 class ReservedAttributeNames {
 
