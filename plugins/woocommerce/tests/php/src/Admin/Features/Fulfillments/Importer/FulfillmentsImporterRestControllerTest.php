@@ -265,6 +265,8 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		// without forcing the session transient to hold them all.
 		$this->assertArrayHasKey( 'rows', $res1 );
 		$this->assertCount( 2, $res1['rows'] );
+		$this->assertSame( (string) $orders[0]->get_id(), $res1['rows'][0]['order_number'] );
+		$this->assertStringContainsString( 'edit', $res1['rows'][0]['order_edit_url'] );
 
 		// Second chunk: completes the import.
 		$req2 = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );

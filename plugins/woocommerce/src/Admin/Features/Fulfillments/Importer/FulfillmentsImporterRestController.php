@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsTracker;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
@@ -237,6 +238,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'order_number'   => array( 'type' => 'string' ),
 						'code'           => array( 'type' => 'string' ),
 						'order_id'       => array( 'type' => 'integer' ),
+						'order_edit_url' => array(
+							'type'   => 'string',
+							'format' => 'uri',
+						),
 						'fulfillment_id' => array( 'type' => 'integer' ),
 						'notified'       => array( 'type' => 'boolean' ),
 					),
@@ -911,6 +916,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			}
 			if ( isset( $row['order_id'] ) ) {
 				$entry['order_id'] = (int) $row['order_id'];
+				// HPOS-aware, so the client does not hardcode post.php.
+				$entry['order_edit_url'] = OrderUtil::get_order_admin_edit_url( (int) $row['order_id'] );
 			}
 			if ( isset( $row['fulfillment_id'] ) ) {
 				$entry['fulfillment_id'] = (int) $row['fulfillment_id'];

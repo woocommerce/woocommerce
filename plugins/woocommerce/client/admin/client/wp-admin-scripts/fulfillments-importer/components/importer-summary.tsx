@@ -53,16 +53,17 @@ function orderCell( row: ImporterRowResult ) {
 	if ( row.order_id === undefined ) {
 		return { display, value: display };
 	}
+	// The server sends the HPOS-aware URL; the fallback covers older rows.
+	const href =
+		row.order_edit_url ||
+		getAdminLink( `post.php?post=${ row.order_id }&action=edit` );
 	return {
 		display: (
-			<a
-				href={ getAdminLink(
-					`post.php?post=${ row.order_id }&action=edit`
-				) }
-				target="_blank"
-				rel="noreferrer"
-			>
+			<a href={ href } target="_blank" rel="noreferrer">
 				{ display || row.order_id }
+				<span className="screen-reader-text">
+					{ __( '(opens in a new tab)', 'woocommerce' ) }
+				</span>
 			</a>
 		),
 		value: row.order_id,
@@ -141,12 +142,9 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	}
 
 	return (
-		<div
-			className="woocommerce-fulfillment-importer-summary"
-			role="status"
-			aria-live="polite"
-			aria-atomic="true"
-		>
+		// The counters carry their own live region; a second one here would
+		// double up announcements.
+		<div className="woocommerce-fulfillment-importer-summary">
 			<ImporterCounters
 				counts={ { created, updated, skipped, failed, notified } }
 			/>

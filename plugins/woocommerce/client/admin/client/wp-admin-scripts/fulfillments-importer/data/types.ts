@@ -10,6 +10,8 @@ export interface ImporterRowResult {
 	/** Stable failure code, present on failed rows only. */
 	code?: string;
 	order_id?: number;
+	/** HPOS-aware admin edit URL, present when the order was resolved. */
+	order_edit_url?: string;
 	fulfillment_id?: number;
 	notified?: boolean;
 }
