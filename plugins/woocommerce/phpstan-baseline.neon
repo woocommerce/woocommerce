@@ -8373,7 +8373,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
 			identifier: method.notFound
-			count: 4
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-

@@ -1539,12 +1539,163 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should synchronously invoke custom data store item deletion behavior.
+	 * @testWith [null]
+	 *           ["line_item"]
+	 *
+	 * @param string|null $type Item type, or null for every type.
+	 */
+	public function test_remove_order_items_invokes_custom_data_store_delete_items( $type ) {
+		$order                 = WC_Helper_Order::create_order();
+		$original_data_store   = $order->get_data_store();
+		$line_item_ids         = array_keys( $order->get_items() );
+		$shipping_item_ids     = array_keys( $order->get_items( 'shipping' ) );
+		$expected_deleted_ids  = null === $type ? array_merge( $line_item_ids, $shipping_item_ids ) : $line_item_ids;
+		$expected_retained_ids = null === $type ? array() : $shipping_item_ids;
+
+		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
+		$custom_data_store = new class( $original_data_store ) extends WC_Order_Data_Store_CPT {
+			public $deleted_item_types = array();
+
+			private $delegate;
+
+			public function __construct( $delegate ) {
+				$this->delegate = $delegate;
+			}
+
+			public function update( &$order ) {
+				return $this->delegate->update( $order );
+			}
+
+			public function delete_items( $order, $type = null ) {
+				$this->deleted_item_types[] = $type;
+				return $this->delegate->delete_items( $order, $type );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$data_store_filter  = static function () use ( $custom_data_store ) {
+			return $custom_data_store;
+		};
+		$removed_item_types = array();
+		$removed_hook       = static function ( $hook_order, $hook_type ) use ( &$removed_item_types ) {
+			$removed_item_types[] = $hook_type;
+		};
+		add_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
+		add_action( 'woocommerce_removed_order_items', $removed_hook, 10, 2 );
+
+		try {
+			$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+			$reflection->setAccessible( true );
+			$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
+
+			$order->remove_order_items( $type );
+
+			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should run synchronously with the requested type.' );
+			$this->assertSame( array( $type ), $removed_item_types, 'The post-removal hook should run synchronously with the requested type.' );
+			foreach ( $expected_deleted_ids as $item_id ) {
+				$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted synchronously.' );
+			}
+			foreach ( $expected_retained_ids as $item_id ) {
+				$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
+			}
+
+			$order->save();
+
+			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'Saving should not invoke the custom delete_items() implementation again.' );
+			$this->assertSame( array( $type ), $removed_item_types, 'Saving should not fire the post-removal hook again.' );
+		} finally {
+			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
+			remove_action( 'woocommerce_removed_order_items', $removed_hook, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should defer deletion when a custom data store opts in to ID-based deletion.
+	 */
+	public function test_remove_order_items_defers_custom_data_store_id_deletion() {
+		$order               = WC_Helper_Order::create_order();
+		$original_items      = $order->get_items();
+		$product             = current( $original_items )->get_product();
+		$original_data_store = $order->get_data_store();
+		$original_item_ids   = array_merge( array_keys( $original_items ), array_keys( $order->get_items( 'shipping' ) ) );
+
+		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
+		$custom_data_store = new class( $original_data_store ) extends WC_Order_Data_Store_CPT {
+			public $delete_items_call_count = 0;
+
+			public $deleted_item_id_batches = array();
+
+			private $delegate;
+
+			public function __construct( $delegate ) {
+				$this->delegate = $delegate;
+			}
+
+			public function update( &$order ) {
+				return $this->delegate->update( $order );
+			}
+
+			public function delete_items( $order, $type = null ) {
+				++$this->delete_items_call_count;
+				return $this->delegate->delete_items( $order, $type );
+			}
+
+			public function delete_items_by_ids( $order, $ids ) {
+				$this->deleted_item_id_batches[] = $ids;
+				return $this->delegate->delete_items_by_ids( $order, $ids );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$data_store_filter = static function () use ( $custom_data_store ) {
+			return $custom_data_store;
+		};
+		add_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
+
+		try {
+			$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+			$reflection->setAccessible( true );
+			$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
+
+			$order->remove_order_items();
+
+			$this->assertSame( 0, $custom_data_store->delete_items_call_count, 'The legacy deletion override should not run when custom ID-based deletion is available.' );
+			$this->assertSame( array(), $custom_data_store->deleted_item_id_batches, 'ID-based deletion should remain deferred until save().' );
+			foreach ( $original_item_ids as $item_id ) {
+				$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items should remain persisted until save().' );
+			}
+
+			$replacement_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
+			$replacement_item->add_meta_data( '_custom_id_deletion_test', 'preserved', true );
+			$order->add_item( $replacement_item );
+			$replacement_item->set_order_id( $order->get_id() );
+			$replacement_item_id = $replacement_item->save();
+
+			$order->save();
+		} finally {
+			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
+		}
+
+		$this->assertSame( 0, $custom_data_store->delete_items_call_count, 'The legacy deletion override should not run during save().' );
+		$this->assertCount( 1, $custom_data_store->deleted_item_id_batches, 'The custom ID-based deletion override should run once during save().' );
+		$this->assertEqualsCanonicalizing( $original_item_ids, $custom_data_store->deleted_item_id_batches[0], 'The custom ID-based deletion override should receive the snapshotted item IDs.' );
+		foreach ( $original_item_ids as $item_id ) {
+			$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Snapshotted items should be deleted during save().' );
+		}
+		$persisted_replacement = WC_Order_Factory::get_order_item( $replacement_item_id );
+		$this->assertInstanceOf( WC_Order_Item::class, $persisted_replacement, 'An item saved after removal should not be deleted during save().' );
+		$this->assertSame( 'preserved', $persisted_replacement->get_meta( '_custom_id_deletion_test' ), 'The replacement item metadata should be preserved.' );
+	}
+
+	/**
 	 * @testdox Should preserve replacement items with a legacy custom data store lacking ID snapshot and deletion methods.
 	 */
 	public function test_remove_order_items_preserves_replacements_with_custom_data_store_fallback() {
-		$order          = WC_Helper_Order::create_order();
-		$original_items = $order->get_items();
-		$product        = current( $original_items )->get_product();
+		$order             = WC_Helper_Order::create_order();
+		$original_items    = $order->get_items();
+		$original_item_ids = array_merge( array_keys( $original_items ), array_keys( $order->get_items( 'shipping' ) ) );
+		$product           = current( $original_items )->get_product();
 
 		$original_data_store = $order->get_data_store();
 		// phpcs:disable Squiz.Commenting -- Anonymous test double methods are self-explanatory.
@@ -1557,7 +1708,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function has_callable( string $method ): bool {
-				return in_array( $method, array( 'get_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
+				return in_array( $method, array( 'delete_items', 'get_item_ids', 'delete_items_by_ids' ), true ) ? false : $this->delegate->has_callable( $method );
 			}
 
 			public function update( &$data ) {
@@ -1565,7 +1716,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			}
 
 			public function get_current_class_name() {
-				return $this->delegate->get_current_class_name();
+				return get_class( $this );
 			}
 
 			public function __call( $method, $parameters ) {
@@ -1579,6 +1730,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$reflection->setValue( $order, $custom_data_store );
 
 		$order->remove_order_items();
+
+		foreach ( $original_item_ids as $item_id ) {
+			$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items should remain persisted until save().' );
+		}
 
 		$early_saved_item = $this->create_deferred_deletion_test_item( $product, 'Early-saved replacement' );
 		$early_saved_item->add_meta_data( '_fallback_test', 'preserved', true );
