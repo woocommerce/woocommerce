@@ -505,9 +505,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			foreach ( $data['raw_attributes'] as $attribute ) {
 				$attribute_id = 0;
 
-				// Get ID if is a global attribute.
+				// Get ID if is a global attribute. Resolved without creating the attribute, the same way
+				// validate_new_variation_attributes() does: creating it yields a taxonomy key the parent
+				// cannot have, so the row's attribute is dropped and the variation matches every value.
 				if ( ! empty( $attribute['taxonomy'] ) ) {
-					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+					$attribute_id = $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
 				}
 
 				if ( $attribute_id ) {
@@ -556,9 +558,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		foreach ( $attributes as $attribute ) {
 			$attribute_id = 0;
 
-			// Get ID if is a global attribute.
+			// Get ID if is a global attribute. Resolved without creating it, as in set_variation_data().
 			if ( ! empty( $attribute['taxonomy'] ) ) {
-				$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+				$attribute_id = $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
 			}
 
 			if ( $attribute_id ) {

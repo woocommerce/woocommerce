@@ -196,14 +196,71 @@ describe( 'mergeSectionsWithDefaults', () => {
 		expect( charts.hiddenBlocks ).toEqual( [] );
 	} );
 
-	it( 'does not fall back to a corrupted default field', () => {
+	it( 'falls back to a readable value for a corrupted default title', () => {
+		// The title is rendered as a React child by every section header.
 		mockDefaultSections = [ { ...DEFAULT_SECTIONS[ 1 ], title: {} } ];
 
 		const [ charts ] = mergeSectionsWithDefaults( [
 			{ key: 'charts', title: { rendered: 'My charts' } },
 		] );
 
-		expect( charts.title ).toBeUndefined();
+		expect( charts.title ).toBe( '' );
+	} );
+
+	it( 'keeps a default section that registers a truthy isVisible', () => {
+		// The filter never enforced a boolean and the dashboard rendered any
+		// truthy value, so dropping it would make the section unreachable.
+		mockDefaultSections = [
+			{ ...DEFAULT_SECTIONS[ 0 ], isVisible: 1 },
+			{ ...DEFAULT_SECTIONS[ 1 ], isVisible: 'yes' },
+		];
+
+		const sections = mergeSectionsWithDefaults( undefined );
+
+		expect( sections.map( ( section ) => section.isVisible ) ).toEqual( [
+			true,
+			true,
+		] );
+	} );
+
+	it( 'offers a default section that registers a falsy isVisible', () => {
+		// `undefined` is neither visible nor listed under "Add more sections".
+		mockDefaultSections = [
+			{ ...DEFAULT_SECTIONS[ 0 ], isVisible: 0 },
+			{ ...DEFAULT_SECTIONS[ 1 ], isVisible: undefined },
+		];
+
+		const sections = mergeSectionsWithDefaults( undefined );
+
+		expect( sections.map( ( section ) => section.isVisible ) ).toEqual( [
+			false,
+			false,
+		] );
+	} );
+
+	it( 'keeps a default section that registers a numeric title', () => {
+		// React prints a number, so the header rendered it before.
+		mockDefaultSections = [ { ...DEFAULT_SECTIONS[ 1 ], title: 2026 } ];
+
+		const [ charts ] = mergeSectionsWithDefaults( undefined );
+
+		expect( charts.title ).toBe( '2026' );
+	} );
+
+	it( 'keeps a default section keyed by a number', () => {
+		// The key is matched by strict equality and round trips through the
+		// stored JSON, so a number ties the section back to its default.
+		mockDefaultSections = [ { ...DEFAULT_SECTIONS[ 1 ], key: 42 } ];
+
+		const sections = mergeSectionsWithDefaults( [
+			{ key: 42, title: 'My charts' },
+		] );
+
+		expect( sections ).toHaveLength( 1 );
+		expect( sections[ 0 ] ).toMatchObject( {
+			key: 42,
+			title: 'My charts',
+		} );
 	} );
 } );
 
@@ -234,6 +291,67 @@ describe( 'CustomizableDashboard', () => {
 
 		expect( getByText( 'Performance' ) ).toBeInTheDocument();
 		expect( getByText( 'Charts' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders a registered section that is visible by a truthy value', () => {
+		// An extension section registered the way the released dashboard
+		// accepted it, on a store that never customized the dashboard.
+		mockDefaultSections = [
+			...DEFAULT_SECTIONS,
+			{
+				key: 'my-extension',
+				component: () => null,
+				title: 'Mine',
+				isVisible: 1,
+				hiddenBlocks: [],
+			},
+		];
+
+		const { getByText } = renderDashboard( undefined );
+
+		expect( getByText( 'Mine' ) ).toBeInTheDocument();
+	} );
+
+	it( 'offers a hidden section the filter registered without an icon', () => {
+		// `Icon` clones the icon it is handed, so anything but a React element
+		// throws where the merchant goes to bring the section back.
+		mockDefaultSections = [
+			...DEFAULT_SECTIONS,
+			{
+				key: 'my-extension',
+				component: () => null,
+				title: 'Mine',
+				isVisible: 0,
+				hiddenBlocks: [],
+			},
+		];
+
+		const { getByTitle } = renderDashboard( undefined );
+		fireEvent.click( getByTitle( 'Add more sections' ) );
+
+		expect( getByTitle( 'Add Mine section' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders the icon of a hidden section that provides one', () => {
+		mockDefaultSections = [
+			...DEFAULT_SECTIONS,
+			{
+				key: 'my-extension',
+				component: () => null,
+				title: 'Mine',
+				isVisible: false,
+				icon: <svg />,
+				hiddenBlocks: [],
+			},
+		];
+
+		// The dropdown renders in a popover, so it lands outside `container`.
+		const { baseElement, getByTitle } = renderDashboard( undefined );
+		fireEvent.click( getByTitle( 'Add more sections' ) );
+
+		expect(
+			baseElement.querySelector( '.my-extension__icon' )
+		).toBeInTheDocument();
 	} );
 
 	it( 'repairs a corrupted preference once, without the React nodes', () => {

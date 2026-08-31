@@ -40,6 +40,11 @@ class ProductFilters extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
+		wp_add_inline_style(
+			generate_block_asset_handle( $this->get_full_block_name(), 'style' ),
+			$this->get_responsive_styles()
+		);
+
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
 		}
@@ -52,6 +57,102 @@ class ProductFilters extends AbstractBlock {
 		if ( ! wp_is_block_theme() && $is_product_archive ) {
 			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 		}
+	}
+
+	/**
+	 * Resolve the responsive overlay breakpoint.
+	 *
+	 * @return string Responsive overlay breakpoint.
+	 */
+	private function get_overlay_breakpoint() {
+		if ( function_exists( 'gutenberg_get_global_settings' ) ) {
+			$viewport_settings = gutenberg_get_global_settings( array( 'viewport' ) );
+		} else {
+			$viewport_settings = wp_get_global_settings( array( 'viewport' ) );
+		}
+
+		if ( is_array( $viewport_settings ) ) {
+			foreach ( array( 'tablet', 'mobile' ) as $viewport ) {
+				if ( isset( $viewport_settings[ $viewport ] ) && is_string( $viewport_settings[ $viewport ] ) ) {
+					return $viewport_settings[ $viewport ];
+				}
+			}
+		}
+
+		return '782px';
+	}
+
+	/**
+	 * Generate viewport-aware Product Filters styles.
+	 *
+	 * @return string Responsive CSS.
+	 */
+	private function get_responsive_styles() {
+		$overlay_breakpoint = $this->get_overlay_breakpoint();
+
+		return <<<CSS
+@media (width > {$overlay_breakpoint}) {
+	:where(.wc-block-product-filters).is-mobile-overlay {
+		display: flex;
+	}
+
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-header,
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-footer,
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__open-overlay {
+		display: none;
+	}
+
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
+		position: relative;
+		pointer-events: auto;
+		inset: 0;
+		z-index: auto;
+		background: inherit;
+		color: inherit;
+		transition: none;
+		flex-grow: 1;
+	}
+
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-wrapper {
+		width: auto;
+		height: auto;
+		background: inherit;
+		color: inherit;
+	}
+
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-dialog {
+		position: relative;
+		width: auto;
+		transform: none;
+		transition: none;
+		background: inherit;
+		color: inherit;
+	}
+
+	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay-content {
+		padding: 0;
+		overflow: visible;
+		flex-grow: 1;
+		background: inherit;
+		color: inherit;
+	}
+}
+CSS;
+	}
+
+	/**
+	 * Resolve the canonical overlay mode with legacy drawer compatibility.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Overlay mode.
+	 */
+	private function get_overlay_mode( $attributes ) {
+		$overlay_mode = $attributes['overlayMode'] ?? null;
+		if ( in_array( $overlay_mode, array( 'off', 'mobile', 'always' ), true ) ) {
+			return $overlay_mode;
+		}
+
+		return isset( $attributes['showFilterDrawer'] ) && false === $attributes['showFilterDrawer'] ? 'off' : 'mobile';
 	}
 
 	/**
@@ -111,10 +212,18 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$show_filter_drawer = ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
-		$wrapper_classes    = array( 'wc-block-product-filters' );
-		if ( ! $show_filter_drawer ) {
+		$overlay_mode     = $this->get_overlay_mode( $attributes );
+		$has_overlay      = 'off' !== $overlay_mode;
+		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
+		$wrapper_classes  = array( 'wc-block-product-filters' );
+		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
+		}
+		if ( 'mobile' === $overlay_mode ) {
+			$wrapper_classes[] = 'is-mobile-overlay';
+		}
+		if ( $has_overlay && 'right' === $overlay_position ) {
+			$wrapper_classes[] = 'is-overlay-right';
 		}
 
 		$wrapper_attributes = array(
@@ -126,13 +235,13 @@ class ProductFilters extends AbstractBlock {
 			'style'                         => $this->get_css_variables( $attributes ),
 		);
 
-		if ( $show_filter_drawer ) {
+		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
-		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
+		// Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
 		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
 			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
 		}
@@ -140,17 +249,19 @@ class ProductFilters extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( $show_filter_drawer ) : ?>
+			<?php if ( $has_overlay ) : ?>
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
 					data-wp-on--click="actions.openOverlay"
 				>
-					<?php echo $this->get_svg_icon( 'filter-icon-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>
+					</svg>
 					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
 				</button>
 				<div class="wc-block-product-filters__overlay">
-					<div class="wc-block-product-filters__overlay-wrapper">
+					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<div
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
@@ -161,9 +272,11 @@ class ProductFilters extends AbstractBlock {
 									type="button"
 									class="wc-block-product-filters__close-overlay"
 									data-wp-on--click="actions.closeOverlay"
+									title="<?php echo esc_attr( __( 'Close', 'woocommerce' ) ); ?>"
 								>
-									<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
-									<?php echo $this->get_svg_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+										<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+									</svg>
 								</button>
 							</header>
 							<div class="wc-block-product-filters__overlay-content">
@@ -192,28 +305,6 @@ class ProductFilters extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Get SVG icon markup for a given icon name.
-	 *
-	 * @param string $name The name of the icon to retrieve.
-	 * @return string SVG markup for the icon, or empty string if icon not found.
-	 */
-	private function get_svg_icon( string $name ) {
-		$icons = array(
-			'close'         => '<path d="M12 13.0607L15.7123 16.773L16.773 15.7123L13.0607 12L16.773 8.28772L15.7123 7.22706L12 10.9394L8.28771 7.22705L7.22705 8.28771L10.9394 12L7.22706 15.7123L8.28772 16.773L12 13.0607Z" fill="currentColor"/>',
-			'filter-icon-2' => '<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>',
-		);
-
-		if ( ! isset( $icons[ $name ] ) ) {
-			return '';
-		}
-
-		return sprintf(
-			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">%s</svg>',
-			$icons[ $name ]
-		);
 	}
 
 	/**

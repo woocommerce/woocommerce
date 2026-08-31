@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix dropdown text and the clear icon running under the chevron in admin single selects on WP 7.0+, including the Order edit Country, State and Customer fields.

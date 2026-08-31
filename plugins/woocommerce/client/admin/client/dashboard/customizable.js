@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useMemo, useRef } from '@wordpress/element';
+import { isValidElement, useEffect, useMemo, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
 import { Dropdown, Button } from '@wordpress/components';
@@ -42,9 +42,11 @@ const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
 /**
- * A stored section is only usable when it carries the `key` that ties it back to
- * a default section. Corrupted `dashboard_sections` preferences have been seen
- * holding `null` entries, which used to crash the whole dashboard.
+ * A section is only usable when it carries the `key` that ties it back to a
+ * default section. Corrupted `dashboard_sections` preferences have been seen
+ * holding `null` entries, which used to crash the whole dashboard. The key is
+ * matched by strict equality and round trips through the stored JSON, so a
+ * string and a finite number both tie a section back to its default.
  *
  * @param {*} section Entry of the stored `dashboard_sections` preference.
  * @return {boolean} Whether the entry can be merged with a default section.
@@ -52,7 +54,7 @@ const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 const isValidSection = ( section ) =>
 	!! section &&
 	typeof section === 'object' &&
-	typeof section.key === 'string';
+	( typeof section.key === 'string' || Number.isFinite( section.key ) );
 
 /**
  * Stored fields that take the dashboard down, or make a section unreachable,
@@ -70,6 +72,23 @@ const FIELD_CHECKS = {
 	hiddenBlocks: Array.isArray,
 	isVisible: ( value ) => typeof value === 'boolean',
 	title: ( value ) => typeof value === 'string',
+};
+
+/**
+ * How to read a field a default section holds the wrong type for. Nothing sits
+ * behind a default to patch it up from, so dropping the field would leave it
+ * `undefined`: every section component dereferences `hiddenBlocks`, and an
+ * `undefined` `isVisible` hides the section without listing it under "Add more
+ * sections", which is the one state a merchant cannot get out of. The dashboard
+ * has always rendered any truthy `isVisible` and printed any numeric `title`, so
+ * the value is converted instead of dropped.
+ *
+ * @type {Object.<string, function(*): *>}
+ */
+const FIELD_FALLBACKS = {
+	hiddenBlocks: () => [],
+	isVisible: ( value ) => !! value,
+	title: ( value ) => ( typeof value === 'number' ? String( value ) : '' ),
 };
 
 /**
@@ -167,14 +186,34 @@ const isUsableDefaultSection = ( section ) =>
 	isValidSection( section ) && !! section.component;
 
 /**
+ * A default section holding a value the dashboard can read for every field it
+ * dereferences. Dropping the field is what the stored preference does, and it
+ * only works there because a default backs it up. A default has nothing behind
+ * it, so its fields are converted rather than dropped.
+ *
+ * @param {section} section Entry returned by the default sections filter.
+ * @return {section} Copy of the section, holding only usable values.
+ */
+const toUsableDefaultSection = ( section ) => {
+	const usable = { ...section };
+
+	Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
+		if ( ! isUsable( usable[ field ] ) ) {
+			usable[ field ] = FIELD_FALLBACKS[ field ]( usable[ field ] );
+		}
+	} );
+
+	return usable;
+};
+
+/**
  * Copy of the default sections, throwing a descriptive error when the
  * `woocommerce_dashboard_default_sections` filter returned something unusable.
- * The filter is a third party surface, so its entries get the same treatment as
- * the stored ones: an entry no section can be built from is dropped, and a
- * corrupted field is dropped so it cannot overwrite a valid stored value.
- * Nothing sits behind a default to patch a field up from, except `hiddenBlocks`
- * which every section component dereferences, so that one falls back to an
- * empty list.
+ * The filter is a third party surface, so an entry no section can be built from
+ * is dropped. Everything else is kept: the filter is a released extension point
+ * that never enforced the documented types, and the dashboard is the last thing
+ * standing between an extension's section and the merchant, so a field it
+ * cannot read is converted instead of costing them the section.
  *
  * @return {Array.<section>} Default sections.
  */
@@ -187,15 +226,7 @@ const getDefaultSections = () => {
 
 	return defaultSections
 		.filter( isUsableDefaultSection )
-		.map( ( section ) => {
-			const usable = deleteUnusableFields( { ...section } );
-
-			if ( ! Array.isArray( usable.hiddenBlocks ) ) {
-				usable.hiddenBlocks = [];
-			}
-
-			return usable;
-		} );
+		.map( toUsableDefaultSection );
 };
 
 export const mergeSectionsWithDefaults = ( prefSections ) => {
@@ -439,11 +470,15 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 											section.title
 										) }
 									>
-										<Icon
-											className={ section.key + '__icon' }
-											icon={ section.icon }
-											size={ 30 }
-										/>
+										{ isValidElement( section.icon ) && (
+											<Icon
+												className={
+													section.key + '__icon'
+												}
+												icon={ section.icon }
+												size={ 30 }
+											/>
+										) }
 										<span className="woocommerce-dashboard-section__add-more-btn-title">
 											{ section.title }
 										</span>

@@ -134,6 +134,105 @@ export function toMoment( format: string, str: unknown ) {
 }
 
 /**
+ * Expands moment's localized format tokens ("L", "LL", "ll", ...) into the
+ * underlying format the locale defines for them.
+ *
+ * Moment resolves those tokens only while formatting, so a day rendered through
+ * one is invisible to the day token scan below and the range end would be
+ * dropped. This mirrors moment's own expansion, including its pass limit, so
+ * the expanded format renders exactly what the original one would.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with its localized tokens expanded, leaving
+ *                      escaped and bracketed ones as the literals they are
+ */
+function expandLocalizedFormat( format: string, localeData: moment.Locale ) {
+	// Bracketed sections and backslash escapes are moment's literals, so an "L"
+	// inside one is text; matching them first leaves them untouched, as
+	// `longDateFormat` has no entry for them.
+	const localizedTokens = /\[[^[]*\]|\\?(?:LTS|LT|LL?L?L?|l{1,4})/g;
+	let expanded = format;
+	// An expansion can itself hold localized tokens; moment allows six passes.
+	let passes = 6;
+
+	while ( passes-- > 0 ) {
+		localizedTokens.lastIndex = 0;
+
+		if ( ! localizedTokens.test( expanded ) ) {
+			break;
+		}
+
+		expanded = expanded.replace(
+			localizedTokens,
+			( token ) =>
+				localeData.longDateFormat(
+					token as moment.LongDateFormatKey
+				) || token
+		);
+	}
+
+	return expanded;
+}
+
+/**
+ * Renders the month and weekday names of a moment format string into escaped
+ * literals.
+ *
+ * Moment picks the grammatical form of both names by pattern-testing the
+ * format string while rendering: month choosers look for a day token next to
+ * the month one, and Ukrainian renders the genitive weekday whenever a
+ * bracketed literal sits before "dddd" - exactly the shape the substitutions
+ * here leave behind. Months and weekdays are the only tokens moment resolves
+ * against the format, so rendering every name in one pass, against the format
+ * as the locale received it, settles each choice before any substitution can
+ * flip one.
+ *
+ * @param {string}        format     - localized date string format
+ * @param {moment.Moment} date       - date whose month and weekday to render
+ * @param {moment.Locale} localeData - locale the format will be rendered with
+ * @return {string} - format string with its month and weekday tokens escaped
+ */
+function escapeNameTokens(
+	format: string,
+	date: moment.Moment,
+	localeData: moment.Locale
+) {
+	// Backslash escapes and bracketed sections are moment's literals, so an
+	// "M" or "d" inside one is text. A backslash escapes the whole token that
+	// follows it; the escaped alternatives mirror moment's own tokens. "MM",
+	// "M", "Mo", "do" and "d" render digits, which carry no grammar.
+	return format.replace(
+		/\\(?:Mo|MM?M?M?|ddd?d?|do?)|\\.|\[[^\]]*\]|M{3,4}|d{2,4}/g,
+		( token ) => {
+			if ( token.startsWith( 'M' ) ) {
+				const name =
+					token.length === 4
+						? localeData.months( date, format )
+						: localeData.monthsShort( date, format );
+
+				return `[${ name }]`;
+			}
+
+			if ( ! token.startsWith( 'd' ) ) {
+				return token;
+			}
+
+			if ( token.length === 4 ) {
+				return `[${ localeData.weekdays( date, format ) }]`;
+			}
+
+			const name =
+				token.length === 3
+					? localeData.weekdaysShort( date )
+					: localeData.weekdaysMin( date );
+
+			return `[${ name }]`;
+		}
+	);
+}
+
+/**
  * Swaps the day of month token of a moment format string for an escaped literal.
  *
  * Substituting in the format instead of in the formatted date keeps the value
@@ -152,9 +251,11 @@ function replaceDayToken(
 ) {
 	let replaced = false;
 	// Backslash escapes and bracketed sections are moment's literals, so a "D"
-	// inside one is text.
+	// inside one is text. A backslash escapes the whole token that follows it,
+	// not just its first character; the escaped alternatives mirror moment's
+	// own day tokens, so a longer run of "D"s leaves the rest live.
 	const dayRangeFormat = format.replace(
-		/\\.|\[[^\]]*\]|D+o?/g,
+		/\\(?:Do|DDDo|DD?D?D?)|\\.|\[[^\]]*\]|D+o?/g,
 		( token ) => {
 			// Runs longer than "DD" are day of year tokens, not day of month.
 			const dayDigits = token.endsWith( 'o' )
@@ -197,16 +298,22 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 	} else if ( isSameMonth ) {
 		// Formatting each day through the token it replaces keeps whatever the
 		// format asked for, such as the zero padding of "DD" or the ordinal of "Do".
+		// Everything else still renders from `after`, so a weekday, week number
+		// or time in the format stays the one the range starts on.
+		const localeData = after.localeData();
 		const dayRangeFormat = replaceDayToken(
-			fullDateFormat,
+			escapeNameTokens(
+				expandLocalizedFormat( fullDateFormat, localeData ),
+				after,
+				localeData
+			),
 			( dayToken ) =>
 				`${ after.format( dayToken ) } - ${ before.format( dayToken ) }`
 		);
 
-		// No day of month token to swap: the format either omits the day, or
-		// renders one through an aggregate token such as "LL" that is not
-		// scanned. Either way the shared month is as much of the range as this
-		// format can carry.
+		// No day of month token to swap: the format either omits the day or
+		// holds only a day of year token, which is left alone. Either way the
+		// shared month is as much of the range as this format can carry.
 		if ( dayRangeFormat === null ) {
 			return after.format( fullDateFormat );
 		}
