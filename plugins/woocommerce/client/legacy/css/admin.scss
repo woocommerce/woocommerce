@@ -8458,9 +8458,11 @@ table.bar_chart {
 		}
 
 		table.widefat.wc-tax-rate-results {
+
 			thead th,
 			tbody td,
 			tbody th {
+
 				&:first-child {
 					padding-left: 1em;
 				}
@@ -8525,8 +8527,9 @@ table.bar_chart {
 }
 
 .wc-modal-add-tax {
+
 	.wc-backbone-modal-main {
-		padding-bottom: calc( 2.5em + 40px );
+		padding-bottom: calc(2.5em + 40px);
 
 		.search-box {
 			float: none;
