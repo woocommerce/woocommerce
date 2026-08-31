@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php
 	$order_fields = $checkout->get_checkout_fields( 'order' );
 
-	// The order notes setting controls the order notes field, not the rest of the fieldset.
+	// Remove the order note field from the form if it's set as disabled.
 	if ( ! apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
 		unset( $order_fields['order_comments'] );
 	}
