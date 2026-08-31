@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Enter key confirming a modal when it is pressed on a button, link or select that already acts on Enter itself.

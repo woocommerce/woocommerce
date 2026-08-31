@@ -139,21 +139,23 @@ function copyJs( { stale = false } = {} ) {
 	);
 }
 
-// Prepend the number validation and maybe-modify-decimal utils onto
-// wc-shipping-zone-methods.js. Always rebuilt from the source, so its
-// .min.js is re-minified on every watch pass (cheap: one small file).
-function concatJs() {
-	const dest = path.join( JS_DEST, 'admin', 'wc-shipping-zone-methods.js' );
-	copyFile(
-		path.join( JS_SRC, 'admin', 'wc-shipping-zone-methods.js' ),
-		dest
-	);
-	const parts = [
-		path.join( JS_SRC, 'admin', 'utils', 'number-validation.js' ),
-		path.join( JS_SRC, 'admin', 'utils', 'maybe-modify-decimal.js' ),
-		dest,
-	];
+// Prepend utils onto the scripts that use them. Always rebuilt from the source,
+// so the .min.js is re-minified on every watch pass (cheap: small files).
+function prependUtils( script, utils ) {
+	const dest = path.join( JS_DEST, 'admin', script );
+	copyFile( path.join( JS_SRC, 'admin', script ), dest );
+	const parts = utils
+		.map( ( util ) => path.join( JS_SRC, 'admin', 'utils', util ) )
+		.concat( dest );
 	write( dest, parts.map( read ).join( '\n' ) );
+}
+
+function concatJs() {
+	prependUtils( 'wc-shipping-zone-methods.js', [
+		'number-validation.js',
+		'maybe-modify-decimal.js',
+	] );
+	prependUtils( 'backbone-modal.js', [ 'modal-keyboard.js' ] );
 }
 
 function minifyJsFile( src, dest ) {
