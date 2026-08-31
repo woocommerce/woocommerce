@@ -72,7 +72,9 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const hasMissingRequired = missingRequired.length > 0;
 
 	const missingLabels = missingRequired
-		.map( ( key ) => FIELD_LABELS[ key ] )
+		.map(
+			( key ) => FIELD_LABELS[ key as Exclude< CanonicalColumnKey, '' > ]
+		)
 		.join( ', ' );
 
 	const rows = useMemo(
