@@ -45,11 +45,13 @@
 		"no-duplicate-selectors": null,
 
 		# 50 hits, all deprecated global colour functions: darken (28),
-		# lighten (13), desaturate (8), adjust-hue (1). These still work because
-		# sass-embedded is pinned to 1.69.5, but Dart Sass has them slated for
-		# removal, so this is a forward-compat cliff rather than a style nit.
-		# Clearing it requires migrating to the Sass module system (sass:color)
-		# and is tracked separately — do that before bumping sass-embedded.
+		# lighten (13), desaturate (8), adjust-hue (1). They still work with the
+		# Dart Sass version we resolve today, but Dart Sass has them slated for
+		# removal and `sass` is a caret range here, so a fresh install can start
+		# warning without a code change. This is a forward-compat cliff rather
+		# than a style nit. Clearing it requires migrating to the Sass module
+		# system (sass:color) and is tracked separately; do that before bumping
+		# Sass.
 		"scss/no-global-function-names": null,
 
 		# Legacy selectors are a theming contract that third-party themes
