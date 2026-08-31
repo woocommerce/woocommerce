@@ -341,6 +341,46 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve supported checkbox description tooltip markup and remove unsupported markup.
+	 */
+	public function test_output_fields_normalizes_checkbox_description_tooltip_html(): void {
+		$options = array(
+			array(
+				'id'       => 'test_checkbox_tooltip',
+				'title'    => 'Checkbox title',
+				'type'     => 'checkbox',
+				'value'    => 'no',
+				'desc_tip' => true,
+				'desc'     => 'Use <strong>supported</strong> <em onclick="unsupported">formatting</em><script>unsupported</script><iframe src="https://example.com">unsupported</iframe>.',
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The checkbox setting output should be valid enough for DOM parsing.' );
+
+		$xpath       = new DOMXPath( $document );
+		$description = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-checkbox ")]/fieldset/p[contains(concat(" ", normalize-space(@class), " "), " description ")]';
+
+		$this->assertSame( 1, $xpath->query( $description . '//strong[normalize-space(.)="supported"]' )->length );
+		$this->assertSame( 1, $xpath->query( $description . '//em[normalize-space(.)="formatting"]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//*[@onclick]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//script | ' . $description . '//iframe' )->length );
+	}
+
+	/**
 	 * @testdox Should not emit a shared "-title" ID for radio settings that have no ID.
 	 */
 	public function test_output_fields_does_not_cross_label_id_less_radio_settings(): void {
