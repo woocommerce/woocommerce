@@ -478,6 +478,55 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart item formatting skips non-scalar variation values before term lookups and option filters.
+	 * @dataProvider non_scalar_variation_value_provider
+	 *
+	 * @param mixed $raw_value Raw cart variation value.
+	 */
+	public function test_formatted_cart_item_data_skips_non_scalar_variation_values( $raw_value ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Non-scalar Variation Product',
+			array( 'pa_size' => '' )
+		);
+
+		$option_filter_calls = 0;
+		$option_filter       = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array(
+				'attribute_pa_size' => $raw_value,
+				'attribute_finish'  => $raw_value,
+			),
+		);
+
+		try {
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides non-scalar cart variation values.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function non_scalar_variation_value_provider(): array {
+		return array(
+			'array'  => array( array( 'gloss' ) ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
 	 * @testdox Cart item formatting decodes taxonomy term entities when checking the rendered product name for duplicate metadata.
 	 */
 	public function test_formatted_cart_item_data_decodes_taxonomy_term_entities_for_name_comparison(): void {

@@ -4536,6 +4536,10 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 		$product_name = wp_specialchars_decode( wp_strip_all_tags( $product_name ), ENT_QUOTES );
 
 		foreach ( $cart_item['variation'] as $name => $value ) {
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+			$value    = (string) $value;
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
 			if ( taxonomy_exists( $taxonomy ) ) {
@@ -4551,6 +4555,7 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 			}
 
+			// The option-name filter can return anything; skip values that cannot be rendered.
 			if ( ! is_scalar( $value ) || '' === (string) $value ) {
 				continue;
 			}
