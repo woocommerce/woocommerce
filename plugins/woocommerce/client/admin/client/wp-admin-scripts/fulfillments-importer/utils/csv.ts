@@ -29,6 +29,10 @@ export function downloadCsv( filename: string, content: string ): void {
  * the row numbers the importer reports.
  */
 export function parseCsvRecords( text: string, delimiter: string ): string[][] {
+	// A quote delimiter would collide with the quoting rules below.
+	if ( delimiter === '"' ) {
+		delimiter = ',';
+	}
 	// Strip a UTF-8 BOM so the first header cell round-trips clean.
 	if ( text.charCodeAt( 0 ) === 0xfeff ) {
 		text = text.slice( 1 );
@@ -76,7 +80,17 @@ export function parseCsvRecords( text: string, delimiter: string ): string[][] {
 	return records;
 }
 
+// Mirrors WC_CSV_Exporter::escape_data(): a leading trigger character can run
+// as a formula when the file is opened in a spreadsheet.
+const ACTIVE_CONTENT_TRIGGERS = [ '=', '+', '-', '@', '\t', '\r' ];
+
 function escapeCsvField( value: string, delimiter: string ): string {
+	if (
+		ACTIVE_CONTENT_TRIGGERS.includes( value[ 0 ] ) &&
+		Number.isNaN( Number( value ) )
+	) {
+		value = `'${ value }`;
+	}
 	if (
 		value.includes( '"' ) ||
 		value.includes( delimiter ) ||
@@ -106,7 +120,11 @@ export function buildFailedRowsCsv(
 		[ ...header, __( 'Import error', 'woocommerce' ) ],
 	];
 	failedRows.forEach( ( row ) => {
-		const record = records[ row.row - 1 ] ?? [];
+		// Should be unreachable, but mark the anomaly instead of emitting a
+		// reason with no columns.
+		const record = records[ row.row - 1 ] ?? [
+			__( '(original row unavailable)', 'woocommerce' ),
+		];
 		out.push( [ ...record, row.message ] );
 	} );
 

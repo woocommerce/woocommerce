@@ -51,4 +51,25 @@ describe( 'buildFailedRowsCsv', () => {
 		);
 		expect( lines ).toHaveLength( 2 );
 	} );
+
+	it( 'neutralizes spreadsheet formula triggers but not plain numbers', () => {
+		const file = 'order,note\n1,x\n9,=HYPERLINK("http://evil")\n';
+		const csv = buildFailedRowsCsv( file, ',', failed );
+
+		expect( csv ).toContain( `"'=HYPERLINK(""http://evil"")"` );
+		// Negative numbers stay untouched, like WC_CSV_Exporter::escape_data().
+		const numeric = buildFailedRowsCsv(
+			'order,amount\n1,x\n9,-12.5\n',
+			',',
+			failed
+		);
+		expect( numeric ).toContain( '9,-12.5,' );
+	} );
+
+	it( 'marks rows whose original record cannot be found', () => {
+		const csv = buildFailedRowsCsv( 'order,tracking\n', ',', failed );
+		expect( csv.split( '\r\n' )[ 1 ] ).toContain(
+			'(original row unavailable)'
+		);
+	} );
 } );
