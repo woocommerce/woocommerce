@@ -482,6 +482,90 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The product-meta section keeps no cursor: a row leaves its candidate set only by being
+	 * settled. A row that can be neither migrated nor marked is therefore served on every
+	 * pass forever, and it would starve the notifications section, which shares this
+	 * processor. The section is parked instead.
+	 *
+	 * @testdox a cursorless section that settles nothing should be parked rather than served again.
+	 */
+	public function test_a_cursorless_section_that_settles_nothing_is_parked(): void {
+		$stuck = new class() implements MigratorInterface {
+			/**
+			 * Section slug.
+			 *
+			 * @return string
+			 */
+			public function get_slug(): string {
+				return 'product-meta';
+			}
+
+			/**
+			 * Remaining candidates. Never falls, since nothing ever settles.
+			 *
+			 * @param int $cursor Keyset cursor. Ignored; this section keeps none.
+			 * @return int
+			 */
+			public function count_remaining( int $cursor = 0 ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface.
+				return 2;
+			}
+
+			/**
+			 * The same two rows on every pass, cursor or not.
+			 *
+			 * @param int $cursor Keyset cursor. Ignored; this section keeps none.
+			 * @param int $size   Batch size.
+			 * @return array
+			 */
+			public function get_batch( int $cursor, int $size ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface.
+				return array( 1, 2 );
+			}
+
+			/**
+			 * Reports every row as unsettled: failed, and not even marked as failed.
+			 *
+			 * @param array  $ids    Row ids.
+			 * @param Writer $writer Writer.
+			 * @return array
+			 */
+			public function migrate_batch( array $ids, Writer $writer ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- part of MigratorInterface.
+				return array( Reporter::OUTCOME_UNSETTLED => count( $ids ) );
+			}
+		};
+
+		$this->processor->configure_run( array( 'product-meta' => $stuck ), wc_get_container()->get( Writer::class ), 50 );
+
+		$batches = $this->run_to_completion( 50 );
+
+		$this->assertSame( 1, $batches, 'The section must be served once, then parked.' );
+		$this->assertTrue( $this->state->is_section_parked( 'product-meta' ) );
+		$this->assertSame(
+			array(),
+			$this->processor->get_next_batch_to_process( 50 ),
+			'A parked section must not be served again.'
+		);
+	}
+
+	/**
+	 * @testdox a section that settles part of its batch should keep running.
+	 */
+	public function test_a_section_that_makes_partial_progress_is_not_parked(): void {
+		$this->seed_notifications( 3 );
+		$reporter = new Reporter();
+
+		$this->processor->configure_run(
+			array( 'notifications' => new NotificationsMigrator( $reporter ) ),
+			wc_get_container()->get( Writer::class ),
+			2,
+			$reporter
+		);
+
+		$this->run_to_completion( 2 );
+
+		$this->assertFalse( $this->state->is_section_parked( 'notifications' ) );
+	}
+
+	/**
 	 * @testdox a dry run should terminate without leaving a cursor a later live run would start above.
 	 */
 	public function test_a_dry_run_leaves_the_stored_state_untouched(): void {

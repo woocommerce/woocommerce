@@ -278,6 +278,13 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		}
 
 		foreach ( $this->migrators as $slug => $migrator ) {
+			// A parked section cannot settle its rows, so serving it again would hand back
+			// the same batch forever and starve the other section, which shares this
+			// processor. It stays skipped until `--retry-failed` or `--force` unparks it.
+			if ( $this->state->is_section_parked( $slug ) ) {
+				continue;
+			}
+
 			$batch = $this->get_section_batch( $slug, $migrator, $size );
 
 			if ( ! empty( $batch ) ) {
@@ -335,7 +342,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			$migrator = $this->migrators[ $slug ];
 
 			try {
-				$migrator->migrate_batch( $raw_ids, $this->writer );
+				$outcomes = $migrator->migrate_batch( $raw_ids, $this->writer );
 			} catch ( \Throwable $e ) {
 				// Throwable, not Exception: an \Error would otherwise pass through unrecorded,
 				// and it is the one kind of failure `BatchProcessingController` does not catch
@@ -351,6 +358,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 			}
 
 			$this->state->refresh_lock();
+			$this->park_if_stuck( $slug, $raw_ids, $outcomes );
 			$this->store_cursor( $slug, $raw_ids );
 
 			if ( $migrator instanceof NotificationsMigrator ) {
@@ -360,6 +368,36 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 
 		// The batch landed, so whatever the last one failed on is no longer the run's state.
 		$this->state->clear_failure();
+	}
+
+	/**
+	 * Park a section whose whole batch came back unsettled.
+	 *
+	 * A row reported as `unsettled` failed and could not be marked as failed either, so it
+	 * is still a candidate and will be served again. When that is true of every row in the
+	 * batch the section has made no progress at all, and serving it again would repeat the
+	 * same batch indefinitely. Partial progress is left alone: the section still drains, one
+	 * batch at a time.
+	 *
+	 * @param string $slug     Section slug.
+	 * @param array  $raw_ids  Ids the section was handed.
+	 * @param array  $outcomes Outcome counts the section reported.
+	 * @return void
+	 */
+	private function park_if_stuck( string $slug, array $raw_ids, array $outcomes ): void {
+		$unsettled = (int) ( $outcomes[ Reporter::OUTCOME_UNSETTLED ] ?? 0 );
+
+		if ( 0 === $unsettled || $unsettled < count( $raw_ids ) ) {
+			return;
+		}
+
+		$reason = sprintf(
+			'%d rows could neither be migrated nor marked as failed, so the section cannot progress.',
+			$unsettled
+		);
+
+		$this->state->park_section( $slug, $reason );
+		$this->reporter->report_section_parked( $slug, $reason );
 	}
 
 	/**

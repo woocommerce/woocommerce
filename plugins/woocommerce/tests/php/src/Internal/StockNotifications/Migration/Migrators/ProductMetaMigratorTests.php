@@ -305,6 +305,44 @@ class ProductMetaMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A marker that never lands leaves the row a candidate, and this section has no cursor to
+	 * move past it. The outcome has to say so, since that is what the processor parks on. The
+	 * writer's own boolean cannot answer it — hence the read-back the outcome is taken from.
+	 *
+	 * @testdox a row whose marker cannot be written is reported as unsettled.
+	 */
+	public function test_a_row_whose_marker_cannot_be_written_is_reported_as_unsettled(): void {
+		$product_id = $this->create_product_with_legacy_flag( 'yes' );
+		$migrator   = $this->build_migrator();
+		$batch      = $migrator->get_batch( 0, 10 );
+
+		$save_thrower = static function () {
+			throw new \RuntimeException( 'third-party callback' );
+		};
+		// Short-circuits the marker write without erroring, the way a third-party filter can.
+		$blocker = static function ( $check, $object_id, $meta_key ) {
+			return self::FAILED_META_KEY === $meta_key ? true : $check;
+		};
+
+		add_action( 'woocommerce_update_product', $save_thrower );
+		add_filter( 'update_post_metadata', $blocker, 10, 3 );
+
+		try {
+			$outcomes = $migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
+		} finally {
+			remove_action( 'woocommerce_update_product', $save_thrower );
+			remove_filter( 'update_post_metadata', $blocker, 10 );
+		}
+
+		$this->assertSame( array( Reporter::OUTCOME_UNSETTLED => 1 ), $outcomes );
+		$this->assertSame(
+			'',
+			get_post_meta( $product_id, self::FAILED_META_KEY, true ),
+			'The marker did not land, which is exactly what the unsettled outcome reports.'
+		);
+	}
+
+	/**
 	 * @testdox a dry run writes no failure marker.
 	 */
 	public function test_a_dry_run_writes_no_failure_marker(): void {

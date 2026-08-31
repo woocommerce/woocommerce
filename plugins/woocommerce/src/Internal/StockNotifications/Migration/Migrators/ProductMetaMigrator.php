@@ -213,8 +213,9 @@ class ProductMetaMigrator implements MigratorInterface {
 				// batch, and the controller would retry it, hit the same product, and
 				// eventually drop the processor — stalling the notifications section too,
 				// since both share one. Settle the row instead and carry on.
-				$this->mark_terminal_failure( $product_id, $writer );
-				$outcome = Reporter::OUTCOME_FAILED;
+				$outcome = $this->mark_terminal_failure( $product_id, $writer )
+					? Reporter::OUTCOME_FAILED
+					: Reporter::OUTCOME_UNSETTLED;
 			}
 
 			$outcomes[ $outcome ] = ( $outcomes[ $outcome ] ?? 0 ) + 1;
@@ -239,9 +240,9 @@ class ProductMetaMigrator implements MigratorInterface {
 		if ( ! $product instanceof WC_Product ) {
 			// Record the visit so the row leaves the candidate set. A row that keeps failing
 			// without a marker is never drained, and the section would stall the whole run.
-			$this->mark_terminal_failure( $product_id, $writer );
-
-			return Reporter::OUTCOME_PRODUCT_MISSING;
+			return $this->mark_terminal_failure( $product_id, $writer )
+				? Reporter::OUTCOME_PRODUCT_MISSING
+				: Reporter::OUTCOME_UNSETTLED;
 		}
 
 		$written = $writer->write_product_meta(
@@ -251,9 +252,9 @@ class ProductMetaMigrator implements MigratorInterface {
 		);
 
 		if ( ! $written ) {
-			$this->mark_terminal_failure( $product_id, $writer );
-
-			return Reporter::OUTCOME_FAILED;
+			return $this->mark_terminal_failure( $product_id, $writer )
+				? Reporter::OUTCOME_FAILED
+				: Reporter::OUTCOME_UNSETTLED;
 		}
 
 		return Reporter::OUTCOME_MIGRATED;
@@ -273,16 +274,27 @@ class ProductMetaMigrator implements MigratorInterface {
 	 * written, so the marker is normally in place by then, and the batch carries on either
 	 * way rather than failing on a row it has already given up on.
 	 *
+	 * The return is read back rather than taken from the writer, whose own contract says its
+	 * boolean means only that a write was issued. Whether the marker actually landed is what
+	 * decides if this section can still make progress, so it is the one thing worth a read.
+	 *
 	 * @param int    $product_id Product id.
 	 * @param Writer $writer     Writer to persist through.
-	 * @return void
+	 * @return bool Whether the row is now settled and will leave the candidate set.
 	 */
-	private function mark_terminal_failure( int $product_id, Writer $writer ): void {
+	private function mark_terminal_failure( int $product_id, Writer $writer ): bool {
 		try {
 			$writer->write_product_marker( $product_id, self::FAILED_META_KEY, (string) time() );
 		} catch ( \Throwable $e ) {
-			// The caller records the row's outcome either way; there is nothing to add here.
-			return;
+			// Swallowed, then checked below: the hooks a meta write fires run after the row
+			// itself is written, so a throwing callback does not mean the marker is missing.
+			unset( $e );
 		}
+
+		if ( $writer->is_dry_run() ) {
+			return true;
+		}
+
+		return '' !== (string) get_post_meta( $product_id, self::FAILED_META_KEY, true );
 	}
 }

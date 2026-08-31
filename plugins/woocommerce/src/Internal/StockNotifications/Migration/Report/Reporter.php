@@ -54,6 +54,14 @@ class Reporter {
 	public const OUTCOME_FAILED = 'failed';
 
 	/**
+	 * Outcome code for a row that failed and could not even be marked as failed, so it stays
+	 * a candidate. A batch made entirely of these is a section that cannot progress.
+	 *
+	 * @var string
+	 */
+	public const OUTCOME_UNSETTLED = 'unsettled';
+
+	/**
 	 * Outcome code for a row skipped because its product is missing, trashed or not a product.
 	 *
 	 * @var string
@@ -138,8 +146,8 @@ class Reporter {
 	 * Record one outcome for one row and log it at the appropriate severity.
 	 *
 	 * `migrated` and `adopted` log nothing here; per-batch totals are logged by report_batch().
-	 * Every other outcome is a skip (`warning`) except `failed`, which is an `error` since it
-	 * represents an exception the row could not recover from. `adopted_downgraded` is not a
+	 * Every other outcome is a skip (`warning`) except `failed` and `unsettled`, which are
+	 * `error`s since they represent an exception the row could not recover from. `adopted_downgraded` is not a
 	 * skip — the row did adopt — but it warns, because the subscriber came out less live than
 	 * they went in and that is worth someone seeing.
 	 *
@@ -155,7 +163,7 @@ class Reporter {
 			return;
 		}
 
-		if ( self::OUTCOME_FAILED === $outcome ) {
+		if ( self::OUTCOME_FAILED === $outcome || self::OUTCOME_UNSETTLED === $outcome ) {
 			$this->has_errors = true;
 			wc_get_logger()->error(
 				sprintf( 'section=%s id=%d outcome=%s', $section, $id, $outcome ),
@@ -198,6 +206,25 @@ class Reporter {
 		$this->has_errors = true;
 		wc_get_logger()->error(
 			sprintf( 'section=%s batch failed: %s', $section, $error->getMessage() ),
+			array( 'source' => self::LOG_SOURCE )
+		);
+	}
+
+	/**
+	 * Log one `error` entry for a section the run has stopped serving.
+	 *
+	 * Distinct from a failed batch: nothing threw, the section simply cannot settle any of
+	 * the rows it is handed, so it is skipped rather than retried until a merchant clears
+	 * the markers with `--retry-failed`.
+	 *
+	 * @param string $section Section slug.
+	 * @param string $reason  Why the section was parked.
+	 * @return void
+	 */
+	public function report_section_parked( string $section, string $reason ): void {
+		$this->has_errors = true;
+		wc_get_logger()->error(
+			sprintf( 'section=%s parked: %s', $section, $reason ),
 			array( 'source' => self::LOG_SOURCE )
 		);
 	}

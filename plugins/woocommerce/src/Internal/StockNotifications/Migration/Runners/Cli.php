@@ -219,6 +219,7 @@ class Cli {
 		);
 
 		$this->print_known_losses( $reporter );
+		$this->print_parked_sections();
 
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 		WP_CLI::log( sprintf( 'Background run enqueued: %s', $this->is_processor_enqueued() ? 'yes' : 'no' ) );
@@ -407,6 +408,9 @@ class Cli {
 			// itself only ever advances one.
 			if ( $force || $retry_failed ) {
 				$run_state->reset_all_cursors();
+				// Both flags put rows back in play, which is the only thing a parked section
+				// was waiting for: whatever stopped its rows settling may since have been fixed.
+				$run_state->unpark_all();
 			}
 
 			$reporter               = $run->get_reporter();
@@ -577,6 +581,28 @@ class Cli {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+	}
+
+	/**
+	 * Print the sections the run has stopped serving, if any.
+	 *
+	 * A parked section is why a run can look idle with work still outstanding, so status has
+	 * to name it rather than leave the count unexplained.
+	 *
+	 * @return void
+	 */
+	private function print_parked_sections(): void {
+		foreach ( $this->state()->get_parked_sections() as $slug => $parked ) {
+			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+			WP_CLI::warning(
+				sprintf(
+					'%s is parked since %s: %s Run with --retry-failed to put it back in play.',
+					$slug,
+					$this->format_site_time( (int) ( $parked['at'] ?? 0 ) ),
+					(string) ( $parked['reason'] ?? '' )
+				)
+			);
+		}
 	}
 
 	/**

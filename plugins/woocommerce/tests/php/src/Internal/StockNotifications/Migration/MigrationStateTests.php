@@ -139,4 +139,44 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 
 		$this->assertNull( $this->sut->get_count( 'notifications' ) );
 	}
+
+	/**
+	 * @testdox a parked section should stay parked until it is unparked.
+	 */
+	public function test_a_parked_section_stays_parked_until_unparked(): void {
+		$this->sut->park_section( 'product-meta', 'cannot settle its rows' );
+
+		$this->assertTrue( $this->sut->is_section_parked( 'product-meta' ) );
+		$this->assertFalse( $this->sut->is_section_parked( 'notifications' ) );
+		$this->assertSame( 'cannot settle its rows', $this->sut->get_parked_sections()['product-meta']['reason'] );
+
+		$this->sut->unpark_all();
+
+		$this->assertSame( array(), $this->sut->get_parked_sections() );
+	}
+
+	/**
+	 * The reason and timestamp are what the Tools screen and the CLI report, so a re-park
+	 * must not overwrite them with a later one and lose when the section first stopped.
+	 *
+	 * @testdox parking a section twice should keep the first reason and timestamp.
+	 */
+	public function test_parking_a_section_twice_keeps_the_first_record(): void {
+		$this->sut->park_section( 'product-meta', 'first reason' );
+		$first = $this->sut->get_parked_sections()['product-meta'];
+
+		$this->sut->park_section( 'product-meta', 'second reason' );
+
+		$this->assertSame( $first, $this->sut->get_parked_sections()['product-meta'] );
+	}
+
+	/**
+	 * @testdox a scalar parked field should read back as nothing parked.
+	 */
+	public function test_a_scalar_parked_field_reads_back_as_empty(): void {
+		update_option( Constants::STATE_OPTION, array( 'parked' => 'yes' ), false );
+
+		$this->assertSame( array(), $this->sut->get_parked_sections() );
+		$this->assertFalse( $this->sut->is_section_parked( 'product-meta' ) );
+	}
 }

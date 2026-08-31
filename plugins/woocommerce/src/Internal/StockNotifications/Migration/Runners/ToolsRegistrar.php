@@ -148,8 +148,12 @@ class ToolsRegistrar {
 		// run has to walk, whatever the cursor has already been past.
 		$migration_state->set_total( 'notifications', $run->get_notifications_migrator()->count_remaining() );
 
-		// A new run supersedes whatever stopped the last one.
+		// A new run supersedes whatever stopped the last one, parked sections included: this
+		// screen has no equivalent of `--retry-failed`, so pressing Run is the merchant's
+		// retry. A section that still cannot settle its rows parks itself again on its first
+		// batch, at the cost of that one batch.
 		$migration_state->clear_failure();
+		$migration_state->unpark_all();
 
 		$batch_processor->enqueue_processor( MigrationBatchProcessor::class );
 
@@ -220,7 +224,14 @@ class ToolsRegistrar {
 	private function get_description( bool $is_running ): string {
 		$lines = array( __( 'Moves subscribers and settings from Back In Stock Notifications into the built-in stock notifications. Runs in the background, a batch at a time.', 'woocommerce' ) );
 
-		foreach ( array( $this->get_progress_line( $is_running ), $this->get_failure_line( $is_running ), $this->get_losses_line() ) as $line ) {
+		$description_lines = array(
+			$this->get_progress_line( $is_running ),
+			$this->get_failure_line( $is_running ),
+			$this->get_parked_line(),
+			$this->get_losses_line(),
+		);
+
+		foreach ( $description_lines as $line ) {
 			if ( '' !== $line ) {
 				$lines[] = $line;
 			}
@@ -256,6 +267,29 @@ class ToolsRegistrar {
 			__( 'The last run stopped on an error at %1$s: %2$s. Starting again retries from the same point. If it keeps stopping, check WooCommerce &gt; Status &gt; Logs.', 'woocommerce' ),
 			wc_get_container()->get( Reporter::class )->format_site_time( (int) $failure['at'] ),
 			esc_html( (string) $failure['message'] )
+		);
+	}
+
+	/**
+	 * The line that says part of the migration has been set aside.
+	 *
+	 * A parked section is skipped rather than retried, so without this the screen would show
+	 * work outstanding and a run that keeps ending immediately, with nothing to explain it.
+	 * Shown whether or not a run is enqueued, since the next run skips the section too.
+	 *
+	 * @return string
+	 */
+	private function get_parked_line(): string {
+		$parked = wc_get_container()->get( MigrationState::class )->get_parked_sections();
+
+		if ( array() === $parked ) {
+			return '';
+		}
+
+		return sprintf(
+			/* translators: %s: comma-separated list of migration section names */
+			__( 'Part of the migration was set aside because its rows could not be recorded either way: %s. Starting the migration again retries it. If it keeps being set aside, check WooCommerce &gt; Status &gt; Logs.', 'woocommerce' ),
+			esc_html( implode( ', ', array_keys( $parked ) ) )
 		);
 	}
 

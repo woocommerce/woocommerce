@@ -61,6 +61,7 @@ class MigrationState {
 		'losses'  => null,
 		'totals'  => array(),
 		'failure' => null,
+		'parked'  => array(),
 	);
 
 	/**
@@ -125,7 +126,7 @@ class MigrationState {
 			}
 		}
 
-		foreach ( array( 'cursor', 'counts', 'totals' ) as $key ) {
+		foreach ( array( 'cursor', 'counts', 'totals', 'parked' ) as $key ) {
 			if ( ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = array();
 			}
@@ -488,6 +489,73 @@ class MigrationState {
 			'message' => $message,
 			'at'      => time(),
 		);
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Park a section that cannot make progress, so the run stops serving it.
+	 *
+	 * A section whose rows can neither be migrated nor marked as failed would be handed out
+	 * again on every pass, forever, and the notifications section shares the processor with
+	 * it. Parking stops that: the section is skipped until `--retry-failed` or `--force`
+	 * puts it back in play, and the reason travels with it so the Tools screen and the CLI
+	 * can say why the run went quiet.
+	 *
+	 * @param string $section Section slug.
+	 * @param string $reason  Why the section cannot progress.
+	 * @return void
+	 */
+	public function park_section( string $section, string $reason ): void {
+		$state = $this->get_state();
+
+		if ( isset( $state['parked'][ $section ] ) ) {
+			return;
+		}
+
+		$state['parked'][ $section ] = array(
+			'reason' => $reason,
+			'at'     => time(),
+		);
+
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Whether a section is currently parked.
+	 *
+	 * @param string $section Section slug.
+	 * @return bool
+	 */
+	public function is_section_parked( string $section ): bool {
+		return isset( $this->get_state()['parked'][ $section ] );
+	}
+
+	/**
+	 * Every parked section, keyed by slug, with its `reason` and `at`.
+	 *
+	 * @return array
+	 */
+	public function get_parked_sections(): array {
+		return $this->get_state()['parked'];
+	}
+
+	/**
+	 * Put every parked section back in play.
+	 *
+	 * Called by the same two flags that clear failure markers and cursors: whatever blocked
+	 * the section may since have been fixed, and a retry has to be able to find out.
+	 *
+	 * @return void
+	 */
+	public function unpark_all(): void {
+		$state = $this->get_state();
+
+		if ( array() === $state['parked'] ) {
+			return;
+		}
+
+		$state['parked'] = array();
+
 		$this->save_state( $state );
 	}
 
