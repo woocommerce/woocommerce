@@ -277,4 +277,234 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 		$coupon->set_amount( -10.0 );
 	}
+
+	// -------------------------------------------------------------------------
+	// Direct setter validation (single-property guards).
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox set_minimum_amount throws exception when minimum exceeds existing maximum.
+	 */
+	public function test_set_minimum_amount_throws_when_exceeds_maximum(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_maximum_amount( '100.00' );
+
+		try {
+			$coupon->set_minimum_amount( '200.00' );
+			$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+		} catch ( \WC_Data_Exception $e ) {
+			$this->assertSame( 'coupon_invalid_minimum_amount', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * @testdox set_maximum_amount throws exception when maximum is below existing minimum.
+	 */
+	public function test_set_maximum_amount_throws_when_below_existing_minimum(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+
+		try {
+			$coupon->set_maximum_amount( '50.00' );
+			$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+		} catch ( \WC_Data_Exception $e ) {
+			$this->assertSame( 'coupon_invalid_maximum_amount', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * @testdox set_minimum_amount succeeds when no maximum amount is set.
+	 */
+	public function test_set_minimum_amount_succeeds_when_no_maximum_set(): void {
+		$coupon = new WC_Coupon();
+
+		$coupon->set_minimum_amount( '200.00' );
+
+		$this->assertSame( '200.00', $coupon->get_minimum_amount() );
+	}
+
+	/**
+	 * @testdox set_minimum_amount succeeds when minimum is less than existing maximum.
+	 */
+	public function test_set_minimum_amount_succeeds_when_less_than_maximum(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_maximum_amount( '100.00' );
+
+		$coupon->set_minimum_amount( '50.00' );
+
+		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
+	}
+
+	/**
+	 * @testdox set_minimum_amount succeeds when maximum amount is zero (no upper limit).
+	 */
+	public function test_set_minimum_amount_succeeds_when_maximum_is_zero(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_maximum_amount( '0' );
+
+		$coupon->set_minimum_amount( '999.00' );
+
+		$this->assertSame( '999.00', $coupon->get_minimum_amount() );
+	}
+
+	/**
+	 * @testdox set_minimum_amount succeeds when minimum equals maximum (boundary is inclusive).
+	 */
+	public function test_set_minimum_amount_succeeds_when_equal_to_maximum(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_maximum_amount( '100.00' );
+
+		$coupon->set_minimum_amount( '100.00' );
+
+		$this->assertSame( '100.00', $coupon->get_minimum_amount() );
+	}
+
+	// -------------------------------------------------------------------------
+	// Atomic set_props() validation (both amounts supplied together).
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox set_props allows raising both minimum and maximum when new minimum exceeds old maximum.
+	 */
+	public function test_set_props_allows_raising_both_minimum_and_maximum_together(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+		$coupon->set_maximum_amount( '200.00' );
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '250.00',
+				'maximum_amount' => '300.00',
+			)
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( '250.00', $coupon->get_minimum_amount() );
+		$this->assertSame( '300.00', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props allows lowering both minimum and maximum together.
+	 */
+	public function test_set_props_allows_lowering_both_minimum_and_maximum_together(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+		$coupon->set_maximum_amount( '200.00' );
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '50.00',
+				'maximum_amount' => '75.00',
+			)
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
+		$this->assertSame( '75.00', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props rejects an invalid min/max pair and leaves both properties unchanged.
+	 */
+	public function test_set_props_rejects_invalid_pair_without_mutating_either_property(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+		$coupon->set_maximum_amount( '200.00' );
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '300.00',
+				'maximum_amount' => '150.00',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'coupon_invalid_minimum_amount', $result->get_error_code() );
+		$this->assertSame( '100.00', $coupon->get_minimum_amount(), 'minimum_amount must not be mutated on failure' );
+		$this->assertSame( '200.00', $coupon->get_maximum_amount(), 'maximum_amount must not be mutated on failure' );
+	}
+
+	/**
+	 * @testdox set_props rejects a minimum-only update that would exceed the existing maximum.
+	 */
+	public function test_set_props_rejects_minimum_only_invalid_update(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+		$coupon->set_maximum_amount( '200.00' );
+
+		$result = $coupon->set_props( array( 'minimum_amount' => '300.00' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( '100.00', $coupon->get_minimum_amount(), 'minimum_amount must not be mutated on failure' );
+	}
+
+	/**
+	 * @testdox set_props rejects a maximum-only update that would fall below the existing minimum.
+	 */
+	public function test_set_props_rejects_maximum_only_invalid_update(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100.00' );
+		$coupon->set_maximum_amount( '200.00' );
+
+		$result = $coupon->set_props( array( 'maximum_amount' => '50.00' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( '200.00', $coupon->get_maximum_amount(), 'maximum_amount must not be mutated on failure' );
+	}
+
+	/**
+	 * @testdox set_props treats a zero maximum as no upper limit and allows any minimum.
+	 */
+	public function test_set_props_allows_any_minimum_when_maximum_is_zero(): void {
+		$coupon = new WC_Coupon();
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '999.00',
+				'maximum_amount' => '0',
+			)
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( '999.00', $coupon->get_minimum_amount() );
+		$this->assertSame( '0', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props allows equal minimum and maximum (boundary is inclusive).
+	 */
+	public function test_set_props_allows_equal_minimum_and_maximum(): void {
+		$coupon = new WC_Coupon();
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '100.00',
+				'maximum_amount' => '100.00',
+			)
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( '100.00', $coupon->get_minimum_amount() );
+		$this->assertSame( '100.00', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props applies a valid min/max pair and still returns errors from other properties.
+	 */
+	public function test_set_props_applies_valid_amounts_and_aggregates_other_errors(): void {
+		$coupon = new WC_Coupon();
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '50.00',
+				'maximum_amount' => '100.00',
+				'amount'         => '-10',
+			)
+		);
+
+		$this->assertWPError( $result );
+		// The valid min/max pair should still be applied.
+		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
+		$this->assertSame( '100.00', $coupon->get_maximum_amount() );
+	}
 }

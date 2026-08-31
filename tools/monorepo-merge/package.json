@@ -21,12 +21,15 @@
 		"lint": "eslint .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint"
+		"posttest": "pnpm lint",
+		"test": "pnpm build && node --test test/merge.test.mjs"
 	},
 	"dependencies": {
-		"@oclif/core": "^1.26.2",
-		"@oclif/plugin-help": "^5.2.20",
-		"@oclif/plugin-plugins": "^2.4.7",
+		"@inquirer/confirm": "^6.1.1",
+		"@inquirer/password": "^5.1.1",
+		"@oclif/core": "^4.13.5",
+		"@oclif/plugin-help": "^6.2.58",
+		"@oclif/plugin-plugins": "^5.4.87",
 		"@octokit/graphql": "4.8.0"
 	},
 	"devDependencies": {
@@ -36,7 +39,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^10.0.0",
 		"jscodeshift": "^0.13.1",
-		"oclif": "^2.7.0",
+		"oclif": "^4.23.30",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
@@ -69,7 +72,23 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.ts"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"bin/**",
+						"src/**/*.ts",
+						"test/**/*.mjs",
+						"tsconfig.json"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Harden `getCanvas` so the non-iframed editor path also waits for the canvas, hidden leftover iframes are ignored, and a missing canvas fails loudly instead of silently resolving to the wrong document.

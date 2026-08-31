@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Start new bank accounts on the Direct bank transfer settings page in the business location set on the Payments settings screen. The store base country used before could arrive with a state suffix ("US:CA"), which matched no entry in the country field and no routing number format.

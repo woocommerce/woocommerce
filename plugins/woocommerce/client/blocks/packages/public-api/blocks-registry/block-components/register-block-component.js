@@ -93,9 +93,8 @@ export function registerBlockComponent( options ) {
  */
 export function registerInnerBlock( options ) {
 	deprecated( 'registerInnerBlock', {
-		version: '2.8.0',
+		version: '4.4.0',
 		alternative: 'registerBlockComponent',
-		plugin: 'WooCommerce Blocks',
 		hint: '"main" has been replaced with "context" and is now optional.',
 	} );
 	assertOption( options, 'main', 'string' );

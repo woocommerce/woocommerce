@@ -1777,8 +1777,21 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 		);
 
 		if ( ! wc_get_loop_prop( 'is_shortcode' ) ) {
-			$args['format'] = '';
-			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+			global $wp_rewrite;
+
+			$args['base'] = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+
+			if ( $wp_rewrite->using_permalinks() ) {
+				$args['format'] = user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' );
+
+				if ( ! $wp_rewrite->use_trailing_slashes ) {
+					$args['format'] = '/' . ltrim( $args['format'], '/' );
+				}
+			} else {
+				$args['format'] = false !== strpos( $args['base'], '?paged=%#%' ) ? '?paged=%#%' : '&paged=%#%';
+			}
+
+			$args['base'] = str_replace( $args['format'], '%_%', $args['base'] );
 		}
 
 		wc_get_template( 'loop/pagination.php', $args );
@@ -2211,11 +2224,8 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		// Enqueue variation scripts.
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
-		// Attach a reset snapshot only when variation-gallery swaps are enabled.
-		if (
-			\Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() &&
-			! isset( $attached_gallery_defaults[ $product->get_id() ] )
-		) {
+		// Attach the reset snapshot once per product.
+		if ( ! isset( $attached_gallery_defaults[ $product->get_id() ] ) ) {
 			wp_add_inline_script(
 				'wc-add-to-cart-variation',
 				sprintf(
@@ -2717,7 +2727,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			array(
 				'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of up-sells.php.
+				// Not used now, but used in previous version of cross-sells.php.
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
 				'columns'        => $columns,
@@ -4564,13 +4574,28 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 	if ( is_array( $item_data ) ) {
 		// Format item data ready to display.
 		foreach ( $item_data as $key => $data ) {
+			if ( ! is_array( $data ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
 			// Set hidden to true to not display meta on cart.
 			if ( ! empty( $data['hidden'] ) ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
+			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
+
+			$label_is_renderable   = is_scalar( $label ) || ( is_object( $label ) && method_exists( $label, '__toString' ) );
+			$display_is_renderable = is_scalar( $display ) || ( is_object( $display ) && method_exists( $display, '__toString' ) );
+
+			if ( ! $label_is_renderable || ! $display_is_renderable ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
+
+			$item_data[ $key ]['key']     = (string) $label;
+			$item_data[ $key ]['display'] = (string) $display;
 		}
 
 		// Output flat or in list format.

@@ -29,6 +29,17 @@ class Hydration {
 	protected $cached_store_notices = null;
 
 	/**
+	 * Snapshot of WC()->cart->cart_context taken by cache_cart_context(), to restore after hydrating the API.
+	 *
+	 * `null` means no snapshot has been taken this cycle, either because the method has not run yet or because
+	 * its guards skipped it (for example, there was no cart). restore_cached_cart_context() only restores from a
+	 * non-null string, so a `null` value always leaves the cart untouched.
+	 *
+	 * @var string|null
+	 */
+	protected $cached_cart_context = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
@@ -53,53 +64,62 @@ class Hydration {
 		$available_routes = StoreApi::container()->get( RoutesController::class )->get_all_routes( 'v1', true );
 		$route_match      = $this->match_route_to_handler( $path, $available_routes );
 
-		/**
-		 * We disable nonce check to support endpoints such as checkout. The caveat here is that we need to be careful to only support GET requests. No other request type should be processed without nonce check. Additionally, no GET request can modify data as part of hydration request, for example adding items to cart.
-		 *
-		 * Long term, we should consider validating nonce here, instead of disabling it temporarily.
-		 */
-		$this->disable_nonce_check();
-
-		$this->cache_store_notices();
-
 		$preloaded_data = array();
 
-		if ( null !== $route_match ) {
-			try {
-				$response = $this->get_response_from_controller(
-					$route_match['controller'],
-					$path,
-					$route_match['url_params'],
-					$route_match['query_params']
-				);
-				if ( $response ) {
-					$preloaded_data = array(
-						'body'    => $response->get_data(),
-						'headers' => $response->get_headers(),
+		// The `finally` guarantees the session state mutated during setup (nonce check disabled, notices cleared,
+		// cart context snapshot) is restored even when dispatching throws something the inner catch does not
+		// handle (an `\Error`, or any Throwable from `rest_preload_api_request()`). Without it, the rest of the
+		// request would run with the nonce check disabled and the `store-api` cart context, and the cleared
+		// notices would be persisted to the session on shutdown.
+		try {
+			/**
+			 * We disable nonce check to support endpoints such as checkout. The caveat here is that we need to be careful to only support GET requests. No other request type should be processed without nonce check. Additionally, no GET request can modify data as part of hydration request, for example adding items to cart.
+			 *
+			 * Long term, we should consider validating nonce here, instead of disabling it temporarily.
+			 */
+			$this->disable_nonce_check();
+
+			$this->cache_store_notices();
+			$this->cache_cart_context();
+
+			if ( null !== $route_match ) {
+				try {
+					$response = $this->get_response_from_controller(
+						$route_match['controller'],
+						$path,
+						$route_match['url_params'],
+						$route_match['query_params']
+					);
+					if ( $response ) {
+						$preloaded_data = array(
+							'body'    => $response->get_data(),
+							'headers' => $response->get_headers(),
+						);
+					}
+				} catch ( \Exception $e ) {
+					// This is executing in frontend of the site, a failure in hydration should not stop the site from working.
+					wc_get_logger()->warning(
+						'Error in hydrating REST API request: ' . $e->getMessage(),
+						array(
+							'source'    => 'blocks-hydration',
+							'data'      => array(
+								'path'       => $path,
+								'controller' => $route_match['controller'] ?? null,
+							),
+							'backtrace' => true,
+						)
 					);
 				}
-			} catch ( \Exception $e ) {
-				// This is executing in frontend of the site, a failure in hydration should not stop the site from working.
-				wc_get_logger()->warning(
-					'Error in hydrating REST API request: ' . $e->getMessage(),
-					array(
-						'source'    => 'blocks-hydration',
-						'data'      => array(
-							'path'       => $path,
-							'controller' => $route_match['controller'] ?? null,
-						),
-						'backtrace' => true,
-					)
-				);
+			} else {
+				// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
+				$preloaded_requests = rest_preload_api_request( array(), $path );
+				$preloaded_data     = $preloaded_requests[ $path ] ?? array();
 			}
-		} else {
-			// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
-			$preloaded_requests = rest_preload_api_request( array(), $path );
-			$preloaded_data     = $preloaded_requests[ $path ] ?? array();
+		} finally {
+			$this->restore_cached_cart_context();
+			$this->restore_cached_store_notices();
+			$this->restore_nonce_check();
 		}
-
-		$this->restore_cached_store_notices();
-		$this->restore_nonce_check();
 
 		// Returns just the single preloaded request, or an empty array if it doesn't exist.
 		return $preloaded_data;
@@ -295,5 +315,40 @@ class Hydration {
 
 		wc_set_notices( $this->cached_store_notices );
 		$this->cached_store_notices = null;
+	}
+
+	/**
+	 * Cache the cart context before hydrating the API.
+	 *
+	 * Dispatching a Store API cart route runs `CartController::load_cart()`, which sets `cart_context` to
+	 * `store-api` on the shared cart and never puts it back. That is correct for a real Store API request, where
+	 * the whole request is Store API — but hydration runs inside a front-end render, so without a snapshot the
+	 * rest of that render inherits the flag. Shipping code branches on it, so the page would silently take the
+	 * block path.
+	 *
+	 * @since 11.1.0
+	 */
+	protected function cache_cart_context(): void {
+		$this->cached_cart_context = null;
+
+		if ( ! did_action( 'woocommerce_init' ) || ! WC()->cart instanceof \WC_Cart ) {
+			return;
+		}
+
+		$this->cached_cart_context = WC()->cart->cart_context;
+	}
+
+	/**
+	 * Restore the cart context, only if a snapshot was taken this cycle.
+	 *
+	 * @since 11.1.0
+	 */
+	protected function restore_cached_cart_context(): void {
+		if ( ! is_string( $this->cached_cart_context ) || ! WC()->cart instanceof \WC_Cart ) {
+			return;
+		}
+
+		WC()->cart->cart_context   = $this->cached_cart_context;
+		$this->cached_cart_context = null;
 	}
 }

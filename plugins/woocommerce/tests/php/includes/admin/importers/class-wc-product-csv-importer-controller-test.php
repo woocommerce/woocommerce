@@ -57,4 +57,31 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			$columns
 		);
 	}
+
+	/**
+	 * @testdox Should URL-encode request-derived values in the next step link so special characters like '+' survive the round trip.
+	 */
+	public function test_get_next_step_link_url_encodes_request_derived_params(): void {
+		$file               = '/tmp/+dir with spaces/import.csv';
+		$delimiter          = '+';
+		$character_encoding = 'UTF-8+custom';
+
+		$_REQUEST['step']               = 'upload';
+		$_REQUEST['file']               = $file;
+		$_REQUEST['delimiter']          = $delimiter;
+		$_REQUEST['character_encoding'] = $character_encoding;
+
+		try {
+			$controller = new WC_Product_CSV_Importer_Controller();
+			$url        = $controller->get_next_step_link();
+		} finally {
+			unset( $_REQUEST['step'], $_REQUEST['file'], $_REQUEST['delimiter'], $_REQUEST['character_encoding'] );
+		}
+
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $params );
+
+		$this->assertSame( $file, $params['file'], 'The file path should survive the query string round trip unchanged' );
+		$this->assertSame( $delimiter, $params['delimiter'], 'The delimiter should survive the query string round trip unchanged' );
+		$this->assertSame( $character_encoding, $params['character_encoding'], 'The character encoding should survive the query string round trip unchanged' );
+	}
 }

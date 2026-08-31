@@ -764,6 +764,7 @@ p.demo_store,
 			ol.commentlist {
 				@include clearfix();
 				margin: 0;
+				padding: 0;
 				width: 100%;
 				background: none;
 				list-style: none;
@@ -805,6 +806,10 @@ p.demo_store,
 						p.meta {
 							font-size: 0.83em;
 						}
+					}
+
+					.comment_container > .comment-text:only-child {
+						margin-inline-start: 0;
 					}
 				}
 

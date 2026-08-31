@@ -567,9 +567,9 @@ class WC_Session_Handler extends WC_Session {
 
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
- 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
-					$this->_table,
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+					"INSERT INTO {$this->_table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
+ 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->_session_expiration
@@ -641,10 +641,10 @@ class WC_Session_Handler extends WC_Session {
 		$batch_size            = 100;
 		$deleted_entries_total = 0;
 		do {
-			$deleted_entries_count  = (int) $wpdb->query(
+			$deleted_entries_count = (int) $wpdb->query(
 				$wpdb->prepare(
-					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
-					$this->_table,
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+					"DELETE FROM {$this->_table} WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d",
 					time(),
 					$batch_size
 				)
@@ -676,7 +676,8 @@ class WC_Session_Handler extends WC_Session {
 		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
 		if ( false === $value ) {
-			$value = $wpdb->get_var( $wpdb->prepare( 'SELECT session_value FROM %i WHERE session_key = %s', $this->_table, $customer_id ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 
 			if ( is_null( $value ) ) {
 				$value = $default_value;
@@ -765,6 +766,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	private function session_exists( $customer_id ) {
-		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT session_key FROM %i WHERE session_key = %s', $this->_table, $customer_id ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( "SELECT session_key FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 	}
 }

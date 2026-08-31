@@ -15,8 +15,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	 * tearDown.
 	 */
 	public function tearDown(): void {
-		WC()->cart->empty_cart();
-
 		// Reset DI container to clear any mocks.
 		$container = wc_get_container();
 		$container->reset_all_resolved();

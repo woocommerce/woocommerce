@@ -303,15 +303,6 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		if ( ! in_array( $subscription['product_type'], array( 'plugin', 'theme' ), true ) ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'This product type is not supported.', 'woocommerce' ),
-				),
-				400
-			);
-		}
-
 		if ( true !== $subscription['local']['installed'] || ! isset( $subscription['local']['active'] ) ) {
 			wp_send_json_error(
 				array(
@@ -326,6 +317,15 @@ class WC_Helper_Subscriptions_API {
 				array(
 					'message' => __( 'This product is already active.', 'woocommerce' ),
 				),
+			);
+		}
+
+		if ( ! in_array( $subscription['product_type'] ?? null, array( 'plugin', 'theme' ), true ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'This product type is not supported.', 'woocommerce' ),
+				),
+				400
 			);
 		}
 

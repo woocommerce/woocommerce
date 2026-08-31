@@ -58,6 +58,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 	}
 
 	/**
@@ -225,6 +226,61 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$result = $this->call_update_check( $payload );
 
 		$this->assertEquals( $cached_data['products'], $result, 'Result should match cached version' );
+	}
+
+	/**
+	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
+	 */
+	public function test_update_check_preserves_cache_when_rate_limited(): void {
+		$cached_data = array(
+			'hash'     => 'a-stale-hash',
+			'updated'  => time(),
+			'products' => array(
+				123 => array(
+					'version' => '1.2.3',
+					'slug'    => 'test-plugin',
+				),
+			),
+			'errors'   => array(),
+		);
+
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		$http_mock = static function () {
+			return array(
+				'headers'  => array( 'retry-after' => '60' ),
+				'response' => array(
+					'code'    => 429,
+					'message' => 'Too Many Requests',
+				),
+				'body'     => '{"code":"wccom_rest_limit_reached","data":{"status":429}}',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $cached_data['products'], $result, 'A rate-limited check should serve the previously cached products' );
+		$this->assertSame(
+			$cached_data,
+			get_transient( '_woocommerce_helper_updates' ),
+			'A 429 should leave the cached update data untouched rather than replacing it with an empty result'
+		);
+		$this->assertNotFalse(
+			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'A 429 should record a backoff window for the update-check endpoint'
+		);
 	}
 
 	/**

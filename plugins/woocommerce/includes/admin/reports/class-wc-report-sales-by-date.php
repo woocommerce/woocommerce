@@ -523,7 +523,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'title'            => sprintf(
 				/* translators: %s: total orders */
 				__( '%s orders placed', 'woocommerce' ),
-				'<strong>' . $data->total_orders . '</strong>'
+				'<strong>' . number_format_i18n( absint( $data->total_orders ) ) . '</strong>'
 			),
 			'color'            => $this->chart_colours['order_count'],
 			'highlight_series' => 1,
@@ -533,7 +533,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'title'            => sprintf(
 				/* translators: %s: total items */
 				__( '%s items purchased', 'woocommerce' ),
-				'<strong>' . $data->total_items . '</strong>'
+				'<strong>' . number_format_i18n( absint( $data->total_items ) ) . '</strong>'
 			),
 			'color'            => $this->chart_colours['item_count'],
 			'highlight_series' => 0,
@@ -541,10 +541,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$legend[] = array(
 			'title'            => sprintf(
 				/* translators: 1: total refunds 2: total refunded orders 3: refunded items */
-				_n( '%1$s refunded %2$d order (%3$d item)', '%1$s refunded %2$d orders (%3$d items)', $this->report_data->total_refunded_orders, 'woocommerce' ),
+				_n( '%1$s refunded %2$s order (%3$s item)', '%1$s refunded %2$s orders (%3$s items)', $this->report_data->total_refunded_orders, 'woocommerce' ),
 				'<strong>' . wc_price( $data->total_refunds ) . '</strong>',
-				$this->report_data->total_refunded_orders,
-				$this->report_data->refunded_order_items
+				number_format_i18n( absint( $this->report_data->total_refunded_orders ) ),
+				number_format_i18n( absint( $this->report_data->refunded_order_items ) )
 			),
 			'color'            => $this->chart_colours['refund_amount'],
 			'highlight_series' => 8,

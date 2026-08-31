@@ -171,8 +171,107 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	 * @testdox Settings registration is hooked to both admin_init and rest_api_init to support direct PHP and REST consumption.
 	 */
 	public function test_register_wp_admin_settings_hooked_to_admin_init_and_rest_api_init(): void {
-		$this->assertSame( 10, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
+		// admin_init runs last so extensions registering settings pages or email classes on
+		// admin_init are still captured; see https://github.com/woocommerce/woocommerce/pull/67494.
+		$this->assertSame( 999, has_action( 'admin_init', array( WC(), 'register_wp_admin_settings' ) ) );
 		$this->assertSame( 10, has_action( 'rest_api_init', array( WC(), 'register_wp_admin_settings' ) ) );
+	}
+
+	/**
+	 * @testdox Settings registration is idempotent, so no hook ordering duplicates the settings groups.
+	 */
+	public function test_register_wp_admin_settings_is_idempotent(): void {
+		remove_all_filters( 'woocommerce_settings_groups' );
+
+		WC()->register_wp_admin_settings();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+		$after_first = apply_filters( 'woocommerce_settings_groups', array() );
+
+		WC()->register_wp_admin_settings();
+		WC()->register_wp_admin_settings();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+		$after_repeats = apply_filters( 'woocommerce_settings_groups', array() );
+
+		$this->assertNotEmpty( $after_first, 'The first call should register the settings groups.' );
+		$this->assertSame(
+			count( $after_first ),
+			count( $after_repeats ),
+			'Repeat calls should not add duplicate settings groups.'
+		);
+
+		$ids = array_column( $after_repeats, 'id' );
+		$this->assertSame( array_values( array_unique( $ids ) ), array_values( $ids ), 'Settings group ids should be unique.' );
+	}
+
+	/**
+	 * @testdox Settings registration is not conditional on the hook it runs from.
+	 */
+	public function test_register_wp_admin_settings_does_not_depend_on_hook_context(): void {
+		global $wp_current_filter, $wp_actions;
+
+		// The previous guard keyed off doing_action( 'rest_api_init' ) && did_action( 'admin_init' ),
+		// which made the rest_api_init path unreachable on admin requests. Reproduce that exact state
+		// rather than calling the method bare: admin_init has already run, and registration is now
+		// invoked from inside rest_api_init. Setting the globals doing_action()/did_action() read is
+		// enough, and avoids firing every core callback bound to those two hooks.
+		$current_filter_backup = $wp_current_filter;
+		$admin_init_backup     = $wp_actions['admin_init'] ?? null;
+
+		$wp_actions['admin_init'] = ( $admin_init_backup ?? 0 ) + 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_current_filter[]      = 'rest_api_init'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			$this->assertTrue( doing_action( 'rest_api_init' ), 'The removed guard condition should be reproduced.' );
+			$this->assertNotEmpty( did_action( 'admin_init' ), 'The removed guard condition should be reproduced.' );
+
+			remove_all_filters( 'woocommerce_settings_groups' );
+
+			WC()->register_wp_admin_settings();
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+			$groups = apply_filters( 'woocommerce_settings_groups', array() );
+			$ids    = array_column( $groups, 'id' );
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			if ( null === $admin_init_backup ) {
+				unset( $wp_actions['admin_init'] );
+			} else {
+				$wp_actions['admin_init'] = $admin_init_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		$this->assertContains( 'general', $ids, 'Registration should happen regardless of which hook is running.' );
+	}
+
+	/**
+	 * @testdox Settings registration recovers from a hook state reset without duplicating per-group settings.
+	 */
+	public function test_register_wp_admin_settings_recovers_from_hook_reset(): void {
+		WC()->register_wp_admin_settings();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores -- Reading the registered settings under test; the hook name is a core legacy one.
+		$general_before = apply_filters( 'woocommerce_settings-general', array() );
+
+		// Wipe the groups filter only, leaving the per-group filters attached. This mirrors
+		// what the WP test framework does between tests (hook state restored, singletons kept).
+		remove_all_filters( 'woocommerce_settings_groups' );
+		WC()->register_wp_admin_settings();
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+		$groups = apply_filters( 'woocommerce_settings_groups', array() );
+		$this->assertContains( 'general', array_column( $groups, 'id' ), 'Registration should re-attach after hook state is reset.' );
+
+		$ids = array_column( $groups, 'id' );
+		$this->assertSame( array_values( array_unique( $ids ) ), array_values( $ids ), 'Settings group ids should be unique after re-registration.' );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores -- Reading the registered settings under test; the hook name is a core legacy one.
+		$general_after = apply_filters( 'woocommerce_settings-general', array() );
+		$this->assertNotEmpty( $general_before, 'The general settings group should have settings registered.' );
+		$this->assertSame(
+			count( $general_before ),
+			count( $general_after ),
+			'Per-group settings should not be duplicated by re-registration.'
+		);
 	}
 
 	/**
@@ -198,9 +297,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		try {
 			$this->assertTrue( is_admin(), 'New post editor load action should run in an admin context.' );
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( 'load-post-new.php' );
-			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WordPress.NamingConventions.ValidHookName.UseUnderscores
 			$query_after_action = WC()->query;
 		} finally {
 			WC()->query                = $original_query;

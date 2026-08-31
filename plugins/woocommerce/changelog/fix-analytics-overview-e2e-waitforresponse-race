@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix lost-response race in the Analytics Overview and variable product E2E tests by registering waitForResponse before the click that triggers the save.

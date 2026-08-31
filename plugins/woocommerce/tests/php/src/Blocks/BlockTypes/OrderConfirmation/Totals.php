@@ -30,7 +30,6 @@ class Totals extends \WP_UnitTestCase {
 
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		wp_set_current_user( 0 );

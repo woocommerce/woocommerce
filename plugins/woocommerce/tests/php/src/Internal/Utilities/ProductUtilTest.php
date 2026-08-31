@@ -89,7 +89,9 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 			$deleted_ids[] = (int) $product_id;
 		};
 
-		set_transient( 'wc_products_onsale', 'foobar' );
+		set_transient( 'wc_products_onsale', 'before' );
+		set_transient( 'product-transient-version', 'before' );
+		set_transient( 'product_query-transient-version', 'before' );
 		add_action( 'woocommerce_delete_product_transients', $track_hook );
 		try {
 			wc_get_container()->get( ProductUtil::class )->delete_product_transients_for_products( $product_ids );
@@ -97,8 +99,10 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 			remove_action( 'woocommerce_delete_product_transients', $track_hook );
 		}
 
-		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
 		$this->assertSame( array( 0, 123, 456 ), $deleted_ids );
+		$this->assertNotSame( 'before', get_transient( 'wc_products_onsale' ) );
+		$this->assertNotSame( 'before', get_transient( 'product-transient-version' ) );
+		$this->assertNotSame( 'before', get_transient( 'product_query-transient-version' ) );
 	}
 
 	/**

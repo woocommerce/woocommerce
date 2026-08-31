@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Aligns the browser-side Customers CSV with the server export order from #67843; the Role column feature (#67653) is unreleased so no shipped behavior changes.
+
+

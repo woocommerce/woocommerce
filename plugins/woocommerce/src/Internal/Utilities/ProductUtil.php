@@ -54,6 +54,7 @@ class ProductUtil {
 
 		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
 		\WC_Cache_Helper::get_transient_version( 'product', true );
+		\WC_Cache_Helper::get_transient_version( 'product_query', true );
 
 		foreach ( $product_ids as $product_id ) {
 			/**

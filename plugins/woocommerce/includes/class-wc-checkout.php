@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
@@ -268,18 +269,27 @@ class WC_Checkout {
 				'shipping_'
 			),
 			'account'  => array(),
-			'order'    => array(
-				'order_comments' => array(
-					'type'        => 'textarea',
-					'class'       => array( 'notes' ),
-					'label'       => __( 'Order notes', 'woocommerce' ),
-					'placeholder' => esc_attr__(
-						'Notes about your order, e.g. special notes for delivery.',
-						'woocommerce'
-					),
-				),
-			),
+			'order'    => array(),
 		);
+
+		/**
+		 * Controls whether the order notes field is added to the checkout.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enabled Whether the order notes field is enabled.
+		 */
+		if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+			$this->fields['order']['order_comments'] = array(
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order notes', 'woocommerce' ),
+				'placeholder' => esc_attr__(
+					'Notes about your order, e.g. special notes for delivery.',
+					'woocommerce'
+				),
+			);
+		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
@@ -618,12 +628,13 @@ class WC_Checkout {
 			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
-					'name'      => $fee->name,
-					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-					'amount'    => $fee->amount,
-					'total'     => $fee->total,
-					'total_tax' => $fee->tax,
-					'taxes'     => array(
+					'name'       => $fee->name,
+					'tax_class'  => $fee->taxable ? $fee->tax_class : '',
+					'tax_status' => $fee->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE,
+					'amount'     => $fee->amount,
+					'total'      => $fee->total,
+					'total_tax'  => $fee->tax,
+					'taxes'      => array(
 						'total' => $fee->tax_data,
 					),
 				)
@@ -910,7 +921,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] );
+				$required    = ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 

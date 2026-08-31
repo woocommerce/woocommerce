@@ -70,19 +70,10 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'pre_update_option_woocommerce_address_autocomplete_enabled' );
-		remove_all_filters( 'woocommerce_is_checkout' );
-		remove_all_actions( 'wp_enqueue_scripts' );
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
-
-		// Dequeue and deregister scripts.
+		// The script registry lives on the $wp_scripts global, which the parent teardown
+		// does not reset, so dequeue and deregister explicitly.
 		wp_dequeue_script( 'a8c-address-autocomplete-service' );
 		wp_deregister_script( 'a8c-address-autocomplete-service' );
-
-		// Clean up options.
-		delete_option( 'test-provider_address_autocomplete_jwt' );
-		delete_option( 'test-provider_jwt_retry_data' );
-		delete_option( 'woocommerce_address_autocomplete_enabled' );
 
 		parent::tearDown();
 	}

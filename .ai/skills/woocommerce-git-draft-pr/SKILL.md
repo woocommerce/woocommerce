@@ -56,7 +56,7 @@ Extract issue/PR refs from commits and branch name:
     - Plugin-affecting, no changelog files in the diff → tick `Automatically create` with Significance, Type, and a user-facing Message.
     - Plugin-affecting with changelog files already in the diff → tick `does not require` with the Comment "Created manually."
     - Not plugin-affecting → tick `does not require` with a Comment explaining why (e.g., "Internal tooling, not shipped to merchants").
-- **Release Communication**: tick `Feature Highlight` for user-visible features merchants will notice, or `Developer Advisory` for changes affecting extension/theme developers (hook signatures, deprecations, REST API field changes). Otherwise leave both unchecked.
+- **Release Communication**: tick `Feature Highlight` for user-visible features merchants will notice, or `Developer Advisory` for changes affecting extension/theme developers (hook signatures, deprecations, REST API field changes). Otherwise leave both unchecked. Make sure you surface to the human you are working with when you mark either of these as checked, and emphasize they need to review the posted draft after the automation to validate the output. 
 
 After filling, keep the template's HTML comments (`<!-- -->`) — they support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
 

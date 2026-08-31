@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use the tooling catalog for shared Babel, PostCSS, and webpack versions.

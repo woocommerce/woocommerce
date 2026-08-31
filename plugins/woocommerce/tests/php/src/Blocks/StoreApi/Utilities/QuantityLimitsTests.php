@@ -11,33 +11,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  */
 class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
-	 * @var string
-	 */
-	private $manage_stock;
-
-	/**
-	 * Set up test environment.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
-	}
-
-	/**
-	 * Clean up test environment.
-	 */
-	public function tearDown(): void {
-		update_option( 'woocommerce_manage_stock', $this->manage_stock );
-		// Clean up custom filters.
-		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
-		remove_all_filters( 'woocommerce_quantity_input_args' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Enable float support for tests.
 	 */
 	private function enable_float_support() {

@@ -42,6 +42,18 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Static because it mirrors the WordPress block-type registry, which is a process-global singleton: once
+	 * any controller has registered the blocks they are registered for the whole request, regardless of which
+	 * container instance owns the controller. Only tracks the AbstractBlock-based block types registered by
+	 * register_blocks(); blocks registered through other paths are not reflected here.
+	 *
+	 * @var bool
+	 */
+	private static $register_blocks_has_run = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -112,6 +124,9 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		// Set before registering rather than after: it guards against re-entry through the on-demand
+		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
+		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -120,6 +135,22 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Covers only the AbstractBlock-based block types that register_blocks() registers — blocks registered
+	 * through other paths are not tracked. Used by the on-demand registration on the
+	 * woocommerce_short_description filter (see Bootstrap::maybe_register_blocks_from_content) to avoid
+	 * re-registering the block set when eager registration already ran on init.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool True if register_blocks() has already run.
+	 */
+	public function register_blocks_has_run() {
+		return self::$register_blocks_has_run;
 	}
 
 	/**
@@ -210,6 +241,24 @@ final class BlockTypesController {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
+		$shop_permalink = WC()->call_function( 'wc_get_page_permalink', 'shop' );
+		register_block_pattern(
+			'woocommerce/cart-empty-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/cart-new-in-store-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
@@ -497,9 +546,11 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
-			$block_types[] = 'SavedForLater';
-		}
+		// Registered unconditionally so content saved while the feature was on
+		// doesn't surface an "unsupported block" notice once it's disabled. The
+		// block gates its own auto-injection, rendering, and inserter visibility
+		// on the `saved-for-later` feature (see SavedForLater).
+		$block_types[] = 'SavedForLater';
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
 			$block_types[] = 'Wishlist';

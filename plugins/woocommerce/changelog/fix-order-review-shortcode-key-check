@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Tighten authorization checks on the review-order shortcode.

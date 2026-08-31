@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Render the editor back button as a compact chevron on WordPress 7.1+ to match the redesigned header, keeping the fullscreen-style button on older versions

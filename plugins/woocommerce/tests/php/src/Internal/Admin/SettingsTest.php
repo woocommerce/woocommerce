@@ -49,6 +49,19 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should decode HTML entities in the currency separators exposed to the client.
+	 */
+	public function test_currency_settings_decode_separator_entities(): void {
+		update_option( 'woocommerce_price_thousand_sep', '&nbsp;' );
+		update_option( 'woocommerce_price_decimal_sep', '&#44;' );
+
+		$currency_settings = Settings::get_currency_settings();
+
+		$this->assertSame( "\u{00A0}", $currency_settings['thousandSeparator'], 'A thousand separator stored as an HTML entity should be decoded to the real character' );
+		$this->assertSame( ',', $currency_settings['decimalSeparator'], 'A decimal separator stored as an HTML entity should be decoded to the real character' );
+	}
+
+	/**
 	 * Get the resolved wc_admin group settings via the REST settings controller.
 	 *
 	 * @return array

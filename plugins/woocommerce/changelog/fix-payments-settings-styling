@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a set of styling issues on the Payments settings screens: the white content background now reaches the bottom of the page, headings match the colour used elsewhere, the dividers under the headers are drawn consistently while the screen loads, the whole offline payments header title acts as the back control, and the offline payment method settings form is aligned and spaced evenly.

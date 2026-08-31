@@ -50,6 +50,9 @@ if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 		--user_registered='2022-01-01 12:23:45'
 fi
 
+echo -e 'Enable Back in Stock Notifications feature \n'
+$WP_CLI_PREFIX wp option update woocommerce_feature_customer_stock_notifications_enabled 'yes'
+
 echo -e 'Update Blog Name \n'
 $WP_CLI_PREFIX wp option update blogname 'WooCommerce Core E2E Test Suite'
 

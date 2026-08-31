@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Correct the Zambian kwacha currency symbol from ZK to K. This changes the public symbol returned by currency APIs and the symbol recognized when saving flat-rate shipping costs.

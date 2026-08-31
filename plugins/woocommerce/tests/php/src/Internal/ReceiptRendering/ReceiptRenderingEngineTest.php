@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingEngine;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use WC_Order;
 
 /**
  * Tests for the ReceiptRenderingEngine class.
@@ -251,5 +252,71 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 
 		$filename = $this->sut->get_existing_receipt( $order );
 		$this->assertNull( $filename );
+	}
+
+	/**
+	 * Captures the HTML that 'generate_receipt' passes to the transient files engine.
+	 *
+	 * @param WC_Order $order The order to render the receipt for.
+	 * @return string The rendered receipt HTML.
+	 */
+	private function render_receipt( WC_Order $order ): string {
+		$rendered = '';
+
+		$this->tfe_mock
+			->expects( self::once() )
+			->method( 'create_transient_file' )
+			->willReturnCallback(
+				function ( $contents ) use ( &$rendered ) {
+					$rendered = $contents;
+					return 'the_generated_file_name';
+				}
+			);
+
+		$this->sut->generate_receipt( $order, null, true );
+
+		return $rendered;
+	}
+
+	/**
+	 * @testdox 'generate_receipt' renders the discount line for an order that has a line item discount but no coupons.
+	 */
+	public function test_generate_receipt_renders_discount_line_for_order_without_coupons() {
+		$order = OrderHelper::create_order();
+
+		$item = current( $order->get_items() );
+		$item->set_total( (float) $item->get_subtotal() - 6 );
+		$item->save();
+		$order->calculate_totals( false );
+
+		$rendered = $this->render_receipt( $order );
+
+		$this->assertStringContainsString( '<td>Discount</td>', $rendered );
+		$expected_amount = wp_kses_post( wc_price( -6, array( 'currency' => $order->get_currency() ) ) );
+		$this->assertStringContainsString( $expected_amount, $rendered );
+	}
+
+	/**
+	 * @testdox 'generate_receipt' renders no discount line for an order that has no discount at all.
+	 */
+	public function test_generate_receipt_renders_no_discount_line_when_there_is_no_discount() {
+		$order = OrderHelper::create_order();
+
+		$rendered = $this->render_receipt( $order );
+
+		$this->assertStringNotContainsString( '<td>Discount</td>', $rendered );
+	}
+
+	/**
+	 * @testdox 'generate_receipt' renders no payment method section for an order that has no payment method title.
+	 */
+	public function test_generate_receipt_renders_no_payment_method_section_when_title_is_empty() {
+		$order = OrderHelper::create_order();
+		$order->set_payment_method_title( '' );
+		$order->save();
+
+		$rendered = $this->render_receipt( $order );
+
+		$this->assertStringNotContainsString( 'payment_method_section_title', $rendered );
 	}
 }

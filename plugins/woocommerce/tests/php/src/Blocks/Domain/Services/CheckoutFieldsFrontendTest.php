@@ -53,10 +53,6 @@ class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_add_notice', [ $this, 'capture_notice' ] );
-		remove_filter( 'woocommerce_add_error', [ $this, 'capture_error' ] );
-		remove_filter( 'woocommerce_add_success', [ $this, 'capture_success' ] );
-
 		foreach ( $this->registered_fields as $field_id ) {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
 		}

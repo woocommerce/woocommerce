@@ -312,7 +312,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	/**
 	 * Ensure backslashes in customer fields survive a session save/read round-trip.
 	 *
-	 * Reproduces the Agentic Checkout flow where one request stores the address in the session and a
+	 * Covers the multi-request flow where one request stores the address in the session and a
 	 * follow-up request reads it back: the session store must not wp_unslash() the data on read, or
 	 * real backslashes the buyer typed get stripped (session data is stored raw, never magic-quoted).
 	 *

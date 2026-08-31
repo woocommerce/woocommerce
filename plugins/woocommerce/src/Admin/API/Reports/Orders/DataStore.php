@@ -99,6 +99,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
+
+		/*
+		 * Refunds are stored with a NULL returning_customer, as they should not count towards
+		 * returning customer counts, so fall back to the value of the refunded (parent) order.
+		 *
+		 * This is a subquery rather than a join, so that the query keeps a single order stats table
+		 * in scope. Joining a second copy of it would make every one of its columns ambiguous for
+		 * the unqualified column names that callbacks on the woocommerce_analytics_clauses_*_orders_subquery
+		 * filters may use.
+		 */
+		$returning_customer = "COALESCE( {$table_name}.returning_customer, ( SELECT customer_type_parent_stats.returning_customer FROM {$table_name} customer_type_parent_stats WHERE customer_type_parent_stats.order_id = {$table_name}.parent_id ) )";
 		// Avoid ambiguous columns in SQL query.
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
@@ -112,7 +123,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_total'        => "{$table_name}.net_total",
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
-			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
 		);
 	}
 

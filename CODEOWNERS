@@ -1,12 +1,12 @@
 # Monorepo CI.
-/.github/ @adimoldovan
+/.github/ @woocommerce/monorepo
 
 # Monorepo tooling folders.
-/packages/js/e2e-utils-playwright/ @adimoldovan
+/packages/js/e2e-utils-playwright/ @woocommerce/monorepo
 
 # Files in root of repository
-/changelog.txt
-/pnpm-lock.yaml
+/changelog.txt @woocommerce/monorepo
+/pnpm-lock.yaml @woocommerce/monorepo
 
 # Docs resources, which gets published to https://developer.woocommerce.com
 /docs/ @woocommerce/developer-advocacy
