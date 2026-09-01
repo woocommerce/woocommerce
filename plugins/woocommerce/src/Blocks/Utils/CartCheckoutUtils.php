@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\Block_Scanner;
+use Automattic\WooCommerce\Internal\Utilities\PostcodeValidation;
 
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
@@ -369,6 +370,8 @@ class CartCheckoutUtils {
 			WC()->countries->get_country_locale()
 		);
 
+		$postcode_rules = PostcodeValidation::get_rules_for_countries( array_keys( $all_countries ) );
+
 		$country_data = array();
 
 		foreach ( array_keys( $all_countries ) as $country_code ) {
@@ -378,6 +381,10 @@ class CartCheckoutUtils {
 				'states'        => $country_states[ $country_code ] ?? array(),
 				'locale'        => $country_locales[ $country_code ] ?? array(),
 			);
+
+			if ( isset( $postcode_rules[ $country_code ] ) ) {
+				$country_data[ $country_code ]['postcode'] = $postcode_rules[ $country_code ];
+			}
 		}
 
 		return $country_data;

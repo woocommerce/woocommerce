@@ -1,39 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	postcodeValidator,
-	postcodeValidatorExistsForCountry,
-} from 'postcode-validator';
-
-/**
- * Internal dependencies
- */
-import postcodeValidationData from '../../../../../../../i18n/postcode-validation-rules.json';
-
-type PostcodeValidationRule = {
-	pattern: string;
-	flags?: string;
-	normalization?: 'removeSpaces' | 'removeSpacesAndHyphens';
-};
-
-const SHARED_RULES = postcodeValidationData.rules as Record<
-	string,
-	PostcodeValidationRule
->;
-
-const normalizePostcode = (
-	postcode: string,
-	normalization?: PostcodeValidationRule[ 'normalization' ]
-): string => {
-	if ( normalization === 'removeSpaces' ) {
-		return postcode.replace( / /g, '' );
-	}
-	if ( normalization === 'removeSpacesAndHyphens' ) {
-		return postcode.trim().replace( /[\s-]/g, '' );
-	}
-	return postcode;
-};
+import { getSetting } from '@woocommerce/settings';
+import type { CountryData } from '@woocommerce/types';
 
 export interface IsPostcodeProps {
 	postcode: string;
@@ -51,22 +20,16 @@ const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
 		return false;
 	}
 
-	if ( Object.hasOwn( SHARED_RULES, country ) ) {
-		const sharedRule = SHARED_RULES[ country ];
-		const regex = new RegExp(
-			`^(?:${ sharedRule.pattern })$`,
-			sharedRule.flags || ''
-		);
-		return regex.test(
-			normalizePostcode( postcode, sharedRule.normalization )
-		);
+	const countryData = getSetting< Record< string, Partial< CountryData > > >(
+		'countryData',
+		{}
+	);
+	const rule = countryData[ country ]?.postcode;
+	if ( ! rule ) {
+		return true;
 	}
-	// If the country is not in the upstream list, trying to validate it would throw, so we skip and assume
-	// that it is valid.
-	if ( postcodeValidatorExistsForCountry( country ) ) {
-		return postcodeValidator( postcode, country );
-	}
-	return true;
+
+	return new RegExp( `^(?:${ rule })$`, 'i' ).test( postcode );
 };
 
 export default isPostcode;

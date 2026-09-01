@@ -53,6 +53,7 @@ export interface WooCommerceSharedSettings {
 					label?: string;
 				}
 			>;
+			postcode?: string;
 			format: string;
 		}
 	>;
