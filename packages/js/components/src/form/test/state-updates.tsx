@@ -605,4 +605,44 @@ describe( 'Form state updates', () => {
 		expect( onChange ).not.toHaveBeenCalled();
 		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
 	} );
+
+	// lodash's toPath() yields no segments for these names, while setWith()
+	// still writes each one as a literal key.
+	it.each( [ '', '[', undefined, null ] )(
+		'writes the zero-segment name %p under the key it lands on',
+		( name ) => {
+			const initialValues: Record< string, unknown > = { other: 2 };
+			const { onChange, onChanges } = renderForm(
+				initialValues,
+				( { setValue } ) => (
+					<button
+						onClick={ () =>
+							setValue(
+								name as unknown as string,
+								'Updated'
+							)
+						}
+					>
+						Write zero-segment name
+					</button>
+				)
+			);
+
+			userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Write zero-segment name',
+				} )
+			);
+
+			const key = String( name );
+			const nextValues = { ...initialValues, [ key ]: 'Updated' };
+			expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+			expect( onChange.mock.calls ).toEqual( [
+				[ { name: key, value: 'Updated' }, nextValues, true ],
+			] );
+			expect( onChanges.mock.calls ).toEqual( [
+				[ [ { name: key, value: 'Updated' } ], nextValues, true ],
+			] );
+		}
+	);
 } );
