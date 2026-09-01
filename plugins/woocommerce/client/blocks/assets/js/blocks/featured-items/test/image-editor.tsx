@@ -43,6 +43,7 @@ describe( 'Featured Items image editor', () => {
 				backgroundImageSize={ { height: 640, width: 960 } }
 				backgroundImageSrc="https://example.com/product.jpg"
 				containerRef={ { current: container } }
+				originalImgDimension={ { height: 100, width: 200 } }
 				setAttributes={ setAttributes }
 				setIsEditingImage={ setIsEditingImage }
 			/>
@@ -77,7 +78,36 @@ describe( 'Featured Items image editor', () => {
 		expect( setIsEditingImage ).toHaveBeenCalledWith( false );
 	} );
 
-	it( 'uses the editor fallback for missing natural image dimensions', () => {
+	// Repeated and parallax backgrounds render a <div>, never an <img>, so the
+	// measured size stays empty for as long as the block keeps that setting.
+	it( 'falls back to the off-screen measurement when no image was measured', () => {
+		render(
+			<ImageEditor
+				align="center"
+				backgroundImageId={ 42 }
+				backgroundImageSize={ {} }
+				backgroundImageSrc="https://example.com/product.jpg"
+				containerRef={ {
+					current: document.createElement( 'div' ),
+				} }
+				originalImgDimension={ { height: 640, width: 960 } }
+				setAttributes={ jest.fn() }
+				setIsEditingImage={ jest.fn() }
+			/>
+		);
+
+		const editorProps = mockGutenbergImageEditor.mock.lastCall?.[ 0 ];
+		expect( editorProps ).toEqual(
+			expect.objectContaining( {
+				height: 640,
+				width: 960,
+				naturalHeight: 640,
+				naturalWidth: 960,
+			} )
+		);
+	} );
+
+	it( 'uses the editor default only when no size has been measured yet', () => {
 		render(
 			<ImageEditor
 				align="center"
@@ -87,6 +117,7 @@ describe( 'Featured Items image editor', () => {
 				containerRef={ {
 					current: document.createElement( 'div' ),
 				} }
+				originalImgDimension={ { height: 0, width: 0 } }
 				setAttributes={ jest.fn() }
 				setIsEditingImage={ jest.fn() }
 			/>

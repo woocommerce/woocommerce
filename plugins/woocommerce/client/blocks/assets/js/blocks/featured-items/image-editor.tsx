@@ -21,7 +21,7 @@ type MediaSize = { height: number; width: number };
 
 interface WithImageEditorRequiredProps< T > {
 	attributes: MediaAttributes & EditorBlock< T >[ 'attributes' ];
-	backgroundImageSize: MediaSize;
+	backgroundImageSize: Partial< MediaSize >;
 	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
@@ -45,9 +45,10 @@ type WithImageEditorProps< T extends EditorBlock< T > > =
 interface ImageEditorProps {
 	align: string;
 	backgroundImageId: number;
-	backgroundImageSize: MediaSize;
+	backgroundImageSize: Partial< MediaSize >;
 	backgroundImageSrc: string;
 	containerRef: RefObject< HTMLDivElement >;
+	originalImgDimension: MediaSize;
 	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
 	setIsEditingImage: ( value: boolean ) => void;
 }
@@ -96,23 +97,33 @@ export const ImageEditor = ( {
 	backgroundImageSize,
 	backgroundImageSrc,
 	containerRef,
+	originalImgDimension,
 	setAttributes,
 	setIsEditingImage,
 }: ImageEditorProps ) => {
 	const clientWidth = useClientWidth( containerRef, [ align ] );
 
+	// The rendered <img> only exists for plain backgrounds, so its measured
+	// size is missing for repeated/parallax ones and until it finishes
+	// loading. useBackgroundImage() measures the same file off-screen, which
+	// covers both cases; the constant is the last resort before either lands.
+	const editorHeight =
+		backgroundImageSize.height ||
+		originalImgDimension.height ||
+		DEFAULT_EDITOR_SIZE.height;
+	const editorWidth =
+		backgroundImageSize.width ||
+		originalImgDimension.width ||
+		DEFAULT_EDITOR_SIZE.width;
+
 	return (
 		<GutenbergImageEditor
 			id={ backgroundImageId }
 			url={ backgroundImageSrc }
-			height={ backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height }
-			width={ backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width }
-			naturalHeight={
-				backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
-			}
-			naturalWidth={
-				backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
-			}
+			height={ editorHeight }
+			width={ editorWidth }
+			naturalHeight={ editorHeight }
+			naturalWidth={ editorWidth }
 			onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
 				setAttributes( { mediaId: id, mediaSrc: url } );
 			} }
@@ -136,12 +147,13 @@ export const withImageEditor =
 				? props.product
 				: props.category;
 
-		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
-			item,
-			mediaId,
-			mediaSrc,
-			blockName: name,
-		} );
+		const { backgroundImageId, backgroundImageSrc, originalImgDimension } =
+			useBackgroundImage( {
+				item,
+				mediaId,
+				mediaSrc,
+				blockName: name,
+			} );
 
 		if ( isEditingImage ) {
 			return (
@@ -152,6 +164,7 @@ export const withImageEditor =
 						backgroundImageSize={ backgroundImageSize }
 						backgroundImageSrc={ backgroundImageSrc }
 						containerRef={ ref }
+						originalImgDimension={ originalImgDimension }
 						setAttributes={ setAttributes }
 						setIsEditingImage={ setIsEditingImage }
 					/>
