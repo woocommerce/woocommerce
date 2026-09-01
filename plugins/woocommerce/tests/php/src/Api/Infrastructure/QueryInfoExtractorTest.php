@@ -120,6 +120,24 @@ class QueryInfoExtractorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox extract merges inline fragments without a type condition into the parent.
+	 */
+	public function test_extract_merges_inline_fragments_without_type_condition(): void {
+		[ $field ] = $this->parse_top_field(
+			'{ thing { id ... { name } ... @include(if: true) { sku reviews { nodes { id } } } ... on Widget { color } } }'
+		);
+
+		$tree = QueryInfoExtractor::extract( $field->selectionSet, array() );
+
+		$this->assertSame( true, $tree['id'] ?? null );
+		$this->assertSame( true, $tree['name'] ?? null );
+		$this->assertSame( true, $tree['sku'] ?? null );
+		$this->assertSame( true, $tree['reviews']['nodes']['id'] ?? null );
+		$this->assertSame( true, $tree['...Widget']['color'] ?? null );
+		$this->assertArrayNotHasKey( '...', $tree );
+	}
+
+	/**
 	 * @testdox extract expands named fragment spreads inline into the parent.
 	 */
 	public function test_extract_inlines_named_fragment_spreads(): void {

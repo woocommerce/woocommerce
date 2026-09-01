@@ -22,9 +22,10 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\SelectionSetNode;
  * - Leaf field (no args, no sub-selection) => true
  * - Field with sub-selections => nested associative array
  * - Field arguments => '__args' reserved key
- * - Inline fragments => '...TypeName' prefix key
- * - Named fragment spreads => expanded inline (merged into the parent as
- *   siblings of the other selections), matching how GraphQL evaluates them
+ * - Inline fragments with a type condition => '...TypeName' prefix key
+ * - Inline fragments without a type condition and named fragment spreads =>
+ *   expanded inline (merged into the parent as siblings of the other
+ *   selections), matching how GraphQL evaluates them
  * - Top-level query args included via '__args'
  */
 class QueryInfoExtractor {
@@ -87,9 +88,15 @@ class QueryInfoExtractor {
 				$field_name            = $selection->name->value;
 				$result[ $field_name ] = self::build_field_entry( $selection, $variable_values, $fragments, $expanded_fragments );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$type_name      = $selection->typeCondition->name->value;
-				$key            = '...' . $type_name;
-				$result[ $key ] = self::extract_selection_set( $selection->selectionSet, $variable_values, $fragments, $expanded_fragments );
+				$sub = self::extract_selection_set( $selection->selectionSet, $variable_values, $fragments, $expanded_fragments );
+				if ( null === $selection->typeCondition ) {
+					// No `on Type` clause (e.g. `... @include(if: $flag) { ... }`):
+					// the fragment applies to the parent type, so merge it like
+					// a named fragment spread.
+					$result = self::merge_selections( $result, $sub );
+				} else {
+					$result[ '...' . $selection->typeCondition->name->value ] = $sub;
+				}
 			} elseif ( $selection instanceof FragmentSpreadNode ) {
 				// Expand named fragment spreads inline: their fields become
 				// siblings of the other selections, matching how GraphQL
