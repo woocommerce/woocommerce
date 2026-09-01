@@ -1376,6 +1376,7 @@ jQuery( function ( $ ) {
 
 				// Rows are re-rendered on every search, so delegate from the results table.
 				results.on( 'change', 'input[type="radio"][name="add_order_tax"]', function() {
+					modal.data( 'wc-selected-tax-rate-id', $( this ).val() );
 					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				} );
 
@@ -1417,8 +1418,8 @@ jQuery( function ( $ ) {
 				modal.data( 'wc-tax-rate-request-id', request_id );
 				table_body.css( 'height', table_body.height() );
 
-				// Replacing the rows drops any selected rate, so re-evaluate the Add button
-				// before the request starts rather than leaving it enabled with no selection.
+				// Replacing the rows drops any visible selection, so re-evaluate the Add button
+				// before the request starts rather than leaving it enabled with no checked input.
 				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( status ) );
 				wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
@@ -1515,13 +1516,13 @@ jQuery( function ( $ ) {
 						.replace( '%1$s', rate.tax_class || '' )
 						.replace( '%2$s', rate.rate_code || '' )
 						.replace( '%3$s', rate.rate_percent || '' ),
-					radio          = $( '<input />', {
-						type:               'radio',
-						id:                 input_id,
-						name:               'add_order_tax',
-						value:              rate.id,
-						'aria-describedby': description_id
-					} );
+						radio          = $( '<input />', {
+							type:               'radio',
+							id:                 input_id,
+							name:               'add_order_tax',
+							value:              rate.id,
+							'aria-describedby': description_id
+						} );
 
 				return $( '<tr></tr>' ).append(
 					$( '<td></td>' ).append(
@@ -1536,6 +1537,22 @@ jQuery( function ( $ ) {
 					$( '<td></td>' ).text( rate.rate_code ),
 					$( '<td></td>' ).text( rate.rate_percent )
 				);
+			},
+
+			restore_selected_tax_rate: function( modal ) {
+				var selected_rate_id = modal.data( 'wc-selected-tax-rate-id' ),
+					selected_input;
+
+				if ( ! selected_rate_id ) {
+					return;
+				}
+
+				selected_input = modal.find( 'input[name="add_order_tax"][value="' + selected_rate_id + '"]' );
+
+				if ( selected_input.length ) {
+					selected_input.prop( 'checked', true );
+					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
+				}
 			},
 
 			update_tax_rate_search_summary: function( modal, search_term ) {
@@ -1599,6 +1616,7 @@ jQuery( function ( $ ) {
 					$.each( results, function( index, rate ) {
 						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_result_row( rate ) );
 					} );
+					wc_meta_boxes_order_items.backbone.restore_selected_tax_rate( modal );
 					announcement = meta.displaying_num || '';
 				}
 
