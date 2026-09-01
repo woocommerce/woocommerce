@@ -120,9 +120,11 @@ describe( 'Variation Selector attribute template edit', () => {
 	it( 'selects a custom attribute row when it is clicked', async () => {
 		const user = userEvent.setup();
 		// A global attribute followed by a custom one, which the Store API
-		// reports as id 0.
+		// reports as id 0 - the payload from #68197. The global id is 1 on
+		// purpose: it collides with the custom row's index, so this case also
+		// fails if the identity ever becomes `attribute.id || index`.
 		renderWithAttributes( [
-			attribute( 'Color', 'pa_color', 4 ),
+			attribute( 'Color', 'pa_color', 1 ),
 			attribute( 'Fit', null, 0 ),
 		] );
 
