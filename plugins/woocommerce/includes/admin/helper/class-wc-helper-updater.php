@@ -214,7 +214,9 @@ class WC_Helper_Updater {
 	 * @return bool
 	 */
 	private static function is_autoupdate_forced( $data, $item ) {
-		if ( empty( $data['autoupdate'] ) ) {
+		// The flag arrives from a remote response, so only a value that reads as boolean true
+		// counts. A truthy string such as "false", or an array, must not trigger an install.
+		if ( true !== filter_var( $data['autoupdate'] ?? null, FILTER_VALIDATE_BOOLEAN ) ) {
 			return false;
 		}
 

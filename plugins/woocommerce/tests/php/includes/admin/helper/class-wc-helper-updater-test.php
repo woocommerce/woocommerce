@@ -524,8 +524,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_should_use_cached_update_data_rejects_non_string_hash() {
 		$data = array(
-			'hash'     => 123, // Not a string.
-			'products' => array(),
+			'hash'                     => 123,
+			// Not a string.
+							'products' => array(),
 		);
 
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject numeric hash' );
@@ -545,7 +546,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$data = array(
 			'hash'     => $hash,
-			'products' => 'string', // Not an array.
+			'products' => 'string',
+		// Not an array.
 		);
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject string products' );
 
@@ -606,7 +608,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'products'    => array(),
 			'updated'     => time(),
 			'errors'      => array(),
-			'extra_field' => 'extra_value', // Extra key should not cause rejection.
+			'extra_field' => 'extra_value',
+		// Extra key should not cause rejection.
 		);
 
 		$this->assertTrue(
@@ -643,6 +646,61 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$item = (array) $transient->response[ $filename ];
 
 		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'The plugin update item carries the wrong forced auto-update state' );
+	}
+
+	/**
+	 * @testdox Only an autoupdate value that reads as boolean true forces an update.
+	 *
+	 * @dataProvider autoupdate_flag_values
+	 *
+	 * @param mixed $flag     Raw value the update-check response reports for autoupdate.
+	 * @param bool  $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_plugins_validates_autoupdate_flag( $flag, bool $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+		$this->mock_update_check_autoupdate_flag( 123, $flag );
+		$this->mock_update_package( 'https://woocommerce.com/package.zip' );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_plugins(
+				(object) array(
+					'response'  => array(),
+					'no_update' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$item = (array) $transient->response[ $filename ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'A non-boolean autoupdate value was read as the wrong forced auto-update state' );
+	}
+
+	/**
+	 * Values the update-check response could report for autoupdate, and whether each forces an update.
+	 *
+	 * Shapes are what survives a JSON round trip, since the response is decoded as an array.
+	 *
+	 * @return array
+	 */
+	public function autoupdate_flag_values(): array {
+		return array(
+			'boolean true'   => array( true, true ),
+			'string "true"'  => array( 'true', true ),
+			'string "1"'     => array( '1', true ),
+			'integer 1'      => array( 1, true ),
+			'boolean false'  => array( false, false ),
+			'string "false"' => array( 'false', false ),
+			'string "0"'     => array( '0', false ),
+			'integer 0'      => array( 0, false ),
+			'empty string'   => array( '', false ),
+			'null'           => array( null, false ),
+			'empty array'    => array( array(), false ),
+			'list'           => array( array( 'yes' ), false ),
+			'object'         => array( array( 'forced' => true ), false ),
+		);
 	}
 
 	/**
@@ -837,6 +895,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->mocked_updates = array( $product_id => $product );
+	}
+
+	/**
+	 * Sets the raw value the mocked update-check response reports for autoupdate.
+	 *
+	 * @param int   $product_id The Woo product id to return an update for.
+	 * @param mixed $flag       Raw value reported for autoupdate.
+	 */
+	private function mock_update_check_autoupdate_flag( int $product_id, $flag ): void {
+		$this->mock_update_check_products( $product_id, false );
+		$this->mocked_updates[ $product_id ]['autoupdate'] = $flag;
 	}
 
 	/**
