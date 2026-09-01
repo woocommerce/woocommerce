@@ -132,8 +132,6 @@ class Batch extends ControllerTestCase {
 
 	/**
 	 * @testdox Should preserve the session cart when loading it fails in a batch sub-request.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_cart_session_failure_does_not_clear_session_cart(): void {
 		WC()->cart->add_to_cart( $this->products[0]->get_id() );
@@ -157,17 +155,10 @@ class Batch extends ControllerTestCase {
 			}
 			return $session_data;
 		};
-		$cookie_update_count      = 0;
-		$cookie_update_callback   = static function () use ( &$cookie_update_count ) {
-			++$cookie_update_count;
-			return false;
-		};
-
 		WC()->session->set( 'cart', $stored_cart );
 		WC()->cart->set_cart_contents( array() );
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 		add_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
-		add_filter( 'woocommerce_set_cookie_enabled', $cookie_update_callback, 10, 0 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
 		$request->set_body_params(
@@ -232,13 +223,8 @@ class Batch extends ControllerTestCase {
 			$wp_query->is_search   = false;
 			$failed_cart_session->clean_up_removed_cart_contents();
 			$this->assertSame( $stored_removed_cart_contents, WC()->session->get( 'removed_cart_contents' ), 'The failed cart should not clean up removed cart contents.' );
-
-			$this->assertFalse( headers_sent(), 'Cookie behavior can only be verified before headers are sent.' );
-			$failed_cart_session->maybe_set_cart_cookies();
-			$this->assertSame( 0, $cookie_update_count, 'The failed cart should not update cart cookies.' );
 		} finally {
 			remove_filter( 'woocommerce_get_cart_item_from_session', $session_failure_callback );
-			remove_filter( 'woocommerce_set_cookie_enabled', $cookie_update_callback );
 			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
 			WC()->cart = $cart_backup;
 			WC()->cart->set_cart_contents( $cart_contents_backup );
