@@ -161,6 +161,22 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cancel_order() returns to direct callers when no custom redirect is provided.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_returns_to_direct_callers_without_custom_redirect(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+		WC_Form_Handler::cancel_order();
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The direct call should cancel the order and return control to the caller.' );
+	}
+
+	/**
 	 * @testdox cancel_order() redirects to the cart when the request URI is unavailable.
 	 * @dataProvider unavailable_request_uri_provider
 	 *
@@ -439,11 +455,18 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @param string $expected_redirect Expected redirect URL.
 	 */
 	private function dispatch_cancel_order_expecting_redirect( string $expected_redirect ): void {
+		global $wp_current_filter;
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The test dispatches the handler in its registered action context.
+
 		try {
 			WC_Form_Handler::cancel_order();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( $expected_redirect, $e->getMessage(), 'The cancellation request should redirect to a clean URL.' );
 			return;
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
 		}
 
 		$this->fail( 'Expected cancel_order() to redirect after handling the request.' );

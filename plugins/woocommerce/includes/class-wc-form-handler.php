@@ -902,6 +902,11 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
+			if ( ! $redirect && ! doing_action( 'wp_loaded' ) ) {
+				// Preserve the historical return behavior for extensions that call this public method directly.
+				return;
+			}
+
 			if ( ! $redirect ) {
 				$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
