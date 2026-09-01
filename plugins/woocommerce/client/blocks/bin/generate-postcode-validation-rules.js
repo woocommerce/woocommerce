@@ -11,10 +11,7 @@ const {
 const { version } = require( 'postcode-validator/package.json' );
 const { devDependencies } = require( '../package.json' );
 
-const OUTPUT_PATH = path.resolve(
-	__dirname,
-	'../../../i18n/postcode-validation-rules.php'
-);
+const OUTPUT_PATH = path.resolve( __dirname, '../../../i18n/postcodes.php' );
 
 const COMPATIBILITY_OVERRIDES = {
 	// Argentina still uses the old four digit codes alongside the lettered ones.
