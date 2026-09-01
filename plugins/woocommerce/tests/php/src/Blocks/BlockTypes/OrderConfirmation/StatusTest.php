@@ -183,7 +183,6 @@ class StatusTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_thankyou_order_received_text',
 			static function ( $text ) use ( $legacy_filter_result ) {
-				// Avoid parameter not used PHPCS errors.
 				unset( $text );
 				return $legacy_filter_result;
 			},
