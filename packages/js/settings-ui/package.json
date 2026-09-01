@@ -105,7 +105,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.json",
+						"jest.config.js",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],
