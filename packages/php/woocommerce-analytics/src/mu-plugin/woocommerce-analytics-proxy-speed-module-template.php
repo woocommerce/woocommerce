@@ -161,7 +161,7 @@ class WooCommerceAnalyticsProxySpeed {
 	private function process_proxy_request() {
 		// Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
 		// registered that filter this early, so it reads false everywhere.
-		if ( 'no' === get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
+		if ( 'yes' !== get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
 			$this->send_json_response(
 				array(
 					'success' => false,

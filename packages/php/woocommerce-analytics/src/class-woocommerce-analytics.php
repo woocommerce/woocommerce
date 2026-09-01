@@ -22,7 +22,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Package version.
 	 */
-	const PACKAGE_VERSION = '0.16.8';
+	const PACKAGE_VERSION = '0.17.1';
 
 	/**
 	 * Proxy speed module version option.
@@ -42,10 +42,11 @@ class Woocommerce_Analytics {
 	 * Last resolved state of the proxy tracking feature.
 	 *
 	 * The speed module runs before plugins load, where the proxy tracking filter
-	 * reads false everywhere. Absent means enabled, so a site that has not
-	 * written it yet keeps working.
+	 * reads false everywhere. Only `yes` serves: the module is installed from a
+	 * request that already wrote this, and on multisite one network-wide module
+	 * file answers for sites that never enabled anything.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var string
 	 */
@@ -208,7 +209,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Mirror the resolved proxy tracking state into PROXY_TRACKING_ENABLED_OPTION.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @return void
 	 */
@@ -260,7 +261,7 @@ class Woocommerce_Analytics {
 	 * turning proxy tracking off would leave an installed module answering
 	 * requests the REST route no longer serves.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @return bool
 	 */
@@ -276,6 +277,10 @@ class Woocommerce_Analytics {
 		if ( ! self::should_install_proxy_speed_module() ) {
 			return;
 		}
+
+		// The module fails closed on this option, so it must be written before the
+		// file exists, not merely on the next `init`.
+		self::sync_proxy_tracking_state();
 
 		if ( ! self::init_filesystem() ) {
 			if ( function_exists( 'wc_get_logger' ) ) {

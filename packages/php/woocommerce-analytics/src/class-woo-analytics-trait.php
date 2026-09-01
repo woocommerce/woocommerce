@@ -272,7 +272,8 @@ trait Woo_Analytics_Trait {
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
-		 * @since 0.16.8 Added the `$event_name` and `$is_client_supplied` parameters.
+		 * @since 0.17.1 Added the `$is_client_supplied` parameter. This call site
+		 *               also began passing `$event_name`, which the hook already had.
 		 *
 		 * @param array  $properties Array of event props to be filtered.
 		 * @param string $event_name Event name. Empty string here: this call builds

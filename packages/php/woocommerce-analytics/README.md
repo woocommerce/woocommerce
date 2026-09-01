@@ -72,6 +72,24 @@ add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 ```
 
+The `POST /wp-json/woocommerce-analytics/v1/track` endpoint this enables is
+unauthenticated, so it is registered only while the filter above returns `true`,
+and events arriving through it are treated as untrusted:
+
+- Server-derived properties (store id, visitor id, IP, session, timezone and the
+  rest of `WC_Analytics_Tracking::get_reserved_property_names()`) are replaced
+  with the server's own values. `_lg`, `_dl` and `_dr` stay the client's, since
+  they describe the page the event happened on rather than the `/track` request.
+- Input is bounded: 50 events per request, 50 properties per event, 50 members
+  per array value, 200 characters per value, 100 characters per name, and 4096
+  characters of client payload per event. Anything past a limit is dropped
+  silently, and the event still records.
+
+The filter's resolved value is mirrored into the `woocommerce_analytics_proxy_tracking_enabled`
+option (`yes`/`no`) on `init`. The optional MU-plugin speed module reads that
+option, because it runs before plugins register their filters. The module serves
+requests only while the option is `yes`.
+
 ## Privacy & Consent Management
 
 ### WP Consent API Integration

@@ -1,4 +1,4 @@
 Significance: patch
 Type: security
 
-Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, bound the size of what it accepts, and only serve it where proxy tracking is enabled.
+Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, bound the size of what it accepts, and only serve it where proxy tracking is enabled. The `jetpack_woocommerce_analytics_event_props` filter gains a third `$is_client_supplied` argument.

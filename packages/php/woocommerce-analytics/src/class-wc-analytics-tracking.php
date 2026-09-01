@@ -43,7 +43,7 @@ class WC_Analytics_Tracking {
 	 * it records the referrer of the request that fired the pixel, which on the
 	 * proxy path is the /track POST, and is not used for page attribution.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var string[]
 	 */
@@ -59,7 +59,7 @@ class WC_Analytics_Tracking {
 	 * downstream overwrite is the only thing standing between a client and the
 	 * visitor id.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var string[]
 	 */
@@ -72,7 +72,7 @@ class WC_Analytics_Tracking {
 	 * the unauthenticated endpoint into an amplifier. The client's own batch size
 	 * is 10 (see `api-client.ts`); the headroom is for retries coalescing.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
@@ -81,7 +81,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum number of properties a client may set on one event.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
@@ -95,7 +95,7 @@ class WC_Analytics_Tracking {
 	 * URL, which is rejected outright once it grows too long. The two are
 	 * independent — a change to one does not imply a change to the other.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
@@ -106,7 +106,7 @@ class WC_Analytics_Tracking {
 	 *
 	 * `Pixel_Builder` checks a name's characters but not its length.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
@@ -118,11 +118,23 @@ class WC_Analytics_Tracking {
 	 * `get_properties()` joins members into one string, which the per-value cap
 	 * never sees, so an array of short members is otherwise unbounded.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
 	const MAX_CLIENT_ARRAY_MEMBERS = 50;
+
+	/**
+	 * Maximum total length of one event's client-supplied properties.
+	 *
+	 * The other caps bound each axis separately and multiply: at their limits one
+	 * event still built a 512KB pixel URL. This bounds the product.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PAYLOAD_LENGTH = 4096;
 
 	/**
 	 * Path suffix of the proxy tracking endpoint.
@@ -131,7 +143,7 @@ class WC_Analytics_Tracking {
 	 * copy: it tests the request shape before loading the autoloader, so no
 	 * package class exists yet at that point. Change both together.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @var string
 	 */
@@ -182,7 +194,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Record an event in Tracks and ClickHouse (If enabled).
 	 *
-	 * @since 0.16.8 Added the `$is_client_supplied` parameter.
+	 * @since 0.17.1 Added the `$is_client_supplied` parameter.
 	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
@@ -192,7 +204,8 @@ class WC_Analytics_Tracking {
 	 *                                   for server-side callers.
 	 *
 	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
-	 *                       or cookie-less context); WP_Error if pixel firing failed.
+	 *                       cookie-less context, or an unusable client event name);
+	 *                       WP_Error if pixel firing failed.
 	 */
 	public static function record_event( $event_name, $event_properties = array(), $is_client_supplied = false ) {
 		// Check consent before recording any event.
@@ -260,7 +273,7 @@ class WC_Analytics_Tracking {
 	 * method rather than a sanitizer callers must remember to invoke, so that a
 	 * future entry point choosing the wrong one is visible at the call site.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Client-supplied properties.
@@ -481,7 +494,7 @@ class WC_Analytics_Tracking {
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
-		 * @since 0.16.8 Added the `$is_client_supplied` parameter.
+		 * @since 0.17.1 Added the `$is_client_supplied` parameter.
 		 *
 		 * @param array  $all_props Array of event props to be filtered.
 		 * @param string $event_name Event name.
@@ -552,7 +565,7 @@ class WC_Analytics_Tracking {
 	 * Memoized: a batch of events would otherwise recompute the common properties
 	 * once per event.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @return string[] Reserved property names.
 	 */
@@ -585,7 +598,7 @@ class WC_Analytics_Tracking {
 	 * Names the filter invents are still the client's to win — see the filter's
 	 * docblock for the contract callbacks are expected to follow.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @param array $event_properties Client-supplied properties. Any non-array value
 	 *                                is tolerated — the REST body is attacker-shaped —
@@ -617,7 +630,7 @@ class WC_Analytics_Tracking {
 	 * keep an ellipsis so they stay distinguishable downstream from a value that
 	 * genuinely ended at the limit, matching `Woo_Analytics_Trait::cap_page_string()`.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @param array $event_properties Client-supplied properties.
 	 * @return array Sanitized properties.
@@ -628,6 +641,8 @@ class WC_Analytics_Tracking {
 		if ( count( $event_properties ) > self::MAX_CLIENT_PROPERTIES_PER_EVENT ) {
 			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
 		}
+
+		$budget = self::MAX_CLIENT_PAYLOAD_LENGTH;
 
 		foreach ( $event_properties as $key => $value ) {
 			// Dropped, not truncated: two long names could truncate to the same key.
@@ -642,11 +657,19 @@ class WC_Analytics_Tracking {
 					$value = array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true );
 				}
 
-				$event_properties[ $key ] = array_map( array( __CLASS__, 'cap_client_value' ), $value );
+				$value = array_map( array( __CLASS__, 'cap_client_value' ), $value );
+			} else {
+				$value = self::cap_client_value( $value );
+			}
+
+			$cost = strlen( $key ) + self::measure_client_value( $value );
+			if ( $cost > $budget ) {
+				unset( $event_properties[ $key ] );
 				continue;
 			}
 
-			$event_properties[ $key ] = self::cap_client_value( $value );
+			$budget                  -= $cost;
+			$event_properties[ $key ] = $value;
 		}
 
 		return $event_properties;
@@ -658,7 +681,7 @@ class WC_Analytics_Tracking {
 	 * Without the type check an array name reaches `PREFIX . $event_name` and
 	 * writes a PHP warning to the log, unauthenticated.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @param mixed $name Client-supplied name.
 	 * @return bool True when the name is a non-empty string within the length bound.
@@ -670,6 +693,27 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
+	 * Length one value contributes to the pixel URL once flattened.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @param mixed $value Already-capped client value.
+	 * @return int Character count, counting the separators an array is joined with.
+	 */
+	private static function measure_client_value( $value ) {
+		if ( ! is_array( $value ) ) {
+			return strlen( (string) $value );
+		}
+
+		$length = count( $value );
+		foreach ( $value as $member ) {
+			$length += strlen( (string) $member );
+		}
+
+		return $length;
+	}
+
+	/**
 	 * Bound one client-supplied value on its way to the pixel URL.
 	 *
 	 * Nested arrays are collapsed to an empty string rather than capped: the
@@ -678,7 +722,7 @@ class WC_Analytics_Tracking {
 	 * unauthenticated caller write warnings into the error log is the actual
 	 * problem; the value itself is meaningless either way.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @param mixed $value Client-supplied value.
 	 * @return mixed Bounded value.
@@ -715,7 +759,7 @@ class WC_Analytics_Tracking {
 	 * Kept in step with `WooCommerceAnalyticsProxySpeed::is_proxy_request()` in
 	 * the MU-plugin template, including the character restriction on the path.
 	 *
-	 * @since 0.16.8
+	 * @since 0.17.1
 	 *
 	 * @return bool True when the request shape matches the proxy endpoint.
 	 */

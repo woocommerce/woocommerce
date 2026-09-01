@@ -679,6 +679,77 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The per-axis caps multiply: at their limits one event built a 512KB pixel
+	 * URL, so the product needs its own bound. Properties are dropped from the
+	 * tail once the budget is spent.
+	 */
+	public function test_client_payload_total_is_capped(): void {
+		$properties = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $i++ ) {
+			$properties[ 'p' . $i ] = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertNotEmpty( $sanitized, 'The budget drops the tail, it does not empty the event.' );
+
+		// The pixel URL is what the budget exists to bound, so assert on it rather
+		// than on the constant. 8KB is the practical ceiling for a GET.
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$props            = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThan( 8192, strlen( Pixel_Builder::build_tracks_url( $props ) ) );
+
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * A realistic event must pass through untouched, or the budget is capping
+	 * first-party analytics rather than an attacker's payload.
+	 */
+	public function test_a_realistic_client_payload_is_not_capped(): void {
+		$properties = array(
+			'pi'  => 731,
+			'pn'  => 'Some Reasonably Long Product Name With Words',
+			'pt'  => 'simple',
+			'pc'  => array( 'Clothing', 'Shirts', 'Sale' ),
+			'pp'  => 115.81,
+			'_lg' => 'en-GB',
+			'_dl' => 'https://example.com/product/some-reasonably-long-product-slug/?utm_source=x',
+			'_dr' => 'https://example.com/shop/page/3/',
+		);
+
+		$this->assertSame( $properties, WC_Analytics_Tracking::sanitize_client_properties( $properties ) );
+	}
+
+	/**
+	 * Every other bounds test calls `sanitize_client_properties()` directly, so
+	 * removing its call site in `record_event()` left the suite green while the
+	 * bounds silently stopped applying. This drives one through the real entry
+	 * point instead.
+	 */
+	public function test_record_client_event_actually_applies_the_bounds(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_client_event(
+			'add_to_cart',
+			array(
+				'pn'        => str_repeat( 'a', 500 ),
+				'Uppercase' => 'dropped by the name check',
+			)
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $props['pn'] ?? '' ) );
+		$this->assertArrayNotHasKey( 'Uppercase', $props );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
 	 * Non-string scalars are analytics payload, not text: capping them would
 	 * change their type on the way to the pixel.
 	 */
