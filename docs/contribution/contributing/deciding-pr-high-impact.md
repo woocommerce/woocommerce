@@ -16,9 +16,12 @@ On this page, we will share some guidelines to help you assess the impact degree
 - Modifies **critical functionality** that shoppers or merchants rely on to run a store.
 - It fixes a **high-priority bug** (this includes Blocks fix releases core version bumps).
 - It contains a **security fix**.
+- Changes affecting **privacy** (how personal or store data is collected, stored, or shared).
 - Updates **SQL queries**.
 - Touches any of the **$_REQUEST** family of variables.
-- Any kind of **data migration/update**.
+- Any kind of **data migration/update**, or other changes affecting **data integrity**.
+- Changes affecting **backward compatibility** (public APIs, hook signatures or timing, templates, or anything third-party code consumes).
+- Changes to **performance-sensitive paths**.
 - Changes to **emails** sent from WooCommerce.
 - Changes to WooCommerce **hooks/actions/filters**.
 - Changes to **REST API endpoints**.
@@ -52,7 +55,7 @@ Bypassing the requirement is an exception for low-risk changes, not an alternati
 
 ### When an independent human review is always required
 
-A PR matching anything in the High-Impact list above must receive an independent human review before merge, no matter who (or what) authored it. The same applies to any change affecting security, privacy, data integrity, backward compatibility, or performance-sensitive paths.
+A PR matching anything in the High-Impact list above must receive an independent human review before merge, no matter who (or what) authored it.
 
 Two things do not count as an independent human review:
 
