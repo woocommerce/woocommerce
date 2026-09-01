@@ -151,7 +151,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 				// Report the keys the merge above actually took, which is the
 				// own enumerable ones. A `for...in` here would also walk the
 				// prototype chain and report fields the form never stored.
-				for ( const key of Object.keys( valuesToSet ) ) {
+				// The `|| {}` leaves a nullish patch a no-op, which is what
+				// the spread above and the previous `for...in` both did.
+				for ( const key of Object.keys( valuesToSet || {} ) ) {
 					const nameValuePair = {
 						name: key,
 						value: valuesToSet[ key ],

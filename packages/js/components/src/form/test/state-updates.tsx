@@ -580,4 +580,29 @@ describe( 'Form state updates', () => {
 			[ [ { name: 'firstName', value: 'Updated' } ], nextValues, true ],
 		] );
 	} );
+
+	it.each( [
+		[ 'null', null ],
+		[ 'undefined', undefined ],
+	] )( 'ignores a %s patch rather than throwing', ( _label, patch ) => {
+		const initialValues = initialNameValues();
+		const { onChange, onChanges } = renderForm(
+			initialValues,
+			( { setValues } ) => (
+				<button
+					onClick={ () => setValues( patch as unknown as NameValues ) }
+				>
+					Apply nullish patch
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Apply nullish patch' } )
+		);
+
+		expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
+		expect( onChange ).not.toHaveBeenCalled();
+		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
+	} );
 } );
