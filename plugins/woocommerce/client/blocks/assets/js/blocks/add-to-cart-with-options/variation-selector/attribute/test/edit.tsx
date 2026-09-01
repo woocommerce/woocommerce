@@ -47,18 +47,24 @@ const sharedContext = jest.requireMock( '@woocommerce/shared-context' );
 
 type EditProps = ComponentProps< typeof AttributeItemTemplateEdit >;
 
+// Checked against the props it actually supplies, so a typo inside
+// `attributes` still fails to compile. The widening cast below is only there
+// because the fixture deliberately omits `isSelected`, `context` and
+// `className`.
+const editProps = {
+	attributes: {
+		displayStyle: 'woocommerce/product-filter-chips',
+		autoselect: false,
+		disabledAttributesAction: 'disable',
+	},
+	setAttributes: jest.fn(),
+	clientId: 'test-client-id',
+} satisfies Pick< EditProps, 'attributes' | 'setAttributes' | 'clientId' >;
+
 const renderEdit = () =>
 	render(
 		<AttributeItemTemplateEdit
-			{ ...( {
-				attributes: {
-					displayStyle: 'woocommerce/product-filter-chips',
-					autoselect: false,
-					disabledAttributesAction: 'disable',
-				},
-				setAttributes: jest.fn(),
-				clientId: 'test-client-id',
-			} as unknown as EditProps ) }
+			{ ...( editProps as unknown as EditProps ) }
 		/>
 	);
 
