@@ -276,6 +276,12 @@ class MigrationBatchProcessorTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $batches, 'The section must be served once, then parked.' );
 		$this->assertTrue( $this->state->is_section_parked( 'product-meta' ) );
+
+		// The drained run handed the lock back, and `get_next_batch_to_process()` returns at
+		// its own lock guard without one - which would pass this assertion whether the section
+		// is parked or not. Take the lock again so the parked-section branch is what answers.
+		$this->state->acquire_lock( 'background migration' );
+
 		$this->assertSame(
 			array(),
 			$this->processor->get_next_batch_to_process( 50 ),
