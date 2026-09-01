@@ -768,6 +768,39 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A forced auto-update flag reaches the theme update item only when the package can be installed.
+	 * @testWith [true, "https://woocommerce.com/package.zip", true]
+	 *           [true, "", false]
+	 *           [true, "woocommerce-com-expired-456", false]
+	 *           [false, "https://woocommerce.com/package.zip", false]
+	 *
+	 * @param bool   $forced   Whether the update-check response flags the product for a forced auto-update.
+	 * @param string $package  Package the update_woo_com_subscription_details filter supplies, as Woo Update Manager does.
+	 * @param bool   $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_themes_forced_autoupdate( bool $forced, string $package, bool $expected ): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, $forced );
+		$this->mock_update_package( $package );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_themes(
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$item = $transient->response[ $stylesheet ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'The theme update item carries the wrong forced auto-update state' );
+	}
+
+	/**
 	 * @testdox A theme update item reports the PHP requirement the update-check response carries.
 	 * @testWith ["8.2"]
 	 *           [null]
@@ -790,17 +823,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->mocked_updates = array( 456 => $product );
-
-		set_transient(
-			'_woocommerce_helper_subscriptions',
-			array(
-				array(
-					'product_id'  => 456,
-					'connections' => array(),
-				),
-			),
-			HOUR_IN_SECONDS
-		);
 
 		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
 		try {
