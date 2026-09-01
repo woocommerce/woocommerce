@@ -20,6 +20,7 @@ import {
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { setOption, deleteOption } from '../../utils/options';
 import { random } from '../../utils/helpers';
+import { wpCLI } from '../../utils/cli';
 
 type SeededOrder = {
 	id: number;
@@ -272,6 +273,71 @@ test.describe(
 				throw err;
 			}
 		};
+
+		test(
+			'WP-CLI preserves the pending rewrite flush only when the active theme is skipped',
+			{ tag: '@skip-on-external-env' },
+			async () => {
+				// Setup and inspection must not load WooCommerce, or those commands could consume the queue they are measuring.
+				const coreOnlyFlags = '--skip-plugins --skip-themes';
+				const pendingOption =
+					'woocommerce_review_order_flush_rewrite_pending';
+				const seedPendingRewrite = () =>
+					wpCLI(
+						`wp eval 'update_option( "${ pendingOption }", "yes" );' ${ coreOnlyFlags }`
+					);
+				const readPendingRewrite = async () =>
+					(
+						await wpCLI(
+							`wp eval 'echo get_option( "${ pendingOption }", "missing" );' ${ coreOnlyFlags }`
+						)
+					).stdout.trim();
+				const activeTheme = (
+					await wpCLI( `wp option get stylesheet ${ coreOnlyFlags }` )
+				).stdout.trim();
+				const inactiveTheme =
+					(
+						await wpCLI(
+							`wp theme list --status=inactive --field=name ${ coreOnlyFlags }`
+						)
+					).stdout
+						.split( /\r?\n/ )
+						.find( Boolean ) ?? '';
+
+				expect(
+					inactiveTheme,
+					'Expected an inactive theme for the WP-CLI control.'
+				).not.toBe( '' );
+
+				try {
+					for ( const skipThemes of [
+						'--skip-themes',
+						`--skip-themes=${ activeTheme }`,
+					] ) {
+						await seedPendingRewrite();
+						await wpCLI( `wp option get siteurl ${ skipThemes }` );
+						expect(
+							await readPendingRewrite(),
+							`Expected the queue to survive ${ skipThemes }.`
+						).toBe( 'yes' );
+					}
+
+					await seedPendingRewrite();
+					await wpCLI(
+						`wp option get siteurl --skip-themes=${ inactiveTheme }`
+					);
+					expect(
+						await readPendingRewrite(),
+						'Expected the inactive-theme control to consume the queue.'
+					).toBe( 'missing' );
+				} finally {
+					await wpCLI(
+						`wp eval 'delete_option( "${ pendingOption }" );' ${ coreOnlyFlags }`
+					);
+					await wpCLI( 'wp rewrite flush' );
+				}
+			}
+		);
 
 		test( 'Scenario 1 — happy path: rate a product, submit, see thank-you in place', async ( {
 			page,
