@@ -146,7 +146,7 @@ For bug fixes, always reference the PR that introduced the bug using: `Bug intro
 
 ### Review Requirements
 
-PRs against `trunk` require an approving review by default. `docs/contribution/contributing/deciding-pr-high-impact.md` defines when that requirement may be bypassed (clearly low-impact changes: docs, typos, tests, tooling outside the release package) and when an independent human review is always required (anything on the High-Impact list, plus security, privacy, data integrity, backward compatibility, and performance-sensitive paths).
+PRs against `trunk` require an approving review from a human by default. `docs/contribution/contributing/deciding-pr-high-impact.md` defines when that requirement may be bypassed (clearly low-impact changes: docs, typos, tests, tooling outside the release package) and when an independent human review is always required (anything on the High-Impact list, plus security, privacy, data integrity, backward compatibility, and performance-sensitive paths).
 
 Two rules matter for agents:
 
