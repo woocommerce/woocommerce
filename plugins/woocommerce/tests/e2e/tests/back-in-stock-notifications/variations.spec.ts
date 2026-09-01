@@ -306,11 +306,6 @@ test.describe(
 
 				const emailBody = bisEmailBody( page );
 
-				// An "Any Color" variation carries no attribute value of its
-				// own, so its title is the bare parent title and the chosen
-				// value is only known from what was submitted: core stores it
-				// as the notification's `posted_attributes` meta and renders it
-				// as the email's attribute list.
 				await expect(
 					emailBody.locator( BIS_EMAIL_ELEMENTS.productTitle )
 				).toHaveText( anyAttributeVariableProduct.name );

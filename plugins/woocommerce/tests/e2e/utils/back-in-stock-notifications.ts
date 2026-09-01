@@ -207,7 +207,7 @@ export type BISVariableProduct = BISProduct & {
 	attributeLabel: string;
 	/** Name of the front-end variation `select`, e.g. `attribute_color`. */
 	attributeSelect: string;
-	/** Only set for the two-variation fixture; an "Any Color" product has no in-stock variation. */
+	/** Only set for the two-variation fixture. */
 	inStockVariation?: BISVariation;
 	outOfStockVariation: BISVariation;
 };
@@ -223,18 +223,13 @@ const BIS_VARIATION_ATTRIBUTE = 'Color';
 /**
  * Return a handle to a variable product with one in-stock and one out-of-stock variation.
  *
- * With `anyAttribute`, the product gets a single "Any Color" variation instead —
- * the variation is stored with an empty attribute value, so the chosen one is
- * only known from what the shopper submitted. Core keeps it as the
- * notification's `posted_attributes` meta and renders it as a list in the emails.
- *
  * Deletion is not the caller's job: the fixtures below queue the parent id for
  * the worker-scoped batch in `reapProducts()`, and deleting the parent takes
  * its variations with it.
  *
  * @param {ApiClient} restApi             WP REST client.
  * @param {Object}    [opts]              Creation options.
- * @param {boolean}   [opts.anyAttribute] Create a single attribute-less ("Any Color") variation.
+ * @param {boolean}   [opts.anyAttribute] Create a single attribute-less variation.
  */
 export async function createOutOfStockVariableProduct(
 	restApi: ApiClient,
@@ -269,11 +264,11 @@ export async function createOutOfStockVariableProduct(
 					regular_price: '9.99',
 					manage_stock: false,
 					stock_status: 'outofstock',
-					// An empty `option` is what makes this "Any Color": the
-					// REST controller stores it as an empty `attribute_color`
-					// meta value, the same shape the admin writes. Omitting the
-					// attribute entirely would store no meta row at all, which
-					// `find_matching_product_variation()` cannot match.
+					// The REST controller stores an empty `option` as an empty
+					// `attribute_color` meta value, the same shape the admin
+					// writes. Omitting the attribute entirely would store no
+					// meta row at all, which `find_matching_product_variation()`
+					// cannot match.
 					attributes: [
 						{ name: BIS_VARIATION_ATTRIBUTE, option: '' },
 					],
@@ -647,7 +642,7 @@ export const test = baseTest.extend<
 	},
 
 	/**
-	 * A variable product whose single out-of-stock variation accepts any attribute value.
+	 * A variable product with a single attribute-less out-of-stock variation.
 	 */
 	anyAttributeVariableProduct: async ( { restApi }, use ) => {
 		const product = await createOutOfStockVariableProduct( restApi, {

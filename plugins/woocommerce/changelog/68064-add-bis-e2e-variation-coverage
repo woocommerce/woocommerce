@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Comment: Add Playwright E2E coverage for Back in Stock Notifications on variable products and variations (form show/hide per variation, variation signup, variation attributes in the emails, and the back-in-stock CTA linking back to the variation), including "Any <attribute>" variations.
+Comment: Add Playwright E2E coverage for Back in Stock Notifications on variable products and variations (form show/hide per variation, variation signup, variation attributes in the emails, and the back-in-stock CTA linking back to a fixed-value variation).
