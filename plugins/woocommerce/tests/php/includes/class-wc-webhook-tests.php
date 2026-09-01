@@ -112,36 +112,52 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Post-action validation accepts extension order types registered for webhooks.
+	 * @testdox Post-action validation honors the order-webhooks registry.
 	 */
-	public function test_is_valid_post_action_accepts_registered_order_webhook_type(): void {
+	public function test_is_valid_post_action_honors_order_webhook_registry(): void {
 		global $wc_order_types;
 
-		$order_type = 'shop_webhook_test';
-		$registered = wc_register_order_type(
+		$order_type          = 'shop_webhook_test';
+		$excluded_order_type = 'shop_no_webhook';
+		$registered          = wc_register_order_type(
 			$order_type,
 			array(
 				'exclude_from_order_webhooks' => false,
 			)
 		);
+		$excluded_registered = wc_register_order_type(
+			$excluded_order_type,
+			array(
+				'exclude_from_order_webhooks' => true,
+			)
+		);
 
 		try {
-			$this->assertTrue( $registered, 'The test order type should be registered.' );
-			$post_id = $this->factory->post->create(
+			$this->assertSame( array( true, true ), array( $registered, $excluded_registered ), 'The test order types should be registered.' );
+			$post_id          = $this->factory->post->create(
 				array(
 					'post_type'   => $order_type,
 					'post_status' => 'publish',
 				)
 			);
-			$webhook = new WC_Webhook();
+			$excluded_post_id = $this->factory->post->create(
+				array(
+					'post_type'   => $excluded_order_type,
+					'post_status' => 'publish',
+				)
+			);
+			$webhook          = new WC_Webhook();
 			$webhook->set_topic( 'order.deleted' );
 
 			$this->assertTrue( $this->call_is_valid_post_action( $webhook, $post_id ) );
+			$this->assertFalse( $this->call_is_valid_post_action( $webhook, $excluded_post_id ) );
 		} finally {
-			if ( post_type_exists( $order_type ) ) {
-				unregister_post_type( $order_type );
+			foreach ( array( $order_type, $excluded_order_type ) as $test_order_type ) {
+				if ( post_type_exists( $test_order_type ) ) {
+					unregister_post_type( $test_order_type );
+				}
+				unset( $wc_order_types[ $test_order_type ] );
 			}
-			unset( $wc_order_types[ $order_type ] );
 		}
 	}
 
