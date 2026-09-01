@@ -124,9 +124,9 @@ test.describe(
 						new RegExp(
 							`You have successfully signed up! You will be notified when "${ escapeRegExp(
 								variableProduct.name
-							) } [-–] ${
+							) } [-–] ${ escapeRegExp(
 								outOfStockVariation.option
-							}" is back in stock\\.`
+							) }" is back in stock\\.`
 						)
 					)
 				).toBeVisible();

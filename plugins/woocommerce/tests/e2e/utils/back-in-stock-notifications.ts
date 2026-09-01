@@ -217,6 +217,9 @@ export type BISVariableProduct = BISProduct & {
  *
  * A product-level (not global) attribute, so parallel workers can reuse the
  * same label without colliding on a shared taxonomy term.
+ *
+ * Keep it single-word ASCII: `attributeSelect` lowercases it to build the
+ * select name, which only matches core's `sanitize_title()` for such labels.
  */
 const BIS_VARIATION_ATTRIBUTE = 'Color';
 
