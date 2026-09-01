@@ -2233,8 +2233,8 @@ class WC_AJAX {
 		 * Filter the product attribute terms search results.
 		 *
 		 * @since 7.0.0
-		 * @param array  $terms    The list of matched terms.
-		 * @param string $taxonomy The terms taxonomy.
+		 * @param array|WP_Error $terms    The list of matched terms, or a term query error.
+		 * @param string         $taxonomy The terms taxonomy.
 		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
 	}
