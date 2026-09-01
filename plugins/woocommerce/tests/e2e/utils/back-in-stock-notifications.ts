@@ -306,6 +306,10 @@ export async function createOutOfStockVariableProduct(
 
 	const created = batch.create;
 
+	// A short batch would otherwise surface as an opaque "cannot read
+	// properties of undefined" from the variation lookups below.
+	expect( created ).toHaveLength( create.length );
+
 	// A variation that came back with the stock status we didn't ask for would
 	// otherwise surface much later, as a form that never appears or an email
 	// that never arrives.
@@ -423,9 +427,11 @@ export async function restockProduct(
 /**
  * Locator for the PDP sign-up form wrapper.
  *
- * On a variable product the wrapper is always rendered and core's
+ * The wrapper is rendered whenever the product allows signups, and core's
  * `back-in-stock-form.js` toggles its `hidden` class from the `show_variation`
- * event, so visibility — not presence — is what the variation specs assert.
+ * event — the class the variation specs assert on. A product whose parent opts
+ * out of signups renders no wrapper at all, so that case is asserted on
+ * presence instead.
  *
  * @param {Page} page Playwright page on the product detail.
  */
@@ -751,7 +757,7 @@ export const bisEmailSubject = {
  * @param {RegExp} subject              The email subject (regular expression).
  * @param {number} [expectedCount]      Expected number of matching rows. Defaults to 1.
  */
-async function openEmailInMailLog(
+export async function openEmailInMailLog(
 	page: Page,
 	receiverEmailAddress: string,
 	subject: RegExp,
@@ -819,10 +825,7 @@ export async function getEmailLinkById(
 		expectedCount
 	);
 
-	const iframe = page.frameLocator(
-		'#wp-mail-logging-modal-content-body-content iframe'
-	);
-	const anchor = iframe.locator( `a${ anchorId }` ).first();
+	const anchor = bisEmailBody( page ).locator( `a${ anchorId }` ).first();
 	await anchor.waitFor( { state: 'attached' } );
 
 	const href = await anchor.getAttribute( 'href' );

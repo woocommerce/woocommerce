@@ -12,6 +12,7 @@ import {
 	bisTargetProductInput,
 	escapeRegExp,
 	getEmailLinkById,
+	openEmailInMailLog,
 	resetBISOptions,
 	restockVariation,
 	selectVariation,
@@ -23,7 +24,6 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
-import { expectEmail } from '../../utils/email';
 
 test.describe(
 	'Back in Stock Notifications — variable products and variations',
@@ -168,8 +168,6 @@ test.describe(
 					outOfStockVariation.notificationName
 				);
 
-				await expectEmail( page, email, subject );
-
 				const productLink = await getEmailLinkById(
 					page,
 					email,
@@ -262,10 +260,7 @@ test.describe(
 					outOfStockVariation.notificationName
 				);
 
-				const emailRow = await expectEmail( page, email, subject );
-				await emailRow
-					.getByRole( 'button', { name: 'View log' } )
-					.click();
+				await openEmailInMailLog( page, email, subject );
 
 				const emailBody = bisEmailBody( page );
 
@@ -307,10 +302,7 @@ test.describe(
 					outOfStockVariation.notificationName
 				);
 
-				const emailRow = await expectEmail( page, email, subject );
-				await emailRow
-					.getByRole( 'button', { name: 'View log' } )
-					.click();
+				await openEmailInMailLog( page, email, subject );
 
 				const emailBody = bisEmailBody( page );
 
