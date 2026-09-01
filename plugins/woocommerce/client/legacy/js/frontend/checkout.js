@@ -543,9 +543,15 @@ jQuery( function ( $ ) {
 				return false;
 			}
 
-			return new RegExp( '^(?:' + rules[ country ] + ')$', 'i' ).test(
-				postcode
-			);
+			// Rules match a postcode with no spaces or hyphens, as on the server.
+			try {
+				return new RegExp( '^(?:' + rules[ country ] + ')$', 'i' ).test(
+					postcode.replace( /[\s-]/g, '' )
+				);
+			} catch ( err ) {
+				// The server ignores a rule it cannot compile.
+				return true;
+			}
 		},
 		show_field_error: function ( $field, $parent, message ) {
 			var descriptionId = ( $field.attr( 'id' ) || '' ) + '_description';

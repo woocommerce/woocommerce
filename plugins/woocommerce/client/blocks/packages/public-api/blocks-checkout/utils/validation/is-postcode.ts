@@ -14,8 +14,6 @@ const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
 		return false;
 	}
 
-	// Mirror WC_Validation::is_postcode(): only ASCII whitespace, letters,
-	// digits, and hyphens may reach country-specific validation.
 	if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {
 		return false;
 	}
@@ -29,7 +27,14 @@ const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
 		return true;
 	}
 
-	return new RegExp( `^(?:${ rule })$`, 'i' ).test( postcode );
+	try {
+		return new RegExp( `^(?:${ rule })$`, 'i' ).test(
+			postcode.replace( /[\s-]/g, '' )
+		);
+	} catch {
+		// The server ignores a rule it cannot compile.
+		return true;
+	}
 };
 
 export default isPostcode;
