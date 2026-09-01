@@ -53,13 +53,12 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * Tear down after each test.
 	 */
 	public function tearDown(): void {
-		$this->cleanup_transients();
-		$this->cleanup_theme_fixture();
-
-		wp_cache_delete( 'plugins', 'plugins' );
-		remove_all_filters( 'update_woo_com_subscription_details' );
-
-		parent::tearDown();
+		try {
+			// The fixture theme lives on disk and in a global, neither of which the parent teardown resets.
+			$this->cleanup_theme_fixture();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
