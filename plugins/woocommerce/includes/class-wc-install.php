@@ -1729,7 +1729,21 @@ class WC_Install {
 			}
 
 			if ( $tax_lookup_alterations ) {
-				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+				$tax_lookup_altered = $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+
+				// A re-key that failed is otherwise invisible: the sync keeps writing rows in the
+				// released shape and the reports keep reading them, so the store quietly misses the
+				// fix. Leave a trace, and name the tool that retries the change.
+				if ( false === $tax_lookup_altered ) {
+					wc_get_logger()->error(
+						sprintf(
+							'Could not re-key %1$s by tax order item: %2$s. Analytics tax reports keep reading the way they did, and running "Verify base database tables" under WooCommerce > Status > Tools retries the change.',
+							$wpdb->prefix . 'wc_order_tax_lookup',
+							'' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error'
+						),
+						array( 'source' => 'wc-order-tax-lookup-migration' )
+					);
+				}
 			}
 		}
 

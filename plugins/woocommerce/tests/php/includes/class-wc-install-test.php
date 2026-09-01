@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Caches\ProductCountCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
  * Class WC_Install_Test.
  */
 class WC_Install_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * Test if verify base table can detect missing tables and clear the stored missing table list.
@@ -159,6 +161,53 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $before, $rows(), 'The second pass should leave the rows alone.' );
 
 		$wpdb->delete( $table, array( 'order_id' => 4242 ), array( '%d' ) );
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+	}
+
+	/**
+	 * The reports read a table the re-key never reached the way they always did, so nothing else
+	 * says the store missed the fix.
+	 *
+	 * @testdox create_tables() logs a tax lookup re-key that did not land.
+	 */
+	public function test_create_tables_logs_a_failed_order_tax_lookup_rekey(): void {
+		global $wpdb;
+
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$table = "{$wpdb->prefix}wc_order_tax_lookup";
+
+		// Put the table back in the shape it held before it was keyed by tax order item.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP PRIMARY KEY, DROP COLUMN order_item_id, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Fail every ALTER against the table, the way a server that refuses the statement would.
+		$break_alter = function ( $query ) use ( $table ) {
+			if ( 0 === strpos( $query, "ALTER TABLE {$table} " ) ) {
+				return "ALTER TABLE `{$table}_missing` ADD COLUMN broken bigint";
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_alter );
+
+		$suppress = $wpdb->suppress_errors( true );
+		WC_Install::create_tables();
+		$wpdb->suppress_errors( $suppress );
+
+		remove_filter( 'query', $break_alter );
+
+		$this->assertLogged( 'error', 'wc_order_tax_lookup', array( 'source' => 'wc-order-tax-lookup-migration' ) );
+
+		// Put the key right again for the tests that follow.
+		WC_Install::create_tables();
+
+		$this->assertNotEmpty(
+			$wpdb->get_var( "SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'The re-key should land again once the server accepts the ALTER.'
+		);
+
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 	}

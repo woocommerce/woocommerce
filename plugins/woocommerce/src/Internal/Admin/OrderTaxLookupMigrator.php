@@ -259,9 +259,10 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			);
 		} elseif ( $batch_processor->is_enqueued( self::class ) ) {
 			$tools['stop_rebuild_analytics_tax_data'] = array(
-				'name'     => __( 'Stop rebuilding analytics tax data', 'woocommerce' ),
-				'button'   => __( 'Stop rebuilding', 'woocommerce' ),
-				'desc'     => sprintf(
+				'name'             => __( 'Stop rebuilding analytics tax data', 'woocommerce' ),
+				'button'           => __( 'Stop rebuilding', 'woocommerce' ),
+				'requires_refresh' => true,
+				'desc'             => sprintf(
 					/* translators: %s: number of orders still to rebuild. */
 					_n(
 						'This will stop the background process that rebuilds the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. There is currently %s order left to rebuild.',
@@ -271,13 +272,14 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 					),
 					$pending_label
 				),
-				'callback' => array( $this, 'dequeue' ),
+				'callback'         => array( $this, 'dequeue' ),
 			);
 		} else {
 			$tools['rebuild_analytics_tax_data'] = array(
-				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
-				'button'   => __( 'Rebuild', 'woocommerce' ),
-				'desc'     => sprintf(
+				'name'             => __( 'Rebuild analytics tax data', 'woocommerce' ),
+				'button'           => __( 'Rebuild', 'woocommerce' ),
+				'requires_refresh' => true,
+				'desc'             => sprintf(
 					/* translators: %s: number of orders to rebuild. */
 					_n(
 						'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The rebuild happens over time in the background (via Action Scheduler). There is currently %s order to rebuild.',
@@ -287,7 +289,7 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 					),
 					$pending_label
 				),
-				'callback' => array( $this, 'enqueue' ),
+				'callback'         => array( $this, 'enqueue' ),
 			);
 		}
 
