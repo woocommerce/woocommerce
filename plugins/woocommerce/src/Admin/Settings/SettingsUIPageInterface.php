@@ -29,10 +29,11 @@ interface SettingsUIPageInterface {
 	 * Build the canonical settings schema for a section.
 	 *
 	 * The `shell.sectionNavigation` key controls the sibling-section navigation
-	 * rendered by the Settings UI shell. Omit the key to let WooCommerce inject
-	 * the default navigation listing every section of the settings page, set a
-	 * custom array of `id`/`label`/`href`/`active` entries to own the navigation,
-	 * or set an empty array to render no shell navigation at all.
+	 * rendered by the Settings UI shell, and only applies to drill-down pages
+	 * (sections of the Payments tab). Set a custom array of `id`/`label`/`href`/
+	 * `active` entries to own the navigation, or omit the key to render none;
+	 * drill-down pages default to header breadcrumbs instead. Top-level settings
+	 * pages render the classic section links and ignore this key.
 	 *
 	 * @since 10.9.0
 	 *

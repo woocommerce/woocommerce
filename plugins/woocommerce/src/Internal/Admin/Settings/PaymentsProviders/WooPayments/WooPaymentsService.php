@@ -68,6 +68,16 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
 	/**
+	 * Marker recorded alongside a step's completed status when the step was skipped forward
+	 * rather than actually completed (e.g. the test account could not be created due to a
+	 * non-recoverable failure). It is never reported as a step status; it only informs the
+	 * status determination logic. Being stored with the step statuses, it shares their
+	 * lifecycle: it is removed when the step progress is cleaned and when the step is
+	 * completed through a non-skip path while a valid account vouches for the completion.
+	 */
+	const ONBOARDING_STEP_SKIPPED_MARKER = 'skipped';
+
+	/**
 	 * Error identifiers for which retrying the test account initialization cannot succeed.
 	 *
 	 * Each entry is matched against both the error type and the error code reported by the
@@ -266,7 +276,18 @@ class WooPaymentsService {
 						// The step has no reason to be blocked or failed.
 						$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 						$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-						$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						if ( ! $this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
+							// Leave a trail. The completion (which also clears a possible stale skip
+							// marker) is retried on every status read, but if the underlying option
+							// write keeps failing, those retries won't succeed either.
+							$this->proxy->call_function( 'wc_get_logger' )->warning(
+								'Failed to store the test account onboarding step completion while auto-completing it.',
+								array(
+									'source'   => 'settings-payments',
+									'location' => $location,
+								)
+							);
+						}
 
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
@@ -290,12 +311,25 @@ class WooPaymentsService {
 				// Ignore any completed stored statuses because of the critical nature of the WPCOM connection.
 				break;
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
+				// Backfill the skip marker for merchants trapped with a marker-less completed
+				// status and an invalid test account. See the method for the full rationale.
+				if ( $meets_requirements ) {
+					$this->maybe_backfill_test_account_skip_marker( $location );
+				}
+
 				// If there is a stored completed status, we respect that IF there is NO invalid test account.
 				// This is the case when the user first creates a test account and then switches to live.
 				// The step can only be completed if the requirements are met.
+				// If the step was skipped forward (the test account could not be created), we respect the
+				// stored completed status even with an invalid test account present — that is precisely
+				// the state a skipped step can leave behind (the platform fell back to an account that
+				// requires verification), and re-gating it would route the merchant back to this step.
 				if ( $meets_requirements &&
 					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
-					! ( $this->has_test_account() && ! $this->has_valid_account() )
+					(
+						$this->was_onboarding_step_completed_via_skip( $step_id, $location ) ||
+						! ( $this->has_test_account() && ! $this->has_valid_account() )
+					)
 				) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
@@ -468,6 +502,25 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Check if an onboarding step was marked as completed by being skipped forward.
+	 *
+	 * This means the step's completion does not reflect actual completion but a deliberate
+	 * decision to let onboarding proceed despite the step's action not succeeding
+	 * (e.g. a non-recoverable test account initialization failure).
+	 *
+	 * @param string $step_id  The ID of the onboarding step.
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool Whether the onboarding step was completed by being skipped forward.
+	 */
+	private function was_onboarding_step_completed_via_skip( string $step_id, string $location ): bool {
+		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+
+		return ! empty( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] );
+	}
+
+	/**
 	 * Mark an onboarding step as completed.
 	 *
 	 * @param string      $step_id   The ID of the onboarding step.
@@ -505,27 +558,58 @@ class WooPaymentsService {
 	 * @param string      $location  The location for which we are onboarding.
 	 *                               This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool        $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
+	 *                               Regardless of this, the stored statuses are re-written whenever the
+	 *                               skip marker needs to be added or can be safely removed, so the marker
+	 *                               reflects how the latest completion happened — to the extent the
+	 *                               account state can vouch for it. Such marker-only maintenance leaves
+	 *                               the stored completion timestamp untouched and does not re-record
+	 *                               the step completion event.
 	 * @param string|null $source    Optional. The source for the current onboarding flow.
 	 *                               If not provided, it will identify the source as the WC Admin Payments settings.
+	 * @param bool        $skipped   Optional. Whether the step is being completed by skipping it forward
+	 *                               rather than through actual completion. A marker is stored with the
+	 *                               step statuses so the status determination logic can tell the two apart.
+	 *                               A non-skip completion clears a previously stored marker, but only
+	 *                               when a valid account vouches for the completion being genuine.
 	 *
 	 * @return bool Whether the onboarding step was marked as completed.
 	 */
-	private function record_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT ): bool {
+	private function record_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT, bool $skipped = false ): bool {
 		// Clear possible failed status for the step.
 		$this->clear_onboarding_step_failed( $step_id, $location );
 
-		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
-		if ( ! $overwrite && ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) ) {
+		$statuses      = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		$was_completed = ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] );
+		$has_marker    = ! empty( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] );
+		// The marker must not outlive the skip being the reason for the completion. Otherwise,
+		// a stale marker would keep bypassing the status re-gating (e.g. for a genuine test
+		// account whose validity lapses later). But it can only be removed when the account state
+		// vouches for a genuine completion — generic completion paths (e.g. the step finish action)
+		// must not strip the skip protection while the account is still the invalid fallback
+		// the skip left behind.
+		$add_marker   = $skipped && ! $has_marker;
+		$clear_marker = ! $skipped && $has_marker && $this->has_valid_account();
+		if ( ! $overwrite && $was_completed && ! $add_marker && ! $clear_marker ) {
 			return true;
 		}
 
-		// Mark the step as completed and record the timestamp.
-		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
+		// Mark the step as completed and record the timestamp. An already-completed step keeps
+		// its stored timestamp (honoring $overwrite): falling through the early return for
+		// marker maintenance must not masquerade as a new completion.
+		if ( $overwrite || ! $was_completed ) {
+			$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
+		}
+		if ( $skipped ) {
+			// The marker records when the skip happened.
+			$statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] = $this->proxy->call_function( 'time' );
+		} elseif ( $clear_marker ) {
+			unset( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] );
+		}
 
 		// Store the updated step data.
 		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
 
-		if ( $result ) {
+		if ( $result && ( $overwrite || ! $was_completed ) ) {
 			$source = $this->validate_onboarding_source( $source );
 
 			// Record an event for the step being completed.
@@ -606,7 +690,7 @@ class WooPaymentsService {
 	 *                      advancing a merchant whose stored onboarding state didn't move.
 	 */
 	private function skip_onboarding_test_account_step( string $location, ?string $source, array $context = array() ): void {
-		$step_recorded = $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+		$step_recorded = $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source, true );
 		if ( ! $step_recorded ) {
 			// Leave a trail before falling back to the regular failure handling.
 			$this->proxy->call_function( 'wc_get_logger' )->error(
@@ -650,6 +734,61 @@ class WooPaymentsService {
 			'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
 			esc_html__( 'A test account could not be created, but onboarding can continue without it.', 'woocommerce' ),
 			(int) WP_Http::FAILED_DEPENDENCY
+		);
+	}
+
+	/**
+	 * Backfill the skip marker for a test account step stuck in an unrecoverable state.
+	 *
+	 * A stored completed status with no skip marker while a connected test account is not valid
+	 * is a state the merchant cannot recover from on their own: the status determination would
+	 * re-derive the step as not completed and the client would route the merchant back into it,
+	 * but re-initialization can never succeed while an account is connected — they would end up
+	 * polling indefinitely. This is the state a skip-forward from before the skip marker existed
+	 * left behind (the platform fell back to an account that requires verification), and also
+	 * where a genuine completion lands if the account validity lapses later. Backfilling the
+	 * marker lets the stored completed status be honored so onboarding can move on.
+	 *
+	 * A legitimately in-flight account is not affected because no completed status is stored for
+	 * it, and if the account later becomes valid and working, the auto-completion clears the
+	 * backfilled marker again.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return void
+	 */
+	private function maybe_backfill_test_account_skip_marker( string $location ): void {
+		if ( ! $this->was_onboarding_step_marked_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ||
+			$this->was_onboarding_step_completed_via_skip( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ||
+			! $this->has_test_account() || $this->has_valid_account()
+		) {
+			return;
+		}
+
+		if ( ! $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, self::SESSION_ENTRY_DEFAULT, true ) ) {
+			// Leave a trail. The backfill is retried on every status read, but if the underlying
+			// option write keeps failing, those retries won't succeed either.
+			$this->proxy->call_function( 'wc_get_logger' )->warning(
+				'Failed to store the test account onboarding step skip marker while backfilling it.',
+				array(
+					'source'   => 'settings-payments',
+					'location' => $location,
+				)
+			);
+
+			return;
+		}
+
+		// Record a dedicated event so the backfill can be told apart from a regular skip-forward:
+		// this state is also reachable by a genuine completion whose account validity lapsed
+		// later, i.e. a merchant who never skipped.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_skip_marker_backfilled',
+			$location,
+			array(
+				'source' => self::SESSION_ENTRY_DEFAULT,
+			)
 		);
 	}
 

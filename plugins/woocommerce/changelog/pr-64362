@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Cast refund amount values to float for PHP 8.1 TypeError fix.

@@ -1,16 +1,18 @@
 ---
 post_title: Settings UI
 sidebar_label: Settings UI
-sidebar_position: 5
+sidebar_position: 7
 ---
 
 # Settings UI
 
-The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The settings UI is an experimental, opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
 It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
 ## Status
+
+> **The settings UI is experimental.** Until it is marked as stable, the PHP API under `Automattic\WooCommerce\Admin\Settings`, the schema format, and the `@woocommerce/settings-ui` package can change in backwards-incompatible ways in any release. Expect to update integrations between WooCommerce versions.
 
 -   The settings UI is behind the `settings-ui` feature flag.
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
@@ -159,11 +161,10 @@ When `get_settings_ui_page()` returns a `SettingsUIPageInterface`, WooCommerce u
 
 ### Section navigation on native pages
 
-The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. Native page schemas control it through three states:
+The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. How it applies depends on where the page is registered:
 
--   **Omit the key** - WooCommerce injects the default navigation listing every section of the settings page, matching the legacy settings adapter. This is the right choice for most pages.
--   **Set a custom array** - the page owns navigation entirely. Each entry needs `id`, `label`, `href`, and `active` keys.
--   **Set an empty array** - no shell navigation renders, for pages that provide their own in-page navigation.
+-   **Top-level pages** never render shell section navigation. The classic section links render with the settings header instead, and any schema-provided value is cleared.
+-   **Drill-down pages** default to no section navigation, since the header breadcrumbs replace it. Setting a custom array renders it as tabs under the header; each entry needs `id`, `label`, `href`, and `active` keys.
 
 ```php
 // Custom navigation entry shape.
@@ -198,6 +199,8 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 -   `info`
 
 Fields before the first `title` marker are placed into a default group automatically.
+
+For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select, radio, and multiselect fields can omit `options` or use an empty array. The Settings UI then renders the same empty choice set that the classic settings API accepts. When a field supplies options, WooCommerce validates their structure before rendering.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
@@ -255,6 +258,14 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 
 The settings embed script depends on the settings UI package and these handles only for the opted-in page. Other settings pages do not load it.
 
+WooCommerce validates the schema structure and declared script handles on the server. Structural checks cover identifiers, references, list and map shapes, values that cross the PHP-to-JavaScript boundary, and renderer metadata. PHP does not keep a list of supported field types or decide whether an HTML attribute such as `min`, `max`, or `step` applies to a field. The registered component and the browser own those rendering rules. The existing `WC_Admin_Settings` flow remains responsible for validating, sanitizing, and saving submitted values.
+
+Each declared script handle must be a non-empty string, and the script must be registered and enqueued before the Settings UI renders. WooCommerce trims surrounding whitespace and removes duplicate handles before loading them; whitespace-only handles are invalid. If the schema or a declared handle is invalid, WooCommerce renders the complete classic settings page in that response. PHP cannot inspect the JavaScript component registry. Extension-defined field types remain valid when their values use the Settings UI value contract and a matching `typeRenderers` entry renders them in the browser.
+
+The component registry exists only in the browser, after PHP has selected the Settings UI mount. The browser resolves a named component, a field override, and then a type renderer. A field without an explicit `component` can then use a native renderer. When a field declares `component`, that custom control is required: if no registry entry resolves it, the page fails closed instead of silently replacing it with a native field. A field without an explicit component also fails closed when it has no registered or native renderer. Component render errors use the same fail-closed state.
+
+The fail-closed state has no editable fallback and no Save action. Its error notice provides a **Use classic settings** link that preserves the current page and section and adds `wc_settings_ui=classic`. This is a user-initiated, request-only reload: it does not change the feature flag or automatically reload the page.
+
 ## Save adapters
 
 The settings UI supports two save adapters:
@@ -306,7 +317,12 @@ Descriptions are sanitized with `wp_kses_post()`. Actions are structured data wi
 
 ## Page header
 
-A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
+The shell header (the page title, badges, breadcrumbs, and the top save button) is reserved for drill-down pages. WooCommerce decides this from the page registration, so a page cannot change it through its schema:
+
+- Pages registered at the top level of settings, whether a `WC_Settings_Page` tab or a registered section, render without the header. The top-level settings tabs stay visible, pages with sections keep the classic section links, and the save button appears at the bottom of the page.
+- Sections of the Payments tab render as drill-down pages. The header replaces the top-level settings tabs, and its breadcrumbs default to a link back to the Payments tab when the schema does not provide any. The save button renders in the header.
+
+A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key for drill-down pages. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
 
 ```php
 $schema['shell']['subtitle'] = __( 'Manage your store payment settings.', 'my-plugin' );
@@ -345,5 +361,5 @@ In development, the settings UI logs warnings for common integration issues:
 -   The settings payload is missing.
 -   The `wc-settings-ui` script is missing for a settings UI mount.
 -   A field declares a component that is not registered.
--   A field type is unsupported.
+-   A field type has no registered or native renderer.
 -   A field declares an unknown save adapter.

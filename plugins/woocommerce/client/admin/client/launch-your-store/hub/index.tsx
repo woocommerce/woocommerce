@@ -104,8 +104,8 @@ const LaunchStoreController = () => {
 
 		// Invalidate the task lists to ensure they are refreshed
 		// when the user returns to the main flow.
-		invalidateResolutionForStoreSelector( 'getTaskLists' );
-		invalidateResolutionForStoreSelector( 'getTaskListsByIds' );
+		void invalidateResolutionForStoreSelector( 'getTaskLists' );
+		void invalidateResolutionForStoreSelector( 'getTaskListsByIds' );
 
 		// Navigate back to the main flow
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );

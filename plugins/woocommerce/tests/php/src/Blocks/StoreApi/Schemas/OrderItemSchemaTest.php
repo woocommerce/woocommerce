@@ -11,12 +11,11 @@ use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WC_Helper_Order;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * OrderItemSchemaTest class.
  */
-class OrderItemSchemaTest extends TestCase {
+class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	/**
 	 * The system under test.
 	 *
@@ -60,10 +59,11 @@ class OrderItemSchemaTest extends TestCase {
 	 * Tear down after test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->sut               = null;
 		$this->schema_controller = null;
 		$this->mock_extend       = null;
+
+		parent::tearDown();
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { useState } from '@wordpress/element';
 import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 
@@ -28,7 +28,7 @@ export default {
 	},
 } as Meta< PriceSliderProps >;
 
-const Template: Story< PriceSliderProps > = ( args ) => {
+const Template: StoryFn< PriceSliderProps > = ( args ) => {
 	const { maxPrice, minPrice, ...props } = args;
 	// PriceSlider expects client to update min & max price, i.e. is a controlled component
 	const [ min, setMin ] = useState( minPrice );

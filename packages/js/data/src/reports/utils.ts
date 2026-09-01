@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull, get, includes, memoize } from 'lodash';
+import { find, isNull, get, includes } from 'lodash';
 import moment from 'moment';
+import createSelector from 'rememo';
 import {
 	appendTimestamp,
 	getCurrentDates,
@@ -388,18 +389,24 @@ const EMPTY_ARRAY = [] as const;
 
 /**
  * Cache helper for returning the full chart dataset after multiple
- * requests. Memoized on the request query (string), only called after
+ * requests. Memoized on the response data references, only called after
  * all the requests have resolved successfully.
  */
-const getReportChartDataResponse = memoize(
-	( _requestString, totals, intervals ) => ( {
+const getReportChartDataResponse = createSelector(
+	( _requestString, totals, intervals, ...pagedIntervals ) => ( {
 		isEmpty: false,
 		isError: false,
 		isRequesting: false,
-		data: { totals, intervals },
+		data: {
+			totals,
+			intervals: intervals.concat( ...pagedIntervals ),
+		},
 	} ),
-	( requestString, totals, intervals ) =>
-		[ requestString, totals.length, intervals.length ].join( ':' )
+	( _requestString, totals, intervals, ...pagedIntervals ) => [
+		totals,
+		intervals,
+		...pagedIntervals,
+	]
 );
 
 /**
@@ -449,7 +456,7 @@ export function getReportChartData< T extends ReportStatEndpoint >(
 	}
 
 	const totals = ( stats && stats.data && stats.data.totals ) || null;
-	let intervals =
+	const intervals =
 		( stats && stats.data && stats.data.intervals ) || EMPTY_ARRAY;
 
 	// If we have more than 100 results for this time period,
@@ -488,15 +495,16 @@ export function getReportChartData< T extends ReportStatEndpoint >(
 			return reportChartDataResponses.error;
 		}
 
-		forEach( pagedData, function ( _data ) {
-			if (
-				_data.data &&
-				_data.data.intervals &&
-				Array.isArray( _data.data.intervals )
-			) {
-				intervals = intervals.concat( _data.data.intervals );
-			}
-		} );
+		return getReportChartDataResponse(
+			getResourceName( endpoint, requestQuery ),
+			totals,
+			intervals,
+			...pagedData.map( ( _data ) =>
+				Array.isArray( _data.data?.intervals )
+					? _data.data.intervals
+					: EMPTY_ARRAY
+			)
+		);
 	}
 
 	return getReportChartDataResponse(

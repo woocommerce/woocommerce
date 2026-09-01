@@ -269,7 +269,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should preserve runtime replacements installed by the $hook_name hook.
 	 *
-	 * @dataProvider runtime_replacement_hooks
+	 * @dataProvider data_provider_test_wc_delete_attribute_preserves_hook_runtime_replacements
 	 *
 	 * @param string $hook_name Attribute deletion hook name.
 	 */
@@ -549,7 +549,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array<string, array{string}>
 	 */
-	public static function runtime_replacement_hooks(): array {
+	public static function data_provider_test_wc_delete_attribute_preserves_hook_runtime_replacements(): array {
 		return array(
 			'before deletion' => array( 'woocommerce_before_attribute_delete' ),
 			'after deletion'  => array( 'woocommerce_attribute_deleted' ),

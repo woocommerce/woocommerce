@@ -399,6 +399,411 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should paginate tax rate search results and find rates by location code.
+	 */
+	public function test_json_search_tax_rates_supports_pagination_and_location_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Pagination fixture California rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Pagination fixture New York rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001' );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = 'Pagination fixture';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 1;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 2, $response['pagination']['total'] );
+			$this->assertSame( 2, $response['pagination']['total_pages'] );
+			$this->assertFalse( $response['pagination']['has_prev'] );
+			$this->assertTrue( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $first_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 2;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertTrue( $response['pagination']['has_prev'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 99;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = '10001';
+			$_GET['page'] = 1;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'Pagination fixture New York rate', $response['results'][0]['label'] );
+			$this->assertSame( 'US-NY-PAGINATION FIXTURE NEW YORK RATE-1', $response['results'][0]['rate_code'] );
+			$this->assertSame( '8.875%', $response['results'][0]['rate_percent'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by their visible tax class labels.
+	 */
+	public function test_json_search_tax_rates_supports_tax_class_label_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$tax_class              = WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
+		$created_tax_class_slug = is_wp_error( $tax_class ) ? null : $tax_class['slug'];
+
+		$standard_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'California base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$reduced_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '4.0000',
+				'tax_rate_name'     => 'Reduced class rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => 'reduced-rate',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$_GET['term'] = 'Standard';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $standard_rate_id, $rate_ids );
+			$standard_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $standard_rate_id ) {
+					return $standard_rate_id === $result['id'];
+				}
+			);
+			$standard_result  = current( $standard_results );
+			$this->assertIsArray( $standard_result );
+			$this->assertSame( 'Standard', $standard_result['tax_class'] );
+
+			$_GET['term'] = 'Reduced rate';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
+
+			$this->assertContains( $reduced_rate_id, $rate_ids );
+			$reduced_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $reduced_rate_id ) {
+					return $reduced_rate_id === $result['id'];
+				}
+			);
+			$reduced_result  = current( $reduced_results );
+			$this->assertIsArray( $reduced_result );
+			$this->assertSame( 'Reduced rate', $reduced_result['tax_class'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $standard_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $reduced_rate_id ) );
+			if ( $created_tax_class_slug ) {
+				WC_Tax::delete_tax_class_by( 'slug', $created_tax_class_slug );
+			}
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should find tax rates by displayed percentages, rate codes, and fallback labels.
+	 */
+	public function test_json_search_tax_rates_supports_displayed_value_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$named_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Displayed value fixture rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$unnamed_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'ZZ',
+				'tax_rate_state'    => 'ZZ',
+				'tax_rate'          => '3.5000',
+				'tax_rate_name'     => '',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			// The results table shows "8.875%", so that string has to find the rate.
+			$_GET['term'] = '8.875%';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// The full rate code is derived from several columns and must be searchable as shown.
+			$_GET['term'] = 'US-NY-DISPLAYED VALUE FIXTURE RATE-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $named_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = 'us-ny-displayed value';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $named_rate_id, array_column( $response['results'], 'id' ) );
+
+			// Rates without a name are shown under the store's tax or VAT label.
+			$_GET['term'] = WC()->countries->tax_or_vat();
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertContains( $unnamed_rate_id, array_column( $response['results'], 'id' ) );
+
+			$_GET['term'] = 'ZZ-ZZ-TAX-1';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertSame( $unnamed_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'ZZ-ZZ-TAX-1', $response['results'][0]['rate_code'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $named_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $unnamed_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Should return each tax rate once when listing results without a search term.
+	 */
+	public function test_json_search_tax_rates_without_a_term_lists_all_rates(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'Unfiltered listing fixture one',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'Unfiltered listing fixture two',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001,10002,10003' );
+
+		$expected_total = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" ) );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = '';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 100;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids = array_column( $response['results'], 'id' );
+
+			// A rate with several postcodes must still be counted once.
+			$this->assertSame( $expected_total, $response['pagination']['total'] );
+			$this->assertContains( $first_rate_id, $rate_ids );
+			$this->assertContains( $second_rate_id, $rate_ids );
+			$this->assertSame( count( $rate_ids ), count( array_unique( $rate_ids ) ) );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
+	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
+	 */
+	public function test_add_coupon_discount_uses_manually_edited_line_total() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '10off-edited' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals();
+		$order->save();
+
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount(
+			array(
+				'order_id' => $order->get_id(),
+				'coupon'   => $coupon->get_code(),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$item  = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'The edited line total should become the new pre-discount price' );
+		$this->assertEquals( 45, $item->get_total(), 'The discount should be taken off the edited price' );
+		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox Product search decodes URL-encoded characters before returning plain text names.
+	 * @dataProvider product_search_name_provider
+	 *
+	 * @param string $search_term          Product search term.
+	 * @param string $product_name         Product name.
+	 * @param string $expected_result_name Expected product name in the response.
+	 */
+	public function test_json_search_products_returns_plain_text_names( string $search_term, string $product_name, string $expected_result_name ): void {
+		$this->_setRole( 'administrator' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$_GET['term']     = $search_term;
+		$_GET['include']  = array( $product->get_id() );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+
+		try {
+			$response = $this->do_ajax( 'woocommerce_json_search_products' );
+		} finally {
+			unset( $_GET['term'], $_GET['include'], $_GET['security'] );
+		}
+
+		$this->assertSame(
+			sprintf( '%s (%s)', $expected_result_name, $product->get_sku() ),
+			$response[ $product->get_id() ],
+			'Product search should return a stripped, plain text product name.'
+		);
+	}
+
+	/**
+	 * Product names used to verify AJAX search response formatting.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function product_search_name_provider(): array {
+		return array(
+			'plain punctuation'    => array( 'Ben', "Ben & Jerry's", "Ben & Jerry's" ),
+			'URL-encoded space'    => array( 'Coffee', 'Coffee%20Mug', 'Coffee Mug' ),
+			'URL-encoded HTML tag' => array( 'Text', 'Text %3Cspan%3Einside%3C/span%3E', 'Text inside' ),
+			'HTML tag'             => array( 'Text', 'Text <span>inside</span>', 'Text inside' ),
+		);
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
@@ -690,6 +1095,629 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			(string) $this->_last_response,
 			'Delete button should use the _ajax_nonce= token.'
 		);
+	}
+
+	/**
+	 * Data provider for test_product_ordering.
+	 *
+	 * Columns: sorting_idx, previd_idx (-1 = none), nextid_idx (-1 = none), expected menu_orders [P1..P5].
+	 */
+	public function product_ordering_provider(): array {
+		return array(
+			'last to first'             => array( 4, -1, 0, array( 2, 3, 4, 5, 1 ) ),
+			'first to last'             => array( 0, 4, -1, array( 5, 1, 2, 3, 4 ) ),
+			'middle one position left'  => array( 2, 0, 1, array( 1, 3, 2, 4, 5 ) ),
+			'middle one position right' => array( 2, 3, 4, array( 1, 2, 4, 3, 5 ) ),
+			'middle to first'           => array( 2, -1, 0, array( 2, 3, 1, 4, 5 ) ),
+			'middle to last'            => array( 2, 4, -1, array( 1, 2, 5, 3, 4 ) ),
+			'drop in place'             => array( 2, 1, 3, array( 1, 2, 3, 4, 5 ) ),
+		);
+	}
+
+	/**
+	 * @testdox 'product_ordering' (legacy algorithm) moves a product to the correct position and shifts the affected range.
+	 * @dataProvider product_ordering_provider
+	 *
+	 * @param int   $sorting_idx     Index (0-based) of the product being dragged.
+	 * @param int   $previd_idx      Index of the product immediately before the drop target, or -1 if dropped at the top.
+	 * @param int   $nextid_idx      Index of the product immediately after the drop target, or -1 if dropped at the bottom.
+	 * @param int[] $expected_orders Expected menu_order values indexed by original product position [P1..P5].
+	 */
+	public function test_product_ordering_using_legacy_algorithm( int $sorting_idx, int $previd_idx, int $nextid_idx, array $expected_orders ): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+		$this->setExpectedDeprecated( 'woocommerce_after_single_product_ordering' );
+
+		// Attach a listener to force the legacy branching path.
+		$legacy_hook = function () {};
+		add_action( 'woocommerce_after_single_product_ordering', $legacy_hook );
+
+		$products = array();
+		for ( $i = 1; $i <= 5; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[ $sorting_idx ];
+		$_POST['previd']   = $previd_idx >= 0 ? $product_ids[ $previd_idx ] : 0;
+		$_POST['nextid']   = $nextid_idx >= 0 ? $product_ids[ $nextid_idx ] : 0;
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_after_single_product_ordering', $legacy_hook );
+
+		foreach ( $product_ids as $idx => $product_id ) {
+			$actual = (int) $wpdb->get_var( $wpdb->prepare( "SELECT menu_order FROM {$wpdb->posts} WHERE ID = %d", $product_id ) );
+			$this->assertSame( $expected_orders[ $idx ], $actual, "Product at index {$idx} has wrong menu_order." );
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' (range algorithm) moves a product to the correct position and shifts the affected range.
+	 * @dataProvider product_ordering_provider
+	 *
+	 * @param int   $sorting_idx     Index (0-based) of the product being dragged.
+	 * @param int   $previd_idx      Index of the product immediately before the drop target, or -1 if dropped at the top.
+	 * @param int   $nextid_idx      Index of the product immediately after the drop target, or -1 if dropped at the bottom.
+	 * @param int[] $expected_orders Expected menu_order values indexed by original product position [P1..P5].
+	 */
+	public function test_product_ordering_using_range_algorithm( int $sorting_idx, int $previd_idx, int $nextid_idx, array $expected_orders ): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$products = array();
+		for ( $i = 1; $i <= 5; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[ $sorting_idx ];
+		$_POST['previd']   = $previd_idx >= 0 ? $product_ids[ $previd_idx ] : 0;
+		$_POST['nextid']   = $nextid_idx >= 0 ? $product_ids[ $nextid_idx ] : 0;
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		foreach ( $product_ids as $idx => $product_id ) {
+			$actual = (int) $wpdb->get_var( $wpdb->prepare( "SELECT menu_order FROM {$wpdb->posts} WHERE ID = %d", $product_id ) );
+			$this->assertSame( $expected_orders[ $idx ], $actual, "Product at index {$idx} has wrong menu_order." );
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' fires 'woocommerce_after_product_ordering' with the moved product ID and full positions map.
+	 */
+	public function test_product_ordering_fires_after_product_ordering_action(): void {
+		$this->_setRole( 'administrator' );
+		$this->setExpectedDeprecated( 'woocommerce_after_product_ordering' );
+
+		$products = array();
+		for ( $i = 1; $i <= 2; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$hook_fired = false;
+		$captured   = array();
+		$hook       = function ( $sorting_id, $all_positions ) use ( &$hook_fired, &$captured ) {
+			$hook_fired = true;
+			$captured   = array(
+				'sorting_id'    => $sorting_id,
+				'all_positions' => $all_positions,
+			);
+		};
+		add_action( 'woocommerce_after_product_ordering', $hook, 10, 2 );
+
+		// Move the last one to the front.
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[1];
+		$_POST['previd']   = 0;
+		$_POST['nextid']   = $product_ids[0];
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_after_product_ordering', $hook, 10 );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_after_product_ordering was not fired.' );
+		$this->assertSame( $product_ids[1], $captured['sorting_id'] );
+		$this->assertSame(
+			array(
+				$product_ids[0] => 2,
+				$product_ids[1] => 1,
+			),
+			$captured['all_positions']
+		);
+
+		foreach ( $product_ids as $product_id ) {
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' (fast path) fires the process_moved and process_reindexed hooks with correct payloads.
+	 */
+	public function test_product_ordering_fires_fast_path_hooks(): void {
+		$this->_setRole( 'administrator' );
+
+		$setup    = array(
+			'Alpha' => 1,
+			'Beta'  => 2,
+			'Gamma' => 3,
+			'Delta' => 0,
+			'Echo'  => 0,
+		);
+		$ids      = array();
+		$products = array();
+		foreach ( $setup as $name => $menu_order ) {
+			$product = new \WC_Product_Simple();
+			$product->set_name( $name );
+			$product->set_menu_order( $menu_order );
+			$product->save();
+			$ids[ $name ]                   = $product->get_id();
+			$products[ $product->get_id() ] = $product;
+		}
+
+		$moved_captured     = array();
+		$reindexed_captured = array();
+		$moved_hook         = function ( $sorting_id, $moved ) use ( &$moved_captured ) {
+			$moved_captured = array(
+				'sorting_id' => $sorting_id,
+				'moved'      => $moved,
+			);
+		};
+		$reindexed_hook     = function ( $sorting_id, $reindexed ) use ( &$reindexed_captured ) {
+			$reindexed_captured = array(
+				'sorting_id' => $sorting_id,
+				'reindexed'  => $reindexed,
+			);
+		};
+		add_action( 'woocommerce_product_ordering_process_moved_products', $moved_hook, 10, 2 );
+		add_action( 'woocommerce_product_ordering_process_reindexed_products', $reindexed_hook, 10, 2 );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $ids['Gamma'];
+		$_POST['previd']   = $ids['Delta'];
+		$_POST['nextid']   = $ids['Echo'];
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_product_ordering_process_moved_products', $moved_hook, 10 );
+		remove_action( 'woocommerce_product_ordering_process_reindexed_products', $reindexed_hook, 10 );
+
+		$this->assertSame(
+			array(
+				'sorting_id' => $ids['Gamma'],
+				'reindexed'  => array( $ids['Delta'] => 1 ),
+			),
+			$reindexed_captured
+		);
+		$this->assertSame(
+			array(
+				'sorting_id' => $ids['Gamma'],
+				'moved'      => array(
+					$ids['Gamma'] => 2,
+					$ids['Echo']  => 3,
+					$ids['Alpha'] => 4,
+					$ids['Beta']  => 5,
+				),
+			),
+			$moved_captured
+		);
+
+		array_walk( $products, static fn( $p ) => $p->delete( true ) );
+	}
+
+	/**
+	 * @testdox Refunding a 0% taxed line item via the AJAX handler preserves the 0-rate tax line on the refund order.
+	 */
+	public function test_refund_line_items_preserves_zero_rate_tax(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$item_id = array_keys( $order->get_items( 'line_item' ) )[0];
+
+		$this->_setRole( 'administrator' );
+
+		// The exact payload shape the admin refund form serializes: the tax
+		// amount arrives as a numeric 0 (accounting.unformat of an empty field).
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $order->get_total();
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => 1 ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $order->get_total() ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array( $item_id => array( $rate_id => 0 ) ) );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+
+		$refund_tax_items = $refunds[0]->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+		$this->assertEquals(
+			$rate_id,
+			array_values( $refund_tax_items )[0]->get_rate_id(),
+			'The preserved tax line must reference the 0% rate.'
+		);
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only AJAX refund on a multi-item order creates no line items and keeps downloads of unrefunded products.
+	 */
+	public function test_refund_line_items_amount_only_skips_untouched_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		$this->_setRole( 'administrator' );
+
+		// An amount-only refund: the form posts no qtys, but a 0 total and a 0
+		// tax amount for every row in the order (those inputs are not gated).
+		$totals     = array();
+		$tax_totals = array();
+		foreach ( $item_ids as $item_id ) {
+			$totals[ $item_id ]     = 0;
+			$tax_totals[ $item_id ] = array( 1 => 0 );
+		}
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = '5';
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array() );
+		$_POST['line_item_totals']     = wp_json_encode( $totals );
+		$_POST['line_item_tax_totals'] = wp_json_encode( $tax_totals );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount( 1, $remaining_downloads, 'Download permissions for a product that was not refunded must be kept.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+	}
+
+	/**
+	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
+	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
+	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
+	 * block in a variation description would render empty. See Bootstrap::maybe_register_blocks_from_content.
+	 *
+	 * @testdox The get_variation AJAX endpoint registers WooCommerce block types on demand for a variation description block.
+	 */
+	public function test_get_variation_registers_block_types_on_demand_for_description(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		// Snapshot and unregister WooCommerce blocks so this test mirrors a request whose eager registration
+		// was skipped; on-demand registration should then re-register them when the description is rendered.
+		$snapshot = array();
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( 0 === strpos( $name, 'woocommerce/' ) ) {
+				$snapshot[ $name ] = $block_type;
+				$registry->unregister( $name );
+			}
+		}
+
+		// The on-demand registration asks the shared BlockTypesController whether register_blocks() already ran
+		// this request; the test bootstrap ran it once for the whole PHPUnit process, so clear the flag too.
+		$this->set_register_blocks_has_run_flag( false );
+
+		// A foundational block register_blocks() always registers (not gated behind a theme/feature flag).
+		$sample = 'woocommerce/product-price';
+		$this->assertNotEmpty( $snapshot, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+
+		$posted_keys = array();
+
+		try {
+			$product   = WC_Helper_Product::create_variation_product();
+			$children  = $product->get_children();
+			$variation = wc_get_product( $children[0] );
+			$variation->set_description( '<!-- wp:woocommerce/product-price /-->' );
+			$variation->save();
+
+			$_POST['product_id'] = $product->get_id();
+			$posted_keys[]       = 'product_id';
+			foreach ( $variation->get_attributes() as $attribute_name => $attribute_value ) {
+				$key           = 'attribute_' . $attribute_name;
+				$_POST[ $key ] = $attribute_value;
+				$posted_keys[] = $key;
+			}
+
+			$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+
+			$response = $this->do_ajax( 'woocommerce_get_variation' );
+
+			$this->assertIsArray( $response, 'The get_variation endpoint should return the matched variation.' );
+			$this->assertSame(
+				$variation->get_id(),
+				$response['variation_id'],
+				'The endpoint should match the variation carrying the block description.'
+			);
+			$this->assertTrue(
+				$registry->is_registered( $sample ),
+				'Hitting ?wc-ajax=get_variation should register block types on demand so a variation description block renders.'
+			);
+		} finally {
+			foreach ( $posted_keys as $key ) {
+				unset( $_POST[ $key ] );
+			}
+
+			// Delete the created posts so they do not leak into later tests. Guarded because
+			// create_variation_product() could throw before either is assigned.
+			if ( isset( $variation ) ) {
+				$variation->delete( true );
+			}
+			if ( isset( $product ) ) {
+				$product->delete( true );
+			}
+
+			foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
+				if ( 0 === strpos( (string) $name, 'woocommerce/' ) ) {
+					$registry->unregister( $name );
+				}
+			}
+			foreach ( $snapshot as $block_type ) {
+				$registry->register( $block_type );
+			}
+			$this->set_register_blocks_has_run_flag( true );
+		}
+	}
+
+	/**
+	 * Set the static registration flag on BlockTypesController.
+	 *
+	 * The flag records whether register_blocks() ran in the current request, and Bootstrap's on-demand block
+	 * registration consults it. Tests that simulate a request whose eager registration was skipped must clear
+	 * it alongside unregistering the block types, and restore it afterwards. It is static, so this sets it on
+	 * the class, not on any one container instance.
+	 *
+	 * @param bool $has_run The flag value to set.
+	 */
+	private function set_register_blocks_has_run_flag( bool $has_run ): void {
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\BlockTypesController::class, 'register_blocks_has_run' );
+		$property->setAccessible( true );
+		$property->setValue( null, $has_run );
+	}
+
+	/**
+	 * @testdox add_order_item rejects a negative quantity with a JSON error and adds nothing to the order.
+	 */
+	public function test_add_order_item_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '-2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count, $order->get_items() );
+	}
+
+	/**
+	 * @testdox add_order_item still accepts a positive quantity.
+	 */
+	public function test_add_order_item_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$product            = \WC_Helper_Product::create_simple_product();
+		$order              = \WC_Helper_Order::create_order();
+		$initial_item_count = count( $order->get_items() );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => (string) $product->get_id(),
+				'qty' => '2',
+			),
+		);
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( $initial_item_count + 1, $order->get_items() );
+	}
+
+	/**
+	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
+	 */
+	public function test_save_order_items_rejects_negative_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox save_order_items accepts a valid positive quantity change.
+	 */
+	public function test_save_order_items_accepts_positive_quantity() {
+		$this->_setRole( 'administrator' );
+
+		$order   = \WC_Helper_Order::create_order();
+		$items   = array_values( $order->get_items() );
+		$item    = $items[0];
+		$item_id = $item->get_id();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['items']    = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '3' ),
+				'line_total'     => array( $item_id => '30' ),
+				'line_subtotal'  => array( $item_id => '30' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_save_order_items' );
+
+		$this->assertTrue( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertEquals( 3, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox remove_order_item rejects a negative quantity passed through the pre-delete save and deletes nothing.
+	 */
+	public function test_remove_order_item_rejects_negative_quantity_in_passthrough() {
+		$this->_setRole( 'administrator' );
+
+		$order        = \WC_Helper_Order::create_order();
+		$items        = array_values( $order->get_items() );
+		$item         = $items[0];
+		$item_id      = $item->get_id();
+		$original_qty = $item->get_quantity();
+
+		$_POST['order_id']       = $order->get_id();
+		$_POST['security']       = wp_create_nonce( 'order-item' );
+		$_POST['order_item_ids'] = array( $item_id );
+		$_POST['items']          = http_build_query(
+			array(
+				'order_item_id'  => array( $item_id ),
+				'order_item_qty' => array( $item_id => '-1' ),
+				'line_total'     => array( $item_id => '-10' ),
+				'line_subtotal'  => array( $item_id => '-10' ),
+			)
+		);
+
+		$response = $this->do_ajax( 'woocommerce_remove_order_item' );
+
+		$this->assertFalse( $response['success'] );
+
+		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
+		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
 	}
 
 	/**

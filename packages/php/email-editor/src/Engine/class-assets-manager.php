@@ -217,6 +217,7 @@ class Assets_Manager {
 	private function preload_rest_api_data( $post_id, string $post_type ): void {
 		$email_post_type    = $post_type;
 		$user_theme_post_id = $this->user_theme->get_user_theme_post()->ID;
+		$post               = is_numeric( $post_id ) ? get_post( (int) $post_id ) : null;
 		$template_slug      = get_post_meta( (int) $post_id, '_wp_page_template', true );
 		$routes             = array(
 			"/wp/v2/{$email_post_type}/" . intval( $post_id ) . '?context=edit',
@@ -230,13 +231,30 @@ class Assets_Manager {
 			'/wp/v2/taxonomies?context=view',
 		);
 
-		if ( is_string( $template_slug ) ) {
+		if ( is_string( $template_slug ) && '' !== $template_slug ) {
 			$routes[] = '/wp/v2/templates/lookup?slug=' . $template_slug;
-		} else {
+		}
+
+		// Recent emails listed by the template selection modal, which opens on emails with no content.
+		if ( $post instanceof \WP_Post && '' === $post->post_content ) {
 			$routes[] = "/wp/v2/{$email_post_type}?context=edit&per_page=30&status=publish,sent";
 		}
 
-		// Preload the data for the specified routes.
+		/**
+		 * Filters the REST API routes preloaded for the email editor.
+		 *
+		 * @param string[]   $routes    The routes to preload.
+		 * @param string     $post_type The edited post type.
+		 * @param int|string $post_id   The edited post ID.
+		 *
+		 * @since 11.2.0
+		 */
+		$routes = apply_filters( 'woocommerce_email_editor_preload_rest_api_routes', $routes, $post_type, $post_id );
+
+		if ( ! is_array( $routes ) ) {
+			$routes = array();
+		}
+
 		$preload_data = array_reduce(
 			$routes,
 			'rest_preload_api_request',

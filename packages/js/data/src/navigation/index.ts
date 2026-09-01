@@ -63,7 +63,7 @@ export const store = createReduxStore( STORE_NAME, {
 
 register( store );
 
-initDispatchers();
+void initDispatchers();
 
 export const NAVIGATION_STORE_NAME = STORE_NAME;
 

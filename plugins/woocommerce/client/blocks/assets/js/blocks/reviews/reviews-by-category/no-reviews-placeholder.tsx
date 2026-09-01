@@ -4,7 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { Placeholder } from '@wordpress/components';
 import { Icon, commentContent } from '@wordpress/icons';
-const NoReviewsPlaceholder = (): JSX.Element => {
+
+interface NoReviewsPlaceholderProps {
+	reason: 'no-reviews' | 'offset';
+}
+
+const NoReviewsPlaceholder = ( {
+	reason,
+}: NoReviewsPlaceholderProps ): JSX.Element => {
 	return (
 		<Placeholder
 			className="wc-block-reviews-by-category"
@@ -16,10 +23,15 @@ const NoReviewsPlaceholder = (): JSX.Element => {
 			}
 			label={ __( 'Reviews by Category', 'woocommerce' ) }
 		>
-			{ __(
-				'This block lists reviews for products from selected categories. The selected categories do not have any reviews yet, but they will show up here when they do.',
-				'woocommerce'
-			) }
+			{ reason === 'offset'
+				? __(
+						'No reviews are visible with the current offset. Reduce the offset to display reviews.',
+						'woocommerce'
+				  )
+				: __(
+						'This block lists reviews for products from selected categories. The selected categories do not have any reviews yet, but they will show up here when they do.',
+						'woocommerce'
+				  ) }
 		</Placeholder>
 	);
 };

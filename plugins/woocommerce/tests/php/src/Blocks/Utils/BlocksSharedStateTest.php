@@ -60,6 +60,21 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Currency data decodes HTML entities in the price separators.
+	 */
+	public function test_currency_data_decodes_separator_entities(): void {
+		update_option( 'woocommerce_price_thousand_sep', '&nbsp;' );
+		update_option( 'woocommerce_price_decimal_sep', '&#44;' );
+
+		$method = new \ReflectionMethod( BlocksSharedState::class, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( null );
+
+		$this->assertSame( "\u{00A0}", $currency_data['currency']['thousandSeparator'] );
+		$this->assertSame( ',', $currency_data['currency']['decimalSeparator'] );
+	}
+
+	/**
 	 * @testdox nonOptimisticProperties is empty when no filter is registered.
 	 */
 	public function test_no_filter_returns_empty_non_optimistic_properties(): void {
