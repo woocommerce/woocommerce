@@ -292,6 +292,7 @@ jQuery( function ( $ ) {
 				.on( 'change', '.refund input.refund_line_total, .refund input.refund_line_tax', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
+				.on( 'input', 'input.refund_order_item_qty', this.refunds.update_restock_state )
 				.on( 'change', '#restock_refunded_items', this.refunds.restock_changed )
 
 				// Qty
