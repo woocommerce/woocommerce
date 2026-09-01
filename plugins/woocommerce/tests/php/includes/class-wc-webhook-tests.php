@@ -83,6 +83,143 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Post-action validation rejects a falsy ID even when a global product exists.
+	 */
+	public function test_is_valid_post_action_rejects_falsy_id_with_global_post(): void {
+		$had_global_post = array_key_exists( 'post', $GLOBALS );
+		$original_post   = $GLOBALS['post'] ?? null;
+		$product_id      = $this->factory->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+		$webhook         = new WC_Webhook();
+		$webhook->set_topic( 'product.deleted' );
+
+		try {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test isolates arbitrary global request state.
+			$GLOBALS['post'] = get_post( $product_id );
+			$this->assertFalse( $this->call_is_valid_post_action( $webhook, 0 ) );
+		} finally {
+			if ( $had_global_post ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global request state changed for this test.
+				$GLOBALS['post'] = $original_post;
+			} else {
+				unset( $GLOBALS['post'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Post-action validation accepts extension order types registered for webhooks.
+	 */
+	public function test_is_valid_post_action_accepts_registered_order_webhook_type(): void {
+		global $wc_order_types;
+
+		$order_type = 'shop_webhook_test';
+		$registered = wc_register_order_type(
+			$order_type,
+			array(
+				'exclude_from_order_webhooks' => false,
+			)
+		);
+
+		try {
+			$this->assertTrue( $registered, 'The test order type should be registered.' );
+			$post_id = $this->factory->post->create(
+				array(
+					'post_type'   => $order_type,
+					'post_status' => 'publish',
+				)
+			);
+			$webhook = new WC_Webhook();
+			$webhook->set_topic( 'order.deleted' );
+
+			$this->assertTrue( $this->call_is_valid_post_action( $webhook, $post_id ) );
+		} finally {
+			if ( post_type_exists( $order_type ) ) {
+				unregister_post_type( $order_type );
+			}
+			unset( $wc_order_types[ $order_type ] );
+		}
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered for a variable product and all of its variations.
+	 */
+	public function test_product_deletion_webhook_delivers_for_variable_product_variations(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$expected_ids  = array_merge( array( $product->get_id() ), $product->get_children() );
+		$delivered_ids = array();
+		$webhook       = $this->create_active_webhook( 'product.deleted' );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		wp_trash_post( $product->get_id() );
+
+		sort( $expected_ids );
+		sort( $delivered_ids );
+		$this->assertSame( $expected_ids, $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product restoration webhooks are delivered for a variable product and all of its variations.
+	 */
+	public function test_product_restoration_webhook_delivers_for_variable_product_variations(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$expected_ids  = array_merge( array( $product->get_id() ), $product->get_children() );
+		$delivered_ids = array();
+		wp_trash_post( $product->get_id() );
+
+		$webhook = $this->create_active_webhook( 'product.restored' );
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
+				if ( $webhook === $delivering_webhook ) {
+					$delivered_ids[] = $arg;
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		wp_untrash_post( $product->get_id() );
+
+		sort( $expected_ids );
+		sort( $delivered_ids );
+		$this->assertSame( $expected_ids, $delivered_ids );
+	}
+
+	/**
+	 * Create an active webhook for integration tests.
+	 *
+	 * @param string $topic Webhook topic.
+	 * @return WC_Webhook
+	 */
+	private function create_active_webhook( string $topic ): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( $topic );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+
+		return $webhook;
+	}
+
+	/**
 	 * @testDox Check if valid resource is true when both arg and topic are valid.
 	 */
 	public function test_is_valid_resource() {

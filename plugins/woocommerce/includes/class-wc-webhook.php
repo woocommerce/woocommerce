@@ -210,12 +210,20 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
-		$post_type_to_resource = array(
-			'product'     => 'product',
-			'shop_coupon' => 'coupon',
-			'shop_order'  => 'order',
+		$post_id = absint( $arg );
+		if ( ! $post_id ) {
+			return false;
+		}
+
+		$post_type_to_resource = array_merge(
+			array(
+				'product'           => 'product',
+				'product_variation' => 'product',
+				'shop_coupon'       => 'coupon',
+			),
+			array_fill_keys( wc_get_order_types( 'order-webhooks' ), 'order' )
 		);
-		$post_type             = get_post_type( absint( $arg ) );
+		$post_type             = get_post_type( $post_id );
 
 		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
 	}
