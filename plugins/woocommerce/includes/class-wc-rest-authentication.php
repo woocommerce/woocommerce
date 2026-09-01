@@ -113,7 +113,14 @@ class WC_REST_Authentication {
 		 * needed.
 		 */
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared against REST route prefixes only, never output or stored; sanitizing would diverge from the route WordPress dispatches.
-		$request_uri  = wp_unslash( $_SERVER['REQUEST_URI'] );
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+
+		// WP::parse_request() trims leading slashes off the URI, but wp_parse_url() would read a
+		// leading '//' as a host, so collapse them first.
+		if ( str_starts_with( $request_uri, '//' ) ) {
+			$request_uri = '/' . ltrim( $request_uri, '/' );
+		}
+
 		$query_string = wp_parse_url( $request_uri, PHP_URL_QUERY );
 		$query_params = array();
 
@@ -275,13 +282,15 @@ class WC_REST_Authentication {
 
 		/*
 		 * Any other namespace is in scope only when the request URI named this exact route.
-		 * WP::parse_request() can take rest_route from more than one place, so the route finally
-		 * dispatched is not necessarily the one is_request_to_rest_api() judged scope from and ran
-		 * woocommerce_rest_is_request_to_rest_api against. We only reach this method once a key
-		 * authenticated, which means that filter approved the URI route: a resolved route equal to the
-		 * URI route inherits that approval, and anything else does not.
+		 * WP::parse_request() can take rest_route from more than one place, so the dispatched route is
+		 * not necessarily the one woocommerce_rest_is_request_to_rest_api approved. WordPress also
+		 * decodes rest_route through parse_str() while the URI route is read raw, so the decoded form
+		 * names the same route.
 		 */
-		return $resolved_route === $this->route_from_request_uri();
+		$uri_route     = $this->route_from_request_uri();
+		$decoded_route = trim( urldecode( $uri_route ), '/' );
+
+		return $resolved_route === $uri_route || $resolved_route === $decoded_route;
 	}
 
 	/**
