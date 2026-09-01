@@ -75,7 +75,7 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 		$se = array(
 			array( true, '123 45', 'SE' ),
 			array( true, '12345', 'SE' ),
-			array( false, '12 345', 'SE' ),
+			array( true, '12 345', 'SE' ),
 			array( false, 'ABC 45', 'SE' ),
 		);
 
@@ -96,29 +96,66 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( false, '10500', 'LV' ),
 			array( false, 'ZZ-1050', 'LV' ),
 			array( false, 'LV-ABCD', 'LV' ),
-			array( false, "LV-1050\n", 'LV' ),
 			// The country prefix without a separator, as produced by wc_normalize_postcode().
 			array( true, 'LV1050', 'LV' ),
 			array( true, 'lv1050', 'LV' ),
 			array( false, 'LV0123', 'LV' ),
-			array( false, "LV1050\n", 'LV' ),
-			// A space is accepted as the prefix separator, but only a literal space.
+			// Spaces and hyphens are ignored wherever they appear, so the result
+			// is the same for the typed value and the formatted one.
 			array( true, 'LV 1050', 'LV' ),
-			array( true, 'lv 1050', 'LV' ),
-			array( false, "LV\n1050", 'LV' ),
-			array( false, "LV\t1050", 'LV' ),
-			// At most one separator, and only a hyphen or a space.
-			array( false, 'LV--1050', 'LV' ),
-			array( false, 'LV  1050', 'LV' ),
+			array( true, "LV\t1050", 'LV' ),
+			array( true, 'LV--1050', 'LV' ),
+			array( true, 'LV  1050', 'LV' ),
+			array( true, "LV-1050\n", 'LV' ),
+			array( true, 'LV-1050 ', 'LV' ),
 			array( false, 'LV_1050', 'LV' ),
 			// The bounds of the four digit range, and trailing characters.
 			array( true, '9999', 'LV' ),
 			array( false, '0999', 'LV' ),
 			array( false, 'LV-1050x', 'LV' ),
-			array( false, 'LV-1050 ', 'LV' ),
 		);
 
-		return array_merge( $cz, $se, $li, $lv );
+		// 'BFP O12' is what wc_format_postcode() makes of 'BFPO 12'.
+		$gb = array(
+			array( true, 'SW1A 1AA', 'GB' ),
+			array( true, 'SW1A  1AA', 'GB' ),
+			array( true, 'sw1a1aa', 'GB' ),
+			array( true, 'BFPO 12', 'GB' ),
+			array( true, 'BFP O12', 'GB' ),
+			array( true, 'GIR 0AA', 'GB' ),
+			array( false, 'SW1A 1A', 'GB' ),
+			array( false, '12345', 'GB' ),
+		);
+
+		// The ISO country code may prefix any postcode.
+		$prefix = array(
+			array( true, 'MD-2001', 'MD' ),
+			array( true, 'MD2001', 'MD' ),
+			array( true, '2001', 'MD' ),
+			array( true, 'AZ 1000', 'AZ' ),
+			array( true, 'AX-22100', 'FI' ),
+			array( false, 'ZZ-2001', 'MD' ),
+		);
+
+		// Argentina accepts the old four digit codes and the lettered ones.
+		$ar = array(
+			array( true, '1425', 'AR' ),
+			array( true, 'C1425ABC', 'AR' ),
+			array( false, '142', 'AR' ),
+		);
+
+		$misc = array(
+			array( true, '100-01', 'TW' ),
+			array( true, '2 000', 'AU' ),
+			array( true, '90210 ', 'US' ),
+			array( true, '90210-1234', 'US' ),
+			array( false, '9021', 'US' ),
+			array( false, '2000#', 'AU' ),
+			array( false, 'anything#', 'XX' ),
+			array( true, 'anything', 'XX' ),
+		);
+
+		return array_merge( $cz, $se, $li, $lv, $gb, $prefix, $ar, $misc );
 	}
 
 	/**
@@ -132,6 +169,19 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_postcode( bool $expected, string $postcode, string $country ): void {
 		$this->assertSame( $expected, WC_Validation::is_postcode( $postcode, $country ) );
+	}
+
+	/**
+	 * A rule that does not compile makes the server accept any postcode for
+	 * that country, so every generated rule must compile.
+	 */
+	public function test_every_postcode_rule_compiles(): void {
+		$rules = \Automattic\WooCommerce\Internal\Utilities\PostcodeValidation::get_rules();
+
+		$this->assertGreaterThan( 100, count( $rules ) );
+		foreach ( $rules as $country => $rule ) {
+			$this->assertNotFalse( preg_match( '~\A(?:' . $rule . ')\z~i', '' ), "The {$country} rule does not compile." );
+		}
 	}
 
 	/**
