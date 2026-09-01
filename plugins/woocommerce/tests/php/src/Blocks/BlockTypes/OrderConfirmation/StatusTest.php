@@ -27,7 +27,7 @@ class StatusTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The block filter pipeline preserves order context, legacy arguments, and legacy precedence.
+	 * @testdox The block filter pipeline preserves order context, legacy arguments, and new-filter precedence.
 	 */
 	public function test_filter_pipeline_preserves_context_arguments_and_precedence(): void {
 		$order                   = $this->create_failed_order();
@@ -59,21 +59,19 @@ class StatusTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_failed_order( $order );
 
-		$this->assertSame( self::BLOCK_FAILED_MESSAGE, $new_filter_message, 'The new filter should receive the exact block default.' );
-		$this->assertSame( $order, $new_filter_order, 'The new filter should receive the exact failed order.' );
 		$this->assertCount( 2, $legacy_filter_arguments, 'The legacy filter should continue receiving two arguments.' );
-		$this->assertSame( $new_filter_result, $legacy_filter_arguments[0], 'The legacy filter should receive the validated new-filter result.' );
+		$this->assertSame( self::BLOCK_FAILED_MESSAGE, $legacy_filter_arguments[0], 'The legacy filter should receive the untouched block default.' );
 		$this->assertNull( $legacy_filter_arguments[1], 'The legacy filter second argument should remain null.' );
-		$this->assertStringContainsString( $legacy_filter_result, $html, 'The legacy filter should retain final output control.' );
-		$this->assertStringNotContainsString( $new_filter_result, $html, 'The legacy replacement should win final precedence.' );
+		$this->assertSame( $legacy_filter_result, $new_filter_message, 'The new filter should receive the validated legacy-filter result.' );
+		$this->assertSame( $order, $new_filter_order, 'The new filter should receive the exact failed order.' );
+		$this->assertStringContainsString( $new_filter_result, $html, 'The new filter should retain final output control.' );
+		$this->assertStringNotContainsString( $legacy_filter_result, $html, 'The new-filter replacement should win final precedence.' );
 	}
 
 	/**
-	 * @testdox An empty new block-filter result is passed unchanged to the legacy filter.
+	 * @testdox An empty new block-filter result is the final message.
 	 */
-	public function test_empty_new_filter_result_is_passed_to_legacy_filter(): void {
-		$legacy_filter_message = null;
-
+	public function test_empty_new_filter_result_is_final(): void {
 		add_filter(
 			'woocommerce_thankyou_order_failed_text',
 			static function () {
@@ -82,42 +80,47 @@ class StatusTest extends WC_Unit_Test_Case {
 		);
 		add_filter(
 			'woocommerce_thankyou_order_received_text',
-			static function ( $message ) use ( &$legacy_filter_message ) {
-				$legacy_filter_message = $message;
+			static function () {
 				return '<strong>Legacy replacement</strong>';
 			}
 		);
 
 		$html = $this->render_failed_order( $this->create_failed_order() );
 
-		$this->assertSame( '', $legacy_filter_message, 'The legacy filter should receive the empty new-filter result.' );
-		$this->assertStringContainsString( '<strong>Legacy replacement</strong>', $html, 'The legacy filter should retain final control after an empty new-filter result.' );
+		$this->assertStringNotContainsString( '<strong>Legacy replacement</strong>', $html, 'An empty new-filter result should override the legacy replacement.' );
+		$this->assertMatchesRegularExpression(
+			'/<p><\/p>\s*<p class="wc-block-order-confirmation-status__actions">/',
+			$html,
+			'The failed-message paragraph should be empty.'
+		);
 	}
 
 	/**
-	 * @testdox An invalid new block-filter result falls back before the legacy filter runs.
+	 * @testdox An invalid new block-filter result preserves the valid legacy-filter result.
 	 */
-	public function test_invalid_new_filter_return_falls_back_to_block_default(): void {
-		$legacy_filter_message = null;
+	public function test_invalid_new_filter_return_preserves_legacy_filter_result(): void {
+		$new_filter_message   = null;
+		$legacy_filter_result = '<a href="https://example.com/legacy">Legacy replacement</a>';
 
 		add_filter(
 			'woocommerce_thankyou_order_failed_text',
-			static function () {
+			static function ( $message ) use ( &$new_filter_message ) {
+				$new_filter_message = $message;
 				return array( 'invalid' );
 			}
 		);
 		add_filter(
 			'woocommerce_thankyou_order_received_text',
-			static function ( $message ) use ( &$legacy_filter_message ) {
-				$legacy_filter_message = $message;
-				return $message;
+			static function () use ( $legacy_filter_result ) {
+				return $legacy_filter_result;
 			}
 		);
 
 		$html = $this->render_failed_order( $this->create_failed_order() );
 
-		$this->assertSame( self::BLOCK_FAILED_MESSAGE, $legacy_filter_message, 'The legacy filter should receive the block default after new-filter fallback.' );
-		$this->assertStringContainsString( self::BLOCK_FAILED_MESSAGE, $html, 'The block default should render after new-filter fallback.' );
+		$this->assertSame( $legacy_filter_result, $new_filter_message, 'The new filter should receive the validated legacy-filter result.' );
+		$this->assertStringContainsString( $legacy_filter_result, $html, 'An invalid new-filter return should preserve the legacy-filter result, not the block default.' );
+		$this->assertStringNotContainsString( self::BLOCK_FAILED_MESSAGE, $html, 'An invalid new-filter return should not discard valid legacy text for the block default.' );
 	}
 
 	/**
@@ -145,17 +148,9 @@ class StatusTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An empty legacy block-filter result remains the final message.
+	 * @testdox An empty legacy block-filter result remains the final message when no new-filter callback runs.
 	 */
 	public function test_empty_legacy_filter_result_remains_empty(): void {
-		$new_filter_result = '<strong>New failure context</strong>';
-
-		add_filter(
-			'woocommerce_thankyou_order_failed_text',
-			static function () use ( $new_filter_result ) {
-				return $new_filter_result;
-			}
-		);
 		add_filter(
 			'woocommerce_thankyou_order_received_text',
 			static function () {
@@ -170,6 +165,37 @@ class StatusTest extends WC_Unit_Test_Case {
 			$html,
 			'The failed-message paragraph should remain empty.'
 		);
+	}
+
+	/**
+	 * @testdox The new filter overrides a single-argument legacy callback that replaces the message unconditionally.
+	 */
+	public function test_single_argument_legacy_replacer_is_overridden_by_new_filter(): void {
+		$new_filter_result    = '<strong>Merchant failure context</strong>';
+		$legacy_filter_result = '<strong>Unconditional legacy replacement</strong>';
+
+		add_filter(
+			'woocommerce_thankyou_order_failed_text',
+			static function () use ( $new_filter_result ) {
+				return $new_filter_result;
+			}
+		);
+		// Shaped like gateway callbacks that declare a single $text parameter (so they never receive
+		// the $order argument) and replace the message unconditionally at a later priority.
+		add_filter(
+			'woocommerce_thankyou_order_received_text',
+			static function ( $text ) use ( $legacy_filter_result ) {
+				// Avoid parameter not used PHPCS errors.
+				unset( $text );
+				return $legacy_filter_result;
+			},
+			11
+		);
+
+		$html = $this->render_failed_order( $this->create_failed_order() );
+
+		$this->assertStringContainsString( $new_filter_result, $html, 'The new filter should override an unconditional single-argument legacy replacer.' );
+		$this->assertStringNotContainsString( $legacy_filter_result, $html, 'The unconditional legacy replacement should not survive the new filter.' );
 	}
 
 	/**
