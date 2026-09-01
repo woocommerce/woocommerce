@@ -1172,11 +1172,11 @@ jQuery( function ( $ ) {
 
 				// Only lines that can actually be returned to stock count towards the total.
 				$( '.woocommerce_order_items input.refund_order_item_qty[data-can-restock="yes"]' ).each( function() {
-					total_qty += parseInt( $( this ).val(), 10 ) || 0;
+					total_qty += parseFloat( $( this ).val() ) || 0;
 				});
 
 				if ( 0 === total_qty ) {
-					$checkbox.prop( 'disabled', true ).prop( 'checked', false ).removeData( 'user-set' );
+					$checkbox.prop( 'disabled', true ).prop( 'checked', false );
 					$description.text( woocommerce_admin_meta_boxes.i18n_restock_enter_qty );
 					return;
 				}

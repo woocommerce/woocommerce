@@ -38,7 +38,7 @@ $restockable_items = array();
 foreach ( $line_items as $restock_item_id => $restock_item ) {
 	$restock_product = $restock_item->get_product();
 
-	if ( $restock_product && $restock_product->managing_stock() && (int) $restock_item->get_meta( '_reduced_stock', true ) > 0 ) {
+	if ( $restock_product && $restock_product->managing_stock() && (float) $restock_item->get_meta( '_reduced_stock', true ) > 0 ) {
 		$restockable_items[ $restock_item_id ] = true;
 	}
 }
