@@ -734,12 +734,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should report when no push token records are registered.
 	 */
 	public function test_resolve_tokens_for_roles_reports_no_registered_tokens(): void {
-		$data_store = new PushTokensDataStore();
+		$sut = new PushTokensDataStore();
 
-		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
 
-		$this->assertSame( array(), $resolution->get_tokens() );
-		$this->assertSame( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, $resolution->get_outcome() );
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve when none are registered.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, $resolution->get_outcome(), 'The outcome should identify the empty registry.' );
 		$this->assertSame(
 			array(
 				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS,
@@ -747,7 +747,30 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'eligible_user_count'          => 0,
 				'resolved_token_count'         => 0,
 			),
-			$resolution->get_diagnostics()
+			$resolution->get_diagnostics(),
+			'Diagnostics should report zero registered and eligible token owners.'
+		);
+	}
+
+	/**
+	 * @testdox Should report when no roles are requested.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_requested_roles(): void {
+		$sut = new PushTokensDataStore();
+
+		$resolution = $sut->resolve_tokens_for_roles( array() );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve without requested roles.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_ROLES, $resolution->get_outcome(), 'The outcome should identify the missing roles.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_ROLES,
+				'registered_token_owner_count' => 0,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should report that role resolution did not run.'
 		);
 	}
 
@@ -756,14 +779,14 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function test_resolve_tokens_for_roles_reports_no_eligible_users(): void {
 		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
-		$data_store    = new PushTokensDataStore();
+		$sut           = new PushTokensDataStore();
 
-		$this->create_push_token_for_user( $data_store, $subscriber_id );
+		$this->create_push_token_for_user( $sut, $subscriber_id );
 
-		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
 
-		$this->assertSame( array(), $resolution->get_tokens() );
-		$this->assertSame( PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS, $resolution->get_outcome() );
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve for users outside the requested roles.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS, $resolution->get_outcome(), 'The outcome should identify the role mismatch.' );
 		$this->assertSame(
 			array(
 				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS,
@@ -771,7 +794,43 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'eligible_user_count'          => 0,
 				'resolved_token_count'         => 0,
 			),
-			$resolution->get_diagnostics()
+			$resolution->get_diagnostics(),
+			'Diagnostics should distinguish registered owners from eligible users.'
+		);
+	}
+
+	/**
+	 * @testdox Should report when eligible users have no valid push tokens.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_valid_tokens(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$sut      = new PushTokensDataStore();
+
+		wp_insert_post(
+			array(
+				'post_author' => $admin_id,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform' => PushToken::PLATFORM_APPLE,
+					'token'    => 'partial_token',
+				),
+			)
+		);
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'Malformed token records should not resolve.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_VALID_TOKENS, $resolution->get_outcome(), 'The outcome should identify invalid token records.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_VALID_TOKENS,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should retain owner and eligibility counts when token hydration fails.'
 		);
 	}
 
@@ -779,15 +838,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should report counts for successfully resolved token recipients.
 	 */
 	public function test_resolve_tokens_for_roles_reports_resolved_counts(): void {
-		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$data_store = new PushTokensDataStore();
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$sut      = new PushTokensDataStore();
 
-		$this->create_push_token_for_user( $data_store, $admin_id );
+		$this->create_push_token_for_user( $sut, $admin_id );
 
-		$resolution = $data_store->resolve_tokens_for_roles( array( 'administrator' ) );
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
 
-		$this->assertCount( 1, $resolution->get_tokens() );
-		$this->assertSame( PushTokenResolution::OUTCOME_RESOLVED, $resolution->get_outcome() );
+		$this->assertCount( 1, $resolution->get_tokens(), 'The eligible token should resolve.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_RESOLVED, $resolution->get_outcome(), 'The outcome should identify successful resolution.' );
 		$this->assertSame(
 			array(
 				'resolution_outcome'           => PushTokenResolution::OUTCOME_RESOLVED,
@@ -795,7 +854,74 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'eligible_user_count'          => 1,
 				'resolved_token_count'         => 1,
 			),
-			$resolution->get_diagnostics()
+			$resolution->get_diagnostics(),
+			'Diagnostics should report exact counts for the core data store.'
+		);
+	}
+
+	/**
+	 * @testdox Should preserve custom token results from get_tokens_for_roles overrides.
+	 */
+	public function test_resolve_tokens_for_roles_preserves_overridden_token_results(): void {
+		$token = new PushToken(
+			array(
+				'user_id'       => 17,
+				'token'         => 'custom-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'custom-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+		$sut   = $this->getMockBuilder( PushTokensDataStore::class )
+			->onlyMethods( array( 'get_tokens_for_roles' ) )
+			->getMock();
+		$sut->expects( $this->once() )
+			->method( 'get_tokens_for_roles' )
+			->with( array( 'administrator' ) )
+			->willReturn( array( $token ) );
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array( $token ), $resolution->get_tokens(), 'The overridden token result should be preserved.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_RESOLVED, $resolution->get_outcome(), 'A non-empty custom result should remain dispatchable.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_RESOLVED,
+				'registered_token_owner_count' => null,
+				'eligible_user_count'          => null,
+				'resolved_token_count'         => 1,
+			),
+			$resolution->get_diagnostics(),
+			'Unavailable core stage counts should not be inferred for a custom result.'
+		);
+	}
+
+	/**
+	 * @testdox Should identify empty custom token results without querying around the override.
+	 */
+	public function test_resolve_tokens_for_roles_reports_empty_overridden_token_results(): void {
+		$sut = $this->getMockBuilder( PushTokensDataStore::class )
+			->onlyMethods( array( 'get_tokens_for_roles' ) )
+			->getMock();
+		$sut->expects( $this->once() )
+			->method( 'get_tokens_for_roles' )
+			->with( array( 'administrator' ) )
+			->willReturn( array() );
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'The empty overridden token result should be preserved.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_CUSTOM_DATA_STORE, $resolution->get_outcome(), 'The outcome should identify an opaque custom result.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_CUSTOM_DATA_STORE,
+				'registered_token_owner_count' => null,
+				'eligible_user_count'          => null,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Unavailable core stage counts should not be inferred for an empty custom result.'
 		);
 	}
 

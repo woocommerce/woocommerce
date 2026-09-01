@@ -347,16 +347,46 @@ class PushTokensDataStore {
 	/**
 	 * Resolves push tokens and returns structured diagnostics for each resolution stage.
 	 *
+	 * Delegates token retrieval to get_tokens_for_roles() so subclass overrides
+	 * continue to control the resolved token list.
+	 *
 	 * @param string[] $roles The roles to query tokens for.
 	 * @return PushTokenResolution The resolved tokens and non-sensitive diagnostics.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function resolve_tokens_for_roles( array $roles ): PushTokenResolution {
-		$resolution = $this->query_tokens_for_roles( $roles );
+		/**
+		 * Resolved role tokens.
+		 *
+		 * @var PushToken[] $tokens
+		 */
+		$tokens     = $this->get_tokens_for_roles( $roles );
+		$cache_key  = implode( ',', $roles );
+		$resolution = $this->token_resolution_cache[ $cache_key ] ?? null;
+
+		if ( empty( $roles ) && empty( $tokens ) ) {
+			return new PushTokenResolution(
+				array(),
+				PushTokenResolution::OUTCOME_NO_ROLES,
+				0,
+				0
+			);
+		}
+
+		if ( null === $resolution || $tokens !== $resolution['tokens'] ) {
+			return new PushTokenResolution(
+				$tokens,
+				empty( $tokens )
+					? PushTokenResolution::OUTCOME_CUSTOM_DATA_STORE
+					: PushTokenResolution::OUTCOME_RESOLVED,
+				null,
+				null
+			);
+		}
 
 		return new PushTokenResolution(
-			$resolution['tokens'],
+			$tokens,
 			$resolution['resolution_outcome'],
 			$resolution['registered_token_owner_count'],
 			$resolution['eligible_user_count']
@@ -390,8 +420,9 @@ class PushTokensDataStore {
 			return $result;
 		}
 
-		if ( isset( $this->token_resolution_cache[ $cache_key ] ) ) {
-			return $this->token_resolution_cache[ $cache_key ];
+		$cached_resolution = $this->token_resolution_cache[ $cache_key ] ?? null;
+		if ( null !== $cached_resolution ) {
+			return $cached_resolution;
 		}
 
 		global $wpdb;
