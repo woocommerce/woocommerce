@@ -1775,3 +1775,72 @@
 33155757615	2026-08-28T08:32:33Z	CI	fix/31068-order-item-qty-validation	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
 33157095382	2026-08-28T08:52:58Z	CI	testops-234-delete-redundant-blocks-e2e-tests	pull_request	Blocks e2e tests - WP latest-1 [WP 7.0.4] 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	2	-	1
 33158668067	2026-08-28T09:16:13Z	CI	fix/31068-order-item-qty-validation	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33161791431	2026-08-28T10:02:11Z	CI	trunk	push	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33163095305	2026-08-28T10:22:14Z	CI	wooplug-6456-enhancement-add-date-field-type-support-for-additional	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33165896698	2026-08-28T11:06:29Z	CI	codex/cleanup-bundled-patterns	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	wordpress	2	wordpress-org	1
+33169102316	2026-08-28T11:57:01Z	CI	add/wooplug-7629-bis-migration-runners	pull_request	Core API tests - @woocommerce_plugin-woocommerce [api]	SAVED	packagist	1	-	1
+33171371588	2026-08-28T12:30:47Z	CI	codex/fix-26743-cancel-order-refresh	pull_request	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33173500801	2026-08-28T13:00:47Z	CI	add/wooplug-7627-bis-migration-primitives	pull_request	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	dockerhub	1	-	1
+33174358527	2026-08-28T13:12:30Z	CI	fix/42348-batch-shipping-rate-selection	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33176531756	2026-08-28T13:41:13Z	CI	codex/cleanup-bundled-patterns	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33177261971	2026-08-28T13:50:36Z	CI	fix/63773-scheduled-sales-memory	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33177975730	2026-08-28T13:59:46Z	CI	fix/68145-skip-themes-rewrite-flush	pull_request	Blocks e2e tests 2_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33181282209	2026-08-28T14:39:39Z	CI	claude/hook-docs-generator-guards	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33183710697	2026-08-28T15:08:54Z	CI	trunk	push	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33187593929	2026-08-28T15:56:49Z	CI	add/wooplug-7630-bis-migration-enable	pull_request	Blocks e2e tests 3_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33188723467	2026-08-28T16:10:47Z	CI	claude/hook-docs-order-confirmation	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33188723467	2026-08-28T16:10:47Z	CI	claude/hook-docs-order-confirmation	pull_request	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33197226189	2026-08-28T17:59:27Z	CI	claude/hook-docs-product-add-to-cart	pull_request	Blocks e2e tests 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33203343171	2026-08-28T19:19:20Z	CI	add/wooplug-7628-bis-migrators	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33206108321	2026-08-28T19:57:13Z	CI	fix/woo6-120-mis-scoped-output-suppressions	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33207125594	2026-08-28T20:11:03Z	CI	senadir/add/date-field-schema-validation	pull_request	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	dockerhub	1	-	1
+33207125594	2026-08-28T20:11:03Z	CI	senadir/add/date-field-schema-validation	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33208790100	2026-08-28T20:34:09Z	CI	fix/store-api-item-data-hidden-type	pull_request	Core e2e tests - serial 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33230733356	2026-08-29T03:10:30Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 3_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33230733356	2026-08-29T03:10:30Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33289697640	2026-08-30T03:11:35Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33289697640	2026-08-30T03:11:35Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 5_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	wordpress	2	wordpress-org	1
+33289697640	2026-08-30T03:11:35Z	scheduled checks 	trunk	schedule	Run nightly checks _ Core e2e tests - WP L-1 - serial [WP 7.0.4] 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33353115231	2026-08-31T03:12:52Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33353115231	2026-08-31T03:12:52Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33372397303	2026-08-31T08:19:50Z	CI	trunk	push	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33372416346	2026-08-31T08:20:04Z	CI	trunk	push	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33372502106	2026-08-31T08:21:07Z	CI	cherry-pick-PR68173-to-release/11.1	pull_request	Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33377393109	2026-08-31T09:23:03Z	CI	testops-234-remove-duplicate-register-product-collection-tests	pull_request	Blocks e2e tests - WP latest-1 [WP 7.0.4] 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33378748307	2026-08-31T09:39:23Z	CI	testops-234-demote-mini-cart-item-data-tests	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33379872558	2026-08-31T09:53:29Z	CI	trunk	push	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33381536125	2026-08-31T10:14:55Z	CI	fix/wooplug-791-separator-numeric-validation	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	dockerhub	1
+33381536125	2026-08-31T10:14:55Z	CI	fix/wooplug-791-separator-numeric-validation	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33383676577	2026-08-31T10:43:10Z	CI	release/11.1	push	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	LOST	dockerhub	2	dockerhub	1
+33385296673	2026-08-31T11:04:55Z	CI	fix/68168-order-fieldset-order-notes	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	2
+33387282524	2026-08-31T11:30:33Z	CI	codex/fix-ajax-product-search-escaping	pull_request	PHP 8.5 WP latest [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33390359223	2026-08-31T12:09:34Z	CI	fix/payment-method-na-label	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33391928680	2026-08-31T12:28:27Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33392542811	2026-08-31T12:35:45Z	CI	fix/variation-selector-placeholder-terms	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	workspace-eacces	1
+33393755002	2026-08-31T12:50:17Z	CI	fix/36538-any-variation-display	pull_request	Core e2e tests - parallel 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33404521447	2026-08-31T14:45:40Z	CI	fix/38574-tracker-retry-minimal	pull_request	Blocks e2e tests 1_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33408145382	2026-08-31T15:23:19Z	CI	trunk	push	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - Gutenberg stable - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - PHP 8.5 - parallel 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - PHP 8.5 - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	wordpress-org	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - WP L-1 - parallel [WP 7.0.4] 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33409364725	2026-08-31T15:35:58Z	CI	wooprd-3596-render-the-settings-page-through-the-dataform-adapter	pull_request	Core e2e tests - WP L-1 - serial [WP 7.0.4] 2_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33410453043	2026-08-31T15:47:27Z	CI	claude/hook-docs-order-confirmation	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33412836603	2026-08-31T16:12:43Z	CI	claude/hook-docs-product-add-to-cart	pull_request	Blocks e2e tests 5_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33412921741	2026-08-31T16:13:39Z	CI	claude/hook-docs-order-confirmation	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33413737009	2026-08-31T16:22:32Z	CI	claude/hook-docs-order-confirmation	pull_request	Blocks e2e tests 8_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33414479458	2026-08-31T16:30:30Z	CI	wooplug-2510-missing-products-in-analytics-products-search-when-there-are	pull_request	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33414929082	2026-08-31T16:35:15Z	CI	wooa7s-1541-downloads-advanced-filters-still-lack-customer-name-and	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	1	-	1
+33415370580	2026-08-31T16:40:05Z	CI	trunk	push	Blocks e2e tests 10_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33417306281	2026-08-31T17:01:35Z	CI	revert/classic-assets-node-build	pull_request	PHP 8.1 WP latest [WP latest] - @woocommerce_email-editor-config [unitphp]	SAVED	unknown	2	-	1
+33418887943	2026-08-31T17:18:56Z	CI	release/11.1	push	Core API tests - @woocommerce_plugin-woocommerce [api]	SAVED	wordpress	1	-	1
+33422582352	2026-08-31T18:00:00Z	CI	codex/fix-checkbox-description-markup	pull_request	Blocks e2e tests 6_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	packagist	1	-	1
+33434540835	2026-08-31T20:10:08Z	CI	fix/remove-ie8-leftovers	pull_request	Blocks e2e tests 7_10 - @woocommerce_plugin-woocommerce [e2e]	LOST	unknown	2	dockerhub	1
+33465407909	2026-09-01T03:13:06Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - unified editor assets 4_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33465407909	2026-09-01T03:13:06Z	scheduled checks 	trunk	schedule	Run nightly checks _ Blocks e2e tests - WP latest-1 [WP 7.0.4] 9_10 - @woocommerce_plugin-woocommerce [e2e]	SAVED	wordpress	1	-	1
+33467558504	2026-09-01T03:48:45Z	CI	sprinkle/modal-enter-key	pull_request	Core e2e tests - serial 1_2 - @woocommerce_plugin-woocommerce [e2e]	SAVED	unknown	2	-	1
+33467558504	2026-09-01T03:48:45Z	CI	sprinkle/modal-enter-key	pull_request	Metrics - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	unknown	2	-	1
+33467558504	2026-09-01T03:48:45Z	CI	sprinkle/modal-enter-key	pull_request	Metrics - unified editor assets - @woocommerce_plugin-woocommerce [performance] (optional)	SAVED	unknown	2	-	1
+33475842254	2026-09-01T06:01:12Z	CI	trunk	push	PHP 7.4 WP latest - 1 [WP 7.0.4] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	packagist	1	-	1
+33480004850	2026-09-01T06:59:19Z	CI	fix/38919-unregister-deleted-attribute-taxonomy	pull_request	PHP 8.5 WP latest (HPOSoff) [WP latest] - @woocommerce_plugin-woocommerce [unitphp]	SAVED	dockerhub	1	-	1
