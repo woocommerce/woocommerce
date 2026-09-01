@@ -42,6 +42,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		// Clean up any existing options/transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 
 		// Remove any filters that might interfere.
@@ -61,6 +62,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		// Clean up options and transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 
@@ -268,6 +270,30 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		// No file should be created since version matches.
 		$mu_plugin_file = $this->temp_mu_plugin_dir . '/woocommerce-analytics-proxy-speed-module.php';
 		$this->assertFileDoesNotExist( $mu_plugin_file );
+	}
+
+	/**
+	 * MU-plugins load whether or not the plugin carrying this package is active,
+	 * so a module file that outlives a deactivation must not be left holding a
+	 * stale `yes`. The sticky option survives: cached pages outlive both.
+	 */
+	public function test_removing_the_module_drops_its_authorization(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+
+		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
+
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'The module reads this to decide whether to serve; it must not survive removal.'
+		);
+		$this->assertSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ),
+			'The sticky option records that cached pages may exist, which removal does not undo.'
+		);
 	}
 
 	/**

@@ -387,6 +387,11 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Maybe removes the proxy speed module. This should be invoked when the plugin is deactivated.
+	 *
+	 * Also drops the module's authorization. MU-plugins load whether or not the
+	 * plugin carrying this package is active, so an undeletable module file left
+	 * behind by a deactivation would keep answering on a stale `yes`. The sticky
+	 * option is left alone: pages cached while the feature was on outlive both.
 	 */
 	public static function maybe_remove_proxy_speed_module() {
 		if ( ! self::init_filesystem() ) {
@@ -408,6 +413,7 @@ class Woocommerce_Analytics {
 		}
 
 		delete_option( self::PROXY_SPEED_MODULE_VERSION_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 	}
 
