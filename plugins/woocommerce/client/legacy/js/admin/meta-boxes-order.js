@@ -1191,9 +1191,7 @@ jQuery( function ( $ ) {
 
 				if ( $checkbox.prop( 'checked' ) ) {
 					$description.text(
-						1 === total_qty
-							? woocommerce_admin_meta_boxes.i18n_restock_will_1
-							: woocommerce_admin_meta_boxes.i18n_restock_will_n.replace( '%qty%', total_qty )
+						woocommerce_admin_meta_boxes.i18n_restock_quantity.replace( '%qty%', total_qty )
 					);
 				} else {
 					$description.text( woocommerce_admin_meta_boxes.i18n_restock_none );
