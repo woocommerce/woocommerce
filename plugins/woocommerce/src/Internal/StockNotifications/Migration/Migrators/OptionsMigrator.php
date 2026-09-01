@@ -109,13 +109,20 @@ class OptionsMigrator {
 	private const TEXT_SUB_KEYS = array( 'subject', 'heading', 'intro_content', 'additional_content' );
 
 	/**
-	 * Placeholders every Core stock notification email declares. Both sides ship this
-	 * same default set; the legacy `woocommerce_bis_*_email_placeholders` filters are the
-	 * only way a stored value could contain anything outside it.
+	 * Placeholders every Core stock notification email declares: the two the email classes
+	 * set themselves, plus the base set `WC_Email::__construct()` merges into every email.
+	 * Both sides ship this same default set; the legacy `woocommerce_bis_*_email_placeholders`
+	 * filters are the only way a stored value could contain anything outside it.
 	 *
 	 * @var string[]
 	 */
-	private const KNOWN_PLACEHOLDERS = array( '{site_title}', '{product_name}' );
+	private const KNOWN_PLACEHOLDERS = array(
+		'{site_title}',
+		'{product_name}',
+		'{site_address}',
+		'{site_url}',
+		'{store_email}',
+	);
 
 	/**
 	 * Outcome code for a value containing a placeholder token outside the known set.
