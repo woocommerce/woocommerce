@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Evaluate conditional additional checkout field rules when persisting fields without requiring the experimental-blocks flag, matching the already graduated validation and frontend behavior.
