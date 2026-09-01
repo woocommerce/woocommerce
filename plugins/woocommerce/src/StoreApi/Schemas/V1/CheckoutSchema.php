@@ -316,7 +316,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @param \WC_Order|\WC_Customer $wc_object Order or customer to read fields from.
 	 * @return array
 	 */
-	protected function get_additional_fields_response( \WC_Data $wc_object ) {
+	public function get_additional_fields_response( \WC_Data $wc_object ) {
 		$fields = $wc_object instanceof \WC_Order
 			? wp_parse_args(
 				$this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' ),
@@ -324,21 +324,19 @@ class CheckoutSchema extends AbstractSchema {
 			)
 			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
 
-		$additional_field_schema = $this->get_additional_fields_schema();
-		foreach ( $fields as $key => $value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
-				unset( $fields[ $key ] );
-				continue;
-			}
+		// Every registered field gets a key, even with no value yet. Hidden/required rules about a missing key match
+		// anything, so a field with no value must still be present, like core address fields are. See issue #66943.
+		$response = [];
+		foreach ( $this->get_additional_fields_schema() as $key => $field_schema ) {
 			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
-			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
-				$fields[ $key ] = (bool) $value;
+			if ( isset( $field_schema['type'] ) && 'boolean' === $field_schema['type'] ) {
+				$response[ $key ] = (bool) ( $fields[ $key ] ?? false );
 			} else {
-				$fields[ $key ] = $this->prepare_html_response( $value );
+				$response[ $key ] = $this->prepare_html_response( $fields[ $key ] ?? '' );
 			}
 		}
 
-		return (object) $fields;
+		return (object) $response;
 	}
 
 	/**
