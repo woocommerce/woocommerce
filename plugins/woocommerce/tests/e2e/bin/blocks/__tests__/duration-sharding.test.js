@@ -3,11 +3,11 @@ const assert = require( 'node:assert/strict' );
 const { describe, test } = require( 'node:test' );
 
 const {
+	assertPlanCoversCorpus,
 	assignDurationShards,
-	buildProjectTestList,
 	collectProjectFiles,
-	parseShard,
 	planDurationShards,
+	selectShardFiles,
 	validateDurationManifest,
 } = require( '../duration-sharding' );
 
@@ -132,28 +132,6 @@ describe( 'assignDurationShards', () => {
 				),
 			/Shard count cannot exceed the number of weighted files/
 		);
-	} );
-} );
-
-describe( 'parseShard', () => {
-	test( 'parses standard Playwright shard values with arbitrary totals', () => {
-		assert.deepEqual( parseShard( '1/10' ), {
-			index: 1,
-			count: 10,
-		} );
-		assert.deepEqual( parseShard( '2/3' ), {
-			index: 2,
-			count: 3,
-		} );
-	} );
-
-	test( 'rejects malformed and out-of-range shard values', () => {
-		for ( const value of [ '1', '0/10', '11/10', 'one/10', '1/0' ] ) {
-			assert.throws(
-				() => parseShard( value ),
-				/Shard must use N\/M with positive integers and N no greater than M/
-			);
-		}
 	} );
 } );
 
@@ -307,17 +285,6 @@ describe( 'Playwright project inventory', () => {
 		);
 	} );
 
-	test( 'renders project-qualified file-only test-list entries', () => {
-		assert.equal(
-			buildProjectTestList( 'blocks-chromium', [
-				'blocks/nested/a.test.ts',
-				'blocks/z.spec.ts',
-			] ),
-			'[blocks-chromium] › blocks/nested/a.test.ts\n' +
-				'[blocks-chromium] › blocks/z.spec.ts\n'
-		);
-	} );
-
 	test( 'plans the complete collected inventory when the manifest drifts', () => {
 		const files = collectProjectFiles( report, 'blocks-chromium' );
 		const manifest = {
@@ -351,5 +318,171 @@ describe( 'Playwright project inventory', () => {
 			.flatMap( ( shard ) => shard.files )
 			.sort();
 		assert.deepEqual( plannedFiles, files );
+	} );
+} );
+
+describe( 'assertPlanCoversCorpus', () => {
+	test( 'accepts a plan that partitions the discovered files exactly', () => {
+		assert.doesNotThrow( () =>
+			assertPlanCoversCorpus(
+				[
+					{ files: [ 'blocks/a.spec.ts' ] },
+					{ files: [ 'blocks/b.spec.ts' ] },
+				],
+				[ 'blocks/a.spec.ts', 'blocks/b.spec.ts' ]
+			)
+		);
+	} );
+
+	test( 'rejects a plan that would silently drop a discovered file', () => {
+		assert.throws(
+			() =>
+				assertPlanCoversCorpus(
+					[ { files: [ 'blocks/a.spec.ts' ] } ],
+					[ 'blocks/a.spec.ts', 'blocks/b.spec.ts' ]
+				),
+			/Missing: blocks\/b\.spec\.ts/
+		);
+	} );
+
+	test( 'rejects a plan that schedules a file nobody discovered', () => {
+		assert.throws(
+			() =>
+				assertPlanCoversCorpus(
+					[
+						{
+							files: [
+								'blocks/a.spec.ts',
+								'blocks/ghost.spec.ts',
+							],
+						},
+					],
+					[ 'blocks/a.spec.ts' ]
+				),
+			/Unexpected: blocks\/ghost\.spec\.ts/
+		);
+	} );
+
+	test( 'rejects a plan that runs the same file in two shards', () => {
+		assert.throws(
+			() =>
+				assertPlanCoversCorpus(
+					[
+						{ files: [ 'blocks/a.spec.ts' ] },
+						{ files: [ 'blocks/a.spec.ts' ] },
+					],
+					[ 'blocks/a.spec.ts' ]
+				),
+			/assigns blocks\/a\.spec\.ts to more than one shard/
+		);
+	} );
+} );
+
+describe( 'selectShardFiles', () => {
+	const files = [
+		'blocks/fast.spec.ts',
+		'blocks/medium.spec.ts',
+		'blocks/slow.spec.ts',
+	];
+	const manifest = {
+		schemaVersion: 1,
+		fallbackDurationMs: 40,
+		files: {
+			'blocks/fast.spec.ts': 10,
+			'blocks/medium.spec.ts': 40,
+			'blocks/slow.spec.ts': 100,
+		},
+	};
+
+	test( 'balances by duration rather than by discovery order', () => {
+		const first = selectShardFiles( {
+			files,
+			manifest,
+			shard: { current: 1, total: 2 },
+		} );
+		const second = selectShardFiles( {
+			files,
+			manifest,
+			shard: { current: 2, total: 2 },
+		} );
+
+		assert.equal( first.fallbackReason, null );
+		assert.deepEqual( [ ...first.files ], [ 'blocks/slow.spec.ts' ] );
+		assert.deepEqual( [ ...second.files ].sort(), [
+			'blocks/fast.spec.ts',
+			'blocks/medium.spec.ts',
+		] );
+	} );
+
+	test( 'covers every discovered file exactly once across all shards', () => {
+		const planned = [ 1, 2, 3 ].flatMap( ( current ) => [
+			...selectShardFiles( {
+				files,
+				manifest,
+				shard: { current, total: 3 },
+			} ).files,
+		] );
+
+		assert.deepEqual( planned.sort(), [ ...files ].sort() );
+	} );
+
+	test( 'selects everything for a single shard, as used by --last-failed retries', () => {
+		const selection = selectShardFiles( {
+			files,
+			manifest,
+			shard: { current: 1, total: 1 },
+		} );
+
+		assert.deepEqual( [ ...selection.files ].sort(), [ ...files ].sort() );
+	} );
+
+	test( 'weights an unrecorded file with the manifest fallback', () => {
+		const selection = selectShardFiles( {
+			files: [ ...files, 'blocks/brand-new.spec.ts' ],
+			manifest,
+			shard: { current: 1, total: 2 },
+		} );
+
+		assert.equal( selection.fallbackReason, null );
+		assert.ok(
+			[ 1, 2 ]
+				.flatMap( ( current ) => [
+					...selectShardFiles( {
+						files: [ ...files, 'blocks/brand-new.spec.ts' ],
+						manifest,
+						shard: { current, total: 2 },
+					} ).files,
+				] )
+				.includes( 'blocks/brand-new.spec.ts' ),
+			'A file missing from the manifest must still be scheduled'
+		);
+	} );
+
+	test( 'reports a fallback reason instead of throwing on an unusable manifest', () => {
+		const selection = selectShardFiles( {
+			files,
+			manifest: { schemaVersion: 99, fallbackDurationMs: 1, files: {} },
+			shard: { current: 1, total: 2 },
+		} );
+
+		assert.equal( selection.files, null );
+		assert.match(
+			selection.fallbackReason,
+			/Unsupported duration manifest schema/
+		);
+	} );
+
+	test( 'reports a fallback reason when there are fewer files than shards', () => {
+		const selection = selectShardFiles( {
+			files: [ 'blocks/only.spec.ts' ],
+			manifest,
+			shard: { current: 1, total: 10 },
+		} );
+
+		assert.equal( selection.files, null );
+		assert.match(
+			selection.fallbackReason,
+			/Shard count cannot exceed the number of weighted files/
+		);
 	} );
 } );

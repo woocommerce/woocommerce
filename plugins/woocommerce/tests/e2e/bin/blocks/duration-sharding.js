@@ -61,27 +61,6 @@ function assignDurationShards( weightedFiles, shardCount ) {
 	return shards;
 }
 
-function parseShard( value ) {
-	const match = /^(\d+)\/(\d+)$/.exec( value );
-	const index = Number( match?.[ 1 ] );
-	const count = Number( match?.[ 2 ] );
-
-	if (
-		! match ||
-		! Number.isSafeInteger( index ) ||
-		! Number.isSafeInteger( count ) ||
-		index < 1 ||
-		count < 1 ||
-		index > count
-	) {
-		throw new Error(
-			'Shard must use N/M with positive integers and N no greater than M'
-		);
-	}
-
-	return { index, count };
-}
-
 function validateDurationManifest( manifest ) {
 	if ( manifest?.schemaVersion !== DURATION_MANIFEST_SCHEMA_VERSION ) {
 		throw new Error(
@@ -176,13 +155,6 @@ function collectProjectFiles( report, projectName ) {
 	return [ ...files ].sort( compareFilePaths );
 }
 
-function buildProjectTestList( projectName, files ) {
-	return files
-		.map( ( file ) => `[${ projectName }] › ${ file }` )
-		.join( '\n' )
-		.concat( files.length > 0 ? '\n' : '' );
-}
-
 function planDurationShards( { files, manifest, shardCount } ) {
 	validateDurationManifest( manifest );
 	const weightedFiles = files.map( ( file ) => ( {
@@ -193,11 +165,84 @@ function planDurationShards( { files, manifest, shardCount } ) {
 	return assignDurationShards( weightedFiles, shardCount );
 }
 
+/**
+ * Guard against a plan that would drop or duplicate a spec file.
+ *
+ * Playwright accepts a run in which every test was excluded, so a gap here
+ * would report success while testing nothing.
+ *
+ * @param {Array<{files: string[]}>} shards Planned shards.
+ * @param {Iterable<string>}         files  Discovered spec files.
+ */
+function assertPlanCoversCorpus( shards, files ) {
+	const corpus = new Set( files );
+	const planned = new Set();
+
+	for ( const shard of shards ) {
+		for ( const file of shard.files ) {
+			if ( planned.has( file ) ) {
+				throw new Error(
+					`Blocks shard plan assigns ${ file } to more than one shard`
+				);
+			}
+			planned.add( file );
+		}
+	}
+
+	const missing = [ ...corpus ].filter( ( file ) => ! planned.has( file ) );
+	const unexpected = [ ...planned ].filter(
+		( file ) => ! corpus.has( file )
+	);
+
+	if ( missing.length > 0 || unexpected.length > 0 ) {
+		throw new Error(
+			`Blocks shard plan does not match the discovered suite. Missing: ${
+				missing.join( ', ' ) || 'none'
+			}. Unexpected: ${ unexpected.join( ', ' ) || 'none' }.`
+		);
+	}
+}
+
+/**
+ * Resolve the spec files that belong to one shard.
+ *
+ * An unusable manifest is a balancing problem rather than a coverage one, so it
+ * is reported back as a fallback reason and the caller can leave Playwright's
+ * own sharding in place. A plan that does not cover the discovered suite is a
+ * coverage problem and always throws.
+ *
+ * @param {Object}                           options
+ * @param {string[]}                         options.files    Discovered spec files.
+ * @param {Object}                           options.manifest Duration manifest.
+ * @param {{current: number, total: number}} options.shard    Requested shard.
+ * @return {{files: Set<string>|null, fallbackReason: string|null}} Selection.
+ */
+function selectShardFiles( { files, manifest, shard } ) {
+	let shards;
+
+	try {
+		shards = planDurationShards( {
+			files,
+			manifest,
+			shardCount: shard.total,
+		} );
+	} catch ( error ) {
+		return { files: null, fallbackReason: error.message };
+	}
+
+	assertPlanCoversCorpus( shards, files );
+
+	return {
+		files: new Set( shards[ shard.current - 1 ].files ),
+		fallbackReason: null,
+	};
+}
+
 module.exports = {
+	assertPlanCoversCorpus,
 	assignDurationShards,
-	buildProjectTestList,
 	collectProjectFiles,
-	parseShard,
 	planDurationShards,
+	selectShardFiles,
 	validateDurationManifest,
 };
