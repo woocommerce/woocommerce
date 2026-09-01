@@ -1050,9 +1050,9 @@ describe( 'settings HTML rendering', () => {
 
 		// DataForm paints the label for a read-only field, so the info
 		// renderer must not repeat it.
-		expect( container.textContent?.match( /Info field/g ) ).toHaveLength(
-			1
-		);
+		expect(
+			( container.textContent ?? '' ).split( 'Info field' )
+		).toHaveLength( 2 );
 
 		// The info description keeps sanitized markup while the group
 		// description renders as plain text, so the only strong tag left is
