@@ -8367,7 +8367,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
 			identifier: method.notFound
-			count: 1
+			count: 4
 			path: includes/class-wc-ajax.php
 
 		-
@@ -66645,12 +66645,6 @@ parameters:
 		-
 			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
 			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
 			count: 2
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
