@@ -96,9 +96,9 @@ class PaymentResult {
 	/**
 	 * Set redirect URL.
 	 *
-	 * @param array $redirect_url URL to redirect the customer to after checkout.
+	 * @param string $redirect_url URL to redirect the customer to after checkout.
 	 */
-	public function set_redirect_url( $redirect_url = [] ) {
+	public function set_redirect_url( $redirect_url = '' ) {
 		$this->redirect_url = esc_url_raw( $redirect_url );
 	}
 }

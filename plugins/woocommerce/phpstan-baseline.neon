@@ -68395,12 +68395,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68607,12 +68601,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @param has invalid value \(bool The WP_DEBUG mode\.\)\: Unexpected token "The", expected variable at offset 115 on line 4$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
