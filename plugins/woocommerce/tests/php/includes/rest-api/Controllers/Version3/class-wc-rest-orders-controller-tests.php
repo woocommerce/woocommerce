@@ -1584,8 +1584,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
 	}
-<<<<<<< HEAD
-=======
 
 	/**
 	 * Create a pending order with one $100 product, optionally with its line total manually edited.
@@ -1979,5 +1977,4 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			),
 		);
 	}
->>>>>>> 240d98b24f (Harden order line meta value handling in the REST API (#68190))
 }
