@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Harden REST API key authentication route handling.
