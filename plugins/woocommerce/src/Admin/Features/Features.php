@@ -550,11 +550,7 @@ class Features {
 	}
 
 	/**
-	 * Checks if analytics is enabled, without building the (translated) feature definitions.
-	 *
-	 * Mirrors FeaturesController::feature_is_enabled( 'analytics' ), since going through
-	 * FeaturesUtil/FeaturesController here can trigger a too-early textdomain load for
-	 * callers that check this before init.
+	 * Checks if analytics is enabled, without going through FeaturesController.
 	 *
 	 * @return bool
 	 */
