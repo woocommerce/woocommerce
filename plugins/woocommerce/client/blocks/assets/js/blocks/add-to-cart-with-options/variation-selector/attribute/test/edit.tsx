@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as hooks from '@woocommerce/base-context/hooks';
 import type { ComponentProps, ReactNode } from 'react';
@@ -22,7 +22,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 jest.mock( '@wordpress/block-editor', () => ( {
 	...jest.requireActual( '@wordpress/block-editor' ),
 	BlockContextProvider: ( { children }: { children: ReactNode } ) => (
-		<div>{ children }</div>
+		<div data-testid="attribute-row">{ children }</div>
 	),
 	InspectorControls: () => null,
 	useBlockProps: jest.fn( () => ( {} ) ),
@@ -98,12 +98,13 @@ const renderWithAttributes = (
  * Exactly one row renders inner blocks; every other row renders a preview. The
  * returned index is the position of the editable one.
  */
-const selectedRowIndex = () => {
-	const rows = screen.getAllByTestId( /attribute-(inner-blocks|preview)/ );
-	return rows.findIndex(
-		( row ) => row.dataset.testid === 'attribute-inner-blocks'
-	);
-};
+const selectedRowIndex = () =>
+	screen
+		.getAllByTestId( 'attribute-row' )
+		.findIndex(
+			( row ) =>
+				!! within( row ).queryByTestId( 'attribute-inner-blocks' )
+		);
 
 describe( 'Variation Selector attribute template edit', () => {
 	beforeEach( () => {
