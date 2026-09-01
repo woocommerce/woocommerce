@@ -6,6 +6,7 @@ import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse, BlockInstance } from '@wordpress/blocks';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import {
 	Feature,
 	PersonalizationTag,
 	GlobalEmailStylesPost,
+	RecentEmailsQuery,
 } from './types';
 
 function getContentFromEntity( entity ): string {
@@ -183,15 +185,38 @@ export const getEditedEmailContent = createRegistrySelector(
 	}
 );
 
+const DEFAULT_RECENT_EMAILS_QUERY: RecentEmailsQuery = {
+	per_page: 30, // show a maximum of 30 for now
+	status: 'publish,sent',
+};
+
+function isRecentEmailsQuery( value: unknown ): value is RecentEmailsQuery {
+	return !! value && typeof value === 'object' && ! Array.isArray( value );
+}
+
+/**
+ * Returns the emails listed in the "Recent" category of the template selection
+ * modal. The query can be changed with a filter, so integrations can list their
+ * own post statuses. A status has to be registered on the site, otherwise the
+ * REST API rejects the request and the list stays empty.
+ */
 export const getSentEmailEditorPosts = createRegistrySelector(
 	( select ) => () => {
 		const postType = select( storeName ).getEmailPostType();
+
+		const filteredQuery = applyFilters(
+			'woocommerce_email_editor_recent_emails_query',
+			{ ...DEFAULT_RECENT_EMAILS_QUERY },
+			postType
+		);
+
+		const query = isRecentEmailsQuery( filteredQuery )
+			? filteredQuery
+			: DEFAULT_RECENT_EMAILS_QUERY;
+
 		return (
 			select( coreDataStore )
-				.getEntityRecords( 'postType', postType, {
-					per_page: 30, // show a maximum of 30 for now
-					status: 'publish,sent', // show only sent emails
-				} )
+				.getEntityRecords( 'postType', postType, query )
 				?.filter(
 					( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
 				) || []

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the vendored webonyx/graphql-php to 15.32.3 to limit parser recursion and field comparisons.

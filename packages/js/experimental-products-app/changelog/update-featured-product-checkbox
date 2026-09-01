@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Render the "Featured product" and "Track inventory" controls as checkboxes, move "Track inventory" above "Stock status", and tighten the row height for checkbox-only fields

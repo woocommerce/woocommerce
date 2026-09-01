@@ -33,6 +33,7 @@
 	},
 	"mappings": {
 		"wp-content/plugins/e2e-test-bin": "./tests/e2e/bin",
+		"wp-content/plugins/settings-ui-component-registration": "./tests/e2e/test-plugins/settings-ui-component-registration",
 		"test-data/images/": "./tests/e2e/test-data/images/",
 		"wp-content/themes/emptytheme": "./tests/e2e/themes/blocks/emptytheme",
 		"wp-content/themes/theme-with-woo-templates": "./tests/e2e/themes/blocks/theme-with-woo-templates",

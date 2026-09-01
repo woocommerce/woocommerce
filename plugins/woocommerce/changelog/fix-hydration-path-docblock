@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Correct the Hydration::get_rest_api_response_data() $path docblock type from array to string and drop the now-resolved PHPStan baseline entries.

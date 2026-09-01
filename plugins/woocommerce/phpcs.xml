@@ -50,7 +50,7 @@
 
 	<!-- Local sniff: flag `%i` SQL identifier placeholders in wpdb::prepare() that aren't guarded by
 	     wpdb::has_cap( 'identifier_placeholders' ). Trusted identifiers should be interpolated directly. -->
-	<rule ref="tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
+	<rule ref="./tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>includes/</include-pattern>
     </rule>  

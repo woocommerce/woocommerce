@@ -548,6 +548,74 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox readfile_chunked() should emit binary download bytes unchanged.
+	 */
+	public function test_readfile_chunked_emits_binary_data_unchanged(): void {
+		$binary_content = "\x00\xFF\xFE<script>&\x80";
+		$temp_file      = wp_tempnam( 'wc-download-handler-streaming' );
+
+		file_put_contents( $temp_file, $binary_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+
+		$output = '';
+		ob_start(
+			function ( $chunk ) use ( &$output ) {
+				$output .= $chunk;
+				return '';
+			}
+		);
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $temp_file, 0, strlen( $binary_content ) );
+		} finally {
+			ob_end_clean();
+			wp_delete_file( $temp_file );
+		}
+
+		$this->assertTrue( $served, 'A complete binary stream should be reported as served.' );
+		$this->assertSame( $binary_content, $output, 'Binary download bytes must not be escaped or otherwise transformed.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should stop and report failure when a stream read fails.
+	 *
+	 * @dataProvider provider_stream_lengths
+	 *
+	 * @param int $length Requested download length, where zero means until EOF.
+	 */
+	public function test_readfile_chunked_reports_read_failure( int $length ): void {
+		$scheme = 'wc-failing-download';
+
+		FakeRemoteStreamWrapper::$fail_reads = true;
+		stream_wrapper_register( $scheme, FakeRemoteStreamWrapper::class );
+
+		ob_start();
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $scheme . '://fixture', 0, $length );
+		} finally {
+			$output = ob_get_clean();
+			stream_wrapper_unregister( $scheme );
+			FakeRemoteStreamWrapper::$fail_reads = false;
+		}
+
+		$this->assertFalse( $served, 'A failed fread() call should make the download fail.' );
+		$this->assertSame( '', $output, 'A failed read should not append anything to the download response.' );
+		$this->assertTrue( FakeRemoteStreamWrapper::$closed, 'The failed stream should be closed immediately.' );
+	}
+
+	/**
+	 * Download lengths for failed-stream coverage.
+	 *
+	 * @return array<string, array<int>>
+	 */
+	public function provider_stream_lengths(): array {
+		return array(
+			'requested range'       => array( 4 ),
+			'read until stream EOF' => array( 0 ),
+		);
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {

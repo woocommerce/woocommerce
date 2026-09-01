@@ -200,6 +200,8 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 
 Fields before the first `title` marker are placed into a default group automatically.
 
+For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select, radio, and multiselect fields can omit `options` or use an empty array. The Settings UI then renders the same empty choice set that the classic settings API accepts. When a field supplies options, WooCommerce validates their structure before rendering.
+
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
 ## Custom component migration
@@ -255,6 +257,14 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 ```
 
 The settings embed script depends on the settings UI package and these handles only for the opted-in page. Other settings pages do not load it.
+
+WooCommerce validates the schema structure and declared script handles on the server. Structural checks cover identifiers, references, list and map shapes, values that cross the PHP-to-JavaScript boundary, and renderer metadata. PHP does not keep a list of supported field types or decide whether an HTML attribute such as `min`, `max`, or `step` applies to a field. The registered component and the browser own those rendering rules. The existing `WC_Admin_Settings` flow remains responsible for validating, sanitizing, and saving submitted values.
+
+Each declared script handle must be a non-empty string, and the script must be registered and enqueued before the Settings UI renders. WooCommerce trims surrounding whitespace and removes duplicate handles before loading them; whitespace-only handles are invalid. If the schema or a declared handle is invalid, WooCommerce renders the complete classic settings page in that response. PHP cannot inspect the JavaScript component registry. Extension-defined field types remain valid when their values use the Settings UI value contract and a matching `typeRenderers` entry renders them in the browser.
+
+The component registry exists only in the browser, after PHP has selected the Settings UI mount. The browser resolves a named component, a field override, and then a type renderer. A field without an explicit `component` can then use a native renderer. When a field declares `component`, that custom control is required: if no registry entry resolves it, the page fails closed instead of silently replacing it with a native field. A field without an explicit component also fails closed when it has no registered or native renderer. Component render errors use the same fail-closed state.
+
+The fail-closed state has no editable fallback and no Save action. Its error notice provides a **Use classic settings** link that preserves the current page and section and adds `wc_settings_ui=classic`. This is a user-initiated, request-only reload: it does not change the feature flag or automatically reload the page.
 
 ## Save adapters
 
@@ -351,5 +361,5 @@ In development, the settings UI logs warnings for common integration issues:
 -   The settings payload is missing.
 -   The `wc-settings-ui` script is missing for a settings UI mount.
 -   A field declares a component that is not registered.
--   A field type is unsupported.
+-   A field type has no registered or native renderer.
 -   A field declares an unknown save adapter.

@@ -269,7 +269,6 @@ class AsyncGenerator {
 
 				$status['state']        = self::STATE_COMPLETED;
 				$status['progress']     = 100;
-				$status['url']          = $feed->get_file_url();
 				$status['path']         = $feed->get_file_path();
 				$status['completed_at'] = time();
 				update_option( $option_key, $status );

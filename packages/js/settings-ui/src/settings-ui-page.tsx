@@ -22,9 +22,12 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
 import {
-	resolveFieldComponent,
+	isNativeSettingsFieldType,
+	NativeSettingsField,
+} from './native-fields';
+import {
+	resolveFieldComponentForRendering,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
@@ -332,6 +335,12 @@ const getVisible = ( {
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
 
+const getClassicSettingsUrl = () => {
+	const url = new URL( window.location.href );
+	url.searchParams.set( 'wc_settings_ui', 'classic' );
+	return url.toString();
+};
+
 type ErrorBoundaryProps = {
 	children: ReactNode;
 };
@@ -345,6 +354,7 @@ export class SettingsUIErrorBoundary extends Component<
 	ErrorBoundaryState
 > {
 	state: ErrorBoundaryState = { hasError: false };
+	private errorRegion: HTMLDivElement | null = null;
 
 	static getDerivedStateFromError(): ErrorBoundaryState {
 		return { hasError: true };
@@ -355,17 +365,43 @@ export class SettingsUIErrorBoundary extends Component<
 			error: caughtError,
 			errorInfo,
 		} );
+		this.errorRegion?.focus();
 	}
 
 	render() {
 		if ( this.state.hasError ) {
+			const message = __(
+				'Something went wrong while rendering this settings page.',
+				'woocommerce'
+			);
+
 			return (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
-						'woocommerce'
-					) }
-				</Notice>
+				<div
+					className="wc-settings-ui__error"
+					role="region"
+					aria-label={ message }
+					tabIndex={ -1 }
+					ref={ ( region ) => {
+						this.errorRegion = region;
+					} }
+				>
+					<Notice
+						status="error"
+						isDismissible={ false }
+						actions={ [
+							{
+								label: __(
+									'Use classic settings',
+									'woocommerce'
+								),
+								url: getClassicSettingsUrl(),
+								variant: 'link',
+							},
+						] }
+					>
+						{ message }
+					</Notice>
+				</div>
 			);
 		}
 
@@ -879,11 +915,26 @@ export const SettingsUIPage = ( {
 							<GroupHeader group={ group } />
 							<div className="wc-settings-ui__section-fields">
 								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
+									const RegisteredFieldComponent =
+										resolveFieldComponentForRendering(
 											field,
 											context
-										) || NativeSettingsField;
+										);
+
+									if (
+										! RegisteredFieldComponent &&
+										! isNativeSettingsFieldType(
+											field.type
+										)
+									) {
+										throw new Error(
+											`Field type "${ field.type }" is not supported.`
+										);
+									}
+
+									const FieldComponent =
+										RegisteredFieldComponent ||
+										NativeSettingsField;
 									const value = values[ field.id ];
 
 									return (

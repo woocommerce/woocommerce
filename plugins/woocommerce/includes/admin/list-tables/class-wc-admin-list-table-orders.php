@@ -533,17 +533,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $post_type, $pagenow;
 
 		// Bail out if not on shop order list page.
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type || ! isset( $_REQUEST['bulk_action'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $post_type || ! isset( $_REQUEST['bulk_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 			return;
 		}
 
 		$order_statuses = wc_get_order_statuses();
-		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // WPCS: input var ok, CSRF ok.
-		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) ); // WPCS: input var ok, CSRF ok.
+		$number         = isset( $_REQUEST['changed'] ) ? absint( $_REQUEST['changed'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
+		$bulk_action    = wc_clean( wp_unslash( $_REQUEST['bulk_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) {
 				/* translators: %d: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
@@ -551,7 +551,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			}
 		}
 
-		if ( 'removed_personal_data' === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+		if ( 'removed_personal_data' === $bulk_action ) {
 			/* translators: %d: orders count */
 			$message = sprintf( _n( 'Removed personal data from %s order.', 'Removed personal data from %s orders.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 			echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
@@ -603,12 +603,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		global $wp_post_statuses;
 
 		// Filter the orders by the posted customer.
-		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_GET['_customer_user'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 			// @codingStandardsIgnoreStart.
 			$query_vars['meta_query'] = array(
 				array(
 					'key'     => '_customer_user',
-					'value'   => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
+					'value'   => (int) $_GET['_customer_user'],
 					'compare' => '=',
 				),
 			);
@@ -671,7 +671,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			return $query;
 		}
 
-		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
+		return wc_clean( wp_unslash( $_GET['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only notice/filter; mutations use list-table nonce/capability checks.
 	}
 
 	/**
@@ -714,15 +714,20 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$date_type  = wc_clean( wp_unslash( $_GET['order_date_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$date_query = wc_clean( wp_unslash( $_GET['m'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			// date_paid and date_completed are stored in postmeta, so we need to do a meta query.
-			if ( 'date_paid' === $date_type || 'date_completed' === $date_type ) {
-				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00" );
-				$date_end   = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 23:59:59" );
+			if ( is_string( $date_query ) && ( 'date_paid' === $date_type || 'date_completed' === $date_type ) ) {
+				// The postmeta values are UTC timestamps, while the requested day is in the site's timezone.
+				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00", wp_timezone() );
 
 				unset( $wp->query_vars['m'] );
 
-				if ( $date_start && $date_end ) {
+				if ( $date_start ) {
+					// Use the next local midnight so the range follows DST-shortened or extended days.
+					// 'tomorrow' resets to midnight; '+1 day' can retain a normalized 01:00 start.
+					// Midnight rollbacks before 2022 may still leave the first repeated hour uncovered.
+					$date_end = ( clone $date_start )->modify( 'tomorrow' );
+
 					$wp->query_vars['meta_key']     = "_$date_type"; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() - 1 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					$wp->query_vars['meta_compare'] = 'BETWEEN';
 				}
 			}

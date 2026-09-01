@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Complete the WPDS token migration for the Settings UI shell while preserving compatibility-specific dimensions.

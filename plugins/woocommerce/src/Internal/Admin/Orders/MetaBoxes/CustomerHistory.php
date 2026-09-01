@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
-use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -230,9 +230,7 @@ class CustomerHistory {
 			return 0;
 		}
 
-		$report_order = $order instanceof AdminOrder ? $order : new AdminOrder( $order->get_id() );
-
-		return (int) $report_order->get_report_customer_id();
+		return (int) CustomersDataStore::get_existing_customer_id_from_order( $order );
 	}
 
 	/**

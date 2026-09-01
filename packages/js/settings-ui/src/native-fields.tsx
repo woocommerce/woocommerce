@@ -40,11 +40,24 @@ const textInputTypes: TextInputType[] = [
 	'tel',
 ];
 
+const nativeFieldTypes = new Set( [
+	'info',
+	'checkbox',
+	'textarea',
+	'select',
+	'radio',
+	'array',
+	'number',
+] );
+
 const toStringValue = ( value: SettingsValue ) =>
 	value === null || typeof value === 'undefined' ? '' : String( value );
 
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
+
+export const isNativeSettingsFieldType = ( type: string ) =>
+	nativeFieldTypes.has( type ) || isTextInputType( type );
 
 // Use HTML boolean attribute presence semantics: disabled="false" still
 // means disabled, while a boolean false remains false.

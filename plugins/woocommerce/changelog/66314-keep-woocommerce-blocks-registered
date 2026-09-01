@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep WooCommerce blocks registered while filtering block inserter availability by editor context.

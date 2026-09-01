@@ -7,6 +7,7 @@
  */
 import reducer, { defaultState } from '../reducer';
 import TYPES from '../action-types';
+import { TaskListType, TaskType } from '../types';
 
 const profileItems = {
 	business_extensions: [],
@@ -38,6 +39,53 @@ const paymentMethods = [
 		image: '',
 	},
 ];
+
+const task = ( id: string, overrides = {} ) =>
+	( {
+		id,
+		title: id,
+		content: '',
+		parentId: '',
+		isComplete: false,
+		isDismissable: true,
+		isDismissed: false,
+		isSnoozed: false,
+		isInProgress: false,
+		inProgressLabel: '',
+		isVisible: true,
+		isSnoozeable: false,
+		isDisabled: false,
+		snoozedUntil: 0,
+		time: '',
+		isVisited: false,
+		additionalInfo: '',
+		canView: true,
+		isActioned: false,
+		eventPrefix: '',
+		level: 3,
+		recordViewEvent: false,
+		...overrides,
+	} ) as TaskType;
+
+const taskList = ( id: string, tasks: TaskType[] ) =>
+	( {
+		id,
+		title: id,
+		isHidden: false,
+		isVisible: true,
+		isComplete: false,
+		tasks,
+		eventPrefix: '',
+		displayProgressHeader: false,
+		keepCompletedTaskList: 'no',
+	} ) as TaskListType;
+
+// `payments` exists in both the setup and extended lists, so an unscoped
+// update would dismiss the setup task too.
+const taskListsWithSharedTaskId = {
+	setup: taskList( 'setup', [ task( 'payments' ) ] ),
+	extended: taskList( 'extended', [ task( 'payments' ) ] ),
+};
 
 describe( 'plugins reducer', () => {
 	it( 'should return a default state', () => {
@@ -138,5 +186,56 @@ describe( 'plugins reducer', () => {
 		/* eslint-disable dot-notation */
 		expect( state.requesting[ 'updateProfileItems' ] ).toBeTruthy();
 		/* eslint-enable dot-notation */
+	} );
+
+	it( 'should only dismiss the task in the supplied task list', () => {
+		const state = reducer(
+			{ ...defaultState, taskLists: taskListsWithSharedTaskId },
+			{
+				type: TYPES.DISMISS_TASK_REQUEST,
+				taskId: 'payments',
+				taskListId: 'extended',
+			}
+		);
+
+		expect( state.taskLists.extended.tasks[ 0 ].isDismissed ).toBe( true );
+		expect( state.taskLists.setup.tasks[ 0 ].isDismissed ).toBe( false );
+	} );
+
+	it( 'should only restore the task in the supplied task list', () => {
+		const dismissed = {
+			setup: taskList( 'setup', [
+				task( 'payments', { isDismissed: true } ),
+			] ),
+			extended: taskList( 'extended', [
+				task( 'payments', { isDismissed: true } ),
+			] ),
+		};
+
+		const state = reducer(
+			{ ...defaultState, taskLists: dismissed },
+			{
+				type: TYPES.UNDO_DISMISS_TASK_SUCCESS,
+				task: { id: 'payments', isDismissed: false },
+				taskListId: 'extended',
+			}
+		);
+
+		expect( state.taskLists.extended.tasks[ 0 ].isDismissed ).toBe( false );
+		expect( state.taskLists.setup.tasks[ 0 ].isDismissed ).toBe( true );
+	} );
+
+	it( 'should dismiss the task in every list when no task list is supplied', () => {
+		const state = reducer(
+			{ ...defaultState, taskLists: taskListsWithSharedTaskId },
+			{
+				type: TYPES.DISMISS_TASK_REQUEST,
+				taskId: 'payments',
+				taskListId: undefined,
+			}
+		);
+
+		expect( state.taskLists.extended.tasks[ 0 ].isDismissed ).toBe( true );
+		expect( state.taskLists.setup.tasks[ 0 ].isDismissed ).toBe( true );
 	} );
 } );

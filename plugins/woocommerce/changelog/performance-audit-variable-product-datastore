@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Audit the variable product datastore and implement optimizations to improve SQL query performance.

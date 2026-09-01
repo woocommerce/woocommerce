@@ -467,7 +467,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We only have PSPs because there is no payment gateway enabled.
-		$this->assertCount( 5, $data['suggestions'] );
+		$this->assertCount( 4, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -513,7 +513,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 9, $data['suggestions'] );
+		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -683,7 +683,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
 		// We get all the suggestions.
-		$this->assertCount( 9, $data['suggestions'] );
+		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -881,8 +881,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 6 suggestions are returned.
-		$this->assertCount( 6, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 5 suggestions are returned.
+		$this->assertCount( 5, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1095,8 +1095,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We don't get BNPL suggestions since WooPayments is active, so only 6 suggestions are returned.
-		$this->assertCount( 6, $data['suggestions'] );
+		// We don't get BNPL suggestions since WooPayments is active, so only 5 suggestions are returned.
+		$this->assertCount( 5, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
@@ -1264,8 +1264,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// We also have the 3 offline payment methods.
 		$this->assertCount( 3, $data['offline_payment_methods'] );
-		// We get BNPL suggestions since WooPayments or Stripe are not active, so 8 suggestions are returned.
-		$this->assertCount( 8, $data['suggestions'] );
+		// We get BNPL suggestions since WooPayments or Stripe are not active, so 7 suggestions are returned.
+		$this->assertCount( 7, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
 

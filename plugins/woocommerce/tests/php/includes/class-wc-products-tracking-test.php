@@ -27,6 +27,7 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
+		unset( $_GET['post_type'], $_GET['orderby'], $_GET['_wp_http_referer'], $_GET['s'], $_POST['action'] );
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		parent::tearDown();
 	}
@@ -100,12 +101,24 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wcadmin_products_view tracks event
+	 * @testdox Should record a products view without a sorting view for the standard Products list.
 	 */
 	public function test_products_view(): void {
 		$_GET['post_type'] = 'product';
 		do_action( 'load-edit.php' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_view' );
+		$this->assertNotRecordedTracksEvent( 'wcadmin_products_sorting_view' );
+	}
+
+	/**
+	 * @testdox Should record only the sorting view event when the Products list is in sorting mode.
+	 */
+	public function test_products_sorting_view(): void {
+		$_GET['post_type'] = 'product';
+		$_GET['orderby']   = 'menu_order title';
+		do_action( 'load-edit.php' );
+		$this->assertRecordedTracksEvent( 'wcadmin_products_view' );
+		$this->assertRecordedTracksEvent( 'wcadmin_products_sorting_view' );
 	}
 
 	/**

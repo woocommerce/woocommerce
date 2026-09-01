@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails.
