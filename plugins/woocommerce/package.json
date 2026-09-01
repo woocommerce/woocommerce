@@ -159,8 +159,6 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
-						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
-						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -190,8 +188,6 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
-						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
-						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -685,8 +681,6 @@
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
-						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
-						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",

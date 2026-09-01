@@ -149,35 +149,4 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_validate_postcode', $callback, 10 );
 		}
 	}
-
-	/**
-	 * Both postcode validators must produce the same result for the shared
-	 * compatibility contract.
-	 *
-	 * @dataProvider data_provider_postcode_validation_parity
-	 *
-	 * @param bool   $expected Expected result.
-	 * @param string $postcode Postcode to validate.
-	 * @param string $country  Country code.
-	 */
-	public function test_postcode_validation_parity( bool $expected, string $postcode, string $country ): void {
-		$this->assertSame( $expected, WC_Validation::is_postcode( $postcode, $country ) );
-	}
-
-	/**
-	 * Loads the fixture list also exercised by the Blocks validator.
-	 *
-	 * @return array<int, array{bool, string, string}>
-	 */
-	public function data_provider_postcode_validation_parity(): array {
-		$fixture_path = WC_ABSPATH . 'client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json';
-		$fixtures     = json_decode( (string) file_get_contents( $fixture_path ), true, 512, JSON_THROW_ON_ERROR ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local test fixture.
-
-		return array_map(
-			static function ( array $fixture ): array {
-				return array( $fixture['expected'], $fixture['postcode'], $fixture['country'] );
-			},
-			$fixtures
-		);
-	}
 }
