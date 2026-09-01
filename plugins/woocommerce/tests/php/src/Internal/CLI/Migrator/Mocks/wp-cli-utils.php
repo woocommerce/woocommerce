@@ -8,7 +8,7 @@
  * @package WooCommerce\Tests\Internal\CLI\Migrator\Mocks
  */
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 namespace WP_CLI\Utils;
 

@@ -1,5 +1,5 @@
 <?php
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Report;
 
@@ -63,7 +63,9 @@ class ReporterTests extends WC_Unit_Test_Case {
 	 * @return string The unmodified message.
 	 */
 	public function capture_log_message( $message, $level, $context ) {
-		if ( 'bis-migration' === ( $context['source'] ?? '' ) ) {
+		// Every log call made during the test comes through here, not just the reporter's, and
+		// `WC_Logger::log()` does not type its context.
+		if ( is_array( $context ) && 'bis-migration' === ( $context['source'] ?? '' ) ) {
 			$this->logged[ $level ][] = (string) $message;
 		}
 

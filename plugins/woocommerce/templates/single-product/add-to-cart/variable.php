@@ -63,7 +63,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		<?php
 		// Reset snapshot for cases where a theme/plugin loads the variation form later, like quick-view modals.
 		?>
-		<script type="text/template" class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
+		<template class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></template>
 		<?php do_action( 'woocommerce_after_variations_table' ); ?>
 
 		<div class="single_variation_wrap">

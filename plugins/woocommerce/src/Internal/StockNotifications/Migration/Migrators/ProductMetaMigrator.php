@@ -335,7 +335,7 @@ class ProductMetaMigrator implements MigratorInterface {
 			return $written;
 		}
 
-		return '' !== (string) get_post_meta( $product_id, Config::get_product_signups_meta_key(), true );
+		return metadata_exists( 'post', $product_id, Config::get_product_signups_meta_key() );
 	}
 
 	/**

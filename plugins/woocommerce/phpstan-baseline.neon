@@ -8257,12 +8257,6 @@ parameters:
 			path: includes/admin/woocommerce-legacy-reports.php
 
 		-
-			message: '#^@param array \$terms does not accept actual type of parameter\: array\<int, int\|string\|WP_Term\>\|numeric\-string\|WP_Error\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^@param string \$search_text does not accept actual type of parameter\: array\|string\.$#'
 			identifier: parameter.phpDocType
 			count: 1
