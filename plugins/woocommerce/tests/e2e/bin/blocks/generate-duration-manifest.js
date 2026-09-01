@@ -240,14 +240,15 @@ function discoverCurrentFiles() {
 	return result.files;
 }
 
-function serializeDurationManifest( manifest ) {
+async function serializeDurationManifest( manifest ) {
+	const prettierConfig = await prettier.resolveConfig( __filename );
 	return prettier.format( JSON.stringify( manifest ), {
-		...prettier.resolveConfig.sync( __filename ),
+		...prettierConfig,
 		parser: 'json',
 	} );
 }
 
-function main(
+async function main(
 	args = process.argv.slice( 2 ),
 	discoverFiles = discoverCurrentFiles
 ) {
@@ -259,16 +260,14 @@ function main(
 			durations: readRunDurations( run.path ),
 		} ) ),
 	} );
-	writeFileSync( outputPath, serializeDurationManifest( manifest ) );
+	writeFileSync( outputPath, await serializeDurationManifest( manifest ) );
 }
 
 if ( require.main === module ) {
-	try {
-		main();
-	} catch ( error ) {
+	main().catch( ( error ) => {
 		console.error( error.message );
 		process.exitCode = 1;
-	}
+	} );
 }
 
 module.exports = {

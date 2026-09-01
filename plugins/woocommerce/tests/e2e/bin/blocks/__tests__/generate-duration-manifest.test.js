@@ -265,7 +265,7 @@ describe( 'parseArguments', () => {
 } );
 
 describe( 'main', () => {
-	test( 'writes a formatted manifest for the current Playwright inventory', () => {
+	test( 'writes a formatted manifest for the current Playwright inventory', async () => {
 		const directory = createReportDirectory();
 		const outputPath = path.join( directory, 'manifest.json' );
 		const arguments_ = [];
@@ -290,7 +290,7 @@ describe( 'main', () => {
 			}
 			arguments_.push( '--output', outputPath );
 
-			main( arguments_, () => [
+			await main( arguments_, () => [
 				'blocks/new.spec.ts',
 				'blocks/a.spec.ts',
 			] );
@@ -298,8 +298,8 @@ describe( 'main', () => {
 			const output = readFileSync( outputPath, 'utf8' );
 			assert.equal(
 				output,
-				prettier.format( output, {
-					...prettier.resolveConfig.sync( __filename ),
+				await prettier.format( output, {
+					...( await prettier.resolveConfig( __filename ) ),
 					parser: 'json',
 				} )
 			);
