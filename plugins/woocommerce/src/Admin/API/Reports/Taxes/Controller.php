@@ -295,8 +295,6 @@ class Controller extends GenericController implements ExportableInterface {
 	 * amount existed (or a manual tax line) - unknown, so exported as an empty cell
 	 * rather than a zero a merchant could mistake for a filing figure.
 	 *
-	 * @since 11.2.0
-	 *
 	 * @param array $item Single report item/row.
 	 * @return string
 	 */
