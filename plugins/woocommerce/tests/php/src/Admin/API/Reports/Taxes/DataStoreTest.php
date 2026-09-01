@@ -43,13 +43,24 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $original_date_type;
 
 	/**
+	 * Original woocommerce_tax_based_on option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_tax_based_on;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_calc_taxes = get_option( 'woocommerce_calc_taxes' );
-		$this->original_date_type  = get_option( 'woocommerce_date_type' );
+		$this->original_calc_taxes   = get_option( 'woocommerce_calc_taxes' );
+		$this->original_date_type    = get_option( 'woocommerce_date_type' );
+		$this->original_tax_based_on = get_option( 'woocommerce_tax_based_on' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		// Pin the tax location basis so the DE order fixtures do not depend on the
+		// environment's store base address.
+		update_option( 'woocommerce_tax_based_on', 'billing' );
 	}
 
 	/**
@@ -57,6 +68,11 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
+		if ( false === $this->original_tax_based_on ) {
+			delete_option( 'woocommerce_tax_based_on' );
+		} else {
+			update_option( 'woocommerce_tax_based_on', $this->original_tax_based_on );
+		}
 		if ( false === $this->original_date_type ) {
 			delete_option( 'woocommerce_date_type' );
 		} else {
