@@ -279,27 +279,44 @@ test.describe(
 			{ tag: '@skip-on-external-env' },
 			async () => {
 				// Setup and inspection must not load WooCommerce, or those commands could consume the queue they are measuring.
-				const coreOnlyFlags = '--skip-plugins --skip-themes';
+				const coreOnlyFlags = [ '--skip-plugins', '--skip-themes' ];
 				const pendingOption =
 					'woocommerce_review_order_flush_rewrite_pending';
 				const seedPendingRewrite = () =>
-					wpCLI(
-						`wp eval 'update_option( "${ pendingOption }", "yes" );' ${ coreOnlyFlags }`
-					);
+					wpCLI( [
+						'wp',
+						'eval',
+						`update_option( "${ pendingOption }", "yes" );`,
+						...coreOnlyFlags,
+					] );
 				const readPendingRewrite = async () =>
 					(
-						await wpCLI(
-							`wp eval 'echo get_option( "${ pendingOption }", "missing" );' ${ coreOnlyFlags }`
-						)
+						await wpCLI( [
+							'wp',
+							'eval',
+							`echo get_option( "${ pendingOption }", "missing" );`,
+							...coreOnlyFlags,
+						] )
 					).stdout.trim();
 				const activeTheme = (
-					await wpCLI( `wp option get stylesheet ${ coreOnlyFlags }` )
+					await wpCLI( [
+						'wp',
+						'option',
+						'get',
+						'stylesheet',
+						...coreOnlyFlags,
+					] )
 				).stdout.trim();
 				const inactiveTheme =
 					(
-						await wpCLI(
-							`wp theme list --status=inactive --field=name ${ coreOnlyFlags }`
-						)
+						await wpCLI( [
+							'wp',
+							'theme',
+							'list',
+							'--status=inactive',
+							'--field=name',
+							...coreOnlyFlags,
+						] )
 					).stdout
 						.split( /\r?\n/ )
 						.find( Boolean ) ?? '';
@@ -315,7 +332,13 @@ test.describe(
 						`--skip-themes=${ activeTheme }`,
 					] ) {
 						await seedPendingRewrite();
-						await wpCLI( `wp option get siteurl ${ skipThemes }` );
+						await wpCLI( [
+							'wp',
+							'option',
+							'get',
+							'siteurl',
+							skipThemes,
+						] );
 						expect(
 							await readPendingRewrite(),
 							`Expected the queue to survive ${ skipThemes }.`
@@ -323,18 +346,25 @@ test.describe(
 					}
 
 					await seedPendingRewrite();
-					await wpCLI(
-						`wp option get siteurl --skip-themes=${ inactiveTheme }`
-					);
+					await wpCLI( [
+						'wp',
+						'option',
+						'get',
+						'siteurl',
+						`--skip-themes=${ inactiveTheme }`,
+					] );
 					expect(
 						await readPendingRewrite(),
 						'Expected the inactive-theme control to consume the queue.'
 					).toBe( 'missing' );
 				} finally {
-					await wpCLI(
-						`wp eval 'delete_option( "${ pendingOption }" );' ${ coreOnlyFlags }`
-					);
-					await wpCLI( 'wp rewrite flush' );
+					await wpCLI( [
+						'wp',
+						'eval',
+						`delete_option( "${ pendingOption }" );`,
+						...coreOnlyFlags,
+					] );
+					await wpCLI( [ 'wp', 'rewrite', 'flush' ] );
 				}
 			}
 		);
