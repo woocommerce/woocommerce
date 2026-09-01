@@ -2865,43 +2865,49 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Returns a document object rule schema matching when the referral-source field equals "other".
+	 * Returns a document object rule schema matching when the referral-source field equals "other" at the given path.
 	 *
+	 * @param string[] $path Property path to the object holding the field (e.g. [ 'checkout', 'additional_fields' ]).
 	 * @return array The rule schema.
 	 */
-	private function get_referral_source_is_other_rule() {
-		return array(
+	private function get_referral_source_is_other_rule( array $path = array( 'checkout', 'additional_fields' ) ) {
+		$rule = array(
 			'type'       => 'object',
 			'properties' => array(
-				'checkout' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'additional_fields' => array(
-							'type'       => 'object',
-							'properties' => array(
-								'plugin-namespace/referral-source' => array(
-									'type'  => 'string',
-									'const' => 'other',
-								),
-							),
-						),
-					),
+				'plugin-namespace/referral-source' => array(
+					'type'  => 'string',
+					'const' => 'other',
 				),
 			),
 		);
+		foreach ( array_reverse( $path ) as $segment ) {
+			$rule = array(
+				'type'       => 'object',
+				'properties' => array( $segment => $rule ),
+			);
+		}
+		return $rule;
 	}
 
 	/**
 	 * Registers a referral-source select field and a referral-detail field with a conditional rule on it.
 	 *
 	 * @param string $rule_prop Which conditional rule to give the detail field (hidden|required).
+	 * @param string $location The location to register both fields in (order|contact|address).
 	 */
-	private function register_conditional_referral_fields( $rule_prop ) {
+	private function register_conditional_referral_fields( $rule_prop, $location = 'order' ) {
+		$rule_paths = array(
+			'order'   => array( 'checkout', 'additional_fields' ),
+			'contact' => array( 'customer', 'additional_fields' ),
+			'address' => array( 'customer', 'billing_address' ),
+		);
+		$rule       = $this->get_referral_source_is_other_rule( $rule_paths[ $location ] );
+
 		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'plugin-namespace/referral-source',
 				'label'    => 'How did you find us?',
-				'location' => 'order',
+				'location' => $location,
 				'type'     => 'select',
 				'options'  => array(
 					array(
@@ -2919,11 +2925,11 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 			array(
 				'id'       => 'plugin-namespace/referral-detail',
 				'label'    => 'Please specify',
-				'location' => 'order',
+				'location' => $location,
 				'type'     => 'text',
 				$rule_prop => 'hidden' === $rule_prop
-					? array( 'not' => $this->get_referral_source_is_other_rule() )
-					: $this->get_referral_source_is_other_rule(),
+					? array( 'not' => $rule )
+					: $rule,
 			)
 		);
 	}
@@ -2933,18 +2939,22 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 *
 	 * @param string $method The request method (POST|PUT).
 	 * @param array  $additional_fields The additional field values to send.
+	 * @param array  $address_fields Additional address field values, merged into both addresses.
 	 * @return \WP_REST_Request The request.
 	 */
-	private function get_checkout_request_with_fields( $method, array $additional_fields ) {
-		$address = array(
-			'first_name' => 'test',
-			'last_name'  => 'test',
-			'address_1'  => 'test',
-			'city'       => 'test',
-			'state'      => '',
-			'postcode'   => 'cb241ab',
-			'country'    => 'GB',
-			'email'      => 'testaccount@test.com',
+	private function get_checkout_request_with_fields( $method, array $additional_fields, array $address_fields = array() ) {
+		$address = array_merge(
+			array(
+				'first_name' => 'test',
+				'last_name'  => 'test',
+				'address_1'  => 'test',
+				'city'       => 'test',
+				'state'      => '',
+				'postcode'   => 'cb241ab',
+				'country'    => 'GB',
+				'email'      => 'testaccount@test.com',
+			),
+			$address_fields
 		);
 		$request = new \WP_REST_Request( $method, '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -3017,5 +3027,66 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		// The POST omits referral-source, but its persisted value still makes the detail field required.
 		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
 		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		// The customer object survives reset_session, so clear the value this test persisted.
+		$this->controller->persist_field_for_customer( 'plugin-namespace/referral-source', '', wc()->customer, 'other' );
+		wc()->customer->save();
+	}
+
+	/**
+	 * @testdox A conditionally required contact field follows the same rules as order fields when its dependency has no value.
+	 */
+	public function test_conditional_required_contact_field_ignores_missing_dependency_key() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required', 'contact' );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-source' => 'other' ) ) );
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields(
+				'POST',
+				array(
+					'plugin-namespace/referral-source' => 'other',
+					'plugin-namespace/referral-detail' => 'a friend',
+				)
+			)
+		);
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * @testdox A conditionally required address field follows the same rules as order fields when its dependency has no value.
+	 */
+	public function test_conditional_required_address_field_ignores_missing_dependency_key() {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required', 'address' );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields( 'POST', array(), array( 'plugin-namespace/referral-source' => 'other' ) )
+		);
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->reset_session();
+
+		$response = rest_get_server()->dispatch(
+			$this->get_checkout_request_with_fields(
+				'POST',
+				array(),
+				array(
+					'plugin-namespace/referral-source' => 'other',
+					'plugin-namespace/referral-detail' => 'a friend',
+				)
+			)
+		);
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 }
