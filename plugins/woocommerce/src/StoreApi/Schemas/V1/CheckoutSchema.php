@@ -324,8 +324,6 @@ class CheckoutSchema extends AbstractSchema {
 			)
 			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
 
-		// Every registered field gets a key, even with no value yet. Hidden/required rules about a missing key match
-		// anything, so a field with no value must still be present, like core address fields are. See issue #66943.
 		$response = [];
 		foreach ( $this->get_additional_fields_schema() as $key => $field_schema ) {
 			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
