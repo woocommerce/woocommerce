@@ -210,6 +210,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
+		if ( ( ! is_int( $arg ) && ! ( is_string( $arg ) && ctype_digit( $arg ) ) ) || 0 >= (int) $arg ) {
+			return false;
+		}
+
 		$post_id = absint( $arg );
 		if ( ! $post_id ) {
 			return false;

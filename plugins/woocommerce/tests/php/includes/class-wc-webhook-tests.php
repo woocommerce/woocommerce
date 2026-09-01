@@ -112,6 +112,50 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Post-action validation rejects non-ID values before coercion.
+	 */
+	public function test_is_valid_post_action_rejects_non_id_values_before_coercion(): void {
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+		$webhook = new WC_Webhook();
+		$webhook->set_topic( 'product.deleted' );
+
+		$cached_post_at_one = wp_cache_get( 1, 'posts', false, $had_cached_post_at_one );
+		$post_at_one        = clone get_post( $post_id );
+		$post_at_one->ID    = 1;
+		wp_cache_set( 1, $post_at_one, 'posts' );
+
+		try {
+			$this->assertTrue( $this->call_is_valid_post_action( $webhook, (string) $post_id ) );
+
+			$invalid_ids = array(
+				'boolean'             => true,
+				'array'               => array( $post_id ),
+				'float'               => (float) $post_id,
+				'negative integer'    => -$post_id,
+				'decimal-like string' => $post_id . '.5',
+			);
+
+			foreach ( $invalid_ids as $description => $invalid_id ) {
+				$this->assertFalse(
+					$this->call_is_valid_post_action( $webhook, $invalid_id ),
+					"A {$description} should not be treated as a post ID."
+				);
+			}
+		} finally {
+			if ( $had_cached_post_at_one ) {
+				wp_cache_set( 1, $cached_post_at_one, 'posts' );
+			} else {
+				wp_cache_delete( 1, 'posts' );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Post-action validation honors the order-webhooks registry.
 	 */
 	public function test_is_valid_post_action_honors_order_webhook_registry(): void {
