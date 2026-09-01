@@ -54,18 +54,20 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Record the redirect target and cancel the redirect.
+	 * Record the redirect target and abort the request the way `exit` would.
 	 *
 	 * PHPUnit has already sent output by the time a test runs, so letting
-	 * `wp_safe_redirect()` reach `header()` raises "headers already sent".
-	 * Returning a falsy location makes `wp_redirect()` bail before that.
+	 * `wp_safe_redirect()` reach `header()` raises "headers already sent", and
+	 * the `exit` that follows it in production would end the test run. Throwing
+	 * from the filter stands in for both.
 	 *
 	 * @param string $location The redirect target.
-	 * @return false
+	 * @return never
+	 * @throws \RuntimeException Always, carrying the redirect target.
 	 */
 	public function capture_redirect( $location ) {
 		$this->redirect_location = (string) $location;
-		return false;
+		throw new \RuntimeException( (string) $location );
 	}
 
 	/**
@@ -259,16 +261,21 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->simulate_cancel_request( $notification->get_id(), true );
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		// The handler redirects and exits once the cancellation is recorded.
+		try {
+			( new MyAccountEndpoint() )->maybe_handle_cancel();
+			$this->fail( 'Expected the cancel handler to redirect.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame(
+				\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+				$e->getMessage()
+			);
+		}
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
 		$this->assertSame( NotificationStatus::CANCELLED, $updated->get_status() );
 		$this->assertSame( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
-		$this->assertSame(
-			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
-			$this->redirect_location
-		);
 	}
 
 	/**

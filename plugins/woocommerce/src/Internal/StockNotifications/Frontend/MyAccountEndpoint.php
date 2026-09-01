@@ -340,5 +340,6 @@ class MyAccountEndpoint {
 		}
 
 		wp_safe_redirect( \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ) );
+		exit;
 	}
 }
