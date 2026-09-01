@@ -53,6 +53,24 @@ class Woocommerce_Analytics {
 	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
 
 	/**
+	 * Whether proxy tracking has ever been enabled on this site.
+	 *
+	 * Decides whether the REST route exists at all. Turning the feature off cannot
+	 * unregister it, because pages cached while it was on still tell their visitors
+	 * to POST events: a 404 loses every one of those silently, while the registered
+	 * route answers 403 with a reason. Sites that never turned it on never get the
+	 * endpoint.
+	 *
+	 * Sticky on purpose — it records that cached pages may exist, which staying off
+	 * for a while does not undo.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
+
+	/**
 	 * Initializer.
 	 * Used to configure the WooCommerce Analytics package.
 	 *
@@ -193,12 +211,13 @@ class Woocommerce_Analytics {
 	 * Register REST API routes.
 	 *
 	 * The tracking proxy endpoint is unauthenticated by design — it exists to
-	 * receive front-end events — so it is only registered where proxy tracking is
-	 * actually in use. The check lives here rather than at the `add_action` site
-	 * because `rest_api_init` fires late enough for the filter to be registered.
+	 * receive front-end events — so a site that has never used proxy tracking never
+	 * gets it. Once a site has used it the route stays registered and refuses while
+	 * the feature is off, rather than disappearing; see
+	 * PROXY_TRACKING_EVER_ENABLED_OPTION and `WC_Analytics_Tracking_Proxy::track_events()`.
 	 */
 	public static function register_rest_routes() {
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+		if ( 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			return;
 		}
 
@@ -215,6 +234,10 @@ class Woocommerce_Analytics {
 	 */
 	public static function sync_proxy_tracking_state() {
 		$enabled = \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ? 'yes' : 'no';
+
+		if ( 'yes' === $enabled && 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
+		}
 
 		if ( get_option( self::PROXY_TRACKING_ENABLED_OPTION ) === $enabled ) {
 			return;
