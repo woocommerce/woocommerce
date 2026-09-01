@@ -23,18 +23,26 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	exit 1
 fi
 
+# Git passes the target remote's name as $1 and its URL as $2. Fall back to
+# origin when the script is run by hand, and when $1 is a bare URL rather than a
+# configured remote, since the remote-tracking refs below only exist for named remotes.
+REMOTE="${1:-origin}"
+if ! git rev-parse --verify --quiet "refs/remotes/$REMOTE/$PROTECTED_BRANCH" >/dev/null; then
+	REMOTE=origin
+fi
+
 # Ensure the checks are running only when pushing a new branch or there are commits to push.
-matchingRemoteBranches=$(git ls-remote --heads origin refs/heads/$CURRENT_BRANCH)
+matchingRemoteBranches=$(git ls-remote --heads "$REMOTE" refs/heads/$CURRENT_BRANCH)
 if [ -n "$matchingRemoteBranches" ]; then
-	commitsToPush=$(git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH)
+	commitsToPush=$(git log "$REMOTE/$CURRENT_BRANCH..$CURRENT_BRANCH")
 	if [ -z "$commitsToPush" ]; then
 		echo 'pre-push: Everything up-to-date, skipping checks'
 		exit 0
 	fi
 fi
 
-git fetch origin trunk >/dev/null 2>&1
-changedFiles=$(git diff $(git merge-base HEAD origin/trunk) --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json' 'pnpm-workspace.yaml')
+git fetch "$REMOTE" "$PROTECTED_BRANCH" >/dev/null 2>&1
+changedFiles=$(git diff $(git merge-base HEAD "$REMOTE/$PROTECTED_BRANCH") --relative --name-only --diff-filter=d -- '.syncpackrc' 'package.json' '*/package.json' 'pnpm-workspace.yaml')
 if [ -n "$changedFiles" ]; then
 	echo -n 'pre-push: validating syncpack mismatches '
 	pnpm exec syncpack lint
