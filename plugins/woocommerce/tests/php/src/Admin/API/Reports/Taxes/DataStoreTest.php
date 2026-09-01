@@ -50,17 +50,27 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $original_tax_based_on;
 
 	/**
+	 * Original woocommerce_shipping_tax_class option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_shipping_tax_class;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_calc_taxes   = get_option( 'woocommerce_calc_taxes' );
-		$this->original_date_type    = get_option( 'woocommerce_date_type' );
-		$this->original_tax_based_on = get_option( 'woocommerce_tax_based_on' );
+		$this->original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$this->original_date_type          = get_option( 'woocommerce_date_type' );
+		$this->original_tax_based_on       = get_option( 'woocommerce_tax_based_on' );
+		$this->original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		// Pin the tax location basis so the DE order fixtures do not depend on the
-		// environment's store base address.
+		// Pin the tax location basis and the shipping tax class so the DE order fixtures
+		// do not depend on the environment's store base address or on the class-inheritance
+		// resolution, which varies with state left behind by the wider suite.
 		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
 	}
 
 	/**
@@ -72,6 +82,11 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			delete_option( 'woocommerce_tax_based_on' );
 		} else {
 			update_option( 'woocommerce_tax_based_on', $this->original_tax_based_on );
+		}
+		if ( false === $this->original_shipping_tax_class ) {
+			delete_option( 'woocommerce_shipping_tax_class' );
+		} else {
+			update_option( 'woocommerce_shipping_tax_class', $this->original_shipping_tax_class );
 		}
 		if ( false === $this->original_date_type ) {
 			delete_option( 'woocommerce_date_type' );
