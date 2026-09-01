@@ -221,9 +221,9 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Processing a batch drops the rows of an order that can no longer be loaded.
+	 * @testdox Processing a batch drops the rows of an order no report can read.
 	 */
-	public function test_process_batch_drops_the_rows_of_an_order_it_cannot_load(): void {
+	public function test_process_batch_drops_the_rows_of_an_order_no_report_can_read(): void {
 		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
 		$this->unmigrate_lookup_rows( $order->get_id(), 0, 0.25 );
 
@@ -240,6 +240,32 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		$tools = $this->sut->handle_woocommerce_debug_tools( array() );
 		$this->assertTrue( $tools['rebuild_analytics_tax_data']['disabled'], 'The tool should not go on offering a run that cannot change anything.' );
+	}
+
+	/**
+	 * @testdox Processing a batch keeps the rows of an order the reports still read but `wc_get_order()` cannot load.
+	 */
+	public function test_process_batch_keeps_the_rows_of_an_order_whose_type_is_not_registered(): void {
+		global $wpdb;
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $order->get_id(), 0, 6.25 );
+
+		// A deactivated plugin leaves its order type unregistered, so `wc_get_order()` fails while
+		// the order's stats row stays behind and the reports go on reading its lookup rows.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_unknown' ), array( 'id' => $order->get_id() ) );
+		} else {
+			$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_unknown' ), array( 'ID' => $order->get_id() ) );
+		}
+		wp_cache_flush();
+
+		$this->assertFalse( wc_get_order( $order->get_id() ), 'The order should not be loadable once its type is not registered.' );
+
+		$this->sut->process_batch( array( $order->get_id() ) );
+
+		$this->assertCount( 1, $this->lookup_rows( $order->get_id() ), 'An order the reports still read should keep its rows.' );
+		$this->assertSame( $order->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the order.' );
 	}
 
 	/**

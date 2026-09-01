@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
@@ -179,10 +180,11 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			$order_id = (int) $order_id;
 			$synced   = TaxesDataStore::sync_order_taxes( $order_id );
 
-			// Rows left behind by an order `wc_get_order()` cannot resolve are rows no report can
-			// read: the Taxes report and its stats both join `wc_order_stats`, which an order that
-			// is gone has no row in. Drop them rather than carrying them for good.
-			if ( -1 === $synced && ! wc_get_order( $order_id ) ) {
+			// The reports only see lookup rows they can join to a `wc_order_stats` row, so an order
+			// without one is gone as far as Analytics is concerned and its rows can go. A failed
+			// `wc_get_order()` is not the same thing: it also fails while the plugin that registers
+			// the order's type is deactivated, and that order still has its stats row.
+			if ( -1 === $synced && ! $this->order_has_stats_row( $order_id ) ) {
 				$wpdb->delete( TaxesDataStore::get_db_table_name(), array( 'order_id' => $order_id ), array( '%d' ) );
 				continue;
 			}
@@ -328,6 +330,27 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 		$batch_processor->remove_processor( self::class );
 
 		return __( 'Background process for rebuilding analytics tax data stopped.', 'woocommerce' );
+	}
+
+	/**
+	 * Whether the order has a row in the order stats table, which is the table every analytics
+	 * report reads orders through.
+	 *
+	 * @param int $order_id Order id.
+	 * @return bool
+	 */
+	private function order_has_stats_row( int $order_id ): bool {
+		global $wpdb;
+
+		$table_name = OrderStatsDataStore::get_db_table_name();
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT 1 FROM {$table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
 	}
 
 	/**
