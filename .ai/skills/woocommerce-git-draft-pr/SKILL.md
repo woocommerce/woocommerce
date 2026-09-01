@@ -30,7 +30,7 @@ From the dynamic context above (read full diffs only if the stat summary is ambi
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
 - **UI changes?** Changes in `client/`, `templates/`, CSS/SCSS, JSX/TSX
-- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives the Milestone, Changelog, and Release Communication decisions in Step 3.
+- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives the Milestone and Changelog decisions in Step 3.
 
 ### 2. Gather Context
 
