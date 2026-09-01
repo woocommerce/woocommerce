@@ -282,14 +282,11 @@ class WC_REST_Authentication {
 
 		/*
 		 * Any other namespace is in scope only when the request URI named this exact route.
-		 * WP::parse_request() can take rest_route from more than one place, so the route finally
-		 * dispatched is not necessarily the one is_request_to_rest_api() judged scope from and ran
-		 * woocommerce_rest_is_request_to_rest_api against. We only reach this method once a key
-		 * authenticated, which means that filter approved the URI route: a resolved route equal to the
-		 * URI route inherits that approval, and anything else does not.
+		 * WP::parse_request() can take rest_route from more than one place, so the dispatched route is
+		 * not necessarily the one woocommerce_rest_is_request_to_rest_api approved. WordPress also
+		 * decodes rest_route through parse_str() while the URI route is read raw, so the decoded form
+		 * names the same route.
 		 */
-		// WordPress reads rest_route through parse_str(), which decodes it, while the URI route is
-		// read raw. Accept the decoded form too, so an encoded character is not read as another route.
 		$uri_route     = $this->route_from_request_uri();
 		$decoded_route = trim( urldecode( $uri_route ), '/' );
 
