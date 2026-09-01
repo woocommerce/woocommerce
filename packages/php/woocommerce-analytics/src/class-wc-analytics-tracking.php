@@ -113,6 +113,18 @@ class WC_Analytics_Tracking {
 	const MAX_CLIENT_NAME_LENGTH = 100;
 
 	/**
+	 * Maximum number of members in a client-supplied array value.
+	 *
+	 * `get_properties()` joins members into one string, which the per-value cap
+	 * never sees, so an array of short members is otherwise unbounded.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_ARRAY_MEMBERS = 50;
+
+	/**
 	 * Path suffix of the proxy tracking endpoint.
 	 *
 	 * Duplicated in the MU-plugin speed module template, which cannot use this
@@ -626,6 +638,10 @@ class WC_Analytics_Tracking {
 
 			// Arrays are flattened later by get_properties(); bound their members too.
 			if ( is_array( $value ) ) {
+				if ( count( $value ) > self::MAX_CLIENT_ARRAY_MEMBERS ) {
+					$value = array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true );
+				}
+
 				$event_properties[ $key ] = array_map( array( __CLASS__, 'cap_client_value' ), $value );
 				continue;
 			}

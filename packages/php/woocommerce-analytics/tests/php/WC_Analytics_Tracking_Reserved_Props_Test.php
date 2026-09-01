@@ -642,6 +642,43 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The per-value cap runs on each member, never on the string
+	 * `get_properties()` joins them into: 20,000 ten-character members produced a
+	 * 300KB pixel URL, which nothing downstream rejects.
+	 */
+	public function test_client_array_member_count_is_capped(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 25, 'abcdefghij' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+
+		$this->assertCount( WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, $sanitized['pc'] );
+
+		$props = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThan(
+			2000,
+			strlen( $props['pc'] ),
+			'The flattened value is what reaches the pixel URL, so the cap must survive flattening.'
+		);
+	}
+
+	/**
+	 * Slicing must not turn an indexed array into an associative one:
+	 * `get_properties()` picks `implode()` over `wp_json_encode()` on that test.
+	 */
+	public function test_capped_arrays_still_flatten_with_implode(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 5, 'a' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+		$props     = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertSame(
+			rawurlencode( implode( ',', array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, 'a' ) ) ),
+			$props['pc']
+		);
+	}
+
+	/**
 	 * Non-string scalars are analytics payload, not text: capping them would
 	 * change their type on the way to the pixel.
 	 */
