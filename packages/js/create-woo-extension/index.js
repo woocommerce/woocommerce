@@ -1,23 +1,50 @@
 const { join } = require( 'path' );
 
 const defaultDependencies = [
+	'@wordpress/components',
+	'@wordpress/element',
 	'@wordpress/hooks',
 	'@wordpress/i18n',
 	'@woocommerce/components',
 ];
-const defaultDevDependencies = [
-	'@woocommerce/dependency-extraction-webpack-plugin',
-	'@woocommerce/eslint-plugin',
-	'@wordpress/prettier-config',
-	'@wordpress/scripts',
-];
+/**
+ * `npmDevDependencies` cannot carry a version: create-block resolves each entry
+ * with npm-package-arg and writes `saveSpec || 'latest'`, and `saveSpec` is null
+ * for registry specs. Pins therefore have to go through `customPackageJSON`,
+ * which is spread over the generated `devDependencies`.
+ */
+const defaultDevDependencies = {
+	'@woocommerce/dependency-extraction-webpack-plugin': 'latest',
+	/* v4 is the first Flat Config release; the scaffolded eslint.config.mjs requires it. */
+	'@woocommerce/eslint-plugin': '^4.0.0',
+	'@wordpress/prettier-config': 'latest',
+	'@wordpress/scripts': 'latest',
+	/*
+	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
+	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
+	 */
+	prettier: 'npm:wp-prettier@3.0.3',
+};
+
+/*
+ * Stopgap: `i18n-calypso@7.4.1` (via `@woocommerce/components`) ships a Yarn-only
+ * `patch:` spec that breaks `npm install`. Pin to 8.1.0 (latest, without the
+ * spec) until the upstream range stops resolving to 7.4.1.
+ */
+const overrides = {
+	'i18n-calypso': '8.1.0',
+};
 
 module.exports = {
 	pluginTemplatesPath: join( __dirname, 'variants', 'default' ),
 	blockTemplatesPath: join( __dirname, 'variants', 'default', 'src' ),
 	defaultValues: {
 		npmDependencies: defaultDependencies,
-		npmDevDependencies: defaultDevDependencies,
+		npmDevDependencies: Object.keys( defaultDevDependencies ),
+		customPackageJSON: {
+			devDependencies: defaultDevDependencies,
+			overrides,
+		},
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {

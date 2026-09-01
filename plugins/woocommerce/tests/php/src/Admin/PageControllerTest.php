@@ -14,6 +14,13 @@ use WC_Unit_Test_Case;
  */
 class PageControllerTest extends WC_Unit_Test_Case {
 	/**
+	 * Admin menu globals mutated by register_page() via add_menu_page()/add_submenu_page().
+	 *
+	 * @var string[]
+	 */
+	private const MENU_FIXTURE_GLOBALS = array( 'menu', 'submenu', 'admin_page_hooks', '_registered_pages', '_parent_pages' );
+
+	/**
 	 * PageController instance.
 	 *
 	 * @var PageController
@@ -56,6 +63,14 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	private $redirected_to = '';
 
 	/**
+	 * Snapshot of the state mutated by the menu fixture, set when one is registered.
+	 * Holds the admin menu globals (MENU_FIXTURE_GLOBALS) and the PageController pages collection.
+	 *
+	 * @var array|null
+	 */
+	private $menu_fixture_backup = null;
+
+	/**
 	 * Set things up before each test case.
 	 *
 	 * @return void
@@ -65,7 +80,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
 		$GLOBALS['current_screen']   = $this->get_screen_mock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		if ( ! did_action( 'current_screen' ) ) {
-			do_action( 'current_screen', $GLOBALS['current_screen'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'current_screen', $GLOBALS['current_screen'] );
 		}
 
 		parent::setUp();
@@ -102,6 +117,24 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		// Restore screen backup.
 		if ( $this->current_screen_backup ) {
 			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		// Restore the state mutated by the menu fixture, if one was registered.
+		if ( null !== $this->menu_fixture_backup ) {
+			foreach ( self::MENU_FIXTURE_GLOBALS as $global_name ) {
+				if ( array_key_exists( $global_name, $this->menu_fixture_backup['globals'] ) ) {
+					$GLOBALS[ $global_name ] = $this->menu_fixture_backup['globals'][ $global_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the pre-fixture values.
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+
+			// Restore the private pages collection of the PageController singleton.
+			$pages_property = new \ReflectionProperty( PageController::class, 'pages' );
+			$pages_property->setAccessible( true );
+			$pages_property->setValue( $this->sut, $this->menu_fixture_backup['pages'] );
+
+			$this->menu_fixture_backup = null;
 		}
 
 		parent::tearDown();
@@ -530,6 +563,147 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'wc-settings', $params['page'], 'Redirect should go to wc-settings page.' );
 		$this->assertEquals( 'checkout', $params['tab'], 'Redirect should go to checkout tab.' );
 		$this->assertEquals( 'WCADMIN_PAYMENT_TASK', $params['from'], 'Redirect should include from parameter.' );
+	}
+
+	/**
+	 * @testdox Should append sub pages in registration order when no position is given.
+	 */
+	public function test_register_page_appends_sub_pages_without_position(): void {
+		wp_set_current_user( $this->admin_user_id );
+
+		$parent_path = $this->register_menu_fixture(
+			array(
+				array( 'id' => 'position-test-first' ),
+				array( 'id' => 'position-test-second' ),
+				array( 'id' => 'position-test-third' ),
+			)
+		);
+
+		$this->assertSame(
+			array( 'position-test-parent', 'position-test-first', 'position-test-second', 'position-test-third' ),
+			$this->get_submenu_titles( $parent_path ),
+			'Sub pages without a position should keep their registration order.'
+		);
+	}
+
+	/**
+	 * @testdox Should place a sub page at the given position within the parent submenu.
+	 */
+	public function test_register_page_honours_position_for_sub_pages(): void {
+		wp_set_current_user( $this->admin_user_id );
+
+		// Position 2 accounts for the link back to the parent that WordPress adds as the first submenu item.
+		$parent_path = $this->register_menu_fixture(
+			array(
+				array( 'id' => 'position-test-first' ),
+				array( 'id' => 'position-test-third' ),
+				array(
+					'id'       => 'position-test-second',
+					'position' => 2,
+				),
+			)
+		);
+
+		$this->assertSame(
+			array( 'position-test-parent', 'position-test-first', 'position-test-second', 'position-test-third' ),
+			$this->get_submenu_titles( $parent_path ),
+			'A sub page registered with position 2 should be inserted as the third item.'
+		);
+	}
+
+	/**
+	 * @testdox Should append a sub page whose position is beyond the end of the parent submenu.
+	 */
+	public function test_register_page_appends_sub_page_with_out_of_range_position(): void {
+		wp_set_current_user( $this->admin_user_id );
+
+		$parent_path = $this->register_menu_fixture(
+			array(
+				array( 'id' => 'position-test-first' ),
+				array( 'id' => 'position-test-second' ),
+				array(
+					'id'       => 'position-test-third',
+					'position' => 99,
+				),
+			)
+		);
+
+		$this->assertSame(
+			array( 'position-test-parent', 'position-test-first', 'position-test-second', 'position-test-third' ),
+			$this->get_submenu_titles( $parent_path ),
+			'An out of range position should append the sub page instead of dropping it.'
+		);
+	}
+
+	/**
+	 * Registers a top level page plus the given sub pages, and returns the parent menu slug.
+	 *
+	 * The global admin menu is emptied first so that assertions only see the fixture. All the state
+	 * mutated by the registration (the admin menu globals and the PageController pages collection)
+	 * is snapshotted here and restored in tear down.
+	 *
+	 * @param array $sub_pages List of option arrays passed to register_page(), each with at least an `id`.
+	 *
+	 * @return string The parent menu slug to look up in $submenu.
+	 */
+	private function register_menu_fixture( array $sub_pages ): string {
+		global $menu, $submenu;
+
+		$backup_globals = array();
+		foreach ( self::MENU_FIXTURE_GLOBALS as $global_name ) {
+			if ( isset( $GLOBALS[ $global_name ] ) ) {
+				$backup_globals[ $global_name ] = $GLOBALS[ $global_name ];
+			}
+		}
+
+		$this->menu_fixture_backup = array(
+			'globals' => $backup_globals,
+			'pages'   => $this->sut->get_pages(),
+		);
+
+		$menu    = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$submenu = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->sut->register_page(
+			array(
+				'id'         => 'position-test-parent',
+				'title'      => 'position-test-parent',
+				'parent'     => null,
+				'path'       => '/position-test-parent',
+				'capability' => 'manage_woocommerce',
+			)
+		);
+
+		foreach ( $sub_pages as $sub_page ) {
+			$this->sut->register_page(
+				array_merge(
+					array(
+						'title'      => $sub_page['id'],
+						'parent'     => 'position-test-parent',
+						'path'       => '/' . $sub_page['id'],
+						'capability' => 'manage_woocommerce',
+					),
+					$sub_page
+				)
+			);
+		}
+
+		return $this->sut->get_path_from_id( 'position-test-parent' );
+	}
+
+	/**
+	 * Returns the menu titles of the sub pages registered under the given parent, in menu order.
+	 *
+	 * @param string $parent_path The parent menu slug.
+	 *
+	 * @return array
+	 */
+	private function get_submenu_titles( string $parent_path ): array {
+		global $submenu;
+
+		$items = $submenu[ $parent_path ] ?? array();
+
+		return array_values( wp_list_pluck( $items, 0 ) );
 	}
 
 	/**

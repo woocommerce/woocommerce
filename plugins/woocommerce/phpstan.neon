@@ -27,6 +27,7 @@ parameters:
 	scanDirectories:
 		- vendor/wordpress/abilities-api
 		- packages/action-scheduler
+		- ../../packages/php/woocommerce-analytics/src
 	scanFiles:
 		- php-stubs/wc-admin-feature-config.php
 		- php-stubs/wc-constants.php
@@ -52,4 +53,3 @@ parameters:
 			path: src/StoreApi/Utilities/ProductItemTrait.php
 	parallel:
 		maximumNumberOfProcesses: 4
-

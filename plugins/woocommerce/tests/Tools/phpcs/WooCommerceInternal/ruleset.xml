@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerceInternal">
+	<description>Local WooCommerce Core PHPCS sniffs. Used standalone to verify the sniffs against their fixtures; the sniffs are wired into the main ruleset from plugins/woocommerce/phpcs.xml.</description>
+
+	<rule ref="./Sniffs/DB/IdentifierPlaceholderSniff.php" />
+</ruleset>

@@ -4,8 +4,9 @@
 		"./typings/**/*",
 		"./assets/js/**/*",
 		"./assets/js/**/*.json",
-		"./packages/checkout/**/*",
-		"./packages/components/**/*",
+		"./packages/public-api/**/*",
+		"./packages/internal/**/*",
+		"./assets/js/middleware/**/*",
 		"./assets/js/blocks/**/block.json",
 		"./assets/js/atomic/blocks/**/block.json",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
@@ -16,6 +17,7 @@
 	],
 	"exclude": [
 		"./storybook/build",
+		"./storybook/dist",
 		"./storybook/webpack.config.js",
 		"./storybook/preview.js",
 		"./bin"

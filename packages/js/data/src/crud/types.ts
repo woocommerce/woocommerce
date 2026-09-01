@@ -53,7 +53,7 @@ export type CrudActions<
 	ResourceName,
 	ItemType,
 	MutableProperties,
-	RequiredFields extends keyof MutableProperties | undefined = undefined
+	RequiredFields extends keyof MutableProperties | undefined = undefined,
 > = MapActions<
 	{
 		create: (
@@ -83,7 +83,7 @@ export type CrudSelectors<
 	PluralResourceName,
 	ItemType,
 	ItemQueryType,
-	MutableProperties
+	MutableProperties,
 > = MapSelectors<
 	{
 		'': WPDataSelector< typeof getItem >;

@@ -237,37 +237,77 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Get the common properties for the event.
+	 * Request-scoped — not for page output, see `get_page_common_properties()`.
+	 *
+	 * Includes the session cookie and `get_server_details()`, so this is only safe
+	 * for events the server fires itself on an uncached request, which includes the
+	 * proxy tracking endpoint.
 	 *
 	 * @return array The common properties.
 	 */
 	public static function get_common_properties() {
-		$blog_user_id    = self::get_blog_user_id();
-		$server_details  = self::get_server_details();
-		$blog_details    = self::get_blog_details();
+		return array_merge(
+			self::get_session_properties(),
+			self::get_page_common_properties(),
+			self::get_server_details()
+		);
+	}
+
+	/**
+	 * Get the visitor's session properties from the session cookie.
+	 *
+	 * Request-derived, so these are for the server-fired path only. The cookie is
+	 * written and read by the client's own SessionManager, which supplies these
+	 * properties directly on events it sends.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array The session properties.
+	 */
+	private static function get_session_properties() {
 		$session_details = self::get_session_details();
 
-		$common_properties = array_merge(
-			array(
-				'session_id'     => $session_details['session_id'] ?? null,
-				'landing_page'   => $session_details['landing_page'] ?? null,
-				'is_engaged'     => $session_details['is_engaged'] ?? null,
-				'ui'             => $blog_user_id,
-				'blog_id'        => $blog_details['blog_id'] ?? null,
-				'store_id'       => $blog_details['store_id'] ?? null,
-				'url'            => $blog_details['url'] ?? null,
-				'woo_version'    => $blog_details['wc_version'] ?? null,
-				'wp_version'     => get_bloginfo( 'version' ),
-				'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-				'device'         => self::get_device_type(),
-				'store_currency' => $blog_details['store_currency'] ?? null,
-				'timezone'       => wp_timezone_string(),
-				'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
-			),
-			$server_details
+		return array(
+			'session_id'   => $session_details['session_id'] ?? null,
+			'landing_page' => $session_details['landing_page'] ?? null,
+			'is_engaged'   => $session_details['is_engaged'] ?? null,
 		);
+	}
 
-		return is_array( $common_properties ) ? $common_properties : array();
+	/**
+	 * Get the common properties that are safe to embed in cacheable page HTML.
+	 *
+	 * Request headers and cookies are not part of the CDN cache key, so a property
+	 * derived from one is attributed to every later visitor of the cached page.
+	 * Anything request-derived belongs in `get_session_properties()` or
+	 * `get_server_details()`, which only reach the server-fired path.
+	 *
+	 * Two exceptions, neither of them licence to add a third: `device` is
+	 * User-Agent derived and a known gap, tracked for a client-side follow-up;
+	 * `ui`, `is_guest` and `store_admin` are safe only because caches bypass
+	 * logged-in requests.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array The common properties.
+	 */
+	public static function get_page_common_properties() {
+		$blog_user_id = self::get_blog_user_id();
+		$blog_details = self::get_blog_details();
+
+		return array(
+			'ui'             => $blog_user_id,
+			'blog_id'        => $blog_details['blog_id'] ?? null,
+			'store_id'       => $blog_details['store_id'] ?? null,
+			'url'            => $blog_details['url'] ?? null,
+			'woo_version'    => $blog_details['wc_version'] ?? null,
+			'wp_version'     => get_bloginfo( 'version' ),
+			'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
+			'device'         => self::get_device_type(),
+			'store_currency' => $blog_details['store_currency'] ?? null,
+			'timezone'       => wp_timezone_string(),
+			'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+		);
 	}
 
 	/**

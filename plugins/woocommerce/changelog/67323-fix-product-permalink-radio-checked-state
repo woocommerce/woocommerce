@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product permalink settings radio buttons reverting to "Custom base" after saving Default, Shop base, or Shop base with category.

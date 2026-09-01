@@ -103,11 +103,10 @@ class RefundSchema extends AbstractSchema {
 				'required'          => true,
 				'sanitize_callback' => 'absint',
 			),
-			'amount'           => array(
-				'description'       => __( 'Amount that was refunded. This is calculated from the line items if not provided.', 'woocommerce' ),
+			'total'            => array(
+				'description'       => __( 'Total amount that was refunded. This is calculated from the line items if not provided.', 'woocommerce' ),
 				'type'              => 'number',
 				'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-				'default'           => 0,
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
@@ -321,7 +320,7 @@ class RefundSchema extends AbstractSchema {
 			'currency_symbol'  => html_entity_decode( get_woocommerce_currency_symbol( $refund->get_currency() ), ENT_QUOTES ),
 			'date_created'     => wc_rest_prepare_date_response( $refund->get_date_created(), false ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $refund->get_date_created() ),
-			'amount'           => wc_format_decimal( $refund->get_amount(), $dp ),
+			'total'            => wc_format_decimal( $refund->get_amount(), $dp ),
 			'reason'           => $refund->get_reason(),
 			'refunded_payment' => $refund->get_refunded_payment(),
 		);

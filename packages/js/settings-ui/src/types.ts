@@ -91,6 +91,11 @@ export type SettingsUIShellBadge = {
 };
 
 export type SettingsUIShell = {
+	/**
+	 * Header visibility: drill-down pages show it, top-level pages hide it
+	 * and save from the bottom of the page. Defaults to 'hidden'.
+	 */
+	header?: 'visible' | 'hidden';
 	title?: string;
 	subtitle?: string;
 	breadcrumbs?: SettingsUIShellBreadcrumb[];

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the WooCommerce Blocks hook docs pipeline (build:docs) and regenerate the hooks reference (filters.md, actions.md) from the current PHP sources.

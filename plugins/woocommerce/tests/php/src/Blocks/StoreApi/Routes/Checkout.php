@@ -20,11 +20,12 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
+use WC_Tax;
 
 /**
  * Checkout Controller Tests.
  *
- * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
  */
 class Checkout extends \WP_Test_REST_TestCase {
 	use MockeryPHPUnitIntegration;
@@ -59,6 +60,13 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @var \WC_Gateway_Paypal
 	 */
 	private $paypal_gateway_before_test;
+
+	/**
+	 * Tax rate IDs inserted by the current test, removed in tearDown().
+	 *
+	 * @var int[]
+	 */
+	private $inserted_tax_rate_ids = array();
 
 	/**
 	 * Create immutable catalog rows shared by all test methods.
@@ -171,6 +179,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	protected function tearDown(): void {
 		try {
+			$this->remove_inserted_tax_rates();
+
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
 			remove_all_filters( 'woocommerce_get_country_locale' );
@@ -213,6 +223,49 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Enable taxes and add a 10% US/CA rate, so an address in California changes the cart total.
+	 */
+	private function enable_taxes_with_us_ca_rate(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'CA Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+	}
+
+	/**
+	 * Delete the tax rates inserted by the current test, so a failing test does not leak them into later ones.
+	 */
+	private function remove_inserted_tax_rates(): void {
+		if ( ! $this->inserted_tax_rate_ids ) {
+			return;
+		}
+
+		foreach ( $this->inserted_tax_rate_ids as $tax_rate_id ) {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+		}
+
+		$this->inserted_tax_rate_ids = array();
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Format the current cart total the way the client sends it in `expected_total`.
+	 */
+	private function get_cart_total_in_minor_units(): string {
+		return (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+	}
+
+	/**
 	 * Invalidate caches for options modified by checkout tests.
 	 */
 	private function invalidate_checkout_option_caches(): void {
@@ -227,6 +280,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'woocommerce_bacs_settings',
 			'woocommerce_pickup_location_settings',
 			'pickup_location_pickup_locations',
+			'woocommerce_calc_taxes',
 		);
 
 		foreach ( $option_names as $option_name ) {
@@ -290,6 +344,410 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure an order is placed when the expected total sent by the client matches the server total.
+	 */
+	public function test_post_data_accepts_matching_expected_total() {
+		WC()->cart->calculate_totals();
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure an order is rejected with a 409 when the expected total sent by the client no longer
+	 * matches the total calculated on the server, and the refreshed cart is returned.
+	 */
+	public function test_post_data_rejects_mismatched_expected_total() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				// A total the customer could never have seen for this cart.
+				'expected_total'   => '1',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 409, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_total_mismatch', $data['code'] );
+		$this->assertArrayHasKey( 'cart', $data['data'], 'The refreshed cart should be returned so the client can display the updated total.' );
+		$this->assertEquals( 1, $data['data']['expected_total'] );
+		$this->assertGreaterThan( 1, $data['data']['actual_total'] );
+	}
+
+	/**
+	 * @testdox A confirmed total of zero should still be reported back in the mismatch payload.
+	 *
+	 * RouteException filters its additional data, and a naive filter drops `0`, which is a total a free
+	 * cart can legitimately confirm before the request's address adds tax or shipping.
+	 */
+	public function test_post_data_reports_zero_expected_total_in_mismatch_payload() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '0',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 409, $response->get_status(), print_r( $data, true ) );
+		$this->assertArrayHasKey( 'expected_total', $data['data'], 'A confirmed total of zero should not be filtered out of the error payload.' );
+		$this->assertSame( 0, $data['data']['expected_total'] );
+	}
+
+	/**
+	 * Ensure an expected total that is not in the documented minor-unit format is rejected outright,
+	 * rather than being coerced to an integer and silently weakening the guard.
+	 */
+	public function test_post_data_rejects_malformed_expected_total() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				// A major-unit total: `(int) '30.00'` is 30, which would pass a check meant to compare 3000.
+				'expected_total'   => '30.00',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * @testdox Should reject the order when this request's address changes the total, even if that total matches the pre-request session total.
+	 *
+	 * validate_order_totals() runs before update_customer_from_request(), so it checks the total for the
+	 * address already in the session, not the address this request is submitting. A client that (correctly)
+	 * echoes back the last total it saw before editing the address ends up matching that stale session
+	 * total, and the guard waves the order through even though the address in this very request raises it.
+	 */
+	public function test_post_data_rejects_expected_total_when_this_requests_address_changes_tax() {
+		$this->enable_taxes_with_us_ca_rate();
+
+		// The address already in the session before this request: untaxed.
+		WC()->customer->set_billing_country( 'GB' );
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->cart->calculate_totals();
+		$expected_total = $this->get_cart_total_in_minor_units();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				// The total for the GB address already in session, not for the CA address below.
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 409, $response->get_status(), 'The order should be rejected because the CA address in this request raises the total above what the shopper confirmed: ' . print_r( $data, true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_total_mismatch', $data['code'], 'The rejection should come from the expected_total guard, not another 409.' );
+		$this->assertEquals( (int) $expected_total, $data['data']['expected_total'] );
+		$this->assertGreaterThan( (int) $expected_total, $data['data']['actual_total'] );
+	}
+
+	/**
+	 * @testdox Should accept the order when expected_total is correctly computed for this request's own address.
+	 *
+	 * A single-POST client (per the documented Store API flow) can submit an address for the first time
+	 * in the place-order request itself, with no prior PUT to sync it to the session. If it correctly
+	 * computes expected_total for that address, the order should place - but validate_order_totals() checks
+	 * the pre-request (addressless) session total instead, so it rejects a correctly-computed request.
+	 */
+	public function test_post_data_accepts_expected_total_correctly_computed_for_this_requests_address() {
+		$this->enable_taxes_with_us_ca_rate();
+
+		// No address in the session yet, matching a fresh single-POST checkout.
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+
+		// Compute the total the order will actually settle at once the CA address in this request
+		// is applied - this is what a correctly implemented client would send as expected_total.
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'CA' );
+		WC()->cart->calculate_totals();
+		$expected_total = $this->get_cart_total_in_minor_units();
+
+		// Reset the session back to addressless, since the client hasn't PUT the address yet.
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+		WC()->cart->calculate_totals();
+
+		// Without this the test would pass vacuously if the tax rate above stopped applying.
+		$this->assertNotSame( $expected_total, $this->get_cart_total_in_minor_units(), 'The CA rate must move the total, otherwise this scenario does not exercise the guard.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'The order should place because expected_total is exactly what the server will charge for the CA address in this request: ' . print_r( $data, true ) );
+	}
+
+	/**
+	 * Ensure the total check is skipped (order placed) when the client does not send an expected total.
+	 */
+	public function test_post_data_skips_total_check_when_not_provided() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure a free order (zero total) is accepted when the client sends a matching expected total.
+	 */
+	public function test_post_data_accepts_matching_expected_total_for_free_order() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $free_product->get_id(), 1 );
+		wc()->cart->calculate_totals();
+
+		// The cart is genuinely free, and a zero total serialises to the string "0".
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+		$this->assertSame( '0', $expected_total );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => $expected_total,
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -354,6 +812,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			array(
 				'billing_address' => (object) $this->get_fallback_billing_address(),
 				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => '3000',
 			)
 		);
 
@@ -384,6 +843,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -412,6 +872,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 
@@ -460,6 +921,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -500,6 +962,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => 'apples',
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -544,6 +1007,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -593,6 +1057,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -641,6 +1106,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -678,6 +1144,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -721,6 +1188,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -764,6 +1232,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -798,6 +1267,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -830,6 +1300,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -888,6 +1359,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -942,6 +1414,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1000,6 +1473,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1058,6 +1532,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => 'invalid-string',
@@ -1104,6 +1579,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'other_extension_data' => array(
 						'another_key' => true,
@@ -1150,6 +1626,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1195,6 +1672,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				),
 				'create_account'   => true,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1253,6 +1731,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				),
 				'create_account'   => false,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1310,6 +1789,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1365,6 +1845,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1422,6 +1903,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1475,6 +1957,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1590,6 +2073,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/job-function'   => 'engineering',
 					'plugin-namespace/leave-on-porch' => true,
 				),
+				'expected_total'    => '3000',
 			)
 		);
 
@@ -1718,6 +2202,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1763,6 +2248,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1824,6 +2310,74 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( $original_billing_country, $stored_order->get_billing_country() );
 		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
 		$this->assertEquals( $original_total, $stored_order->get_total() );
+	}
+
+	/**
+	 * @testdox Paying an existing order enforces the coupon's global usage limit.
+	 * @testWith ["route-global-limited", true, 409, false]
+	 *           ["route-global-ok", false, 200, true]
+	 *
+	 * @param string $code            Coupon code.
+	 * @param bool   $exhaust         Exhaust the coupon's global limit first.
+	 * @param int    $expected_status Expected HTTP status.
+	 * @param bool   $keeps_coupon    Whether the coupon should remain on the order.
+	 */
+	public function test_checkout_order_enforces_coupon_global_usage_limit( $code, $exhaust, $expected_status, $keeps_coupon ) {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_amount( 2 );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+		if ( $exhaust ) {
+			$coupon->increase_usage_count();
+		}
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->set_recorded_coupon_usage_counts( false );
+		$order->save();
+
+		$address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => '',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'phone'      => '555-32123',
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $address, array( 'email' => $order->get_billing_email() ) ),
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( $expected_status, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$codes = wc_get_order( $order->get_id() )->get_coupon_codes();
+		if ( $keeps_coupon ) {
+			$this->assertContains( $code, $codes );
+		} else {
+			$this->assertNotContains( $code, $codes );
+			$this->assertEquals( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
+		}
 	}
 
 	/**
@@ -1919,6 +2473,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID, // Payment method might still be required, even if free.
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1971,6 +2526,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => '',
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2036,6 +2592,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2102,6 +2659,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2219,6 +2777,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -2540,6 +3099,37 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
+	 */
+	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		$order_id_during_payment = 0;
+		$payment_handler         = function ( $context, $payment_result ) use ( &$order_id_during_payment ) {
+			unset( $context );
+			$order_id_during_payment = (int) WC()->session->get( 'order_awaiting_payment' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = (int) $response->get_data()['order_id'];
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should create an order.' );
+		$this->assertSame( $order_id, $order_id_during_payment, 'The order should be linked to the session before payment processing starts.' );
+		$persisted_session_data = WC()->session->get_session_data();
+		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
+		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
@@ -2575,6 +3165,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		return $request;
@@ -2647,5 +3238,28 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
 		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
+
+	/**
+	 * @testdox Should return an error response when restoring the cart session throws.
+	 */
+	public function test_cart_session_failure_returns_error_response() {
+		wc()->session->set( 'cart', wc()->cart->get_cart_for_session() );
+
+		// The route restores the cart only when this action has not run yet, so reset
+		// the counter to put the process back into the state a REST request starts in.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		add_filter(
+			'woocommerce_get_cart_item_from_session',
+			static function () {
+				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 	}
 }

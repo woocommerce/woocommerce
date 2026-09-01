@@ -140,6 +140,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			'woocommerce/product-meta',
 			'woocommerce/product-rating',
 			'woocommerce/product-price',
+			'woocommerce/product-summary',
 			'woocommerce/related-products',
 			'woocommerce/add-to-cart-with-options',
 			'woocommerce/product-gallery',

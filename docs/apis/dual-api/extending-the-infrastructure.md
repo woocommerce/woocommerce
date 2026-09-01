@@ -44,7 +44,7 @@ The surface uses three patterns (see `Schema/README.md`):
 - Emits per-field authorization gates and the input-side "only if provided" gates.
 - Warns at build time about unresolvable attribute references (e.g. a missing `use` import) and errors on duplicate metadata names.
 
-It is **not** unit-tested directly; it's validated end-to-end against a comprehensive dummy code-API fixture under `tests/php/src/Internal/Api/Fixtures/DummyApi/`, whose generated output is committed alongside it. When you change the builder or templates, update the dummy API if needed and regenerate both core and the fixture (`build:api` + `build:api:test`), then run the `wc-phpunit-graphql-infra` test suite. Treat a non-imports-only diff in the generated trees as a signal to review.
+It is **not** unit-tested directly; it's validated end-to-end against a comprehensive dummy code-API fixture under `tests/php/src/Internal/Api/Fixtures/DummyApi/`, whose generated output is committed alongside it. When you change the builder or templates, update the dummy API if needed and regenerate both core and the fixture (`build:api` + `build:api:test`), then run the `wc-phpunit-graphql` test suite. Treat a non-imports-only diff in the generated trees as a signal to review.
 
 ## Runtime helpers
 

@@ -88,16 +88,22 @@ test.describe( 'Product Collection: Extensibility Events', () => {
 		test.beforeEach( async ( { page, pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock( 'featured' );
 
+			let resolvePayload!: ( payload: {
+				productId?: number;
+				collection?: string;
+			} ) => void;
 			promise = new Promise( ( resolve ) => {
-				void page.exposeFunction( 'resolvePayload', resolve );
-				void page.addInitScript( () => {
-					window.document.addEventListener(
-						'wc-blocks_viewed_product',
-						( e ) => {
-							window.resolvePayload( e.detail );
-						}
-					);
-				} );
+				resolvePayload = resolve;
+			} );
+
+			await page.exposeFunction( 'resolvePayload', resolvePayload );
+			await page.addInitScript( () => {
+				window.document.addEventListener(
+					'wc-blocks_viewed_product',
+					( e ) => {
+						window.resolvePayload( e.detail );
+					}
+				);
 			} );
 
 			await pageObject.publishAndGoToFrontend();
@@ -117,7 +123,11 @@ test.describe( 'Product Collection: Extensibility Events', () => {
 		} );
 
 		test( 'when Product Title is clicked', async ( { page } ) => {
-			await page.locator( '.wp-block-post-title' ).nth( 0 ).click();
+			await page
+				.locator( '.wp-block-post-title' )
+				.first()
+				.getByRole( 'link' )
+				.click();
 
 			const { collection, productId } = await promise;
 			expect( collection ).toEqual(

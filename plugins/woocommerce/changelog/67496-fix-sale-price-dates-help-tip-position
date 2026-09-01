@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Sale price dates help tip rendering below the Cancel link instead of next to its label in the product editor.

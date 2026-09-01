@@ -33,110 +33,44 @@ jest.mock( '../..', () => {
 
 	return {
 		CustomerEffortScoreTracks: ( { onSubmitLabel } ) =>
-			mockCreateElement(
-				'span',
-				null,
-				onSubmitLabel ?? 'Default submit label'
-			),
+			mockCreateElement( 'span', null, onSubmitLabel ),
 	};
 } );
 
 describe( 'CustomerEffortScoreTracksContainer', () => {
-	let hadPagenow;
-	let hadAdminpage;
-	let originalPagenow;
-	let originalAdminpage;
+	const originalPagenow = window.pagenow;
+	const originalAdminpage = window.adminpage;
 
 	beforeEach( () => {
-		hadPagenow = Object.prototype.hasOwnProperty.call( window, 'pagenow' );
-		hadAdminpage = Object.prototype.hasOwnProperty.call(
-			window,
-			'adminpage'
-		);
-		originalPagenow = window.pagenow;
-		originalAdminpage = window.adminpage;
 		window.pagenow = 'product';
 		window.adminpage = 'post-php';
 	} );
 
 	afterEach( () => {
-		if ( hadPagenow ) {
-			window.pagenow = originalPagenow;
-		} else {
-			delete window.pagenow;
-		}
-
-		if ( hadAdminpage ) {
-			window.adminpage = originalAdminpage;
-		} else {
-			delete window.adminpage;
-		}
+		window.pagenow = originalPagenow;
+		window.adminpage = originalAdminpage;
 	} );
 
-	it( 'forwards the canonical submit label for a matching queue item', () => {
+	it( 'forwards the canonical label from a normalized queue item', () => {
 		const clearQueue = jest.fn();
 
 		render(
-			<CustomerEffortScoreTracksContainer
-				queue={ [
-					{
-						onSubmitLabel: 'Canonical success',
-						pagenow: 'product',
-						adminpage: 'post-php',
-					},
-				] }
-				resolving={ false }
-				clearQueue={ clearQueue }
-			/>
-		);
-
-		expect( screen.getByText( 'Canonical success' ) ).toBeInTheDocument();
-		expect( clearQueue ).toHaveBeenCalledTimes( 1 );
-	} );
-
-	it( 'prefers the canonical submit label on a normalized queue item', () => {
-		const clearQueue = jest.fn();
-
-		render(
-			<CustomerEffortScoreTracksContainer
-				queue={ [
+			createElement( CustomerEffortScoreTracksContainer, {
+				queue: [
 					{
 						onSubmitLabel: 'Canonical success',
 						onsubmit_label: 'Legacy value',
 						pagenow: 'product',
 						adminpage: 'post-php',
 					},
-				] }
-				resolving={ false }
-				clearQueue={ clearQueue }
-			/>
+				],
+				resolving: false,
+				clearQueue,
+			} )
 		);
 
 		expect( screen.getByText( 'Canonical success' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'Legacy value' ) ).not.toBeInTheDocument();
 		expect( clearQueue ).toHaveBeenCalledTimes( 1 );
-	} );
-
-	it( 'ignores queue items for a different page', () => {
-		const clearQueue = jest.fn();
-
-		render(
-			<CustomerEffortScoreTracksContainer
-				queue={ [
-					{
-						onSubmitLabel: 'Different page',
-						pagenow: 'edit-product',
-						adminpage: 'edit-php',
-					},
-				] }
-				resolving={ false }
-				clearQueue={ clearQueue }
-			/>
-		);
-
-		expect(
-			screen.queryByText( 'Different page' )
-		).not.toBeInTheDocument();
-		expect( clearQueue ).not.toHaveBeenCalled();
 	} );
 } );

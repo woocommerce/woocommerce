@@ -116,7 +116,7 @@ export const Plugins = ( {
 
 	useEffect( () => {
 		if ( autoInstall ) {
-			installAndActivate();
+			void installAndActivate();
 		}
 	}, [ autoInstall ] );
 
@@ -170,7 +170,7 @@ export const Plugins = ( {
 				onClick={ () => {
 					onClick();
 					setHasBeenClicked( true );
-					installAndActivate();
+					void installAndActivate();
 				} }
 			>
 				{ installText }

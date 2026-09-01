@@ -1,15 +1,24 @@
 /**
  * External dependencies
  */
-import { BaseControl, CheckboxControl } from '@wordpress/components';
+import {
+	BaseControl,
+	CheckboxControl,
+	SelectControl,
+	TextControl,
+	TextareaControl,
+} from '@wordpress/components';
 import { createElement, RawHTML } from '@wordpress/element';
-import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
+import {
+	createSettingsHelpElement as getHelp,
+	sanitizeSettingsHtml,
+} from './html';
 import { NumberSpinControl } from './number-spin-control';
 import type { SettingsFieldComponentProps, SettingsValue } from './types';
 
@@ -34,11 +43,24 @@ const textInputTypes: TextInputType[] = [
 	'tel',
 ];
 
+const nativeFieldTypes = new Set( [
+	'info',
+	'checkbox',
+	'textarea',
+	'select',
+	'radio',
+	'array',
+	'number',
+] );
+
 const toStringValue = ( value: SettingsValue ) =>
 	value === null || typeof value === 'undefined' ? '' : String( value );
 
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
+
+export const isNativeSettingsFieldType = ( type: string ) =>
+	nativeFieldTypes.has( type ) || isTextInputType( type );
 
 // Use HTML boolean attribute presence semantics: disabled="false" still
 // means disabled, while a boolean false remains false.
@@ -76,15 +98,6 @@ const getNumberInputAttributes = (
 	};
 };
 
-const getHelp = ( description?: string ) =>
-	description ? (
-		<span
-			dangerouslySetInnerHTML={ {
-				__html: sanitizeSettingsHtml( description ),
-			} }
-		/>
-	) : undefined;
-
 export const NativeSettingsField = ( {
 	field,
 	value,
@@ -119,41 +132,46 @@ export const NativeSettingsField = ( {
 
 	if ( field.type === 'textarea' ) {
 		return (
-			<Field.Root className="wc-settings-ui__control">
-				<Field.Label>{ field.label }</Field.Label>
-				<Textarea
-					value={ toStringValue( value ) }
-					placeholder={ field.placeholder }
-					disabled={ field.disabled }
-					onChange={ ( event ) => onChange( event.target.value ) }
-				/>
-				{ field.description ? (
-					<Field.Details>
-						{ getHelp( field.description ) }
-					</Field.Details>
-				) : null }
-			</Field.Root>
+			<TextareaControl
+				className="wc-settings-ui__control"
+				label={ field.label }
+				help={ getHelp( field.description ) }
+				value={ toStringValue( value ) }
+				placeholder={ field.placeholder }
+				disabled={ field.disabled }
+				onChange={ onChange }
+				__nextHasNoMarginBottom
+			/>
 		);
 	}
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
-		const items = ( field.options || [] ).map( ( option ) => ( {
-			value: option.value,
-			label: option.label,
-		} ) );
-		const selectedItem =
-			items.find( ( item ) => item.value === toStringValue( value ) ) ??
-			null;
+		const selectValue = toStringValue( value );
+		const options = Array.isArray( field.options ) ? field.options : [];
+		const selectOptions = options.some(
+			( option ) => option.value === selectValue
+		)
+			? options
+			: [
+					{
+						value: selectValue,
+						label: __( 'Select', 'woocommerce' ),
+						disabled: true,
+					},
+					...options,
+			  ];
 
 		return (
 			<SelectControl
 				className="wc-settings-ui__control"
 				label={ field.label }
-				details={ getHelp( field.description ) }
-				items={ items }
-				value={ selectedItem }
+				help={ getHelp( field.description ) }
+				value={ selectValue }
+				options={ selectOptions }
 				disabled={ field.disabled }
-				onValueChange={ ( item ) => onChange( item?.value ?? '' ) }
+				onChange={ ( nextValue ) => onChange( nextValue ) }
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 			/>
 		);
 	}
@@ -211,15 +229,17 @@ export const NativeSettingsField = ( {
 
 	if ( isTextInputType( field.type ) ) {
 		return (
-			<InputControl
+			<TextControl
 				className="wc-settings-ui__control"
 				type={ field.type }
 				label={ field.label }
-				details={ getHelp( field.description ) }
+				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
 				placeholder={ field.placeholder }
 				disabled={ field.disabled }
-				onChange={ ( event ) => onChange( event.target.value ) }
+				onChange={ onChange }
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				{ ...field.customAttributes }
 			/>
 		);
@@ -228,13 +248,15 @@ export const NativeSettingsField = ( {
 	warn( `Field type "${ field.type }" is not supported.`, { field } );
 
 	return (
-		<InputControl
+		<TextControl
 			className="wc-settings-ui__control"
 			label={ field.label }
-			details={ getHelp( field.description ) }
+			help={ getHelp( field.description ) }
 			value={ toStringValue( value ) }
 			disabled={ field.disabled }
-			onChange={ ( event ) => onChange( event.target.value ) }
+			onChange={ onChange }
+			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 		/>
 	);
 };
