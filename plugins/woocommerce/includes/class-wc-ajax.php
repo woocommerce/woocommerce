@@ -2437,16 +2437,126 @@ class WC_AJAX {
 		 * @since 3.4.0
 		 * @param array $args The search arguments.
 		 */
-		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
+		$args  = apply_filters( 'woocommerce_product_attribute_terms', $args );
+		$terms = get_terms( $args );
+		$terms = self::maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy );
 
 		/**
 		 * Filter the product attribute terms search results.
 		 *
 		 * @since 7.0.0
-		 * @param array  $terms    The list of matched terms.
-		 * @param string $taxonomy The terms taxonomy.
+		 * @param array|WP_Error $terms    The list of matched terms, or a term query error.
+		 * @param string         $taxonomy The terms taxonomy.
 		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
+	}
+
+	/**
+	 * Include an exact taxonomy term match omitted by a full broad result set.
+	 *
+	 * @param mixed $terms       The broad search results.
+	 * @param mixed $args        The filtered broad search arguments.
+	 * @param mixed $search_text The requested search text.
+	 * @param mixed $taxonomy    The requested taxonomy.
+	 * @return mixed
+	 */
+	private static function maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy ) {
+		// Public filters may change argument and result shapes, so compose only the expected representations.
+		if ( ! is_array( $args ) || ! is_array( $terms ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
+			return $terms;
+		}
+
+		// An empty request or broad response cannot hide an exact term beyond a positive cap.
+		if ( '' === $search_text || empty( $terms ) ) {
+			return $terms;
+		}
+
+		$filtered_offset = $args['offset'] ?? 0;
+
+		// Recovery applies only to the first result window. WP_Term_Query defaults the offset to an empty string.
+		if ( ! in_array( $filtered_offset, array( 0, '0', '' ), true ) ) {
+			return $terms;
+		}
+
+		$filtered_number = $args['number'] ?? null;
+
+		// Public filters may replace the cap with an unsupported type, which should fail closed without coercion.
+		if ( ! is_int( $filtered_number ) && ! is_string( $filtered_number ) ) {
+			return $terms;
+		}
+
+		$number = filter_var( $filtered_number, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) );
+
+		// Recovery applies only when a positive finite cap is completely filled.
+		if ( false === $number || count( $terms ) !== $number ) {
+			return $terms;
+		}
+
+		// Replacing the broad selector is safe only for the standard query shape.
+		if (
+			'all' !== ( $args['fields'] ?? null ) ||
+			( $args['taxonomy'] ?? null ) !== $taxonomy ||
+			( $args['name__like'] ?? null ) !== $search_text ||
+			array_key_exists( 'name', $args ) ||
+			array_key_exists( 'search', $args )
+		) {
+			return $terms;
+		}
+
+		// Exact recovery is limited to nonhierarchical global attributes.
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) || is_taxonomy_hierarchical( $taxonomy ) ) {
+			return $terms;
+		}
+
+		$term_ids = array();
+		foreach ( $terms as $term ) {
+			// A non-term result cannot be safely combined with an exact term object.
+			if ( ! $term instanceof WP_Term ) {
+				return $terms;
+			}
+
+			// Keep an already-visible exact term in its configured position.
+			if ( $search_text === $term->name ) {
+				return $terms;
+			}
+
+			$term_ids[] = (int) $term->term_id;
+		}
+
+		// Preserve filtered eligibility constraints while replacing only the broad selector and bounding the lookup.
+		$exact_args = $args;
+		unset( $exact_args['name__like'] );
+		$exact_args['name']    = $search_text;
+		$exact_args['fields']  = 'all';
+		$exact_args['number']  = 1;
+		$exact_args['offset']  = 0;
+		$exact_args['orderby'] = 'none';
+
+		$exact_terms = get_terms( $exact_args );
+		// Query hooks may return an error or alter the exact-query result shape.
+		if ( ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
+			return $terms;
+		}
+
+		$exact_term = reset( $exact_terms );
+		// A non-term exact result cannot be safely combined with the broad term objects.
+		if ( ! $exact_term instanceof WP_Term ) {
+			return $terms;
+		}
+
+		// Query hooks may change the taxonomy after the exact-query arguments are validated.
+		if ( $taxonomy !== $exact_term->taxonomy ) {
+			return $terms;
+		}
+
+		// Database collation may resolve to an already-visible case- or accent-equivalent term.
+		if ( in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
+			return $terms;
+		}
+
+		array_unshift( $terms, $exact_term );
+
+		return array_slice( $terms, 0, $number );
 	}
 
 	/**
