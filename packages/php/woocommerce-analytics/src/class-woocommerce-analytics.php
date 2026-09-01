@@ -22,7 +22,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Package version.
 	 */
-	const PACKAGE_VERSION = '0.17.1';
+	const PACKAGE_VERSION = '0.18.0';
 
 	/**
 	 * Proxy speed module version option.
@@ -46,7 +46,7 @@ class Woocommerce_Analytics {
 	 * request that already wrote this, and on multisite one network-wide module
 	 * file answers for sites that never enabled anything.
 	 *
-	 * @since 0.17.1
+	 * @since 0.18.0
 	 *
 	 * @var string
 	 */
@@ -66,7 +66,7 @@ class Woocommerce_Analytics {
 	 * it, for an uninstall routine or a site that wants the endpoint gone once the
 	 * caches holding those pages have expired.
 	 *
-	 * @since 0.17.1
+	 * @since 0.18.0
 	 *
 	 * @var string
 	 */
@@ -230,7 +230,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Mirror the resolved proxy tracking state into PROXY_TRACKING_ENABLED_OPTION.
 	 *
-	 * @since 0.17.1
+	 * @since 0.18.0
 	 *
 	 * @return void
 	 */
@@ -256,7 +256,7 @@ class Woocommerce_Analytics {
 	 * authorization but deliberately leaves this alone: removing the module does
 	 * not expire the cached pages this records.
 	 *
-	 * @since 0.17.1
+	 * @since 0.18.0
 	 *
 	 * @return void
 	 */
@@ -302,7 +302,7 @@ class Woocommerce_Analytics {
 	 * turning proxy tracking off would leave an installed module answering
 	 * requests the REST route no longer serves.
 	 *
-	 * @since 0.17.1
+	 * @since 0.18.0
 	 *
 	 * @return bool
 	 */
