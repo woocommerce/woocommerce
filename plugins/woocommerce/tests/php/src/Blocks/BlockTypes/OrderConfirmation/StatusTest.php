@@ -180,8 +180,6 @@ class StatusTest extends WC_Unit_Test_Case {
 				return $new_filter_result;
 			}
 		);
-		// Shaped like gateway callbacks that declare a single $text parameter (so they never receive
-		// the $order argument) and replace the message unconditionally at a later priority.
 		add_filter(
 			'woocommerce_thankyou_order_received_text',
 			static function ( $text ) use ( $legacy_filter_result ) {
