@@ -31,7 +31,9 @@ final class PostcodeValidation {
 			 *
 			 * @param array $rules Rules keyed by country code.
 			 */
-			self::$rules = apply_filters( 'woocommerce_postcode_validation_rules', include WC_ABSPATH . 'i18n/postcode-validation-rules.php' );
+			$rules = apply_filters( 'woocommerce_postcode_validation_rules', include WC_ABSPATH . 'i18n/postcode-validation-rules.php' );
+
+			self::$rules = is_array( $rules ) ? $rules : array();
 		}
 
 		return self::$rules;
@@ -55,6 +57,9 @@ final class PostcodeValidation {
 	/**
 	 * Validate a postcode against its country's rule.
 	 *
+	 * Spaces and hyphens are ignored, so the result does not depend on how the
+	 * postcode was typed or formatted.
+	 *
 	 * @since 11.2.0
 	 *
 	 * @param string $postcode Postcode to validate.
@@ -68,7 +73,8 @@ final class PostcodeValidation {
 			return null;
 		}
 
-		$matched = preg_match( '~\A(?:' . $pattern . ')\z~i', $postcode );
+		$postcode = (string) preg_replace( '/[\s\-]/', '', $postcode );
+		$matched  = preg_match( '~\A(?:' . $pattern . ')\z~i', $postcode );
 
 		return false === $matched ? null : 1 === $matched;
 	}

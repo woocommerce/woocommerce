@@ -16,35 +16,24 @@ const OUTPUT_PATH = path.resolve(
 	'../../../i18n/postcode-validation-rules.php'
 );
 
-// Stands in for each separator a format allows, so it can be typed or left out.
-const OPTIONAL_SEPARATOR = '[ -]?';
-
-// Where WooCommerce validates differently from the upstream package on purpose.
 const COMPATIBILITY_OVERRIDES = {
+	// Argentina still uses the old four digit codes alongside the lettered ones.
+	AR: '[A-HJ-NP-Z]?[0-9]{4}([A-Z]{3})?',
 	AT: '[0-9]{4}',
 	BA: '[7-8][0-9]{4}',
-	CA: '[ABCEGHJKLMNPRSTVXY][0-9][ABCEGHJKLMNPRSTVWXYZ] ?[0-9][ABCEGHJKLMNPRSTVWXYZ][0-9]',
-	CZ: '(?:CZ-)?[0-9]{3}\\s?[0-9]{2}',
 	DE: '(?:0[1-9]|[1-9][0-9])[0-9]{3}',
-	DK: '(?:DK[- ]?)?(?:[1-24-9]\\d{3}|3[0-8]\\d{2})',
+	DK: '(?:[1-24-9][0-9]{3}|3[0-8][0-9]{2})',
 	ES: '[0-9]{5}',
-	FI: '[0-9]{5}',
-	FR: '[0-9]{5}',
-	GB: '(?:[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy]?[0-9]{1,2} [0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][0-9][abcdefghjkpstuw] [0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy][0-9][abehmnprvwxy] [0-9][abdefghjlnpqrstuwxyz]{2}|gir 0aa|bfpo [0-9]{1,4}|bfpo c\\/o [0-9]{1,3})',
-	IE: '(?:[AC-FHKNPRTV-Y][0-9]{2}|D6W) [0-9AC-FHKNPRTV-Y]{4}',
-	IN: '[1-9][0-9]{2}\\s?[0-9]{3}',
-	JP: '[0-9]{3}-?[0-9]{4}',
+	GB: '(?:[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy]?[0-9]{1,2}[0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][0-9][abcdefghjkpstuw][0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy][0-9][abehmnprvwxy][0-9][abdefghjlnpqrstuwxyz]{2}|gir0aa|bfpo[0-9]{1,4}|bfpoc\\/o[0-9]{1,3})',
+	IN: '[1-9][0-9]{5}',
 	KH: '[0-9]{6}',
 	LI: '94[8-9][0-9]',
-	LV: '(?:LV[- ]?)?[1-9][0-9]{3}',
-	MN: '[0-9]{5}(?:-[0-9]{4})?',
+	LV: '[1-9][0-9]{3}',
+	MN: '[0-9]{5}(?:[0-9]{4})?',
 	NI: '[1-9][0-9]{4}',
-	NL: '[1-9][0-9]{3}\\s?(?!SA|SD|SS)[A-Z]{2}',
-	PR: '[0-9]{5}(?:-[0-9]{4})?',
-	PT: '[0-9]{4}-[0-9]{3}',
-	SE: '(?:SE-)?[0-9]{3}\\s?[0-9]{2}',
+	NL: '[1-9][0-9]{3}(?!SA|SD|SS)[A-Z]{2}',
+	PR: '[0-9]{5}(?:[0-9]{4})?',
 	SI: '[1-9][0-9]{3}',
-	SK: '(?:SK-)?[0-9]{3}\\s?[0-9]{2}',
 };
 
 if ( devDependencies[ 'postcode-validator' ] !== version ) {
@@ -69,14 +58,14 @@ function removeAnchors( regex ) {
 }
 
 /**
- * Make every separator (space or hyphen) in a pattern optional, so a postcode
- * matches with or without it, but only where the format puts one. Hyphens
- * inside character classes (ranges) are kept.
+ * Remove every separator (space, hyphen, or a class or escape that only matches
+ * those) from a pattern, along with its quantifier. Hyphens inside other
+ * character classes (ranges) are kept.
  *
  * @param {string} pattern Regular expression source.
- * @return {string} Expression source with optional separators.
+ * @return {string} Expression source for a postcode with no separators.
  */
-function relaxSeparators( pattern ) {
+function stripSeparators( pattern ) {
 	let out = '';
 
 	for ( let i = 0; i < pattern.length; i++ ) {
@@ -91,17 +80,13 @@ function relaxSeparators( pattern ) {
 			const end = pattern.indexOf( ']', i + 1 );
 			token = pattern.slice( i, end + 1 );
 			i = end;
-			// A class is a separator when it can only match separators.
 			isSeparator = /^\[(?:[ -]|\\[s-])+\]$/.test( token );
 		}
 
-		if ( isSeparator ) {
-			if ( pattern[ i + 1 ] === '?' ) {
-				i++;
-			}
-			out += OPTIONAL_SEPARATOR;
-		} else {
+		if ( ! isSeparator ) {
 			out += token;
+		} else if ( /[?*+]/.test( pattern[ i + 1 ] || '' ) ) {
+			i++;
 		}
 	}
 
@@ -118,19 +103,32 @@ function toPhpString( value ) {
 	return `'${ value.replaceAll( '\\', '\\\\' ).replaceAll( "'", "\\'" ) }'`;
 }
 
-// Strip INTL rule from the package.
+// INTL is the package's catch-all, not a country.
 const countryCodes = [ ...POSTCODE_REGEXES.keys() ]
 	.filter( ( key ) => key !== 'INTL' )
 	.sort();
 
 const rules = Object.fromEntries(
 	countryCodes.map( ( countryCode ) => {
-		const upstreamRegex = POSTCODE_REGEXES.get( countryCode );
-
-		const pattern = relaxSeparators(
-			COMPATIBILITY_OVERRIDES[ countryCode ] ??
-				removeAnchors( upstreamRegex )
+		const upstream = stripSeparators(
+			removeAnchors( POSTCODE_REGEXES.get( countryCode ) )
 		);
+		const override = COMPATIBILITY_OVERRIDES[ countryCode ];
+
+		if ( override === upstream ) {
+			throw new Error(
+				`The ${ countryCode } override matches upstream; remove it`
+			);
+		}
+
+		// Postal conventions let a postcode carry its ISO country code, and
+		// wc_format_postcode() strips the separator after it (MD-2001 -> MD2001).
+		const pattern = `(?:${ countryCode })?${ override ?? upstream }`;
+
+		// PHP wraps the rule in ~ delimiters.
+		if ( pattern.includes( '~' ) ) {
+			throw new Error( `Unsupported delimiter in ${ countryCode } rule` );
+		}
 
 		// Catch malformed generated rules before they reach either consumer.
 		new RegExp( `^(?:${ pattern })$`, 'i' );
