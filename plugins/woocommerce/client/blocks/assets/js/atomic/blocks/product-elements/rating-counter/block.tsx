@@ -48,8 +48,6 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 type ProductRatingCounterProps = {
 	className?: string;
 	textAlign?: string;
-	isDescendentOfSingleProductBlock: boolean;
-	isDescendentOfQueryLoop: boolean;
 	postId: number;
 	productId: number;
 	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;

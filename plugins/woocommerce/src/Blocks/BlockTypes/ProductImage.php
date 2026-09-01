@@ -46,12 +46,10 @@ class ProductImage extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'showProductLink'                  => true,
-			'imageSizing'                      => 'single',
-			'productId'                        => 'number',
-			'isDescendentOfQueryLoop'          => 'false',
-			'isDescendentOfSingleProductBlock' => 'false',
-			'scale'                            => 'cover',
+			'showProductLink' => true,
+			'imageSizing'     => 'single',
+			'productId'       => 'number',
+			'scale'           => 'cover',
 		);
 
 		return wp_parse_args( $attributes, $defaults );

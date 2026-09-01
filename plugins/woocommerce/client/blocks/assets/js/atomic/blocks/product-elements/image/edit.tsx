@@ -9,7 +9,7 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { useEffect, useRef } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 import { useProduct } from '@woocommerce/entities';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -76,27 +76,9 @@ const Edit = ( {
 			blockClientId: blockProps?.id,
 		} );
 
-	useEffect( () => {
-		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-				showSaleBadge: false,
-			} );
-		} else {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-			} );
-		}
-	}, [
-		isDescendentOfQueryLoop,
-		isDescendentOfSingleProductBlock,
-		setAttributes,
-	] );
-
 	const showAllControls =
 		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+	const showSaleBadge = showAllControls ? false : attributes.showSaleBadge;
 
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -171,6 +153,7 @@ const Edit = ( {
 			) }
 			<Block
 				{ ...{ ...attributes, ...context } }
+				showSaleBadge={ showSaleBadge }
 				isAdmin={ true }
 				product={ product }
 				isResolving={ isResolving }

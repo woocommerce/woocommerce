@@ -25,6 +25,7 @@ type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
 		isExperimentalWcRestApiV4Enabled: boolean;
+		isDescendentOfSingleProductTemplate: boolean;
 		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
