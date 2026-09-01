@@ -1,0 +1,993 @@
+---
+sidebar_position: 7
+sidebar_label: 'Order Fulfillments'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Order fulfillments
+
+The order fulfillments API allows you to create, view, update, and delete fulfillments for an order, along with their metadata (tracking numbers, shipment provider, and any custom data you want to attach).
+
+:::info
+
+These endpoints are only available when the **Order Fulfillments** feature is enabled (`woocommerce_feature_fulfillments_enabled` option). If the feature is disabled, these routes are not registered and requests to them will return a `404 rest_no_route` error.
+
+:::
+
+## Order fulfillment properties
+
+| Attribute      | Type      | Description                                                                                                                       |
+| -------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | integer   | Unique identifier for the fulfillment. `READ-ONLY`                                                                 |
+| `entity_type`  | string    | The type of entity this fulfillment belongs to. Currently always `WC_Order`. `READ-ONLY`                          |
+| `entity_id`    | string    | The ID of the entity this fulfillment belongs to, i.e. the order ID. `READ-ONLY`                                   |
+| `status`       | string    | Status of the fulfillment, e.g. `unfulfilled` or `fulfilled`. Custom statuses can also be used. Default is `unfulfilled`.           |
+| `is_fulfilled` | boolean   | Whether the fulfillment is fulfilled. Default is `false`.                                                                          |
+| `date_updated` | date-time | The date the fulfillment was last updated, as GMT, in ISO 8601 format (e.g. `2024-01-15T11:45:00Z`). `READ-ONLY`   |
+| `date_deleted` | date-time | The date the fulfillment was deleted, as GMT, or `null` if it hasn't been deleted. `READ-ONLY`                     |
+| `meta_data`    | array     | Meta data. See [Order fulfillment - Meta data properties](#order-fulfillment---meta-data-properties)                                |
+
+The following parameters are also accepted when creating or updating a fulfillment, but are not part of the stored resource:
+
+| Attribute         | Type    | Description                                                                                                                            |
+| ----------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `notify_customer` | boolean | Whether to notify the customer about this change. Default is `false`. `WRITE-ONLY`                                     |
+| `customer_note`   | string  | An optional note from the merchant, included in the update notification email. Only used when updating a fulfillment. `WRITE-ONLY` |
+
+### Order fulfillment - Meta data properties
+
+| Attribute | Type    | Description                                                                     |
+| --------- | ------- | -------------------------------------------------------------------------------- |
+| `id`      | integer | Meta ID. `0` for entries that haven't been saved yet. `READ-ONLY` |
+| `key`     | string  | Meta key.                                                                       |
+| `value`   | mixed   | Meta value. Can be a string, number, array, or object.                         |
+
+The `_items` meta key is required and must be an array of objects describing which order line items are being fulfilled:
+
+```json
+[
+	{
+		"item_id": 456,
+		"qty": 2
+	}
+]
+```
+
+| Field     | Type    | Description                          |
+| --------- | ------- | ------------------------------------- |
+| `item_id` | integer | The order line item ID.               |
+| `qty`     | integer | Quantity of the item being fulfilled. |
+
+Other common (optional) meta keys: `_tracking_number`, `_shipment_provider`, `_tracking_url`. Meta keys prefixed with an underscore are private and only shown to merchants and in customer emails; unprefixed keys are also shown to merchants and customers alongside the fulfillment.
+
+## List fulfillments for an order
+
+```http
+GET /wp-json/wc/v3/orders/<id>/fulfillments
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/orders/723/fulfillments \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'orders/723/fulfillments' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/723/fulfillments')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/723/fulfillments").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/723/fulfillments").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"id": 1,
+		"entity_type": "WC_Order",
+		"entity_id": "723",
+		"status": "fulfilled",
+		"is_fulfilled": true,
+		"date_updated": "2024-01-15T10:30:00Z",
+		"date_deleted": null,
+		"meta_data": [
+			{
+				"id": 1,
+				"key": "_items",
+				"value": [
+					{ "item_id": 456, "qty": 2 }
+				]
+			},
+			{
+				"id": 2,
+				"key": "_tracking_number",
+				"value": "1Z999AA1234567890"
+			},
+			{
+				"id": 3,
+				"key": "_shipment_provider",
+				"value": "ups"
+			}
+		]
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+## Create a fulfillment
+
+```http
+POST /wp-json/wc/v3/orders/<id>/fulfillments
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST "https://example.com/wp-json/wc/v3/orders/723/fulfillments?notify_customer=true" \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "status": "fulfilled",
+  "is_fulfilled": true,
+  "meta_data": [
+    {
+      "key": "_items",
+      "value": [
+        { "item_id": 456, "qty": 2 }
+      ]
+    },
+    {
+      "key": "_tracking_number",
+      "value": "1Z999AA1234567890"
+    },
+    {
+      "key": "_shipment_provider",
+      "value": "ups"
+    }
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+	status: 'fulfilled',
+	is_fulfilled: true,
+	meta_data: [
+		{
+			key: '_items',
+			value: [ { item_id: 456, qty: 2 } ],
+		},
+		{
+			key: '_tracking_number',
+			value: '1Z999AA1234567890',
+		},
+		{
+			key: '_shipment_provider',
+			value: 'ups',
+		},
+	],
+};
+
+WooCommerce.post( 'orders/723/fulfillments?notify_customer=true', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'status' => 'fulfilled',
+    'is_fulfilled' => true,
+    'meta_data' => [
+        [ 'key' => '_items', 'value' => [ [ 'item_id' => 456, 'qty' => 2 ] ] ],
+        [ 'key' => '_tracking_number', 'value' => '1Z999AA1234567890' ],
+        [ 'key' => '_shipment_provider', 'value' => 'ups' ],
+    ],
+];
+
+print_r($woocommerce->post('orders/723/fulfillments?notify_customer=true', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "status": "fulfilled",
+    "is_fulfilled": True,
+    "meta_data": [
+        {"key": "_items", "value": [{"item_id": 456, "qty": 2}]},
+        {"key": "_tracking_number", "value": "1Z999AA1234567890"},
+        {"key": "_shipment_provider", "value": "ups"},
+    ],
+}
+
+print(wcapi.post("orders/723/fulfillments?notify_customer=true", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  status: "fulfilled",
+  is_fulfilled: true,
+  meta_data: [
+    { key: "_items", value: [ { item_id: 456, qty: 2 } ] },
+    { key: "_tracking_number", value: "1Z999AA1234567890" },
+    { key: "_shipment_provider", value: "ups" }
+  ]
+}
+
+woocommerce.post("orders/723/fulfillments?notify_customer=true", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"id": 2,
+	"entity_type": "WC_Order",
+	"entity_id": "723",
+	"status": "fulfilled",
+	"is_fulfilled": true,
+	"date_updated": "2024-01-15T11:45:00Z",
+	"date_deleted": null,
+	"meta_data": [
+		{
+			"id": 3,
+			"key": "_items",
+			"value": [
+				{ "item_id": 456, "qty": 2 }
+			]
+		},
+		{
+			"id": 4,
+			"key": "_tracking_number",
+			"value": "1Z999AA1234567890"
+		},
+		{
+			"id": 5,
+			"key": "_shipment_provider",
+			"value": "ups"
+		}
+	]
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Setting `notify_customer=true` when the fulfillment is created as fulfilled triggers the `woocommerce_fulfillment_created_notification` action, which sends the default fulfillment email.
+
+## Retrieve a fulfillment
+
+```http
+GET /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/orders/723/fulfillments/2 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'orders/723/fulfillments/2' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/723/fulfillments/2')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/723/fulfillments/2").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/723/fulfillments/2").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"id": 2,
+	"entity_type": "WC_Order",
+	"entity_id": "723",
+	"status": "fulfilled",
+	"is_fulfilled": true,
+	"date_updated": "2024-01-15T11:45:00Z",
+	"date_deleted": null,
+	"meta_data": [
+		{
+			"id": 4,
+			"key": "_tracking_number",
+			"value": "1Z999AA1234567890"
+		},
+		{
+			"id": 5,
+			"key": "_shipment_provider",
+			"value": "ups"
+		}
+	]
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Update a fulfillment
+
+Any `meta_data` entries not included in the request are removed from the fulfillment, so send the full set of metadata you want the fulfillment to have.
+
+```http
+PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X PUT "https://example.com/wp-json/wc/v3/orders/723/fulfillments/2?notify_customer=true" \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "status": "fulfilled",
+  "is_fulfilled": true,
+  "customer_note": "Your package is on its way!",
+  "meta_data": [
+    {
+      "key": "_items",
+      "value": [
+        { "item_id": 456, "qty": 2 }
+      ]
+    },
+    {
+      "key": "_tracking_number",
+      "value": "1Z999AA1234567890"
+    },
+    {
+      "key": "_shipment_provider",
+      "value": "ups"
+    },
+    {
+      "key": "_delivery_date",
+      "value": "2024-01-16"
+    }
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+	status: 'fulfilled',
+	is_fulfilled: true,
+	customer_note: 'Your package is on its way!',
+	meta_data: [
+		{
+			key: '_items',
+			value: [ { item_id: 456, qty: 2 } ],
+		},
+		{
+			key: '_tracking_number',
+			value: '1Z999AA1234567890',
+		},
+		{
+			key: '_shipment_provider',
+			value: 'ups',
+		},
+		{
+			key: '_delivery_date',
+			value: '2024-01-16',
+		},
+	],
+};
+
+WooCommerce.put( 'orders/723/fulfillments/2?notify_customer=true', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'status' => 'fulfilled',
+    'is_fulfilled' => true,
+    'customer_note' => 'Your package is on its way!',
+    'meta_data' => [
+        [ 'key' => '_items', 'value' => [ [ 'item_id' => 456, 'qty' => 2 ] ] ],
+        [ 'key' => '_tracking_number', 'value' => '1Z999AA1234567890' ],
+        [ 'key' => '_shipment_provider', 'value' => 'ups' ],
+        [ 'key' => '_delivery_date', 'value' => '2024-01-16' ],
+    ],
+];
+
+print_r($woocommerce->put('orders/723/fulfillments/2?notify_customer=true', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "status": "fulfilled",
+    "is_fulfilled": True,
+    "customer_note": "Your package is on its way!",
+    "meta_data": [
+        {"key": "_items", "value": [{"item_id": 456, "qty": 2}]},
+        {"key": "_tracking_number", "value": "1Z999AA1234567890"},
+        {"key": "_shipment_provider", "value": "ups"},
+        {"key": "_delivery_date", "value": "2024-01-16"},
+    ],
+}
+
+print(wcapi.put("orders/723/fulfillments/2?notify_customer=true", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  status: "fulfilled",
+  is_fulfilled: true,
+  customer_note: "Your package is on its way!",
+  meta_data: [
+    { key: "_items", value: [ { item_id: 456, qty: 2 } ] },
+    { key: "_tracking_number", value: "1Z999AA1234567890" },
+    { key: "_shipment_provider", value: "ups" },
+    { key: "_delivery_date", value: "2024-01-16" }
+  ]
+}
+
+woocommerce.put("orders/723/fulfillments/2?notify_customer=true", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"id": 2,
+	"entity_type": "WC_Order",
+	"entity_id": "723",
+	"status": "fulfilled",
+	"is_fulfilled": true,
+	"date_updated": "2024-01-16T09:30:00Z",
+	"date_deleted": null,
+	"meta_data": [
+		{
+			"id": 3,
+			"key": "_items",
+			"value": [
+				{ "item_id": 456, "qty": 2 }
+			]
+		},
+		{
+			"id": 4,
+			"key": "_tracking_number",
+			"value": "1Z999AA1234567890"
+		},
+		{
+			"id": 5,
+			"key": "_shipment_provider",
+			"value": "ups"
+		},
+		{
+			"id": 6,
+			"key": "_delivery_date",
+			"value": "2024-01-16"
+		}
+	]
+}
+```
+
+  </TabItem>
+</Tabs>
+
+`notify_customer=true` triggers `woocommerce_fulfillment_created_notification` if the fulfillment is being marked as fulfilled for the first time, or `woocommerce_fulfillment_updated_notification` for subsequent updates to an already-fulfilled fulfillment. `customer_note` is only used for the update notification email.
+
+## Delete a fulfillment
+
+```http
+DELETE /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE "https://example.com/wp-json/wc/v3/orders/723/fulfillments/2?notify_customer=true" \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete( 'orders/723/fulfillments/2', {
+	notify_customer: true,
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('orders/723/fulfillments/2', ['notify_customer' => true])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("orders/723/fulfillments/2", params={"notify_customer": True}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("orders/723/fulfillments/2", notify_customer: true).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"message": "Fulfillment deleted successfully."
+}
+```
+
+  </TabItem>
+</Tabs>
+
+Deleting a fulfilled fulfillment with `notify_customer=true` triggers the `woocommerce_fulfillment_deleted_notification` action.
+
+## Get fulfillment metadata
+
+```http
+GET /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v3/orders/723/fulfillments/2/metadata \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'orders/723/fulfillments/2/metadata' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/723/fulfillments/2/metadata')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/723/fulfillments/2/metadata").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/723/fulfillments/2/metadata").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"id": 4,
+		"key": "_tracking_number",
+		"value": "1Z999AA1234567890"
+	},
+	{
+		"id": 5,
+		"key": "_shipment_provider",
+		"value": "ups"
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+## Update fulfillment metadata
+
+Like updating a fulfillment, this replaces the full metadata set: any existing meta keys not present in the request body are removed.
+
+```http
+PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v3/orders/723/fulfillments/2/metadata \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '[
+  {
+    "key": "_tracking_number",
+    "value": "1Z999AA9876543210"
+  },
+  {
+    "key": "_shipment_provider",
+    "value": "fedex"
+  }
+]'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = [
+	{ key: '_tracking_number', value: '1Z999AA9876543210' },
+	{ key: '_shipment_provider', value: 'fedex' },
+];
+
+WooCommerce.put( 'orders/723/fulfillments/2/metadata', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    [ 'key' => '_tracking_number', 'value' => '1Z999AA9876543210' ],
+    [ 'key' => '_shipment_provider', 'value' => 'fedex' ],
+];
+
+print_r($woocommerce->put('orders/723/fulfillments/2/metadata', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = [
+    {"key": "_tracking_number", "value": "1Z999AA9876543210"},
+    {"key": "_shipment_provider", "value": "fedex"},
+]
+
+print(wcapi.put("orders/723/fulfillments/2/metadata", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = [
+  { key: "_tracking_number", value: "1Z999AA9876543210" },
+  { key: "_shipment_provider", value: "fedex" }
+]
+
+woocommerce.put("orders/723/fulfillments/2/metadata", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"id": 4,
+		"key": "_tracking_number",
+		"value": "1Z999AA9876543210"
+	},
+	{
+		"id": 5,
+		"key": "_shipment_provider",
+		"value": "fedex"
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete fulfillment metadata
+
+Deletes a single metadata entry by key and returns the fulfillment's remaining metadata.
+
+```http
+DELETE /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE https://example.com/wp-json/wc/v3/orders/723/fulfillments/2/metadata \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "meta_key": "_shipment_provider"
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete( 'orders/723/fulfillments/2/metadata', {
+	meta_key: '_shipment_provider',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('orders/723/fulfillments/2/metadata', ['meta_key' => '_shipment_provider'])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("orders/723/fulfillments/2/metadata", params={"meta_key": "_shipment_provider"}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("orders/723/fulfillments/2/metadata", meta_key: "_shipment_provider").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+	{
+		"id": 4,
+		"key": "_tracking_number",
+		"value": "1Z999AA9876543210"
+	}
+]
+```
+
+  </TabItem>
+</Tabs>
+
+## Look up a tracking number
+
+Given a tracking number, tries to determine the shipment provider and tracking URL. Useful when you have a tracking number but don't know (or want to guess) which carrier it belongs to.
+
+```http
+GET /wp-json/wc/v3/orders/<id>/fulfillments/lookup
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl "https://example.com/wp-json/wc/v3/orders/723/fulfillments/lookup?tracking_number=1234567890123456" \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get( 'orders/723/fulfillments/lookup', {
+	tracking_number: '1234567890123456',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('orders/723/fulfillments/lookup', ['tracking_number' => '1234567890123456'])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("orders/723/fulfillments/lookup", params={"tracking_number": "1234567890123456"}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("orders/723/fulfillments/lookup", tracking_number: "1234567890123456").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+When the tracking number format matches more than one carrier, a `possibilities` map is included instead of a single answer:
+
+```json
+{
+	"tracking_number": "1234567890123456",
+	"shipping_provider": "fedex",
+	"tracking_url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+	"possibilities": {
+		"fedex": {
+			"url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+			"ambiguity_score": 95
+		},
+		"ups": {
+			"url": "https://www.ups.com/track?tracknum=1234567890123456",
+			"ambiguity_score": 85
+		}
+	}
+}
+```
+
+When the format unambiguously matches a single carrier:
+
+```json
+{
+	"tracking_number": "1Z999AA1234567890",
+	"shipping_provider": "ups",
+	"tracking_url": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+
+| Parameter          | Type    | Description                      |
+| ------------------ | ------- | --------------------------------- |
+| `tracking_number`  | string  | Required. The tracking number to look up. |
+
+## Error responses
+
+Errors follow the standard WooCommerce REST API error shape:
+
+```json
+{
+	"code": "error_code",
+	"message": "Error message description",
+	"data": {
+		"status": 400
+	}
+}
+```
+
+Common error codes for the fulfillments endpoints:
+
+-   `woocommerce_rest_order_invalid_id` - The order ID does not exist.
+-   `woocommerce_rest_order_id_missing` - The order ID is required but was not supplied.
+-   `woocommerce_rest_tracking_number_missing` - The `tracking_number` parameter is required but was not supplied.
+-   Standard authentication/authorization errors when the current user lacks `manage_woocommerce` and isn't the order's owner.
