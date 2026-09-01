@@ -17,6 +17,14 @@ namespace Automattic\WooCommerce\Internal\Caches;
  *
  * Known limitations:
  *
+ * - Rotating the namespace throws away the whole store's lookup cache, not just the entries for
+ *   the coupon that changed, and the WC_Coupon CRUD trashes and deletes coupons through those
+ *   same hooks. A store that creates and removes coupons all day therefore keeps that cache
+ *   mostly empty, and every miss runs get_ids_by_code(), which compares `LOWER(post_title)`
+ *   against every published coupon. Deleting only the key for that one code would be cheaper,
+ *   but it is not enough: the same code can sit in the cache under more than one key (see the
+ *   last point below), and a lookup that started before the delete can still write the old id
+ *   back after it.
  * - Both hook listeners key off a transition across the `publish` boundary, because the core
  *   coupon data store only resolves published coupons. A custom data store registered through
  *   the `woocommerce_data_stores` filter that resolves further statuses would need its own
