@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Validate postcodes against the same generated rule set on the server, in the Checkout block, and in the shortcode checkout, and cover every country the source package lists.
+Validate postcodes against the same generated rule set on the server, in the Checkout block, and in the shortcode checkout. Spaces, hyphens and an ISO country code prefix no longer change the result, and every country the source package lists gets a rule.
