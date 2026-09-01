@@ -51,6 +51,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
+		WC()->countries->locale = array();
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
@@ -213,6 +214,40 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $errors->get_error_message( 'billing_country_validation' ) );
 		$this->assertEmpty( $errors->get_error_message( 'shipping_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' skips the required check for fields hidden via the country locale.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hidden Whether the locale marks the postcode field as hidden.
+	 */
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden ) {
+		$locale_filter = function ( $locale ) use ( $hidden ) {
+			$locale['ES']['postcode']['hidden'] = $hidden;
+			return $locale;
+		};
+		add_filter( 'woocommerce_get_country_locale', $locale_filter );
+		WC()->countries->locale   = array();
+		$_POST['billing_country'] = 'ES';
+
+		$data   = array(
+			'billing_country'           => 'ES',
+			'billing_postcode'          => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$required_error = $errors->get_error_message( 'billing_postcode_required' );
+		if ( $hidden ) {
+			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
+		} else {
+			$this->assertNotEmpty( $required_error, 'Visible required fields should still trigger a required-field error.' );
+		}
 	}
 
 	/**

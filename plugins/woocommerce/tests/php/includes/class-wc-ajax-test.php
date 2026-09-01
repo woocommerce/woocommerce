@@ -399,6 +399,44 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Applying a coupon in the order editor calculates the discount from a manually edited line total.
+	 */
+	public function test_add_coupon_discount_uses_manually_edited_line_total() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '10off-edited' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		foreach ( $order->get_items() as $item ) {
+			$item->set_total( 50 );
+			$item->save();
+		}
+		$order->calculate_totals();
+		$order->save();
+
+		wc_get_container()->get( CouponsController::class )->add_coupon_discount(
+			array(
+				'order_id' => $order->get_id(),
+				'coupon'   => $coupon->get_code(),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$item  = current( $order->get_items() );
+		$this->assertEquals( 50, $item->get_subtotal(), 'The edited line total should become the new pre-discount price' );
+		$this->assertEquals( 45, $item->get_total(), 'The discount should be taken off the edited price' );
+		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).

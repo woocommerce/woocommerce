@@ -1,4 +1,4 @@
-const webpackOverride = require( '../webpack.config' );
+import webpackOverride from '../webpack.config.js';
 
 const staticDirs = [
 	{
@@ -13,7 +13,7 @@ if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
 		to: '/assets/woocommerce-blocks',
 	} );
 }
-module.exports = {
+export default {
 	stories: [
 		// Introductory documentation
 		'../stories/**/*.mdx',
@@ -53,12 +53,7 @@ module.exports = {
 	},
 	addons: [
 		'@storybook/addon-docs',
-		'@storybook/addon-controls',
-		// This package has been deprecated, in favor of @storybook/addon-controls
-		// However, it is still needed for the <Timeline /> story because changing the values with @storybook/addon-controls makes it crash. It seems that we cannot have jsx elements in props.
-		'@storybook/addon-viewport',
 		'@storybook/addon-a11y',
-		'@storybook/addon-actions',
 		'@storybook/addon-links',
 	],
 
@@ -92,9 +87,5 @@ module.exports = {
 	framework: {
 		name: '@storybook/react-webpack5',
 		options: {},
-	},
-
-	docs: {
-		autodocs: true,
 	},
 };

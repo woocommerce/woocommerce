@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -708,6 +709,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
+			),
+			StockNotifications::FEATURE_NAME       => array(
+				'name'                         => __( 'Back in Stock Notifications', 'woocommerce' ),
+				'description'                  => __(
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
+					'woocommerce'
+				),
+				'option_key'                   => StockNotifications::ENABLE_OPTION_NAME,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			BlockEditorUnifiedAssets::FEATURE_NAME => array(
 				'name'                         => __( 'Unified block editor assets', 'woocommerce' ),

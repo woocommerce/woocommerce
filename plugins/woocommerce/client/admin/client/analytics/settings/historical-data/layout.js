@@ -50,7 +50,7 @@ class HistoricalDataLayout extends Component {
 							<span className="woocommerce-setting__help">
 								{ __(
 									'This tool populates historical analytics data by processing customers ' +
-										'and orders created prior to activating WooCommerce Admin.',
+										'and orders created before Analytics started recording data.',
 									'woocommerce'
 								) }
 							</span>

@@ -260,12 +260,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Default Back In Stock alpha to enabled during tests when no
-		// per-suite override has been set.
-		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		}
-
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -299,6 +293,11 @@ class WC_Unit_Tests_Bootstrap {
 		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
 		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
 		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+
+		// Enable Back In Stock Notifications during tests. Set here rather than in load_wc()
+		// because install_wc() includes uninstall.php, which deletes every 'woocommerce_%'
+		// option. This still runs on `setup_theme`, in time for the `init` feature check.
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {

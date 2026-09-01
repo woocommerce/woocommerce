@@ -78,7 +78,7 @@ return array(
 			'visa_as',
 			'airwallex',
 			'viva_wallet',
-			'klarna_checkout',
+			'kustom_checkout',
 			'gocardless',
 		),
 		'other_express_checkout' => array(
@@ -117,7 +117,7 @@ return array(
 			'airwallex',
 			'viva_wallet',
 			'gocardless',
-			'klarna_checkout',
+			'kustom_checkout',
 			'nexi_checkout',
 		),
 		'other_express_checkout' => array(
@@ -212,7 +212,7 @@ return array(
 			'visa_as',
 			'viva_wallet',
 			'gocardless',
-			'klarna_checkout',
+			'kustom_checkout',
 			'nexi_checkout',
 		),
 		'other_express_checkout' => array(
@@ -242,7 +242,7 @@ return array(
 			'viva_wallet',
 			'paytrail',
 			'gocardless',
-			'klarna_checkout',
+			'kustom_checkout',
 		),
 		'other_bnpl'  => array(
 			'klarna',
@@ -293,7 +293,7 @@ return array(
 			'airwallex',
 			'viva_wallet',
 			'gocardless',
-			'klarna_checkout',
+			'kustom_checkout',
 			'nexi_checkout',
 		),
 		'other_express_checkout' => array(
@@ -460,7 +460,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
-			'klarna_checkout',
+			'kustom_checkout',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
@@ -479,7 +479,7 @@ return array(
 			'stripe',
 			'mollie',
 			'visa_as',
-			'klarna_checkout',
+			'kustom_checkout',
 			'nexi_checkout',
 		),
 		'other_bnpl'  => array(
@@ -593,7 +593,7 @@ return array(
 			'mollie',
 			'visa_as',
 			'viva_wallet',
-			'klarna_checkout',
+			'kustom_checkout',
 			'nexi_checkout',
 		),
 		'other_express_checkout' => array(

@@ -357,13 +357,34 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 		$order  = $this->create_order_with_manually_edited_total();
 
-		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon_using_edited_totals( $coupon->get_code() ) );
 
 		$item = current( $order->get_items() );
 		$this->assertEquals( 50, $item->get_subtotal(), 'Edited line total should become the new pre-discount price' );
 		$this->assertEquals( 45, $item->get_total(), 'Discount should be taken off the edited price' );
 		$this->assertEquals( 5, $order->get_discount_total(), 'Discount should be 10% of the edited price' );
 		$this->assertEquals( 45, $order->get_total() );
+	}
+
+	/**
+	 * @testdox Plain apply_coupon() calculates the discount from the stored subtotal, leaving edited totals alone.
+	 */
+	public function test_apply_coupon_keeps_stored_subtotals() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'percent_coupon_no_sync',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order  = $this->create_order_with_manually_edited_total();
+
+		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'apply_coupon() should not adopt the edited total as a new subtotal' );
+		$this->assertEquals( 90, $item->get_total(), 'The discount should be calculated from the stored subtotal' );
+		$this->assertEquals( 10, $order->get_discount_total() );
 	}
 
 	/**
@@ -380,11 +401,24 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 		$order = $this->create_order_with_manually_edited_total();
 
-		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591' ) );
+		$this->assertWPError( $order->apply_coupon_using_edited_totals( 'expired_coupon_28591' ) );
 
 		$item = current( $order->get_items() );
 		$this->assertEquals( 100, $item->get_subtotal(), 'Failed coupon application should not change the subtotal' );
 		$this->assertEquals( 50, $item->get_total(), 'Failed coupon application should not change the total' );
+	}
+
+	/**
+	 * @testdox A nonexistent coupon code is rejected before validation and leaves manually edited line items unchanged.
+	 */
+	public function test_apply_coupon_unknown_code_keeps_manually_edited_line_items() {
+		$order = $this->create_order_with_manually_edited_total();
+
+		$this->assertWPError( $order->apply_coupon_using_edited_totals( 'no_such_coupon_28591' ) );
+
+		$item = current( $order->get_items() );
+		$this->assertEquals( 100, $item->get_subtotal(), 'A rejected unknown code should not change the subtotal' );
+		$this->assertEquals( 50, $item->get_total(), 'A rejected unknown code should not change the total' );
 	}
 
 	/**
@@ -400,7 +434,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 		$order  = $this->create_order_with_manually_edited_total();
 
-		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon_using_edited_totals( $coupon->get_code() ) );
 		$this->assertTrue( $order->remove_coupon( $coupon->get_code() ) );
 
 		$item = current( $order->get_items() );
@@ -428,7 +462,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->set_billing_email( $guest_email );
 		$order->save();
 
-		$this->assertWPError( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertWPError( $order->apply_coupon_using_edited_totals( $coupon->get_code() ) );
 
 		$item = current( $order->get_items() );
 		$this->assertEquals( 100, $item->get_subtotal(), 'Usage-limit rejection should not change the subtotal' );
@@ -455,8 +489,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 		$order          = $this->create_order_with_manually_edited_total();
 
-		$this->assertTrue( $order->apply_coupon( $percent_coupon->get_code() ) );
-		$this->assertTrue( $order->apply_coupon( $fixed_coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon_using_edited_totals( $percent_coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon_using_edited_totals( $fixed_coupon->get_code() ) );
 
 		$item = current( $order->get_items() );
 		$this->assertEquals( 50, $item->get_subtotal(), 'Second coupon application should not re-sync the subtotal' );
@@ -516,7 +550,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 		$order  = $this->create_taxed_order_with_manually_edited_total();
 
-		$this->assertTrue( $order->apply_coupon( $coupon->get_code() ) );
+		$this->assertTrue( $order->apply_coupon_using_edited_totals( $coupon->get_code() ) );
 
 		$item  = current( $order->get_items() );
 		$taxes = $item->get_taxes();
@@ -544,7 +578,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$original_taxes = current( $order->get_items() )->get_taxes();
 
-		$this->assertWPError( $order->apply_coupon( 'expired_coupon_28591_tax' ) );
+		$this->assertWPError( $order->apply_coupon_using_edited_totals( 'expired_coupon_28591_tax' ) );
 
 		$item = current( $order->get_items() );
 		$this->assertEquals( 100, $item->get_subtotal() );

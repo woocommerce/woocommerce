@@ -46,8 +46,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
-use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -412,11 +410,6 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 
-		// Feature flags.
-		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			$container->get( StockNotifications::class );
-		}
-
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
@@ -440,6 +433,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 

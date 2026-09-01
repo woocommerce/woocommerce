@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the compact back button on WordPress 7.1 again, where the header sizes the back button column by its content
