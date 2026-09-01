@@ -136,6 +136,26 @@ class MyAccountEndpoint {
 	public const DEFAULT_PER_PAGE = 10;
 
 	/**
+	 * Product name to show as the row label.
+	 *
+	 * {@see Notification::get_product_name()} returns the variation name, which
+	 * already carries the attributes ("Hoodie - Blue, Large"). The row renders
+	 * those attributes separately underneath, so use the parent title here and
+	 * let the variation list own them.
+	 *
+	 * @param Notification $notification The notification to label.
+	 * @return string Product name, or an empty string when the product is gone.
+	 */
+	public static function get_display_product_name( Notification $notification ): string {
+		$product = $notification->get_product();
+		if ( ! $product ) {
+			return '';
+		}
+
+		return (string) $product->get_title();
+	}
+
+	/**
 	 * Render the endpoint template.
 	 *
 	 * Hooked to `woocommerce_account_stock-notifications_endpoint`, mirroring

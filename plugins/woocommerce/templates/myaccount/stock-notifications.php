@@ -46,7 +46,6 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-variation"><span class="nobr"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></span></th>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></span></th>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></span></th>
 			</tr>
@@ -54,13 +53,19 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 		<tbody>
 		<?php foreach ( $notifications as $notification ) : ?>
 			<?php
-			$product_name = $notification->get_product_name();
+			$product_name = MyAccountEndpoint::get_display_product_name( $notification );
 			$permalink    = $notification->get_product_permalink();
 			$variation    = $notification->get_product_formatted_variation_list( true );
 			$date_created = $notification->get_date_created();
 			?>
 			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
 				<th class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>" scope="row">
+					<?php
+					/*
+					 * A deleted product still gets a row, rather than being skipped, so the
+					 * customer can see the sign-up exists and cancel it.
+					 */
+					?>
 					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
 						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
 					<?php elseif ( '' !== $product_name ) : ?>
@@ -68,10 +73,11 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php else : ?>
 						<?php esc_html_e( 'Product unavailable', 'woocommerce' ); ?>
 					<?php endif; ?>
+
+					<?php if ( '' !== $variation ) : ?>
+						<span class="description"><?php echo esc_html( $variation ); ?></span>
+					<?php endif; ?>
 				</th>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-variation" data-title="<?php esc_attr_e( 'Variation', 'woocommerce' ); ?>">
-					<?php echo '' !== $variation ? esc_html( $variation ) : '&mdash;'; ?>
-				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
 					<?php if ( $date_created ) : ?>
 						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>

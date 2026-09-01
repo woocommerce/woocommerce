@@ -21,6 +21,7 @@ const test = baseTest.extend( {
 		const product = await createOutOfStockProduct( restApi, {
 			namePrefix: 'BIS MyAccount',
 		} );
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( product );
 		await product.cleanup();
 	},

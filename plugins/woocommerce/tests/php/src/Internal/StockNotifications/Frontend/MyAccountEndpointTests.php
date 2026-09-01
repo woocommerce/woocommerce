@@ -20,17 +20,28 @@ use WC_Helper_Product;
 class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 	/**
+	 * Location passed to the last suppressed redirect, or null if none happened.
+	 *
+	 * @var string|null
+	 */
+	private $redirect_location = null;
+
+	/**
 	 * Set up the test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		\wc_clear_notices();
+		$this->redirect_location = null;
+		add_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
 	}
 
 	/**
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
+		remove_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
+		$this->redirect_location = null;
 		\wc_clear_notices();
 		\wp_set_current_user( 0 );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -40,6 +51,21 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 			unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
 		}
 		parent::tearDown();
+	}
+
+	/**
+	 * Record the redirect target and cancel the redirect.
+	 *
+	 * PHPUnit has already sent output by the time a test runs, so letting
+	 * `wp_safe_redirect()` reach `header()` raises "headers already sent".
+	 * Returning a falsy location makes `wp_redirect()` bail before that.
+	 *
+	 * @param string $location The redirect target.
+	 * @return false
+	 */
+	public function capture_redirect( $location ) {
+		$this->redirect_location = (string) $location;
+		return false;
 	}
 
 	/**
@@ -61,6 +87,42 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		return $notification;
+	}
+
+	/**
+	 * The row label uses the parent title for a variation, so the attributes are
+	 * not repeated by both the name and the variation list rendered beneath it.
+	 */
+	public function test_get_display_product_name_uses_parent_title_for_variations(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+		$this->assertNotEmpty( $variations );
+
+		$variation = wc_get_product( $variations[0] );
+		$this->assertInstanceOf( \WC_Product_Variation::class, $variation );
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation->get_id() );
+		$notification->set_user_email( 'nobody@example.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->assertSame( $variable->get_title(), MyAccountEndpoint::get_display_product_name( $notification ) );
+		// The Notification getter still returns the attribute-carrying variation name.
+		$this->assertSame( $variation->get_name(), $notification->get_product_name() );
+	}
+
+	/**
+	 * A notification whose product no longer exists has no name to show.
+	 */
+	public function test_get_display_product_name_is_empty_without_a_product(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 999999 );
+		$notification->set_user_email( 'nobody@example.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->assertSame( '', MyAccountEndpoint::get_display_product_name( $notification ) );
 	}
 
 	/**
@@ -203,6 +265,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( Notification::class, $updated );
 		$this->assertSame( NotificationStatus::CANCELLED, $updated->get_status() );
 		$this->assertSame( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
+		$this->assertSame(
+			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+			$this->redirect_location
+		);
 	}
 
 	/**
