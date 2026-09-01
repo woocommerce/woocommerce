@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { _n } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useRef, useEffect, RawHTML } from '@wordpress/element';
 import { sanitizeHTML } from '@woocommerce/sanitize';
@@ -15,6 +15,36 @@ import type { NoticeBannerProps } from '@woocommerce/base-components/notice-bann
  * Internal dependencies
  */
 import StoreNotice from '../store-notice';
+
+/**
+ * Renders notice contents as a list, so a single notice and multiple notices
+ * share the same markup and can be styled with a single set of rules.
+ *
+ * `role="list"` is needed because the list markers are removed with CSS, which
+ * strips the implicit list semantics in some browsers.
+ *
+ * `data-id` mirrors the classic notice templates, which expose the notice id on
+ * each `li` via `wc_get_notice_data_attr()`. Store API errors surface their
+ * error code as the notice id (e.g. `woocommerce_rest_cart_coupon_error`), so
+ * this gives themes and scripts the same per-notice hook the shortcode
+ * checkout has.
+ */
+const StoreNoticeList = ( {
+	notices,
+}: {
+	notices: ( Pick< NoticeType, 'id' | 'content' > &
+		Partial< Pick< NoticeType, 'context' > > )[];
+} ): JSX.Element => (
+	// The role is not redundant here, see above.
+	// eslint-disable-next-line jsx-a11y/no-redundant-roles
+	<ul className="wc-block-components-notice-banner__list" role="list">
+		{ notices.map( ( notice ) => (
+			<li key={ notice.id + '-' + notice.context } data-id={ notice.id }>
+				<RawHTML>{ notice.content }</RawHTML>
+			</li>
+		) ) }
+	</ul>
+);
 
 const StoreNotices = ( {
 	className,
@@ -103,9 +133,16 @@ const StoreNotices = ( {
 					key={ notice.id + '-' + notice.context }
 					{ ...notice }
 				>
-					<RawHTML>
-						{ sanitizeHTML( decodeEntities( notice.content ) ) }
-					</RawHTML>
+					<StoreNoticeList
+						notices={ [
+							{
+								...notice,
+								content: sanitizeHTML(
+									decodeEntities( notice.content )
+								),
+							},
+						] }
+					/>
 				</StoreNotice>
 			) ) }
 			{ Object.entries( dismissibleNoticeGroups ).map(
@@ -139,35 +176,22 @@ const StoreNotices = ( {
 							} );
 						},
 					};
-					return uniqueNotices.length === 1 ? (
-						<StoreNotice
-							key={ 'store-notice-' + status }
-							{ ...noticeProps }
-						>
-							<RawHTML>{ uniqueNotices[ 0 ].content }</RawHTML>
-						</StoreNotice>
-					) : (
+					return (
 						<StoreNotice
 							key={ 'store-notice-' + status }
 							{ ...noticeProps }
 							summary={
 								status === 'error'
-									? __(
+									? _n(
+											'Please fix the following error before continuing',
 											'Please fix the following errors before continuing',
+											uniqueNotices.length,
 											'woocommerce'
 									  )
 									: ''
 							}
 						>
-							<ul>
-								{ uniqueNotices.map( ( notice ) => (
-									<li
-										key={ notice.id + '-' + notice.context }
-									>
-										<RawHTML>{ notice.content }</RawHTML>
-									</li>
-								) ) }
-							</ul>
+							<StoreNoticeList notices={ uniqueNotices } />
 						</StoreNotice>
 					);
 				}
