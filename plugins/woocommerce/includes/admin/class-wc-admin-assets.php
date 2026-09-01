@@ -721,7 +721,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_restock_enter_qty'                          => __( 'Enter a refund quantity to return items to stock.', 'woocommerce' ),
 					'i18n_restock_quantity'                           => __( 'Quantity to restock: %qty%', 'woocommerce' ),
 					'i18n_restock_none'                               => __( 'No items will be restocked.', 'woocommerce' ),
-					'restock_refunded_items_default'                  => (bool) apply_filters( 'woocommerce_restock_refunded_items', true ),
+					'restock_refunded_items_default'                  => wc_bool_to_string( apply_filters( 'woocommerce_restock_refunded_items', true ) ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),
 					'i18n_product_simple_tip'                         => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
 					'i18n_product_grouped_tip'                        => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),

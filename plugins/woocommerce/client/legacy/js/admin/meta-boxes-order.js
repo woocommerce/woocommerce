@@ -1159,7 +1159,7 @@ jQuery( function ( $ ) {
 
 			// Apply the restock checkbox state from the current refund quantities.
 			update_restock_state: function() {
-				var $row = $( 'tr.restock-refunded-items' );
+				var $row = $( '#woocommerce-order-items tr.restock-refunded-items' );
 
 				if ( ! $row.length || 'yes' !== $row.data( 'can-restock' ) ) {
 					return;
@@ -1185,13 +1185,13 @@ jQuery( function ( $ ) {
 					$checkbox.prop( 'disabled', false );
 
 					if ( ! $checkbox.data( 'user-set' ) ) {
-						$checkbox.prop( 'checked', woocommerce_admin_meta_boxes.restock_refunded_items_default );
+						$checkbox.prop( 'checked', 'yes' === woocommerce_admin_meta_boxes.restock_refunded_items_default );
 					}
 				}
 
 				if ( $checkbox.prop( 'checked' ) ) {
 					$description.text(
-						woocommerce_admin_meta_boxes.i18n_restock_quantity.replace( '%qty%', total_qty )
+						woocommerce_admin_meta_boxes.i18n_restock_quantity.replace( /%qty%/g, total_qty )
 					);
 				} else {
 					$description.text( woocommerce_admin_meta_boxes.i18n_restock_none );
