@@ -734,6 +734,95 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * An associative array serializes to JSON, which carries its keys, while an
+	 * indexed one is joined and drops them. Measuring both as a joined list
+	 * charged nothing for the keys, and 50 such properties built a 152KB URL.
+	 */
+	public function test_associative_array_keys_are_charged_to_the_budget(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+
+		$properties = array();
+		for ( $p = 0; $p < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $p++ ) {
+			$members = array();
+			for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS; $i++ ) {
+				$members[ str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) . $i ] = 'v';
+			}
+			$properties[ 'p' . $p ] = $members;
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+		$props     = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH,
+			strlen( Pixel_Builder::build_tracks_url( $props ) )
+		);
+
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * One oversized value used to charge its key against the budget and then be
+	 * dropped anyway, so short properties after it were refused for space that
+	 * nothing occupied.
+	 */
+	public function test_a_dropped_property_does_not_spend_the_budget(): void {
+		// Long names on purpose: the leak is the key's own cost, so short keys hide
+		// it however many properties are dropped.
+		$properties = array();
+		for ( $i = 0; $i < 40; $i++ ) {
+			$name                = str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH - 12 ) . $i;
+			$properties[ $name ] = str_repeat( 'y', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+		$properties['last'] = 'short';
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertSame( 'short', $sanitized['last'] ?? null, 'A property that fits must not be refused for a dropped one.' );
+	}
+
+	/**
+	 * `cap_client_value()` counts characters, so a 250-character CJK value must
+	 * come back at 200 characters rather than being cut mid-sequence at 200 bytes.
+	 *
+	 * @dataProvider multibyte_value_provider
+	 *
+	 * @param string $character One multibyte character.
+	 */
+	public function test_value_cap_counts_characters_not_bytes( string $character ): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'pn' => str_repeat( $character, 250 ) )
+		);
+
+		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $sanitized['pn'] ) );
+		$this->assertSame( $sanitized['pn'], mb_convert_encoding( $sanitized['pn'], 'UTF-8', 'UTF-8' ), 'The cut must not split a character.' );
+	}
+
+	/**
+	 * Multibyte characters whose byte length differs from their character length.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function multibyte_value_provider(): array {
+		return array(
+			'CJK'    => array( '漢' ),
+			'emoji'  => array( '😀' ),
+			'accent' => array( 'é' ),
+		);
+	}
+
+	/**
+	 * The bound is a limit, not an off-by-one rejection of the longest legal value.
+	 */
+	public function test_a_value_at_the_length_limit_is_untouched(): void {
+		$exact = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pn' => $exact ) );
+
+		$this->assertSame( $exact, $sanitized['pn'] );
+	}
+
+	/**
 	 * An array that hits the member cap always exceeded the budget, so the whole
 	 * property used to vanish. Losing a few categories is easier to notice.
 	 */
@@ -845,7 +934,8 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 		$result = WC_Analytics_Tracking::record_client_event( $event_name, array( 'pi' => 42 ) );
 
-		$this->assertTrue( $result, 'A malformed name is a skip, not an error the caller must handle.' );
+		$this->assertTrue( is_wp_error( $result ), 'Reporting success for an event that produced no pixel is what hides the loss.' );
+		$this->assertSame( 'invalid_event_name', $result->get_error_code() );
 		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel may be queued for an unusable event name.' );
 	}
 
@@ -1008,10 +1098,18 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'The template must not call the trusted entry point.'
 		);
 
+		// Nothing executes the template, so the direction of the comparison has to
+		// be asserted literally: inverting it serves exactly the requests it is
+		// there to refuse, and every other test stays green.
 		$this->assertStringContainsString(
-			'Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION',
+			"if ( 'yes' !== get_option( \\Automattic\\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {",
 			$template,
-			'The template must refuse requests while proxy tracking is disabled; the REST gate cannot reach it.'
+			'The template must refuse unless the option says yes; the REST gate cannot reach it.'
+		);
+		$this->assertStringContainsString(
+			"'code'    => 'proxy_tracking_disabled',",
+			$template,
+			'Both paths must refuse with one body shape, or a client has two to recognise.'
 		);
 
 		$this->assertStringContainsString(

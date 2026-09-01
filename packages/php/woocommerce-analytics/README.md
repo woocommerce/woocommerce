@@ -73,13 +73,23 @@ add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__retu
 ```
 
 The `POST /wp-json/woocommerce-analytics/v1/track` endpoint this enables is
-unauthenticated, so it is registered only while the filter above returns `true`,
-and events arriving through it are treated as untrusted:
+unauthenticated, so a site where the filter has never returned `true` never gets
+it. Once a site has used it the route stays registered and answers `403
+proxy_tracking_disabled` while the filter is `false`, rather than disappearing:
+pages cached while it was on still tell their visitors to post there, and a `404`
+loses those events with no signal anywhere.
+
+Events arriving through it are treated as untrusted:
 
 - Server-derived properties (store id, visitor id, IP, session, timezone and the
   rest of `WC_Analytics_Tracking::get_reserved_property_names()`) are replaced
   with the server's own values. `_lg`, `_dl` and `_dr` stay the client's, since
   they describe the page the event happened on rather than the `/track` request.
+
+  The reserved set includes generic names such as `url`, `device`, `timezone`,
+  `is_guest` and `landing_page`. An event that sends one of those for its own
+  purposes has it silently replaced, so prefix or rename event-specific
+  properties that would collide.
 - Input is bounded, silently. A request carries at most 50 events; events past
   that are **not recorded at all**. Within an event, at most 50 properties, 50
   members per array value, 200 characters per value, 100 characters per name and

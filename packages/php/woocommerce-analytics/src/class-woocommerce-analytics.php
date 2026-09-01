@@ -62,7 +62,9 @@ class Woocommerce_Analytics {
 	 * endpoint.
 	 *
 	 * Sticky on purpose — it records that cached pages may exist, which staying off
-	 * for a while does not undo.
+	 * for a while does not undo. `reset_proxy_tracking_state()` is the way to clear
+	 * it, for an uninstall routine or a site that wants the endpoint gone once the
+	 * caches holding those pages have expired.
 	 *
 	 * @since 0.17.1
 	 *
@@ -247,13 +249,29 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Forget that proxy tracking was ever enabled, so the REST route stops being
+	 * registered.
+	 *
+	 * Separate from `maybe_remove_proxy_speed_module()`, which clears the module's
+	 * authorization but deliberately leaves this alone: removing the module does
+	 * not expire the cached pages this records.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @return void
+	 */
+	public static function reset_proxy_tracking_state() {
+		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+	}
+
+	/**
 	 * Maybe update proxy speed module.
 	 *
-	 * Turning proxy tracking off uninstalls the module as well as leaving the REST
-	 * route unregistered, so the two halves of "the endpoint is gone" agree. The
-	 * module itself also refuses requests while the feature is off, because this
-	 * runs on `admin_init` behind a day-long transient and cannot be relied on to
-	 * take effect promptly.
+	 * Turning proxy tracking off uninstalls the module, and the REST route starts
+	 * refusing, so both halves stop serving. The module refuses on its own too,
+	 * because this runs on `admin_init` behind a day-long transient and cannot be
+	 * relied on to take effect promptly.
 	 */
 	public static function maybe_update_proxy_speed_module() {
 		// Skip if we've already checked recently.

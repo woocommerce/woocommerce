@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: security
 
-Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, bound the size of what it accepts, and only serve it where proxy tracking is enabled. The `jetpack_woocommerce_analytics_event_props` filter gains a third `$is_client_supplied` argument.
+Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, bound the size of what it accepts, and serve it only on sites that use proxy tracking. Adds `WC_Analytics_Tracking::record_client_event()`, the `MAX_CLIENT_*` bounds, and a third `$is_client_supplied` argument to the `jetpack_woocommerce_analytics_event_props` filter.

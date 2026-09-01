@@ -162,10 +162,13 @@ class WooCommerceAnalyticsProxySpeed {
 		// Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
 		// registered that filter this early, so it reads false everywhere.
 		if ( 'yes' !== get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
+			// Same body the REST controller's WP_Error produces, so a client has one
+			// shape to recognise whichever path answered.
 			$this->send_json_response(
 				array(
-					'success' => false,
-					'error'   => 'Proxy tracking is not enabled on this site.',
+					'code'    => 'proxy_tracking_disabled',
+					'message' => 'Proxy tracking is not enabled on this site.',
+					'data'    => array( 'status' => 403 ),
 				),
 				403
 			);

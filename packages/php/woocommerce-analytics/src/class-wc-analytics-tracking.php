@@ -222,9 +222,9 @@ class WC_Analytics_Tracking {
 	 *                                   the rest are capped when true. Defaults to false
 	 *                                   for server-side callers.
 	 *
-	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
-	 *                       cookie-less context, or an unusable client event name);
-	 *                       WP_Error if pixel firing failed.
+	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA, or
+	 *                       cookie-less context); WP_Error for an unusable client
+	 *                       event name, or if the pixel could not be built or fired.
 	 */
 	public static function record_event( $event_name, $event_properties = array(), $is_client_supplied = false ) {
 		// Check consent before recording any event.
@@ -246,8 +246,12 @@ class WC_Analytics_Tracking {
 		$is_client_supplied = $is_client_supplied || self::is_proxy_tracking_request();
 
 		if ( $is_client_supplied ) {
+			// An error rather than a silent skip: the caller sent a name that cannot
+			// be recorded, and reporting success for an event that produced no pixel
+			// is what makes the loss invisible. Telling a client about its own
+			// malformed input leaks nothing.
 			if ( ! self::is_valid_client_name( $event_name ) ) {
-				return true;
+				return new WP_Error( 'invalid_event_name', 'the event name is empty, too long, or not a string', 400 );
 			}
 
 			$event_properties = self::sanitize_client_properties( $event_properties );
@@ -550,26 +554,8 @@ class WC_Analytics_Tracking {
 
 		$all_properties = array_merge( $properties, $required_properties );
 
-		// Convert array values to a comma-separated string and URL-encode them to ensure compatibility with JavaScript's encodeURIComponent() for pixel URL transmission.
 		foreach ( $all_properties as $key => $value ) {
-			if ( ! is_array( $value ) ) {
-				continue;
-			}
-
-			if ( empty( $value ) ) {
-				$all_properties[ $key ] = '';
-				continue;
-			}
-
-			$is_indexed_array = array_keys( $value ) === range( 0, count( $value ) - 1 );
-			if ( $is_indexed_array ) {
-				$value_string           = implode( ',', $value );
-				$all_properties[ $key ] = rawurlencode( $value_string );
-				continue;
-			}
-
-			// Serialize non-indexed arrays to JSON strings.
-			$all_properties[ $key ] = wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
+			$all_properties[ $key ] = self::flatten_property_value( $value );
 		}
 
 		return $all_properties;
@@ -674,7 +660,7 @@ class WC_Analytics_Tracking {
 				continue;
 			}
 
-			$budget -= strlen( $key );
+			$was_array = is_array( $value ) && ! empty( $value );
 
 			// Arrays are flattened later by get_properties(); bound their members too.
 			if ( is_array( $value ) ) {
@@ -685,13 +671,19 @@ class WC_Analytics_Tracking {
 				// Trimmed to fit rather than dropped: losing a few categories is
 				// easier to notice than the whole property disappearing, and the
 				// member cap alone always exceeds the budget.
-				$value = self::fit_client_array( array_map( array( __CLASS__, 'cap_client_value' ), $value ), $budget );
+				$value = self::fit_client_array(
+					array_map( array( __CLASS__, 'cap_client_value' ), $value ),
+					$budget - strlen( $key )
+				);
 			} else {
 				$value = self::cap_client_value( $value );
 			}
 
-			$cost = self::measure_client_value( $value );
-			if ( array() === $value || $cost > $budget ) {
+			$cost = strlen( $key ) + self::measure_client_value( $value );
+
+			// The budget is only spent on properties that survive, or one oversized
+			// value would charge its key against everything after it.
+			if ( ( $was_array && array() === $value ) || $cost > $budget ) {
 				unset( $event_properties[ $key ] );
 				continue;
 			}
@@ -721,22 +713,46 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Bytes one value contributes to the pixel URL.
+	 * Reduce one property value to the string that goes into the pixel URL.
 	 *
-	 * Mirrors the two encoding steps a value goes through: `get_properties()`
-	 * encodes a joined array, then `http_build_query()` encodes every value again.
+	 * Array values are joined and encoded for compatibility with the client's
+	 * `encodeURIComponent()`; an associative array becomes JSON, which carries its
+	 * keys. The single definition matters: the payload budget measures a value by
+	 * running it through here, and an approximation that missed the JSON branch
+	 * charged nothing for those keys.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @param mixed $value Property value.
+	 * @return mixed The scalar it serializes to; non-array values are returned as-is.
+	 */
+	private static function flatten_property_value( $value ) {
+		if ( ! is_array( $value ) ) {
+			return $value;
+		}
+
+		if ( empty( $value ) ) {
+			return '';
+		}
+
+		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
+			return rawurlencode( implode( ',', $value ) );
+		}
+
+		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
+	 * Bytes one value contributes to the pixel URL.
 	 *
 	 * @since 0.17.1
 	 *
 	 * @param mixed $value Already-capped client value.
-	 * @return int Byte count after encoding.
+	 * @return int Byte count after `flatten_property_value()` and the encoding
+	 *             `http_build_query()` applies on top of it.
 	 */
 	private static function measure_client_value( $value ) {
-		if ( is_array( $value ) ) {
-			$value = rawurlencode( implode( ',', array_map( 'strval', $value ) ) );
-		}
-
-		return strlen( rawurlencode( (string) $value ) );
+		return strlen( rawurlencode( (string) self::flatten_property_value( $value ) ) );
 	}
 
 	/**

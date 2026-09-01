@@ -297,6 +297,20 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The sticky option has to be clearable, or a site that tried the feature once
+	 * carries the endpoint for good with no supported way back.
+	 */
+	public function test_reset_proxy_tracking_state_clears_both_options(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		Woocommerce_Analytics::reset_proxy_tracking_state();
+
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ) );
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+	}
+
+	/**
 	 * Test that maybe_remove_proxy_speed_module cleans up options and transients.
 	 */
 	public function test_maybe_remove_proxy_speed_module_cleans_up(): void {
