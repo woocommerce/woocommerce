@@ -1346,6 +1346,16 @@ jQuery( function ( $ ) {
 					load_tax_rates( 1 );
 				} );
 
+				pagination.on( 'keydown', '.first-page, .prev-page, .next-page, .last-page', function( event ) {
+					if ( 13 !== event.which ) {
+						return;
+					}
+
+					event.preventDefault();
+					event.stopPropagation();
+					$( this ).trigger( 'click' );
+				} );
+
 				pagination.on( 'click', '.prev-page', function() {
 					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( Math.max( 1, current_page - 1 ) );
