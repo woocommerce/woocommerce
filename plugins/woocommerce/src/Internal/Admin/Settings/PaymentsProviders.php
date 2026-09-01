@@ -1276,6 +1276,8 @@ class PaymentsProviders {
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
 		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
+		// Suggestion details are embedded in the gateway details, so clear their cache too.
+		$this->extension_suggestions->clear_cache();
 	}
 
 	/**
