@@ -77,6 +77,14 @@
 	}
 }
 
+// Keep grouped steppers equal when child products have different `max` attributes.
+// The repeated component class overrides theme quantity input widths.
+.wc-block-add-to-cart-with-options-grouped-product-item-selector
+	.wc-block-components-quantity-selector.wc-block-components-quantity-selector
+	input.wc-block-components-quantity-selector__input {
+	width: 40px;
+}
+
 // `cursor` needs to override some styles from WordPress core, that's why we
 // need extra specificity.
 :where(.wc-block-add-to-cart-with-options.is-invalid) .wp-block-woocommerce-product-button .wc-block-components-product-button__button {
