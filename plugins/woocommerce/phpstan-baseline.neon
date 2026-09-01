@@ -8257,12 +8257,6 @@ parameters:
 			path: includes/admin/woocommerce-legacy-reports.php
 
 		-
-			message: '#^@param array \$terms does not accept actual type of parameter\: array\<int, int\|string\|WP_Term\>\|numeric\-string\|WP_Error\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^@param string \$search_text does not accept actual type of parameter\: array\|string\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -8373,7 +8367,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
 			identifier: method.notFound
-			count: 4
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -15824,12 +15818,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$str of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Parameter \#2 \$args of function wp_safe_remote_post expects array\{method\?\: string, timeout\?\: float, redirection\?\: int, httpversion\?\: string, user\-agent\?\: string, reject_unsafe_urls\?\: bool, blocking\?\: bool, headers\?\: array\|string, \.\.\.\}, array\{method\: ''POST'', timeout\: 45, redirection\: 5, httpversion\: ''1\.0'', blocking\: false, headers\: array\{user\-agent\: non\-falsy\-string\}, body\: non\-empty\-string\|false, cookies\: array\{\}\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-tracker.php
