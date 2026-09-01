@@ -309,6 +309,8 @@ This is part of the WooCommerce monorepo:
 
 For code review standards and critical violations to flag, use the **`woocommerce-code-review` skill**.
 
+Automated reviews complement the [Review Requirements](#review-requirements); they never satisfy the human review requirement.
+
 ## Notes for AI Agents
 
 - This doc provides context; skills provide procedures
