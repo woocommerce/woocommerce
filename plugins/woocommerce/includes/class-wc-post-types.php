@@ -725,10 +725,10 @@ class WC_Post_Types {
 	/**
 	 * Flush rules if the event is queued.
 	 *
-	 * Consuming the queue regenerates and persists the whole rewrite graph, so it can only run on a
-	 * request that sees every registered post type and taxonomy. A request that skips the active
-	 * theme would write the theme's rules away with nothing left to retry, so it leaves the queue
-	 * for the next normal request. This is the same check register_post_types() makes at the top.
+	 * Consuming the queue regenerates and persists the whole rewrite graph. A request that skips
+	 * the active theme would write the theme's rules away with nothing left to retry, so it
+	 * leaves the queue for the next normal request. This mirrors the `$theme_unavailable` check
+	 * in register_post_types().
 	 *
 	 * @since 3.3.0
 	 */
