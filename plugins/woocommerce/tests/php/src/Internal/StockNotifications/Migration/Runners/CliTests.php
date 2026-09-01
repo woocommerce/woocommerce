@@ -266,15 +266,19 @@ class CliTests extends WC_Unit_Test_Case {
 	 * @testdox a second run should write nothing and report nothing outstanding.
 	 */
 	public function test_a_second_run_writes_nothing(): void {
-		$this->seed_notifications( 3 );
+		update_post_meta( $this->product_id, '_wc_bis_disabled', 'yes' );
 
 		$this->cli()->run( array(), array( 'yes' => true ) );
-		$first = LegacyStore::get_core_rows();
+
+		$first = get_post_meta( $this->product_id, 'customer_stock_notifications_enable_signups', true );
+
+		// Asserted before the comparison below, which two unmigrated runs would also satisfy.
+		$this->assertSame( 'no', $first, 'The first run must have migrated the product.' );
 
 		MockWPCLI::reset();
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
-		$this->assertSame( $first, LegacyStore::get_core_rows() );
+		$this->assertSame( $first, get_post_meta( $this->product_id, 'customer_stock_notifications_enable_signups', true ) );
 		$this->assertSame( 'Run complete.', MockWPCLI::$last_success_message );
 	}
 
