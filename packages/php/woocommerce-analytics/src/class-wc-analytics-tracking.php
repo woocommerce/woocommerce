@@ -130,11 +130,30 @@ class WC_Analytics_Tracking {
 	 * The other caps bound each axis separately and multiply: at their limits one
 	 * event still built a 512KB pixel URL. This bounds the product.
 	 *
+	 * Counted after percent-encoding, in bytes, unlike the per-value cap which
+	 * counts characters. A `%` or a CJK character costs three bytes in the URL,
+	 * so counting characters here would under-count by 3x and let the budget pass
+	 * a payload that still blows past MAX_PIXEL_URL_LENGTH.
+	 *
 	 * @since 0.17.1
 	 *
 	 * @var int
 	 */
 	const MAX_CLIENT_PAYLOAD_LENGTH = 4096;
+
+	/**
+	 * Maximum length of a pixel URL this package will fire.
+	 *
+	 * The backstop for every other cap. It is the only bound that sees the final
+	 * URL, so it is also the only one covering properties a
+	 * `jetpack_woocommerce_analytics_event_props` callback added after the
+	 * client-side caps ran.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @var int
+	 */
+	const MAX_PIXEL_URL_LENGTH = 8192;
 
 	/**
 	 * Path suffix of the proxy tracking endpoint.
@@ -347,6 +366,10 @@ class WC_Analytics_Tracking {
 	private static function record_pixel_url( $pixel_url ) {
 		if ( empty( $pixel_url ) ) {
 			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
+		}
+
+		if ( strlen( $pixel_url ) > self::MAX_PIXEL_URL_LENGTH ) {
+			return new WP_Error( 'pixel_too_long', 'tracks pixel URL exceeds the maximum length', 400 );
 		}
 
 		// Check if batching is supported.
@@ -651,19 +674,24 @@ class WC_Analytics_Tracking {
 				continue;
 			}
 
+			$budget -= strlen( $key );
+
 			// Arrays are flattened later by get_properties(); bound their members too.
 			if ( is_array( $value ) ) {
 				if ( count( $value ) > self::MAX_CLIENT_ARRAY_MEMBERS ) {
 					$value = array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true );
 				}
 
-				$value = array_map( array( __CLASS__, 'cap_client_value' ), $value );
+				// Trimmed to fit rather than dropped: losing a few categories is
+				// easier to notice than the whole property disappearing, and the
+				// member cap alone always exceeds the budget.
+				$value = self::fit_client_array( array_map( array( __CLASS__, 'cap_client_value' ), $value ), $budget );
 			} else {
 				$value = self::cap_client_value( $value );
 			}
 
-			$cost = strlen( $key ) + self::measure_client_value( $value );
-			if ( $cost > $budget ) {
+			$cost = self::measure_client_value( $value );
+			if ( array() === $value || $cost > $budget ) {
 				unset( $event_properties[ $key ] );
 				continue;
 			}
@@ -693,24 +721,39 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Length one value contributes to the pixel URL once flattened.
+	 * Bytes one value contributes to the pixel URL.
+	 *
+	 * Mirrors the two encoding steps a value goes through: `get_properties()`
+	 * encodes a joined array, then `http_build_query()` encodes every value again.
 	 *
 	 * @since 0.17.1
 	 *
 	 * @param mixed $value Already-capped client value.
-	 * @return int Character count, counting the separators an array is joined with.
+	 * @return int Byte count after encoding.
 	 */
 	private static function measure_client_value( $value ) {
-		if ( ! is_array( $value ) ) {
-			return strlen( (string) $value );
+		if ( is_array( $value ) ) {
+			$value = rawurlencode( implode( ',', array_map( 'strval', $value ) ) );
 		}
 
-		$length = count( $value );
-		foreach ( $value as $member ) {
-			$length += strlen( (string) $member );
+		return strlen( rawurlencode( (string) $value ) );
+	}
+
+	/**
+	 * Drop trailing members until an array value fits the remaining budget.
+	 *
+	 * @since 0.17.1
+	 *
+	 * @param array $members Already-capped members.
+	 * @param int   $budget Bytes still available for this value.
+	 * @return array Members that fit; empty when even one does not.
+	 */
+	private static function fit_client_array( $members, $budget ) {
+		while ( ! empty( $members ) && self::measure_client_value( $members ) > $budget ) {
+			array_pop( $members );
 		}
 
-		return $length;
+		return $members;
 	}
 
 	/**

@@ -683,10 +683,10 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 * URL, so the product needs its own bound. Properties are dropped from the
 	 * tail once the budget is spent.
 	 */
-	public function test_client_payload_total_is_capped(): void {
+	public function test_client_payload_total_is_capped( string $character = 'a' ): void {
 		$properties = array();
 		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $i++ ) {
-			$properties[ 'p' . $i ] = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+			$properties[ 'p' . $i ] = str_repeat( $character, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
 		}
 
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
@@ -694,12 +694,77 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->assertNotEmpty( $sanitized, 'The budget drops the tail, it does not empty the event.' );
 
 		// The pixel URL is what the budget exists to bound, so assert on it rather
-		// than on the constant. 8KB is the practical ceiling for a GET.
+		// than on the constant.
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
 		$props            = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
 
-		$this->assertLessThan( 8192, strlen( Pixel_Builder::build_tracks_url( $props ) ) );
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH,
+			strlen( Pixel_Builder::build_tracks_url( $props ) )
+		);
 
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * An ASCII-only fixture hid this: the budget counted characters while the URL
+	 * carries percent-encoded bytes, so `%`, CJK and emoji each cost 3x what the
+	 * budget charged and the same payload built a 12KB URL.
+	 *
+	 * @dataProvider expensive_character_provider
+	 *
+	 * @param string $character One character whose encoded form is longer than itself.
+	 */
+	public function test_client_payload_budget_counts_encoded_bytes( string $character ): void {
+		$this->test_client_payload_total_is_capped( $character );
+	}
+
+	/**
+	 * Characters that cost more in the URL than they do in the payload.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function expensive_character_provider(): array {
+		return array(
+			'percent' => array( '%' ),
+			'CJK'     => array( '漢' ),
+			'emoji'   => array( '😀' ),
+			'space'   => array( ' ' ),
+		);
+	}
+
+	/**
+	 * An array that hits the member cap always exceeded the budget, so the whole
+	 * property used to vanish. Losing a few categories is easier to notice.
+	 */
+	public function test_oversized_arrays_lose_members_not_the_property(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+
+		$this->assertArrayHasKey( 'pc', $sanitized, 'The property must survive with fewer members.' );
+		$this->assertLessThan( count( $members ), count( $sanitized['pc'] ) );
+	}
+
+	/**
+	 * The last bound, and the only one that sees the final URL — so the only one
+	 * covering properties a filter callback added after the client caps ran.
+	 * Driven through the trusted path, where no client cap applies.
+	 */
+	public function test_oversized_pixel_urls_are_not_fired(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		$result = WC_Analytics_Tracking::record_event(
+			'add_to_cart',
+			array( 'pn' => str_repeat( 'a', WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH * 2 ) )
+		);
+
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertSame( 'pixel_too_long', $result->get_error_code() );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'Nothing may be queued.' );
+
+		$this->reset_pixel_batch_queue();
 		unset( $_COOKIE['tk_ai'] );
 	}
 
