@@ -176,6 +176,7 @@ async function fetchSearchResults(
 							billingPeriodInterval:
 								product.billing_period_interval,
 							currency: product.currency,
+							hasQualityBadge: product.has_quality_badge ?? false,
 						};
 					}
 				);
@@ -452,7 +453,7 @@ function addNotice(
 	options?: Partial< NoticeOptions >
 ) {
 	if ( status === NoticeStatus.Error ) {
-		dispatch( noticeStore ).addNotice(
+		void dispatch( noticeStore ).addNotice(
 			productKey,
 			message,
 			status,
@@ -466,12 +467,15 @@ function addNotice(
 			};
 		}
 
-		dispatch( coreNoticesStore ).createSuccessNotice( message, options );
+		void dispatch( coreNoticesStore ).createSuccessNotice(
+			message,
+			options
+		);
 	}
 }
 
 const removeNotice = ( productKey: string ) => {
-	dispatch( noticeStore ).removeNotice( productKey );
+	void dispatch( noticeStore ).removeNotice( productKey );
 };
 
 const subscriptionToProduct = ( subscription: Subscription ): Product => {

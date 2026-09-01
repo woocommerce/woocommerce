@@ -14,14 +14,6 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
  */
 class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	/**
-	 * tearDown.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-	}
-
-	/**
 	 * Test that wc_restock_refunded_items() preserves order item stock metadata.
 	 */
 	public function test_wc_restock_refunded_items_stock_metadata() {

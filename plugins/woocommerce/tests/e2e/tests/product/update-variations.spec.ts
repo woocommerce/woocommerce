@@ -17,6 +17,7 @@ const {
 	productAttributes,
 	sampleVariations,
 	createVariations,
+	generateVariationsFromAttributes,
 } = utils;
 const variationOnePrice = '9.99';
 const variationTwoPrice = '11.99';
@@ -34,8 +35,53 @@ let productId_indivEdit: number,
 	productId_manageStock: number,
 	productId_variationDefaults: number,
 	productId_removeVariation: number,
+	productId_paginationCancel: number,
 	defaultVariation,
 	variationIds_indivEdit: number[];
+
+const paginatedProductAttributes = [
+	{
+		name: 'Colour',
+		visible: true,
+		variation: true,
+		options: [ 'Red', 'Green', 'Blue', 'Black' ],
+	},
+	{
+		name: 'Size',
+		visible: true,
+		variation: true,
+		options: [ 'Small', 'Medium', 'Large', 'XL' ],
+	},
+];
+
+const paginatedProductVariations = generateVariationsFromAttributes(
+	paginatedProductAttributes
+).map( ( values ) => ( {
+	regular_price: variationOnePrice,
+	attributes: values.map( ( option, index ) => ( {
+		name: paginatedProductAttributes[ index ].name,
+		option,
+	} ) ),
+} ) );
+
+async function gotToVariationsTab( page: Page ) {
+	await test.step( 'Click on the "Variations" tab.', async () => {
+		await expect( async () => {
+			await page
+				.getByRole( 'link', { name: 'Variations' } )
+				.last()
+				.click();
+
+			// Sometimes the click on link is too fast and the initial tab (General) is still visible
+			// so we need to wait make sure some content from the variations tab is visible.
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+
+			await expect( expandButton ).toBeVisible();
+		} ).toPass();
+	} );
+}
 
 test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -96,6 +142,17 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
+		await test.step( 'Create variable product for pagination cancel test', async () => {
+			productId_paginationCancel = await createVariableProduct(
+				paginatedProductAttributes
+			);
+
+			await createVariations(
+				productId_paginationCancel,
+				paginatedProductVariations
+			);
+		} );
+
 		await test.step( 'Hide variable product tour', async () => {
 			await showVariableProductTour( browser, false );
 		} );
@@ -104,25 +161,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.afterAll( async () => {
 		await deleteProductsAddedByTests();
 	} );
-
-	async function gotToVariationsTab( page: Page ) {
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await expect( async () => {
-				await page
-					.getByRole( 'link', { name: 'Variations' } )
-					.last()
-					.click();
-
-				// Sometimes the click on link is too fast and the initial tab (General) is still visible
-				// so we need to wait make sure some content from the variations tab is visible.
-				const expandButton = page
-					.getByRole( 'link', { name: 'Expand' } )
-					.first();
-
-				await expect( expandButton ).toBeVisible();
-			} ).toPass();
-		} );
-	}
 
 	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
@@ -359,6 +397,73 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 	} );
 
+	test( 'dismissed pagination warning keeps unsaved variation edits on the current page', async ( {
+		page,
+	} ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_paginationCancel }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		const pageSelector = page.getByLabel( 'Select Page' ).first();
+
+		await test.step( 'Confirm the first variation page is selected.', async () => {
+			await expect( pageSelector ).toHaveValue( '1' );
+		} );
+
+		const firstVariation = page.locator( '.woocommerce_variation' ).first();
+		const unsavedPrice = '42.42';
+		const priceInput = firstVariation.getByRole( 'textbox', {
+			name: 'Regular price',
+		} );
+
+		await test.step( 'Expand the first variation and edit it without saving.', async () => {
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+
+			await priceInput.fill( unsavedPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Dismiss the save warning raised by paginating.', async () => {
+			// Awaited rather than handled via a `page.on( 'dialog', … )` listener (the
+			// convention elsewhere in this suite) because the assertions below are all
+			// true *before* the click too. Racing the click against the dialog promise
+			// is what proves the dialog was actually raised and dismissed; a listener
+			// that is not awaited would let this test pass without exercising the
+			// cancel path at all.
+			const dialogPromise = page
+				.waitForEvent( 'dialog' )
+				.then( async ( dialog ) => {
+					expect( dialog.type() ).toBe( 'confirm' );
+					await dialog.dismiss();
+				} );
+
+			await Promise.all( [
+				dialogPromise,
+				page
+					.locator( '.variations-pagenav .next-page' )
+					.first()
+					.click(),
+			] );
+		} );
+
+		await test.step( 'Confirm the page, the edit and its dirty state are preserved.', async () => {
+			await expect( pageSelector ).toHaveValue( '1' );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+			await expect( priceInput ).toHaveValue( unsavedPrice );
+			await expect(
+				page.getByRole( 'button', { name: 'Save changes' } )
+			).toBeEnabled();
+		} );
+	} );
+
 	test( 'can manage stock levels', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
@@ -418,7 +523,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await test.step( 'Click "Save changes"', async () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 			await page.waitForFunction(
-				() => ! Boolean( document.querySelector( '.blockUI' ) )
+				() => ! document.querySelector( '.blockUI' )
 			);
 		} );
 

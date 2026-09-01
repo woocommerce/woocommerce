@@ -7,6 +7,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
+import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -15,8 +16,8 @@ import { BackButtonContent } from '../back-button-content';
 import { storeName } from '../../../store';
 
 jest.mock( '@wordpress/components', () => ( {
-	Button: ( { children, label, onClick } ) => (
-		<button aria-label={ label } onClick={ onClick }>
+	Button: ( { children, label, onClick, icon } ) => (
+		<button aria-label={ label } onClick={ onClick } data-icon={ icon }>
 			{ children }
 		</button>
 	),
@@ -30,6 +31,8 @@ jest.mock( '@wordpress/components', () => ( {
 jest.mock( '@wordpress/icons', () => ( {
 	Icon: () => <span>Icon</span>,
 	arrowLeft: 'arrowLeft',
+	chevronLeft: 'chevronLeft',
+	chevronRight: 'chevronRight',
 	wordpress: 'wordpress',
 } ) );
 
@@ -44,6 +47,33 @@ const mockUrls = {
 	back: 'https://example.com/back',
 	listings: 'https://example.com/listings',
 	send: 'https://example.com/send',
+};
+
+// jsdom does not do layout, so we fake the slot width the way each WordPress
+// version sizes that column.
+type SizeSlot = ( slot: HTMLElement ) => number;
+
+const fixedColumn: SizeSlot = () => 64;
+
+const contentSizedColumn: SizeSlot = ( slot ) =>
+	slot.querySelector( 'button' ) ? 74 : 0;
+
+const renderInSlot = ( sizeSlot: SizeSlot ) => {
+	jest.spyOn(
+		HTMLElement.prototype,
+		'getBoundingClientRect'
+	).mockImplementation( function ( this: HTMLElement ) {
+		const width = this.classList.contains( 'editor-header__back-button' )
+			? sizeSlot( this )
+			: 0;
+		return { width } as DOMRect;
+	} );
+
+	return render(
+		<div className="editor-header__back-button">
+			<BackButtonContent />
+		</div>
+	);
 };
 
 describe( 'BackButtonContent', () => {
@@ -65,6 +95,10 @@ describe( 'BackButtonContent', () => {
 				return {};
 			} )
 		);
+	} );
+
+	afterEach( () => {
+		jest.restoreAllMocks();
 	} );
 
 	it( 'should render the back button', () => {
@@ -90,6 +124,44 @@ describe( 'BackButtonContent', () => {
 		// Verify button has onClick handler (we don't actually click to avoid navigation error)
 		expect( button ).toBeInTheDocument();
 		expect( button.onclick ).not.toBeNull();
+	} );
+
+	it( 'should render the fullscreen-style button in a fixed 64px slot (WordPress ≤ 7.0 header)', () => {
+		const { container } = renderInSlot( fixedColumn );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'should render the compact button in a content-sized slot (WordPress 7.1+ header)', () => {
+		const { container, getByRole } = renderInSlot( contentSizedColumn );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).not.toBeInTheDocument();
+		expect(
+			getByRole( 'button', { name: 'Close editor' } )
+		).toHaveAttribute( 'data-icon', 'chevronLeft' );
+	} );
+
+	it( 'should render the right chevron in a content-sized slot in RTL', () => {
+		( isRTL as jest.Mock ).mockReturnValueOnce( true );
+		const { getByRole } = renderInSlot( contentSizedColumn );
+		expect(
+			getByRole( 'button', { name: 'Close editor' } )
+		).toHaveAttribute( 'data-icon', 'chevronRight' );
+	} );
+
+	it( 'should fall back to the fullscreen-style button when there is no header slot', () => {
+		const { container } = render( <BackButtonContent /> );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'should apply woocommerce_email_editor_close_content filter to render custom component', () => {

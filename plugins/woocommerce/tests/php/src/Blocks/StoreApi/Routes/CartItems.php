@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use WC_Logger;
 use WC_Logger_Interface;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -408,6 +410,49 @@ class CartItems extends ControllerTestCase {
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
 		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * The cart item schema must advertise cart-item extensions. It inherits the property from
+	 * ItemSchema, which sits below ProductSchema and so can pick up the wrong identifier.
+	 */
+	public function test_get_item_schema_advertises_cart_item_extensions() {
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'        => CartItemSchema::IDENTIFIER,
+				'namespace'       => 'cart_item_extension_namespace',
+				'schema_callback' => function () {
+					return array(
+						'cart_item_extension_key' => array(
+							'description' => 'Test key',
+							'type'        => 'boolean',
+						),
+					);
+				},
+			)
+		);
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'        => ProductSchema::IDENTIFIER,
+				'namespace'       => 'product_extension_namespace',
+				'schema_callback' => function () {
+					return array(
+						'product_extension_key' => array(
+							'description' => 'Test key',
+							'type'        => 'boolean',
+						),
+					);
+				},
+			)
+		);
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$schema     = $controller->get_item_schema();
+		$extensions = (array) $schema['properties']['extensions']['properties'];
+
+		$this->assertArrayHasKey( 'cart_item_extension_namespace', $extensions, 'The cart item schema must advertise extensions registered against the cart-item endpoint.' );
+		$this->assertArrayNotHasKey( 'product_extension_namespace', $extensions, 'The cart item schema must not advertise extensions registered against the product endpoint.' );
 	}
 
 	/**

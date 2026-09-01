@@ -12,6 +12,7 @@ env:
 jobs:
   analyze-trends-cfes:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Analyze CFEs trends
         env:
@@ -36,6 +37,7 @@ jobs:
           " > /dev/null
   analyze-trends-prrs:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Analyze PRRs trends
         env:
@@ -60,6 +62,7 @@ jobs:
           "
   analyze-quality:
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Analyze quality issues
         env:

@@ -62,15 +62,16 @@ export class Analytics {
 			consentManager.addConsentChangeListener( this.handleConsentChange );
 
 			this.sessionManager.init();
-			const { sessionId, landingPage, isNewSession } = this.sessionManager;
+			const { sessionId, landingPage, isEngaged, isNewSession } = this.sessionManager;
 
-			// Not needed if proxy tracking is enabled.
+			// Not needed if proxy tracking is enabled: that request carries the session cookie itself.
 			if ( ! this.features.proxy ) {
-				// Add session ID and landing page to common properties.
+				// The page markup is cacheable, so the server cannot send these.
 				this.commonProps = {
 					...this.commonProps,
 					session_id: sessionId,
 					landing_page: landingPage,
+					is_engaged: isEngaged,
 				};
 			}
 

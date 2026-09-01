@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent REST product update and duplicate requests from fatally erroring when given a variation ID, and preserve the stored product type instead of converting the product to simple when the requested type names no known class.

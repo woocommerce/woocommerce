@@ -7,6 +7,7 @@ import { globalIgnores } from 'eslint/config';
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
+import { coreModules } from '@woocommerce/eslint-config/core-modules.js';
 
 export default [
 	// node_modules is ignored by default. `api` has its own config and command.
@@ -34,29 +35,8 @@ export default [
 	{
 		settings: {
 			'import/core-modules': [
-				'@woocommerce/admin-layout',
-				'@woocommerce/components',
-				'@woocommerce/customer-effort-score',
-				'@woocommerce/currency',
-				'@woocommerce/csv-export',
-				'@woocommerce/data',
-				'@woocommerce/date',
-				'@woocommerce/explat',
-				'@woocommerce/internal-js-tests',
-				'@woocommerce/navigation',
-				'@woocommerce/number',
-				'@woocommerce/onboarding',
-				'@woocommerce/product-editor',
-				'@woocommerce/settings',
-				'@woocommerce/tracks',
-				'@woocommerce/experimental',
-				'@wordpress/components',
-				'@wordpress/core-data',
-				'@wordpress/element',
-				'@wordpress/blocks',
-				'@wordpress/block-editor',
+				...coreModules,
 				'@wordpress/block-library',
-				'@wordpress/notices',
 				'dompurify',
 				'@react-spring/web',
 				'react-router-dom',

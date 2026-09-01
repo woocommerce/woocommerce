@@ -914,7 +914,10 @@ function wc_order_fully_refunded( $order_id ) {
 	$order      = wc_get_order( $order_id );
 	$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
-	if ( ! $max_refund ) {
+	// Numeric comparison, not truthiness: when prior refunds sum a float epsilon
+	// above the order total, the difference formats to '-0' — a truthy string that
+	// is numerically zero — which would otherwise create a ghost 0.00 refund below.
+	if ( (float) $max_refund <= 0 ) {
 		return;
 	}
 

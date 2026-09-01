@@ -1,6 +1,33 @@
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
+		function init_sale_datepickers( $row ) {
+			if ( ! $.fn.datepicker ) {
+				return;
+			}
+
+			var $date_from = $row.find( 'input[name="_sale_price_dates_from"]' ),
+				$date_to   = $row.find( 'input[name="_sale_price_dates_to"]' );
+
+			function sync_date_limits() {
+				$date_from.datepicker( 'option', 'maxDate', $date_to.datepicker( 'getDate' ) );
+				$date_to.datepicker( 'option', 'minDate', $date_from.datepicker( 'getDate' ) );
+			}
+
+			$date_from.add( $date_to ).datepicker( {
+				defaultDate: '',
+				dateFormat: 'yy-mm-dd',
+				numberOfMonths: 1,
+				showButtonPanel: true,
+				onSelect: function() {
+					sync_date_limits();
+					$( this ).trigger( 'change' );
+				}
+			} );
+
+			sync_date_limits();
+		}
+
 		$( '#the-list' ).on(
 			'click',
 			'.editinline',
@@ -14,24 +41,26 @@ jQuery(
 
 				var $wc_inline_data = $( '#woocommerce_inline_' + post_id );
 
-				var sku        = $wc_inline_data.find( '.sku' ).text(),
-				regular_price  = $wc_inline_data.find( '.regular_price' ).text(),
-				sale_price     = $wc_inline_data.find( '.sale_price ' ).text(),
-				weight         = $wc_inline_data.find( '.weight' ).text(),
-				length         = $wc_inline_data.find( '.length' ).text(),
-				width          = $wc_inline_data.find( '.width' ).text(),
-				height         = $wc_inline_data.find( '.height' ).text(),
-				shipping_class = $wc_inline_data.find( '.shipping_class' ).text(),
-				visibility     = $wc_inline_data.find( '.visibility' ).text(),
-				stock_status   = $wc_inline_data.find( '.stock_status' ).text(),
-				stock          = $wc_inline_data.find( '.stock' ).text(),
-				featured       = $wc_inline_data.find( '.featured' ).text(),
-				manage_stock   = $wc_inline_data.find( '.manage_stock' ).text(),
-				menu_order     = $wc_inline_data.find( '.menu_order' ).text(),
-				tax_status     = $wc_inline_data.find( '.tax_status' ).text(),
-				tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
-				backorders     = $wc_inline_data.find( '.backorders' ).text(),
-				product_type   = $wc_inline_data.find( '.product_type' ).text();
+				var sku          = $wc_inline_data.find( '.sku' ).text(),
+				regular_price    = $wc_inline_data.find( '.regular_price' ).text(),
+				sale_price       = $wc_inline_data.find( '.sale_price ' ).text(),
+				sale_date_from   = $wc_inline_data.find( '.sale_price_dates_from' ).text(),
+				sale_date_to     = $wc_inline_data.find( '.sale_price_dates_to' ).text(),
+				weight           = $wc_inline_data.find( '.weight' ).text(),
+				length           = $wc_inline_data.find( '.length' ).text(),
+				width            = $wc_inline_data.find( '.width' ).text(),
+				height           = $wc_inline_data.find( '.height' ).text(),
+				shipping_class   = $wc_inline_data.find( '.shipping_class' ).text(),
+				visibility       = $wc_inline_data.find( '.visibility' ).text(),
+				stock_status     = $wc_inline_data.find( '.stock_status' ).text(),
+				stock            = $wc_inline_data.find( '.stock' ).text(),
+				featured         = $wc_inline_data.find( '.featured' ).text(),
+				manage_stock     = $wc_inline_data.find( '.manage_stock' ).text(),
+				menu_order       = $wc_inline_data.find( '.menu_order' ).text(),
+				tax_status       = $wc_inline_data.find( '.tax_status' ).text(),
+				tax_class        = $wc_inline_data.find( '.tax_class' ).text(),
+				backorders       = $wc_inline_data.find( '.backorders' ).text(),
+				product_type     = $wc_inline_data.find( '.product_type' ).text();
 
 				var formatted_regular_price = regular_price.replace( '.', woocommerce_admin.mon_decimal_point ),
 				formatted_sale_price        = sale_price.replace( '.', woocommerce_admin.mon_decimal_point );
@@ -45,6 +74,11 @@ jQuery(
 				$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
 				$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );
 				$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( formatted_sale_price );
+				$( 'input[name="_sale_price_dates_from"]', '.inline-edit-row' ).val( sale_date_from );
+				$( 'input[name="_sale_price_dates_to"]', '.inline-edit-row' ).val( sale_date_to );
+				setTimeout( function() {
+					init_sale_datepickers( $( '#edit-' + post_id ) );
+				}, 0 );
 				$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
 				$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );

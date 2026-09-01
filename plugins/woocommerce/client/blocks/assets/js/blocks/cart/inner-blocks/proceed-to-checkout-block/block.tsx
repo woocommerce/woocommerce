@@ -90,13 +90,15 @@ const Block = ( {
 			href={ filteredLink }
 			disabled={ isCalculating || cartIsLoading }
 			onClick={ ( e ) => {
-				dispatchOnProceedToCheckout().then( ( observerResponses ) => {
-					if ( observerResponses.some( isErrorResponse ) ) {
-						e.preventDefault();
-						return;
+				void dispatchOnProceedToCheckout().then(
+					( observerResponses ) => {
+						if ( observerResponses.some( isErrorResponse ) ) {
+							e.preventDefault();
+							return;
+						}
+						setShowSpinner( true );
 					}
-					setShowSpinner( true );
-				} );
+				);
 			} }
 		>
 			{ showSpinner && <Spinner /> }

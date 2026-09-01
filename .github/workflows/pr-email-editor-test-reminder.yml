@@ -1,7 +1,12 @@
 name: Email Editor Test Reminder
 
+# Runs on `pull_request_target` rather than `pull_request` so it also works for
+# pull requests opened from a fork. On `pull_request` a fork gets a read-only
+# token, which a `permissions:` block cannot raise, so posting the reminder
+# comment fails with a 403. This workflow only ever checks out and runs base
+# branch code, so it never executes anything a fork controls.
 on:
-    pull_request:
+    pull_request_target:
         types: [opened, synchronize, reopened]
 
 concurrency:
@@ -16,9 +21,17 @@ jobs:
     check-and-comment:
         name: Check and add test reminder comment
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             - name: Checkout
               uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  # Check out the base branch, never the pull request head. The job
+                  # holds a write token, so it must not run code from the PR.
+                  ref: ${{ github.event.pull_request.base.sha }}
+                  # Keep the token out of the local git config. No later step runs
+                  # git, so nothing here needs it.
+                  persist-credentials: false
 
             - name: Setup Node
               uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0

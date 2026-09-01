@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Dispatch plugin install/activate failures as error notices instead of success notices when the rejected PluginError is passed to createNoticesFromResponse().

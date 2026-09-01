@@ -44,6 +44,8 @@ class Checkout extends \WP_UnitTestCase {
 	 * @throws \Exception If the API class is not registered with container.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
