@@ -3398,4 +3398,69 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'Retrying after a post-payment failure must not create a second paid order.'
 		);
 	}
+
+	/**
+	 * @testdox A recovered checkout empties the cart the gateway never got to.
+	 */
+	public function test_recovered_checkout_empties_the_cart() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertTrue( WC()->cart->is_empty(), 'Recovery should leave the shopper with an empty cart, as a successful checkout does.' );
+	}
+
+	/**
+	 * @testdox A recovered checkout leaves a cart that no longer belongs to the order alone.
+	 */
+	public function test_recovered_checkout_keeps_a_cart_that_no_longer_matches_the_order() {
+		// Pay-for-order runs through the same trait with a cart unrelated to the order, and a
+		// shopper checking out in a second tab has moved the cart on. Model that by changing the
+		// cart after the order was built from it, so the hashes no longer agree.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) {
+				$context->order->payment_complete();
+				WC()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			998
+		);
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertFalse( WC()->cart->is_empty(), 'A cart that no longer matches the order must survive recovery.' );
+	}
+
+	/**
+	 * @testdox A failure raised after the gateway has run is recovered too.
+	 */
+	public function test_failure_raised_after_the_gateway_ran_is_recovered() {
+		// Priority 1000 runs after Legacy::process_legacy_payment (999), so BACS has really
+		// processed the payment and moved the order on before this throws.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () {
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			1000
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A failure after the gateway ran must not be reported as a failed checkout: ' . print_r( $response->get_data(), true )
+		);
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+		$this->assertFalse( $orders[0]->needs_payment(), 'BACS moved the order on, so it must not be left awaiting payment.' );
+	}
 }

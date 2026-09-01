@@ -183,9 +183,14 @@ class Checkout extends AbstractCartRoute {
 
 			// If we encountered an exception, free up stock and release held coupons. An order that
 			// already took payment keeps both: its stock is committed and its coupons are spent.
-			if ( $this->order && $this->order->needs_payment() ) {
-				wc_release_stock_for_order( $this->order );
-				wc_release_coupons_for_order( $this->order );
+			// Re-read the order first, since a gateway that advanced it may have done so on its own
+			// instance, leaving the one held here reporting a stale status.
+			$order = $this->order ? wc_get_order( $this->order->get_id() ) : null;
+			$order = $order instanceof \WC_Order ? $order : $this->order;
+
+			if ( $order && $order->needs_payment() ) {
+				wc_release_stock_for_order( $order );
+				wc_release_coupons_for_order( $order );
 			}
 
 			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {

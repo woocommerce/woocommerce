@@ -175,6 +175,10 @@ trait CheckoutTrait {
 	 * longer needs payment has been moved on by the gateway. Statuses that represent an
 	 * order going nowhere are excluded, since they also stop needing payment.
 	 *
+	 * This trusts the status the gateway persisted, not the payment processor. A gateway that
+	 * advances the order without charging is already reporting a successful payment by every other
+	 * measure, so this reads the same signal the rest of the checkout does.
+	 *
 	 * @param \WC_Order $order Order object.
 	 * @return bool
 	 */
@@ -214,10 +218,15 @@ trait CheckoutTrait {
 			sprintf(
 				/* translators: %s: the error that was raised after payment was taken. */
 				__( 'Checkout could not be completed after payment was taken: %s', 'woocommerce' ),
-				$error->getMessage()
+				wp_strip_all_tags( $error->getMessage() )
 			)
 		);
 
+		/*
+		 * Payment was taken, so the order confirmation is where the shopper belongs. Any redirect a
+		 * gateway set before it threw described work still to be done (a hosted page, a 3DS step),
+		 * which no longer applies.
+		 */
 		$payment_result->set_status( 'success' );
 		$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
 
@@ -225,8 +234,13 @@ trait CheckoutTrait {
 		 * The gateway did not reach the point where it empties the cart, so do it here. Without
 		 * this the shopper lands on the confirmation page with the order still in their cart, and
 		 * can place it a second time.
+		 *
+		 * Only when the cart is still the one this order was built from. Pay-for-order goes through
+		 * the same trait with a cart that has nothing to do with the order, and a shopper checking
+		 * out in a second tab has moved the cart on. Same guard core uses in wc_clear_cart_after_payment()
+		 * and in the offline gateways.
 		 */
-		if ( WC()->cart ) {
+		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
 			WC()->cart->empty_cart();
 		}
 	}
