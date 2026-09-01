@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Api\Infrastructure;
 
 use Automattic\WooCommerce\Api\Infrastructure\QueryInfoExtractor;
+use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\CountingNodeList;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\FieldNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\FragmentDefinitionNode;
@@ -190,5 +191,115 @@ class QueryInfoExtractorTest extends WC_Unit_Test_Case {
 		$tree = QueryInfoExtractor::extract_from_info( $info, array() );
 
 		$this->assertArrayNotHasKey( '__args', $tree );
+	}
+
+	// The enable above closes the ResolveInfo block only; restore the file-level suppression for the AST properties used below.
+	// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+	/**
+	 * @testdox extract expands each named fragment once, so a document whose fragments spread each other twice is processed in linear work.
+	 */
+	public function test_extract_expands_duplicate_fragment_spreads_once_per_fragment(): void {
+		// Each fragment spreads the next one twice.
+		$fragment_count = 40;
+		$source         = "{ product { ...F0 } }\n";
+		for ( $i = 0; $i < $fragment_count - 1; $i++ ) {
+			$next    = $i + 1;
+			$source .= "fragment F{$i} on Product { ...F{$next} ...F{$next} }\n";
+		}
+		$source .= 'fragment F' . ( $fragment_count - 1 ) . " on Product { id name }\n";
+
+		[ $field, $fragments ] = $this->parse_top_field( $source );
+		foreach ( $fragments as $fragment ) {
+			CountingNodeList::instrument( $fragment->selectionSet );
+		}
+		CountingNodeList::reset();
+
+		$tree = QueryInfoExtractor::extract( $field->selectionSet, array(), $fragments );
+
+		// Each fragment's selections are iterated exactly once, rather than once per spread.
+		$this->assertSame( $fragment_count, CountingNodeList::$iterations );
+		$this->assertSame(
+			array(
+				'id'   => true,
+				'name' => true,
+			),
+			$tree
+		);
+	}
+
+	/**
+	 * @testdox extract yields the same tree for repeated spreads of a memoized fragment as for a single spread.
+	 */
+	public function test_extract_repeated_spreads_of_the_same_fragment_are_idempotent(): void {
+		[ $field, $fragments ] = $this->parse_top_field(
+			'{ root { product { id ...Details } ...Extra ...Extra } } '
+			. 'fragment Details on Product { name price { amount } } '
+			. 'fragment Extra on Root { product { price { currency } } other(id: 3) { id } }'
+		);
+
+		$tree = QueryInfoExtractor::extract( $field->selectionSet, array(), $fragments );
+
+		$this->assertSame(
+			array(
+				'product' => array(
+					'id'    => true,
+					'name'  => true,
+					'price' => array(
+						'amount'   => true,
+						'currency' => true,
+					),
+				),
+				'other'   => array(
+					'__args' => array( 'id' => 3 ),
+					'id'     => true,
+				),
+			),
+			$tree
+		);
+	}
+
+	/**
+	 * @testdox extract expands the same fragment under every parent it is spread in.
+	 */
+	public function test_extract_expands_the_same_fragment_under_different_parents(): void {
+		[ $field, $fragments ] = $this->parse_top_field( '{ root { a { ...F } b { ...F } } } fragment F on Thing { x y }' );
+
+		$tree = QueryInfoExtractor::extract( $field->selectionSet, array(), $fragments );
+
+		$this->assertSame(
+			array(
+				'a' => array(
+					'x' => true,
+					'y' => true,
+				),
+				'b' => array(
+					'x' => true,
+					'y' => true,
+				),
+			),
+			$tree
+		);
+	}
+
+	/**
+	 * @testdox extract terminates on a fragment cycle instead of recursing forever.
+	 */
+	public function test_extract_terminates_on_fragment_cycles(): void {
+		[ $field, $fragments ] = $this->parse_top_field( '{ root { ...A } } fragment A on Root { a ...B } fragment B on Root { b ...A }' );
+
+		$tree = QueryInfoExtractor::extract( $field->selectionSet, array(), $fragments );
+
+		$this->assertArrayHasKey( 'a', $tree );
+		$this->assertArrayHasKey( 'b', $tree );
+	}
+
+	/**
+	 * @testdox extract ignores spreads of undefined fragments.
+	 */
+	public function test_extract_ignores_undefined_fragments(): void {
+		[ $field ] = $this->parse_top_field( '{ root { a ...Missing } }' );
+
+		$this->assertSame( array( 'a' => true ), QueryInfoExtractor::extract( $field->selectionSet, array() ) );
 	}
 }
