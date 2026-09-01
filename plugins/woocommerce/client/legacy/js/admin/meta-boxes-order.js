@@ -1379,7 +1379,28 @@ jQuery( function ( $ ) {
 					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				} );
 
+				results.on( 'keydown', 'input[type="radio"][name="add_order_tax"]', function( event ) {
+					wc_meta_boxes_order_items.backbone.handle_tax_rate_result_tab_navigation( modal, event );
+				} );
+
 				load_tax_rates( 1 );
+			},
+
+			handle_tax_rate_result_tab_navigation: function( modal, event ) {
+				if ( 9 !== event.which || event.altKey || event.ctrlKey || event.metaKey ) {
+					return;
+				}
+
+				var radios = modal[ 0 ].querySelectorAll( 'input[type="radio"][name="add_order_tax"]' ),
+					current_index = Array.prototype.indexOf.call( radios, event.target ),
+					next_index = current_index + ( event.shiftKey ? -1 : 1 );
+
+				if ( -1 === current_index || next_index < 0 || next_index >= radios.length ) {
+					return;
+				}
+
+				event.preventDefault();
+				radios[ next_index ].focus();
 			},
 
 			search_tax_rates: function( modal, page, is_search ) {
