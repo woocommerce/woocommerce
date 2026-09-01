@@ -139,9 +139,30 @@ class Status extends AbstractOrderConfirmationBlock {
 				) . '</p>';
 				break;
 			case 'failed':
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-				$order_received_text = apply_filters( 'woocommerce_thankyou_order_received_text', esc_html__( 'Your order cannot be processed as the originating bank/merchant has declined your transaction. Please attempt your purchase again.', 'woocommerce' ), null );
-				$actions             = '<a href="' . esc_url( $order->get_checkout_payment_url() ) . '" class="button">' . esc_html__( 'Try again', 'woocommerce' ) . '</a> ';
+				$default_order_failed_text = esc_html__( 'Your order cannot be processed as the originating bank/merchant has declined your transaction. Please attempt your purchase again.', 'woocommerce' );
+
+				/**
+				 * Filters the message shown when an order has failed.
+				 *
+				 * @param string    $message The failed order message.
+				 * @param \WC_Order $order   The failed order.
+				 *
+				 * @since 11.2.0
+				 */
+				$order_failed_text = apply_filters( 'woocommerce_thankyou_order_failed_text', $default_order_failed_text, $order );
+				$order_failed_text = is_string( $order_failed_text ) ? $order_failed_text : $default_order_failed_text;
+
+				/**
+				 * Filters the message shown after checkout is complete.
+				 *
+				 * @param string $message The message, including failure-specific customization.
+				 * @param null   $order   Null to preserve existing failed-order callback behavior.
+				 *
+				 * @since 2.2.0
+				 */
+				$filtered_order_failed_text = apply_filters( 'woocommerce_thankyou_order_received_text', $order_failed_text, null );
+				$order_failed_text          = is_string( $filtered_order_failed_text ) ? $filtered_order_failed_text : $order_failed_text;
+				$actions                    = '<a href="' . esc_url( $order->get_checkout_payment_url() ) . '" class="button">' . esc_html__( 'Try again', 'woocommerce' ) . '</a> ';
 
 				if ( wc_get_page_permalink( 'myaccount' ) ) {
 					$actions .= '<a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="button">' . esc_html__( 'My account', 'woocommerce' ) . '</a> ';
@@ -155,7 +176,7 @@ class Status extends AbstractOrderConfirmationBlock {
 					)
 				) . '</h1>';
 				$content .= '
-				<p>' . $order_received_text . '</p>
+				<p>' . wp_kses_post( $order_failed_text ) . '</p>
 				<p class="wc-block-order-confirmation-status__actions">' . $actions . '</p>
 			';
 				break;
