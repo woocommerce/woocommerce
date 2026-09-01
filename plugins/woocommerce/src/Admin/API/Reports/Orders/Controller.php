@@ -77,6 +77,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['attribute_is_not']    = (array) $request['attribute_is_not'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
+		$args['free_orders'] = $request['free_orders'];
+
 		return $args;
 	}
 
@@ -468,7 +470,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'products'        => __( 'Product(s)', 'woocommerce' ),
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
-			'net_total' 	  => __( 'Net Sales', 'woocommerce' ),
+			'net_total'       => __( 'Net Sales', 'woocommerce' ),
 			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
@@ -501,7 +503,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total' 	  => $item['net_total'],
+			'net_total'       => $item['net_total'],
 			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 

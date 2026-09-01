@@ -161,6 +161,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		$this->add_from_sql_params( $query_args, $order_status_filter );
 
+		$free_orders_filter = $this->get_free_orders_subquery( $query_args );
+		if ( $free_orders_filter ) {
+			$this->subquery->add_sql_clause( 'where', "AND ( {$free_orders_filter} )" );
+		}
+
 		$this->subquery->add_sql_clause( 'where', "AND itemmeta_rate_id.meta_value = {$order_tax_lookup_table}.tax_rate_id" );
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );

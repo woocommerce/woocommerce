@@ -94,9 +94,15 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
+		$free_orders_filter  = $this->get_free_orders_subquery( $query_args );
+		if ( $order_status_filter || $free_orders_filter ) {
+			$products_from_clause .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+		}
 		if ( $order_status_filter ) {
-			$products_from_clause  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$products_where_clause .= " AND ( {$order_status_filter} )";
+		}
+		if ( $free_orders_filter ) {
+			$products_where_clause .= " AND ( {$free_orders_filter} )";
 		}
 
 		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
