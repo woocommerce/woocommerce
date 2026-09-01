@@ -192,8 +192,13 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Checks whether WooCommerce.com flagged this update to be installed automatically,
-	 * regardless of the merchant's per-plugin or per-theme auto-update setting.
+	 * Checks whether WooCommerce.com flagged this update to be installed automatically.
+	 *
+	 * Uses core's own `autoupdate` flag, the same one api.wordpress.org sets on WordPress.org
+	 * plugins, so these updates follow the same path through WP_Automatic_Updater::should_update().
+	 * The flag overrides the per-item setting and the site-wide plugins_auto_update_enabled and
+	 * themes_auto_update_enabled switches. AUTOMATIC_UPDATER_DISABLED, disable_autoupdate and the
+	 * auto_update_plugin and auto_update_theme filters still apply.
 	 *
 	 * The package checks are required: forcing an update that cannot be installed, either
 	 * because no package was supplied or because the subscription expired, only produces a
