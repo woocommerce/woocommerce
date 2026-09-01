@@ -3262,4 +3262,140 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 	}
+
+
+	/**
+	 * Adds a payment participant that takes payment and then throws, simulating a
+	 * post-payment integration (transactional email, CRM, fulfilment) failing after
+	 * the money has already changed hands.
+	 *
+	 * Priority 998 runs before Legacy::process_legacy_payment (999), so the cart is
+	 * left populated exactly as it is when a gateway dies part-way through.
+	 */
+	private function fail_after_payment_is_taken(): void {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) {
+				$context->order->payment_complete();
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			998
+		);
+	}
+
+	/**
+	 * Re-registers the checkout route so the next dispatch behaves like a separate
+	 * HTTP request. Without this the route object, and the order it is holding, is
+	 * carried over from the previous dispatch.
+	 */
+	private function simulate_fresh_request(): void {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
+	}
+
+	/**
+	 * Builds a valid place-order request for the seeded cart.
+	 */
+	private function build_checkout_post_request(): \WP_REST_Request {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		return $request;
+	}
+
+	/**
+	 * @testdox A failure raised after the gateway took payment is not reported to the shopper as a failed order.
+	 */
+	public function test_failure_after_payment_is_taken_is_not_reported_as_a_failed_order() {
+		$this->fail_after_payment_is_taken();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A failure after payment was taken must not be reported as a failed checkout: ' . print_r( $response->get_data(), true )
+		);
+	}
+
+	/**
+	 * @testdox An order that took payment is not left awaiting payment when a later step fails.
+	 */
+	public function test_failure_after_payment_is_taken_leaves_the_order_paid() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist after a single place-order attempt.' );
+		$this->assertFalse( $orders[0]->needs_payment(), 'The order took payment, so it must not be left awaiting payment.' );
+	}
+
+	/**
+	 * @testdox Retrying after a failure raised post-payment does not place a duplicate paid order.
+	 */
+	public function test_retry_after_failure_post_payment_does_not_duplicate_the_order() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$order_ids_after_first_attempt = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->simulate_fresh_request();
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			$order_ids_after_first_attempt,
+			$order_ids_after_retry,
+			'Retrying after a post-payment failure must not create a second paid order.'
+		);
+	}
 }
