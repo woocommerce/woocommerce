@@ -283,7 +283,10 @@ class CartController {
 			);
 		}
 
-		if ( ! $product->is_in_stock() ) {
+		if (
+			! $product->is_in_stock() ||
+				( $product->managing_stock() && ! $product->backorders_allowed() && $product->get_stock_quantity() <= abs( (float) get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) )
+		) {
 			throw new RouteException(
 				'woocommerce_rest_product_out_of_stock',
 				sprintf(
@@ -692,7 +695,10 @@ class CartController {
 			);
 		}
 
-		if ( ! $product->is_in_stock() ) {
+		if (
+			! $product->is_in_stock() ||
+				( $product->managing_stock() && ! $product->backorders_allowed() && $product->get_stock_quantity() <= abs( (float) get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) )
+		) {
 			throw new OutOfStockException(
 				'woocommerce_rest_product_out_of_stock',
 				$product->get_name()
