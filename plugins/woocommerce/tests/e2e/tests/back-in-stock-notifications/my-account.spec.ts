@@ -1,54 +1,70 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
+import { expect, request, tags } from '../../fixtures/fixtures';
 import {
-	expect,
-	request,
-	tags,
-	test as baseTest,
-} from '../../fixtures/fixtures';
-import { CUSTOMER_STATE_PATH } from '../../playwright.config';
-import {
-	BIS_OPTIONS,
 	createOutOfStockProduct,
+	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
+	test,
 } from '../../utils/back-in-stock-notifications';
-import { deleteOption } from '../../utils/options';
+import { logInFromMyAccount } from '../../utils/login';
 
-const test = baseTest.extend( {
-	product: async ( { restApi }, use ) => {
-		const product = await createOutOfStockProduct( restApi, {
-			namePrefix: 'BIS MyAccount',
-		} );
-		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
-		await use( product );
-		await product.cleanup();
-	},
-} );
+const MY_ACCOUNT_ENDPOINT = 'my-account/stock-notifications/';
+const TABLE = '.woocommerce-customer-stock-notifications-table';
+
+/**
+ * A customer account owned by a single test.
+ *
+ * The suite's shared customer accumulates sign-ups as the specs run, so row
+ * counts and the empty state would depend on execution order. Each test gets a
+ * throwaway account instead, and deletes it afterwards.
+ */
+type TestCustomer = {
+	id: number;
+	username: string;
+	password: string;
+};
+
+/**
+ * Create a customer account for one test to sign in as.
+ *
+ * @param {Object} restApi Authenticated REST client from the `restApi` fixture.
+ */
+async function createTestCustomer( restApi ): Promise< TestCustomer > {
+	const suffix = `${ Date.now() }-${ Math.floor( Math.random() * 1e6 ) }`;
+	const username = `bis-my-account-${ suffix }`;
+	const password = 'password';
+
+	const response = await restApi.post< { id: number } >(
+		`${ WC_API_PATH }/customers`,
+		{
+			email: `${ username }@woocommercecoree2etestsuite.com`,
+			username,
+			password,
+		}
+	);
+
+	return { id: response.data.id, username, password };
+}
 
 test.describe(
 	'Back in Stock Notifications — My Account',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.afterEach( async ( { baseURL } ) => {
-			for ( const option of Object.values( BIS_OPTIONS ) ) {
-				await deleteOption( request, baseURL!, option );
-			}
+		test.afterAll( async ( { baseURL } ) => {
+			await resetBISOptions( request, baseURL! );
 		} );
 
 		test.describe( 'Logged-in customer with signups', () => {
-			test.use( { storageState: CUSTOMER_STATE_PATH } );
-
-			test.beforeEach( async ( { baseURL } ) => {
-				// Single opt-in so the signup lands as "active" immediately —
-				// gives us one active row. The second row is created with
-				// double opt-in on, so it stays "pending".
-				await setBISOptions( request, baseURL!, {
-					allowSignups: true,
-					doubleOptIn: false,
-				} );
-			} );
+			// Signed out, so each test can sign in as the account it owns.
+			test.use( { storageState: { cookies: [], origins: [] } } );
 
 			test( 'renders a pending and an active notification in the tab', async ( {
 				page,
@@ -56,31 +72,42 @@ test.describe(
 				product,
 				restApi,
 			} ) => {
-				// Row 1: signup while double opt-in is off → active.
-				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
-				await expect(
-					page.getByText(
-						/You have successfully signed up|You have already joined this waitlist/i
-					)
-				).toBeVisible();
-
-				// Row 2: flip double opt-in on, create a second product, sign
-				// up again → pending.
+				const customer = await createTestCustomer( restApi );
+				// Single opt-in so the first signup lands as "active" straight away.
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
-					doubleOptIn: true,
+					doubleOptIn: false,
 				} );
-				const secondProduct = await createOutOfStockProduct( restApi, {
-					namePrefix: 'BIS MyAccount Pending',
-				} );
+
+				const secondProduct = await createOutOfStockProduct( restApi );
+
 				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
+
+					// Row 1: signup while double opt-in is off → active.
+					await page.goto( product.permalink );
+					await signUpOnProductPage( page );
+					await expect(
+						page.getByText(
+							/You have successfully signed up|You have already joined this waitlist/i
+						)
+					).toBeVisible();
+
+					// Row 2: flip double opt-in on and sign up again → pending.
+					await setBISOptions( request, baseURL!, {
+						allowSignups: true,
+						doubleOptIn: true,
+					} );
 					await page.goto( secondProduct.permalink );
 					await signUpOnProductPage( page );
 
-					await page.goto( 'my-account/stock-notifications/' );
+					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-					// The page renders the expected heading.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Stock notifications',
@@ -88,9 +115,7 @@ test.describe(
 					).toBeVisible();
 
 					// Both products appear as rows.
-					const table = page.locator(
-						'.woocommerce-customer-stock-notifications-table'
-					);
+					const table = page.locator( TABLE );
 					await expect( table ).toBeVisible();
 					await expect(
 						table.getByRole( 'link', {
@@ -108,44 +133,52 @@ test.describe(
 						2
 					);
 				} finally {
-					await secondProduct.cleanup();
+					await restApi.delete(
+						`${ WC_API_PATH }/products/${ secondProduct.id }`,
+						{ force: true }
+					);
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
 				}
 			} );
 
 			test( 'cancel click removes the row from the My Account list', async ( {
 				page,
 				baseURL,
+				product,
 				restApi,
 			} ) => {
-				// Arrange: create a product + one pending signup for the
-				// logged-in customer.
+				const customer = await createTestCustomer( restApi );
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: true,
 				} );
-				const pendingProduct = await createOutOfStockProduct( restApi, {
-					namePrefix: 'BIS MyAccount Cancel',
-				} );
+
 				try {
-					await page.goto( pendingProduct.permalink );
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
+
+					await page.goto( product.permalink );
 					await signUpOnProductPage( page );
 
-					await page.goto( 'my-account/stock-notifications/' );
+					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-					const row = page
-						.locator(
-							'.woocommerce-customer-stock-notifications-table tbody tr'
-						)
-						.filter( {
-							has: page.getByRole( 'link', {
-								name: new RegExp( pendingProduct.name, 'i' ),
-							} ),
-						} );
+					const row = page.locator( `${ TABLE } tbody tr` ).filter( {
+						has: page.getByRole( 'link', {
+							name: new RegExp( product.name, 'i' ),
+						} ),
+					} );
 					await expect( row ).toBeVisible();
 
 					await row.getByRole( 'button', { name: 'Cancel' } ).click();
 
-					// The refresh after the POST lands us back on the same tab.
+					// The redirect after the POST lands us back on the same tab.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Stock notifications',
@@ -159,46 +192,62 @@ test.describe(
 					await expect(
 						page.getByText(
 							new RegExp(
-								`back in stock notification.*${ pendingProduct.name }.*cancelled`,
+								`back in stock notification.*${ product.name }.*cancelled`,
 								'i'
 							)
 						)
 					).toBeVisible();
 				} finally {
-					await pendingProduct.cleanup();
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
 				}
 			} );
 		} );
 
 		test.describe( 'Logged-in customer with no signups', () => {
-			test.use( { storageState: CUSTOMER_STATE_PATH } );
+			test.use( { storageState: { cookies: [], origins: [] } } );
 
 			test( 'renders the empty state and a catalog link', async ( {
 				page,
+				restApi,
 			} ) => {
-				await page.goto( 'my-account/stock-notifications/' );
+				const customer = await createTestCustomer( restApi );
 
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Stock notifications',
-					} )
-				).toBeVisible();
+				try {
+					await page.goto( 'my-account/' );
+					await logInFromMyAccount(
+						page,
+						customer.username,
+						customer.password
+					);
 
-				await expect(
-					page.getByText(
-						"You haven't signed up for any back-in-stock notifications yet."
-					)
-				).toBeVisible();
+					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-				await expect(
-					page.getByRole( 'link', { name: 'Browse products' } )
-				).toBeVisible();
+					await expect(
+						page.getByRole( 'heading', {
+							name: 'Stock notifications',
+						} )
+					).toBeVisible();
 
-				await expect(
-					page.locator(
-						'.woocommerce-customer-stock-notifications-table'
-					)
-				).toHaveCount( 0 );
+					await expect(
+						page.getByText(
+							"You haven't signed up for any back-in-stock notifications yet."
+						)
+					).toBeVisible();
+
+					await expect(
+						page.getByRole( 'link', { name: 'Browse products' } )
+					).toBeVisible();
+
+					await expect( page.locator( TABLE ) ).toHaveCount( 0 );
+				} finally {
+					await restApi.delete(
+						`${ WC_API_PATH }/customers/${ customer.id }`,
+						{ force: true }
+					);
+				}
 			} );
 		} );
 
@@ -206,7 +255,7 @@ test.describe(
 			test.use( { storageState: { cookies: [], origins: [] } } );
 
 			test( 'is redirected to the login form', async ( { page } ) => {
-				await page.goto( 'my-account/stock-notifications/' );
+				await page.goto( MY_ACCOUNT_ENDPOINT );
 
 				// Standard WC behaviour: unauthenticated account endpoints show
 				// the login form on the My Account page.
