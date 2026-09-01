@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Unify postcode validation rules used by the server and Checkout blocks.
+Validate postcodes against the same generated rule set on the server, in the Checkout block, and in the shortcode checkout, and cover every country the source package lists.
