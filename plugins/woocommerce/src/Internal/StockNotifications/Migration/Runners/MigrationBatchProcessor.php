@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationRun;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\MigratorInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Requirements;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
@@ -20,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Drives the whole legacy Back In Stock Notifications migration as a single
- * `BatchProcessorInterface`, across its batched sections.
+ * `BatchProcessorInterface`, across two batched sections: notifications, then product-meta.
  *
  * `get_next_batch_to_process()` serves the first section with pending work and only
  * moves on once that section is drained; a returned batch never spans two sections.
@@ -83,6 +84,15 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private array $counted_on_drain = array();
 
 	/**
+	 * Known-losses counts this instance has already added to the run's running total,
+	 * keyed by loss name. Only the difference against these is ever added again, so a
+	 * process that pumps several batches does not count the same skip twice.
+	 *
+	 * @var array<string,int>
+	 */
+	private array $losses_contributed = array();
+
+	/**
 	 * Requirement checks re-run on every batch, not just at run start.
 	 *
 	 * @var Requirements
@@ -90,7 +100,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private Requirements $requirements;
 
 	/**
-	 * Outcome collector shared by this run's migrators.
+	 * Outcome collector shared by this run's migrators, kept so the notifications
+	 * section's known losses can be cached when it drains.
 	 *
 	 * @var Reporter
 	 */
@@ -113,7 +124,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 
 	/**
 	 * The section migrators, keyed by `get_slug()` and, since PHP preserves insertion order
-	 * on associative arrays, held in the order the whole class runs them.
+	 * on associative arrays, ordered notifications then product-meta. That order is the
+	 * section order the whole class runs on.
 	 *
 	 * @var array<string, MigratorInterface>
 	 */
@@ -215,8 +227,9 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * Display only; it never drives the batch loop. The counts are computed at run start
 	 * and on section drain, cached in `wc_bis_migration_state`, and only read here - never
 	 * a live query, so a Tools page load never triggers one. A section whose count has
-	 * never been cached contributes zero. A section that scans by keyset caches rows left
-	 * to visit, not rows left to migrate: its scan does not know which of them are candidates.
+	 * never been cached contributes zero. For the notifications section the cached number
+	 * is rows left to visit, not rows left to migrate: its scan does not know which of
+	 * them are candidates.
 	 *
 	 * @return int Number of items pending processing.
 	 */
@@ -356,6 +369,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 				$this->state->refresh_lock();
 				$this->park_if_stuck( $slug, $raw_ids, $outcomes );
 				$this->store_cursor( $slug, $raw_ids );
+
+				if ( $migrator instanceof NotificationsMigrator ) {
+					$this->accumulate_losses( $migrator );
+				}
 			}
 
 			// The batch landed, so whatever the last one failed on is no longer the run's state.
@@ -459,6 +476,10 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 * refreshed the section is not counted again by this instance, so the sections a run
 	 * has already passed cost nothing on every later batch.
 	 *
+	 * The notifications section also caches its known losses here: they are what this run
+	 * accumulated per row, so they are only complete once its scan has reached the end of
+	 * the legacy table, which is exactly this point.
+	 *
 	 * @param string            $slug     Section slug.
 	 * @param MigratorInterface $migrator Section migrator.
 	 * @return void
@@ -471,6 +492,37 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$this->counted_on_drain[ $slug ] = true;
 
 		$this->state->set_count( $slug, $migrator->count_remaining( $this->state->get_cursor( $slug ) ) );
+	}
+
+	/**
+	 * Add what this instance has newly skipped to the run's running loss total.
+	 *
+	 * Called as each batch lands, not on drain: a background run is a fresh PHP request per
+	 * batch, so a Reporter read at drain time belongs to a request that has processed
+	 * nothing and reports zeros. Only the difference against what this instance has already
+	 * contributed is added, so the CLI — which pumps many batches through one Reporter —
+	 * does not count the same skip on every batch.
+	 *
+	 * @param NotificationsMigrator $migrator The section whose losses these are.
+	 * @return void
+	 */
+	private function accumulate_losses( NotificationsMigrator $migrator ): void {
+		$current = $this->reporter->with_run_losses( $migrator );
+		$deltas  = array();
+
+		foreach ( $current as $key => $value ) {
+			$delta = (int) $value - (int) ( $this->losses_contributed[ $key ] ?? 0 );
+
+			if ( $delta > 0 ) {
+				$deltas[ $key ] = $delta;
+			}
+		}
+
+		$this->losses_contributed = $current;
+
+		if ( ! empty( $deltas ) ) {
+			$this->state->add_losses( $deltas );
+		}
 	}
 
 	/**

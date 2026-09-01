@@ -56,8 +56,15 @@ class Cli {
 	private const DB_VERSION_OPTION = Constants::DB_VERSION_OPTION;
 
 	/**
+	 * Legacy meta key recording a permanent per-row failure. Cleared by `--retry-failed`.
+	 *
+	 * @var string
+	 */
+	private const LEGACY_FAILED_META_KEY = Constants::LEGACY_FAILED_META_KEY;
+
+	/**
 	 * Product meta key marking a product the product-meta section can never settle.
-	 * Cleared by `--retry-failed`.
+	 * Cleared by `--retry-failed`, matching LEGACY_FAILED_META_KEY for notifications.
 	 *
 	 * @var string
 	 */
@@ -233,8 +240,23 @@ class Cli {
 			WP_CLI::log( 'CLI lock held: no' );
 		}
 
+		// The legacy count reads a legacy table, so it is only available while those tables
+		// stand; the product-meta count reads postmeta and is always available.
+		$failed_notifications = is_wp_error( $check ) && 'legacy_tables_missing' === $check->get_error_code()
+			? 0
+			: $this->count_failed_rows();
+
+		$failed_products = $this->count_failed_products();
+
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-		WP_CLI::log( sprintf( 'Rows marked permanently failed: %d (product-meta)', $this->count_failed_products() ) );
+		WP_CLI::log(
+			sprintf(
+				'Rows marked permanently failed: %d (notifications: %d, product-meta: %d)',
+				$failed_notifications + $failed_products,
+				$failed_notifications,
+				$failed_products
+			)
+		);
 
 		// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 		WP_CLI::success( 'Status reported.' );
@@ -243,8 +265,8 @@ class Cli {
 	/**
 	 * Run the migration.
 	 *
-	 * Drives the requested sections, in their fixed order (never reordered by `--section`),
-	 * each from the cursor the previous run left behind. A
+	 * Drives the requested sections, in the fixed order (notifications, then product-meta,
+	 * never reordered by `--section`), each from the cursor the previous run left behind. A
 	 * section is drained once its cursor reaches the end of what it has to visit.
 	 *
 	 * Settings migrate on every run, whatever `--section` asked for: they are a fixed set of
@@ -261,7 +283,7 @@ class Cli {
 	 * ## OPTIONS
 	 *
 	 * [--section=<sections>]
-	 * : Comma-separated sections to run. Defaults to every section.
+	 * : Comma-separated sections to run. Defaults to both: notifications, product-meta.
 	 *
 	 * [--batch-size=<size>]
 	 * : Maximum rows fetched per batch. Default 500.
@@ -270,12 +292,12 @@ class Cli {
 	 * : Compute and report everything without writing anything.
 	 *
 	 * [--force]
-	 * : CLI only, requires --yes. Resets every cursor and unparks every section, so a run
-	 * revisits rows it has already been past. Does not skip Requirements::check() and does
-	 * not change any status mapping.
+	 * : CLI only, requires --yes. Overrides the is_queued='on' pre-flight refusal, so a run
+	 * can start while the legacy extension still has rows queued for its own sender. Does not
+	 * skip Requirements::check() and does not change any status mapping.
 	 *
 	 * [--retry-failed]
-	 * : Clear the permanent-failure marker on failed rows so they are retried. Ignored under
+	 * : Clear the permanent-failure marker on legacy rows so they are retried. Ignored under
 	 * --dry-run.
 	 *
 	 * [--max-batches=<n>]
@@ -287,7 +309,7 @@ class Cli {
 	 * ## EXAMPLES
 	 *
 	 *     wp wc bis-migrate run
-	 *     wp wc bis-migrate run --section=product-meta --dry-run
+	 *     wp wc bis-migrate run --section=notifications --dry-run
 	 *     wp wc bis-migrate run --force --yes
 	 *
 	 * @param array $args       Positional arguments (unused).
@@ -326,6 +348,22 @@ class Cli {
 		$batch_size   = isset( $assoc_args['batch-size'] ) ? max( 1, (int) $assoc_args['batch-size'] ) : self::DEFAULT_BATCH_SIZE;
 		$max_batches  = isset( $assoc_args['max-batches'] ) ? max( 1, (int) $assoc_args['max-batches'] ) : null;
 
+		if ( in_array( 'notifications', $sections, true ) ) {
+			$queued = $this->requirements()->count_legacy_queued_rows();
+
+			if ( $queued > 0 && ! $force ) {
+				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+				WP_CLI::error(
+					sprintf(
+						'Refusing to start: %d legacy row(s) are still queued (is_queued=\'on\') by the active ' .
+						'Back In Stock Notifications extension. Let the legacy queue drain, or pass --force --yes to override.',
+						$queued
+					)
+				);
+				return;
+			}
+		}
+
 		if ( ! $dry_run ) {
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 			WP_CLI::confirm( 'This will write to the database. Continue?', $assoc_args );
@@ -350,6 +388,10 @@ class Cli {
 			if ( $retry_failed && ! $dry_run ) {
 				$cleared = 0;
 
+				if ( in_array( 'notifications', $sections, true ) ) {
+					$cleared += $this->clear_failed_markers();
+				}
+
 				if ( in_array( 'product-meta', $sections, true ) ) {
 					$cleared += $this->clear_product_meta_failure_markers();
 				}
@@ -371,9 +413,10 @@ class Cli {
 				$run_state->unpark_all();
 			}
 
-			$reporter  = $run->get_reporter();
-			$migrators = array_intersect_key( $run->build_migrators( $dry_run ), array_flip( $sections ) );
-			$writer    = $run->build_writer( $dry_run );
+			$reporter               = $run->get_reporter();
+			$notifications_migrator = $run->get_notifications_migrator();
+			$migrators              = array_intersect_key( $run->build_migrators( $dry_run ), array_flip( $sections ) );
+			$writer                 = $run->build_writer( $dry_run );
 
 			// Settings are not a section: the processor writes them on every batch, whatever
 			// `--section` asked for, since there is nothing about them to scan or restrict.
@@ -394,6 +437,12 @@ class Cli {
 				$remaining = $migrators[ $slug ]->count_remaining( $run_state->get_cursor( $slug ) );
 				$run_state->set_count( $slug, $remaining );
 				$total_estimate += $remaining;
+			}
+
+			if ( in_array( 'notifications', $sections, true ) ) {
+				// The denominator the Tools screen shows progress against: the whole legacy
+				// table, whatever the cursor has already been past.
+				$run_state->set_total( 'notifications', $notifications_migrator->count_remaining() );
 			}
 
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
@@ -517,6 +566,24 @@ class Cli {
 	}
 
 	/**
+	 * Count legacy rows currently carrying the permanent-failure marker.
+	 *
+	 * @return int
+	 */
+	private function count_failed_rows(): int {
+		global $wpdb;
+
+		$table = Constants::legacy_meta();
+
+		// $table is $wpdb->prefix-based, never user input.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE meta_key = %s", self::LEGACY_FAILED_META_KEY );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+	}
+
+	/**
 	 * Print the sections the run has stopped serving, if any.
 	 *
 	 * A parked section is why a run can look idle with work still outstanding, so status has
@@ -553,6 +620,27 @@ class Cli {
 		$sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s", self::PRODUCT_META_FAILED_KEY );
 
 		return (int) $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- $sql was built with $wpdb->prepare() above.
+	}
+
+	/**
+	 * Clear the permanent-failure marker from every legacy row that carries it, re-admitting
+	 * those rows to the candidate set. Used by `--retry-failed`.
+	 *
+	 * @return int Number of marker rows removed.
+	 */
+	private function clear_failed_markers(): int {
+		global $wpdb;
+
+		$table = Constants::legacy_meta();
+
+		// $table is $wpdb->prefix-based, never user input.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare( "DELETE FROM {$table} WHERE meta_key = %s", self::LEGACY_FAILED_META_KEY );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql was built with $wpdb->prepare() above.
+
+		return false === $result ? 0 : (int) $result;
 	}
 
 	/**

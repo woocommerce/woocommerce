@@ -196,6 +196,62 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a lock left behind by a dead run should be reclaimed so the next run proceeds.
+	 */
+	public function test_a_stale_lock_is_reclaimed(): void {
+		$this->seed_notifications( 1 );
+
+		$this->state->acquire_lock( 'dead run (pid 1)' );
+		$this->age_the_lock( 2 * HOUR_IN_SECONDS );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertSame( '', MockWPCLI::$last_error_message );
+		$this->assertCount( 1, LegacyStore::get_core_rows() );
+		$this->assertNull( $this->state->get_lock(), 'The run should release the lock it reclaimed.' );
+	}
+
+	/**
+	 * @testdox legacy rows still queued by the active extension should refuse a run until --force.
+	 */
+	public function test_queued_rows_refuse_a_run_until_forced(): void {
+		$this->seed_notifications( 1 );
+
+		$this->replace_requirements_with_queued_rows( 3 );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertStringContainsString( '3 legacy row(s) are still queued', MockWPCLI::$last_error_message );
+		$this->assertSame( array(), LegacyStore::get_core_rows() );
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'force' => true,
+				'yes'   => true,
+			)
+		);
+
+		$this->assertSame( '', MockWPCLI::$last_error_message );
+		$this->assertCount( 1, LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox a plain run should migrate every eligible row, release the lock and report success.
+	 */
+	public function test_run_migrates_every_row(): void {
+		$this->seed_notifications( 3 );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertCount( 3, LegacyStore::get_core_rows() );
+		$this->assertSame( 'Run complete.', MockWPCLI::$last_success_message );
+		$this->assertNull( $this->state->get_lock() );
+		$this->assertNull( MockWPCLI::$last_halt_code );
+	}
+
+	/**
 	 * @testdox --dry-run should write nothing and still release the lock.
 	 */
 	public function test_dry_run_writes_nothing(): void {
@@ -206,6 +262,25 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
 		$this->assertSame( 'Dry run complete.', MockWPCLI::$last_success_message );
 		$this->assertNull( $this->state->get_lock() );
+	}
+
+	/**
+	 * @testdox --max-batches should bound the CLI loop.
+	 */
+	public function test_max_batches_bounds_the_loop(): void {
+		$this->seed_notifications( 6 );
+
+		$this->cli()->run(
+			array(),
+			array(
+				'section'     => 'notifications',
+				'batch-size'  => 2,
+				'max-batches' => 2,
+				'yes'         => true,
+			)
+		);
+
+		$this->assertCount( 4, LegacyStore::get_core_rows(), 'Two batches of two is where the run should stop.' );
 	}
 
 	/**
@@ -224,6 +299,61 @@ class CliTests extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), LegacyStore::get_core_rows(), 'The notifications section was not asked for.' );
 		$this->assertNull( $this->state->get_count( 'notifications' ), 'A section outside --section is never counted.' );
+	}
+
+	/**
+	 * @testdox a drained section should end the run with a zero cached count, whatever the batch size divides into.
+	 */
+	public function test_a_drained_section_caches_a_zero_count(): void {
+		// Four rows in batches of two: every batch is full, so nothing but the drain itself
+		// marks the section as finished.
+		$this->seed_notifications( 4 );
+
+		$this->cli()->run(
+			array(),
+			array(
+				'section'    => 'notifications',
+				'batch-size' => 2,
+				'yes'        => true,
+			)
+		);
+
+		$cached = $this->state->get_count( 'notifications' );
+
+		$this->assertNotNull( $cached );
+		$this->assertSame( 0, (int) $cached['count'] );
+	}
+
+	/**
+	 * @testdox --retry-failed should clear the permanent-failure marker and re-admit the row.
+	 */
+	public function test_retry_failed_re_admits_a_failed_row(): void {
+		$legacy_ids = $this->seed_notifications( 2 );
+		$failed_id  = $legacy_ids[0];
+
+		LegacyStore::add_meta( $failed_id, '_wc_bis_migration_failed', array( 'reason' => 'exception' ) );
+
+		$this->cli()->run(
+			array(),
+			array(
+				'section' => 'notifications',
+				'yes'     => true,
+			)
+		);
+		$this->assertCount( 1, LegacyStore::get_core_rows(), 'A marked row stays out of the candidate set.' );
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'section'      => 'notifications',
+				'retry-failed' => true,
+				'yes'          => true,
+			)
+		);
+
+		$this->assertCount( 2, LegacyStore::get_core_rows() );
+		$this->assertSame( array(), LegacyStore::get_legacy_meta( $failed_id, '_wc_bis_migration_failed' ) );
 	}
 
 	/**
@@ -260,6 +390,57 @@ class CliTests extends WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, LegacyStore::get_legacy_meta( $legacy_ids[0], '_wc_bis_migration_failed' ) );
+	}
+
+	/**
+	 * @testdox a run with an error-severity outcome should halt non-zero.
+	 */
+	public function test_error_severity_halts_non_zero(): void {
+		$legacy_ids = $this->seed_notifications( 2 );
+		$failing_id = $legacy_ids[1];
+
+		// Give the failing row a Core row to adopt: its marker write is the one write that
+		// happens inside the per-row try/catch, so failing it fails that row alone.
+		LegacyStore::add_core_notification(
+			array(
+				'product_id' => $this->product_id,
+				'user_email' => "shopper{$failing_id}@example.com",
+			)
+		);
+
+		$thrower = static function ( $query ) {
+			if ( false !== strpos( $query, '_wc_bis_legacy_adopted' ) ) {
+				throw new \RuntimeException( 'forced row failure' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $thrower );
+
+		try {
+			$this->cli()->run(
+				array(),
+				array(
+					'section' => 'notifications',
+					'yes'     => true,
+				)
+			);
+		} finally {
+			remove_filter( 'query', $thrower );
+		}
+
+		$this->assertSame( 1, MockWPCLI::$last_halt_code );
+		$this->assertStringContainsString( 'error-severity outcomes', MockWPCLI::$last_warning_message );
+
+		// The halt has to happen outside the try, because WP_CLI::halt() calls exit() and PHP
+		// skips `finally` on exit. A single permanently-failed row sets has_errors(), so this
+		// is an ordinary way for a run to end — and it must not wedge the lock for an hour.
+		// MockWPCLI::halt() records instead of exiting, so only an assertion catches this.
+		$this->assertFalse(
+			( new MigrationState() )->is_lock_held(),
+			'A run that halted on an error-severity outcome must still hand its lock back.'
+		);
 	}
 
 	/**
@@ -308,6 +489,31 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `--retry-failed` clears the product-meta markers as well as the legacy ones, so status
+	 * has to say how many of each a retry would put back in play. Counting only the legacy
+	 * rows leaves a product killed by a throwing third-party save hook invisible.
+	 *
+	 * @testdox status should count products marked permanently failed, not only legacy rows.
+	 */
+	public function test_status_counts_failed_products(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_wc_bis_migration_signups_failed', (string) time() );
+
+		MockWPCLI::reset();
+		$this->cli()->status( array(), array() );
+
+		$reported = '';
+
+		foreach ( MockWPCLI::$all_log_messages as $message ) {
+			if ( 0 === strpos( $message, 'Rows marked permanently failed:' ) ) {
+				$reported = $message;
+			}
+		}
+
+		$this->assertSame( 'Rows marked permanently failed: 1 (notifications: 0, product-meta: 1)', $reported );
+	}
+
+	/**
 	 * Build a command instance against the current container replacements.
 	 *
 	 * @return Cli
@@ -327,6 +533,37 @@ class CliTests extends WC_Unit_Test_Case {
 		$controller->method( 'is_enqueued' )->willReturn( $enqueued );
 
 		wc_get_container()->replace( BatchProcessingController::class, $controller );
+	}
+
+	/**
+	 * Replace the requirements check with one reporting outstanding legacy queued rows, as
+	 * only an active legacy extension can.
+	 *
+	 * @param int $count Rows to report as queued.
+	 * @return void
+	 */
+	private function replace_requirements_with_queued_rows( int $count ): void {
+		$requirements = $this->createMock( Requirements::class );
+		$requirements->method( 'check' )->willReturn( true );
+		$requirements->method( 'count_legacy_queued_rows' )->willReturn( $count );
+
+		wc_get_container()->replace( Requirements::class, $requirements );
+	}
+
+	/**
+	 * Push the current lock's acquisition time into the past.
+	 *
+	 * @param int $seconds How far back to move it.
+	 * @return void
+	 */
+	private function age_the_lock( int $seconds ): void {
+		$lock = ( new MigrationState() )->get_lock();
+
+		update_option(
+			Constants::LOCK_OPTION,
+			sprintf( '%010d|%s', time() - $seconds, $lock['owner'] ),
+			false
+		);
 	}
 
 	/**
