@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add an order-aware filter for failed order confirmation messages in classic and block renderers. `__return_false` on the legacy block filter now falls back to the default message; `__return_empty_string` remains a valid suppression value. Filtered output is restricted by `wp_kses_post()`.
+Add an order-aware filter for failed order confirmation messages in classic and block renderers.
