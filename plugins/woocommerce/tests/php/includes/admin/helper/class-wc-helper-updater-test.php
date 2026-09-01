@@ -34,6 +34,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private $mocked_request_products;
 
 	/**
+	 * Fixture theme root, when a Woo theme has been mocked.
+	 *
+	 * @var string|null
+	 */
+	private $theme_root;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -47,11 +54,42 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_transients();
+		$this->cleanup_theme_fixture();
 
 		wp_cache_delete( 'plugins', 'plugins' );
 		remove_all_filters( 'update_woo_com_subscription_details' );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Unregister and delete the fixture theme, when one was created.
+	 */
+	private function cleanup_theme_fixture() {
+		if ( null === $this->theme_root ) {
+			return;
+		}
+
+		// register_theme_directory() has no counterpart, so the fixture root is removed by hand.
+		global $wp_theme_directories;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Unregistering the fixture theme root.
+		$wp_theme_directories = array_values( array_diff( (array) $wp_theme_directories, array( $this->theme_root ) ) );
+		wp_clean_themes_cache();
+
+		$theme_dir = $this->theme_root . '/woo-test-theme';
+		foreach ( array( $theme_dir . '/style.css', $theme_dir . '/index.php' ) as $file ) {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+		}
+		foreach ( array( $theme_dir, $this->theme_root ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture in the temp directory.
+				rmdir( $dir );
+			}
+		}
+
+		$this->theme_root = null;
 	}
 
 	/**
@@ -673,6 +711,62 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A theme update item reports the PHP requirement the update-check response carries.
+	 * @testWith ["8.2"]
+	 *           [null]
+	 *
+	 * @param string|null $requires_php PHP requirement reported for the product, or null when it reports none.
+	 */
+	public function test_transient_update_themes_passes_requires_php( ?string $requires_php ): void {
+		$stylesheet = $this->mock_local_woo_theme();
+
+		$product = array(
+			'version'        => '2.0.0',
+			'url'            => 'https://woocommerce.com/products/test-theme',
+			'package'        => '',
+			'slug'           => 'woo-test-theme',
+			'upgrade_notice' => '',
+		);
+
+		if ( null !== $requires_php ) {
+			$product['requires_php'] = $requires_php;
+		}
+
+		$this->mocked_updates = array( 456 => $product );
+
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_id'  => 456,
+					'connections' => array(),
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_themes(
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertArrayHasKey( $stylesheet, $transient->response, 'The theme should have been offered an update' );
+
+		$this->assertSame(
+			$requires_php,
+			$transient->response[ $stylesheet ]['requires_php'] ?? null,
+			'The theme update item should report the PHP requirement, so WP_Automatic_Updater::should_update() can enforce it'
+		);
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
 	 *
 	 * @return string The plugin file name.
@@ -695,6 +789,33 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		);
 
 		return $filename;
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_themes() report a single Woo theme, from a fixture theme root.
+	 *
+	 * @return string The theme stylesheet.
+	 */
+	private function mock_local_woo_theme(): string {
+		$stylesheet       = 'woo-test-theme';
+		$this->theme_root = untrailingslashit( get_temp_dir() ) . '/wc-helper-updater-themes';
+
+		wp_mkdir_p( $this->theme_root . '/' . $stylesheet );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+		file_put_contents(
+			$this->theme_root . '/' . $stylesheet . '/style.css',
+			"/*\nTheme Name: Woo Test Theme\nVersion: 1.0.0\nWoo: 456:def456\n*/\n"
+		);
+
+		// WP_Theme reports a theme without an index.php as broken, and wp_get_themes() then skips it.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+		file_put_contents( $this->theme_root . '/' . $stylesheet . '/index.php', "<?php\n" );
+
+		register_theme_directory( $this->theme_root );
+		wp_clean_themes_cache();
+
+		return $stylesheet;
 	}
 
 	/**

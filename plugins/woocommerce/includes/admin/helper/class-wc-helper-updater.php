@@ -176,6 +176,10 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $theme['_product_id'] );
 
+			if ( isset( $data['requires_php'] ) ) {
+				$item['requires_php'] = $data['requires_php'];
+			}
+
 			if ( self::is_autoupdate_forced( $data, $item ) ) {
 				$item['autoupdate'] = true;
 			}
