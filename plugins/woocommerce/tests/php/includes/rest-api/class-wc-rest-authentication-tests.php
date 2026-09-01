@@ -314,8 +314,8 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'encoded slash'          => array( '/wp-json/myplugin/v1/items/a%2Fb', '/myplugin/v1/items/a/b' ),
 			'encoded ampersand'      => array( '/wp-json/myplugin/v1/items/a%26b', '/myplugin/v1/items/a&b' ),
 			'encoded multibyte'      => array( '/wp-json/myplugin/v1/items/caf%C3%A9', '/myplugin/v1/items/café' ),
-			// The normalized resolved route keeps its leading slash, but a trailing slash introduced by
-			// decoding %2F is not present in the route value we compare against here.
+			// rest_route is stored with its leading slash and trimmed before comparison, so the decoded
+			// URI route has to be trimmed too, or a trailing '%2F' leaves a slash behind.
 			'encoded trailing slash' => array( '/wp-json/myplugin/v1/items/a%2F', '/myplugin/v1/items/a' ),
 			// A '+' survives when the server fills PATH_INFO, and parse_str() reads it as a space when
 			// WordPress falls back to the raw URI. Both readings name this route.
