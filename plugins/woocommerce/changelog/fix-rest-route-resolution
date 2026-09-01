@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve REST API routes the way WordPress does when the request URI has repeated leading slashes or percent-encoded characters.
