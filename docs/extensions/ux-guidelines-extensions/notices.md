@@ -1,6 +1,7 @@
 ---
 post_title: Notices
 sidebar_label: Notices
+sidebar_position: 4
 ---
 
 # Notices

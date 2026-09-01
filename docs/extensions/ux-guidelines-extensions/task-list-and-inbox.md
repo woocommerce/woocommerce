@@ -1,6 +1,7 @@
 ---
-post_title: Task list and inbox
-sidebar_label: Task list and inbox
+post_title: Task List and Inbox
+sidebar_label: Task List and Inbox
+sidebar_position: 3
 ---
 
 # Task List and Inbox
