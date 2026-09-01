@@ -214,11 +214,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return false;
 		}
 
-		$post_id = absint( $arg );
-		if ( ! $post_id ) {
-			return false;
-		}
-
+		$post_id               = absint( $arg );
 		$post_type_to_resource = array_merge(
 			array(
 				'product'           => 'product',
