@@ -72,36 +72,37 @@ add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 ```
 
-The `POST /wp-json/woocommerce-analytics/v1/track` endpoint this enables is
-unauthenticated, so a site where the filter has never returned `true` never gets
-it. Once a site has used it the route stays registered and answers `403
-proxy_tracking_disabled` while the filter is `false`, rather than disappearing:
-pages cached while it was on still tell their visitors to post there, and a `404`
-loses those events with no signal anywhere.
+This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
+endpoint. Sites that have never enabled proxy tracking do not get it. Once
+enabled, the route stays registered and answers `403 proxy_tracking_disabled`
+while the filter is `false`, so events from pages still held in a cache fail
+visibly instead of disappearing into a `404`.
 
-Events arriving through it are treated as untrusted:
+Events arriving through it are untrusted:
 
-- Server-derived properties (store id, visitor id, IP, session, timezone and the
-  rest of `WC_Analytics_Tracking::get_reserved_property_names()`) are replaced
-  with the server's own values. `_lg`, `_dl` and `_dr` stay the client's, since
-  they describe the page the event happened on rather than the `/track` request.
+-   Server-derived properties are replaced with the server's own values. The set
+    is `WC_Analytics_Tracking::get_reserved_property_names()`, which includes
+    generic names like `url`, `device` and `timezone`. Rename event properties
+    that would collide. `_lg`, `_dl` and `_dr` stay the client's: they describe
+    the page, not the `/track` request.
+-   Input is bounded silently. Over-limit properties are dropped and the event
+    still records; events past the batch limit are not recorded at all.
 
-  The reserved set includes generic names such as `url`, `device`, `timezone`,
-  `is_guest` and `landing_page`. An event that sends one of those for its own
-  purposes has it silently replaced, so prefix or rename event-specific
-  properties that would collide.
-- Input is bounded, silently. A request carries at most 50 events; events past
-  that are **not recorded at all**. Within an event, at most 50 properties, 50
-  members per array value, 200 characters per value, 100 characters per name and
-  4096 encoded bytes of payload; anything past those is dropped and **the event
-  still records** without it. A finished pixel URL over 8KB is not fired.
+| Limit                     | Value |
+| ------------------------- | ----- |
+| Events per request        | 50    |
+| Properties per event      | 50    |
+| Members per array value   | 50    |
+| Characters per value      | 200   |
+| Characters per name       | 100   |
+| Encoded payload per event | 4096  |
+| Pixel URL bytes           | 8192  |
 
-The filter's resolved value is mirrored into the `woocommerce_analytics_proxy_tracking_enabled`
-option (`yes`/`no`) on `init`. The optional MU-plugin speed module reads that
-option, because it runs before plugins register their filters. The module serves
-requests only while the option is `yes`.
+The filter's value is mirrored into the `woocommerce_analytics_proxy_tracking_enabled`
+option, which the optional MU-plugin speed module reads because it runs before
+plugins register filters.
 
-The filter must resolve to the same value for every request on a site. A callback
+**The filter must resolve to the same value for every request on a site.** One
 that varies by cohort, percentage or geo makes cached pages disagree with what
 `/track` decides, and makes the speed module install and uninstall itself on
 alternate runs.
