@@ -250,9 +250,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		}
 
 		if ( $args['force_delete'] ) {
+			/*
+			 * No code lookup cache invalidation here. Core only reroutes `post` and `page` to the
+			 * trash when the force flag is off, so this really deletes the coupon and fires
+			 * `deleted_post`, which CouponCodeLookupInvalidator listens to. The trash branch below
+			 * is covered the same way through `transition_post_status`.
+			 */
 			wp_delete_post( $id );
-
-			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( $coupon->get_code() );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
