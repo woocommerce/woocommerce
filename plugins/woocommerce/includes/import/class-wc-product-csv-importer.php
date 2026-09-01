@@ -48,6 +48,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $cogs_is_enabled = false;
 
 	/**
+	 * Product IDs keyed by their original CSV IDs for this import request.
+	 *
+	 * @var array<int, int>
+	 */
+	private $original_id_map = array();
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -90,59 +97,75 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function adjust_character_encoding( $value ) {
 		$encoding = $this->params['character_encoding'];
-		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+
+		// Skip conversion when the value is already UTF-8 or when mbstring is unavailable.
+		if ( 'UTF-8' === $encoding || ! function_exists( 'mb_convert_encoding' ) ) {
+			return $value;
+		}
+
+		return mb_convert_encoding( $value, 'UTF-8', $encoding );
 	}
 
 	/**
 	 * Read file.
+	 *
+	 * @throws RuntimeException When the file cannot be opened.
 	 */
 	protected function read_file() {
 		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file ) ) {
 			wp_die( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
 
-		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
+		$handle = @fopen( $this->file, 'r' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- warning suppressed so a strict error handler cannot preempt the RuntimeException below.
 
-		if ( false !== $handle ) {
-			$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
+		if ( false === $handle ) {
+			// An exception rather than wp_die(), so callers in any context (admin, AJAX, REST, CLI) can catch and present it appropriately.
+			throw new RuntimeException( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
+		}
 
-			if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-				$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
-			}
+		$headers = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-			// Remove line breaks in keys, to avoid mismatch mapping of keys.
-			$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
+		// fgetcsv() returns false for an empty file; leave the keys empty so the empty-file error can be shown instead of fataling on array_map().
+		$this->raw_keys = is_array( $headers ) ? array_map( 'trim', $headers ) : array();
 
-			// Remove BOM signature from the first item.
-			if ( isset( $this->raw_keys[0] ) ) {
-				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
-			}
+		if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+			$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
+		}
 
-			if ( 0 !== $this->params['start_pos'] ) {
-				fseek( $handle, (int) $this->params['start_pos'] );
-			}
+		// Remove line breaks in keys, to avoid mismatch mapping of keys.
+		$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
 
-			while ( 1 ) {
-				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
+		// Remove BOM signature from the first item.
+		if ( isset( $this->raw_keys[0] ) ) {
+			$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
+		}
 
-				if ( false !== $row ) {
-					if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
-					}
+		if ( 0 !== $this->params['start_pos'] ) {
+			fseek( $handle, (int) $this->params['start_pos'] );
+		}
 
-					$this->raw_data[]                                 = $row;
-					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+		while ( 1 ) {
+			$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
-						break;
-					}
-				} else {
+			if ( false !== $row ) {
+				if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+					$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
+				}
+
+				$this->raw_data[]                                 = $row;
+				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+
+				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
 					break;
 				}
+			} else {
+				break;
 			}
-
-			$this->file_position = ftell( $handle );
 		}
+
+		$this->file_position = ftell( $handle );
+
+		fclose( $handle ); // @codingStandardsIgnoreLine.
 
 		if ( ! empty( $this->params['mapping'] ) ) {
 			$this->set_mapped_keys();
@@ -180,6 +203,49 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Find a product previously mapped from an original CSV ID.
+	 *
+	 * Only mappings backed by an `_original_id` meta row are cached: successful
+	 * lookups and placeholders created by this instance. Misses are not cached
+	 * because a later row or a hook can still create the mapping. The cache
+	 * assumes placeholders are not deleted while a batch is being parsed.
+	 *
+	 * @param int $original_id Original product ID from the CSV file.
+	 * @return int Mapped product ID, or 0 when no mapping exists.
+	 */
+	private function get_product_id_by_original_id( $original_id ): int {
+		global $wpdb;
+
+		$original_id = absint( $original_id );
+		if ( isset( $this->original_id_map[ $original_id ] ) ) {
+			return $this->original_id_map[ $original_id ];
+		}
+
+		$product_id = absint( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $original_id ) ) );
+
+		if ( $product_id ) {
+			$this->original_id_map[ $original_id ] = $product_id;
+		}
+
+		return $product_id;
+	}
+
+	/**
+	 * Remember a placeholder created for an original CSV ID during this import request.
+	 *
+	 * @param int $original_id Original product ID from the CSV file.
+	 * @param int $product_id  Placeholder product ID.
+	 */
+	private function remember_original_id_mapping( $original_id, $product_id ): void {
+		$original_id = absint( $original_id );
+		$product_id  = absint( $product_id );
+
+		if ( $original_id && $product_id ) {
+			$this->original_id_map[ $original_id ] = $product_id;
+		}
+	}
+
+	/**
 	 * Parse relative field and return product ID.
 	 *
 	 * Handles `id:xx` and SKUs.
@@ -206,14 +272,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id = intval( $matches[1] );
 
 			// If original_id is found, use that instead of the given ID since a new placeholder must have been created already.
-			$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) ); // WPCS: db call ok, cache ok.
+			$mapped_product_id = $this->get_product_id_by_original_id( $id );
 
-			if ( $original_id ) {
-				return absint( $original_id );
+			if ( $mapped_product_id ) {
+				return $mapped_product_id;
 			}
 
 			// See if the given ID maps to a valid product already.
-			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // WPCS: db call ok, cache ok.
+			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The importer requires a fresh indexed ID lookup that may include newly created placeholders.
 
 			if ( $existing_id ) {
 				return absint( $existing_id );
@@ -225,7 +291,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
 				$product->add_meta_data( '_original_id', $id, true );
-				$id = $product->save();
+				$placeholder_id = $product->save();
+				$this->remember_original_id_mapping( $id, $placeholder_id );
+
+				return $placeholder_id;
 			}
 
 			return $id;
@@ -265,8 +334,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return int
 	 */
 	public function parse_id_field( $value ) {
-		global $wpdb;
-
 		$id = absint( $value );
 
 		if ( ! $id ) {
@@ -274,10 +341,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// See if this maps to an ID placeholder already.
-		$original_id = $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_original_id' AND meta_value = %s;", $id ) ); // WPCS: db call ok, cache ok.
+		$mapped_product_id = $this->get_product_id_by_original_id( $id );
 
-		if ( $original_id ) {
-			return absint( $original_id );
+		if ( $mapped_product_id ) {
+			return $mapped_product_id;
 		}
 
 		// Not updating? Make sure we have a new placeholder for this ID.
@@ -301,10 +368,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( $row_sku ) {
 				$product->set_sku( $row_sku );
 			}
-			$id = $product->save();
+			$placeholder_id = $product->save();
+			$this->remember_original_id_mapping( $id, $placeholder_id );
+
+			return $placeholder_id;
 		}
 
-		return $id && ! is_wp_error( $id ) ? $id : 0;
+		return $id;
 	}
 
 	/**
@@ -825,14 +895,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		/**
-		 * Match special column names.
+		 * Match special column names by prefix.
+		 *
+		 * These prefixes must stay in sync with the `starts_with()` checks in `expand_data()`,
+		 * which is what decides how the column is actually consumed. Matching anywhere in the
+		 * column name instead of at the start would apply a formatting callback to columns
+		 * `expand_data()` never treats as special.
 		 */
-		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+		$prefix_match_data_formatting = array(
+			'attributes:value'    => array( $this, 'parse_comma_field' ),
+			'attributes:visible'  => array( $this, 'parse_bool_field' ),
+			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
+			'downloads:url'       => array( $this, 'parse_download_file_field' ),
+			// Allow some HTML in meta fields.
+			'meta:'               => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -844,9 +920,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$callback = $data_formatting[ $heading ];
 			} else {
-				foreach ( $regex_match_data_formatting as $regex => $callback ) {
-					if ( preg_match( $regex, $heading ) ) {
-						$callback = $callback;
+				foreach ( $prefix_match_data_formatting as $prefix => $prefix_callback ) {
+					if ( $this->starts_with( $heading, $prefix ) ) {
+						$callback = $prefix_callback;
 						break;
 					}
 				}
@@ -1151,6 +1227,144 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Whether a variation row that does not exist yet can be created under its parent product.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $parsed_data Parsed row data.
+	 * @return true|WP_Error True when the variation can be created, a WP_Error describing the refusal otherwise.
+	 */
+	protected function can_create_variation( $parsed_data ) {
+		// A row ID cannot be honored when creating a new variation: reusing an existing
+		// post's ID would corrupt that post, and a nonexistent ID cannot be assigned.
+		if ( ! empty( $parsed_data['id'] ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_has_id',
+				esc_html__( 'A new variation cannot be created for a row that specifies an ID.', 'woocommerce' )
+			);
+		}
+
+		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
+		// could never be matched again and every re-import would duplicate it.
+		if ( empty( $parsed_data['sku'] ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_missing_sku',
+				esc_html__( 'A new variation cannot be created without a SKU.', 'woocommerce' )
+			);
+		}
+
+		if ( empty( $parsed_data['parent_id'] ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_missing_parent',
+				esc_html__( 'A new variation cannot be created without a parent product.', 'woocommerce' )
+			);
+		}
+
+		$parent = wc_get_product( $parsed_data['parent_id'] );
+
+		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_parent_not_variable',
+				esc_html__( 'A new variation can only be created for a variable parent product.', 'woocommerce' )
+			);
+		}
+
+		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
+		if ( in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+			return new WP_Error(
+				'woocommerce_product_importer_variation_parent_missing',
+				esc_html__( 'A new variation cannot be created for a parent product that does not exist.', 'woocommerce' )
+			);
+		}
+
+		return $this->validate_new_variation_attributes( $parsed_data, $parent );
+	}
+
+	/**
+	 * Check that a new variation's attributes are offered by its parent product.
+	 *
+	 * The storefront variation selector only renders values the parent declares, so a variation
+	 * carrying a value the parent does not offer would be created but never selectable. Likewise,
+	 * an attribute the parent does not have at all is dropped on save, silently turning the row
+	 * into an "any" variation that matches every combination.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array      $parsed_data    Parsed row data.
+	 * @param WC_Product $parent_product Parent product the variation would be created under.
+	 * @return true|WP_Error True when every attribute is offered by the parent, a WP_Error describing the refusal otherwise.
+	 */
+	protected function validate_new_variation_attributes( $parsed_data, $parent_product ) {
+		if ( empty( $parsed_data['raw_attributes'] ) ) {
+			return true;
+		}
+
+		$parent_attributes = $parent_product->get_attributes();
+
+		foreach ( $parsed_data['raw_attributes'] as $attribute ) {
+			if ( empty( $attribute['name'] ) ) {
+				continue;
+			}
+
+			// Resolve the row's attribute the same way set_variation_data() does, so a row that would
+			// have been stored correctly is never refused here. get_attribute_taxonomy_id() is deliberately
+			// not used: it creates the global attribute when it is missing, which must not happen for a
+			// row that is about to be refused.
+			$attribute_id   = empty( $attribute['taxonomy'] ) ? 0 : $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
+			$attribute_name = $attribute_id ? sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : sanitize_title( $attribute['name'] );
+
+			// An attribute the parent does not have is dropped on save. An attribute the parent has but
+			// does not use for variations is allowed through: get_variation_parent_attributes() promotes it.
+			if ( ! isset( $parent_attributes[ $attribute_name ] ) ) {
+				return new WP_Error(
+					'woocommerce_product_importer_variation_unknown_attribute',
+					sprintf(
+						/* translators: %s: attribute name */
+						esc_html__( 'A new variation cannot be created because the parent product has no "%s" attribute.', 'woocommerce' ),
+						esc_html( $attribute['name'] )
+					)
+				);
+			}
+
+			$parent_attribute = $parent_attributes[ $attribute_name ];
+			$raw_value        = isset( $attribute['value'] ) ? current( (array) $attribute['value'] ) : '';
+
+			// An empty value is a valid "any" variation.
+			if ( '' === $raw_value || false === $raw_value ) {
+				continue;
+			}
+
+			if ( $parent_attribute->is_taxonomy() ) {
+				$taxonomy = $parent_attribute->get_name();
+				$term     = get_term_by( 'name', $raw_value, $taxonomy );
+				$value    = ( $term && ! is_wp_error( $term ) ) ? $term->slug : sanitize_title( $raw_value );
+
+				// The terms assigned to the parent are the exact set the storefront selector renders.
+				// WC_Product_Attribute::get_terms() is avoided here because it inserts any term that does
+				// not exist yet, which must not happen while deciding whether to refuse a row.
+				$options = wc_get_product_terms( $parent_product->get_id(), $taxonomy, array( 'fields' => 'slugs' ) );
+			} else {
+				$value   = $raw_value;
+				$options = $parent_attribute->get_options();
+			}
+
+			if ( ! in_array( $value, $options, true ) ) {
+				return new WP_Error(
+					'woocommerce_product_importer_variation_unknown_attribute_value',
+					sprintf(
+						/* translators: 1: attribute value, 2: attribute name */
+						esc_html__( 'A new variation cannot be created because "%1$s" is not an option of the parent product\'s "%2$s" attribute.', 'woocommerce' ),
+						esc_html( $raw_value ),
+						esc_html( wc_attribute_label( $parent_attribute->get_name(), $parent_product ) )
+					)
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Process importer.
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
@@ -1215,16 +1429,45 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
-				$data['skipped'][] = new WP_Error(
-					'woocommerce_product_importer_error',
-					esc_html__( 'No matching product exists to update.', 'woocommerce' ),
-					array(
-						'id'  => $id,
-						'sku' => esc_attr( $sku ),
-						'row' => $this->get_row_id( $parsed_data ),
-					)
-				);
-				continue;
+				$create_variation = false;
+				$refusal          = null;
+
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) ) {
+					$can_create_variation = $this->can_create_variation( $parsed_data );
+
+					// Anything other than an explicit pass refuses, so an override still written against
+					// the previous boolean contract cannot turn a refusal into a creation.
+					if ( true !== $can_create_variation ) {
+						$refusal = is_wp_error( $can_create_variation ) ? $can_create_variation : null;
+					} else {
+						/**
+						 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+						 *
+						 * Only fires for variation rows that passed validation, so it can veto the creation but not force it.
+						 *
+						 * @since 11.1.0
+						 *
+						 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+						 * @param array $parsed_data      Parsed row data.
+						 */
+						$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', true, $parsed_data );
+					}
+				}
+
+				if ( ! $create_variation ) {
+					// A refused variation row reports why it was refused; anything else is a row whose
+					// ID or SKU simply matches nothing on the site.
+					$data['skipped'][] = new WP_Error(
+						'woocommerce_product_importer_error',
+						$refusal ? $refusal->get_error_message() : esc_html__( 'No matching product exists to update.', 'woocommerce' ),
+						array(
+							'id'  => $id,
+							'sku' => esc_attr( $sku ),
+							'row' => $this->get_row_id( $parsed_data ),
+						)
+					);
+					continue;
+				}
 			}
 
 			$result = $this->process_item( $parsed_data );

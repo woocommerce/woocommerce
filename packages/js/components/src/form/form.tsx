@@ -331,7 +331,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 const Form = forwardRef( FormComponent ) as <
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Values extends Record< string, any >
+	Values extends Record< string, any >,
 >(
 	props: PropsWithChildrenFunction<
 		FormProps< Values >,

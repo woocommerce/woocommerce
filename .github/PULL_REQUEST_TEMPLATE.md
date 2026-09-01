@@ -118,7 +118,7 @@ Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce
 ### Release Communication
 
 <!-- release-communication-section -->
-Select if this PR needs a generated summary for release notes:
+Select the release communication labels this PR needs:
 
 - [ ] **Feature Highlight** - For user-facing features (what changed, user impact)
 - [ ] **Developer Advisory** - For developer-facing changes (what changed, how to detect, actions needed)
@@ -127,10 +127,18 @@ Select if this PR needs a generated summary for release notes:
 <summary>When to use each?</summary>
 
 **Feature Highlight**: New features, UI changes, or improvements that merchants/store owners will notice.
+
 - Example: "New bulk editing for products", "Improved checkout performance"
 
 **Developer Advisory**: Breaking changes, deprecations, or changes that affect themes/plugins/extensions.
+
 - Example: "Hook signature change", "Deprecated filter", "REST API field removed"
 
-An AI will analyze your PR and post a draft comment for you to review and edit.
+Selected labels are applied when the pull request is merged.
 </details>
+
+### Use of AI Tools
+
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but you must disclose what tooling you are using and to what extent a pull request has been authored by AI. It is your responsibility to review and take responsibility for what AI generates. See the WordPress AI Guidelines: <https://make.wordpress.org/ai/handbook/ai-guidelines/>.
+-->

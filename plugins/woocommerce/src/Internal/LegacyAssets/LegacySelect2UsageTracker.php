@@ -204,7 +204,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	protected function record_frontend_event( string $event_name, array $properties ): void {
-		if ( ! class_exists( WC_Analytics_Tracking::class ) ) {
+		if ( ! $this->is_frontend_tracking_available() ) {
 			return;
 		}
 
@@ -219,7 +219,9 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	protected function is_frontend_tracking_available(): bool {
-		return did_action( 'woocommerce_analytics_init' ) && class_exists( WC_Analytics_Tracking::class );
+		return did_action( 'woocommerce_analytics_init' )
+			&& class_exists( WC_Analytics_Tracking::class )
+			&& is_callable( array( WC_Analytics_Tracking::class, 'add_event_to_queue' ) );
 	}
 
 	/**

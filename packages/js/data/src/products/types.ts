@@ -180,7 +180,7 @@ export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
 export type ProductQuery<
 	Status = ProductStatus,
-	Type = ProductType
+	Type = ProductType,
 > = BaseQueryParams< keyof Product > & {
 	orderby?:
 		| 'date'

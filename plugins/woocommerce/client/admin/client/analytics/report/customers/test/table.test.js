@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
  */
 import CustomersReportTable from '../table';
 
-const captured = { getRowsContent: null };
+const captured = { getRowsContent: null, getHeadersContent: null };
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -49,6 +49,7 @@ jest.mock( '../../../components/report-table', () => ( {
 	__esModule: true,
 	default: ( props ) => {
 		captured.getRowsContent = props.getRowsContent;
+		captured.getHeadersContent = props.getHeadersContent;
 		return null;
 	},
 } ) );
@@ -70,8 +71,30 @@ const baseCustomer = {
 	country: '',
 };
 
-// Country cell is the 9th column (0-indexed: 8) per getHeadersContent in table.js.
-const COUNTRY_COL = 8;
+// getHeadersContent in table.js, in order. This is also the browser-side CSV
+// export order, so it must match Controller::get_export_columns() in
+// src/Admin/API/Reports/Customers/Controller.php.
+const HEADER_KEYS = [
+	'name',
+	'username',
+	'date_last_active',
+	'date_registered',
+	'email',
+	'orders_count',
+	'total_spend',
+	'avg_order_value',
+	'country',
+	'city',
+	'state',
+	'postcode',
+	'billing_phone',
+	'shipping_phone',
+	'role',
+];
+
+const col = ( key ) => HEADER_KEYS.indexOf( key );
+
+const COUNTRY_COL = col( 'country' );
 
 function getCountryCell( customer ) {
 	captured.getRowsContent = null;
@@ -156,5 +179,94 @@ describe( 'CustomersReportTable country cell', () => {
 		} );
 
 		expect( () => renderCellDisplay( cell.display ) ).not.toThrow();
+	} );
+} );
+
+describe( 'CustomersReportTable column order', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	// The same Download button exports the table client-side for single-page
+	// reports and server-side for larger ones, so drift between the two orders
+	// makes identical reports produce differently ordered CSVs.
+	it( 'keeps the header order in sync with the server-side CSV export', () => {
+		mockCountriesStore( [] );
+		captured.getHeadersContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+
+		expect(
+			captured.getHeadersContent().map( ( header ) => header.key )
+		).toEqual( HEADER_KEYS );
+	} );
+
+	it( 'emits every cell under its own header', () => {
+		mockCountriesStore( [] );
+		captured.getRowsContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+
+		// One distinct value per field, so a cell landing under the wrong
+		// header surfaces as a mismatch instead of passing by coincidence.
+		const customer = {
+			name: 'Alice',
+			username: 'alice',
+			date_last_active: '2026-08-01T00:00:00',
+			date_registered: '2026-07-01T00:00:00',
+			email: 'alice@example.com',
+			orders_count: 7,
+			total_spend: 123,
+			avg_order_value: 45,
+			country: 'FR',
+			city: 'Paris',
+			state: 'IDF',
+			postcode: '75001',
+			billing_phone: '555-32123',
+			shipping_phone: '555-99887',
+			role: 'Customer',
+		};
+
+		const row = captured.getRowsContent( [ customer ] )[ 0 ];
+
+		expect( row ).toHaveLength( HEADER_KEYS.length );
+		expect(
+			Object.fromEntries(
+				HEADER_KEYS.map( ( key, index ) => [ key, row[ index ].value ] )
+			)
+		).toEqual( customer );
+	} );
+} );
+
+describe( 'CustomersReportTable phone cells', () => {
+	const BILLING_PHONE_COL = col( 'billing_phone' );
+	const SHIPPING_PHONE_COL = col( 'shipping_phone' );
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'maps billing and shipping phone into their cells', () => {
+		mockCountriesStore( [] );
+		captured.getRowsContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+		const rows = captured.getRowsContent( [
+			{
+				...baseCustomer,
+				billing_phone: '555-32123',
+				shipping_phone: '555-99887',
+			},
+		] );
+
+		expect( rows[ 0 ][ BILLING_PHONE_COL ].value ).toBe( '555-32123' );
+		expect( rows[ 0 ][ SHIPPING_PHONE_COL ].value ).toBe( '555-99887' );
+	} );
+
+	it( 'keeps the phone headers aligned with the phone cells', () => {
+		mockCountriesStore( [] );
+		captured.getHeadersContent = null;
+		render( <CustomersReportTable query={ {} } /> );
+		const headers = captured.getHeadersContent();
+
+		expect( headers[ BILLING_PHONE_COL ].key ).toBe( 'billing_phone' );
+		expect( headers[ SHIPPING_PHONE_COL ].key ).toBe( 'shipping_phone' );
 	} );
 } );

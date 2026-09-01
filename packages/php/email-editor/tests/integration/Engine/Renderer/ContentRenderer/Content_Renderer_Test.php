@@ -64,6 +64,39 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test render() uses a synthetic post's own content and never leaks other published posts.
+	 */
+	public function testItRendersSyntheticPostWithoutLeakingOtherPosts(): void {
+		// A published decoy: if the synthetic post (ID 0) triggered a real
+		// "latest posts" query, this is the content that would leak.
+		$decoy_id = $this->factory->post->create(
+			array(
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>DECOY_PUBLISHED_POST_MARKER</p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $decoy_id );
+
+		$synthetic_post = new \WP_Post(
+			(object) array(
+				'ID'           => 0,
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>SYNTHETIC_POST_MARKER</p><!-- /wp:paragraph -->',
+			)
+		);
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		$content = $this->renderer->render( $synthetic_post, $template );
+
+		$this->assertStringContainsString( 'SYNTHETIC_POST_MARKER', $content );
+		$this->assertStringNotContainsString( 'DECOY_PUBLISHED_POST_MARKER', $content );
+	}
+
+	/**
 	 * Test render() inlines content styles into the HTML.
 	 */
 	public function testRenderInlinesContentStyles(): void {

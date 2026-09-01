@@ -49,7 +49,7 @@ export const useOptionDismiss = ( optionName: string ): DismissState => {
 	const { updateOptions } = useDispatch( optionsStore );
 
 	const onDismiss = () => {
-		updateOptions( { [ optionName ]: 'yes' } );
+		void updateOptions( { [ optionName ]: 'yes' } );
 	};
 
 	return { isDismissed, hasResolved, onDismiss };

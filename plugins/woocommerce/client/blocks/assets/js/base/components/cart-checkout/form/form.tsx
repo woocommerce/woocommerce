@@ -51,7 +51,7 @@ import { validateState } from './validate-state';
  * Checkout form.
  */
 const Form = <
-	T extends AddressFormValues | ContactFormValues | OrderFormValues
+	T extends AddressFormValues | ContactFormValues | OrderFormValues,
 >( {
 	id = '',
 	fields,
@@ -111,7 +111,7 @@ const Form = <
 			if ( hasValidationError ) {
 				return;
 			}
-			dispatch( validationStore ).setValidationErrors( {
+			void dispatch( validationStore ).setValidationErrors( {
 				[ `${ addressType }_${ key }` ]: {
 					message: error,
 					hidden: !! inputRef?.isFocused(),
@@ -132,7 +132,7 @@ const Form = <
 				}
 			} );
 			if ( errorsToClear.length ) {
-				dispatch( validationStore ).clearValidationErrors(
+				void dispatch( validationStore ).clearValidationErrors(
 					errorsToClear
 				);
 			}

@@ -16,6 +16,9 @@ interface Brand {
 	thumbnailFileName: string;
 }
 
+const productBrandsPageUrl =
+	'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product';
+
 test.use( { storageState: ADMIN_STATE_PATH } );
 
 test( 'Merchant can add brands', async ( { page } ) => {
@@ -26,9 +29,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * This is to workaround the hover menu for now.
 	 */
 	const goToBrandsPage = async () => {
-		await page.goto(
-			'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product'
-		);
+		await page.goto( productBrandsPageUrl );
 
 		// Wait for the Brands page to load.
 		// This is needed so that checking for existing brands would work.

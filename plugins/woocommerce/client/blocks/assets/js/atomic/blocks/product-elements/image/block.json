@@ -40,8 +40,10 @@
 			"aspectRatio": true,
 			"__experimentalSkipSerialization": true
 		},
-		"email": true,
-		"__experimentalSelector": ".wc-block-components-product-image"
+		"email": true
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-image.wc-block-components-product-image, .wp-block-woocommerce-product-image .wc-block-components-product-image"
 	},
 	"ancestor": [
 		"woocommerce/all-products",

@@ -4,6 +4,11 @@
  *
  * Functions for determining the current query/page.
  *
+ * Note that the query-dependent conditional functions are only reliable
+ * once the main query has been set up, that is, on or after the "wp" action hook.
+ * If used before that, they won't trigger any error or warning: they will simply
+ * return false, even if the condition they check for would be met later in the request.
+ *
  * @package     WooCommerce\Functions
  * @version     2.3.0
  */

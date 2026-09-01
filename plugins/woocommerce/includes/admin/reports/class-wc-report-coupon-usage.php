@@ -116,7 +116,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 
 		$legend[] = array(
 			/* translators: %s: coupons amount */
-			'title'            => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . $total_coupons . '</strong>' ),
+			'title'            => sprintf( __( '%s coupons used in total', 'woocommerce' ), '<strong>' . number_format_i18n( $total_coupons ) . '</strong>' ),
 			'color'            => $this->chart_colours['coupon_count'],
 			'highlight_series' => 0,
 		);

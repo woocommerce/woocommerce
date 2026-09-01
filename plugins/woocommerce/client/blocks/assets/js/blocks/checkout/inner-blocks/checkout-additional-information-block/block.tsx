@@ -22,7 +22,7 @@ const Block = () => {
 	const { setAdditionalFields } = useDispatch( checkoutStore );
 
 	const onChangeForm = ( additionalValues: OrderFormValues ) => {
-		setAdditionalFields( additionalValues );
+		void setAdditionalFields( additionalValues );
 	};
 
 	const additionalFieldValues = {

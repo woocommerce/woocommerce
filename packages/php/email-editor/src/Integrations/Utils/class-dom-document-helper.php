@@ -54,6 +54,22 @@ class Dom_Document_Helper {
 	}
 
 	/**
+	 * Returns every element matching the given tag name, in document order.
+	 *
+	 * @param string $tag_name The tag name to search for.
+	 * @return array<int, \DOMElement>
+	 */
+	public function find_elements( string $tag_name ): array {
+		$elements = array();
+		foreach ( $this->dom->getElementsByTagName( $tag_name ) as $element ) {
+			if ( $element instanceof \DOMElement ) {
+				$elements[] = $element;
+			}
+		}
+		return $elements;
+	}
+
+	/**
 	 * Returns the value of the given attribute from the given element.
 	 *
 	 * @param \DOMElement $element The element to get the attribute value from.
@@ -84,6 +100,44 @@ class Dom_Document_Helper {
 	 */
 	public function get_outer_html( \DOMElement $element ): string {
 		return (string) $this->dom->saveHTML( $element );
+	}
+
+	/**
+	 * Removes the given element from the document.
+	 *
+	 * A no-op when the element has already been detached (its parent is null), so removing the same
+	 * node twice — e.g. two images sharing one wrapper — is safe.
+	 *
+	 * @param \DOMElement $element The element to remove.
+	 */
+	public function remove_element( \DOMElement $element ): void {
+		$parent = $element->parentNode; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		if ( $parent instanceof \DOMNode ) {
+			$parent->removeChild( $element );
+		}
+	}
+
+	/**
+	 * Serializes every top-level node of the loaded fragment back to HTML.
+	 *
+	 * The document is loaded with LIBXML_HTML_NOIMPLIED (no implicit html/body wrapper), so the
+	 * top-level nodes are the fragment's own roots. Useful for reading back what remains after
+	 * elements have been removed.
+	 *
+	 * @return string
+	 */
+	public function get_root_html(): string {
+		$html = '';
+		foreach ( $this->dom->childNodes as $child ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			// Skip the `<?xml encoding="UTF-8">` processing instruction that load_html() prepends to
+			// force UTF-8; serializing it back would corrupt callers (e.g. strip_tags treats the
+			// unterminated `<?` as a tag and swallows the rest of the string).
+			if ( XML_PI_NODE === $child->nodeType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				continue;
+			}
+			$html .= (string) $this->dom->saveHTML( $child );
+		}
+		return $html;
 	}
 
 	/**
