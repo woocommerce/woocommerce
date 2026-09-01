@@ -59,4 +59,4 @@ Two things do not count as an independent human review:
 - **The author's own review of AI-generated code.** The author drives the agent, provides its context, and shapes its solution. The author and the agent are a single workflow, not two reviewers. A single workflow can produce a convincing implementation of the wrong approach and not notice.
 - **An AI review, automated or requested by anyone.** AI reviews are encouraged as an additional safety net, but they complement an independent human review rather than replace it.
 
-Community PRs always require a review and should only be merged with an approval.
+Community PRs always require a review and should only be merged with approval from a human.
