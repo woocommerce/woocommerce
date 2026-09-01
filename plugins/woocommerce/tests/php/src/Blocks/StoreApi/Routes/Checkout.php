@@ -3263,7 +3263,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 	}
 
-
 	/**
 	 * Adds a payment participant that takes payment and then throws, simulating a
 	 * post-payment integration (transactional email, CRM, fulfilment) failing after
@@ -3462,5 +3461,33 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
 		$this->assertFalse( $orders[0]->needs_payment(), 'BACS moved the order on, so it must not be left awaiting payment.' );
+	}
+
+	/**
+	 * @testdox A recovered checkout records what went wrong on the order.
+	 */
+	public function test_recovered_checkout_records_the_failure_on_the_order() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$notes = wc_get_order_notes( array( 'order_id' => $orders[0]->get_id() ) );
+		$notes = wp_list_pluck( $notes, 'content' );
+
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'Transactional email integration failed.' );
+				}
+			),
+			'The merchant needs a trace of the failure on the order, since the shopper was told the checkout succeeded. Notes: ' . print_r( $notes, true )
+		);
 	}
 }
