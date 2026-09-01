@@ -6,20 +6,23 @@
 const { shouldConfirmModalOnEnter } = require('../modal-keyboard');
 
 /**
- * Build an element, optionally inside a wrapper matching a selector.
+ * Build an element, optionally inside a wrapper carrying the given attributes.
  *
  * @param {string} tagName - Tag to create.
- * @param {string} [wrapperClass] - Class for an ancestor element.
+ * @param {Object} [wrapperAttributes] - Attributes for an ancestor element.
  * @returns {HTMLElement} The created element.
  */
-function element( tagName, wrapperClass ) {
+function element( tagName, wrapperAttributes ) {
 	const node = document.createElement( tagName );
 
-	if ( wrapperClass ) {
+	if ( wrapperAttributes ) {
 		const wrapper = document.createElement( 'div' );
-		wrapper.className = wrapperClass;
+
+		Object.keys( wrapperAttributes ).forEach( ( name ) => {
+			wrapper.setAttribute( name, wrapperAttributes[ name ] );
+		} );
+
 		wrapper.appendChild( node );
-		return node;
 	}
 
 	return node;
@@ -54,16 +57,32 @@ describe( 'Modal Keyboard Utils - shouldConfirmModalOnEnter', () => {
 
 	it( 'does not confirm inside an enhanced select', () => {
 		expect(
-			shouldConfirmModalOnEnter( element( 'span', 'select2-container' ) )
+			shouldConfirmModalOnEnter(
+				element( 'span', { class: 'select2-container' } )
+			)
 		).toBe( false );
 		expect(
-			shouldConfirmModalOnEnter( element( 'li', 'select2-selection' ) )
+			shouldConfirmModalOnEnter(
+				element( 'li', { class: 'select2-selection' } )
+			)
+		).toBe( false );
+	} );
+
+	it( 'does not confirm inside a combobox', () => {
+		const combobox = element( 'div' );
+		combobox.setAttribute( 'role', 'combobox' );
+
+		expect( shouldConfirmModalOnEnter( combobox ) ).toBe( false );
+		expect(
+			shouldConfirmModalOnEnter( element( 'span', { role: 'combobox' } ) )
 		).toBe( false );
 	} );
 
 	it( 'confirms for a plain element outside an enhanced select', () => {
 		expect(
-			shouldConfirmModalOnEnter( element( 'span', 'wc-backbone-modal' ) )
+			shouldConfirmModalOnEnter(
+				element( 'span', { class: 'wc-backbone-modal' } )
+			)
 		).toBe( true );
 	} );
 
