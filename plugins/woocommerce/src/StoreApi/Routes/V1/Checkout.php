@@ -181,8 +181,9 @@ class Checkout extends AbstractCartRoute {
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
 
-			// If we encountered an exception, free up stock and release held coupons.
-			if ( $this->order ) {
+			// If we encountered an exception, free up stock and release held coupons. An order that
+			// already took payment keeps both: its stock is committed and its coupons are spent.
+			if ( $this->order && $this->order->needs_payment() ) {
 				wc_release_stock_for_order( $this->order );
 				wc_release_coupons_for_order( $this->order );
 			}

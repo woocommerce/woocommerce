@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Customer;
 
 /**
@@ -81,6 +82,7 @@ trait CheckoutTrait {
 	 * Fires an action hook instructing active payment gateways to process the payment for an order and provide a result.
 	 *
 	 * @throws RouteException If the order is missing, or on payment error.
+	 * @throws \Throwable If a gateway raised an Error rather than an Exception, and no payment was taken.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -117,7 +119,24 @@ trait CheckoutTrait {
 			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
+			/*
+			 * The gateway may have taken payment before this failure happened, for example when a
+			 * post-payment integration throws while the order status is transitioning. Reporting a
+			 * failure would send the shopper back to place the order again, and every retry takes
+			 * payment for another order. Record what went wrong and report the success the order
+			 * actually represents.
+			 */
+			if ( $this->order_has_taken_payment( $order ) ) {
+				$this->recover_order_that_took_payment( $order, $e, $payment_result );
+				return;
+			}
+
+			// Errors are not part of the gateway contract, so let them surface as they did before.
+			if ( ! $e instanceof \Exception ) {
+				throw $e;
+			}
+
 			$additional_data = [];
 
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
@@ -133,6 +152,82 @@ trait CheckoutTrait {
 			}
 
 			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, array_map( 'esc_attr', $additional_data ) );
+		}
+	}
+
+	/**
+	 * Re-reads the order so its status reflects whatever the gateway persisted, falling back
+	 * to the in-memory order when it can no longer be read.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return \WC_Order
+	 */
+	private function refresh_order( \WC_Order $order ): \WC_Order {
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		return $refreshed_order instanceof \WC_Order ? $refreshed_order : $order;
+	}
+
+	/**
+	 * Whether a gateway has already taken or accepted payment for the order.
+	 *
+	 * The order is always awaiting payment when a gateway is invoked, so anything that no
+	 * longer needs payment has been moved on by the gateway. Statuses that represent an
+	 * order going nowhere are excluded, since they also stop needing payment.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function order_has_taken_payment( \WC_Order $order ): bool {
+		$order = $this->refresh_order( $order );
+
+		return ! $order->needs_payment() && ! $order->has_status(
+			array(
+				OrderStatus::CHECKOUT_DRAFT,
+				OrderStatus::CANCELLED,
+				OrderStatus::REFUNDED,
+				OrderStatus::TRASH,
+			)
+		);
+	}
+
+	/**
+	 * Records a failure that happened after payment was taken and reports the checkout as
+	 * successful, so the shopper is sent to the order confirmation rather than back to retry.
+	 *
+	 * @param \WC_Order     $order          Order object.
+	 * @param \Throwable    $error          The failure raised after payment was taken.
+	 * @param PaymentResult $payment_result Payment result object.
+	 */
+	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
+		$order = $this->refresh_order( $order );
+
+		wc_get_logger()->error(
+			sprintf( 'Checkout for order #%d failed after payment was taken.', $order->get_id() ),
+			array(
+				'order' => $order,
+				'error' => $error,
+			)
+		);
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: the error that was raised after payment was taken. */
+				__( 'Checkout could not be completed after payment was taken: %s', 'woocommerce' ),
+				$error->getMessage()
+			)
+		);
+
+		$payment_result->set_status( 'success' );
+		$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+
+		/*
+		 * The gateway did not reach the point where it empties the cart, so do it here. Without
+		 * this the shopper lands on the confirmation page with the order still in their cart, and
+		 * can place it a second time.
+		 */
+		if ( WC()->cart ) {
+			WC()->cart->empty_cart();
 		}
 	}
 
