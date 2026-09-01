@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent draft and private Shop pages from displaying the public product archive.
