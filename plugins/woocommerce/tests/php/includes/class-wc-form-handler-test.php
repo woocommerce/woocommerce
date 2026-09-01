@@ -128,7 +128,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $user_id );
 		$order             = WC_Helper_Order::create_order( $user_id );
-		$filtered_endpoint = wc_get_page_permalink( 'myaccount' );
+		$filtered_endpoint = home_url( '/filtered-cancel-page/' );
 		$filter            = static function ( string $url ) use ( $filtered_endpoint ): string {
 			$query = wp_parse_url( $url, PHP_URL_QUERY );
 			return $filtered_endpoint . '?' . $query;
@@ -139,6 +139,8 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_get_cancel_order_url_raw', $filter );
 
 		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $filtered_endpoint ) );
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The order should be cancelled before the filtered redirect.' );
 	}
 
 	/**
@@ -156,6 +158,67 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->dispatch_cancel_order_expecting_redirect( $redirect_to );
 
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The order should be cancelled before the custom redirect.' );
+	}
+
+	/**
+	 * @testdox cancel_order() redirects to the cart when the request URI is unavailable.
+	 * @dataProvider unavailable_request_uri_provider
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 *
+	 * @param string|null $request_uri Request URI to use, or null to remove it.
+	 */
+	public function test_cancel_order_redirects_to_cart_when_request_uri_is_unavailable( ?string $request_uri ): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+		if ( null === $request_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $request_uri;
+		}
+
+		$this->dispatch_cancel_order_expecting_redirect( wc_get_cart_url() );
+	}
+
+	/**
+	 * Provides unavailable request URI values.
+	 *
+	 * @return array<string,array{string|null}>
+	 */
+	public function unavailable_request_uri_provider(): array {
+		return array(
+			'missing request URI' => array( null ),
+			'empty request URI'   => array( '' ),
+		);
+	}
+
+	/**
+	 * @testdox cancel_order() persists the cancellation notice for a fresh guest session.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_persists_notice_for_fresh_guest_session(): void {
+		wp_set_current_user( 0 );
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init_session_cookie();
+
+		$this->assertFalse( WC()->session->has_session(), 'The guest should start without a cookie-backed session.' );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$this->prepare_cancel_order_request( $order );
+		$this->dispatch_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+
+		$this->assertTrue( WC()->session->has_session(), 'Cancelling the guest order should establish a session.' );
+
+		WC()->session->save_data();
+		$saved_session_data = WC()->session->get_session( WC()->session->get_customer_id(), array() );
+		WC()->session->destroy_session();
+		$saved_notices = maybe_unserialize( $saved_session_data['wc_notices'] ?? array() );
+
+		$this->assertNotEmpty( $saved_notices['notice'] ?? array(), 'The cancellation notice should be saved for the redirect.' );
 	}
 
 	/**
