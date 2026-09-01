@@ -630,6 +630,49 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The installed version is left out of the update-check cache key.
+	 */
+	public function test_update_check_cache_key_ignores_installed_version(): void {
+		$cached_data = array(
+			'hash'     => md5(
+				wp_json_encode(
+					array(
+						123 => array(
+							'product_id' => 123,
+							'file_id'    => 'abc123',
+						),
+					)
+				)
+			),
+			'updated'  => time(),
+			'products' => array(
+				123 => array( 'version' => '2.0.0' ),
+			),
+			'errors'   => array(),
+		);
+
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+						'version'    => '1.5.0',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame( $cached_data['products'], $result, 'A payload differing only by installed version should still hit the cache' );
+		$this->assertNull( $this->mocked_request_products, 'Updating an extension should not force a remote update-check' );
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
 	 *
 	 * @return string The plugin file name.
