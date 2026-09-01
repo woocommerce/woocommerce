@@ -48,7 +48,7 @@ The impact assessment above is also the reference for when that requirement can 
 
 Contributors with permission to bypass the review requirement may use their judgment to merge a PR without a formal approval when it clearly fits the "should not mark as High-Impact" list above: documentation, changelog, or typo changes; updates to automated tests; and tooling or infrastructure changes not shipped in the release package.
 
-Bypassing the requirement is an exception for low-risk changes, not an alternative default. If you are unsure whether your change qualifies, request a review.
+Bypassing the requirement is an exception for low-risk changes, not an alternative default. If you are unsure whether your change qualifies, request a review from a human.
 
 ### When an independent human review is always required
 
