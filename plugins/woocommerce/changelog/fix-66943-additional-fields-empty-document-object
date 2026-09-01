@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Give every registered additional checkout field a key in the checkout response, so hidden and required rules about a field with no value yet no longer match on first load.
