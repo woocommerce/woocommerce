@@ -2965,13 +2965,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	public function test_conditional_hidden_field_cleared_when_dependency_has_no_value() {
 		$this->unregister_fields();
 		$this->register_conditional_referral_fields( 'hidden' );
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features[] = 'experimental-blocks';
-				return $features;
-			}
-		);
 
 		$request  = $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-detail' => 'posted while hidden' ) );
 		$response = rest_get_server()->dispatch( $request );

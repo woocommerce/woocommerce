@@ -8,7 +8,6 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
-use Automattic\WooCommerce\Admin\Features\Features;
 use WC_Customer;
 
 /**
@@ -321,19 +320,12 @@ trait CheckoutTrait {
 	 * @param callable         $persist Callback invoked as `$persist( string $key, mixed $value )` for each field.
 	 */
 	private function resolve_and_persist_additional_fields( \WP_REST_Request $request, callable $persist ): void {
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$document_object = $this->get_document_object_from_rest_request( $request );
-			$document_object->set_context( 'order' );
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
-			);
-		} else {
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_fields_for_location( 'order' ),
-				$this->additional_fields_controller->get_fields_for_location( 'contact' )
-			);
-		}
+		$document_object = $this->get_document_object_from_rest_request( $request );
+		$document_object->set_context( 'order' );
+		$additional_fields = array_merge(
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
+		);
 
 		$field_values = isset( $request['additional_fields'] ) ? (array) $request['additional_fields'] : array();
 
