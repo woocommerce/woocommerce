@@ -152,7 +152,7 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
  * @return array
  */
 function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() ) {
-	$cache_key   = 'wc_' . $taxonomy . md5( wp_json_encode( $args ) );
+	$cache_key   = WC_Cache_Helper::get_cache_prefix( 'product_terms_' . $taxonomy ) . 'wc_' . $taxonomy . md5( wp_json_encode( $args ) );
 	$cache_group = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . $product_id;
 	$terms       = wp_cache_get( $cache_key, $cache_group );
 
