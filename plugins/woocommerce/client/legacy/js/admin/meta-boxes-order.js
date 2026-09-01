@@ -1314,6 +1314,14 @@ jQuery( function ( $ ) {
 					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
 					load_tax_rates;
 
+				modal.data( 'wc-existing-tax-rate-ids', $( '.order-tax-id' ).map( function() {
+					return String( $( this ).val() );
+				} ).get() );
+
+				if ( ! modal.data( 'wc-selected-tax-rate-id' ) ) {
+					modal.data( 'wc-selected-tax-rate-id', modal.data( 'wc-existing-tax-rate-ids' )[ 0 ] || '' );
+				}
+
 				// The modal template is filterable, so only wire the controls up when the
 				// elements this code depends on are actually present.
 				if ( ! form.length || ! search.length || ! results.length || ! pagination.length ) {
@@ -1480,9 +1488,12 @@ jQuery( function ( $ ) {
 			},
 
 			update_tax_rate_add_button: function( modal ) {
+				var checked_rate_id = modal.find( 'input[name="add_order_tax"]:checked' ).val(),
+					existing_tax_rate_ids = modal.data( 'wc-existing-tax-rate-ids' ) || [];
+
 				modal.find( '#btn-ok' ).prop(
 					'disabled',
-					! modal.find( 'input[name="add_order_tax"]:checked' ).length
+					! checked_rate_id || -1 !== $.inArray( String( checked_rate_id ), existing_tax_rate_ids )
 				);
 			},
 
