@@ -39,6 +39,19 @@ class Woocommerce_Analytics {
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
 
 	/**
+	 * Last resolved state of the proxy tracking feature.
+	 *
+	 * The speed module runs before plugins load, where the proxy tracking filter
+	 * reads false everywhere. Absent means enabled, so a site that has not
+	 * written it yet keeps working.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
+
+	/**
 	 * Initializer.
 	 * Used to configure the WooCommerce Analytics package.
 	 *
@@ -111,6 +124,9 @@ class Woocommerce_Analytics {
 		}
 
 		add_action( 'admin_init', array( __CLASS__, 'maybe_update_proxy_speed_module' ) );
+
+		// Late on `init`, so every plugin has registered its feature filters.
+		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
 
 		// Tracking only Site pages.
 		if ( is_admin() || wp_doing_ajax() || wp_is_xml_request() || is_login() || is_feed() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
@@ -187,6 +203,23 @@ class Woocommerce_Analytics {
 
 		$controller = new WC_Analytics_Tracking_Proxy();
 		$controller->register_routes();
+	}
+
+	/**
+	 * Mirror the resolved proxy tracking state into PROXY_TRACKING_ENABLED_OPTION.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @return void
+	 */
+	public static function sync_proxy_tracking_state() {
+		$enabled = \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ? 'yes' : 'no';
+
+		if ( get_option( self::PROXY_TRACKING_ENABLED_OPTION ) === $enabled ) {
+			return;
+		}
+
+		update_option( self::PROXY_TRACKING_ENABLED_OPTION, $enabled );
 	}
 
 	/**

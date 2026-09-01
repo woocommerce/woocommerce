@@ -102,6 +102,17 @@ class WC_Analytics_Tracking {
 	const MAX_CLIENT_PROPERTY_LENGTH = 200;
 
 	/**
+	 * Maximum length of a client-supplied event or property name.
+	 *
+	 * `Pixel_Builder` checks a name's characters but not its length.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_NAME_LENGTH = 100;
+
+	/**
 	 * Path suffix of the proxy tracking endpoint.
 	 *
 	 * Duplicated in the MU-plugin speed module template, which cannot use this
@@ -191,6 +202,10 @@ class WC_Analytics_Tracking {
 		$is_client_supplied = $is_client_supplied || self::is_proxy_tracking_request();
 
 		if ( $is_client_supplied ) {
+			if ( ! self::is_valid_client_name( $event_name ) ) {
+				return true;
+			}
+
 			$event_properties = self::sanitize_client_properties( $event_properties );
 		}
 
@@ -603,6 +618,12 @@ class WC_Analytics_Tracking {
 		}
 
 		foreach ( $event_properties as $key => $value ) {
+			// Dropped, not truncated: two long names could truncate to the same key.
+			if ( ! self::is_valid_client_name( $key ) || ! Pixel_Builder::prop_name_is_valid( $key ) ) {
+				unset( $event_properties[ $key ] );
+				continue;
+			}
+
 			// Arrays are flattened later by get_properties(); bound their members too.
 			if ( is_array( $value ) ) {
 				$event_properties[ $key ] = array_map( array( __CLASS__, 'cap_client_value' ), $value );
@@ -613,6 +634,23 @@ class WC_Analytics_Tracking {
 		}
 
 		return $event_properties;
+	}
+
+	/**
+	 * Whether a client-supplied event or property name is usable.
+	 *
+	 * Without the type check an array name reaches `PREFIX . $event_name` and
+	 * writes a PHP warning to the log, unauthenticated.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @param mixed $name Client-supplied name.
+	 * @return bool True when the name is a non-empty string within the length bound.
+	 */
+	private static function is_valid_client_name( $name ) {
+		return is_string( $name )
+			&& '' !== $name
+			&& mb_strlen( $name ) <= self::MAX_CLIENT_NAME_LENGTH;
 	}
 
 	/**

@@ -510,17 +510,23 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	public function test_filter_receives_the_client_supplied_flag(): void {
 		$seen     = array();
 		$callback = function ( $props, $event_name, $is_client_supplied ) use ( &$seen ) {
-			$seen[] = $is_client_supplied;
+			$seen[] = array( $event_name, $is_client_supplied );
 			return $props;
 		};
 		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10, 3 );
 
 		WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_add_to_cart', array(), true );
-		WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_add_to_cart', array(), false );
+		WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', array(), false );
 
 		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10 );
 
-		$this->assertSame( array( true, false ), $seen );
+		$this->assertSame(
+			array(
+				array( 'woocommerceanalytics_add_to_cart', true ),
+				array( 'woocommerceanalytics_product_view', false ),
+			),
+			$seen
+		);
 	}
 
 	/**
@@ -652,6 +658,90 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * A JSON array survives the consumers' truthiness check and reaches
+	 * `PREFIX . $event_name`, where PHP writes a warning to the log on an
+	 * unauthenticated request. `failOnWarning` makes that warning fail the test.
+	 *
+	 * @dataProvider unusable_client_event_name_provider
+	 *
+	 * @param mixed $event_name Name a client could post.
+	 */
+	public function test_client_events_with_an_unusable_name_are_dropped( $event_name ): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		$result = WC_Analytics_Tracking::record_client_event( $event_name, array( 'pi' => 42 ) );
+
+		$this->assertTrue( $result, 'A malformed name is a skip, not an error the caller must handle.' );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel may be queued for an unusable event name.' );
+	}
+
+	/**
+	 * Names a client could post that cannot become an `_en` value.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function unusable_client_event_name_provider(): array {
+		return array(
+			'array'      => array( array( 'product_view' ) ),
+			'nested map' => array( array( 'name' => 'product_view' ) ),
+			'empty'      => array( '' ),
+			'oversized'  => array( str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH + 1 ) ),
+		);
+	}
+
+	/**
+	 * A name at the limit is still recorded: the bound is a limit, not an
+	 * off-by-one rejection of the longest legal name.
+	 */
+	public function test_client_event_name_at_the_length_limit_is_recorded(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		$name = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH );
+
+		WC_Analytics_Tracking::record_client_event( $name, array() );
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( WC_Analytics_Tracking::PREFIX . $name, $props['_en'] ?? null );
+	}
+
+	/**
+	 * Names are the one axis left unbounded once values and counts are capped.
+	 * The charset check is `Pixel_Builder`'s own, so this drops exactly what it
+	 * would reject — but rejecting there loses the whole event, not one property.
+	 */
+	public function test_unusable_client_property_names_are_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH + 1 ) => 'oversized',
+				'Uppercase' => 'bad charset',
+				'has space' => 'bad charset',
+				'pi'        => 42,
+				'_lg'       => 'en-GB',
+			)
+		);
+
+		$this->assertSame( array( 'pi' => 42, '_lg' => 'en-GB' ), $sanitized );
+	}
+
+	/**
+	 * A JSON object key that is all digits becomes an integer array key in PHP,
+	 * which `Pixel_Builder` would reject for the whole event.
+	 */
+	public function test_numeric_client_property_names_are_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'0'  => 'dropped',
+				'pi' => 42,
+			)
+		);
+
+		$this->assertSame( array( 'pi' => 42 ), $sanitized );
+	}
+
+	/**
 	 * The guard's defensive early returns, none of which a data provider typed
 	 * `string` can reach. WorDBless leaves REQUEST_METHOD absent and REQUEST_URI
 	 * empty, so without this the `! isset()` branches are never executed and
@@ -746,9 +836,15 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		);
 
 		$this->assertStringContainsString(
-			'Features::is_proxy_tracking_enabled()',
+			'Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION',
 			$template,
 			'The template must refuse requests while proxy tracking is disabled; the REST gate cannot reach it.'
+		);
+
+		$this->assertStringContainsString(
+			'MAX_CLIENT_EVENTS_PER_REQUEST',
+			$template,
+			'The template must cap the batch with the same constant as the REST controller.'
 		);
 	}
 }

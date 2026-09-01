@@ -159,12 +159,9 @@ class WooCommerceAnalyticsProxySpeed {
 	 * @return void
 	 */
 	private function process_proxy_request() {
-		// The REST route is only registered where proxy tracking is enabled, but this
-		// module runs at MU-plugin stage and never reaches rest_api_init, so without
-		// this check the endpoint would keep answering on sites that turned the
-		// feature off. The check lives here rather than in init() because it needs
-		// the autoloader, which init() loads only after is_proxy_request() matches.
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+		// Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
+		// registered that filter this early, so it reads false everywhere.
+		if ( 'no' === get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
 			$this->send_json_response(
 				array(
 					'success' => false,
@@ -233,7 +230,7 @@ class WooCommerceAnalyticsProxySpeed {
 			$event_name = $event['event_name'] ?? null;
 			$properties = $event['properties'] ?? array();
 
-			if ( ! $event_name || ! is_array( $properties ) ) {
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
 				$results[ $index ] = array(
 					'success' => false,
 					'error'   => 'Missing event_name or invalid properties',

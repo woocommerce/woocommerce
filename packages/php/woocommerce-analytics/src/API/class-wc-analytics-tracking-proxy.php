@@ -101,7 +101,7 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			// Validate event name and properties.
 			$event_name = $event['event_name'] ?? null;
 			$properties = $event['properties'] ?? array();
-			if ( ! $event_name || ! is_array( $properties ) ) {
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
 				$results[ $index ] = array(
 					'success' => false,
 					'error'   => 'Missing event_name or invalid properties',

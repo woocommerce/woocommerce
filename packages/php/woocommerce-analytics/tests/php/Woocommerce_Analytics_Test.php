@@ -41,10 +41,12 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Clean up any existing options/transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 
 		// Remove any filters that might interfere.
 		remove_all_filters( 'woocommerce_analytics_auto_install_proxy_speed_module' );
+		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 	}
 
 	/**
@@ -58,7 +60,9 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Clean up options and transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
+		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 
 		parent::tear_down();
 	}
@@ -280,6 +284,50 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		// Options and transients should be deleted.
 		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ) );
 		$this->assertFalse( get_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT ) );
+	}
+
+	/**
+	 * The speed module runs at MU-plugin stage, where no plugin has registered a
+	 * callback on the proxy tracking filter yet, so it cannot ask `Features` and
+	 * has to read a persisted answer instead.
+	 */
+	public function test_sync_proxy_tracking_state_records_the_resolved_value(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+
+		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
+
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame(
+			'no',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'Turning the feature off must be mirrored too, or the module never stops answering.'
+		);
+	}
+
+	/**
+	 * The mirror runs on every front-end and admin request, so it must not write
+	 * to the options table when nothing changed.
+	 */
+	public function test_sync_proxy_tracking_state_does_not_rewrite_an_unchanged_value(): void {
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$writes = 0;
+		$spy    = function ( $value ) use ( &$writes ) {
+			++$writes;
+			return $value;
+		};
+		add_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
+
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		remove_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
+
+		$this->assertSame( 0, $writes );
 	}
 
 	/**
