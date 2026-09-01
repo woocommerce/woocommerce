@@ -9,8 +9,8 @@ Covers the scenarios from the original plugin test plan that have a target in co
 - `variations.spec.ts` — variable products: the form following the selected
   variation, signup against a variation, the variation's attributes in the
   emails, the back-in-stock email linking back to the variation pre-selected,
-  and the parent-level signup opt-out that variations inherit. Covers both
-  fixed-value and `Any <attribute>` variations.
+  and the parent-level signup opt-out removing the form from the whole variable
+  product page. Covers both fixed-value and `Any <attribute>` variations.
 
 ## Variation notes
 
@@ -20,6 +20,11 @@ Covers the scenarios from the original plugin test plan that have a target in co
   `.woocommerce .wc_bis_form.hidden { display: none }` ships in `woocommerce.css`
   (the `woocommerce-general` handle), which bundled themes such as Twenty
   Twenty-Three replace with their own stylesheet.
+- The parent-level opt-out is asserted on the product page only. On render,
+  `maybe_render_form()` passes the parent from `global $product` to
+  `product_allows_signups()`, so the variation branch of that method — the one
+  that walks up to the parent — is only reached on the signup POST, which the
+  form's absence makes unreachable from the UI.
 - The plugin's "already signed up for this variation" scenario has no core
   target: that message is only rendered when the
   `woocommerce_customer_stock_notifications_personalization_enabled` filter is

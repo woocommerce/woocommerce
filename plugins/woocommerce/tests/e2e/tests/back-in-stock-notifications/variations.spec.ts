@@ -203,26 +203,28 @@ test.describe(
 				).toHaveValue( outOfStockVariation.option );
 			} );
 
-			test( 'a parent opted out of signups renders no form for its variations', async ( {
+			test( 'a parent opted out of signups renders no form on its product page', async ( {
 				page,
 				restApi,
 				variableProduct,
 			} ) => {
+				// Positive control: the form is there before the opt-out, so a
+				// product page that renders no form for an unrelated reason
+				// cannot pass the assertion below.
+				await page.goto( variableProduct.permalink );
+				await expect( bisFormLocator( page ) ).toHaveCount( 1 );
+
 				await setProductSignupsAllowed(
 					restApi,
 					variableProduct.id,
 					false
 				);
 
+				// `maybe_render_form()` reads the parent from `global $product`,
+				// so the parent's opt-out meta removes the form from the whole
+				// variable product page — there is nothing left to show for
+				// any variation.
 				await page.goto( variableProduct.permalink );
-				await selectVariation(
-					page,
-					variableProduct,
-					variableProduct.outOfStockVariation
-				);
-
-				// A variation has no opt-out of its own — the parent's meta is
-				// what decides, through `product_allows_signups()`.
 				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 			} );
 		} );
