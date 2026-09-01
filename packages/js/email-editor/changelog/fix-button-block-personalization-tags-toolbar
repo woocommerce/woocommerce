@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the Personalization Tags toolbar button on the Button block by registering the shortcode format as non-interactive
