@@ -11,6 +11,28 @@ export type DurationShard = {
 	files: string[];
 };
 
+export type ManifestDrift = {
+	shardCount: number;
+	modelledTotalMs: number;
+	actualTotalMs: number;
+	totalDeviation: number;
+	worstShardDeviation: number;
+	shards: Array< {
+		index: number;
+		modelledMs: number;
+		actualMs: number;
+		deviation: number;
+	} >;
+	newFiles: string[];
+	staleFiles: string[];
+	drifts: Array< {
+		file: string;
+		modelledMs: number;
+		actualMs: number;
+		deltaMs: number;
+	} >;
+};
+
 export type ShardSelection = {
 	files: Set< string > | null;
 	fallbackReason: string | null;
@@ -42,5 +64,11 @@ export function selectShardFiles( options: {
 	manifest: DurationManifest;
 	shard: { current: number; total: number };
 } ): ShardSelection;
+
+export function summarizeManifestDrift( options: {
+	manifest: DurationManifest;
+	actualDurations: Record< string, number >;
+	shardCount: number;
+} ): ManifestDrift;
 
 export function validateDurationManifest( manifest: unknown ): void;

@@ -238,11 +238,94 @@ function selectShardFiles( { files, manifest, shard } ) {
 	};
 }
 
+/**
+ * Compare a duration manifest against freshly measured durations.
+ *
+ * Reports how far the committed plan has drifted from reality, at the
+ * granularity that matters: per shard, since the slowest shard is the CI
+ * critical path. Individual spec timings are far noisier than shard totals, so
+ * `drifts` is for naming culprits, not for deciding whether to act.
+ *
+ * @param {Object}                options
+ * @param {Object}                options.manifest        Committed duration manifest.
+ * @param {Record<string,number>} options.actualDurations Measured ms per spec file.
+ * @param {number}                options.shardCount      Shards the plan is built for.
+ * @return {Object} Drift summary.
+ */
+function summarizeManifestDrift( { manifest, actualDurations, shardCount } ) {
+	validateDurationManifest( manifest );
+
+	const files = Object.keys( actualDurations ).sort( compareFilePaths );
+	if ( files.length === 0 ) {
+		throw new Error( 'No measured durations were supplied' );
+	}
+
+	const shards = planDurationShards( {
+		files,
+		manifest,
+		shardCount,
+	} ).map( ( shard ) => {
+		const actualMs = shard.files.reduce(
+			( total, file ) => total + actualDurations[ file ],
+			0
+		);
+		return {
+			index: shard.index,
+			modelledMs: shard.durationMs,
+			actualMs,
+			deviation: ( actualMs - shard.durationMs ) / shard.durationMs,
+		};
+	} );
+
+	const modelledTotalMs = shards.reduce(
+		( total, shard ) => total + shard.modelledMs,
+		0
+	);
+	const actualTotalMs = shards.reduce(
+		( total, shard ) => total + shard.actualMs,
+		0
+	);
+
+	const drifts = files
+		.filter( ( file ) => manifest.files[ file ] !== undefined )
+		.map( ( file ) => ( {
+			file,
+			modelledMs: manifest.files[ file ],
+			actualMs: actualDurations[ file ],
+			deltaMs: actualDurations[ file ] - manifest.files[ file ],
+		} ) )
+		.filter( ( drift ) => drift.deltaMs !== 0 )
+		.sort(
+			( first, second ) =>
+				Math.abs( second.deltaMs ) - Math.abs( first.deltaMs ) ||
+				compareFilePaths( first.file, second.file )
+		);
+
+	return {
+		shardCount,
+		modelledTotalMs,
+		actualTotalMs,
+		totalDeviation: ( actualTotalMs - modelledTotalMs ) / modelledTotalMs,
+		worstShardDeviation: Math.max(
+			...shards.map( ( shard ) => Math.abs( shard.deviation ) )
+		),
+		shards,
+		newFiles: files.filter(
+			( file ) => manifest.files[ file ] === undefined
+		),
+		staleFiles: Object.keys( manifest.files )
+			.filter( ( file ) => actualDurations[ file ] === undefined )
+			.sort( compareFilePaths ),
+		drifts,
+	};
+}
+
 module.exports = {
 	assertPlanCoversCorpus,
 	assignDurationShards,
 	collectProjectFiles,
 	planDurationShards,
 	selectShardFiles,
+	summarizeManifestDrift,
 	validateDurationManifest,
 };
