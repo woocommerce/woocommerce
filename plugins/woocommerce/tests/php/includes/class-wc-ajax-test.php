@@ -354,6 +354,50 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should include an exact taxonomy term match when a filter supplies the default empty offset.
+	 */
+	public function test_json_search_taxonomy_terms_includes_exact_name_with_empty_offset(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 6 00',
+					'Candidate 6 01',
+					'Candidate 6 02',
+					'6',
+				)
+			);
+
+			// WP_Term_Query documents an empty string as its own "no offset" default.
+			add_filter(
+				'woocommerce_product_attribute_terms',
+				static function ( $args ) {
+					$args['offset'] = '';
+
+					return $args;
+				}
+			);
+
+			$exact_query_count = 0;
+			$this->track_exact_taxonomy_term_queries_for_test( $fixture['taxonomy'], '6', $exact_query_count );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( '6', 'Candidate 6 00', 'Candidate 6 01' ),
+				wp_list_pluck( $response, 'name' ),
+				'An empty filtered offset should still recover the omitted exact match.'
+			);
+			$this->assertSame( 1, $exact_query_count, 'An empty filtered offset should trigger one bounded exact-name term query.' );
+		} finally {
+			if ( null !== $fixture ) {
+				$this->unregister_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should preserve the ordering of a visible exact taxonomy term match.
 	 */
 	public function test_json_search_taxonomy_terms_does_not_promote_visible_exact_name(): void {

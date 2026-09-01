@@ -2261,8 +2261,8 @@ class WC_AJAX {
 
 		$filtered_offset = $args['offset'] ?? 0;
 
-		// Recovery applies only to the first result window.
-		if ( ! in_array( $filtered_offset, array( 0, '0' ), true ) ) {
+		// Recovery applies only to the first result window. WP_Term_Query defaults the offset to an empty string.
+		if ( ! in_array( $filtered_offset, array( 0, '0', '' ), true ) ) {
 			return $terms;
 		}
 
