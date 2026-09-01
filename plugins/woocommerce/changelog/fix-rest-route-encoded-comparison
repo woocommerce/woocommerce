@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep third-party REST routes in scope for API key authentication when the request URI is percent-encoded.
