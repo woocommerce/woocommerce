@@ -652,6 +652,78 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		self::remove_download_handlers();
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ok for unit tests.
+		file_put_contents( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/array-args-123.ods', str_pad( '', 100 ) );
+
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Array args 123',
+					'file' => content_url( 'uploads/woocommerce_uploads/array-args-123.ods' ),
+				),
+			)
+		);
+
+		$email         = 'admin@example.org';
+		$download_keys = array_keys( $product->get_downloads() );
+		$valid_args    = array(
+			'download_file' => $product->get_id(),
+			'order'         => $order->get_order_key(),
+			'email'         => $email,
+			'uid'           => hash( 'sha256', $email ),
+			'key'           => $download_keys[0],
+		);
+
+		$downloads_served = 0;
+		$download_counter = function () use ( &$downloads_served ) {
+			++$downloads_served;
+		};
+
+		add_action( 'woocommerce_download_file_force', $download_counter );
+
+		foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+			$_GET = $valid_args;
+
+			if ( 'uid' === $arg ) {
+				// The UID is only consulted when no email address is supplied.
+				unset( $_GET['email'] );
+			}
+
+			$_GET[ $arg ]   = array( 'x' );
+			$wp_die_message = '';
+
+			// We do not use expectException() here because every argument is checked in turn.
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$wp_die_message = $e->getMessage();
+			}
+
+			$this->assertStringContainsString(
+				'Invalid download link',
+				$wp_die_message,
+				"An array value for the \"$arg\" query argument should render the invalid download link error."
+			);
+		}
+
+		$this->assertSame( 0, $downloads_served, 'No file is served for a download link carrying array query arguments.' );
+
+		// The same link with scalar values is unaffected.
+		$_GET = $valid_args;
+		WC_Download_Handler::download_product();
+		$this->assertSame( 1, $downloads_served, 'A valid download link still serves the file.' );
+
+		$_GET = array();
+		remove_action( 'woocommerce_download_file_force', $download_counter );
+		self::restore_download_handlers();
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *

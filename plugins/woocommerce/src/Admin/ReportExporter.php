@@ -179,11 +179,11 @@ class ReportExporter {
 		if (
 			isset( $_GET['action'] ) &&
 			! empty( $_GET['filename'] ) &&
-			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // WPCS: input var ok, sanitization ok.
+			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only export download reached from an emailed admin link and gated on the view_woocommerce_reports capability; the value is only compared verbatim against a fixed action name.
 			current_user_can( 'view_woocommerce_reports' )
 		) {
 			$exporter = new ReportCSVExporter();
-			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
+			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only export download reached from an emailed admin link and gated on the view_woocommerce_reports capability; set_filename() applies sanitize_file_name(), which keeps the read inside the reports directory.
 			$exporter->export();
 		}
 	}
