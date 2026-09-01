@@ -61,13 +61,16 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * the `exit` that follows it in production would end the test run. Throwing
 	 * from the filter stands in for both.
 	 *
+	 * The target is recorded in `$redirect_location` rather than in the exception
+	 * message, which phpcs requires to be escaped.
+	 *
 	 * @param string $location The redirect target.
 	 * @return never
-	 * @throws \RuntimeException Always, carrying the redirect target.
+	 * @throws \RuntimeException Always, to stand in for the `exit`.
 	 */
 	public function capture_redirect( $location ) {
 		$this->redirect_location = (string) $location;
-		throw new \RuntimeException( (string) $location );
+		throw new \RuntimeException( 'Redirected.' );
 	}
 
 	/**
@@ -266,11 +269,13 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 			( new MyAccountEndpoint() )->maybe_handle_cancel();
 			$this->fail( 'Expected the cancel handler to redirect.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertSame(
-				\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
-				$e->getMessage()
-			);
+			unset( $e );
 		}
+
+		$this->assertSame(
+			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+			$this->redirect_location
+		);
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
