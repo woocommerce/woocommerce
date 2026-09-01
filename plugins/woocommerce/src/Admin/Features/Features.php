@@ -332,7 +332,7 @@ class Features {
 
 		if (
 			in_array( 'analytics', $features, true ) &&
-			! FeaturesUtil::feature_is_enabled( 'analytics' )
+			! self::is_analytics_enabled()
 		) {
 			$unavailable_features[] = 'analytics';
 		}
@@ -489,7 +489,7 @@ class Features {
 		$compatibility_values = array_merge(
 			array_fill_keys( array_keys( self::$retired_feature_compatibility_versions ), true ),
 			array(
-				'analytics'                  => FeaturesUtil::feature_is_enabled( 'analytics' ),
+				'analytics'                  => self::is_analytics_enabled(),
 				'remote-inbox-notifications' => 'yes' === get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' ),
 			)
 		);
@@ -547,6 +547,20 @@ class Features {
 		}
 
 		return ! in_array( 'analytics', self::get_features_with_legacy_compatibility_defaults(), true );
+	}
+
+	/**
+	 * Checks if analytics is enabled, without building the (translated) feature definitions.
+	 *
+	 * Mirrors FeaturesController::feature_is_enabled( 'analytics' ), since going through
+	 * FeaturesUtil/FeaturesController here can trigger a too-early textdomain load for
+	 * callers that check this before init.
+	 *
+	 * @return bool
+	 */
+	private static function is_analytics_enabled() {
+		return ! self::is_analytics_disabled_by_legacy_filters()
+			&& 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 	}
 
 	/**
