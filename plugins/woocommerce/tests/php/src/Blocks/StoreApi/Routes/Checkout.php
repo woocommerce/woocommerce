@@ -3477,8 +3477,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'status' => 'any',
 			)
 		);
-		$notes = wc_get_order_notes( array( 'order_id' => $orders[0]->get_id() ) );
-		$notes = wp_list_pluck( $notes, 'content' );
+		$notes  = wc_get_order_notes( array( 'order_id' => $orders[0]->get_id() ) );
+		$notes  = wp_list_pluck( $notes, 'content' );
 
 		$this->assertNotEmpty(
 			array_filter(
