@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix unnecessary repeated processing of fragments in the GraphQL side of the dual API.
