@@ -782,6 +782,20 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				$first_three_names,
 				'A competing filtered search selector should retain the broad response.',
 			),
+			'competing name'   => array(
+				static function ( $args ) {
+					$args['name'] = array(
+						'Candidate 6 00',
+						'Candidate 6 01',
+						'Candidate 6 02',
+					);
+
+					return $args;
+				},
+				$pluck_names,
+				$first_three_names,
+				'A competing filtered name selector should retain the broad response.',
+			),
 		);
 	}
 
