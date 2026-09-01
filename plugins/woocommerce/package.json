@@ -1103,7 +1103,7 @@
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^9.3.0",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.62.1",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
