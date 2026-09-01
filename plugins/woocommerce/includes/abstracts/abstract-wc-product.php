@@ -1928,7 +1928,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function has_enough_stock( $quantity ) {
-		return ! $this->managing_stock() || $this->backorders_allowed() || $this->get_stock_quantity() >= $quantity;
+		return ! $this->managing_stock() ||
+			$this->backorders_allowed() ||
+			(
+				$this->get_stock_quantity() >= $quantity
+					&& $this->get_stock_quantity() > abs( (float) get_option( 'woocommerce_notify_no_stock_amount', 0 ) )
+			);
 	}
 
 	/**

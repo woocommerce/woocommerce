@@ -893,7 +893,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			$product = $values['data'];
 
 			// Check stock based on stock-status.
-			if ( ! $product->is_in_stock() ) {
+			if (
+				! $product->is_in_stock() ||
+					( $product->managing_stock() && ! $product->backorders_allowed() && $product->get_stock_quantity() <= abs( (float) get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) )
+			) {
 				/* translators: %s: product name */
 				$error->add( 'out-of-stock', sprintf( __( 'Sorry, "%s" is not in stock. Please edit your cart and try again. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 				return $error;
