@@ -71,6 +71,10 @@ class Filterer implements RegisterHooksInterface {
 	 * @since 11.2.0
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		if ( ! is_string( $new_status ) || ! is_string( $old_status ) ) {
+			return;
+		}
+
 		$was_published = ProductStatus::PUBLISH === $old_status;
 		$is_published  = ProductStatus::PUBLISH === $new_status;
 

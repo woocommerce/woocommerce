@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -117,6 +118,32 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				'third'  => array( 3 => 3 ),
 			),
 			$limited_counts
+		);
+	}
+
+	/**
+	 * @testdox Status-transition hooks with non-string statuses are ignored without errors.
+	 * @dataProvider non_string_status_transition_provider
+	 *
+	 * @param mixed $new_status New post status.
+	 * @param mixed $old_status Old post status.
+	 */
+	public function test_transition_callback_ignores_non_string_status_values( $new_status, $old_status ): void {
+		$this->expectNotToPerformAssertions();
+
+		$filterer = new Filterer();
+		$filterer->handle_transition_post_status( $new_status, $old_status, null );
+	}
+
+	/**
+	 * Non-string status values passed to the transition callback.
+	 *
+	 * @return array<string, array{mixed, mixed}>
+	 */
+	public static function non_string_status_transition_provider(): array {
+		return array(
+			'non-string new status' => array( new \stdClass(), ProductStatus::PUBLISH ),
+			'non-string old status' => array( ProductStatus::PUBLISH, new \stdClass() ),
 		);
 	}
 
