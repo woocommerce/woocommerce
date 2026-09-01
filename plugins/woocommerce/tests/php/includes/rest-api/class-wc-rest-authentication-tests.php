@@ -164,6 +164,10 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'plain permalink non-woocommerce route'       => array( '/?rest_route=/wp/v2/users&x=wp-json/wc/', false ),
 			'non-woocommerce route with query'            => array( '/wp-json/wp/v2/users?context=edit&x=wp-json/wc/', false ),
 			'non-woocommerce path with substring'         => array( '/not-wp-json/wc/v3/products', false ),
+			'woocommerce route, repeated leading slash'   => array( '//wp-json/wc/v3/products', true ),
+			'third-party route, repeated leading slash'   => array( '//wp-json/wc-custom/v1/resource', true ),
+			'many leading slashes'                        => array( '////wp-json/wc/v3/products', true ),
+			'non-woocommerce route, repeated leading slash' => array( '//wp-json/wp/v2/users', false ),
 			// A character esc_url_raw() strips must not be collapsed into a WooCommerce route prefix.
 			'path with stripped character in prefix'      => array( '/wp-json/w^c/v3/products', false ),
 			'plain route with stripped character in prefix' => array( '/?rest_route=/w^c/v3/products', false ),
@@ -208,6 +212,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			// WP::parse_request() strips the home path case-insensitively, so this still reaches WooCommerce.
 			'woocommerce route, home path cased' => array( '/Shop/wp-json/wc/v3/products', true ),
 			'index.php permalink'                => array( '/shop/index.php/wp-json/wc/v3/products', true ),
+			'repeated slash after home path'     => array( '/shop//wp-json/wc/v3/products', true ),
 			'non-woocommerce route'              => array( '/shop/wp-json/wp/v2/users', false ),
 		);
 	}

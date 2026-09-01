@@ -113,7 +113,14 @@ class WC_REST_Authentication {
 		 * needed.
 		 */
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared against REST route prefixes only, never output or stored; sanitizing would diverge from the route WordPress dispatches.
-		$request_uri  = wp_unslash( $_SERVER['REQUEST_URI'] );
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+
+		// WP::parse_request() trims leading slashes off the URI, but wp_parse_url() would read a
+		// leading '//' as a host, so collapse them first.
+		if ( str_starts_with( $request_uri, '//' ) ) {
+			$request_uri = '/' . ltrim( $request_uri, '/' );
+		}
+
 		$query_string = wp_parse_url( $request_uri, PHP_URL_QUERY );
 		$query_params = array();
 

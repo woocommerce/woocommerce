@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve REST API routes correctly when the request URI has repeated leading slashes.
