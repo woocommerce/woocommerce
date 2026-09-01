@@ -350,8 +350,7 @@ trait CheckoutTrait {
 	 * @return DocumentObject The document object.
 	 */
 	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
-		// Posted fields merge over persisted values (from the order when paying for one, otherwise the customer
-		// session) so partial requests evaluate hidden/required rules against the full field state. See issue #66943.
+		// Ensure DocumentObject has all fields (posted, saved), not just posted.
 		$saved_fields      = $this->schema instanceof CheckoutSchema
 			? (array) $this->schema->get_additional_fields_response( $this->order instanceof \WC_Order ? $this->order : wc()->customer )
 			: [];
