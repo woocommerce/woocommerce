@@ -48,7 +48,7 @@
 
 <!-- wp:woocommerce/product-filter-rating -->
 <div class="wp-block-woocommerce-product-filter-rating"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->
-<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":{},"right":{},"left":{}}}} -->
+<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"}}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":4,"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10"}}}} -->
 <h4 class="wp-block-accordion-heading has-icon has-icon-right"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Rating', 'purple' );?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h4>
 <!-- /wp:accordion-heading -->
@@ -68,7 +68,7 @@
 
 <!-- wp:woocommerce/product-filter-attribute -->
 <div class="wp-block-woocommerce-product-filter-attribute"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->
-<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":{},"right":{},"left":{}}}} -->
+<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"}}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":4,"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10"}}}} -->
 <h4 class="wp-block-accordion-heading has-icon has-icon-right"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Attribute filter', 'purple' );?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h4>
 <!-- /wp:accordion-heading -->
@@ -88,7 +88,7 @@
 
 <!-- wp:woocommerce/product-filter-status -->
 <div class="wp-block-woocommerce-product-filter-status"><!-- wp:accordion {"style":{"spacing":{"blockGap":"0"}}} -->
-<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":{},"right":{},"left":{}}}} -->
+<div role="group" class="wp-block-accordion"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"}}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":4,"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10"}}}} -->
 <h4 class="wp-block-accordion-heading has-icon has-icon-right"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10)"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Status', 'purple' );?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h4>
 <!-- /wp:accordion-heading -->
