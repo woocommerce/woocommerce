@@ -31,7 +31,7 @@ final class PostcodeValidation {
 			 *
 			 * @param array $rules Rules keyed by country code.
 			 */
-			$rules = apply_filters( 'woocommerce_postcode_validation_rules', include WC_ABSPATH . 'i18n/postcode-validation-rules.php' );
+			$rules = apply_filters( 'woocommerce_postcode_validation_rules', include WC_ABSPATH . 'i18n/postcodes.php' );
 
 			self::$rules = is_array( $rules ) ? $rules : array();
 		}
