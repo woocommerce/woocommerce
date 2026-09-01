@@ -288,7 +288,12 @@ class WC_REST_Authentication {
 		 * authenticated, which means that filter approved the URI route: a resolved route equal to the
 		 * URI route inherits that approval, and anything else does not.
 		 */
-		return $resolved_route === $this->route_from_request_uri();
+		// WordPress reads rest_route through parse_str(), which decodes it, while the URI route is
+		// read raw. Accept the decoded form too, so an encoded character is not read as another route.
+		$uri_route     = $this->route_from_request_uri();
+		$decoded_route = trim( urldecode( $uri_route ), '/' );
+
+		return $resolved_route === $uri_route || $resolved_route === $decoded_route;
 	}
 
 	/**

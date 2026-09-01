@@ -281,6 +281,52 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let an authenticated key through to a third-party route the URI named in percent-encoded form.
+	 *
+	 * @dataProvider provider_encoded_third_party_routes
+	 *
+	 * @param string $request_uri    Request URI.
+	 * @param string $resolved_route Route WordPress resolves from that URI.
+	 */
+	public function test_reject_out_of_scope_route_allows_encoded_third_party_route( string $request_uri, string $resolved_route ): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = $request_uri;
+		$wp->query_vars['rest_route'] = $resolved_route;
+
+		$this->authenticate_as( 1 );
+
+		$this->assertNull(
+			$this->sut->reject_out_of_scope_route( null ),
+			'A third-party route the URI named must stay in scope however the URI encoded it.'
+		);
+	}
+
+	/**
+	 * Data provider pairing an encoded request URI with the route WordPress resolves from it.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_encoded_third_party_routes(): array {
+		return array(
+			'encoded space'          => array( '/wp-json/myplugin/v1/items/a%20b', '/myplugin/v1/items/a b' ),
+			'encoded hyphen'         => array( '/wp-json/myplugin/v1/items/a%2Db', '/myplugin/v1/items/a-b' ),
+			'encoded slash'          => array( '/wp-json/myplugin/v1/items/a%2Fb', '/myplugin/v1/items/a/b' ),
+			'encoded ampersand'      => array( '/wp-json/myplugin/v1/items/a%26b', '/myplugin/v1/items/a&b' ),
+			'encoded multibyte'      => array( '/wp-json/myplugin/v1/items/caf%C3%A9', '/myplugin/v1/items/café' ),
+			// The resolved route is trimmed of slashes, so the decoded one has to be trimmed to match.
+			'encoded trailing slash' => array( '/wp-json/myplugin/v1/items/a%2F', '/myplugin/v1/items/a' ),
+			// A '+' survives when the server fills PATH_INFO, and parse_str() reads it as a space when
+			// WordPress falls back to the raw URI. Both readings name this route.
+			'plus kept as plus'      => array( '/wp-json/myplugin/v1/items/a+b', '/myplugin/v1/items/a+b' ),
+			'plus read as space'     => array( '/wp-json/myplugin/v1/items/a+b', '/myplugin/v1/items/a b' ),
+			// WP::parse_request() re-escapes '%' in PATH_INFO, so an encoded percent reaches the route
+			// undecoded and only the raw comparison names it.
+			'encoded percent'        => array( '/wp-json/myplugin/v1/items/a%2520b', '/myplugin/v1/items/a%2520b' ),
+		);
+	}
+
+	/**
 	 * @testdox Should treat a namespace opted in through the woocommerce_rest_is_request_to_rest_api filter as a WooCommerce request.
 	 */
 	public function test_is_request_to_rest_api_honours_scope_filter(): void {
@@ -318,6 +364,25 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$result = $this->sut->reject_out_of_scope_route( null );
 
 		$this->assertWPError( $result, 'A resolved route the URI never named must be rejected even when the URI names an opted-in namespace.' );
+		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject a resolved route in the same namespace as the one the URI names.
+	 */
+	public function test_reject_out_of_scope_route_rejects_sibling_route_in_same_namespace(): void {
+		global $wp;
+
+		// Same namespace, different resource, and the URI is encoded. Decoding must not collapse the
+		// two into a match: scope is judged per route, not per namespace.
+		$_SERVER['REQUEST_URI']       = '/wp-json/myplugin/v1/items/a%20b';
+		$wp->query_vars['rest_route'] = '/myplugin/v1/items/other';
+
+		$this->authenticate_as( 1 );
+
+		$result = $this->sut->reject_out_of_scope_route( null );
+
+		$this->assertWPError( $result, 'A sibling route the URI never named must be rejected.' );
 		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
 	}
 
