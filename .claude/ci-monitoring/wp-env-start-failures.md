@@ -6,10 +6,10 @@ Write prose in `.claude/ci-monitoring/analysis.md`; it is appended at the end.
 | | |
 |---|---|
 | Window | 2026-07-15 (retry merged, PR #66491) → 2026-09-01 |
-| Runs scanned | 5135 |
-| Last run tracked | [33485128911](https://github.com/woocommerce/woocommerce/actions/runs/33485128911) |
+| Runs scanned | 5181 |
+| Last run tracked | [33492068717](https://github.com/woocommerce/woocommerce/actions/runs/33492068717) |
 | Collection cursor | 2026-09-01 |
-| Updated | 2026-09-01T08:50:11Z |
+| Updated | 2026-09-01T09:39:29Z |
 
 A job is **recovered** when it emitted a retry warning and then passed, and lost
 when it exhausted every attempt. Jobs that started cleanly first time are not

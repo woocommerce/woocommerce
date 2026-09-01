@@ -136,9 +136,16 @@ scan_run() {
   local ok=0 try err
   err=$(mktemp)
   for try in 1 2 3; do
-    if gh api "repos/$REPO/actions/runs/$run/attempts/$att/logs" > "$z" 2>"$err" \
-       && unzip -qq -o "$z" -d "$d" 2>/dev/null; then
-      ok=1; break
+    if gh api "repos/$REPO/actions/runs/$run/attempts/$att/logs" > "$z" 2>"$err"; then
+      unzip -qq -o "$z" -d "$d" 2>/dev/null && { ok=1; break; }
+      # A run stopped before any job wrote a log still serves 200 with a zero-entry zip,
+      # which unzip rejects. Nothing to read, and never will be -- count it as read, or
+      # the attempt stays out of the seen-set and every later collection fetches it again.
+      # An archive holding entries opens with the local file header signature PK\x03\x04;
+      # one holding none opens straight with the end-of-central-directory record PK\x05\x06.
+      # Read the signature rather than unzip's wording, and rather than the run conclusion:
+      # most of these runs were cancelled, but some conclude `failure`.
+      [ "$(od -An -tx1 -N4 "$z" | tr -d ' ')" = "504b0506" ] && { ok=2; break; }
     fi
     # 404 means there is nothing to read and never will be -- most of these are runs held
     # at `action_required` that never started a job. Count them as read; retrying them
