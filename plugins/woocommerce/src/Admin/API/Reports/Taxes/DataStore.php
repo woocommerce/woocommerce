@@ -296,6 +296,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Cache of lookup_is_keyed_by_order_item(). Only `true` sticks: the re-key can land while a
+	 * request runs (the "Verify base database tables" tool re-keys right before the tools list
+	 * re-renders), and a cached `false` would outlive it.
+	 *
+	 * @var bool|null
+	 */
+	private static $lookup_keyed_by_order_item = null;
+
+	/**
 	 * Whether the lookup's primary key includes the tax order item.
 	 *
 	 * The re-key in `WC_Install::create_tables()` can fail on a large store, and dbDelta adds the
@@ -303,20 +312,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * on (order_id, tax_rate_id) collapses the lines sharing a rate into one row that the report
 	 * then matches to a single line, which reads worse than it did before the column existed.
 	 *
+	 * `OrderTaxLookupMigrator` reads this too: a rebuild over such a table would write every row
+	 * back at zero while stepping the cursor past it, so it waits instead.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.2.0
+	 *
 	 * @return bool
 	 */
-	private static function lookup_is_keyed_by_order_item(): bool {
+	public static function lookup_is_keyed_by_order_item(): bool {
 		global $wpdb;
 
-		static $keyed_by_order_item = null;
-
-		if ( null === $keyed_by_order_item ) {
+		if ( true !== self::$lookup_keyed_by_order_item ) {
 			$table_name = self::get_db_table_name();
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
-			$keyed_by_order_item = (bool) $wpdb->get_var( "SHOW KEYS FROM `{$table_name}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" );
+			self::$lookup_keyed_by_order_item = (bool) $wpdb->get_var( "SHOW KEYS FROM `{$table_name}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" );
 		}
 
-		return $keyed_by_order_item;
+		return self::$lookup_keyed_by_order_item;
 	}
 
 	/**

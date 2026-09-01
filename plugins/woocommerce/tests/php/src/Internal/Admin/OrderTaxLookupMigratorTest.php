@@ -173,6 +173,16 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clear the data store's per-request cache of the lookup table's key shape, so a key change
+	 * made by this test is seen.
+	 */
+	private function reset_lookup_key_cache(): void {
+		$property = new \ReflectionProperty( TaxesDataStore::class, 'lookup_keyed_by_order_item' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
+	}
+
+	/**
 	 * @testdox Only orders still holding rows without a tax order item are pending.
 	 */
 	public function test_only_orders_in_the_old_shape_are_pending(): void {
@@ -256,6 +266,39 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $this->lookup_rows( $rebuilt->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( $rebuilt->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the whole batch.' );
 		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that could not be rebuilt should not hold the pass up.' );
+	}
+
+	/**
+	 * @testdox The rebuild waits for the re-key instead of parking the cursor at the end of the table.
+	 */
+	public function test_rebuild_waits_until_the_lookup_is_keyed_by_order_item(): void {
+		global $wpdb;
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id() );
+		$this->unmigrate_lookup_rows( $order->get_id(), 0, 6.25 );
+
+		$table_name = TaxesDataStore::get_db_table_name();
+
+		// The shape a failed re-key leaves behind: dbDelta added the column, the key change never
+		// landed. Rebuilding here would write every row back at zero and step past it for good.
+		$wpdb->query( "ALTER TABLE `{$table_name}` DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+		$this->reset_lookup_key_cache();
+
+		try {
+			$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'No orders should be handed out while the re-key has not landed.' );
+			$this->assertSame( 0, $this->sut->get_total_pending_count(), 'No order should count as pending while the rebuild cannot change it.' );
+			$this->assertFalse( get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should stay where it is.' );
+
+			$tools = $this->sut->handle_woocommerce_debug_tools( array() );
+			$this->assertTrue( $tools['rebuild_analytics_tax_data']['disabled'], 'The tool should not offer a run that cannot change anything.' );
+			$this->assertStringContainsString( 'Verify base database tables', $tools['rebuild_analytics_tax_data']['desc'], 'The tool should say how to put the re-key right.' );
+		} finally {
+			$wpdb->query( "ALTER TABLE `{$table_name}` DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id, order_item_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+			$this->reset_lookup_key_cache();
+		}
+
+		$this->assertSame( array( $order->get_id() ), $this->sut->get_next_batch_to_process( 10 ), 'The rebuild should pick the order up once the re-key has landed.' );
+		$this->assertSame( 1, $this->sut->get_total_pending_count(), 'The order should be back to pending once the re-key has landed.' );
 	}
 
 	/**

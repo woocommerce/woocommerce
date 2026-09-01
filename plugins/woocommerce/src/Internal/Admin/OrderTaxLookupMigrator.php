@@ -97,6 +97,12 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	public function get_total_pending_count(): int {
 		global $wpdb;
 
+		// While the lookup is not keyed by tax order item there is nothing the rebuild can change,
+		// so no order counts as pending. See get_next_batch_to_process().
+		if ( ! TaxesDataStore::lookup_is_keyed_by_order_item() ) {
+			return 0;
+		}
+
 		$table_name = TaxesDataStore::get_db_table_name();
 
 		return (int) $wpdb->get_var(
@@ -121,6 +127,15 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 */
 	public function get_next_batch_to_process( int $size ): array {
 		global $wpdb;
+
+		// On a table the re-key in `WC_Install::create_tables()` never reached, the sync would
+		// write every row back at zero and the pass would park the cursor at the end of the table
+		// with nothing rebuilt. Hand out nothing instead: an empty batch retires the processor
+		// with the cursor where it stands, so the rebuild is still on offer once the re-key has
+		// landed.
+		if ( ! TaxesDataStore::lookup_is_keyed_by_order_item() ) {
+			return array();
+		}
 
 		$table_name = TaxesDataStore::get_db_table_name();
 
@@ -210,6 +225,19 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function handle_woocommerce_debug_tools( array $tools ): array {
+		// A failed re-key would otherwise go unseen here: with no order counting as pending, the
+		// tool would say there is nothing to rebuild. Say what is actually missing instead.
+		if ( ! TaxesDataStore::lookup_is_keyed_by_order_item() ) {
+			$tools['rebuild_analytics_tax_data'] = array(
+				'name'     => __( 'Rebuild analytics tax data', 'woocommerce' ),
+				'button'   => __( 'Rebuild', 'woocommerce' ),
+				'disabled' => true,
+				'desc'     => __( 'This will rebuild the Analytics tax data of orders recorded before WooCommerce kept a record of every tax line. The database change the rebuild needs is missing on this store. Run "Verify base database tables" to apply it, then come back here.', 'woocommerce' ),
+			);
+
+			return $tools;
+		}
+
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		$pending_count   = $this->get_total_pending_count();
 
