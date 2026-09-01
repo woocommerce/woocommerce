@@ -8,6 +8,9 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Opis\JsonSchema\{
 	Validator,
 	ValidationResult,
@@ -35,6 +38,18 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	protected $additional_fields_controller;
 
 	/**
+	 * Checkout schema instance, needed for the trait.
+	 * @var CheckoutSchema
+	 */
+	protected $schema;
+
+	/**
+	 * Current order, needed for the trait.
+	 * @var \WC_Order|null
+	 */
+	private $order = null;
+
+	/**
 	 * Fixture data.
 	 * @var FixtureData
 	 */
@@ -59,6 +74,7 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 		parent::setUp();
 		// Needed for trait.
 		$this->additional_fields_controller = Package::container()->get( CheckoutFields::class );
+		$this->schema                       = StoreApi::container()->get( SchemaController::class )->get( CheckoutSchema::IDENTIFIER );
 
 		$fixtures       = new FixtureData();
 		$this->products = array(
