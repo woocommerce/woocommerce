@@ -400,8 +400,27 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// Also skip orders without tax lines: computing bases would hydrate every
 		// line item, fee and shipping row for a write that never happens.
 		if ( $has_taxable_amount_column && ! empty( $tax_items ) ) {
+			// A refund's tax items re-derive the compound flag from the live rate, which can
+			// be gone by refund time; the parent's tax items carry the flags as charged, and
+			// the refund base must mirror them or a refunded order stops netting to zero.
+			$flag_items = $tax_items;
+			if ( $order instanceof \WC_Order_Refund ) {
+				$parent = wc_get_order( $order->get_parent_id() );
+				if ( $parent ) {
+					/**
+					 * Tax line items of the parent order.
+					 *
+					 * @var \WC_Order_Item_Tax[] $parent_tax_items
+					 */
+					$parent_tax_items = $parent->get_items( OrderItemType::TAX );
+					if ( ! empty( $parent_tax_items ) ) {
+						$flag_items = $parent_tax_items;
+					}
+				}
+			}
+
 			$compound_rate_ids = array();
-			foreach ( $tax_items as $tax_item ) {
+			foreach ( $flag_items as $tax_item ) {
 				if ( $tax_item->get_compound() ) {
 					$compound_rate_ids[] = $tax_item->get_rate_id();
 				}
