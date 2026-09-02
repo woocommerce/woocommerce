@@ -119,12 +119,14 @@ test.describe(
 					await expect( table ).toBeVisible();
 					await expect(
 						table.getByRole( 'link', {
-							name: new RegExp( product.name, 'i' ),
+							name: product.name,
+							exact: true,
 						} )
 					).toBeVisible();
 					await expect(
 						table.getByRole( 'link', {
-							name: new RegExp( secondProduct.name, 'i' ),
+							name: secondProduct.name,
+							exact: true,
 						} )
 					).toBeVisible();
 
@@ -171,7 +173,8 @@ test.describe(
 
 					const row = page.locator( `${ TABLE } tbody tr` ).filter( {
 						has: page.getByRole( 'link', {
-							name: new RegExp( product.name, 'i' ),
+							name: product.name,
+							exact: true,
 						} ),
 					} );
 					await expect( row ).toBeVisible();
@@ -191,10 +194,7 @@ test.describe(
 					// And a notice confirms the cancellation.
 					await expect(
 						page.getByText(
-							new RegExp(
-								`back in stock notification.*${ product.name }.*cancelled`,
-								'i'
-							)
+							`Back in stock notification for "${ product.name }" cancelled.`
 						)
 					).toBeVisible();
 				} finally {
@@ -263,7 +263,7 @@ test.describe(
 					page.getByRole( 'heading', { name: 'Login' } )
 				).toBeVisible();
 				await expect(
-					page.getByLabel( /Username or email address/i )
+					page.getByLabel( 'Username or email address' )
 				).toBeVisible();
 			} );
 		} );
