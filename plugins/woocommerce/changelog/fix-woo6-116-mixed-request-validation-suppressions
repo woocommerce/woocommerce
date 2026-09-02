@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace legacy WPCS suppression comments in the settings save handler, thanks page, conditional tag helpers and terms template with exact PHPCS annotations, and document the hooks on those lines.
