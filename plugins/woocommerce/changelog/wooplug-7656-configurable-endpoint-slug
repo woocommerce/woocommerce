@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Stock notifications setting under Settings > Advanced > Account endpoints, so the My Account endpoint slug can be renamed or cleared to turn the page off.

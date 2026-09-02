@@ -532,6 +532,47 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A blank endpoint setting drops the menu item, since the endpoint is unregistered.
+	 */
+	public function test_menu_item_is_skipped_when_the_endpoint_is_disabled(): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, '' );
+
+		$endpoint = new MyAccountEndpoint();
+		$items    = $endpoint->register_menu_item( array( 'downloads' => 'Downloads' ), array() );
+
+		$this->assertArrayNotHasKey( MyAccountEndpoint::ENDPOINT, $items );
+
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
+	}
+
+	/**
+	 * The query var keeps its key and takes its slug from the endpoint setting.
+	 */
+	public function test_query_var_uses_the_configured_slug(): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, 'restock-alerts' );
+
+		$endpoint = new MyAccountEndpoint();
+		$vars     = $endpoint->register_query_var( array( 'orders' => 'orders' ) );
+
+		$this->assertSame( 'restock-alerts', $vars[ MyAccountEndpoint::ENDPOINT ] );
+
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
+	}
+
+	/**
+	 * The slug falls back to the default when the option is unset or not a string.
+	 */
+	public function test_get_endpoint_slug_falls_back_to_the_default(): void {
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
+		$this->assertSame( MyAccountEndpoint::ENDPOINT, MyAccountEndpoint::get_endpoint_slug() );
+
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, array( 'not-a-string' ) );
+		$this->assertSame( MyAccountEndpoint::ENDPOINT, MyAccountEndpoint::get_endpoint_slug() );
+
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
+	}
+
+	/**
 	 * Helper: fake the global state needed for `maybe_handle_cancel()` to proceed past guards.
 	 *
 	 * @param int  $notification_id Notification id.
