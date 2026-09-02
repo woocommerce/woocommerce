@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -344,6 +345,131 @@ class QueryBuilder extends \WP_UnitTestCase {
 		);
 
 		set_query_var( 'filter_stock_status', '' );
+	}
+
+	/**
+	 * @testdox Rating filters return the matching published product identity.
+	 */
+	public function test_filter_by_rating_returns_exact_products(): void {
+		$had_query_var            = array_key_exists( 'rating_filter', $GLOBALS['wp_query']->query_vars );
+		$previous_query_var       = get_query_var( 'rating_filter' );
+		$matching_product         = null;
+		$non_matching_product     = null;
+		$product_ids_with_reviews = array();
+
+		try {
+			$fixtures = new FixtureData();
+
+			$matching_product = $fixtures->get_simple_product(
+				array(
+					'name'          => 'One-star query target',
+					'regular_price' => '10',
+					'status'        => 'publish',
+				)
+			);
+			$fixtures->add_product_review( $matching_product->get_id(), 1 );
+			$product_ids_with_reviews[] = $matching_product->get_id();
+
+			$non_matching_product = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Five-star query distractor',
+					'regular_price' => '10',
+					'status'        => 'publish',
+				)
+			);
+			$fixtures->add_product_review( $non_matching_product->get_id(), 5 );
+			$product_ids_with_reviews[] = $non_matching_product->get_id();
+
+			set_query_var( 'rating_filter', '1' );
+
+			$merged_query      = Utils::initialize_merged_query( $this->block_instance );
+			$query             = new WP_Query( $merged_query );
+			$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+			$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The one-star target should be returned.' );
+			$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The five-star distractor should be excluded.' );
+		} finally {
+			if ( $had_query_var ) {
+				set_query_var( 'rating_filter', $previous_query_var );
+			} else {
+				unset( $GLOBALS['wp_query']->query_vars['rating_filter'] );
+			}
+
+			foreach ( $product_ids_with_reviews as $product_id ) {
+				/** @var int[] $review_ids */
+				$review_ids = get_comments(
+					array(
+						'fields'  => 'ids',
+						'post_id' => $product_id,
+						'type'    => 'review',
+					)
+				);
+				foreach ( $review_ids as $review_id ) {
+					wp_delete_comment( $review_id, true );
+				}
+				\WC_Comments::clear_transients( $product_id );
+			}
+
+			if ( $matching_product instanceof \WC_Product ) {
+				$matching_product->delete( true );
+			}
+			if ( $non_matching_product instanceof \WC_Product ) {
+				$non_matching_product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Stock filters return the matching published product identity.
+	 */
+	public function test_filter_by_stock_status_returns_exact_products(): void {
+		$had_query_var        = array_key_exists( 'filter_stock_status', $GLOBALS['wp_query']->query_vars );
+		$previous_query_var   = get_query_var( 'filter_stock_status' );
+		$matching_product     = null;
+		$non_matching_product = null;
+
+		try {
+			$fixtures = new FixtureData();
+
+			$matching_product     = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Out-of-stock query target',
+					'regular_price' => '10',
+					'status'        => 'publish',
+					'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+			$non_matching_product = $fixtures->get_simple_product(
+				array(
+					'name'          => 'In-stock query distractor',
+					'regular_price' => '10',
+					'status'        => 'publish',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+				)
+			);
+
+			set_query_var( 'filter_stock_status', ProductStockStatus::OUT_OF_STOCK );
+
+			$merged_query      = Utils::initialize_merged_query( $this->block_instance );
+			$query             = new WP_Query( $merged_query );
+			$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+			$this->assertContains( $matching_product->get_id(), $found_product_ids, 'The out-of-stock target should be returned.' );
+			$this->assertNotContains( $non_matching_product->get_id(), $found_product_ids, 'The in-stock distractor should be excluded.' );
+		} finally {
+			if ( $had_query_var ) {
+				set_query_var( 'filter_stock_status', $previous_query_var );
+			} else {
+				unset( $GLOBALS['wp_query']->query_vars['filter_stock_status'] );
+			}
+
+			if ( $matching_product instanceof \WC_Product ) {
+				$matching_product->delete( true );
+			}
+			if ( $non_matching_product instanceof \WC_Product ) {
+				$non_matching_product->delete( true );
+			}
+		}
 	}
 
 	/**
@@ -1310,5 +1436,314 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$this->assertSame( 0, $merged_query['offset'] );
 		$this->assertSame( 9, $merged_query['posts_per_page'] );
+	}
+
+	/**
+	 * @testdox Inspector query controls return exact product identities through the real Controller to QueryBuilder path.
+	 *
+	 * @dataProvider inspector_query_result_provider
+	 *
+	 * @param string   $scenario Inspector query scenario.
+	 * @param string[] $expected Expected product identities in order.
+	 */
+	public function test_inspector_query_result( string $scenario, array $expected ): void {
+		$products              = array();
+		$terms                 = array();
+		$registered_taxonomies = array();
+
+		try {
+			$fixtures   = new FixtureData();
+			$products[] = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Alpha inspector target',
+					'regular_price' => '10',
+					'status'        => 'publish',
+					'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+			$products[] = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Zulu inspector distractor',
+					'regular_price' => '15',
+					'status'        => 'publish',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+				)
+			);
+			$products[] = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Below inspector distractor',
+					'regular_price' => '5',
+					'status'        => 'publish',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+				)
+			);
+
+			$product_ids = array_map(
+				static function ( \WC_Product $product ): int {
+					return $product->get_id();
+				},
+				$products
+			);
+			$query       = array(
+				'post__in' => $product_ids,
+			);
+			$base_query  = array();
+
+			switch ( $scenario ) {
+				case 'category':
+				case 'tag':
+				case 'brand':
+					$taxonomy = array(
+						'category' => 'product_cat',
+						'tag'      => 'product_tag',
+						'brand'    => 'product_brand',
+					)[ $scenario ];
+					if ( ! taxonomy_exists( $taxonomy ) ) {
+						register_taxonomy( $taxonomy, 'product' );
+						$registered_taxonomies[] = $taxonomy;
+					}
+					$term = wp_insert_term( "Inspector {$scenario} target", $taxonomy );
+					if ( is_wp_error( $term ) ) {
+						throw new \RuntimeException( $term->get_error_message() );
+					}
+					$term_id = (int) $term['term_id'];
+					$terms[] = array( $term_id, $taxonomy );
+					wp_set_object_terms( $product_ids[0], array( $term_id ), $taxonomy );
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+					$base_query['tax_query'] = array(
+						array(
+							'field'    => 'term_id',
+							'taxonomy' => $taxonomy,
+							'terms'    => array( $term_id ),
+						),
+					);
+					break;
+				case 'attributes':
+					foreach ( array( 'pa_inspector_color', 'pa_inspector_size' ) as $taxonomy ) {
+						register_taxonomy( $taxonomy, 'product' );
+						$registered_taxonomies[] = $taxonomy;
+
+						$term = wp_insert_term( "{$taxonomy} target", $taxonomy );
+						if ( is_wp_error( $term ) ) {
+							throw new \RuntimeException( $term->get_error_message() );
+						}
+						$term_id = (int) $term['term_id'];
+						$terms[] = array( $term_id, $taxonomy );
+						wp_set_object_terms( $product_ids[0], array( $term_id ), $taxonomy );
+						if ( 'pa_inspector_color' === $taxonomy ) {
+							wp_set_object_terms( $product_ids[1], array( $term_id ), $taxonomy );
+						}
+						$query['woocommerceAttributes'][] = array(
+							'taxonomy' => $taxonomy,
+							'termId'   => $term_id,
+						);
+					}
+					break;
+				case 'stock':
+					$query['woocommerceStockStatus'] = array( ProductStockStatus::OUT_OF_STOCK );
+					break;
+				case 'minimum-price':
+					$query['priceRange'] = array(
+						'min' => 10,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'maximum-price':
+					$query['priceRange'] = array(
+						'max' => 10,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'inclusive-price':
+					$query['priceRange'] = array(
+						'min' => 10,
+						'max' => 10,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'created-before':
+				case 'created-within':
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[0],
+							'post_date'     => '2024-01-01 00:00:00',
+							'post_date_gmt' => '2024-01-01 00:00:00',
+						)
+					);
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[1],
+							'post_date'     => '2024-02-01 00:00:00',
+							'post_date_gmt' => '2024-02-01 00:00:00',
+						)
+					);
+					$query['post__in']  = array( $product_ids[0], $product_ids[1] );
+					$query['timeFrame'] = array(
+						'operator' => 'created-before' === $scenario ? 'not-in' : 'in',
+						'value'    => '2024-01-15 00:00:00',
+					);
+					break;
+				case 'hand-picked':
+					unset( $query['post__in'] );
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[0],
+							'post_date'     => '2024-03-01 00:00:00',
+							'post_date_gmt' => '2024-03-01 00:00:00',
+						)
+					);
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[1],
+							'post_date'     => '2024-01-01 00:00:00',
+							'post_date_gmt' => '2024-01-01 00:00:00',
+						)
+					);
+					$query['woocommerceHandPickedProducts'] = array( $product_ids[1], $product_ids[0] );
+					$query['orderBy']                       = 'post__in';
+					break;
+				case 'title-descending':
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[0],
+							'post_date'     => '2024-03-01 00:00:00',
+							'post_date_gmt' => '2024-03-01 00:00:00',
+						)
+					);
+					wp_update_post(
+						array(
+							'ID'            => $product_ids[1],
+							'post_date'     => '2024-01-01 00:00:00',
+							'post_date_gmt' => '2024-01-01 00:00:00',
+						)
+					);
+					$query['post__in'] = array( $product_ids[0], $product_ids[1] );
+					$query['orderBy']  = 'title';
+					$query['order']    = 'desc';
+					break;
+			}
+
+			$parsed_block = Utils::get_base_parsed_block();
+
+			$parsed_block['attrs']['query'] = array_merge( $parsed_block['attrs']['query'], $query );
+
+			$parsed_block['attrs']['query']['inherit'] = false;
+
+			$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block, $base_query );
+
+			$result = new WP_Query( $merged_query );
+
+			$product_names = wp_list_pluck( $result->posts, 'post_title' );
+
+			$this->assertSame( $expected, $product_names, "Unexpected product order for {$scenario}." );
+		} finally {
+			foreach ( $products as $product ) {
+				$product->delete( true );
+			}
+			foreach ( $terms as list( $term_id, $taxonomy ) ) {
+				wp_delete_term( $term_id, $taxonomy );
+			}
+			foreach ( $registered_taxonomies as $taxonomy ) {
+				unregister_taxonomy( $taxonomy );
+			}
+		}
+	}
+
+	/**
+	 * Inspector query result cases.
+	 *
+	 * @return array<string, array{string, string[]}>
+	 */
+	public function inspector_query_result_provider(): array {
+		return array(
+			'category'         => array( 'category', array( 'Alpha inspector target' ) ),
+			'tag'              => array( 'tag', array( 'Alpha inspector target' ) ),
+			'brand'            => array( 'brand', array( 'Alpha inspector target' ) ),
+			'combined attrs'   => array( 'attributes', array( 'Alpha inspector target' ) ),
+			'stock'            => array( 'stock', array( 'Alpha inspector target' ) ),
+			'minimum price'    => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
+			'maximum price'    => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
+			'inclusive price'  => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
+			'created before'   => array( 'created-before', array( 'Alpha inspector target' ) ),
+			'created within'   => array( 'created-within', array( 'Zulu inspector distractor' ) ),
+			'hand picked'      => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'title descending' => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Inspector pagination controls produce nonempty page-one and page-two windows through the Controller page argument.
+	 *
+	 * @dataProvider inspector_pagination_result_provider
+	 *
+	 * @param int      $page Requested page.
+	 * @param int      $expected_offset Expected query offset.
+	 * @param string[] $expected_names Expected product names.
+	 */
+	public function test_inspector_pagination_result( int $page, int $expected_offset, array $expected_names ): void {
+		$products = array();
+
+		try {
+			$fixtures = new FixtureData();
+			foreach ( array( 'Alpha', 'Beta', 'Gamma', 'Kappa', 'Omega' ) as $name ) {
+				$products[] = $fixtures->get_simple_product(
+					array(
+						'name'          => "{$name} pagination product",
+						'regular_price' => '10',
+						'status'        => 'publish',
+					)
+				);
+			}
+
+			$parsed_block = Utils::get_base_parsed_block();
+
+			$parsed_block['attrs']['query']['inherit'] = false;
+
+			$parsed_block['attrs']['query']['orderBy'] = 'title';
+
+			$parsed_block['attrs']['query']['order'] = 'asc';
+
+			$parsed_block['attrs']['query']['perPage'] = 2;
+
+			$parsed_block['attrs']['query']['offset'] = 1;
+
+			$parsed_block['attrs']['query']['post__in'] = array_map(
+				static function ( \WC_Product $product ): int {
+					return $product->get_id();
+				},
+				$products
+			);
+
+			$this->block_instance->set_parsed_block( $parsed_block );
+			$block          = new \stdClass();
+			$block->context = $parsed_block['attrs'];
+
+			$merged_query = $this->block_instance->build_frontend_query( array(), $block, $page );
+
+			$result = new WP_Query( $merged_query );
+
+			$this->assertSame( 2, $merged_query['posts_per_page'], 'The requested page size should reach WP_Query.' );
+			$this->assertSame( $expected_offset, $merged_query['offset'], "Page {$page} should use the cumulative inspector offset." );
+			$this->assertSame( $expected_names, wp_list_pluck( $result->posts, 'post_title' ), "Page {$page} should contain the expected nonempty product window." );
+		} finally {
+			foreach ( $products as $product ) {
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Inspector pagination result cases.
+	 *
+	 * @return array<string, array{int, int, string[]}>
+	 */
+	public function inspector_pagination_result_provider(): array {
+		return array(
+			'page one' => array( 1, 1, array( 'Beta pagination product', 'Gamma pagination product' ) ),
+			'page two' => array( 2, 3, array( 'Kappa pagination product', 'Omega pagination product' ) ),
+		);
 	}
 }

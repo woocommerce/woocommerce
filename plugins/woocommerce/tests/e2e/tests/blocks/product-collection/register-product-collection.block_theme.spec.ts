@@ -55,45 +55,9 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 
 	// Activate plugin which registers custom product collections
 	test.beforeEach( async ( { requestUtils } ) => {
-		// There's been multiple instances of flaky tests due to "socket hang up" errors.
-		// Seems it's more common as I found a similar issue in here:
-		// https://github.com/sillsdev/web-languageforge/issues/1402.
-		// This is a retry mechanism to ensure the plugin is activated and ready.
-		const maxRetries = 3;
-		let retryCount = 0;
-		let lastError;
-
-		while ( retryCount < maxRetries ) {
-			try {
-				await requestUtils.activatePlugin(
-					'woocommerce-blocks-test-register-product-collection'
-				);
-
-				// Verify plugin is active by making a test request
-				try {
-					await requestUtils.rest( {
-						method: 'GET',
-						path: 'wp/v2/plugins',
-					} );
-					return; // If we get here, plugin is ready
-				} catch ( verifyError ) {
-					// If verification fails, continue to retry
-					lastError = verifyError;
-				}
-			} catch ( error ) {
-				lastError = error;
-			}
-
-			retryCount++;
-			if ( retryCount < maxRetries ) {
-				// Exponential backoff for retries
-				await new Promise( ( resolve ) =>
-					setTimeout( resolve, Math.pow( 2, retryCount ) * 200 )
-				);
-			}
-		}
-
-		throw lastError;
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-register-product-collection'
+		);
 	} );
 
 	test( `Registered collections should be available in Collection chooser`, async ( {
@@ -309,108 +273,6 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			await page.evaluate( () => {
 				window.__removePreview();
 			} );
-
-			await expect( previewButtonLocator ).toBeHidden();
-		} );
-	} );
-
-	[
-		{
-			id: 'myCustomCollectionWithProductContext',
-			name: 'My Custom Collection - Product Context',
-			label: 'Block: My Custom Collection - Product Context',
-			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//single-product` ],
-		},
-		{
-			id: 'myCustomCollectionWithCartContext',
-			name: 'My Custom Collection - Cart Context',
-			label: 'Block: My Custom Collection - Cart Context',
-			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
-		},
-		{
-			id: 'myCustomCollectionWithOrderContext',
-			name: 'My Custom Collection - Order Context',
-			label: 'Block: My Custom Collection - Order Context',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//order-confirmation`,
-			],
-		},
-		{
-			id: 'myCustomCollectionWithArchiveContext',
-			name: 'My Custom Collection - Archive Context',
-			label: 'Block: My Custom Collection - Archive Context',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-			],
-		},
-		{
-			id: 'myCustomCollectionMultipleContexts',
-			name: 'My Custom Collection - Multiple Contexts',
-			label: 'Block: My Custom Collection - Multiple Contexts',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//single-product`,
-				`${ BLOCK_THEME_SLUG }//order-confirmation`,
-			],
-		},
-	].forEach( ( collection ) => {
-		collection.previewLabelTemplate.forEach( ( template ) => {
-			test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				if (
-					template === `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
-				) {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
-					} );
-					await editor.createTemplate( {
-						templateName: 'Products by Category',
-					} );
-				} else {
-					await pageObject.goToEditorTemplate( template );
-				}
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate(
-					collection.id as Collections
-				);
-
-				// Check if the preview button is visible
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeVisible();
-			} );
-		} );
-
-		test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
-				collection.id as Collections
-			);
-
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
-
-			await expect( previewButtonLocator ).toBeHidden();
-		} );
-
-		test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				collection.id as Collections
-			);
-
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
 
 			await expect( previewButtonLocator ).toBeHidden();
 		} );

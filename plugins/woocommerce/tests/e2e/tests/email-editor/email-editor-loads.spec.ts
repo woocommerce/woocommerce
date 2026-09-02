@@ -1,40 +1,82 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-import { expect, test } from '../../fixtures/fixtures';
+import { expect, request, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { disableEmailEditor } from './helpers/enable-email-editor-feature';
+import {
+	deleteEmailPost,
+	disableEmailEditor,
+	enableEmailEditor,
+} from './helpers/enable-email-editor-feature';
 import { accessTheEmailEditor } from '../../utils/email';
+import { setOption } from '../../utils/options';
 
 test.describe( 'WooCommerce Email Editor Core', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.afterAll( async ( { baseURL } ) => {
-		await disableEmailEditor( baseURL );
+	const emailPostIds = new Set< string >();
+
+	const captureEmailPostId = ( page: Page ) => {
+		const postId = new URL( page.url() ).searchParams.get( 'post' );
+		if ( postId && /^[1-9]\d*$/.test( postId ) ) {
+			emailPostIds.add( postId );
+		}
+		return postId;
+	};
+
+	const accessAndTrackEmailPost = async ( page: Page ) => {
+		try {
+			await accessTheEmailEditor( page, 'New order' );
+		} finally {
+			captureEmailPostId( page );
+		}
+		expect( captureEmailPostId( page ) ).toMatch( /^[1-9]\d*$/ );
+	};
+
+	test.beforeAll( async ( { baseURL } ) => {
+		await enableEmailEditor( baseURL );
 	} );
 
-	test( 'Can enable the email editor', async ( { page } ) => {
-		// Navigate to the settings page.
-		await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+	test.afterAll( async ( { baseURL } ) => {
+		const cleanupErrors: unknown[] = [];
 
-		// Enable the email editor using the UI.
-		await page.getByRole( 'link', { name: 'Advanced' } ).click();
-		await page.getByRole( 'link', { name: 'Features' } ).click();
-		await page
-			.getByRole( 'checkbox', { name: 'Enable the block-based email' } )
-			.check();
-		await page.getByRole( 'button', { name: 'Save changes' } ).click();
-		await page.getByRole( 'link', { name: 'Emails' } ).click();
-		await expect(
-			page.locator( '#email_notification_settings-description' )
-		).toContainText(
-			'Manage email notifications sent from WooCommerce below'
-		);
+		for ( const postId of emailPostIds ) {
+			try {
+				await deleteEmailPost( baseURL, postId );
+			} catch ( error ) {
+				cleanupErrors.push( error );
+			}
+		}
+
+		try {
+			await disableEmailEditor( baseURL );
+			const verification = await setOption(
+				request,
+				baseURL,
+				'woocommerce_feature_block_email_editor_enabled',
+				'no'
+			);
+			expect( verification ).toContain( 'already set to: no' );
+		} catch ( error ) {
+			cleanupErrors.push( error );
+		}
+
+		if ( cleanupErrors.length > 0 ) {
+			throw new AggregateError(
+				cleanupErrors,
+				'Email editor cleanup failed.'
+			);
+		}
 	} );
 
 	test( 'Can access the email editor', async ( { page } ) => {
 		// Try with the new order email.
-		await accessTheEmailEditor( page, 'New order' );
+		await accessAndTrackEmailPost( page );
 		// TODO: WP 7.0 compat - WP 7.0 changed the editor sidebar tab role from
 		// tab to button. Simplify when WP 7.0 is the minimum supported version.
 		const emailTab = page
@@ -53,7 +95,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 	} );
 
 	test( 'Can preview in new tab', async ( { page } ) => {
-		await accessTheEmailEditor( page, 'New order' );
+		await accessAndTrackEmailPost( page );
 		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
 
 		// WP 7.1 adds a "Responsive styles" toggle to this menu; the email
@@ -71,41 +113,22 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 				.getByRole( 'menuitem', { name: 'Preview in new tab' } )
 				.click(),
 		] );
-		await newPage.bringToFront();
-		await newPage.waitForLoadState( 'domcontentloaded' );
-		// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
-		await newPage.waitForSelector( '.wp-block-heading' );
-		await page.close(); // close the original tab.
-		await expect( newPage.url() ).toContain( 'preview=true' );
-		await expect( newPage.locator( 'body' ) ).toContainText(
-			'New order: #12345'
-		);
-	} );
-
-	test( 'Can send test email', async ( { page } ) => {
-		await accessTheEmailEditor( page, 'New order' );
-		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
-		await page
-			.getByRole( 'menuitem', { name: 'Send a test email' } )
-			.click();
-		await expect(
-			page.locator( '.components-modal__header' )
-		).toContainText( 'Send a test email' );
-		await expect(
-			page.getByRole( 'button', { name: 'Send test email' } )
-		).toBeEnabled();
-		await expect(
-			page.getByRole( 'button', { name: 'Cancel' } )
-		).toBeEnabled();
-		await page.getByRole( 'button', { name: 'Send test email' } ).click();
-		await expect(
-			page.locator( '.woocommerce-send-preview-modal-notice-error' )
-		).toContainText( 'Sorry, we were unable to send this email.' );
-		await page.getByRole( 'button', { name: 'Close' } ).click();
+		try {
+			await newPage.bringToFront();
+			await newPage.waitForLoadState( 'domcontentloaded' );
+			// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
+			await newPage.waitForSelector( '.wp-block-heading' );
+			await page.close(); // close the original tab.
+			await expect( newPage.locator( 'body' ) ).toContainText(
+				'New order: #12345'
+			);
+		} finally {
+			await newPage.close();
+		}
 	} );
 
 	test( 'Can edit and save content', async ( { page } ) => {
-		await accessTheEmailEditor( page, 'New order' );
+		await accessAndTrackEmailPost( page );
 		await expect(
 			page
 				.locator( 'iframe[name="editor-canvas"]' )
@@ -118,15 +141,26 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		// dirtying change, so the Save button stays disabled. A single-line
 		// edit commits normally and still exercises the edit → save → preview
 		// flow this test covers.
-		await page
+		const editableParagraph = page
 			.locator( 'iframe[name="editor-canvas"]' )
 			.contentFrame()
-			.getByText( 'You’ve received a new' )
-			.fill( 'Hello world from Woo plugin' );
+			.getByText( 'You’ve received a new' );
+		await editableParagraph.click();
+		await expect( editableParagraph ).toBeEditable();
+		await editableParagraph.fill( 'Hello world from Woo plugin' );
+		await expect(
+			page
+				.locator( 'iframe[name="editor-canvas"]' )
+				.contentFrame()
+				.getByText( 'Hello world from Woo plugin' )
+		).toBeVisible();
 		await expect(
 			page.getByRole( 'button', { name: 'Save', exact: true } )
 		).toBeVisible();
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await expect( page.locator( '#a11y-speak-polite' ) ).toHaveText(
+			'Email saved.'
+		);
 		await expect(
 			page
 				.locator( 'iframe[name="editor-canvas"]' )
@@ -142,8 +176,16 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			.getByRole( 'menuitem', { name: 'Preview in new tab' } )
 			.click();
 		const page1 = await page1Promise;
-		await expect( page1.locator( 'body' ) ).toContainText(
-			'Hello world from Woo plugin'
-		);
+		try {
+			await page1.bringToFront();
+			await page1.waitForLoadState( 'domcontentloaded' );
+			// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the generated preview to replace the loading screen.
+			await page1.waitForSelector( '.wp-block-heading' );
+			await expect( page1.locator( 'body' ) ).toContainText(
+				'Hello world from Woo plugin'
+			);
+		} finally {
+			await page1.close();
+		}
 	} );
 } );

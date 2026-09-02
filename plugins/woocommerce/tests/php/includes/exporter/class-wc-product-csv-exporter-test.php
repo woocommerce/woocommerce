@@ -163,6 +163,60 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Selected product IDs restrict the export to those products and their variations.
+	 */
+	public function test_selected_product_ids_restrict_export_rows(): void {
+		$simple_product_ids = array();
+		$variable_product   = new WC_Product_Variable();
+
+		try {
+			$simple_product       = WC_Helper_Product::create_simple_product();
+			$simple_product_ids[] = $simple_product->get_id();
+
+			WC_Helper_Product::create_variation_product( $variable_product );
+			$variation_ids = $variable_product->get_children( 'edit' );
+
+			$unrelated_product    = WC_Helper_Product::create_simple_product();
+			$simple_product_ids[] = $unrelated_product->get_id();
+
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->set_product_ids_to_export( array( $simple_product->get_id(), $variable_product->get_id() ) );
+			$exporter->prepare_data_to_export();
+
+			$exported_ids = array_map( 'intval', wp_list_pluck( $this->get_exported_data( $exporter ), 'id' ) );
+			$expected_ids = array_merge(
+				array( $simple_product->get_id(), $variable_product->get_id() ),
+				$variation_ids
+			);
+			sort( $exported_ids );
+			sort( $expected_ids );
+
+			$this->assertSame( $expected_ids, $exported_ids );
+			$this->assertCount( count( $expected_ids ), $exported_ids );
+			$this->assertNotContains( $unrelated_product->get_id(), $exported_ids );
+		} finally {
+			if ( $variable_product->get_id() ) {
+				$variation_ids = (array) wc_get_products(
+					array(
+						'parent' => $variable_product->get_id(),
+						'type'   => ProductType::VARIATION,
+						'return' => 'ids',
+						'limit'  => -1,
+					)
+				);
+				foreach ( $variation_ids as $variation_id ) {
+					WC_Helper_Product::delete_product( $variation_id );
+				}
+				WC_Helper_Product::delete_product( $variable_product->get_id() );
+			}
+
+			foreach ( array_reverse( $simple_product_ids ) as $product_id ) {
+				WC_Helper_Product::delete_product( $product_id );
+			}
+		}
+	}
+
+	/**
 	 * @testdox CSV data is written with an append-only fopen mode so write-only stream wrappers are supported.
 	 */
 	public function test_write_csv_data_uses_append_only_fopen_mode(): void {

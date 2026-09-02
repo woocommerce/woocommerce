@@ -130,15 +130,13 @@ test.describe(
 				name: 'Enable',
 			} );
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( await enableLink.isVisible() ) {
-				await enableLink.click();
-				await expect(
-					paypalDiv
-						.getByText( 'Active' )
-						.or( paypalDiv.getByText( 'Test account' ) )
-				).toBeVisible( visibilityOptions );
-			}
+			await expect( enableLink ).toBeVisible( visibilityOptions );
+			await enableLink.click();
+			await expect(
+				paypalDiv
+					.getByText( 'Active' )
+					.or( paypalDiv.getByText( 'Test account' ) )
+			).toBeVisible( visibilityOptions );
 
 			await paypalDiv
 				.getByRole( 'button', {
@@ -174,58 +172,55 @@ test.describe(
 				.locator( '#woocommerce_paypal_title' )
 				.inputValue();
 
-			await test.step( 'Update the title field', async () => {
-				await page
-					.locator( '#woocommerce_paypal_title' )
-					.fill( 'PayPal Custom Title ' + Date.now() );
+			try {
+				await test.step( 'Update the title field', async () => {
+					await page
+						.locator( '#woocommerce_paypal_title' )
+						.fill( 'PayPal Custom Title ' + Date.now() );
 
-				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
+					// TODO: Temporarily removing the disabled attribute from the Save changes button.
+					await enableSaveButton( page );
 
-				await page
-					.getByRole( 'button', {
-						name: 'Save changes',
-					} )
-					.click();
+					await page
+						.getByRole( 'button', {
+							name: 'Save changes',
+						} )
+						.click();
 
-				await expect(
-					page.locator( 'div.updated.inline' )
-				).toContainText( 'Your settings have been saved.' );
-			} );
+					await expect(
+						page.locator( 'div.updated.inline' )
+					).toContainText( 'Your settings have been saved.' );
 
-			await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
-				const paypalButtonsSetting = page.getByText(
-					'Enable PayPal Buttons',
-					{ exact: true }
-				);
-				await expect( paypalButtonsSetting ).toBeVisible();
-			} );
+					await page.reload();
+				} );
 
-			// Clean up by reverting the title change and disabling PayPal Standard.
-			await test.step( 'Revert title change and disable PayPal Standard', async () => {
-				await page
-					.locator( '#woocommerce_paypal_title' )
-					.fill( originalPayPalTitle );
+				await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
+					const paypalButtonsSetting = page.getByText(
+						'Enable PayPal Buttons',
+						{ exact: true }
+					);
+					await expect( paypalButtonsSetting ).toBeVisible();
+				} );
+			} finally {
+				await test.step( 'Revert title change', async () => {
+					await page
+						.locator( '#woocommerce_paypal_title' )
+						.fill( originalPayPalTitle );
 
-				await page
-					.getByRole( 'checkbox', {
-						name: 'Enable PayPal Standard',
-					} )
-					.uncheck();
+					// TODO: Temporarily removing the disabled attribute from the Save changes button.
+					await enableSaveButton( page );
 
-				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
+					await page
+						.getByRole( 'button', {
+							name: 'Save changes',
+						} )
+						.click();
 
-				await page
-					.getByRole( 'button', {
-						name: 'Save changes',
-					} )
-					.click();
-
-				await expect(
-					page.locator( 'div.updated.inline' )
-				).toContainText( 'Your settings have been saved.' );
-			} );
+					await expect(
+						page.locator( 'div.updated.inline' )
+					).toContainText( 'Your settings have been saved.' );
+				} );
+			}
 		} );
 	}
 );

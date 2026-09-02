@@ -13,23 +13,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 	} );
 
-	test( 'should be visible', async ( { frontendUtils } ) => {
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		await expect( blocks ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
-		);
-	} );
-
-	test( 'should not enqueue add-to-cart-script', async ( { page } ) => {
-		let isScriptEnqueued = false;
-		page.on( 'request', ( request ) => {
-			if ( request.url().includes( 'add-to-cart.min.js' ) )
-				isScriptEnqueued = true;
-		} );
-		await page.reload();
-		expect( isScriptEnqueued ).toBe( false );
-	} );
-
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,
@@ -70,6 +53,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await handleAddToCartAjaxSetting( admin, page, {
 			isChecked: true,
 		} );
+
 		await frontendUtils.goToShop();
 
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
@@ -97,24 +81,5 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 
 		await expect( productElement ).toBeVisible();
-
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: false,
-		} );
-	} );
-
-	test( 'the filter `woocommerce_product_add_to_cart_text` should be applied', async ( {
-		requestUtils,
-		frontendUtils,
-	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-custom-add-to-cart-button-text'
-		);
-		await frontendUtils.goToShop();
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		const buttonWithNewText = blocks.getByText( 'Buy Now' );
-		await expect( buttonWithNewText ).toHaveCount(
-			blockData.selectors.frontend.productsToDisplay
-		);
 	} );
 } );

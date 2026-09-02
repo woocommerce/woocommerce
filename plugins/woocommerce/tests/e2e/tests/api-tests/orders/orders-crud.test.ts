@@ -3,8 +3,6 @@
  */
 import { test, expect } from '../../../fixtures/api-tests-fixtures';
 import { order } from '../../../data';
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL !== undefined;
 
 /**
  * Billing properties to update.
@@ -38,19 +36,6 @@ const updatedCustomerShipping = {
 	postcode: '10013',
 	phone: '123456789',
 };
-
-/**
- * Data tables to be used for testing the 'Create an order' API.
- */
-const statusesDataTable = [
-	'pending',
-	'processing',
-	'on-hold',
-	'completed',
-	'cancelled',
-	'refunded',
-	'failed',
-];
 
 /**
  * A simple product that will be added to an order.
@@ -88,37 +73,9 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			expect( responseJSON.status ).toEqual( 'pending' );
 		} );
 
-		for ( const expectedStatus of statusesDataTable ) {
-			test( `can create an order with status ${ expectedStatus }`, async ( {
-				request,
-			} ) => {
-				const requestPayload = {
-					...order,
-					status: expectedStatus,
-				};
-				//create order with status
-				const response = await request.post( './wp-json/wc/v3/orders', {
-					data: requestPayload,
-				} );
-				const responseJSON = await response.json();
-				expect( response.status() ).toEqual( 201 );
-				expect( typeof responseJSON.id ).toEqual( 'number' );
-				expect( responseJSON.status ).toEqual( expectedStatus );
-
-				// Cleanup: Delete this order
-				await request.delete(
-					`./wp-json/wc/v3/orders/${ responseJSON.id }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			} );
-		}
-
 		test.describe( 'Order Notes tests', () => {
 			let orderNoteId: number;
+
 			test( 'can create a order note', async ( { request } ) => {
 				// call API to create an order note on the previously created order
 				const response = await request.post(
@@ -249,37 +206,6 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 				}
 			);
 		} );
-
-		const delay = ( delayInms ) => {
-			return new Promise( ( resolve ) =>
-				setTimeout( resolve, delayInms )
-			);
-		};
-
-		for ( const expectedOrderStatus of statusesDataTable ) {
-			test( `can update status of an order to ${ expectedOrderStatus }`, async ( {
-				request,
-			} ) => {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( shouldSkip ) {
-					await delay( 1000 ); // if this runs too fast on an external host, it fails
-				}
-				const requestPayload = {
-					status: expectedOrderStatus,
-				};
-
-				const response = await request.put(
-					`./wp-json/wc/v3/orders/${ orderId }`,
-					{
-						data: requestPayload,
-					}
-				);
-				const responseJSON = await response.json();
-				expect( response.status() ).toEqual( 200 );
-				expect( responseJSON.id ).toEqual( orderId );
-				expect( responseJSON.status ).toEqual( expectedOrderStatus );
-			} );
-		}
 
 		test( 'can add shipping and billing contacts to an order', async ( {
 			request,

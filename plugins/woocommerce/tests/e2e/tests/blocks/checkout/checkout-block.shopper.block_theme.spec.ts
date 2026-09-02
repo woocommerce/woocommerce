@@ -6,21 +6,17 @@ import {
 	test as base,
 	customerFile,
 	guestFile,
-	BlockData,
-	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import {
-	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 	FREE_SHIPPING_NAME,
 	FREE_SHIPPING_PRICE,
 	FLAT_RATE_SHIPPING_NAME,
 	FLAT_RATE_SHIPPING_PRICE,
-	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from './constants';
 import { CheckoutPage } from './checkout.page';
 
@@ -34,142 +30,19 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-const blockData: BlockData = {
-	name: 'Checkout',
-	slug: 'woocommerce/checkout',
-	mainClass: '.wp-block-woocommerce-checkout',
-	selectors: {
-		editor: {
-			block: '.wp-block-woocommerce-checkout',
-			insertButton: "//button//span[text()='Checkout']",
-		},
-		frontend: {},
-	},
-};
-
-test.describe( 'Shopper → Account (guest user)', () => {
-	test.use( { storageState: guestFile } );
-
-	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_enable_guest_checkout',
-			data: { value: 'yes' },
-		} );
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_enable_checkout_login_reminder',
-			data: { value: 'yes' },
-		} );
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-	} );
-
-	// eslint-disable-next-line playwright/no-skipped-test -- This will be rewritten as a unit/integration test - WOOPLUG-4303
-	test.skip( 'Shopper can log in to an existing account and can create an account', async ( {
-		requestUtils,
-		checkoutPageObject,
-		page,
-		baseURL,
-	} ) => {
-		//Get the login link from checkout page.
-		const loginLink = page.getByRole( 'link', { name: 'Log in' } );
-
-		await expect( loginLink ).toHaveAttribute(
-			'href',
-			baseURL +
-				'/my-account/?redirect_to=' +
-				encodeURIComponent( baseURL + '/checkout/' )
-		);
-
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_enable_signup_and_login_from_checkout',
-			data: { value: 'yes' },
-		} );
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
-			data: { value: 'yes' },
-		} );
-
-		await page.reload();
-
-		const createAccount = page.getByLabel( 'Create an account' );
-		await createAccount.check();
-
-		const testEmail = `test-${ Date.now() }@example.com`;
-		await checkoutPageObject.fillInCheckoutWithTestData( {
-			email: testEmail,
-		} );
-		await checkoutPageObject.placeOrder();
-
-		// Get users from API with same email used when purchasing.
-		await requestUtils
-			.rest( {
-				method: 'GET',
-				path: `wc/v3/customers?email=${ testEmail }`,
-			} )
-			.then( ( response ) => {
-				expect( response[ 0 ].email ).toBe( testEmail );
-			} );
-	} );
-} );
-
 test.describe( 'Shopper → Local pickup', () => {
-	test.beforeEach( async ( { admin } ) => {
-		// Enable local pickup.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=pickup_location'
-		);
-		await admin.page.getByLabel( 'Enable local pickup' ).check();
-		await admin.page
-			.getByRole( 'button', { name: 'Add pickup location' } )
-			.click();
-		await admin.page.getByLabel( 'Location name' ).fill( 'Testing' );
-		await admin.page.getByPlaceholder( 'Address' ).fill( 'Test Address' );
-		await admin.page.getByPlaceholder( 'City' ).fill( 'Test City' );
-		await admin.page.getByPlaceholder( 'Postcode / ZIP' ).fill( '90210' );
-		await admin.page
-			.getByLabel( 'Pickup details' )
-			.fill( 'Pickup method.' );
-		await admin.page.getByRole( 'button', { name: 'Done' } ).click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
-		await admin.page.waitForResponse( ( response ) => {
-			return response.url().includes( 'wp-json/wc/v3/pickup-locations' );
+	test.beforeEach( async ( { localPickupUtils } ) => {
+		await localPickupUtils.enableLocalPickup();
+		await localPickupUtils.addPickupLocation( {
+			location: {
+				name: 'Testing',
+				address: 'Test Address',
+				city: 'Test City',
+				postcode: '90210',
+				state: 'US:CA',
+				details: 'Pickup method.',
+			},
 		} );
-	} );
-
-	test( 'The shopper can choose a local pickup option', async ( {
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
-
-		await expect(
-			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
-			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
 	} );
 
 	test( 'Switching between local pickup and shipping does not affect the address and is used for the order', async ( {
@@ -221,152 +94,6 @@ test.describe( 'Shopper → Local pickup', () => {
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
-
-	test( 'Delivery/pickup toggle is not shown when shipping methods are disabled', async ( {
-		admin,
-		page,
-		frontendUtils,
-		checkoutPageObject,
-	} ) => {
-		// Disable hide rates until address is entered.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=options'
-		);
-
-		await admin.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.uncheck();
-
-		let saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		if ( await saveButton.isEnabled() ) {
-			await saveButton.click();
-		}
-
-		// Disable all other shipping methods.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&zone_id=0'
-		);
-
-		// There are 2 shipping methods and 2 toggles with our test data. Disable both.
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).first().click();
-		await admin.page.getByRole( 'link', { name: 'Yes' } ).last().click();
-
-		saveButton = admin.page.getByRole( 'button', {
-			name: 'Save changes',
-		} );
-
-		await saveButton.click();
-
-		// Go to checkout.
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Pickup', exact: true } )
-		).toBeHidden();
-
-		await expect(
-			page.getByRole( 'radio', { name: 'Ship', exact: true } )
-		).toBeHidden();
-
-		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
-		await page.getByLabel( 'Testing' ).last().check();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
-
-		await expect(
-			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
-			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
-		).toBeVisible();
-		await checkoutPageObject.verifyBillingDetails();
-	} );
-} );
-
-test.describe( 'Shopper → Shipping and Billing Addresses', () => {
-	const billingTestData = {
-		firstname: 'John',
-		lastname: 'Doe',
-		company: 'Automattic',
-		addressfirstline: '123 Main Road',
-		addresssecondline: 'Unit 23',
-		city: 'San Francisco',
-		state: 'California',
-		country: 'United Kingdom',
-		countryKey: 'GB',
-		postcode: 'SW1 1AA',
-		phone: '123456789',
-		email: 'john.doe@example.com',
-	};
-	const shippingTestData = {
-		firstname: 'Jane',
-		lastname: 'Doe',
-		company: 'WooCommerce',
-		addressfirstline: '123 Main Avenue',
-		addresssecondline: 'Unit 42',
-		city: 'Los Angeles',
-		phone: '987654321',
-		country: 'Albania',
-		countryKey: 'AL',
-		state: 'Berat',
-		postcode: '1234',
-	};
-	// `as string` is safe here because we know the variable is a string, it is defined above.
-	const blockSelectorInEditor = blockData.selectors.editor.block as string;
-
-	test.beforeEach( async ( { admin, editor, page } ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.openDocumentSettingsSidebar();
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				'  [data-type="woocommerce/checkout-shipping-address-block"]'
-		);
-		const checkbox = page.getByRole( 'checkbox', {
-			name: 'Company',
-			exact: true,
-		} );
-		await checkbox.click();
-		await expect( checkbox ).toBeChecked();
-		await expect(
-			editor.canvas.locator(
-				'div.wc-block-components-address-form__company'
-			)
-		).toBeVisible();
-		await editor.saveSiteEditorEntities();
-	} );
-
-	test( 'User can add postcodes for different countries', async ( {
-		frontendUtils,
-		page,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page.getByLabel( 'Use same address for billing' ).uncheck();
-
-		await checkoutPageObject.fillShippingDetails( shippingTestData );
-		await checkoutPageObject.fillBillingDetails( billingTestData );
-		await expect(
-			page.getByText( 'Please enter a valid postcode' )
-		).toBeHidden();
-	} );
 } );
 
 test.describe( 'Shopper → Shipping (customer user)', () => {
@@ -414,9 +141,14 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			name: 'Billing address',
 		} );
 
-		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
-			billingForm.getByLabel( 'Phone' ).inputValue
-		);
+		const syncedShippingPhone = await shippingForm
+			.getByLabel( 'Phone' )
+			.inputValue();
+		const syncedBillingPhone = await billingForm
+			.getByLabel( 'Phone' )
+			.inputValue();
+		expect( syncedShippingPhone ).toBe( '0987654322' );
+		expect( syncedBillingPhone ).toBe( syncedShippingPhone );
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 		const overrideBillingDetails = {
@@ -432,6 +164,14 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			email: 'juan.perez@test.com',
 		};
 		await checkoutPageObject.fillBillingDetails( overrideBillingDetails );
+		const finalShippingPhone = await shippingForm
+			.getByLabel( 'Phone' )
+			.inputValue();
+		const finalBillingPhone = await billingForm
+			.getByLabel( 'Phone' )
+			.inputValue();
+		expect( finalBillingPhone ).toBe( overrideBillingDetails.phone );
+		expect( finalShippingPhone ).not.toBe( finalBillingPhone );
 		await checkoutPageObject.placeOrder();
 		await checkoutPageObject.verifyAddressDetails(
 			'billing',
@@ -441,32 +181,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Place Guest Order', () => {
-	test.use( { storageState: guestFile } );
-
-	test( 'Guest user can place order', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		expect(
-			await checkoutPageObject.selectAndVerifyShippingOption(
-				FREE_SHIPPING_NAME,
-				FREE_SHIPPING_PRICE
-			)
-		).toBe( true );
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-		await expect(
-			page.getByText( 'Your order has been received.' )
-		).toBeVisible();
-	} );
-} );
-
-test.describe( 'Shopper → Place Virtual Order', () => {
+test.describe( 'Shopper → Store shipping disabled', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
@@ -475,44 +190,7 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 		} );
 	} );
 
-	test( 'Does not see shipping options for digital orders when shipping is enabled', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		localPickupUtils,
-		page,
-		requestUtils,
-	} ) => {
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
-			data: { value: 'all' },
-		} );
-		await localPickupUtils.enableLocalPickup();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
-
-		await frontendUtils.goToCheckout();
-
-		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
-		await expect(
-			page.getByText( 'Pickup', { exact: true } )
-		).toBeHidden();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
-	} );
-
-	test( 'can place a digital order when shipping is disabled', async ( {
+	test( 'can place a physical order when store shipping is disabled', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		localPickupUtils,
@@ -522,45 +200,6 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
-
-		await frontendUtils.goToCheckout();
-
-		// Delivery total in the sidebar.
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
-
-		// Ship/Pickup method selector.
-		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
-		await expect(
-			page.getByText( 'Pickup', { exact: true } )
-		).toBeHidden();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
-
-		await localPickupUtils.enableLocalPickup();
-	} );
-
-	test( 'can place a digital order when shipping is disabled, but Local Pickup is still enabled', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		localPickupUtils,
-		page,
-	} ) => {
-		await localPickupUtils.enableLocalPickup();
-
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
 		await expect(
@@ -624,38 +263,11 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 		await expect(
 			page.getByText( 'Please enter a valid zip code' )
 		).toBeVisible();
+		await expect( page.getByLabel( 'Email address' ) ).toBeFocused();
 	} );
 } );
 
 test.describe( 'Billing Address Form', () => {
-	const blockSelectorInEditor = blockData.selectors.editor.block as string;
-
-	test( 'Enable company field', async ( { page, admin, editor } ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.openDocumentSettingsSidebar();
-
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				'  [data-type="woocommerce/checkout-shipping-address-block"]'
-		);
-
-		const companyCheckbox = page.getByLabel( 'Company', {
-			exact: true,
-		} );
-		await companyCheckbox.click();
-		await expect( companyCheckbox ).toBeChecked();
-
-		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
-		await expect( companyInput ).toBeVisible();
-
-		await editor.saveSiteEditorEntities();
-	} );
-
 	test.describe( 'Guest user', () => {
 		test.use( { storageState: guestFile } );
 

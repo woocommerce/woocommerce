@@ -40,6 +40,34 @@ $WP_CLI_PREFIX bash -c 'printf "apache_modules:\n  - mod_rewrite\n" > /var/www/h
 echo -e 'Update URL structure \n'
 $WP_CLI_PREFIX wp rewrite structure '/%postname%/' --hard
 
+echo -e 'Remove Blocks database request lock configuration \n'
+$WP_CLI_PREFIX php -r '
+$path = "/var/www/html/.htaccess";
+$block = "# BEGIN WooCommerce Blocks E2E DB Lock\nphp_value auto_prepend_file /var/www/html/wp-content/plugins/woocommerce/blocks-bin/playwright/request-lock.php\n# END WooCommerce Blocks E2E DB Lock\n";
+$contents = file_get_contents( $path );
+if ( false === $contents ) {
+	fwrite( STDERR, "Unable to read .htaccess.\n" );
+	exit( 1 );
+}
+$updated = preg_replace( "/^" . preg_quote( $block, "/" ) . "/m", "", $contents );
+if ( null === $updated ) {
+	fwrite( STDERR, "Unable to remove Blocks E2E database lock configuration.\n" );
+	exit( 1 );
+}
+if ( $updated !== $contents && false === file_put_contents( $path, $updated ) ) {
+	fwrite( STDERR, "Unable to update .htaccess.\n" );
+	exit( 1 );
+}
+if (
+	0 !== substr_count( $updated, "# BEGIN WooCommerce Blocks E2E DB Lock" ) ||
+	0 !== substr_count( $updated, "# END WooCommerce Blocks E2E DB Lock" ) ||
+	0 !== substr_count( $updated, "php_value auto_prepend_file /var/www/html/wp-content/plugins/woocommerce/blocks-bin/playwright/request-lock.php" )
+) {
+	fwrite( STDERR, "Blocks E2E database lock configuration remains in .htaccess.\n" );
+	exit( 1 );
+}
+' || exit $?
+
 echo -e 'Add Customer user \n'
 if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 	$WP_CLI_PREFIX wp user create customer customer@woocommercecoree2etestsuite.com \

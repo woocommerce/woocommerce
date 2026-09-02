@@ -17,30 +17,12 @@ const taxClasses = [
 		name: 'Tax Class Simple',
 		slug: 'tax-class-simple',
 	},
-	{
-		name: 'Tax Class Variable',
-		slug: 'tax-class-variable',
-	},
-	{
-		name: 'Tax Class External',
-		slug: 'tax-class-external',
-	},
 ];
 const taxRates = [
 	{
 		name: 'Tax Rate Simple',
 		rate: '10.0000',
 		class: 'tax-class-simple',
-	},
-	{
-		name: 'Tax Rate Variable',
-		rate: '20.0000',
-		class: 'tax-class-variable',
-	},
-	{
-		name: 'Tax Rate External',
-		rate: '30.0000',
-		class: 'tax-class-external',
 	},
 ];
 async function getOrderIdFromPage( page: Page ) {
@@ -55,7 +37,11 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page.locator( 'span > .select2-search__field' ).fill( product.name );
+	const productSearch = page.locator(
+		'.select2-container--open input.select2-search__field'
+	);
+	await expect( productSearch ).toBeVisible();
+	await productSearch.fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 
 	const quantityField = page
@@ -161,129 +147,6 @@ const test = baseTest.extend( {
 			force: true,
 		} );
 	},
-
-	variableProduct: async ( { restApi }, use ) => {
-		let product = {};
-
-		const variations = [
-			{
-				regular_price: '100',
-				attributes: [
-					{
-						name: 'Size',
-						option: 'Small',
-					},
-					{
-						name: 'Colour',
-						option: 'Yellow',
-					},
-				],
-				tax_class: 'Tax Class Variable',
-			},
-			{
-				regular_price: '100',
-				attributes: [
-					{
-						name: 'Size',
-						option: 'Medium',
-					},
-					{
-						name: 'Colour',
-						option: 'Magenta',
-					},
-				],
-				tax_class: 'Tax Class Variable',
-			},
-		];
-
-		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: `Product variable ${ random() }`,
-				type: 'variable',
-				tax_class: 'Tax Class Variable',
-			} )
-			.then( ( response ) => {
-				product = response.data;
-			} );
-
-		for ( const variation of variations ) {
-			await restApi.post(
-				`${ WC_API_PATH }/products/${ product.id }/variations`,
-				variation
-			);
-		}
-
-		await use( product );
-
-		// Cleanup
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
-	},
-
-	externalProduct: async ( { restApi }, use ) => {
-		let product = {};
-
-		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: `Product external ${ random() }`,
-				regular_price: '800',
-				tax_class: 'Tax Class External',
-				external_url: 'https://wordpress.org/plugins/woocommerce',
-				type: 'external',
-				button_text: 'Buy now',
-			} )
-			.then( ( response ) => {
-				product = response.data;
-			} );
-
-		await use( product );
-
-		// Cleanup
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
-	},
-
-	groupedProduct: async ( { restApi }, use ) => {
-		let product = {};
-		let subProductAId: number;
-		let subProductBId: number;
-
-		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: 'Add-on A',
-				regular_price: '11.95',
-			} )
-			.then( ( response: { data: { id: number } } ) => {
-				subProductAId = response.data.id;
-			} );
-		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: 'Add-on B',
-				regular_price: '18.97',
-			} )
-			.then( ( response: { data: { id: number } } ) => {
-				subProductBId = response.data.id;
-			} );
-		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: `Product grouped ${ random() }`,
-				regular_price: '29.99',
-				grouped_products: [ subProductAId, subProductBId ],
-				type: 'grouped',
-			} )
-			.then( ( response ) => {
-				product = response.data;
-			} );
-
-		await use( product );
-
-		// Cleanup
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
-	},
 } );
 
 test.describe(
@@ -328,99 +191,7 @@ test.describe(
 			}
 		} );
 
-		test( 'can create a simple guest order', async ( {
-			page,
-			simpleProduct,
-			order,
-		} ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
-			order.id = await getOrderIdFromPage( page );
-
-			await page
-				.locator( '#order_status' )
-				.selectOption( 'wc-processing' );
-
-			// Enter billing information
-			await page
-				.getByRole( 'heading', { name: 'Billing Edit' } )
-				.getByRole( 'link' )
-				.click();
-			await page
-				.getByRole( 'textbox', { name: 'First name' } )
-				.fill( 'Bart' );
-			await page
-				.getByRole( 'textbox', { name: 'Last name' } )
-				.fill( 'Simpson' );
-			await page
-				.getByRole( 'textbox', { name: 'Company' } )
-				.fill( 'Kwik-E-Mart' );
-			await page
-				.getByRole( 'textbox', { name: 'Address line 1' } )
-				.fill( '742 Evergreen Terrace' );
-			await page
-				.getByRole( 'textbox', { name: 'City' } )
-				.fill( 'Springfield' );
-			await page
-				.getByRole( 'textbox', { name: 'Postcode' } )
-				.fill( '12345' );
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if (
-				await page
-					.getByRole( 'textbox', { name: 'Select an option…' } )
-					.isVisible()
-			) {
-				await page
-					.getByRole( 'textbox', { name: 'Select an option…' } )
-					.click();
-				await page.getByRole( 'option', { name: 'Florida' } ).click();
-			}
-			await page
-				.getByRole( 'textbox', { name: 'Email address' } )
-				.fill( 'elbarto@example.com' );
-			await page
-				.getByRole( 'textbox', { name: 'Phone' } )
-				.fill( '555-555-5555' );
-			await page
-				.getByRole( 'textbox', { name: 'Transaction ID' } )
-				.fill( '1234567890' );
-
-			// Enter shipping information
-			await page
-				.getByRole( 'heading', { name: 'Shipping Edit' } )
-				.getByRole( 'link' )
-				.click();
-			page.on( 'dialog', ( dialog ) => dialog.accept() );
-			await page
-				.getByRole( 'link', { name: 'Copy billing address' } )
-				.click();
-			await page
-				.getByPlaceholder( 'Customer notes about the order' )
-				.fill( 'Only asked for a slushie' );
-
-			// Add a product
-			await addProductToOrder( page, simpleProduct, 2 );
-
-			// Create the order
-			await page.getByRole( 'button', { name: 'Create' } ).click();
-			await expect( page.getByText( 'Order updated' ) ).toBeVisible();
-
-			// Confirm the details
-			await expect(
-				page.getByText(
-					'Billing Edit Load billing address Bart SimpsonKwik-E-Mart742 Evergreen'
-				)
-			).toBeVisible();
-			await expect(
-				page.getByText(
-					'Shipping Edit Load shipping address Copy billing address Bart SimpsonKwik-E-'
-				)
-			).toBeVisible();
-			await expect(
-				page.locator( 'table' ).filter( { hasText: 'Paid: $200.00' } )
-			).toBeVisible();
-		} );
-
-		test( 'can add a product without an extra click or rogue search box', async ( {
+		test( 'can add a product using the keyboard without a rogue search box', async ( {
 			page,
 			simpleProduct,
 		} ) => {
@@ -434,15 +205,6 @@ test.describe(
 
 			const modal = page.locator( '.wc-backbone-modal-content' );
 			await expect( modal ).toBeVisible();
-
-			const productSearch = page.locator(
-				'span > .select2-search__field'
-			);
-			await expect( productSearch ).toBeFocused();
-
-			// Close the automatically opened search so the existing keyboard
-			// regression still exercises opening the control with Enter.
-			await page.keyboard.press( 'Escape' );
 
 			// Focus the (closed) product-search control and press Enter.
 			// Before the fix this submitted the modal, closing it and
@@ -461,7 +223,9 @@ test.describe(
 			// dropdown; type the query, wait for the result, then press Enter to
 			// choose it with the keyboard (results are loaded first, so this is
 			// not the premature-Enter path).
-			await productSearch.fill( simpleProduct.name );
+			await page
+				.locator( 'span > .select2-search__field' )
+				.fill( simpleProduct.name );
 			await page
 				.getByRole( 'option', { name: simpleProduct.name } )
 				.first()
@@ -488,6 +252,7 @@ test.describe(
 
 		test( 'can create an order for an existing customer', async ( {
 			page,
+			restApi,
 			simpleProduct,
 			customer,
 			order,
@@ -506,147 +271,97 @@ test.describe(
 				} )
 				.click();
 
-			// Add a product
-			await addProductToOrder( page, simpleProduct, 2 );
-
-			// Create the order
-			await page.getByRole( 'button', { name: 'Create' } ).click();
-			await expect( page.getByText( 'Order updated' ) ).toBeVisible();
-
-			// Confirm the details
-			await expect(
-				page.getByText(
-					'Billing Edit Load billing address Sideshow BobDie Bart Die123 Fake'
-				)
-			).toBeVisible();
-			await expect(
-				page.getByText(
-					'Shipping Edit Load shipping address Copy billing address Sideshow BobDie Bart'
-				)
-			).toBeVisible();
-
-			// View customer profile
-			await page.getByRole( 'link', { name: 'Profile →' } ).click();
-			await expect(
-				page.getByRole( 'heading', {
-					name: `Edit User ${ customer.username }`,
-				} )
-			).toBeVisible();
-
-			// Go back to the order
-			await page.goto(
-				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
+			await expect( page.locator( '#_billing_first_name' ) ).toHaveValue(
+				'Sideshow'
 			);
-			await page
-				.getByRole( 'link', {
-					name: 'View other orders',
-				} )
-				.click();
-			await expect(
-				page.locator( 'h1.wp-heading-inline' )
-			).toContainText( 'Orders' );
-			await expect( page.getByRole( 'row' ) ).toHaveCount( 3 ); // 1 order and header and footer rows
-		} );
+			await expect( page.locator( '#_billing_address_1' ) ).toHaveValue(
+				'123 Fake St'
+			);
+			await expect( page.locator( '#_shipping_first_name' ) ).toHaveValue(
+				'Sideshow'
+			);
+			await expect( page.locator( '#_shipping_address_1' ) ).toHaveValue(
+				'321 Fake St'
+			);
 
-		test( 'can create new order', async ( { page, order } ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
-			await expect(
-				page.locator( 'h1.wp-heading-inline' )
-			).toContainText( 'Add new order' );
-			order.id = await getOrderIdFromPage( page );
+			await page.locator( '#_billing_address_1' ).fill( '124 Fake St' );
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+			await page
+				.getByRole( 'link', { name: 'Copy billing address' } )
+				.click();
+			await expect( page.locator( '#_shipping_address_1' ) ).toHaveValue(
+				'124 Fake St'
+			);
 
 			await page
 				.locator( '#order_status' )
 				.selectOption( 'wc-processing' );
-			await page.locator( 'input[name=order_date]' ).fill( '2018-12-13' );
-			await page.locator( 'input[name=order_date_hour]' ).fill( '18' );
-			await page.locator( 'input[name=order_date_minute]' ).fill( '55' );
+			await page
+				.getByPlaceholder( 'Customer notes about the order' )
+				.fill( 'Leave the order with the prison guard' );
 
-			await page.locator( 'button.save_order' ).click();
+			await addProductToOrder( page, simpleProduct, 2 );
+			await page
+				.getByRole( 'button', { name: 'Recalculate', exact: true } )
+				.click();
+			await expect( page.locator( 'th.line_tax' ) ).toHaveText(
+				'Tax Rate Simple'
+			);
 
-			await expect(
-				page.locator(
-					'div.updated.notice.notice-success.is-dismissible',
-					{
-						has: page.locator( 'p' ),
-					}
-				)
-			).toContainText( 'Order updated.' );
+			await page.getByRole( 'button', { name: 'Create' } ).click();
+			await expect( page.getByText( 'Order updated' ) ).toBeVisible();
+
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
+			);
+			await expect( page.locator( '#_billing_address_1' ) ).toHaveValue(
+				'124 Fake St'
+			);
+			await expect( page.locator( '#_shipping_address_1' ) ).toHaveValue(
+				'124 Fake St'
+			);
 			await expect( page.locator( '#order_status' ) ).toHaveValue(
 				'wc-processing'
 			);
 			await expect(
-				page.locator( 'div.note_content' ).filter( {
-					hasText:
-						'Order status changed from Pending payment to Processing.',
+				page.getByPlaceholder( 'Customer notes about the order' )
+			).toHaveValue( 'Leave the order with the prison guard' );
+			await expect(
+				page.locator( 'td.name > a' ).filter( {
+					hasText: simpleProduct.name,
 				} )
 			).toBeVisible();
-		} );
+			await expect( page.locator( 'th.line_tax' ) ).toHaveText(
+				'Tax Rate Simple'
+			);
 
-		test( 'can create new complex order with multiple product types & tax classes', async ( {
-			page,
-			simpleProduct,
-			variableProduct,
-			externalProduct,
-			groupedProduct,
-			order,
-		} ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
-			order.id = await getOrderIdFromPage( page );
-
-			// open modal for adding line items
-			await page.locator( 'button.add-line-item' ).click();
-			await page.locator( 'button.add-order-item' ).click();
-
-			// search for each product to add
-			for ( const [ index, product ] of [
-				simpleProduct,
-				variableProduct,
-				groupedProduct,
-				externalProduct,
-			].entries() ) {
-				if ( index > 0 ) {
-					await page.getByText( 'Search for a product…' ).click();
-				}
-				await page
-					.locator( 'span > .select2-search__field' )
-					.fill( product.name );
-				await page
-					.getByRole( 'option', { name: product.name } )
-					.first()
-					.click();
-			}
-
-			await page.locator( 'button#btn-ok' ).click();
-
-			// assert that products added
-			await expect(
-				page.locator( 'td.name > a >> nth=0' )
-			).toContainText( simpleProduct.name );
-			await expect(
-				page.locator( 'td.name > a >> nth=1' )
-			).toContainText( variableProduct.name );
-			await expect(
-				page.locator( 'td.name > a >> nth=2' )
-			).toContainText( groupedProduct.name );
-			await expect(
-				page.locator( 'td.name > a >> nth=3' )
-			).toContainText( externalProduct.name );
-
-			// Recalculate taxes
-			page.on( 'dialog', ( dialog ) => dialog.accept() );
-			await page
-				.getByRole( 'button', { name: 'Recalculate', exact: true } )
-				.click();
-
-			// verify tax names
-			let i = 0;
-			for ( const taxRate of taxRates ) {
-				await expect(
-					page.locator( `th.line_tax >> nth=${ i }` )
-				).toHaveText( taxRate.name );
-				i++;
-			}
+			const response = await restApi.get(
+				`${ WC_API_PATH }/orders/${ order.id }`
+			);
+			const persistedOrder = response.data;
+			expect( persistedOrder.customer_id ).toBe( customer.id );
+			expect( persistedOrder.status ).toBe( 'processing' );
+			expect( persistedOrder.customer_note ).toBe(
+				'Leave the order with the prison guard'
+			);
+			expect( persistedOrder.billing.address_1 ).toBe( '124 Fake St' );
+			expect( persistedOrder.shipping.address_1 ).toBe( '124 Fake St' );
+			expect( persistedOrder.line_items ).toHaveLength( 1 );
+			expect( persistedOrder.line_items[ 0 ].product_id ).toBe(
+				simpleProduct.id
+			);
+			expect( persistedOrder.line_items[ 0 ].quantity ).toBe( 2 );
+			expect( Number( persistedOrder.line_items[ 0 ].total ) ).toBe(
+				200
+			);
+			expect( persistedOrder.tax_lines ).toHaveLength( 1 );
+			expect( persistedOrder.tax_lines[ 0 ].label ).toBe(
+				'Tax Rate Simple'
+			);
+			expect( Number( persistedOrder.tax_lines[ 0 ].tax_total ) ).toBe(
+				20
+			);
+			expect( Number( persistedOrder.total ) ).toBe( 220 );
 		} );
 	}
 );

@@ -31,172 +31,106 @@ test.describe(
 			} );
 		} );
 
-		test.afterAll( async () => {
-			await page.close();
+		test.afterAll( async ( { baseURL } ) => {
+			const cleanupErrors: unknown[] = [];
+
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_analytics_scheduled_import',
+					'yes'
+				);
+			} catch ( error ) {
+				cleanupErrors.push( error );
+			}
+
+			try {
+				await page.close();
+			} catch ( error ) {
+				cleanupErrors.push( error );
+			}
+
+			if ( cleanupErrors.length ) {
+				throw new AggregateError(
+					cleanupErrors,
+					'Failed to restore Analytics Settings test state.'
+				);
+			}
 		} );
 
-		test( 'should show Immediate mode by default when option is not set', async ( {
+		test( 'manages scheduled import mode confirmation and persistence', async ( {
 			baseURL,
 		} ) => {
-			// Delete the option to simulate a new installation
-			await deleteOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import'
-			);
+			const immediately = page.getByRole( 'radio', {
+				name: /Immediately/i,
+			} );
+			const scheduled = page.getByRole( 'radio', {
+				name: /Scheduled \(recommended\)/i,
+			} );
+			const confirmationHeading = page.getByRole( 'heading', {
+				name: 'Are you sure?',
+			} );
+			const successNotice = page
+				.getByText( 'Your settings have been successfully saved.' )
+				.first();
 
-			// Reload the page
-			await page.reload();
+			await test.step( 'Use Immediate when the option is absent', async () => {
+				await deleteOption(
+					request,
+					baseURL,
+					'woocommerce_analytics_scheduled_import'
+				);
+				await page.reload();
+				await expect( immediately ).toBeChecked();
+			} );
 
-			// Verify "Immediately" is selected
-			await expect(
-				page.getByRole( 'radio', {
-					name: /Immediately/i,
-				} )
-			).toBeChecked();
-		} );
+			await test.step( 'Cancel a scheduled to immediate change', async () => {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_analytics_scheduled_import',
+					'yes'
+				);
+				await page.reload();
+				await expect( scheduled ).toBeChecked();
 
-		test( 'should switch from scheduled to immediate mode with confirmation modal - cancel flow', async ( {
-			baseURL,
-		} ) => {
-			// Set to scheduled mode
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'yes'
-			);
+				await immediately.click();
+				await expect( confirmationHeading ).toBeVisible();
+				await page
+					.getByRole( 'button', { name: /Cancel/i, exact: false } )
+					.click();
+				await expect( confirmationHeading ).toBeHidden();
+				await expect( scheduled ).toBeChecked();
+			} );
 
-			// Reload the page
-			await page.reload();
+			await test.step( 'Confirm and persist immediate mode', async () => {
+				await immediately.click();
+				await expect( confirmationHeading ).toBeVisible();
+				await page
+					.getByRole( 'button', {
+						name: /Confirm/i,
+						exact: false,
+					} )
+					.click();
+				await page
+					.getByRole( 'button', { name: 'Save settings' } )
+					.click();
+				await expect( successNotice ).toBeVisible();
+				await page.reload();
+				await expect( immediately ).toBeChecked();
+			} );
 
-			// Verify "Scheduled (recommended)" is selected
-			await expect(
-				page.getByRole( 'radio', {
-					name: /Scheduled \(recommended\)/i,
-				} )
-			).toBeChecked();
-
-			// Click "Immediately" radio option
-			await page.getByRole( 'radio', { name: /Immediately/i } ).click();
-
-			// Verify confirmation modal appears
-			await expect(
-				page.getByRole( 'heading', { name: 'Are you sure?' } )
-			).toBeVisible();
-
-			// Click "Cancel" button
-			await page
-				.getByRole( 'button', { name: /Cancel/i, exact: false } )
-				.click();
-
-			// Verify modal closes
-			await expect(
-				page.locator(
-					'.woocommerce-analytics-import-mode-confirmation-modal'
-				)
-			).toBeHidden();
-
-			// Verify "Scheduled (recommended)" is still selected on page
-			await expect(
-				page.getByRole( 'radio', {
-					name: /Scheduled \(recommended\)/i,
-				} )
-			).toBeChecked();
-		} );
-
-		test( 'should switch from scheduled to immediate mode with confirmation modal - confirm flow', async ( {
-			baseURL,
-		} ) => {
-			// Set to scheduled mode
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'yes'
-			);
-
-			// Reload the page
-			await page.reload();
-
-			// Click "Immediately" radio option
-			await page.getByRole( 'radio', { name: /Immediately/i } ).click();
-
-			// Verify confirmation modal appears
-			await expect(
-				page.getByRole( 'heading', { name: 'Are you sure?' } )
-			).toBeVisible();
-
-			// Click "Confirm" button
-			await page
-				.getByRole( 'button', { name: /Confirm/i, exact: false } )
-				.click();
-
-			// Click "Save settings" button
-			await page.getByRole( 'button', { name: 'Save settings' } ).click();
-
-			// Verify success message
-			await expect(
-				page
-					.getByText( 'Your settings have been successfully saved.' )
-					.first()
-			).toBeVisible();
-
-			// Refresh page and verify "Immediately" is selected
-			await page.reload();
-			await expect(
-				page.getByRole( 'radio', { name: /Immediately/i } )
-			).toBeChecked();
-		} );
-
-		test( 'should switch from immediate to scheduled mode without confirmation modal', async ( {
-			baseURL,
-		} ) => {
-			// Set to immediate mode
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'no'
-			);
-
-			// Reload the page
-			await page.reload();
-
-			// Verify "Immediately" is selected
-			await expect(
-				page.getByRole( 'radio', { name: /Immediately/i } )
-			).toBeChecked();
-
-			// Click "Scheduled (recommended)" radio option
-			await page
-				.getByRole( 'radio', {
-					name: /Scheduled \(recommended\)/i,
-				} )
-				.click();
-
-			// Verify NO modal appears (no warning when switching back to recommended mode)
-			await expect(
-				page.getByRole( 'heading', { name: 'Are you sure?' } )
-			).toBeHidden();
-
-			// Click "Save settings" button
-			await page.getByRole( 'button', { name: 'Save settings' } ).click();
-
-			// Verify success message
-			await expect(
-				page
-					.getByText( 'Your settings have been successfully saved.' )
-					.first()
-			).toBeVisible();
-
-			// Refresh page and verify "Scheduled (recommended)" is selected
-			await page.reload();
-			await expect(
-				page.getByRole( 'radio', {
-					name: /Scheduled \(recommended\)/i,
-				} )
-			).toBeChecked();
+			await test.step( 'Return to scheduled mode without a warning', async () => {
+				await scheduled.click();
+				await expect( confirmationHeading ).toBeHidden();
+				await page
+					.getByRole( 'button', { name: 'Save settings' } )
+					.click();
+				await expect( successNotice ).toBeVisible();
+				await page.reload();
+				await expect( scheduled ).toBeChecked();
+			} );
 		} );
 	}
 );

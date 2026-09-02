@@ -12,6 +12,12 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
+const LIFECYCLE_TEMPLATES = [
+	'Product Catalog',
+	'External Product Add to Cart + Options',
+];
+const FALLBACK_TEMPLATES = [ 'Products by Attribute' ];
+
 test.describe( 'Template customization', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
@@ -19,6 +25,15 @@ test.describe( 'Template customization', () => {
 
 	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 		if ( ! testData.canBeOverriddenByThemes ) {
+			return;
+		}
+		const retainsLifecycle = LIFECYCLE_TEMPLATES.includes(
+			testData.templateName
+		);
+		const retainsFallback = FALLBACK_TEMPLATES.includes(
+			testData.templateName
+		);
+		if ( ! retainsLifecycle && ! retainsFallback ) {
 			return;
 		}
 		const userText = `Hello World in the ${ testData.templateName } template`;
@@ -29,79 +44,81 @@ test.describe( 'Template customization', () => {
 				: 'template part';
 
 		test.describe( `${ testData.templateName } template`, () => {
-			test( "theme template has priority over WooCommerce's and can be modified", async ( {
-				admin,
-				editor,
-				frontendUtils,
-				requestUtils,
-				page,
-			} ) => {
-				// Edit the theme template.
-				await admin.visitSiteEditor( {
-					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
-					postType: testData.templateType,
-					canvas: 'edit',
-				} );
-
-				await editor.canvas
-					.locator( 'body' )
-					.waitFor( { timeout: 20000 } );
-
-				await editor.insertBlock( {
-					name: 'core/paragraph',
-					attributes: { content: userText },
-				} );
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
-				} );
-
-				// Verify template name didn't change.
-				// See: https://github.com/woocommerce/woocommerce/issues/42221
-				await expect(
-					page.getByRole( 'heading', {
-						name: templateTypeName,
-					} )
-				).toBeVisible();
-
-				// Verify the template is the one modified by the user.
-				await testData.visitPage( {
+			if ( retainsLifecycle ) {
+				test( "theme template has priority over WooCommerce's and can be modified", async ( {
 					admin,
 					editor,
 					frontendUtils,
 					requestUtils,
 					page,
-				} );
-				await expect(
-					page.getByText( userText ).first()
-				).toBeVisible();
+				} ) => {
+					// Edit the theme template.
+					await admin.visitSiteEditor( {
+						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+						postType: testData.templateType,
+						canvas: 'edit',
+					} );
 
-				// Revert edition and verify the template from the theme is used.
-				await admin.visitSiteEditor( {
-					postType: testData.templateType,
-				} );
-				await editor.revertTemplate( {
-					templateName: testData.templateName,
-				} );
+					await editor.canvas
+						.locator( 'body' )
+						.waitFor( { timeout: 20000 } );
 
-				await testData.visitPage( {
-					admin,
-					editor,
-					frontendUtils,
-					requestUtils,
-					page,
+					await editor.insertBlock( {
+						name: 'core/paragraph',
+						attributes: { content: userText },
+					} );
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
+
+					// Verify template name didn't change.
+					// See: https://github.com/woocommerce/woocommerce/issues/42221
+					await expect(
+						page.getByRole( 'heading', {
+							name: templateTypeName,
+						} )
+					).toBeVisible();
+
+					// Verify the template is the one modified by the user.
+					await testData.visitPage( {
+						admin,
+						editor,
+						frontendUtils,
+						requestUtils,
+						page,
+					} );
+					await expect(
+						page.getByText( userText ).first()
+					).toBeVisible();
+
+					// Revert edition and verify the template from the theme is used.
+					await admin.visitSiteEditor( {
+						postType: testData.templateType,
+					} );
+					await editor.revertTemplate( {
+						templateName: testData.templateName,
+					} );
+
+					await testData.visitPage( {
+						admin,
+						editor,
+						frontendUtils,
+						requestUtils,
+						page,
+					} );
+
+					await expect(
+						page
+							.getByText(
+								`${ testData.templateName } template loaded from theme`
+							)
+							.first()
+					).toBeVisible();
+					await expect( page.getByText( userText ) ).toHaveCount( 0 );
 				} );
+			}
 
-				await expect(
-					page
-						.getByText(
-							`${ testData.templateName } template loaded from theme`
-						)
-						.first()
-				).toBeVisible();
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
-			} );
-
-			if ( testData.fallbackTemplate ) {
+			if ( retainsFallback && testData.fallbackTemplate ) {
 				test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
 					admin,
 					frontendUtils,

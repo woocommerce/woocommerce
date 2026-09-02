@@ -204,6 +204,7 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 
 		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
 		$this->assertIsArray( $result );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $result['status'] );
 
 		$this->assertSame(
 			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
@@ -617,13 +618,19 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	 * leaving in_sync and core_updated_customized posts untouched.
 	 */
 	public function test_run_applies_to_every_uncustomized_post(): void {
-		// 3 posts, each with a distinct fixture email so each registers in the registry.
-		$uncustomized_post_id = $this->generate_stamped_post( 'wc_test_run_uncustomized' );
-		$customized_post_id   = $this->generate_stamped_post( 'wc_test_run_customized' );
-		$in_sync_post_id      = $this->generate_stamped_post( 'wc_test_run_in_sync' );
+		// 4 posts, each with a distinct fixture email so each registers in the registry.
+		$first_uncustomized_post_id  = $this->generate_stamped_post( 'wc_test_run_uncustomized_first' );
+		$second_uncustomized_post_id = $this->generate_stamped_post( 'wc_test_run_uncustomized_second' );
+		$customized_post_id          = $this->generate_stamped_post( 'wc_test_run_customized' );
+		$in_sync_post_id             = $this->generate_stamped_post( 'wc_test_run_in_sync' );
 
 		update_post_meta(
-			$uncustomized_post_id,
+			$first_uncustomized_post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED
+		);
+		update_post_meta(
+			$second_uncustomized_post_id,
 			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
 			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED
 		);
@@ -644,9 +651,15 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		WCEmailTemplateAutoApplier::run();
 
 		$this->assertSame(
-			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
-			(string) get_post_meta( $uncustomized_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
-			'Uncustomized post must flip to in_sync after run().'
+			array(
+				WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+				WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			),
+			array(
+				(string) get_post_meta( $first_uncustomized_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+				(string) get_post_meta( $second_uncustomized_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			),
+			'Every uncustomized post must flip to in_sync after run().'
 		);
 
 		$this->assertSame(
@@ -687,10 +700,33 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 
 		$captured = array();
 		WCEmailTemplateAutoApplier::set_logger( $this->build_recording_logger( $captured ) );
+		$order_candidates_by_id = static function ( \WP_Query $query ): void {
+			$meta_query = $query->get( 'meta_query' );
+			if (
+				Integration::EMAIL_POST_TYPE !== $query->get( 'post_type' )
+				|| 'ids' !== $query->get( 'fields' )
+				|| ! is_array( $meta_query )
+				|| ! in_array(
+					array(
+						'key'   => WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+						'value' => WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+					),
+					$meta_query,
+					true
+				)
+			) {
+				return;
+			}
+
+			$query->set( 'orderby', 'ID' );
+			$query->set( 'order', 'ASC' );
+		};
+		add_action( 'pre_get_posts', $order_candidates_by_id );
 
 		try {
 			WCEmailTemplateAutoApplier::run();
 		} finally {
+			remove_action( 'pre_get_posts', $order_candidates_by_id );
 			remove_all_filters( 'wp_insert_post_empty_content' );
 		}
 
@@ -1096,6 +1132,10 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Email Registered fixture email instance.
 	 */
 	private function register_fixture_email( string $email_id ): \WC_Email {
+		if ( ! class_exists( \WC_Email::class ) ) {
+			require_once WC_ABSPATH . 'includes/emails/class-wc-email.php';
+		}
+
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();

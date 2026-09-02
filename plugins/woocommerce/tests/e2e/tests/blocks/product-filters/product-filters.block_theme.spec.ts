@@ -54,7 +54,7 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'should be visible and contain correct inner blocks', async ( {
+	test( 'shows the Product Filters inner-block structure and List View names', async ( {
 		editor,
 		pageObject,
 	} ) => {
@@ -84,18 +84,6 @@ test.describe( `${ blockData.name }`, () => {
 		for ( const option of expectedColorFilterOptions ) {
 			await expect( colorFilterBlock ).toContainText( option );
 		}
-	} );
-
-	test( 'should contain the correct inner block names in the list view', async ( {
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
-
-		const block = editor.canvas.getByLabel(
-			blockData.selectors.editor.blocks.filters.label
-		);
-		await expect( block ).toBeVisible();
 
 		await pageObject.page.getByLabel( 'Document Overview' ).click();
 		const listView = pageObject.page.getByLabel( 'List View' );

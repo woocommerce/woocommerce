@@ -59,6 +59,9 @@ test.describe( 'Shop page', () => {
 		expect( updatedShopPage.slug ).toBe( 'market' );
 
 		await page.goto( 'market/' );
+		// The first request processes WooCommerce's queued rewrite flush. Reload
+		// once so WordPress resolves the updated product archive rules.
+		await page.reload();
 		await expectShopTemplateToBeLoaded( page );
 	} );
 } );

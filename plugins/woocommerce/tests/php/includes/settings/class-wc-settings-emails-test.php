@@ -5,6 +5,11 @@
  * @package WooCommerce\Tests\Settings
  */
 
+declare( strict_types = 1 );
+
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Email\EmailColors;
+use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
@@ -99,6 +104,172 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Default email settings expose the current color palette contract.
+	 */
+	public function test_get_default_settings_exposes_current_color_palette_contract(): void {
+		$settings       = ( new WC_Settings_Emails() )->get_settings_for_section( '' );
+		$settings_by_id = $this->index_settings_by_id( $settings );
+		$default_colors = EmailColors::get_default_colors();
+
+		$expected = array(
+			'woocommerce_email_base_color'            => array( 'Accent', $default_colors['base'] ),
+			'woocommerce_email_background_color'      => array( 'Email background', $default_colors['bg'] ),
+			'woocommerce_email_body_background_color' => array( 'Content background', $default_colors['body_bg'] ),
+			'woocommerce_email_text_color'            => array( 'Heading & text', $default_colors['body_text'] ),
+			'woocommerce_email_footer_text_color'     => array( 'Secondary text', $default_colors['footer_text'] ),
+		);
+
+		foreach ( $expected as $id => $contract ) {
+			list( $title, $default ) = $contract;
+			$this->assertSame( $title, $settings_by_id[ $id ]['title'] );
+			$this->assertSame( $default, $settings_by_id[ $id ]['default'] );
+		}
+
+		$titles = array_column( $settings, 'title' );
+		$this->assertEmpty(
+			array_intersect(
+				array( 'Base color', 'Background color', 'Body background color', 'Body text color', 'Footer text color' ),
+				$titles
+			)
+		);
+	}
+
+	/**
+	 * @testdox The email font setting renders every supported font and the selected value.
+	 */
+	public function test_email_font_family_setting_contract(): void {
+		$settings_by_id = $this->index_settings_by_id( ( new WC_Settings_Emails() )->get_settings_for_section( '' ) );
+		$setting        = $settings_by_id['woocommerce_email_font_family'];
+
+		$this->assertSame( 'Font family', $setting['title'] );
+		$this->assertSame( 'email_font_family', $setting['type'] );
+		$this->assertSame( 'Helvetica', $setting['default'] );
+
+		$setting['field_name'] = $setting['id'];
+		$setting['value']      = 'Georgia';
+
+		ob_start();
+		try {
+			( new WC_Settings_Emails() )->email_font_family( $setting );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document = $this->load_html_document( '<table>' . $output . '</table>' );
+		$select   = $this->get_element_by_id( $document, 'woocommerce_email_font_family' );
+
+		$options = $select->getElementsByTagName( 'option' );
+		$this->assertCount( count( EmailFont::$font ), $options );
+
+		$rendered_fonts = array();
+		$selected       = array();
+		foreach ( $options as $option ) {
+			$rendered_fonts[ $option->getAttribute( 'value' ) ] = $option->getAttribute( 'data-font-family' );
+			if ( $option->hasAttribute( 'selected' ) ) {
+				$selected[] = $option->getAttribute( 'value' );
+			}
+		}
+
+		$this->assertSame( EmailFont::$font, $rendered_fonts );
+		$this->assertSame( array( 'Georgia' ), $selected );
+	}
+
+	/**
+	 * @testdox The email footer setting exposes the current placeholder contract.
+	 */
+	public function test_email_footer_setting_contract(): void {
+		$settings_by_id = $this->index_settings_by_id( ( new WC_Settings_Emails() )->get_settings_for_section( '' ) );
+		$setting        = $settings_by_id['woocommerce_email_footer_text'];
+
+		$this->assertSame( 'Footer text', $setting['title'] );
+		$this->assertSame( 'textarea', $setting['type'] );
+		$this->assertSame( '{site_title}<br />{store_address}', $setting['default'] );
+		$this->assertSame( 'N/A', $setting['placeholder'] );
+		$this->assertStringContainsString( '{store_address}', $setting['desc'] );
+		$this->assertStringContainsString( '{store_email}', $setting['desc'] );
+	}
+
+	/**
+	 * @testdox A single email preview renders its exact type, content settings, URL, and sender values.
+	 */
+	public function test_email_preview_single_contract(): void {
+		$option_names        = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address' );
+		$previous            = array();
+		$previous_transients = array();
+
+		foreach ( $option_names as $option_name ) {
+			$previous[ $option_name ] = get_option( $option_name, null );
+		}
+		foreach ( EmailPreview::get_all_email_setting_ids() as $transient_name ) {
+			$previous_transients[ $transient_name ] = array(
+				'value'   => get_option( '_transient_' . $transient_name, false ),
+				'timeout' => get_option( '_transient_timeout_' . $transient_name, false ),
+			);
+		}
+
+		try {
+			update_option( 'woocommerce_email_from_name', 'Woo Test Store' );
+			update_option( 'woocommerce_email_from_address', 'orders@example.com' );
+
+			$email = WC_Emails::instance()->get_emails()[ WC_Email_Customer_Processing_Order::class ];
+
+			ob_start();
+			try {
+				( new WC_Settings_Emails() )->email_preview_single( $email );
+				$output = (string) ob_get_contents();
+			} finally {
+				ob_end_clean();
+			}
+
+			$document = $this->load_html_document( $output );
+			$mount    = $this->get_element_by_id( $document, 'wc_settings_email_preview_slotfill' );
+
+			$this->assertSame(
+				array(
+					array(
+						'label' => $email->get_title(),
+						'value' => WC_Email_Customer_Processing_Order::class,
+					),
+				),
+				json_decode( $mount->getAttribute( 'data-email-types' ), true )
+			);
+			$this->assertSame(
+				EmailPreview::get_email_content_setting_ids( $email->id ),
+				json_decode( $mount->getAttribute( 'data-email-setting-ids' ), true )
+			);
+			$this->assertSame(
+				html_entity_decode( wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ),
+				$mount->getAttribute( 'data-preview-url' )
+			);
+			$this->assertSame( 'Woo Test Store', $this->get_element_by_id( $document, 'woocommerce_email_from_name' )->getAttribute( 'value' ) );
+			$this->assertSame( 'orders@example.com', $this->get_element_by_id( $document, 'woocommerce_email_from_address' )->getAttribute( 'value' ) );
+		} finally {
+			foreach ( $previous_transients as $transient_name => $transient ) {
+				delete_transient( $transient_name );
+				if ( false !== $transient['value'] ) {
+					add_option(
+						'_transient_' . $transient_name,
+						$transient['value'],
+						'',
+						false === $transient['timeout']
+					);
+				}
+				if ( false !== $transient['timeout'] ) {
+					add_option( '_transient_timeout_' . $transient_name, $transient['timeout'], '', false );
+				}
+			}
+			foreach ( $previous as $option_name => $value ) {
+				if ( null === $value ) {
+					delete_option( $option_name );
+				} else {
+					update_option( $option_name, $value );
+				}
+			}
+		}
+	}
+
+	/**
 	 * @testdox get_settings('') should return reply-to settings when block email editor is enabled.
 	 */
 	public function test_get_default_settings_with_block_email_editor_enabled() {
@@ -147,7 +318,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'run_email_admin_options' )
 			->will(
 				$this->returnCallback(
-					function( $email ) use ( &$admin_options_invoked, &$actual_email ) {
+					function ( $email ) use ( &$admin_options_invoked, &$actual_email ) {
 						$admin_options_invoked = true;
 						$actual_email          = $email;
 					}
@@ -178,16 +349,16 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$email = WC_Emails::instance()->get_emails()[ WC_Email_New_Order::class ];
 
 		$emails = $this->getMockBuilder( WC_Emails::class )
-								 ->setMethods( array( 'get_emails' ) )
-								 ->getMock();
+								->setMethods( array( 'get_emails' ) )
+								->getMock();
 
 		$emails->method( 'get_emails' )
-						 ->willReturn( array( WC_Email_New_Order::class => $email ) );
+						->willReturn( array( WC_Email_New_Order::class => $email ) );
 
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Emails' => array(
-					'instance' => function() use ( $emails ) {
+					'instance' => function () use ( $emails ) {
 						return $emails;
 					},
 				),
@@ -195,13 +366,13 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		);
 
 		$sut = $this->getMockBuilder( WC_Settings_Emails::class )
-					   ->setMethods( array( 'save_settings_for_current_section' ) )
-					   ->getMock();
+						->setMethods( array( 'save_settings_for_current_section' ) )
+						->getMock();
 
 		$sut->method( 'save_settings_for_current_section' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$save_settings_for_current_section_invoked ) {
+								function () use ( &$save_settings_for_current_section_invoked ) {
 									$save_settings_for_current_section_invoked = true;
 								}
 							)
@@ -211,5 +382,60 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->assertEquals( $expect_save_settings_for_current_section, $save_settings_for_current_section_invoked );
 		$this->assertEquals( '' === $section_name ? 0 : 1, did_action( 'woocommerce_update_options_email_new_order' ) );
+	}
+
+	/**
+	 * Index settings that expose an ID.
+	 *
+	 * @param array[] $settings Settings definitions.
+	 * @return array<string, array> Settings keyed by ID.
+	 */
+	private function index_settings_by_id( array $settings ): array {
+		$indexed = array();
+
+		foreach ( $settings as $setting ) {
+			if ( ! empty( $setting['id'] ) ) {
+				$indexed[ $setting['id'] ] = $setting;
+			}
+		}
+
+		return $indexed;
+	}
+
+	/**
+	 * Load rendered HTML into a DOM document.
+	 *
+	 * @param string $html Rendered HTML.
+	 * @return DOMDocument Parsed document.
+	 */
+	private function load_html_document( string $html ): DOMDocument {
+		$document                = new DOMDocument();
+		$previous_libxml_setting = libxml_use_internal_errors( true );
+		$loaded                  = $document->loadHTML( '<!DOCTYPE html><html><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_libxml_setting );
+
+		if ( ! $loaded ) {
+			throw new RuntimeException( 'Rendered email settings markup should be parseable HTML.' );
+		}
+
+		return $document;
+	}
+
+	/**
+	 * Get a required element from rendered settings markup.
+	 *
+	 * @param DOMDocument $document Parsed document.
+	 * @param string      $id       Element ID.
+	 * @return DOMElement Required element.
+	 */
+	private function get_element_by_id( DOMDocument $document, string $id ): DOMElement {
+		$element = $document->getElementById( $id );
+
+		if ( ! $element instanceof DOMElement ) {
+			throw new RuntimeException( 'Expected rendered element was not found.' );
+		}
+
+		return $element;
 	}
 }

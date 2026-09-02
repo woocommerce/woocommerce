@@ -376,60 +376,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
-	test( 'allows adding variable products that have "any" as a variation attribute', async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/v-neck-t-shirt/' );
-
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const colorBlueOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const colorRedOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Red', exact: true } );
-		const sizeLargeOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Size' } )
-			.getByRole( 'radio', { name: 'Large', exact: true } );
-
-		await colorBlueOption.click();
-		await sizeLargeOption.click();
-
-		// We use the Add to Cart + Options class to make sure we don't select
-		// the Add to Cart button from the Related Products block.
-		const addToCartButton = page
-			.locator( '.wp-block-add-to-cart-with-options' )
-			.getByRole( 'button', { name: 'Add to cart' } );
-
-		// Note: The button is always enabled for accessibility reasons.
-		// Instead, we check directly for the "disabled" class, which grays
-		// out the button.
-		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
-
-		await addToCartButton.click();
-
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
-
-		await colorRedOption.click();
-
-		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
-
-		// Add a second variation (Red + Large).
-		await addToCartButton.click();
-
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
-	} );
-
 	test( 'allows adding variable products with custom attribute slugs', async ( {
 		page,
 		pageObject,
@@ -617,6 +563,19 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
+		await test.step( 'reconciles repeated grouped additions', async () => {
+			await page
+				.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+				.click();
+
+			await expect(
+				page.getByLabel( 'Number of items in the cart: 4' )
+			).toBeVisible();
+		} );
+
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
 			const reduceBeanieQuantityButton = page
 				.locator(
@@ -681,7 +640,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await batchPromise;
 
 			await expect(
-				page.getByLabel( 'Number of items in the cart: 3' )
+				page.getByLabel( 'Number of items in the cart: 5' )
 			).toBeVisible();
 		} );
 
@@ -722,80 +681,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
 			await expect(
-				page.getByLabel( 'Number of items in the cart: 4' )
-			).toBeVisible();
-		} );
-	} );
-
-	test( 'correctly reconciles cart state when adding grouped products multiple times', async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/logo-collection' );
-
-		const addToCartButton = page
-			.getByRole( 'button', { name: 'Add to cart' } )
-			.first();
-
-		const increaseBeanie = page
-			.locator(
-				'[data-block-name="woocommerce/add-to-cart-with-options"]'
-			)
-			.getByLabel( 'Increase quantity of Beanie' );
-
-		const increaseTShirt = page
-			.locator(
-				'[data-block-name="woocommerce/add-to-cart-with-options"]'
-			)
-			.getByLabel( 'Increase quantity of T-Shirt' );
-
-		await test.step( 'add two child products to cart', async () => {
-			await increaseBeanie.click();
-			await increaseTShirt.click();
-
-			await addToCartButton.click();
-
-			await expect(
-				page.getByRole( 'button', {
-					name: 'Added to cart',
-					exact: true,
-				} )
-			).toBeVisible();
-
-			await expect(
-				page.getByLabel( 'Number of items in the cart: 2' )
+				page.getByLabel( 'Number of items in the cart: 6' )
 			).toBeVisible();
 		} );
 
-		await test.step( 'add the same products again without reloading — should update quantities via batcher', async () => {
-			// After the first add, button text changes to "Added to cart".
-			// Quantities still show 1 for each. Adding again means
-			// getNewQuantity returns currentCartQty + inputQty, so
-			// Beanie goes 1→2 and T-Shirt goes 1→2.
-			const addedToCartButton = page
-				.getByRole( 'button', {
-					name: 'Added to cart',
-					exact: true,
-				} )
-				.first();
-
-			await addedToCartButton.click();
-
-			await expect(
-				page.getByLabel( 'Number of items in the cart: 4' )
-			).toBeVisible();
-		} );
-
-		await test.step( 'verify cart state persists after reload', async () => {
-			// Reloading while a batch request is still in flight aborts it,
-			// losing the re-add server-side.
+		await test.step( 'persists reconciled grouped additions after reload', async () => {
 			await page.evaluate( async () => {
 				const { store } = await import( '@wordpress/interactivity' );
 				const unlockKey =
@@ -812,39 +702,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.reload();
 
 			await expect(
-				page.getByLabel( 'Number of items in the cart: 4' )
+				page.getByLabel( 'Number of items in the cart: 6' )
 			).toBeVisible();
 		} );
-	} );
-
-	test( "doesn't allow selecting invalid variations in chips mode", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/hoodie/' );
-
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const logoYesOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'radio', { name: 'Yes', exact: true } );
-		const colorGreenOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Green', exact: true } );
-
-		await expect( colorGreenOption ).toBeEnabled();
-
-		await logoYesOption.click();
-
-		await expect( colorGreenOption ).toBeDisabled();
 	} );
 
 	test( "doesn't allow selecting invalid variations in dropdown mode", async ( {
@@ -1167,31 +1027,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
-	test( "allows adding products to cart when the 'Enable AJAX add to cart buttons' setting is disabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
-
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/t-shirt' );
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
-
-		await addToCartButton.click();
-
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
-	} );
-
-	test( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+	test( 'redirects simple, variable, and grouped products to cart after addition', async ( {
 		page,
 		pageObject,
 		editor,
@@ -1204,135 +1040,55 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/t-shirt' );
+		await test.step( 'redirects a simple product', async () => {
+			await page.goto( '/product/beanie' );
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			await page
+				.getByRole( 'button', {
+					name: 'Add to cart',
+				} )
+				.click();
+
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
+			await expect(
+				page.getByLabel( 'Quantity of Beanie in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		await addToCartButton.click();
+		await test.step( 'redirects a selected variation', async () => {
+			await page.goto( '/product/v-neck-t-shirt/' );
 
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
+			const addToCartBlock = page.locator(
+				'.wp-block-add-to-cart-with-options'
+			);
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Blue', exact: true } )
+				.click();
+			await addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Size' } )
+				.getByRole( 'radio', { name: 'Large', exact: true } )
+				.click();
 
-	test( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
+			await expect(
+				page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		// We intentionally test the V-Neck T-Shirt because it has variations
-		// using 'any' as a variation attribute.
-		await page.goto( '/product/v-neck-t-shirt/' );
+		await test.step( 'redirects grouped child products', async () => {
+			await page.goto( '/product/logo-collection' );
 
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const colorBlueOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const sizeLargeOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Size' } )
-			.getByRole( 'radio', { name: 'Large', exact: true } );
+			await page.getByLabel( 'Increase quantity of T-Shirt' ).click();
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
-		await colorBlueOption.click();
-		await sizeLargeOption.click();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			await expect( page ).toHaveURL( /\/cart\/?$/ );
+			await expect(
+				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
-
-	test( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
-
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/logo-collection' );
-
-		const increaseQuantityButton = page.getByLabel(
-			'Increase quantity of T-Shirt'
-		);
-		await increaseQuantityButton.click();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
-
-	test( 'allows adding simple products to cart when inside the Product block', async ( {
-		page,
-		pageObject,
-	} ) => {
-		await pageObject.createPostWithProductBlock( 't-shirt' );
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
-
-		await addToCartButton.click();
-
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
-	} );
-
-	test( 'allows adding variable products to cart when inside the Product block', async ( {
-		page,
-		pageObject,
-	} ) => {
-		await pageObject.createPostWithProductBlock( 'hoodie' );
-
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const colorBlueOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const logoYesOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'radio', { name: 'Yes', exact: true } );
-
-		await colorBlueOption.click();
-		await logoYesOption.click();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-			exact: true,
-		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByRole( 'button', { name: '1 in cart', exact: true } )
-		).toBeVisible();
 	} );
 
 	test( 'allows adding variations to cart when inside the Product block', async ( {

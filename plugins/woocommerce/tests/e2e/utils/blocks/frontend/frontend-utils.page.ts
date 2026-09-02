@@ -1,50 +1,73 @@
 /**
  * External dependencies
  */
-import { Page, Locator, Request, Response } from '@playwright/test';
-import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
+import type { Page, Locator, Request } from '@playwright/test';
+import type { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
-const wait = ( time: number ) =>
-	new Promise( ( resolve ) => setTimeout( resolve, time ) );
-
-/**
- * Custom waitForFunction implementation that runs in Node.js context.
- *
- * Unlike page.waitForFunction() which executes in the browser context and can
- * only access serializable values passed as arguments, this function runs in
- * the Node.js context and has full access to closures and local variables. This
- * allows us to directly reference variables without serialization limitations.
- */
-async function waitForFunction(
-	predicateFunction: () => boolean,
-	timeout = 5000,
-	interval = 100
-) {
-	// Lint is too grabby in this case, this usage is fine
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-	const startTime = performance.now();
-	do {
-		if ( predicateFunction() ) {
-			return true;
-		}
-		await wait( interval );
-	} while ( performance.now() - startTime < timeout );
-
-	throw new Error(
-		`Timeout reached after ${ timeout }ms waiting for condition to be met.`
-	);
-}
-
-const STORE_API_CART_WRITE_REQUEST_URLS = [
-	'/cart/add-item',
-	'/batch',
-	'/cart/remove-item',
-	'/cart/update-item',
-	'/cart/apply-coupon/',
-	'/cart/remove-coupon/',
-	'/cart/update-customer',
-	'/cart/select-shipping-rate',
+const CART_WRITE_REQUEST_PATHS = [
+	'/wc/store/v1/cart/add-item',
+	'/wc/store/v1/cart/remove-item',
+	'/wc/store/v1/cart/update-item',
+	'/wc/store/v1/cart/apply-coupon',
+	'/wc/store/v1/cart/remove-coupon',
+	'/wc/store/v1/cart/update-customer',
+	'/wc/store/v1/cart/select-shipping-rate',
 ];
+const CART_BATCH_REQUEST_PATH = '/wc/store/v1/batch';
+const CART_REQUEST_TIMEOUT = 5000;
+const WRITE_REQUEST_METHODS = new Set( [ 'POST', 'PUT', 'PATCH', 'DELETE' ] );
+
+const getPathname = ( url: string ) =>
+	new URL( url, 'http://localhost' ).pathname.replace( /\/+$/, '' );
+
+const isWriteMethod = ( method: string ) =>
+	WRITE_REQUEST_METHODS.has( method.toUpperCase() );
+
+const isCartWritePath = ( path: string ) =>
+	CART_WRITE_REQUEST_PATHS.some( ( cartPath ) =>
+		getPathname( path ).endsWith( cartPath )
+	);
+
+const isCartWriteRequest = ( request: Request ) => {
+	if ( ! isWriteMethod( request.method() ) ) {
+		return false;
+	}
+
+	const requestUrl = new URL( request.url(), 'http://localhost' );
+
+	if ( requestUrl.searchParams.get( 'wc-ajax' ) === 'add_to_cart' ) {
+		return true;
+	}
+
+	const requestPath = requestUrl.pathname.replace( /\/+$/, '' );
+
+	if ( isCartWritePath( requestPath ) ) {
+		return true;
+	}
+
+	if ( ! requestPath.endsWith( CART_BATCH_REQUEST_PATH ) ) {
+		return false;
+	}
+
+	try {
+		const batch = request.postDataJSON() as {
+			requests?: Array< { method?: string; path?: string } >;
+		};
+
+		return (
+			Array.isArray( batch?.requests ) &&
+			batch.requests.some(
+				( batchRequest ) =>
+					typeof batchRequest.method === 'string' &&
+					typeof batchRequest.path === 'string' &&
+					isWriteMethod( batchRequest.method ) &&
+					isCartWritePath( batchRequest.path )
+			)
+		);
+	} catch {
+		return false;
+	}
+};
 
 export class FrontendUtils {
 	page: Page;
@@ -63,79 +86,83 @@ export class FrontendUtils {
 		return this.page.locator( selector );
 	}
 
-	/**
-	 * Start tracking cart-related requests and return a function to wait for completion
-	 */
-	private trackCartRequests( timeout = 5000 ) {
-		// key: request url, value: count of pending requests with this url
-		const pendingRequests = new Map< string, number >();
+	private async performCartAction( action: () => Promise< void > ) {
+		const pendingRequests = new Set< Request >();
+		let cartRequestObserved = false;
+		let actionCompleted = false;
+		let resolveCartRequests!: () => void;
+		const cartRequestsCompleted = new Promise< void >( ( resolve ) => {
+			resolveCartRequests = resolve;
+		} );
+		let deadline: ReturnType< typeof setTimeout > | undefined;
 
-		const requestHandler = ( request: Request ) => {
-			const url = request.url();
+		const resolveIfComplete = () => {
 			if (
-				STORE_API_CART_WRITE_REQUEST_URLS.some( ( cartUrl ) =>
-					url.includes( cartUrl )
-				)
+				actionCompleted &&
+				cartRequestObserved &&
+				pendingRequests.size === 0
 			) {
-				pendingRequests.set(
-					url,
-					( pendingRequests.get( url ) ?? 0 ) + 1
-				);
+				resolveCartRequests();
 			}
 		};
 
-		const responseHandler = ( response: Response ) => {
-			const url = response.url();
-			const pendingRequestCount = pendingRequests.get( url );
-
-			// means we're not dealing with cart request
-			if ( pendingRequestCount === undefined ) {
-				return;
+		const requestHandler = ( request: Request ) => {
+			if ( isCartWriteRequest( request ) ) {
+				pendingRequests.add( request );
+				cartRequestObserved = true;
 			}
+		};
 
-			if ( pendingRequestCount === 1 ) {
-				pendingRequests.delete( url );
-				return;
+		const requestSettledHandler = ( request: Request ) => {
+			if ( pendingRequests.delete( request ) ) {
+				resolveIfComplete();
 			}
-
-			pendingRequests.set( url, pendingRequestCount - 1 );
 		};
 
 		this.page.on( 'request', requestHandler );
-		this.page.on( 'response', responseHandler );
+		this.page.on( 'requestfinished', requestSettledHandler );
+		this.page.on( 'requestfailed', requestSettledHandler );
 
-		return {
-			waitForCartRequests: async () => {
-				try {
-					await waitForFunction(
-						() => pendingRequests.size === 0,
-						timeout
-					);
-				} finally {
-					this.page.off( 'request', requestHandler );
-					this.page.off( 'response', responseHandler );
-				}
-			},
-		};
+		try {
+			await action();
+			actionCompleted = true;
+			resolveIfComplete();
+
+			if ( ! cartRequestObserved || pendingRequests.size > 0 ) {
+				const timeout = new Promise< never >( ( _, reject ) => {
+					deadline = setTimeout( () => {
+						reject(
+							new Error(
+								`Timed out after ${ CART_REQUEST_TIMEOUT }ms waiting for a cart write request to settle.`
+							)
+						);
+					}, CART_REQUEST_TIMEOUT );
+				} );
+
+				await Promise.race( [ cartRequestsCompleted, timeout ] );
+			}
+		} finally {
+			if ( deadline !== undefined ) {
+				clearTimeout( deadline );
+			}
+			this.page.off( 'request', requestHandler );
+			this.page.off( 'requestfinished', requestSettledHandler );
+			this.page.off( 'requestfailed', requestSettledHandler );
+		}
 	}
 
 	async addToCart( itemName = '' ) {
-		// Start tracking cart requests before the action
-		const { waitForCartRequests } = this.trackCartRequests();
-
-		if ( itemName !== '' ) {
-			// We can't use `getByRole()` here because the Add to Cart button
-			// might be a button (in blocks) or a link (in the legacy template).
-			await this.page
-				.getByLabel( `Add to cart: “${ itemName }”` )
-				.click();
-		} else {
-			await this.page.click( 'text=Add to cart' );
-		}
-
-		// Wait for the cart request triggered by this action to complete
-		// We do it the complex way as there are no visual cues that we can rely on
-		await waitForCartRequests();
+		await this.performCartAction( async () => {
+			if ( itemName !== '' ) {
+				// We can't use `getByRole()` here because the Add to Cart button
+				// might be a button (in blocks) or a link (in the legacy template).
+				await this.page
+					.getByLabel( `Add to cart: “${ itemName }”` )
+					.click();
+			} else {
+				await this.page.click( 'text=Add to cart' );
+			}
+		} );
 	}
 
 	async goToCheckout() {
@@ -170,19 +197,12 @@ export class FrontendUtils {
 			return; // Cart is already empty
 		}
 
-		// Track cart-related requests to wait for completion
-		const { waitForCartRequests } = this.trackCartRequests();
-
 		// Count initial remove buttons and remove all items
 		const removeButtons = this.page.getByLabel( /Remove .* from cart/ );
 		let itemCount = await removeButtons.count();
 
 		while ( itemCount > 0 ) {
-			// Click the first remove button
-			await removeButtons.first().click();
-
-			// Wait for the cart request to complete
-			await waitForCartRequests();
+			await this.performCartAction( () => removeButtons.first().click() );
 
 			// Check if empty cart message is now visible
 			if ( await emptyCartMessage.isVisible() ) {

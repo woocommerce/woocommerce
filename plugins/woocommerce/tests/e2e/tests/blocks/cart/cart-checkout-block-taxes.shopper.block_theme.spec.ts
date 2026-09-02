@@ -28,6 +28,16 @@ test.describe( 'Shopper → Taxes', () => {
 		page,
 		checkoutPageObject,
 	} ) => {
+		await requestUtils.rest( {
+			method: 'POST',
+			path: 'wc/v3/taxes',
+			data: {
+				rate: '20',
+				name: 'Blocks tax visibility rate',
+				class: 'standard',
+			},
+		} );
+
 		// Turn off tax display.
 		await requestUtils.rest( {
 			method: 'PUT',

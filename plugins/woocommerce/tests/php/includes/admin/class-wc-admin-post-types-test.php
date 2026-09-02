@@ -242,6 +242,192 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bulk Edit updates only selected products, including prices and stock.
+	 */
+	public function test_bulk_edit_updates_selected_products_and_preserves_unselected_product(): void {
+		$manage_stock_option_exists = false !== get_option( 'woocommerce_manage_stock', false );
+		$original_manage_stock      = get_option( 'woocommerce_manage_stock' );
+		$first_product              = WC_Helper_Product::create_simple_product();
+		$second_product             = WC_Helper_Product::create_simple_product();
+		$unselected_product         = WC_Helper_Product::create_simple_product();
+
+		$first_product->set_regular_price( '100' );
+		$first_product->set_sale_price( '80' );
+		$first_product->set_manage_stock( true );
+		$first_product->set_stock_quantity( 10 );
+		$first_product->save();
+
+		$second_product->set_regular_price( '12.34' );
+		$second_product->set_sale_price( '10' );
+		$second_product->set_manage_stock( true );
+		$second_product->set_stock_quantity( 4 );
+		$second_product->save();
+
+		$unselected_product->set_regular_price( '55' );
+		$unselected_product->set_sale_price( '45' );
+		$unselected_product->set_manage_stock( true );
+		$unselected_product->set_stock_quantity( 7 );
+		$unselected_product->save();
+
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		try {
+			$this->bulk_edit(
+				array( $first_product, $second_product ),
+				array(
+					'change_regular_price' => '2',
+					'_regular_price'       => '10%',
+					'change_sale_price'    => '4',
+					'_sale_price'          => '10%',
+					'_manage_stock'        => 'yes',
+					'change_stock'         => '2',
+					'_stock'               => '10',
+				)
+			);
+		} finally {
+			if ( $manage_stock_option_exists ) {
+				update_option( 'woocommerce_manage_stock', $original_manage_stock );
+			} else {
+				delete_option( 'woocommerce_manage_stock' );
+			}
+		}
+
+		$this->assert_product_prices_and_stock( $first_product->get_id(), '110', '99', 20 );
+		$this->assert_product_prices_and_stock( $second_product->get_id(), '13.57', '12.21', 14 );
+		$this->assert_product_prices_and_stock( $unselected_product->get_id(), '55', '45', 7 );
+	}
+
+	/**
+	 * @testdox Bulk Edit persists sale-price edge cases.
+	 * @dataProvider bulk_edit_sale_price_edge_case_provider
+	 *
+	 * @param string              $initial_regular_price Initial regular price.
+	 * @param string              $initial_sale_price Initial sale price.
+	 * @param array<string,mixed> $request_data Bulk Edit request fields.
+	 * @param string              $expected_regular_price Expected regular price.
+	 * @param string              $expected_sale_price Expected sale price.
+	 */
+	public function test_bulk_edit_sale_price_edge_cases(
+		string $initial_regular_price,
+		string $initial_sale_price,
+		array $request_data,
+		string $expected_regular_price,
+		string $expected_sale_price
+	): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $initial_regular_price );
+		$product->set_sale_price( $initial_sale_price );
+		$product->save();
+
+		$this->bulk_edit( array( $product ), $request_data );
+
+		/** @var WC_Product $updated_product */
+		$updated_product = wc_get_product( $product->get_id() );
+		$this->assertSame( $expected_regular_price, $updated_product->get_regular_price( 'edit' ), 'Bulk Edit should persist the expected regular price.' );
+		$this->assertSame( $expected_sale_price, $updated_product->get_sale_price( 'edit' ), 'Bulk Edit should persist the expected sale price.' );
+	}
+
+	/**
+	 * Provides Bulk Edit price operations and expected persisted values.
+	 *
+	 * @return array<string, array{string, string, array<string, string>, string, string}>
+	 */
+	public static function bulk_edit_sale_price_edge_case_provider(): array {
+		return array(
+			'fixed regular increase'             => array(
+				'100',
+				'80',
+				array(
+					'change_regular_price' => '2',
+					'_regular_price'       => '10',
+				),
+				'110',
+				'80',
+			),
+			'percentage regular increase'        => array(
+				'100',
+				'80',
+				array(
+					'change_regular_price' => '2',
+					'_regular_price'       => '10%',
+				),
+				'110',
+				'80',
+			),
+			'fixed sale decrease'                => array(
+				'100',
+				'80',
+				array(
+					'change_sale_price' => '3',
+					'_sale_price'       => '5',
+				),
+				'100',
+				'75',
+			),
+			'percentage sale decrease'           => array(
+				'100',
+				'80',
+				array(
+					'change_sale_price' => '3',
+					'_sale_price'       => '10%',
+				),
+				'100',
+				'72',
+			),
+			'regular basis percentage'           => array(
+				'100',
+				'80',
+				array(
+					'change_sale_price' => '4',
+					'_sale_price'       => '10%',
+				),
+				'100',
+				'90',
+			),
+			'absent sale percentage decrease'    => array(
+				'100',
+				'',
+				array(
+					'change_sale_price' => '3',
+					'_sale_price'       => '10%',
+				),
+				'100',
+				'90',
+			),
+			'literal zero sale increase'         => array(
+				'100',
+				'0',
+				array(
+					'change_sale_price' => '2',
+					'_sale_price'       => '10%',
+				),
+				'100',
+				'0',
+			),
+			'empty change-to restoration'        => array(
+				'100',
+				'80',
+				array(
+					'change_sale_price' => '1',
+					'_sale_price'       => '',
+				),
+				'100',
+				'',
+			),
+			'two-decimal regular-basis rounding' => array(
+				'12.34',
+				'',
+				array(
+					'change_sale_price' => '4',
+					'_sale_price'       => '10%',
+				),
+				'12.34',
+				'11.11',
+			),
+		);
+	}
+
+	/**
 	 * @testdox Quick Edit stores sale boundaries in the site timezone.
 	 */
 	public function test_quick_edit_uses_site_timezone_for_sale_dates(): void {
@@ -300,6 +486,68 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+	}
+
+	/**
+	 * Submit a Bulk Edit request for selected products.
+	 *
+	 * @param WC_Product[]        $products Products to edit.
+	 * @param array<string,mixed> $request_data Request fields.
+	 */
+	private function bulk_edit( array $products, array $request_data ): void {
+		$_REQUEST = array_merge(
+			array(
+				'woocommerce_bulk_edit'        => '1',
+				'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+				'change_regular_price'         => '',
+				'_regular_price'               => '',
+				'change_sale_price'            => '',
+				'_sale_price'                  => '',
+				'change_weight'                => '',
+				'_weight'                      => '',
+				'change_dimensions'            => '',
+				'_length'                      => '',
+				'_width'                       => '',
+				'_height'                      => '',
+				'_tax_status'                  => '',
+				'_tax_class'                   => '',
+				'_shipping_class'              => '',
+				'_visibility'                  => '',
+				'_featured'                    => '',
+				'_sold_individually'           => '',
+				'_manage_stock'                => '',
+				'_backorders'                  => '',
+				'change_stock'                 => '',
+				'_stock'                       => '',
+				'_stock_status'                => '',
+				'change_cogs_value'            => '',
+				'_cogs_value'                  => '',
+			),
+			$request_data
+		);
+
+		foreach ( $products as $product ) {
+			/** @var WP_Post $post */
+			$post = get_post( $product->get_id() );
+			$this->sut->bulk_and_quick_edit_save_post( $product->get_id(), $post );
+		}
+	}
+
+	/**
+	 * Assert freshly reloaded product prices and stock.
+	 *
+	 * @param int    $product_id Product ID.
+	 * @param string $regular_price Expected regular price.
+	 * @param string $sale_price Expected sale price.
+	 * @param int    $stock_quantity Expected stock quantity.
+	 */
+	private function assert_product_prices_and_stock( int $product_id, string $regular_price, string $sale_price, int $stock_quantity ): void {
+		/** @var WC_Product $product */
+		$product = wc_get_product( $product_id );
+
+		$this->assertSame( $regular_price, $product->get_regular_price( 'edit' ), 'Bulk Edit should persist the expected regular price.' );
+		$this->assertSame( $sale_price, $product->get_sale_price( 'edit' ), 'Bulk Edit should persist the expected sale price.' );
+		$this->assertSame( $stock_quantity, $product->get_stock_quantity( 'edit' ), 'Bulk Edit should persist the expected stock quantity.' );
 	}
 
 	/**

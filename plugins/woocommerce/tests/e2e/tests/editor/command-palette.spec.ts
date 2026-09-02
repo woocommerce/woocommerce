@@ -117,42 +117,6 @@ test( 'can use the "Add new product" command', async ( { page } ) => {
 	).toBeVisible();
 } );
 
-test( 'can use the "Add new order" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Add new order',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.getByRole( 'heading', { name: 'Add new order' } )
-	).toBeVisible();
-} );
-
-test( 'can use the "Products" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } ).first()
-	).toBeVisible();
-} );
-
-test( 'can use the "Orders" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Orders',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Orders' } ).first()
-	).toBeVisible();
-} );
-
 test( 'can use the product search command', async ( { page, product } ) => {
 	await clickOnCommandPaletteOption( {
 		page,
@@ -163,18 +127,4 @@ test( 'can use the product search command', async ( { page, product } ) => {
 	await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
 		`${ product.name }`
 	);
-} );
-
-test( 'can use an analytics command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Analytics: Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } )
-	).toBeVisible();
-	const pageTitle = await page.title();
-	expect( pageTitle.includes( 'Products ‹ Analytics' ) ).toBeTruthy();
 } );

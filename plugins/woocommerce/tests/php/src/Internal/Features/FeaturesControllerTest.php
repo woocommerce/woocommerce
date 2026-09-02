@@ -322,6 +322,110 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Block Email Editor setting is visible and persists enablement.
+	 */
+	public function test_block_email_editor_setting_is_visible_and_persists_enablement(): void {
+		$feature_option_name     = 'woocommerce_feature_block_email_editor_enabled';
+		$missing_option_value    = new \stdClass();
+		$previous_option_value   = get_option( $feature_option_name, $missing_option_value );
+		$dummy_features_priority = has_action(
+			'woocommerce_register_feature_definitions',
+			array( $this, 'register_dummy_features' )
+		);
+		$real_sut                = null;
+
+		if ( false !== $dummy_features_priority ) {
+			remove_action(
+				'woocommerce_register_feature_definitions',
+				array( $this, 'register_dummy_features' ),
+				$dummy_features_priority
+			);
+		}
+
+		try {
+			$real_sut = new FeaturesController();
+			$real_sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+			$all_settings = $real_sut->add_feature_settings( array(), 'features' );
+			$settings     = array_values(
+				array_filter(
+					$all_settings,
+					function ( $candidate ) use ( $feature_option_name ) {
+						return ( $candidate['id'] ?? null ) === $feature_option_name;
+					}
+				)
+			);
+			$this->assertCount( 1, $settings, 'The Block Email Editor feature should have exactly one settings row.' );
+			$setting = $settings[0];
+
+			$this->assertSame( $feature_option_name, $setting['id'], 'The setting should use the feature enable option.' );
+			$this->assertSame( 'Block Email Editor (alpha)', $setting['title'], 'The setting should use the built-in feature title.' );
+			$this->assertSame( 'checkbox', $setting['type'], 'The setting should render as a checkbox.' );
+			$this->assertSame( 'no', $setting['default'], 'The Block Email Editor feature should be disabled by default.' );
+
+			$this->assertTrue( $real_sut->change_feature_enable( 'block_email_editor', true ), 'Enabling the built-in Block Email Editor feature should update its option.' );
+			$this->assertSame( 'yes', get_option( $feature_option_name ), 'Enabling the feature should persist the expected option value.' );
+			$this->assertTrue( $real_sut->feature_is_enabled( 'block_email_editor' ), 'The real feature controller should report the enabled feature as enabled.' );
+		} finally {
+			if ( $real_sut instanceof FeaturesController ) {
+				$this->remove_features_controller_callbacks( $real_sut );
+			}
+
+			if ( $previous_option_value === $missing_option_value ) {
+				delete_option( $feature_option_name );
+			} else {
+				update_option( $feature_option_name, $previous_option_value );
+			}
+
+			if ( false !== $dummy_features_priority ) {
+				add_action(
+					'woocommerce_register_feature_definitions',
+					array( $this, 'register_dummy_features' ),
+					$dummy_features_priority,
+					1
+				);
+			}
+		}
+	}
+
+	/**
+	 * Remove callbacks registered by a temporary feature controller.
+	 *
+	 * @param FeaturesController $controller Temporary controller instance.
+	 */
+	private function remove_features_controller_callbacks( FeaturesController $controller ): void {
+		$callbacks = array(
+			array( 'before_woocommerce_init', 'register_additional_features' ),
+			array( 'init', 'start_listening_for_option_changes' ),
+			array( 'updated_option', 'process_updated_option' ),
+			array( 'added_option', 'process_added_option' ),
+			array( 'woocommerce_get_sections_advanced', 'add_features_section' ),
+			array( 'woocommerce_get_settings_advanced', 'add_feature_settings' ),
+			array( 'deactivated_plugin', 'handle_plugin_deactivation' ),
+			array( 'all_plugins', 'filter_plugins_list' ),
+			array( 'admin_notices', 'display_notices_in_plugins_page' ),
+			array( 'load-plugins.php', 'maybe_invalidate_cached_plugin_data' ),
+			array( 'after_plugin_row', 'handle_plugin_list_rows' ),
+			array( 'current_screen', 'enqueue_script_to_fix_plugin_list_html' ),
+			array( 'views_plugins', 'handle_plugins_page_views_list' ),
+			array( 'woocommerce_admin_shared_settings', 'set_change_feature_enable_nonce' ),
+			array( 'admin_init', 'change_feature_enable_from_query_params' ),
+			array( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, 'display_email_improvements_feedback_notice' ),
+			array( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, 'flag_abandoned_cart_recovery_enabled_notice' ),
+			array( 'woocommerce_settings_advanced', 'maybe_render_abandoned_cart_recovery_enabled_notice' ),
+			array( 'woocommerce_settings-advanced', 'add_point_of_sale_setting_for_rest_api' ),
+		);
+
+		foreach ( $callbacks as $callback_definition ) {
+			$callback = array( $controller, $callback_definition[1] );
+			$priority = has_filter( $callback_definition[0], $callback );
+			if ( false !== $priority ) {
+				remove_filter( $callback_definition[0], $callback, $priority );
+			}
+		}
+	}
+
+	/**
 	 * @testdox 'declare_compatibility' fails when invoked from outside the 'before_woocommerce_init' action.
 	 */
 	public function test_declare_compatibility_outside_before_woocommerce_init_hook() {

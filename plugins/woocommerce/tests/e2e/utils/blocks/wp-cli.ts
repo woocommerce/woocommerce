@@ -17,6 +17,11 @@ type RunCommand = (
 	args: string[]
 ) => Promise< CommandResult >;
 
+type DatabaseSnapshotOperation = 'import' | 'restore' | 'export';
+
+const DATABASE_SNAPSHOT_COORDINATOR =
+	'/var/www/html/wp-content/plugins/woocommerce/blocks-bin/playwright/database-snapshot.php';
+
 async function runCommand( executable: string, args: string[] ) {
 	return await execFilePromisified( executable, args );
 }
@@ -32,10 +37,10 @@ export async function wpCLI( command: string ) {
 }
 
 /**
- * Creates a database restore function that resolves the Blocks E2E CLI
- * container once and reuses it for subsequent restores.
+ * Creates a database snapshot coordinator that resolves the Blocks E2E CLI
+ * container once and reuses it for subsequent operations.
  */
-export function createBlocksDatabaseRestorer( execute: RunCommand ) {
+export function createBlocksDatabaseSnapshotCoordinator( execute: RunCommand ) {
 	let cliContainerIdPromise: Promise< string > | undefined;
 
 	const getCliContainerId = async () => {
@@ -74,7 +79,10 @@ export function createBlocksDatabaseRestorer( execute: RunCommand ) {
 		return await cliContainerIdPromise;
 	};
 
-	return async ( databaseFile: string ) => {
+	return async (
+		operation: DatabaseSnapshotOperation,
+		databaseFile: string
+	) => {
 		const cliContainerId = await getCliContainerId();
 
 		return await execute( 'docker', [
@@ -82,23 +90,37 @@ export function createBlocksDatabaseRestorer( execute: RunCommand ) {
 			'--workdir',
 			'/var/www/html',
 			cliContainerId,
-			'sh',
-			'-c',
-			'wp db reset --yes && wp db import "$1"',
-			'restore-blocks-database',
+			'php',
+			DATABASE_SNAPSHOT_COORDINATOR,
+			operation,
 			databaseFile,
 		] );
 	};
 }
 
-const restoreDatabase = createBlocksDatabaseRestorer( runCommand );
+const coordinateDatabaseSnapshot =
+	createBlocksDatabaseSnapshotCoordinator( runCommand );
+
+/**
+ * Imports a Blocks E2E database snapshot through the existing CLI container.
+ */
+export async function importBlocksDatabase( databaseFile: string ) {
+	return await coordinateDatabaseSnapshot( 'import', databaseFile );
+}
 
 /**
  * Resets the Blocks E2E database and imports its snapshot through the existing
  * CLI container.
  */
 export async function restoreBlocksDatabase( databaseFile: string ) {
-	return await restoreDatabase( databaseFile );
+	return await coordinateDatabaseSnapshot( 'restore', databaseFile );
+}
+
+/**
+ * Exports a Blocks E2E database snapshot through the existing CLI container.
+ */
+export async function exportBlocksDatabase( databaseFile: string ) {
+	return await coordinateDatabaseSnapshot( 'export', databaseFile );
 }
 
 /**

@@ -356,6 +356,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await page
 				.locator( '#field_to_edit' )
 				.selectOption( 'toggle_downloadable' );
+			await expect(
+				page.locator(
+					'#woocommerce-product-data .blockUI.blockOverlay'
+				)
+			).toBeHidden( { timeout: 45_000 } );
 		} );
 
 		await test.step( 'Expand all variations.', async () => {

@@ -1,225 +1,153 @@
 /**
+ * External dependencies
+ */
+import type { APIRequestContext } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
-test.describe( 'Webhooks API tests', () => {
-	let webhookId: number;
+const positiveSafeInteger = ( value: unknown ): number => {
+	expect( Number.isSafeInteger( value ) ).toBe( true );
+	expect( value ).toEqual( expect.any( Number ) );
+	expect( value ).toBeGreaterThan( 0 );
+	return value as number;
+};
 
-	test.describe( 'Create a webhook', () => {
-		test( 'can create a webhook', async ( { request } ) => {
-			// call API to create a webhook
-			const response = await request.post( './wp-json/wc/v3/webhooks', {
+const cleanupWebhook = async (
+	request: APIRequestContext,
+	webhookId: number
+): Promise< unknown[] > => {
+	if ( webhookId <= 0 ) {
+		return [];
+	}
+
+	try {
+		const response = await request.delete(
+			`./wp-json/wc/v3/webhooks/${ webhookId }`,
+			{
+				data: { force: true },
+			}
+		);
+		if ( ! [ 200, 404 ].includes( response.status() ) ) {
+			throw new Error(
+				`Webhook cleanup failed with HTTP ${ response.status() }.`
+			);
+		}
+		return [];
+	} catch ( error ) {
+		return [ error ];
+	}
+};
+
+const throwLifecycleErrors = (
+	primaryError: unknown,
+	cleanupErrors: unknown[]
+) => {
+	if ( primaryError && cleanupErrors.length > 0 ) {
+		throw new AggregateError(
+			[ primaryError, ...cleanupErrors ],
+			'Webhook lifecycle and cleanup both failed.'
+		);
+	}
+	if ( primaryError ) {
+		throw primaryError;
+	}
+	if ( cleanupErrors.length > 0 ) {
+		throw new AggregateError( cleanupErrors, 'Webhook cleanup failed.' );
+	}
+};
+
+test.describe( 'Webhooks API tests', () => {
+	test( 'can round-trip a webhook through authenticated installed V3 HTTP', async ( {
+		request,
+	} ) => {
+		let webhookId = 0;
+		let primaryError: unknown;
+		const deliveryUrl = 'http://127.0.0.1:1/woocommerce-webhook';
+
+		try {
+			const createResponse = await request.post(
+				'./wp-json/wc/v3/webhooks',
+				{
+					data: {
+						name: 'Installed V3 order updates',
+						topic: 'order.updated',
+						delivery_url: deliveryUrl,
+					},
+				}
+			);
+			const createdWebhook = await createResponse.json();
+			webhookId = positiveSafeInteger( createdWebhook.id );
+
+			expect( createResponse.status() ).toBe( 201 );
+			expect( createResponse.headers().location ).toContain(
+				`/wp-json/wc/v3/webhooks/${ webhookId }`
+			);
+			expect( createdWebhook ).toMatchObject( {
+				id: webhookId,
+				name: 'Installed V3 order updates',
+				status: 'active',
+				topic: 'order.updated',
+				delivery_url: deliveryUrl,
+				hooks: [
+					'woocommerce_update_order',
+					'woocommerce_order_refunded',
+				],
+			} );
+
+			const itemPath = `./wp-json/wc/v3/webhooks/${ webhookId }`;
+			const itemResponse = await request.get( itemPath );
+			expect( itemResponse.status() ).toBe( 200 );
+
+			const item = await itemResponse.json();
+			expect( item ).toMatchObject( {
+				id: webhookId,
+				name: 'Installed V3 order updates',
+				status: 'active',
+				topic: 'order.updated',
+				delivery_url: deliveryUrl,
+			} );
+
+			const updateResponse = await request.put( itemPath, {
 				data: {
-					name: 'Order updated',
-					topic: 'order.updated',
-					delivery_url: 'http://requestb.in/1g0sxmo1',
+					name: 'Installed V3 paused order updates',
+					status: 'paused',
 				},
 			} );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 201 );
-			expect( typeof responseJSON.id ).toEqual( 'number' );
-			expect( responseJSON.name ).toEqual( 'Order updated' );
-			expect( responseJSON.status ).toEqual( 'active' );
-			expect( responseJSON.topic ).toEqual( 'order.updated' );
-			expect( responseJSON.delivery_url ).toEqual(
-				'http://requestb.in/1g0sxmo1'
-			);
-			expect( responseJSON.hooks ).toEqual(
-				expect.arrayContaining( [
-					'woocommerce_update_order',
-					'woocommerce_order_refunded',
-				] )
-			);
+			expect( updateResponse.status() ).toBe( 200 );
 
-			webhookId = responseJSON.id;
-		} );
-	} );
+			const updatedWebhook = await updateResponse.json();
+			expect( updatedWebhook ).toMatchObject( {
+				id: webhookId,
+				name: 'Installed V3 paused order updates',
+				status: 'paused',
+			} );
 
-	test.describe( 'Retrieve after create', () => {
-		test( 'can retrieve a webhook', async ( { request } ) => {
-			// call API to retrieve the previously saved webhook
-			const response = await request.get(
-				`./wp-json/wc/v3/webhooks/${ webhookId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( false );
-			expect( typeof responseJSON.id ).toEqual( 'number' );
-			expect( responseJSON.name ).toEqual( 'Order updated' );
-			expect( responseJSON.status ).toEqual( 'active' );
-			expect( responseJSON.topic ).toEqual( 'order.updated' );
-			expect( responseJSON.delivery_url ).toEqual(
-				'http://requestb.in/1g0sxmo1'
-			);
-			expect( responseJSON.hooks ).toEqual(
-				expect.arrayContaining( [
-					'woocommerce_update_order',
-					'woocommerce_order_refunded',
-				] )
-			);
-		} );
+			const freshItemResponse = await request.get( itemPath );
+			expect( freshItemResponse.status() ).toBe( 200 );
 
-		test( 'can retrieve all webhooks', async ( { request } ) => {
-			// call API to retrieve all webhooks
-			const response = await request.get( './wp-json/wc/v3/webhooks' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThan( 0 );
-		} );
-	} );
+			const freshItem = await freshItemResponse.json();
+			expect( freshItem ).toMatchObject( {
+				id: webhookId,
+				name: 'Installed V3 paused order updates',
+				status: 'paused',
+			} );
 
-	test.describe( 'Update a webhook', () => {
-		test( `can update a web hook`, async ( { request } ) => {
-			// update webhook
-			const response = await request.put(
-				`./wp-json/wc/v3/webhooks/${ webhookId }`,
-				{
-					data: {
-						status: 'paused',
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.status ).toEqual( 'paused' );
-		} );
-	} );
+			const deleteResponse = await request.delete( itemPath, {
+				data: { force: true },
+			} );
+			expect( deleteResponse.status() ).toBe( 200 );
 
-	test.describe( 'Delete a webhook', () => {
-		test( 'can permanently delete a webhook', async ( { request } ) => {
-			// Delete the webhook
-			const response = await request.delete(
-				`./wp-json/wc/v3/webhooks/${ webhookId }`,
-				{
-					data: {
-						force: true,
-					},
-				}
-			);
-			expect( response.status() ).toEqual( 200 );
+			const deletedWebhook = await deleteResponse.json();
+			expect( deletedWebhook.id ).toBe( webhookId );
+			expect( ( await request.get( itemPath ) ).status() ).toBe( 404 );
+		} catch ( error ) {
+			primaryError = error;
+		}
 
-			// Verify that the webhook can no longer be retrieved
-			const getDeletedWebhookResponse = await request.get(
-				`./wp-json/wc/v3/webhooks/${ webhookId }`
-			);
-
-			expect( getDeletedWebhookResponse.status() ).toEqual( 404 );
-		} );
-	} );
-
-	test.describe( 'Batch webhook operations', () => {
-		let webhookId1: number;
-		let webhookId2: number;
-		let webhookId3: number;
-		test( 'can batch create webhooks', async ( { request } ) => {
-			// Batch create webhooks
-			// call API to batch create a webhook
-			const response = await request.post(
-				'wp-json/wc/v3/webhooks/batch',
-				{
-					data: {
-						create: [
-							{
-								name: 'Round toe',
-								topic: 'coupon.created',
-								delivery_url: 'http://requestb.in/1g0sxmo1',
-							},
-							{
-								name: 'Customer deleted',
-								topic: 'customer.deleted',
-								delivery_url: 'http://requestb.in/1g0sxmo1',
-							},
-						],
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-
-			// Verify that the new webhooks were created
-			const webhooks = responseJSON.create;
-			expect( webhooks ).toHaveLength( 2 );
-			webhookId1 = webhooks[ 0 ].id;
-			webhookId2 = webhooks[ 1 ].id;
-			expect( webhookId1 ).toBeDefined();
-			expect( webhookId2 ).toBeDefined();
-			expect( webhooks[ 0 ].name ).toEqual( 'Round toe' );
-			expect( webhooks[ 1 ].name ).toEqual( 'Customer deleted' );
-		} );
-
-		test( 'can batch update webhooks', async ( { request } ) => {
-			// set payload to create, update and delete webhooks
-			const batchUpdatePayload = {
-				create: [
-					{
-						name: 'Order Created',
-						topic: 'order.created',
-						delivery_url: 'http://requestb.in/1g0sxmo1',
-					},
-				],
-				update: [
-					{
-						id: webhookId1,
-						name: 'Square toe',
-					},
-				],
-				delete: [ webhookId2 ],
-			};
-
-			// Call API to batch update the webhooks
-			const response = await request.post(
-				'wp-json/wc/v3/webhooks/batch',
-				{
-					data: batchUpdatePayload,
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.create ).toHaveLength( 1 );
-
-			webhookId3 = responseJSON.create[ 0 ].id;
-			expect( webhookId3 ).toBeDefined();
-			expect( responseJSON.create[ 0 ].name ).toEqual( 'Order Created' );
-			expect( responseJSON.create[ 0 ].topic ).toEqual( 'order.created' );
-			expect( responseJSON.create[ 0 ].delivery_url ).toEqual(
-				'http://requestb.in/1g0sxmo1'
-			);
-
-			expect( responseJSON.update ).toHaveLength( 1 );
-			expect( responseJSON.update[ 0 ].id ).toEqual( webhookId1 );
-			expect( responseJSON.update[ 0 ].name ).toEqual( 'Square toe' );
-
-			// Verify that the deleted webhook can no longer be retrieved
-			const getDeletedWebhookResponse = await request.get(
-				`./wp-json/wc/v3/webhooks/${ webhookId2 }`
-			);
-			expect( getDeletedWebhookResponse.status() ).toEqual( 404 );
-		} );
-
-		test( 'can batch delete webhooks', async ( { request } ) => {
-			// Batch delete the created webhooks
-			const response = await request.post(
-				'wp-json/wc/v3/webhooks/batch',
-				{
-					data: {
-						delete: [ webhookId1, webhookId3 ],
-					},
-				}
-			);
-			await response.json();
-
-			//Call the API to attempte to retrieve the deleted webhooks
-			const deletedResponse1 = await request.get(
-				`wp-json/wc/v3/webhooks/${ webhookId1 }`
-			);
-			const deletedResponse3 = await request.get(
-				`wp-json/wc/v3/webhooks/${ webhookId3 }`
-			);
-
-			expect( deletedResponse1.status() ).toEqual( 404 );
-			expect( deletedResponse3.status() ).toEqual( 404 );
-		} );
+		const cleanupErrors = await cleanupWebhook( request, webhookId );
+		throwLifecycleErrors( primaryError, cleanupErrors );
 	} );
 } );

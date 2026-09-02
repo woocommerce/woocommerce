@@ -113,6 +113,60 @@ describe( 'createMutationQueue', () => {
 			).toEqual( [ '/a', '/b', '/c' ] );
 		} );
 
+		it.each( [
+			{
+				name: 'awaited submissions',
+				requestGroups: [ [ '/a' ], [ '/b' ], [ '/c' ] ],
+				expectedBatchSizes: [ 1, 1, 1 ],
+			},
+			{
+				name: 'mixed synchronous groups separated by awaits',
+				requestGroups: [
+					[ '/a', '/b' ],
+					[ '/c' ],
+					[ '/d', '/e', '/f' ],
+				],
+				expectedBatchSizes: [ 2, 1, 3 ],
+			},
+		] )(
+			'starts a new batch after each fully settled group: $name',
+			async ( { requestGroups, expectedBatchSizes } ) => {
+				const mockFetch = createMockFetch(
+					requestGroups.flat().map( ( _, index ) => ( {
+						status: 200,
+						body: { value: index + 1 },
+					} ) )
+				);
+				global.fetch = mockFetch;
+				const takeSnapshotSpy = jest.spyOn(
+					stateHandler,
+					'takeSnapshot'
+				);
+				const queue = createMutationQueue( {
+					endpoint: '/batch',
+					getHeaders: () => ( {} ),
+					...stateHandler,
+				} );
+
+				for ( const paths of requestGroups ) {
+					await Promise.all(
+						paths.map( ( path ) =>
+							queue.submit( { path, method: 'POST' } )
+						)
+					);
+				}
+
+				expect(
+					mockFetch.mock.calls.map(
+						( [ , options ] ) =>
+							JSON.parse( options.body ).requests.length
+					)
+				).toEqual( expectedBatchSizes );
+				expect( takeSnapshotSpy ).toHaveBeenCalledTimes(
+					requestGroups.length
+				);
+			}
+		);
 		it( 'disables keepalive for oversized payloads', async () => {
 			const mockFetch = createMockFetch( [
 				{ status: 200, body: { value: 10 } },

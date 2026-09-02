@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductQueryMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use WC_Helper_Product;
 
 /**
  * Tests for the ProductQuery block type
@@ -14,6 +15,91 @@ class ProductQuery extends \WP_UnitTestCase {
 	 * @var ProductQueryMock
 	 */
 	private $block_instance;
+
+	/**
+	 * @testdox Should add Interactivity API context only to valid product loop items.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_add_iapi_context_updates_only_valid_product_loop_items(): void {
+		$product_ids = array();
+		$post_id     = 0;
+
+		try {
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+			$post_id       = self::factory()->post->create();
+
+			$markup = sprintf(
+				'<ul><li id="first-product" class="wp-block-post post-%1$d"></li><li id="second-product" class="extra wp-block-post post-%2$d"></li><li id="missing-id" class="wp-block-post"></li><li id="malformed-id" class="wp-block-post post-not-a-number"></li><li id="non-product" class="wp-block-post post-%3$d"></li></ul>',
+				$product_ids[0],
+				$product_ids[1],
+				$post_id
+			);
+
+			$this->assertSame(
+				$markup,
+				$this->block_instance->add_iapi_context(
+					$markup,
+					array( 'attrs' => array( '__woocommerceNamespace' => 'another-block' ) )
+				),
+				'A different block namespace should leave the markup byte-identical.'
+			);
+
+			$processed_markup = $this->block_instance->add_iapi_context(
+				$markup,
+				array( 'attrs' => array( '__woocommerceNamespace' => 'woocommerce/product-query/product-template' ) )
+			);
+			$processor        = new \WP_HTML_Tag_Processor( $processed_markup );
+			$items            = array();
+
+			while ( $processor->next_tag( array( 'tag_name' => 'LI' ) ) ) {
+				$items[ $processor->get_attribute( 'id' ) ] = array(
+					'interactive' => $processor->get_attribute( 'data-wp-interactive' ),
+					'context'     => $processor->get_attribute( 'data-wp-context' ),
+					'key'         => $processor->get_attribute( 'data-wp-key' ),
+				);
+			}
+
+			foreach (
+				array(
+					'first-product'  => $product_ids[0],
+					'second-product' => $product_ids[1],
+				) as $item_id => $product_id
+			) {
+				$this->assertSame( 'woocommerce/products', $items[ $item_id ]['interactive'] );
+				$this->assertSame( 'product-item-' . $product_id, $items[ $item_id ]['key'] );
+				$context = $items[ $item_id ]['context'];
+				$this->assertIsString( $context );
+				if ( ! is_string( $context ) ) {
+					throw new \UnexpectedValueException( 'Product context should be a serialized string.' );
+				}
+				list( $namespace, $json_context ) = explode( '::', $context, 2 );
+				$this->assertSame( 'woocommerce/products', $namespace );
+				$this->assertSame(
+					array(
+						'productId'   => $product_id,
+						'variationId' => null,
+					),
+					json_decode( $json_context, true )
+				);
+			}
+
+			foreach ( array( 'missing-id', 'malformed-id', 'non-product' ) as $item_id ) {
+				$this->assertNull( $items[ $item_id ]['interactive'], "$item_id should not become interactive." );
+				$this->assertNull( $items[ $item_id ]['context'], "$item_id should not receive product context." );
+				$this->assertNull( $items[ $item_id ]['key'], "$item_id should not receive an Interactivity API key." );
+			}
+		} finally {
+			foreach ( $product_ids as $product_id ) {
+				WC_Helper_Product::delete_product( $product_id );
+			}
+			if ( $post_id ) {
+				wp_delete_post( $post_id, true );
+			}
+		}
+	}
 
 	/**
 	 * Return starting point for parsed block test data.

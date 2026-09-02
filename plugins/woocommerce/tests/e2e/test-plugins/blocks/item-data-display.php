@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test Item Data Display
- * Description: Adds custom item_data to cart items for testing HTML rendering and entity decoding.
+ * Description: Adds visible, malformed, and explicitly hidden custom item_data to cart items for Mini-Cart rendering tests.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
@@ -40,6 +40,26 @@ add_action(
 				$item_data[] = array(
 					'key'   => 'Note',
 					'value' => '&lt;b&gt;important&lt;/b&gt;',
+				);
+
+				// Malformed trailing entry: no usable key or value.
+				$item_data[] = array(
+					'key'   => '',
+					'value' => '',
+				);
+
+				// A second identical malformed entry preserves the duplicate
+				// Interactivity loop-key scenario from the former fixture.
+				$item_data[] = array(
+					'key'   => '',
+					'value' => '',
+				);
+
+				// Well-formed but explicitly hidden trailing entry.
+				$item_data[] = array(
+					'key'    => 'Secret',
+					'value'  => 'v',
+					'hidden' => true,
 				);
 
 				return $item_data;

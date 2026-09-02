@@ -67,7 +67,9 @@ test.describe( 'Shopper → Notices', () => {
 			const cookies = await page.context().cookies();
 			await noJsContext.addCookies( cookies );
 
-			await noJsPage.goto( currentUrl );
+			await noJsPage.goto( currentUrl, {
+				waitUntil: 'domcontentloaded',
+			} );
 
 			// Verify error notice banner is rendered in SSR output (not client-side JS).
 			// Note: The notice text content contains HTML and is rendered client-side via
@@ -88,11 +90,12 @@ test.describe( 'Shopper → Notices', () => {
 		productCollectionPage,
 	} ) => {
 		const checkMiniCartTitle = async ( itemCount: number ) => {
-			try {
+			const miniCartTitleLabelBlock = page.locator(
+				'[data-block-name="woocommerce/mini-cart-title-label-block"]'
+			);
+
+			if ( await miniCartTitleLabelBlock.count() ) {
 				// iAPI Mini Cart.
-				const miniCartTitleLabelBlock = page.locator(
-					'[data-block-name="woocommerce/mini-cart-title-label-block"]'
-				);
 				await expect( miniCartTitleLabelBlock ).toBeVisible( {
 					timeout: 1000,
 				} );
@@ -106,9 +109,11 @@ test.describe( 'Shopper → Notices', () => {
 				await expect( miniCartTitleItemsCounterBlock ).toContainText(
 					String( itemCount )
 				);
-			} catch ( e ) {
+			} else {
 				// Legacy React Mini Cart.
-				await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+				await expect(
+					page.getByText( 'Your cart', { exact: true } )
+				).toBeVisible();
 				await expect(
 					page.getByText(
 						`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`

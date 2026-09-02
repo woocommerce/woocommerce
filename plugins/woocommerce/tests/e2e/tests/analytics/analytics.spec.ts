@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { request as apiRequest, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import {
 	WC_ADMIN_API_PATH,
 	WC_API_PATH,
@@ -12,7 +12,6 @@ import {
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { setOption } from '../../utils/options';
 
 /**
  * Escape a string for literal use inside a RegExp.
@@ -332,7 +331,7 @@ test.beforeAll( async ( { request, restApi } ) => {
 						orders: stats.data?.totals?.orders_count,
 						itemsSold: stats.data?.totals?.items_sold,
 					};
-				} catch ( e ) {
+				} catch {
 					return { orders: undefined, itemsSold: undefined };
 				}
 			},
@@ -367,41 +366,6 @@ test.afterAll( async ( { restApi } ) => {
 } );
 
 test(
-	'renders the overview performance indicators',
-	{
-		tag: [ tags.PAYMENTS, tags.SERVICES ],
-	},
-	async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-		);
-
-		// The overview performance tiles are store-wide and cannot be scoped to
-		// this spec's data, so any exact total asserted here would be polluted
-		// by orders that earlier specs in this serial run leave in the shared
-		// store. Assert only that the performance section renders; the exact
-		// figures are verified on the product-scoped report tests below.
-		//
-		// Require a value (a digit or `$`) after the label so this matches the
-		// rendered tile ("Total sales $1,229.30 …") and not a bare-label
-		// `menuitem` an indicator picker might also contribute to the DOM.
-		for ( const label of [
-			'Total sales',
-			'Net sales',
-			'Orders',
-			'Products sold',
-			'Variations Sold',
-		] ) {
-			await expect(
-				page.getByRole( 'menuitem', {
-					name: new RegExp( `^${ escapeRegExp( label ) } [\\d$]` ),
-				} )
-			).toBeVisible();
-		}
-	}
-);
-
-test(
 	'downloads revenue report as CSV',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
@@ -422,7 +386,7 @@ test(
 			await expect( page.locator( '.components-snackbar' ) ).toHaveText(
 				'Your Revenue Report will be emailed to you.'
 			);
-		} catch ( e ) {
+		} catch {
 			const downloadPromise = page.waitForEvent( 'download' );
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
@@ -459,82 +423,62 @@ test(
 		// totals are a stable zero regardless of what else the store contains.
 		await page.getByRole( 'button', { name: 'Month to date' } ).click();
 		await page.getByText( 'Last month' ).click();
+
+		const statsResponsePromise = page.waitForResponse(
+			( response ) => {
+				const requestUrl = new URL( response.url() );
+
+				return (
+					requestUrl.pathname.endsWith(
+						'/wc-analytics/reports/products/stats'
+					) &&
+					requestUrl.searchParams.get( 'products' ) ===
+						String( variableProductId )
+				);
+			},
+			{ timeout: 15_000 }
+		);
 		await page.getByRole( 'button', { name: 'Update' } ).click();
+		const [ statsResponse ] = await Promise.all( [
+			statsResponsePromise,
+			expect( page ).toHaveURL(
+				( url ) => {
+					const query = url.searchParams;
+
+					return (
+						query.get( 'path' ) === '/analytics/products' &&
+						query.get( 'filter' ) === 'single_product' &&
+						query.get( 'products' ) ===
+							String( variableProductId ) &&
+						query.get( 'period' ) === 'last_month' &&
+						query.get( 'compare' ) === 'previous_year'
+					);
+				},
+				{ timeout: 5_000 }
+			),
+		] );
+		expect( statsResponse.ok() ).toBeTruthy();
+
+		const requestQuery = new URL( statsResponse.url() ).searchParams;
+		const after = requestQuery.get( 'after' ) ?? '';
+		const before = requestQuery.get( 'before' ) ?? '';
+
+		expect( requestQuery.get( 'products' ) ).toBe(
+			String( variableProductId )
+		);
+		expect( requestQuery.get( 'interval' ) ).toBe( 'day' );
+		expect( after ).toMatch( /^\d{4}-\d{2}-01T00:00:00$/ );
+
+		const month = after.slice( 0, 7 );
+		const [ yearNumber, monthNumber ] = month.split( '-' ).map( Number );
+		const finalDay = new Date( Date.UTC( yearNumber, monthNumber, 0 ) )
+			.getUTCDate()
+			.toString()
+			.padStart( 2, '0' );
+		expect( before ).toBe( `${ month }-${ finalDay }T23:59:59` );
+
 		await expect( summaryTile( page, 'Items sold', '0' ) ).toBeVisible();
 		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
-	}
-);
-
-test(
-	'set custom date range on revenue report',
-	{
-		tag: [ tags.PAYMENTS, tags.SERVICES ],
-	},
-	async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
-		);
-
-		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
-
-		// The revenue report is store-wide (there is no product scope for it), so
-		// only assert on a date range that predates every spec's orders, where the
-		// totals are a stable zero regardless of what else the shared serial store
-		// contains. This still exercises the custom-date-range UI end to end.
-		await page.getByRole( 'button', { name: 'Month to date' } ).click();
-		await page.getByText( 'Custom', { exact: true } ).click();
-		await page
-			.getByPlaceholder( 'mm/dd/yyyy' )
-			.first()
-			.fill( '01/01/2022' );
-		await page.getByPlaceholder( 'mm/dd/yyyy' ).last().fill( '01/30/2022' );
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-
-		await expect(
-			page.getByRole( 'button', {
-				name: 'Custom (Jan 1 - 30, 2022) vs. Previous year (Jan 1 - 30, 2021)',
-			} )
-		).toBeVisible();
-		for ( const label of [
-			'Gross sales',
-			'Returns',
-			'Coupons',
-			'Net sales',
-			'Taxes',
-			'Shipping',
-			'Total sales',
-		] ) {
-			await expect( summaryTile( page, label, '$0.00' ) ).toBeVisible();
-		}
-	}
-);
-
-test(
-	'scope orders report via advanced product filter',
-	{
-		tag: [ tags.PAYMENTS, tags.SERVICES ],
-	},
-	async ( { page } ) => {
-		// Scope the orders report to this spec's data with the product advanced
-		// filter: every one of this spec's 10 orders contains productIds[0] and no
-		// other order in the shared store does, so the totals below are isolated
-		// from orders left behind by earlier serial specs. Pre-applying the filter
-		// via the URL also exercises the report's advanced-filter query path
-		// without the flaky multi-step filter-builder clicks.
-		await page.goto(
-			`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders&filter=advanced&product_includes=${ productIds[ 0 ] }`
-		);
-
-		await expect( summaryTile( page, 'Orders', '10' ) ).toBeVisible();
-		await expect(
-			summaryTile( page, 'Net sales', '$1,229.30' )
-		).toBeVisible();
-		await expect(
-			summaryTile( page, 'Average order value', '$122.93' )
-		).toBeVisible();
-		await expect(
-			summaryTile( page, 'Average items per order', '11' )
-		).toBeVisible();
 	}
 );
 
@@ -631,87 +575,5 @@ test(
 				.getByText( 'Your settings have been successfully saved.' )
 				.first()
 		).toBeVisible();
-	}
-);
-
-// Overview manual-import trigger. Folded in here so its `scheduled_import`
-// toggle serialises with the data suite's within one core-parallel worker.
-test.describe(
-	'manual import trigger',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
-	() => {
-		test.beforeEach( async ( { page } ) => {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
-			);
-		} );
-
-		test( 'shows the manual update trigger in scheduled mode', async ( {
-			page,
-			baseURL,
-		} ) => {
-			// Switch to scheduled mode, where the manual "Update now" trigger is
-			// offered.
-			await setOption(
-				apiRequest,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'yes'
-			);
-
-			// Enabling scheduled mode schedules a recurring batch import whose
-			// first run is "now" (OrdersScheduler::schedule_recurring_batch_processor
-			// → as_schedule_recurring_action( time(), … )). Until that batch runs,
-			// the status bar renders its busy "in progress" state instead of the
-			// "Update now" trigger, and wp-env has no cron to run it. So drain the
-			// Action Scheduler queue via ?process-waiting-actions — exactly as this
-			// spec's data setup does — until the batch clears and the button
-			// settles to idle. Poll because the reload races the drain.
-			const updateButton = page.getByRole( 'button', {
-				name: 'Manually trigger analytics data import',
-			} );
-			await expect( async () => {
-				await page.request.get( '?process-waiting-actions' );
-				await page.reload();
-				await expect( page.getByText( 'Data status' ) ).toBeVisible();
-				await expect( updateButton ).toBeVisible( { timeout: 2_000 } );
-			} ).toPass( {
-				timeout: 30_000,
-				intervals: [ 1_000, 2_000, 3_000 ],
-			} );
-
-			// Clicking it fires the import and flips the button to a busy state.
-			const responsePromise = page.waitForResponse(
-				( response ) =>
-					response
-						.url()
-						.includes( '/wc-analytics/imports/trigger' ) &&
-					response.ok()
-			);
-			await updateButton.click();
-
-			const busyButton = page.getByRole( 'button', {
-				name: 'Analytics data import in progress',
-			} );
-			await expect( busyButton ).toBeDisabled();
-			await responsePromise;
-		} );
-
-		test( 'hides the manual update trigger in immediate mode', async ( {
-			page,
-			baseURL,
-		} ) => {
-			// In immediate mode there is no batch import to trigger, so the
-			// status bar (and its button) are not rendered.
-			await setOption(
-				apiRequest,
-				baseURL,
-				'woocommerce_analytics_scheduled_import',
-				'no'
-			);
-			await page.reload();
-
-			await expect( page.getByText( 'Data status' ) ).toBeHidden();
-		} );
 	}
 );

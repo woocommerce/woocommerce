@@ -3,7 +3,7 @@
  */
 import '@testing-library/jest-dom';
 import { screen, waitFor } from '@testing-library/react';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, getBlockType } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
@@ -152,6 +152,21 @@ async function setup( attributes = {} ) {
 }
 
 describe( 'Product Gallery Block', () => {
+	it( 'uses the registered default gallery settings', () => {
+		const productGalleryBlock = createBlock( blockJson.name );
+
+		expect( productGalleryBlock.attributes ).toMatchObject( {
+			hoverZoom: true,
+			fullScreenOnClick: true,
+		} );
+	} );
+
+	it( 'restricts registration to Single Product descendants', () => {
+		expect( getBlockType( blockJson.name )?.ancestor ).toEqual( [
+			'woocommerce/single-product',
+		] );
+	} );
+
 	it( 'should render the block in the editor with correct structure', async () => {
 		await setup();
 

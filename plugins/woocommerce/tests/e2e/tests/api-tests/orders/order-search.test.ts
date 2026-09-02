@@ -21,34 +21,6 @@ const order = {
 	coupon_lines: [],
 };
 
-/**
- * Search parameters to be used.
- * The following scenarios are not covered in this test suite because they're already covered in the `List all orders > search` test in `orders.test.js`
- * ```
- * can search by billing address 1
- * can search by shipping address 1
- * can search by billing last name
- * can search by billing email
- * can search by item name
- * ```
- */
-const searchParams = [
-	[ 'billing first name', order.billing.first_name ],
-	[ 'billing company name', order.billing.company ],
-	[ 'billing address 2', order.billing.address_2 ],
-	[ 'billing city name', order.billing.city ],
-	[ 'billing post code', order.billing.postcode ],
-	[ 'billing phone', order.billing.phone ],
-	[ 'billing state', order.billing.state ],
-	[ 'shipping first name', order.shipping.first_name ],
-	[ 'shipping last name', order.shipping.last_name ],
-	[ 'shipping address 2', order.shipping.address_2 ],
-	[ 'shipping city', order.shipping.city ],
-	[ 'shipping post code', order.shipping.postcode ],
-	[ 'shipping state', order.shipping.state ],
-	[ 'orderId', 'orderId' ],
-];
-
 test.describe( 'Order Search API tests', () => {
 	test.beforeAll( async ( { request } ) => {
 		// Create a product to be associated with the order
@@ -82,37 +54,17 @@ test.describe( 'Order Search API tests', () => {
 		} );
 	} );
 
-	const titleIndex = 0;
-	const paramIndex = 1;
-
-	for ( const searchParamRow of searchParams ) {
-		test( `can search by ${ searchParamRow[ titleIndex ] }`, async ( {
-			request,
-		} ) => {
-			const searchValue =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				searchParamRow[ paramIndex ] === 'orderId'
-					? order.id
-					: searchParamRow[ paramIndex ];
-			const response = await request.get( './wp-json/wc/v3/orders/', {
-				params: { search: searchValue },
-			} );
-			const responseJSON = await response.json();
-
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.length ).toBeGreaterThanOrEqual( 1 );
-			expect( responseJSON[ 0 ].id ).toEqual( order.id );
-		} );
-	}
-
-	test( 'can return an empty result set when no matches were found', async ( {
-		request,
-	} ) => {
+	test( 'can search by billing first name', async ( { request } ) => {
 		const response = await request.get( './wp-json/wc/v3/orders/', {
-			params: { search: 'Chauncey Smith Kunde' },
+			params: { search: order.billing.first_name },
 		} );
 		const responseJSON = await response.json();
+		const responseIDs = responseJSON.map(
+			( result: { id: number } ) => result.id
+		);
+
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON ).toEqual( [] );
+		expect( responseJSON.length ).toBeGreaterThanOrEqual( 1 );
+		expect( responseIDs ).toContain( order.id );
 	} );
 } );

@@ -47,9 +47,44 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) );
+		$this->assertSame( 200, $response->get_status() );
 		$gateways = $response->get_data();
+		$this->assertIsArray( $gateways );
 
-		$this->assertEquals( 200, $response->get_status() );
+		$gateways_by_id = array_column( $gateways, null, 'id' );
+		$setting_types  = array(
+			WC_Gateway_BACS::ID   => array(
+				'title'        => 'safe_text',
+				'instructions' => 'textarea',
+			),
+			WC_Gateway_Cheque::ID => array(
+				'title'        => 'safe_text',
+				'instructions' => 'textarea',
+			),
+			WC_Gateway_COD::ID    => array(
+				'title'              => 'safe_text',
+				'instructions'       => 'textarea',
+				'enable_for_methods' => 'multiselect',
+				'enable_for_virtual' => 'checkbox',
+			),
+		);
+
+		foreach ( $setting_types as $gateway_id => $expected_settings ) {
+			$this->assertArrayHasKey( $gateway_id, $gateways_by_id );
+
+			$gateway = $gateways_by_id[ $gateway_id ];
+			$this->assertSame( $gateway_id, $gateway['id'] );
+			$this->assertIsBool( $gateway['enabled'] );
+			$this->assertContains( 'products', $gateway['method_supports'] );
+			$this->assertSame( rest_url( '/wc/v3/payment_gateways/' . $gateway_id ), $gateway['_links']['self'][0]['href'] );
+			$this->assertSame( rest_url( '/wc/v3/payment_gateways' ), $gateway['_links']['collection'][0]['href'] );
+
+			foreach ( $expected_settings as $setting_id => $setting_type ) {
+				$this->assertArrayHasKey( $setting_id, $gateway['settings'] );
+				$this->assertSame( $setting_id, $gateway['settings'][ $setting_id ]['id'] );
+				$this->assertSame( $setting_type, $gateway['settings'][ $setting_id ]['type'] );
+			}
+		}
 
 		$matching_gateway_data = current(
 			array_filter(
@@ -270,6 +305,80 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$paypal   = $response->get_data();
 		$this->assertEquals( 'authorization', $paypal['settings']['paymentaction']['value'] );
+	}
+
+	/**
+	 * Test that updating a gateway's enabled state persists across a fresh registry.
+	 */
+	public function test_update_payment_gateway_enabled_state() {
+		wp_set_current_user( $this->user );
+
+		$woocommerce                        = WC();
+		$gateway                            = new WC_Gateway_Cheque();
+		$option_key                         = $gateway->get_option_key();
+		$missing_option                     = new stdClass();
+		$original_option                    = get_option( $option_key, $missing_option );
+		$option_existed                     = $missing_option !== $original_option;
+		$woocommerce_properties             = get_object_vars( $woocommerce );
+		$had_payment_gateways_property      = array_key_exists( 'payment_gateways', $woocommerce_properties );
+		$original_payment_gateways_property = $had_payment_gateways_property ? $woocommerce_properties['payment_gateways'] : null;
+		$paypal_instance_property           = new ReflectionProperty( WC_Gateway_Paypal::class, 'instance' );
+		$paypal_instance_property->setAccessible( true );
+		$original_paypal_instance = $paypal_instance_property->getValue();
+
+		$disabled_settings = is_array( $original_option ) ? $original_option : array();
+
+		$disabled_settings['enabled'] = 'no';
+
+		try {
+			update_option( $option_key, $disabled_settings );
+			$woocommerce->payment_gateways = new WC_Payment_Gateways();
+
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertFalse( $data['enabled'] );
+
+			$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
+			$request->set_body_params(
+				array(
+					'enabled' => true,
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertTrue( $data['enabled'] );
+
+			$woocommerce->payment_gateways = new WC_Payment_Gateways();
+
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertTrue( $data['enabled'] );
+
+			update_option( $option_key, $disabled_settings );
+			$woocommerce->payment_gateways = new WC_Payment_Gateways();
+
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertFalse( $data['enabled'] );
+		} finally {
+			if ( $option_existed ) {
+				update_option( $option_key, $original_option );
+			} else {
+				delete_option( $option_key );
+			}
+
+			if ( $had_payment_gateways_property ) {
+				$woocommerce->payment_gateways = $original_payment_gateways_property;
+			} else {
+				unset( $woocommerce->payment_gateways );
+			}
+
+			WC_Gateway_Paypal::set_instance( $original_paypal_instance );
+		}
 	}
 
 	/**

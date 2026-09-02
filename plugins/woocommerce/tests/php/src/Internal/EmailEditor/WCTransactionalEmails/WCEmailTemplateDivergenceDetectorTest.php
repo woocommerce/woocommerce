@@ -596,6 +596,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 
 		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $status );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
 	}
 
 	/**
@@ -608,6 +612,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Email Registered fixture email instance.
 	 */
 	private function register_fixture_email( string $email_id ): \WC_Email {
+		if ( ! class_exists( \WC_Email::class ) ) {
+			require_once WC_ABSPATH . 'includes/emails/class-wc-email.php';
+		}
+
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();

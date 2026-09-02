@@ -43,6 +43,8 @@ To re-create the environment for a fresh state:
 
 `pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
+Core and Blocks tests reuse the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:e2e:restart` selects a clean Core profile, while `pnpm env:start:blocks` selects and seeds the Blocks profile. Rerun the appropriate setup whenever switching profiles. `pnpm test:e2e:*` runs tests against the environment's current state. Blocks test setup validates the selected profile's request-lock and prepend mechanics and snapshots the current prepared database for test isolation; it does not select or seed the profile.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
@@ -186,7 +188,7 @@ How a helper is wired up depends on when it needs to be active:
         - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
         - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
-- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
+- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. A Blocks spec activates any plugin it needs (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because these plugins change store behavior globally and must not be on for every test. The Blocks snapshot teardown restores plugin activation state before the next test. Explicitly deactivate a plugin only when its behavior must stop within the same test; do not add duplicate after-test database cleanup.
 
 `woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.
 

@@ -1,559 +1,389 @@
 /**
+ * External dependencies
+ */
+import type { APIRequestContext } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { test, expect, tags } from '../../../fixtures/api-tests-fixtures';
 import { admin } from '../../../test-data/data';
+import { wpCLI } from '../../../utils/cli';
+
+const requirePositiveCustomerId = (
+	value: unknown,
+	operation: string
+): number => {
+	if (
+		typeof value !== 'number' ||
+		! Number.isSafeInteger( value ) ||
+		value <= 0
+	) {
+		throw new Error(
+			`${ operation } returned an invalid customer ID: ${ String(
+				value
+			) }`
+		);
+	}
+
+	return value;
+};
+
+const listUserIdsThroughWpCLI = async ( customerId: number ) => {
+	const { stdout } = await wpCLI(
+		`wp user list --include=${ customerId } --field=ID`
+	);
+
+	return ( stdout.match( /^\d+\r?$/gm ) ?? [] ).map( Number );
+};
+
+const deleteNetworkUser = async ( customerId: number ) => {
+	if (
+		! ( await listUserIdsThroughWpCLI( customerId ) ).includes( customerId )
+	) {
+		return;
+	}
+
+	await wpCLI( `wp user delete ${ customerId } --yes --network` );
+
+	if (
+		( await listUserIdsThroughWpCLI( customerId ) ).includes( customerId )
+	) {
+		throw new Error(
+			`Network customer ${ customerId } still exists after WP-CLI cleanup.`
+		);
+	}
+};
+
+const deleteSingleSiteUser = async (
+	request: APIRequestContext,
+	customerId: number
+) => {
+	const deleteResponse = await request.delete(
+		`./wp-json/wp/v2/users/${ customerId }`,
+		{ data: { force: true, reassign: 1 } }
+	);
+
+	if ( deleteResponse.status() === 404 ) {
+		return;
+	}
+
+	if ( deleteResponse.status() !== 200 ) {
+		throw new Error(
+			`Customer ${ customerId } cleanup returned ${ deleteResponse.status() }.`
+		);
+	}
+
+	const readResponse = await request.get(
+		`./wp-json/wp/v2/users/${ customerId }`
+	);
+	if ( readResponse.status() !== 404 ) {
+		throw new Error(
+			`Customer ${ customerId } remained readable after cleanup (status ${ readResponse.status() }).`
+		);
+	}
+};
+
+const cleanupCustomers = async (
+	request: APIRequestContext,
+	customerIds: number[]
+) => {
+	const cleanupErrors: unknown[] = [];
+
+	for ( const customerId of customerIds ) {
+		try {
+			requirePositiveCustomerId( customerId, 'Cleanup' );
+
+			if ( process.env.IS_MULTISITE ) {
+				await deleteNetworkUser( customerId );
+			} else {
+				await deleteSingleSiteUser( request, customerId );
+			}
+		} catch ( error ) {
+			cleanupErrors.push( error );
+		}
+	}
+
+	return cleanupErrors;
+};
+
+const runWithCustomerCleanup = async (
+	request: APIRequestContext,
+	getCustomerIds: () => number[],
+	runLifecycle: () => Promise< void >
+) => {
+	let primaryFailure: { error: unknown } | undefined;
+
+	try {
+		await runLifecycle();
+	} catch ( error ) {
+		primaryFailure = { error };
+	}
+
+	const cleanupErrors = await cleanupCustomers( request, getCustomerIds() );
+
+	if ( primaryFailure && cleanupErrors.length > 0 ) {
+		throw new AggregateError(
+			[ primaryFailure.error, ...cleanupErrors ],
+			'Customer lifecycle and cleanup both failed.'
+		);
+	}
+
+	if ( primaryFailure ) {
+		throw primaryFailure.error;
+	}
+
+	if ( cleanupErrors.length > 0 ) {
+		throw new AggregateError(
+			cleanupErrors,
+			'Customer lifecycle cleanup failed.'
+		);
+	}
+};
+
+const deleteCustomerThroughWoo = async (
+	request: APIRequestContext,
+	customerId: number
+) => {
+	// WooCommerce customer deletion is unsupported on multisite. The final
+	// network-aware WP-CLI cleanup owns deletion there.
+	if ( process.env.IS_MULTISITE ) {
+		return;
+	}
+
+	const deleteResponse = await request.delete(
+		`./wp-json/wc/v3/customers/${ customerId }`,
+		{ data: { force: true } }
+	);
+	expect( deleteResponse.status() ).toEqual( 200 );
+
+	const deletedReadResponse = await request.get(
+		`./wp-json/wc/v3/customers/${ customerId }`
+	);
+	expect( deletedReadResponse.status() ).toEqual( 404 );
+};
+
+const deleteCustomersThroughWooBatch = async (
+	request: APIRequestContext,
+	customerIds: number[]
+) => {
+	// Preserve create/read/update coverage on multisite without claiming the
+	// unsupported WooCommerce customer-deletion behavior.
+	if ( process.env.IS_MULTISITE ) {
+		return;
+	}
+
+	const deleteResponse = await request.post(
+		'./wp-json/wc/v3/customers/batch',
+		{ data: { delete: customerIds } }
+	);
+	const deleteResult = await deleteResponse.json();
+	expect( deleteResponse.status() ).toEqual( 200 );
+	expect( deleteResult.delete.map( ( { id } ) => id ) ).toEqual(
+		customerIds
+	);
+
+	for ( const customerId of customerIds ) {
+		const deletedReadResponse = await request.get(
+			`./wp-json/wc/v3/customers/${ customerId }`
+		);
+		expect( deletedReadResponse.status() ).toEqual( 404 );
+	}
+};
 
 test.describe( 'Customers API tests: CRUD', () => {
-	let adminId: number;
-	let customerId: number;
-	let subscriberUserId: number;
-	let subscriberUserCreatedDuringTests = false;
-
-	test.beforeAll( async ( { request } ) => {
-		// Call the API to return all users and determine if a
-		// subscriber user has been created
+	test( 'can retrieve admin user', async ( { request } ) => {
 		const customersResponse = await request.get(
 			'./wp-json/wc/v3/customers',
-			{
-				params: {
-					role: 'all',
-				},
-			}
+			{ params: { role: 'all', per_page: 100 } }
 		);
-		const customersResponseJSON = await customersResponse.json();
+		const customers = await customersResponse.json();
 
-		// Get the admin user ID
-		const adminJSON = customersResponseJSON.find(
+		expect( customersResponse.status() ).toEqual( 200 );
+		const adminCustomer = customers.find(
 			( { username } ) => username === admin.username
 		);
-		adminId = adminJSON.id;
+		const adminId = requirePositiveCustomerId(
+			adminCustomer?.id,
+			'Admin customer lookup'
+		);
 
-		for ( const element of customersResponseJSON ) {
-			if ( element.role === 'subscriber' ) {
-				subscriberUserId = element.id;
-				break;
-			}
-		}
-
-		// If a subscriber user has not been created then create one
-		if ( ! subscriberUserId ) {
-			const now = Date.now();
-			const userResponse = await request.post( './wp-json/wp/v2/users', {
-				data: {
-					username: `customer${ now }`,
-					email: `customer${ now }@woocommercecoretestsuite.com`,
-					first_name: 'Jane',
-					last_name: 'Smith',
-					roles: [ 'subscriber' ],
-					password: 'password',
-					name: 'Jane',
-				},
-			} );
-
-			expect( userResponse.status() ).toEqual( 201 );
-
-			const userResponseJSON = await userResponse.json();
-			// set subscriber user id to newly created user
-			subscriberUserId = userResponseJSON.id;
-			subscriberUserCreatedDuringTests = true;
-		}
-
-		// Verify the subscriber user has been created
 		const response = await request.get(
-			`./wp-json/wc/v3/customers/${ subscriberUserId }`
+			`./wp-json/wc/v3/customers/${ adminId }`
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON.role ).toEqual( 'subscriber' );
+		expect( responseJSON.username ).toEqual( admin.username );
+		expect( responseJSON.role ).toEqual( 'administrator' );
+		expect( responseJSON.is_paying_customer ).toEqual( false );
 	} );
 
-	test.afterAll( async ( { request } ) => {
-		// delete subscriber user if one was created during the execution of these tests
-		if ( subscriberUserCreatedDuringTests ) {
-			await request.delete(
-				`./wp-json/wc/v3/customers/${ subscriberUserId }`,
-				{
-					data: {
-						force: true,
-					},
+	test(
+		'can round-trip a customer through authenticated installed V3 HTTP',
+		{
+			tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		},
+		async ( { request } ) => {
+			const unique = Date.now();
+			const email = `customer.roundtrip.${ unique }@example.com`;
+			const billingCity = 'San Francisco';
+			const customerIds: number[] = [];
+
+			await runWithCustomerCleanup(
+				request,
+				() => customerIds,
+				async () => {
+					const createResponse = await request.post(
+						'./wp-json/wc/v3/customers',
+						{
+							data: {
+								email,
+								username: `customer.roundtrip.${ unique }`,
+								billing: { city: billingCity },
+							},
+						}
+					);
+					const createdCustomer = await createResponse.json();
+					const customerId = requirePositiveCustomerId(
+						createdCustomer.id,
+						'Customer create'
+					);
+					customerIds.push( customerId );
+
+					expect( createResponse.status() ).toEqual( 201 );
+					expect( createdCustomer.email ).toEqual( email );
+					expect( createdCustomer.billing.city ).toEqual(
+						billingCity
+					);
+
+					const createdReadResponse = await request.get(
+						`./wp-json/wc/v3/customers/${ customerId }`
+					);
+					const createdReadCustomer =
+						await createdReadResponse.json();
+					expect( createdReadResponse.status() ).toEqual( 200 );
+					expect( createdReadCustomer.id ).toEqual( customerId );
+					expect( createdReadCustomer.email ).toEqual( email );
+					expect( createdReadCustomer.billing.city ).toEqual(
+						billingCity
+					);
+
+					const updatedFirstName = 'Jack';
+					const updateResponse = await request.put(
+						`./wp-json/wc/v3/customers/${ customerId }`,
+						{ data: { first_name: updatedFirstName } }
+					);
+					expect( updateResponse.status() ).toEqual( 200 );
+
+					const updatedReadResponse = await request.get(
+						`./wp-json/wc/v3/customers/${ customerId }`
+					);
+					const updatedReadCustomer =
+						await updatedReadResponse.json();
+					expect( updatedReadResponse.status() ).toEqual( 200 );
+					expect( updatedReadCustomer.first_name ).toEqual(
+						updatedFirstName
+					);
+
+					await deleteCustomerThroughWoo( request, customerId );
 				}
 			);
 		}
-	} );
+	);
 
-	test.describe( 'Retrieve after env setup', () => {
-		/**
-		 * when the environment is created,
-		 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#woocommerce-playwright-end-to-end-tests),
-		 * we have an admin user and a subscriber user that can both be
-		 * accessed through their ids
-		 * neither of these are returned as part of the get all customers call
-		 * unless the role 'all' is passed as a search param
-		 * but they can be accessed by specific id reference
-		 */
-		test( 'can retrieve admin user', async ( { request } ) => {
-			// call API to retrieve the previously saved customer
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ adminId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.is_paying_customer ).toEqual( false );
-			expect( responseJSON.role ).toEqual( 'administrator' );
-			// this test was updated to allow for local test setup and other test sites.
-			expect( responseJSON.username ).toEqual( admin.username );
-		} );
-
-		test( 'can retrieve subscriber user', async ( { request } ) => {
-			// if environment was created with subscriber user
-			// call API to retrieve the customer
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ subscriberUserId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.is_paying_customer ).toEqual( false );
-			expect( responseJSON.role ).toEqual( 'subscriber' );
-		} );
-
-		test( 'retrieve user with id 0 is invalid', async ( { request } ) => {
-			// call API to retrieve the previously saved customer
-			const response = await request.get( './wp-json/wc/v3/customers/0' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 404 );
-			expect( responseJSON.code ).toEqual( 'wc_user_invalid_id' );
-			expect( responseJSON.message ).toEqual( 'Invalid user ID.' );
-		} );
-
-		test( 'can retrieve customers', async ( { request } ) => {
-			// call API to retrieve all customers should initially return empty array
-			const response = await request.get( './wp-json/wc/v3/customers' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThanOrEqual( 1 );
-		} );
-
-		// however, if we pass in the search string for role 'all' then all users are returned
-		test( 'can retrieve all customers', async ( { request } ) => {
-			// call API to retrieve all customers should initially return empty array
-			// unless the role 'all' is passed as a search string, in which case the admin
-			// and subscriber users will be returned
-			const response = await request.get( './wp-json/wc/v3/customers', {
-				params: {
-					role: 'all',
+	test(
+		'can batch round-trip customers through authenticated installed V3 HTTP',
+		{
+			tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		},
+		async ( { request } ) => {
+			const unique = Date.now();
+			const customers = [
+				{
+					email: `customer.batch.one.${ unique }@example.com`,
+					username: `customer.batch.one.${ unique }`,
 				},
-			} );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThanOrEqual( 3 );
-		} );
-	} );
-
-	test.describe( 'Create a customer', () => {
-		test( 'can create a customer', async ( { request } ) => {
-			// call API to create a customer
-			const username = `john.doe.${ Date.now() }`;
-			const email = `john.doe.${ Date.now() }@example.com`;
-			const response = await request.post( './wp-json/wc/v3/customers', {
-				data: {
-					email,
-					first_name: 'John',
-					last_name: 'Doe',
-					username,
-					billing: {
-						first_name: 'John',
-						last_name: 'Doe',
-						company: '',
-						address_1: '969 Market',
-						address_2: '',
-						city: 'San Francisco',
-						state: 'CA',
-						postcode: '94103',
-						country: 'US',
-						email,
-						phone: '(555) 555-5555',
-					},
-					shipping: {
-						first_name: 'John',
-						last_name: 'Doe',
-						company: '',
-						address_1: '969 Market',
-						address_2: '',
-						city: 'San Francisco',
-						state: 'CA',
-						postcode: '94103',
-						country: 'US',
-					},
+				{
+					email: `customer.batch.two.${ unique }@example.com`,
+					username: `customer.batch.two.${ unique }`,
 				},
-			} );
-			const responseJSON = await response.json();
+			];
+			const customerIds: number[] = [];
 
-			// Save the customer ID. It will be used by the retrieve, update, and delete tests.
-			customerId = responseJSON.id;
+			await runWithCustomerCleanup(
+				request,
+				() => customerIds,
+				async () => {
+					const createResponse = await request.post(
+						'./wp-json/wc/v3/customers/batch',
+						{ data: { create: customers } }
+					);
+					const createResult = await createResponse.json();
+					const createdCustomers = createResult.create ?? [];
 
-			expect( response.status() ).toEqual( 201 );
-			expect( typeof responseJSON.id ).toEqual( 'number' );
-			// Verify that the customer role is 'customer'
-			expect( responseJSON.role ).toEqual( 'customer' );
-		} );
-	} );
+					for ( const [
+						index,
+						createdCustomer,
+					] of createdCustomers.entries() ) {
+						customerIds.push(
+							requirePositiveCustomerId(
+								createdCustomer.id,
+								`Batch create item ${ index + 1 }`
+							)
+						);
+					}
 
-	test.describe( 'Retrieve after create', () => {
-		test( 'can retrieve a customer', async ( { request } ) => {
-			// call API to retrieve the previously saved customer
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ customerId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.id ).toEqual( customerId );
-			expect( responseJSON.is_paying_customer ).toEqual( false );
-			expect( responseJSON.role ).toEqual( 'customer' );
-		} );
+					expect( createResponse.status() ).toEqual( 200 );
+					expect( createdCustomers ).toHaveLength( customers.length );
+					expect( new Set( customerIds ).size ).toEqual(
+						customers.length
+					);
+					expect(
+						createdCustomers.map( ( { email } ) => email )
+					).toEqual( customers.map( ( { email } ) => email ) );
 
-		test( 'can retrieve all customers after create', async ( {
-			request,
-		} ) => {
-			// call API to retrieve all customers
-			const response = await request.get( './wp-json/wc/v3/customers' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThan( 0 );
-		} );
-	} );
+					const updatedFirstNames = [ 'Jack', 'José' ];
+					const updateResponse = await request.post(
+						'./wp-json/wc/v3/customers/batch',
+						{
+							data: {
+								update: customerIds.map( ( id, index ) => ( {
+									id,
+									first_name: updatedFirstNames[ index ],
+								} ) ),
+							},
+						}
+					);
+					const updateResult = await updateResponse.json();
+					expect( updateResponse.status() ).toEqual( 200 );
+					expect(
+						updateResult.update.map( ( { id } ) => id )
+					).toEqual( customerIds );
 
-	test.describe( 'Update a customer', () => {
-		test( `can update the admin user/customer`, async ( { request } ) => {
-			/**
-			 * update customer names (regular, billing and shipping) to admin
-			 * (these were initialised blank when the environment is created,
-			 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#woocommerce-playwright-end-to-end-tests
-			 */
-			const response = await request.put(
-				`./wp-json/wc/v3/customers/${ adminId }`,
-				{
-					data: {
-						first_name: 'admin',
-						billing: {
-							first_name: 'admin',
-						},
-						shipping: {
-							first_name: 'admin',
-						},
-					},
+					for ( const [
+						index,
+						customerId,
+					] of customerIds.entries() ) {
+						const readResponse = await request.get(
+							`./wp-json/wc/v3/customers/${ customerId }`
+						);
+						const readCustomer = await readResponse.json();
+						expect( readResponse.status() ).toEqual( 200 );
+						expect( readCustomer.id ).toEqual( customerId );
+						expect( readCustomer.email ).toEqual(
+							customers[ index ].email
+						);
+						expect( readCustomer.first_name ).toEqual(
+							updatedFirstNames[ index ]
+						);
+					}
+
+					await deleteCustomersThroughWooBatch(
+						request,
+						customerIds
+					);
 				}
 			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.first_name ).toEqual( 'admin' );
-			expect( responseJSON.billing.first_name ).toEqual( 'admin' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'admin' );
-		} );
-
-		test( 'retrieve after update admin', async ( { request } ) => {
-			// call API to retrieve the admin customer we updated above
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ adminId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.first_name ).toEqual( 'admin' );
-			expect( responseJSON.billing.first_name ).toEqual( 'admin' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'admin' );
-		} );
-
-		test( `can update the subscriber user/customer`, async ( {
-			request,
-		} ) => {
-			// update customer names (billing and shipping) to Jane
-			// (these were initialised blank, only regular first_name was populated)
-			const response = await request.put(
-				`./wp-json/wc/v3/customers/${ subscriberUserId }`,
-				{
-					data: {
-						first_name: 'Jane',
-						billing: {
-							first_name: 'Jane',
-						},
-						shipping: {
-							first_name: 'Jane',
-						},
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.id ).toEqual( subscriberUserId );
-			expect( responseJSON.first_name ).toEqual( 'Jane' );
-			expect( responseJSON.billing.first_name ).toEqual( 'Jane' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'Jane' );
-		} );
-
-		test( 'retrieve after update subscriber', async ( { request } ) => {
-			// call API to retrieve the subscriber customer we updated above
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ subscriberUserId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.first_name ).toEqual( 'Jane' );
-			expect( responseJSON.billing.first_name ).toEqual( 'Jane' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'Jane' );
-		} );
-
-		test( `can update a customer`, async ( { request } ) => {
-			// update customer names (regular, billing and shipping) from John to Jack
-			const response = await request.put(
-				`./wp-json/wc/v3/customers/${ customerId }`,
-				{
-					data: {
-						first_name: 'Jack',
-						billing: {
-							first_name: 'Jack',
-						},
-						shipping: {
-							first_name: 'Jack',
-						},
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.first_name ).toEqual( 'Jack' );
-			expect( responseJSON.billing.first_name ).toEqual( 'Jack' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'Jack' );
-		} );
-
-		test( 'retrieve after update customer', async ( { request } ) => {
-			// call API to retrieve the updated customer we created above
-			const response = await request.get(
-				`./wp-json/wc/v3/customers/${ customerId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.first_name ).toEqual( 'Jack' );
-			expect( responseJSON.billing.first_name ).toEqual( 'Jack' );
-			expect( responseJSON.shipping.first_name ).toEqual( 'Jack' );
-		} );
-	} );
-
-	test.describe( 'Delete a customer', () => {
-		test( 'can permanently delete an customer', async ( { request } ) => {
-			test.skip(
-				!! process.env.IS_MULTISITE,
-				'Skip tests on deleting a customer on multisites until bug #384 in private repo is resolved.'
-			);
-
-			// Delete the customer.
-			const response = await request.delete(
-				`./wp-json/wc/v3/customers/${ customerId }`,
-				{
-					data: {
-						force: true,
-					},
-				}
-			);
-			expect( response.status() ).toEqual( 200 );
-
-			// Verify that the customer can no longer be retrieved.
-			const getDeletedCustomerResponse = await request.get(
-				`./wp-json/wc/v3/customers/${ customerId }`
-			);
-			expect( getDeletedCustomerResponse.status() ).toEqual( 404 );
-		} );
-	} );
-
-	test.describe( 'Batch update customers', () => {
-		/**
-		 * 2 Customers to be created in one batch.
-		 */
-		const now = Date.now();
-		const expectedCustomers = [
-			{
-				email: `john.doe.${ now }@example.com`,
-				first_name: 'John',
-				last_name: 'Doe',
-				username: `john.doe.${ now }`,
-				billing: {
-					first_name: 'John',
-					last_name: 'Doe',
-					company: '',
-					address_1: '969 Market',
-					address_2: '',
-					city: 'San Francisco',
-					state: 'CA',
-					postcode: '94103',
-					country: 'US',
-					email: `john.doe.${ now }@example.com`,
-					phone: '(555) 555-5555',
-				},
-				shipping: {
-					first_name: 'John',
-					last_name: 'Doe',
-					company: '',
-					address_1: '969 Market',
-					address_2: '',
-					city: 'San Francisco',
-					state: 'CA',
-					postcode: '94103',
-					country: 'US',
-				},
-			},
-			{
-				email: `joao.silva.${ now }@example.com`,
-				first_name: 'João',
-				last_name: 'Silva',
-				username: `joao.silva.${ now }`,
-				billing: {
-					first_name: 'João',
-					last_name: 'Silva',
-					company: '',
-					address_1: 'Av. Brasil, 432',
-					address_2: '',
-					city: 'Rio de Janeiro',
-					state: 'RJ',
-					postcode: '12345-000',
-					country: 'BR',
-					email: `joao.silva.${ now }@example.com`,
-					phone: '(55) 5555-5555',
-				},
-				shipping: {
-					first_name: 'João',
-					last_name: 'Silva',
-					company: '',
-					address_1: 'Av. Brasil, 432',
-					address_2: '',
-					city: 'Rio de Janeiro',
-					state: 'RJ',
-					postcode: '12345-000',
-					country: 'BR',
-				},
-			},
-		];
-
-		// set payload to use batch create: action
-		const batchCreate2CustomersPayload = {
-			create: expectedCustomers,
-		};
-
-		test( 'can batch create customers', async ( { request } ) => {
-			// Batch create 2 new customers.
-			// call API to batch create customers
-			const response = await request.post(
-				'wp-json/wc/v3/customers/batch',
-				{
-					data: batchCreate2CustomersPayload,
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-
-			// Verify that the 2 new customers were created
-			const actualCustomers = responseJSON.create;
-			expect( actualCustomers ).toHaveLength( expectedCustomers.length );
-
-			for ( let i = 0; i < actualCustomers.length; i++ ) {
-				const { id, first_name } = actualCustomers[ i ];
-				const expectedCustomerName = expectedCustomers[ i ].first_name;
-
-				expect( id ).toBeDefined();
-				expect( first_name ).toEqual( expectedCustomerName );
-
-				// Save the customer id
-				expectedCustomers[ i ].id = id;
-			}
-		} );
-
-		test( 'can batch update customers', async ( { request } ) => {
-			// set payload to use batch update: action
-			const newEmail = `emailupdated.${ Date.now() }@example.com`;
-			const newAddress = '123 Addressupdate Street';
-			const batchUpdatePayload = {
-				update: [
-					{
-						id: expectedCustomers[ 0 ].id,
-						email: newEmail,
-					},
-					{
-						id: expectedCustomers[ 1 ].id,
-						billing: {
-							address_1: newAddress,
-						},
-					},
-				],
-			};
-
-			// Call API to update the customers
-			const response = await request.post(
-				'wp-json/wc/v3/customers/batch',
-				{
-					data: batchUpdatePayload,
-				}
-			);
-			const responseJSON = await response.json();
-
-			// Verify the response code and the number of customers that were updated.
-			const updatedCustomers = responseJSON.update;
-			expect( response.status() ).toEqual( 200 );
-			expect( updatedCustomers ).toHaveLength( 2 );
-
-			// Verify that the 1st customer was updated to have a new email address.
-			expect( updatedCustomers[ 0 ].id ).toEqual(
-				expectedCustomers[ 0 ].id
-			);
-			expect( updatedCustomers[ 0 ].email ).toEqual( newEmail );
-
-			// Verify that the amount of the 2nd customer was updated to have a new billing address.
-			expect( updatedCustomers[ 1 ].id ).toEqual(
-				expectedCustomers[ 1 ].id
-			);
-			expect( updatedCustomers[ 1 ].billing.address_1 ).toEqual(
-				newAddress
-			);
-		} );
-
-		test( 'can batch delete customers', async ( { request } ) => {
-			test.skip(
-				!! process.env.IS_MULTISITE,
-				'Skip tests on deleting a customer on multisites until bug #384 in private repo is resolved.'
-			);
-
-			// Batch delete the 2 customers.
-			const customerIdsToDelete = expectedCustomers.map(
-				( { id } ) => id
-			);
-			const batchDeletePayload = {
-				delete: customerIdsToDelete,
-			};
-
-			//Call API to batch delete the customers
-			const response = await request.post(
-				'wp-json/wc/v3/customers/batch',
-				{
-					data: batchDeletePayload,
-				}
-			);
-			const responseJSON = await response.json();
-
-			// Verify that the response shows the 2 customers.
-			const deletedCustomerIds = responseJSON.delete.map(
-				( { id } ) => id
-			);
-			expect( response.status() ).toEqual( 200 );
-			expect( deletedCustomerIds ).toEqual( customerIdsToDelete );
-
-			// Verify that the 2 deleted customers cannot be retrieved.
-			for ( const id of customerIdsToDelete ) {
-				//Call the API to attempte to retrieve the customers
-				const r = await request.get(
-					`wp-json/wc/v3/customers/${ id }`
-				);
-				expect( r.status() ).toEqual( 404 );
-			}
-		} );
-	} );
+		}
+	);
 } );

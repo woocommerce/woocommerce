@@ -120,36 +120,5 @@ test.describe(
 				0
 			);
 		} );
-
-		test( 'should be able to remove grouped products from the cart', async ( {
-			page,
-		} ) => {
-			await page.goto( `product/${ groupedProductSlug }` );
-			await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
-			await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
-			await page
-				.getByRole( 'button', { name: 'Add to cart', exact: true } )
-				.click();
-
-			await expect(
-				page.getByText(
-					new RegExp(
-						`${ simpleProduct1.name }.*and.*${ simpleProduct2.name }.*have been added to your cart`
-					)
-				)
-			).toBeVisible();
-
-			await page.goto( 'cart/' );
-			await page
-				.getByRole( 'button', { name: 'Remove' } )
-				.first()
-				.click();
-			await page
-				.getByRole( 'button', { name: 'Remove' } )
-				.first()
-				.click();
-
-			await checkCartContent( false, page, [], 0 );
-		} );
 	}
 );

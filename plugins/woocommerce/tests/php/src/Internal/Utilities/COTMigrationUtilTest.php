@@ -59,6 +59,8 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	public function test_get_post_or_object_meta() {
 		$order = OrderHelper::create_order();
 		$post  = get_post( $order->get_id() );
+		$order->update_meta_data( 'dummy_meta', 'dummy_value' );
+		$order->save();
 		update_post_meta( $order->get_id(), 'dummy_meta', 'dummy_value' );
 
 		$this->assertEquals( 'dummy_value', $this->sut->get_post_or_object_meta( $post, $order, 'dummy_meta', true ) );

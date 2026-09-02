@@ -85,6 +85,60 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product archive titles fall back to Shop when the configured Shop page is missing.
+	 */
+	public function test_product_archive_title_falls_back_to_shop_when_shop_page_is_missing(): void {
+		global $wp_query, $wp_the_query;
+
+		$missing_option_sentinel = new stdClass();
+		$previous_shop_page_id   = get_option( 'woocommerce_shop_page_id', $missing_option_sentinel );
+		$previous_wp_query       = $wp_query;
+		$previous_wp_the_query   = $wp_the_query;
+		$shop_page_id            = 0;
+
+		try {
+			$shop_page_id = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => 'Retired catalog',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop_page_id );
+			wp_delete_post( $shop_page_id, true );
+
+			$query                       = new WP_Query( array( 'post_type' => 'product' ) );
+			$query->is_post_type_archive = true;
+			$query->is_archive           = true;
+			$query->is_tax               = false;
+			$query->is_home              = false;
+			$wp_query                    = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$this->assertTrue( is_shop(), 'The query must represent the product archive.' );
+			$this->assertSame( '', get_the_title( $shop_page_id ), 'The configured Shop page must be missing.' );
+			$this->assertSame( 10, has_filter( 'post_type_archive_title', 'wc_update_product_archive_title' ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core owns this hook; the test exercises WooCommerce's registered callback.
+			$title = apply_filters( 'post_type_archive_title', 'Products', 'product' );
+
+			$this->assertSame( __( 'Shop', 'woocommerce' ), $title );
+		} finally {
+			if ( $missing_option_sentinel === $previous_shop_page_id ) {
+				delete_option( 'woocommerce_shop_page_id' );
+			} else {
+				update_option( 'woocommerce_shop_page_id', $previous_shop_page_id );
+			}
+			$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			if ( $shop_page_id && get_post( $shop_page_id ) ) {
+				wp_delete_post( $shop_page_id, true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox woocommerce_get_product_subcategories caches results under the expected key.
 	 */
 	public function test_subcategories_are_cached_under_expected_key(): void {
