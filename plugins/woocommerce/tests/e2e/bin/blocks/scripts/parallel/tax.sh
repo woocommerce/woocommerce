@@ -17,6 +17,22 @@ $rate_ids = $wpdb->get_col( "SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_
 foreach ( $rate_ids as $rate_id ) {
 	WC_Tax::_delete_tax_rate( $rate_id );
 }
+
+$required_tax_classes = array(
+	'reduced-rate' => 'Reduced rate',
+	'zero-rate'    => 'Zero rate',
+);
+
+foreach ( $required_tax_classes as $slug => $name ) {
+	if ( WC_Tax::get_tax_class_by( 'slug', $slug ) ) {
+		continue;
+	}
+
+	$result = WC_Tax::create_tax_class( $name, $slug );
+	if ( is_wp_error( $result ) ) {
+		WP_CLI::error( sprintf( 'Could not create tax class "%1$s": %2$s', $slug, $result->get_error_message() ) );
+	}
+}
 PHP
 )"
 
