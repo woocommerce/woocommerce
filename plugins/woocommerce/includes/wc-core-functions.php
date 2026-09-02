@@ -982,32 +982,23 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 /**
  * Recursively get page children.
  *
- * @param int       $page_id       Page ID.
- * @param bool|null $all_languages Whether to query across all languages. Defaults to true while rewrite rules are generated.
+ * @param  int $page_id Page ID.
  * @return int[]
  */
-function wc_get_page_children( $page_id, $all_languages = null ) {
-	if ( null === $all_languages ) {
-		$all_languages = doing_filter( 'rewrite_rules_array' );
-	}
-
-	$query_args = array(
-		'post_parent' => $page_id,
-		'post_type'   => 'page',
-		'numberposts' => -1, // @codingStandardsIgnoreLine
-		'post_status' => 'any',
-		'fields'      => 'ids',
+function wc_get_page_children( $page_id ) {
+	$page_ids = get_posts(
+		array(
+			'post_parent' => $page_id,
+			'post_type'   => 'page',
+			'numberposts' => -1, // @codingStandardsIgnoreLine
+			'post_status' => 'any',
+			'fields'      => 'ids',
+		)
 	);
-	if ( $all_languages ) {
-		// Persisted rewrite rules must include every language when this query variable is supported.
-		$query_args['lang'] = '';
-	}
-
-	$page_ids = get_posts( $query_args );
 
 	if ( ! empty( $page_ids ) ) {
 		foreach ( $page_ids as $page_id ) {
-			$page_ids = array_merge( $page_ids, wc_get_page_children( $page_id, $all_languages ) );
+			$page_ids = array_merge( $page_ids, wc_get_page_children( $page_id ) );
 		}
 	}
 
@@ -1104,9 +1095,17 @@ function wc_fix_rewrite_rules( $rules ) {
 
 	$page_rewrite_rules = array();
 
+	if ( $shop_page_ids ) {
+		global $wpdb;
+
+		// Read pages directly, like WP_Rewrite::page_uri_index(), so multilingual query filters cannot hide the
+		// descendants of a Shop page in another language from the persisted rules.
+		$pages = $wpdb->get_results( "SELECT ID, post_name, post_parent FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status NOT IN ( 'auto-draft', 'trash' )" );
+	}
+
 	foreach ( $shop_page_ids as $shop_page_id ) {
 		// Subpage rules.
-		foreach ( wc_get_page_children( $shop_page_id, true ) as $subpage ) {
+		foreach ( wp_list_pluck( get_page_children( $shop_page_id, $pages ), 'ID' ) as $subpage ) {
 			$uri                                = get_page_uri( $subpage );
 			$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
 			$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );

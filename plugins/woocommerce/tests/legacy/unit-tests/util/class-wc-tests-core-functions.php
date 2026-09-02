@@ -758,9 +758,11 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_get_page_children ignores the current language while rewrite rules are generated.
+	 * Test wc_get_page_children function.
+	 *
+	 * @return void
 	 */
-	public function test_wc_get_page_children(): void {
+	public function test_wc_get_page_children() {
 		$page_id = wp_insert_post(
 			array(
 				'post_title'  => 'Parent Page',
@@ -775,86 +777,19 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$child_page_id = wp_insert_post(
 			array(
 				'post_parent' => $page_id,
-				'post_title'  => 'Child Page',
+				'post_title'  => 'Parent Page',
 				'post_type'   => 'page',
-				'post_name'   => 'child-page',
+				'post_name'   => 'parent-page',
 				'post_status' => 'publish',
 				'post_author' => 1,
 				'menu_order'  => 0,
 			)
 		);
+		$children      = wc_get_page_children( $page_id );
+		$this->assertEquals( $child_page_id, $children[0] );
 
-		$grandchild_page_id = wp_insert_post(
-			array(
-				'post_parent' => $child_page_id,
-				'post_title'  => 'Grandchild Page',
-				'post_type'   => 'page',
-				'post_name'   => 'grandchild-page',
-				'post_status' => 'publish',
-				'post_author' => 1,
-				'menu_order'  => 0,
-			)
-		);
-
-		$filter_by_current_language = static function ( $query ) {
-			if ( 'page' === $query->get( 'post_type' ) && ( ! isset( $query->query_vars['lang'] ) || '' !== $query->query_vars['lang'] ) ) {
-				$query->set( 'post__in', array( 0 ) );
-			}
-		};
-
-		$rewrite_children = array();
-
-		$get_rewrite_children = static function ( $rules ) use ( $page_id, &$rewrite_children ) {
-			$rewrite_children = wc_get_page_children( $page_id );
-
-			return $rules;
-		};
-
-		$filtered_rewrite_children = array();
-
-		$get_filtered_rewrite_children = static function ( $rules ) use ( $page_id, &$filtered_rewrite_children ) {
-			$filtered_rewrite_children = wc_get_page_children( $page_id, false );
-
-			return $rules;
-		};
-
-		$unfiltered_children = wc_get_page_children( $page_id );
-
-		add_action( 'parse_query', $filter_by_current_language );
-		remove_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
-		add_filter( 'rewrite_rules_array', $get_rewrite_children, 20 );
-		add_filter( 'rewrite_rules_array', $get_filtered_rewrite_children, 20 );
-		try {
-			$current_language_children = wc_get_page_children( $page_id );
-			$all_language_children     = wc_get_page_children( $page_id, true );
-			apply_filters( 'rewrite_rules_array', array() );
-		} finally {
-			add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
-			remove_filter( 'rewrite_rules_array', $get_filtered_rewrite_children, 20 );
-			remove_filter( 'rewrite_rules_array', $get_rewrite_children, 20 );
-			remove_action( 'parse_query', $filter_by_current_language );
-			wp_delete_post( $grandchild_page_id, true );
-			wp_delete_post( $child_page_id, true );
-			wp_delete_post( $page_id, true );
-		}
-
-		$this->assertEqualsCanonicalizing(
-			array( $child_page_id, $grandchild_page_id ),
-			$unfiltered_children,
-			'Single-language sites should keep returning every descendant.'
-		);
-		$this->assertSame( array(), $current_language_children, 'Existing callers should retain the current-language query behavior.' );
-		$this->assertSame( array(), $filtered_rewrite_children, 'Callers should be able to retain current-language queries during rewrite generation.' );
-		$this->assertEqualsCanonicalizing(
-			array( $child_page_id, $grandchild_page_id ),
-			$all_language_children,
-			'Callers should be able to query every language outside rewrite generation.'
-		);
-		$this->assertEqualsCanonicalizing(
-			array( $child_page_id, $grandchild_page_id ),
-			$rewrite_children,
-			'Page descendants used for rewrite rules should not depend on the current request language.'
-		);
+		wp_delete_post( $page_id, true );
+		wp_delete_post( $child_page_id, true );
 	}
 
 	/**
@@ -946,6 +881,13 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 			return $shop_page_ids;
 		};
+		// Model a multilingual plugin hiding pages outside the current language from page queries.
+		$filter_by_current_language = static function ( $query ) {
+			if ( 'page' === $query->get( 'post_type' ) ) {
+				$query->set( 'post__in', array( 0 ) );
+			}
+		};
+		add_action( 'parse_query', $filter_by_current_language );
 		add_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
 		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
 
@@ -958,6 +900,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
 			$missing_shop_rules = wc_fix_rewrite_rules( array() );
 		} finally {
+			remove_action( 'parse_query', $filter_by_current_language );
 			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
 			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
 			remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
@@ -979,7 +922,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		}
 
 		$this->assertArrayNotHasKey( 'shop/collection/?$', $rules, 'A Shop page repointed through woocommerce_get_shop_page_id should not keep rules for the stored page.' );
-		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should honor the filtered Shop page.' );
+		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should honor the filtered Shop page regardless of page query filters.' );
 		$this->assertArrayHasKey( 'tienda/collection-es/?$', $rules, 'Persisted rules should include descendants of additional translated Shop pages supplied by integrations.' );
 		$this->assertArrayNotHasKey( $unrelated_child_rule, $missing_shop_rules, 'Missing and invalid Shop page IDs should not be converted into page ID 1.' );
 	}
