@@ -570,9 +570,11 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
 
 			$this->assertTrue( wc_update_11202_reset_refund_returning_customer_markers(), 'A batch with stale refund rows should request another run.' );
+			$this->assertSame( $refund->get_id(), (int) get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be stored between batches.' );
 			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ), 'The cache should stay valid until the last batch completes.' );
 
 			$this->assertFalse( wc_update_11202_reset_refund_returning_customer_markers(), 'A run with no stale refund rows should complete.' );
+			$this->assertFalse( get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be cleared on completion.' );
 			$this->assertFalse( ReportsCache::get( $cache_key ), 'The cache should be invalidated once the migration completes.' );
 		} finally {
 			delete_transient( $cache_key );
