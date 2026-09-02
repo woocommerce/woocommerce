@@ -2,7 +2,7 @@
 /**
  * Title: Storefront
  * Slug: purple/storefront
- * Inserter: no
+ * Categories: purple
  * Template Types: front-page
  *
  * @package purple
