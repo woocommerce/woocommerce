@@ -350,6 +350,6 @@ In development, the settings UI logs warnings for common integration issues:
 
 -   The settings payload is missing.
 -   The `wc-settings-ui` script is missing for a settings UI mount.
--   A field declares a component that is not registered.
--   A field type has no registered or built-in control.
 -   A field declares an unknown save adapter.
+
+A field that declares an unregistered component, or whose type has no registered or built-in control, does not log a warning. The page fails closed instead, as described under [Load extension scripts before mount](#load-extension-scripts-before-mount).
