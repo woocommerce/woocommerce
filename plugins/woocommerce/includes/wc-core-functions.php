@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 
@@ -2141,8 +2142,6 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * @return array
  */
 function wc_get_permalink_structure() {
-	global $l10n, $wp_textdomain_registry;
-
 	$saved_permalinks   = (array) get_option( 'woocommerce_permalinks', array() );
 	$default_permalinks = array(
 		'product_base'           => 'product',
@@ -2153,72 +2152,9 @@ function wc_get_permalink_structure() {
 	);
 
 	if ( empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] ) ) {
-		/*
-		 * These defaults are persisted site-wide. Mirror get_locale()'s stored-setting
-		 * chain without its request cache or locale filter, then translate explicitly.
-		 */
-		if ( is_multisite() && wp_installing() ) {
-			$site_locale = get_site_option( 'WPLANG' );
-		} else {
-			$site_locale = get_option( 'WPLANG' );
-
-			if ( false === $site_locale && is_multisite() ) {
-				$site_locale = get_site_option( 'WPLANG' );
-			}
-		}
-
-		if ( false === $site_locale ) {
-			$site_locale = defined( 'WPLANG' ) ? WPLANG : ( $GLOBALS['wp_local_package'] ?? '' );
-		}
-
-		$site_locale = is_string( $site_locale ) ? sanitize_locale_name( $site_locale ) : '';
-		$site_locale = '' !== $site_locale ? $site_locale : 'en_US';
-
-		$translation_controller = WP_Translation_Controller::get_instance();
-
-		if ( ! $translation_controller->is_textdomain_loaded( 'woocommerce', $site_locale ) && $wp_textdomain_registry instanceof WP_Textdomain_Registry ) {
-			$translation_path           = $wp_textdomain_registry->get( 'woocommerce', $site_locale );
-			$custom_translation_file    = WP_LANG_DIR . '/woocommerce/woocommerce-' . $site_locale . '.mo';
-			$previous_controller_locale = $translation_controller->get_locale();
-			$had_previous_translations  = isset( $l10n['woocommerce'] );
-			$previous_translations      = $l10n['woocommerce'] ?? null;
-
-			/*
-			 * Prevent load_textdomain() from registering request-locale legacy translations
-			 * under the explicit site locale. Restore the global after loading.
-			 */
-			unset( $l10n['woocommerce'] );
-
-			try {
-				if ( is_readable( $custom_translation_file ) ) {
-					load_textdomain( 'woocommerce', $custom_translation_file, $site_locale );
-				}
-
-				if ( is_string( $translation_path ) && '' !== $translation_path ) {
-					load_textdomain( 'woocommerce', trailingslashit( $translation_path ) . 'woocommerce-' . $site_locale . '.mo', $site_locale );
-				}
-			} finally {
-				$translation_controller->set_locale( $previous_controller_locale );
-
-				if ( $had_previous_translations ) {
-					$l10n['woocommerce'] = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the translations isolated above.
-				} else {
-					unset( $l10n['woocommerce'] );
-				}
-			}
-		}
-
+		// These defaults are persisted site-wide, so translate them in the site locale rather than the request locale.
 		foreach ( array( 'product_base', 'category_base', 'tag_base' ) as $permalink_key ) {
-			/*
-			 * Bypass gettext filters because they can depend on the current request locale,
-			 * while these translations are persisted as site-wide defaults.
-			 */
-			$translated_slug = $translation_controller->translate( $default_permalinks[ $permalink_key ], 'slug', 'woocommerce', $site_locale );
-			$translated_slug = false !== $translated_slug ? $translated_slug : $default_permalinks[ $permalink_key ];
-
-			if ( is_string( $translated_slug ) && '' !== $translated_slug ) {
-				$default_permalinks[ $permalink_key ] = $translated_slug;
-			}
+			$default_permalinks[ $permalink_key ] = SiteLocale::translate_slug( $default_permalinks[ $permalink_key ] );
 		}
 	}
 
