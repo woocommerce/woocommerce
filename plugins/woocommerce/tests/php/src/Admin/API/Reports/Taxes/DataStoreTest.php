@@ -622,6 +622,14 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		// The refund's own tax items re-derive the compound flag from the live rate,
 		// so deleting the rate first exercises the parent-flags fallback.
 		WC_Tax::_delete_tax_rate( $compound_rate_id );
+
+		// A real refund happens in a later request, where the rate objects cache is cold;
+		// clear it so the refund's tax items re-derive their flags from the database.
+		$rate_store = wc_get_container()->get( \Automattic\WooCommerce\Internal\Tax\TaxRateDataStore::class );
+		$cache_prop = ( new \ReflectionClass( $rate_store ) )->getProperty( 'rate_objects_cache' );
+		$cache_prop->setAccessible( true );
+		$cache_prop->setValue( $rate_store, array() );
+
 		$refund = $this->refund_order_in_full( $order );
 
 		DataStore::sync_order_taxes( $refund->get_id() );
