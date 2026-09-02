@@ -278,6 +278,11 @@ test.describe(
 			'WP-CLI preserves the pending rewrite flush only when the active theme is skipped',
 			{ tag: '@skip-on-external-env' },
 			async () => {
+				test.skip(
+					process.env.DISABLE_HPOS === '1',
+					'WP-CLI theme skipping is independent of HPOS and is covered by the core serial projects.'
+				);
+
 				// Setup and inspection must not load WooCommerce, or those commands could consume the queue they are measuring.
 				const coreOnlyFlags = [ '--skip-plugins', '--skip-themes' ];
 				const pendingOption =
@@ -364,7 +369,15 @@ test.describe(
 						`delete_option( "${ pendingOption }" );`,
 						...coreOnlyFlags,
 					] );
-					await wpCLI( [ 'wp', 'rewrite', 'flush' ] );
+					// Let the next normal request regenerate the complete ruleset without loading extension-heavy state under WP-CLI.
+					await wpCLI( [
+						'wp',
+						'option',
+						'update',
+						'rewrite_rules',
+						'',
+						...coreOnlyFlags,
+					] );
 				}
 			}
 		);
