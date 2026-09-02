@@ -829,6 +829,74 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sync leaves alone a row a sync running beside it wrote.
+	 */
+	public function test_sync_keeps_the_rows_a_sync_running_beside_it_wrote(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$restore = $this->write_a_row_beside_the_next_sync( $order->get_id(), 777, 888 );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$restore();
+
+		$rows = $this->lookup_rows( $order->get_id() );
+
+		$this->assertContains( '888', array_column( $rows, 'order_item_id' ), 'A sync should prune the rows it read and no others, so a row written beside it survives.' );
+		$this->assertCount( 3, $rows, 'The order should hold its own two rows and the one written beside them.' );
+	}
+
+	/**
+	 * Write a row for the order while the next sync is between reading the order's rows and
+	 * pruning them, the way a sync of the same order running beside it does.
+	 *
+	 * @param int $order_id      Order id.
+	 * @param int $tax_rate_id   Tax rate id to write the row on.
+	 * @param int $order_item_id Tax order item id to write the row on.
+	 * @return callable Removes the filter again.
+	 */
+	private function write_a_row_beside_the_next_sync( int $order_id, int $tax_rate_id, int $order_item_id ): callable {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'wc_order_tax_lookup';
+		$written    = false;
+
+		$filter = function ( $query ) use ( &$written, $table_name, $order_id, $tax_rate_id, $order_item_id ) {
+			global $wpdb;
+
+			if ( $written || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
+				return $query;
+			}
+
+			$written = true;
+
+			$wpdb->insert(
+				$table_name,
+				array(
+					'order_id'      => $order_id,
+					'date_created'  => '2023-02-10 10:00:00',
+					'tax_rate_id'   => $tax_rate_id,
+					'order_item_id' => $order_item_id,
+					'shipping_tax'  => 0,
+					'order_tax'     => 1.0,
+					'total_tax'     => 1.0,
+				)
+			);
+
+			return $query;
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
+	}
+
+	/**
 	 * Make the next write to the lookup table fail, the way a database error mid-sync would.
 	 *
 	 * @return callable Removes the filter again.

@@ -337,7 +337,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * Writes one row per tax order item, in a single statement so that a write that does not land
 	 * rebuilds none of the order's tax lines rather than some of them, then drops the rows the
-	 * order no longer carries.
+	 * order held before and no longer carries.
 	 *
 	 * @param int $order_id Order ID.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
@@ -359,20 +359,50 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$date_created  = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
 		$tax_items     = $order->get_items( OrderItemType::TAX );
 		$keyed_by_item = self::lookup_is_keyed_by_order_item();
-		$rows          = array();
-		$values        = array();
-		$keys          = array();
-		$key_values    = array( $order->get_id() );
+
+		// Read the rows the order already holds, so that the prune below names the rows this sync
+		// found, the way the Products and Coupons stores do. Deleting everything outside the
+		// snapshot instead would let two syncs that read different tax lines delete each other's
+		// rows and leave the order with none.
+		$existing_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT tax_rate_id, order_item_id FROM {$table_name} WHERE order_id = %d",
+				$order->get_id()
+			),
+			ARRAY_A
+		);
+
+		// Nothing has been written yet, so the order keeps the rows it came in with. Carrying on
+		// would prune against an empty snapshot, which leaves every row the order no longer
+		// carries in place for the reports to go on counting.
+		if ( $wpdb->last_error ) {
+			return false;
+		}
+
+		$stale  = array();
+		$rows   = array();
+		$values = array();
+
+		foreach ( $existing_rows as $existing_row ) {
+			$stale[ $existing_row['tax_rate_id'] . '-' . $existing_row['order_item_id'] ] = array(
+				(int) $existing_row['tax_rate_id'],
+				(int) $existing_row['order_item_id'],
+			);
+		}
 
 		foreach ( $tax_items as $tax_item ) {
 			// Leaving the column at zero on a table the re-key never reached keeps the row in the
 			// shape the released report reads, rather than collapsing the order's tax lines into
 			// one row the report matches to a single line.
 			$order_item_id = $keyed_by_item ? $tax_item->get_id() : 0;
-			$tax_rate_id   = $tax_item->get_rate_id();
+			$tax_rate_id   = (int) $tax_item->get_rate_id();
+
+			// A row this sync is about to write is not stale. The key is the rate and the item
+			// together, so a line whose rate id has changed leaves behind the row it held before.
+			unset( $stale[ $tax_rate_id . '-' . $order_item_id ] );
 
 			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
-			$keys[] = '(%d, %d)';
 
 			array_push(
 				$values,
@@ -384,7 +414,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_item->get_tax_total(),
 				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
 			);
-			array_push( $key_values, $tax_rate_id, $order_item_id );
 		}
 
 		// One statement for the whole order. Rebuilding only some of its lines would leave a row
@@ -405,26 +434,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 		}
 
-		// Keep only the rows just written, which drops the rows of lines the order no longer
-		// carries and the rows written before the order item column existed, which sit at zero. The
-		// key is the rate and the item together, so matching on the item alone would leave behind
-		// the old row of a line whose rate id has changed. Prune only once the writes have landed,
-		// so a write that did not land leaves the order with the rows it came in with. The two
-		// statements are not one transaction, so a prune that never runs at all leaves the order's
-		// old rows beside its new ones until the order is synced again.
-		$stale_keys = $keys ? ' AND (tax_rate_id, order_item_id) NOT IN (' . implode( ', ', $keys ) . ')' : '';
-		$deleted    = $wpdb->query(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per tax line.
-				"DELETE FROM {$table_name} WHERE order_id = %d" . $stale_keys,
-				$key_values
-			)
-		);
+		// Drop the rows the order came in with that it no longer carries, which includes the rows
+		// written before the order item column existed, since those sit at zero. Prune only once
+		// the writes have landed, so a write that did not land leaves the order with the rows it
+		// came in with.
+		if ( $stale ) {
+			$keys       = array();
+			$key_values = array( $order->get_id() );
 
-		// A row the order no longer carries goes on being counted by the reports, so a prune that
-		// failed is not a sync that succeeded.
-		if ( false === $deleted ) {
-			return false;
+			foreach ( $stale as $stale_key ) {
+				$keys[] = '(%d, %d)';
+				array_push( $key_values, $stale_key[0], $stale_key[1] );
+			}
+
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per stale row.
+					"DELETE FROM {$table_name} WHERE order_id = %d AND (tax_rate_id, order_item_id) IN (" . implode( ', ', $keys ) . ')',
+					$key_values
+				)
+			);
+
+			// A row the order no longer carries goes on being counted by the reports, so a prune
+			// that failed is not a sync that succeeded.
+			if ( false === $deleted ) {
+				return false;
+			}
 		}
 
 		foreach ( $tax_items as $tax_item ) {
