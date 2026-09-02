@@ -384,7 +384,7 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		$this->assertNotEmpty( $queue, 'A search event should have been queued.' );
 
 		$event = end( $queue );
-		$this->assertSame( 'search', $event['eventName'], 'The queued event should be the search event.' );
+		$this->assertSame( 'search_performed', $event['eventName'], 'The queued event should be the search event.' );
 
 		return (string) ( $event['props']['search_query'] ?? '' );
 	}
