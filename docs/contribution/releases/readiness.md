@@ -26,7 +26,7 @@ The RC is the last point where finding a problem is cheap: nothing has shipped, 
 The checklist covers four areas:
 
 * **Compatibility evidence.** The QIT compatibility regression sweep runs automatically against each prerelease and reports which extension versions the release would break. Introduced issues need a verdict, not just a look.
-* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict: release-blocking, fix in a point release, or not a bug.
+* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict per the [release decision matrix](/docs/contribution/releases/decision-matrix): release-blocking, fix in a point release, next release, or not a bug.
 * **Rollback path.** Who reverts, how, and what revert means for this version - answered before it's needed, not during an incident.
 * **Comms.** Changelog in shape, and a known-issues list when verdicts left something open.
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore the wc_product_meta_lookup join when the Products list is filtered by "Out of stock", so posts_clauses callbacks registered after WooCommerce can still reference the alias.

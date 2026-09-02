@@ -343,22 +343,21 @@ export default function AttributeItemTemplateEdit(
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				{ productAttributes.map( ( attribute ) => (
+				{ productAttributes.map( ( attribute, index ) => (
+					// Identify rows by position, not by `attribute.id`: the
+					// Store API reports 0 for every non-taxonomy attribute, so
+					// custom attributes would all share the same identity.
 					<CustomDataProvider
-						key={ attribute.id }
+						key={ index }
 						id="attribute"
 						data={ attribute }
 					>
 						<AttributeItem
 							blocks={ blocks }
 							isSelected={
-								( selectedAttributeItem ||
-									productAttributes[ 0 ]?.id ) ===
-								attribute.id
+								( selectedAttributeItem ?? 0 ) === index
 							}
-							onSelect={ () =>
-								setSelectedAttributeItem( attribute.id )
-							}
+							onSelect={ () => setSelectedAttributeItem( index ) }
 						/>
 					</CustomDataProvider>
 				) ) }

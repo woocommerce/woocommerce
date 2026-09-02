@@ -106,6 +106,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $temp_item_id_counter = 0;
 
 	/**
+	 * Whether the data store supports deferred item deletion.
+	 *
+	 * @var bool|null Null until first checked.
+	 */
+	private $data_store_supports_deferred_item_deletion = null;
+
+	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
 	 * Populated by remove_order_items() with a specific item type and processed by
@@ -119,6 +126,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $item_types_to_bulk_delete = array();
 
 	/**
+	 * Item IDs captured for bulk delete by type.
+	 *
+	 * @since 11.1.0
+	 * @var array<string, array<int>>
+	 */
+	protected $item_ids_to_bulk_delete_by_type = array();
+
+	/**
 	 * Whether every order item type should be deleted on the next save().
 	 *
 	 * Set by remove_order_items() when called with no type (so every item type
@@ -128,6 +143,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var bool
 	 */
 	protected $bulk_delete_all_items_pending = false;
+
+	/**
+	 * IDs of items captured when a full deferred removal is requested.
+	 *
+	 * @since 11.1.0
+	 * @var array<int>
+	 */
+	protected $item_ids_to_bulk_delete = array();
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -313,6 +336,139 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Deletes items in bulk if the data store supports it, otherwise deletes them one by one.
+	 *
+	 * @param array<int> $item_ids IDs of the items to delete.
+	 * @return void
+	 */
+	private function delete_items_by_ids( array $item_ids ): void {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			// @phpstan-ignore-next-line -- Optional data store method checked above.
+			$data_store->delete_items_by_ids( $this, $item_ids );
+		} else {
+			// Custom data stores may not support bulk deletion by IDs, so delete the snapshotted items individually
+			// so that items added *after* remove_order_items() are preserved.
+			foreach ( array_unique( $item_ids ) as $item_id ) {
+				$item = WC_Order_Factory::get_order_item( $item_id );
+
+				if ( $item && $this->get_id() === $item->get_order_id() ) {
+					$item->delete();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Determine whether the data store supports deferred item deletion.
+	 *
+	 * @return bool
+	 */
+	private function data_store_supports_deferred_item_deletion(): bool {
+		if ( null !== $this->data_store_supports_deferred_item_deletion ) {
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( ! $data_store->has_callable( 'delete_items' ) ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		$data_store_class = $data_store->get_current_class_name();
+		$is_cpt_store     = is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true );
+
+		if ( ! $is_cpt_store ) {
+			// Standalone data stores opt in to deferred deletion by providing this optional method.
+			$this->data_store_supports_deferred_item_deletion = $data_store->has_callable( 'delete_items_by_ids' );
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		$delete_items_method = new ReflectionMethod( $data_store_class, 'delete_items' );
+		if ( Abstract_WC_Order_Data_Store_CPT::class === $delete_items_method->getDeclaringClass()->getName() ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		if ( ! $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			$this->data_store_supports_deferred_item_deletion = false;
+			return false;
+		}
+
+		$delete_items_by_ids_method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
+
+		$this->data_store_supports_deferred_item_deletion = Abstract_WC_Order_Data_Store_CPT::class !== $delete_items_by_ids_method->getDeclaringClass()->getName();
+		return $this->data_store_supports_deferred_item_deletion;
+	}
+
+	/**
+	 * Get IDs of items currently persisted for this order.
+	 *
+	 * @param string|null $type Item type, or null for every registered item type.
+	 * @return array<int>
+	 */
+	private function get_persisted_item_ids( $type = null ): array {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( $data_store->has_callable( 'get_item_ids' ) ) {
+			// @phpstan-ignore-next-line -- Optional data store method checked above.
+			$item_ids = $data_store->get_item_ids( $this, $type );
+
+			return array_values(
+				array_unique(
+					array_filter(
+						array_map( 'intval', (array) $item_ids ),
+						static fn( $item_id ) => $item_id > 0
+					)
+				)
+			);
+		}
+
+		$types = null === $type
+			? array_keys( $this->get_item_types_to_group() )
+			: array( $type );
+
+		$item_ids = array();
+		foreach ( $types as $item_type ) {
+			if ( ! is_string( $item_type ) || '' === $item_type ) {
+				continue;
+			}
+
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$items = $this->data_store->read_items( $this, $item_type );
+			foreach ( (array) $items as $item ) {
+				if ( ! $item instanceof WC_Order_Item ) {
+					continue;
+				}
+				$item_id = absint( $item->get_id() );
+
+				if ( $item_id && $this->get_id() === (int) $item->get_order_id() ) {
+					$item_ids[] = $item_id;
+				}
+			}
+		}
+
+		return array_values( array_unique( $item_ids ) );
+	}
+
+	/**
 	 * Save all order items which are part of this order.
 	 *
 	 * @return void
@@ -321,10 +477,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$items_changed = false;
 
 		if ( $this->bulk_delete_all_items_pending ) {
-			$this->data_store->delete_items( $this );
-			$this->bulk_delete_all_items_pending = false;
-			$this->item_types_to_bulk_delete     = array();
-			$items_changed                       = true;
+			$this->delete_items_by_ids( $this->item_ids_to_bulk_delete );
+			$this->bulk_delete_all_items_pending   = false;
+			$this->item_ids_to_bulk_delete_by_type = array();
+			$this->item_ids_to_bulk_delete         = array();
+			$this->item_types_to_bulk_delete       = array();
+			$items_changed                         = true;
 
 			/**
 			 * Trigger action after removing all order line items from the database.
@@ -336,11 +494,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 */
 			do_action( 'woocommerce_removed_order_items', $this, null );
 		} elseif ( ! empty( $this->item_types_to_bulk_delete ) ) {
-			// Drain the queue one type at a time, dropping each entry only after delete_items() succeeds.
+			// Drain the queue one type at a time, dropping each entry only after item deletion succeeds.
 			// If a delete or hook callback throws, save()'s catch handles it and any types that have not
 			// yet been processed remain queued for the next save() rather than being silently lost.
 			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
-				$this->data_store->delete_items( $this, $type );
+				$item_ids = $this->item_ids_to_bulk_delete_by_type[ $type ] ?? array();
+				$this->delete_items_by_ids( $item_ids );
+				unset( $this->item_ids_to_bulk_delete_by_type[ $type ] );
 				$items_changed                   = true;
 				$this->item_types_to_bulk_delete = array_values(
 					array_filter(
@@ -950,17 +1110,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * The items are cleared from the in-memory order immediately, but the database
-	 * deletion is deferred until the next call to save(). This keeps the checkout
-	 * "resume order" flow atomic: if anything between here and save() throws, the
-	 * previously persisted items remain intact in the database. As a consequence,
-	 * the `woocommerce_removed_order_items` action now fires from save_items()
-	 * (after the actual DB delete completes) rather than synchronously from this
-	 * method — listeners that observe the persisted state continue to see it as
-	 * before, but listeners pairing pre/post on the same call stack will see
-	 * the post-hook fire at save() time.
+	 * The items are cleared from the in-memory order immediately, but core data stores defer
+	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
+	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
 	 * @param string|null $type Order item type. Default null (remove every type).
+	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
@@ -989,11 +1144,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
-		$has_persisted_items = $this->get_id() > 0;
+		$has_persisted_items  = $this->get_id() > 0;
+		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
+
+		if ( $delete_synchronously && $has_persisted_items ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$this->data_store->delete_items( $this, $type );
+		}
 
 		if ( ! empty( $type ) ) {
-			if ( $has_persisted_items ) {
-				$this->item_types_to_bulk_delete[] = $type;
+			if ( $has_persisted_items && ! $delete_synchronously ) {
+				$item_ids = $this->get_persisted_item_ids( $type );
+
+				if ( $this->bulk_delete_all_items_pending ) {
+					$this->item_ids_to_bulk_delete = array_values(
+						array_unique(
+							array_merge( $this->item_ids_to_bulk_delete, $item_ids )
+						)
+					);
+				} else {
+					$this->item_types_to_bulk_delete[]              = $type;
+					$this->item_ids_to_bulk_delete_by_type[ $type ] = array_values(
+						array_unique(
+							array_merge(
+								$this->item_ids_to_bulk_delete_by_type[ $type ] ?? array(),
+								$item_ids
+							)
+						)
+					);
+				}
 			}
 
 			$group = $this->type_to_group( $type );
@@ -1005,9 +1184,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		} else {
-			if ( $has_persisted_items ) {
-				$this->bulk_delete_all_items_pending = true;
-				$this->item_types_to_bulk_delete     = array();
+			if ( $has_persisted_items && ! $delete_synchronously ) {
+				$item_ids = $this->get_persisted_item_ids();
+
+				foreach ( $this->item_ids_to_bulk_delete_by_type as $typed_item_ids ) {
+					$item_ids = array_merge( $item_ids, $typed_item_ids );
+				}
+
+				$this->bulk_delete_all_items_pending   = true;
+				$this->item_ids_to_bulk_delete         = array_values(
+					array_unique(
+						array_merge( $this->item_ids_to_bulk_delete, $item_ids )
+					)
+				);
+				$this->item_types_to_bulk_delete       = array();
+				$this->item_ids_to_bulk_delete_by_type = array();
 			}
 			$type_to_group = $this->get_item_types_to_group();
 			// Union with currently populated keys so any group already loaded into
@@ -1020,6 +1211,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $groups as $group ) {
 				$this->items[ $group ] = array();
 			}
+		}
+
+		if ( $delete_synchronously ) {
+			/**
+			 * This action is documented in save_items().
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, $type );
 		}
 	}
 
@@ -1299,7 +1499,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( ! $items_key ) {
 			return false;
 		}
-
 		// Make sure existing items are loaded so we can append this new one.
 		if ( ! isset( $this->items[ $items_key ] ) ) {
 			$this->items[ $items_key ] = $this->get_items( $item->get_type() );
@@ -1310,8 +1509,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
+
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
+
+			// Scrub this item from deferred bulk deletion snapshots, in case it was removed and then re-added before save().
+			$this->item_ids_to_bulk_delete = array_values(
+				array_filter(
+					$this->item_ids_to_bulk_delete,
+					static fn( $deleted_item_id ) => $deleted_item_id !== $item_id
+				)
+			);
+
+			foreach ( $this->item_ids_to_bulk_delete_by_type as $type => $item_ids ) {
+				$this->item_ids_to_bulk_delete_by_type[ $type ] = array_values(
+					array_filter(
+						$item_ids,
+						static fn( $deleted_item_id ) => $deleted_item_id !== $item_id
+					)
+				);
+			}
 		} else {
 			$this->items[ $items_key ][ 'new:' . $items_key . $this->temp_item_id_counter++ ] = $item;
 		}
@@ -1441,9 +1658,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
-	 * @since 11.2.0 When no coupons are applied yet, line items whose totals were manually
-	 *               edited have their subtotals synced to those totals first, so discounts
-	 *               are calculated from the edited prices rather than the original ones.
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
@@ -1476,18 +1690,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// With no coupons applied, a line total differing from its subtotal is a manual price
-		// adjustment. Adopt it as the new pre-discount price, otherwise discounts would be
-		// calculated from the original price and recalculations would discard the adjustment.
-		// With coupons already applied this is skipped: the difference also contains their
-		// discounts and the manual portion cannot be separated out.
-		$original_subtotals = empty( $applied_coupons ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
-
 		$discounts = new WC_Discounts( $this );
 		$applied   = $discounts->apply_coupon( $coupon );
 
 		if ( is_wp_error( $applied ) ) {
-			$this->restore_item_subtotals( $original_subtotals );
 			return $applied;
 		}
 
@@ -1497,7 +1703,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $data_store && 0 === $this->get_customer_id() ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
-				$this->restore_item_subtotals( $original_subtotals );
 				return new WP_Error(
 					'invalid_coupon',
 					$coupon->get_coupon_error( 106 ),
@@ -1539,6 +1744,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		wc_update_coupon_usage_counts( $this->get_id() );
 
 		return true;
+	}
+
+	/**
+	 * Apply a coupon treating manually edited line item totals as the pre-discount price.
+	 *
+	 * When the order has no coupons yet, line items whose total differs from their subtotal
+	 * adopt that total as the new subtotal, so the discount is calculated from the edited
+	 * price and recalculations keep the manual adjustment. On failure the original subtotals
+	 * are restored. Call this only where a subtotal/total difference is meant to be treated
+	 * as a manual edit, such as the admin order editor; otherwise use apply_coupon().
+	 *
+	 * @since 11.2.0
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
+	 * @return true|WP_Error True if applied, error if not.
+	 */
+	public function apply_coupon_using_edited_totals( $raw_coupon ) {
+		// With coupons already applied the subtotal/total difference also contains their
+		// discounts and the manual portion cannot be separated out, so it is left alone.
+		$original_subtotals = empty( $this->get_items( 'coupon' ) ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
+
+		$applied = $this->apply_coupon( $raw_coupon );
+
+		if ( is_wp_error( $applied ) ) {
+			$this->restore_item_subtotals( $original_subtotals );
+		}
+
+		return $applied;
 	}
 
 	/**

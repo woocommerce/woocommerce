@@ -188,7 +188,7 @@ const Blueprint = () => {
 			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
 			<p className="blueprint-settings-export-intro">
 				{ __(
-					'Select the settings, plugins, and themes to export as a .json file.',
+					'Select the settings, plugins, and themes to export as a .json file. Payment settings are not exported and must be configured manually after import.',
 					'woocommerce'
 				) }
 			</p>

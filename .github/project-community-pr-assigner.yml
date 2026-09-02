@@ -102,13 +102,13 @@
 'plugins/woocommerce/src/{Abilities,Api,Caches,Caching,Database,Enums,Proxies,Utilities,Vendor}/**/*':
     - team: rubik
 
-'plugins/woocommerce/src/Internal/{Abilities,AbilitiesApi,Agentic,Api,BatchProcessing,Caches,ComingSoon,CustomerEmailVerification,DataStores,DependencyManagement,Features,LegacyAssets,Logging,MCP,OrderReviews,Orders,OrderWithdrawal,PushNotifications,ReceiptRendering,RestApi,ShopperLists,StockNotifications,Traits,TransientFiles}/**/*':
+'plugins/woocommerce/src/Internal/{Abilities,AbilitiesApi,Api,BatchProcessing,Caches,ComingSoon,CustomerEmailVerification,DataStores,DependencyManagement,Features,LegacyAssets,Logging,MCP,OrderReviews,Orders,OrderWithdrawal,PushNotifications,ReceiptRendering,RestApi,ShopperLists,StockNotifications,Traits,TransientFiles}/**/*':
     - team: rubik
 
 'plugins/woocommerce/src/Internal/{AddressProvider,POS}/**/*':
     - team: woo-fse
 
-'plugins/woocommerce/src/Internal/Admin/{Agentic,Logging,Onboarding,Orders,Schedulers}/**/*':
+'plugins/woocommerce/src/Internal/Admin/{Logging,Onboarding,Orders,Schedulers}/**/*':
     - team: rubik
 
 'plugins/woocommerce/src/Internal/Admin/*':
@@ -138,10 +138,10 @@
 'plugins/woocommerce/tests/php/src/{Api,Caching,Database,Proxies,Utilities}/**/*':
     - team: rubik
 
-'plugins/woocommerce/tests/php/src/Internal/{Abilities,AbilitiesApi,Agentic,Api,BatchProcessing,Caches,ComingSoon,CustomerEmailVerification,DataStores,DependencyManagement,Features,LegacyAssets,LegacyPhpApi,Logging,MCP,OrderReviews,Orders,OrderWithdrawal,PushNotifications,ReceiptRendering,RestApi,ShopperLists,StockNotifications,Telemetry,Traits,TransientFiles}/**/*':
+'plugins/woocommerce/tests/php/src/Internal/{Abilities,AbilitiesApi,Api,BatchProcessing,Caches,ComingSoon,CustomerEmailVerification,DataStores,DependencyManagement,Features,LegacyAssets,LegacyPhpApi,Logging,MCP,OrderReviews,Orders,OrderWithdrawal,PushNotifications,ReceiptRendering,RestApi,ShopperLists,StockNotifications,Telemetry,Traits,TransientFiles}/**/*':
     - team: rubik
 
-'plugins/woocommerce/tests/php/src/Internal/Admin/{Agentic,Logging,Onboarding,Orders,Schedulers}/**/*':
+'plugins/woocommerce/tests/php/src/Internal/Admin/{Logging,Onboarding,Orders,Schedulers}/**/*':
     - team: rubik
 
 'plugins/woocommerce/tests/php/src/Internal/Admin/*':
@@ -172,13 +172,13 @@
 'packages/php/email-editor/**/*':
     - team: ballade
 
-'plugins/woocommerce/client/admin/client/{abandoned-cart-recovery,marketing,settings-email}/**/*':
+'plugins/woocommerce/client/admin/client/{marketing,settings-email}/**/*':
     - team: ballade
 
 'plugins/woocommerce/src/Admin/Marketing/**/*':
     - team: ballade
 
-'plugins/woocommerce/src/Internal/{AbandonedCartRecovery,Email,EmailEditor}/**/*':
+'plugins/woocommerce/src/Internal/{Email,EmailEditor}/**/*':
     - team: ballade
 
 'plugins/woocommerce/src/Internal/Admin/{EmailImprovements,EmailPreview,Emails,Marketing}/**/*':
@@ -196,7 +196,7 @@
 'plugins/woocommerce/tests/**/*{coupon,email,mailer,marketing}*':
     - team: ballade
 
-'plugins/woocommerce/tests/php/src/Internal/{AbandonedCartRecovery,Email,EmailEditor}/**/*':
+'plugins/woocommerce/tests/php/src/Internal/{Email,EmailEditor}/**/*':
     - team: ballade
 
 'plugins/woocommerce/tests/php/src/Internal/Admin/{EmailImprovements,EmailPreview,Emails,Marketing}/**/*':

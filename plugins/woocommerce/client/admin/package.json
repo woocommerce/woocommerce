@@ -193,7 +193,6 @@
 		"jest-environment-jsdom": "29.5.x",
 		"jest-environment-node": "29.5.x",
 		"md5": "^2.3.0",
-		"merge-config": "^2.0.0",
 		"mini-css-extract-plugin": "2.9.x",
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
@@ -218,7 +217,6 @@
 		"webpack": "catalog:tooling",
 		"webpack-bundle-analyzer": "4.9.x",
 		"webpack-cli": "5.1.x",
-		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"whatwg-fetch": "^3.6.20"
 	},

@@ -109,6 +109,16 @@
 			$( document.body ).trigger( 'wc_backbone_modal_removed', this._target );
 		},
 		addButton: function( e ) {
+			// Allow listeners to cancel the response via event.preventDefault(),
+			// e.g. to validate inputs and keep the modal open. Covers click,
+			// touch and keyboard paths.
+			var beforeResponse = $.Event( 'wc_backbone_modal_before_response' );
+			$( document.body ).trigger( beforeResponse, [ this._target, this.$el ] );
+
+			if ( beforeResponse.isDefaultPrevented() ) {
+				return;
+			}
+
 			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
 			this.closeButton( e, true );
 		},
