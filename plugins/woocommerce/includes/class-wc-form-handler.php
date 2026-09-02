@@ -882,6 +882,10 @@ class WC_Form_Handler {
 			$order_can_cancel = $order->has_status( $valid_statuses );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+			if ( WC()->session instanceof WC_Session_Handler && ! WC()->session->has_session() ) {
+				WC()->session->set_customer_session_cookie( true );
+			}
+
 			if ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				// Cancel the order + restore stock.
@@ -898,10 +902,20 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $redirect ) {
-				wp_safe_redirect( $redirect );
-				exit;
+			if ( ! $redirect && ! doing_action( 'wp_loaded' ) ) {
+				// Preserve the historical return behavior for extensions that call this public method directly.
+				return;
 			}
+
+			if ( ! $redirect ) {
+				$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
+			}
+
+			$redirect = $redirect ? $redirect : wc_get_cart_url();
+			$redirect = $redirect ? $redirect : home_url();
+			wp_safe_redirect( $redirect );
+			exit;
 		}
 	}
 
