@@ -401,6 +401,45 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A Global Unique ID that matches a variable product fails a row whose blank Type defaults to simple.
+	 */
+	public function test_import_fails_global_unique_id_rows_that_would_change_the_product_type() {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_name( 'Original variable product name' );
+		$product->set_global_unique_id( '6667778889990' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-global-unique-id-blank-type.csv';
+		file_put_contents( $csv_file, "Type,GTIN,Name\n,6667778889990,Updated product name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type' => 'type',
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'The Global Unique ID matches a product of a different type.', $data['failed'][0]->get_error_message() );
+		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $product->get_id() ) );
+		$this->assertSame( 'Original variable product name', wc_get_product( $product->get_id() )->get_name() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox An unmatched SKU is not matched by Global Unique ID when updating existing products.
 	 */
 	public function test_import_does_not_fall_back_to_global_unique_id_when_the_sku_is_unmatched() {
