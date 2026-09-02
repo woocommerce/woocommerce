@@ -16,7 +16,7 @@ import type {
 import { FieldProps } from './utils';
 
 export interface FormProps<
-	T extends AddressFormValues | ContactFormValues | OrderFormValues
+	T extends AddressFormValues | ContactFormValues | OrderFormValues,
 > {
 	// Id for component.
 	id?: string;

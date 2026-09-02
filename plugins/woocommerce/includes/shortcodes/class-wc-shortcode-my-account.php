@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,6 +46,12 @@ class WC_Shortcode_My_Account {
 		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
 		if ( isset( $wp->query_vars['lost-password'] ) ) {
 			self::lost_password();
+			return;
+		}
+
+		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
+			// Order withdrawal is an EU regulation requirement which needs standalone access.
+			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
 			return;
 		}
 
@@ -90,16 +98,22 @@ class WC_Shortcode_My_Account {
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
 
-		if ( get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) ) ) {
+		// Suppress the nag during the resend cooldown so it doesn't contradict the "we emailed you" confirmation.
+		// Driven off the same timestamp WC_Form_Handler::resend_set_password() writes, so the notice reappears
+		// once the cooldown lapses and the link can be requested again.
+		$last_resend_at  = (int) get_user_meta( get_current_user_id(), WC_Form_Handler::SET_PASSWORD_RESEND_META, true );
+		$within_cooldown = $last_resend_at > 0 && ( time() - $last_resend_at ) < WC_Form_Handler::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS;
+
+		if ( ! $within_cooldown && get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) ) ) {
+			$resend_url = wp_nonce_url( add_query_arg( 'wc-resend-set-password', '1', wc_get_page_permalink( 'myaccount' ) ), 'wc-resend-set-password' );
 			wc_add_notice(
 				sprintf(
-					// translators: %s: site name.
-					__( 'Your account with %s is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),
-					esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) )
-				),
-				'notice',
-				array(),
-				true
+					/* translators: %1$s and %2$s are opening and closing anchor tags for the resend-link button. */
+					__( '%1$sResend%2$s', 'woocommerce' ),
+					'<a href="' . esc_url( $resend_url ) . '" class="button wc-forward">',
+					'</a>'
+				) . ' ' . __( 'Your account is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),
+				'notice'
 			);
 		}
 	}
@@ -233,14 +247,14 @@ class WC_Shortcode_My_Account {
 		/**
 		 * After sending the reset link, don't show the form again.
 		 */
-		if ( ! empty( $_GET['reset-link-sent'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['reset-link-sent'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only UI selector; login and path are normalized downstream.
 			wc_get_template( 'myaccount/lost-password-confirmation.php' );
 			return;
 
 			/**
 			 * Process reset key / login from email confirmation link
 			 */
-		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
+		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only UI selector; login and path are normalized downstream.
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
 				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
 				$userdata               = get_userdata( absint( $rp_id ) );
@@ -279,7 +293,7 @@ class WC_Shortcode_My_Account {
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read-only UI selector; login and path are normalized downstream.
 
 		if ( empty( $login ) ) {
 
@@ -378,17 +392,34 @@ class WC_Shortcode_My_Account {
 
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
+		// The temporary-password notice is gone for good now, so drop its resend rate-limit timestamp.
+		delete_user_meta( $user->ID, WC_Form_Handler::SET_PASSWORD_RESEND_META );
 
-		/**
-		 * Fires after the user's password has been reset via WooCommerce.
-		 *
-		 * This provides parity with WordPress core's reset_password() function.
-		 *
-		 * @since 10.9.0
-		 * @param WP_User $user     The user.
-		 * @param string  $new_pass New user password in plaintext.
-		 */
-		do_action( 'after_password_reset', $user, $new_pass );
+		// WordPress core hooks wp_password_change_notification() onto after_password_reset. Detach it around
+		// the action so it doesn't duplicate the notification WooCommerce sends directly below (guarded by the
+		// woocommerce_disable_password_change_notification filter), then restore it to its original priority.
+		$core_notification_priority = has_action( 'after_password_reset', 'wp_password_change_notification' );
+		if ( false !== $core_notification_priority ) {
+			remove_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+		}
+
+		try {
+			/**
+			 * Fires after the user's password has been reset via WooCommerce.
+			 *
+			 * This provides parity with WordPress core's reset_password() function.
+			 *
+			 * @since 10.9.0
+			 * @param WP_User $user     The user.
+			 * @param string  $new_pass New user password in plaintext.
+			 */
+			do_action( 'after_password_reset', $user, $new_pass );
+		} finally {
+			if ( false !== $core_notification_priority ) {
+				add_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+			}
+		}
+
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
 
@@ -405,7 +436,7 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
-		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // WPCS: input var ok, sanitization ok.
+		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only UI selector; login and path are normalized downstream.
 
 		if ( $value ) {
 			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );

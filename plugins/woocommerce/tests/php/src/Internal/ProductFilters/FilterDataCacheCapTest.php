@@ -12,6 +12,12 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
  * Tests for the filter-combination cache entry cap in FilterData.
  */
 class FilterDataCacheCapTest extends AbstractProductFiltersTest {
+	/**
+	 * This class only reads its product catalog inside per-test transactions.
+	 */
+	protected static function uses_class_product_filter_fixtures(): bool {
+		return true;
+	}
 
 	/**
 	 * System under test.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure exact global attribute terms remain selectable when partial matches fill the search results.

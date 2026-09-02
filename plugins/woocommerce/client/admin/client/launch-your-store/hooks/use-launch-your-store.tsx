@@ -56,8 +56,7 @@ export const useLaunchYourStore = (
 				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
 				privateLink: getOption( 'woocommerce_private_link' ),
 				shareKey: getOption( 'woocommerce_share_key' ),
-				launchYourStoreEnabled:
-					window.wcAdminFeatures[ 'launch-your-store' ],
+				launchYourStoreEnabled: true,
 			};
 		},
 		[ enabled ]

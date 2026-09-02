@@ -31,7 +31,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer__screen-overlay {
-	background-color: rgba(95, 95, 95, 0.35);
+	background-color: $drawer-overlay-background;
 	bottom: 0;
 	left: 0;
 	position: fixed;
@@ -60,20 +60,18 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer {
-	border-left: 1px solid $universal-translucent-border-color;
 	background: #fff;
 	display: block;
 	height: 100%;
-	left: 100%;
+	inset-inline-start: 100%;
 	position: fixed;
-	right: 0;
 	top: 0;
 	transform: translateX(max(-100%, var(--neg-drawer-width)));
 	width: var(--drawer-width);
 	max-width: 100%;
 }
 
-.rtl .wc-block-components-drawer {
+.wc-block-components-drawer:dir(rtl) {
 	transform: translateX(min(100%, var(--drawer-width)));
 }
 
@@ -88,9 +86,8 @@ $drawer-animation-duration: 0.3s;
 	animation-name: slidein;
 }
 
-.rtl
-	.wc-block-components-drawer__screen-overlay--with-slide-in
-	.wc-block-components-drawer {
+.wc-block-components-drawer__screen-overlay--with-slide-in
+	.wc-block-components-drawer:dir(rtl) {
 	animation-name: rtlslidein;
 }
 
@@ -117,7 +114,7 @@ $drawer-animation-duration: 0.3s;
 	color: inherit !important;
 	position: absolute !important;
 	top: $gap-small;
-	right: $gap-small;
+	inset-inline-end: $gap-small;
 	opacity: 0.6;
 	z-index: 2;
 	// Increase clickable area.

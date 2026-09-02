@@ -384,13 +384,13 @@ class WC_Helper_Product {
 
 		foreach ( $terms as $term ) {
 			$result = term_exists( $term, $attribute->slug );
-
-			if ( ! $result ) {
-				$result               = wp_insert_term( $term, $attribute->slug );
-				$return['term_ids'][] = $result['term_id'];
-			} else {
-				$return['term_ids'][] = $result['term_id'];
+			if ( $result ) {
+				// Delete pre-existing term data to guarantee clean testing environment.
+				wp_delete_term( $result['term_id'], $attribute->slug );
 			}
+
+			$result               = wp_insert_term( $term, $attribute->slug );
+			$return['term_ids'][] = $result['term_id'];
 		}
 
 		return $return;
@@ -443,5 +443,41 @@ class WC_Helper_Product {
 	 */
 	public static function save_post_test_update_meta_data_direct( $id ) {
 		update_post_meta( $id, '_test2', 'world' );
+	}
+
+	/**
+	 * Creates a variable product with global attributes and a single variation.
+	 *
+	 * Variation attribute values may be term slugs or empty strings ("Any" attributes).
+	 *
+	 * @param string $product_name         Product name.
+	 * @param array  $variation_attributes Variation attributes, e.g. array( 'pa_size' => 'huge', 'pa_number' => '' ).
+	 * @param array  $attribute_terms      Attribute terms keyed by raw attribute name (without 'pa_' prefix).
+	 *
+	 * @return array The variable product and its variation: array( WC_Product_Variable, WC_Product_Variation ).
+	 */
+	public static function create_variation_product_with_global_attributes( $product_name, $variation_attributes, $attribute_terms = array(
+		'size'   => array( 'small', 'huge' ),
+		'number' => array( '0', '1' ),
+	) ) {
+		$product = new WC_Product_Variable();
+		$product->set_name( $product_name );
+
+		$attributes = array();
+		foreach ( $attribute_terms as $attribute_name => $terms ) {
+			$attributes[] = self::create_product_attribute_object( $attribute_name, $terms );
+		}
+
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$variation = self::create_product_variation_object(
+			$product->get_id(),
+			$product_name . ' variation',
+			10,
+			$variation_attributes
+		);
+
+		return array( $product, wc_get_product( $variation->get_id() ) );
 	}
 }

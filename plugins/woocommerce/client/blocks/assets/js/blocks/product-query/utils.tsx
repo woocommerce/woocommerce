@@ -99,6 +99,10 @@ export function useAllowedControls(
 		[ attributes ]
 	);
 
+	if ( ! Array.isArray( controls ) ) {
+		return [];
+	}
+
 	if ( ! isSiteEditorPage() ) {
 		return controls.filter( ( control ) => control !== 'wooInherit' );
 	}

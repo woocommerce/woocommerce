@@ -142,15 +142,15 @@ $task-alert-yellow: #f0b849;
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon {
 		border-radius: 50%;
-		width: 32px;
-		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
 	}
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon svg {
 		fill: $white;
-		position: relative;
-		top: 4px;
-		left: 5px;
 	}
 
 	&.complete {

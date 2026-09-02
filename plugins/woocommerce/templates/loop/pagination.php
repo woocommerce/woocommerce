@@ -30,10 +30,17 @@ if ( $total <= 1 ) {
 ?>
 <nav class="woocommerce-pagination" aria-label="<?php esc_attr_e( 'Product Pagination', 'woocommerce' ); ?>">
 	<?php
-	echo paginate_links(
+	echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress generates the pagination markup after applying the public arguments filter.
+		/**
+		 * Filters the pagination arguments for the product loop.
+		 *
+		 * @param array $args Pagination arguments.
+		 *
+		 * @since 2.0.0
+		 */
 		apply_filters(
 			'woocommerce_pagination_args',
-			array( // WPCS: XSS ok.
+			array(
 				'base'      => $base,
 				'format'    => $format,
 				'add_args'  => false,

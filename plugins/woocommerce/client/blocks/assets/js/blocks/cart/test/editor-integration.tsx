@@ -170,10 +170,6 @@ describe( 'Cart block editor integration', () => {
 			/^Block: Product Collection$/i
 		);
 		expect( productCollection ).toBeVisible();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 
 	it( 'shows the cart preview in the editor', async () => {

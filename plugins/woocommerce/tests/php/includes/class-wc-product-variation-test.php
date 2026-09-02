@@ -121,4 +121,24 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 		$this->assertIsString( $url );
 		$this->assertNotEmpty( $url );
 	}
+
+	/**
+	 * @testdox A variation's viewability follows its parent's status.
+	 */
+	public function test_is_viewable_variation_follows_parent_status() {
+		wp_set_current_user( 0 );
+		$this->assertTrue( $this->variation->is_viewable(), 'A variation of a published parent is viewable when logged out.' );
+		$this->assertTrue( $this->variation->is_publicly_viewable(), 'A variation of a published parent is publicly viewable.' );
+
+		$this->parent_product->set_status( 'draft' );
+		$this->parent_product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( $this->variation->is_viewable(), 'A variation whose parent is a draft is not viewable when logged out.' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		$this->assertTrue( $this->variation->is_viewable(), 'A variation whose parent is a draft is viewable by admins.' );
+		$this->assertFalse( $this->variation->is_publicly_viewable(), 'A variation whose parent is a draft is never publicly viewable.' );
+	}
 }

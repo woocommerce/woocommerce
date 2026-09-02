@@ -1,6 +1,8 @@
 ---
 post_title: HTML best practices
+description: Best practices for HTML emails to ensure proper rendering across all major email clients.
 sidebar_label: HTML best practices
+sidebar_position: 1
 ---
 
 # Email HTML - Best Practices

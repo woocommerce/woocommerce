@@ -7,7 +7,6 @@ import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
@@ -56,21 +55,21 @@ export function InnerEditor( {
 	settings,
 	contentRef,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	settings: Record< string, unknown >;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
 		onNavigateToEntityRecord,
 		onNavigateToPreviousEntityRecord,
 	} = useNavigateToEntityRecord(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostId,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostType,
 		'post-only'
 	);
@@ -125,13 +124,12 @@ export function InnerEditor( {
 
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
-		removeEditorPanel( 'post-status' );
+		void removeEditorPanel( 'post-status' );
 	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();
 
 	const editorSettings = useMemo(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		() => ( {
 			...settings,
 			onNavigateToEntityRecord,
@@ -185,6 +183,11 @@ export function InnerEditor( {
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
 					customSavePanel={ customSavePanel }
+					customSaveButton={
+						currentPost.postType === 'wp_template'
+							? undefined
+							: customSaveButton
+					}
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

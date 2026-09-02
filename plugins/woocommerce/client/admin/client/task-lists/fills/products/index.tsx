@@ -145,7 +145,6 @@ export const Products = () => {
 		];
 
 		if (
-			!! window.wcAdminFeatures?.printful &&
 			! isRequestingPlugins &&
 			! installedPlugins.includes( 'printful-shipping-for-woocommerce' )
 		) {
@@ -218,7 +217,7 @@ export const Products = () => {
 						} }
 						onImport={ () => {
 							setIsConfirmingLoadSampleProducts( false );
-							loadSampleProduct();
+							void loadSampleProduct();
 						} }
 					/>
 				)

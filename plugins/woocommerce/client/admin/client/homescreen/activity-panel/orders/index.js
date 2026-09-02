@@ -31,6 +31,7 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -73,9 +74,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( customer ) => {
-		const { name } = customer || {};
-
+	const getCustomerString = ( name ) => {
 		if ( ! name ) {
 			return '';
 		}
@@ -88,12 +87,13 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			id: orderId,
 			number: orderNumber,
 			customer_id: customerId,
+			billing,
 		} = order;
 		const customer =
 			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
 		if ( customer && customer.id ) {
-			customerUrl = window.wcAdminFeatures.analytics
+			customerUrl = isFeatureEnabled( 'analytics' )
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
 						customers: customer.id,
@@ -101,11 +101,21 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
+		// Guest orders have no customer record; fall back to the billing name.
+		// createInterpolateElement parses <word> as a token, so strip angle
+		// brackets from the name to keep it from being read as markup.
+		const sanitizeName = ( name ) =>
+			( name || '' ).replace( /[<>]/g, '' ).trim();
+		const guestName = billing
+			? `${ billing.first_name || '' } ${ billing.last_name || '' }`
+			: '';
+		const customerName = sanitizeName( customer?.name || guestName );
+
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
 			__( '<orderLink>Order #%1$s</orderLink> %2$s', 'woocommerce' ),
 			orderNumber,
-			getCustomerString( customer )
+			getCustomerString( customerName )
 		);
 
 		return (
@@ -217,6 +227,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 				'status',
 				'total',
 				'customer',
+				'billing',
 				'line_items',
 				'customer_id',
 				'date_created_gmt',
@@ -304,7 +315,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} );
 
 	if ( isError ) {
-		if ( ! orderStatuses.length && window.wcAdminFeatures.analytics ) {
+		if ( ! orderStatuses.length && isFeatureEnabled( 'analytics' ) ) {
 			return (
 				<EmptyContent
 					title={ __(

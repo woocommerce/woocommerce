@@ -17,6 +17,7 @@ import {
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
 		json: () => Promise.resolve( {} ),
+		ok: true,
 		status: 200,
 	} )
 );
@@ -24,7 +25,7 @@ global.fetch = jest.fn().mockImplementation( () =>
 const fetchMock = jest.spyOn( global, 'fetch' );
 
 describe( 'fetchExperimentAssignment', () => {
-	it( 'applies woocommerce_explat_request_args before constructing the full URL', () => {
+	it( 'applies woocommerce_explat_request_args before constructing the full URL', async () => {
 		addFilter(
 			'woocommerce_explat_request_args',
 			'test',
@@ -38,11 +39,11 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '123',
 			anonId: 'abc',
 		} );
-		Promise.resolve( fetchPromise );
 
 		expect( fetchMock ).toHaveBeenCalledWith(
 			'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/woocommerce?experiment_name=123&anon_id=abc&test=test'
 		);
+		await fetchPromise;
 	} );
 
 	it( 'should throw error when anonId is empty', async () => {
@@ -78,6 +79,7 @@ describe( 'fetchExperimentAssignment', () => {
 		window.fetch.mockImplementation( () =>
 			Promise.resolve( {
 				json: () => Promise.resolve( data ),
+				ok: true,
 				status: 200,
 			} )
 		);
@@ -89,7 +91,7 @@ describe( 'fetchExperimentAssignment', () => {
 		await expect( assignment ).toEqual( data );
 	} );
 
-	it( 'adds woo_wcadmin_install_timestamp to request args', () => {
+	it( 'adds woo_wcadmin_install_timestamp to request args', async () => {
 		const filterArgs = { args: {} };
 		addFilter(
 			'woocommerce_explat_request_args',
@@ -104,16 +106,16 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '123',
 			anonId: 'abc',
 		} );
-		Promise.resolve( fetchPromise );
 
 		expect( filterArgs.args ).toHaveProperty(
 			'woo_wcadmin_install_timestamp'
 		);
+		await fetchPromise;
 	} );
 } );
 
 describe( 'fetchExperimentAssignmentWithAuth', () => {
-	it( 'applies woocommerce_explat_request_args before constructing the full URL', () => {
+	it( 'applies woocommerce_explat_request_args before constructing the full URL', async () => {
 		fetchMock.mockClear();
 		addFilter(
 			'woocommerce_explat_request_args',
@@ -128,7 +130,6 @@ describe( 'fetchExperimentAssignmentWithAuth', () => {
 			experimentName: '123',
 			anonId: 'abc',
 		} );
-		Promise.resolve( fetchPromise );
 
 		expect( fetchMock ).toHaveBeenCalledWith(
 			'/wc-admin/experiments/assignment?experiment_name=123&anon_id=abc&test=test&_locale=user',
@@ -138,9 +139,10 @@ describe( 'fetchExperimentAssignmentWithAuth', () => {
 				headers: { Accept: 'application/json, */*;q=0.1' },
 			}
 		);
+		await fetchPromise;
 	} );
 
-	it( 'adds woo_wcadmin_install_timestamp to request args', () => {
+	it( 'adds woo_wcadmin_install_timestamp to request args', async () => {
 		const filterArgs = { args: {} };
 		addFilter(
 			'woocommerce_explat_request_args',
@@ -155,10 +157,10 @@ describe( 'fetchExperimentAssignmentWithAuth', () => {
 			experimentName: '123',
 			anonId: 'abc',
 		} );
-		Promise.resolve( fetchPromise );
 
 		expect( filterArgs.args ).toHaveProperty(
 			'woo_wcadmin_install_timestamp'
 		);
+		await fetchPromise;
 	} );
 } );

@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Traits;
 use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
 use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -20,9 +20,16 @@ use WP_Error;
 /**
  * Tests for the simplified RestApiCache trait.
  */
-class RestApiCacheTest extends WC_REST_Unit_Test_Case {
+class RestApiCacheTest extends WC_Unit_Test_Case {
 
 	private const CACHE_GROUP = 'woocommerce_rest_api_cache';
+
+	/**
+	 * REST server used to dispatch requests to the test controller.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * System under test.
@@ -81,8 +88,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	 * Tear down after each test.
 	 */
 	public function tearDown(): void {
-		global $wp_rest_server;
-		$wp_rest_server = null;
+		$this->clear_rest_server();
 
 		remove_all_filters( 'woocommerce_rest_api_not_modified_response' );
 
@@ -911,12 +917,9 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	 * on the same server instance.
 	 */
 	private function reset_rest_server() {
-		global $wp_rest_server;
-		$wp_rest_server = new WP_REST_Server();
-		$this->server   = $wp_rest_server;
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'rest_api_init' );
-		$this->sut->register_routes();
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->sut, 'register_routes' ) )
+		);
 	}
 
 	/**

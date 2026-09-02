@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Add extra flexibility to the HTTP status code computation of the dual code+GraphQL API.

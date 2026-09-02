@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Shopper Collection: declare the atomic product-image, product-price and product-button stylesheets as style dependencies so their CSS is enqueued on the frontend whenever the block renders, instead of relying on duplicated/missing rules.

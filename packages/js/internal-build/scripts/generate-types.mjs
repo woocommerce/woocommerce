@@ -24,6 +24,7 @@ import { join, dirname, relative, resolve, posix } from 'node:path';
 import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 // ---------------------------------------------------------------------------
@@ -42,7 +43,7 @@ const PACKAGE_NAMES = [
 	'@wordpress/notices',
 ];
 
-const PKG_ROOT = resolve( dirname( new URL( import.meta.url ).pathname ), '..' );
+const PKG_ROOT = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const TYPES_DIR = join( PKG_ROOT, 'type-overrides' );
 
 function dtPackageName( packageName ) {

@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\PreviewOrder;
 use WC_Emails;
 use WC_Helper_Order;
 use WC_Product;
+use WC_Product_Download;
 use WC_Unit_Test_Case;
 
 /**
@@ -183,6 +184,37 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Email preview shipping details can be hidden.
+	 */
+	public function test_shipping_details_filter_can_hide_preview_shipping_details(): void {
+		$captured_order = null;
+		$captured_args  = null;
+		$hide_shipping  = function ( $show_shipping_details, $order, $email_type ) use ( &$captured_args ) {
+			$captured_args = array( $show_shipping_details, $order, $email_type );
+			return false;
+		};
+		$capture_order  = function ( $order ) use ( &$captured_order ) {
+			$captured_order = $order;
+			return $order;
+		};
+		add_filter( 'woocommerce_email_preview_show_shipping_details', $hide_shipping, 10, 3 );
+		add_filter( 'woocommerce_email_preview_dummy_order', $capture_order, 10, 1 );
+
+		$content = $this->sut->render();
+
+		remove_filter( 'woocommerce_email_preview_show_shipping_details', $hide_shipping, 10 );
+		remove_filter( 'woocommerce_email_preview_dummy_order', $capture_order, 10 );
+
+		$this->assertInstanceOf( PreviewOrder::class, $captured_order );
+		$this->assertSame( array(), $captured_order->get_shipping_methods(), 'Hidden preview shipping details should remove the dummy shipping method.' );
+		$this->assertSame( '0', $captured_order->get_shipping_total(), 'Hidden preview shipping details should remove the dummy shipping total.' );
+		$this->assertSame( '', $captured_order->get_shipping_address_1(), 'Hidden preview shipping details should remove the dummy shipping address.' );
+		$this->assertSame( array( true, $captured_order, EmailPreview::DEFAULT_EMAIL_TYPE ), $captured_args, 'Filter should receive the default visibility, preview order, and email type.' );
+		$this->assertStringNotContainsString( 'Flat rate', $content, 'Hidden preview shipping details should not render the dummy shipping method.' );
+		$this->assertStringNotContainsString( 'Shipping address', $content, 'Hidden preview shipping details should not render the shipping address section.' );
+	}
+
+	/**
 	 * Test dummy address filter - woocommerce_email_preview_dummy_address
 	 */
 	public function test_dummy_address_filter() {
@@ -235,6 +267,54 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Your ' . self::SITE_TITLE . ' order has been received!', $subject );
 
 		remove_filter( 'woocommerce_prepare_email_for_preview', $email_filter, 10 );
+	}
+
+	/**
+	 * @testdox Email preview provides dummy product files as download objects.
+	 */
+	public function test_provide_dummy_product_file_returns_download_object_in_preview(): void {
+		add_filter( 'woocommerce_is_email_preview', '__return_true' );
+
+		$file = $this->sut->provide_dummy_product_file( null );
+
+		remove_filter( 'woocommerce_is_email_preview', '__return_true' );
+
+		$this->assertInstanceOf( WC_Product_Download::class, $file );
+		$this->assertSame( 'Sample Download File.pdf', $file->get_name() );
+		$this->assertSame( 'sample-download.pdf', $file->get_file() );
+	}
+
+	/**
+	 * @testdox Email preview downloadable items ignore downloads resolved from the dummy order.
+	 */
+	public function test_get_dummy_downloadable_items_returns_only_preview_downloads(): void {
+		$downloads = array(
+			array(
+				'product_name'   => 'Unexpected Dummy Product',
+				'product_id'     => 0,
+				'download_url'   => 'https://example.com/unexpected',
+				'download_name'  => 'Unexpected Download.pdf',
+				'access_expires' => time() + DAY_IN_SECONDS,
+			),
+		);
+
+		try {
+			$this->sut->set_up_filters();
+			/**
+			 * Filters the list of downloadable items for an order.
+			 *
+			 * @since 3.2.0
+			 *
+			 * @param array    $downloads Downloadable items.
+			 * @param WC_Order $order     Order object.
+			 */
+			$result = apply_filters( 'woocommerce_order_get_downloadable_items', $downloads, new PreviewOrder() );
+		} finally {
+			$this->sut->clean_up_filters();
+		}
+
+		$this->assertCount( 1, $result, 'Existing downloads from dummy order permission records must not be merged into preview output.' );
+		$this->assertSame( 'Sample Download File.pdf', $result[0]['download_name'], 'Preview output should keep the synthetic downloadable item.' );
 	}
 
 	/**

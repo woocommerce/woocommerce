@@ -6,7 +6,7 @@ import { ShippingMethod } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { PluginBanner } from '../../experimental-shipping-recommendation/components/plugin-banner';
+import { PluginBanner } from '../../shipping-recommendation/components/plugin-banner';
 
 /**
  * Renders a column layout for the shipping method. Used for rendering a single shipping partner.

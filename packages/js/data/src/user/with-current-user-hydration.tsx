@@ -40,9 +40,9 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				useDispatch( store );
 
 			if ( shouldHydrate ) {
-				startResolution( 'getCurrentUser', [] );
-				receiveCurrentUser( currentUser );
-				finishResolution( 'getCurrentUser', [] );
+				void startResolution( 'getCurrentUser', [] );
+				void receiveCurrentUser( currentUser );
+				void finishResolution( 'getCurrentUser', [] );
 			}
 
 			return <OriginalComponent { ...props } />;

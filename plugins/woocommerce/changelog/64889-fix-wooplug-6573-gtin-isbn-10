@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve the 'X' check digit in ISBN-10 identifiers entered in the GTIN/UPC/EAN/ISBN product field. The server-side sanitizer, classic editor validation, and block editor input pattern previously stripped or rejected 'X', silently truncating valid ISBN-10s such as 157249042X.

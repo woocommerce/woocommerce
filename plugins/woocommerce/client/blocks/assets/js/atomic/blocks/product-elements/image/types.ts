@@ -6,7 +6,15 @@ import { ProductQueryContext } from '@woocommerce/blocks/product-query/types';
 export enum ImageSizing {
 	SINGLE = 'single',
 	THUMBNAIL = 'thumbnail',
+	// Deprecated synonym for THUMBNAIL.
+	CROPPED = 'cropped',
 }
+
+export type AspectRatioStyle = {
+	dimensions?: {
+		aspectRatio?: string;
+	};
+};
 
 export interface BlockAttributes {
 	// The product ID.
@@ -33,6 +41,8 @@ export interface BlockAttributes {
 	scale: 'cover' | 'contain' | 'fill';
 	// Aspect ratio of the image.
 	aspectRatio: string;
+	// Block style from dimensions support (not React CSSProperties).
+	style?: AspectRatioStyle;
 }
 
 export interface ProductImageContext extends ProductQueryContext {

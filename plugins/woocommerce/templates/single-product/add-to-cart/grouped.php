@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.2.0
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +22,7 @@ global $product, $post;
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="cart grouped_form" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
-	<table cellspacing="0" class="woocommerce-grouped-product-list group_table">
+	<table cellspacing="0" class="woocommerce-grouped-product-list group_table" role="presentation">
 		<tbody>
 			<?php
 			$quantites_required      = false;

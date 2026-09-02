@@ -20,6 +20,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->initialize_rest_api_routes();
 		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
 		$this->user = $this->factory->user->create(

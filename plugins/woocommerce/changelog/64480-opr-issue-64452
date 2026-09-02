@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix `cartItemScreenReaderPrice` filter output being announced by screen readers as separate fragments instead of a single sentence.

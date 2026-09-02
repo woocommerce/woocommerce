@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve the store timezone offset via date-fns-tz instead of moment-timezone's .tz() so Analytics no longer crashes with "tz is not a function" when a plugin replaces the global window.moment (#64020).

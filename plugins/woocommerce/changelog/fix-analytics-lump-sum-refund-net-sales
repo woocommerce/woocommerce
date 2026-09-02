@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Analytics order stats for lump-sum full refunds (e.g. order status set to Refunded) so net revenue uses product net, not the full refund total.

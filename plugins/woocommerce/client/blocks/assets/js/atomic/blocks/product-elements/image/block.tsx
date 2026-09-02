@@ -14,12 +14,7 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import {
-	isString,
-	objectHasProp,
-	isEmpty,
-	ProductResponseItem,
-} from '@woocommerce/types';
+import { isEmpty, ProductResponseItem } from '@woocommerce/types';
 import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
@@ -27,8 +22,8 @@ import { ProductEntityResponse } from '@woocommerce/entities';
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
-import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
-import { isTryingToDisplayLegacySaleBadge } from './utils';
+import { BlockAttributes, ProductImageContext } from './types';
+import { isTryingToDisplayLegacySaleBadge, resolveAspectRatio } from './utils';
 
 const buildStyles = ( props: Partial< ImageProps > ) => {
 	const { aspectRatio, height, width, scale } = props;
@@ -58,16 +53,12 @@ const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 
 const ImagePlaceholder = ( props: {
 	style?: Record< string, unknown >;
-	showFullSize: boolean;
 } ): JSX.Element => {
-	const { showFullSize, ...restProps } = props;
-	const src = showFullSize
-		? getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC )
-		: PLACEHOLDER_IMG_SRC;
+	const src = getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
 
 	return (
 		<img
-			{ ...restProps }
+			{ ...props }
 			src={ src }
 			// Decorative image with no value, so alt should be empty.
 			alt=""
@@ -88,7 +79,6 @@ interface ImageProps {
 		thumbnail?: string | undefined;
 	};
 	loaded: boolean;
-	showFullSize: boolean;
 	fallbackAlt: string;
 	scale: 'cover' | 'contain' | 'fill';
 	width?: string | undefined;
@@ -99,19 +89,19 @@ interface ImageProps {
 const Image = ( {
 	image,
 	loaded,
-	showFullSize,
 	fallbackAlt,
 	width,
 	scale,
 	height,
 	aspectRatio,
 }: ImageProps ): JSX.Element => {
-	const { thumbnail, src, srcset, sizes, alt } = image || {};
+	const { src, srcset, sizes, alt } = image || {};
 	const imageProps = {
 		alt: alt || fallbackAlt,
 		hidden: ! loaded,
-		src: showFullSize ? src : thumbnail,
-		...( showFullSize && { srcSet: srcset, sizes } ),
+		src,
+		srcSet: srcset,
+		sizes,
 	};
 
 	const imageStyles = buildStyles( {
@@ -122,12 +112,7 @@ const Image = ( {
 	} );
 
 	if ( ! image ) {
-		return (
-			<ImagePlaceholder
-				showFullSize={ showFullSize }
-				style={ imageStyles }
-			/>
-		);
+		return <ImagePlaceholder style={ imageStyles } />;
 	}
 
 	return (
@@ -142,7 +127,7 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & {
+	Omit< HTMLAttributes< HTMLDivElement >, 'style' > & {
 		isAdmin?: boolean;
 		product?: ProductResponseItem | ProductEntityResponse;
 		isResolving?: boolean;
@@ -173,7 +158,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		className,
 		height,
 		imageId,
-		imageSizing = ImageSizing.SINGLE,
+		imageSizing,
 		scale,
 		showProductLink = true,
 		style,
@@ -193,13 +178,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	} );
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
-	const finalAspectRatio =
-		objectHasProp( style, 'dimensions' ) &&
-		objectHasProp( style.dimensions, 'aspectRatio' ) &&
-		isString( style.dimensions.aspectRatio )
-			? style.dimensions.aspectRatio
-			: aspectRatio;
+	const storeAspectRatio = getSetting< string | null >(
+		'thumbnailAspectRatio',
+		null
+	);
+	const finalAspectRatio = resolveAspectRatio(
+		style,
+		aspectRatio,
+		storeAspectRatio,
+		imageSizing
+	);
 	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
 		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
 	}`;
@@ -227,10 +215,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					) }
 					style={ styleProps.style }
 				>
-					<ImagePlaceholder
-						showFullSize={ showFullSize }
-						style={ imageStyles }
-					/>
+					<ImagePlaceholder style={ imageStyles } />
 				</div>
 				{ children }
 			</>
@@ -289,7 +274,6 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
 						loaded={ ! isLoading }
-						showFullSize={ showFullSize }
 						width={ width }
 						height={ height }
 						scale={ scale }

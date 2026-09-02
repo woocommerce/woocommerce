@@ -61,11 +61,9 @@ class OrderRefund extends \WC_Order_Refund {
 		if ( is_null( $this->customer_id ) ) {
 			$parent_order = \wc_get_order( $this->get_parent_id() );
 
-			if ( ! $parent_order ) {
-				$this->customer_id = false;
-			}
-
-			$this->customer_id = CustomersDataStore::get_or_create_customer_from_order( $parent_order );
+			$this->customer_id = $parent_order instanceof \WC_Order
+				? CustomersDataStore::get_or_create_customer_from_order( $parent_order )
+				: false;
 		}
 
 		return $this->customer_id;

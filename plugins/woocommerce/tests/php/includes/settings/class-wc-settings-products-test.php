@@ -128,6 +128,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_hold_stock_minutes'      => 'number',
 			'woocommerce_notify_low_stock'        => 'checkbox',
 			'woocommerce_notify_no_stock'         => 'checkbox',
+			'woocommerce_notify_backorder'        => 'checkbox',
 			'woocommerce_stock_email_recipient'   => 'text',
 			'woocommerce_notify_low_stock_amount' => 'number',
 			'woocommerce_notify_no_stock_amount'  => 'number',

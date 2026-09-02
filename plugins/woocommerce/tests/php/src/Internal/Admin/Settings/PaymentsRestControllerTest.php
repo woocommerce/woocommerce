@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -19,7 +19,7 @@ use WC_Gateway_PayPal;
  *
  * @class PaymentsRestController
  */
-class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
+class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -45,6 +45,13 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -57,7 +64,22 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->sut = new PaymentsRestController();
 		$this->sut->init( $this->mock_service );
-		$this->sut->register_routes( true );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->sut->register_routes( true );
+				},
+			),
+			true
+		);
+	}
+
+	/**
+	 * Tear down the REST server.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		parent::tearDown();
 	}
 
 	/**

@@ -252,16 +252,6 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	}
 
 	/**
-	 * Add missing license key notice.
-	 */
-	private function add_missing_license_key_notice() {
-		if ( ! class_exists( 'WC_Admin_Notices' ) ) {
-			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-notices.php';
-		}
-		WC_Admin_Notices::add_notice( 'maxmind_license_key' );
-	}
-
-	/**
 	 * Remove missing license key notice.
 	 */
 	private function remove_missing_license_key_notice() {
@@ -272,13 +262,14 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	}
 
 	/**
-	 * Display notice if license key is missing.
+	 * Remove the old missing license key notice when it no longer applies.
 	 *
 	 * @param mixed $old_value Option old value.
 	 * @param mixed $new_value Current value.
 	 */
 	public function display_missing_license_key_notice( $old_value, $new_value ) {
 		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
+			$this->remove_missing_license_key_notice();
 			return;
 		}
 
@@ -289,9 +280,8 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
 		$license_key = $this->get_option( 'license_key' );
 		if ( ! empty( $license_key ) ) {
+			$this->remove_missing_license_key_notice();
 			return;
 		}
-
-		$this->add_missing_license_key_notice();
 	}
 }

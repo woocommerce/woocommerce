@@ -38,6 +38,39 @@ Block themes can customize those templates in the following ways:
 - It's possible to create templates for specific products and taxonomies. For example, if the theme provides a template with file name of `single-product-cap.html`, that template will be used when rendering the product with slug `cap`. Similarly, themes can provide specific taxonomy templates: `taxonomy-product_cat-clothing.html` would be used in the product category with slug `clothing`.
 - Always keep in mind users can make modifications to the templates provided by the theme via the Site Editor.
 
+#### Cart and Checkout page templates
+
+The `page-cart.html` and `page-checkout.html` templates should render the content from the assigned Cart and Checkout pages. Add layout, headers, footers, and other template-level content around the page content, but keep the Cart and Checkout blocks in the corresponding page content.
+
+WooCommerce's default `page-cart.html` template uses the `woocommerce/page-content-wrapper` block with `woocommerce/store-notices`, `core/post-title`, and `core/post-content` inside it:
+
+```html
+<!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+    <!-- wp:woocommerce/store-notices /-->
+    <!-- wp:post-title {"align":"wide", "level":1} /-->
+    <!-- wp:post-content {"align":"wide"} /-->
+</main>
+<!-- /wp:group -->
+<!-- /wp:woocommerce/page-content-wrapper -->
+```
+
+The default `page-checkout.html` template uses the same wrapper and store notices, but renders page content without a page title:
+
+```html
+<!-- wp:woocommerce/page-content-wrapper {"page":"checkout"} -->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+    <!-- wp:woocommerce/store-notices /-->
+    <!-- wp:post-content {"align":"wide"} /-->
+</main>
+<!-- /wp:group -->
+<!-- /wp:woocommerce/page-content-wrapper -->
+```
+
+Use the same pattern when overriding `page-cart.html` or `page-checkout.html` in a theme. Avoid placing `woocommerce/cart` or `woocommerce/checkout` directly in these template files as a replacement for `core/post-content`. If the template bypasses page content, the page editor can become out of sync with what shoppers see, and WooCommerce features that inspect the assigned page content may not detect the Cart or Checkout block correctly.
+
 ### Block template parts
 
 WooCommerce also comes with two specific [block template parts](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/templates/parts):

@@ -9,8 +9,6 @@ import {
 	Icon,
 	help as helpIcon,
 	external,
-	bell,
-	bellUnread,
 	listView,
 	comment,
 	store,
@@ -20,7 +18,6 @@ import { H, Section } from '@woocommerce/components';
 import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSlot } from '@woocommerce/experimental';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
@@ -30,17 +27,9 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
-import {
-	getLowStockCount as getLowStockProducts,
-	getOrderStatuses,
-	getUnreadOrders,
-} from '../homescreen/activity-panel/orders/utils';
-import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
-import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
@@ -50,12 +39,6 @@ import HeaderAccount from '../marketplace/components/header-account/header-accou
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
-);
-
-const InboxPanel = lazy( () =>
-	import(
-		/* webpackChunkName: "activity-panels-inbox" */ './panels/inbox/inbox-panel'
-	)
 );
 
 const SetupTasksPanel = lazy( () =>
@@ -71,8 +54,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
-	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
-	const hasExtendedNotifications = Boolean( fills?.length );
 	const { comingSoon } = useLaunchYourStore( {
 		enabled: isHomescreen,
 	} );
@@ -127,65 +108,27 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		[ query.page, query.task ]
 	);
 
-	const checkIfHasAbbreviatedNotifications = useCallback(
-		( select, setupTaskListHidden, thingsToDoNextCount ) => {
-			const orderStatuses = getOrderStatuses( select );
-
-			const isOrdersCardVisible = setupTaskListHidden
-				? getUnreadOrders( select, orderStatuses ) > 0
-				: false;
-			const isReviewsCardVisible = setupTaskListHidden
-				? getUnapprovedReviews( select )
-				: false;
-			const isLowStockCardVisible = setupTaskListHidden
-				? getLowStockProducts( select )
-				: false;
-
-			return (
-				thingsToDoNextCount > 0 ||
-				isOrdersCardVisible ||
-				isReviewsCardVisible ||
-				isLowStockCardVisible ||
-				hasExtendedNotifications
-			);
-		},
-		[ hasExtendedNotifications ]
-	);
-
 	const {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-		thingsToDoNextCount,
-	} = useTaskListsState();
+	} = useTaskListsState( {
+		setupTasklist: true,
+		extendedTaskList: false,
+	} );
 
-	const {
-		hasUnreadNotes,
-		hasAbbreviatedNotifications,
-		previewSiteBtnTrackData,
-	} = useSelect(
+	const { previewSiteBtnTrackData } = useSelect(
 		( select ) => {
 			const { getOption } = select( optionsStore );
 
 			return {
-				hasUnreadNotes: checkIfHasUnreadNotes( select ),
-				hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
-					select,
-					setupTaskListHidden,
-					thingsToDoNextCount
-				),
 				previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
 					select,
 					getOption
 				),
 			};
 		},
-		[
-			checkIfHasAbbreviatedNotifications,
-			thingsToDoNextCount,
-			setupTaskListHidden,
-			getPreviewSiteBtnTrackData,
-		]
+		[ getPreviewSiteBtnTrackData ]
 	);
 
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
@@ -255,33 +198,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		);
 	};
 
-	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
-		const activity = {
-			name: 'activity',
-			title: __( 'Activity', 'woocommerce' ),
-			// Use bellUnread (bell + dot baked into the SVG) when there is
-			// unread activity so the unread state lives in one source of truth
-			// inside @wordpress/icons rather than a separately-positioned CSS
-			// pseudo-element on top of the plain bell.
-			icon: (
-				<Icon
-					icon={
-						hasUnreadNotes || hasAbbreviatedNotifications
-							? bellUnread
-							: bell
-					}
-					size={ 18 }
-				/>
-			),
-			unread: hasUnreadNotes || hasAbbreviatedNotifications,
-			visible:
-				( isEmbedded || ! isHomescreen ) &&
-				! isPerformingSetupTask() &&
-				! isProductScreen() &&
-				currentUserCan( 'manage_woocommerce' ),
-		};
-
 		const feedback = {
 			name: 'feedback',
 			title: __( 'Feedback', 'woocommerce' ),
@@ -401,7 +318,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		};
 
 		return [
-			activity,
 			feedback,
 			setup,
 			previewSite,
@@ -416,15 +332,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const { task } = query;
 
 		switch ( tab ) {
-			case 'activity':
-				return (
-					<InboxPanel
-						hasAbbreviatedNotifications={
-							hasAbbreviatedNotifications
-						}
-						thingsToDoNextCount={ thingsToDoNextCount }
-					/>
-				);
 			case 'help':
 				return <HelpPanel taskName={ task } />;
 			case 'setup':

@@ -107,6 +107,13 @@ class Checkout extends AbstractCartRoute {
 							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
 							'type'        => 'string',
 						],
+						'expected_total'    => [
+							'description'       => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
+							'type'              => 'string',
+							// Digits only. The value is compared as an integer, so decimals or stray characters would silently weaken the check.
+							'pattern'           => '^[0-9]+$',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
@@ -146,7 +153,11 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
+		try {
+			$this->load_cart_session( $request );
+		} catch ( \Throwable $error ) {
+			return $this->add_response_headers( $this->get_cart_session_error_response( $error ) );
+		}
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -277,8 +288,8 @@ class Checkout extends AbstractCartRoute {
 					continue;
 				}
 
-				// Clean the field value to trim whitespace.
-				$field_value = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
+				// Clean the field value to trim whitespace. Request body is JSON-decoded and never magic-quoted, so no wp_unslash().
+				$field_value = wc_clean( $field_values[ $field_key ] ?? '' );
 
 				if ( empty( $field_value ) ) {
 					if ( true === $field['required'] ) {
@@ -545,21 +556,10 @@ class Checkout extends AbstractCartRoute {
 		$this->validate_user_can_place_order();
 
 		/**
-		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
-		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
-		 */
-		$this->cart_controller->calculate_totals();
-
-		/**
 		 * Validate that the cart is not empty.
 		 */
 		$this->cart_controller->validate_cart_not_empty();
 		wc_log_order_step( '[Store API #2] Cart validated' );
-
-		/**
-		 * Validate items and fix violations before the order is processed.
-		 */
-		$this->cart_controller->validate_cart();
 
 		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
@@ -568,6 +568,25 @@ class Checkout extends AbstractCartRoute {
 		$this->update_customer_from_request( $request );
 		// Customer save-point: 1 (session-stored).
 		wc_log_order_step( '[Store API #3] Updated customer data from request' );
+
+		/**
+		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+		 */
+		$this->cart_controller->calculate_totals();
+
+		/**
+		 * Validate items and fix violations before the order is processed.
+		 */
+		$this->cart_controller->validate_cart();
+
+		/**
+		 * Reject the order if the total the shopper confirmed no longer matches the total the
+		 * server calculates for this request (e.g. a server-side filter or another concurrent
+		 * request changed the cart, a product price/quantity was edited, a stock limit clamped
+		 * a quantity, a coupon expired, or shipping/tax was recalculated).
+		 */
+		$this->validate_order_totals( $request );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
@@ -668,7 +687,7 @@ class Checkout extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
+		 * @example docs/examples/checkout-order-processed.md
 
 		 * @param \WC_Order $order Order object.
 		 */
@@ -902,11 +921,9 @@ class Checkout extends AbstractCartRoute {
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			if ( 'shipping_address' === $context_data['param'] ) {
-				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );
-
-				if ( ! WC()->cart->needs_shipping() ) {
-					$field_values = $request['billing_address'] ?? [];
-				}
+				$field_values = WC()->cart->needs_shipping()
+					? (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] )
+					: (array) ( $request['billing_address'] ?? [] );
 			} else {
 				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}
@@ -946,12 +963,13 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			$all_payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -1044,6 +1062,57 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Reject the order if what the customer is going to be charged at is higher from what they saw.
+	 *
+	 * Runs on POST /checkout only, before the draft order is materialised, so a mismatch leaves
+	 * no order behind. The check only runs when the client sends the total it displayed; flows
+	 * that cannot know the final total up front (e.g. some express payment methods) omit it and
+	 * are unaffected.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException When the recalculated total is higher. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
+	 */
+	private function validate_order_totals( \WP_REST_Request $request ): void {
+		// The route schema constrains this to minor-unit digits, so the integer comparison below is exact.
+		$expected_total = (string) ( $request['expected_total'] ?? '' );
+
+		if ( '' === $expected_total ) {
+			return;
+		}
+
+		// CartSchema::prepare_money_response() is not exported, so we use the money formatter directly here to match the total_price format.
+		$decimals     = wc_get_price_decimals();
+		$actual_total = woocommerce_store_api_get_formatter( 'money' )->format(
+			$this->cart_controller->get_cart_instance()->get_total( 'edit' ),
+			[ 'decimals' => $decimals ]
+		);
+
+		if ( (int) $actual_total <= (int) $expected_total ) {
+			return;
+		}
+
+		$expected_amount = wc_remove_number_precision( absint( $expected_total ) );
+		$actual_amount   = wc_remove_number_precision( absint( $actual_total ) );
+
+		throw new RouteException(
+			'woocommerce_rest_checkout_total_mismatch',
+			sprintf(
+				/* translators: %1$s: total the shopper confirmed, %2$s: updated, higher total */
+				esc_html__( 'The order total changed from %1$s to %2$s while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
+				esc_html( wc_price( $expected_amount, [ 'in_span' => false ] ) ),
+				esc_html( wc_price( $actual_amount, [ 'in_span' => false ] ) )
+			),
+			409,
+			[
+				'expected_total' => absint( $expected_total ),
+				'actual_total'   => absint( $actual_total ),
+			]
+		);
 	}
 
 	/**

@@ -12,12 +12,12 @@ const webpack = require( 'webpack' );
 /**
  * Internal dependencies
  */
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -35,6 +35,51 @@ const getSubdirectoriesAt = ( searchPath ) => {
 
 const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
+const SETTINGS_UI_PACKAGE_DIR = path.resolve(
+	__dirname,
+	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
+);
+
+const resolvePackageDirectory = ( packageName, fromDirectory ) =>
+	path.dirname(
+		require.resolve( `${ packageName }/package.json`, {
+			paths: [ fromDirectory ],
+		} )
+	);
+
+const dataViewsPackageDirectory = resolvePackageDirectory(
+	'@wordpress/dataviews',
+	SETTINGS_UI_PACKAGE_DIR
+);
+const dataViewsUiPackageDirectory = resolvePackageDirectory(
+	'@wordpress/ui',
+	dataViewsPackageDirectory
+);
+const dataViewsBundledPackageDirectories = [
+	dataViewsPackageDirectory,
+	resolvePackageDirectory(
+		'@wordpress/components',
+		dataViewsPackageDirectory
+	),
+	resolvePackageDirectory( '@wordpress/compose', dataViewsPackageDirectory ),
+	resolvePackageDirectory( '@wordpress/data', dataViewsPackageDirectory ),
+	dataViewsUiPackageDirectory,
+	resolvePackageDirectory( '@wordpress/theme', dataViewsUiPackageDirectory ),
+];
+const dataViewsBundledDependencyRoots = [
+	...new Set(
+		dataViewsBundledPackageDirectories.map( ( packageDirectory ) =>
+			path.resolve( packageDirectory, '../..' )
+		)
+	),
+];
+const dataViewsWpEntry = require.resolve( '@wordpress/dataviews/wp', {
+	paths: [ SETTINGS_UI_PACKAGE_DIR ],
+} );
+const settingsUIDataFormRuntimeEntry = path.resolve(
+	SETTINGS_UI_PACKAGE_DIR,
+	'src/dataform-runtime.ts'
+);
 
 // Admin writes directly to the plugin's `assets/client/admin/` so PHP can
 // enqueue without an intermediate copy step. The JS config and every composed
@@ -52,7 +97,6 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
-	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -61,10 +105,8 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
-	'block-templates',
-	'product-editor',
 	'sanitize',
-	'settings-ui-sdk',
+	'settings-ui',
 	'remote-logging',
 	'email-editor',
 ];
@@ -111,10 +153,13 @@ const getEntryPoints = () => {
 	wcAdminPackages.forEach( ( name ) => {
 		const source = resolvePackageSourceEntry( name );
 		const style = resolvePackageStyleEntry( name );
+		const privateRuntime =
+			name === 'settings-ui' ? settingsUIDataFormRuntimeEntry : null;
 		// Order matters: webpack uses the last item in an array entry as the
-		// chunk's export source. Stylesheet first so `src/index.ts`'s exports
-		// land on the `window.wc.<name>` global.
-		entryPoints[ name ] = style ? [ style, source ] : source;
+		// chunk's export source. Private runtime and stylesheet entries come
+		// first so only `src/index.ts` exports land on `window.wc.<name>`.
+		const entries = [ style, privateRuntime, source ].filter( Boolean );
+		entryPoints[ name ] = entries.length === 1 ? source : entries;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
@@ -179,6 +224,27 @@ const jsConfig = {
 		parser: styleConfig.parser,
 		rules: [
 			{
+				// The DataForm runtime is a private entry until WOOPRD-3596 imports
+				// it from the renderer. Keep it in production builds without
+				// re-exporting it through window.wc.settingsUi.
+				include: settingsUIDataFormRuntimeEntry,
+				sideEffects: true,
+			},
+			{
+				// DataViews' /wp build inlines WordPress packages but leaves their
+				// third-party imports external. Resolve those imports from the exact
+				// package graph bundled into this entry under pnpm's strict layout.
+				// Keep this private runtime even while no public package export uses it.
+				include: dataViewsWpEntry,
+				sideEffects: true,
+				resolve: {
+					modules: [
+						...dataViewsBundledDependencyRoots,
+						'node_modules',
+					],
+				},
+			},
+			{
 				test: /\.(t|j)sx?$/,
 				parser: {
 					// Disable AMD to fix an issue where underscore and lodash where clashing
@@ -214,6 +280,14 @@ const jsConfig = {
 				},
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
+			{
+				// @wordpress/theme declares sideEffects: false, which would
+				// tree-shake bare imports of its design tokens stylesheet.
+				// TODO: remove this rule when bumping @wordpress/theme past
+				// 0.17.0; newer releases fix the tree-shaking upstream.
+				test: /@wordpress[\/\\]theme[\/\\].*\.css$/,
+				sideEffects: true,
+			},
 			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
@@ -265,21 +339,6 @@ const jsConfig = {
 				}
 				return outputPath;
 			},
-		} ),
-
-		// product-editor's block.json files come straight from source so PHP's
-		// BlockRegistry can load them without a separate package build.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					context: path.join(
-						__dirname,
-						'../../../../packages/js/product-editor/src/blocks'
-					),
-					from: '**/block.json',
-					to: './product-editor/blocks/[path][name][ext]',
-				},
-			],
 		} ),
 
 		// React Fast Refresh.

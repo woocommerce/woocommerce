@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { useMemo } from '@wordpress/element';
 import { createSlotFill } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { ErrorBoundary, PluginDocumentSettingPanel } from '@wordpress/editor';
 
 /**

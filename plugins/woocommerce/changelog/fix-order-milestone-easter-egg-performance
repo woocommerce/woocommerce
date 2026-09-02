@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Improve order edit page performance by resolving milestone easter egg orders with a bounded HPOS ID query instead of hydrating order objects.

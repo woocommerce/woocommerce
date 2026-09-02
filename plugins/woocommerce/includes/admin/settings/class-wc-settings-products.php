@@ -289,6 +289,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'            => 'woocommerce_notify_no_stock',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
+					'checkboxgroup' => '',
+					'autoload'      => false,
+					'class'         => 'manage_stock_field',
+				),
+
+				array(
+					'desc'          => __( 'Enable backorder notifications', 'woocommerce' ),
+					'id'            => 'woocommerce_notify_backorder',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',

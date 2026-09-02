@@ -39,17 +39,30 @@ class Package {
 	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
 
 	/**
-	 * Whether the merged variation gallery feature is enabled for the current
-	 * request.
+	 * Highest variant bucket in the former canary cohort.
 	 *
-	 * Reads the same option as the Features toggles, so the `FeaturesController`
-	 * and the merged-package machinery share a single source of truth. Defaults
-	 * to off for the 10.9 canary period.
+	 * @deprecated 11.1.0 The variation gallery is enabled for all users.
+	 */
+	public const CANARY_MAX_VARIANT = 6;
+
+	/**
+	 * Whether the current store is in the former canary cohort.
+	 *
+	 * @deprecated 11.1.0 Use Package::is_enabled() instead.
+	 * @return bool
+	 */
+	public static function is_in_canary_cohort(): bool {
+		wc_deprecated_function( __METHOD__, '11.1.0', __CLASS__ . '::is_enabled' );
+		return self::is_enabled();
+	}
+
+	/**
+	 * As of WooCommerce 11.1, the variation gallery is enabled for all users.
 	 *
 	 * @return bool
 	 */
 	public static function is_enabled() {
-		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' );
+		return true;
 	}
 
 	/**
@@ -67,10 +80,6 @@ class Package {
 	 * @internal
 	 */
 	final public static function init(): void {
-		if ( ! self::is_enabled() ) {
-			return;
-		}
-
 		$container = wc_get_container();
 		$container->get( ClassicVariationGalleryAdmin::class )->register();
 		$container->get( LegacyVariationGalleryCompatibility::class )->register();

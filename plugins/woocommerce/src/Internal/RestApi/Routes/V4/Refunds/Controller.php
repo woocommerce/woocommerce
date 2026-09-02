@@ -15,11 +15,12 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
-use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Http;
 use WP_Error;
+use WC_Order;
 use WC_Order_Refund;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -46,9 +47,16 @@ class Controller extends AbstractController {
 	/**
 	 * Schema class for this route.
 	 *
-	 * @var OrderSchema
+	 * @var RefundSchema
 	 */
 	protected $item_schema;
+
+	/**
+	 * Schema class for preview responses.
+	 *
+	 * @var RefundPreviewSchema
+	 */
+	protected $preview_schema;
 
 	/**
 	 * Collection query class.
@@ -67,13 +75,16 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param RefundSchema    $item_schema Refund schema class.
-	 * @param CollectionQuery $collection_query Collection query class.
-	 * @param DataUtils       $data_utils Data utils class.
 	 * @internal
+	 *
+	 * @param RefundSchema        $item_schema Refund schema class.
+	 * @param RefundPreviewSchema $preview_schema Preview schema class.
+	 * @param CollectionQuery     $collection_query Collection query class.
+	 * @param DataUtils           $data_utils Data utils class.
 	 */
-	final public function init( RefundSchema $item_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
+	final public function init( RefundSchema $item_schema, RefundPreviewSchema $preview_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
 		$this->item_schema      = $item_schema;
+		$this->preview_schema   = $preview_schema;
 		$this->collection_query = $collection_query;
 		$this->data_utils       = $data_utils;
 	}
@@ -152,6 +163,35 @@ class Controller extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/preview',
+			array(
+				// permission_callback below intentionally uses the create-refund capability:
+				// preview is read-only but logically part of the refund-creation flow, so it
+				// requires the same capability. This prevents read-only-API clients from
+				// probing refund state on orders they cannot act on.
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'order_id'   => array(
+							'description'       => __( 'The ID of the order to preview a refund for.', 'woocommerce' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'minimum'           => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						// Shared with the wc/v3 preview endpoint so the accepted
+						// payload cannot drift between API versions.
+						'line_items' => $this->data_utils->get_preview_line_items_arg_schema(),
+					),
+				),
+				'schema' => array( $this, 'get_public_preview_schema' ),
 			)
 		);
 
@@ -286,43 +326,59 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
+		// The refund amount field was renamed from 'amount' to 'total'. Reject the old
+		// name explicitly: unknown params are silently dropped by the REST layer, so a
+		// request sending 'amount' as a cap would otherwise fall back to the full
+		// line-item total and refund more than the client intended. has_param(), not a
+		// get_param() null check — get_param() returns null for both an absent field
+		// and an explicit {"amount": null}, and the explicit-null form must be rejected
+		// too rather than reaching the calculated-total fallback.
+		if ( $request->has_param( 'amount' ) ) {
+			return $this->get_route_error_response(
+				'unsupported_amount_field',
+				__( 'The amount field is not supported. Use total instead.', 'woocommerce' )
+			);
+		}
+
+		$order = wc_get_order( $request['order_id'] );
+
+		// wc_get_order can return a WC_Order_Refund for refund IDs — reject those
+		// here since refunds are not refundable themselves.
+		if ( ! $order instanceof \WC_Order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		// The shared engine runs the whole creation preparation: fill missing
+		// refund totals, validate against the order's refund history, convert to
+		// the internal wc_create_refund() format, resolve the amount, and apply
+		// the aggregate guards. Shared with the wc/v3 compute_totals path so a
+		// fix lands once.
+		$prepared = $this->data_utils->prepare_refund_creation_or_error(
+			$order,
+			$request['line_items'] ?? array(),
+			$request->has_param( 'total' ),
+			$request['total'],
+			'wc-v4-refunds'
+		);
+
+		if ( is_wp_error( $prepared ) ) {
+			// Preserve any status carried on the WP_Error so create and preview
+			// return the same HTTP code for the same invalid input (e.g. 422 for
+			// over-refund / non-refundable order). Falls back to 400 otherwise.
+			$error_data = $prepared->get_error_data();
+			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+			return $this->get_route_error_response_from_object( $prepared, $status );
+		}
+
+		// Mirror the filled schema-format array back onto the request so the
+		// 'created' hook and any other downstream readers of
+		// $request['line_items'] see normalised data with refund_total populated.
+		$request->set_param( 'line_items', $prepared['schema_line_items'] );
+
+		$line_item_data = $prepared['line_items'];
+		$refund_amount  = $prepared['amount'];
+
 		try {
-			$order = wc_get_order( $request['order_id'] );
-
-			if ( ! $order ) {
-				return $this->get_route_error_by_code( self::INVALID_ID );
-			}
-
-			// Validate request line_items before proceeding against the order being refunded.
-			$validation_error = $this->data_utils->validate_line_items( $request['line_items'], $order );
-
-			if ( is_wp_error( $validation_error ) ) {
-				return $this->get_route_error_response( $validation_error->get_error_code(), $validation_error->get_error_message() );
-			}
-
-			// Convert line items to internal format.
-			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'], $order );
-			$calculated_total = ! empty( $request['line_items'] ) ? $this->data_utils->calculate_refund_amount( $request['line_items'] ) : 0;
-			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;
-
-			if ( 0 > $refund_amount || ! $refund_amount ) {
-				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
-			}
-
-			// Prevent under-refunding: amount cannot be less than calculated line items total.
-			// Over-refunding is allowed for goodwill/compensation scenarios.
-			if ( ! empty( $request['amount'] ) && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
-				return $this->get_route_error_response(
-					'invalid_refund_amount',
-					sprintf(
-						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
-						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
-						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
-						wc_format_decimal( $calculated_total, wc_get_price_decimals() )
-					)
-				);
-			}
-
 			$refund = wc_create_refund(
 				array(
 					'order_id'       => $order->get_id(),
@@ -372,6 +428,49 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Preview a refund without creating it.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public function preview_item( $request ) {
+		$order = wc_get_order( $request['order_id'] );
+
+		// wc_get_order returns WC_Order|WC_Order_Refund|false; only a WC_Order
+		// (shop_order) is previewable here — refunds and missing IDs are rejected.
+		if ( ! $order instanceof WC_Order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		// The shared engine runs the whole pipeline: normalize, validate, build,
+		// and the aggregate guards. Its WP_Errors carry their HTTP status in the
+		// error data; wrap them in this controller's error envelope, as the
+		// validation branch always has.
+		$preview = $this->data_utils->compute_refund_preview_or_error( $order, $request['line_items'], 'wc-v4-refunds' );
+
+		if ( is_wp_error( $preview ) ) {
+			$error_data = $preview->get_error_data();
+			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+			return $this->get_route_error_response_from_object( $preview, $status );
+		}
+
+		return rest_ensure_response( $preview );
+	}
+
+	/**
+	 * Get the public schema for the preview endpoint.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return array
+	 */
+	public function get_public_preview_schema(): array {
+		return $this->preview_schema->get_item_schema();
+	}
+
+	/**
 	 * Delete a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -386,7 +485,7 @@ class Controller extends AbstractController {
 
 		$request->set_param( 'context', 'edit' );
 
-		$response = new WP_REST_Response( null, 204 );
+		$response = new WP_REST_Response( null, WP_Http::NO_CONTENT );
 		$result   = $refund->delete( true );
 
 		if ( ! $result ) {

@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useSettings } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
+import { itemsStore, reportsStore, useSettings } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -12,17 +13,18 @@ import { SCHEDULED_IMPORT_SETTING_NAME } from '../config';
 
 // Mock dependencies.
 jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
 	useSettings: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
-
-// Enable the feature flag before mocking config.
-window.wcAdminFeatures = {
-	'analytics-scheduled-import': true,
-};
 
 jest.mock( '../config', () => ( {
 	config: {
@@ -56,32 +58,46 @@ jest.mock( '../historical-data', () => ( {
 describe( 'Settings - Import Mode Modal', () => {
 	const mockUpdateSettings = jest.fn();
 	const mockPersistSettings = jest.fn();
+	const mockUpdateAndPersistSettings = jest.fn();
+	const mockInvalidateReportResolutions = jest.fn();
+	const mockInvalidateItemResolutions = jest.fn();
+	const mockCreateNotice = jest.fn();
+	let settingsState;
 
 	beforeEach( () => {
 		jest.clearAllMocks();
 
-		useSettings.mockReturnValue( {
+		settingsState = {
 			settingsError: false,
 			isRequesting: false,
 			isDirty: false,
 			persistSettings: mockPersistSettings,
-			updateAndPersistSettings: jest.fn(),
+			updateAndPersistSettings: mockUpdateAndPersistSettings,
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
 				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
 			},
-		} );
-
-		// Mock window.wcAdminFeatures.
-		window.wcAdminFeatures = {
-			'analytics-scheduled-import': true,
 		};
+		useSettings.mockImplementation( () => settingsState );
+		useDispatch.mockImplementation( ( store ) => {
+			if ( store === 'core/notices' ) {
+				return { createNotice: mockCreateNotice };
+			}
+			return {
+				invalidateResolutionForStoreSelector:
+					store === reportsStore
+						? mockInvalidateReportResolutions
+						: mockInvalidateItemResolutions,
+			};
+		} );
+		window.wpNavMenuUrlUpdate = jest.fn();
 	} );
 
 	afterEach( () => {
 		delete window.wcAdminFeatures;
+		delete window.wpNavMenuUrlUpdate;
+		jest.restoreAllMocks();
 	} );
-
 	it( 'renders import mode radio control', () => {
 		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
 
@@ -201,5 +217,99 @@ describe( 'Settings - Import Mode Modal', () => {
 		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
 			woocommerce_analytics_scheduled_import: 'yes',
 		} );
+	} );
+
+	it( 'invalidates report resolutions only after settings are saved', () => {
+		const { rerender } = render(
+			<Settings createNotice={ jest.fn() } query={ {} } />
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /save settings/i } )
+		);
+
+		expect( mockPersistSettings ).toHaveBeenCalled();
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+
+		settingsState = { ...settingsState, isRequesting: true };
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+
+		settingsState = { ...settingsState, isRequesting: false };
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+
+		expect( useDispatch ).toHaveBeenCalledWith( 'core/notices' );
+		expect( useDispatch ).toHaveBeenCalledWith( reportsStore );
+		expect( useDispatch ).toHaveBeenCalledWith( itemsStore );
+		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+			1,
+			'getReportItems'
+		);
+		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+			2,
+			'getReportStats'
+		);
+		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
+			'getItems'
+		);
+	} );
+
+	it( 'does not invalidate report resolutions when saving fails', () => {
+		const { rerender } = render(
+			<Settings createNotice={ jest.fn() } query={ {} } />
+		);
+
+		settingsState = { ...settingsState, isRequesting: true };
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		settingsState = {
+			...settingsState,
+			isRequesting: false,
+			settingsError: true,
+		};
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+		expect( mockCreateNotice ).toHaveBeenCalledWith(
+			'error',
+			'There was an error saving your settings. Please try again.'
+		);
+	} );
+
+	it( 'invalidates report resolutions after resetting defaults', () => {
+		jest.spyOn( window, 'confirm' ).mockReturnValue( true );
+		const { rerender } = render(
+			<Settings createNotice={ jest.fn() } query={ {} } />
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /reset defaults/i } )
+		);
+
+		expect( mockUpdateAndPersistSettings ).toHaveBeenCalledWith(
+			'wcAdminSettings',
+			{
+				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
+			}
+		);
+		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
+		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+
+		settingsState = { ...settingsState, isRequesting: true };
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		settingsState = { ...settingsState, isRequesting: false };
+		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+
+		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
+			'getReportItems'
+		);
+		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
+			'getReportStats'
+		);
+		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
+			'getItems'
+		);
 	} );
 } );

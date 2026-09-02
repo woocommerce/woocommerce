@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: adds `glob`, `rimraf`, and `uuid` to Syncpack
-

@@ -5,7 +5,6 @@ import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 
 /**
@@ -18,6 +17,7 @@ import {
 	ScreenLayout,
 	ScreenRoot,
 	ScreenColors,
+	ScreenBackground,
 } from './screens';
 import { Navigator } from './navigator';
 
@@ -71,6 +71,10 @@ export function RawStylesSidebar(): JSX.Element {
 
 						<Navigator.Screen path="/colors">
 							<ScreenColors />
+						</Navigator.Screen>
+
+						<Navigator.Screen path="/background">
+							<ScreenBackground />
 						</Navigator.Screen>
 
 						<Navigator.Screen path="/layout">

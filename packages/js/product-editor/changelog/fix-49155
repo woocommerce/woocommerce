@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the image gallery removal conflict now that the image gallery is stateless

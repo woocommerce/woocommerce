@@ -18,7 +18,19 @@
 	height: 100%;
 }
 
-:where(.wc-block-add-to-cart-with-options) {
+// Default radius lives on the block wrapper so user/theme border-radius
+// styles (inline or global) override it, then inner elements inherit.
+:where(.wc-block-add-to-cart-with-options__quantity-selector) {
+	border-radius: $universal-border-radius;
+}
+
+.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector {
+	border-radius: inherit;
+}
+
+:where(.wc-block-add-to-cart-with-options),
+:where(.wc-block-add-to-cart-with-options__quantity-selector),
+:where(.wc-block-add-to-cart-with-options-grouped-product-item-selector) {
 	// This resets some WC component styles, so we need it to have specificity
 	// until those stylesheets are updated.
 	.wc-block-components-quantity-selector.wc-block-components-quantity-selector {
@@ -27,6 +39,7 @@
 		margin-bottom: 0;
 		margin-right: 0;
 	}
+
 	:where(.wc-block-components-quantity-selector) {
 		&::after {
 			border: 1px solid currentColor;
@@ -41,7 +54,6 @@
 			-moz-appearance: textfield;
 			border: unset;
 			text-align: center;
-			order: 2;
 			font-weight: 600;
 			background-color: transparent;
 			color: currentColor;

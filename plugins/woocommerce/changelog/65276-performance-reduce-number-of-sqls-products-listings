@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced the number of SQL queries on the shop, cart, and checkout pages in the store, as well as on the products page in the admin area, by adding missing cache priming.

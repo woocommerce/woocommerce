@@ -162,7 +162,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
 			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
 		}
 

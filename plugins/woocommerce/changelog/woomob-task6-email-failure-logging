@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Log mailer failures from the QR sign-in notification email via `wc_get_logger()` instead of swallowing the exception silently, so a misconfigured mailer is observable rather than invisible. The exchange response is still never blocked by mail delivery.

@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
-import { Component as ReactComponent } from '@wordpress/element';
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 /**
@@ -16,50 +15,30 @@ jest.mock( '@woocommerce/block-data', () => ( {
 	COLLECTIONS_STORE_KEY: 'test/store',
 } ) );
 
-class TestErrorBoundary extends ReactComponent {
-	constructor( props ) {
-		super( props );
-		this.state = { hasError: false, error: {} };
-	}
-	static getDerivedStateFromError( error ) {
-		// Update state so the next render will show the fallback UI.
-		return { hasError: true, error };
-	}
-
-	render() {
-		if ( this.state.hasError ) {
-			return <div data-error={ this.state.error } />;
-		}
-
-		return this.props.children;
-	}
-}
-
 describe( 'useCollection', () => {
-	let registry, mocks, renderer;
-	const getProps = ( testRenderer ) => {
-		const { results, isLoading } =
-			testRenderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-		return {
-			results,
-			isLoading,
-		};
-	};
+	let registry, mocks;
 
-	const getWrappedComponents = ( Component, props ) => (
-		<RegistryProvider value={ registry }>
-			<TestErrorBoundary>
-				<Component { ...props } />
-			</TestErrorBoundary>
-		</RegistryProvider>
+	const wrapper = ( { children } ) => (
+		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
 
-	const getTestComponent =
-		() =>
-		( { options } ) => {
-			const items = useCollection( options );
-			return <div { ...items } />;
-		};
+	const renderUseCollection = ( options ) =>
+		renderHook( ( props ) => useCollection( props.options ), {
+			initialProps: { options },
+			wrapper,
+		} );
+
+	// useCollection throws during render for invalid options or store errors;
+	// renderHook rethrows that error, so we capture it here.
+	const renderUseCollectionError = ( options ) => {
+		let error;
+		try {
+			renderUseCollection( options );
+		} catch ( caught ) {
+			error = caught;
+		}
+		return error;
+	};
 
 	const setUpMocks = () => {
 		// Memoize the fixture by selector args so wp-data's SCRIPT_DEBUG
@@ -92,161 +71,108 @@ describe( 'useCollection', () => {
 	beforeEach( () => {
 		registry = createRegistry();
 		mocks = {};
-		renderer = null;
 		setUpMocks();
 	} );
 	it(
 		'should throw an error if an options object is provided without ' +
 			'a namespace property',
 		() => {
-			const TestComponent = getTestComponent();
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent, {
-						options: {
-							resourceName: 'products',
-							query: { bar: 'foo' },
-						},
-					} )
-				);
+			const error = renderUseCollectionError( {
+				resourceName: 'products',
+				query: { bar: 'foo' },
 			} );
-			//eslint-disable-next-line testing-library/await-async-query
-			const props = renderer.root.findByType( 'div' ).props;
-			expect( props[ 'data-error' ].message ).toMatch( /options object/ );
+			expect( error.message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
-			renderer.unmount();
 		}
 	);
 	it(
 		'should throw an error if an options object is provided without ' +
 			'a resourceName property',
 		() => {
-			const TestComponent = getTestComponent();
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							query: { bar: 'foo' },
-						},
-					} )
-				);
+			const error = renderUseCollectionError( {
+				namespace: 'test/store',
+				query: { bar: 'foo' },
 			} );
-			//eslint-disable-next-line testing-library/await-async-query
-			const props = renderer.root.findByType( 'div' ).props;
-			expect( props[ 'data-error' ].message ).toMatch( /options object/ );
+			expect( error.message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
-			renderer.unmount();
 		}
 	);
 	it(
 		'should return expected behaviour for equivalent query on props ' +
 			'across renders',
 		() => {
-			const TestComponent = getTestComponent();
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							query: { bar: 'foo' },
-						},
-					} )
-				);
+			const { result, rerender } = renderUseCollection( {
+				namespace: 'test/store',
+				resourceName: 'products',
+				query: { bar: 'foo' },
 			} );
-			const { results } = getProps( renderer );
+			const { results } = result.current;
 			// rerender
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							query: { bar: 'foo' },
-						},
-					} )
-				);
+			rerender( {
+				options: {
+					namespace: 'test/store',
+					resourceName: 'products',
+					query: { bar: 'foo' },
+				},
 			} );
 			// re-render should result in same products object because although
 			// query-state is a different instance, it's still equivalent.
-			const { results: newResults } = getProps( renderer );
+			const { results: newResults } = result.current;
 			expect( newResults ).toBe( results );
 			// now let's change the query passed through to verify new object
 			// is created.
 			// remember this won't actually change the results because the mock
 			// selector is returning an equivalent object when it is called,
 			// however it SHOULD be a new object instance.
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							query: { foo: 'bar' },
-						},
-					} )
-				);
+			rerender( {
+				options: {
+					namespace: 'test/store',
+					resourceName: 'products',
+					query: { foo: 'bar' },
+				},
 			} );
-			const { results: resultsVerification } = getProps( renderer );
+			const { results: resultsVerification } = result.current;
 			expect( resultsVerification ).not.toBe( results );
 			expect( resultsVerification ).toEqual( results );
-			renderer.unmount();
 		}
 	);
 	it(
 		'should return expected behaviour for equivalent resourceValues on' +
 			' props across renders',
 		() => {
-			const TestComponent = getTestComponent();
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							resourceValues: [ 10, 20 ],
-						},
-					} )
-				);
+			const { result, rerender } = renderUseCollection( {
+				namespace: 'test/store',
+				resourceName: 'products',
+				resourceValues: [ 10, 20 ],
 			} );
-			const { results } = getProps( renderer );
+			const { results } = result.current;
 			// rerender
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							resourceValues: [ 10, 20 ],
-						},
-					} )
-				);
+			rerender( {
+				options: {
+					namespace: 'test/store',
+					resourceName: 'products',
+					resourceValues: [ 10, 20 ],
+				},
 			} );
 			// re-render should result in same products object because although
 			// query-state is a different instance, it's still equivalent.
-			const { results: newResults } = getProps( renderer );
+			const { results: newResults } = result.current;
 			expect( newResults ).toBe( results );
 			// now let's change the query passed through to verify new object
 			// is created.
 			// remember this won't actually change the results because the mock
 			// selector is returning an equivalent object when it is called,
 			// however it SHOULD be a new object instance.
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						options: {
-							namespace: 'test/store',
-							resourceName: 'products',
-							resourceValues: [ 20, 10 ],
-						},
-					} )
-				);
+			rerender( {
+				options: {
+					namespace: 'test/store',
+					resourceName: 'products',
+					resourceValues: [ 20, 10 ],
+				},
 			} );
-			const { results: resultsVerification } = getProps( renderer );
+			const { results: resultsVerification } = result.current;
 			expect( resultsVerification ).not.toBe( results );
 			expect( resultsVerification ).toEqual( results );
-			renderer.unmount();
 		}
 	);
 	it( 'should return previous query results if `shouldSelect` is false', () => {
@@ -264,19 +190,12 @@ describe( 'useCollection', () => {
 				return cache.get( key );
 			}
 		);
-		const TestComponent = getTestComponent();
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent, {
-					options: {
-						namespace: 'test/store',
-						resourceName: 'products',
-						resourceValues: [ 10, 20 ],
-					},
-				} )
-			);
+		const { result, rerender } = renderUseCollection( {
+			namespace: 'test/store',
+			resourceName: 'products',
+			resourceValues: [ 10, 20 ],
 		} );
-		const { results } = getProps( renderer );
+		const { results } = result.current;
 		// Capture the call count after the first render so the next assertion
 		// measures whether the rerender caused additional invocations rather
 		// than the absolute total (wp-data's SCRIPT_DEBUG unstable-reference
@@ -285,19 +204,15 @@ describe( 'useCollection', () => {
 		const callsAfterFirstRender =
 			mocks.selectors.getCollection.mock.calls.length;
 		// rerender but with shouldSelect to false
-		act( () => {
-			renderer.update(
-				getWrappedComponents( TestComponent, {
-					options: {
-						namespace: 'test/store',
-						resourceName: 'productsb',
-						resourceValues: [ 10, 30 ],
-						shouldSelect: false,
-					},
-				} )
-			);
+		rerender( {
+			options: {
+				namespace: 'test/store',
+				resourceName: 'productsb',
+				resourceValues: [ 10, 30 ],
+				shouldSelect: false,
+			},
 		} );
-		const { results: results2 } = getProps( renderer );
+		const { results: results2 } = result.current;
 		expect( results2 ).toBe( results );
 		// `shouldSelect: false` should not have triggered any new selector
 		// invocations; the cached previous results should be returned.
@@ -307,19 +222,15 @@ describe( 'useCollection', () => {
 
 		// rerender again but set shouldSelect to true again and we should see
 		// new results
-		act( () => {
-			renderer.update(
-				getWrappedComponents( TestComponent, {
-					options: {
-						namespace: 'test/store',
-						resourceName: 'productsb',
-						resourceValues: [ 10, 30 ],
-						shouldSelect: true,
-					},
-				} )
-			);
+		rerender( {
+			options: {
+				namespace: 'test/store',
+				resourceName: 'productsb',
+				resourceValues: [ 10, 30 ],
+				shouldSelect: true,
+			},
 		} );
-		const { results: results3 } = getProps( renderer );
+		const { results: results3 } = result.current;
 		expect( results3 ).not.toEqual( results );
 		expect( results3 ).toEqual( [
 			'test/store',
@@ -330,54 +241,41 @@ describe( 'useCollection', () => {
 	} );
 	const renderWithStoreError = ( errorValue ) => {
 		mocks.selectors.getCollectionError.mockReturnValue( errorValue );
-		const TestComponent = getTestComponent();
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent, {
-					options: {
-						namespace: 'test/store',
-						resourceName: 'products',
-						query: { bar: 'foo' },
-					},
-				} )
-			);
+		return renderUseCollectionError( {
+			namespace: 'test/store',
+			resourceName: 'products',
+			query: { bar: 'foo' },
 		} );
-		//eslint-disable-next-line testing-library/await-async-query
-		return renderer.root.findByType( 'div' ).props;
 	};
 
 	it( 'should propagate an Error instance from the store via the error boundary', () => {
 		const error = new Error( 'A real error' );
-		const props = renderWithStoreError( error );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe( 'A real error' );
+		const caught = renderWithStoreError( error );
+		expect( caught ).toBeInstanceOf( Error );
+		expect( caught.message ).toBe( 'A real error' );
 		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
 	} );
 	it( 'should convert a non-Error object with a message into an Error instance', () => {
 		const error = { code: 'rest_no_route', message: 'No route found.' };
-		const props = renderWithStoreError( error );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe( 'No route found.' );
+		const caught = renderWithStoreError( error );
+		expect( caught ).toBeInstanceOf( Error );
+		expect( caught.message ).toBe( 'No route found.' );
 		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
 	} );
 	it( 'should use a fallback message when a non-Error object has no message', () => {
-		const props = renderWithStoreError( { code: 500 } );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
+		const caught = renderWithStoreError( { code: 500 } );
+		expect( caught ).toBeInstanceOf( Error );
+		expect( caught.message ).toBe(
 			'Something went wrong while loading data.'
 		);
 		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
 	} );
 	it( 'should use a fallback message when a primitive value is returned from the store', () => {
-		const props = renderWithStoreError( 'oops' );
-		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
-		expect( props[ 'data-error' ].message ).toBe(
+		const caught = renderWithStoreError( 'oops' );
+		expect( caught ).toBeInstanceOf( Error );
+		expect( caught.message ).toBe(
 			'Something went wrong while loading data.'
 		);
 		expect( console ).toHaveErrored( /your React components:/ );
-		renderer.unmount();
 	} );
 } );

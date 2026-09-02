@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -37,11 +36,6 @@ class Coupons {
 	 */
 	public function __construct() {
 		if ( ! is_admin() ) {
-			return;
-		}
-
-		// If the main marketing feature is disabled, don't modify coupon behavior.
-		if ( ! Features::is_enabled( 'marketing' ) ) {
 			return;
 		}
 

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -37,7 +37,7 @@ describe( 'ProductPrice', () => {
 	};
 
 	test( 'should use default price if no format is provided', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductPrice
 				price={ 50 }
 				regularPrice={ 100 }
@@ -45,11 +45,11 @@ describe( 'ProductPrice', () => {
 			/>
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should apply the format if one is provided', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductPrice
 				price={ 50 }
 				regularPrice={ 100 }
@@ -58,6 +58,6 @@ describe( 'ProductPrice', () => {
 			/>
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 } );

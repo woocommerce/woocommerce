@@ -11,11 +11,14 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features as WCAdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -166,8 +169,7 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
-		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
-		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
+		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -292,9 +294,9 @@ class FeaturesController {
 		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
-			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+			'analytics'                            => array(
+				'name'                         => __( 'WooCommerce Analytics', 'woocommerce' ),
+				'description'                  => __( 'Enable WooCommerce Analytics to track your store\'s key metrics and view them in a detailed dashboard. All data stays within your store.', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
@@ -302,22 +304,24 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'product_block_editor'               => array(
-				'name'                         => __( 'New product editor', 'woocommerce' ),
-				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+			ProductMediaGallery::FEATURE_ID        => array(
+				'name'                         => __( 'Product gallery videos', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries.', 'woocommerce' ),
+				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
+				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'cart_checkout_blocks'               => array(
+			'cart_checkout_blocks'                 => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'rate_limit_checkout'                => array(
+			'rate_limit_checkout'                  => array(
 				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
 				'description'                  => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
@@ -330,7 +334,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'marketplace'                        => array(
+			'marketplace'                          => array(
 				'name'                         => __( 'Marketplace', 'woocommerce' ),
 				'description'                  => __(
 					'New, faster way to find extensions and themes for your WooCommerce store',
@@ -344,9 +348,18 @@ class FeaturesController {
 				'deprecated_since'             => '10.5.0',
 				'deprecated_value'             => true,
 			),
+			'order_withdrawal'                     => array(
+				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal feature for customer requests.', 'woocommerce' ),
+				'learn_more_url'               => 'https://woocommerce.com/document/customer-order-withdrawal/',
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => false,
+			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-			'order_attribution'                  => array(
+			'order_attribution'                    => array(
 				'name'                         => __( 'Order Attribution', 'woocommerce' ),
 				'description'                  => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -358,20 +371,20 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'site_visibility_badge'              => array(
+			'site_visibility_badge'                => array(
 				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the site visibility badge in the WordPress admin bar',
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 				'disabled'                     => false,
 			),
-			'hpos_fts_indexes'                   => array(
+			'hpos_fts_indexes'                     => array(
 				'name'                         => __( 'HPOS Full text search indexes', 'woocommerce' ),
 				'description'                  => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -383,7 +396,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
-			'hpos_datastore_caching'             => array(
+			'hpos_datastore_caching'               => array(
 				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'                  => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage and is recommended for stores using object caching.',
@@ -396,7 +409,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
-			'remote_logging'                     => array(
+			'remote_logging'                       => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
 				'description'                  => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
@@ -431,7 +444,7 @@ class FeaturesController {
 					},
 				),
 			),
-			'deferred_transactional_emails'      => array(
+			'deferred_transactional_emails'        => array(
 				'name'                         => __( 'Deferred emails', 'woocommerce' ),
 				'description'                  => __(
 					'Send transactional emails asynchronously via Action Scheduler instead of during the current request.',
@@ -441,7 +454,7 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
-			'customer_review_request'            => array(
+			'customer_review_request'              => array(
 				'name'                         => __( 'Customer review request (beta)', 'woocommerce' ),
 				'description'                  => __(
 					'Send customers a transactional email after order completion inviting them to review the products they bought, and host the per-order Review Order landing page.',
@@ -453,19 +466,7 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
-			'abandoned_cart_recovery'            => array(
-				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
-				'description'                  => __(
-					'Send a reminder email to shoppers who didn\'t finish checking out.',
-					'woocommerce'
-				),
-				// Skip compatibility checks like the other opt-in transactional-email features.
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'enabled_by_default'           => false,
-				'is_experimental'              => false,
-			),
-			'email_improvements'                 => array(
+			'email_improvements'                   => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
 					'Enable modern email design for transactional emails',
@@ -485,7 +486,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'blueprint'                          => array(
+			'blueprint'                            => array(
 				'name'                         => __( 'Blueprint (beta)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable blueprint to import and export settings in bulk',
@@ -506,7 +507,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'block_email_editor'                 => array(
+			'block_email_editor'                   => array(
 				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the block-based email editor for transactional emails.',
@@ -528,17 +529,16 @@ class FeaturesController {
 			),
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
 				'name'                         => __( 'Variation gallery', 'woocommerce' ),
-				'description'                  => __(
-					'Add multiple images per product variation. Once enabled, the Additional Variation Images extension will be deactivated and its data migrated.',
-					'woocommerce'
-				),
-				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
-				'is_experimental'              => true,
-				'enabled_by_default'           => false,
+				'description'                  => __( 'Add multiple images per product variation.', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '11.1.0',
+				'deprecated_value'             => true,
 			),
-			'wc-visual-attribute'                => array(
+			'wc-visual-attribute'                  => array(
 				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
 				'description'                  => __(
 					'Add color swatches to product attribute values.',
@@ -551,28 +551,35 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'point_of_sale'                      => array(
+			'point_of_sale'                        => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
 				'description'                  => __(
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-
-				/*
-				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
-				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
-				* feature.
-				*
-				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
-				*/
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
+				'deprecated_since'             => '11.0.0',
+				'deprecated_value'             => true,
 			),
-			'fulfillments'                       => array(
+			'point_of_sale_staff'                  => array(
+				'name'                         => __( 'POS staff', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental: POS staff management, roles, and order attribution.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
+				// false when it's ready for an experimental preview.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'fulfillments'                         => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
@@ -583,7 +590,7 @@ class FeaturesController {
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'mcp_integration'                    => array(
+			'mcp_integration'                      => array(
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
 				'description'                  => $this->get_mcp_integration_description(),
 				'enabled_by_default'           => false,
@@ -592,7 +599,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_legacy'                    => false,
 			),
-			'destroy-empty-sessions'             => array(
+			'destroy-empty-sessions'               => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
 				'description'                  => __(
 					'[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.',
@@ -603,19 +610,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'agentic_checkout'                   => array(
-				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
-			'dual_code_graphql_api'              => array(
+			'dual_code_graphql_api'                => array(
 				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
 				'description'                  => __(
 					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
@@ -627,19 +622,21 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			PushNotifications::FEATURE_NAME      => array(
+			PushNotifications::FEATURE_NAME        => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
-			'rest_api_caching'                   => array(
+			'rest_api_caching'                     => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
 				'description'                  => sprintf(
 					/* translators: %1$s and %2$s are opening and closing <a> tags */
@@ -653,7 +650,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'cart_save_for_later'                => array(
+			'cart_save_for_later'                  => array(
 				'name'                         => __( 'Save for Later in Cart', 'woocommerce' ),
 				'description'                  => __(
 					'Let shoppers save cart items to a list to purchase later.',
@@ -666,7 +663,7 @@ class FeaturesController {
 				'option_key'                   => 'woocommerce_cart_save_for_later_enabled',
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'product_wishlist'                   => array(
+			'product_wishlist'                     => array(
 				'name'                         => __( 'Wishlists', 'woocommerce' ),
 				'description'                  => __(
 					'Let shoppers save products to a wishlist from product pages. Requires the Add to Cart + Options block on the single-product template.',
@@ -677,12 +674,33 @@ class FeaturesController {
 				'option_key'                   => 'woocommerce_product_wishlist_enabled',
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			ProductCacheController::FEATURE_NAME => array(
+			ProductCacheController::FEATURE_NAME   => array(
 				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
 				'description'                  => __(
 					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
 					'woocommerce'
 				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+			),
+			StockNotifications::FEATURE_NAME       => array(
+				'name'                         => __( 'Back in Stock Notifications', 'woocommerce' ),
+				'description'                  => __(
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
+					'woocommerce'
+				),
+				'option_key'                   => StockNotifications::ENABLE_OPTION_NAME,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			BlockEditorUnifiedAssets::FEATURE_NAME => array(
+				'name'                         => __( 'Unified block editor assets', 'woocommerce' ),
+				'description'                  => __( 'Load WooCommerce block editor scripts and styles from shared bundles to improve editor performance.', 'woocommerce' ),
+				'option_key'                   => BlockEditorUnifiedAssets::OPTION_NAME,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
@@ -698,6 +716,15 @@ class FeaturesController {
 		foreach ( $legacy_features as $slug => $definition ) {
 			$this->add_feature_definition( $slug, $definition['name'], $definition );
 		}
+
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $slug, $definition ) => $definition['option_key'] ?? sprintf( 'woocommerce_feature_%s_enabled', $slug ),
+				array_keys( $this->features ),
+				$this->features
+			)
+		);
 
 		$this->init_compatibility_info_by_feature();
 	}
@@ -844,14 +871,6 @@ class FeaturesController {
 			}
 		}
 
-		// We're deprecating the product block editor feature in favor of a v3 coming out.
-		// We want to hide this setting in the UI for users that don't have it enabled.
-		// If users have it enabled, we won't hide it until they explicitly disable it.
-		if ( isset( $features['product_block_editor'] )
-			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
-			$features['product_block_editor']['disable_ui'] = true;
-		}
-
 		if ( isset( $features['wc-visual-attribute'] ) && ! wp_is_block_theme() ) {
 			$features['wc-visual-attribute']['disable_ui'] = true;
 		}
@@ -920,6 +939,10 @@ class FeaturesController {
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
 			return (bool) ( $feature['deprecated_value'] ?? false );
+		}
+
+		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
+			return false;
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
@@ -1351,6 +1374,34 @@ class FeaturesController {
 			$sections['features'] = __( 'Features', 'woocommerce' );
 		}
 		return $sections;
+	}
+
+	/**
+	 * Handler for the 'woocommerce_settings-advanced' hook, which defines the settings
+	 * exposed in the wc/v3 settings REST API for the 'advanced' group. It appends the
+	 * Point of Sale feature flag setting.
+	 *
+	 * This is a compatibility shim for the WooCommerce mobile apps: app versions released
+	 * before the point_of_sale feature became always enabled (deprecated in 11.0.0) read and
+	 * write this setting via wc/v3/settings/advanced/woocommerce_feature_point_of_sale_enabled
+	 * to decide whether POS can be used. The setting is no longer rendered in the admin UI;
+	 * this shim can be removed once those app versions are no longer supported.
+	 *
+	 * @param array $settings The settings of the 'advanced' group, as exposed in the REST API.
+	 * @return array The updated settings array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_point_of_sale_setting_for_rest_api( $settings ): array {
+		$settings[] = array(
+			'id'          => 'woocommerce_feature_point_of_sale_enabled',
+			'option_key'  => 'woocommerce_feature_point_of_sale_enabled',
+			'label'       => __( 'Point of Sale', 'woocommerce' ),
+			'description' => __( 'Enable Point of Sale functionality in the WooCommerce mobile apps.', 'woocommerce' ),
+			'type'        => 'checkbox',
+			'default'     => 'yes',
+		);
+		return $settings;
 	}
 
 	/**
@@ -1851,8 +1902,9 @@ class FeaturesController {
 
 		$incompatible_features_count = count( $incompatible_features );
 		if ( $incompatible_features_count > 0 ) {
-			$columns_count      = $wp_list_table->get_column_count();
-			$is_active          = true; // For now we are showing active plugins in the "Incompatible with..." view.
+			$columns_count = $wp_list_table->get_column_count();
+			$is_active     = true;
+			// For now we are showing active plugins in the "Incompatible with..." view.
 			$is_active_class    = $is_active ? 'active' : 'inactive';
 			$is_active_td_style = $is_active ? " style='border-left: 4px solid #72aee6;'" : '';
 
@@ -2023,8 +2075,8 @@ class FeaturesController {
 	/**
 	 * Changes the feature given it's id, a toggle value and nonce as a query param.
 	 *
-	 * `/wp-admin/post.php?product_block_editor=1&_feature_nonce=1234`, 1 for on
-	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
+	 * `/wp-admin/post.php?feature_id=1&_feature_nonce=1234`, 1 for on
+	 * `/wp-admin/post.php?feature_id=0&_feature_nonce=1234`, 0 for off
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
@@ -2078,58 +2130,6 @@ class FeaturesController {
 				}
 			);
 		}
-	}
-
-	/**
-	 * Flag a one-shot transient when the merchant turns on Abandoned cart recovery.
-	 *
-	 * `change_feature_enable` fires this action mid-request before the post-save
-	 * redirect, so the actual notice has to render on the next page load. We
-	 * stash a transient here and `maybe_render_abandoned_cart_recovery_enabled_notice`
-	 * picks it up the next time `woocommerce_settings_advanced` fires.
-	 *
-	 * @param string $feature_id Feature being toggled.
-	 * @param bool   $is_enabled True when turned on, false when turned off.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function flag_abandoned_cart_recovery_enabled_notice( $feature_id, $is_enabled ): void {
-		if ( 'abandoned_cart_recovery' === $feature_id && $is_enabled ) {
-			set_transient( 'wc_abandoned_cart_recovery_enabled_notice', 'yes', MINUTE_IN_SECONDS );
-		}
-	}
-
-	/**
-	 * Render a success notice after the merchant enables Abandoned cart recovery,
-	 * pointing them straight at the email settings page where they actually
-	 * configure it.
-	 *
-	 * Hooks into `woocommerce_settings_advanced` at priority 1, which fires
-	 * inside the settings template right after `WC_Admin_Settings::show_messages()`
-	 * (the "Your settings have been saved." notice) and before the form fields.
-	 * That places our notice in the same visual slot below the tabs, alongside
-	 * the standard save confirmation.
-	 *
-	 * `WC_Admin_Settings::add_message()` would be the cleaner API but escapes
-	 * its input via `esc_html()`, which strips the link tag. Direct echo here
-	 * keeps the markup intact while still matching the surrounding notice style.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function maybe_render_abandoned_cart_recovery_enabled_notice(): void {
-		if ( 'yes' !== get_transient( 'wc_abandoned_cart_recovery_enabled_notice' ) ) {
-			return;
-		}
-		delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
-
-		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_customer_abandoned_cart_recovery' );
-
-		printf(
-			'<div id="wc-abandoned-cart-recovery-enabled-notice" class="updated inline"><p><strong>%1$s <a href="%2$s">%3$s</a></strong></p></div>',
-			esc_html__( 'Abandoned cart recovery is enabled.', 'woocommerce' ),
-			esc_url( $settings_url ),
-			esc_html__( 'Configure the recovery email →', 'woocommerce' )
-		);
 	}
 
 	/**

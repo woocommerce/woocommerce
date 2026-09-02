@@ -1,7 +1,9 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -51,17 +53,16 @@ class CustomerHistory {
 			$customer_id   = $order->get_customer_id();
 			$billing_email = $order->get_billing_email();
 			$result        = $this->query_hpos( $customer_id, $billing_email );
-		} elseif ( method_exists( $order, 'get_report_customer_id' ) ) {
-			$result = $this->query_cpt( $order->get_report_customer_id() );
 		} else {
-			wc_get_logger()->warning(
-				'CustomerHistory: Order object does not have get_report_customer_id method.',
-				array( 'source' => 'customer-history' )
-			);
-			$result = (object) array(
-				'orders_count' => 0,
-				'total_spend'  => 0,
-			);
+			$customer_report_id = $this->get_cpt_report_customer_id( $order );
+			if ( $customer_report_id > 0 ) {
+				$result = $this->query_cpt( $customer_report_id );
+			} else {
+				$result = (object) array(
+					'orders_count' => 0,
+					'total_spend'  => 0,
+				);
+			}
 		}
 
 		$orders_count = (int) ( $result->orders_count ?? 0 );
@@ -123,7 +124,7 @@ class CustomerHistory {
 
 		$sql = null;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status filters are built from hardcoded fragments; trusted table names.
 		if ( $customer_id > 0 ) {
 			$status_filter    = $excluded_statuses_sql ? "AND status NOT IN $excluded_statuses_sql" : '';
 			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
@@ -133,21 +134,18 @@ class CustomerHistory {
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT id, total_amount
-					FROM %i
+					FROM {$orders_table}
 					WHERE customer_id = %d AND type = 'shop_order' $status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
+					FROM {$orders_table} AS rp
+					INNER JOIN {$orders_table} AS co ON rp.parent_order_id = co.id
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = %d AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
 				$customer_id,
-				$orders_table,
-				$orders_table,
 				$customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
@@ -160,25 +158,20 @@ class CustomerHistory {
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT o.id, o.total_amount
-					FROM %i AS o
-					INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
+					FROM {$orders_table} AS o
+					INNER JOIN {$addresses_table} AS a ON o.id = a.order_id AND a.address_type = 'billing'
 					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' $o_status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
-					INNER JOIN %i AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
+					FROM {$orders_table} AS rp
+					INNER JOIN {$orders_table} AS co ON rp.parent_order_id = co.id
+					INNER JOIN {$addresses_table} AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
-				$addresses_table,
 				$billing_email,
-				$orders_table,
-				$orders_table,
-				$addresses_table,
 				$billing_email
 			);
 		}
@@ -224,6 +217,20 @@ class CustomerHistory {
 			'orders_count' => $customer_row['orders_count'] ?? 0,
 			'total_spend'  => $customer_row['total_spend'] ?? 0,
 		);
+	}
+
+	/**
+	 * Get the analytics customer ID for a CPT-backed order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return int The reports customer ID.
+	 */
+	private function get_cpt_report_customer_id( WC_Order $order ): int {
+		if ( ! $order->get_id() ) {
+			return 0;
+		}
+
+		return (int) CustomersDataStore::get_existing_customer_id_from_order( $order );
 	}
 
 	/**
@@ -274,7 +281,10 @@ class CustomerHistory {
 		$prefixed = array_map(
 			function ( $status ) {
 				$status = sanitize_title( $status );
-				return 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				$status = 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				// Status columns are varchar(20) and longer values are silently truncated
+				// on write, so truncate the same way or comparisons never match long slugs.
+				return mb_substr( $status, 0, 20 );
 			},
 			$excluded_statuses
 		);

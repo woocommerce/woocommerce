@@ -9,6 +9,7 @@ on:
     branches: [trunk]
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'
@@ -18,6 +19,7 @@ jobs:
   prepare:
     if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'trunk' && github.event.pull_request.milestone != null }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       milestoned_branch: ${{ steps.get-branches.outputs.milestoned_branch }}
       next_branch: ${{ steps.get-branches.outputs.next_branch }}
@@ -42,7 +44,7 @@ jobs:
       # Behavior can be overridden using a hidden comment in HTML. By default, cherry-pick is disabled for PRs with the 'Release' label.
       - name: Check if cherry-pick should proceed
         id: check-cherry-pick
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const body  = context.payload.pull_request.body || '';
@@ -79,7 +81,7 @@ jobs:
       # Identify release branches to cherry-pick to
       - name: Get release branches
         id: get-branches
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           BASE_VERSION: ${{ steps.extract-version.outputs.base_version }}
           SOURCE_BRANCH: ${{ steps.check-cherry-pick.outputs.source_branch }}
@@ -150,10 +152,11 @@ jobs:
     needs: [prepare, cherry-pick-milestoned]
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'success' && needs.cherry-pick-milestoned.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       # Add original milestone to new PR
       - name: Add milestone
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -167,7 +170,7 @@ jobs:
       # Comment on original PR about cherry-pick success
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           TARGET_BRANCH: ${{ needs.prepare.outputs.milestoned_branch }}
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick-milestoned.outputs.cherry_pick_pr_number }}
@@ -218,10 +221,11 @@ jobs:
   handle-skipped-milestoned:
     needs: [prepare, cherry-pick-milestoned]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-milestoned.outputs.error_message }}
         with:
@@ -242,10 +246,11 @@ jobs:
     needs: [prepare, cherry-pick-next]
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'success' && needs.cherry-pick-next.outputs.cherry_pick_pr_number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       # Add original milestone to new PR
       - name: Add milestone
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -259,7 +264,7 @@ jobs:
       # Comment on original PR about cherry-pick success
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           TARGET_BRANCH: ${{ needs.prepare.outputs.next_branch }}
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick-next.outputs.cherry_pick_pr_number }}
@@ -310,10 +315,11 @@ jobs:
   handle-skipped-next:
     needs: [prepare, cherry-pick-next]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'skipped' }}
     steps:
       - name: Comment on original PR about skip
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-next.outputs.error_message }}
         with:
@@ -333,6 +339,7 @@ jobs:
   handle-failures-milestoned:
     needs: [prepare, cherry-pick-milestoned]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'failed' }}
     steps:
       - name: Handle failure for milestoned branch
@@ -341,7 +348,7 @@ jobs:
       # Label original PR with failure tag
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -355,7 +362,7 @@ jobs:
       # Comment on original PR about failure
       - name: Comment on original PR about cherry-pick failure
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-milestoned.outputs.error_message || 'Unknown error' }}
           TARGET_BRANCH: ${{ needs.prepare.outputs.milestoned_branch }}
@@ -412,6 +419,7 @@ jobs:
   handle-failures-next:
     needs: [prepare, cherry-pick-next]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ always() && needs.cherry-pick-next.outputs.status == 'failed' }}
     steps:
       - name: Handle failure for next branch
@@ -421,7 +429,7 @@ jobs:
       # Label original PR with failure tag
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -435,7 +443,7 @@ jobs:
       # Comment on original PR about failure
       - name: Comment on original PR
         if: always()
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-next.outputs.error_message || 'Unknown error' }}
           TARGET_BRANCH: ${{ needs.prepare.outputs.next_branch }}

@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, woocommerce, mikejolley, jameskoster, claudiosanches, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, wpmuguru, royho, barryhughes-1, claudiulodro, tiagonoronha, ryelle, levinmedia, aljullu, nerrad, joshuawold, assassinateur, haszari, mppfeiffer, nielslange, opr18, ralucastn, tjcafferkey, danielwrobert, patriciahillebrandt, albarin, dinhtungdu, imanish003, karolmanijak, sunyatasattva, alexandrelara, gigitux, danieldudzic, samueljseay, alexflorisca, opr18, tarunvijwani, pauloarromba, saadtarhi, bor0, kloon, coreymckrill, jorgeatorres, leifsinger, neosinner
 Tags: online store, ecommerce, shop, shopping cart, sell online
-Requires at least: 6.9
-Tested up to: 7.0
+Requires at least: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 10.8.1
+Stable tag: 11.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -128,7 +128,7 @@ Request new features and extensions and vote on existing suggestions on our offi
 
 = WooCommerce is awesome! Can I contribute? =
 
-Yes, you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and follow the [development blog](https://woocommerce.wordpress.com/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to stay up-to-date with everything happening in the project.
+Yes, you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and follow the [development blog](https://developer.woocommerce.com/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to stay up-to-date with everything happening in the project.
 
 = Where can I find REST API documentation? =
 
@@ -144,7 +144,7 @@ Check out [Frequently Asked Questions](https://woocommerce.com/document/frequent
 
 * PHP 7.4 or greater is required (PHP 8.0 or greater is recommended)
 * MySQL 5.5.5 or greater, OR MariaDB version 10.1 or greater, is required
-* WordPress 6.9 or greater
+* WordPress 7.0 or greater
 * (Recommended) WordPress [memory limit](https://woocommerce.com/document/increasing-the-wordpress-memory-limit/) of 256 MB or greater.
 * (Recommended) [HTTPS](https://woocommerce.com/document/ssl-and-https/) support.
 
@@ -170,6 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-dev 2026-XX-XX =
+= 11.2.0-dev 2026-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

@@ -14,8 +14,17 @@ import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import { sanitizeHTML } from '@woocommerce/sanitize';
+import type {
+	AddCartItemOutcome,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
+/**
+ * Internal dependencies
+ */
+import {
+	swapPreformattedHtml,
+	LIST_ITEM_HTML_CONFIG,
+} from '../../base/utils/preformatted-html';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -61,44 +70,6 @@ type BlockStore = {
 	};
 };
 
-// Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
-// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
-// + dimensions + lazy loading).
-const ALLOWED_TAGS = [
-	'a',
-	'b',
-	'em',
-	'i',
-	'strong',
-	'p',
-	'br',
-	'span',
-	'bdi',
-	'del',
-	'ins',
-	'img',
-	'picture',
-	'source',
-];
-const ALLOWED_ATTR = [
-	'class',
-	'target',
-	'href',
-	'rel',
-	'name',
-	'download',
-	'aria-hidden',
-	'src',
-	'srcset',
-	'sizes',
-	'alt',
-	'width',
-	'height',
-	'loading',
-	'decoding',
-];
-
 const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
 		'woocommerce/shopper-lists',
@@ -106,7 +77,7 @@ const { state: shopperListsState, actions: shopperListsActions } =
 		{ lock: universalLock }
 	);
 
-const { state: cartState, actions: cartActions } = store< WooCommerce >(
+const { actions: cartActions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
@@ -261,31 +232,21 @@ store< BlockStore >(
 				);
 				const isVariation = listItem.variation_id > 0;
 
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the saved list if it actually grew.
-				const lookup = {
-					id: listItem.id,
-					...( isVariation && { variation } ),
-				};
-				const beforeItem = cartState.findItemInCart( lookup );
-				const beforeQuantity = beforeItem?.quantity ?? 0;
-
 				pendingKeys[ listItem.key ] = true;
 				try {
-					yield cartActions.addCartItem( {
+					// `addCartItem` resolves an `AddCartItemOutcome` captured
+					// at the moment its own request settles (accepted or
+					// rejected), so `outcome.success` tells us directly
+					// whether to drop the source entry — no need to read or
+					// sum the cart ourselves.
+					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
 						type: isVariation ? 'variation' : 'simple',
 						...( isVariation && { variation } ),
-					} );
+					} ) ) as AddCartItemOutcome;
 
-					const afterItem = cartState.findItemInCart( lookup );
-					const afterQuantity = afterItem?.quantity ?? 0;
-
-					if ( afterQuantity <= beforeQuantity ) {
+					if ( ! outcome.success ) {
 						return;
 					}
 
@@ -328,18 +289,15 @@ store< BlockStore >(
 			// and a clean swap when it has (e.g. after Remove shifts the
 			// next item into this slot).
 			updateInnerHtml: () => {
-				const { ref } = getElement();
 				const { listItem, htmlField } = getContext< BlockContext >();
-				if ( ! ref || ! listItem || ! htmlField ) {
+				if ( ! listItem || ! htmlField ) {
 					return;
 				}
-				const html = listItem[ htmlField ];
-				if ( typeof html === 'string' ) {
-					ref.innerHTML = sanitizeHTML( html, {
-						tags: ALLOWED_TAGS,
-						attr: ALLOWED_ATTR,
-					} );
-				}
+				swapPreformattedHtml(
+					getElement().ref,
+					listItem[ htmlField ],
+					LIST_ITEM_HTML_CONFIG
+				);
 			},
 		},
 	},

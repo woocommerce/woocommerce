@@ -62,7 +62,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getRegisteredChannels', [] );
+		void invalidateResolution( 'getRegisteredChannels', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect(

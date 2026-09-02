@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix product filters not applying when Full Page Reload is enabled in the Product Collection block.

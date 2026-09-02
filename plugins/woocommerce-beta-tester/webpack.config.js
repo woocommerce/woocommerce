@@ -9,7 +9,6 @@ module.exports = {
 		// Separate entry point for the live-branches page.
 		app: './src/app/index.js',
 		'live-branches': './src/live-branches/index.tsx',
-		'product-editor-devtools': './src/product-editor-dev-tools/index.ts',
 	},
 	module: {
 		...defaultConfig.module,

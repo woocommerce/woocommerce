@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix webhook topic validator accepting `coupon.published`, `customer.published`, `customer.restored`, and `order.published` topics that have no registered hook, causing webhooks to save as Active but never deliver. The validator now derives the default-pair allowlist from the new `WC_Webhook::get_default_topic_hooks()` static, so extensions that register hooks for those pairs via `woocommerce_webhook_topic_hooks` are honored automatically.

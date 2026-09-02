@@ -3,13 +3,15 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { useEffect, useState, useMemo } from '@wordpress/element';
+import { EmptyContent, Section, Badge } from '@woocommerce/components';
 import {
-	EmptyContent,
-	Section,
-	Badge,
-	EllipsisMenu,
-} from '@woocommerce/components';
-import { Card, CardHeader, Button, CardFooter } from '@wordpress/components';
+	Card,
+	CardHeader,
+	DropdownMenu,
+	Button,
+	CardFooter,
+} from '@wordpress/components';
+import { chevronDown, moreVertical } from '@wordpress/icons';
 import { notesStore, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -119,7 +121,10 @@ const renderNotes = ( {
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
 	return (
-		<Card size="large">
+		<Card
+			className="woocommerce-homescreen-card woocommerce-inbox-card"
+			size="large"
+		>
 			{ showHeader && (
 				<CardHeader size="medium">
 					<div className="woocommerce-inbox-card__header">
@@ -128,20 +133,21 @@ const renderNotes = ( {
 						</Text>
 						<Badge count={ unreadNotesCount } />
 					</div>
-					<EllipsisMenu
-						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
-						renderContent={ ( { onToggle } ) => (
-							<div className="woocommerce-inbox-card__section-controls">
-								<Button
-									onClick={ () => {
-										onDismissAll( true );
-										onToggle();
-									} }
-								>
-									{ __( 'Dismiss all', 'woocommerce' ) }
-								</Button>
-							</div>
-						) }
+					<DropdownMenu
+						controls={ [
+							{
+								title: __( 'Dismiss all', 'woocommerce' ),
+								onClick: () => {
+									onDismissAll( true );
+								},
+							},
+						] }
+						icon={ moreVertical }
+						label={ __( 'Inbox notes options', 'woocommerce' ) }
+						popoverProps={ { placement: 'bottom-end' } }
+						toggleProps={ {
+							className: 'woocommerce-ellipsis-menu__toggle',
+						} }
 					/>
 				</CardHeader>
 			) }
@@ -184,10 +190,12 @@ const renderNotes = ( {
 								size="medium"
 							>
 								<Button
-									isPrimary={ true }
+									icon={ chevronDown }
+									iconPosition="right"
 									onClick={ () => {
 										loadMoreNotes();
 									} }
+									variant="tertiary"
 								>
 									{ notesArray.length >
 									DEFAULT_INBOX_QUERY.per_page

@@ -1,0 +1,7 @@
+# Use the main phpstan config
+includes:
+	- phpstan.neon
+
+# Rewrite tested PHP version
+parameters:
+	phpVersion: 70400

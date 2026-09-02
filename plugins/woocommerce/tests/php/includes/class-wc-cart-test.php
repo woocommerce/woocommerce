@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Cart.
  */
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -12,6 +13,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Stores arguments received by the woocommerce_add_to_cart_quantity filter.
+	 *
+	 * @var array
+	 */
+	protected $add_to_cart_quantity_filter_args = array();
+
 	/**
 	 * Called before every test.
 	 */
@@ -27,9 +36,18 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		// The parent teardown only clears chosen_shipping_methods, through
+		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
+		// make later shipping calculations fail on a missing package hash, so clear them
+		// here, where a failing assertion cannot skip it.
+		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
+			WC()->session->set( $key, null );
+		}
+
+		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -46,9 +64,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
-		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Sold individually variable product' );
+		$variable_product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) ) )
+		);
 		$variable_product->set_sold_individually( true );
 		$variable_product->save();
+		WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'SOLD INDIVIDUALLY VARIATION ' . microtime(),
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variable_product = new WC_Product_Variable( $variable_product->get_id() );
 
 		$variation_ids = $variable_product->get_children();
 		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
@@ -215,6 +244,411 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should preserve zero variation attributes when adding a variation directly by ID.
+	 */
+	public function test_add_variation_to_the_cart_directly_by_id_preserves_zero_attributes(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product with zero attribute' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'length' );
+		$attribute->set_options( array( '0', '1' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'length' => '0' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $variation->get_id(), 1 );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $product->get_id(), $cart_item['product_id'], 'The cart item should use the parent product ID.' );
+		$this->assertSame( $variation->get_id(), $cart_item['variation_id'], 'The cart item should use the variation ID.' );
+		$this->assertSame(
+			array( 'attribute_length' => '0' ),
+			$cart_item['variation'],
+			'The zero variation attribute should be preserved in cart item data.'
+		);
+
+		$variation->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Cart item product names include selected Any variation attributes.
+	 *
+	 * @dataProvider selected_any_variation_name_provider
+	 *
+	 * @param string                $product_name      Product name.
+	 * @param array<string, string> $stored_attributes Stored variation attributes.
+	 * @param string                $expected_name     Expected contextual cart item name.
+	 */
+	public function test_cart_item_product_name_includes_selected_any_variation_attributes( string $product_name, array $stored_attributes, string $expected_name ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes( $product_name, $stored_attributes );
+		$option_filter_calls         = 0;
+		$option_filter               = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$name                = WC()->cart->get_item_product_name( $cart_item );
+
+			$this->assertSame( $expected_name, $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides stored variation attribute shapes for contextual name cases.
+	 *
+	 * @return array<string, array{string, array<string, string>, string}>
+	 */
+	public static function selected_any_variation_name_provider(): array {
+		return array(
+			'one fixed, one Any' => array(
+				'Cart Any Product',
+				array(
+					'pa_size'   => 'huge',
+					'pa_number' => '',
+				),
+				'Cart Any Product - huge, 1',
+			),
+			'all Any'            => array(
+				'shirt',
+				array(
+					'pa_size'   => '',
+					'pa_number' => '',
+				),
+				'shirt - huge, 1',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Cart item product names honor swapped product objects and non-variation items.
+	 */
+	public function test_cart_item_product_name_honors_swapped_products_and_non_variations(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+
+		try {
+			$cart_item = array(
+				'data'      => $simple,
+				'variation' => array(),
+			);
+
+			$this->assertSame( $simple->get_name(), WC()->cart->get_item_product_name( $cart_item ) );
+
+			$swapped = new WC_Product_Simple();
+			$swapped->set_name( 'Swapped Display Product' );
+
+			$this->assertSame( 'Swapped Display Product', WC()->cart->get_item_product_name( $cart_item, $swapped ) );
+			$this->assertSame( '', WC()->cart->get_item_product_name( array() ) );
+		} finally {
+			$simple->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item names preserve filtered custom Any attribute labels without duplicate metadata.
+	 */
+	public function test_cart_item_name_preserves_filtered_custom_any_attribute_labels(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Custom Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		// For custom attributes, core passes wc_attribute_taxonomy_name( 'attribute_finish' ) as the
+		// attribute name, so the filter sees "pa_attribute_finish" rather than "finish".
+		$filter_option_name = function ( $value, $term, $attribute_name ) {
+			unset( $term );
+
+			return 'pa_attribute_finish' === $attribute_name && 'gloss' === $value ? 'Polished' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $filter_option_name, 10, 3 );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		$rendered_name = WC()->cart->get_item_product_name( $cart_item );
+
+		$this->assertSame( 'Custom Any Product - Polished', $rendered_name );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $rendered_name ) ) );
+
+		$cart_item['variation']['attribute_finish'] = 'Black & White';
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Custom Any Product - Black &amp; White' ) ) );
+
+		$variation->set_name( 'Custom Any Product - Black & White' );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, false ) ) );
+	}
+
+	/**
+	 * @testdox Two-argument cart item formatting preserves selected Any variation metadata.
+	 */
+	public function test_formatted_cart_item_data_preserves_selected_any_value_when_product_name_is_omitted(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Legacy Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+		$option_filter_calls    = 0;
+		$option_filter          = function () use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $option_filter_calls;
+		};
+		$attribute_filter_calls = 0;
+		$attribute_filter       = function ( $is_in_name ) use ( &$attribute_filter_calls ) {
+			++$attribute_filter_calls;
+
+			return $is_in_name;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+		add_filter( 'woocommerce_is_attribute_in_product_name', $attribute_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame( 'finish: Filtered 1', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		$this->assertSame( 1, $option_filter_calls );
+		$this->assertSame( 1, $attribute_filter_calls );
+	}
+
+	/**
+	 * @testdox Cart item formatting omits custom Any metadata when filtered display values cannot be rendered.
+	 * @dataProvider unrenderable_variation_option_label_provider
+	 *
+	 * @param mixed $filtered_value Filtered variation option label.
+	 */
+	public function test_formatted_cart_item_data_omits_unrenderable_custom_any_metadata( $filtered_value ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Unrenderable Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		$option_filter = static function () use ( $filtered_value ) {
+			return $filtered_value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+	}
+
+	/**
+	 * Provides filtered variation option labels that cannot be rendered.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unrenderable_variation_option_label_provider(): array {
+		return array(
+			'false'            => array( false ),
+			'non-scalar array' => array( array( 'unexpected' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Cart item formatting skips non-scalar variation values before term lookups and option filters.
+	 * @dataProvider non_scalar_variation_value_provider
+	 *
+	 * @param mixed $raw_value Raw cart variation value.
+	 */
+	public function test_formatted_cart_item_data_skips_non_scalar_variation_values( $raw_value ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Non-scalar Variation Product',
+			array( 'pa_size' => '' )
+		);
+
+		$option_filter_calls = 0;
+		$option_filter       = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array(
+				'attribute_pa_size' => $raw_value,
+				'attribute_finish'  => $raw_value,
+			),
+		);
+
+		try {
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides non-scalar cart variation values.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function non_scalar_variation_value_provider(): array {
+		return array(
+			'array'  => array( array( 'gloss' ) ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * @testdox Cart item formatting decodes taxonomy term entities when checking the rendered product name for duplicate metadata.
+	 */
+	public function test_formatted_cart_item_data_decodes_taxonomy_term_entities_for_name_comparison(): void {
+		$taxonomy = 'pa_encoded_finish';
+		$term     = false;
+
+		register_taxonomy( $taxonomy, array( 'product' ) );
+
+		try {
+			$term = wp_insert_term( 'Black & White', $taxonomy, array( 'slug' => 'black-white' ) );
+			$this->assertNotWPError( $term );
+
+			$variation = new WC_Product_Variation();
+			$variation->set_name( 'Encoded Any Product' );
+			$variation->set_attributes( array( $taxonomy => '' ) );
+
+			$cart_item = array(
+				'data'      => $variation,
+				'variation' => array( 'attribute_' . $taxonomy => 'black-white' ),
+			);
+
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Any Product - Black & White' ) ) );
+		} finally {
+			if ( is_array( $term ) ) {
+				wp_delete_term( $term['term_id'], $taxonomy );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata decodes URL-encoded custom attribute values for the name comparison and for display.
+	 */
+	public function test_formatted_cart_item_data_decodes_url_encoded_custom_values(): void {
+		// A fixed attribute whose stored value carries a percent escape. wc_get_formatted_variation()
+		// decodes it when generating the variation title, so the cart value must be decoded to match.
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Encoded Fixed Product - Black White' );
+		$variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame(
+			'',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, $variation->get_name() ) ),
+			'A decoded value already shown in the name must not be repeated as metadata.'
+		);
+
+		$this->assertSame(
+			'finish: Black White',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Fixed Product' ) ),
+			'A value missing from the name must display decoded, matching how the name renders it.'
+		);
+
+		// The same normalisation applies to a selected "Any" value reaching the cart.
+		$any_variation = new WC_Product_Variation();
+		$any_variation->set_name( 'Encoded Any Product' );
+		$any_variation->set_attributes( array( 'finish' => '' ) );
+
+		$any_cart_item = array(
+			'data'      => $any_variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame( 'Encoded Any Product - Black White', WC()->cart->get_item_product_name( $any_cart_item ) );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $any_cart_item, true, 'Encoded Any Product - Black White' ) ) );
+	}
+
+	/**
+	 * @testdox Cart item metadata omits fixed taxonomy attributes already shown in the variation name.
+	 */
+	public function test_formatted_cart_item_data_omits_metadata_for_fixed_taxonomy_attributes(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Fixed Taxonomy Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+			)
+		);
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
+	 */
+	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Replaced Name Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$replace_name = function () {
+			return 'Custom cart label';
+		};
+		add_filter( 'woocommerce_cart_item_name', $replace_name, 20 );
+
+		try {
+			list( $cart_item_key, $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+
+			$name = WC()->cart->get_item_product_name( $cart_item );
+			/**
+			 * This filter is documented in woocommerce/templates/cart/cart.php.
+			 *
+			 * @since 2.1.0
+			 */
+			$rendered_name = apply_filters( 'woocommerce_cart_item_name', $name, $cart_item, (string) $cart_item_key );
+
+			$this->assertSame( 'Custom cart label', $rendered_name );
+			$this->assertSame( 'Cart Replaced Name Product - huge, 1', $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ), 'Dedup must key on the template-provided name, not on name-filter output.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -844,6 +1278,286 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Set up a stock-managed product with exactly one unit, held by a separate unpaid order.
+	 *
+	 * Mirrors the state an abandoned checkout leaves behind: the last unit is reserved by an
+	 * order that belongs to the shopper's own session.
+	 *
+	 * @return array{0: WC_Product, 1: WC_Order} The product and the order holding its stock.
+	 */
+	private function create_last_unit_product_held_by_order(): array {
+		$product       = $this->create_stock_managed_product( 1 );
+		$holding_order = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: the separate order really holds the only unit.
+		$this->assertEquals( 1, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		return array( $product, $holding_order );
+	}
+
+	/**
+	 * Create a simple product that manages stock, with no backorders.
+	 *
+	 * @param int $stock_quantity How many units the product has in stock.
+	 * @return WC_Product The product.
+	 */
+	private function create_stock_managed_product( int $stock_quantity ): WC_Product {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		// ReserveStock is only enabled once the reserved-stock table has shipped (schema >= 430).
+		update_option( 'woocommerce_schema_version', 430 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( $stock_quantity );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Create an unpaid order that holds a quantity of a product, as an in-progress checkout does.
+	 *
+	 * @param WC_Product $product  The product to hold stock for.
+	 * @param int        $quantity How many units the order holds.
+	 * @return WC_Order The order holding the stock.
+	 */
+	private function create_order_holding_stock( WC_Product $product, int $quantity ): WC_Order {
+		$holding_order = WC_Helper_Order::create_order();
+		$holding_order->remove_order_items();
+		$holding_order->add_product( wc_get_product( $product->get_id() ), $quantity );
+		$holding_order->set_status( OrderStatus::PENDING );
+		$holding_order->save();
+
+		( new ReserveStock() )->reserve_stock_for_order( $holding_order, 60 );
+
+		return $holding_order;
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when their own hold is tracked by store_api_draft_order and order_awaiting_payment is boolean false (Cause A: payment_complete() writes false, not unset).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_when_awaiting_payment_is_false() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// The draft pointer correctly identifies the shopper's own holding order...
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		// ...but a completed payment earlier in the session left this as boolean false rather than unsetting it.
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'A boolean-false order_awaiting_payment must fall through to the store_api_draft_order pointer, not skip it.'
+		);
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when only store_api_draft_order identifies their own hold (baseline fallback, no order_awaiting_payment set).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_via_draft_fallback() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', null );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock uses order_awaiting_payment to exclude the shopper's own hold when it holds a real order id.
+	 */
+	public function test_check_cart_item_stock_uses_order_awaiting_payment_when_set() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', $holding_order->get_id() );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock still blocks when a live hold is NOT identified as the shopper's own (oversell safety: the fix must not relax holds it cannot attribute to this session).
+	 */
+	public function test_check_cart_item_stock_blocks_when_hold_is_not_the_shoppers_own() {
+		list( $product ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Session points at neither the holding order nor any awaiting order.
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$result = WC()->cart->check_cart_item_stock();
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertContains( 'out-of-stock', $result->get_error_codes() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock prefers order_awaiting_payment over store_api_draft_order when both point at a live hold (the classic checkout order wins).
+	 */
+	public function test_check_cart_item_stock_prefers_order_awaiting_payment_over_draft_order() {
+		// Three units in stock: the classic checkout order holds two of them, the draft order holds one.
+		$product       = $this->create_stock_managed_product( 3 );
+		$classic_order = $this->create_order_holding_stock( $product, 2 );
+		$draft_order   = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: between them, the two orders hold all three units.
+		$this->assertEquals( 3, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		WC()->session->set( 'order_awaiting_payment', $classic_order->get_id() );
+		WC()->session->set( 'store_api_draft_order', $draft_order->get_id() );
+
+		/*
+		 * Excluding the classic order leaves one unit held, so the two units in the cart fit into
+		 * the three in stock. Excluding the draft order instead would leave two units held and
+		 * block the cart, so this assertion only holds while order_awaiting_payment takes priority.
+		 */
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'order_awaiting_payment must take priority over store_api_draft_order when both hold stock.'
+		);
+	}
+
+	/**
+	 * @testdox Should clear the cart after payment when the order cart hash matches.
+	 */
+	public function test_clear_cart_after_payment_clears_cart_when_order_cart_hash_matches(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( WC()->cart->get_cart_hash() );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the paid order matches the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not clear the cart after payment when the order cart hash differs.
+	 */
+	public function test_clear_cart_after_payment_keeps_cart_when_order_cart_hash_differs(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertFalse( WC()->cart->is_empty(), 'Cart should not be emptied when the paid order does not match the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
+	 */
+	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+		$filter              = function ( $should_clear_cart_after_payment ) {
+			$this->assertFalse( $should_clear_cart_after_payment, 'The filter should receive the final value after the cart hash check.' );
+			return true;
+		};
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			add_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the filter overrides the final value.' );
+		} finally {
+			remove_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
 	 * @testdox should clear shipping data from session when the cart is empty
 	 */
 	public function test_setting_session_should_clear_shipping_data_when_cart_is_empty() {
@@ -1415,5 +2129,142 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+
+	/**
+	 * Capture all arguments passed to the filter without modifying the quantity.
+	 *
+	 * @param int $quantity       The quantity to add to cart.
+	 * @param int $product_id     The parent product ID.
+	 * @param int $variation_id   The variation ID being added.
+	 *
+	 * @return int
+	 */
+	public function capture_add_to_cart_quantity_filter_args( $quantity, $product_id, $variation_id ) {
+		$this->add_to_cart_quantity_filter_args = func_get_args();
+		return $quantity;
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive variation_id when a variable product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		// Create a variable product and pick the first available variation to add.
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = $variations[0];
+
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			$variation['attributes']
+		);
+
+		// Ensure all 3 arguments were passed before accessing individual indexes.
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive 0 as variation_id when a simple product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_zero_variation_id_for_simple_product() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * Applying the same coupon a second time returns false and leaves the discount total unchanged.
+	 */
+	public function test_apply_same_coupon_twice_returns_false() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'dup-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$first = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$discount_after_first = WC()->cart->get_discount_total();
+
+		$second = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( $first, 'first application should succeed' );
+		$this->assertFalse( $second, 'second application of same coupon should be rejected' );
+		$this->assertEqualsWithDelta( $discount_after_first, WC()->cart->get_discount_total(), 0.001, 'discount total should be unchanged after rejected re-application' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
+	 */
+	public function test_mini_cart_template_renders_selected_any_values_once(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Mini Cart Any Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+
+			ob_start();
+			woocommerce_mini_cart();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( 'Mini Cart Any Product - huge, 1', $html, 'The merged name must render.' );
+			$this->assertStringNotContainsString( '<dl class="variation"', $html, 'No variation meta list must render for values already in the name.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Adds a variation to the cart, asserting success.
+	 *
+	 * @param WC_Product $product    Variable product.
+	 * @param WC_Product $variation  Variation to add.
+	 * @param array      $attributes Selected variation attributes.
+	 * @return array The cart item key and cart item: array( string, array ).
+	 */
+	private function add_variation_to_cart( $product, $variation, array $attributes = array(
+		'attribute_pa_size'   => 'huge',
+		'attribute_pa_number' => '1',
+	) ): array {
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		return array( (string) $cart_item_key, WC()->cart->get_cart_item( (string) $cart_item_key ) );
 	}
 }

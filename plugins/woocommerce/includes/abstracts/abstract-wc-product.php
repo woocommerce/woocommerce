@@ -1714,6 +1714,33 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Whether the current user can view this product: it is published, or they can edit it.
+	 * A variation additionally requires its parent to be viewable.
+	 *
+	 * @since 11.1.0
+	 * @return bool
+	 */
+	public function is_viewable() {
+		$parent_id = $this->get_parent_id();
+
+		return ( ProductStatus::PUBLISH === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) )
+			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) || current_user_can( 'edit_post', $parent_id ) );
+	}
+
+	/**
+	 * Whether this product is publicly viewable: the product and its parent (if it has one) are published.
+	 *
+	 * @since 11.1.0
+	 * @return bool
+	 */
+	public function is_publicly_viewable() {
+		$parent_id = $this->get_parent_id();
+
+		return ProductStatus::PUBLISH === $this->get_status()
+			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) );
+	}
+
+	/**
 	 * Returns whether or not the product is visible in the catalog.
 	 *
 	 * @return bool
@@ -1731,18 +1758,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function is_visible_core() {
 		$visible = CatalogVisibility::VISIBLE === $this->get_catalog_visibility() || ( is_search() && CatalogVisibility::SEARCH === $this->get_catalog_visibility() ) || ( ! is_search() && CatalogVisibility::CATALOG === $this->get_catalog_visibility() );
 
-		if ( ProductStatus::TRASH === $this->get_status() ) {
+		if ( ProductStatus::TRASH === $this->get_status() || ! $this->is_viewable() ) {
 			$visible = false;
-		} elseif ( ProductStatus::PUBLISH !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
-			$visible = false;
-		}
-
-		if ( $this->get_parent_id() ) {
-			$parent_product = wc_get_product( $this->get_parent_id() );
-
-			if ( $parent_product && ProductStatus::PUBLISH !== $parent_product->get_status() && ! current_user_can( 'edit_post', $parent_product->get_id() ) ) {
-				$visible = false;
-			}
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $this->is_in_stock() ) {
@@ -1765,7 +1782,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 * @param bool          $purchasable Whether the product is purchasable.
 		 * @param WC_Product    $product     Product object.
 		 */
-		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && ( ProductStatus::PUBLISH === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) ) && '' !== $this->get_price(), $this );
+		return apply_filters( 'woocommerce_is_purchasable', $this->exists() && $this->is_viewable() && '' !== $this->get_price(), $this );
 	}
 
 	/**

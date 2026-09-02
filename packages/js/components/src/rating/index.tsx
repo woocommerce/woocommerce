@@ -56,8 +56,8 @@ const Rating = ( {
 	const label = sprintf(
 		/* translators: %1$s: rating, %2$s: total number of stars */
 		__( '%1$s out of %2$s stars.', 'woocommerce' ),
-		rating,
-		totalStars
+		rating.toString(),
+		totalStars.toString()
 	);
 	return (
 		<div className={ classes } aria-label={ label }>

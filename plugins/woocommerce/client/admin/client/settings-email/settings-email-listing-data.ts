@@ -7,7 +7,7 @@ import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
@@ -48,6 +48,35 @@ const emailListingNonce = () => {
 };
 
 /**
+ * Request creation of the post backing an email type (a draft with the
+ * file template content, or the existing post when one is already there).
+ * Standalone so surfaces outside the listing hook (e.g. the "Edit template"
+ * button) can lazily create a post before navigating to the editor.
+ */
+export const recreateEmailPostRequest = async (
+	emailId: string
+): Promise< EmailListingRecreateEmailPostResponse | null > => {
+	try {
+		const response: EmailListingRecreateEmailPostResponse = await apiFetch(
+			{
+				path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${ emailListingNonce() }`,
+				method: 'POST',
+				data: { email_id: emailId },
+			}
+		);
+		return response;
+	} catch ( e ) {
+		const wpError = e as WPError;
+		// eslint-disable-next-line no-console
+		console.error(
+			'[WooCommerce Admin] Error recreating email post: ',
+			wpError
+		);
+		return null;
+	}
+};
+
+/**
  * Hook providing transactional emails enriched by woo_email post data for DataViews component.
  */
 export const useTransactionalEmails = (
@@ -65,11 +94,18 @@ export const useTransactionalEmails = (
 	}, [ emailTypesData ] );
 
 	const validPostIds = Array.from( postIdsMap.values() ).filter( Boolean );
-	const emailPosts = useEntityRecords( 'postType', 'woo_email', {
-		include: validPostIds.join( ',' ),
-		per_page: -1,
-		status: 'any',
-	} ) as { records: Post[] };
+	const emailPosts = useEntityRecords(
+		'postType',
+		'woo_email',
+		{
+			include: validPostIds.join( ',' ),
+			per_page: -1,
+			status: 'any',
+		},
+		// With lazy post creation most emails have no post; an empty `include`
+		// would fetch every woo_email post, so skip the request entirely.
+		{ enabled: validPostIds.length > 0 }
+	) as { records: Post[] };
 
 	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 
@@ -127,6 +163,8 @@ export const useTransactionalEmails = (
 				return {
 					...emailType,
 					link: post?.link || '',
+					postStatus:
+						( post as { status?: string } | null )?.status ?? null,
 					status: status as EmailStatus,
 					templateStatus,
 					templateVersion,
@@ -310,9 +348,8 @@ export const useTransactionalEmails = (
 				}
 
 				// Now we can fetch the old settings and update the settings
-				const currentSettings = await select(
-					settingsStore
-				).getSettings( settingsGroup );
+				const currentSettings =
+					await select( settingsStore ).getSettings( settingsGroup );
 				const updatedSettings = { ...currentSettings } as {
 					[ key: string ]: { [ key: string ]: unknown };
 				};
@@ -333,23 +370,12 @@ export const useTransactionalEmails = (
 	);
 
 	const recreateEmailPost = useCallback(
-		async ( emailId: string ) => {
-			try {
-				const response: EmailListingRecreateEmailPostResponse =
-					await apiFetch( {
-						path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${ emailListingNonce() }`,
-						method: 'POST',
-						data: { email_id: emailId },
-					} );
-				updateEmailPostIdInState( emailId, response?.post_id || '' );
-			} catch ( e ) {
-				const wpError = e as WPError;
-				// eslint-disable-next-line no-console
-				console.error(
-					'[WooCommerce Admin] Error recreating email post: ',
-					wpError
-				);
-			}
+		async (
+			emailId: string
+		): Promise< EmailListingRecreateEmailPostResponse | null > => {
+			const response = await recreateEmailPostRequest( emailId );
+			updateEmailPostIdInState( emailId, response?.post_id || '' );
+			return response;
 		},
 		[ updateEmailPostIdInState ]
 	);

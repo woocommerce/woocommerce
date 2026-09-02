@@ -25,8 +25,9 @@ jobs:
     api-staleness:
         name: 'GraphQL API Staleness Check'
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
-            - uses: 'actions/checkout@v4'
+            - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
               name: 'Checkout'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'

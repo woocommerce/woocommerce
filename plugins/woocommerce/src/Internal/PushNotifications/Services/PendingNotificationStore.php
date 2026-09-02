@@ -120,16 +120,10 @@ class PendingNotificationStore {
 	 * @since 10.7.0
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
-		$data        = $notification->to_array();
-		$type        = $data['type'];
-		$resource_id = $data['resource_id'];
-		unset( $data['type'], $data['resource_id'] );
-
-		// Pass `type` and `resource_id` positionally and bundle any subclass-specific
-		// extras (event_type, stock_quantity_at_trigger, etc.) into a single array
-		// argument so the safety-net callback signature stays stable as new
-		// notification subclasses add fields to to_array().
-		$args = array( $type, $resource_id, $data );
+		// Canonical, identity-keyed args shared with NotificationProcessor::cancel_safety_net().
+		// Action Scheduler matches stored args by exact equality, so both sides must derive
+		// them from the same place; see Notification::get_safety_net_args().
+		$args = $notification->get_safety_net_args();
 
 		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
 			return;

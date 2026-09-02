@@ -69,13 +69,13 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the generate_feed endpoint method.
+	 * @testdox Should prepare the feed status using the current uploads URL.
 	 *
 	 * @dataProvider provider_generate_feed
 	 * @param bool        $force_regeneration Whether to force regeneration of the feed.
 	 * @param string|null $fields The fields to include in the feed.
 	 */
-	public function test_generate_feed( bool $force_regeneration, ?string $fields = null ) {
+	public function test_generate_feed( bool $force_regeneration, ?string $fields = null ): void {
 		$request = new WP_REST_Request( 'POST', '/wc/pos/v1/catalog/create' );
 
 		if ( $force_regeneration ) {
@@ -90,19 +90,75 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 			->with( $fields ? array( '_product_fields' => $fields ) : array() )
 			->willReturn(
 				array(
-					'action_id' => 6789,
-					'path'      => '/tmp/random_path.json',
-					'url'       => 'https://example.com/feed.json',
+					'state'           => AsyncGenerator::STATE_COMPLETED,
+					'action_id'       => 6789,
+					'path'            => '/tmp/random_path.json',
+					'file_name'       => 'pos-catalog-feed.json',
+					'page'            => 3,
+					'entries_written' => 250,
+					'updated_at'      => time(),
+					'url'             => 'https://old.example/uploads/product-feeds/pos-catalog-feed.json',
 				)
 			);
 
-		$response      = $this->sut->generate_feed( $request );
+		$upload_dir_filter = function ( array $upload_dir ): array {
+			$upload_dir['baseurl'] = 'https://current.example/uploads';
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $upload_dir_filter );
+
+		try {
+			$response = $this->sut->generate_feed( $request );
+		} finally {
+			remove_filter( 'upload_dir', $upload_dir_filter );
+		}
+
 		$response_data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertArrayNotHasKey( 'action_id', $response_data );
-		$this->assertArrayNotHasKey( 'path', $response_data );
+
+		// Sensitive and internal-only fields must never be exposed to the client.
+		foreach ( array( 'action_id', 'path', 'file_name', 'page', 'entries_written', 'updated_at' ) as $internal_key ) {
+			$this->assertArrayNotHasKey( $internal_key, $response_data );
+		}
+
 		$this->assertArrayHasKey( 'url', $response_data );
-		$this->assertEquals( 'https://example.com/feed.json', $response_data['url'] );
+		$this->assertEquals( 'https://current.example/uploads/product-feeds/pos-catalog-feed.json', $response_data['url'] );
+	}
+
+	/**
+	 * @testdox Should replace a legacy serialized download URL without duplicating it.
+	 */
+	public function test_generate_feed_replaces_legacy_serialized_url(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/pos/v1/catalog/create' );
+
+		$this->mock_async_generator->expects( $this->once() )
+			->method( 'get_status' )
+			->with( array() )
+			->willReturn(
+				array(
+					'state' => AsyncGenerator::STATE_COMPLETED,
+					'path'  => '/tmp/pos-catalog-feed.json',
+					'url'   => 'https://old.example/uploads/product-feeds/pos-catalog-feed.json',
+				)
+			);
+
+		$upload_dir_filter = function ( array $upload_dir ): array {
+			$upload_dir['baseurl'] = 'https://current.example/uploads';
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $upload_dir_filter );
+
+		try {
+			$response = $this->sut->generate_feed( $request );
+		} finally {
+			remove_filter( 'upload_dir', $upload_dir_filter );
+		}
+
+		$this->assertSame(
+			'https://current.example/uploads/product-feeds/pos-catalog-feed.json',
+			$response->get_data()['url'],
+			'A legacy absolute URL should be replaced with one URL based on the current site configuration.'
+		);
 	}
 }

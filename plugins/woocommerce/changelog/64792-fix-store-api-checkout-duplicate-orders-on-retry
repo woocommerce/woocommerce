@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: reuse the session's pending/failed order on checkout POST retry instead of creating a duplicate. Also restore session precedence for `payment_method` in the deferred-draft response so a shopper's PATCH-time selection isn't overwritten by their saved default.

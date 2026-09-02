@@ -15,6 +15,16 @@ reviews:
         - Is backwards compatible.
         - Is readable and intuitive.
         - Has unit or E2E tests where applicable.
+        Treat any change to a public or externally exposed class, interface, function, or method signature as high-risk,
+        regardless of whether it lives in the `Internal` namespace — third-party code implements and consumes some of
+        these contracts in practice. Flag such changes and ask the author to state the backwards-compatibility impact in
+        the PR description. Call out explicitly when a method is added to an interface that external code can implement:
+        this is a backwards-incompatible change because existing implementers fatal on load (e.g. WooCommerce 10.9.0 was
+        reverted on WP Cloud after a required method was added to `FeedInterface`). Suggest a non-breaking alternative
+        such as adding the method to a concrete class, introducing a new interface, or providing a default via an
+        abstract base class. For renames or removals of existing public symbols, follow the deprecate-don't-rename
+        policy: keep the original symbol with an `@deprecated` notice pointing to the replacement, rather than changing
+        it in place.
         When making any changes to code that deletes or modifies orders/products/customer data, make sure that there are
         sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that
         the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and

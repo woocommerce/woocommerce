@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add __next40pxDefaultSize prop to SelectControl components to resolve deprecated size warning on WP 7.0+.

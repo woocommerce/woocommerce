@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent non-scalar cart item data provided by extensions from causing a fatal error when rendering the classic cart.

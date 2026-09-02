@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors when product attribute lookup updates run after a product is deleted.

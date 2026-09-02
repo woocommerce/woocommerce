@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product image tooltip: set aria-label via DOM attribute instead of interpolating the translated string into the HTML template, preventing broken markup when the translation contains characters such as quotes.

@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0](https://www.npmjs.com/package/@woocommerce/currency/v/6.0.0) - 2026-06-10 
+
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. [#64114]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+
 ## [5.0.0](https://www.npmjs.com/package/@woocommerce/currency/v/5.0.0) - 2025-10-27 
 
 -   Patch - Adding dependency to avoid invalid types reference in external plugins. [#52969]

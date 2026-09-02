@@ -42,47 +42,44 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Render WordPress core's #lost-connection-notice markup on Woo admin
-		 * screens that don't already get it for free.
+		 * Whether the current screen should get the #wc-lost-connection-notice markup and toggle handler.
+		 * Limited to Woo admin screens, minus wc-admin React pages and classic post edit screens, which get WP
+		 * core's own notice. Classic order edit is the exception: core's notice there wrongly claims local
+		 * autosave backups are running, which disable_autosave() has turned off.
 		 *
-		 * WP core renders this element on classic post-type edit pages (via
-		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
-		 * to Heartbeat events. By echoing the same markup here and enqueueing
-		 * the `autosave` script (see admin_scripts()), Woo admin screens
-		 * inherit the same offline awareness without any new copy, styling,
-		 * or behavior.
-		 *
-		 * Translation strings use the 'default' text domain so WP core's
-		 * existing translations apply.
-		 *
-		 * Skipped on:
-		 * - Classic post-type edit screens (WP core already renders the notice).
-		 * - wc-admin React pages (they use their own layout rather than the
-		 *   standard admin_notices position).
-		 *
-		 * @return void
+		 * @return bool Whether to render and toggle the notice.
 		 */
-		public function render_lost_connection_notice() {
+		private function should_show_lost_connection_notice() {
 			$screen = get_current_screen();
-			if ( ! $screen ) {
-				return;
-			}
 
-			if ( 'post' === $screen->base ) {
-				return;
+			if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+				return false;
 			}
 
 			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
 			if ( $is_wc_admin_page ) {
-				return;
+				return false;
 			}
 
-			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+			$is_classic_order_edit_screen = 'post' === $screen->base
+				&& in_array( $screen->post_type, wc_get_order_types( 'order-meta-boxes' ), true );
+
+			return 'post' !== $screen->base || $is_classic_order_edit_screen;
+		}
+
+		/**
+		 * Render a #wc-lost-connection-notice mirroring WP core's own notice on post edit screens.
+		 * See should_show_lost_connection_notice() for which screens get it.
+		 *
+		 * @return void
+		 */
+		public function render_lost_connection_notice() {
+			if ( ! $this->should_show_lost_connection_notice() ) {
 				return;
 			}
 			?>
-			<div id="lost-connection-notice" class="notice error hidden">
+			<div id="wc-lost-connection-notice" class="notice error hidden">
 				<p>
 					<span class="spinner"></span>
 					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
@@ -417,8 +414,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_selection_too_long_n'       => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 					'i18n_load_more'                  => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 					'i18n_searching'                  => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+					'i18n_loading_tax_rates'          => _x( 'Loading tax rates…', 'order tax rate search status', 'woocommerce' ),
+					/* translators: %s: tax rate search term. */
+					'i18n_tax_rate_search_results'    => _x( 'Showing results for “%s”', 'order tax rate search results summary', 'woocommerce' ),
+					'i18n_clear_tax_rate_search'      => _x( 'Clear search', 'order tax rate search results action', 'woocommerce' ),
+					'i18n_no_tax_rates'               => _x( 'No tax rates have been set up yet.', 'order tax rate empty state', 'woocommerce' ),
+					'i18n_no_tax_rates_help'          => _x( 'Set up tax rates or enable automated tax calculation before adding tax to this order.', 'order tax rate empty state', 'woocommerce' ),
+					'i18n_tax_settings'               => _x( 'Go to tax settings', 'order tax rate empty state action', 'woocommerce' ),
+					/* translators: 1: tax class, 2: rate code, 3: rate percentage. */
+					'i18n_tax_rate_details'           => _x( 'Tax class: %1$s. Rate code: %2$s. Rate: %3$s.', 'tax rate option screen reader details', 'woocommerce' ),
+					'tax_rates_settings_url'          => admin_url( 'admin.php?page=wc-settings&tab=tax' ),
 					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
 					'search_products_nonce'           => wp_create_nonce( 'search-products' ),
+					'search_tax_rates_nonce'          => wp_create_nonce( 'search-tax-rates' ),
 					'search_customers_nonce'          => wp_create_nonce( 'search-customers' ),
 					'search_categories_nonce'         => wp_create_nonce( 'search-categories' ),
 					'search_taxonomy_terms_nonce'     => wp_create_nonce( 'search-taxonomy-terms' ),
@@ -466,12 +474,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
-				// Pair the #lost-connection-notice markup with core's autosave script.
-				// See render_lost_connection_notice() for scoping rationale.
-				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
-					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
-					wp_enqueue_script( 'autosave' );
+				$show_lost_connection_notice = $this->should_show_lost_connection_notice();
+
+				// The notice is toggled via heartbeat events (see woocommerce_admin.js), so ensure the emitter is loaded.
+				if ( $show_lost_connection_notice ) {
+					wp_enqueue_script( 'heartbeat' );
 				}
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
@@ -506,10 +513,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'export_selected_products_nonce' => current_user_can( 'export' ) ? wp_create_nonce( 'export-selected-products' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
+					'show_lost_connection_notice'       => $show_lost_connection_notice,
 				);
 
 				wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
@@ -522,7 +530,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Products.
 			if ( in_array( $screen_id, array( 'edit-product' ) ) ) {
-				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version );
+				wp_enqueue_script( 'jquery-ui-datepicker' );
+				wp_enqueue_script( 'woocommerce_quick-edit', WC()->plugin_url() . '/assets/js/admin/quick-edit' . $suffix . '.js', array( 'jquery', 'woocommerce_admin' ), $version, false );
 
 				$params = array(
 					'strings' => array(
@@ -582,6 +591,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
 					'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 					'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
+					'i18n_scheduled_sale_end_before_start' => esc_js( __( 'The sale end date cannot be earlier than the sale start date.', 'woocommerce' ) ),
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
 					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
@@ -808,6 +818,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					array(
 						'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
 						'run_tool_confirmation'   => esc_js( __( 'Are you sure you want to run this tool?', 'woocommerce' ) ),
+						'tools_poll_interval'     => 10000,
+						'tools_url'               => esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=tools' ) ),
 					)
 				);
 			}
