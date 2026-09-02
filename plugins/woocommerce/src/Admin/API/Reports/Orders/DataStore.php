@@ -386,6 +386,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_attributions = $this->get_order_attributions_by_order_ids( array_keys( $mapped_orders ) );
 		$customers          = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
+		$billing_details    = $this->map_array_by_key(
+			$this->get_order_billing_details_by_order_ids( $order_ids ),
+			'order_id'
+		);
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
@@ -446,6 +450,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_id ] ) ? array_merge( $defaults, $mapped_data[ $order_id ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
+			}
+
+			$billing_order_id = $order_id;
+			if (
+				isset( $billing_details[ $order_id ] )
+				&& 'shop_order_refund' === $billing_details[ $order_id ]['order_type']
+				&& $order_data['parent_id']
+			) {
+				$billing_order_id = $order_data['parent_id'];
+			}
+
+			if ( isset( $billing_details[ $billing_order_id ] ) && 0 === (int) $billing_details[ $billing_order_id ]['customer_id'] ) {
+				$orders_data[ $key ]['extended_info']['customer']['first_name'] = (string) $billing_details[ $billing_order_id ]['first_name'];
+				$orders_data[ $key ]['extended_info']['customer']['last_name']  = (string) $billing_details[ $billing_order_id ]['last_name'];
 			}
 
 			$source_type = $order_attributions[ $order_id ]['_wc_order_attribution_source_type'] ?? '';
@@ -554,6 +572,61 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		/* phpcs:enable */
 
 		return $customers;
+	}
+
+	/**
+	 * Get the customer ID and billing name stored on each order.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 * @return array
+	 */
+	private function get_order_billing_details_by_order_ids( $order_ids ) {
+		global $wpdb;
+
+		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$included_order_ids = implode( ',', $order_ids );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table    = OrdersTableDataStore::get_orders_table_name();
+			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
+
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			return $wpdb->get_results(
+				"SELECT orders.id AS order_id,
+					orders.type AS order_type,
+					orders.customer_id,
+					addresses.first_name,
+					addresses.last_name
+				FROM {$orders_table} orders
+				LEFT JOIN {$addresses_table} addresses
+					ON orders.id = addresses.order_id
+					AND addresses.address_type = 'billing'
+				WHERE orders.id IN ({$included_order_ids})",
+				ARRAY_A
+			);
+			/* phpcs:enable */
+		}
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+		return $wpdb->get_results(
+			"SELECT orders.ID AS order_id,
+				orders.post_type AS order_type,
+				MAX( CASE WHEN order_meta.meta_key = '_customer_user' THEN order_meta.meta_value END ) AS customer_id,
+				MAX( CASE WHEN order_meta.meta_key = '_billing_first_name' THEN order_meta.meta_value END ) AS first_name,
+				MAX( CASE WHEN order_meta.meta_key = '_billing_last_name' THEN order_meta.meta_value END ) AS last_name
+			FROM {$wpdb->posts} orders
+			LEFT JOIN {$wpdb->postmeta} order_meta
+				ON orders.ID = order_meta.post_id
+				AND order_meta.meta_key IN ( '_customer_user', '_billing_first_name', '_billing_last_name' )
+			WHERE orders.ID IN ({$included_order_ids})
+			GROUP BY orders.ID, orders.post_type",
+			ARRAY_A
+		);
+		/* phpcs:enable */
 	}
 
 	/**

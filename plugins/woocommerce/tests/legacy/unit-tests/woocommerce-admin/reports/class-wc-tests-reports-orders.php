@@ -121,6 +121,121 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use each guest order's billing name when the orders share an email address.
+	 */
+	public function test_extended_info_uses_each_guest_orders_billing_name_when_email_is_shared(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$registered_customer = new WC_Customer();
+		$registered_customer->set_username( 'marketplace-account' );
+		$registered_customer->set_password( 'password' );
+		$registered_customer->set_email( 'marketplace@example.org' );
+		$registered_customer->set_first_name( 'Registered' );
+		$registered_customer->set_last_name( 'Customer' );
+		$registered_customer->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$first_order = $this->create_guest_order( $product, 'marketplace@example.org' );
+		$first_order->set_billing_first_name( 'Ada' );
+		$first_order->set_billing_last_name( 'Lovelace' );
+		$first_order->save();
+
+		$second_order = $this->create_guest_order( $product, 'marketplace@example.org' );
+		$second_order->set_billing_first_name( 'Grace' );
+		$second_order->set_billing_last_name( 'Hopper' );
+		$second_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$first_order,
+			array( $first_order->get_id(), $second_order->get_id() )
+		);
+
+		$this->assertNotEmpty( $rows[ $first_order->get_id() ]['customer_id'], 'Guest orders should have an analytics customer ID' );
+		$this->assertEquals(
+			$rows[ $first_order->get_id() ]['customer_id'],
+			$rows[ $second_order->get_id() ]['customer_id'],
+			'Orders sharing an email should retain the same analytics customer identity'
+		);
+		$this->assertSame( 'Ada', $rows[ $first_order->get_id() ]['extended_info']['customer']['first_name'], 'The first order should use its own billing first name' );
+		$this->assertSame( 'Lovelace', $rows[ $first_order->get_id() ]['extended_info']['customer']['last_name'], 'The first order should use its own billing last name' );
+		$this->assertSame( 'Grace', $rows[ $second_order->get_id() ]['extended_info']['customer']['first_name'], 'The second order should use its own billing first name' );
+		$this->assertSame( 'Hopper', $rows[ $second_order->get_id() ]['extended_info']['customer']['last_name'], 'The second order should use its own billing last name' );
+	}
+
+	/**
+	 * @testdox Should keep the profile name for a registered customer's order.
+	 */
+	public function test_extended_info_keeps_registered_customer_profile_name(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_id = $this->factory->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'registered-customer@example.org',
+				'first_name' => 'Profile',
+				'last_name'  => 'Customer',
+			)
+		);
+		$product     = WC_Helper_Product::create_simple_product();
+		$order       = WC_Helper_Order::create_order( $customer_id, $product );
+		$order->set_billing_first_name( 'Order' );
+		$order->set_billing_last_name( 'Name' );
+		$order->set_total( 25 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id( $order, array( $order->get_id() ) );
+
+		$this->assertSame( 'Profile', $rows[ $order->get_id() ]['extended_info']['customer']['first_name'] );
+		$this->assertSame( 'Customer', $rows[ $order->get_id() ]['extended_info']['customer']['last_name'] );
+	}
+
+	/**
+	 * @testdox Should use the parent billing name for refunds and the order billing name for ordinary child orders.
+	 */
+	public function test_extended_info_resolves_billing_name_source_by_order_type(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$parent_order = $this->create_guest_order( $product, 'parent@example.org' );
+		$parent_order->set_billing_first_name( 'Parent' );
+		$parent_order->set_billing_last_name( 'Customer' );
+		$parent_order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $parent_order->get_id(),
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created' );
+
+		$child_order = $this->create_guest_order( $product, 'child@example.org' );
+		$child_order->set_parent_id( $parent_order->get_id() );
+		$child_order->set_billing_first_name( 'Child' );
+		$child_order->set_billing_last_name( 'Customer' );
+		$child_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$parent_order,
+			array( $refund->get_id(), $child_order->get_id() )
+		);
+
+		$this->assertSame( 'Parent', $rows[ $refund->get_id() ]['extended_info']['customer']['first_name'], 'A refund should use its parent order billing name' );
+		$this->assertSame( 'Customer', $rows[ $refund->get_id() ]['extended_info']['customer']['last_name'], 'A refund should use its parent order billing name' );
+		$this->assertSame( 'Child', $rows[ $child_order->get_id() ]['extended_info']['customer']['first_name'], 'An ordinary child order should use its own billing name' );
+		$this->assertSame( 'Customer', $rows[ $child_order->get_id() ]['extended_info']['customer']['last_name'], 'An ordinary child order should use its own billing name' );
+	}
+
+	/**
 	 * Test that refunded orders in list have products.
 	 */
 	public function test_products_in_orders() {
@@ -331,8 +446,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates a completed order for a guest customer, using a billing email that is not attached to
-	 * any registered user.
+	 * Creates a completed order for a guest customer.
 	 *
 	 * @param WC_Product $product      Product to add to the order.
 	 * @param string     $email        Billing email used to identify the guest customer.
@@ -355,6 +469,27 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->save();
 
 		return $order;
+	}
+
+	/**
+	 * Returns extended report rows keyed by order ID.
+	 *
+	 * @param WC_Order $order     Order used to derive the reporting time frame.
+	 * @param int[]    $order_ids Order IDs to include.
+	 * @return array
+	 */
+	private function get_extended_report_rows_by_order_id( $order, $order_ids ) {
+		$data_store = new OrdersDataStore();
+		$data       = $data_store->get_data(
+			array(
+				'after'          => gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() ),
+				'before'         => gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() ),
+				'extended_info'  => 1,
+				'order_includes' => $order_ids,
+			)
+		);
+
+		return array_column( $data->data, null, 'order_id' );
 	}
 
 	/**
