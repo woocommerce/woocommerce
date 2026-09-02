@@ -145,22 +145,44 @@ detail( sprintf( '%d job(s) this POC can run locally', count( $eligible_jobs ) )
 heading( '4 · Run those checks locally' );
 
 $started_all = time();
+$passed_jobs = array();
+$failed_jobs = array();
 
 foreach ( $eligible_jobs as $job ) {
 	$check = run_the_check( $job );
 
-	if ( ! $check['passed'] ) {
-		// A receipt has to mean something. One failure publishes nothing at all,
-		// so no part of this diff can be skipped on a bad result.
-		fail( sprintf( '%s failed — publishing nothing', $job['projectName'] ) );
-		warn( 'Fix it and re-run. CI will run every job until a receipt exists.' );
-		exit( 1 );
+	if ( $check['passed'] ) {
+		$passed_jobs[] = $job;
+		pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
+		continue;
 	}
 
-	pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
+	// Substitution is per job, so one failure costs only its own job. That job
+	// gets no receipt, CI runs it, and CI decides. Nothing here can turn a
+	// failing check into a skipped one.
+	$failed_jobs[] = $job;
+	fail( sprintf( '%s — no receipt, CI will run this one', $job['projectName'] ) );
 }
 
-detail( sprintf( 'all %d passed in %ds', count( $eligible_jobs ), time() - $started_all ), 2 );
+detail(
+	sprintf(
+		'%d passed, %d failed, in %ds',
+		count( $passed_jobs ),
+		count( $failed_jobs ),
+		time() - $started_all
+	),
+	2
+);
+
+if ( array() === $passed_jobs ) {
+	fail( 'nothing passed — there is no receipt to publish' );
+	exit( 1 );
+}
+
+if ( array() !== $failed_jobs ) {
+	warn( 'Some checks failed. Their jobs will run in CI and may fail there too.' );
+	warn( 'A failing check locally is not skipped — it is simply left to CI.' );
+}
 
 // ---------------------------------------------------------------------------
 // 5. Make the commit known to GitHub without pushing a branch.
@@ -238,7 +260,7 @@ if ( git( 'rev-parse HEAD' ) !== $sha ) {
 	exit( 1 );
 }
 
-foreach ( $eligible_jobs as $job ) {
+foreach ( $passed_jobs as $job ) {
 	$posted = github_api(
 		$token,
 		'POST',
@@ -269,7 +291,7 @@ foreach ( $eligible_jobs as $job ) {
 	}
 }
 
-pass( sprintf( '%d receipt(s) published', count( $eligible_jobs ) ) );
+pass( sprintf( '%d receipt(s) published', count( $passed_jobs ) ) );
 
 // ---------------------------------------------------------------------------
 // 8. Read it back the way the workflow does.
