@@ -21,8 +21,14 @@ describes HEAD. It is opt-in because publishing a receipt has no visible effect,
 while pushing a branch starts CI and notifies reviewers.
 
 Runs against the real repository. Creates one ref and one commit status, then
-removes the ref. Safe to run repeatedly. Needs `gh` or any GitHub token
-reachable from `GH_TOKEN`, `GITHUB_TOKEN`, or the git credential store.
+removes the ref. Safe to run repeatedly.
+
+Requires the [GitHub CLI](https://cli.github.com), authenticated with `gh auth
+login`. It is the only supported source of credentials, and the script stops with
+instructions if it is missing or logged out. Reading tokens from the environment
+or the git credential store as well would let the script authenticate as one
+identity while `gh` reports another, and the receipt's creator is the whole basis
+for trusting it.
 
 It refuses to publish anything it cannot honestly describe: the working tree must
 be clean (the check runs against the tree, but the receipt names HEAD), the branch
