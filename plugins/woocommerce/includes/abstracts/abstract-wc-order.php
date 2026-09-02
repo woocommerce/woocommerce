@@ -3173,7 +3173,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @param string   $total_html The formatted total COGS HTML.
 		 * @param float    $total      The total COGS value.
-		 * @param WC_Order $order      The order object.
+		 * @param WC_Abstract_Order $order The order object.
 		 */
 		return apply_filters(
 			'woocommerce_order_cogs_total_value_html',
