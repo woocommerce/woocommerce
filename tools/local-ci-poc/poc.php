@@ -50,15 +50,37 @@ $temporary_ref = null;
  * but pushing a branch starts CI and notifies reviewers, so it stays something
  * the contributor asks for rather than something running the checks does to them.
  */
-$push_when_done = in_array( '--push', array_slice( $argv, 1 ), true );
+$push_when_done = false;
+
+/**
+ * Substrings limiting which projects to run, from --only.
+ *
+ * Substitution is per job, so running a subset is legitimate: the jobs left out
+ * simply get no receipt and CI runs them. This matters because the local run is
+ * serial while CI's matrix is parallel — two of these packages take minutes on
+ * their own, and a contributor may reasonably want the twenty quick ones only.
+ *
+ * @var string[]
+ */
+$only_projects = array();
 
 foreach ( array_slice( $argv, 1 ) as $argument ) {
 	if ( '--push' === $argument ) {
+		$push_when_done = true;
+		continue;
+	}
+
+	if ( str_starts_with( $argument, '--only=' ) ) {
+		$only_projects = array_filter( array_map( 'trim', explode( ',', substr( $argument, 7 ) ) ) );
 		continue;
 	}
 
 	printf(
-		"usage: php %s [--push]\n\n  --push  push the current branch after the receipt is published,\n          so the SHA that reaches GitHub is the one the receipt names\n",
+		"usage: php %s [--push] [--only=SUBSTRING[,SUBSTRING...]]\n\n"
+			. "  --push   push the current branch after the receipts are published, so the\n"
+			. "           SHA that reaches GitHub is the one they name\n"
+			. "  --only   only run jobs whose project name contains one of these substrings.\n"
+			. "           Everything left out gets no receipt, so CI runs it as usual.\n",
 		basename( __FILE__ )
 	);
 
@@ -137,6 +159,24 @@ heading( '3 · Ask the planner what CI would run for this diff' );
 detail( 'the same ci-jobs tool CI uses, run locally:' );
 
 $eligible_jobs = eligible_jobs_for_this_diff();
+$planned_count = count( $eligible_jobs );
+
+if ( array() !== $only_projects ) {
+	$eligible_jobs = array_values(
+		array_filter(
+			$eligible_jobs,
+			function ( array $job ) use ( $only_projects ): bool {
+				foreach ( $only_projects as $wanted ) {
+					if ( str_contains( $job['projectName'], $wanted ) ) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+		)
+	);
+}
 
 if ( array() === $eligible_jobs ) {
 	detail( 'no JavaScript unit jobs for this diff — nothing to substitute', 2 );
@@ -149,6 +189,18 @@ foreach ( $eligible_jobs as $job ) {
 }
 
 detail( sprintf( '%d job(s) this POC can run locally', count( $eligible_jobs ) ), 2 );
+
+if ( count( $eligible_jobs ) < $planned_count ) {
+	detail(
+		sprintf( '--only kept %d of %d; CI runs the rest', count( $eligible_jobs ), $planned_count ),
+		2
+	);
+} elseif ( $planned_count > 5 ) {
+	// Worth saying plainly: CI runs these in parallel, this runs them one after
+	// another, and a couple of the bigger packages take minutes by themselves.
+	warn( 'These run one at a time here, where CI runs them in parallel.' );
+	warn( 'Use --only=<substring> to substitute just the quick ones.' );
+}
 
 // ---------------------------------------------------------------------------
 // 4. Run one of those checks for real.
