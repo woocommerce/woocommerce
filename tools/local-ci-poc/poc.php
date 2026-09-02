@@ -53,6 +53,16 @@ $temporary_ref = null;
 $push_when_done = false;
 
 /**
+ * How many checks to run at once, from --jobs.
+ *
+ * CI gives every job its own runner; a laptop has to share. Four is a deliberate
+ * compromise: jest already spreads a single package's test files across its own
+ * workers, so running many packages at once oversubscribes the CPU and each one
+ * slows down. Raise it for a machine with cores to spare.
+ */
+$concurrency = 4;
+
+/**
  * Substrings limiting which projects to run, from --only.
  *
  * Substitution is per job, so running a subset is legitimate: the jobs left out
@@ -75,12 +85,18 @@ foreach ( array_slice( $argv, 1 ) as $argument ) {
 		continue;
 	}
 
+	if ( str_starts_with( $argument, '--jobs=' ) ) {
+		$concurrency = max( 1, (int) substr( $argument, 7 ) );
+		continue;
+	}
+
 	printf(
-		"usage: php %s [--push] [--only=SUBSTRING[,SUBSTRING...]]\n\n"
+		"usage: php %s [--push] [--only=SUBSTRING[,...]] [--jobs=N]\n\n"
 			. "  --push   push the current branch after the receipts are published, so the\n"
 			. "           SHA that reaches GitHub is the one they name\n"
 			. "  --only   only run jobs whose project name contains one of these substrings.\n"
-			. "           Everything left out gets no receipt, so CI runs it as usual.\n",
+			. "           Everything left out gets no receipt, so CI runs it as usual.\n"
+			. "  --jobs   how many checks to run at once (default 4).\n",
 		basename( __FILE__ )
 	);
 
@@ -196,10 +212,10 @@ if ( count( $eligible_jobs ) < $planned_count ) {
 		2
 	);
 } elseif ( $planned_count > 5 ) {
-	// Worth saying plainly: CI runs these in parallel, this runs them one after
-	// another, and a couple of the bigger packages take minutes by themselves.
-	warn( 'These run one at a time here, where CI runs them in parallel.' );
-	warn( 'Use --only=<substring> to substitute just the quick ones.' );
+	// CI gives each of these its own runner. Even run concurrently here they
+	// share one machine, and two of the bigger packages take minutes alone.
+	warn( 'CI gives each of these its own runner; here they share this machine.' );
+	warn( 'Use --only=<substring> to substitute a subset, or --jobs=N to widen.' );
 }
 
 // ---------------------------------------------------------------------------
@@ -208,35 +224,41 @@ if ( count( $eligible_jobs ) < $planned_count ) {
 
 heading( '4 · Run those checks locally' );
 
+detail( sprintf( 'up to %d at a time; results appear as each finishes', $concurrency ), 2 );
+
 $started_all = time();
 $passed_jobs = array();
 $failed_jobs = array();
 
-foreach ( $eligible_jobs as $job ) {
-	$check = run_the_check( $job );
+run_checks_in_parallel(
+	$eligible_jobs,
+	$concurrency,
+	function ( array $job, array $check ) use ( &$passed_jobs, &$failed_jobs ): void {
+		if ( $check['passed'] ) {
+			$passed_jobs[] = $job;
+			pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
+			return;
+		}
 
-	if ( $check['passed'] ) {
-		$passed_jobs[] = $job;
-		pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
-		continue;
+		// Substitution is per job, so one failure costs only its own job. That job
+		// gets no receipt, CI runs it, and CI decides. Nothing here can turn a
+		// failing check into a skipped one.
+		$failed_jobs[] = $job;
+		fail( sprintf( '%s — no receipt, CI will run this one', $job['projectName'] ) );
 	}
+);
 
-	// Substitution is per job, so one failure costs only its own job. That job
-	// gets no receipt, CI runs it, and CI decides. Nothing here can turn a
-	// failing check into a skipped one.
-	$failed_jobs[] = $job;
-	fail( sprintf( '%s — no receipt, CI will run this one', $job['projectName'] ) );
-}
+$wall_clock = time() - $started_all;
+$cpu_time   = array_sum( array_column( array_merge( $passed_jobs, $failed_jobs ), 'seconds' ) );
 
 detail(
-	sprintf(
-		'%d passed, %d failed, in %ds',
-		count( $passed_jobs ),
-		count( $failed_jobs ),
-		time() - $started_all
-	),
+	sprintf( '%d passed, %d failed, in %ds', count( $passed_jobs ), count( $failed_jobs ), $wall_clock ),
 	2
 );
+
+if ( $cpu_time > $wall_clock && $wall_clock > 0 ) {
+	detail( sprintf( '%ds of work done in %ds wall clock', $cpu_time, $wall_clock ), 2 );
+}
 
 if ( array() === $passed_jobs ) {
 	fail( 'nothing passed — there is no receipt to publish' );
@@ -501,34 +523,92 @@ function eligible_jobs_for_this_diff(): array {
 }
 
 /**
- * Run one planned job exactly as CI would, and time it.
+ * Run planned jobs, several at a time, reporting each as it finishes.
+ *
+ * CI runs this matrix across separate runners; the nearest a laptop gets is a
+ * pool. Jobs are started in order but finish in whatever order they finish, so
+ * results are reported through the callback rather than returned as a batch —
+ * a fifteen-second package should not sit behind a three-minute one before the
+ * reader hears about it.
+ *
+ * @param array<int, array{name: string, projectName: string, command: string}> $jobs        Jobs to run.
+ * @param int                                                                   $concurrency How many at once.
+ * @param callable                                                              $on_finish   Called with (job, check result).
+ */
+function run_checks_in_parallel( array $jobs, int $concurrency, callable $on_finish ): void {
+	$queue   = $jobs;
+	$running = array();
+
+	while ( array() !== $queue || array() !== $running ) {
+		while ( array() !== $queue && count( $running ) < $concurrency ) {
+			$running[] = start_the_check( array_shift( $queue ) );
+		}
+
+		foreach ( $running as $index => $process ) {
+			if ( proc_get_status( $process['handle'] )['running'] ) {
+				continue;
+			}
+
+			$on_finish( $process['job'], finish_the_check( $process ) );
+			unset( $running[ $index ] );
+		}
+
+		// Nothing to do but wait for a child to exit; polling any faster would
+		// just spin the CPU that the checks themselves need.
+		usleep( 200000 );
+	}
+}
+
+/**
+ * Start one planned job exactly as CI would.
  *
  * The command comes from the planner rather than being assumed, so this cannot
- * drift from what CI runs for the same job.
+ * drift from what CI runs for the same job. Output goes straight to a per-job
+ * file: with several running at once, interleaving them on this terminal would
+ * make all of them unreadable.
  *
- * @param array{name: string, projectName: string, command: string} $job Job to run.
+ * @param array{name: string, projectName: string, command: string} $job Job to start.
+ *
+ * @return array{job: array, handle: resource, log: string, started: int}
+ */
+function start_the_check( array $job ): array {
+	$log = sprintf( '%s/poc-check-%s.log', sys_get_temp_dir(), md5( $job['name'] ) );
+
+	$descriptors = array(
+		0 => array( 'file', '/dev/null', 'r' ),
+		1 => array( 'file', $log, 'w' ),
+		2 => array( 'file', $log, 'a' ),
+	);
+
+	$command = sprintf(
+		'pnpm --filter=%s %s',
+		escapeshellarg( $job['projectName'] ),
+		$job['command']
+	);
+
+	return array(
+		'job'     => $job,
+		'handle'  => proc_open( $command, $descriptors, $pipes ),
+		'log'     => $log,
+		'started' => time(),
+	);
+}
+
+/**
+ * Collect the result of a finished job.
+ *
+ * @param array{job: array, handle: resource, log: string, started: int} $process Finished process.
  *
  * @return array{passed: bool, seconds: int, summary: string}
  */
-function run_the_check( array $job ): array {
-	$log     = sys_get_temp_dir() . '/poc-check.log';
-	$started = time();
-
-	$command = sprintf(
-		'pnpm --filter=%s %s > %s 2>&1',
-		escapeshellarg( $job['projectName'] ),
-		$job['command'],
-		escapeshellarg( $log )
-	);
-
-	exec( $command, $ignored, $exit_code );
-
-	$output  = is_readable( $log ) ? (string) file_get_contents( $log ) : '';
-	$summary = preg_match( '/Tests: +\d+ passed/', $output, $matches ) ? $matches[0] : 'ran';
+function finish_the_check( array $process ): array {
+	$exit_code = proc_close( $process['handle'] );
+	$output    = is_readable( $process['log'] ) ? (string) file_get_contents( $process['log'] ) : '';
+	$summary   = preg_match( '/Tests: +\d+ passed/', $output, $matches ) ? $matches[0] : 'ran';
 
 	return array(
 		'passed'  => 0 === $exit_code,
-		'seconds' => time() - $started,
+		'seconds' => time() - $process['started'],
 		'summary' => $summary,
 	);
 }
