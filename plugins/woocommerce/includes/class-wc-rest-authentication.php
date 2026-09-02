@@ -91,8 +91,6 @@ class WC_REST_Authentication {
 	 *
 	 * 'wc/' is WooCommerce; 'wc-' lets third party plugins use our authentication methods.
 	 *
-	 * @since 11.1.0
-	 *
 	 * @param string $route Route without the REST prefix or surrounding slashes.
 	 * @return bool
 	 */
@@ -104,8 +102,6 @@ class WC_REST_Authentication {
 	 * The route WordPress resolved for this request, trimmed of surrounding slashes.
 	 *
 	 * Null when WordPress has not parsed the request yet, which is not the same as an empty route.
-	 *
-	 * @since 11.1.0
 	 *
 	 * @return string|null
 	 */
