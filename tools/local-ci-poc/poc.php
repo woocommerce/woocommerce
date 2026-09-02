@@ -24,6 +24,7 @@
 namespace LocalCi;
 
 require_once __DIR__ . '/lib/Shell.php';
+require_once __DIR__ . '/lib/Cleanup.php';
 require_once __DIR__ . '/lib/Output.php';
 require_once __DIR__ . '/lib/Git.php';
 require_once __DIR__ . '/lib/GitHubApi.php';
@@ -35,6 +36,12 @@ require_once __DIR__ . '/lib/Options.php';
 
 const REPOSITORY   = 'woocommerce/woocommerce';
 const TRUNK_BRANCH = 'trunk';
+
+// Armed before anything is started, so an interrupt during the checks — by far
+// the longest part of a run — stops them rather than orphaning them.
+Cleanup::arm();
+Cleanup::add( array( CheckRunner::class, 'stop_everything' ) );
+Cleanup::add( array( TemporaryRef::class, 'remove' ) );
 
 $options = Options::from_argv( $argv );
 

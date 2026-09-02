@@ -33,13 +33,6 @@ final class TemporaryRef {
 	private static $published;
 
 	/**
-	 * Whether cleanup handlers have been registered.
-	 *
-	 * @var bool
-	 */
-	private static $handlers_registered = false;
-
-	/**
 	 * Publish HEAD under a ref named after the commit.
 	 *
 	 * @param string $sha Commit to publish.
@@ -47,8 +40,6 @@ final class TemporaryRef {
 	 * @return bool Whether the push succeeded.
 	 */
 	public static function publish( string $sha ): bool {
-		self::register_handlers();
-
 		$ref = 'refs/local-ci/' . $sha;
 
 		if ( ! Git::push_ref( $ref ) ) {
@@ -79,43 +70,5 @@ final class TemporaryRef {
 		self::$published = null;
 
 		Git::delete_ref( $ref );
-	}
-
-	/**
-	 * Arrange for cleanup however the process ends.
-	 *
-	 * Anything this tool started elsewhere is stopped here too, so an interrupted
-	 * run does not leave test processes holding the CPU.
-	 */
-	private static function register_handlers(): void {
-		if ( self::$handlers_registered ) {
-			return;
-		}
-
-		self::$handlers_registered = true;
-
-		register_shutdown_function(
-			static function (): void {
-				CheckRunner::stop_everything();
-				self::remove();
-			}
-		);
-
-		if ( ! function_exists( 'pcntl_signal' ) ) {
-			return;
-		}
-
-		pcntl_async_signals( true );
-
-		foreach ( array( SIGINT, SIGTERM, SIGHUP ) as $signal ) {
-			pcntl_signal(
-				$signal,
-				static function (): void {
-					CheckRunner::stop_everything();
-					self::remove();
-					exit( 130 );
-				}
-			);
-		}
 	}
 }

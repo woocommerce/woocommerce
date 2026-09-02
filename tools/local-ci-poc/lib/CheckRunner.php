@@ -68,7 +68,9 @@ final class CheckRunner {
 	public static function stop_everything(): void {
 		foreach ( self::$running as $process ) {
 			if ( is_resource( $process['handle'] ) ) {
-				proc_terminate( $process['handle'] );
+				// The whole tree, not just the process this tool spawned: that one
+				// is a package manager whose grandchildren do the actual work.
+				Cleanup::kill_process_tree( proc_get_status( $process['handle'] )['pid'] );
 				proc_close( $process['handle'] );
 			}
 
@@ -186,7 +188,7 @@ final class CheckRunner {
 		}
 
 		if ( $status['running'] ) {
-			proc_terminate( $process['handle'] );
+			Cleanup::kill_process_tree( $status['pid'] );
 			proc_close( $process['handle'] );
 			self::forget_log( $process['log'] );
 
