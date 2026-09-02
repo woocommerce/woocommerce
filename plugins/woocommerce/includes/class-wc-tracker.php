@@ -198,7 +198,8 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Close out the current snapshot, whether it was accepted or given up on.
+	 * Close out the current tracking attempt, whether a snapshot was sent or the
+	 * attempt was abandoned before one existed.
 	 *
 	 * The scheduled gate reads only the send time, so advancing it is what puts the
 	 * store back on the weekly interval and stops the daily retries.
@@ -222,13 +223,19 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get the last time tracking data was sent.
+	 * Get the time the current tracking attempt was closed out.
+	 *
+	 * Despite the option name, this is not only set on delivery: it also advances when an
+	 * attempt is abandoned, including before a snapshot could be built. The scheduled gate
+	 * reads it as "this cycle is done", not "a snapshot was sent".
 	 *
 	 * @return int|bool
 	 */
 	private static function get_last_send_time() {
 		/**
 		 * Filter the last time tracking data was sent.
+		 *
+		 * The timestamp also covers abandoned attempts, not only deliveries.
 		 *
 		 * @since 2.3.0
 		 */
