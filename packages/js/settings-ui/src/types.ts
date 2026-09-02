@@ -119,21 +119,6 @@ export type SettingsFieldContext = {
 	section?: string;
 };
 
-export type SettingsFieldComponentProps = {
-	field: SettingsUIField;
-	value: SettingsValue;
-	onChange: ( value: SettingsValue ) => void;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	setValue: ( fieldId: string, value: SettingsValue ) => void;
-	setValues: ( values: Partial< SettingsValues > ) => void;
-	context: SettingsFieldContext;
-};
-
-export type SettingsFieldComponent = (
-	props: SettingsFieldComponentProps
-) => JSX.Element | null;
-
 /**
  * The field surface a registered edit control receives. A frozen subset of
  * the DataForm field, so extensions do not couple to package internals.

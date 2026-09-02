@@ -652,6 +652,62 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		$string_args = array(
+			'download_file' => '1',
+			'order'         => 'wc_order_x',
+			'key'           => 'k',
+			'email'         => 'a@example.org',
+		);
+
+		$product_was_looked_up = false;
+		$lookup_watcher        = function ( $type ) use ( &$product_was_looked_up ) {
+			$product_was_looked_up = true;
+			return $type;
+		};
+
+		add_filter( 'woocommerce_product_type_query', $lookup_watcher );
+
+		try {
+			foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+				$_GET = $string_args;
+
+				if ( 'uid' === $arg ) {
+					// The UID is only consulted when no email address is supplied.
+					unset( $_GET['email'] );
+				}
+
+				$_GET[ $arg ]          = array( 'x' );
+				$wp_die_message        = '';
+				$product_was_looked_up = false;
+
+				// We do not use expectException() here because every argument is checked in turn.
+				try {
+					WC_Download_Handler::download_product();
+				} catch ( WPDieException $e ) {
+					$wp_die_message = $e->getMessage();
+				}
+
+				$this->assertStringContainsString(
+					'Invalid download link',
+					$wp_die_message,
+					"An array value for the \"$arg\" query argument should render the invalid download link error."
+				);
+
+				$this->assertFalse(
+					$product_was_looked_up,
+					"Array query arguments are rejected before any product lookup, but the \"$arg\" case reached one."
+				);
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $lookup_watcher );
+			$_GET = array();
+		}
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *
