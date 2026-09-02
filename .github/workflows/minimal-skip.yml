@@ -1,0 +1,52 @@
+name: 'Minimal skip'
+
+# Proof of concept. Scoped to its own files so it cannot affect any other PR.
+on:
+    pull_request:
+        paths:
+            - 'tools/minimal-skip/**'
+            - '.github/workflows/minimal-skip.yml'
+
+permissions:
+    contents: read
+    statuses: read
+
+jobs:
+    number:
+        name: 'Minimal skip: @woocommerce/number'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        env:
+            GH_TOKEN: ${{ github.token }}
+            HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+            CONTEXT: 'local-skip/@woocommerce/number'
+        steps:
+            - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
+
+            - name: 'Is there a receipt for this commit?'
+              id: 'receipt'
+              # Fails open: any error leaves found empty, so the test runs.
+              # Uncertainty must never skip.
+              run: |
+                  found=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses" 2>/dev/null \
+                    | jq -r --arg ctx "$CONTEXT" \
+                      'map(select(.context == $ctx)) | .[0] | select(.state == "success") | .creator.login' \
+                    2>/dev/null || true)
+
+                  if [ -n "$found" ]; then
+                    echo "Receipt posted by $found. Skipping the test."
+                    echo "skip=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "No receipt. Running the test."
+                    echo "skip=false" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              if: steps.receipt.outputs.skip != 'true'
+              with:
+                  install: '@woocommerce/number...'
+                  php-version: 'false'
+
+            - name: 'Run the test'
+              if: steps.receipt.outputs.skip != 'true'
+              run: pnpm --filter=@woocommerce/number test:js
