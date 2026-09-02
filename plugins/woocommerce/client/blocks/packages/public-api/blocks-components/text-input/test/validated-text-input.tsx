@@ -466,5 +466,54 @@ describe( 'ValidatedTextInput', () => {
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).not.toHaveBeenCalled();
 		} );
+		it( 'clears stale validation error when required changes from true to false', async () => {
+			const setValidationErrors = jest.fn();
+			const clearValidationError = jest.fn();
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+							clearValidationError,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
+				}
+			);
+
+			const TestComponent = ( { isRequired = true } ) => {
+				const [ inputValue, setInputValue ] = useState( '' );
+				return (
+					<ValidatedTextInput
+						instanceId={ '7' }
+						id={ 'test-input' }
+						onChange={ ( value ) => setInputValue( value ) }
+						value={ inputValue }
+						label={ 'Test Input' }
+						required={ isRequired }
+						focusOnMount={ false }
+					/>
+				);
+			};
+			const { rerender } = await render( <TestComponent /> );
+			await expect( setValidationErrors ).toHaveBeenCalledWith( {
+				'test-input': {
+					message: 'Please enter a valid test input',
+					hidden: true,
+				},
+			} );
+			setValidationErrors.mockClear();
+
+			await rerender( <TestComponent isRequired={ false } /> );
+			await expect( clearValidationError ).toHaveBeenCalledWith(
+				'test-input'
+			);
+			await expect( setValidationErrors ).not.toHaveBeenCalled();
+		} );
 	} );
 } );
