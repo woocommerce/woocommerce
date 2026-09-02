@@ -240,11 +240,11 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox cancel_order() still handles a different order after it ignored a repeated call.
+	 * @testdox cancel_order() handles each order once per request, in any call order.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
 	 */
-	public function test_cancel_order_handles_a_different_order_after_a_repeated_call(): void {
+	public function test_cancel_order_handles_each_order_once_per_request(): void {
 		global $wp_current_filter;
 
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
@@ -262,6 +262,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 			$this->prepare_cancel_order_request( $second_order );
 			WC_Form_Handler::cancel_order();
+
+			$this->prepare_cancel_order_request( $first_order );
+			WC_Form_Handler::cancel_order();
 		} finally {
 			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
 		}
@@ -269,7 +272,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_get_order( $first_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The first order should be cancelled.' );
 		$this->assertTrue( wc_get_order( $second_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The second order should be cancelled even though the previous request was deduplicated.' );
 		$this->assertSame( 2, wc_notice_count( 'notice' ), 'Each order should add exactly one cancellation notice.' );
-		$this->assertSame( 0, wc_notice_count( 'error' ), 'No repeated handling should add an error notice.' );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'Neither the immediate repeat nor the later repeat for the first order should add an error notice.' );
 	}
 
 	/**
@@ -639,9 +642,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Resets the handled order ID cancel_order() leaves behind so it cannot leak into the next test.
 	 */
 	private function reset_cancel_order_handled_flag(): void {
-		$handled_id = new ReflectionProperty( WC_Form_Handler::class, 'handled_cancel_order_id' );
-		$handled_id->setAccessible( true );
-		$handled_id->setValue( null, null );
+		$handled_ids = new ReflectionProperty( WC_Form_Handler::class, 'handled_cancel_order_ids' );
+		$handled_ids->setAccessible( true );
+		$handled_ids->setValue( null, array() );
 
 		$pending = new ReflectionProperty( WC_Form_Handler::class, 'cancel_order_redirect_pending' );
 		$pending->setAccessible( true );

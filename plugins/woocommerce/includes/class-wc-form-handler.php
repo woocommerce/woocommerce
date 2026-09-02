@@ -27,11 +27,11 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
-	 * ID of the order whose cancellation request cancel_order() already handled in this request.
+	 * IDs of the orders whose cancellation requests cancel_order() already handled in this request, as keys.
 	 *
-	 * @var int|null
+	 * @var array<int, true>
 	 */
-	private static $handled_cancel_order_id = null;
+	private static $handled_cancel_order_ids = array();
 
 	/**
 	 * Whether redirect_after_cancel_order() should redirect once wp_loaded finishes.
@@ -889,7 +889,7 @@ class WC_Form_Handler {
 				self::$cancel_order_redirect_pending = true;
 			}
 
-			if ( self::$handled_cancel_order_id === $order_id ) {
+			if ( isset( self::$handled_cancel_order_ids[ $order_id ] ) ) {
 				// Already handled earlier in this request, for example by a direct call from another callback.
 				return;
 			}
@@ -933,7 +933,7 @@ class WC_Form_Handler {
 				exit;
 			}
 
-			self::$handled_cancel_order_id = $order_id;
+			self::$handled_cancel_order_ids[ $order_id ] = true;
 		}
 	}
 
@@ -952,7 +952,7 @@ class WC_Form_Handler {
 		}
 
 		self::$cancel_order_redirect_pending = false;
-		self::$handled_cancel_order_id       = null;
+		self::$handled_cancel_order_ids      = array();
 
 		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
