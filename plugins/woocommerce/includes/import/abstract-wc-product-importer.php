@@ -240,9 +240,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @param string $global_unique_id Global Unique ID as entered in the row.
 	 * @param string $type             Row product type, or an empty string when the row has none.
 	 * @return int|WP_Error Product ID, 0 when nothing matches, or WP_Error for a type mismatch.
+	 *
+	 * @since 11.2.0
 	 */
 	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
-		// Match the stored form, which WC_Product::set_global_unique_id() strips the same way.
+		// Match the stored form; keep this in step with the stripping in WC_Product::set_global_unique_id().
 		$global_unique_id = (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
 
 		if ( '' === $global_unique_id ) {
