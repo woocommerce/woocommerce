@@ -21,6 +21,10 @@ import {
 	type AddressFieldsForShippingRates as AddressFieldsForShippingRatesType,
 } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
+// Deep import avoids pulling the whole @woocommerce/blocks-checkout barrel
+// (React components, data stores) into base-utils. isPostcode itself has no
+// such side effects; it mirrors WC_Validation::is_postcode().
+import isPostcode from '@woocommerce/blocks-checkout/utils/validation/is-postcode';
 
 export const addressFieldsForShippingRates: AddressFieldsForShippingRatesType =
 	[ 'state', 'country', 'postcode', 'city' ];
@@ -173,6 +177,20 @@ export const hasAllFieldsForShippingRates = (
 		if ( hidden === true || required === false ) {
 			return true;
 		}
-		return isValidAddressKey( key, address ) && address[ key ] !== '';
+		if ( ! isValidAddressKey( key, address ) || address[ key ] === '' ) {
+			return false;
+		}
+		// A partially typed postcode is not enough to fetch shipping rates.
+		// Reuse the same country-aware validation used on submit.
+		if (
+			key === 'postcode' &&
+			! isPostcode( {
+				postcode: address.postcode,
+				country: address.country,
+			} )
+		) {
+			return false;
+		}
+		return true;
 	} );
 };
