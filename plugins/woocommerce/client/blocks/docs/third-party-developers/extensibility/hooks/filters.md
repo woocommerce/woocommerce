@@ -1079,7 +1079,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ### Description
 
-Filters the variation option name for custom option slugs.
+Allows extensions to attach their own name/value pairs to a cart item, which the Store API returns in the item's `item_data` field.
 
 ### Parameters
 
@@ -1477,14 +1477,14 @@ apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Pro
 Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 
 ```php
-apply_filters( 'woocommerce_return_previous_exceptions', bool $ )
+apply_filters( 'woocommerce_return_previous_exceptions', bool $return_previous_exceptions )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $ | bool | The WP_DEBUG mode. |
+| $return_previous_exceptions | bool | Whether to include the previous exception. Defaults to the WP_DEBUG value. |
 
 ### Source
 
