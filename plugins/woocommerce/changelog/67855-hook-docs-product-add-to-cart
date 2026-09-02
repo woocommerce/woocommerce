@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Document loop_shop_per_page in WC_Query, correct the product grid, product button and quantity input hook docblocks, and fix the add to cart @since values.
+Fix the product and add to cart block hook docblocks.
