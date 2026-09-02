@@ -14,7 +14,7 @@ set -uo pipefail
 
 REPO=woocommerce/woocommerce
 CHECK_PKG=@woocommerce/number          # real check: 17 jest tests, ~1.5s, no Docker
-CONTEXT=local-ci/v1/poc
+CONTEXT="local-ci/v1/@woocommerce/number::JavaScript"   # projectName-qualified: 21 packages share the name "JavaScript"
 
 # An interrupted run must not leave the temporary ref behind.
 TEMP_REF=""
@@ -56,6 +56,7 @@ say "3 · Run an eligible check locally"
 START=$(date +%s)
 if pnpm --filter="$CHECK_PKG" test:js >/tmp/poc-check.log 2>&1; then
   ok "$CHECK_PKG passed in $(( $(date +%s) - START ))s — $(grep -oE 'Tests: +[0-9]+ passed' /tmp/poc-check.log | head -1)"
+  echo "    this is the same command CI runs for that package's JavaScript job"
 else
   no "check failed — a real run would stop here and not push"; exit 1
 fi
@@ -63,6 +64,10 @@ fi
 # ------------------------------------------- 4. make the SHA known to GitHub
 say "4 · Publish the commit to a ref that triggers nothing"
 SHA=$(git rev-parse HEAD)
+if git ls-remote origin | grep -q "^$SHA"; then
+  echo "  NOTE: this commit is already on the remote, so the 422 -> 200 transition"
+  echo "        cannot be shown. Everything else below still runs for real."
+fi
 echo "  before: does GitHub know this commit?"
 KNOWN=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
   "https://api.github.com/repos/$REPO/commits/$SHA")
