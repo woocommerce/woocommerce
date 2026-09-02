@@ -78,11 +78,12 @@
 }
 
 // Keep grouped steppers equal when child products have different `max` attributes.
-// The repeated component class overrides theme quantity input widths.
+// The repeated component class overrides theme quantity input widths. `2.9em` matches
+// the component's 40px floor at its default 14px font size and grows with larger text.
 .wc-block-add-to-cart-with-options-grouped-product-item-selector
 	.wc-block-components-quantity-selector.wc-block-components-quantity-selector
 	input.wc-block-components-quantity-selector__input {
-	width: 40px;
+	width: 2.9em;
 }
 
 // `cursor` needs to override some styles from WordPress core, that's why we
