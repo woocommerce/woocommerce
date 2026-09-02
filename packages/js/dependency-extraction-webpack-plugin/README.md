@@ -42,14 +42,14 @@ const webpackConfig = {
 
 Additional module requests on top of WordPress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) are:
 
-| Request                        | Global                   | Script handle          | Notes                                                   |
-| ------------------------------ | ------------------------ | ---------------------- | --------------------------------------------------------|
-| `@woocommerce/data`            | `wc['data']`             | `wc-store-data`        | |
-| `@woocommerce/csv-export`      | `wc['csvExport']`        | `wc-csv`               | |
-| `@woocommerce/blocks-registry` | `wc['wcBlocksRegistry']` | `wc-blocks-registry`   | |
-| `@woocommerce/block-data`      | `wc['wcBlocksData']`     | `wc-blocks-data-store` | This dependency does not have an associated npm package |
-| `@woocommerce/settings`        | `wc['wcSettings']`       | `wc-settings`          | |
-| `@woocommerce/*`               | `wc['*']`                | `wc-*`                 | |
+| Request | Global | Script handle | Notes |
+| --- | --- | --- | --- |
+| `@woocommerce/data` | `wc['data']` | `wc-store-data` | |
+| `@woocommerce/csv-export` | `wc['csvExport']` | `wc-csv` | |
+| `@woocommerce/blocks-registry` | `wc['wcBlocksRegistry']` | `wc-blocks-registry` | |
+| `@woocommerce/block-data` | `wc['wcBlocksData']` | `wc-blocks-data-store` | This dependency does not have an associated npm package |
+| `@woocommerce/settings` | `wc['wcSettings']` | `wc-settings` | |
+| `@woocommerce/*` | `wc['*']` | `wc-*` | |
 
 ### Options
 
