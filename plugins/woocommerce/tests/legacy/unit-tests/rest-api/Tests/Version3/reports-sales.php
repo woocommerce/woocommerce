@@ -81,6 +81,67 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose a stable V3 sales response shape for an empty day.
+	 */
+	public function test_sales_response_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$date    = wp_date( 'Y-m-d' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_query_params(
+			array(
+				'date_min' => $date,
+				'date_max' => $date,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+
+		$report = $reports[0];
+		$this->assertSame(
+			array(
+				'total_sales',
+				'net_sales',
+				'average_sales',
+				'total_orders',
+				'total_items',
+				'total_tax',
+				'total_shipping',
+				'total_refunds',
+				'total_discount',
+				'totals_grouped_by',
+				'totals',
+				'total_customers',
+				'_links',
+			),
+			array_keys( $report )
+		);
+
+		foreach ( array( 'total_sales', 'net_sales', 'average_sales', 'total_tax', 'total_shipping', 'total_discount' ) as $key ) {
+			$this->assertIsString( $report[ $key ], $key . ' should be serialized as a decimal string.' );
+		}
+		foreach ( array( 'total_orders', 'total_items', 'total_refunds', 'total_customers' ) as $key ) {
+			$this->assertIsInt( $report[ $key ], $key . ' should be serialized as an integer.' );
+		}
+
+		$this->assertSame( 'day', $report['totals_grouped_by'] );
+		$this->assertArrayHasKey( $date, $report['totals'] );
+
+		$period = $report['totals'][ $date ];
+		$this->assertSame( array( 'sales', 'orders', 'items', 'tax', 'shipping', 'discount', 'customers', 'refunds' ), array_keys( $period ) );
+		foreach ( array( 'sales', 'tax', 'shipping', 'discount', 'refunds' ) as $key ) {
+			$this->assertIsString( $period[ $key ], $key . ' should be serialized as a decimal string.' );
+		}
+		foreach ( array( 'orders', 'items', 'customers' ) as $key ) {
+			$this->assertIsInt( $period[ $key ], $key . ' should be serialized as an integer.' );
+		}
+	}
+
+	/**
 	 * @testdox Should return sales totals from HPOS data when sync is disabled.
 	 */
 	public function test_get_sales_report_with_hpos_enabled_and_sync_off(): void {
