@@ -714,8 +714,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'has_tokens' )->willReturn( true );
+
 		$store = new PendingNotificationStore();
-		$store->init( $this->createMock( InternalNotificationDispatcher::class ) );
+		$store->init( $this->createMock( InternalNotificationDispatcher::class ), $data_store );
 
 		$method = new \ReflectionMethod( PendingNotificationStore::class, 'schedule_safety_net' );
 		$method->setAccessible( true );

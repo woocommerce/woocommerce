@@ -32,6 +32,13 @@ class PushTokensDataStore {
 	 */
 	private array $tokens_by_roles_cache = array();
 
+	/**
+	 * In-memory cache for get_user_ids_with_tokens(). Null until the first lookup.
+	 *
+	 * @var int[]|null
+	 */
+	private ?array $users_with_tokens_cache = null;
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -312,6 +319,46 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Returns the IDs of users that own at least one push token.
+	 *
+	 * Memoized per request, so a token registered later in the same request is
+	 * not reflected.
+	 *
+	 * @since 11.2.0
+	 * @return int[]
+	 */
+	private function get_user_ids_with_tokens(): array {
+		if ( null !== $this->users_with_tokens_cache ) {
+			return $this->users_with_tokens_cache;
+		}
+
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
+		$user_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		$this->users_with_tokens_cache = array_map( 'intval', $user_ids );
+
+		return $this->users_with_tokens_cache;
+	}
+
+	/**
+	 * Determines whether any push token exists, ignoring roles and preferences
+	 * so callers can bail out before the cost of get_tokens_for_roles().
+	 *
+	 * @since 11.2.0
+	 * @return bool True if at least one push token exists.
+	 */
+	public function has_tokens(): bool {
+		return ! empty( $this->get_user_ids_with_tokens() );
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
@@ -350,15 +397,7 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		global $wpdb;
-
-		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
-		$users_with_tokens = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
-				PushToken::POST_TYPE
-			)
-		);
+		$users_with_tokens = $this->get_user_ids_with_tokens();
 
 		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
