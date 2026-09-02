@@ -59,7 +59,9 @@ fs.rmSync( path.join( targetDirectory, 'blocks-json.php' ), { force: true } );
 
 for ( const sourceManifest of sourceManifests ) {
 	const metadata = JSON.parse( fs.readFileSync( sourceManifest, 'utf8' ) );
-	const blockName = String( metadata.name ?? '' ).split( '/' )[ 1 ];
+	// Block names are `namespace/block-name`, the shape WordPress itself enforces. Reject anything else:
+	// a name like `woocommerce/..` would otherwise resolve to a path outside the target directory.
+	const blockName = /^[a-z][a-z0-9-]*\/([a-z][a-z0-9-]*)$/.exec( String( metadata.name ?? '' ) )?.[ 1 ];
 	if ( ! blockName ) {
 		throw new Error( `Invalid block name in ${ sourceManifest }` );
 	}
