@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
