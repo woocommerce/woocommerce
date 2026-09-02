@@ -57,6 +57,13 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 			$permalink    = $notification->get_product_permalink();
 			$variation    = $notification->get_product_formatted_variation_list( true );
 			$date_created = $notification->get_date_created();
+
+			$cancel_label_name = '' !== $product_name ? $product_name : __( 'an unavailable product', 'woocommerce' );
+			if ( '' !== $variation ) {
+				$cancel_label_name .= ' ' . $variation;
+			}
+			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
+			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $cancel_label_name );
 			?>
 			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
 				<th class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>" scope="row">
@@ -91,7 +98,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
 							<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
 							<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
-							<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+							<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 						</form>
 					<?php else : ?>
 						&mdash;
