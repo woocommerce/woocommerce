@@ -104,8 +104,8 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The empty query container does not add a database join.
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- The empty query container does not add a database join.
+			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Optional container; populated only when the hide-free-products option is on.
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Catalog visibility and out-of-stock exclusion are stored only in the product_visibility taxonomy; term_taxonomy_id lookups use the term_relationships index.
 				'relation' => 'AND',
 			),
 		);
@@ -137,7 +137,7 @@ class WC_Widget_Products extends WC_Widget {
 					'terms'    => $product_visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ],
 					'operator' => 'NOT IN',
 				),
-			); // WPCS: slow query ok.
+			);
 		}
 
 		switch ( $show ) {
