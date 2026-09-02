@@ -97,6 +97,14 @@ trait CheckoutTrait {
 			$session->save_data();
 		}
 
+		/*
+		 * Recovery writes the success status and redirect onto this instance rather than whatever
+		 * the hook below leaves in $payment_result. The hook takes the result by reference and can
+		 * replace it, including with a value that is not a PaymentResult at all, and the caller
+		 * keeps this instance either way: it is the one serialised into the response.
+		 */
+		$result_for_recovery = $payment_result;
+
 		try {
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
@@ -128,7 +136,7 @@ trait CheckoutTrait {
 			 * actually represents.
 			 */
 			if ( $this->order_has_taken_payment( $order ) ) {
-				$this->recover_order_that_took_payment( $order, $e, $payment_result );
+				$this->recover_order_that_took_payment( $order, $e, $result_for_recovery );
 				return;
 			}
 

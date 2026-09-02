@@ -3340,21 +3340,32 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->fail_after_payment_is_taken();
 
 		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
 
 		$this->assertEquals(
 			200,
 			$response->get_status(),
-			'A failure after payment was taken must not be reported as a failed checkout: ' . print_r( $response->get_data(), true )
+			'A failure after payment was taken must not be reported as a failed checkout: ' . print_r( $data, true )
+		);
+
+		// A 200 on its own proves little: the route returns one whenever process_payment() does not
+		// throw, so the payload is what shows the shopper was actually sent to their order.
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must report the payment as successful.' );
+		$this->assertSame(
+			wc_get_order( $data['order_id'] )->get_checkout_order_received_url(),
+			$data['payment_result']['redirect_url'],
+			'Recovery must redirect the shopper to the order they just paid for.'
 		);
 	}
 
 	/**
-	 * @testdox An order that took payment is not left awaiting payment when a later step fails.
+	 * @testdox A single attempt that fails after payment leaves one order, and the shopper is sent to it.
 	 */
 	public function test_failure_after_payment_is_taken_leaves_the_order_paid() {
 		$this->fail_after_payment_is_taken();
 
-		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
 
 		$orders = wc_get_orders(
 			array(
@@ -3364,6 +3375,14 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertCount( 1, $orders, 'Exactly one order should exist after a single place-order attempt.' );
 		$this->assertFalse( $orders[0]->needs_payment(), 'The order took payment, so it must not be left awaiting payment.' );
+
+		// The helper pays the order itself, so the assertion above holds with or without recovery.
+		// Tying the response to that same order is what shows recovery ran.
+		$this->assertSame(
+			$orders[0]->get_id(),
+			$response->get_data()['order_id'],
+			'The shopper must be sent to the order that took payment, not told to place another.'
+		);
 	}
 
 	/**
@@ -3489,5 +3508,93 @@ class Checkout extends \WP_Test_REST_TestCase {
 			),
 			'The merchant needs a trace of the failure on the order, since the shopper was told the checkout succeeded. Notes: ' . print_r( $notes, true )
 		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock() {
+		// Its own product rather than a class fixture, so enabling stock management here cannot
+		// leak into the other tests in this class.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		// The only extension hooks between wc_reserve_stock_for_order() and update_status( 'pending' )
+		// are deprecated ones, and that window is exactly what this test covers, so the notice is
+		// expected rather than a signal to hook something else.
+		$this->setExpectedDeprecated( 'woocommerce_blocks_checkout_order_processed' );
+
+		// Fires while the order is still checkout-draft and holding stock.
+		$state_at_failure = null;
+		add_action(
+			'woocommerce_blocks_checkout_order_processed',
+			function () use ( &$state_at_failure, $product ) {
+				$draft_ids = wc_get_orders(
+					array(
+						'limit'  => 1,
+						'status' => 'checkout-draft',
+						'return' => 'ids',
+					)
+				);
+
+				$state_at_failure = array(
+					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
+				);
+				throw new \Exception( 'Extension failed while the order was still a draft.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 500, $response->get_status(), 'The checkout should still be reported as failed: ' . print_r( $response->get_data(), true ) );
+
+		// Without these the test could pass for the wrong reason: no hold placed, or the order
+		// already past checkout-draft by the time the failure lands.
+		$this->assertSame( 2, $state_at_failure['held'], 'The order must actually be holding stock when the failure happens, or this test proves nothing.' );
+		$this->assertSame( 'checkout-draft', $state_at_failure['status'], 'The failure must land while the order is still a draft, which is the window this test covers.' );
+
+		$this->assertSame(
+			0,
+			(int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+			'A draft order that never took payment must not keep its stock hold when the checkout fails.'
+		);
+	}
+
+	/**
+	 * @testdox Recovery survives a gateway that replaces the payment result with an invalid value.
+	 */
+	public function test_recovery_handles_a_gateway_that_discards_the_payment_result() {
+		// Takes payment, then hands back something that is not a PaymentResult. The route rejects
+		// the result, and recovery has to cope with the replacement rather than fatal on it.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) {
+				$context->order->payment_complete();
+				$payment_result = null;
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A discarded payment result must not turn a paid order into a fatal: ' . print_r( $data, true )
+		);
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
 	}
 }
