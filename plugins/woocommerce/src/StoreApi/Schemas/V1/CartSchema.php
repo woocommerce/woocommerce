@@ -354,6 +354,11 @@ class CartSchema extends AbstractSchema {
 
 		$cart_all_items  = $cart->get_cart();
 		$cart_line_items = array_values( array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product ) );
+		if ( ! empty( $cart_line_items ) ) {
+			// Prime the reserved-stock cache once for the whole cart so per-item lookups via
+			// QuantityLimits and CartController collapse into a single SQL.
+			$controller->prime_reserved_stock_for_cart_items( $cart_all_items );
+		}
 
 		// Batch-prime image attachment caches for cross-sells and cart line items in one query.
 		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array_merge( $cross_sells, array_column( $cart_line_items, 'data' ) ) );

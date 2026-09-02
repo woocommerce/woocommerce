@@ -46,6 +46,8 @@ class CartController {
 		$quantity_limits = new QuantityLimits();
 		$cart_items      = $this->get_cart_items();
 
+		$this->prime_reserved_stock_for_cart_items( $cart_items );
+
 		foreach ( $cart_items as $cart_item ) {
 			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
 
@@ -569,6 +571,8 @@ class CartController {
 		$too_many_in_cart_products     = [];
 		$partial_out_of_stock_products = [];
 		$not_purchasable_products      = [];
+
+		$this->prime_reserved_stock_for_cart_items( $cart_items );
 
 		foreach ( $cart_items as $cart_item ) {
 			try {
@@ -1101,9 +1105,38 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		$qty_reserved = ( new ReserveStock() )->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$qty_reserved = ( new ReserveStock() )->get_reserved_stock_cached( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
+	}
+
+	/**
+	 * Prime the request-scoped reserved-stock cache for the stock-managed products in the cart.
+	 *
+	 * Collapses the per-item N+1 against `wc_reserved_stock` into a single SELECT shared
+	 * across {@see validate_cart_items()}, {@see get_remaining_stock_for_product()}, and
+	 * {@see QuantityLimits::get_remaining_stock()} called from `CartItemSchema`.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array $cart_items Cart items (as returned by `WC_Cart::get_cart()`).
+	 */
+	public function prime_reserved_stock_for_cart_items( $cart_items ): void {
+		$product_ids = array();
+		foreach ( $cart_items as $cart_item ) {
+			$product = $cart_item['data'] ?? false;
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+			if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+				continue;
+			}
+			$product_ids[] = (int) $product->get_stock_managed_by_id();
+		}
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+		( new ReserveStock() )->prime_reserved_stock( $product_ids, $this->get_draft_order_id() );
 	}
 
 	/**
