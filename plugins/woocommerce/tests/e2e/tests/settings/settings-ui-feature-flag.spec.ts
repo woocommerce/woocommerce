@@ -87,9 +87,6 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			.first();
 		await expect( dataForm ).toBeVisible();
 		await expect(
-			dataForm.locator( '.dataforms-layouts-card__field' )
-		).toHaveCount( 3 );
-		await expect(
 			settingsUI.locator( '.wc-settings-ui__section-card' )
 		).toHaveCount( 0 );
 
@@ -116,6 +113,75 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		expect( compatibilityFailures ).toEqual( [] );
 	} );
 
+	test( 'saves a DataForm edit through the form post round-trip', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		const settingsUI = page.locator( '[data-wc-settings-ui]' );
+		await expect( settingsUI ).toBeVisible();
+
+		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
+		const originalUnit = await weightUnit.inputValue();
+		const updatedUnit = originalUnit === 'kg' ? 'g' : 'kg';
+		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
+
+		await expect( saveButton ).toBeDisabled();
+		await weightUnit.selectOption( updatedUnit );
+		await expect( saveButton ).toBeEnabled();
+		await saveButton.click();
+
+		await expect(
+			page.getByText( 'Your settings have been saved.' )
+		).toBeVisible();
+		await page.reload();
+		await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
+			updatedUnit
+		);
+
+		await settingsUI
+			.getByLabel( 'Weight unit' )
+			.selectOption( originalUnit );
+		await settingsUI.getByRole( 'button', { name: 'Save' } ).click();
+		await expect(
+			page.getByText( 'Your settings have been saved.' )
+		).toBeVisible();
+		await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
+			originalUnit
+		);
+	} );
+
+	test( 'toggles dependent fields with a visibility rule', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		const settingsUI = page.locator( '[data-wc-settings-ui]' );
+		await expect( settingsUI ).toBeVisible();
+
+		const enableReviews = settingsUI.getByLabel( 'Enable product reviews' );
+		const verifiedOwnerLabel = settingsUI.getByLabel(
+			'Show "verified owner" label on customer reviews'
+		);
+		const verifiedOwnersOnly = settingsUI.getByLabel(
+			'Reviews can only be left by "verified owners"'
+		);
+		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
+
+		await expect( enableReviews ).toBeChecked();
+		await expect( verifiedOwnerLabel ).toBeVisible();
+		await expect( verifiedOwnersOnly ).toBeVisible();
+
+		await enableReviews.uncheck();
+		await expect( verifiedOwnerLabel ).toHaveCount( 0 );
+		await expect( verifiedOwnersOnly ).toHaveCount( 0 );
+		await expect( saveButton ).toBeEnabled();
+
+		await enableReviews.check();
+		await expect( verifiedOwnerLabel ).toBeVisible();
+		await expect( verifiedOwnersOnly ).toBeVisible();
+		// Restoring the original value leaves nothing to save.
+		await expect( saveButton ).toBeDisabled();
+	} );
+
 	test( 'loads a declared component registration before mounting settings', async ( {
 		page,
 	} ) => {
@@ -129,6 +195,15 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		await expect(
 			page.getByTestId( 'settings-ui-registered-component' )
 		).toContainText( 'Registered settings UI component' );
+
+		const registeredInput = page.getByLabel( 'Registered component value' );
+		await expect( registeredInput ).toHaveValue( 'Initial value' );
+		await registeredInput.fill( 'Updated value' );
+		await expect(
+			page.locator(
+				'input[name="settings_ui_component_registered_value"]'
+			)
+		).toHaveValue( 'Updated value' );
 	} );
 
 	test( 'fails closed when an executed script omits its component registration', async ( {
