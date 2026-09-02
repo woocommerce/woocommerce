@@ -240,6 +240,14 @@ class BlockPatterns {
 	/**
 	 * Parse prefixed categories from the PTK patterns into the actual WooCommerce categories.
 	 *
+	 * The Patterns Toolkit returns category identifiers as prefixed slugs (for
+	 * example `_woo_featured_selling`) whose titles may be localized (or, for
+	 * some locales, malformed). The slug is the stable, locale-independent
+	 * identifier, so derive the canonical category from it instead of from the
+	 * (possibly translated) title. This keeps the category registered under the
+	 * expected slug (for example `featured-selling`) in every locale, letting
+	 * PatternRegistry apply the translated label.
+	 *
 	 * @param array $patterns The patterns to parse.
 	 * @return array The parsed patterns.
 	 */
@@ -261,10 +269,10 @@ class BlockPatterns {
 				$pattern['categories'] = array_map(
 					function ( $category ) {
 						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
-							if ( strpos( $category['title'], $prefix ) !== false ) {
-								$parsed_category   = str_replace( $prefix, '', $category['title'] );
-								$parsed_category   = str_replace( '_', ' ', $parsed_category );
-								$category['title'] = ucfirst( $parsed_category );
+							if ( str_starts_with( $category['slug'], $prefix ) ) {
+								$canonical_slug    = substr( $category['slug'], strlen( $prefix ) );
+								$category['title'] = ucfirst( str_replace( '_', ' ', $canonical_slug ) );
+								$category['slug']  = $canonical_slug;
 							}
 						}
 
