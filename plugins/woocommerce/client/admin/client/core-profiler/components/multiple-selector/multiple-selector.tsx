@@ -41,6 +41,10 @@ export const MultipleSelector = ( {
 			getFilteredItems={ ( allItems ) => allItems }
 			selected={ selectedOptions }
 			inputProps={ {
+				// Typing is not supported here, and on touch devices the
+				// virtual keyboard covers the menu with no way to dismiss it,
+				// so keep it from opening.
+				readOnly: true,
 				'aria-readonly': true,
 				'aria-label': __(
 					'Use up and down arrow keys to navigate',
