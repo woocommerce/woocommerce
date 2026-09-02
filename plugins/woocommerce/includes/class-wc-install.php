@@ -3188,17 +3188,13 @@ EOT;
 <!-- /wp:woocommerce/filled-cart-block -->
 
 <!-- wp:woocommerce/empty-cart-block -->
-<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
-<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
 <!-- wp:separator {"className":"is-style-dots"} -->
 <hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
 <!-- /wp:separator -->
 
-<!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
 <!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>

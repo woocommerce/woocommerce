@@ -529,12 +529,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_items\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_order_item_type\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -4235,12 +4229,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/importers/class-wc-tax-rate-importer.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Variant SKU'' \(''Variant SKU'', ''Variant SKU''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: includes/admin/importers/mappings/shopify.php
 
 		-
 			message: '#^Variable \$errors might not be defined\.$#'
@@ -8263,12 +8251,6 @@ parameters:
 			path: includes/admin/woocommerce-legacy-reports.php
 
 		-
-			message: '#^@param array \$terms does not accept actual type of parameter\: array\<int, int\|string\|WP_Term\>\|numeric\-string\|WP_Error\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^@param string \$search_text does not accept actual type of parameter\: array\|string\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -8379,7 +8361,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
 			identifier: method.notFound
-			count: 4
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -15835,12 +15817,6 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
-			message: '#^Parameter \#2 \$args of function wp_safe_remote_post expects array\{method\?\: string, timeout\?\: float, redirection\?\: int, httpversion\?\: string, user\-agent\?\: string, reject_unsafe_urls\?\: bool, blocking\?\: bool, headers\?\: array\|string, \.\.\.\}, array\{method\: ''POST'', timeout\: 45, redirection\: 5, httpversion\: ''1\.0'', blocking\: false, headers\: array\{user\-agent\: non\-falsy\-string\}, body\: non\-empty\-string\|false, cookies\: array\{\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
 			message: '#^Property WC_Shipping_Method\:\:\$enabled \(string\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
@@ -17187,7 +17163,7 @@ parameters:
 		-
 			message: '#^Offset 1 might not exist on array\{0\: WC_DateTime, 1\?\: WC_DateTime\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 2
+			count: 1
 			path: includes/data-stores/class-wc-data-store-wp.php
 
 		-
@@ -24242,12 +24218,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function wp_trash_comment expects int\|WP_Comment, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
-
-		-
-			message: '#^Parameter \#1 \$commentarr of function wp_update_comment expects array, array\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
@@ -38634,7 +38604,7 @@ parameters:
 		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 12
+			count: 10
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
@@ -38735,30 +38705,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:create_products_permission_check\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|bool but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\|WP_REST_Response\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
@@ -38890,30 +38836,6 @@ parameters:
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_snooze_task\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
@@ -39010,12 +38932,6 @@ parameters:
 			path: src/Admin/API/OnboardingTasks.php
 
 		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:dismiss_task\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:get_tasks\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
@@ -39047,12 +38963,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:snooze_task_permissions_check\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks\:\:undo_dismiss_task\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
@@ -50670,12 +50580,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\Downloads\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\Downloads\:\:render_order_downloads_column_headers\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
 			count: 1
 			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
 
@@ -62683,12 +62587,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62815,12 +62713,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\|WC_Product given\.$#'
 			identifier: argument.type
 			count: 2
@@ -62833,20 +62725,8 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$variation of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for_variation\(\) expects WC_Product_Variation, WC_Product given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:create_data_for_product\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WC_Product\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 

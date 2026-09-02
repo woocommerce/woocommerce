@@ -57,6 +57,7 @@ class WC_REST_Authentication {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
+		add_filter( 'rest_authentication_errors', array( $this, 'reject_out_of_scope_route' ), 20 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'check_user_permissions' ), 10, 3 );
 	}
@@ -71,16 +72,125 @@ class WC_REST_Authentication {
 			return false;
 		}
 
+		$resolved_route = $this->resolved_route();
+		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
+			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+
+		/**
+		 * Filters whether the current request is a request to the WooCommerce REST API.
+		 *
+		 * @since 2.6.0
+		 *
+		 * @param bool $is_request_to_rest_api Whether the request is to a WooCommerce REST API endpoint.
+		 */
+		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $is_wc_route );
+	}
+
+	/**
+	 * Whether a route is in a namespace a WooCommerce API key may authenticate.
+	 *
+	 * 'wc/' is WooCommerce; 'wc-' lets third party plugins use our authentication methods.
+	 *
+	 * @param string $route Route without the REST prefix or surrounding slashes.
+	 * @return bool
+	 */
+	private function is_wc_namespace( string $route ): bool {
+		return str_starts_with( $route, 'wc/' ) || str_starts_with( $route, 'wc-' );
+	}
+
+	/**
+	 * The route WordPress resolved for this request, trimmed of surrounding slashes.
+	 *
+	 * Null when WordPress has not parsed the request yet, which is not the same as an empty route.
+	 *
+	 * @return string|null
+	 */
+	private function resolved_route(): ?string {
+		global $wp;
+
+		if ( ! $wp instanceof WP || ! isset( $wp->query_vars['rest_route'] ) || ! is_string( $wp->query_vars['rest_route'] ) ) {
+			return null;
+		}
+
+		return trim( $wp->query_vars['rest_route'], '/' );
+	}
+
+	/**
+	 * The REST route the request URI points to, normalized the way WordPress matches it.
+	 *
+	 * Returns the route without the REST prefix or surrounding slashes, e.g. 'wc/v3/products', or
+	 * an empty string when the URI is not a REST request. This reads the URI and nothing else, so the
+	 * route it returns is always the one the URI names. That is what is_resolved_route_in_scope()
+	 * compares the route WordPress ends up resolving against.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return string
+	 */
+	private function route_from_request_uri() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return '';
+		}
+
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
-		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 
-		// Check if the request is to the WC API endpoints.
-		$woocommerce = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
+		/*
+		 * Parse the raw URI, not an esc_url_raw() copy. This decides whether an API key may
+		 * authenticate the request, so it has to read the URI the way WordPress routes on it.
+		 * esc_url_raw() rewrites its input, so the route derived from an escaped copy is not always
+		 * the route that gets served. Only parsed and compared here, never output, so no escaping is
+		 * needed.
+		 */
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and compared against REST route prefixes only, never output or stored; sanitizing would diverge from the route WordPress dispatches.
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
 
-		// Allow third party plugins use our authentication methods.
-		$third_party = ( false !== strpos( $request_uri, $rest_prefix . 'wc-' ) );
+		// WP::parse_request() trims leading slashes off the URI, but wp_parse_url() would read a
+		// leading '//' as a host, so collapse them first.
+		if ( str_starts_with( $request_uri, '//' ) ) {
+			$request_uri = '/' . ltrim( $request_uri, '/' );
+		}
 
-		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
+		$query_string = wp_parse_url( $request_uri, PHP_URL_QUERY );
+		$query_params = array();
+
+		if ( is_string( $query_string ) ) {
+			parse_str( $query_string, $query_params );
+		}
+
+		// Plain permalinks carry the route in the query string.
+		if ( isset( $query_params['rest_route'] ) && is_string( $query_params['rest_route'] ) ) {
+			return trim( $query_params['rest_route'], '/' );
+		}
+
+		$request_path = wp_parse_url( $request_uri, PHP_URL_PATH );
+
+		if ( ! is_string( $request_path ) ) {
+			return '';
+		}
+
+		// Strip the site's home path the way WP::parse_request() does, so subdirectory installs
+		// resolve to the same path WordPress matches its rewrite rules against.
+		$request_path = trim( $request_path, '/' );
+		$home_path    = wp_parse_url( home_url(), PHP_URL_PATH );
+
+		if ( is_string( $home_path ) && '' !== $home_path ) {
+			$home_path = trim( $home_path, '/' );
+
+			if ( 0 === stripos( $request_path, $home_path ) ) {
+				$request_path = trim( substr( $request_path, strlen( $home_path ) ), '/' );
+			}
+		}
+
+		if ( str_starts_with( $request_path, 'index.php/' ) ) {
+			$request_path = substr( $request_path, strlen( 'index.php/' ) );
+		}
+
+		// Pretty permalinks carry the route after the REST prefix; anything else is not a REST request.
+		if ( ! str_starts_with( $request_path, $rest_prefix ) ) {
+			return '';
+		}
+
+		return trim( substr( $request_path, strlen( $rest_prefix ) ), '/' );
 	}
 
 	/**
@@ -146,6 +256,67 @@ class WC_REST_Authentication {
 		}
 
 		return $this->get_error();
+	}
+
+	/**
+	 * Reject a request when a WooCommerce API key authenticated a route outside our namespaces.
+	 *
+	 * Scope is first judged from REQUEST_URI, during 'determine_current_user', before WordPress has
+	 * parsed the request, so at that point the route the request will be dispatched to is not settled
+	 * yet. This runs later on rest_authentication_errors, after authentication_fallback() and
+	 * check_authentication_error(), so $this->user reflects the final authentication decision and
+	 * WordPress has resolved the route. It acts only on a key we authenticated ourselves; a failed or
+	 * absent key keeps the result the earlier callbacks produced.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param WP_Error|null|bool $result Authentication result from earlier callbacks.
+	 * @return WP_Error|null|bool
+	 */
+	public function reject_out_of_scope_route( $result ) {
+		if ( null !== $this->user && ! $this->is_resolved_route_in_scope() ) {
+			return new WP_Error(
+				'woocommerce_rest_authentication_error',
+				__( 'The provided API key cannot be used to access this endpoint.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Check that the route WordPress resolved is one an API key may authenticate.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool False only when the resolved route is not ours and the request URI never named it.
+	 */
+	private function is_resolved_route_in_scope() {
+		// Has WordPress picked a route yet? If not, there is nothing to compare.
+		$resolved_route = $this->resolved_route();
+
+		if ( null === $resolved_route ) {
+			return true;
+		}
+
+		// Our own namespaces are always in scope for a WooCommerce key. The read/write permission
+		// check in check_user_permissions() still bounds what the key can do there.
+		if ( $this->is_wc_namespace( $resolved_route ) ) {
+			return true;
+		}
+
+		/*
+		 * Any other namespace is in scope only when the request URI named this exact route.
+		 * WP::parse_request() can take rest_route from more than one place, so the dispatched route is
+		 * not necessarily the one woocommerce_rest_is_request_to_rest_api approved. WordPress also
+		 * decodes rest_route through parse_str() while the URI route is read raw, so the decoded form
+		 * names the same route.
+		 */
+		$uri_route     = $this->route_from_request_uri();
+		$decoded_route = trim( urldecode( $uri_route ), '/' );
+
+		return $resolved_route === $uri_route || $resolved_route === $decoded_route;
 	}
 
 	/**
