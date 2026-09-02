@@ -1,0 +1,74 @@
+name: 'POC: local CI receipt consumption'
+
+# Demonstrates the consumption half of the local-first CI proposal: a job that
+# checks for a receipt on the head commit and skips its work when a valid one
+# exists. Self-contained — it does not touch ci.yml's matrix.
+#
+# Scoped to this POC's own files so it cannot affect other pull requests.
+
+on:
+    pull_request:
+        paths:
+            - 'tools/local-ci-poc/**'
+            - '.github/workflows/poc-local-ci.yml'
+
+permissions:
+    contents: read
+    statuses: read
+
+jobs:
+    js-unit:
+        name: 'POC: @woocommerce/number JavaScript'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
+
+            - name: 'Look for a receipt on the head commit'
+              id: receipt
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                  CONTEXT: 'local-ci/v1/@woocommerce/number::JavaScript'
+              run: |
+                  # The combined status endpoint returns the latest state per context.
+                  found=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/status" \
+                    --jq ".statuses[] | select(.context == \"$CONTEXT\" and .state == \"success\") | .creator.login" \
+                    | head -1)
+
+                  if [ -n "$found" ]; then
+                    echo "substituted=true" >> "$GITHUB_OUTPUT"
+                    echo "creator=$found"   >> "$GITHUB_OUTPUT"
+                    echo "Receipt found on $HEAD_SHA, posted by $found."
+                  else
+                    echo "substituted=false" >> "$GITHUB_OUTPUT"
+                    echo "No receipt for $CONTEXT on $HEAD_SHA."
+                  fi
+
+            - name: 'Run the check (no valid receipt)'
+              if: steps.receipt.outputs.substituted != 'true'
+              run: |
+                  corepack pnpm install --filter=@woocommerce/number... --frozen-lockfile
+                  corepack pnpm --filter=@woocommerce/number test:js
+
+            - name: 'Skip the check (receipt accepted)'
+              if: steps.receipt.outputs.substituted == 'true'
+              run: |
+                  echo "Skipped: already run locally by ${{ steps.receipt.outputs.creator }}."
+
+            - name: 'Summary'
+              if: ${{ always() }}
+              run: |
+                  {
+                    echo "### POC — local CI receipt consumption"
+                    echo ""
+                    if [ "${{ steps.receipt.outputs.substituted }}" = "true" ]; then
+                      echo "**Skipped** \`@woocommerce/number\` JavaScript — receipt posted by \
+                  \`${{ steps.receipt.outputs.creator }}\`."
+                    else
+                      echo "**Ran** \`@woocommerce/number\` JavaScript — no receipt on this commit."
+                    fi
+                    echo ""
+                    echo "Not implemented: trusted-team validation, and the assertion in"
+                    echo "\`evaluate-project-jobs\` that every planned-and-not-substituted job actually ran."
+                  } >> "$GITHUB_STEP_SUMMARY"

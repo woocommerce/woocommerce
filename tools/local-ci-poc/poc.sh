@@ -64,14 +64,20 @@ fi
 # ------------------------------------------- 4. make the SHA known to GitHub
 say "4 · Publish the commit to a ref that triggers nothing"
 SHA=$(git rev-parse HEAD)
-if git ls-remote origin | grep -q "^$SHA"; then
-  echo "  NOTE: this commit is already on the remote, so the 422 -> 200 transition"
-  echo "        cannot be shown. Everything else below still runs for real."
-fi
 echo "  before: does GitHub know this commit?"
-KNOWN=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+BEFORE=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
   "https://api.github.com/repos/$REPO/commits/$SHA")
-echo "    GET /commits/$SHA → HTTP $KNOWN"
+echo "    GET /commits/$SHA → HTTP $BEFORE"
+if [ "$BEFORE" = "200" ]; then
+  echo "    NOTE: this commit is already on the remote (pushed, or open in a PR), so the"
+  echo "          422 -> 200 transition cannot be shown. To see it, make a local commit"
+  echo "          and run this before pushing. Everything below still runs for real."
+fi
+
+# Count workflow runs BEFORE the temp push, so step 5 measures what the push caused
+RUNS_BEFORE=$(curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.github.com/repos/$REPO/actions/runs?head_sha=$SHA" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["total_count"])')
 TEMP_REF="refs/local-ci/$SHA"
 git push --no-verify -q origin "HEAD:$TEMP_REF" 2>/dev/null && ok "pushed to $TEMP_REF"
 echo "  after:"
@@ -82,10 +88,16 @@ echo "    GET /commits/$SHA → HTTP $KNOWN"
 # --------------------------------------------- 5. confirm nothing triggered
 say "5 · Confirm no workflow was triggered"
 sleep 4
-RUNS=$(curl -s -H "Authorization: Bearer $TOKEN" \
+RUNS_AFTER=$(curl -s -H "Authorization: Bearer $TOKEN" \
   "https://api.github.com/repos/$REPO/actions/runs?head_sha=$SHA" \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["total_count"])')
-[ "$RUNS" = "0" ] && ok "0 workflow runs for this SHA" || no "$RUNS runs — investigate"
+echo "    workflow runs for this SHA: $RUNS_BEFORE before the push, $RUNS_AFTER after"
+if [ "$RUNS_BEFORE" = "$RUNS_AFTER" ]; then
+  ok "the temporary ref triggered nothing"
+  [ "$RUNS_AFTER" != "0" ] && echo "    (the $RUNS_AFTER existing runs come from the branch push and PR, not from this ref)"
+else
+  no "count changed — the temporary ref triggered something; investigate"
+fi
 echo "    refs/local-ci/* is outside refs/heads/* and refs/tags/*, so Actions cannot trigger on it"
 
 # ----------------------------------------------------- 6. publish a receipt
@@ -98,16 +110,18 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" \
 # ------------------------------------------------------- 7. read it back
 say "7 · Read it back, as CI would"
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://api.github.com/repos/$REPO/commits/$SHA/statuses" \
+  "https://api.github.com/repos/$REPO/commits/$SHA/status" \
   | python3 -c '
 import json,sys
-for st in json.load(sys.stdin):
+for st in json.load(sys.stdin).get("statuses", []):
     ctx = st["context"]
     if not ctx.startswith("local-ci/"):
         continue
     who = (st.get("creator") or {}).get("login", "<none>")
     print("    " + ctx + "  " + st["state"] + "  creator=" + who)
-    print("    -> CI validates that creator is in the trusted team, then subtracts the job")
+print("    NOT IMPLEMENTED: nothing reads this yet. In the full design CI would")
+print("    validate the creator against the trusted team and subtract the job.")
+print("    This POC does not skip any CI job.")
 '
 
 # -------------------------------------------------------------- 8. cleanup
