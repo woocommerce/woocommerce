@@ -270,6 +270,13 @@ class MyAccountEndpoint {
 			)
 		) : array();
 
+		// The notifications come from a raw SQL select, so nothing has primed the
+		// post cache for the products the rows render. Prime it once here instead
+		// of letting each row's wc_get_product() call issue its own query.
+		if ( $notifications ) {
+			_prime_post_caches( array_filter( array_map( static fn( $notification ) => (int) $notification->get_product_id(), $notifications ) ) );
+		}
+
 		return array(
 			'notifications' => $notifications,
 			'current_page'  => $current_page,
