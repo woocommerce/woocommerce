@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { DataForm } from '@wordpress/dataviews';
+import type { Field } from '@wordpress/dataviews';
 import { act } from 'react';
 import { createElement } from '@wordpress/element';
 import { createRoot } from 'react-dom/client';
@@ -51,6 +52,10 @@ const textField: SettingsUIField = {
 	label: 'Test field',
 	type: 'text',
 };
+
+// Unresolvable fields carry a control that throws when DataForm renders it.
+const renderEditControl = ( field: Field< SettingsValues > ) =>
+	( field.Edit as ( props: object ) => unknown )( {} );
 
 const mountedRoots: Array< () => void > = [];
 
@@ -200,28 +205,32 @@ describe( 'dataform adapter', () => {
 		] )(
 			'fails closed for unknown type "%s" with no registered renderer',
 			( type ) => {
-				expect( () =>
-					buildDataFormField(
-						{ ...textField, type },
-						createOptions( [] )
-					)
-				).toThrow( `Field type "${ type }" is not supported.` );
+				const field = buildDataFormField(
+					{ ...textField, type },
+					createOptions( [] )
+				);
+
+				expect( () => renderEditControl( field ) ).toThrow(
+					`Field type "${ type }" is not supported.`
+				);
 			}
 		);
 
 		it( 'fails closed for an unknown type that carries options', () => {
 			// Options alone resolve DataForm's adaptiveSelect control, so an
 			// unresolved type has to fail before that fallback applies.
-			expect( () =>
-				buildDataFormField(
-					{
-						...textField,
-						type: 'extension_defined',
-						options: [ { label: 'One', value: 'one' } ],
-					},
-					createOptions( [] )
-				)
-			).toThrow( 'Field type "extension_defined" is not supported.' );
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'extension_defined',
+					options: [ { label: 'One', value: 'one' } ],
+				},
+				createOptions( [] )
+			);
+
+			expect( () => renderEditControl( field ) ).toThrow(
+				'Field type "extension_defined" is not supported.'
+			);
 		} );
 	} );
 
@@ -310,12 +319,12 @@ describe( 'dataform adapter', () => {
 		it( 'fails closed when a declared component is not registered', () => {
 			jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 
-			expect( () =>
-				buildDataFormField(
-					{ ...textField, component: 'test/missing-component' },
-					createOptions( [] )
-				)
-			).toThrow(
+			const field = buildDataFormField(
+				{ ...textField, component: 'test/missing-component' },
+				createOptions( [] )
+			);
+
+			expect( () => renderEditControl( field ) ).toThrow(
 				'Component "test/missing-component" is not registered.'
 			);
 		} );
@@ -766,6 +775,68 @@ describe( 'dataform adapter', () => {
 					( input ) => input.value === 'b' && input.disabled
 				)
 			).toBe( true );
+		} );
+
+		const brokenHiddenField: SettingsUIField = {
+			id: 'hidden_field',
+			label: 'Hidden field',
+			type: 'text',
+			component: 'test/missing-component',
+			visibility: { controller: 'toggle', value: 'on' },
+		};
+		const toggleField: SettingsUIField = {
+			id: 'toggle',
+			label: 'Toggle',
+			type: 'text',
+		};
+
+		it( 'keeps a hidden field with an unregistered component off the page', () => {
+			const options = createOptions( [ toggleField, brokenHiddenField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { toggle: 'off', hidden_field: '' };
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ () => undefined }
+				/>
+			);
+
+			expect( container.querySelectorAll( 'input' ) ).toHaveLength( 1 );
+		} );
+
+		it( 'fails closed once a field with an unregistered component is visible', () => {
+			jest.spyOn( console, 'error' ).mockImplementation(
+				() => undefined
+			);
+			const options = createOptions( [ toggleField, brokenHiddenField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { toggle: 'on', hidden_field: '' };
+			const container = document.createElement( 'div' );
+			document.body.appendChild( container );
+			const root = createRoot( container );
+
+			try {
+				expect( () =>
+					act( () => {
+						root.render(
+							<DataForm
+								data={ data }
+								fields={ adapter.fields }
+								form={ adapter.getForm( data ) }
+								onChange={ () => undefined }
+							/>
+						);
+					} )
+				).toThrow(
+					'Component "test/missing-component" is not registered.'
+				);
+			} finally {
+				act( () => root.unmount() );
+				container.remove();
+			}
 		} );
 
 		it( 'shows an info field title exactly once', () => {

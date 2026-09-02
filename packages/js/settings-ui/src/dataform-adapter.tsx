@@ -243,6 +243,14 @@ const buildValidationRules = (
 	return rules;
 };
 
+// The control throws when DataForm renders it, so a hidden field with a
+// broken config stays harmless while a visible one still fails closed.
+const createFailingControl =
+	( message: string ): Field< SettingsValues >[ 'Edit' ] =>
+	() => {
+		throw new Error( message );
+	};
+
 export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
@@ -278,11 +286,12 @@ export const buildDataFormField = (
 	}
 
 	// A field declaring a component requires that custom control. Failing
-	// closed beats silently rendering a native field in its place.
+	// closed beats silently rendering a built-in control in its place.
 	if ( settingsField.component ) {
-		throw new Error(
+		field.Edit = createFailingControl(
 			`Component "${ settingsField.component }" is not registered.`
 		);
+		return field;
 	}
 
 	if ( settingsField.type === 'info' ) {
@@ -303,9 +312,10 @@ export const buildDataFormField = (
 	// draw the field. Failing closed beats dropping it beside a live Save
 	// button, and matches the page this renderer replaces.
 	if ( ! descriptor ) {
-		throw new Error(
+		field.Edit = createFailingControl(
 			`Field type "${ settingsField.type }" is not supported.`
 		);
+		return field;
 	}
 
 	if ( descriptor.edit ) {
