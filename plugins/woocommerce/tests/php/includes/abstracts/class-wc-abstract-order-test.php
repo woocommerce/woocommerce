@@ -121,7 +121,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		update_user_meta( $admin_id, 'billing_country', 'MV' ); // Different than customer's address and base location.
+		update_user_meta( $admin_id, 'billing_country', 'MV' );
+		// Different than customer's address and base location.
 		wp_set_current_user( $admin_id );
 		WC()->customer = null;
 		WC()->initialize_cart();
@@ -332,9 +333,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->apply_coupon( $coupon_code );
 		$this->assertCount( 1, $order->get_items( 'coupon' ) );
 
-		$hook_fired   = false;
-		$hook_coupon  = null;
-		$hook_order   = null;
+		$hook_fired  = false;
+		$hook_coupon = null;
+		$hook_order  = null;
 
 		add_action(
 			'woocommerce_order_removed_coupon',
@@ -359,9 +360,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_all_actions( 'woocommerce_order_removed_coupon' );
 		}
-  }
+	}
 
-  /*
+	/*
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order
@@ -808,7 +809,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
 		$this->add_product_with_cogs_to_order( $order, 56.78, 3 );
 
-		$fee = new WC_Order_Item_Fee(); // Example of line item without COGS.
+		$fee = new WC_Order_Item_Fee();
+		// Example of line item without COGS.
 		$order->add_item( $fee );
 
 		$calculated_value = $order->calculate_cogs_total_value();
