@@ -3017,7 +3017,35 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'Fixture precondition: priming must cache the product-only groups for the variation.'
 		);
 
+		// Pins a bug this branch already hit once: an earlier version released relationship
+		// caches by calling clean_object_term_cache() once per post type with the whole
+		// batch's id list, firing the action with the wrong $object_type for ids that didn't
+		// match. The release code no longer calls that helper, but nothing asserted the
+		// action itself, so a reintroduction wouldn't be caught.
+		$fired_with_wrong_type = false;
+		add_action(
+			'clean_object_term_cache',
+			function ( $object_ids, $object_type ) use ( $parent, $variation, &$fired_with_wrong_type ) {
+				$object_ids = (array) $object_ids;
+
+				if ( in_array( $parent->get_id(), $object_ids, true ) && 'product' !== $object_type ) {
+					$fired_with_wrong_type = true;
+				}
+
+				if ( in_array( $variation->get_id(), $object_ids, true ) && 'product_variation' !== $object_type ) {
+					$fired_with_wrong_type = true;
+				}
+			},
+			10,
+			2
+		);
+
 		wc_scheduled_sales();
+
+		$this->assertFalse(
+			$fired_with_wrong_type,
+			'clean_object_term_cache must not fire with a post type that does not match the ids it was given.'
+		);
 
 		foreach ( array( $parent->get_id(), $variation->get_id() ) as $id ) {
 			foreach ( $taxonomies as $taxonomy ) {
