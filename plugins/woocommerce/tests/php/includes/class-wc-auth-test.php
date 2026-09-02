@@ -35,4 +35,59 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 		$maybe_delete_key->setAccessible( true );
 		$maybe_delete_key->invoke( $wc_auth, $key_data );
 	}
+
+	/**
+	 * Get the protected WC_Auth::make_validation() method.
+	 *
+	 * @return ReflectionMethod
+	 */
+	private function get_make_validation_method() {
+		$make_validation = ( new ReflectionClass( WC_Auth::class ) )->getMethod( 'make_validation' );
+		$make_validation->setAccessible( true );
+
+		return $make_validation;
+	}
+
+	/**
+	 * A well formed set of handshake parameters passes validation.
+	 */
+	public function test_make_validation_accepts_string_parameters() {
+		$request_backup = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Saved and restored so the test can drive make_validation() with a known request.
+		$_REQUEST       = array(
+			'app_name'     => 'Test app',
+			'user_id'      => '123',
+			'return_url'   => 'https://example.com/return',
+			'callback_url' => 'https://example.com/callback',
+			'scope'        => 'read',
+		);
+
+		try {
+			$this->assertNull( $this->get_make_validation_method()->invoke( new WC_Auth() ) );
+		} finally {
+			$_REQUEST = $request_backup;
+		}
+	}
+
+	/**
+	 * An array submitted for a handshake parameter is rejected instead of reaching a string-only function.
+	 */
+	public function test_make_validation_rejects_array_parameters() {
+		$request_backup = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Saved and restored so the test can drive make_validation() with a known request.
+		$_REQUEST       = array(
+			'app_name'     => 'Test app',
+			'user_id'      => '123',
+			'return_url'   => array( 'https://example.com/return' ),
+			'callback_url' => 'https://example.com/callback',
+			'scope'        => 'read',
+		);
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Missing parameter return_url' );
+
+		try {
+			$this->get_make_validation_method()->invoke( new WC_Auth() );
+		} finally {
+			$_REQUEST = $request_backup;
+		}
+	}
 }
