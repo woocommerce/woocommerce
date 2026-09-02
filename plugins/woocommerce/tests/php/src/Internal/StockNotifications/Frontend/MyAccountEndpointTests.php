@@ -175,7 +175,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$user_b = $this->factory->user->create( array( 'role' => 'customer' ) );
 
 		$this->create_notification( $user_a, NotificationStatus::ACTIVE );
-		$b_notification = $this->create_notification( $user_b, NotificationStatus::PENDING );
+		$b_notification = $this->create_notification( $user_b, NotificationStatus::ACTIVE );
 
 		\wp_set_current_user( $user_b );
 		$endpoint = new MyAccountEndpoint();
@@ -236,23 +236,180 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * SENT and CANCELLED notifications are filtered out — only ACTIVE/PENDING render in the My Account view.
+	 * Only ACTIVE notifications render in the main My Account table. PENDING rows
+	 * have their own table, and SENT / CANCELLED rows are filtered out entirely.
 	 */
-	public function test_get_current_user_notifications_page_excludes_sent_and_cancelled(): void {
+	public function test_get_current_user_notifications_page_lists_active_only(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		\wp_set_current_user( $user_id );
 
-		$active  = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
-		$pending = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$active = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
 		$this->create_notification( $user_id, NotificationStatus::SENT );
 		$this->create_notification( $user_id, NotificationStatus::CANCELLED );
 
 		$endpoint = new MyAccountEndpoint();
 		$page     = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE );
 
-		$this->assertSame( 2, $page['total_items'] );
-		$visible_ids = array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] );
-		$this->assertEqualsCanonicalizing( array( $active->get_id(), $pending->get_id() ), $visible_ids );
+		$this->assertSame( 1, $page['total_items'] );
+		$this->assertSame( array( $active->get_id() ), array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] ) );
+	}
+
+	/**
+	 * Pagination counts only ACTIVE rows, so pending sign-ups never shift the active pages.
+	 */
+	public function test_get_current_user_notifications_page_paginates_active_only(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->create_notification( $user_id, NotificationStatus::ACTIVE );
+			$this->create_notification( $user_id, NotificationStatus::PENDING );
+		}
+
+		$endpoint = new MyAccountEndpoint();
+		$page     = $endpoint->get_current_user_notifications_page( 1, 2 );
+
+		$this->assertSame( 3, $page['total_items'] );
+		$this->assertSame( 2, $page['total_pages'] );
+		$this->assertCount( 2, $page['notifications'] );
+		foreach ( $page['notifications'] as $notification ) {
+			$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+		}
+	}
+
+	/**
+	 * The pending fetcher returns only the current user's PENDING rows, newest first.
+	 */
+	public function test_get_current_user_pending_notifications_returns_users_pending_rows_newest_first(): void {
+		$user_a = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$user_b = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$first  = $this->create_notification( $user_a, NotificationStatus::PENDING );
+		$second = $this->create_notification( $user_a, NotificationStatus::PENDING );
+		$this->create_notification( $user_a, NotificationStatus::ACTIVE );
+		$this->create_notification( $user_a, NotificationStatus::SENT );
+		$this->create_notification( $user_a, NotificationStatus::CANCELLED );
+		$this->create_notification( $user_b, NotificationStatus::PENDING );
+
+		\wp_set_current_user( $user_a );
+		$endpoint = new MyAccountEndpoint();
+		$pending  = $endpoint->get_current_user_pending_notifications( MyAccountEndpoint::DEFAULT_PER_PAGE );
+
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_map( static fn ( $n ) => $n->get_id(), $pending ) );
+		foreach ( $pending as $notification ) {
+			$this->assertSame( $user_a, (int) $notification->get_user_id() );
+			$this->assertSame( NotificationStatus::PENDING, $notification->get_status() );
+		}
+	}
+
+	/**
+	 * The pending fetcher caps the result set at the requested limit.
+	 */
+	public function test_get_current_user_pending_notifications_respects_limit(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		for ( $i = 0; $i < 4; $i++ ) {
+			$this->create_notification( $user_id, NotificationStatus::PENDING );
+		}
+
+		$endpoint = new MyAccountEndpoint();
+
+		$this->assertCount( 2, $endpoint->get_current_user_pending_notifications( 2 ) );
+		// A non-positive limit is clamped to 1 rather than dropping the LIMIT clause.
+		$this->assertCount( 1, $endpoint->get_current_user_pending_notifications( 0 ) );
+	}
+
+	/**
+	 * Anonymous visitors get no pending rows without querying by user-supplied ids.
+	 */
+	public function test_get_current_user_pending_notifications_returns_empty_for_anonymous(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		\wp_set_current_user( 0 );
+
+		$endpoint = new MyAccountEndpoint();
+		$this->assertSame( array(), $endpoint->get_current_user_pending_notifications( MyAccountEndpoint::DEFAULT_PER_PAGE ) );
+	}
+
+	/**
+	 * The rendered endpoint splits pending and active rows into their own tables, links
+	 * each pending row to a resend URL that returns to the endpoint, and honours the
+	 * pending-limit filter.
+	 */
+	public function test_render_endpoint_splits_pending_and_active_tables(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		$active    = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$pending_1 = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$pending_2 = $this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		$limit_filter = static fn () => 1;
+		add_filter( 'woocommerce_account_customer_stock_notifications_pending_limit', $limit_filter );
+		try {
+			ob_start();
+			wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+			$html = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_account_customer_stock_notifications_pending_limit', $limit_filter );
+		}
+
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringContainsString( 'Awaiting confirmation', $html );
+		$this->assertStringContainsString( 'Active notifications', $html );
+		$this->assertStringNotContainsString( "You haven't signed up", $html );
+
+		// Only the newest pending row survives the limit of 1.
+		$this->assertStringContainsString( 'value="' . $pending_2->get_id() . '"', $html );
+		$this->assertStringNotContainsString( 'value="' . $pending_1->get_id() . '"', $html );
+		$this->assertStringContainsString( 'value="' . $active->get_id() . '"', $html );
+
+		// The resend link carries the pending id and points back at the endpoint, not the product.
+		$endpoint_url = \wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) );
+		$this->assertStringContainsString( 'wc_bis_resend_notification=' . $pending_2->get_id(), $html );
+		$this->assertStringContainsString( esc_url( add_query_arg( 'wc_bis_resend_notification', $pending_2->get_id(), $endpoint_url ) ), $html );
+		$this->assertStringNotContainsString( 'wc_bis_resend_notification=' . $active->get_id(), $html );
+	}
+
+	/**
+	 * A customer with only pending sign-ups sees the pending table, not the empty state.
+	 */
+	public function test_render_endpoint_with_only_pending_rows_hides_empty_state(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		ob_start();
+		wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringNotContainsString( 'Active notifications', $html );
+		$this->assertStringNotContainsString( "You haven't signed up", $html );
+	}
+
+	/**
+	 * With no pending rows the active table renders without the "Active notifications" heading,
+	 * so a store without double opt-in sees the single table it always had.
+	 */
+	public function test_render_endpoint_without_pending_rows_omits_active_heading(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		ob_start();
+		wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+		$html = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringNotContainsString( 'Awaiting confirmation', $html );
+		$this->assertStringNotContainsString( 'Active notifications', $html );
 	}
 
 	/**
@@ -321,7 +478,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The cancellable statuses are the ones the My Account view lists.
+	 * Both PENDING and ACTIVE rows keep their Cancel button; SENT and CANCELLED never get one.
 	 */
 	public function test_is_cancellable_matches_listed_statuses(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );

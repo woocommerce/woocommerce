@@ -60,14 +60,19 @@ class NotificationManagementService {
 	 * Get resend verification email URL.
 	 *
 	 * @param Notification $notification The notification.
+	 * @param string       $base_url     Optional. URL to append the resend query args to. Defaults to the product permalink.
 	 * @return string The resend verification email URL.
 	 */
-	public function get_resend_verification_email_url( Notification $notification ): string {
+	public function get_resend_verification_email_url( Notification $notification, string $base_url = '' ): string {
+		if ( '' === $base_url ) {
+			$base_url = $notification->get_product_permalink();
+		}
+
 		$url = add_query_arg(
 			array(
 				self::RESEND_QUERY_ARG => $notification->get_id(),
 			),
-			$notification->get_product_permalink()
+			$base_url
 		);
 
 		return wp_nonce_url( $url, self::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
@@ -112,12 +117,17 @@ class NotificationManagementService {
 			return;
 		}
 
+		// Only the owner may resend a customer-linked notification. Bail silently on a
+		// mismatch, the same way the My Account cancel handler does, so the response
+		// doesn't confirm that the id exists.
+		$owner_id = (int) $notification->get_user_id();
+		if ( $owner_id > 0 && is_user_logged_in() && get_current_user_id() !== $owner_id ) {
+			return;
+		}
+
 		$this->ensure_notice_session();
 
-		$redirect_url = $notification->get_product_permalink();
-		if ( empty( $redirect_url ) ) {
-			$redirect_url = wc_get_page_permalink( 'shop' );
-		}
+		$redirect_url = $this->get_resend_redirect_url( $notification );
 
 		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
 			wc_add_notice( esc_html__( 'This notification is already verified or cancelled.', 'woocommerce' ), 'error' );
@@ -143,6 +153,35 @@ class NotificationManagementService {
 		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
+	}
+
+	/**
+	 * Resolve where to send the customer after a resend request.
+	 *
+	 * Returns to the page the link was clicked on (minus the resend query args) so a
+	 * click from My Account stays on the endpoint, and one from the product page stays
+	 * on the product. Falls back to the product permalink, then the shop page.
+	 *
+	 * @param Notification $notification The notification being resent.
+	 * @return string The redirect URL.
+	 */
+	private function get_resend_redirect_url( Notification $notification ): string {
+		$redirect_url = '';
+
+		if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri  = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$redirect_url = remove_query_arg( array( self::RESEND_QUERY_ARG, '_wpnonce' ), $request_uri );
+		}
+
+		if ( empty( $redirect_url ) ) {
+			$redirect_url = $notification->get_product_permalink();
+		}
+
+		if ( empty( $redirect_url ) ) {
+			$redirect_url = wc_get_page_permalink( 'shop' );
+		}
+
+		return $redirect_url;
 	}
 
 	/**

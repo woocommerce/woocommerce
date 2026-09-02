@@ -30,10 +30,19 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	private $email_manager;
 
 	/**
+	 * Request URI in place before the test, restored on teardown.
+	 *
+	 * @var string|null
+	 */
+	private $original_request_uri;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null;
 
 		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
 		// in production code never runs during the test.
@@ -55,6 +64,12 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
 		unset( $_GET['_wpnonce'], $_GET[ NotificationManagementService::RESEND_QUERY_ARG ] );
+		if ( null === $this->original_request_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		}
+		wp_set_current_user( 0 );
 
 		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
 		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
@@ -87,6 +102,121 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( NotificationManagementService::RESEND_QUERY_ARG . '=' . $notification->get_id(), $url );
 		$this->assertStringContainsString( '_wpnonce=', $url );
+	}
+
+	/**
+	 * @testdox Should build the resend URL on the given base URL instead of the product permalink.
+	 */
+	public function test_get_resend_verification_email_url_honours_base_url() {
+		$notification = $this->build_pending_notification();
+		$base_url     = 'https://example.com/my-account/stock-notifications/';
+
+		$url = $this->sut->get_resend_verification_email_url( $notification, $base_url );
+
+		$this->assertStringStartsWith( $base_url, $url );
+		$this->assertStringContainsString( NotificationManagementService::RESEND_QUERY_ARG . '=' . $notification->get_id(), $url );
+		$this->assertStringContainsString( '_wpnonce=', $url );
+		$this->assertStringNotContainsString( $notification->get_product_permalink(), $url );
+	}
+
+	/**
+	 * @testdox Should default the resend URL to the product permalink when no base URL is given.
+	 */
+	public function test_get_resend_verification_email_url_defaults_to_product_permalink() {
+		$notification = $this->build_pending_notification();
+
+		$url = $this->sut->get_resend_verification_email_url( $notification );
+
+		$this->assertStringStartsWith( $notification->get_product_permalink(), $url );
+	}
+
+	/**
+	 * @testdox Should redirect back to the originating URL with the resend query args stripped.
+	 */
+	public function test_resend_request_redirects_to_originating_url_without_resend_args() {
+		$notification = $this->build_pending_notification();
+
+		$nonce                  = $this->seed_resend_request( $notification->get_id() );
+		$_SERVER['REQUEST_URI'] = '/my-account/stock-notifications/?' . http_build_query(
+			array(
+				NotificationManagementService::RESEND_QUERY_ARG => $notification->get_id(),
+				'_wpnonce' => $nonce,
+				'keep'     => '1',
+			)
+		);
+
+		try {
+			$this->sut->maybe_process_resend_request();
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( '/my-account/stock-notifications/?keep=1', $e->getMessage() );
+			$this->assertStringNotContainsString( NotificationManagementService::RESEND_QUERY_ARG, $e->getMessage() );
+			$this->assertStringNotContainsString( '_wpnonce', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox Should fall back to the product permalink when the request URI is unavailable.
+	 */
+	public function test_resend_request_redirects_to_product_permalink_without_request_uri() {
+		$notification = $this->build_pending_notification();
+
+		$this->seed_resend_request( $notification->get_id() );
+		unset( $_SERVER['REQUEST_URI'] );
+
+		try {
+			$this->sut->maybe_process_resend_request();
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( $notification->get_product_permalink(), $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox Should silently drop a resend request from a logged-in user who does not own the notification.
+	 */
+	public function test_resend_request_ignores_other_users_notification() {
+		$owner_id    = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$attacker_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$notification = $this->build_pending_notification();
+		$notification->set_user_id( $owner_id );
+		$notification->save();
+
+		wp_set_current_user( $attacker_id );
+		$this->seed_resend_request( $notification->get_id() );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		// Must return before the redirect path; a redirect would throw.
+		$this->sut->maybe_process_resend_request();
+
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( '', (string) $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+		$this->assertEmpty( wc_get_notices() );
+	}
+
+	/**
+	 * @testdox Should let the owner resend a notification linked to their account.
+	 */
+	public function test_resend_request_allows_owner() {
+		$owner_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$notification = $this->build_pending_notification();
+		$notification->set_user_id( $owner_id );
+		$notification->save();
+
+		wp_set_current_user( $owner_id );
+		$this->seed_resend_request( $notification->get_id() );
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->sut->maybe_process_resend_request();
 	}
 
 	/**
@@ -263,9 +393,14 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	 * Populate superglobals as if a valid resend request reached the site.
 	 *
 	 * @param int $notification_id Notification id.
+	 * @return string The nonce placed in the request.
 	 */
-	private function seed_resend_request( int $notification_id ): void {
+	private function seed_resend_request( int $notification_id ): string {
+		$nonce = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification_id );
+
 		$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification_id;
-		$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification_id );
+		$_GET['_wpnonce']                                        = $nonce;
+
+		return $nonce;
 	}
 }

@@ -48,8 +48,9 @@ class MyAccountEndpoint {
 	/**
 	 * Statuses a customer can still cancel from My Account.
 	 *
-	 * The same list backs the listing query, the Cancel button in the template
-	 * and the cancel request handler, so the three can't drift apart.
+	 * Backs the Cancel button in the template and the cancel request handler,
+	 * so the two can't drift apart. The listing itself splits into a pending
+	 * table and an active table, each querying a single status.
 	 *
 	 * @return string[] List of {@see NotificationStatus} values.
 	 */
@@ -68,6 +69,13 @@ class MyAccountEndpoint {
 	}
 
 	/**
+	 * Notification management service, used to build resend-verification URLs.
+	 *
+	 * @var NotificationManagementService
+	 */
+	private NotificationManagementService $notification_management_service;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -76,6 +84,17 @@ class MyAccountEndpoint {
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT . '_title', array( $this, 'filter_endpoint_title' ) );
 		add_action( 'woocommerce_account_' . self::ENDPOINT . '_endpoint', array( $this, 'render_endpoint' ) );
 		add_action( 'template_redirect', array( $this, 'maybe_handle_cancel' ) );
+	}
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationManagementService $notification_management_service The notification management service.
+	 */
+	final public function init( NotificationManagementService $notification_management_service ): void {
+		$this->notification_management_service = $notification_management_service;
 	}
 
 	/**
@@ -201,23 +220,81 @@ class MyAccountEndpoint {
 		$per_page = (int) apply_filters( 'woocommerce_account_customer_stock_notifications_per_page', self::DEFAULT_PER_PAGE );
 		$per_page = max( 1, $per_page );
 
-		$page = $this->get_current_user_notifications_page( $current_page, $per_page );
+		/**
+		 * Filter how many pending (awaiting confirmation) notifications the My Account
+		 * stock-notifications tab lists above the active table.
+		 *
+		 * The pending table is not paginated, so this is a hard cap.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $limit Maximum number of pending notifications shown. Default {@see self::DEFAULT_PER_PAGE}.
+		 */
+		$pending_limit = (int) apply_filters( 'woocommerce_account_customer_stock_notifications_pending_limit', self::DEFAULT_PER_PAGE );
+		$pending_limit = max( 1, $pending_limit );
+
+		$pending = $this->get_current_user_pending_notifications( $pending_limit );
+		$page    = $this->get_current_user_notifications_page( $current_page, $per_page );
+
+		// Both lists come from raw SQL selects, so nothing has primed the post cache
+		// for the products the rows render. Prime it once here instead of letting
+		// each row's wc_get_product() call issue its own query.
+		$product_ids = array_filter( array_map( static fn( $notification ) => (int) $notification->get_product_id(), array_merge( $pending, $page['notifications'] ) ) );
+		if ( $product_ids ) {
+			_prime_post_caches( array_values( array_unique( $product_ids ) ) );
+		}
+
+		$endpoint_url = self::get_endpoint_url();
+		$resend_urls  = array();
+		foreach ( $pending as $notification ) {
+			$resend_urls[ $notification->get_id() ] = $this->notification_management_service->get_resend_verification_email_url( $notification, $endpoint_url );
+		}
 
 		\wc_get_template(
 			'myaccount/stock-notifications.php',
 			array(
-				'notifications' => $page['notifications'],
-				'has_items'     => ! empty( $page['notifications'] ),
-				'current_page'  => $page['current_page'],
-				'total_pages'   => $page['total_pages'],
-				'total_items'   => $page['total_items'],
-				'per_page'      => $per_page,
+				'notifications'         => $page['notifications'],
+				'pending_notifications' => $pending,
+				'resend_urls'           => $resend_urls,
+				'has_pending'           => ! empty( $pending ),
+				'has_items'             => ! empty( $pending ) || ! empty( $page['notifications'] ),
+				'current_page'          => $page['current_page'],
+				'total_pages'           => $page['total_pages'],
+				'total_items'           => $page['total_items'],
+				'per_page'              => $per_page,
 			)
 		);
 	}
 
 	/**
-	 * Return one page of the current user's notifications, newest first.
+	 * Return the current user's pending (awaiting confirmation) notifications, newest first.
+	 *
+	 * Always scopes to `get_current_user_id()` — the caller is never trusted.
+	 *
+	 * @param int $limit Maximum number of notifications to return.
+	 * @return array<Notification>
+	 */
+	public function get_current_user_pending_notifications( int $limit ): array {
+		$limit = max( 1, $limit );
+
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return array();
+		}
+
+		return NotificationQuery::get_notifications(
+			array(
+				'user_id'  => $user_id,
+				'status'   => NotificationStatus::PENDING,
+				'order_by' => array( 'id' => 'DESC' ),
+				'return'   => 'objects',
+				'limit'    => $limit,
+			)
+		);
+	}
+
+	/**
+	 * Return one page of the current user's active notifications, newest first.
 	 *
 	 * Always scopes to `get_current_user_id()` — the caller is never trusted.
 	 *
@@ -239,10 +316,11 @@ class MyAccountEndpoint {
 			);
 		}
 
-		// Only the statuses the customer can act on. SENT and CANCELLED rows are
-		// noise here; merchants who want a full history can build their own view
-		// via {@see NotificationQuery::get_notifications()}.
-		$statuses = self::get_cancellable_statuses();
+		// Only confirmed sign-ups. PENDING rows render in their own table above this
+		// one ({@see self::get_current_user_pending_notifications()}); SENT and
+		// CANCELLED rows are noise here, and merchants who want a full history can
+		// build their own view via {@see NotificationQuery::get_notifications()}.
+		$statuses = array( NotificationStatus::ACTIVE );
 
 		$total_items = NotificationQuery::count_notifications(
 			array(
@@ -269,13 +347,6 @@ class MyAccountEndpoint {
 				'offset'   => ( $current_page - 1 ) * $per_page,
 			)
 		) : array();
-
-		// The notifications come from a raw SQL select, so nothing has primed the
-		// post cache for the products the rows render. Prime it once here instead
-		// of letting each row's wc_get_product() call issue its own query.
-		if ( $notifications ) {
-			_prime_post_caches( array_filter( array_map( static fn( $notification ) => (int) $notification->get_product_id(), $notifications ) ) );
-		}
 
 		return array(
 			'notifications' => $notifications,
