@@ -4231,12 +4231,6 @@ parameters:
 			path: includes/admin/importers/class-wc-tax-rate-importer.php
 
 		-
-			message: '#^Array has 2 duplicate keys with value ''Variant SKU'' \(''Variant SKU'', ''Variant SKU''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: includes/admin/importers/mappings/shopify.php
-
-		-
 			message: '#^Variable \$errors might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -24224,12 +24218,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function wp_trash_comment expects int\|WP_Comment, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
-
-		-
-			message: '#^Parameter \#1 \$commentarr of function wp_update_comment expects array, array\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php

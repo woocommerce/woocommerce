@@ -3099,6 +3099,37 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
+	 */
+	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		$order_id_during_payment = 0;
+		$payment_handler         = function ( $context, $payment_result ) use ( &$order_id_during_payment ) {
+			unset( $context );
+			$order_id_during_payment = (int) WC()->session->get( 'order_awaiting_payment' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = (int) $response->get_data()['order_id'];
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should create an order.' );
+		$this->assertSame( $order_id, $order_id_during_payment, 'The order should be linked to the session before payment processing starts.' );
+		$persisted_session_data = WC()->session->get_session_data();
+		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
+		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
