@@ -377,7 +377,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 				return array( 'response' => array( 'code' => 200 ) );
 			}
 		);
-		$this->expect_tracker_warning();
+		$logger = $this->expect_tracker_warning();
 
 		// Four consecutive scheduled runs, on a store where building the snapshot always fails.
 		for ( $run = 0; $run < 4; $run++ ) {
@@ -392,6 +392,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 3, $builds, 'The build should be attempted the same number of times a failed delivery is retried, then abandoned.' );
 		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'Abandoning the snapshot should record the send time so the next attempt waits for the weekly interval.' );
 		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+		$this->assertCount( 1, $logger->warnings, 'Abandoning the snapshot should be logged once, on the run that gives up.' );
+		$this->assertSame( 3, $logger->warnings[0]['failures'], 'The warning should report the attempts made, not the run that found the limit exceeded.' );
 	}
 
 	/**
