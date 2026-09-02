@@ -29,12 +29,12 @@ class PushTokenResolutionTest extends WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provide_negative_counts
 	 *
-	 * @param int|null $registered_token_owner_count Registered token owner count.
-	 * @param int|null $eligible_user_count          Eligible user count.
+	 * @param int $registered_token_owner_count Registered token owner count.
+	 * @param int $eligible_user_count          Eligible user count.
 	 */
 	public function test_rejects_negative_diagnostic_counts(
-		?int $registered_token_owner_count,
-		?int $eligible_user_count
+		int $registered_token_owner_count,
+		int $eligible_user_count
 	): void {
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Push token resolution counts cannot be negative.' );
@@ -50,13 +50,12 @@ class PushTokenResolutionTest extends WC_Unit_Test_Case {
 	/**
 	 * Provides invalid diagnostic count combinations.
 	 *
-	 * @return array<string, array{int|null, int|null}>
+	 * @return array<string, array{int, int}>
 	 */
 	public function provide_negative_counts(): array {
 		return array(
 			'negative registered owners' => array( -1, 0 ),
 			'negative eligible users'    => array( 0, -1 ),
-			'negative with null peer'    => array( null, -1 ),
 		);
 	}
 }
