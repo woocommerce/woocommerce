@@ -985,6 +985,25 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_taxes removes an obsolete persisted tax item.
+	 */
+	public function test_update_taxes_removes_obsolete_persisted_tax_item(): void {
+		$order    = new WC_Order();
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate_id( 1234 );
+		$tax_item->set_label( 'Obsolete tax' );
+		$order->add_item( $tax_item );
+		$order->save();
+
+		$this->assertGreaterThan( 0, $tax_item->get_id(), 'The tax item should be persisted before update_taxes() removes it.' );
+
+		$order->update_taxes();
+
+		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax item should be removed from the in-memory order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_taxes(), 'The obsolete tax item should be removed from the persisted order.' );
+	}
+
+	/**
 	 * @testdox calculate_taxes handles inherited shipping tax when no taxable product class is available.
 	 * @dataProvider inherited_shipping_tax_without_taxable_products_provider
 	 *

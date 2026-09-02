@@ -1350,13 +1350,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get an order item object, based on its type.
 	 *
-	 * @since  3.0.0
-	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
+	 * @since 3.0.0
+	 * @since 11.2.0 Supports temporary item keys when loading local items.
+	 * @param  int|string $item_id Item ID or temporary item key to get.
+	 * @param  bool       $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
 		if ( $load_from_db ) {
+			if ( is_string( $item_id ) ) {
+				return is_numeric( $item_id ) ? WC_Order_Factory::get_order_item( (int) $item_id ) : false;
+			}
+
 			return WC_Order_Factory::get_order_item( $item_id );
 		}
 
@@ -1367,6 +1372,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					return $items[ $item_id ];
 				}
 			}
+		}
+
+		if ( is_string( $item_id ) ) {
+			if ( ! is_numeric( $item_id ) ) {
+				return false;
+			}
+
+			$item_id = (int) $item_id;
 		}
 
 		// Load all items of type and cache.
@@ -1406,11 +1419,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove item from the order.
 	 *
+	 * @since 3.0.0
+	 * @since 11.2.0 Supports temporary item keys when loading local items.
+	 *
 	 * @param int|string $item_id Item ID or temporary item key to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
-		// @phpstan-ignore-next-line argument.type (temporary item keys are supported when loading from local items)
 		$item      = $this->get_item( $item_id, false );
 		$items_key = $item ? $this->get_items_key( $item ) : false;
 
