@@ -1242,14 +1242,16 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
+	$value_changed = (string) get_option( 'woocommerce_hold_stock_minutes', '' ) !== (string) $value;
+
 	// Clear existing scheduled events.
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+	if ( $value_changed && function_exists( 'as_unschedule_all_actions' ) ) {
 		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-	} else {
+	} elseif ( $value_changed ) {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 	}
 
-	if ( '' !== $value ) {
+	if ( $value_changed && '' !== $value ) {
 		/**
 		 * Filters the interval at which to cancel unpaid orders in minutes.
 		 *
