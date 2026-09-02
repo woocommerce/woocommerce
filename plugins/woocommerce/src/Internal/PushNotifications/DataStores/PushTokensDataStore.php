@@ -334,7 +334,6 @@ class PushTokensDataStore {
 	 * and update() can move a token to a different user, so every write clears
 	 * both.
 	 *
-	 * @since 11.2.0
 	 * @return void
 	 */
 	private function invalidate_token_caches(): void {
@@ -348,7 +347,6 @@ class PushTokensDataStore {
 	 * Memoized per request, so a token registered later in the same request is
 	 * not reflected.
 	 *
-	 * @since 11.2.0
 	 * @return int[]
 	 */
 	private function get_user_ids_with_tokens(): array {
