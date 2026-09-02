@@ -69,7 +69,8 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An array submitted for a handshake parameter is rejected instead of reaching a string-only function.
+	 * An array submitted for a handshake parameter is reported as invalid rather than missing, and never
+	 * reaches a string-only function.
 	 */
 	public function test_make_validation_rejects_array_parameters() {
 		$request_backup = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Saved and restored so the test can drive make_validation() with a known request.
@@ -82,7 +83,7 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Missing parameter return_url' );
+		$this->expectExceptionMessage( 'Invalid parameter return_url' );
 
 		try {
 			$this->get_make_validation_method()->invoke( new WC_Auth() );

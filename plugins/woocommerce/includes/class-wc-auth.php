@@ -167,10 +167,15 @@ class WC_Auth {
 		);
 
 		foreach ( $params as $param ) {
-			// Every handshake parameter is a single string; array input is rejected here so that it cannot reach the string-only functions used below.
-			if ( empty( $_REQUEST[ $param ] ) || ! is_scalar( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+			if ( empty( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 				/* translators: %s: parameter */
 				throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param ) );
+			}
+
+			// Every handshake parameter is a single string; array input is rejected here so that it cannot reach the string-only functions used below.
+			if ( ! is_scalar( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+				/* translators: %s: parameter */
+				throw new Exception( sprintf( __( 'Invalid parameter %s', 'woocommerce' ), $param ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The caught message is escaped by esc_html() where it is rendered; escaping here would double-encode translated text.
 			}
 
 			$data[ $param ] = (string) wp_unslash( $_REQUEST[ $param ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw values are needed to validate the submitted URLs and scope; each value is sanitized or escaped where it is used, and key creation verifies capability and nonce.
