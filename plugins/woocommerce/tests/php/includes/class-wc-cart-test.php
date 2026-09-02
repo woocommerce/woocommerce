@@ -39,6 +39,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
 
+		// The parent teardown only clears chosen_shipping_methods, through
+		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
+		// make later shipping calculations fail on a missing package hash, so clear them
+		// here, where a failing assertion cannot skip it.
+		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
+			WC()->session->set( $key, null );
+		}
+
 		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
@@ -1662,12 +1670,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		// Nothing clears these keys between tests under the test session handlers, and the
-		// placeholder rates make later shipping calculations fail on a missing package hash.
-		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
-			WC()->session->set( $key, null );
-		}
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
