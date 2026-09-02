@@ -16,6 +16,8 @@ const execFileAsync = promisify( execFile );
 const SNAPSHOT_COORDINATOR =
 	'/var/www/html/wp-content/plugins/woocommerce/blocks-bin/playwright/database-snapshot.php';
 const LOCK_FILE = '/var/www/html/.woocommerce-blocks-e2e-db.lock';
+const HTACCESS_LOCK_BLOCK_SCRIPT =
+	'/var/www/html/wp-content/plugins/woocommerce/blocks-bin/playwright/htaccess-lock-block.php';
 const HTACCESS_FILE = '/var/www/html/.htaccess';
 const REQUEST_LOCK_PROBE_URL =
 	'/wp-content/plugins/woocommerce/blocks-bin/playwright/request-lock-probe.php';
@@ -241,6 +243,54 @@ test( 'a held exclusive lock rejects requests with 503 until it is released', as
 		signal: AbortSignal.timeout( 10_000 ),
 	} );
 	assert.equal( response.status, 200 );
+} );
+
+test( 'htaccess-lock-block.php removes any marker block and installs exactly one', async () => {
+	const root = `${ testRoot }/htaccess`;
+	const htaccess = `${ root }/.htaccess`;
+	const script = `${ root }/lock-block.php`;
+	const base = '# BEGIN WordPress\nRewriteEngine On\n# END WordPress\n';
+	const staleBlock =
+		'# BEGIN WooCommerce Blocks E2E DB Lock\nphp_value auto_prepend_file /an/older/path/request-lock.php\n# END WooCommerce Blocks E2E DB Lock\n';
+	const writeHtaccess = ( contents ) =>
+		dockerExec( cliContainerId, [
+			'php',
+			'-r',
+			'file_put_contents($argv[1], $argv[2]);',
+			'--',
+			htaccess,
+			contents,
+		] );
+	const readHtaccess = async () =>
+		( await dockerExec( cliContainerId, [ 'cat', htaccess ] ) ).stdout;
+	const run = ( mode ) => dockerExec( cliContainerId, [ 'php', script, mode ] );
+
+	// Point a copy of the script at a scratch .htaccess so the live one is untouched.
+	await dockerExec( cliContainerId, [
+		'sh',
+		'-c',
+		'mkdir -p "$1" && sed "s#/var/www/html/.htaccess#$1/.htaccess#" "$2" > "$1/lock-block.php"',
+		'--',
+		root,
+		HTACCESS_LOCK_BLOCK_SCRIPT,
+	] );
+
+	// A block written by an older revision, present twice, is removed by its markers.
+	await writeHtaccess( base + staleBlock + staleBlock );
+	await run( 'remove' );
+	assert.equal( await readHtaccess(), base );
+
+	// Install replaces a stale block rather than adding a second, and is idempotent.
+	await writeHtaccess( base + staleBlock );
+	await run( 'install' );
+	await run( 'install' );
+	assert.equal( await readHtaccess(), base + REQUEST_LOCK_BLOCK );
+
+	// Remove restores the original file, and a missing file counts as removed.
+	await run( 'remove' );
+	assert.equal( await readHtaccess(), base );
+	await dockerExec( cliContainerId, [ 'rm', htaccess ] );
+	await run( 'remove' );
 } );
 
 test( 'the PHP coordinator owns import, restore, and export child lifecycles', async () => {
