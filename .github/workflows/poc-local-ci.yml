@@ -31,10 +31,18 @@ jobs:
                   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
                   CONTEXT: 'local-ci/v1/@woocommerce/number::JavaScript'
               run: |
-                  # The combined status endpoint returns the latest state per context.
-                  found=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/status" \
-                    --jq ".statuses[] | select(.context == \"$CONTEXT\" and .state == \"success\") | .creator.login" \
-                    | head -1)
+                  # The list endpoint, not the combined one: only this shape carries
+                  # `creator`, which is the identity the full design validates against
+                  # the trusted team. It returns newest first, so take the most recent
+                  # entry for the context and then require it to be a success — a later
+                  # failure must not be masked by an earlier success.
+                  latest=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses" \
+                    --jq "[.[] | select(.context == \"$CONTEXT\")][0]")
+                  if [ -n "$latest" ] && [ "$(jq -r '.state' <<<"$latest")" = 'success' ]; then
+                    found=$(jq -r '.creator.login // ""' <<<"$latest")
+                  else
+                    found=''
+                  fi
 
                   if [ -n "$found" ]; then
                     echo "substituted=true" >> "$GITHUB_OUTPUT"
