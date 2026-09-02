@@ -17,6 +17,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRout
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
@@ -3567,6 +3568,141 @@ class Checkout extends \WP_Test_REST_TestCase {
 			0,
 			(int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
 			'A draft order that never took payment must not keep its stock hold when the checkout fails.'
+		);
+	}
+
+	/**
+	 * @testdox An Error raised before any payment was taken still surfaces instead of being swallowed.
+	 */
+	public function test_error_raised_before_payment_is_not_converted_into_a_successful_checkout() {
+		// No payment_complete() here: the order is still awaiting payment when this lands, so the
+		// recovery path must not claim it, and an Error must keep behaving as it did before.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () {
+				// Raises Error: call to a member function on null.
+				$integration = null;
+				$integration->push_order();
+			},
+			998
+		);
+
+		$caught = null;
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} catch ( \Throwable $error ) {
+			$caught = $error;
+		}
+
+		$this->assertInstanceOf( \Error::class, $caught, 'An Error with no payment taken must surface rather than be reported as a successful checkout.' );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+		$this->assertTrue( $orders[0]->has_status( OrderStatus::PENDING ), 'The order never took payment, so it must be left awaiting payment.' );
+	}
+
+	/**
+	 * @testdox Recovery keeps a redirect the gateway set before it failed.
+	 */
+	public function test_recovery_keeps_a_redirect_the_gateway_already_set() {
+		$gateway_redirect = 'https://example.com/3ds-challenge';
+
+		// Parks the order on-hold with an authentication step still outstanding, sets the redirect
+		// that step needs, then fails. The shopper still has to complete the challenge.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) use ( $gateway_redirect ) {
+				$context->order->update_status( OrderStatus::ON_HOLD );
+				$payment_result->set_redirect_url( $gateway_redirect );
+				throw new \Exception( 'Gateway failed after parking the order for authentication.' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'The order moved past awaiting payment, so the checkout is recovered: ' . print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+		$this->assertSame(
+			$gateway_redirect,
+			$data['payment_result']['redirect_url'],
+			'Overwriting the gateway redirect would walk the shopper past the step it was pointing at.'
+		);
+	}
+
+	/**
+	 * @testdox A failure on a fully discounted order still releases its stock and coupon holds.
+	 */
+	public function test_failure_on_a_zero_total_order_releases_held_stock_and_coupons() {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10' );
+		$product->set_virtual( true );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'zero_total_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 100 );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+		WC()->cart->apply_coupon( 'zero_total_coupon' );
+
+		$state_at_failure = null;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( $order ) use ( &$state_at_failure, $product ) {
+				$state_at_failure = array(
+					'total'  => (float) $order->get_total(),
+					'status' => $order->get_status(),
+					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+					'coupon' => $order->get_meta( '_coupon_held_keys' ),
+				);
+				throw new \Exception( 'Extension failed on a fully discounted order.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 500, $response->get_status(), 'The checkout should be reported as failed: ' . print_r( $response->get_data(), true ) );
+
+		// Preconditions: without these the release assertions could pass for the wrong reason.
+		$this->assertSame( 0.0, $state_at_failure['total'], 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertSame( 2, $state_at_failure['held'], 'The order must actually be holding stock when the failure happens.' );
+		$this->assertNotEmpty( $state_at_failure['coupon'], 'The order must actually be holding the coupon when the failure happens.' );
+
+		$this->assertSame(
+			0,
+			(int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+			'A zero-total order that never took payment must not keep its stock hold when the checkout fails.'
+		);
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => 1,
+				'status' => 'pending',
+				'return' => 'ids',
+			)
+		);
+		$this->assertNotEmpty( $orders, 'The failed order should still exist to inspect.' );
+		$this->assertEmpty(
+			wc_get_order( $orders[0] )->get_meta( '_coupon_held_keys' ),
+			'A zero-total order that never took payment must release its coupon hold, or the shopper cannot retry with the same coupon.'
 		);
 	}
 

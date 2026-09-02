@@ -67,6 +67,16 @@ class PaymentResult {
 	}
 
 	/**
+	 * Get the redirect URL.
+	 *
+	 * @since 11.2.0
+	 * @return string URL the customer is sent to after checkout, empty when none was set.
+	 */
+	public function get_redirect_url(): string {
+		return $this->redirect_url;
+	}
+
+	/**
 	 * Set payment status.
 	 *
 	 * @throws \Exception When an invalid status is provided.

@@ -63,6 +63,10 @@ trait CheckoutTrait {
 	/**
 	 * For orders which do not require payment, just update status.
 	 *
+	 * There is deliberately no recovery here of the kind process_payment() does. Nothing was
+	 * charged, so a failure costs the shopper only a retry, and reporting success on an order
+	 * whose completion actually failed would be worse than reporting the failure.
+	 *
 	 * @throws RouteException If the order is missing.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -135,7 +139,11 @@ trait CheckoutTrait {
 			 * payment for another order. Record what went wrong and report the success the order
 			 * actually represents.
 			 */
-			if ( $this->order_has_taken_payment( $order ) ) {
+			// Re-read once here: a gateway that advanced the order may have done so on its own
+			// instance, leaving the one held above reporting a stale status.
+			$order = $this->refresh_order( $order );
+
+			if ( $this->order_moved_past_payment( $order ) ) {
 				$this->recover_order_that_took_payment( $order, $e, $result_for_recovery );
 				return;
 			}
@@ -177,25 +185,31 @@ trait CheckoutTrait {
 	}
 
 	/**
-	 * Whether a gateway has already taken or accepted payment for the order.
+	 * Whether the order has moved beyond the point of awaiting payment.
 	 *
-	 * The order is always awaiting payment when a gateway is invoked, so anything that no
-	 * longer needs payment has been moved on by the gateway. Statuses that represent an
-	 * order going nowhere are excluded, since they also stop needing payment.
+	 * An order reaches a gateway either awaiting payment or as a draft, so any other status
+	 * means something moved it on. Statuses that represent an order going nowhere are listed
+	 * too, since they are not a payment either.
 	 *
-	 * This trusts the status the gateway persisted, not the payment processor. A gateway that
-	 * advances the order without charging is already reporting a successful payment by every other
-	 * measure, so this reads the same signal the rest of the checkout does.
+	 * The name is deliberately about the status rather than the money: an order parked on-hold
+	 * for manual review counts here even though nothing has been captured yet. What matters to
+	 * the caller is that the order is no longer waiting to be paid, so sending the shopper back
+	 * to place it again would be wrong.
+	 *
+	 * This reads the status the gateway persisted, not the payment processor, which is the same
+	 * signal the rest of the checkout uses. It is a plain status check on purpose: needs_payment()
+	 * would fold in the order total and two filters, so a fully discounted order or a site that
+	 * filters the payable statuses could flip the answer.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return bool
 	 */
-	private function order_has_taken_payment( \WC_Order $order ): bool {
-		$order = $this->refresh_order( $order );
-
-		return ! $order->needs_payment() && ! $order->has_status(
+	private function order_moved_past_payment( \WC_Order $order ): bool {
+		return ! $order->has_status(
 			array(
 				OrderStatus::CHECKOUT_DRAFT,
+				OrderStatus::PENDING,
+				OrderStatus::FAILED,
 				OrderStatus::CANCELLED,
 				OrderStatus::REFUNDED,
 				OrderStatus::TRASH,
@@ -212,14 +226,22 @@ trait CheckoutTrait {
 	 * @param PaymentResult $payment_result Payment result object.
 	 */
 	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
-		$order = $this->refresh_order( $order );
-
+		/*
+		 * The failure is carried in the message rather than the context: the file log handler
+		 * renders context with wp_json_encode(), and neither WC_Order nor Throwable exposes public
+		 * properties, so passing the objects alone would write an empty {}. This is the only log of
+		 * the error, since the checkout now reports success and the route's failure step never runs.
+		 */
 		wc_get_logger()->error(
-			sprintf( 'Checkout for order #%d failed after payment was taken.', $order->get_id() ),
-			array(
-				'order' => $order,
-				'error' => $error,
-			)
+			sprintf(
+				'Checkout for order #%1$d failed after payment was taken: %2$s: %3$s in %4$s:%5$d',
+				$order->get_id(),
+				get_class( $error ),
+				$error->getMessage(),
+				$error->getFile(),
+				$error->getLine()
+			),
+			array( 'source' => 'store-api' )
 		);
 
 		$order->add_order_note(
@@ -230,13 +252,18 @@ trait CheckoutTrait {
 			)
 		);
 
-		/*
-		 * Payment was taken, so the order confirmation is where the shopper belongs. Any redirect a
-		 * gateway set before it threw described work still to be done (a hosted page, a 3DS step),
-		 * which no longer applies.
-		 */
 		$payment_result->set_status( 'success' );
-		$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+
+		/*
+		 * A redirect the gateway set before it threw is kept. It is the only statement of where the
+		 * gateway wanted the shopper, and an order can reach here still needing the shopper to act,
+		 * for example one parked on-hold awaiting a 3DS challenge: overwriting that would walk them
+		 * past the authentication step. The order confirmation is the fallback for the common case,
+		 * where the gateway threw before setting anything.
+		 */
+		if ( '' === $payment_result->get_redirect_url() ) {
+			$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+		}
 
 		/*
 		 * The gateway did not reach the point where it empties the cart, so do it here. Without
