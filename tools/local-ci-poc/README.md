@@ -13,6 +13,7 @@ branch is too late — the workflow has already started.
 php tools/local-ci-poc/poc.php                    # publish receipts for HEAD
 php tools/local-ci-poc/poc.php --push             # ... and push the branch straight after
 php tools/local-ci-poc/poc.php --only=number      # ... only these projects
+php tools/local-ci-poc/poc.php --jobs=8           # ... this many at a time
 ```
 
 Without `--push` the receipt is published and the push is left to you. That leaves
@@ -49,11 +50,12 @@ costs one job, not the whole run.
 
 Two constraints are worth knowing before reading the numbers:
 
-- **The local run is serial, CI's matrix is parallel.** Most of these packages
-  take seconds, but `@woocommerce/admin-library` and `@woocommerce/components`
-  take minutes on their own. Substituting all 23 can cost more laptop time than
-  it saves in CI wall-clock — it frees slots, which is the point, but it is not
-  free. `--only=<substring>` exists for this.
+- **CI gives each job a runner; a laptop shares one machine.** The checks run
+  concurrently here — half the cores, capped at eight, overridable with
+  `--jobs=N` — which on a 16-core machine took eight packages from 67s to 27s.
+  That still is not 23 runners: `@woocommerce/admin-library` and
+  `@woocommerce/components` take minutes on their own, so substituting all 23
+  frees 23 CI slots but is not free locally. `--only=<substring>` exists for that.
 - **Not every job is honestly runnable locally.** CI builds each project's
   dependencies before testing (`build-type: dependencies`); this script does not.
   `@woocommerce/experimental` and `@woocommerce/customer-effort-score` fail

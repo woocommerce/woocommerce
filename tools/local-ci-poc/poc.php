@@ -55,12 +55,13 @@ $push_when_done = false;
 /**
  * How many checks to run at once, from --jobs.
  *
- * CI gives every job its own runner; a laptop has to share. Four is a deliberate
- * compromise: jest already spreads a single package's test files across its own
- * workers, so running many packages at once oversubscribes the CPU and each one
- * slows down. Raise it for a machine with cores to spare.
+ * CI gives every job its own runner; a laptop has to share. The default is half
+ * the machine's cores, capped at eight: jest already spreads one package's test
+ * files across its own workers, so running many packages at once oversubscribes
+ * the CPU and every one of them slows down. Measured on a 16-core machine over
+ * eight packages: 67s at 1, 41s at 4, 27s at 8.
  */
-$concurrency = 4;
+$concurrency = default_concurrency();
 
 /**
  * Substrings limiting which projects to run, from --only.
@@ -96,7 +97,8 @@ foreach ( array_slice( $argv, 1 ) as $argument ) {
 			. "           SHA that reaches GitHub is the one they name\n"
 			. "  --only   only run jobs whose project name contains one of these substrings.\n"
 			. "           Everything left out gets no receipt, so CI runs it as usual.\n"
-			. "  --jobs   how many checks to run at once (default 4).\n",
+			. "  --jobs   how many checks to run at once (default: half this machine's\n"
+			. "           cores, capped at 8).\n",
 		basename( __FILE__ )
 	);
 
@@ -524,6 +526,23 @@ function eligible_jobs_for_this_diff(): array {
 	}
 
 	return $eligible;
+}
+
+/**
+ * How many checks to run at once when --jobs is not given.
+ *
+ * Half the cores, because each check is itself a jest run that spreads its test
+ * files over its own workers. Capped at eight: past that the checks contend for
+ * the same CPU and each one slows down more than the extra concurrency wins.
+ */
+function default_concurrency(): int {
+	$cores = (int) shell( 'getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null' );
+
+	if ( $cores < 2 ) {
+		return 2;
+	}
+
+	return max( 2, min( 8, intdiv( $cores, 2 ) ) );
 }
 
 /**
