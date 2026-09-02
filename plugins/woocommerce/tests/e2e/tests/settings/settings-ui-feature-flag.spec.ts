@@ -140,9 +140,11 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			);
 		} finally {
 			// The save persists a site-wide option, so restore it even when an
-			// assertion fails.
+			// assertion fails. Plugins and themes are skipped because booting
+			// the extensions earlier specs install can exhaust the CLI
+			// container's memory before the command runs.
 			await wpCLI(
-				`wp option update woocommerce_weight_unit ${ originalUnit }`
+				`wp option update woocommerce_weight_unit ${ originalUnit } --skip-plugins --skip-themes`
 			);
 		}
 	} );
