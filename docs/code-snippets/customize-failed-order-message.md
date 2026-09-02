@@ -9,6 +9,8 @@ WooCommerce displays a message on the order confirmation page when an order fail
 
 The filter receives the current message and the failed order, so the message can include order details:
 
+When packaging this snippet in a plugin or theme, replace `your-text-domain` with the plugin or theme's text domain so its translation catalog can include the message.
+
 ```php
 /**
  * Customize the message shown for failed orders.
@@ -19,7 +21,8 @@ The filter receives the current message and the failed order, so the message can
  */
 function your_prefix_customize_failed_order_message( $message, $order ) {
 	return sprintf(
-		'We could not process order #%s. Please try again or contact us for help.',
+		/* translators: %s: Order number. */
+		__( 'We could not process order #%s. Please try again or contact us for help.', 'your-text-domain' ),
 		esc_html( $order->get_order_number() )
 	);
 }
