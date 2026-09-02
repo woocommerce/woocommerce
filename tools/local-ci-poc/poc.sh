@@ -119,9 +119,10 @@ for st in json.load(sys.stdin).get("statuses", []):
         continue
     who = (st.get("creator") or {}).get("login", "<none>")
     print("    " + ctx + "  " + st["state"] + "  creator=" + who)
-print("    NOT IMPLEMENTED: nothing reads this yet. In the full design CI would")
-print("    validate the creator against the trusted team and subtract the job.")
-print("    This POC does not skip any CI job.")
+print("    .github/workflows/poc-local-ci.yml reads exactly this and, when the")
+print("    state is success, skips running the package'"'"'s JavaScript job.")
+print("    Trust is NOT implemented: the workflow does not yet check that")
+print("    creator belongs to a trusted team. That is the next piece.")
 '
 
 # -------------------------------------------------------------- 8. cleanup
