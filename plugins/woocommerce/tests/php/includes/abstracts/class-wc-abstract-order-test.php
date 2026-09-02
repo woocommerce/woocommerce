@@ -362,7 +362,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		}
 	}
 
-	/*
+	/**
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order
