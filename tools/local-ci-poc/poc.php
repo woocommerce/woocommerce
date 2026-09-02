@@ -603,3 +603,5 @@ function fail( string $text ): void {
 function detail( string $text, int $indent = 1 ): void {
 	printf( "%s%s\n", str_repeat( '  ', $indent ), $text );
 }
+
+// Testings
