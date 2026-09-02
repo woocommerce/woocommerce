@@ -10,8 +10,15 @@ branch is too late — the workflow has already started.
 ## Run it
 
 ```sh
-php tools/local-ci-poc/poc.php
+php tools/local-ci-poc/poc.php            # publish a receipt for HEAD
+php tools/local-ci-poc/poc.php --push     # ... and push the branch straight after
 ```
+
+Without `--push` the receipt is published and the push is left to you. That leaves
+a window: commit anything more before pushing and the pushed SHA has no receipt,
+so CI runs everything. `--push` closes it by pushing while the receipt still
+describes HEAD. It is opt-in because publishing a receipt has no visible effect,
+while pushing a branch starts CI and notifies reviewers.
 
 Runs against the real repository. Creates one ref and one commit status, then
 removes the ref. Safe to run repeatedly. Needs `gh` or any GitHub token
