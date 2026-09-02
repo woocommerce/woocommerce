@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rename the store search event so Tracks ingest stops rejecting it.

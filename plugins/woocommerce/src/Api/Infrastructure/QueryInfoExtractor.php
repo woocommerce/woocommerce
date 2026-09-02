@@ -22,9 +22,10 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\SelectionSetNode;
  * - Leaf field (no args, no sub-selection) => true
  * - Field with sub-selections => nested associative array
  * - Field arguments => '__args' reserved key
- * - Inline fragments => '...TypeName' prefix key
- * - Named fragment spreads => expanded inline (merged into the parent as
- *   siblings of the other selections), matching how GraphQL evaluates them
+ * - Inline fragments with a type condition => '...TypeName' prefix key
+ * - Inline fragments without a type condition and named fragment spreads =>
+ *   expanded inline (merged into the parent as siblings of the other
+ *   selections), matching how GraphQL evaluates them
  * - Top-level query args included via '__args'
  */
 class QueryInfoExtractor {
@@ -56,6 +57,26 @@ class QueryInfoExtractor {
 	 * @return array The query info tree for the selection set.
 	 */
 	public static function extract( ?SelectionSetNode $selection_set, array $variable_values, array $fragments = array() ): array {
+		$expanded_fragments = array();
+
+		return self::extract_selection_set( $selection_set, $variable_values, $fragments, $expanded_fragments );
+	}
+
+	/**
+	 * Recursive worker behind {@see self::extract()}.
+	 *
+	 * Named fragments are expanded once per extract() call and the result is
+	 * reused for every further spread, so the work stays proportional to the
+	 * size of the document. This runs after validation, whose limits don't
+	 * bound how often a fragment is spread.
+	 *
+	 * @param ?SelectionSetNode                     $selection_set      The selection set to process.
+	 * @param array                                 $variable_values    Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments          Named fragment definitions from the document.
+	 * @param array<string, array>                  $expanded_fragments Memoized expansions, keyed by fragment name. Passed by reference so the whole walk shares one cache.
+	 * @return array The query info tree for the selection set.
+	 */
+	private static function extract_selection_set( ?SelectionSetNode $selection_set, array $variable_values, array $fragments, array &$expanded_fragments ): array {
 		if ( null === $selection_set ) {
 			return array();
 		}
@@ -65,11 +86,17 @@ class QueryInfoExtractor {
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
 				$field_name            = $selection->name->value;
-				$result[ $field_name ] = self::build_field_entry( $selection, $variable_values, $fragments );
+				$result[ $field_name ] = self::build_field_entry( $selection, $variable_values, $fragments, $expanded_fragments );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$type_name      = $selection->typeCondition->name->value;
-				$key            = '...' . $type_name;
-				$result[ $key ] = self::extract( $selection->selectionSet, $variable_values, $fragments );
+				$sub = self::extract_selection_set( $selection->selectionSet, $variable_values, $fragments, $expanded_fragments );
+				if ( null === $selection->typeCondition ) {
+					// No `on Type` clause (e.g. `... @include(if: $flag) { ... }`):
+					// the fragment applies to the parent type, so merge it like
+					// a named fragment spread.
+					$result = self::merge_selections( $result, $sub );
+				} else {
+					$result[ '...' . $selection->typeCondition->name->value ] = $sub;
+				}
 			} elseif ( $selection instanceof FragmentSpreadNode ) {
 				// Expand named fragment spreads inline: their fields become
 				// siblings of the other selections, matching how GraphQL
@@ -79,11 +106,10 @@ class QueryInfoExtractor {
 				// recursive merge so overlapping selections are unioned
 				// rather than replaced — `array_merge` would drop the
 				// existing sub-selection under the same field name.
-				$fragment = $fragments[ $selection->name->value ] ?? null;
-				if ( null === $fragment ) {
+				$spread = self::expand_fragment( $selection->name->value, $variable_values, $fragments, $expanded_fragments );
+				if ( null === $spread ) {
 					continue;
 				}
-				$spread = self::extract( $fragment->selectionSet, $variable_values, $fragments );
 				$result = self::merge_selections( $result, $spread );
 			}
 		}
@@ -92,14 +118,43 @@ class QueryInfoExtractor {
 	}
 
 	/**
+	 * Expand a named fragment into its query info tree, memoizing the result.
+	 *
+	 * @param string                                $name               The fragment name.
+	 * @param array                                 $variable_values    Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments          Named fragment definitions from the document.
+	 * @param array<string, array>                  $expanded_fragments Memoized expansions, keyed by fragment name.
+	 * @return ?array The expanded tree, or null when the fragment is not defined.
+	 */
+	private static function expand_fragment( string $name, array $variable_values, array $fragments, array &$expanded_fragments ): ?array {
+		if ( array_key_exists( $name, $expanded_fragments ) ) {
+			return $expanded_fragments[ $name ];
+		}
+
+		$fragment = $fragments[ $name ] ?? null;
+		if ( null === $fragment ) {
+			return null;
+		}
+
+		// Seed the entry before recursing so a fragment cycle expands to nothing
+		// instead of recursing forever (defensive: NoFragmentCycles rejects
+		// such documents during validation).
+		$expanded_fragments[ $name ] = array();
+		$expanded_fragments[ $name ] = self::extract_selection_set( $fragment->selectionSet, $variable_values, $fragments, $expanded_fragments );
+
+		return $expanded_fragments[ $name ];
+	}
+
+	/**
 	 * Build the entry for a single field node.
 	 *
-	 * @param FieldNode                             $field           The field node.
-	 * @param array                                 $variable_values Variable values for resolving arguments.
-	 * @param array<string, FragmentDefinitionNode> $fragments       Named fragment definitions from the document.
+	 * @param FieldNode                             $field              The field node.
+	 * @param array                                 $variable_values    Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments          Named fragment definitions from the document.
+	 * @param array<string, array>                  $expanded_fragments Memoized fragment expansions, keyed by fragment name.
 	 * @return array|bool True for leaf fields, associative array otherwise.
 	 */
-	private static function build_field_entry( FieldNode $field, array $variable_values, array $fragments ): array|bool {
+	private static function build_field_entry( FieldNode $field, array $variable_values, array $fragments, array &$expanded_fragments ): array|bool {
 		$has_args          = ! empty( $field->arguments ) && count( $field->arguments ) > 0;
 		$has_sub_selection = null !== $field->selectionSet;
 
@@ -118,7 +173,7 @@ class QueryInfoExtractor {
 		}
 
 		if ( $has_sub_selection ) {
-			$sub   = self::extract( $field->selectionSet, $variable_values, $fragments );
+			$sub   = self::extract_selection_set( $field->selectionSet, $variable_values, $fragments, $expanded_fragments );
 			$entry = self::merge_selections( $entry, $sub );
 		}
 
