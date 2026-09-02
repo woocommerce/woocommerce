@@ -1,11 +1,35 @@
 # Back in Stock Notifications — Playwright tests
 
-Covers the four scenarios from the original plugin test plan that have a target in core:
+Covers the scenarios from the original plugin test plan that have a target in core:
 
 - `signing-up.spec.ts` — PDP form rendering + signup flow (logged-in, guest single-opt-in, guest double-opt-in, requires-account).
 - `receiving-confirmations.spec.ts` — verify email + verified email + unsubscribe flow (double opt-in).
 - `receiving-notifications.spec.ts` — back-in-stock email dispatch on restock + unsubscribe flow.
 - `managing-notifications.spec.ts` — admin list rendering + Resend on PENDING + Resend guard on ACTIVE + admin Cancel.
+- `variations.spec.ts` — variable products: the form following the selected
+  variation, signup against a variation, the variation's attributes in the
+  emails, the back-in-stock email linking back to a fixed-value variation
+  pre-selected, and the parent-level signup opt-out removing the form from the
+  whole variable product page.
+
+## Variation notes
+
+- The form's show/hide is asserted on the `hidden` class rather than on
+  visibility. That class is the contract `back-in-stock-form.js` drives; whether
+  it actually hides the form depends on the theme, since
+  `.woocommerce .wc_bis_form.hidden { display: none }` ships in `woocommerce.css`
+  (the `woocommerce-general` handle), which bundled themes such as Twenty
+  Twenty-Three replace with their own stylesheet.
+- The parent-level opt-out is asserted on the product page only. On render,
+  `maybe_render_form()` passes the parent from `global $product` to
+  `product_allows_signups()`, so the variation branch of that method — the one
+  that walks up to the parent — is only reached on the signup POST, which the
+  form's absence makes unreachable from the UI.
+- The plugin's "already signed up for this variation" scenario has no core
+  target: that message is only rendered when the
+  `woocommerce_customer_stock_notifications_personalization_enabled` filter is
+  enabled (it defaults to `false`) and it resolves against the parent product on
+  a variable PDP, not the selected variation.
 
 ## Skipped scenarios
 
