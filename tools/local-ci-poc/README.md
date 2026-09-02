@@ -10,8 +10,9 @@ branch is too late — the workflow has already started.
 ## Run it
 
 ```sh
-php tools/local-ci-poc/poc.php            # publish a receipt for HEAD
-php tools/local-ci-poc/poc.php --push     # ... and push the branch straight after
+php tools/local-ci-poc/poc.php                    # publish receipts for HEAD
+php tools/local-ci-poc/poc.php --push             # ... and push the branch straight after
+php tools/local-ci-poc/poc.php --only=number      # ... only these projects
 ```
 
 Without `--push` the receipt is published and the push is left to you. That leaves
@@ -35,6 +36,29 @@ be clean (the check runs against the tree, but the receipt names HEAD), the bran
 must already contain the tip of trunk (CI tests the merge, not the commit), HEAD
 must not move while the check runs, and a rejected `POST /statuses` exits non-zero
 rather than printing the code and carrying on.
+
+## What it substitutes
+
+It asks `ci-jobs` — the same planner CI uses — which jobs this diff would produce,
+keeps the JavaScript unit jobs, and runs each one with the command the planner
+gives. A change under `packages/js` typically plans 23 of them.
+
+Substitution is **per job**. Each job that passes gets its own receipt named after
+it; each that fails gets none and runs in CI as usual. One local failure therefore
+costs one job, not the whole run.
+
+Two constraints are worth knowing before reading the numbers:
+
+- **The local run is serial, CI's matrix is parallel.** Most of these packages
+  take seconds, but `@woocommerce/admin-library` and `@woocommerce/components`
+  take minutes on their own. Substituting all 23 can cost more laptop time than
+  it saves in CI wall-clock — it frees slots, which is the point, but it is not
+  free. `--only=<substring>` exists for this.
+- **Not every job is honestly runnable locally.** CI builds each project's
+  dependencies before testing (`build-type: dependencies`); this script does not.
+  `@woocommerce/experimental` and `@woocommerce/customer-effort-score` fail
+  locally for that reason alone. They get no receipt, so CI runs them — the
+  failure mode is wasted local time, never a wrongly skipped job.
 
 ## What it proves
 
@@ -78,9 +102,10 @@ Four findings, each verified by running this:
 
 ## What it does not prove
 
-- **Matrix subtraction.** `poc-local-ci.yml` skips the work inside a job, but the
-  job is still scheduled. Removing it from the matrix needs the planner change, and
-  the merge guard must learn the planned set first, or a missing job is
+- **Matrix subtraction.** The job is still scheduled and still checks out the
+  repository; a receipt skips its install and its test run, which is where the
+  time goes, but not the job itself. Removing it from the matrix needs the planner
+  change, and the merge guard must learn the planned set first, or a missing job is
   indistinguishable from a substituted one.
 - **Trust.** No team membership is checked. The receipt here was posted by a script
   that did run the check, but nothing structurally required it to — anyone who can
