@@ -22,9 +22,9 @@ class SiteLocale {
 	 *
 	 * Mirrors the stored-setting chain that get_locale() reads underneath.
 	 *
-	 * @since 11.2.0
-	 *
 	 * @return string Site locale, for example en_US.
+	 *
+	 * @since 11.2.0
 	 */
 	public static function get(): string {
 		if ( is_multisite() && wp_installing() ) {
@@ -49,10 +49,10 @@ class SiteLocale {
 	/**
 	 * Translate a WooCommerce slug into the site locale, bypassing gettext filters.
 	 *
-	 * @since 11.2.0
-	 *
 	 * @param string $slug Untranslated slug, translated with the `slug` context.
 	 * @return string Translated slug, or the untranslated one when no translation exists.
+	 *
+	 * @since 11.2.0
 	 */
 	public static function translate_slug( string $slug ): string {
 		$site_locale = self::get();
