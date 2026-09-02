@@ -2902,8 +2902,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_scheduled_sales_releases_the_flushed_groups_on_a_request_local_cache(): void {
 		// The mirror of the external-cache test: on the default object cache the loop must
-		// flush products, term-queries and product_objects, or the relief the batching
-		// exists for never happens. Nothing else pins those three calls.
+		// flush products and term-queries, or the relief the batching exists for never
+		// happens. Nothing else pins those two calls. product_objects is released per id
+		// rather than as a group flush (see
+		// test_wc_scheduled_sales_releases_the_product_objects_cache_by_id), so it isn't
+		// covered here.
 		if ( ! wp_cache_supports( 'flush_group' ) || wp_using_ext_object_cache() ) {
 			$this->markTestSkipped( 'Requires a request-local object cache with flush_group support.' );
 		}
@@ -2918,7 +2921,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		wp_cache_set( 'sentinel', 'release me', 'products' );
 		wp_cache_set( 'sentinel', 'release me', 'term-queries' );
-		wp_cache_set( 'sentinel', 'release me', 'product_objects' );
 
 		wc_scheduled_sales();
 
@@ -2930,15 +2932,50 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_cache_get( 'sentinel', 'term-queries' ),
 			'The term-queries group must be flushed when the cache is request-local.'
 		);
-		$this->assertFalse(
-			wp_cache_get( 'sentinel', 'product_objects' ),
-			'The product_objects group must be flushed after each batch.'
-		);
 		$this->assertEquals(
 			100,
 			get_post_meta( $product->get_id(), '_price', true ),
 			'Fixture precondition: the product should have been processed.'
 		);
+	}
+
+	/**
+	 * @testdox product_objects entries are released by id, independent of flush_group support.
+	 */
+	public function test_wc_scheduled_sales_releases_the_product_objects_cache_by_id(): void {
+		// product_objects can't be flushed as a whole group without support this loop can't
+		// rely on: ProductCache::flush() only bumps a namespace prefix and frees nothing, so
+		// the release goes through ProductCache::remove() per id instead. That path only
+		// runs anything when the feature that populates the cache is on.
+		$features_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+		$was_enabled         = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME );
+		$features_controller->change_feature_enable( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME, true );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+			$product_cache = new \Automattic\WooCommerce\Internal\Caches\ProductCache();
+			$product_cache->set( $product );
+			$this->assertTrue(
+				$product_cache->is_cached( $product->get_id() ),
+				'Fixture precondition: the product must be cached before the run.'
+			);
+
+			wc_scheduled_sales();
+
+			$this->assertFalse(
+				$product_cache->is_cached( $product->get_id() ),
+				'The product must be released from product_objects by id after the batch that processed it.'
+			);
+		} finally {
+			$features_controller->change_feature_enable( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME, $was_enabled );
+		}
 	}
 
 	/**

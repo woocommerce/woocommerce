@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -859,10 +860,16 @@ function wc_scheduled_sales() {
 	$product_util           = wc_get_container()->get( ProductUtil::class );
 	$must_refresh_transient = false;
 
-	// Computed once: neither depends on the batch or the mode.
-	$supports_flush_group  = wp_cache_supports( 'flush_group' );
-	$flush_product_objects = $supports_flush_group;
-	$flush_shared_groups   = $supports_flush_group && ! wp_using_ext_object_cache();
+	// Computed once: neither depends on the batch or the mode. product_objects releases by
+	// id via ProductCache::remove(), which reaches a real wp_cache_delete() on every backend
+	// — unlike ProductCache::flush(), which only bumps a namespace prefix and frees nothing
+	// — so this doesn't need flush_group support the way the group flushes below do.
+	$product_cache = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' )
+		? wc_get_container()->get( ProductCache::class )
+		: null;
+
+	$supports_flush_group = wp_cache_supports( 'flush_group' );
+	$flush_shared_groups  = $supports_flush_group && ! wp_using_ext_object_cache();
 
 	/**
 	 * Apply a sale state to a list of products, priming caches in batches.
@@ -878,7 +885,7 @@ function wc_scheduled_sales() {
 	 *                                                            objects that expose an ID.
 	 * @param string                                 $mode        'start' or 'end'.
 	 */
-	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
+	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $product_cache, $flush_shared_groups ): void {
 		// Sliced per iteration: array_chunk() would build every batch before the first runs.
 		$batch_size = 50;
 		$total      = count( $product_ids );
@@ -956,11 +963,13 @@ function wc_scheduled_sales() {
 				wp_cache_delete_multiple( $batch_ids, "{$release_taxonomy}_relationships" );
 			}
 
-			// Saving releases a product's own entry; this catches the ones only read. The
-			// group is non-persistent, and has no other release path when flush_group is
-			// unsupported, so that configuration keeps them for the whole run.
-			if ( $flush_product_objects ) {
-				wp_cache_flush_group( 'product_objects' );
+			// Saving already releases a product's own entry via ProductCache::remove(); this
+			// catches the ones only read. Released per id rather than as a group flush, so it
+			// works regardless of flush_group support.
+			if ( $product_cache ) {
+				foreach ( $batch_ids as $product_id ) {
+					$product_cache->remove( $product_id );
+				}
 			}
 
 			// Persistent-capable, so released only when the cache is request-local. Whole
