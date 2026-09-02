@@ -54,10 +54,50 @@ if ( null === $token ) {
 pass( 'found one (never prompts; no token means publish nothing and exit 0)' );
 
 // ---------------------------------------------------------------------------
-// 2. What CI would run for this diff, according to CI's own planner.
+// 2. Refuse to publish anything the receipt could not honestly describe.
 // ---------------------------------------------------------------------------
 
-heading( '2 · Ask the planner what CI would run for this diff' );
+heading( '2 · Check this commit is publishable' );
+
+// Captured before the check runs, so step 7 can confirm HEAD did not move
+// underneath a long test run.
+$sha = git( 'rev-parse HEAD' );
+
+if ( ! working_tree_is_clean() ) {
+	// The check runs against the working tree, but the receipt names HEAD. Let
+	// those differ and the receipt vouches for code that was never tested.
+	fail( 'working tree has uncommitted changes' );
+	detail( 'The check would run against the working tree while the receipt names', 2 );
+	detail( 'HEAD. Commit or stash first, so the two describe the same code.', 2 );
+	exit( 1 );
+}
+
+pass( 'working tree is clean — what gets tested is what HEAD contains' );
+
+if ( ! fetch_trunk() ) {
+	fail( 'could not fetch trunk — cannot tell whether this branch is current' );
+	exit( 1 );
+}
+
+$behind = commits_behind_trunk();
+
+if ( 0 !== $behind ) {
+	// CI tests the merge of this branch with trunk, not this commit. Those trees
+	// are identical only while the branch already contains the tip of trunk.
+	fail( sprintf( 'branch is %d commit(s) behind trunk', $behind ) );
+	detail( 'CI tests the merge of this branch with trunk, so a receipt published', 2 );
+	detail( 'now could vouch for a combination CI never tested. Merge trunk and', 2 );
+	detail( 're-run.', 2 );
+	exit( 1 );
+}
+
+pass( 'up to date with trunk — HEAD is the tree CI would merge and test' );
+
+// ---------------------------------------------------------------------------
+// 3. What CI would run for this diff, according to CI's own planner.
+// ---------------------------------------------------------------------------
+
+heading( '3 · Ask the planner what CI would run for this diff' );
 detail( 'the same ci-jobs tool CI uses, run locally:' );
 
 $planned_jobs = plan_jobs_for_this_diff();
@@ -73,10 +113,10 @@ if ( array() === $planned_jobs ) {
 detail( 'the design reads this list; this POC substitutes the one job below', 2 );
 
 // ---------------------------------------------------------------------------
-// 3. Run one of those checks for real.
+// 4. Run one of those checks for real.
 // ---------------------------------------------------------------------------
 
-heading( '3 · Run an eligible check locally' );
+heading( '4 · Run an eligible check locally' );
 
 $check = run_the_check();
 
@@ -91,12 +131,10 @@ pass( sprintf( '%s passed in %ds — %s', CHECK_PACKAGE, $check['seconds'], $che
 detail( "this is the same command CI runs for that package's JavaScript job", 2 );
 
 // ---------------------------------------------------------------------------
-// 4. Make the commit known to GitHub without pushing a branch.
+// 5. Make the commit known to GitHub without pushing a branch.
 // ---------------------------------------------------------------------------
 
-heading( '4 · Publish the commit to a ref that triggers nothing' );
-
-$sha = git( 'rev-parse HEAD' );
+heading( '5 · Publish the commit to a ref that triggers nothing' );
 
 detail( 'before: does GitHub know this commit?' );
 $known_before = commit_is_known_to_github( $token, $sha );
@@ -133,10 +171,10 @@ detail(
 );
 
 // ---------------------------------------------------------------------------
-// 5. Confirm that ref started nothing.
+// 6. Confirm that ref started nothing.
 // ---------------------------------------------------------------------------
 
-heading( '5 · Confirm no workflow was triggered' );
+heading( '6 · Confirm no workflow was triggered' );
 
 sleep( 4 );
 $runs_after = count_workflow_runs( $token, $sha );
@@ -156,10 +194,17 @@ if ( $runs_before === $runs_after ) {
 detail( 'refs/local-ci/* is outside refs/heads/* and refs/tags/*, so Actions cannot trigger on it', 2 );
 
 // ---------------------------------------------------------------------------
-// 6. Publish the receipt.
+// 7. Publish the receipt.
 // ---------------------------------------------------------------------------
 
-heading( '6 · Publish the receipt' );
+heading( '7 · Publish the receipt' );
+
+if ( git( 'rev-parse HEAD' ) !== $sha ) {
+	// A commit landed while the check was running, so the result describes a tree
+	// that is no longer HEAD.
+	fail( 'HEAD moved while the check was running — publishing nothing' );
+	exit( 1 );
+}
 
 $posted = github_api(
 	$token,
@@ -174,11 +219,31 @@ $posted = github_api(
 
 detail( sprintf( 'POST /statuses → HTTP %d', $posted['status'] ), 2 );
 
+if ( 201 !== $posted['status'] ) {
+	// Printing the code and carrying on would make a failed publish look like a
+	// successful one, and step 8 would then show a stale receipt or none at all.
+	fail( 'the receipt was not published' );
+
+	$message = (string) ( $posted['body']['message'] ?? '' );
+
+	if ( '' !== $message ) {
+		detail( 'GitHub said: ' . $message, 2 );
+	}
+
+	if ( 403 === $posted['status'] ) {
+		detail( 'A 403 here usually means the token lacks the repo:status scope.', 2 );
+	}
+
+	exit( 1 );
+}
+
+pass( 'receipt published' );
+
 // ---------------------------------------------------------------------------
-// 7. Read it back the way the workflow does.
+// 8. Read it back the way the workflow does.
 // ---------------------------------------------------------------------------
 
-heading( '7 · Read it back, as CI would' );
+heading( '8 · Read it back, as CI would' );
 
 foreach ( read_receipts( $token, $sha ) as $receipt ) {
 	detail(
@@ -193,10 +258,10 @@ detail( 'Trust is NOT implemented: the workflow does not yet check that creator'
 detail( 'belongs to a trusted team. That is the next piece.', 2 );
 
 // ---------------------------------------------------------------------------
-// 8. Leave nothing behind but the receipt.
+// 9. Leave nothing behind but the receipt.
 // ---------------------------------------------------------------------------
 
-heading( '8 · Clean up' );
+heading( '9 · Clean up' );
 
 delete_the_temporary_ref();
 pass( 'temporary ref removed' );
@@ -433,6 +498,35 @@ function delete_the_temporary_ref(): void {
 
 	git_succeeds( sprintf( 'push --no-verify -q origin --delete %s', $temporary_ref ) );
 	$temporary_ref = null;
+}
+
+/**
+ * Whether the working tree has no uncommitted or untracked changes.
+ *
+ * Respects .gitignore, so build output does not count.
+ */
+function working_tree_is_clean(): bool {
+	return '' === git( 'status --porcelain' );
+}
+
+/**
+ * Fetch trunk from the remote so the staleness check reads current data.
+ *
+ * A stale local ref would happily report "up to date" against a trunk that moved
+ * days ago, which is the exact thing the check exists to catch.
+ */
+function fetch_trunk(): bool {
+	return git_succeeds( 'fetch -q origin trunk' );
+}
+
+/**
+ * How many commits trunk has that this branch does not.
+ *
+ * Reads FETCH_HEAD rather than origin/trunk, because that is what `git fetch
+ * origin trunk` is guaranteed to have just written.
+ */
+function commits_behind_trunk(): int {
+	return (int) git( 'rev-list --count HEAD..FETCH_HEAD' );
 }
 
 /**
