@@ -64,13 +64,28 @@ class SettingsController {
 			'desc_tip' => true,
 		);
 
-		// Insert right before the end of the account endpoints group.
-		foreach ( $settings as $index => $field ) {
-			if ( isset( $field['type'], $field['id'] ) && 'sectionend' === $field['type'] && 'account_endpoint_options' === $field['id'] ) {
-				array_splice( $settings, $index, 0, array( $setting ) );
-				return $settings;
+		// Slot it right after Downloads so it sits with the other list endpoints,
+		// otherwise before Logout so Logout stays last, otherwise at the end of the group.
+		$position = 0;
+		foreach ( array_values( $settings ) as $index => $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+				continue;
+			}
+			if ( 'woocommerce_myaccount_downloads_endpoint' === $field['id'] ) {
+				$position = $index + 1;
+				break;
+			}
+			if ( 'woocommerce_logout_endpoint' === $field['id'] || ( 'account_endpoint_options' === $field['id'] && 'sectionend' === ( $field['type'] ?? '' ) ) ) {
+				$position = $index;
+				break;
 			}
 		}
+
+		if ( 0 === $position ) {
+			return $settings;
+		}
+
+		array_splice( $settings, $position, 0, array( $setting ) );
 
 		return $settings;
 	}
