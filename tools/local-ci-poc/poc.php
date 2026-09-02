@@ -87,16 +87,28 @@ heading( '2 · Check this commit is publishable' );
 // underneath a long test run.
 $sha = git( 'rev-parse HEAD' );
 
-if ( ! working_tree_is_clean() ) {
+$modified  = modified_tracked_files();
+$untracked = untracked_files();
+
+if ( array() !== $modified ) {
 	// The check runs against the working tree, but the receipt names HEAD. Let
 	// those differ and the receipt vouches for code that was never tested.
-	fail( 'working tree has uncommitted changes' );
+	fail( sprintf( '%d tracked file(s) modified', count( $modified ) ) );
 	warn( 'The check would run against the working tree while the receipt names' );
 	warn( 'HEAD. Commit or stash first, so the two describe the same code.' );
 	exit( 1 );
 }
 
-pass( 'working tree is clean — what gets tested is what HEAD contains' );
+pass( 'no tracked file is modified — what gets tested is what HEAD contains' );
+
+if ( array() !== $untracked ) {
+	// Not a refusal. Scratch files are normal, and they are not part of HEAD, so
+	// the receipt still describes what it claims to. Worth saying out loud
+	// though: an untracked file can still change how a test behaves.
+	warn( sprintf( '%d untracked file(s) present, e.g. %s', count( $untracked ), $untracked[0] ) );
+	warn( 'They are not in HEAD, so the receipt is still accurate — but an' );
+	warn( 'untracked file can change how a test behaves.' );
+}
 
 if ( ! fetch_trunk() ) {
 	fail( 'could not fetch trunk — cannot tell whether this branch is current' );
@@ -634,12 +646,49 @@ function branch_name(): string {
 }
 
 /**
- * Whether the working tree has no uncommitted or untracked changes.
+ * Tracked files with staged or unstaged changes.
  *
- * Respects .gitignore, so build output does not count.
+ * These are what make the working tree differ from HEAD, so they are what makes
+ * a receipt naming HEAD dishonest.
+ *
+ * @return string[] Paths.
  */
-function working_tree_is_clean(): bool {
-	return '' === git( 'status --porcelain' );
+function modified_tracked_files(): array {
+	return status_paths( false );
+}
+
+/**
+ * Files git does not track. Respects .gitignore, so build output does not count.
+ *
+ * @return string[] Paths.
+ */
+function untracked_files(): array {
+	return status_paths( true );
+}
+
+/**
+ * Read `git status --porcelain` and return one side of it.
+ *
+ * @param bool $want_untracked True for untracked paths, false for tracked changes.
+ *
+ * @return string[] Paths.
+ */
+function status_paths( bool $want_untracked ): array {
+	$paths = array();
+
+	foreach ( explode( "\n", git( 'status --porcelain' ) ) as $line ) {
+		if ( '' === trim( $line ) ) {
+			continue;
+		}
+
+		$is_untracked = str_starts_with( $line, '?? ' );
+
+		if ( $is_untracked === $want_untracked ) {
+			$paths[] = trim( substr( $line, 3 ) );
+		}
+	}
+
+	return $paths;
 }
 
 /**
