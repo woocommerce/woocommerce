@@ -1359,7 +1359,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_item( $item_id, $load_from_db = true ) {
 		if ( $load_from_db ) {
 			if ( is_string( $item_id ) ) {
-				return is_numeric( $item_id ) ? WC_Order_Factory::get_order_item( (int) $item_id ) : false;
+				return ctype_digit( $item_id ) ? WC_Order_Factory::get_order_item( (int) $item_id ) : false;
 			}
 
 			return WC_Order_Factory::get_order_item( $item_id );
@@ -1375,7 +1375,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		if ( is_string( $item_id ) ) {
-			if ( ! is_numeric( $item_id ) ) {
+			if ( ! ctype_digit( $item_id ) ) {
 				return false;
 			}
 

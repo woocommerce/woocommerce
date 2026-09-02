@@ -1300,6 +1300,35 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a non-integer numeric string as an item ID.
+	 * @testWith ["%s.5"]
+	 *           ["%se0"]
+	 *
+	 * @param string $item_id_format Format for an invalid item ID based on the persisted ID.
+	 */
+	public function test_remove_item_rejects_non_integer_numeric_string( string $item_id_format ): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Persisted fee' );
+		$fee->set_amount( '1' );
+		$fee->set_total( '1' );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+		$order->save();
+
+		$item_id         = $fee->get_id();
+		$invalid_item_id = sprintf( $item_id_format, $item_id );
+
+		$this->assertFalse( $order->get_item( $invalid_item_id, false ), 'A decimal or exponent string should not resolve to a persisted item.' );
+		$this->assertFalse( $order->remove_item( $invalid_item_id ), 'A decimal or exponent string should not remove a persisted item.' );
+		$this->assertArrayHasKey( $item_id, $order->get_items( 'fee' ), 'The item should remain in the in-memory order.' );
+
+		$order->save();
+
+		$this->assertArrayHasKey( $item_id, wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The item should remain in the persisted order.' );
+	}
+
+	/**
 	 * @testdox add_item() should preserve a persisted item re-added after deferred removal.
 	 * @dataProvider provide_deferred_removal_types
 	 *
