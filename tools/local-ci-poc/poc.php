@@ -12,7 +12,8 @@
  * Runs against the real repository. Creates one ref and one commit status, then
  * removes the ref. Safe to run repeatedly.
  *
- *     php tools/local-ci-poc/poc.php
+ *     php tools/local-ci-poc/poc.php            publish a receipt for HEAD
+ *     php tools/local-ci-poc/poc.php --push     ... and then push the branch
  *
  * Needs `gh`, or any token reachable from GH_TOKEN, GITHUB_TOKEN, or the git
  * credential store. The steps read top to bottom; the plumbing they call is at
@@ -33,6 +34,28 @@ const RECEIPT_CONTEXT = 'local-ci/v1/@woocommerce/number::JavaScript';
 
 /** Set once the temporary ref exists, so the shutdown handler knows to remove it. */
 $temporary_ref = null;
+
+/**
+ * Whether to push the branch once the receipt is published.
+ *
+ * Off by default. Publishing a receipt is a local act with no visible effect,
+ * but pushing a branch starts CI and notifies reviewers, so it stays something
+ * the contributor asks for rather than something running the checks does to them.
+ */
+$push_when_done = in_array( '--push', array_slice( $argv, 1 ), true );
+
+foreach ( array_slice( $argv, 1 ) as $argument ) {
+	if ( '--push' === $argument ) {
+		continue;
+	}
+
+	printf(
+		"usage: php %s [--push]\n\n  --push  push the current branch after the receipt is published,\n          so the SHA that reaches GitHub is the one the receipt names\n",
+		basename( __FILE__ )
+	);
+
+	exit( '--help' === $argument || '-h' === $argument ? 0 : 1 );
+}
 
 remove_the_temporary_ref_however_we_exit();
 
@@ -258,10 +281,31 @@ warn( 'Trust is NOT implemented: the workflow does not yet check that creator' )
 warn( 'belongs to a trusted team. That is the next piece.' );
 
 // ---------------------------------------------------------------------------
-// 9. Leave nothing behind but the receipt.
+// 9. Optionally push, while the receipt still describes HEAD.
 // ---------------------------------------------------------------------------
 
-heading( '9 · Clean up' );
+heading( '9 · Push the branch' );
+
+if ( ! $push_when_done ) {
+	detail( 'not pushing (no --push)', 2 );
+	warn( 'The receipt names ' . short( $sha ) . '. Commit anything more before you' );
+	warn( 'push and the pushed SHA has no receipt, so CI runs everything.' );
+	warn( 'Re-run with --push to close that window.' );
+} elseif ( push_the_current_branch() ) {
+	pass( sprintf( 'pushed %s — the SHA CI sees is the one the receipt names', branch_name() ) );
+} else {
+	// Not fatal: the receipt is already published and stays valid for this SHA.
+	fail( 'the push failed' );
+	warn( 'The receipt is published and still valid. Push when ready, as long as' );
+	warn( 'HEAD is still ' . short( $sha ) . '.' );
+	exit( 1 );
+}
+
+// ---------------------------------------------------------------------------
+// 10. Leave nothing behind but the receipt.
+// ---------------------------------------------------------------------------
+
+heading( '10 · Clean up' );
 
 delete_the_temporary_ref();
 pass( 'temporary ref removed' );
@@ -498,6 +542,24 @@ function delete_the_temporary_ref(): void {
 
 	git_succeeds( sprintf( 'push --no-verify -q origin --delete %s', $temporary_ref ) );
 	$temporary_ref = null;
+}
+
+/**
+ * Push the current branch to origin.
+ *
+ * Deliberately without --no-verify, unlike the temporary ref: this is a real
+ * branch push, so the repo's own pre-push hook should run exactly as it would
+ * for a hand-typed `git push`.
+ */
+function push_the_current_branch(): bool {
+	return git_succeeds( 'push origin HEAD' );
+}
+
+/**
+ * The current branch name, for output.
+ */
+function branch_name(): string {
+	return git( 'branch --show-current' );
 }
 
 /**
