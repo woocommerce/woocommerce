@@ -240,8 +240,9 @@ class WC_Comments {
 		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			$raw_rating = is_scalar( $_POST['rating'] ) ? wp_unslash( $_POST['rating'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the value is range checked and cast to an integer below.
 
-			// Ratings are whole numbers from 1 to 5. Numeric input is range checked before it is
-			// truncated, so that both 0.5 and 5.9 are rejected rather than stored as 0 and 5.
+			// Stored ratings are whole numbers from 1 to 5. Numeric input is range checked before it
+			// is truncated, so 0.5 and 5.9 are rejected rather than stored as 0 and 5, while 4.7
+			// still stores 4 as before.
 			if ( is_numeric( $raw_rating ) && ( $raw_rating < 1 || $raw_rating > 5 ) ) {
 				return;
 			}
