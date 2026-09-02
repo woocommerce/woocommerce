@@ -545,6 +545,47 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart item metadata decodes URL-encoded custom attribute values for the name comparison and for display.
+	 */
+	public function test_formatted_cart_item_data_decodes_url_encoded_custom_values(): void {
+		// A fixed attribute whose stored value carries a percent escape. wc_get_formatted_variation()
+		// decodes it when generating the variation title, so the cart value must be decoded to match.
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Encoded Fixed Product - Black White' );
+		$variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame(
+			'',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, $variation->get_name() ) ),
+			'A decoded value already shown in the name must not be repeated as metadata.'
+		);
+
+		$this->assertSame(
+			'finish: Black White',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Fixed Product' ) ),
+			'A value missing from the name must display decoded, matching how the name renders it.'
+		);
+
+		// The same normalisation applies to a selected "Any" value reaching the cart.
+		$any_variation = new WC_Product_Variation();
+		$any_variation->set_name( 'Encoded Any Product' );
+		$any_variation->set_attributes( array( 'finish' => '' ) );
+
+		$any_cart_item = array(
+			'data'      => $any_variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame( 'Encoded Any Product - Black White', WC()->cart->get_item_product_name( $any_cart_item ) );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $any_cart_item, true, 'Encoded Any Product - Black White' ) ) );
+	}
+
+	/**
 	 * @testdox Cart item metadata omits fixed taxonomy attributes already shown in the variation name.
 	 */
 	public function test_formatted_cart_item_data_omits_metadata_for_fixed_taxonomy_attributes(): void {

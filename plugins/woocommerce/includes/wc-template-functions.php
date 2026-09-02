@@ -4559,7 +4559,11 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 			if ( ! is_scalar( $value ) || '' === (string) $value ) {
 				continue;
 			}
-			$value = (string) $value;
+
+			// Variation values can be stored URL-encoded, while variation titles are built
+			// from decoded values by wc_get_formatted_variation(). Decode here so an encoded
+			// value is matched against the title and displayed the same way the title shows it.
+			$value = rawurldecode( (string) $value );
 
 			// Check the display value against the title.
 			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
