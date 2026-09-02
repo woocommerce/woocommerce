@@ -50,35 +50,30 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that products and coupon are added and token in url.
+	 * @testdox Adds legacy products, quantities, SKUs, variations, additional data, and a coupon from a checkout link.
 	 */
-	public function test_products_and_coupon_are_added_and_token_in_url() {
-		$test_products = [
-			\WC_Helper_Product::create_simple_product(),
-			\WC_Helper_Product::create_simple_product(),
-			\WC_Helper_Product::create_simple_product(),
-			\WC_Helper_Product::create_variation_product(),
-		];
+	public function test_products_and_coupon_are_added_and_token_in_url(): void {
+		$legacy_product    = \WC_Helper_Product::create_simple_product();
+		$quantity_product  = \WC_Helper_Product::create_simple_product();
+		$sku_product       = \WC_Helper_Product::create_simple_product();
+		$variable_product  = \WC_Helper_Product::create_variation_product();
+		$available_options = $variable_product->get_available_variations();
+		$chosen_variation  = array_shift( $available_options );
 
-		$product_ids = [];
-		$products    = [];
+		$sku_product->set_sku( 'CHECKOUT-LINK-SKU' );
+		$sku_product->save();
 
-		foreach ( $test_products as $product ) {
-			$product_ids[] = $product->get_id();
-			if ( $product->is_type( 'variable' ) ) {
-				$variations = $product->get_available_variations();
-				$variation  = array_shift( $variations );
-
-				$products[] = $product->get_id() . ':1:' . http_build_query( $variation['attributes'], '', ';' );
-			} else {
-				$products[] = $product->get_id();
-			}
-		}
-
-		$coupon = CouponHelper::create_coupon( 'test-coupon' );
-
-		$_GET['products'] = implode( ',', $products );
+		$_GET['products'] = implode(
+			',',
+			[
+				(string) $legacy_product->get_id(),
+				$quantity_product->get_id() . ':2',
+				'CHECKOUT-LINK-SKU',
+				$variable_product->get_id() . ':1:' . http_build_query( $chosen_variation['attributes'], '', ';' ) . ':nyp=99',
+			]
+		);
 		$_GET['coupon']   = 'test-coupon';
+		CouponHelper::create_coupon( 'test-coupon' );
 
 		$service = new class() extends CheckoutLink {
 			/**
@@ -91,45 +86,61 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 			}
 		};
 
-		$url = $service->get_checkout_link_test();
+		$url                  = $service->get_checkout_link_test();
+		$cart_by_product      = [];
+		$expected_product_ids = [
+			$legacy_product->get_id(),
+			$quantity_product->get_id(),
+			$sku_product->get_id(),
+			$variable_product->get_id(),
+		];
 
-		$cart_contents    = WC()->cart->get_cart();
-		$cart_product_ids = array_map(
-			function ( $item ) {
-				return $item['product_id'];
-			},
-			$cart_contents
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$cart_by_product[ $cart_item['product_id'] ] = $cart_item;
+		}
+
+		$this->assertSame( $expected_product_ids, array_keys( $cart_by_product ), 'All checkout-link product identifier formats should resolve.' );
+		$this->assertSame( 1, $cart_by_product[ $legacy_product->get_id() ]['quantity'], 'A legacy product ID should default to quantity one.' );
+		$this->assertSame( 2, $cart_by_product[ $quantity_product->get_id() ]['quantity'], 'A legacy product ID and quantity should remain supported.' );
+		$this->assertSame( 1, $cart_by_product[ $sku_product->get_id() ]['quantity'], 'A SKU should resolve to its product.' );
+		$this->assertSame(
+			[
+				'attribute_pa_colour' => '',
+				'attribute_pa_number' => '',
+				'attribute_pa_size'   => 'small',
+			],
+			$cart_by_product[ $variable_product->get_id() ]['variation'],
+			'Variation data should select the requested variation.'
 		);
+		$this->assertSame( '99', $cart_by_product[ $variable_product->get_id() ]['nyp'], 'Additional product data should be retained on the cart item.' );
+		$this->assertArrayNotHasKey( 'nyp', $cart_by_product[ $variable_product->get_id() ]['variation'], 'Additional product data should not be treated as variation data.' );
+		$this->assertSame( [ 'test-coupon' ], WC()->cart->get_applied_coupons(), 'The checkout-link coupon should be applied.' );
+		$this->assertStringContainsString( 'session=', $url, 'Guest checkout links should include a cart session token.' );
+	}
 
-		$applied_coupons      = WC()->cart->get_coupons();
-		$applied_coupon_codes = array_map(
-			function ( $coupon ) {
-				return $coupon->get_code();
-			},
-			$applied_coupons
-		);
+	/**
+	 * @testdox Does not treat an unresolved numeric product ID as a numeric SKU.
+	 */
+	public function test_unresolved_numeric_product_id_does_not_resolve_as_sku(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_sku( '999999' );
+		$product->save();
 
-		$this->assertEquals( array_values( $product_ids ), array_values( $cart_product_ids ) );
+		$_GET['products'] = '999999';
 
-		// Check that the variable product in cart has the expected variations.
-		foreach ( $cart_contents as $cart_item ) {
-			if ( isset( $cart_item['variation'] ) && ! empty( $cart_item['variation'] ) ) {
-				// The first variation should have pa_size=small, pa_colour and pa_number should be empty.
-				$expected_variation = [
-					'attribute_pa_size'   => 'small',
-					'attribute_pa_colour' => '',
-					'attribute_pa_number' => '',
-				];
-				$this->assertEquals( $expected_variation, $cart_item['variation'] );
+		$service = new class() extends CheckoutLink {
+			/**
+			 * Get the checkout link for testing.
+			 *
+			 * @return string The checkout link.
+			 */
+			public function get_checkout_link_test() {
+				return parent::get_checkout_link();
 			}
-		}
-		
-		$this->assertEquals( array_values( [ 'test-coupon' ] ), array_values( $applied_coupon_codes ) );
-		$this->assertStringContainsString( 'session=', $url );
+		};
 
-		// Clean up.
-		foreach ( $test_products as $product ) {
-			wp_delete_post( $product->get_id(), true );
-		}
+		$service->get_checkout_link_test();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'An unresolved numeric ID must not add a product with the same numeric SKU.' );
 	}
 }
