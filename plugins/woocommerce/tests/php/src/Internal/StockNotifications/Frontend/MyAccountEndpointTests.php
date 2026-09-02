@@ -95,6 +95,26 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run the cancel handler expecting it to redirect, and assert the target.
+	 *
+	 * `capture_redirect()` throws in place of the `exit` that follows the redirect
+	 * in production, so the call has to be wrapped.
+	 */
+	private function run_cancel_expecting_redirect(): void {
+		try {
+			( new MyAccountEndpoint() )->maybe_handle_cancel();
+			$this->fail( 'Expected the cancel handler to redirect.' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		}
+
+		$this->assertSame(
+			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+			$this->redirect_location
+		);
+	}
+
+	/**
 	 * The row label uses the parent title for a variation, so the attributes are
 	 * not repeated by both the name and the variation list rendered beneath it.
 	 */
@@ -264,18 +284,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->simulate_cancel_request( $notification->get_id(), true );
 
-		// The handler redirects and exits once the cancellation is recorded.
-		try {
-			( new MyAccountEndpoint() )->maybe_handle_cancel();
-			$this->fail( 'Expected the cancel handler to redirect.' );
-		} catch ( \RuntimeException $e ) {
-			unset( $e );
-		}
+		$this->run_cancel_expecting_redirect();
 
-		$this->assertSame(
-			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
-			$this->redirect_location
-		);
+		$this->assertEmpty( \wc_get_notices( 'error' ) );
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
@@ -286,6 +297,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	/**
 	 * A notification that is already sent or cancelled can no longer be cancelled,
 	 * even with a valid nonce — the My Account view never offers the button for it.
+	 * The customer gets an error notice rather than a page that looks unchanged.
 	 *
 	 * @testWith ["sent"]
 	 *           ["cancelled"]
@@ -299,9 +311,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->simulate_cancel_request( $notification->get_id(), true );
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		$this->run_cancel_expecting_redirect();
 
-		$this->assertNull( $this->redirect_location );
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
@@ -321,7 +333,8 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An invalid nonce does not modify the notification.
+	 * An invalid nonce does not modify the notification. Nonces expire after 12-24
+	 * hours, so a stale tab has to surface a recoverable error rather than nothing.
 	 */
 	public function test_cancel_with_invalid_nonce_does_not_cancel(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -330,7 +343,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->simulate_cancel_request( $notification->get_id(), false );
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		$this->run_cancel_expecting_redirect();
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
@@ -359,7 +374,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		$this->run_cancel_expecting_redirect();
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
 		$updated_a = Factory::get_notification( $notification_a->get_id() );
 		$updated_b = Factory::get_notification( $notification_b->get_id() );
@@ -371,8 +388,28 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A cancel for a notification that no longer exists reports an error rather than
+	 * re-rendering the page unchanged.
+	 */
+	public function test_cancel_for_missing_notification_reports_an_error(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$id           = $notification->get_id();
+
+		$this->simulate_cancel_request( $id, true );
+		$notification->delete( true );
+
+		$this->run_cancel_expecting_redirect();
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
+	}
+
+	/**
 	 * User A cannot cancel user B's notification even when the nonce validates against B's action name
 	 * (WordPress nonces bind to the current user, so this effectively asserts the ownership check).
+	 *
+	 * This one stays silent: an error notice would confirm that the id exists.
 	 */
 	public function test_cancel_does_not_touch_other_users_notification(): void {
 		$user_a = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -385,6 +422,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->simulate_cancel_request( $notification_b->get_id(), true );
 
 		( new MyAccountEndpoint() )->maybe_handle_cancel();
+
+		$this->assertNull( $this->redirect_location );
+		$this->assertEmpty( \wc_get_notices( 'error' ) );
 
 		$updated_b = Factory::get_notification( $notification_b->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated_b );

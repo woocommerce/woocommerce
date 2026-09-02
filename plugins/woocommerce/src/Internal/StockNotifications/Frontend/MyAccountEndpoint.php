@@ -287,7 +287,10 @@ class MyAccountEndpoint {
 	 * - Nonce must be scoped to the specific notification id ({@see ::get_cancel_nonce_action()}).
 	 * - The notification must belong to the current user.
 	 *
-	 * On any guard failure the request is silently dropped (no destructive side effects).
+	 * Requests that aren't a cancel submission, and ones whose notification isn't the
+	 * current user's, are dropped silently. A cancel the customer can act on — an expired
+	 * nonce, a notification that's gone or already cancelled — redirects back with an
+	 * error notice instead, so the button never looks dead.
 	 */
 	public function maybe_handle_cancel(): void {
 		global $wp;
@@ -314,12 +317,12 @@ class MyAccountEndpoint {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! wp_verify_nonce( $nonce, self::get_cancel_nonce_action( $notification_id ) ) ) {
-			return;
+			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ) );
 		}
 
 		$notification = Factory::get_notification( $notification_id );
 		if ( ! $notification instanceof Notification ) {
-			return;
+			$this->redirect_with_error( __( 'That back in stock notification no longer exists.', 'woocommerce' ) );
 		}
 
 		if ( (int) $notification->get_user_id() !== get_current_user_id() ) {
@@ -327,7 +330,7 @@ class MyAccountEndpoint {
 		}
 
 		if ( ! self::is_cancellable( $notification ) ) {
-			return;
+			$this->redirect_with_error( __( 'That back in stock notification has already been cancelled.', 'woocommerce' ) );
 		}
 
 		$notification->set_status( NotificationStatus::CANCELLED );
@@ -348,7 +351,28 @@ class MyAccountEndpoint {
 			\wc_add_notice( esc_html__( 'Back in stock notification cancelled.', 'woocommerce' ) );
 		}
 
-		wp_safe_redirect( \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ) );
+		wp_safe_redirect( self::get_endpoint_url() );
 		exit;
+	}
+
+	/**
+	 * Queue an error notice and redirect back to the stock notifications endpoint.
+	 *
+	 * @param string $message The error to show the customer.
+	 * @return never
+	 */
+	private function redirect_with_error( string $message ) {
+		\wc_add_notice( esc_html( $message ), 'error' );
+		wp_safe_redirect( self::get_endpoint_url() );
+		exit;
+	}
+
+	/**
+	 * Get the URL of the My Account > stock notifications endpoint.
+	 *
+	 * @return string
+	 */
+	private static function get_endpoint_url(): string {
+		return \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) );
 	}
 }
