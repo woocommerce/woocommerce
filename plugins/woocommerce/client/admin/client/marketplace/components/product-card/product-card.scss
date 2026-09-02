@@ -92,7 +92,7 @@
 
 		&__footer {
 			display: flex;
-			/* The quality badge, when present, wraps onto its own row below the price: */
+			/* The quality badge, when present, takes its own row above the price: */
 			flex-wrap: wrap;
 			justify-content: space-between;
 			align-items: center;
@@ -102,6 +102,12 @@
 
 		&:hover {
 			outline: 1.5px solid var(--wp-admin-theme-color);
+		}
+
+		/* Fill the card so the content grid below can pin the footer to the
+		   bottom (and compact cards can centre their content). */
+		&-wrapper {
+			height: 100%;
 		}
 
 		&__content {
@@ -420,16 +426,27 @@
 				min-height: 0;
 			}
 
+			/* Centre the icon and text in the card so that, in a grid mixing
+			   cards with and without the badge, the extra height of a badged
+			   card is split evenly instead of leaving a gap at the bottom. */
+			.woocommerce-marketplace__product-card__content {
+				align-content: center;
+			}
+
 			.woocommerce-marketplace__product-card__details {
-				/* Top-align the icon with the title, like regular cards, so it
-				   sits identically whether or not the badge row is present. */
-				align-items: flex-start;
+				align-items: center;
 			}
 
 			.woocommerce-marketplace__product-card__meta {
 				/* Optical compensation: the title's negative focus-ring margin
-				   would otherwise pin the text to the icon's top edge. */
+				   would otherwise shift the text up relative to the icon. */
 				margin-top: $grid-unit-05;
+
+				/* Title, badge and price stack with 4px between them; without
+				   the badge the title and price keep the tighter 2px gap. */
+				&:has(.woocommerce-marketplace__quality-badge) {
+					gap: $grid-unit-05;
+				}
 			}
 
 			.woocommerce-marketplace__product-card__link {
