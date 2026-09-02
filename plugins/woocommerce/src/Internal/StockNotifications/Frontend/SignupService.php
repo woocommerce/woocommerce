@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
@@ -535,10 +536,11 @@ class SignupService {
 				break;
 		}
 
-		if ( is_user_logged_in() && ! $has_action_button ) {
+		// The endpoint can be switched off from Settings > Advanced, leaving nowhere to link to.
+		if ( is_user_logged_in() && ! $has_action_button && '' !== MyAccountEndpoint::get_endpoint_slug() ) {
 			$button_class    = \wc_wp_theme_get_element_class_name( 'button' );
 			$wp_button_class = $button_class ? ' ' . $button_class : '';
-			$message         = sprintf( '<a href="%s" class="button wc-forward%s">%s</a> %s', \wc_get_account_endpoint_url( 'stock-notifications' ), $wp_button_class, esc_html_x( 'Manage notifications', 'notice action', 'woocommerce' ), $message );
+			$message         = sprintf( '<a href="%s" class="button wc-forward%s">%s</a> %s', \wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ), $wp_button_class, esc_html_x( 'Manage notifications', 'notice action', 'woocommerce' ), $message );
 		}
 
 		return $message;
