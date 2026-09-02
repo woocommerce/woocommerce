@@ -303,6 +303,21 @@ test.describe(
 							...coreOnlyFlags,
 						] )
 					).stdout.trim();
+				const unrelatedPlugins = (
+					await wpCLI( [
+						'wp',
+						'plugin',
+						'list',
+						'--status=active',
+						'--field=name',
+						...coreOnlyFlags,
+					] )
+				).stdout
+					.split( /\r?\n/ )
+					.filter( ( plugin ) => plugin && plugin !== 'woocommerce' );
+				const skipUnrelatedPlugins = unrelatedPlugins.length
+					? [ `--skip-plugins=${ unrelatedPlugins.join( ',' ) }` ]
+					: [];
 				const activeTheme = (
 					await wpCLI( [
 						'wp',
@@ -343,6 +358,7 @@ test.describe(
 							'get',
 							'siteurl',
 							skipThemes,
+							...skipUnrelatedPlugins,
 						] );
 						expect(
 							await readPendingRewrite(),
@@ -357,6 +373,7 @@ test.describe(
 						'get',
 						'siteurl',
 						`--skip-themes=${ inactiveTheme }`,
+						...skipUnrelatedPlugins,
 					] );
 					expect(
 						await readPendingRewrite(),
