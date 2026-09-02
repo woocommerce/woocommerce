@@ -944,6 +944,62 @@ describe( 'settings HTML rendering', () => {
 		}
 	} );
 
+	it.each( [ 'number', 'integer', 'datetime-local' ] )(
+		'keeps a cleared %s field canonical as null',
+		( fieldType ) => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				components: {
+					'test/clear-field': ( { data, field, onChange } ) => (
+						<button
+							type="button"
+							onClick={ () =>
+								onChange( { [ field.id ]: undefined } )
+							}
+						>
+							{ data[ field.id ] === null
+								? 'Canonical null'
+								: 'Clear value' }
+						</button>
+					),
+				},
+			} );
+
+			const schema = createSingleFieldSchema(
+				{
+					id: 'test_field',
+					label: 'Test field',
+					type: fieldType,
+					value:
+						fieldType === 'datetime-local'
+							? '2026-01-01T12:00:00Z'
+							: 1,
+					component: 'test/clear-field',
+				},
+				{ save: { adapter: 'form_post' } }
+			);
+			const { container, form, root } = renderElementInMainForm(
+				<SettingsUIPage schema={ schema } />
+			);
+
+			try {
+				act( () => container.querySelector( 'button' )?.click() );
+
+				expect( container.textContent ).toContain( 'Canonical null' );
+				expect(
+					form
+						.querySelector(
+							'input[type="hidden"][name="test_field"]'
+						)
+						?.getAttribute( 'value' )
+				).toBe( '' );
+			} finally {
+				act( () => root.unmount() );
+				form.remove();
+			}
+		}
+	);
+
 	it( 'serializes edits from built-in controls into the form-post hidden inputs', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -1028,6 +1084,9 @@ describe( 'settings HTML rendering', () => {
 			expect( hiddenValues( 'unit' ) ).toEqual( [ 'lbs' ] );
 			expect( hiddenValues( 'amount' ) ).toEqual( [ '5' ] );
 			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR', 'ES' ] );
+
+			act( () => changeTextInput( number, '' ) );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '' ] );
 		} finally {
 			act( () => root.unmount() );
 			form.remove();

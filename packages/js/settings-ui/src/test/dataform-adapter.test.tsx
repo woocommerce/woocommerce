@@ -98,6 +98,7 @@ describe( 'dataform adapter', () => {
 			[ 'radio', 'text' ],
 			[ 'checkbox', 'boolean' ],
 			[ 'number', 'number' ],
+			[ 'integer', 'integer' ],
 			[ 'array', 'array' ],
 		];
 
@@ -650,6 +651,34 @@ describe( 'dataform adapter', () => {
 
 			expect( field.isValid?.min ).toBe( 0 );
 			expect( field.isValid?.max ).toBe( 100 );
+		} );
+
+		it( 'maps integer range attributes to numeric constraints', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'integer',
+					customAttributes: { min: '0', max: 100 },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( 0 );
+			expect( field.isValid?.max ).toBe( 100 );
+		} );
+
+		it( 'maps canonical numeric validation to range constraints', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					type: 'integer',
+					validation: { min: 1, max: 9 },
+				},
+				createOptions( [] )
+			);
+
+			expect( field.isValid?.min ).toBe( 1 );
+			expect( field.isValid?.max ).toBe( 9 );
 		} );
 
 		it( 'maps date range attributes as strings', () => {
