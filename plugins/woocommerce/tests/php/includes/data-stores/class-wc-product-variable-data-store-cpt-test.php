@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -1991,5 +1992,107 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * Creates a variation under the class fixture product with the given stored state.
+	 *
+	 * @param string      $status        Post status.
+	 * @param string|null $stock_status  Value for `_stock_status`, or null to leave the meta absent.
+	 * @param string      $regular_price Regular price ('' for none).
+	 * @param string      $sale_price    Sale price ('' for none).
+	 * @return int Variation ID.
+	 */
+	private function create_stored_variation( string $status, ?string $stock_status, string $regular_price, string $sale_price ): int {
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( self::$product_id );
+		$variation->set_status( $status );
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->set_stock_status( $stock_status ?? ProductStockStatus::IN_STOCK );
+		$variation->save();
+		if ( null === $stock_status ) {
+			delete_post_meta( $variation->get_id(), '_stock_status' );
+		}
+		if ( '' === $regular_price && '' !== $sale_price ) {
+			// The CRUD layer blanks a sale price without a regular price; write it directly to model legacy or direct-meta data.
+			update_post_meta( $variation->get_id(), '_sale_price', $sale_price );
+		}
+		return $variation->get_id();
+	}
+
+	/**
+	 * @testdox stored_state_allows_purchase applies the published, not-out-of-stock, priced rule.
+	 *
+	 * @testWith [ "publish", "instock", "10", "", true ]
+	 *           [ "publish", "onbackorder", "10", "", true ]
+	 *           [ "publish", "", "10", "", true ]
+	 *           [ "publish", "instock", "0", "", true ]
+	 *           [ "publish", "instock", "", "5", true ]
+	 *           [ "publish", "outofstock", "10", "", false ]
+	 *           [ "publish", "instock", "", "", false ]
+	 *           [ "private", "instock", "10", "", false ]
+	 *           [ "draft", "instock", "10", "", false ]
+	 *
+	 * @param string $status        Post status.
+	 * @param string $stock_status  Stock status.
+	 * @param string $regular_price Regular price.
+	 * @param string $sale_price    Sale price.
+	 * @param bool   $expected      Expected result.
+	 */
+	public function test_stored_state_allows_purchase( string $status, string $stock_status, string $regular_price, string $sale_price, bool $expected ): void {
+		$this->assertSame( $expected, WC_Product_Variable_Data_Store_CPT::stored_state_allows_purchase( $status, $stock_status, $regular_price, $sale_price ) );
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates keeps only published, not-out-of-stock, priced variations, in input order.
+	 */
+	public function test_get_purchasable_variation_candidates_filters_on_stored_state_and_preserves_order(): void {
+		$sut = new WC_Product_Variable_Data_Store_CPT();
+
+		$out_of_stock = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10', '' );
+		$unpriced     = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '' );
+		$private      = $this->create_stored_variation( ProductStatus::PRIVATE, ProductStockStatus::IN_STOCK, '10', '' );
+		$in_stock     = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+		$backorder    = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::ON_BACKORDER, '10', '' );
+		$free         = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '0', '' );
+		$sale_only    = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '5' );
+		$no_stock_row = $this->create_stored_variation( ProductStatus::PUBLISH, null, '10', '' );
+
+		$input  = array( $backorder, $out_of_stock, $in_stock, $unpriced, $free, $private, $sale_only, $no_stock_row, 999999999 );
+		$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), $input );
+
+		$this->assertSame(
+			array( $backorder, $in_stock, $free, $sale_only, $no_stock_row ),
+			$result,
+			'Candidates must be the stored-state subset in the same order as the input.'
+		);
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates returns an empty array for empty input without querying.
+	 */
+	public function test_get_purchasable_variation_candidates_returns_empty_for_empty_input(): void {
+		global $wpdb;
+		$sut = new WC_Product_Variable_Data_Store_CPT();
+
+		$product        = wc_get_product( self::$product_id );
+		$queries_before = $wpdb->num_queries;
+		$result         = $sut->get_purchasable_variation_candidates( $product, array() );
+
+		$this->assertSame( array(), $result );
+		$this->assertSame( $queries_before, $wpdb->num_queries, 'Empty input must not hit the database.' );
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates deduplicates and casts input IDs.
+	 */
+	public function test_get_purchasable_variation_candidates_deduplicates_and_casts_ids(): void {
+		$sut      = new WC_Product_Variable_Data_Store_CPT();
+		$in_stock = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+
+		$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( (string) $in_stock, $in_stock, "$in_stock" ) );
+
+		$this->assertSame( array( $in_stock ), $result );
 	}
 }

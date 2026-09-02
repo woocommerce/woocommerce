@@ -830,6 +830,97 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	}
 
 	/**
+	 * Decide whether stored variation data leaves room for the variation to be purchasable and in stock.
+	 *
+	 * This mirrors the filter-free core of WC_Product_Variation::is_purchasable() && is_in_stock(): published,
+	 * not out of stock, and a regular or sale price present. It is a pre-check, not a verdict: filters,
+	 * subclasses and custom data stores can still change the real answer either way. A missing stock status
+	 * counts as in stock, matching the product object default.
+	 *
+	 * @internal
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $status        Post status.
+	 * @param string $stock_status  Stored `_stock_status` ('' when absent).
+	 * @param string $regular_price Stored `_regular_price`.
+	 * @param string $sale_price    Stored `_sale_price`.
+	 * @return bool
+	 */
+	public static function stored_state_allows_purchase( string $status, string $stock_status, string $regular_price, string $sale_price ): bool {
+		if ( ProductStatus::PUBLISH !== $status ) {
+			return false;
+		}
+		if ( '' !== $stock_status && ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+			return false;
+		}
+		return '' !== $regular_price || '' !== $sale_price;
+	}
+
+	/**
+	 * Narrow a list of variation IDs to those that could be purchasable and in stock, judged on stored data only.
+	 *
+	 * See stored_state_allows_purchase() for the predicate. Input order is preserved; duplicates and unknown
+	 * IDs are dropped. Reads wp_posts and wp_postmeta directly, by primary key and post_id index only.
+	 *
+	 * @internal
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param WC_Product $product       Parent variable product (unused, keeps the data store call convention).
+	 * @param int[]      $variation_ids Variation IDs to narrow, typically `WC_Product_Variable::get_children()`.
+	 * @return int[] Subset of `$variation_ids` that may be purchasable.
+	 */
+	public function get_purchasable_variation_candidates( $product, array $variation_ids ): array {
+		global $wpdb;
+
+		$variation_ids = array_values( array_unique( array_map( 'intval', $variation_ids ) ) );
+		if ( empty( $variation_ids ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		$status_query = "SELECT ID, post_status FROM {$wpdb->posts} WHERE ID IN ( {$placeholders} )";
+		$meta_query   = "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ( {$placeholders} ) AND meta_key IN ( '_stock_status', '_regular_price', '_sale_price' )";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$statuses = $wpdb->get_results( $wpdb->prepare( $status_query, ...$variation_ids ), ARRAY_A );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$meta = $wpdb->get_results( $wpdb->prepare( $meta_query, ...$variation_ids ), ARRAY_A );
+
+		$state = array();
+		foreach ( (array) $statuses as $row ) {
+			$state[ (int) $row['ID'] ] = array(
+				'status'         => (string) $row['post_status'],
+				'_stock_status'  => '',
+				'_regular_price' => '',
+				'_sale_price'    => '',
+			);
+		}
+		foreach ( (array) $meta as $row ) {
+			$id = (int) $row['post_id'];
+			if ( isset( $state[ $id ] ) && '' === $state[ $id ][ $row['meta_key'] ] ) {
+				$state[ $id ][ $row['meta_key'] ] = (string) $row['meta_value'];
+			}
+		}
+
+		return array_values(
+			array_filter(
+				$variation_ids,
+				function ( $variation_id ) use ( $state ) {
+					return isset( $state[ $variation_id ] ) && self::stored_state_allows_purchase(
+						$state[ $variation_id ]['status'],
+						$state[ $variation_id ]['_stock_status'],
+						$state[ $variation_id ]['_regular_price'],
+						$state[ $variation_id ]['_sale_price']
+					);
+				}
+			)
+		);
+	}
+
+	/**
 	 * Syncs all variation names if the parent name is changed.
 	 *
 	 * @param WC_Product $product Product object.
