@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add notice property to RecommendedPaymentMethod type for payment method warnings.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the WooCommerce Admin header non-sticky on all pages.

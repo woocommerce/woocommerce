@@ -12,12 +12,14 @@
 }
 
 .wc-block-components-quantity-selector {
-	border: 1px solid $universal-translucent-border-color;
-	border-radius: $universal-border-radius;
-	box-sizing: border-box;
-	display: flex;
-	position: relative;
-	width: 107px;
+	&:where(:has(input:not([type="hidden"]))) {
+		border: 1px solid $universal-translucent-border-color;
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		display: flex;
+		position: relative;
+		width: 107px;
+	}
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
@@ -31,8 +33,6 @@
 		line-height: 1;
 		margin: 0;
 		min-width: 40px;
-		order: 2;
-		padding: 0.4em 0;
 		text-align: center;
 		vertical-align: middle;
 
@@ -74,17 +74,21 @@
 	}
 
 	> .wc-block-components-quantity-selector__button--minus {
-		border-radius: $universal-border-radius 0 0 $universal-border-radius;
-		order: 1;
+		border-start-start-radius: inherit;
+		border-end-start-radius: inherit;
 	}
 
 	> .wc-block-components-quantity-selector__button--plus {
-		border-radius: 0 $universal-border-radius $universal-border-radius 0;
-		order: 3;
+		border-start-end-radius: inherit;
+		border-end-end-radius: inherit;
 	}
 	&[hidden] {
 		display: none;
 	}
+}
+
+:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
 }
 
 .theme-twentyseventeen {

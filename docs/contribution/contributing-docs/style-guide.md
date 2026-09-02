@@ -28,7 +28,7 @@ This style guide is intended to provide guidelines for creating effective and us
 
 - Our target audience has a range of roles and abilities. When creating a tutorial or how-to guide, it's important to consider the intended audience. Are they beginners or advanced users? What is their technical background? Understanding the audience can help guide the level of detail and the choice of language used in the guide.
 
-- Use language understable even by readers with little technical knowledge and readers whose first language might not be English.
+- Use language understandable even by readers with little technical knowledge and readers whose first language might not be English.
 
 - Consider that this might be the first WooCommerce documentation page the reader has seen. They may have arrived here via a Google search or another website. Give the reader enough context about the topic and link words and phrases to other relevant Docs articles as often as possible.
 

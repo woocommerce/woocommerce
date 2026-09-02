@@ -1,18 +1,13 @@
 <?php
+/**
+ * WooCommerce Product Editor subsection interface compatibility shim.
+ */
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockContainerInterface;
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
-
 /**
- * Interface for subsection containers, which contain sub-sections and blocks.
+ * Removed product editor subsection container interface.
+ *
+ * @deprecated 10.9.0 Product editor extension APIs were deprecated. The product block editor was removed in 11.0.0 with no replacement.
  */
-interface SubsectionInterface extends BlockContainerInterface {
-	/**
-	 * Adds a new block to the sub-section.
-	 *
-	 * @param array $block_config block config.
-	 */
-	public function add_block( array $block_config ): BlockInterface;
-}
+interface SubsectionInterface {}

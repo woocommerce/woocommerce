@@ -1,0 +1,876 @@
+---
+sidebar_position: 12
+sidebar_label: 'Product attribute terms'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Product attribute terms
+The product attribute terms API allows you to create, view, update, and delete individual, or a batch, of attribute terms.
+
+## Attribute term properties
+|   Attribute   |   Type  |                                       Description                                        |
+|---------------|---------|------------------------------------------------------------------------------------------|
+| `id`          | integer | Unique identifier for the resource. `READ-ONLY`            |
+| `name`        | string  | Term name. `REQUIRED`                                      |
+| `slug`        | string  | An alphanumeric identifier for the resource unique to its type.                          |
+| `description` | string  | HTML description of the resource.                                                        |
+| `menu_order`  | integer | Menu order, used to custom sort the resource.                                            |
+| `count`       | integer | Number of published products for the resource. `READ-ONLY` |
+
+## Create an attribute term
+This API helps you to create a new product attribute term.
+
+```http
+POST /wp-json/wc/v1/products/attributes/<attribute_id>/terms
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v1/products/attributes/2/terms \
+    -u consumer_key:consumer_secret \
+    -H "Content-Type: application/json" \
+    -d '{
+  "name": "XXS"
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  name: "XXS"
+};
+
+WooCommerce.post("products/attributes/2/terms", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'name' => 'XXS'
+];
+
+print_r($woocommerce->post('products/attributes/2/terms', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "name": "XXS"
+}
+
+print(wcapi.post("products/attributes/2/terms", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  name: "XXS"
+}
+
+woocommerce.post("products/attributes/2/terms", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 23,
+  "name": "XXS",
+  "slug": "xxs",
+  "description": "",
+  "menu_order": 1,
+  "count": 1,
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Retrieve an attribute term
+This API lets you retrieve a product attribute term by ID.
+
+```http
+GET /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/products/attributes/2/terms/23 \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("products/attributes/2/terms/23")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('products/attributes/2/terms/23')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("products/attributes/2/terms/23").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("products/attributes/2/terms/23").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 23,
+  "name": "XXS",
+  "slug": "xxs",
+  "description": "",
+  "menu_order": 1,
+  "count": 1,
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## List all attribute terms
+This API lets you retrieve all terms from a product attribute.
+
+```http
+GET /wp-json/wc/v1/products/attributes/<attribute_id>/terms
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v1/products/attributes/2/terms \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("products/attributes/2/terms")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('products/attributes/2/terms')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("products/attributes/2/terms").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("products/attributes/2/terms").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+[
+  {
+    "id": 23,
+    "name": "XXS",
+    "slug": "xxs",
+    "description": "",
+    "menu_order": 1,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 22,
+    "name": "XS",
+    "slug": "xs",
+    "description": "",
+    "menu_order": 2,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/22"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 17,
+    "name": "S",
+    "slug": "s",
+    "description": "",
+    "menu_order": 3,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/17"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 18,
+    "name": "M",
+    "slug": "m",
+    "description": "",
+    "menu_order": 4,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/18"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 19,
+    "name": "L",
+    "slug": "l",
+    "description": "",
+    "menu_order": 5,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/19"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 20,
+    "name": "XL",
+    "slug": "xl",
+    "description": "",
+    "menu_order": 6,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/20"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  },
+  {
+    "id": 21,
+    "name": "XXL",
+    "slug": "xxl",
+    "description": "",
+    "menu_order": 7,
+    "count": 1,
+    "_links": {
+      "self": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/21"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+        }
+      ]
+    }
+  }
+]
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+|  Parameter   |   Type  |                                                                Description                                                                 |
+|--------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `context`    | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`.                                  |
+| `page`       | integer | Current page of the collection.                                                                                                            |
+| `per_page`   | integer | Maximum number of items to be returned in result set.                                                                                      |
+| `search`     | string  | Limit results to those matching a string.                                                                                                  |
+| `exclude`    | string  | Ensure result set excludes specific ids.                                                                                                   |
+| `include`    | string  | Limit result set to specific ids.                                                                                                          |
+| `order`      | string  | Order sort attribute ascending or descending. Default is `asc`. Options: `asc` and `desc`.                                                 |
+| `orderby`    | string  | Sort collection by object attribute. Default is `name`. Options: `id`, `include`, `name`, `slug`, `term_group`, `description` and `count`. |
+| `hide_empty` | bool    | Whether to hide resources not assigned to any products. Default is `false`.                                                                |
+| `parent`     | integer | Limit result set to resources assigned to a specific parent.                                                                               |
+| `product`    | integer | Limit result set to resources assigned to a specific product.                                                                              |
+| `slug`       | string  | Limit result set to resources with a specific slug.                                                                                        |
+
+## Update an attribute term
+This API lets you make changes to a product attribute term.
+
+```http
+PUT /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v1/products/attributes/2/terms/23 \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "name": "XXS"
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  name: "XXS"
+};
+
+WooCommerce.put("products/attributes/2/terms/23", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'name' => 'XXS'
+];
+
+print_r($woocommerce->put('products/attributes/2/terms/23', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "name": "XXS"
+}
+
+print(wcapi.put("products/attributes/2/terms/23", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  name: "XXS"
+}
+
+woocommerce.put("products/attributes/2/terms/23", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 23,
+  "name": "XXS",
+  "slug": "xxs",
+  "description": "",
+  "menu_order": 1,
+  "count": 1,
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete an attribute term
+This API helps you delete a product attribute term.
+
+```http
+DELETE /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X DELETE https://example.com/wp-json/wc/v1/products/attributes/2/terms/23?force=true \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.delete("products/attributes/2/terms/23", {
+  force: true
+})
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->delete('products/attributes/2/terms/23', ['force' => true])); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.delete("products/attributes/2/terms/23", params={"force": True}).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.delete("products/attributes/2/terms/23", force: true).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "id": 23,
+  "name": "XXS",
+  "slug": "xxs",
+  "description": "",
+  "menu_order": 1,
+  "count": 1,
+  "_links": {
+    "self": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+      }
+    ]
+  }
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+| Parameter |  Type  |                          Description                          |
+|-----------|--------|---------------------------------------------------------------|
+| `force`   | string | Required to be `true`, as resource does not support trashing. |
+
+## Batch update attribute terms
+This API helps you to batch create, update and delete multiple product attribute terms.
+
+:::note
+Note: By default it's limited to up to 100 objects to be created, updated or deleted.
+:::
+
+```http
+POST /wp-json/wc/v1/products/attributes/<attribute_id>/terms/batch
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST https://example.com/wp-json/wc/v1/products/attributes/<attribute_id>/terms/batch \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{
+  "create": [
+    {
+      "name": "XXS"
+    },
+    {
+      "name": "S"
+    }
+  ],
+  "update": [
+    {
+      "id": 19,
+      "menu_order": 6
+    }
+  ],
+  "delete": [
+    21,
+    20
+  ]
+}'
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+const data = {
+  create: [
+    {
+      name: "XXS"
+    },
+    {
+      name: "S"
+    }
+  ],
+  update: [
+    {
+      id: 19,
+      menu_order: 6
+    }
+  ],
+  delete: [
+    21,
+    20
+  ]
+};
+
+WooCommerce.post("products/attributes/2/terms/batch", data)
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php
+$data = [
+    'create' => [
+        [
+            'name' => 'XXS'
+        ],
+        [
+            'name' => 'S'
+        ]
+    ],
+    'update' => [
+        [
+            'id' => 19,
+            'menu_order' => 6
+        ]
+    ],
+    'delete' => [
+        21,
+        20
+    ]
+];
+
+print_r($woocommerce->post('products/attributes/2/terms/batch', $data));
+?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+data = {
+    "create": [
+        {
+            "name": "XXS"
+        },
+        {
+            "name": "S"
+        }
+    ],
+    "update": [
+        {
+            "id": 19,
+            "menu_order": 6
+        }
+    ],
+    "delete": [
+        21,
+        20
+    ]
+}
+
+print(wcapi.post("products/attributes/2/terms/batch", data).json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+data = {
+  create: [
+    {
+      name: "XXS"
+    },
+    {
+      name: "S"
+    }
+  ],
+  update: [
+    {
+      id: 19,
+      menu_order: 6
+    }
+  ],
+  delete: [
+    21,
+    20
+  ]
+}
+
+woocommerce.post("products/attributes/2/terms/batch", data).parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "create": [
+    {
+      "id": 23,
+      "name": "XXS",
+      "slug": "xxs",
+      "description": "",
+      "menu_order": 1,
+      "count": 0,
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/23"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+          }
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "name": "S",
+      "slug": "s",
+      "description": "",
+      "menu_order": 3,
+      "count": 0,
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/17"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+          }
+        ]
+      }
+    }
+  ],
+  "update": [
+    {
+      "id": 19,
+      "name": "L",
+      "slug": "l",
+      "description": "",
+      "menu_order": 5,
+      "count": 1,
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/19"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+          }
+        ]
+      }
+    }
+  ],
+  "delete": [
+    {
+      "id": 21,
+      "name": "XXL",
+      "slug": "xxl",
+      "description": "",
+      "menu_order": 7,
+      "count": 1,
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/21"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+          }
+        ]
+      }
+    },
+    {
+      "id": 20,
+      "name": "XL",
+      "slug": "xl",
+      "description": "",
+      "menu_order": 6,
+      "count": 1,
+      "_links": {
+        "self": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms/20"
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://example.com/wp-json/wc/v1/products/attributes/2/terms"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+  </TabItem>
+</Tabs>

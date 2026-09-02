@@ -354,15 +354,36 @@ class FixtureData {
 	}
 
 	/**
-	 * Upload a sample image and return it's ID.
+	 * Create a sample image attachment and return its ID.
 	 *
-	 * @param integer $product_id
-	 * @return void
+	 * @param integer $product_id Parent product ID.
+	 * @return int|\WP_Error
 	 */
-	public function sideload_image( $product_id = 0 ) {
-		global $wpdb;
-		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product_id, '', 'src' );
-		return $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) )[0];
+	public function create_image_attachment( $product_id = 0 ) {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid'           => 'http://example.org/wp-content/uploads/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+				'post_parent'    => $product_id,
+				'post_title'     => 'Dr1Bczxq4q.png',
+			),
+			'Dr1Bczxq4q.png',
+			$product_id,
+			true
+		);
+
+		if ( ! is_wp_error( $attachment_id ) ) {
+			wp_update_attachment_metadata(
+				$attachment_id,
+				array(
+					'width'  => 186,
+					'height' => 144,
+					'file'   => 'Dr1Bczxq4q.png',
+				)
+			);
+		}
+
+		return $attachment_id;
 	}
 
 	/**

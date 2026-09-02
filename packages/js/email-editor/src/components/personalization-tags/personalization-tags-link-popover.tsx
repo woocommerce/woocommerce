@@ -83,7 +83,7 @@ const PersonalizationTagsLinkPopover = ( {
 				>
 					<div className="woocommerce-personalization-tag-popover-content">
 						<TextControl
-							label={ __( 'Link Text', 'woocommerce' ) }
+							label={ __( 'Link Text', __i18n_text_domain__ ) }
 							value={ linkText }
 							onChange={ ( value ) => setLinkText( value ) }
 							__nextHasNoMarginBottom // To avoid warning about deprecation in console
@@ -93,7 +93,7 @@ const PersonalizationTagsLinkPopover = ( {
 						<SelectControl
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
-							label={ __( 'Link tag', 'woocommerce' ) }
+							label={ __( 'Link tag', __i18n_text_domain__ ) }
 							value={ linkHref }
 							onChange={ ( value ) => {
 								setLinkHref( value );
@@ -102,7 +102,7 @@ const PersonalizationTagsLinkPopover = ( {
 								.filter( ( tag ) => {
 									return (
 										tag.category ===
-										__( 'Link', 'woocommerce' )
+										__( 'Link', __i18n_text_domain__ )
 									);
 								} )
 								.map( ( tag ) => {
@@ -119,7 +119,7 @@ const PersonalizationTagsLinkPopover = ( {
 									setIsPopoverVisible( false );
 								} }
 							>
-								{ __( 'Cancel', 'woocommerce' ) }
+								{ __( 'Cancel', __i18n_text_domain__ ) }
 							</Button>
 							<Button
 								isPrimary
@@ -128,7 +128,7 @@ const PersonalizationTagsLinkPopover = ( {
 									onUpdate( linkElement, linkHref, linkText );
 								} }
 							>
-								{ __( 'Update link', 'woocommerce' ) }
+								{ __( 'Update link', __i18n_text_domain__ ) }
 							</Button>
 						</div>
 					</div>

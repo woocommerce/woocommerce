@@ -52,8 +52,20 @@ export function sortFilterOptions(
 					getSortableText( a )
 				);
 			case 'count-asc':
+				// Fallback to name sort when count is not available
+				if ( a.count === undefined || b.count === undefined ) {
+					return getSortableText( a ).localeCompare(
+						getSortableText( b )
+					);
+				}
 				return a.count - b.count;
 			default: // count-desc
+				// Fallback to name sort when count is not available
+				if ( a.count === undefined || b.count === undefined ) {
+					return getSortableText( a ).localeCompare(
+						getSortableText( b )
+					);
+				}
 				return b.count - a.count;
 		}
 	} );

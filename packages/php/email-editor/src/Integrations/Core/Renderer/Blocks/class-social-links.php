@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Social_Links_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 /**
@@ -43,26 +44,39 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
 
-		$content = '';
+		$content                = '';
+		$is_first_rendered_link = true;
 		foreach ( $inner_blocks as $block ) {
-			$content .= $this->generate_social_link_content( $block, $attrs );
+			$social_link_content = $this->generate_social_link_content(
+				$block,
+				$attrs,
+				! $is_first_rendered_link,
+				$rendering_context->get_start_side()
+			);
+			if ( '' === $social_link_content ) {
+				continue;
+			}
+			$is_first_rendered_link = false;
+			$content               .= $social_link_content;
 		}
 
 		return str_replace(
 			'{social_links_content}',
 			$content,
-			$this->get_block_wrapper( $block_content, $parsed_block )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Generates the social link content.
 	 *
-	 * @param array $block The block data.
-	 * @param array $parent_block_attrs The parent block attributes.
+	 * @param array  $block The block data.
+	 * @param array  $parent_block_attrs The parent block attributes.
+	 * @param bool   $render_gap Whether to render a gap before the item.
+	 * @param string $gap_side The physical side used for the horizontal gap.
 	 * @return string The generated content.
 	 */
-	private function generate_social_link_content( $block, $parent_block_attrs ) {
+	private function generate_social_link_content( $block, $parent_block_attrs, bool $render_gap = false, string $gap_side = 'left' ) {
 		$service_name = $block['attrs']['service'] ?? '';
 		$service_url  = $block['attrs']['url'] ?? '';
 		$label        = $block['attrs']['label'] ?? '';
@@ -122,10 +136,11 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$main_table_styles = $this->compile_css(
 			array(
-				'background-color' => $icon_background_color_value,
-				'border-radius'    => '9999px',
-				'display'          => 'inline-table',
-				'float'            => 'none',
+				'background-color'    => $icon_background_color_value,
+				'border-radius'       => '9999px',
+				'display'             => 'inline-table',
+				'float'               => 'none',
+				'margin-' . $gap_side => $render_gap ? '16px' : '',
 			)
 		);
 
@@ -153,8 +168,9 @@ class Social_Links extends Abstract_Block_Renderer {
 		);
 
 		if ( $is_pill_shape ) {
-			$row_container_styles['padding-left']  = '17px';
-			$row_container_styles['padding-right'] = '17px';
+			$pill_shape_horizontal_padding         = rtrim( rtrim( number_format( $font_size_value * 2 / 3, 2, '.', '' ), '0' ), '.' ) . 'px';
+			$row_container_styles['padding-left']  = $pill_shape_horizontal_padding;
+			$row_container_styles['padding-right'] = $pill_shape_horizontal_padding;
 		}
 		$row_container_styles = $this->compile_css( $row_container_styles );
 
@@ -206,18 +222,23 @@ class Social_Links extends Abstract_Block_Renderer {
 
 		$main_table = Table_Wrapper_Helper::render_table_wrapper( $social_link_content, $main_table_attrs, array(), $main_row_attrs, false );
 
-		return Table_Wrapper_Helper::render_outlook_table_cell( $main_table );
+		$outlook_cell_attrs = array(
+			'style' => $render_gap ? 'padding-' . $gap_side . ':16px;' : '',
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_cell( $main_table, $outlook_cell_attrs );
 	}
 
 	/**
 	 * Gets the block wrapper.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string The block wrapper HTML.
 	 */
-	private function get_block_wrapper( $block_content, $parsed_block ) {
-		$content = $this->adjust_block_content( $block_content, $parsed_block );
+	private function get_block_wrapper( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
+		$content = $this->adjust_block_content( $block_content, $parsed_block, $rendering_context );
 
 		$table_styles    = $content['table_styles'];
 		$classes         = $content['classes'];
@@ -250,17 +271,17 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * Adjusts the block content.
 	 * Returns css classes and styles compatible with email clients.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array The adjusted block content.
 	 */
-	private function adjust_block_content( $block_content, $parsed_block ) {
+	private function adjust_block_content( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
 		$block_content    = $this->adjust_style_attribute( $block_content );
 		$block_attributes = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'textAlign' => 'left',
-				'style'     => array(),
+				'style' => array(),
 			)
 		);
 		$html             = new \WP_HTML_Tag_Processor( $block_content );
@@ -269,12 +290,8 @@ class Social_Links extends Abstract_Block_Renderer {
 			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
-			// remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = str_replace( 'has-background', '', $block_classes );
-			// remove border related classes because we handle border on wrapping table cell.
-			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
-			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
-			$html->set_attribute( 'class', trim( $block_classes ) );
+			// Remove the background and border classes because we render both on the wrapping table cell.
+			Html_Processing_Helper::remove_wrapper_handled_classes( $html );
 			$block_content = $html->get_updated_html();
 		}
 
@@ -293,11 +310,11 @@ class Social_Links extends Abstract_Block_Renderer {
 			'word-break'     => 'break-word',
 		);
 
-		$styles['text-align'] = 'left';
+		$styles['text-align'] = $rendering_context->get_default_text_align();
 		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
-			$styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
-			$styles['text-align'] = $parsed_block['attrs']['align'];
+			$styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['textAlign'] );
+		} elseif ( null !== $rendering_context->sanitize_text_align( $parsed_block['attrs']['align'] ?? null ) ) {
+			$styles['text-align'] = $rendering_context->resolve_text_align( $parsed_block['attrs']['align'] );
 		}
 
 		$compiled_styles = $this->compile_css( $block_styles['declarations'], $styles );

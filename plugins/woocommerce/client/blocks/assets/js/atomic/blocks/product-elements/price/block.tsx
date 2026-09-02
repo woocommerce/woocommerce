@@ -95,39 +95,50 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		parentName ===
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
-	// If the block is not a descendant of the All Products block, we are
-	// already printing the styles from the PHP side (in the frontend) and the
-	// `edit.tsx` file (in the editor).
-	const computedStyles = useStyleProps( props );
-	let styleProps = {
-		className: '',
-		style: {},
+	const styleProps = useStyleProps( props );
+	const {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+		...priceStyle
+	} = styleProps.style;
+	const blockMarginStyle = {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
 	};
-	if ( isDescendentOfAllProductsBlock ) {
-		styleProps = computedStyles;
-	}
 
 	const showPricePreview =
 		( isDescendentOfSingleProductTemplate &&
 			! isDescendentOfAddToCartGroupedProductSelectorBlock ) ||
 		! product;
 
-	const wrapperClassName = clsx(
-		'wc-block-components-product-price',
-		className,
-		styleProps.className,
-		{
-			[ `${ parentClassName }__product-price` ]: parentClassName,
-		}
+	const blockClassName = clsx(
+		'wp-block-woocommerce-product-price',
+		className
 	);
+	const wrapperClassName = clsx( styleProps.className, {
+		[ `${ parentClassName }__product-price` ]: parentClassName,
+	} );
 
 	if ( ! product?.id && ! isDescendentOfSingleProductTemplate ) {
 		const productPriceComponent = (
-			<ProductPrice align={ textAlign } className={ wrapperClassName } />
+			<ProductPrice
+				align={ textAlign }
+				className={ wrapperClassName }
+				style={ priceStyle }
+			/>
 		);
 		if ( isDescendentOfAllProductsBlock ) {
 			return (
-				<div className="wp-block-woocommerce-product-price">
+				<div
+					className={ blockClassName }
+					style={ isAdmin ? undefined : blockMarginStyle }
+				>
 					{ productPriceComponent }
 				</div>
 			);
@@ -190,9 +201,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		<ProductPrice
 			align={ textAlign }
 			className={ wrapperClassName }
-			style={ styleProps.style }
-			regularPriceStyle={ styleProps.style }
-			priceStyle={ styleProps.style }
+			style={ priceStyle }
 			priceClassName={ priceClassName }
 			currency={ currency }
 			price={ showPricePreview ? pricePreview : prices.price }
@@ -211,7 +220,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	);
 	if ( isDescendentOfAllProductsBlock ) {
 		return (
-			<div className="wp-block-woocommerce-product-price">
+			<div
+				className={ blockClassName }
+				style={ isAdmin ? undefined : blockMarginStyle }
+			>
 				{ productPriceComponent }
 			</div>
 		);

@@ -18,7 +18,8 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 /**
  * Internal dependencies
  */
-import { Text, ListItem } from '../../';
+import { Text } from '../../text';
+import { ExperimentalListItem as ListItem } from '../experimental-list-item';
 import { VerticalCSSTransition } from '../../vertical-css-transition';
 
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
@@ -56,6 +57,7 @@ type TaskItemProps = {
 	actionLabel?: string;
 	className?: string;
 	children?: React.ReactNode;
+	secondaryAction?: React.ReactNode;
 };
 
 const OptionalTaskTooltip = ( {
@@ -132,6 +134,7 @@ export const TaskItem = ( {
 	level = 3,
 	action,
 	actionLabel,
+	secondaryAction,
 	...listItemProps
 }: TaskItemProps ) => {
 	const [ isTaskExpanded, setTaskExpanded ] = useState( expanded );
@@ -260,56 +263,65 @@ export const TaskItem = ( {
 					</div>
 				) }
 			</div>
-			{ showEllipsisMenu && (
-				<EllipsisMenu
-					label={ __( 'Task Options', 'woocommerce' ) }
-					className="woocommerce-task-list__item-after"
-					onToggle={ ( e: React.MouseEvent | React.KeyboardEvent ) =>
-						e.stopPropagation()
-					}
-					renderContent={ () => (
-						<div className="woocommerce-task-card__section-controls">
-							{ onDismiss && ! completed && (
-								<Button
-									onClick={ (
-										e:
-											| React.MouseEvent
-											| React.KeyboardEvent
-									) => {
-										e.stopPropagation();
-										onDismiss();
-									} }
-								>
-									{ __( 'Dismiss', 'woocommerce' ) }
-								</Button>
+			{ ( secondaryAction || showEllipsisMenu ) && (
+				<div className="woocommerce-task-list__item-after">
+					{ secondaryAction }
+					{ showEllipsisMenu && (
+						<EllipsisMenu
+							label={ __( 'Task Options', 'woocommerce' ) }
+							onToggle={ (
+								e: React.MouseEvent | React.KeyboardEvent
+							) => e.stopPropagation() }
+							renderContent={ () => (
+								<div className="woocommerce-task-card__section-controls">
+									{ onDismiss && ! completed && (
+										<Button
+											onClick={ (
+												e:
+													| React.MouseEvent
+													| React.KeyboardEvent
+											) => {
+												e.stopPropagation();
+												onDismiss();
+											} }
+										>
+											{ __( 'Dismiss', 'woocommerce' ) }
+										</Button>
+									) }
+									{ onSnooze && ! completed && (
+										<Button
+											onClick={ (
+												e: React.MouseEvent
+											) => {
+												e.stopPropagation();
+												onSnooze();
+											} }
+										>
+											{ __(
+												'Remind me later',
+												'woocommerce'
+											) }
+										</Button>
+									) }
+									{ onDelete && completed && (
+										<Button
+											onClick={ (
+												e:
+													| React.MouseEvent
+													| React.KeyboardEvent
+											) => {
+												e.stopPropagation();
+												onDelete();
+											} }
+										>
+											{ __( 'Delete', 'woocommerce' ) }
+										</Button>
+									) }
+								</div>
 							) }
-							{ onSnooze && ! completed && (
-								<Button
-									onClick={ ( e: React.MouseEvent ) => {
-										e.stopPropagation();
-										onSnooze();
-									} }
-								>
-									{ __( 'Remind me later', 'woocommerce' ) }
-								</Button>
-							) }
-							{ onDelete && completed && (
-								<Button
-									onClick={ (
-										e:
-											| React.MouseEvent
-											| React.KeyboardEvent
-									) => {
-										e.stopPropagation();
-										onDelete();
-									} }
-								>
-									{ __( 'Delete', 'woocommerce' ) }
-								</Button>
-							) }
-						</div>
+						/>
 					) }
-				/>
+				</div>
 			) }
 		</ListItem>
 	);

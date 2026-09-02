@@ -49,7 +49,7 @@ class NotificationsPage {
 	 * Edit notification.
 	 */
 	public function edit() {
-		$edit_page = new NotificationEditPage();
+		$edit_page = wc_get_container()->get( NotificationEditPage::class );
 		$edit_page->output();
 		$this->output_admin_notice();
 	}

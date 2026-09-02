@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartItemsBlock class.
  */
@@ -17,28 +15,12 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	/**
 	 * Render the markup for the Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-		}
-
-		return $content;
-	}
-
-	/**
-	 * Render experimental iAPI block markup.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class'    => 'wc-block-mini-cart__items',
@@ -52,6 +34,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 }

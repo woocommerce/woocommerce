@@ -9,7 +9,7 @@ import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
-import reducer, { State } from './reducer';
+import reducer, { type State } from './reducer';
 import controls from '../controls';
 import { SelectFromMap, WPDataSelectors } from '../types';
 import { getItemsType } from './selectors';

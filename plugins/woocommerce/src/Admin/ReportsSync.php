@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler;
@@ -27,6 +28,11 @@ class ReportsSync {
 		add_action( 'woocommerce_new_product', array( __CLASS__, 'clear_stock_count_cache' ) );
 		add_action( 'update_option_woocommerce_notify_low_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
 		add_action( 'update_option_woocommerce_notify_no_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
+		// Invalidate report caches when the analytics date type changes, so all report families
+		// (Orders, Revenue, Taxes) reflect the new date basis immediately instead of after the cache TTL.
+		// The very first save of the option takes the add_option path, so hook both.
+		add_action( 'add_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
+		add_action( 'update_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
 		add_action( 'trashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
 		add_action( 'delete_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
@@ -83,6 +89,13 @@ class ReportsSync {
 		}
 
 		self::reset_import_stats( $days, $skip_existing );
+		// A full (non-windowed) import covers the orders whose failed-import
+		// records were dropped due to the storage cap, so reset the overflow
+		// counter. Windowed imports may not reach those orders, so the counter
+		// is kept to keep the UI warning accurate.
+		if ( false === $days ) {
+			OrdersScheduler::reset_failed_order_imports_overflow();
+		}
 		foreach ( self::get_schedulers() as $scheduler ) {
 			$scheduler::schedule_action( 'import_batch_init', array( $days, $skip_existing ) );
 		}
@@ -178,6 +191,7 @@ class ReportsSync {
 
 		// Delete import options.
 		delete_option( ImportScheduler::IMPORT_STATS_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		return __( 'Report table data is being deleted.', 'woocommerce' );
 	}

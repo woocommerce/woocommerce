@@ -19,9 +19,11 @@ declare global {
 	}
 }
 
-const Promotions: ( { format }: { format: string } ) => null | JSX.Element = ( {
+const Promotions: ( {
 	format,
-} ) => {
+}: {
+	format: string;
+} ) => null | React.JSX.Element = ( { format } ) => {
 	if (
 		! window?.wcMarketplace?.promotions ||
 		! Array.isArray( window?.wcMarketplace?.promotions )

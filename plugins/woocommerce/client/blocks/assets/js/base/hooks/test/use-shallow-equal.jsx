@@ -1,10 +1,7 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { renderHook } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -12,12 +9,11 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { useShallowEqual } from '../use-shallow-equal';
 
 describe( 'useShallowEqual', () => {
-	const TestComponent = ( { testValue } ) => {
-		const newValue = useShallowEqual( testValue );
-		return <div data-newValue={ newValue } />;
-	};
-	let renderer;
-	beforeEach( () => ( renderer = null ) );
+	const renderShallowEqual = ( testValue ) =>
+		renderHook( ( props ) => useShallowEqual( props.testValue ), {
+			initialProps: { testValue },
+		} );
+
 	it.each`
 		testValueA                  | aType         | testValueB                  | bType
 		${ { a: 'b', foo: 'bar' } } | ${ 'object' } | ${ { foo: 'bar', a: 'b' } } | ${ 'object' }
@@ -28,22 +24,11 @@ describe( 'useShallowEqual', () => {
 	`(
 		'$testValueA ($aType) and $testValueB ($bType) are expected to be equal',
 		( { testValueA, testValueB } ) => {
-			let testPropValue;
-			act( () => {
-				renderer = TestRenderer.create(
-					<TestComponent testValue={ testValueA } />
-				);
-			} );
-			testPropValue =
-				renderer.root.findByType( 'div' ).props[ 'data-newValue' ];
-			expect( testPropValue ).toBe( testValueA );
+			const { result, rerender } = renderShallowEqual( testValueA );
+			expect( result.current ).toBe( testValueA );
 			// do update
-			act( () => {
-				renderer.update( <TestComponent testValue={ testValueB } /> );
-			} );
-			testPropValue =
-				renderer.root.findByType( 'div' ).props[ 'data-newValue' ];
-			expect( testPropValue ).toBe( testValueA );
+			rerender( { testValue: testValueB } );
+			expect( result.current ).toBe( testValueA );
 		}
 	);
 
@@ -58,22 +43,11 @@ describe( 'useShallowEqual', () => {
 	`(
 		'$testValueA ($aType) and $testValueB ($bType) are expected to not be equal',
 		( { testValueA, testValueB } ) => {
-			let testPropValue;
-			act( () => {
-				renderer = TestRenderer.create(
-					<TestComponent testValue={ testValueA } />
-				);
-			} );
-			testPropValue =
-				renderer.root.findByType( 'div' ).props[ 'data-newValue' ];
-			expect( testPropValue ).toBe( testValueA );
+			const { result, rerender } = renderShallowEqual( testValueA );
+			expect( result.current ).toBe( testValueA );
 			// do update
-			act( () => {
-				renderer.update( <TestComponent testValue={ testValueB } /> );
-			} );
-			testPropValue =
-				renderer.root.findByType( 'div' ).props[ 'data-newValue' ];
-			expect( testPropValue ).toBe( testValueB );
+			rerender( { testValue: testValueB } );
+			expect( result.current ).toBe( testValueB );
 		}
 	);
 } );

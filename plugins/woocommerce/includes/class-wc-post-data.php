@@ -43,7 +43,6 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
-		add_action( 'set_object_terms', array( __CLASS__, 'recount_terms_for_product_visibility_change' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -113,9 +112,18 @@ class WC_Post_Data {
 	public static function do_deferred_product_sync() {
 		global $wc_deferred_product_sync;
 
-		if ( ! empty( $wc_deferred_product_sync ) ) {
-			$wc_deferred_product_sync = wp_parse_id_list( $wc_deferred_product_sync );
-			array_walk( $wc_deferred_product_sync, array( __CLASS__, 'deferred_product_sync' ) );
+		// Syncing a product may defer more products (e.g. from hooks fired while saving it),
+		// so the queue is drained in rounds, syncing each product at most once.
+		$processed = array();
+		while ( ! empty( $wc_deferred_product_sync ) ) {
+			$product_ids              = array_diff( wp_parse_id_list( $wc_deferred_product_sync ), $processed );
+			$wc_deferred_product_sync = array();
+
+			foreach ( $product_ids as $product_id ) {
+				self::deferred_product_sync( $product_id );
+			}
+
+			$processed = array_merge( $processed, $product_ids );
 		}
 	}
 
@@ -146,6 +154,16 @@ class WC_Post_Data {
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( ProductStatus::PUBLISH === $new_status || ProductStatus::PUBLISH === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
+		}
+
+		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			/**
+			 * Fires when a product or product variation transitions to published status.
+			 *
+			 * @since 10.8.0
+			 * @param int $product_id The product or variation ID.
+			 */
+			do_action( 'woocommerce_product_published', $post->ID );
 		}
 	}
 
@@ -342,8 +360,8 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // WPCS: input var ok, CSRF ok.
-			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
+			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
 			switch ( $product_type ) {
 				case ProductType::GROUPED:
 				case ProductType::VARIABLE:
@@ -590,13 +608,16 @@ class WC_Post_Data {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query(
-				"
+				$wpdb->prepare(
+					"
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
-				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				"
-			); // WPCS: unprepared SQL ok.
+				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = %d;
+					",
+					$postid
+				)
+			);
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
@@ -668,10 +689,13 @@ class WC_Post_Data {
 	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
 	 *
 	 * @since 10.4.0
+	 * @deprecated 11.2.0 Product term-count consistency is now handled by the TermCount service.
 	 *
 	 * @return void
 	 */
 	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		wc_deprecated_function( __FUNCTION__, '11.2.0' );
+
 		if ( 'product_visibility' !== $taxonomy ) {
 			return;
 		}

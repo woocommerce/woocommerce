@@ -20,13 +20,10 @@ a {
 }
 
 .email_content_wrapper {
-	direction: ltr;
 	font-size: inherit;
-	text-align: left;
 }
 
 .email_footer {
-	direction: ltr;
 	text-align: center;
 }
 
@@ -77,6 +74,7 @@ a {
 	display: block !important;
 	padding-bottom: 8px !important; /* Half of the flex gap between blocks */
 	padding-left: 0 !important;
+	padding-right: 0 !important;
 	width: 100% !important;
 	}
 

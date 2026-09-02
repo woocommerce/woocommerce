@@ -33,6 +33,8 @@ class AbilitiesCategories {
 
 	/**
 	 * Register WooCommerce ability categories.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function register_categories(): void {
 		// Only register if the function exists.
@@ -40,12 +42,24 @@ class AbilitiesCategories {
 			return;
 		}
 
-		wp_register_ability_category(
-			'woocommerce-rest',
-			array(
-				'label'       => __( 'WooCommerce REST API', 'woocommerce' ),
-				'description' => __( 'REST API operations for WooCommerce resources including products, orders, and other store data.', 'woocommerce' ),
-			)
-		);
+		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce' ) ) {
+			wp_register_ability_category(
+				'woocommerce',
+				array(
+					'label'       => __( 'WooCommerce', 'woocommerce' ),
+					'description' => __( 'Abilities for WooCommerce store operations, including core commerce features and extension-provided capabilities.', 'woocommerce' ),
+				)
+			);
+		}
+
+		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce-rest' ) ) {
+			wp_register_ability_category(
+				'woocommerce-rest',
+				array(
+					'label'       => __( 'WooCommerce REST API', 'woocommerce' ),
+					'description' => __( 'REST API operations for store resources including products, orders, and other store data.', 'woocommerce' ),
+				)
+			);
+		}
 	}
 }

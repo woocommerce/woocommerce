@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
@@ -11,6 +10,22 @@ use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
  * Tests related to Counts service.
  */
 class FilterDataTest extends AbstractProductFiltersTest {
+	/**
+	 * This class only reads its product catalog inside per-test transactions.
+	 */
+	protected static function uses_class_product_filter_fixtures(): bool {
+		return true;
+	}
+
+	/**
+	 * Add product reviews used by the filter-count assertions.
+	 */
+	protected function set_up_additional_class_product_filter_fixtures(): void {
+		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
+		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
+		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
+	}
+
 	/**
 	 * The system under test.
 	 *
@@ -35,10 +50,6 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
 		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
-
-		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
-		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
-		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
 	}
 
 	/**
@@ -81,12 +92,23 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Test stock counts without filter.
+	 * @testdox Test stock counts without filter: via wc_product_meta_lookup table.
 	 */
-	public function test_get_stock_status_counts_with_default_query() {
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+	public function test_get_stock_status_counts_with_default_query_using_lookup_table() {
+		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
+	}
 
-		$this->test_get_stock_status_counts_with( $wp_query );
+	/**
+	 * @testdox Test stock counts without filter: via postmeta table.
+	 */
+	public function test_get_stock_status_counts_with_default_query_using_postmeta_table() {
+		global $wpdb;
+		// Empty the lookup table to confirm that the underlying query is targeting the correct postmeta table.
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		update_option( 'woocommerce_product_lookup_table_is_generating', '1' );
+		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
+		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 	}
 
 	/**
@@ -467,7 +489,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @param callable  $filter_callback Callback passed to filter test products.
 	 */
 	private function test_get_stock_status_counts_with( $wp_query, $filter_callback = null ) {
-		$query_vars = array_filter( $wp_query->query_vars );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = microtime( true );
 
 		$actual_stock_status_counts = $this->sut->get_stock_status_counts( $query_vars, array( 'instock', 'outofstock', 'onbackorder' ) );
 
@@ -500,7 +523,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @param callable  $filter_callback Callback passed to filter test products.
 	 */
 	private function test_get_filtered_price_with( $wp_query, $filter_callback = null ) {
-		$query_vars = array_filter( $wp_query->query_vars );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = microtime( true );
 
 		$prices = array();
 

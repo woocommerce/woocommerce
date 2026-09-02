@@ -7,14 +7,64 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-
 /**
  * Order Route Tests.
  *
  * Tests for the /wc/store/v1/order endpoint, focusing on authorization.
  */
 class Order extends ControllerTestCase {
+	/**
+	 * Product ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $product_id;
+
+	/**
+	 * Customer IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $customer_ids = array();
+
+	/**
+	 * Create immutable fixtures shared by all test methods.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		$product          = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product',
+					'regular_price' => 10,
+				),
+			)
+		)[0];
+		self::$product_id = $product->get_id();
+
+		self::$customer_ids = array(
+			$factory->user->create(
+				array(
+					'role'       => 'customer',
+					'user_email' => 'customer1@test.com',
+				)
+			),
+			$factory->user->create(
+				array(
+					'role'       => 'customer',
+					'user_email' => 'customer2@test.com',
+				)
+			),
+		);
+	}
+
+	/**
+	 * Delete the class-owned product through its data store.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( array( self::$product_id ) );
+	}
 
 	/**
 	 * Test product.
@@ -43,41 +93,9 @@ class Order extends ControllerTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$fixtures      = new FixtureData();
-		$this->product = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Test Product',
-				'regular_price' => 10,
-			)
-		);
-
-		// Create test customers.
-		$this->customer_id   = $this->factory->user->create(
-			array(
-				'role'       => 'customer',
-				'user_email' => 'customer1@test.com',
-			)
-		);
-		$this->customer_id_2 = $this->factory->user->create(
-			array(
-				'role'       => 'customer',
-				'user_email' => 'customer2@test.com',
-			)
-		);
-	}
-
-	/**
-	 * Tear down test data.
-	 */
-	protected function tearDown(): void {
-		parent::tearDown();
-
-		if ( $this->customer_id ) {
-			wp_delete_user( $this->customer_id );
-		}
-		if ( $this->customer_id_2 ) {
-			wp_delete_user( $this->customer_id_2 );
-		}
+		$this->product       = wc_get_product( self::$product_id );
+		$this->customer_id   = self::$customer_ids[0];
+		$this->customer_id_2 = self::$customer_ids[1];
 	}
 
 	/**

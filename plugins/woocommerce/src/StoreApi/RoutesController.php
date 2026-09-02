@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * RoutesController class.
@@ -39,7 +39,7 @@ class RoutesController {
 	public function __construct( SchemaController $schema_controller ) {
 		$this->schema_controller = $schema_controller;
 		$this->routes            = [
-			'v1'      => [
+			'v1'            => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
 				Routes\V1\CartAddItem::IDENTIFIER        => Routes\V1\CartAddItem::class,
@@ -71,15 +71,16 @@ class RoutesController {
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
-			'private' => [
+			'private'       => [
 				// This route should be moved outside of the Store API namespace.
 				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
 			],
-			'agentic' => [
-				// Agentic Commerce Protocol endpoints.
-				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER         => Routes\V1\Agentic\CheckoutSessions::class,
-				Routes\V1\Agentic\CheckoutSessionsUpdate::IDENTIFIER   => Routes\V1\Agentic\CheckoutSessionsUpdate::class,
-				Routes\V1\Agentic\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Agentic\CheckoutSessionsComplete::class,
+			'shopper_lists' => [
+				// Gated by ShopperListsController — registered only when at least one shopper-list feature is enabled.
+				Routes\V1\ShopperLists::IDENTIFIER       => Routes\V1\ShopperLists::class,
+				Routes\V1\ShopperListsBySlug::IDENTIFIER => Routes\V1\ShopperListsBySlug::class,
+				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,
+				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
 		];
 	}
@@ -92,8 +93,8 @@ class RoutesController {
 		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
 		$this->register_routes( 'private', 'wc/private' );
 
-		if ( FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
-			$this->register_routes( 'agentic', 'wc/agentic/v1' );
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled() ) {
+			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
 		}
 	}
 

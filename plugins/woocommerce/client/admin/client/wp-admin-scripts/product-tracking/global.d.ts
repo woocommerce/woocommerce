@@ -1,2 +1,2 @@
 declare const productScreen: { name: string };
-declare const tinymce: import("tinymce").EditorManager;
+declare const tinymce: import('tinymce').EditorManager;

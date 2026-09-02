@@ -75,6 +75,9 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 			'email_options'                           => array( 'title', 'sectionend' ),
 			'woocommerce_email_from_name'             => 'text',
 			'woocommerce_email_from_address'          => 'email',
+			'woocommerce_email_reply_to_enabled'      => 'checkbox',
+			'woocommerce_email_reply_to_name'         => 'text',
+			'woocommerce_email_reply_to_address'      => 'email',
 			'email_template_options'                  => array( 'title', 'sectionend' ),
 			'previewing_new_templates'                => 'previewing_new_templates',
 			'woocommerce_email_header_image'          => 'email_image_url',
@@ -99,25 +102,32 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	 * @testdox get_settings('') should return reply-to settings when block email editor is enabled.
 	 */
 	public function test_get_default_settings_with_block_email_editor_enabled() {
-		// Enable block email editor feature before any WooCommerce initialization.
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		$previous_value = get_option( 'woocommerce_feature_block_email_editor_enabled', null );
 
-		$sut                   = new WC_Settings_Emails();
-		$settings              = $sut->get_settings_for_section( '' );
-		$setting_ids_and_types = $this->get_ids_and_types( $settings );
+		try {
+			// Enable block email editor feature before any WooCommerce initialization.
+			update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
-		// Verify reply-to fields are present.
-		$this->assertArrayHasKey( 'woocommerce_email_reply_to_enabled', $setting_ids_and_types );
-		$this->assertEquals( 'checkbox', $setting_ids_and_types['woocommerce_email_reply_to_enabled'] );
+			$sut                   = new WC_Settings_Emails();
+			$settings              = $sut->get_settings_for_section( '' );
+			$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
-		$this->assertArrayHasKey( 'woocommerce_email_reply_to_name', $setting_ids_and_types );
-		$this->assertEquals( 'text', $setting_ids_and_types['woocommerce_email_reply_to_name'] );
+			// Verify reply-to fields are present.
+			$this->assertArrayHasKey( 'woocommerce_email_reply_to_enabled', $setting_ids_and_types );
+			$this->assertEquals( 'checkbox', $setting_ids_and_types['woocommerce_email_reply_to_enabled'] );
 
-		$this->assertArrayHasKey( 'woocommerce_email_reply_to_address', $setting_ids_and_types );
-		$this->assertEquals( 'email', $setting_ids_and_types['woocommerce_email_reply_to_address'] );
+			$this->assertArrayHasKey( 'woocommerce_email_reply_to_name', $setting_ids_and_types );
+			$this->assertEquals( 'text', $setting_ids_and_types['woocommerce_email_reply_to_name'] );
 
-		// Clean up.
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+			$this->assertArrayHasKey( 'woocommerce_email_reply_to_address', $setting_ids_and_types );
+			$this->assertEquals( 'email', $setting_ids_and_types['woocommerce_email_reply_to_address'] );
+		} finally {
+			if ( null === $previous_value ) {
+				delete_option( 'woocommerce_feature_block_email_editor_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_block_email_editor_enabled', $previous_value );
+			}
+		}
 	}
 
 	/**

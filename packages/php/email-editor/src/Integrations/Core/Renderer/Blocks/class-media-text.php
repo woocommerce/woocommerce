@@ -79,7 +79,7 @@ class Media_Text extends Abstract_Block_Renderer {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 
 		// Get layout attributes.
-		$media_position     = $block_attrs['mediaPosition'] ?? 'left';
+		$media_position     = $block_attrs['mediaPosition'] ?? $rendering_context->get_start_side();
 		$vertical_alignment = $this->get_vertical_alignment_from_attributes( $block_attrs );
 		$media_width        = $this->get_media_width_from_attributes( $block_attrs );
 		$text_width         = 100 - $media_width; // Text takes the remaining width.
@@ -96,7 +96,7 @@ class Media_Text extends Abstract_Block_Renderer {
 			array(
 				'width'           => '100%',
 				'border-collapse' => 'collapse',
-				'text-align'      => 'left',
+				'text-align'      => $rendering_context->get_default_text_align(),
 			)
 		);
 
@@ -104,7 +104,7 @@ class Media_Text extends Abstract_Block_Renderer {
 		$table_attrs = array(
 			'class' => 'email-block-media-text ' . $original_wrapper_classname,
 			'style' => $block_styles['css'],
-			'align' => 'left',
+			'align' => $rendering_context->get_default_text_align(),
 			'width' => '100%',
 		);
 

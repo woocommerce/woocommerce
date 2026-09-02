@@ -135,7 +135,7 @@ class WooContentProcessor {
 			.order-item-data td {
 				border: 0;
 				padding: 0;
-				vertical-align: top;
+				vertical-align: middle;
 			}
 			.order-item-data img {
 				border-radius: 4px;

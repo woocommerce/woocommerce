@@ -198,7 +198,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_map( 'wc_get_product', $product_reference );
+				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -281,13 +281,6 @@ class HandlerRegistry {
 					);
 				}
 
-				$product_ids = array_map(
-					function ( $product ) {
-						return $product->get_id();
-					},
-					$products
-				);
-
 				$all_cross_sells = array_reduce(
 					$products,
 					function ( $acc, $product ) {
@@ -302,7 +295,7 @@ class HandlerRegistry {
 				// Remove duplicates and product references. We don't want to display
 				// what's already in cart.
 				$unique_cross_sells = array_unique( $all_cross_sells );
-				$cross_sells        = array_diff( $unique_cross_sells, $product_ids );
+				$cross_sells        = array_diff( $unique_cross_sells, $product_reference );
 
 				return array(
 					'post__in' => empty( $cross_sells ) ? array( -1 ) : $cross_sells,

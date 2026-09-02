@@ -230,4 +230,27 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 		$this->assertEquals( '+00-000-00-00-000', WC_Validation::format_phone( '+00.000.00.00.000' ) );
 		$this->assertEquals( '+00 000 00 00 000', WC_Validation::format_phone( '+00 000 00 00 000' ) );
 	}
+
+	/**
+	 * Test is_phone_format().
+	 */
+	public function test_is_phone_format() {
+		$this->assertTrue( WC_Validation::is_phone_format( '+00 000 00 00 000' ) );
+		$this->assertTrue( WC_Validation::is_phone_format( '(000) 00 00 000' ) );
+		$this->assertFalse( WC_Validation::is_phone_format( '+00 aaa dd ee fff' ) );
+	}
+
+	/**
+	 * Test that is_phone_format() ignores the woocommerce_validate_phone filter while is_phone() honors it.
+	 */
+	public function test_is_phone_format_ignores_validate_phone_filter() {
+		add_filter( 'woocommerce_validate_phone', '__return_false' );
+
+		try {
+			$this->assertTrue( WC_Validation::is_phone_format( '+00 000 00 00 000' ) );
+			$this->assertFalse( WC_Validation::is_phone( '+00 000 00 00 000' ) );
+		} finally {
+			remove_filter( 'woocommerce_validate_phone', '__return_false' );
+		}
+	}
 }

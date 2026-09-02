@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Admin_Settings;
 use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
-use WP_Filesystem_Direct;
 
 /**
  * Settings class.
@@ -81,11 +80,12 @@ class Settings {
 				if ( true === $result ) {
 					// Create infrastructure to prevent listing contents of the logs directory.
 					try {
-						$filesystem = FilesystemUtil::get_wp_filesystem();
+						$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 						$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
 						$filesystem->put_contents( $dir . 'index.html', '' );
-					} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-						// Creation failed.
+					} catch ( Exception $exception ) {
+						// Best-effort: the directory exists and stays usable without the no-listing files, but log a trace.
+						error_log( 'WooCommerce: could not write log directory protection files: ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
 			}
@@ -295,16 +295,10 @@ class Settings {
 		$directory     = self::get_log_directory();
 
 		$status_info = array();
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
-			if ( $filesystem instanceof WP_Filesystem_Direct ) {
-				$status_info[] = __( '✅ Ready', 'woocommerce' );
-			} else {
-				$status_info[] = __( '⚠️ The file system is not configured for direct writes. This could cause problems for the logger.', 'woocommerce' );
-				$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
-			}
-		} catch ( Exception $exception ) {
-			$status_info[] = __( '⚠️ The file system connection could not be initialized.', 'woocommerce' );
+		if ( wp_is_writable( $directory ) ) {
+			$status_info[] = __( '✅ Ready', 'woocommerce' );
+		} else {
+			$status_info[] = __( '⚠️ The log directory is not writable.', 'woocommerce' );
 			$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
 		}
 
@@ -316,10 +310,6 @@ class Settings {
 				esc_html( $directory )
 			)
 		);
-
-		if ( ! wp_is_writable( $directory ) ) {
-			$location_info[] = __( '⚠️ This directory does not appear to be writable.', 'woocommerce' );
-		}
 
 		$location_info[] = sprintf(
 			// translators: %s is an amount of computer disk space, e.g. 5 KB.

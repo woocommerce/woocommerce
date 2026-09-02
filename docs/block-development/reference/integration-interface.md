@@ -14,13 +14,13 @@ You are an extension developer, and to allow users to interact with your extensi
 
 You may use the `IntegrationRegistry` to register an `IntegrationInterface` this will be a class that will handle the enqueuing of scripts, styles, and data. You may have a different `IntegrationInterface` for each block (Mini-Cart, Cart and Checkout), or you may use the same one, it is entirely dependent on your use case.
 
-You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationRegistry.php) to the callback.
+You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and `woocommerce_blocks_checkout_block_registration`. These hooks pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Integrations/IntegrationRegistry.php) to the callback.
 
 You may then use the `register` method on this object to register your `IntegrationInterface`.
 
 ## `IntegrationInterface` methods
 
-To begin, we'll need to create our integration class, our `IntegrationInterface`. This will be a class that implements WooCommerce Blocks' interface named [`IntegrationInterface`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationInterface.php).
+To begin, we'll need to create our integration class, our `IntegrationInterface`. This will be a class that implements WooCommerce Blocks' interface named [`IntegrationInterface`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Integrations/IntegrationInterface.php).
 
 In this section, we will step through the interface's members and discuss what they are used for.
 

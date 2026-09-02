@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add the contract status-transition machine and the gateway capability registry.

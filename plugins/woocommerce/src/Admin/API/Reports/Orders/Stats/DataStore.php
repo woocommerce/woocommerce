@@ -101,7 +101,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
 		parent::__construct();
 	}
 
@@ -113,7 +113,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
 		// Avoid ambiguous columns in SQL query.
-		$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
+		// Identify refund rows by the sign of the whole row (net + tax + shipping), not net alone:
+		// when a prior partial refund already covered the net portion, an incremental full-refund
+		// row can have net_total = 0 while still carrying negative tax or shipping.
+		$refunds = "ABS( SUM( CASE WHEN ( {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ) < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
 		if ( ! OrderUtil::uses_new_full_refund_data() ) {
 			$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
 		}
@@ -143,6 +146,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function init() {
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'delete_order' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
+		add_action( 'woocommerce_delete_order_refund', array( __CLASS__, 'delete_refund' ) );
 	}
 
 	/**
@@ -339,7 +343,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$table_name = self::get_db_table_name();
 
 		if ( isset( $query_args['date_type'] ) ) {
-			$this->date_column_name = $query_args['date_type'];
+			$this->date_column_name = $this->sanitize_date_column_name( $query_args['date_type'] );
 		}
 
 		$this->initialize_queries();
@@ -377,7 +381,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+		// @todo Remove these assignments when refactoring segmenter classes to use query objects.
 		$totals_query    = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $where_time,
@@ -594,25 +598,51 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
-			if ( $parent_order ) {
+			// Refunds attach to the original order. Skip if the parent is another refund.
+			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 
 				$refund_type               = $order->get_meta( '_refund_type' );
 				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
-				if ( 'full' === $refund_type && $uses_new_full_refund_data ) {
+				$use_parent_refund_amounts = $uses_new_full_refund_data && (
+					'full' === $refund_type
+					|| self::should_split_full_refund_using_parent_order( $order, $parent_order )
+				);
+				if ( $use_parent_refund_amounts ) {
+					// A full refund derives its amounts from the parent order so that net, tax
+					// and shipping each zero out — a lump-sum refund carries no line items of its
+					// own, so the parent is the only reliable source for that split.
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
 					$data['tax_total']      = -1 * $parent_order->get_total_tax();
 					$data['net_total']      = -1 * self::get_net_total( $parent_order );
 					$data['shipping_total'] = -1 * $parent_order->get_shipping_total();
+
+					// If earlier refunds already booked part of the order, subtract what they
+					// recorded so this row only captures the remaining, not-yet-refunded portion.
+					// With no prior refunds this loop is skipped, leaving the totals above intact.
+					foreach ( $parent_order->get_refunds() as $prior_refund ) {
+						if ( $prior_refund->get_id() === $order->get_id() ) {
+							continue;
+						}
+						$data['num_items_sold'] -= self::get_num_items_sold( $prior_refund );
+						$data['tax_total']      -= (float) $prior_refund->get_total_tax();
+						$data['net_total']      -= self::get_net_total( $prior_refund );
+						$data['shipping_total'] -= (float) $prior_refund->get_shipping_total();
+					}
 				}
 			}
 			/**
-			 * Set date_completed and date_paid the same as date_created to avoid problems
-			 * when they are being used to sort the data, as refunds don't have them filled
-			*/
-			$data['date_completed'] = $data['date_created'];
-			$data['date_paid']      = $data['date_created'];
+			 * Refunds don't have date_completed and date_paid filled, so backfill each from
+			 * date_created for sorting — but only when the parent order has that date itself.
+			 * A refund of a never-paid order (e.g. a failed order manually set to "refunded")
+			 * moves no money; backfilling its dates would include the refund row in reports
+			 * filtered by that date while the parent row (NULL date) stays excluded, counting
+			 * a one-sided negative. Mirroring the parent keeps the pair excluded together.
+			 */
+			$parent_is_order        = $parent_order instanceof WC_Order;
+			$data['date_completed'] = $parent_is_order && ! $parent_order->get_date_completed() ? null : $data['date_created'];
+			$data['date_paid']      = $parent_is_order && ! $parent_order->get_date_paid() ? null : $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
@@ -663,6 +693,54 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		ReportsCache::invalidate();
 	}
 
+	/**
+	 * Deletes the refund stats when a refund is deleted.
+	 *
+	 * This hook fires after the refund is gone, so delete_order() cannot be reused —
+	 * its is_order() guard and wc_get_order() call both need the record. The customer
+	 * ID comes from the stats row instead.
+	 *
+	 * HPOS only. CPT deletes the post first, so delete_post has already run the whole
+	 * cascade; repeating it here would fire the public hooks twice for one deletion.
+	 * Under HPOS-with-sync the HPOS record goes first, so delete_order() short-circuits
+	 * and this is the only cleanup that runs.
+	 *
+	 * The cascade runs even without a stats row: imports are not atomic, so lookup rows
+	 * can outlive one, and skipping would orphan them.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $refund_id Refund ID.
+	 */
+	public static function delete_refund( $refund_id ): void {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		$refund_id  = (int) $refund_id;
+		$table_name = self::get_db_table_name();
+
+		// A missing row yields customer ID 0, on which the customer cleanup no-ops.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$customer_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT customer_id FROM {$table_name} WHERE order_id = %d", $refund_id ) );
+
+		$wpdb->delete( $table_name, array( 'order_id' => $refund_id ) );
+
+		/**
+		 * Fires when orders stats are deleted.
+		 *
+		 * @param int $order_id Order ID.
+		 * @param int $customer_id Customer ID.
+		 *
+		 * @since 4.0.0
+		 */
+		do_action( 'woocommerce_analytics_delete_order_stats', $refund_id, absint( $customer_id ) );
+
+		ReportsCache::invalidate();
+	}
+
 
 	/**
 	 * Calculation methods.
@@ -694,6 +772,34 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected static function get_net_total( $order ) {
 		$net_total = floatval( $order->get_total() ) - floatval( $order->get_total_tax() ) - floatval( $order->get_shipping_total() );
 		return (float) $net_total;
+	}
+
+	/**
+	 * Whether this refund is a single lump-sum refund for the full order (e.g. status set to refunded without line items).
+	 *
+	 * @param WC_Order_Refund|OrderRefund|Order $refund        Refund order.
+	 * @param WC_Order|Order                    $parent_order Parent order (not a refund).
+	 * @return bool
+	 */
+	protected static function should_split_full_refund_using_parent_order( $refund, $parent_order ) {
+		// The parent must be the original order, not another refund.
+		if ( ! $parent_order instanceof WC_Order || 'shop_order_refund' === $parent_order->get_type() ) {
+			return false;
+		}
+
+		if ( self::get_num_items_sold( $refund ) > 0 ) {
+			return false;
+		}
+
+		$parent_refunds = $parent_order->get_refunds();
+		if ( 1 !== count( $parent_refunds ) ) {
+			return false;
+		}
+
+		$refund_total = wc_format_decimal( abs( (float) $refund->get_total() ) );
+		$order_total  = wc_format_decimal( (float) $parent_order->get_total() );
+
+		return $refund_total === $order_total;
 	}
 
 	/**
@@ -768,12 +874,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$first_order       = $oldest_orders[0];
 		$second_order      = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
-		$excluded_statuses = self::get_excluded_report_order_statuses();
+		$excluded_statuses = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
+		$order_status      = self::normalize_order_status( $order->get_status() );
 
-		// Order is older than previous first order.
-		if ( $order->get_date_created() < wc_string_to_datetime( $first_order->date_created ) &&
-			! in_array( $order->get_status(), $excluded_statuses, true )
-		) {
+		// Order is older than previous first order. Stats dates only have second resolution, so
+		// orders placed within the same second are ranked by ID, the tie breaker
+		// get_oldest_orders() already sorts by. Without it, whichever of the two is imported
+		// last is reported as returning, making the customer type depend on the import order.
+		$order_date       = $order->get_date_created();
+		$first_order_date = wc_string_to_datetime( $first_order->date_created );
+		$is_older         = $order_date < $first_order_date || (
+			$order_date &&
+			$order_date->getTimestamp() === $first_order_date->getTimestamp() &&
+			(int) $order->get_id() < (int) $first_order->order_id
+		);
+
+		if ( $is_older && ! in_array( $order_status, $excluded_statuses, true ) ) {
 			self::set_customer_first_order( $customer_id, $order->get_id() );
 			return false;
 		}
@@ -786,7 +902,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			wc_string_to_datetime( $second_order->date_created ) < $order->get_date_created();
 		// Status has changed to an excluded status and next oldest order is now the first order.
 		$status_change = $second_order &&
-			in_array( $order->get_status(), $excluded_statuses, true );
+			in_array( $order_status, $excluded_statuses, true );
 		if ( $is_first_order && ( $date_change || $status_change ) ) {
 			self::set_customer_first_order( $customer_id, $second_order->order_id );
 			return true;
@@ -805,12 +921,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$orders_stats_table = self::get_db_table_name();
 
+		// Refund rows share the customer ID of their parent order but are stored with a NULL
+		// returning_customer, which the orders report relies on to fall back to the refunded
+		// order's value. Keep them NULL by only updating rows that carry their own flag.
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d AND returning_customer IS NOT NULL",
 				$order_id,
 				$customer_id
 			)

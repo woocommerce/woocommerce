@@ -189,6 +189,11 @@ class CheckoutFields {
 	 * @return WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
+		// Warn when fields are registered before `after_setup_theme`. Registering that early can cause problems, such as loading translations before they're ready.
+		if ( ! did_action( 'after_setup_theme' ) && ! doing_action( 'after_setup_theme' ) ) {
+			_doing_it_wrong( 'woocommerce_register_additional_checkout_field', 'Additional checkout fields should be registered on the woocommerce_init action or later.', '11.0.0' );
+		}
+
 		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
 		if ( false === $this->validate_options( $options ) ) {
 			return;
@@ -1396,13 +1401,16 @@ class CheckoutFields {
 				 * WC_Email::additional_checkout_fields
 				 * WC_Email::additional_address_fields
 				 * CheckoutFieldsFrontend::render_order_other_fields
+				 * CheckoutFieldsFrontend::render_order_address_fields
 				 * AdditionalFields::render_content
+				 * BillingAddress::render_content
+				 * ShippingAddress::render_content
 				 *
-				 * @param bool                    Whether the field should be shown.
-				 * @param array          $field   Field data.
-				 * @param array          $fields  All fields for better context when field should be shown or hidden based on other fields values.
-				 * @param array          $context Additional context for the filter. Data depends in which method filter_fields_for_order_confirmation is called.
-				 * @param CheckoutFields $this    The CheckoutFields instance.
+				 * @param bool           $show_field Whether the field should be shown.
+				 * @param array          $field      Field data.
+				 * @param array          $fields     All fields for better context when field should be shown or hidden based on other fields values.
+				 * @param array          $context    Additional context for the filter. Data depends in which method filter_fields_for_order_confirmation is called.
+				 * @param CheckoutFields $instance   The CheckoutFields instance.
 				 * @since 10.1.0
 				 */
 				return apply_filters( 'woocommerce_filter_fields_for_order_confirmation', ! empty( $field['show_in_order_confirmation'] ), $field, $fields, $context, $this );

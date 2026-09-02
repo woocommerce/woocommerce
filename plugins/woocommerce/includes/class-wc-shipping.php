@@ -320,20 +320,12 @@ class WC_Shipping {
 		// local pickup rates here however since those are not shipped.
 		$is_shippable = $this->is_package_shippable( $package );
 
-		// Check if we need to recalculate shipping for this package.
-		$package_to_hash = $package;
-
-		// Remove data objects so hashes are consistent.
-		foreach ( $package_to_hash['contents'] as $item_id => $item ) {
-			unset( $package_to_hash['contents'][ $item_id ]['data'] );
-		}
-
 		// Get rates stored in the WC session data for this package.
 		$wc_session_key = 'shipping_for_package_' . $package_key;
 		$stored_rates   = WC()->session->get( $wc_session_key );
 
 		// Calculate the hash for this package so we can tell if it's changed since last calculation.
-		$package_hash = 'wc_ship_' . md5( wp_json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+		$package_hash = $this->get_package_hash( $package );
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
@@ -416,6 +408,46 @@ class WC_Shipping {
 		}
 
 		return $package;
+	}
+
+	/**
+	 * Generate the shipping-rate cache hash for a package.
+	 *
+	 * @param array $package_to_hash Package of cart items.
+	 * @return string
+	 */
+	private function get_package_hash( array $package_to_hash ): string {
+		/**
+		 * Filters package fields that should not affect the shipping-rate cache hash.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $ignored_fields Package field names ignored while generating the cache hash.
+		 * @param array $package        Package of cart items.
+		 */
+		$ignored_fields = apply_filters(
+			'woocommerce_shipping_package_hash_ignored_fields',
+			array(
+				'subtotal',
+				'total',
+				'package_id',
+				'package_name',
+				'rates',
+				'package_index',
+			),
+			$package_to_hash
+		);
+
+		foreach ( array_unique( array_filter( (array) $ignored_fields, 'is_string' ) ) as $field ) {
+			unset( $package_to_hash[ $field ] );
+		}
+
+		// Remove data objects so hashes are consistent.
+		foreach ( (array) ( $package_to_hash['contents'] ?? array() ) as $item_id => $item ) {
+			unset( $package_to_hash['contents'][ $item_id ]['data'] );
+		}
+
+		return 'wc_ship_' . md5( wp_json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
 	}
 
 	/**

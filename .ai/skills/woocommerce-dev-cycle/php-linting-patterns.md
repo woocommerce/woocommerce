@@ -39,7 +39,7 @@ pnpm lint:php:fix
 ### Quick Reference Table
 
 | Issue | Wrong | Correct |
-|-------|-------|---------|
+| ----- | ----- | ------- |
 | **Translators comment** | Before return | Before function call |
 | **File docblock (PSR-12)** | After `declare()` | Before `declare()` |
 | **Indentation** | Spaces | Tabs only |
@@ -121,7 +121,7 @@ if ( ! class_exists( 'WC_Payments_Utils' ) ) {
      * Mock class for testing.
      *
      * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
-     * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+     * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
      * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
      */
     class WC_Payments_Utils {

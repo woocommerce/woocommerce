@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as CoreEmailEditorIntegration;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Coupon_Code_Generator;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer as WooCommerceEmailEditorIntegration;
 
 /**
@@ -88,6 +89,9 @@ class Bootstrap {
 				10,
 				1
 			);
+
+			$coupon_generator = new Coupon_Code_Generator();
+			$coupon_generator->init();
 		}
 	}
 

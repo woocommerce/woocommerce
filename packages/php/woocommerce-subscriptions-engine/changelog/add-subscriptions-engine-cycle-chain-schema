@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add the cycle-chain data model: a live contract as the source of truth holding its latest snapshot references, immutable per-billing cycles on a chain as (contract_id, kind), and per-contract snapshots with copy-forward reuse, persisted through a contract repository with targeted cycle access.

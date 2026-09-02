@@ -23,7 +23,6 @@ export default function AddToCartWithOptionsVariationSelectorEdit(
 	} );
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		template: ATTRIBUTE_ITEM_TEMPLATE,
-		templateLock: 'all',
 	} );
 
 	return <div { ...innerBlocksProps } />;

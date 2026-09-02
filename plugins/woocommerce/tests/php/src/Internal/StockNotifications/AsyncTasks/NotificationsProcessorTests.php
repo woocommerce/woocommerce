@@ -46,12 +46,12 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		 * Clean up after tests
 		 */
 	public function tearDown(): void {
-		parent::tearDown();
 		unset( $this->sut );
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		parent::tearDown();
 	}
 
 	/**

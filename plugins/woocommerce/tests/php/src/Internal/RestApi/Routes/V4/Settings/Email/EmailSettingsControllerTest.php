@@ -20,11 +20,11 @@ use WP_REST_Request;
 class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * User ID.
+	 * Shared shop_manager user for REST auth.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * @var callable
@@ -37,6 +37,15 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var array<string, mixed>
 	 */
 	private $prev_options = array();
+
+	/**
+	 * Create the shared shop manager user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
 
 	/**
 	 * Setup.
@@ -65,13 +74,6 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		foreach ( $option_ids as $id ) {
 			$this->prev_options[ $id ] = get_option( $id, null );
 		}
-
-		// Create a user with permissions.
-		$this->user_id = $this->factory->user->create(
-			array(
-				'role' => 'shop_manager',
-			)
-		);
 	}
 
 	/**
@@ -109,7 +111,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Reply-to fields should be present, but design fields should not be present.
 	 */
 	public function test_get_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/email' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -158,13 +160,13 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting email settings when block email editor is disabled.
-	 * Reply-to fields should not be present, but design fields should be present.
+	 * Reply-to and design fields should be present.
 	 */
 	public function test_get_item_without_block_email_editor() {
 		// Disable block email editor feature.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/email' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -180,10 +182,10 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce_email_from_name', $data['values'] );
 		$this->assertArrayHasKey( 'woocommerce_email_from_address', $data['values'] );
 
-		// Reply-to fields should NOT be present when block email editor is disabled.
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_enabled', $data['values'] );
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_name', $data['values'] );
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_address', $data['values'] );
+		// Reply-to fields should be present when block email editor is disabled.
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_enabled', $data['values'] );
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_name', $data['values'] );
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_address', $data['values'] );
 
 		// Design fields SHOULD be present when block email editor is disabled.
 		$this->assertArrayHasKey( 'woocommerce_email_header_image', $data['values'] );
@@ -197,15 +199,15 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce_email_text_color', $data['values'] );
 		$this->assertArrayHasKey( 'woocommerce_email_footer_text_color', $data['values'] );
 
-		// Verify the email_options group exists and does not contain reply-to fields.
-		if ( isset( $data['groups']['email_options'] ) && isset( $data['groups']['email_options']['fields'] ) ) {
-			$field_ids = array_column( $data['groups']['email_options']['fields'], 'id' );
-			$this->assertContains( 'woocommerce_email_from_name', $field_ids );
-			$this->assertContains( 'woocommerce_email_from_address', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_enabled', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_name', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_address', $field_ids );
-		}
+		// Verify the email_options group exists and contains reply-to fields.
+		$this->assertArrayHasKey( 'email_options', $data['groups'] );
+		$this->assertArrayHasKey( 'fields', $data['groups']['email_options'] );
+		$field_ids = array_column( $data['groups']['email_options']['fields'], 'id' );
+		$this->assertContains( 'woocommerce_email_from_name', $field_ids );
+		$this->assertContains( 'woocommerce_email_from_address', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_enabled', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_name', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_address', $field_ids );
 
 		// Verify email template options group exists with design fields.
 		$this->assertArrayHasKey( 'email_template_options', $data['groups'] );
@@ -232,7 +234,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating email settings.
 	 */
 	public function test_update_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -264,7 +266,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * When reply-to is enabled, the name is required.
 	 */
 	public function test_update_item_with_invalid_reply_to_name() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -289,7 +291,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * When reply-to is enabled, the name is required.
 	 */
 	public function test_update_item_with_invalid_reply_to_address() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(

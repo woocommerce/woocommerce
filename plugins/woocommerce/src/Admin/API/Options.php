@@ -5,7 +5,7 @@
  * Handles requests to get and update options in the wp_options table.
  *
  * IMPORTANT: This API is for legacy support only. DO NOT add new options here. See p90Yrv-2vK-p2#comment-6482 for more details.
- * For new settings/options, use Settings REST API (https://woocommerce.github.io/woocommerce-rest-api-docs/#setting-option-properties) or create dedicated endpoints instead.
+ * For new settings/options, use Settings REST API (https://developer.woocommerce.com/docs/apis/rest-api/v3/setting-options/#setting-option-properties) or create dedicated endpoints instead.
  *
  * Example:
  * - Use register_rest_route() to create a new endpoint
@@ -197,7 +197,6 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_admin_install_timestamp',
 			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_show_marketplace_suggestions',
-			'woocommerce_task_list_reminder_bar_hidden',
 			'wc_connect_options',
 			'woocommerce_admin_created_default_shipping_zones',
 			'woocommerce_admin_reviewed_default_shipping_zones',

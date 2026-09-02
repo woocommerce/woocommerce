@@ -1,7 +1,6 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
 
@@ -88,7 +87,7 @@ class ProductsBySlug extends AbstractRoute {
 			$object = $this->get_product_variation_by_slug( $slug );
 		}
 
-		if ( ! $object || 0 === $object->get_id() || ProductStatus::PUBLISH !== $object->get_status() ) {
+		if ( ! $object || 0 === $object->get_id() || ! $object->is_publicly_viewable() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
 		}
 

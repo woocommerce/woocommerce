@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -28,6 +29,13 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var array
 	 */
 	private static array $created_order_ids = array();
+
+	/**
+	 * Import action IDs created for shared order fixtures.
+	 *
+	 * @var int[]
+	 */
+	private static array $created_import_action_ids = array();
 
 	/**
 	 * Created user ID for testing purposes.
@@ -73,6 +81,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setupBeforeClass(): void {
 		parent::setupBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
@@ -81,6 +90,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller->initialize_fulfillments();
 
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
+		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 
 		for ( $order_number = 1; $order_number <= 10; $order_number++ ) {
 			$order                     = WC_Helper_Order::create_order( get_current_user_id() );
@@ -109,29 +119,64 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			);
 			self::$created_fulfillment_ids[ $customer_order->get_id() ][] = $f->get_id();
 		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::disable_direct_product_attribute_lookup_updates();
+	}
+
+	/**
+	 * Track import actions created for shared order fixtures.
+	 *
+	 * @param int $action_id Action ID.
+	 */
+	public static function track_import_action( $action_id ): void {
+		$action = \ActionScheduler_Store::instance()->fetch_action( $action_id );
+		if ( 'wc-admin_import_orders' === $action->get_hook() ) {
+			self::$created_import_action_ids[] = (int) $action_id;
+		}
 	}
 
 	/**
 	 * Destroys the test environment after all tests on this file are run.
 	 */
 	public static function tearDownAfterClass(): void {
-		// Delete the created orders and their fulfillments.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
-		foreach ( self::$created_order_ids as $order_id ) {
-			WC_Helper_Order::delete_order( $order_id );
-		}
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			$fulfillments_data_store = new FulfillmentsDataStore();
+			$action_store            = \ActionScheduler_Store::instance();
+			foreach ( self::$created_import_action_ids as $action_id ) {
+				$action_store->delete_action( $action_id );
+			}
 
-		// Delete the created user.
-		wp_delete_user( self::$created_user_id );
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
+			// Delete the created orders and their fulfillments.
+			foreach ( self::$created_order_ids as $order_id ) {
+				$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
+				WC_Helper_Order::delete_order( $order_id );
+			}
 
-		parent::tearDownAfterClass();
+			// Delete the created user.
+			wp_delete_user( self::$created_user_id );
+		} finally {
+			try {
+				if ( false === self::$original_fulfillments_flag ) {
+					delete_option( 'woocommerce_feature_fulfillments_enabled' );
+				} else {
+					update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+				}
+			} finally {
+				try {
+					parent::tearDownAfterClass();
+				} finally {
+					self::$created_order_ids          = array();
+					self::$created_import_action_ids  = array();
+					self::$created_fulfillment_ids    = array();
+					self::$created_user_id            = -1;
+					self::$customer_order_id          = -1;
+					self::$original_fulfillments_flag = null;
+					self::disable_direct_product_attribute_lookup_updates();
+				}
+			}
+		}
 	}
 
 	/**
@@ -2136,6 +2181,146 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertFalse( $hook_fired, 'Notification hook should not fire when notify_customer is false' );
 
 		remove_action( 'woocommerce_fulfillment_updated_notification', $callback );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * A `_date_fulfilled` value supplied via meta_data on create must be routed
+	 * through the UTC normalization contract (set_date_fulfilled), and the
+	 * response must surface it as ISO 8601 with a 'Z' suffix.
+	 */
+	public function test_create_fulfillment_normalizes_date_fulfilled_meta_to_utc() {
+		$original_timezone = get_option( 'timezone_string' );
+		$original_offset   = get_option( 'gmt_offset' );
+
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		update_option( 'gmt_offset', '' );
+
+		$date_fulfilled = $this->dispatch_create_with_date_fulfilled_meta( '2025-01-15 10:30:00' );
+
+		update_option( 'timezone_string', $original_timezone );
+		update_option( 'gmt_offset', $original_offset );
+
+		// Bare MySQL string is treated as site-local (LA, UTC-8 in January) and
+		// surfaced as ISO 8601 with explicit 'Z'.
+		$this->assertSame( '2025-01-15T18:30:00Z', $date_fulfilled );
+	}
+
+	/**
+	 * Dispatches a create-fulfillment REST request with a `_date_fulfilled` meta
+	 * value and returns the value the API surfaces back for that key.
+	 *
+	 * @param string $date_fulfilled Value to send in `meta_data['_date_fulfilled']`.
+	 * @return string|null
+	 */
+	private function dispatch_create_with_date_fulfilled_meta( string $date_fulfilled ): ?string {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		// Use is_fulfilled=false so the data store does not unconditionally overwrite
+		// date_fulfilled with current_time() during create; this isolates the test to
+		// the meta-data normalization path under test.
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => $date_fulfilled,
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		wp_set_current_user( 0 );
+
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				return $meta['value'];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The /metadata endpoints must format `_date_fulfilled` as ISO 8601 with 'Z'
+	 * suffix instead of leaking the raw 'Y-m-d H:i:s' UTC storage form.
+	 */
+	public function test_get_fulfillment_meta_formats_date_fulfilled_as_iso8601() {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		wp_set_current_user( 1 );
+
+		// Use is_fulfilled=false so the data store does not overwrite the
+		// _date_fulfilled meta value with current_time() during create.
+		$create = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$create->set_header( 'content-type', 'application/json' );
+		$create->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_date_fulfilled',
+							'value' => '2025-01-15T10:30:00Z',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+		$create_response = $this->server->dispatch( $create );
+		$this->assertEquals( WP_Http::CREATED, $create_response->get_status() );
+		$fulfillment_id = $create_response->get_data()['id'];
+
+		$get          = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment_id . '/metadata' );
+		$get_response = $this->server->dispatch( $get );
+		$this->assertEquals( WP_Http::OK, $get_response->get_status() );
+
+		$get_meta = null;
+		foreach ( $get_response->get_data() as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$get_meta = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $get_meta );
+
 		wp_set_current_user( 0 );
 	}
 }

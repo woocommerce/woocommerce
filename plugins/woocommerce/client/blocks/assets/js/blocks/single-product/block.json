@@ -10,19 +10,11 @@
 		"align": [ "wide", "full" ]
 	},
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"productId": {
 			"type": "number"
 		}
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
+	"example": {},
 	"usesContext": [ "postId", "postType", "queryId" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

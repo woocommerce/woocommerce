@@ -870,21 +870,180 @@
 	};
 
 	/**
+	 * Check whether the current gallery is using variation-specific markup.
+	 */
+	$.fn.wc_variations_gallery_is_active = function () {
+		return 'yes' === $( this ).attr( 'data-product_gallery_active' );
+	};
+
+	/**
+	 * Get the default product gallery HTML used for restoring classic templates.
+	 *
+	 * Prefer the snapshot embedded in this form. Fall back to the page-level
+	 * defaults for older template overrides that don't include it.
+	 */
+	$.fn.wc_get_default_product_gallery_html = function () {
+		var $form = $( this );
+		var $template = $form.find( '.wc-product-gallery-default-template' );
+
+		if ( $template.length ) {
+			return $.trim( $template.html() );
+		}
+
+		var defaults = window.wc_variation_gallery_defaults || {};
+		return defaults[ $form.data( 'product_id' ) ] || '';
+	};
+
+	/**
+	 * Find the gallery root within a container.
+	 */
+	$.fn.wc_find_gallery_root = function () {
+		return $( this )
+			.find( '.woocommerce-product-gallery' )
+			.addBack( '.woocommerce-product-gallery' )
+			.first();
+	};
+
+	/**
+	 * Replace the current classic product gallery markup and reinitialize gallery behaviors.
+	 */
+	$.fn.wc_variations_gallery_replace = function ( gallery_html, variation ) {
+		var $form = $( this ),
+			$product = $form.closest( '.product' ),
+			$current_gallery = $product.wc_find_gallery_root(),
+			$parsed_gallery = $( $.parseHTML( $.trim( gallery_html ) ) ),
+			$new_gallery = $parsed_gallery.wc_find_gallery_root(),
+			current_image_id =
+				variation && variation.image_id ? variation.image_id : '';
+
+		if ( ! $current_gallery.length || ! $new_gallery.length ) {
+			return false;
+		}
+
+		/**
+		 * Notify subscribers that the current gallery DOM is about to be
+		 * removed and replaced.
+		 *
+		 * @event wc-product-gallery-before-destroy
+		 * @since 10.8.0
+		 * @param {HTMLElement} galleryEl - The gallery root element being torn down.
+		 * @param {Object}      params    - The `wc_single_product_params` object.
+		 */
+		if ( typeof wc_single_product_params !== 'undefined' ) {
+			$current_gallery.trigger( 'wc-product-gallery-before-destroy', [
+				$current_gallery[ 0 ],
+				wc_single_product_params,
+			] );
+		}
+
+		$current_gallery.replaceWith( $new_gallery );
+
+		if (
+			typeof $.fn.wc_product_gallery === 'function' &&
+			typeof wc_single_product_params !== 'undefined'
+		) {
+			$new_gallery.trigger( 'wc-product-gallery-before-init', [
+				$new_gallery[ 0 ],
+				wc_single_product_params,
+			] );
+
+			$new_gallery.wc_product_gallery( wc_single_product_params );
+
+			$new_gallery.trigger( 'wc-product-gallery-after-init', [
+				$new_gallery[ 0 ],
+				wc_single_product_params,
+			] );
+		} else {
+			$new_gallery.css( 'opacity', 1 );
+		}
+
+		$form.attr( 'current-image', current_image_id );
+		$form.attr( 'data-product_gallery_active', 'yes' );
+
+		return true;
+	};
+
+	/**
+	 * Restore the default classic product gallery markup after a variation gallery swap.
+	 */
+	$.fn.wc_variations_gallery_reset = function () {
+		var $form = $( this ),
+			default_gallery_html = $form.wc_get_default_product_gallery_html(),
+			reset_gallery = false;
+
+		if ( default_gallery_html.length ) {
+			reset_gallery = $form.wc_variations_gallery_replace(
+				default_gallery_html,
+				false
+			);
+		}
+
+		if ( reset_gallery ) {
+			$form.removeAttr( 'data-product_gallery_active' );
+			$form.attr( 'current-image', '' );
+		}
+
+		return reset_gallery;
+	};
+
+	/**
 	 * Sets product images for the chosen variation
 	 */
 	$.fn.wc_variations_image_update = function ( variation ) {
 		var $form = this,
 			$product = $form.closest( '.product' ),
-			$product_gallery = $product.find( '.images' ),
-			$gallery_nav = $product.find( '.flex-control-nav' ),
-			$gallery_img = $gallery_nav.find( 'li:eq(0) img' ),
-			$product_img_wrap = $product_gallery
-				.find(
-					'.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder'
-				)
-				.eq( 0 ),
-			$product_img = $product_img_wrap.find( '.wp-post-image' ),
-			$product_link = $product_img_wrap.find( 'a' ).eq( 0 );
+			$product_gallery,
+			$gallery_nav,
+			$gallery_img,
+			$product_img_wrap,
+			$product_img,
+			$product_link;
+
+		if (
+			variation &&
+			variation.gallery_images_html &&
+			variation.gallery_images_html.length &&
+			$form.wc_variations_gallery_replace(
+				variation.gallery_images_html,
+				variation
+			)
+		) {
+			window.setTimeout( function () {
+				$( window ).trigger( 'resize' );
+			}, 20 );
+
+			return;
+		}
+
+		if ( $form.wc_variations_gallery_is_active() ) {
+			var reset_succeeded = $form.wc_variations_gallery_reset();
+
+			if ( ! variation ) {
+				if ( reset_succeeded ) {
+					window.setTimeout( function () {
+						$( window ).trigger( 'resize' );
+					}, 20 );
+				}
+				return;
+			}
+
+			if ( ! reset_succeeded ) {
+				// Don't fall through to the single-image mutation path without
+				// a clean reset snapshot.
+				return;
+			}
+		}
+
+		$product_gallery = $product.find( '.images' );
+		$gallery_nav = $product.find( '.flex-control-nav' );
+		$gallery_img = $gallery_nav.find( 'li:eq(0) img' );
+		$product_img_wrap = $product_gallery
+			.find(
+				'.woocommerce-product-gallery__image, .woocommerce-product-gallery__image--placeholder'
+			)
+			.eq( 0 );
+		$product_img = $product_img_wrap.find( '.wp-post-image' );
+		$product_link = $product_img_wrap.find( 'a' ).eq( 0 );
 
 		if (
 			variation &&
@@ -1001,6 +1160,11 @@
 				.eq( 0 ),
 			$product_img = $product_img_wrap.find( '.wp-post-image' ),
 			$product_link = $product_img_wrap.find( 'a' ).eq( 0 );
+
+		if ( $form.wc_variations_gallery_is_active() ) {
+			$form.wc_variations_gallery_reset();
+			return;
+		}
 
 		$product_img.wc_reset_variation_attr( 'src' );
 		$product_img.wc_reset_variation_attr( 'width' );

@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.2.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -78,7 +78,7 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
-			<ul class="wc_payment_methods payment_methods methods">
+			<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>">
 				<?php
 				if ( ! empty( $available_gateways ) ) {
 					foreach ( $available_gateways as $gateway ) {

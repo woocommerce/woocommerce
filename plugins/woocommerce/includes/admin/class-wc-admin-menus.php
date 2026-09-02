@@ -6,14 +6,12 @@
  * @version 2.5.0
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,7 +38,6 @@ class WC_Admin_Menus {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
-		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
@@ -69,6 +66,9 @@ class WC_Admin_Menus {
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
+		// Ensure WC taxonomy meta boxes are visible by default on the first visit to Appearance > Menus.
+		add_action( 'load-nav-menus.php', array( $this, 'register_default_nav_menu_meta_boxes_filter' ), 9 );
+
 		// Admin bar menus.
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
@@ -89,7 +89,7 @@ class WC_Admin_Menus {
 		$woocommerce_icon = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+CjxwYXRoIGZpbGw9IiNhMmFhYjIiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOAoJYzAtNi4xLTIuNS04LjctOC42LTguN0g3LjNDMi42LDAuMSwwLDIuMywwLDYuM3MyLjUsNi40LDcuMSw2LjRoNS4xdjI0LjFjMCw2LjgsNC42LDEwLjgsMTEuMiwxMC44UzMzLDQ1LDM2LjMsMzguOWw3LjItMTMuNXYxMS40CgljMCw2LjcsNC40LDEwLjgsMTEuMSwxMC44czkuMi0yLjMsMTMtOC43bDE2LjYtMjhjMy42LTYuMSwxLjEtMTAuOC02LjktMTAuOEM3Ny4zLDAuMSw3Ny4zLDAuMSw3Ny40LDAuMXoiLz4KPC9zdmc+Cg==';
 
 		if ( self::can_view_woocommerce_menu_item() ) {
-			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // WPCS: override ok.
+			$menu[] = array( '', 'read', 'separator-woocommerce', '', 'wp-menu-separator woocommerce' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress uses the $menu global for admin menu registration.
 		}
 
 		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'edit_others_shop_orders', 'woocommerce', null, $woocommerce_icon, '55.5' );
@@ -154,12 +154,12 @@ class WC_Admin_Menus {
 		WC_Admin_Settings::get_settings_pages();
 
 		// Add any posted messages.
-		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_GET['wc_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 		}
 
-		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_GET['wc_message'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 		}
 
 		do_action( 'woocommerce_settings_page_init' );
@@ -182,8 +182,8 @@ class WC_Admin_Menus {
 		WC_Admin_Settings::get_settings_pages();
 
 		// Get current tab/section.
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 
 		// Save settings if data has been posted.
 		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
@@ -252,13 +252,13 @@ class WC_Admin_Menus {
 		switch ( $post_type ) {
 			case 'shop_order':
 			case 'shop_coupon':
-				$parent_file = 'woocommerce'; // WPCS: override ok.
+				$parent_file = 'woocommerce'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress uses $parent_file to control admin menu highlighting.
 				break;
 			case 'product':
 				$screen = get_current_screen();
 				if ( $screen && taxonomy_is_product_attribute( $screen->taxonomy ) ) {
-					$submenu_file = 'product_attributes'; // WPCS: override ok.
-					$parent_file  = 'edit.php?post_type=product'; // WPCS: override ok.
+					$submenu_file = 'product_attributes'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- $submenu_file is a WordPress admin menu routing global.
+					$parent_file  = 'edit.php?post_type=product'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- $parent_file is a WordPress admin menu routing global.
 				}
 				break;
 		}
@@ -375,11 +375,7 @@ class WC_Admin_Menus {
 	 * @return void
 	 */
 	public function settings_page() {
-		if ( Features::is_enabled( 'settings' ) ) {
-			echo '<div id="wc-settings-page"/>';
-		} else {
-			WC_Admin_Settings::output();
-		}
+		WC_Admin_Settings::output();
 	}
 
 	/**
@@ -431,6 +427,104 @@ class WC_Admin_Menus {
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+	}
+
+	/**
+	 * Ensure the Product Categories, Product Tags, and Brands meta boxes
+	 * are visible by default on the Appearance > Menus screen.
+	 *
+	 * WordPress's wp_initial_nav_menu_meta_boxes() hides every box except page,
+	 * post, custom-links, and category on a user's first visit. We intercept
+	 * the empty user option and return a hidden list that excludes the WC
+	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
+	 * them visible.
+	 *
+	 * The computed list is persisted to user meta on that first read, mirroring
+	 * core's wp_initial_nav_menu_meta_boxes(). This keeps the snapshot stable
+	 * across the multiple reads in a single page load and, crucially, across
+	 * later requests: boxes registered by plugins installed after the first
+	 * visit stay visible, matching vanilla WordPress instead of defaulting to
+	 * hidden on every recompute. As in core, only the current user's snapshot is
+	 * persisted, so reads on behalf of another user never overwrite that user's
+	 * own first-visit snapshot.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 */
+	public function register_default_nav_menu_meta_boxes_filter() {
+		add_filter( 'get_user_option_metaboxhidden_nav-menus', array( $this, 'filter_default_nav_menu_hidden_meta_boxes' ), 10, 3 );
+	}
+
+	/**
+	 * Filter the default hidden meta boxes for the Appearance > Menus screen.
+	 *
+	 * Only applies when the user has no saved preference for the nav-menus
+	 * screen. Returns a list of every registered nav-menus meta box except the
+	 * four core visible boxes, the "WooCommerce endpoints" box, and the WC
+	 * taxonomy boxes. Product Brands is visible only when its taxonomy exists.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed   $result Value for the user's option, or false if not set.
+	 * @param string  $option Name of the option being retrieved.
+	 * @param WP_User $user   WP_User object of the user whose option is being retrieved.
+	 * @return mixed The filtered option value.
+	 */
+	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
+		global $wp_meta_boxes;
+
+		// Once a snapshot exists the option reads non-false, so this early return
+		// also makes the update_user_meta() call below idempotent: a re-entrant read
+		// bails here instead of persisting again.
+		if ( false !== $result ) {
+			return $result;
+		}
+
+		if ( ! $user || ! isset( $wp_meta_boxes['nav-menus'] ) || ! is_array( $wp_meta_boxes['nav-menus'] ) ) {
+			return $result;
+		}
+
+		$visible = array(
+			'add-post-type-page',
+			'add-post-type-post',
+			'add-custom-links',
+			'add-category',
+			'add-product_cat',
+			'add-product_tag',
+			'woocommerce_endpoints_nav_link',
+		);
+
+		if ( taxonomy_exists( 'product_brand' ) ) {
+			$visible[] = 'add-product_brand';
+		}
+
+		$hidden = array();
+		foreach ( $wp_meta_boxes['nav-menus'] as $priorities ) {
+			foreach ( (array) $priorities as $priority => $boxes ) {
+				foreach ( (array) $boxes as $box ) {
+					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {
+						$hidden[] = $box['id'];
+					}
+				}
+			}
+		}
+
+		// Persist the snapshot, mirroring core's wp_initial_nav_menu_meta_boxes(),
+		// so later reads in this request and in future requests return this same
+		// list instead of recomputing it against a changed meta box registry.
+		//
+		// Like core, only the current user's snapshot is persisted. This filter
+		// runs for whichever user's option is being read, so a read performed on
+		// behalf of another user (user-switching or admin tooling) still receives
+		// the computed default below for display, but must not consume that user's
+		// durable first-visit snapshot from this request's meta box registry.
+		$current_user_id = get_current_user_id();
+		if ( $current_user_id && (int) $user->ID === $current_user_id ) {
+			update_user_meta( $current_user_id, 'metaboxhidden_nav-menus', $hidden );
+		}
+
+		return $hidden;
 	}
 
 	/**
@@ -524,24 +618,6 @@ class WC_Admin_Menus {
 				'href'   => wc_get_page_permalink( 'shop' ),
 			)
 		);
-	}
-
-	/**
-	 * Maybe add new management product experience.
-	 *
-	 * @return void
-	 */
-	public function maybe_add_new_product_management_experience() {
-		if ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			global $submenu;
-			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
-				// Disable phpcs since we need to override submenu classes.
-				// Note that `phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited` does not work to disable this check.
-				// phpcs:disable
-				$submenu['edit.php?post_type=product'][10][2] = 'admin.php?page=wc-admin&path=/add-product';
-				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
-			}
-		}
 	}
 
 	/**

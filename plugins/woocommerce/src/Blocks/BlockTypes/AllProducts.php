@@ -29,6 +29,7 @@ class AllProducts extends AbstractBlock {
 		$this->asset_data_registry->add( 'minRows', wc_get_theme_support( 'product_blocks::min_rows', 1 ) );
 		$this->asset_data_registry->add( 'maxRows', wc_get_theme_support( 'product_blocks::max_rows', 6 ) );
 		$this->asset_data_registry->add( 'defaultRows', wc_get_theme_support( 'product_blocks::default_rows', 3 ) );
+		$this->asset_data_registry->add( 'thumbnailAspectRatio', $this->get_store_thumbnail_aspect_ratio() );
 
 		// Hydrate the All Product block with data from the API. This is for the add to cart buttons which show current quantity in cart, and events.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
@@ -42,5 +43,28 @@ class AllProducts extends AbstractBlock {
 	protected function register_block_type_assets() {
 		parent::register_block_type_assets();
 		$this->register_chunk_translations( [ $this->block_name ] );
+	}
+
+	/**
+	 * Get the store thumbnail aspect ratio from WooCommerce Customizer settings.
+	 * This method is a copy from the one in ProductImage.php.
+	 *
+	 * @return string|null CSS aspect ratio value (e.g. "1/1", "4/3"), or null when uncropped.
+	 */
+	private function get_store_thumbnail_aspect_ratio() {
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+
+		if ( 'uncropped' === $cropping ) {
+			return null;
+		}
+
+		if ( 'custom' === $cropping ) {
+			$width  = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
+
+			return $width . '/' . $height;
+		}
+
+		return str_replace( ':', '/', $cropping );
 	}
 }

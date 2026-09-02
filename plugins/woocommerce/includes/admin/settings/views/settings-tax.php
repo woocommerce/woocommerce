@@ -8,6 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 $settings = array(
 
@@ -78,24 +79,24 @@ $settings = array(
 	array(
 		'title'   => __( 'Display prices in the shop', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_shop',
-		'default' => 'excl',
+		'default' => TaxDisplayMode::EXCLUSIVE,
 		'type'    => 'select',
 		'class'   => 'wc-enhanced-select',
 		'options' => array(
-			'incl' => __( 'Including tax', 'woocommerce' ),
-			'excl' => __( 'Excluding tax', 'woocommerce' ),
+			TaxDisplayMode::INCLUSIVE => __( 'Including tax', 'woocommerce' ),
+			TaxDisplayMode::EXCLUSIVE => __( 'Excluding tax', 'woocommerce' ),
 		),
 	),
 
 	array(
 		'title'   => __( 'Display prices during cart and checkout', 'woocommerce' ),
 		'id'      => 'woocommerce_tax_display_cart',
-		'default' => 'excl',
+		'default' => TaxDisplayMode::EXCLUSIVE,
 		'type'    => 'select',
 		'class'   => 'wc-enhanced-select',
 		'options' => array(
-			'incl' => __( 'Including tax', 'woocommerce' ),
-			'excl' => __( 'Excluding tax', 'woocommerce' ),
+			TaxDisplayMode::INCLUSIVE => __( 'Including tax', 'woocommerce' ),
+			TaxDisplayMode::EXCLUSIVE => __( 'Excluding tax', 'woocommerce' ),
 		),
 	),
 

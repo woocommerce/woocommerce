@@ -159,7 +159,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 							$output[] = $o2;
 						}
 					}
-					if ( preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) { // did we just close a function?
+					if ( preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ) ?? '', $matches ) ) { // did we just close a function?
 						$fnn = $matches[1]; // get the function name
 						$arg_count = $stack->pop(); // see how many arguments there were (cleverly stored on the stack, thank you)
 						$output[] = $stack->pop(); // pop the function and push onto the output
@@ -186,7 +186,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 						}
 					}
 					// make sure there was a function
-					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ), $matches ) ) {
+					if ( ! preg_match( "/^([A-Za-z]\w*)\($/", $stack->last( 2 ) ?? '', $matches ) ) {
 						return self::trigger( "unexpected ','" );
 					}
 					$stack->push( $stack->pop() + 1 ); // increment the argument count

@@ -73,16 +73,22 @@ class WC_Analytics_Tracking {
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 *
-	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
+	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
+	 *                       or cookie-less context); WP_Error if pixel firing failed.
 	 */
 	public static function record_event( $event_name, $event_properties = array() ) {
-		// Check consent before recording any event
+		// Check consent before recording any event.
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
 		}
 
 		// Skip recording if the request is coming from a bot.
 		if ( User_Agent_Info::is_bot() ) {
+			return true;
+		}
+
+		// Skip events that arrive without a stable visitor id (e.g. no tk_ai cookie); see get_visitor_id().
+		if ( empty( self::get_visitor_id() ) ) {
 			return true;
 		}
 
@@ -231,37 +237,77 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Get the common properties for the event.
+	 * Request-scoped — not for page output, see `get_page_common_properties()`.
+	 *
+	 * Includes the session cookie and `get_server_details()`, so this is only safe
+	 * for events the server fires itself on an uncached request, which includes the
+	 * proxy tracking endpoint.
 	 *
 	 * @return array The common properties.
 	 */
 	public static function get_common_properties() {
-		$blog_user_id    = self::get_blog_user_id();
-		$server_details  = self::get_server_details();
-		$blog_details    = self::get_blog_details();
+		return array_merge(
+			self::get_session_properties(),
+			self::get_page_common_properties(),
+			self::get_server_details()
+		);
+	}
+
+	/**
+	 * Get the visitor's session properties from the session cookie.
+	 *
+	 * Request-derived, so these are for the server-fired path only. The cookie is
+	 * written and read by the client's own SessionManager, which supplies these
+	 * properties directly on events it sends.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array The session properties.
+	 */
+	private static function get_session_properties() {
 		$session_details = self::get_session_details();
 
-		$common_properties = array_merge(
-			array(
-				'session_id'     => $session_details['session_id'] ?? null,
-				'landing_page'   => $session_details['landing_page'] ?? null,
-				'is_engaged'     => $session_details['is_engaged'] ?? null,
-				'ui'             => $blog_user_id,
-				'blog_id'        => $blog_details['blog_id'] ?? null,
-				'store_id'       => $blog_details['store_id'] ?? null,
-				'url'            => $blog_details['url'] ?? null,
-				'woo_version'    => $blog_details['wc_version'] ?? null,
-				'wp_version'     => get_bloginfo( 'version' ),
-				'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-				'device'         => self::get_device_type(),
-				'store_currency' => $blog_details['store_currency'] ?? null,
-				'timezone'       => wp_timezone_string(),
-				'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
-			),
-			$server_details
+		return array(
+			'session_id'   => $session_details['session_id'] ?? null,
+			'landing_page' => $session_details['landing_page'] ?? null,
+			'is_engaged'   => $session_details['is_engaged'] ?? null,
 		);
+	}
 
-		return is_array( $common_properties ) ? $common_properties : array();
+	/**
+	 * Get the common properties that are safe to embed in cacheable page HTML.
+	 *
+	 * Request headers and cookies are not part of the CDN cache key, so a property
+	 * derived from one is attributed to every later visitor of the cached page.
+	 * Anything request-derived belongs in `get_session_properties()` or
+	 * `get_server_details()`, which only reach the server-fired path.
+	 *
+	 * Two exceptions, neither of them licence to add a third: `device` is
+	 * User-Agent derived and a known gap, tracked for a client-side follow-up;
+	 * `ui`, `is_guest` and `store_admin` are safe only because caches bypass
+	 * logged-in requests.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array The common properties.
+	 */
+	public static function get_page_common_properties() {
+		$blog_user_id = self::get_blog_user_id();
+		$blog_details = self::get_blog_details();
+
+		return array(
+			'ui'             => $blog_user_id,
+			'blog_id'        => $blog_details['blog_id'] ?? null,
+			'store_id'       => $blog_details['store_id'] ?? null,
+			'url'            => $blog_details['url'] ?? null,
+			'woo_version'    => $blog_details['wc_version'] ?? null,
+			'wp_version'     => get_bloginfo( 'version' ),
+			'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
+			'device'         => self::get_device_type(),
+			'store_currency' => $blog_details['store_currency'] ?? null,
+			'timezone'       => wp_timezone_string(),
+			'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+		);
 	}
 
 	/**
@@ -452,9 +498,14 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Get the visitor id from the cookie or IP address (if proxy tracking is enabled).
+	 * Get the existing stable visitor id: the `tk_ai` cookie, or an IP-based hash when
+	 * proxy tracking is enabled. Returns null otherwise so the caller skips the event.
 	 *
-	 * @return string|null
+	 * We never mint a new id here: attributing an event to a brand-new id creates a
+	 * throwaway one-event "visitor" (mostly cookie-less crawlers) that inflates session
+	 * counts. Real browsers already have a `tk_ai` cookie by the time an event fires.
+	 *
+	 * @return string|null Stable visitor id, or null when none is available.
 	 */
 	private static function get_visitor_id() {
 		// Return cached result if available.
@@ -462,46 +513,27 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
-		// Prefer tk_ai cookie if present.
+		// Prefer the tk_ai cookie if present.
 		if ( ! empty( $_COOKIE['tk_ai'] ) ) {
 			self::$cached_visitor_id = sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) );
 			return self::$cached_visitor_id;
 		}
 
-		// Fallback to IP-based visitor ID if proxy tracking is enabled.
+		// Cron and WP-CLI have no real visitor; never attribute background activity to one.
+		if ( ( defined( 'DOING_CRON' ) && DOING_CRON )
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
+		) {
+			return null;
+		}
+
+		// Proxy tracking provides a stable id from daily_salt + domain + ip + user_agent.
 		if ( Features::is_proxy_tracking_enabled() ) {
 			self::$cached_visitor_id = self::get_ip_based_visitor_id();
 			return self::$cached_visitor_id;
 		}
 
-		// Generate a new anonId and try to save it in the browser's cookies.
-		// Note that base64-encoding an 18 character string generates a 24-character anon id.
-		$binary = '';
-		for ( $i = 0; $i < 18; ++$i ) {
-			$binary .= chr( wp_rand( 0, 255 ) );
-		}
-
-		self::$cached_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-
-
-		if ( ! headers_sent()
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			&& ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-		) {
-			setcookie(
-				'tk_ai',
-				self::$cached_visitor_id,
-				array(
-					'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
-					'path'     => '/',
-					'domain'   => COOKIE_DOMAIN,
-					'secure'   => is_ssl(),
-					'httponly' => true,
-					'samesite' => 'Strict',
-				)
-			);
-		}
-		return self::$cached_visitor_id;
+		// No stable id arrived with the request. Do not mint one (see method doc).
+		return null;
 	}
 
 	/**

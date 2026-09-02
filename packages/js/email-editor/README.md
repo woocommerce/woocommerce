@@ -235,6 +235,32 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
+#### Text domain
+
+Translation function calls (`__()`, `_x()`, `_n()`, `_nx()`) in this package use the `__i18n_text_domain__` identifier as their text domain argument rather than a hardcoded string literal, so each consumer plugin can extract and translate strings under its own text domain.
+
+If the identifier is not substituted at bundle time, the package falls back to `'woocommerce'` at runtime so the editor still loads — strings then resolve under the `woocommerce` text domain (matching the package's pre-1.11 behaviour, where the domain was hardcoded). To extract and translate strings under a different text domain, consumers should substitute the identifier at bundle time, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+
+```js
+// consumer webpack.config.js
+const webpack = require( 'webpack' );
+
+module.exports = {
+    // …
+    plugins: [
+        new webpack.DefinePlugin( {
+            __i18n_text_domain__: JSON.stringify( 'your-text-domain' ),
+        } ),
+    ],
+};
+```
+
+For Jest (or any non-webpack test runner), the runtime fallback applies, so unit tests will see strings under the `woocommerce` domain by default. Set the identifier on the global in the consumer's test setup file to override:
+
+```js
+globalThis.__i18n_text_domain__ = 'your-text-domain';
+```
+
 #### Global Styles Engine
 
 A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
@@ -330,3 +356,4 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_close_action_callback`                   | `function` backAction                                 | `function` backAction                      | Action to perform when the close (back) button is clicked                                                                      |
 | `woocommerce_email_editor_close_content`                           | `React.ComponentType` DefaultBackButtonContent        | `React.ComponentType` Back button content  | Custom component for the back button content in the editor header                                                              |
 | `woocommerce_email_editor_create_coupon_handler`                   | `() => void` handler                                  | `() => void` handler                       | Handler function called when user clicks "Create new coupon". Should open the coupon creation UI.                              |
+| `woocommerce_email_editor_recent_emails_query`                     | `RecentEmailsQuery` query, `string` postType          | `RecentEmailsQuery` query                  | Query used to load the emails listed in the `Recent` category of the template selection modal. Statuses must be registered.    |

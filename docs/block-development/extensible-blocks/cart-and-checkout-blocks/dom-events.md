@@ -10,7 +10,7 @@ Some blocks need to react to certain events in order to display the most up to d
 
 ## WooCommerce core events in WooCommerce Blocks
 
-WooCommerce core uses jQuery events to trigger and listen to certain events, like when a product is added or removed from the cart. In WooCommerce Blocks, we moved away from using jQuery, but we still need to listen to those events. To achieve that, we have a utility named [`translatejQueryEventToNative()`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/3f7c3e517d7bf13008a22d0c2eb89434a9c35ae7/assets/js/base/utils/legacy-events.ts#L79-L106) that listens to those jQuery events, and every time one is triggered, it triggers an associated DOM native event (with the `wc-blocks_` prefix).
+WooCommerce core uses jQuery events to trigger and listen to certain events, like when a product is added or removed from the cart. In WooCommerce Blocks, we moved away from using jQuery, but we still need to listen to those events. To achieve that, we have a utility named [`translatejQueryEventToNative()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/base/utils/legacy-events.ts) that listens to those jQuery events, and every time one is triggered, it triggers an associated DOM native event (with the `wc-blocks_` prefix).
 
 ## WooCommerce Blocks events
 

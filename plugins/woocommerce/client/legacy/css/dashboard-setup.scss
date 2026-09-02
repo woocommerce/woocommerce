@@ -25,15 +25,62 @@
 		color: #757575;
 	}
 
-	.description div {
+	.description {
+		display: flex;
+		align-items: center;
+		gap: 24px;
 		margin-top: 11px;
-		float: left;
-		width: 70%;
 	}
 
-	.description img {
-		float: right;
-		width: 30%;
+	&__content {
+		flex: 1;
+		min-width: 0;
+
+		h3 {
+			display: flex;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: var(--grid-unit-10, 8px);
+			margin: var(--grid-unit-20, 16px) 0 var(--grid-unit-10, 8px);
+			font-size: 18px;
+			line-height: 1.3;
+		}
+
+		p {
+			margin: 0 0 16px;
+			color: #50575e;
+		}
+	}
+
+	#dashboard-widgets & &__content h3 {
+		margin: var(--grid-unit-20, 16px) 0 var(--grid-unit-10, 8px);
+	}
+
+	&__meta {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--grid-unit-10, 8px);
+	}
+
+	&__in-progress {
+		background-color: var(--Alias-bg-bg-surface-warning, #fff2d7);
+		border-radius: 4px;
+		color: var(--Alias-text-text-warning, #4d3716);
+		display: inline-block;
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 16px;
+		padding: var(--grid-unit-05, 4px) var(--grid-unit-10, 8px);
+	}
+
+	&__image {
+		flex: 0 0 90px;
+		width: 90px;
+		max-width: 90px;
+		height: auto;
+		margin-right: 24px;
 	}
 
 	.circle-progress {
@@ -42,11 +89,11 @@
 
 		circle {
 			stroke: #f0f0f0;
-			stroke-width: 1px;
+			stroke-width: 2px;
 		}
 
 		.bar {
-			stroke: #949494;
+			stroke: #3858e9;
 		}
 	}
 }

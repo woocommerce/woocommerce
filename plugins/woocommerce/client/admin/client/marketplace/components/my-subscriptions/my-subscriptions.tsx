@@ -26,7 +26,7 @@ import { connectUrl } from '../../utils/functions';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
 
-export default function MySubscriptions(): JSX.Element {
+export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -66,7 +66,7 @@ export default function MySubscriptions(): JSX.Element {
 			notice_id: 'woo-connect-notice',
 			dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 		};
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
@@ -88,7 +88,7 @@ export default function MySubscriptions(): JSX.Element {
 				notice_id: 'woo-disconnect-notice',
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			};
-			apiFetch( {
+			void apiFetch( {
 				path: `/wc-admin/notice/dismiss`,
 				method: 'POST',
 				data,

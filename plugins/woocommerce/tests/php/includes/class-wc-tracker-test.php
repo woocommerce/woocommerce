@@ -7,8 +7,11 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
@@ -95,6 +98,329 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'no', $tracking_data['wc_admin_disabled'] );
 	}
 
+	/**
+	 * @testdox Should send a blocking request with a short timeout so the response can be inspected.
+	 */
+	public function test_send_tracking_data_uses_blocking_request(): void {
+		$request_args = null;
+		$this->fake_tracker_response( 200, $request_args );
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertTrue( $request_args['blocking'], 'The tracker request must be blocking to read the response.' );
+		$this->assertSame( 10, $request_args['timeout'], 'The tracker request timeout should be short.' );
+	}
+
+	/**
+	 * @testdox Should record the send time and clear the failure counter after a successful delivery.
+	 */
+	public function test_successful_send_records_last_send_and_clears_failures(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+		$this->fake_tracker_response( 204 );
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'A 2xx response should record the send time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'A 2xx response should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should not record the send time and should count the failure when delivery fails with a retryable error.
+	 *
+	 * @testWith [500]
+	 *           [503]
+	 *           [429]
+	 *           [408]
+	 *           [425]
+	 *           ["wp_error"]
+	 *
+	 * @param int|string $status HTTP status, or "wp_error" for a transport failure.
+	 */
+	public function test_retryable_failure_keeps_snapshot_pending( $status ): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$last_send = strtotime( '-2 weeks' );
+		update_option( 'woocommerce_tracker_last_send', $last_send );
+		$this->fake_tracker_response( $status );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( $last_send, (int) get_option( 'woocommerce_tracker_last_send' ), 'A retryable failure must leave the last send time unchanged so the next daily run retries.' );
+		$this->assertSame( 1, (int) get_option( 'woocommerce_tracker_send_failures' ), 'A retryable failure should increment the failure counter.' );
+		$this->assertCount( 1, $logger->warnings, 'A failed delivery should be logged as a warning.' );
+		$this->assertSame( 'woocommerce-tracker', $logger->warnings[0]['source'] );
+	}
+
+	/**
+	 * @testdox Should give up on the snapshot when the server rejects it with a non-retryable status.
+	 *
+	 * @testWith [400]
+	 *           [403]
+	 *           [404]
+	 *           [410]
+	 *
+	 * @param int $status HTTP status.
+	 */
+	public function test_non_retryable_failure_records_last_send( int $status ): void {
+		update_option( 'woocommerce_tracker_send_failures', 1 );
+		$this->fake_tracker_response( $status );
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'A non-retryable failure should record the send time so the snapshot is not retried.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should give up on the snapshot after the maximum number of consecutive failures.
+	 */
+	public function test_max_consecutive_failures_records_last_send(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+		$this->fake_tracker_response( 503 );
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'The third consecutive failure should record the send time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should bound consecutive failures for any truthy value of the tracking option.
+	 *
+	 * @testWith ["yes"]
+	 *           ["1"]
+	 *
+	 * @param string $allow_tracking Stored value of the tracking option.
+	 */
+	public function test_consecutive_failures_are_bounded_for_any_truthy_tracking_value( string $allow_tracking ): void {
+		update_option( 'woocommerce_allow_tracking', $allow_tracking );
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+		$this->assertSame( 1, (int) get_option( 'woocommerce_tracker_send_failures' ), 'The first failure should persist a count of one.' );
+
+		WC_Tracker::send_tracking_data();
+		$this->assertSame( 2, (int) get_option( 'woocommerce_tracker_send_failures' ), 'The second failure should persist a count of two.' );
+
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( 3, $requests, 'Each daily run should retry while the snapshot is still pending.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'The third consecutive failure should record the send time so the snapshot is abandoned.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should retry on the next daily run after a failed delivery without waiting for the weekly interval.
+	 */
+	public function test_failed_send_is_retried_on_next_run(): void {
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return 1 === $requests ? new WP_Error( 'http_request_failed', 'Timed out' ) : array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data();
+		WC_Tracker::send_tracking_data();
+
+		$this->assertSame( 2, $requests, 'The second run should retry because the first delivery did not record a send time.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5 );
+	}
+
+	/**
+	 * @testdox Should suppress a second override send within an hour of a failed attempt.
+	 */
+	public function test_override_send_is_suppressed_within_an_hour_of_a_failed_attempt(): void {
+		$request_args = null;
+		$requests     = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return new WP_Error( 'http_request_failed', 'Timed out' );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertSame( 1, $requests, 'A failed override send must still block a second override send within the hour.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_attempt' ), 5, 'Every attempt should record its time.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_last_send' ), 'A failed attempt must not record a send time.' );
+	}
+
+	/**
+	 * @testdox Should include the payload size in the failure log.
+	 */
+	public function test_failure_log_includes_payload_size(): void {
+		$this->fake_tracker_response( 503 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertGreaterThan( 0, $logger->warnings[0]['body_bytes'], 'The failure log should report the payload size.' );
+	}
+
+	/**
+	 * @testdox Should report a rejected oversized snapshot distinctly.
+	 */
+	public function test_too_large_snapshot_is_logged_as_such(): void {
+		$this->fake_tracker_response( 413 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertStringContainsString( 'too large', $logger->messages[0] );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'An oversized snapshot is not retried.' );
+	}
+
+	/**
+	 * @testdox Should clear the failure counter when tracking is turned off.
+	 */
+	public function test_opting_out_clears_failure_counter(): void {
+		update_option( 'woocommerce_tracker_send_failures', 2 );
+
+		WC()->handle_tracking_setting_change( 'yes', 'no' );
+
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Opting out should discard pending retry state.' );
+	}
+
+	/**
+	 * @testdox Should treat a snapshot that cannot be encoded as a non-retryable failure.
+	 */
+	public function test_unencodable_snapshot_is_logged_and_not_retried(): void {
+		$requests = 0;
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		add_filter(
+			'woocommerce_tracker_data',
+			function ( $data ) {
+				$data['unencodable'] = INF;
+				return $data;
+			}
+		);
+		update_option( 'woocommerce_tracker_send_failures', 1 );
+		$logger = $this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertSame( 0, $requests, 'An unencodable snapshot must not be posted.' );
+		$this->assertSame( 'json_encode_failure', $logger->warnings[0]['error_code'] );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'An unencodable snapshot should not be retried daily.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+	}
+
+	/**
+	 * @testdox Should not record retry state when tracking was turned off while the request was in flight.
+	 */
+	public function test_retry_state_is_not_recorded_after_opt_out_during_request(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		add_filter(
+			'pre_http_request',
+			function () {
+				update_option( 'woocommerce_allow_tracking', 'no' );
+				return array( 'response' => array( 'code' => 503 ) );
+			}
+		);
+		$this->expect_tracker_warning();
+
+		WC_Tracker::send_tracking_data( true );
+
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Retry state must not be created once tracking is off.' );
+	}
+
+	/**
+	 * Fake the tracker HTTP response.
+	 *
+	 * @param int|string $status       HTTP status code, or "wp_error" for a transport failure.
+	 * @param array|null $request_args Receives the request arguments by reference.
+	 */
+	private function fake_tracker_response( $status, &$request_args = null ): void {
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args ) use ( $status, &$request_args ) {
+				$request_args = $args;
+				if ( 'wp_error' === $status ) {
+					return new WP_Error( 'http_request_failed', 'Timed out' );
+				}
+				return array(
+					'headers'  => array(),
+					'body'     => '',
+					'response' => array(
+						'code'    => $status,
+						'message' => '',
+					),
+				);
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Inject a fake logger that records warning contexts.
+	 *
+	 * @return object Fake logger with public `warnings` (contexts) and `messages` arrays.
+	 */
+	private function expect_tracker_warning() {
+		$logger = new class() implements WC_Logger_Interface {
+			/**
+			 * Recorded warning contexts.
+			 *
+			 * @var array
+			 */
+			public $warnings = array();
+
+			/**
+			 * Recorded warning messages.
+			 *
+			 * @var array
+			 */
+			public $messages = array();
+
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			public function add( $handle, $message, $level = WC_Log_Levels::NOTICE ) {}
+			public function log( $level, $message, $context = array() ) {}
+			public function emergency( $message, $context = array() ) {}
+			public function alert( $message, $context = array() ) {}
+			public function critical( $message, $context = array() ) {}
+			public function error( $message, $context = array() ) {}
+			public function warning( $message, $context = array() ) {
+				$this->warnings[] = $context;
+				$this->messages[] = $message;
+			}
+			public function notice( $message, $context = array() ) {}
+			public function info( $message, $context = array() ) {}
+			public function debug( $message, $context = array() ) {}
+			// phpcs:enable
+		};
+		add_filter(
+			'woocommerce_logging_class',
+			static function () use ( $logger ) {
+				return $logger;
+			}
+		);
+		return $logger;
+	}
 	/**
 	 * @testDox Test the features compatibility data for plugin tracking data.
 	 */
@@ -184,29 +510,11 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test orders tracking data.
 	 */
 	public function test_get_tracking_data_orders() {
-		$dummy_product          = WC_Helper_Product::create_simple_product();
 		$status_entries         = array( OrderInternalStatus::PROCESSING, OrderInternalStatus::COMPLETED, OrderInternalStatus::REFUNDED, OrderInternalStatus::PENDING );
 		$created_via_entries    = array( 'api', 'checkout', 'admin' );
 		$payment_method_entries = array( WC_Gateway_Paypal::ID, 'stripe', WC_Gateway_COD::ID );
 
-		$order_count = count( $status_entries ) * count( $created_via_entries ) * count( $payment_method_entries );
-
-		foreach ( $status_entries as $status_entry ) {
-			foreach ( $created_via_entries as $created_via_entry ) {
-				foreach ( $payment_method_entries as $payment_method_entry ) {
-					$order = wc_create_order(
-						array(
-							'status'         => $status_entry,
-							'created_via'    => $created_via_entry,
-							'payment_method' => $payment_method_entry,
-						)
-					);
-					$order->add_product( $dummy_product );
-					$order->save();
-					$order->calculate_totals();
-				}
-			}
-		}
+		$order_count = $this->create_tracking_orders( $status_entries, $created_via_entries, $payment_method_entries );
 
 		$order_data = WC_Tracker::get_tracking_data()['orders'];
 
@@ -217,14 +525,15 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Gross revenue is for wc-completed and wc-refunded status, so we calculate expected revenue per status, multiply by 2, and then multiply by 10 to account for the 10 USD per status.
 		$this->assertEquals( ( $order_count / count( $status_entries ) ) * 2 * 10, $order_data['gross'] );
 
-		// Gross revenue is for wc-pending status, so we calculate expected revenue per status, multiply by 1, and then multiply by 10 to account for the 10 USD per status.
+		// Processing gross revenue covers one status, so multiply the orders per status by the fixed 10 USD total.
 		$this->assertEquals( ( $order_count / count( $status_entries ) ) * 1 * 10, $order_data['processing_gross'] );
 
-		// Order count per gateway is calculated for three status (completed, processing and refunded) so we multiply order count by 3 and then divide by the number of status entries.
-		$this->assertEquals( ( $order_count * 3 / count( $status_entries ) ), $order_data['gateway__USD_count'] );
-
-		// Order revenue per gateway is calculated for three status (completed, processing and refunded) so we multiply order count by 3, then by 10 to account for 10 USD per order and then divide by the number of status entries.
-		$this->assertEquals( ( $order_count * 3 * 10 / count( $status_entries ) ), $order_data['gateway__USD_total'] );
+		$orders_per_gateway = count( $created_via_entries ) * 3;
+		foreach ( $payment_method_entries as $payment_method_entry ) {
+			$gateway_key = 'gateway_' . $payment_method_entry . '_USD';
+			$this->assertEquals( $orders_per_gateway, $order_data[ $gateway_key . '_count' ] );
+			$this->assertEquals( $orders_per_gateway * 10, $order_data[ $gateway_key . '_total' ] );
+		}
 
 		foreach ( $created_via_entries as $created_via_entry ) {
 			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data['created_via'][ $created_via_entry ] );
@@ -232,13 +541,112 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Persist the order matrix read by the tracker aggregate queries.
+	 *
+	 * @param string[] $statuses        Order statuses.
+	 * @param string[] $created_via     Order origins.
+	 * @param string[] $payment_methods Payment methods.
+	 * @return int Number of inserted orders.
+	 */
+	private function create_tracking_orders( array $statuses, array $created_via, array $payment_methods ): int {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_count = 0;
+			foreach ( $statuses as $status ) {
+				foreach ( $created_via as $origin ) {
+					foreach ( $payment_methods as $payment_method ) {
+						$order = wc_create_order(
+							array(
+								'status'      => $status,
+								'created_via' => $origin,
+							)
+						);
+						$order->set_payment_method( $payment_method );
+						$order->set_total( 10 );
+						$order->save();
+						++$order_count;
+					}
+				}
+			}
+
+			return $order_count;
+		}
+
+		$order_date = gmdate( 'Y-m-d H:i:s' );
+		$orders     = array();
+
+		foreach ( $statuses as $status ) {
+			foreach ( $created_via as $origin ) {
+				foreach ( $payment_methods as $payment_method ) {
+					$orders[] = array(
+						'status'         => $status,
+						'date'           => $order_date,
+						'payment_method' => $payment_method,
+						'created_via'    => $origin,
+						'recorded_sales' => 0,
+					);
+				}
+			}
+		}
+
+		return $this->insert_hpos_tracking_orders( $orders );
+	}
+
+	/**
+	 * Insert minimal HPOS rows consumed by tracker queries.
+	 *
+	 * @param array[] $orders Order persistence data.
+	 * @return int Number of inserted orders.
+	 */
+	private function insert_hpos_tracking_orders( array $orders ): int {
+		global $wpdb;
+
+		$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
+		$order_rows    = array();
+		$order_values  = array();
+		$detail_rows   = array();
+		$detail_values = array();
+
+		foreach ( $orders as $order ) {
+			$order_rows[] = '(%d, %s, %s, %s, %f, %s, %s, %s)';
+			array_push( $order_values, $next_order_id, $order['status'], 'USD', 'shop_order', 10, $order['date'], $order['date'], $order['payment_method'] );
+
+			$detail_rows[] = '(%d, %s, %s, %d)';
+			array_push( $detail_values, $next_order_id, $order['created_via'], WOOCOMMERCE_VERSION, $order['recorded_sales'] );
+
+			++$next_order_id;
+		}
+
+		$order_table    = OrdersTableDataStore::get_orders_table_name();
+		$order_columns  = 'id, status, currency, type, total_amount, date_created_gmt, date_updated_gmt, payment_method';
+		$detail_table   = OrdersTableDataStore::get_operational_data_table_name();
+		$detail_columns = 'order_id, created_via, woocommerce_version, recorded_sales';
+
+		$order_query         = $wpdb->prepare(
+			"INSERT INTO {$order_table} ({$order_columns}) VALUES " . implode( ', ', $order_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
+			$order_values
+		);
+		$order_rows_inserted = $wpdb->query( $order_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$this->assertSame( count( $orders ), $order_rows_inserted, 'Expected every tracker order row to be inserted.' );
+
+		$detail_query         = $wpdb->prepare(
+			"INSERT INTO {$detail_table} ({$detail_columns}) VALUES " . implode( ', ', $detail_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
+			$detail_values
+		);
+		$detail_rows_inserted = $wpdb->query( $detail_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$this->assertSame( count( $orders ), $detail_rows_inserted, 'Expected operational data for every tracker order row.' );
+
+		( new OrderCountCache() )->flush( 'shop_order', array_keys( wc_get_order_statuses() ) );
+
+		return count( $orders );
+	}
+
+	/**
 	 * @testDox Test order snapshot data.
 	 */
 	public function test_get_tracking_data_order_snapshot() {
-		$dummy_product = WC_Helper_Product::create_simple_product();
-		$year          = gmdate( 'Y' );
-		$first_20      = array();
-		$last_20       = array();
+		$year     = gmdate( 'Y' );
+		$first_20 = array();
+		$last_20  = array();
 
 		// Populate order dates.
 		for ( $i = 1; $i <= 20; $i++ ) {
@@ -246,18 +654,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			$last_20[]  = sprintf( '%d-02-%02d 12:00:00', $year + 2, $i );
 		}
 
-		// Create set of orders.
-		foreach ( array_merge( $first_20, $last_20 ) as $order_date ) {
-			$order = wc_create_order(
-				array(
-					'status' => OrderInternalStatus::COMPLETED,
-				)
-			);
-			$order->add_product( $dummy_product );
-			$order->set_date_created( $order_date );
-			$order->save();
-			$order->calculate_totals();
-		}
+		$this->create_tracking_snapshot_orders( array_merge( $first_20, $last_20 ) );
 
 		$order_snapshot = WC_Tracker::get_tracking_data()['order_snapshot'];
 
@@ -283,6 +680,39 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( $order_details['recorded_sales'], 'yes' );
 			$this->assertEquals( $order_details['woocommerce_version'], WOOCOMMERCE_VERSION );
 		}
+	}
+
+	/**
+	 * Persist orders read by the first/last order snapshot queries.
+	 *
+	 * @param string[] $order_dates Order creation dates.
+	 */
+	private function create_tracking_snapshot_orders( array $order_dates ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			foreach ( $order_dates as $order_date ) {
+				$order = wc_create_order(
+					array(
+						'status' => OrderInternalStatus::COMPLETED,
+					)
+				);
+				$order->set_date_created( $order_date );
+				$order->set_total( 10 );
+				$order->save();
+			}
+			return;
+		}
+
+		$orders = array_map(
+			static fn( $order_date ) => array(
+				'status'         => OrderInternalStatus::COMPLETED,
+				'date'           => $order_date,
+				'payment_method' => '',
+				'created_via'    => 'admin',
+				'recorded_sales' => 1,
+			),
+			$order_dates
+		);
+		$this->insert_hpos_tracking_orders( $orders );
 	}
 
 	/**
@@ -344,29 +774,32 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_last_modified'], 'unknown' );
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_first_optin'], 'unknown' );
 
-		$time_one = time();
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_one );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
-		sleep( 1 ); // be sure $time_two is at least one second after $time_one.
-		$time_two = time();
+		// first_optin is recorded once on the first opt-in and must never change afterwards.
+		$first_optin = (int) get_option( 'woocommerce_allow_tracking_first_optin' );
+
+		// last_modified must be refreshed to the current time on every tracking change. Capturing the
+		// time immediately before each update keeps this deterministic without waiting on the clock.
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'no' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_two );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
-		sleep( 1 ); // be sure $time_three is at least one second after $time_two.
-		$time_three = time();
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_three );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
 		// Restore everything as it was.
 		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );

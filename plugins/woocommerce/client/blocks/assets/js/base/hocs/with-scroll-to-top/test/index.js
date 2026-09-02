@@ -1,55 +1,35 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
 import withScrollToTop from '../index';
 
-const TestComponent = withScrollToTop( ( props ) => (
-	<span { ...props }>
-		<button />
-	</span>
-) );
-
 const focusedMock = jest.fn();
 const scrollIntoViewMock = jest.fn();
 
-const mockedButton = {
-	focus: focusedMock,
-	scrollIntoView: scrollIntoViewMock,
-};
-const render = ( { inView } ) => {
-	const getBoundingClientRect = () => ( {
+let scrollToTop;
+const TestComponent = withScrollToTop( ( props ) => {
+	scrollToTop = props.scrollToTop;
+	return (
+		<span>
+			<button />
+		</span>
+	);
+} );
+
+const setup = ( { inView } ) => {
+	render( <TestComponent /> );
+	const button = screen.getByRole( 'button' );
+	button.focus = focusedMock;
+	button.scrollIntoView = scrollIntoViewMock;
+	button.getBoundingClientRect = () => ( {
 		bottom: inView ? 0 : -10,
 	} );
-	return TestRenderer.create( <TestComponent />, {
-		createNodeMock: ( element ) => {
-			if ( element.type === 'button' ) {
-				return {
-					...mockedButton,
-					getBoundingClientRect,
-				};
-			}
-			if ( element.type === 'div' ) {
-				return {
-					getBoundingClientRect,
-					parentElement: {
-						querySelectorAll: () => [
-							{ ...mockedButton, getBoundingClientRect },
-						],
-					},
-					scrollIntoView: scrollIntoViewMock,
-				};
-			}
-			return null;
-		},
-	} );
+	scrollToTop( { focusableSelector: 'button' } );
 };
 
 describe( 'withScrollToTop Component', () => {
@@ -60,11 +40,7 @@ describe( 'withScrollToTop Component', () => {
 
 	describe( 'if component is not in view', () => {
 		beforeEach( () => {
-			const renderer = render( { inView: false } );
-			const props = renderer.root.findByType( 'span' ).props;
-			props.scrollToTop( {
-				focusableSelector: 'button',
-			} );
+			setup( { inView: false } );
 		} );
 
 		it( 'scrolls to top of the component when scrollToTop is called', () => {
@@ -78,11 +54,7 @@ describe( 'withScrollToTop Component', () => {
 
 	describe( 'if component is in view', () => {
 		beforeEach( () => {
-			const renderer = render( { inView: true } );
-			const props = renderer.root.findByType( 'span' ).props;
-			props.scrollToTop( {
-				focusableSelector: 'button',
-			} );
+			setup( { inView: true } );
 		} );
 
 		it( "doesn't scroll to top of the component when scrollToTop is called", () => {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product editor content from showing through the sticky editor tools.

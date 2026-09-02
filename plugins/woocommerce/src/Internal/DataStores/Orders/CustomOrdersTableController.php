@@ -148,6 +148,7 @@ class CustomOrdersTableController {
 		add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 		add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_order_cache_group_as_non_persistent' ) );
+		add_filter( 'map_meta_cap', array( $this, 'maybe_translate_order_caps' ), 0, 4 );
 	}
 
 	/**
@@ -187,6 +188,37 @@ class CustomOrdersTableController {
 		$this->order_cache_controller      = $order_cache_controller;
 		$this->plugin_util                 = $plugin_util;
 		$this->db_util                     = $db_util;
+	}
+
+	/**
+	 * Translate capabilities for HPOS orders when sync is not active.
+	 *
+	 * Only activates when HPOS is the authoritative source and sync is off,
+	 * then lazily delegates to HposOrderCapabilityHelper for the actual
+	 * capability translation.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string[] $caps    The resolved primitive capabilities.
+	 * @param string   $cap     The meta capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @param array    $args    Additional arguments (object ID).
+	 * @return string[] Translated capabilities.
+	 */
+	public function maybe_translate_order_caps( $caps, $cap, $user_id, $args ) {
+		if ( ! $this->custom_orders_table_usage_is_enabled() ) {
+			return $caps;
+		}
+
+		if ( ! $this->data_synchronizer instanceof DataSynchronizer ) {
+			return $caps;
+		}
+
+		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+			return $caps;
+		}
+
+		return wc_get_container()->get( HposOrderCapabilityHelper::class )->translate_order_caps( $caps, $cap, $user_id, $args );
 	}
 
 	/**

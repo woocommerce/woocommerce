@@ -35,10 +35,12 @@ const createGroupSpaceBetween = ( innerBlocks: BlockInstance[] ) =>
 		'core/group',
 		// Row variation of the group block
 		{
+			className: 'wc-product-collection-carousel-header',
 			layout: {
 				type: 'flex',
 				flexWrap: 'nowrap',
 				justifyContent: 'space-between',
+				verticalAlignment: 'center',
 			},
 		},
 		innerBlocks
@@ -253,7 +255,7 @@ const useCarouselLayoutAdjustments = (
 	);
 
 	useEffect( () => {
-		if ( ! clientId ) {
+		if ( ! clientId || ! productCollectionBlock ) {
 			return;
 		}
 
@@ -278,7 +280,13 @@ const useCarouselLayoutAdjustments = (
 		}
 
 		previousLayoutType.current = displayLayout.type;
-	}, [ displayLayout.type, clientId, actions, collection ] );
+	}, [
+		displayLayout.type,
+		clientId,
+		actions,
+		collection,
+		productCollectionBlock,
+	] );
 };
 
 export default useCarouselLayoutAdjustments;

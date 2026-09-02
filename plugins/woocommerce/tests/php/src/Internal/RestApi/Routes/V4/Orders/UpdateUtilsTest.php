@@ -75,7 +75,7 @@ class UpdateUtilsTest extends WC_Unit_Test_Case {
  *
  * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
  * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
- * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+ * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
  */
 class TestableUpdateUtils extends UpdateUtils {
 

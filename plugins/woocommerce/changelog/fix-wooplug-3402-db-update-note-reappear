@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix DB update admin note not reappearing after being dismissed by the user.

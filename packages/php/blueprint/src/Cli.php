@@ -41,6 +41,12 @@ class Cli {
 						'optional' => true,
 						'options'  => array( 'all', 'error', 'info', 'debug' ),
 					),
+					array(
+						'type'        => 'flag',
+						'name'        => 'yes',
+						'optional'    => true,
+						'description' => 'Proceed without prompting for confirmation.',
+					),
 				),
 				'when'     => 'after_wp_load',
 			)

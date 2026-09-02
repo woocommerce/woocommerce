@@ -1,7 +1,10 @@
+@import "variables";
+
 #coming-soon-footer-banner {
 	width: 100%;
 	min-height: 56px;
 	background: #fff;
+	color: $gray-900;
 	position: fixed;
 	display: flex;
 	font-size: 13px;
@@ -24,15 +27,23 @@
 
 	a {
 		color: #3858e9;
-		text-decoration: none;
+		text-decoration: underline;
+
+		&:hover {
+			text-decoration: none;
+		}
 	}
 
 	a.coming-soon-footer-banner-dismiss {
 		/* stylelint-disable-next-line function-url-quotes */
-		background-image: url('data:image/svg+xml,<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4995 13.0602L16.2118 16.7725L17.2725 15.7118L13.5602 11.9995L17.2725 8.28723L16.2119 7.22657L12.4995 10.9389L8.78722 7.22656L7.72656 8.28722L11.4389 11.9995L7.72657 15.7119L8.78723 16.7725L12.4995 13.0602Z" fill="%23757575"/></svg>');
+		background-image: url('data:image/svg+xml,<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4995 13.0602L16.2118 16.7725L17.2725 15.7118L13.5602 11.9995L17.2725 8.28723L16.2119 7.22657L12.4995 10.9389L8.78722 7.22656L7.72656 8.28722L11.4389 11.9995L7.72657 15.7119L8.78723 16.7725L12.4995 13.0602Z" fill="%23#{str-slice("#{$gray-900}", 2)}"/></svg>');
 		width: 24px;
 		height: 24px;
 		cursor: pointer;
 		background-repeat: no-repeat;
+
+		&:hover {
+			opacity: 0.6;
+		}
 	}
 }

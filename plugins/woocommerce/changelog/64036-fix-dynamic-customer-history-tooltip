@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix customer history "Total orders" tooltip to dynamically reflect excluded order statuses instead of using hardcoded text.

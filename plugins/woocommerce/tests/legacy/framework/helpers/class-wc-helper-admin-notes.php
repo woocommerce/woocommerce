@@ -19,12 +19,14 @@ class WC_Helper_Admin_Notes {
 	 */
 	public static function reset_notes_dbs() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_notes" ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_note_actions" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_notes" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_note_actions" ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
-	 * Create four notes that we can use for notes REST API tests
+	 * Create four notes that we can use for notes REST API tests.
+	 *
+	 * @return int[] Note IDs keyed by their fixture number.
 	 */
 	public static function add_notes_for_tests() {
 		$data_store = WC_Data_Store::load( 'admin-note' );
@@ -37,8 +39,6 @@ class WC_Helper_Admin_Notes {
 		$note_1->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note_1->set_source( 'PHPUNIT_TEST' );
 		$note_1->set_is_snoozable( false );
-		$note_1->set_layout( 'plain' );
-		$note_1->set_image( '' );
 		$note_1->add_action(
 			'PHPUNIT_TEST_NOTE_1_ACTION_1_SLUG',
 			'PHPUNIT_TEST_NOTE_1_ACTION_1_LABEL',
@@ -60,8 +60,6 @@ class WC_Helper_Admin_Notes {
 		$note_2->set_source( 'PHPUNIT_TEST' );
 		$note_2->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
 		$note_2->set_is_snoozable( true );
-		$note_2->set_layout( 'thumbnail' );
-		$note_2->set_image( 'https://an-image.jpg' );
 		// This note has no actions.
 		$note_2->save();
 
@@ -74,8 +72,6 @@ class WC_Helper_Admin_Notes {
 		$note_3->set_source( 'PHPUNIT_TEST' );
 		$note_3->set_status( Note::E_WC_ADMIN_NOTE_SNOOZED );
 		$note_3->set_date_reminder( time() - HOUR_IN_SECONDS );
-		$note_3->set_layout( 'thumbnail' );
-		$note_3->set_image( 'https://an-image.jpg' );
 		// This note has no actions.
 		$note_3->save();
 
@@ -87,8 +83,6 @@ class WC_Helper_Admin_Notes {
 		$note_4->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note_4->set_source( 'PHPUNIT_TEST' );
 		$note_4->set_is_snoozable( false );
-		$note_4->set_layout( 'plain' );
-		$note_4->set_image( '' );
 		$note_4->add_action(
 			'PHPUNIT_TEST_NOTE_4_ACTION_1_SLUG',
 			'PHPUNIT_TEST_NOTE_4_ACTION_1_LABEL',
@@ -100,6 +94,13 @@ class WC_Helper_Admin_Notes {
 			'?s=PHPUNIT_TEST_NOTE_4_ACTION_2_URL'
 		);
 		$note_4->save();
+
+		return array(
+			1 => $note_1->get_id(),
+			2 => $note_2->get_id(),
+			3 => $note_3->get_id(),
+			4 => $note_4->get_id(),
+		);
 	}
 
 	/**
@@ -118,8 +119,6 @@ class WC_Helper_Admin_Notes {
 		$note->set_name( $name );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );
-		$note->set_layout( 'plain' );
-		$note->set_image( '' );
 		$note->save();
 	}
 }

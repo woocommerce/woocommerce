@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Resolve all PHPStan level 9 findings across the engine source and tests by adding type-safe hydration coercion at the entity, value object and repository boundaries (behavior-preserving for valid data).

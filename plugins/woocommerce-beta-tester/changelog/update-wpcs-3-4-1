@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update woocommerce-sniffs to 1.0.1 / wp-coding-standards/wpcs to 3.4.1 (security release).

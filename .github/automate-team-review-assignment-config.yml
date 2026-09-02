@@ -17,14 +17,6 @@ when:
         - woo-fse
   - author:
       teamIs:
-        - flux
-      ignore:
-        nameIs:
-    assign:
-      teams:
-        - flux
-  - author:
-      teamIs:
         - ballade
       ignore:
         nameIs:

@@ -4,9 +4,13 @@ on:
     - cron: '0 9 * * *' # Every day at 9 AM UTC
   workflow_dispatch:
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   check-feature-freeze:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       event-version: ${{ steps.find-feature-freeze-event.outputs.event-version }}
       event-title: ${{ steps.find-feature-freeze-event.outputs.event-title }}
@@ -17,7 +21,7 @@ jobs:
 
       - name: Check for Feature Freeze events in a week
         id: find-feature-freeze-event
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const ical = require('node-ical');
@@ -68,6 +72,7 @@ jobs:
     needs: check-feature-freeze
     if: needs.check-feature-freeze.outputs.event-title != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Send feature highlight reminder notification
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0

@@ -44,6 +44,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->recent_reviews();
 		$this->expectOutputRegex( '/Loading reviews data.../' );
+		$this->expectOutputRegex( '/wc-dashboard-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-content/' );
 	}
@@ -65,6 +66,39 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->expectOutputRegex( "/#comment-{$comment_id1}/" );
 		$this->expectOutputRegex( "/#comment-{$comment_id5}/" );
 		$this->expectOutputRegex( '/reviewed by/' );
+
+		$product->delete();
+	}
+
+	/**
+	 * Test: recent reviews widget truncates long product and reviewer names.
+	 */
+	public function test_recent_reviews_widget_content_truncates_long_product_and_reviewer_names() {
+		$product_name = 'Extra long dashboard review stress test product name with multiple descriptive words';
+		$author_name  = 'Alexandria Montgomery-Silverstein With A Very Long Reviewer Name';
+		$product      = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id(), 'Review content here' );
+		wp_update_comment(
+			array(
+				'comment_ID'       => $comment_id,
+				'comment_author'   => $author_name,
+				'comment_date'     => current_time( 'mysql' ),
+				'comment_date_gmt' => current_time( 'mysql', true ),
+			)
+		);
+
+		wp_set_current_user( $this->user );
+		ob_start();
+		( new WC_Admin_Dashboard() )->recent_reviews_content();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'title="' . esc_attr( $product_name ) . '"', $html );
+		$this->assertStringContainsString( '>' . esc_html( wc_trim_string( $product_name, 40 ) ) . '</a>', $html );
+		$this->assertStringContainsString( 'title="' . esc_attr( $author_name ) . '"', $html );
+		$this->assertStringContainsString( '>' . esc_html( wc_trim_string( $author_name, 24 ) ) . '</span>', $html );
 
 		$product->delete();
 	}
@@ -102,7 +136,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->status_widget();
 		$this->expectOutputRegex( '/Loading status data.../' );
-		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/' );
+		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">/' );
 	}
 
 	/**

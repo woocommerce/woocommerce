@@ -9,26 +9,12 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
-import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { useEffect, useRef } from '@wordpress/element';
 import { useProduct } from '@woocommerce/entities';
-import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import {
 	ToggleControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -40,7 +26,7 @@ import {
  */
 import Block from './block';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { BlockAttributes, ImageSizing } from './types';
+import { BlockAttributes } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
 const TEMPLATE = [
@@ -54,7 +40,6 @@ const TEMPLATE = [
 
 const DEFAULT_ATTRIBUTES = {
 	showProductLink: true,
-	imageSizing: ImageSizing.SINGLE,
 };
 
 const Edit = ( {
@@ -63,7 +48,7 @@ const Edit = ( {
 	context,
 	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
-	const { showProductLink, imageSizing, width, height, scale } = attributes;
+	const { showProductLink, width, height, scale } = attributes;
 
 	const ref = useRef< HTMLDivElement >( null );
 
@@ -123,12 +108,6 @@ const Edit = ( {
 		}
 	);
 
-	const isBlockTheme = getSettingWithCoercion(
-		'isBlockTheme',
-		false,
-		isBoolean
-	);
-
 	const { product, isResolving } = useProduct( context.postId );
 
 	return (
@@ -149,7 +128,6 @@ const Edit = ( {
 							setAttributes( {
 								showProductLink:
 									DEFAULT_ATTRIBUTES.showProductLink,
-								imageSizing: DEFAULT_ATTRIBUTES.imageSizing,
 							} )
 						}
 					>
@@ -187,60 +165,6 @@ const Edit = ( {
 									} )
 								}
 							/>
-						</ToolsPanelItem>
-						<ToolsPanelItem
-							label={ __( 'Resolution', 'woocommerce' ) }
-							hasValue={ () =>
-								imageSizing !== DEFAULT_ATTRIBUTES.imageSizing
-							}
-							onDeselect={ () =>
-								setAttributes( {
-									imageSizing: DEFAULT_ATTRIBUTES.imageSizing,
-								} )
-							}
-							isShownByDefault
-						>
-							<ToggleGroupControl
-								__next40pxDefaultSize
-								__nextHasNoMarginBottom
-								label={ __( 'Resolution', 'woocommerce' ) }
-								isBlock
-								help={
-									! isBlockTheme
-										? createInterpolateElement(
-												__(
-													'Product image cropping can be modified in the <a>Customizer</a>.',
-													'woocommerce'
-												),
-												{
-													a: (
-														// eslint-disable-next-line jsx-a11y/anchor-has-content
-														<a
-															href={ `${ getAdminLink(
-																'customize.php'
-															) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-															target="_blank"
-															rel="noopener noreferrer"
-														/>
-													),
-												}
-										  )
-										: null
-								}
-								value={ imageSizing }
-								onChange={ ( value: ImageSizing ) =>
-									setAttributes( { imageSizing: value } )
-								}
-							>
-								<ToggleGroupControlOption
-									value={ ImageSizing.SINGLE }
-									label={ __( 'Full Size', 'woocommerce' ) }
-								/>
-								<ToggleGroupControlOption
-									value={ ImageSizing.THUMBNAIL }
-									label={ __( 'Thumbnail', 'woocommerce' ) }
-								/>
-							</ToggleGroupControl>
 						</ToolsPanelItem>
 					</ToolsPanel>
 				</InspectorControls>

@@ -29,7 +29,7 @@ interface CategorySelectorProps {
 
 export default function CategorySelector(
 	props: CategorySelectorProps
-): JSX.Element {
+): React.JSX.Element {
 	const [ selected, setSelected ] = useState< Category >();
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ categoriesToShow, setCategoriesToShow ] = useState< Category[] >(
@@ -40,8 +40,8 @@ export default function CategorySelector(
 		'start' | 'middle' | 'end'
 	>( 'start' );
 
-	const categorySelectorRef = useRef< HTMLUListElement >( null );
-	const selectedCategoryRef = useRef< HTMLLIElement >( null );
+	const categorySelectorRef = useRef< HTMLUListElement | null >( null );
+	const selectedCategoryRef = useRef< HTMLLIElement | null >( null );
 
 	const query = useQuery();
 

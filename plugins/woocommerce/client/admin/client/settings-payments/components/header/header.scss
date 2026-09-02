@@ -5,10 +5,13 @@
 
 	.woocommerce-layout__header-heading {
 		.woocommerce-settings-payments-header__title {
-			color: $gray-900;
-			font-size: 16px;
+			// font-size, font-weight, AND color all inherit from the
+			// shared `.woocommerce-layout__header-heading` rule
+			// (15px / 500 / $gray-900, in client/admin/client/header/
+			// style.scss). Dropped the duplicate 16px + 600 + $gray-900
+			// overrides here so all floating-header titles stay in
+			// lockstep on the same tokens.
 			font-style: normal;
-			font-weight: 600;
 			line-height: 24px;
 		}
 	}

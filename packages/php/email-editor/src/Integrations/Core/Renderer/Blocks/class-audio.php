@@ -51,7 +51,7 @@ class Audio extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		return $this->add_spacer( $rendered_content, $parsed_block['email_attrs'] ?? array() );
+		return $this->add_spacer_with_context( $rendered_content, $parsed_block['email_attrs'] ?? array(), $rendering_context );
 	}
 	/**
 	 * Renders the audio block content as an audio player for email.
@@ -119,23 +119,28 @@ class Audio extends Abstract_Block_Renderer {
 		$border_color     = '#AAA';
 		$icon_size        = '18px';
 		$font_size        = '14px';
+		$start_side       = $rendering_context->get_start_side();
+		$end_side         = $rendering_context->get_end_side();
 
 		// Generate the icon content.
 		$icon_content = sprintf(
-			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="padding: 0.25em; padding-left: 17px; display: inline-block; vertical-align: middle;"><img height="%2$s" src="%3$s" style="display:block;margin-right:0;vertical-align:middle;" width="%2$s" alt="%4$s"></a>',
+			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="padding: 0.25em; padding-%5$s: 17px; display: inline-block; vertical-align: middle;"><img height="%2$s" src="%3$s" style="display:block;margin-%6$s:0;vertical-align:middle;" width="%2$s" alt="%4$s"></a>',
 			$audio_url,
 			esc_attr( $icon_size ),
 			esc_url( $icon_image ),
 			// translators: %s is the audio player icon.
-			sprintf( __( '%s icon', 'woocommerce' ), __( 'Audio', 'woocommerce' ) )
+			sprintf( __( '%s icon', 'woocommerce' ), __( 'Audio', 'woocommerce' ) ),
+			esc_attr( $start_side ),
+			esc_attr( $end_side )
 		);
 		$icon_content = Table_Wrapper_Helper::render_table_cell( $icon_content, array( 'style' => sprintf( 'vertical-align:middle;font-size:%s;', $font_size ) ) );
 
 		// Generate the label content.
 		$label_content    = sprintf(
-			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="text-decoration:none; padding: 0.25em; padding-right: 17px; display: inline-block;"><span style="margin-left:.5em;margin-right:.5em;font-weight:bold"> %2$s </span></a>',
+			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="text-decoration:none; padding: 0.25em; padding-%3$s: 17px; display: inline-block;"><span style="margin-left:.5em;margin-right:.5em;font-weight:bold"> %2$s </span></a>',
 			$audio_url,
-			esc_html( $label )
+			esc_html( $label ),
+			esc_attr( $end_side )
 		);
 		$label_cell_style = sprintf(
 			'vertical-align:middle;font-size:%s;',
@@ -154,7 +159,7 @@ class Audio extends Abstract_Block_Renderer {
 		);
 
 		$main_table_attrs = array(
-			'align' => 'left',
+			'align' => $rendering_context->get_default_text_align(),
 			'style' => $main_table_styles,
 		);
 
@@ -173,12 +178,12 @@ class Audio extends Abstract_Block_Renderer {
 		);
 
 		$cell_attrs = array(
-			'style' => 'min-width: 100%; vertical-align: middle; word-break: break-word; text-align: left;',
+			'style' => 'min-width: 100%; vertical-align: middle; word-break: break-word; text-align: ' . $rendering_context->get_default_text_align() . ';',
 		);
 
 		$main_wrapper = Table_Wrapper_Helper::render_table_wrapper( $main_table, $table_attrs, $cell_attrs );
 
-		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => 'left' ) );
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => $rendering_context->get_default_text_align() ) );
 	}
 
 	/**

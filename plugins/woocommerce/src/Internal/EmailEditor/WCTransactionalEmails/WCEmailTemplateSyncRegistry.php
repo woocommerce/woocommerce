@@ -132,8 +132,7 @@ class WCEmailTemplateSyncRegistry {
 			return array();
 		}
 
-		$wc_emails  = \WC_Emails::instance();
-		$all_emails = $wc_emails->get_emails();
+		$emails_by_id = WCTransactionalEmailPostsManager::get_instance()->get_emails_by_id();
 
 		$registry = array();
 
@@ -142,7 +141,7 @@ class WCEmailTemplateSyncRegistry {
 				continue;
 			}
 
-			$email = self::find_email_for_id( $all_emails, $email_id );
+			$email = $emails_by_id[ $email_id ] ?? null;
 			if ( null === $email ) {
 				self::get_logger()->notice(
 					sprintf(
@@ -208,26 +207,6 @@ class WCEmailTemplateSyncRegistry {
 	}
 
 	/**
-	 * Look up the registered WC_Email instance for the given ID.
-	 *
-	 * `WC_Emails::get_emails()` keys entries by class name, not by email ID, so a
-	 * linear search over the `->id` property is required.
-	 *
-	 * @param array<string, \WC_Email> $all_emails Registered WC_Email instances keyed by class.
-	 * @param string                   $email_id   The email ID to look up.
-	 * @return \WC_Email|null
-	 */
-	private static function find_email_for_id( array $all_emails, string $email_id ): ?\WC_Email {
-		foreach ( $all_emails as $email ) {
-			if ( $email instanceof \WC_Email && $email->id === $email_id ) {
-				return $email;
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * Classify an email ID as either first-party (core / POS / Fulfillments) or third-party.
 	 *
 	 * @param string $email_id The email ID.
@@ -253,8 +232,10 @@ class WCEmailTemplateSyncRegistry {
 	 *
 	 * @param string $file Absolute path to the template file.
 	 * @return string The parsed version, or an empty string if none is declared.
+	 *
+	 * @since 10.8.0
 	 */
-	private static function parse_version_header( string $file ): string {
+	public static function parse_version_header( string $file ): string {
 		if ( ! is_readable( $file ) ) {
 			return '';
 		}

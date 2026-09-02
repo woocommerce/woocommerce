@@ -28,8 +28,8 @@ export const SubscriptionsContext =
 	createContext< SubscriptionsContextType >( defaultContext );
 
 export function SubscriptionsContextProvider( props: {
-	children: JSX.Element;
-} ): JSX.Element {
+	children: React.JSX.Element;
+} ): React.JSX.Element {
 	const [ subscriptions, setSubscriptions ] = useState<
 		Array< Subscription >
 	>( [] );

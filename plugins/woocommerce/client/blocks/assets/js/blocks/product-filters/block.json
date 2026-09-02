@@ -3,7 +3,7 @@
 	"apiVersion": 3,
 	"name": "woocommerce/product-filters",
 	"title": "Product Filters",
-	"description": "Let shoppers filter products displayed on the page.",
+	"description": "Add a set of filters shoppers can use.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
@@ -15,7 +15,6 @@
 			"enableContrastChecker": false,
 			"button": true
 		},
-		"multiple": true,
 		"inserter": true,
 		"interactivity": true,
 		"typography": {
@@ -35,11 +34,19 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [ "postId", "query", "queryId" ],
+	"usesContext": [ "postId", "query", "queryId", "forcePageReload" ],
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"overlayMode": {
+			"type": "string",
+			"enum": [ "off", "mobile", "always" ]
+		},
+		"overlayPosition": {
+			"type": "string",
+			"enum": [ "left", "right" ]
 		}
 	},
 	"example": {

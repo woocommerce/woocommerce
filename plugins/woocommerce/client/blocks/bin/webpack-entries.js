@@ -29,10 +29,6 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
 	},
-	'add-to-cart-with-options-variation-selector-attribute-options': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-options',
-	},
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},
@@ -62,6 +58,7 @@ const blocks = {
 	'coming-soon': {},
 	'coupon-code': {},
 	'customer-account': {},
+	dropdown: {},
 	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -69,7 +66,10 @@ const blocks = {
 	'featured-product': {
 		customDir: 'featured-items/featured-product',
 	},
-	'filter-wrapper': {},
+	'filter-wrapper': {
+		// Frontend-only lazy component registration; exclude from styling build.
+		skipStyling: true,
+	},
 	'handpicked-products': {},
 	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
 	'legacy-template': {
@@ -115,6 +115,9 @@ const blocks = {
 	'reviews-by-product': {
 		customDir: 'reviews/reviews-by-product',
 	},
+	'saved-for-later': {},
+	wishlist: {},
+	'add-to-wishlist-button': {},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},
@@ -300,6 +303,16 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	),
 } );
 
+const cartAndCheckoutFrontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
+	...Object.fromEntries(
+		Object.entries( cartAndCheckoutBlocks ).filter( ( [ blockName ] ) => {
+			return ! frontendScriptModuleBlocksToSkip.includes(
+				`woocommerce/${ blockName }`
+			);
+		} )
+	),
+} );
+
 // Remove styles from style build,
 // that are already included in interactivity
 // script modules build.
@@ -311,7 +324,10 @@ const blockStylingEntries = getBlockEntries(
 				...blocks,
 				...genericBlocks,
 				...cartAndCheckoutBlocks,
-			} ).filter( ( [ blockName ] ) => {
+			} ).filter( ( [ blockName, config ] ) => {
+				if ( config.skipStyling ) {
+					return false;
+				}
 				return ! frontendScriptModuleBlocksToSkip.includes(
 					`woocommerce/${ blockName }`
 				);
@@ -322,10 +338,13 @@ const blockStylingEntries = getBlockEntries(
 
 const entries = {
 	styling: {
-		// Packages styles
-		'packages-style': glob.sync( './packages/**/index.{t,j}s', {
-			dotRelative: true,
-		} ),
+		// Package entry points included in the styling build.
+		'packages-style': glob.sync(
+			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
+			{
+				dotRelative: true,
+			}
+		),
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
@@ -337,17 +356,18 @@ const entries = {
 		...blockStylingEntries,
 	},
 	core: {
-		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
-		blocksCheckoutEvents: './assets/js/events/index.ts',
-		wcSettings: './assets/js/settings/shared/index.ts',
-		wcBlocksData: './assets/js/data/index.ts',
+		wcBlocksRegistry: './packages/public-api/blocks-registry/index.js',
+		blocksCheckoutEvents:
+			'./packages/public-api/blocks-checkout-events/index.ts',
+		wcSettings: './packages/public-api/settings/index.ts',
+		wcBlocksData: './packages/public-api/block-data/index.ts',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
-		wcBlocksSharedContext: './assets/js/shared/context/index.js',
-		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
+		wcBlocksSharedContext: './packages/public-api/shared-context/index.js',
+		wcBlocksSharedHocs: './packages/public-api/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
-		priceFormat: './packages/prices/index.js',
-		wcTypes: './assets/js/types/index.ts',
-		wcEntities: './assets/js/entities/index.ts',
+		priceFormat: './packages/public-api/price-format/index.js',
+		wcTypes: './packages/public-api/types/index.ts',
+		wcEntities: './packages/public-api/entity-registration/index.ts',
 	},
 	main: {
 		// Shared blocks code
@@ -381,11 +401,9 @@ const entries = {
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
 	},
 	cartAndCheckoutFrontend: {
-		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
-		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
+		...cartAndCheckoutFrontendEntries,
+		blocksCheckout: './packages/public-api/blocks-checkout/index.js',
+		blocksComponents: './packages/public-api/blocks-components/index.ts',
 	},
 };
 

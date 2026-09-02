@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
+use Automattic\WooCommerce\Internal\Admin\Notes\NoteActionForbiddenException;
 
 /**
  * REST API Admin Note Action controller class.
@@ -79,7 +80,27 @@ class NoteActions extends Notes {
 			);
 		}
 
-		$triggered_note = NotesFactory::trigger_note_action( $note, $triggered_action );
+		try {
+			$triggered_note = NotesFactory::trigger_note_action( $note, $triggered_action );
+		} catch ( NoteActionForbiddenException $e ) {
+			// Handlers hooked into `woocommerce_note_action[_*]` throw this typed
+			// exception when the current user lacks the per-action capability the
+			// handler enforces (the route-level permission check is intentionally
+			// coarser). Convert it to a 403 so REST clients get correct HTTP
+			// semantics. Any other exception bubbles uncaught so genuine server
+			// faults surface as 500s instead of being masked as auth errors.
+			//
+			// The ignore below matches the same `return.type` issue already captured
+			// in the PHPStan baseline for the other two WP_Error returns in this
+			// method (broken `@return` docblock — unqualified WP class names resolve
+			// in the current namespace). Localized here so the baseline doesn't grow.
+			// @phpstan-ignore-next-line return.type -- see rationale above.
+			return new \WP_Error(
+				'woocommerce_note_action_forbidden',
+				$e->getMessage(),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
 
 		$data = $triggered_note->get_data();
 		$data = $this->prepare_item_for_response( $data, $request );

@@ -13,6 +13,28 @@
 /**
  * Styling begins
  */
+.wc-dashboard-widget-loading {
+	padding: 16px 10px;
+	text-align: center;
+
+	p {
+		align-items: center;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin: 0;
+	}
+
+	.spinner {
+		float: none;
+		margin: 0;
+	}
+
+	&__text {
+		color: $gray-700;
+	}
+}
+
 ul.woocommerce_stats {
 	overflow: hidden;
 	zoom: 1;
@@ -48,10 +70,6 @@ ul.woocommerce_stats {
 
 #woocommerce_dashboard_status {
 
-	.wc-status-widget-loading {
-		padding: 0 10px;
-	}
-
 	.inside {
 		padding: 0;
 		margin: 0;
@@ -70,6 +88,7 @@ ul.woocommerce_stats {
 	.wc_status_list {
 		overflow: hidden;
 		margin: 0;
+		border-radius: 0 0 var(--wc-card-border-radius, 8px) var(--wc-card-border-radius, 8px);
 
 		li {
 			width: 50%;
@@ -82,9 +101,16 @@ ul.woocommerce_stats {
 
 			a {
 				display: block;
-				padding: 9px 12px;
+				padding: 9px 12px 9px 44px;
 				position: relative;
-				font-size: 12px;
+				font-size: 13px;
+				line-height: 1.5;
+				color: $wp-admin-icon-gray;
+
+				&:hover,
+				&:focus {
+					background-color: $wp-admin-hover-gray;
+				}
 
 				.wc_sparkline {
 					width: 4em;
@@ -99,23 +125,27 @@ ul.woocommerce_stats {
 				}
 
 				strong {
-					font-size: 18px;
+					font-size: 16px;
 					line-height: 1.2em;
 					font-weight: normal;
 					display: block;
+					color: $gray-900;
 				}
 
 				&::before {
 
-					@include icon();
-					font-size: 2em;
-					position: relative;
-					width: auto;
-					line-height: 1.2em;
-					color: #464646;
-					float: left;
-					margin-right: 12px;
-					margin-bottom: 12px;
+					@include icon_dashicons( "\f14c" );
+					font-size: 20px;
+					position: absolute;
+					top: 50%;
+					left: 12px;
+					transform: translateY(-50%);
+					width: 20px;
+					height: 20px;
+					line-height: 20px;
+					color: $wp-admin-icon-gray;
+					float: none;
+					margin: 0;
 				}
 			}
 		}
@@ -124,11 +154,15 @@ ul.woocommerce_stats {
 			border-top: 0;
 		}
 
+		li:not(.sales-this-month):not(.best-seller-this-month):not(.processing-orders):not(.on-hold-orders):not(.low-in-stock):not(.out-of-stock) {
+			clear: both;
+			width: 100%;
+		}
+
 		li.sales-this-month {
 			width: 100%;
 
 			a::before {
-				font-family: "Dashicons";
 				content: "\f185";
 			}
 		}
@@ -137,7 +171,7 @@ ul.woocommerce_stats {
 			width: 100%;
 
 			a::before {
-				content: "\e006";
+				content: "\f174";
 			}
 		}
 
@@ -145,16 +179,14 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: "\e011";
-				color: $green;
+				content: "\f469";
 			}
 		}
 
 		li.on-hold-orders {
 
 			a::before {
-				content: "\e033";
-				color: #999;
+				content: "\f523";
 			}
 		}
 
@@ -162,16 +194,14 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: "\e016";
-				color: $orange;
+				content: "\f14c";
 			}
 		}
 
 		li.out-of-stock {
 
 			a::before {
-				content: "\e013";
-				color: $red;
+				content: "\f158";
 			}
 		}
 	}
@@ -179,30 +209,58 @@ ul.woocommerce_stats {
 
 #woocommerce_dashboard_recent_reviews {
 
+	#wc-recent-reviews-widget-content > p {
+		margin-bottom: 0;
+	}
+
+	ul {
+		margin: 0;
+	}
+
 	li {
-		line-height: 1.5em;
+		display: grid;
+		grid-template-columns: 32px minmax(0, 1fr) max-content;
+		column-gap: 10px;
+		align-items: start;
+		font-size: 13px;
+		line-height: 1.4;
 		margin-bottom: 12px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 
 	h4.meta {
-		line-height: 1.4;
-		margin: -0.2em 0 0 0;
+		grid-column: 2;
+		grid-row: 1;
+		font-size: 13px;
+		line-height: 1.5;
+		margin: 0;
 		font-weight: normal;
-		color: #999;
+		color: $wp-admin-icon-gray;
 	}
 
 	blockquote {
+		grid-column: 2 / -1;
+		grid-row: 2;
+		line-height: 1.4;
 		padding: 0;
 		margin: 0;
 	}
 
 	.avatar {
-		float: left;
-		margin: 0 10px 5px 0;
+		float: none;
+		grid-column: 1;
+		grid-row: 1 / span 2;
+		margin: 0;
 	}
 
 	.star-rating {
-		float: right;
+		float: none;
+		grid-column: 3;
+		grid-row: 1;
+		justify-self: end;
 		overflow: hidden;
 		position: relative;
 		height: 1.5em;
@@ -213,7 +271,7 @@ ul.woocommerce_stats {
 
 		&::before {
 			content: "\e021\e021\e021\e021\e021";
-			color: darken(#ccc, 10%);
+			color: $wp-admin-icon-gray;
 			float: left;
 			top: 0;
 			left: 0;
@@ -238,7 +296,7 @@ ul.woocommerce_stats {
 			left: 0;
 			letter-spacing: 0.1em;
 			letter-spacing: 0\9; // IE8 & below hack ;-(
-			color: var(--wc-primary);
+			color: $wp-admin-text-gray;
 		}
 	}
 }

@@ -11,12 +11,12 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotificationRequests;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Data_Exception;
-use WC_Logger;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -30,6 +30,9 @@ use WP_Http;
  * @since 10.6.0
  */
 class PushTokenRestController extends RestApiControllerBase {
+	use AuthorizesPushNotificationRequests;
+	use ConvertsExceptionsToWpError;
+
 	/**
 	 * The root namespace for the JSON REST API endpoints.
 	 *
@@ -45,14 +48,18 @@ class PushTokenRestController extends RestApiControllerBase {
 	protected string $rest_base = 'push-tokens';
 
 	/**
-	 * Get the WooCommerce REST API namespace for the class.
+	 * Class identifier used by `woocommerce_rest_api_get_rest_namespaces`.
+	 *
+	 * Intentionally distinct from the URL `$route_namespace` — the filter keys
+	 * one class per value here, so sharing the value with sibling controllers
+	 * in the same module would overwrite them.
 	 *
 	 * @since 10.6.0
 	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return $this->route_namespace;
+		return 'wc-push-notifications-push-tokens';
 	}
 
 	/**
@@ -64,7 +71,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base,
 			array(
 				array(
@@ -102,7 +109,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		);
 
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				array(
@@ -289,41 +296,6 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Checks user is authenticated and authorized to access this endpoint.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool|WP_Error
-	 */
-	public function authorize_as_authenticated( WP_REST_Request $request ) {
-		if ( ! get_current_user_id() ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
-		}
-
-		$has_valid_role = array_reduce(
-			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
-			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry,
-			false
-		);
-
-		if ( ! $has_valid_role ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Validates that the request is signed with a Jetpack blog token,
 	 * ensuring only WPCOM can access this endpoint.
 	 *
@@ -349,43 +321,6 @@ class PushTokenRestController extends RestApiControllerBase {
 			'woocommerce_rest_cannot_view',
 			__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
 			array( 'status' => rest_authorization_required_code() )
-		);
-	}
-
-	/**
-	 * Converts an exception to an instance of WP_Error.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param Exception $e The exception to convert.
-	 * @return WP_Error
-	 */
-	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		/**
-		 * If the exception is `WC_Data_Exception`, and doesn't represent an
-		 * internal server error (which may contain internal details that should
-		 * be obscured) then format it as a `WP_Error`.
-		 */
-		if (
-			$e instanceof WC_Data_Exception
-			&& $e->getCode() !== WP_Http::INTERNAL_SERVER_ERROR
-		) {
-			return new WP_Error(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getErrorData()
-			);
-		}
-
-		wc_get_container()
-			->get( LegacyProxy::class )
-			->call_function( 'wc_get_logger' )
-			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
-
-		return new WP_Error(
-			'woocommerce_internal_error',
-			'Internal server error',
-			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
 		);
 	}
 

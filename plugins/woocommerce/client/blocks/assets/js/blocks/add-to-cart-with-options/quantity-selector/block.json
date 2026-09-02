@@ -9,9 +9,18 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"__experimentalBorder": {
+			"radius": true
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-add-to-cart-with-options-quantity-selector, .wc-block-add-to-cart-with-options-grouped-product-item-selector .wc-block-components-quantity-selector"
 	},
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"style": "file:../woocommerce/add-to-cart-with-options-quantity-selector-style.css",
 	"viewScriptModule": "woocommerce/add-to-cart-with-options-quantity-selector"
 }

@@ -2,16 +2,13 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
-	productId: number;
 	allowZero?: boolean;
 	inputElement?: HTMLInputElement | null;
 };
@@ -19,6 +16,12 @@ export type Context = {
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
@@ -49,97 +52,85 @@ store< QuantitySelectorStore >(
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const { productData } = addToCartWithOptionsStore.state;
+				const product = productsState.productInContext;
 
-				if ( ! productData ) {
+				if ( ! product ) {
 					return true;
 				}
 
-				return (
-					productData.is_in_stock && ! productData.sold_individually
-				);
+				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				// Note: in grouped products, `productData` will be the parent product.
-				// We handle grouped products decrease differently because we
-				// allow setting the quantity to 0.
-				const { quantity, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+				const { quantity } = addToCartWithOptionsStore.state;
 
-				const { allowZero, productId } = getContext< Context >();
+				const product = productsState.productInContext;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! product ) {
 					return true;
 				}
 
-				const { id, min, step } = productObject;
+				const { id, add_to_cart: addToCart } = product;
 
 				const currentQuantity = quantity[ id ] || 0;
 
+				const { allowZero } = getContext< Context >();
 				return (
 					( allowZero && currentQuantity > 0 ) ||
-					currentQuantity - step >= min
+					currentQuantity - addToCart.multiple_of >= addToCart.minimum
 				);
 			},
 			get allowsIncrease() {
-				const { quantity, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+				const { quantity } = addToCartWithOptionsStore.state;
 
-				const { productId } = getContext< Context >();
+				const product = productsState.productInContext;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! product ) {
 					return true;
 				}
 
-				const { id, max, step } = productObject;
+				const { id, add_to_cart: addToCart } = product;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity + step <= max;
+				return (
+					currentQuantity + addToCart.multiple_of <= addToCart.maximum
+				);
 			},
 			get inputQuantity(): number {
-				const { productId } = getContext< Context >();
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return 0;
+				}
 
 				const quantity =
-					addToCartWithOptionsStore.state.quantity?.[ productId ];
+					addToCartWithOptionsStore.state.quantity?.[ product.id ];
 
 				return quantity === undefined ? 0 : quantity;
 			},
 		},
 		actions: {
 			increaseQuantity: () => {
-				const { productId, inputElement } = getContext< Context >();
+				const { inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
 
-				const currentValue = Number( inputElement.value ) || 0;
+				const product = productsState.productInContext;
 
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
-
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				let newValue = currentValue + 1;
-
-				if ( productObject ) {
-					const { max, min, step } = productObject;
-					newValue = currentValue + step;
-					newValue = Math.max( min, Math.min( max, newValue ) );
+				if ( ! product ) {
+					return;
 				}
+
+				const currentValue = Number( inputElement.value ) || 0;
+				const { id: productId, add_to_cart: addToCart } = product;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
+
+				const newValue = Math.max(
+					minimum,
+					Math.min( maximum, currentValue + multipleOf )
+				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
@@ -147,31 +138,34 @@ store< QuantitySelectorStore >(
 				);
 			},
 			decreaseQuantity: () => {
-				const { allowZero, productId, inputElement } =
-					getContext< Context >();
+				const { allowZero, inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
 
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return;
+				}
+
 				const currentValue = Number( inputElement.value ) || 0;
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { id: productId, add_to_cart: addToCart } = product;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				let newValue = currentValue - 1;
-
-				if ( productObject ) {
-					const { max, min, step } = productObject;
-					newValue = currentValue - step;
-					if ( allowZero && newValue < min && currentValue === min ) {
-						newValue = 0;
-					} else {
-						newValue = Math.min( max, Math.max( min, newValue ) );
-					}
+				let newValue = currentValue - multipleOf;
+				if (
+					allowZero &&
+					newValue < minimum &&
+					currentValue === minimum
+				) {
+					newValue = 0;
+				} else {
+					newValue = Math.min(
+						maximum,
+						Math.max( minimum, newValue )
+					);
 				}
 
 				if ( newValue !== currentValue ) {
@@ -185,21 +179,16 @@ store< QuantitySelectorStore >(
 			// the change event isn't triggered in invalid numbers (ie: writing
 			// letters) if the current value is already invalid or an empty string.
 			handleQuantityBlur: () => {
-				const { allowZero, productId, inputElement } =
-					getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { allowZero, inputElement } = getContext< Context >();
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
+				const product = productsState.productInContext;
 
-				if ( ! productObject ) {
+				if ( ! product ) {
 					return;
 				}
 
+				const { id: productId, add_to_cart: addToCart } = product;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
-				const { min } = productObject;
 
 				if (
 					allowZero &&
@@ -212,10 +201,11 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
+				// In other product types, we reset inputs to `minimum` if they
+				// are 0 or NaN.
 				const value = inputElement?.valueAsNumber ?? NaN;
-				const newValue = ! isNaN( value ) && value > 0 ? value : min;
+				const newValue =
+					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
@@ -229,10 +219,14 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return;
+				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					product.id,
 					element.ref.checked ? 1 : 0
 				);
 			},

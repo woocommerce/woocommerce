@@ -1,0 +1,119 @@
+/*
+Adapted from @automattic/webpack-rtl-plugin, that was originally adapted and released by Romain Berger under the MIT License (MIT):
+
+MIT License
+
+Copyright (c) 2016 Romain Berger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+const rtlcss = require( 'rtlcss' );
+
+const pluginName = 'WebpackRTLPlugin';
+
+class WebpackRTLPlugin {
+	constructor( options ) {
+		this.options = {
+			options: {},
+			plugins: [],
+			filenameSuffix: null,
+			...options,
+		};
+		this.cache = new WeakMap();
+	}
+
+	apply( compiler ) {
+		compiler.hooks.thisCompilation.tap( pluginName, ( compilation ) => {
+			compilation.hooks.processAssets.tapPromise(
+				{
+					name: pluginName,
+					stage: compiler.webpack.Compilation
+						.PROCESS_ASSETS_STAGE_DERIVED,
+				},
+				async ( assets ) => {
+					const cssRe = /\.css(?:$|\?)/;
+					return Promise.all(
+						[ ...compilation.chunks ]
+							.flatMap( ( chunk ) =>
+								// Collect all files form all chunks, and generate an array of {chunk, file} objects
+								[ ...chunk.files ].map( ( asset ) => ( {
+									chunk,
+									asset,
+								} ) )
+							)
+							.filter( ( { asset } ) => cssRe.test( asset ) )
+							.map( async ( { chunk, asset } ) => {
+								if ( this.options.test ) {
+									const re = new RegExp( this.options.test );
+									if ( ! re.test( asset ) ) {
+										return;
+									}
+								}
+
+								/*
+								 * In-place mode rewrites the original stylesheet to
+								 * RTL rather than emitting a separate `-rtl.css`
+								 * sibling, so an existing (LTR) `<link>` renders RTL.
+								 * Storybook uses this for its RTL preview, where the
+								 * content-hashed chunk filenames can't be predicted
+								 * to swap a link. Skips the sibling/caching path.
+								 */
+								if ( this.options.inPlace ) {
+									const rtlSource = rtlcss.process(
+										assets[ asset ].source(),
+										this.options.options,
+										this.options.plugins
+									);
+									compilation.updateAsset(
+										asset,
+										new compiler.webpack.sources.RawSource(
+											rtlSource
+										)
+									);
+									return;
+								}
+
+								// Compute the filename
+								const filename = asset.replace(
+									cssRe,
+									this.options.filenameSuffix || '-rtl$&'
+								);
+								const assetInstance = assets[ asset ];
+								chunk.files.add( filename );
+
+								if ( this.cache.has( assetInstance ) ) {
+									const cachedRTL =
+										this.cache.get( assetInstance );
+									compilation.emitAsset(
+										filename,
+										cachedRTL
+									);
+								} else {
+									const baseSource = assetInstance.source();
+									const rtlSource = rtlcss.process(
+										baseSource,
+										this.options.options,
+										this.options.plugins
+									);
+									// Save the asset
+									const rtlAsset =
+										new compiler.webpack.sources.RawSource(
+											rtlSource
+										);
+									compilation.emitAsset( filename, rtlAsset );
+									this.cache.set( assetInstance, rtlAsset );
+								}
+							} )
+					);
+				}
+			);
+		} );
+	}
+}
+
+module.exports = WebpackRTLPlugin;

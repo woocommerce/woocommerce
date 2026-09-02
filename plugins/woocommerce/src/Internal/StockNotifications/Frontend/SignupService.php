@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -50,16 +51,29 @@ class SignupService {
 	private NotificationManagementService $notification_management_service;
 
 	/**
+	 * Email manager.
+	 *
+	 * @var EmailManager
+	 */
+	private EmailManager $email_manager;
+
+	/**
 	 * Init the service.
 	 *
 	 * @internal
 	 *
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
+	 * @param EmailManager                  $email_manager The email manager.
 	 */
-	final public function init( EligibilityService $eligibility_service, NotificationManagementService $notification_management_service ) {
+	final public function init(
+		EligibilityService $eligibility_service,
+		NotificationManagementService $notification_management_service,
+		EmailManager $email_manager
+	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
+		$this->email_manager                   = $email_manager;
 	}
 
 	/**
@@ -159,6 +173,10 @@ class SignupService {
 		 * @param Notification $notification The notification.
 		 */
 		do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
+
+		if ( Config::requires_double_opt_in() && NotificationStatus::PENDING === $notification->get_status() ) {
+			$this->email_manager->send_verify_email( $notification );
+		}
 
 		$signup_code = self::SIGNUP_SUCCESS;
 		if ( Config::requires_double_opt_in() ) {

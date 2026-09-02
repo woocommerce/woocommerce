@@ -4,12 +4,19 @@
 import { render, waitFor } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
+
 /**
  * Internal dependencies
  */
 import { Products } from '..';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockReturnValue( {
+		createNotice: jest.fn(),
+	} ),
+} ) );
 
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {

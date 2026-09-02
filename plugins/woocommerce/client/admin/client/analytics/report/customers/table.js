@@ -5,6 +5,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Fragment, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Tooltip } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { Date, Link, Pill } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
@@ -34,6 +35,11 @@ function CustomersReportTable( {
 		};
 	} );
 
+	// This order is also the browser-side CSV export order (ReportTable exports
+	// the table as-is when the report fits one page), so it must match
+	// Controller::get_export_columns() in
+	// src/Admin/API/Reports/Customers/Controller.php, which the same Download
+	// button uses for larger reports. New columns go last in both.
 	const getHeadersContent = () => {
 		return [
 			{
@@ -104,13 +110,26 @@ function CustomersReportTable( {
 				hiddenByDefault: true,
 				isSortable: true,
 			},
+			{
+				label: __( 'Billing phone', 'woocommerce' ),
+				key: 'billing_phone',
+				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Shipping phone', 'woocommerce' ),
+				key: 'shipping_phone',
+				hiddenByDefault: true,
+			},
+			{
+				label: __( 'Role', 'woocommerce' ),
+				key: 'role',
+			},
 		];
 	};
 
 	const getCountryName = ( code ) => {
-		return typeof countries[ code ] !== 'undefined'
-			? countries[ code ]
-			: null;
+		const country = countries.find( ( c ) => c.code === code );
+		return country ? decodeEntities( country.name ) : null;
 	};
 
 	const getRowsContent = ( customers ) => {
@@ -134,11 +153,14 @@ function CustomersReportTable( {
 				user_id: userId,
 				orders_count: ordersCount,
 				username,
+				role,
 				total_spend: totalSpend,
 				postcode,
 				city,
 				state,
 				country,
+				billing_phone: billingPhone,
+				shipping_phone: shippingPhone,
 			} = customer;
 			const countryName = getCountryName( country );
 			const customerName =
@@ -232,6 +254,18 @@ function CustomersReportTable( {
 				{
 					display: postcode,
 					value: postcode,
+				},
+				{
+					display: billingPhone,
+					value: billingPhone,
+				},
+				{
+					display: shippingPhone,
+					value: shippingPhone,
+				},
+				{
+					display: role,
+					value: role,
 				},
 			];
 		} );

@@ -20,6 +20,7 @@ interface NoReviewsPlaceholderProps {
 	getProduct: () => void;
 	isLoading: boolean;
 	product?: Product;
+	reason: 'no-reviews' | 'offset';
 }
 
 const NoReviewsPlaceholder = ( {
@@ -27,6 +28,7 @@ const NoReviewsPlaceholder = ( {
 	getProduct,
 	isLoading,
 	product,
+	reason,
 }: NoReviewsPlaceholderProps ) => {
 	const renderApiError = () => (
 		<ErrorPlaceholder
@@ -41,19 +43,29 @@ const NoReviewsPlaceholder = ( {
 		return renderApiError();
 	}
 
-	const content =
-		! product || isLoading ? (
-			<Spinner />
-		) : (
-			sprintf(
-				/* translators: %s is the product name. */
-				__(
-					"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
+	let content =
+		reason === 'offset'
+			? __(
+					'No reviews are visible with the current offset. Reduce the offset to display reviews.',
 					'woocommerce'
-				),
-				decodeEntities( product.name )
-			)
-		);
+			  )
+			: undefined;
+
+	if ( ! content ) {
+		content =
+			! product || isLoading ? (
+				<Spinner />
+			) : (
+				sprintf(
+					/* translators: %s is the product name. */
+					__(
+						"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
+						'woocommerce'
+					),
+					decodeEntities( product.name )
+				)
+			);
+	}
 
 	return (
 		<Placeholder

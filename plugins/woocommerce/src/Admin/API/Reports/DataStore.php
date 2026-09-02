@@ -99,6 +99,18 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	protected $date_column_name = 'date_created';
 
 	/**
+	 * Allow-list a date column name before it is interpolated into SQL.
+	 *
+	 * @param string $column   Requested date column name.
+	 * @param string $fallback Column to use when the requested one is not allowed.
+	 * @return string
+	 */
+	protected function sanitize_date_column_name( $column, $fallback = 'date_created' ) {
+		$allowed = array( 'date_created', 'date_created_gmt', 'date_paid', 'date_completed' );
+		return in_array( $column, $allowed, true ) ? $column : $fallback;
+	}
+
+	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @var array
@@ -291,6 +303,27 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	}
 
 	/**
+	 * Batch-prime post + meta caches for a list of IDs, plus their `_thumbnail_id` attachments.
+	 *
+	 * @param array $ids Post IDs to prime.
+	 * @return void
+	 */
+	protected static function prime_object_caches( array $ids ): void {
+		$ids = array_unique( array_filter( array_map( 'intval', $ids ) ) );
+		if ( empty( $ids ) ) {
+			return;
+		}
+		_prime_post_caches( $ids );
+
+		$image_ids = array_filter(
+			array_map( static fn( $id ) => (int) get_post_meta( $id, '_thumbnail_id', true ), $ids )
+		);
+		if ( ! empty( $image_ids ) ) {
+			_prime_post_caches( array_unique( $image_ids ) );
+		}
+	}
+
+	/**
 	 * Whether or not the report should use the caching layer.
 	 *
 	 * Provides an opportunity for plugins to prevent reports from using cache.
@@ -334,6 +367,18 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				return ! empty( $param );
 			}
 		);
+
+		// Normalize DateTime objects to ISO 8601 strings to avoid cache key
+		// instability caused by microsecond-level differences in serialization.
+		array_walk(
+			$params,
+			function ( &$value ) {
+				if ( $value instanceof \DateTimeInterface ) {
+					$value = $value->format( DATE_ATOM );
+				}
+			}
+		);
+
 		ksort( $params );
 		return implode(
 			'_',
@@ -810,7 +855,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 */
 	protected static function normalize_order_status( $status ) {
 		$status = trim( $status );
-		return 'wc-' . $status;
+		// Status columns are varchar(20) and longer values are silently truncated
+		// on write, so truncate the same way or comparisons never match long slugs.
+		return mb_substr( 'wc-' . $status, 0, 20 );
 	}
 
 	/**
@@ -1341,7 +1388,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		$subqueries        = array();
 		$excluded_statuses = array();
 		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
-			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), esc_sql( $query_args['status_is'] ) );
+			// Escape after normalizing: truncation could otherwise cut an escape
+			// sequence in half and leave a dangling backslash in the SQL literal.
+			$allowed_statuses = array_map( 'esc_sql', array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] ) );
 			if ( $allowed_statuses ) {
 				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
 			}
@@ -1358,7 +1407,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		}
 
 		if ( $excluded_statuses ) {
-			$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
+			$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", array_map( 'esc_sql', $excluded_statuses ) ) . "' )";
 		}
 
 		return implode( " $operator ", $subqueries );

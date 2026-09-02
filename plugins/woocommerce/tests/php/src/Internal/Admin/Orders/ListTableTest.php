@@ -1,17 +1,17 @@
 <?php
-declare( strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests related to order list table in admin.
  */
 class ListTableTest extends \WC_Unit_Test_Case {
-	use HPOSToggleTrait;
 
 	/**
 	 * @var ListTable
@@ -19,12 +19,47 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Setup - enables HPOS.
+	 * Previous HPOS state.
+	 *
+	 * @var bool
+	 */
+	private static bool $hpos_prev_state;
+
+	/**
+	 * Set up class fixtures.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		if ( ! self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+		}
+	}
+
+	/**
+	 * Tear down class fixtures.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		}
+
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->setup_cot();
-		$this->toggle_cot_authoritative( true );
 		$this->sut      = new ListTable();
 		$set_order_type = function ( $order_type ) {
 			$this->order_type = $order_type;
@@ -231,5 +266,230 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$filtered_items = $get_items->call( $this->sut );
 
 		$this->assertCount( 2, $filtered_items ); // Both orders should be shown.
+	}
+
+	/**
+	 * Helper to read the order query args prepared by the list table.
+	 *
+	 * @return array
+	 */
+	private function get_order_query_args(): array {
+		$getter = function () {
+			return $this->order_query_args;
+		};
+
+		return $getter->call( $this->sut );
+	}
+
+	/**
+	 * @testdox Submitting the search form with an empty search term keeps the cached-count fast path.
+	 */
+	public function test_empty_search_term_uses_cached_count_fast_path(): void {
+		\WC_Helper_Order::create_order();
+
+		$_REQUEST['s']             = '';
+		$_REQUEST['search-filter'] = 'all';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		unset( $_REQUEST['s'], $_REQUEST['search-filter'] );
+
+		$this->assertArrayNotHasKey( 's', $query_args, 'An empty search term should not be added to the query args' );
+		$this->assertArrayNotHasKey( 'search_filter', $query_args, 'The search filter should not be added without a search term' );
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'An empty search should use cached order counts instead of a COUNT query' );
+	}
+
+	/**
+	 * @testdox Searching with a term applies the selected search filter and uses a real results count.
+	 */
+	public function test_search_term_sets_search_filter_and_counts_results(): void {
+		\WC_Helper_Order::create_order();
+
+		$_REQUEST['s']             = 'some-term';
+		$_REQUEST['search-filter'] = 'order_id';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		unset( $_REQUEST['s'], $_REQUEST['search-filter'] );
+
+		$this->assertSame( 'some-term', $query_args['s'] ?? null, 'The search term should be added to the query args' );
+		$this->assertSame( 'order_id', $query_args['search_filter'] ?? null, 'The selected search filter should be applied' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'Searches should count their actual results' );
+	}
+
+	/**
+	 * @testdox When a filter modifies the query args via woocommerce_order_list_table_prepare_items_query_args, the cache fast path is not used.
+	 */
+	public function test_filter_modifying_query_args_disables_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$called = false;
+
+		$callback = function ( $args ) use ( &$called ) {
+			$called               = true;
+			$args['meta_query'][] = array(
+				'key'     => 'my_custom_meta_key',
+				'value'   => 'any_value',
+				'compare' => '=',
+			);
+			return $args;
+		};
+		add_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		remove_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->assertTrue( $called, 'The filter should have been invoked' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'When a filter modifies the query args, the cache fast path should not be used' );
+	}
+
+	/**
+	 * @testdox Without any filter modifying the query args, the cache fast path is still used.
+	 */
+	public function test_basic_query_still_uses_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'A basic query should use the cache fast path' );
+	}
+
+	/**
+	 * Create two paid orders with all date props set to the given dates.
+	 *
+	 * @param string $date1 Date for the first order.
+	 * @param string $date2 Date for the second order.
+	 *
+	 * @return \WC_Order[]
+	 */
+	private function create_orders_dated( string $date1, string $date2 ): array {
+		$orders = array();
+
+		foreach ( array( $date1, $date2 ) as $date ) {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_date_created( $date );
+			$order->set_date_paid( $date );
+			$order->set_date_completed( $date );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		return $orders;
+	}
+
+	/**
+	 * @testdox Filtering by a specific day and order_date_type=date_paid (as Analytics revenue links do) shows only orders paid that day.
+	 */
+	public function test_filtering_by_day_and_date_paid_shows_only_matching_orders(): void {
+		list( $order1, ) = $this->create_orders_dated( '2023-10-25 10:00:00', '2023-09-01 10:00:00' );
+
+		$_GET['m']               = '20231025';
+		$_GET['order_date_type'] = 'date_paid';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$get_items = function () {
+			return $this->items;
+		};
+		$items     = $get_items->call( $this->sut );
+
+		unset( $_GET['m'], $_GET['order_date_type'] );
+
+		$this->assertSame( '2023-10-25...2023-10-25', $query_args['date_paid'] ?? null, 'A day-granularity filter should query the full day on date_paid' );
+		$this->assertCount( 1, $items, 'Only the order paid on the selected day should be shown' );
+		$this->assertEquals( $order1->get_id(), $items[0]->get_id() );
+	}
+
+	/**
+	 * @testdox Filtering by a specific day without order_date_type filters on date_created.
+	 */
+	public function test_filtering_by_day_defaults_to_date_created(): void {
+		list( $order1, ) = $this->create_orders_dated( '2023-10-25 10:00:00', '2023-09-01 10:00:00' );
+
+		$_GET['m'] = '20231025';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$get_items = function () {
+			return $this->items;
+		};
+		$items     = $get_items->call( $this->sut );
+
+		unset( $_GET['m'] );
+
+		$this->assertSame( '2023-10-25...2023-10-25', $query_args['date_created'] ?? null, 'A day-granularity filter should default to date_created' );
+		$this->assertCount( 1, $items, 'Only the order created on the selected day should be shown' );
+		$this->assertEquals( $order1->get_id(), $items[0]->get_id() );
+	}
+
+	/**
+	 * @testdox Filtering by month keeps working and honors order_date_type.
+	 */
+	public function test_filtering_by_month_honors_order_date_type(): void {
+		list( $order1, ) = $this->create_orders_dated( '2023-10-25 10:00:00', '2023-09-01 10:00:00' );
+
+		$_GET['m']               = '202310';
+		$_GET['order_date_type'] = 'date_completed';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$get_items = function () {
+			return $this->items;
+		};
+		$items     = $get_items->call( $this->sut );
+
+		unset( $_GET['m'], $_GET['order_date_type'] );
+
+		$this->assertSame( '2023-10-01...2023-10-31', $query_args['date_completed'] ?? null, 'A month-granularity filter should query the full month on the requested date type' );
+		$this->assertCount( 1, $items, 'Only the order completed in the selected month should be shown' );
+		$this->assertEquals( $order1->get_id(), $items[0]->get_id() );
+	}
+
+	/**
+	 * @testdox An unrecognized order_date_type falls back to filtering on date_created.
+	 */
+	public function test_filtering_with_invalid_order_date_type_falls_back_to_date_created(): void {
+		$this->create_orders_dated( '2023-10-25 10:00:00', '2023-09-01 10:00:00' );
+
+		$_GET['m']               = '20231025';
+		$_GET['order_date_type'] = 'date_hacked';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		unset( $_GET['m'], $_GET['order_date_type'] );
+
+		$this->assertSame( '2023-10-25...2023-10-25', $query_args['date_created'] ?? null, 'Unknown date types should fall back to date_created' );
+		$this->assertArrayNotHasKey( 'date_hacked', $query_args, 'Unknown date types should never reach the query args' );
+	}
+
+	/**
+	 * @testdox An invalid date value in the m query arg is ignored.
+	 */
+	public function test_filtering_with_invalid_date_is_ignored(): void {
+		$this->create_orders_dated( '2023-10-25 10:00:00', '2023-09-01 10:00:00' );
+
+		$_GET['m'] = '20231399';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$get_items = function () {
+			return $this->items;
+		};
+		$items     = $get_items->call( $this->sut );
+
+		unset( $_GET['m'] );
+
+		$this->assertArrayNotHasKey( 'date_created', $query_args, 'An invalid date should not produce a date filter' );
+		$this->assertCount( 2, $items, 'An invalid date filter should be ignored and all orders shown' );
 	}
 }

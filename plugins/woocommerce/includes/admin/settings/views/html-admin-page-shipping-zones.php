@@ -105,6 +105,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
+			<# if ( data.zone_order_conflict_warning ) { #>
+				<div class="notice notice-warning inline wc-shipping-zone-order-conflict-warning">
+					<p>{{ data.zone_order_conflict_warning }}</p>
+				</div>
+			<# } #>
 		</td>
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
@@ -147,7 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
+					<div class="wc-backbone-modal-buttons">
 						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>

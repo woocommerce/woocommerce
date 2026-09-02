@@ -250,6 +250,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$product_names = array();
 
+		if ( $query_args['extended_info'] ) {
+			self::prime_object_caches( array_column( $products_data, 'product_id' ) );
+		}
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
@@ -631,7 +635,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'%f', // shipping_tax_amount.
 					'%f', // product_gross_revenue.
 				)
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This data store owns the formatted analytics write; caching a write is not applicable.
 
 			/**
 			 * Fires when product's reports are updated.

@@ -132,7 +132,66 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
 		$meta_data    = $cache_engine->get_cached_objects( $object_ids, $this->get_cache_group() );
 
-		return array_filter( $meta_data );
+		foreach ( $meta_data as $object_id => $object_meta ) {
+			if ( null === $object_meta ) {
+				unset( $meta_data[ $object_id ] );
+				continue;
+			}
+
+			if ( $this->is_valid_cached_meta( $object_meta ) ) {
+				continue;
+			}
+
+			/*
+			 * A malformed cache entry - not an array, or an array whose elements are not complete
+			 * meta rows - would fatal or silently load wrong values downstream
+			 * (WC_Data_Store_WP::filter_raw_meta_data() reads $meta->meta_key; WC_Data::init_meta_data()
+			 * reads meta_id/meta_key/meta_value). This can happen when a third-party persistent
+			 * object cache returns a corrupt or cross-contaminated value. Invalidate the entry and
+			 * exclude it from the cache hits so it is re-read from the database in this same
+			 * request, and surface it for diagnosis.
+			 */
+			$cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
+			wc_get_logger()->warning(
+				sprintf(
+					'Discarded a corrupt HPOS meta cache entry for order %1$d; it will be re-read from the database.',
+					(int) $object_id
+				),
+				array( 'source' => 'hpos-data-cache' )
+			);
+			unset( $meta_data[ $object_id ] );
+		}
+
+		return $meta_data;
+	}
+
+	/**
+	 * Determine whether a cached meta entry is a well-formed array of meta rows.
+	 *
+	 * An empty array is valid: it represents an order with no meta. Each non-empty element must be
+	 * an object carrying the meta_id, meta_key and meta_value properties that database-backed rows
+	 * always have (see CustomMetaDataStore::get_meta_data_for_object_ids()) and that downstream
+	 * consumers read.
+	 *
+	 * @param mixed $object_meta The cached value to validate.
+	 *
+	 * @return bool True when the value is a usable array of meta rows.
+	 */
+	private function is_valid_cached_meta( $object_meta ): bool {
+		if ( ! is_array( $object_meta ) ) {
+			return false;
+		}
+
+		foreach ( $object_meta as $meta_row ) {
+			if ( ! is_object( $meta_row )
+				|| ! property_exists( $meta_row, 'meta_id' )
+				|| ! property_exists( $meta_row, 'meta_key' )
+				|| ! property_exists( $meta_row, 'meta_value' ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -10,9 +10,9 @@ import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import { useStoreCartCoupons } from '../use-store-cart-coupons';
 
 // Mock the resolvers to avoid actual API calls on cart data store setup.
-jest.mock( '../../../../../data/cart/resolvers', () => {
+jest.mock( '@woocommerce/block-data/cart/resolvers', () => {
 	return {
-		...jest.requireActual( '../../../../../data/cart/resolvers' ),
+		...jest.requireActual( '@woocommerce/block-data/cart/resolvers' ),
 		getCartData: jest
 			.fn()
 			.mockResolvedValue(
@@ -592,9 +592,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			// Should not throw error even on network failure
 			await act( async () => {
-				const success = await result.current.applyCoupon(
-					'NETWORK_FAIL'
-				);
+				const success =
+					await result.current.applyCoupon( 'NETWORK_FAIL' );
 				expect( success ).toBe( false );
 			} );
 

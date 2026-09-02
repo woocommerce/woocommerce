@@ -11,7 +11,7 @@ sidebar_position: 2
 There are some specific software requirements you will need to consider when developing WooCommerce extensions. The necessary software includes:
 
 * [Git](https://git-scm.com/) for version control of your source code  
-* [Node.js](https://nodejs.org/) and [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) to manage node-based scripts and build processes  
+* [Node.js](https://nodejs.org/) to run node-based scripts and build processes. PNPM installs and uses the Node version pinned in the repository automatically, so a version manager such as [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is optional.  
 * [Pnpm](https://pnpm.io/) is an npm alternative required if you are building WooCommerce from the repository  
 * [Composer](https://getcomposer.org/) is an optional dependency management tool for PHP-based development  
 * [WP-CLI](http://wp-cli.org/) is the command line interface for WordPress
@@ -76,15 +76,11 @@ git clone https://github.com/woocommerce/woocommerce.git
 cd woocommerce
 ```
 
-#### Install and activate Node
+#### Install Node
 
-It is recommended to install and activate Node using [Node Version Manager](https://github.com/nvm-sh/nvm) (or nvm). You can install nvm using the following CLI command:
+You need [Node.js](https://nodejs.org/) installed to run PNPM and the build scripts. You do not need to match a specific Node version yourself: PNPM reads the version pinned in `pnpm-workspace.yaml` (`useNodeVersion`, mirrored in `.nvmrc`) and installs and uses it automatically for every script it runs.
 
-```shell
-nvm install
-```
-
-You can learn more about how to install and utilize nvm in [the nvm GitHub repository](https://github.com/nvm-sh/nvm?tab=readme-ov-file#intro).
+If you would like a tool to install and switch between Node versions, [Node Version Manager](https://github.com/nvm-sh/nvm) (nvm) is one option. With nvm installed, running `nvm install` from the repository root picks up the pinned version from `.nvmrc`. You can learn more in [the nvm GitHub repository](https://github.com/nvm-sh/nvm?tab=readme-ov-file#intro).
 
 #### Install dependencies
 
