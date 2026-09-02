@@ -1067,9 +1067,8 @@ p.demo_store,
 	}
 
 	table.woocommerce-customer-stock-notifications-table {
-		// The variation attributes sit under the product name in the same cell,
-		// matching how the admin notifications list renders them. The cell is a
-		// `<th>`, so the bold `tbody th` weight from `shop_table` is undone here.
+		// Variation attributes sit under the product name, inside the row header,
+		// so the bold `tbody th` weight from `shop_table` is undone here.
 		.description {
 			display: block;
 			font-size: 0.9em;
