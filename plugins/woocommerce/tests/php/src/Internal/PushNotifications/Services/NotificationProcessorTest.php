@@ -245,8 +245,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should mark as sent and log diagnostics when role resolution returns no tokens.
-	 * @testWith ["no_registered_tokens", 0, 0]
-	 *           ["no_eligible_users", 1, 0]
+	 * @testWith ["no_eligible_users", 1, 0]
+	 *           ["no_valid_tokens", 1, 1]
 	 *
 	 * @param string $resolution_outcome           The expected resolution outcome.
 	 * @param int    $registered_token_owner_count The registered token owner count.
@@ -257,20 +257,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		int $registered_token_owner_count,
 		int $eligible_user_count
 	): void {
-		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'resolve_tokens_for_roles' )->willReturn(
-			new PushTokenResolution(
-				array(),
-				$resolution_outcome,
-				$registered_token_owner_count,
-				$eligible_user_count
-			)
-		);
-
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
-		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
+		$sut = $this->create_processor_with_resolution(
+			new PushTokenResolution( array(), $resolution_outcome, $registered_token_owner_count, $eligible_user_count )
+		);
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -294,6 +285,43 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 				'preference_eligible_token_count' => 0,
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should mark as sent without logging when the store has no registered tokens.
+	 */
+	public function test_process_marks_sent_without_logging_when_no_tokens_registered(): void {
+		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
+
+		$sut = $this->create_processor_with_resolution(
+			new PushTokenResolution( array(), PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, 0, 0 )
+		);
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$result       = $sut->process( $notification );
+
+		$this->assertTrue( $result );
+
+		$order = wc_get_order( $this->order_id );
+
+		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertNotLogged( 'info', 'recipient resolution found no eligible tokens' );
+	}
+
+	/**
+	 * Builds a processor whose data store returns the given resolution.
+	 *
+	 * @param PushTokenResolution $resolution The resolution the data store should return.
+	 * @return NotificationProcessor
+	 */
+	private function create_processor_with_resolution( PushTokenResolution $resolution ): NotificationProcessor {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'resolve_tokens_for_roles' )->willReturn( $resolution );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
+
+		return $sut;
 	}
 
 	/**

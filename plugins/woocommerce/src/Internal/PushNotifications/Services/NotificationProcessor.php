@@ -190,6 +190,10 @@ class NotificationProcessor {
 	/**
 	 * Logs structured diagnostics when recipient resolution produces no tokens to dispatch.
 	 *
+	 * Skipped when the store has no registered tokens at all. That is the
+	 * expected state for any store that never connected a mobile app, and
+	 * logging it on every event would only add noise.
+	 *
 	 * @param Notification        $notification                   The notification being processed.
 	 * @param PushTokenResolution $resolution                     The role-based token resolution.
 	 * @param int                 $preference_eligible_token_count Number of tokens remaining after preference filtering.
@@ -201,6 +205,10 @@ class NotificationProcessor {
 		int $preference_eligible_token_count
 	): void {
 		$diagnostics = $resolution->get_diagnostics();
+
+		if ( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS === $diagnostics['resolution_outcome'] ) {
+			return;
+		}
 
 		if ( 0 < $diagnostics['resolved_token_count'] && 0 === $preference_eligible_token_count ) {
 			$diagnostics['resolution_outcome'] = PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES;
