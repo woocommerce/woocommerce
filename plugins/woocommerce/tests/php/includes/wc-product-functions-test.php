@@ -2898,6 +2898,50 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A request-local cache has the flushed groups released after the run.
+	 */
+	public function test_wc_scheduled_sales_releases_the_flushed_groups_on_a_request_local_cache(): void {
+		// The mirror of the external-cache test: on the default object cache the loop must
+		// flush products, term-queries and product_objects, or the relief the batching
+		// exists for never happens. Nothing else pins those three calls.
+		if ( ! wp_cache_supports( 'flush_group' ) || wp_using_ext_object_cache() ) {
+			$this->markTestSkipped( 'Requires a request-local object cache with flush_group support.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wp_cache_set( 'sentinel', 'release me', 'products' );
+		wp_cache_set( 'sentinel', 'release me', 'term-queries' );
+		wp_cache_set( 'sentinel', 'release me', 'product_objects' );
+
+		wc_scheduled_sales();
+
+		$this->assertFalse(
+			wp_cache_get( 'sentinel', 'products' ),
+			'The products group must be flushed when the cache is request-local.'
+		);
+		$this->assertFalse(
+			wp_cache_get( 'sentinel', 'term-queries' ),
+			'The term-queries group must be flushed when the cache is request-local.'
+		);
+		$this->assertFalse(
+			wp_cache_get( 'sentinel', 'product_objects' ),
+			'The product_objects group must be flushed after each batch.'
+		);
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+	}
+
+	/**
 	 * @testdox A batch holding both a product and a variation leaves no term relationship cached.
 	 */
 	public function test_wc_scheduled_sales_releases_term_caches_for_a_mixed_batch(): void {
