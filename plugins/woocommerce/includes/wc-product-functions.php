@@ -846,6 +846,11 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
+ * The products are processed in batches, and each batch primes and then releases its
+ * own caches. The before hooks therefore fire before any product is primed, and the
+ * after hooks fire once the last batch has released, so a callback that reads its
+ * payload with wc_get_product() takes a cold read per ID.
+ *
  * @since 3.0.0
  */
 function wc_scheduled_sales() {
