@@ -7,6 +7,8 @@ import { test as setup, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
+	exportBlocksDatabase,
+	importBlocksDatabase,
 	wpCLI,
 	customerFile,
 	BLOCK_THEME_SLUG,
@@ -68,7 +70,7 @@ setup( 'blocks setup', async () => {
 	let databaseImported = false;
 
 	try {
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await importBlocksDatabase( DB_EXPORT_FILE );
 		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {
@@ -107,7 +109,7 @@ setup( 'blocks setup', async () => {
 	}
 
 	console.log( '├ Exporting database snapshot…' );
-	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
+	await exportBlocksDatabase( DB_EXPORT_FILE );
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );
