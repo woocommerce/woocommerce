@@ -27,11 +27,11 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
-	 * Whether cancel_order() handled a cancellation request without an explicit redirect.
+	 * ID of the order whose cancellation request cancel_order() handled without an explicit redirect.
 	 *
-	 * @var bool
+	 * @var int|null
 	 */
-	private static $cancel_order_handled = false;
+	private static $handled_cancel_order_id = null;
 
 	/**
 	 * Hook in methods.
@@ -876,7 +876,13 @@ class WC_Form_Handler {
 
 			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $_GET['order_id'] );
-			$order     = wc_get_order( $order_id );
+
+			if ( self::$handled_cancel_order_id === $order_id ) {
+				// Already handled earlier in this request, for example by a direct call from another wp_loaded callback.
+				return;
+			}
+
+			$order = wc_get_order( $order_id );
 			/**
 			 * Filter valid order statuses for cancel.
 			 *
@@ -915,7 +921,7 @@ class WC_Form_Handler {
 				exit;
 			}
 
-			self::$cancel_order_handled = true;
+			self::$handled_cancel_order_id = $order_id;
 		}
 	}
 
@@ -929,11 +935,11 @@ class WC_Form_Handler {
 	 * @since 11.2.0
 	 */
 	public static function redirect_after_cancel_order(): void {
-		if ( ! self::$cancel_order_handled ) {
+		if ( null === self::$handled_cancel_order_id ) {
 			return;
 		}
 
-		self::$cancel_order_handled = false;
+		self::$handled_cancel_order_id = null;
 
 		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
