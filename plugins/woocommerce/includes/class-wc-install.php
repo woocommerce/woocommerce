@@ -352,7 +352,9 @@ class WC_Install {
 		),
 		'11.2.0'   => array(
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
-			'wc_update_1120_migrate_tax_lookup_order_items',
+		),
+		'11.2.0-1' => array(
+			'wc_update_11201_migrate_tax_lookup_order_items',
 		),
 	);
 

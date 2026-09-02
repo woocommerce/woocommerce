@@ -323,6 +323,6 @@ function wc_update_1050_add_idx_user_email() {
  *
  * @return void
  */
-function wc_update_1120_migrate_tax_lookup_order_items() {
+function wc_update_11201_migrate_tax_lookup_order_items() {
 	wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderTaxLookupMigrator::class );
 }
