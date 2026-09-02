@@ -39,23 +39,50 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 	 * @return array
 	 */
 	protected function get_reports() {
+		global $wpdb;
+
+		// Same cache group and invalidation signal get_comments() used, so ratings written outside WooCommerce still refresh the totals.
+		$cache_key = 'wc_report_reviews_totals_' . wp_cache_get_last_changed( 'comment' );
+		$counts    = wp_cache_get( $cache_key, 'comment-queries' );
+
+		if ( false === $counts ) {
+			$counts = array_fill_keys( range( 1, 5 ), 0 );
+
+			/*
+			 * A single grouped aggregate in place of one COUNT query per rating. The predicates
+			 * repeat what get_comments() built for these reports: comments awaiting moderation are
+			 * included and only spam and trashed ones are dropped, the post has to be a product,
+			 * and the comment types WooCommerce keeps out of comment queries are excluded. Ratings
+			 * are compared as strings, as the meta query did, so '0' and unrated comments fall out.
+			 */
+			$rows = $wpdb->get_results(
+				"SELECT {$wpdb->commentmeta}.meta_value AS rating, COUNT(*) AS total
+				FROM {$wpdb->comments}
+				INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->comments}.comment_post_ID
+				INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id
+				WHERE {$wpdb->comments}.comment_approved IN ( '0', '1' )
+				AND {$wpdb->comments}.comment_type NOT IN ( 'note', 'order_note', 'webhook_delivery', 'action_log' )
+				AND {$wpdb->posts}.post_type = 'product'
+				AND {$wpdb->commentmeta}.meta_key = 'rating'
+				AND {$wpdb->commentmeta}.meta_value IN ( '1', '2', '3', '4', '5' )
+				GROUP BY {$wpdb->commentmeta}.meta_value"
+			);
+
+			foreach ( $rows as $row ) {
+				$counts[ (int) $row->rating ] = (int) $row->total;
+			}
+
+			wp_cache_set( $cache_key, $counts, 'comment-queries' );
+		}
+
 		$data = array();
 
-		$query_data = array(
-			'count'      => true,
-			'post_type'  => 'product',
-			'meta_key'   => 'rating', // WPCS: slow query ok.
-			'meta_value' => '', // WPCS: slow query ok.
-		);
-
 		for ( $i = 1; $i <= 5; $i++ ) {
-			$query_data['meta_value'] = $i;
-
 			$data[] = array(
 				'slug'  => 'rated_' . $i . '_out_of_5',
 				/* translators: %s: average rating */
 				'name'  => sprintf( __( 'Rated %s out of 5', 'woocommerce' ), $i ),
-				'total' => (int) get_comments( $query_data ),
+				'total' => (int) $counts[ $i ],
 			);
 		}
 
