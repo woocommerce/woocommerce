@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Escape the product title in the single product reviews heading and replace legacy WPCS output suppressions with documented hooks and exact PHPCS annotations.
