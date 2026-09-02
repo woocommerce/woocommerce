@@ -449,7 +449,8 @@ class WC_Product_Variable extends WC_Product {
 	 * Small products are scanned in children order; the batch pre-check already puts candidates first within
 	 * a batch. Larger products ask the data store for the candidate list in one indexed fetch, unless a
 	 * persistent object cache is in use (priming is then nearly free and the fetch would be the only new
-	 * query) or the active data store does not offer the method. Every child stays in the returned list.
+	 * query) or the active data store does not offer the method. Every child stays in the returned list, and
+	 * nothing that is not a child gets in, even if the data store returns foreign or duplicate IDs.
 	 *
 	 * @param int[] $variation_ids All children, cast to int, in children order.
 	 * @return int[] Same IDs, candidates first.
@@ -466,6 +467,8 @@ class WC_Product_Variable extends WC_Product {
 
 		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
 		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
+		// Only this product's children may be scanned, whatever the data store returned.
+		$candidate_ids = array_values( array_unique( array_intersect( $candidate_ids, $variation_ids ) ) );
 		$remaining_ids = array_keys( array_diff_key( array_flip( $variation_ids ), array_flip( $candidate_ids ) ) );
 
 		return array_merge( $candidate_ids, $remaining_ids );

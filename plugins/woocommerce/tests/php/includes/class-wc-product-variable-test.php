@@ -588,6 +588,74 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_purchasable_variations ignores candidate IDs from the data store that are not children of the product.
+	 */
+	public function test_has_purchasable_variations_ignores_foreign_candidate_ids_from_data_store(): void {
+		$foreign = WC_Helper_Product::create_simple_product();
+
+		$data_store = new class() extends WC_Product_Variable_Data_Store_CPT {
+			/**
+			 * ID of a purchasable product that is not a child of the product under test.
+			 *
+			 * @var int
+			 */
+			public $foreign_id = 0;
+
+			/**
+			 * Returns the foreign product plus the first child twice.
+			 *
+			 * @param WC_Product_Variable $product       Parent product.
+			 * @param int[]               $variation_ids Children being scanned.
+			 * @return int[]
+			 */
+			public function get_purchasable_variation_candidates( $product, array $variation_ids ): array {
+				return array( $this->foreign_id, $variation_ids[0], $variation_ids[0] );
+			}
+		};
+
+		$data_store->foreign_id = $foreign->get_id();
+		// Registered before the fixture exists: the product factory caches instances, so a product
+		// loaded earlier would keep the stock data store.
+		add_filter(
+			'woocommerce_data_stores',
+			static function ( $stores ) use ( $data_store ) {
+				$stores['product-variable'] = $data_store;
+				return $stores;
+			}
+		);
+
+		$specs   = array_fill( 0, 61, array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ) );
+		$product = $this->create_variable_product_with_variations( $specs );
+		$child   = $product->get_children()[0];
+		$this->assertSame( get_class( $data_store ), $product->get_data_store()->get_current_class_name() );
+
+		$checked_ids    = array();
+		$variation_hits = array();
+		add_filter(
+			'woocommerce_is_purchasable',
+			function ( $purchasable, $checked ) use ( &$checked_ids ) {
+				$checked_ids[] = $checked->get_id();
+				return $purchasable;
+			},
+			1,
+			2
+		);
+		add_filter(
+			'woocommerce_variation_is_purchasable',
+			function ( $purchasable, $variation ) use ( &$variation_hits ) {
+				$variation_hits[] = $variation->get_id();
+				return $purchasable;
+			},
+			1,
+			2
+		);
+
+		$this->assertFalse( $product->has_purchasable_variations() );
+		$this->assertNotContains( $foreign->get_id(), $checked_ids );
+		$this->assertSame( 1, count( array_keys( $variation_hits, $child, true ) ) );
+	}
+
+	/**
 	 * @testdox has_purchasable_variations respects the woocommerce_get_children filter.
 	 */
 	public function test_has_purchasable_variations_respects_children_filter(): void {
