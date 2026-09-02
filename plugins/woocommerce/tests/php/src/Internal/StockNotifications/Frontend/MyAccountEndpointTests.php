@@ -406,6 +406,50 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A failed database write reports an error instead of telling the customer the
+	 * notification was cancelled.
+	 */
+	public function test_cancel_reports_an_error_when_the_save_fails(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_cancel_request( $notification->get_id(), true );
+
+		$neutralize_update = array( $this, 'neutralize_notification_update' );
+		add_filter( 'query', $neutralize_update );
+		try {
+			$this->run_cancel_expecting_redirect();
+		} finally {
+			remove_filter( 'query', $neutralize_update );
+		}
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
+		$this->assertEmpty( \wc_get_notices( 'success' ) );
+
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertInstanceOf( Notification::class, $reloaded );
+		$this->assertSame( NotificationStatus::ACTIVE, $reloaded->get_status() );
+	}
+
+	/**
+	 * Make an UPDATE against the stock notifications table match no rows, so the data
+	 * store reports the failure the way a real database error would.
+	 *
+	 * @param string $query The query about to run.
+	 * @return string
+	 */
+	public function neutralize_notification_update( $query ) {
+		global $wpdb;
+
+		if ( is_string( $query ) && 0 === stripos( $query, 'UPDATE' ) && false !== stripos( $query, $wpdb->prefix . 'wc_stock_notifications' ) ) {
+			return $query . ' AND 1 = 0';
+		}
+
+		return $query;
+	}
+
+	/**
 	 * User A cannot cancel user B's notification even when the nonce validates against B's action name
 	 * (WordPress nonces bind to the current user, so this effectively asserts the ownership check).
 	 *

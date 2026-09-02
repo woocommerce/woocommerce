@@ -296,8 +296,8 @@ class MyAccountEndpoint {
 	 *
 	 * Requests that aren't a cancel submission, and ones whose notification isn't the
 	 * current user's, are dropped silently. A cancel the customer can act on — an expired
-	 * nonce, a notification that's gone or already cancelled — redirects back with an
-	 * error notice instead, so the button never looks dead.
+	 * nonce, a notification that's gone or already cancelled, a save that fails — redirects
+	 * back with an error notice instead, so the button never looks dead.
 	 */
 	public function maybe_handle_cancel(): void {
 		global $wp;
@@ -343,7 +343,15 @@ class MyAccountEndpoint {
 		$notification->set_status( NotificationStatus::CANCELLED );
 		$notification->set_cancellation_source( NotificationCancellationSource::USER );
 		$notification->set_date_cancelled( time() );
+
 		$notification->save();
+
+		// `WC_Data_Store::update()` drops the data store's return value, so a failed write
+		// reaches us as a successful save. Read the row back to confirm it really changed.
+		$saved = Factory::get_notification( $notification->get_id() );
+		if ( ! $saved instanceof Notification || NotificationStatus::CANCELLED !== $saved->get_status() ) {
+			$this->redirect_with_error( __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ) );
+		}
 
 		$product_name = $notification->get_product_name();
 		if ( '' !== $product_name ) {
