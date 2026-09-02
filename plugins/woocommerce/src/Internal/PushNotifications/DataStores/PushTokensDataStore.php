@@ -369,6 +369,9 @@ class PushTokensDataStore {
 	/**
 	 * Queries tokens and captures diagnostics for each recipient resolution stage.
 	 *
+	 * The total and total_pages entries are only meaningful for paginated
+	 * queries and stay at zero otherwise.
+	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
 	 * @param int|null $per_page Optional number of tokens per page.
@@ -479,12 +482,16 @@ class PushTokensDataStore {
 			}
 		}
 
-		$result['tokens']                           = $tokens;
-		$result['total']                            = $paginate ? (int) $query->found_posts : count( $tokens );
-		$result['total_pages']                      = $paginate ? (int) $query->max_num_pages : (int) ! empty( $tokens );
-		$result['resolution_outcome']               = empty( $tokens )
+		$result['tokens']             = $tokens;
+		$result['resolution_outcome'] = empty( $tokens )
 			? PushTokenResolution::OUTCOME_NO_VALID_TOKENS
 			: PushTokenResolution::OUTCOME_RESOLVED;
+
+		if ( $paginate ) {
+			$result['total']       = (int) $query->found_posts;
+			$result['total_pages'] = (int) $query->max_num_pages;
+		}
+
 		$this->token_resolution_cache[ $cache_key ] = $result;
 		return $this->token_resolution_cache[ $cache_key ];
 	}
