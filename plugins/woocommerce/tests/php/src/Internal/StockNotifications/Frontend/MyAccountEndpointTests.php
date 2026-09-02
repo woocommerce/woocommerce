@@ -284,6 +284,43 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A notification that is already sent or cancelled can no longer be cancelled,
+	 * even with a valid nonce — the My Account view never offers the button for it.
+	 *
+	 * @testWith ["sent"]
+	 *           ["cancelled"]
+	 *
+	 * @param string $status Non-cancellable notification status.
+	 */
+	public function test_cancel_ignored_for_non_cancellable_status( string $status ): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, $status );
+
+		$this->simulate_cancel_request( $notification->get_id(), true );
+
+		( new MyAccountEndpoint() )->maybe_handle_cancel();
+
+		$this->assertNull( $this->redirect_location );
+
+		$updated = Factory::get_notification( $notification->get_id() );
+		$this->assertInstanceOf( Notification::class, $updated );
+		$this->assertSame( $status, $updated->get_status() );
+	}
+
+	/**
+	 * The cancellable statuses are the ones the My Account view lists.
+	 */
+	public function test_is_cancellable_matches_listed_statuses(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$this->assertTrue( MyAccountEndpoint::is_cancellable( $this->create_notification( $user_id, NotificationStatus::PENDING ) ) );
+		$this->assertTrue( MyAccountEndpoint::is_cancellable( $this->create_notification( $user_id, NotificationStatus::ACTIVE ) ) );
+		$this->assertFalse( MyAccountEndpoint::is_cancellable( $this->create_notification( $user_id, NotificationStatus::SENT ) ) );
+		$this->assertFalse( MyAccountEndpoint::is_cancellable( $this->create_notification( $user_id, NotificationStatus::CANCELLED ) ) );
+	}
+
+	/**
 	 * An invalid nonce does not modify the notification.
 	 */
 	public function test_cancel_with_invalid_nonce_does_not_cancel(): void {

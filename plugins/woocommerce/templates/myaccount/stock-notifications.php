@@ -86,12 +86,16 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
-						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
-						<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
-						<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
-						<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-					</form>
+					<?php if ( MyAccountEndpoint::is_cancellable( $notification ) ) : ?>
+						<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
+							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
+							<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
+							<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
+							<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						</form>
+					<?php else : ?>
+						&mdash;
+					<?php endif; ?>
 				</td>
 			</tr>
 		<?php endforeach; ?>

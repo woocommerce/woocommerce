@@ -46,6 +46,28 @@ class MyAccountEndpoint {
 	}
 
 	/**
+	 * Statuses a customer can still cancel from My Account.
+	 *
+	 * The same list backs the listing query, the Cancel button in the template
+	 * and the cancel request handler, so the three can't drift apart.
+	 *
+	 * @return string[] List of {@see NotificationStatus} values.
+	 */
+	public static function get_cancellable_statuses(): array {
+		return array( NotificationStatus::PENDING, NotificationStatus::ACTIVE );
+	}
+
+	/**
+	 * Check whether a notification can still be cancelled by the customer.
+	 *
+	 * @param Notification $notification The notification to check.
+	 * @return bool True when the notification is in a cancellable status.
+	 */
+	public static function is_cancellable( Notification $notification ): bool {
+		return in_array( (string) $notification->get_status(), self::get_cancellable_statuses(), true );
+	}
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -217,23 +239,10 @@ class MyAccountEndpoint {
 			);
 		}
 
-		/**
-		 * Filter the notification statuses shown on the My Account stock-notifications screen.
-		 *
-		 * Defaults to PENDING + ACTIVE — the statuses the customer can act on. SENT
-		 * notifications are deliberately hidden because the email has already been
-		 * dispatched and the row is just noise; CANCELLED is hidden for the same
-		 * reason. Merchants who want a full history can build their own view via
-		 * {@see NotificationQuery::get_notifications()}.
-		 *
-		 * @since 11.2.0
-		 *
-		 * @param string[] $statuses List of {@see NotificationStatus} values to include.
-		 */
-		$statuses = (array) apply_filters(
-			'woocommerce_account_customer_stock_notifications_statuses',
-			array( NotificationStatus::PENDING, NotificationStatus::ACTIVE )
-		);
+		// Only the statuses the customer can act on. SENT and CANCELLED rows are
+		// noise here; merchants who want a full history can build their own view
+		// via {@see NotificationQuery::get_notifications()}.
+		$statuses = self::get_cancellable_statuses();
 
 		$total_items = NotificationQuery::count_notifications(
 			array(
@@ -317,7 +326,7 @@ class MyAccountEndpoint {
 			return;
 		}
 
-		if ( NotificationStatus::CANCELLED === $notification->get_status() ) {
+		if ( ! self::is_cancellable( $notification ) ) {
 			return;
 		}
 
