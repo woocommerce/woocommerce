@@ -129,8 +129,41 @@ This is a boundary, not a bug: the mechanism only applies to branches on this
 repository, which matches the trusted-org-member model the design assumes. Fork
 contributions always get full CI.
 
+## How the files are arranged
+
+`poc.php` is the narrative — the ten steps in order, and nothing else. Everything
+it calls sits in `lib/`, one concern per file:
+
+| File | What it owns | Reusable elsewhere |
+| --- | --- | --- |
+| `Shell.php` | Running commands | Yes |
+| `Output.php` | Terminal output and colour | Yes |
+| `Git.php` | Reading and writing the local repository | Yes |
+| `GitHubApi.php` | REST calls, and the one way a token is obtained | Yes |
+| `Receipts.php` | What a receipt is called, published and read | Yes |
+| `CheckRunner.php` | Running checks concurrently | Yes |
+| `TemporaryRef.php` | The ref that makes a commit addressable | Yes |
+| `Cleanup.php` | Stopping everything this tool started | Yes |
+| `Options.php` | Command line arguments | Yes |
+| `JobPlanner.php` | **Which jobs CI would run** | **No — replace this** |
+
+Only `JobPlanner` knows anything about this repository: it shells out to
+`pnpm utils ci-jobs` and filters on WooCommerce's job naming. To use this
+elsewhere, replace that one class with something that knows how the other
+repository decides what CI runs, keeping the same return shape
+(`name`, `projectName`, `command`). `Receipts::context_for()` is the contract the
+workflow must agree with, so those two change together or not at all.
+
 ## Note on cleanup
 
-An earlier run was interrupted mid-flight and leaked its temporary ref. The script
-now removes it from a shutdown handler and on `SIGINT`/`SIGTERM`. Any real
-implementation needs the same, or abandoned refs accumulate on the remote.
+Cleanup is armed at startup, before anything is started, and covers the shutdown
+handler plus `SIGINT`/`SIGTERM`/`SIGHUP`.
+
+Two things made that necessary rather than tidy. An early version registered its
+handlers only when it created the temporary ref, which is most of the way through
+a run — so an interrupt during the checks, by far the longest phase, was
+unguarded. And terminating the process this tool spawns is not enough: that
+process is a package manager, which runs a test runner, which forks its own
+workers. Signalling only the child left 48 test processes running. Cleanup now
+walks the tree and kills children before parents, so a parent cannot notice one
+die and start a replacement.
