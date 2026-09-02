@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Settings UI Save button disabled when a visibility toggle restores the original values.
