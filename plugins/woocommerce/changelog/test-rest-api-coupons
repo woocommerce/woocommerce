@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add REST coupon collection filter and pagination coverage and persisted-state checks to the existing coupon tests.
