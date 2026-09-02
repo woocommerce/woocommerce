@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Serialize mutations of the wc_pending_batch_processes option in BatchProcessingController with a short-lived database lock and a fresh re-read, so concurrent enqueue/dequeue/remove requests no longer clobber each other and silently drop or resurrect batch processors.

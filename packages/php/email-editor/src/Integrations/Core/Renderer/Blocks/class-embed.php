@@ -186,6 +186,23 @@ class Embed extends Abstract_Block_Renderer {
 			return '';
 		}
 
+		$rendered = $this->render_embed( $block_content, $parsed_block, $rendering_context );
+		if ( '' === $rendered ) {
+			return '';
+		}
+
+		return $rendered . $this->render_caption( $block_content );
+	}
+
+	/**
+	 * Renders the embed itself (player, thumbnail, card or link fallback) without the caption.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	private function render_embed( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$attr = $parsed_block['attrs'];
 
 		// Check if this is a supported audio or video provider embed and has a valid URL.
@@ -215,6 +232,25 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If we have a valid audio or video provider embed, proceed with normal rendering.
 		return $this->render_content( $block_content, $parsed_block, $rendering_context );
+	}
+
+	/**
+	 * Render the block's figcaption (if any) as a centered block appended below the embed output.
+	 *
+	 * @param string $block_content Block content.
+	 * @return string Caption HTML or empty string.
+	 */
+	private function render_caption( string $block_content ): string {
+		if ( ! preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/is', $block_content, $matches ) ) {
+			return '';
+		}
+
+		$caption = trim( $matches[1] );
+		if ( '' === $caption ) {
+			return '';
+		}
+
+		return '<div style="text-align: center; margin-top: 8px;">' . Html_Processing_Helper::sanitize_caption_html( $caption ) . '</div>';
 	}
 
 	/**
@@ -595,7 +631,12 @@ class Embed extends Abstract_Block_Renderer {
 	private function get_video_thumbnail_url( string $url, string $provider ): string {
 		// YouTube thumbnails follow a predictable URL pattern, so no HTTP request is needed.
 		if ( 'youtube' === $provider ) {
-			return $this->get_youtube_thumbnail( $url );
+			$thumbnail = $this->get_youtube_thumbnail( $url );
+			if ( '' !== $thumbnail ) {
+				return $thumbnail;
+			}
+			// YouTube URLs without an extractable video ID (e.g. playlists)
+			// fall through to the oEmbed thumbnail lookup below.
 		}
 
 		// All other supported video providers (VideoPress, Vimeo, TikTok, Dailymotion)
@@ -611,10 +652,12 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Thumbnail URL or empty string.
 	 */
 	private function get_youtube_thumbnail( string $url ): string {
-		// Extract video ID from various YouTube URL formats.
+		// Extract video ID from various YouTube URL formats. The `videoseries`
+		// token (used by playlist embed URLs like /embed/videoseries?list=…) is
+		// not a real video ID, so it is excluded to fall through to oEmbed.
 		$video_id = '';
 
-		if ( preg_match( '/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $url, $matches ) ) {
+		if ( preg_match( '/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/)|youtu\.be\/)(?!videoseries\b)([a-zA-Z0-9_-]+)/i', $url, $matches ) ) {
 			$video_id = $matches[1];
 		}
 

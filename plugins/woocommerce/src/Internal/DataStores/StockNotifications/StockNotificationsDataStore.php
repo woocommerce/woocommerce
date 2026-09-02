@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -73,11 +72,6 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 * @return string
 	 */
 	public function get_database_schema(): string {
-
-		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			return '';
-		}
-
 		global $wpdb;
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';

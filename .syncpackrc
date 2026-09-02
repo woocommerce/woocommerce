@@ -1,6 +1,10 @@
 {
 	"indent": "\t",
-	"semverRange": "^",
+	"semverGroups": [
+		{
+			"range": "^"
+		}
+	],
 	"customTypes": {
 		"engines": {
 			"path": "engines",
@@ -81,28 +85,49 @@
 			"dependencies": [
 				"@typescript-eslint/**"
 			],
-			"pinVersion": "^5.62.0",
+			"pinVersion": "^8.63.0",
 			"packages": [
 				"**"
 			]
 		},
 		{
-			"label": "Babel dependencies, must be aligned with versions in @wordpress/babel-preset-default package",
+			"label": "typescript-eslint meta-package (flat config); keep aligned with @typescript-eslint/*",
+			"dependencies": [
+				"typescript-eslint"
+			],
+			"pinVersion": "^8.63.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"eslint-plugin-testing-library"
+			],
+			"pinVersion": "^7.16.2",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Direct Babel build tooling shared across workspace packages",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@babel/core",
 				"@babel/cli",
 				"@babel/plugin-syntax-jsx",
-				"@babel/plugin-transform-react-jsx",
-				"@babel/plugin-transform-runtime",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime"
 			],
-			"pinVersion": "7.25.7",
 			"packages": [
 				"**"
-			]
+			],
+			"policy": "catalog"
 		},
 		{
 			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
@@ -173,22 +198,31 @@
 			"pinVersion": "^0.0.10"
 		},
 		{
+			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"eslint"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.55.0"
+			"pinVersion": "^10.0.0"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"webpack"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "5.97.x"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -382,7 +416,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "2.17.0"
+			"pinVersion": "4.49.0"
 		},
 		{
 			"dependencies": [
@@ -391,7 +425,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "14.7.0"
+			"pinVersion": "25.6.0"
 		},
 		{
 			"dependencies": [
@@ -452,16 +486,12 @@
 			"isIgnored": true
 		},
 		{
-			"label": "experimental-products-app uses custom WordPress package versions",
+			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
 			"dependencies": [
-				"@wordpress/base-styles",
-				"@wordpress/dataviews",
-				"@wordpress/icons",
-				"@wordpress/router",
-				"@wordpress/theme"
+				"@wordpress/dataviews"
 			],
 			"packages": [
-				"@woocommerce/experimental-products-app"
+				"@woocommerce/settings-ui"
 			],
 			"isIgnored": true
 		},
@@ -487,7 +517,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-bundled"
+			"policy": "catalog"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
@@ -501,7 +531,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "catalog:wp-min"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -522,13 +552,17 @@
 			"pinVersion": "4.3.x"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"postcss"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "8.4.x"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

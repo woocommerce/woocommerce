@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Enable the product object caching feature by default for newly installed stores. Existing stores are unaffected and keep the opt-in default.

@@ -1946,6 +1946,28 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should sanitize external product button text.
+	 */
+	public function test_update_external_product_sanitizes_button_text(): void {
+		$shop_manager = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $shop_manager );
+
+		$product = WC_Helper_Product::create_external_product();
+		$this->update_product_via_post_request(
+			$product,
+			array(
+				'button_text' => 'Buy now<style>.hidden { display: none; }</style>',
+			)
+		);
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( 'Buy now', $updated_product->get_button_text(), 'HTML should be removed from the button text.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test that batch create operations update term counts correctly.
 	 *
 	 * Verifies that when creating products via batch operations, the term counts
@@ -2185,5 +2207,475 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Updating a product can still change its product type.
+	 */
+	public function test_update_can_change_product_type(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params( array( 'type' => 'variable' ) );
+
+		$response        = $this->server->dispatch( $request );
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( 200, $response->get_status(), 'Valid product type changes should continue to succeed.' );
+		$this->assertInstanceOf( WC_Product_Variable::class, $updated_product );
+	}
+
+	/**
+	 * @testdox Product preparation allows an extension-backed product whose ID collides with a variation post.
+	 */
+	public function test_prepare_object_allows_extension_product_when_id_collides_with_variation_post(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$product_id       = $variable_product->get_children()[0];
+
+		$custom_data_store           = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Number of products read through the extension data store.
+			 *
+			 * @var int
+			 */
+			public $read_count = 0;
+
+			/**
+			 * Mark the extension-backed product as read without loading the colliding WordPress post.
+			 *
+			 * @param WC_Product $product Product being read.
+			 */
+			public function read( &$product ) {
+				++$this->read_count;
+				$product->set_object_read( true );
+			}
+		};
+		$register_custom_data_store  = static function ( $data_stores ) use ( $custom_data_store ) {
+			$data_stores['product-simple'] = $custom_data_store;
+			return $data_stores;
+		};
+		$resolve_custom_product_type = static function ( $product_type, $queried_product_id ) use ( $product_id ) {
+			return $product_id === $queried_product_id ? ProductType::SIMPLE : $product_type;
+		};
+		add_filter( 'woocommerce_data_stores', $register_custom_data_store );
+		add_filter( 'woocommerce_product_type_query', $resolve_custom_product_type, 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product_id );
+		$request->set_url_params( array( 'id' => $product_id ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product_id, $result->get_id() );
+		$this->assertSame( 'product_variation', get_post_type( $product_id ) );
+		$this->assertSame( 1, $custom_data_store->read_count, 'Product type detection should not construct the product twice.' );
+	}
+
+	/**
+	 * Invoke the protected prepare_object_for_database() on the endpoint under test.
+	 *
+	 * @param WP_REST_Request $request  Request object.
+	 * @param bool            $creating Whether the request creates a new product.
+	 * @return mixed
+	 */
+	private function invoke_prepare( WP_REST_Request $request, bool $creating ) {
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		return $prepare_method->invoke( $this->endpoint, $request, $creating );
+	}
+
+	/**
+	 * @testdox Updating a product that no longer exists with a type param returns an error response instead of a fatal error.
+	 */
+	public function test_prepare_object_returns_error_when_product_deleted_with_type(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $product->get_id(), true );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Construction failures on the create path are rethrown instead of misreported as an invalid product ID.
+	 */
+	public function test_prepare_object_rethrows_create_path_store_failure(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$break_store = function ( $stores ) {
+			$stores['product'] = 'WC_Nonexistent_Data_Store';
+			return $stores;
+		};
+		add_filter( 'woocommerce_data_stores', $break_store );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Invalid data store.' );
+
+		$this->invoke_prepare( $request, true );
+	}
+
+	/**
+	 * @testdox Duplicating a product preserves the error code of a typed data exception thrown during preparation.
+	 */
+	public function test_duplicate_preserves_data_exception_error_code(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		// The route guard is served from the warm product instance cache, so the only
+		// read on this route happens inside the preparation construction.
+		$throw_data_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new WC_Data_Exception( 'custom_duplicate_block', 'Simulated typed failure.', 409 );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_data_exception );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 409, $response->get_status(), 'A typed exception should keep its own HTTP status on the duplicate route' );
+		$this->assertEquals( 'custom_duplicate_block', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A non-scalar type value in a batch item is rejected instead of silently rewriting the product type.
+	 */
+	public function test_batch_update_with_array_type_is_rejected(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $variable_product->get_id(),
+							'type' => array( 'simple' ),
+							'name' => 'Renamed via array-type batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'error', $data['update'][0], 'A non-scalar type must be rejected, not coerced' );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_type', $data['update'][0]['error']['code'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The product type must not be rewritten' );
+	}
+
+	/**
+	 * @testdox Typed exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_typed_exception_for_extension_backed_product(): void {
+		$typed_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension backend that is temporarily unavailable.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws WC_Data_Exception Always, with a typed error code and status.
+			 */
+			public function read( &$product ) {
+				throw new WC_Data_Exception( 'ext_backend_unavailable', 'Backend unavailable.', 503 );
+			}
+		};
+		$register    = static function ( $data_stores ) use ( $typed_store ) {
+			$data_stores['product-simple'] = $typed_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID does not correspond to any WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999991' );
+		$request->set_url_params( array( 'id' => 999999991 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Backend unavailable.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox Generic exceptions from extension-backed product stores are rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_generic_exception_for_extension_backed_product(): void {
+		$failing_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate a transient failure in an extension backend that stores products outside wp_posts.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, simulating a temporary outage.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Remote backend timeout.' );
+			}
+		};
+		$register      = static function ( $data_stores ) use ( $failing_store ) {
+			$data_stores['product-simple'] = $failing_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999992' );
+		$request->set_url_params( array( 'id' => 999999992 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Remote backend timeout.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox An extension store reusing the core invalid-product message is rethrown instead of becoming a 404.
+	 */
+	public function test_prepare_object_rethrows_extension_exception_reusing_core_message(): void {
+		$mimicking_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Simulate an extension store that reuses the core failure message for its own failures.
+			 *
+			 * @param WC_Product $product Product being read.
+			 * @throws RuntimeException Always, with the core store's message text.
+			 */
+			public function read( &$product ) {
+				throw new RuntimeException( 'Invalid product.' );
+			}
+		};
+		$register        = static function ( $data_stores ) use ( $mimicking_store ) {
+			$data_stores['product-simple'] = $mimicking_store;
+			return $data_stores;
+		};
+		add_filter( 'woocommerce_data_stores', $register );
+
+		// Extension-backed product: the ID has no corresponding WordPress post.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/999999993' );
+		$request->set_url_params( array( 'id' => 999999993 ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$this->expectException( RuntimeException::class );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox The invalid-product error keeps one code but distinguishes variation targets in its message.
+	 */
+	public function test_invalid_product_id_error_distinguishes_variations_in_message(): void {
+		$error_method = new ReflectionMethod( $this->endpoint, 'get_invalid_product_id_error' );
+		$error_method->setAccessible( true );
+
+		$variation_error = $error_method->invoke( $this->endpoint, true );
+		$generic_error   = $error_method->invoke( $this->endpoint, false );
+
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $variation_error->get_error_code() );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $generic_error->get_error_code() );
+		$this->assertStringContainsString( 'variations', $variation_error->get_error_message() );
+		$this->assertStringNotContainsString( 'variations', $generic_error->get_error_message() );
+	}
+
+	/**
+	 * @testdox A falsy type value in a batch item preserves the stored product type instead of causing a fatal error.
+	 */
+	public function test_batch_update_with_falsy_type_preserves_stored_type(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'   => $variable_product->get_id(),
+							'type' => '',
+							'name' => 'Renamed via falsy-type batch',
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'error', $data['update'][0], 'A falsy type should not fail the item' );
+		$this->assertEquals( 'Renamed via falsy-type batch', $data['update'][0]['name'] );
+		$this->assertInstanceOf( WC_Product_Variable::class, wc_get_product( $variable_product->get_id() ), 'The stored product type must be preserved' );
+	}
+
+	/**
+	 * @testdox A stored type whose class is registered only through woocommerce_product_class keeps that class.
+	 */
+	public function test_falsy_type_preserves_filter_registered_product_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? 'acme-widget' : $override;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type ) {
+				return 'acme-widget' === $product_type ? WC_Product_Grouped::class : $classname;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Grouped::class, $result, 'The filter-registered class must win over the WC_Product_Simple fallback' );
+	}
+
+	/**
+	 * @testdox A non-string stored product type falls back to a simple product instead of causing a fatal error.
+	 */
+	public function test_non_string_stored_product_type_does_not_fatal(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_product_type_query',
+			static function ( $override, $product_id ) use ( $product ) {
+				return $product->get_id() === $product_id ? array( ProductType::SIMPLE ) : $override;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => '' ) );
+
+		$result = $this->invoke_prepare( $request, false );
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product->get_id(), $result->get_id() );
+	}
+
+	/**
+	 * @testdox Product constructor exceptions are rethrown when the product still exists.
+	 */
+	public function test_prepare_object_rethrows_unexpected_constructor_exception(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$throw_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new Exception( 'Simulated unexpected read failure.' );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_exception );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Simulated unexpected read failure.' );
+
+		$this->invoke_prepare( $request, false );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_duplicate_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID returns the variation endpoint error instead of an empty product.
+	 */
+	public function test_duplicate_with_variation_id_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Batch updates continue processing valid products when a variation is rejected.
+	 */
+	public function test_batch_update_handles_variation_error_per_item(): void {
+		$product          = WC_Helper_Product::create_simple_product();
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'   => $variation_id,
+						'type' => 'simple',
+					),
+					array(
+						'id'   => $product->get_id(),
+						'name' => 'Updated in batch',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $data['update'][0]['error']['code'] );
+		$this->assertSame( 'Updated in batch', $data['update'][1]['name'] );
+		$this->assertSame( 'Updated in batch', wc_get_product( $product->get_id() )->get_name() );
 	}
 }

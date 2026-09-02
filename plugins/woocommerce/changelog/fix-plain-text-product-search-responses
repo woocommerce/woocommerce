@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore plain-text product names in AJAX search responses.

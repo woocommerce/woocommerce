@@ -68,7 +68,7 @@ export const getTourConfig = ( {
 								? 'right'
 								: defaultPlacement;
 							if ( state.placement !== desiredPlacement ) {
-								instance.setOptions( {
+								void instance.setOptions( {
 									placement: desiredPlacement,
 								} );
 							}

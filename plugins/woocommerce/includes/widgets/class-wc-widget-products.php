@@ -104,11 +104,11 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array(),
-			'tax_query'      => array(
+			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The empty query container does not add a database join.
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- The empty query container does not add a database join.
 				'relation' => 'AND',
 			),
-		); // WPCS: slow query ok.
+		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
 			$query_args['tax_query'][] = array(

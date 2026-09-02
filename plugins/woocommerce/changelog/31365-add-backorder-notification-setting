@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a setting to enable or disable backorder stock notification emails, plus a woocommerce_should_send_backorder_notification filter, mirroring the existing low stock and out of stock notifications.

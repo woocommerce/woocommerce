@@ -57,7 +57,7 @@ class WC_Tests_API_Reports_Customers_Totals extends WC_REST_Unit_Test_Case {
 				'number'       => 0,
 				'fields'       => 'ID',
 				'count_total'  => true,
-				'meta_query'   => array( // WPCS: slow query ok.
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Test setup intentionally mirrors the legacy production query shape.
 					array(
 						'key'     => 'paying_customer',
 						'value'   => 1,

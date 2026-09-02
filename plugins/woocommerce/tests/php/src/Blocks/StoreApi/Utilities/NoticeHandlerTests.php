@@ -5,12 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * NoticeHandler unit tests.
  */
-class NoticeHandlerTests extends TestCase {
+class NoticeHandlerTests extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test convert_notices_to_exceptions.

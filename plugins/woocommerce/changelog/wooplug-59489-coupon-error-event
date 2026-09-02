@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add errored_coupon and errored_coupon_in_checkout JS events fired when a coupon fails to apply on the classic cart and checkout pages.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Scaffold ESLint Flat Config (`eslint.config.mjs`) instead of `.eslintrc.js`, which recent ESLint versions no longer read.

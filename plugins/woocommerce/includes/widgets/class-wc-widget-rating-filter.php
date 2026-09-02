@@ -76,7 +76,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$sql .= ' AND ' . $search;
 		}
 
-		return absint( $wpdb->get_var( $sql ) ); // WPCS: unprepared SQL ok.
+		return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- All dynamic fragments are produced and prepared by WP_Meta_Query, WP_Tax_Query, and WC_Query.
 	}
 
 	/**
@@ -98,7 +98,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		ob_start();
 
 		$found         = false;
-		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only filter; every rating component is cast.
 		$base_link     = remove_query_arg( 'paged', $this->get_current_page_url() );
 
 		$this->widget_start( $args, $instance );

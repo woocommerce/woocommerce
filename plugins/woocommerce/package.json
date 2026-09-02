@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.1.0",
+	"version": "11.2.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -58,7 +58,7 @@
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
 		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
-		"lint:lang:js": "eslint . --ext=js,ts",
+		"lint:lang:js": "eslint .",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
@@ -80,7 +80,8 @@
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
+		"test:e2e:blocks": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/*.test.mjs && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
+		"test:e2e:blocks:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:e2e:blocks",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
 		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-serial --project=core-parallel tests/email-editor/update-propagation",
@@ -100,6 +101,7 @@
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
+		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
 		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
@@ -138,6 +140,11 @@
 		"wp_org_slug": "woocommerce",
 		"build_step": "pnpm build:zip",
 		"ci": {
+			"ignore": [
+				"{,**/}*.md",
+				"{,**/}readme.txt",
+				"{,**/}changelog/!(*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.php|*.json|*.scss|*.css)"
+			],
 			"lint": {
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
@@ -151,15 +158,12 @@
 					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -184,12 +188,13 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -215,8 +220,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -269,7 +273,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -307,7 +311,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -334,7 +338,7 @@
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -387,7 +391,7 @@
 					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -417,7 +421,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -450,7 +454,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -483,7 +487,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -516,7 +520,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -550,7 +554,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -584,7 +588,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -732,15 +736,12 @@
 					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
@@ -848,6 +849,38 @@
 					}
 				},
 				{
+					"name": "Metrics - unified editor assets",
+					"testType": "performance",
+					"command": "test:metrics:ci:unified-editor-assets",
+					"optional": true,
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/metrics/**",
+						".wp-env.e2e.json"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/admin-library",
+						"@woocommerce/block-library",
+						"@woocommerce/classic-assets"
+					],
+					"testEnv": {
+						"start": "env:perf"
+					},
+					"events": [
+						"pull_request"
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-unified-editor-assets-report",
+						"resultsPath": "../../tools/compare-perf/artifacts/"
+					}
+				},
+				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
@@ -870,15 +903,18 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -902,6 +938,58 @@
 					}
 				},
 				{
+					"name": "Blocks e2e tests - unified editor assets",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:blocks:unified-editor-assets",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [
+						"patterns/**/*.php",
+						"includes/**/*.php",
+						"src/Blocks/**/*.php",
+						"src/Internal/Features/BlockEditorUnifiedAssets.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"nightly-checks"
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-unified-editor-assets-report",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
 					"name": "Blocks e2e tests - WP pre-release",
 					"optional": true,
 					"testType": "e2e",
@@ -920,15 +1008,18 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -968,15 +1059,18 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -1058,38 +1152,37 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@babel/preset-env": "7.25.7",
+		"@babel/cli": "catalog:tooling",
+		"@babel/core": "catalog:tooling",
+		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.61.1",
-		"@typescript-eslint/eslint-plugin": "^5.62.0",
-		"@typescript-eslint/experimental-utils": "^5.62.0",
-		"@typescript-eslint/parser": "^5.62.0",
+		"@typescript-eslint/eslint-plugin": "^8.63.0",
+		"@typescript-eslint/parser": "^8.63.0",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "11.9.0",
-		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",
 		"allure-playwright": "^3.1.0",
 		"autoprefixer": "9.8.6",
-		"axios": "^0.24.0",
+		"axios": "^0.33.0",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
-		"eslint": "^8.55.0",
-		"eslint-config-wpcalypso": "5.0.0",
-		"eslint-plugin-jest": "23.20.0",
-		"eslint-plugin-playwright": "1.6.0",
+		"eslint": "^10.0.0",
+		"eslint-plugin-jest": "^29.15.4",
+		"eslint-plugin-playwright": "^2.10.5",
 		"fs-extra": "11.1.1",
 		"glob": "^10.3.10",
+		"globals": "^16.5.0",
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"prettier": "npm:wp-prettier@^2.8.5",
+		"prettier": "npm:wp-prettier@3.0.3",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
 		"typescript": "5.7.x",

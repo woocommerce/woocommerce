@@ -213,7 +213,7 @@ export default function ShipmentTrackingNumberForm() {
 									! isLoading &&
 									! isEmpty( trackingNumberTemp.trim() )
 								) {
-									handleTrackingNumberLookup();
+									void handleTrackingNumberLookup();
 								}
 							} }
 							aria-invalid={ !! error }

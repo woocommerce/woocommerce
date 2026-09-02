@@ -798,7 +798,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the order line items schema.
+	 * @testdox Should expose the expected order line item schema.
 	 */
 	public function test_order_line_items_schema() {
 		wp_set_current_user( $this->user );
@@ -813,6 +813,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
+		$this->assertSame( array( 'string', 'null' ), $line_item_properties['parent_name']['type'] );
 
 		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
 		$this->assertEquals( 5, count( $meta_data_item_properties ) );

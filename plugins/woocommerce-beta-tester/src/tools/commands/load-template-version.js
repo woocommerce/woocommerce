@@ -37,24 +37,6 @@ export const LoadTemplateVersion = () => {
 	const selectedTemplate = params.template_name || '';
 	const selectedVersion = params.version || '';
 
-	// Load templates on component mount
-	useEffect( () => {
-		loadTemplates();
-	}, [] );
-
-	// Load versions when template changes
-	useEffect( () => {
-		if ( selectedTemplate ) {
-			loadVersions( selectedTemplate );
-		} else {
-			setVersions( [] );
-			updateCommandParams( LOAD_TEMPLATE_VERSION_ACTION_NAME, {
-				template_name: selectedTemplate,
-				version: '',
-			} );
-		}
-	}, [ selectedTemplate ] );
-
 	/**
 	 * Load available templates
 	 */
@@ -76,6 +58,7 @@ export const LoadTemplateVersion = () => {
 			setTemplates( options );
 			setIsLoadingTemplates( false );
 		} catch ( error ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Error loading templates:', error );
 			setIsLoadingTemplates( false );
 		}
@@ -108,10 +91,29 @@ export const LoadTemplateVersion = () => {
 			}
 			setIsLoadingVersions( false );
 		} catch ( error ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Error loading versions:', error );
 			setIsLoadingVersions( false );
 		}
 	};
+
+	// Load templates on component mount
+	useEffect( () => {
+		loadTemplates();
+	}, [] );
+
+	// Load versions when template changes
+	useEffect( () => {
+		if ( selectedTemplate ) {
+			loadVersions( selectedTemplate );
+		} else {
+			setVersions( [] );
+			updateCommandParams( LOAD_TEMPLATE_VERSION_ACTION_NAME, {
+				template_name: selectedTemplate,
+				version: '',
+			} );
+		}
+	}, [ selectedTemplate ] );
 
 	/**
 	 * Handle template selection change

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal TypeError in wc_modify_map_meta_cap() on PHP 8+ when get_userdata() returns false for an invalid user ID.
