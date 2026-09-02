@@ -388,7 +388,20 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Number of variations primed and hydrated per batch while scanning for a purchasable one.
+	 *
+	 * @var int
+	 */
+	private const PURCHASABLE_SCAN_CHUNK_SIZE = 50;
+
+	/**
 	 * Check if there are variations that can be purchased for the current product.
+	 *
+	 * Children are primed and checked in batches. Within each batch, variations that look purchasable on
+	 * stored data (published, not out of stock, priced) are checked first and the rest are deferred, so the
+	 * common case hydrates one variation instead of all of them. Every variation is still evaluated with
+	 * is_purchasable() and is_in_stock() before returning false, so filters and overrides that widen
+	 * purchasability keep working.
 	 *
 	 * @internal
 	 *
@@ -403,22 +416,91 @@ class WC_Product_Variable extends WC_Product {
 		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
 		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
 		 */
-		$has_purchasable_variations = false;
-		$variation_ids              = $this->get_children();
-		if ( ! empty( $variation_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $variation_ids );
+		$variation_ids = array_values( array_unique( array_map( 'intval', (array) $this->get_children() ) ) );
+		if ( empty( $variation_ids ) ) {
+			return false;
+		}
 
-			foreach ( $variation_ids as $variation_id ) {
-				$variation = wc_get_product( $variation_id );
-				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
-					$has_purchasable_variations = true;
-					break;
+		$deferred_ids = array();
+		foreach ( array_chunk( $this->get_purchasable_scan_order( $variation_ids ), self::PURCHASABLE_SCAN_CHUNK_SIZE ) as $chunk ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $chunk );
+
+			$candidate_ids = array();
+			foreach ( $chunk as $variation_id ) {
+				if ( $this->variation_may_be_purchasable( $variation_id ) ) {
+					$candidate_ids[] = $variation_id;
+				} else {
+					$deferred_ids[] = $variation_id;
 				}
+			}
+
+			if ( $this->any_variation_is_purchasable( $candidate_ids ) ) {
+				return true;
 			}
 		}
 
-		return $has_purchasable_variations;
+		return $this->any_variation_is_purchasable( $deferred_ids );
+	}
+
+	/**
+	 * Order children so that likely-purchasable ones come first when that can be known cheaply.
+	 *
+	 * Small products are scanned in children order; the batch pre-check already puts candidates first within
+	 * a batch. Larger products ask the data store for the candidate list in one indexed fetch, unless a
+	 * persistent object cache is in use (priming is then nearly free and the fetch would be the only new
+	 * query) or the active data store does not offer the method. Every child stays in the returned list.
+	 *
+	 * @param int[] $variation_ids All children, cast to int, in children order.
+	 * @return int[] Same IDs, candidates first.
+	 */
+	private function get_purchasable_scan_order( array $variation_ids ): array {
+		if ( count( $variation_ids ) <= self::PURCHASABLE_SCAN_CHUNK_SIZE || wp_using_ext_object_cache() ) {
+			return $variation_ids;
+		}
+
+		$data_store = $this->data_store;
+		if ( ! $data_store instanceof WC_Data_Store || ! $data_store->has_callable( 'get_purchasable_variation_candidates' ) ) {
+			return $variation_ids;
+		}
+
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
+		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
+		$remaining_ids = array_keys( array_diff_key( array_flip( $variation_ids ), array_flip( $candidate_ids ) ) );
+
+		return array_merge( $candidate_ids, $remaining_ids );
+	}
+
+	/**
+	 * Stored-state pre-check for one variation, read from primed post and meta caches.
+	 *
+	 * @param int $variation_id Variation ID.
+	 * @return bool
+	 */
+	private function variation_may_be_purchasable( int $variation_id ): bool {
+		return WC_Product_Variable_Data_Store_CPT::stored_state_allows_purchase(
+			(string) get_post_status( $variation_id ),
+			(string) get_post_meta( $variation_id, '_stock_status', true ),
+			(string) get_post_meta( $variation_id, '_regular_price', true ),
+			(string) get_post_meta( $variation_id, '_sale_price', true )
+		);
+	}
+
+	/**
+	 * Run the full purchasability checks on hydrated variations, stopping at the first hit.
+	 *
+	 * @param int[] $variation_ids Variation IDs whose caches are primed.
+	 * @return bool
+	 */
+	private function any_variation_is_purchasable( array $variation_ids ): bool {
+		foreach ( $variation_ids as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

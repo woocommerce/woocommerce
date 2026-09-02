@@ -1,5 +1,8 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Tests for WC_Product_Variable.
  */
@@ -405,5 +408,204 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		update_post_meta( $attachment_id, '_wp_attached_file', $attached_file );
 
 		return $attachment_id;
+	}
+
+	/**
+	 * Builds a saved variable product whose variations have the given stored state, in order.
+	 *
+	 * Each spec is [ post status, stock status, regular price ].
+	 *
+	 * @param array $specs Variation specs.
+	 * @return WC_Product_Variable Freshly loaded parent product.
+	 */
+	private function create_variable_product_with_variations( array $specs ): WC_Product_Variable {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Scan order fixture' );
+		$parent->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array_map( 'strval', range( 1, count( $specs ) ) ) ) ) );
+		$parent->save();
+
+		foreach ( $specs as $index => $spec ) {
+			list( $status, $stock_status, $regular_price ) = $spec;
+			$variation                                     = new WC_Product_Variation();
+			$variation->set_parent_id( $parent->get_id() );
+			$variation->set_attributes( array( 'pa_size' => (string) ( $index + 1 ) ) );
+			$variation->set_status( $status );
+			$variation->set_stock_status( $stock_status );
+			$variation->set_regular_price( $regular_price );
+			$variation->save();
+		}
+
+		WC_Product_Variable::sync( $parent->get_id() );
+		return wc_get_product( $parent->get_id() );
+	}
+
+	/**
+	 * Counts how many distinct variations get their purchasability evaluated during a callback.
+	 *
+	 * @param callable $callback Code to run.
+	 * @return int Number of distinct variation IDs passed to woocommerce_variation_is_purchasable.
+	 */
+	private function count_variations_checked( callable $callback ): int {
+		$seen    = array();
+		$counter = function ( $purchasable, $variation ) use ( &$seen ) {
+			$seen[ $variation->get_id() ] = true;
+			return $purchasable;
+		};
+		add_filter( 'woocommerce_variation_is_purchasable', $counter, 1, 2 );
+		$callback();
+		remove_filter( 'woocommerce_variation_is_purchasable', $counter, 1 );
+		return count( $seen );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations checks likely-purchasable variations before the rest.
+	 */
+	public function test_has_purchasable_variations_checks_candidates_first(): void {
+		$product = $this->create_variable_product_with_variations(
+			array(
+				array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ),
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '' ),
+				array( ProductStatus::PRIVATE, ProductStockStatus::IN_STOCK, '10' ),
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ),
+			)
+		);
+
+		$result  = null;
+		$checked = $this->count_variations_checked(
+			function () use ( $product, &$result ) {
+				$result = $product->has_purchasable_variations();
+			}
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( 1, $checked, 'Only the purchasable candidate should have been evaluated.' );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations still evaluates non-candidates when every candidate is rejected by a filter.
+	 */
+	public function test_has_purchasable_variations_falls_back_to_non_candidates(): void {
+		$product  = $this->create_variable_product_with_variations(
+			array(
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ),
+				array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ),
+			)
+		);
+		$children = $product->get_children();
+
+		// Reject the stored-state candidate, and let a filter make the out-of-stock one purchasable.
+		add_filter(
+			'woocommerce_is_purchasable',
+			function ( $purchasable, $candidate ) use ( $children ) {
+				return $purchasable && (int) $candidate->get_id() !== (int) $children[0];
+			},
+			10,
+			2
+		);
+		add_filter( 'woocommerce_product_is_in_stock', '__return_true' );
+
+		$result  = null;
+		$checked = $this->count_variations_checked(
+			function () use ( $product, &$result ) {
+				$result = $product->has_purchasable_variations();
+			}
+		);
+
+		$this->assertTrue( $result, 'A filter that makes a non-candidate purchasable must still be honoured.' );
+		$this->assertSame( 2, $checked, 'Both variations should have been evaluated, candidate first.' );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations returns false when no variation is purchasable, evaluating every variation.
+	 */
+	public function test_has_purchasable_variations_evaluates_all_when_none_purchasable(): void {
+		$product = $this->create_variable_product_with_variations(
+			array(
+				array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ),
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '' ),
+				array( ProductStatus::PRIVATE, ProductStockStatus::IN_STOCK, '10' ),
+			)
+		);
+
+		$result  = null;
+		$checked = $this->count_variations_checked(
+			function () use ( $product, &$result ) {
+				$result = $product->has_purchasable_variations();
+			}
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 3, $checked, 'Every variation is evaluated before returning false.' );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations evaluates is_purchasable before is_in_stock for each variation.
+	 */
+	public function test_has_purchasable_variations_keeps_check_order_per_variation(): void {
+		$product = $this->create_variable_product_with_variations(
+			array(
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ),
+			)
+		);
+
+		$calls = array();
+		add_filter(
+			'woocommerce_variation_is_purchasable',
+			function ( $value ) use ( &$calls ) {
+				$calls[] = 'purchasable';
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_is_in_stock',
+			function ( $value ) use ( &$calls ) {
+				$calls[] = 'in_stock';
+				return $value;
+			}
+		);
+
+		$this->assertTrue( $product->has_purchasable_variations() );
+		$this->assertSame( array( 'purchasable', 'in_stock' ), $calls );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations finds a purchasable variation beyond the chunk threshold without evaluating the ones before it.
+	 */
+	public function test_has_purchasable_variations_handles_products_above_chunk_threshold(): void {
+		$specs   = array_fill( 0, 60, array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ) );
+		$specs[] = array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' );
+		$product = $this->create_variable_product_with_variations( $specs );
+
+		$result  = null;
+		$checked = $this->count_variations_checked(
+			function () use ( $product, &$result ) {
+				$result = $product->has_purchasable_variations();
+			}
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( 1, $checked );
+	}
+
+	/**
+	 * @testdox has_purchasable_variations respects the woocommerce_get_children filter.
+	 */
+	public function test_has_purchasable_variations_respects_children_filter(): void {
+		$product  = $this->create_variable_product_with_variations(
+			array(
+				array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ),
+				array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ),
+			)
+		);
+		$children = $product->get_children();
+
+		add_filter(
+			'woocommerce_get_children',
+			function ( $ids ) use ( $children ) {
+				return array_values( array_intersect( $ids, array( $children[1] ) ) );
+			}
+		);
+
+		$this->assertFalse( $product->has_purchasable_variations(), 'Only the filtered child list may be considered.' );
 	}
 }
