@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -38,9 +39,10 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 	 *
 	 * The cursor is what bounds progress, so it outlives the run. An order the processor could not
 	 * rebuild keeps its rows at zero; without the cursor every later batch would pick that order up
-	 * again and the processor would never reach the end of the table. That is also why the option
-	 * is left behind once the pass is done: clearing it would put those orders back in front of the
-	 * next pass. Delete it by hand to run the rebuild over the whole table again.
+	 * again and the processor would never reach the end of the table. Such an order is recorded as
+	 * a failed analytics import instead, which is retried from Analytics settings. That is also why
+	 * the option is left behind once the pass is done: clearing it would put those orders back in
+	 * front of the next pass. Delete it by hand to run the rebuild over the whole table again.
 	 *
 	 * @var string
 	 */
@@ -190,17 +192,21 @@ class OrderTaxLookupMigrator implements BatchProcessorInterface, RegisterHooksIn
 			}
 
 			// A write that did not land leaves the order holding the rows it came in with, which
-			// report the way they did before. Log the order id so the failure can be looked at.
+			// report the way they did before. The cursor steps past it either way, so record it as
+			// a failed analytics import: that is the list Analytics settings offers a retry over,
+			// and the retry re-imports the order, which is the same work this pass could not do.
 			if ( false === $synced ) {
 				wc_get_logger()->error(
-					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and reports the way it did before.",
+					"Could not rebuild the analytics tax lookup rows of order {$order_id}. The order keeps the rows it had and reports the way it did before. It is recorded as a failed analytics import, so it can be retried from Analytics settings.",
 					array( 'source' => 'wc-order-tax-lookup-migration' )
 				);
+
+				OrdersScheduler::record_failed_order_import( $order_id );
 			}
 		}
 
-		// Step past every order in the batch, including any that could not be rebuilt. See
-		// CURSOR_OPTION.
+		// Step past every order in the batch, including any that could not be rebuilt, which are
+		// left to the failed import retry. See CURSOR_OPTION.
 		update_option( self::CURSOR_OPTION, max( array_map( 'absint', $batch ) ), false );
 
 		ReportsCache::invalidate();

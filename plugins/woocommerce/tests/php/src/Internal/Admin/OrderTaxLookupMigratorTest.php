@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -48,6 +49,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Reports::reset_stats_dbs();
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		$this->sut = wc_get_container()->get( OrderTaxLookupMigrator::class );
 	}
@@ -58,6 +60,7 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
 		delete_option( OrderTaxLookupMigrator::CURSOR_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( OrderTaxLookupMigrator::class );
 
 		parent::tearDown();
@@ -292,6 +295,11 @@ class OrderTaxLookupMigratorTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $this->lookup_rows( $rebuilt->get_id() ), 'The rest of the batch should still be rebuilt.' );
 		$this->assertSame( $rebuilt->get_id(), (int) get_option( OrderTaxLookupMigrator::CURSOR_OPTION ), 'The cursor should step past the whole batch.' );
 		$this->assertSame( array(), $this->sut->get_next_batch_to_process( 10 ), 'An order that could not be rebuilt should not hold the pass up.' );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array( $failing->get_id() ), $failed['ids'], 'The cursor steps past an order the rebuild could not finish, so it should be left where Analytics settings offers a retry over it.' );
+		$this->assertNotContains( $rebuilt->get_id(), $failed['ids'], 'An order that was rebuilt should not be recorded as a failed import.' );
 	}
 
 	/**
