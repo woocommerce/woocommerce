@@ -274,51 +274,12 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
-					'title'         => __( 'Notifications', 'woocommerce' ),
-					'desc'          => __( 'Enable low stock notifications', 'woocommerce' ),
-					'id'            => 'woocommerce_notify_low_stock',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'autoload'      => false,
-					'class'         => 'manage_stock_field',
-				),
-
-				array(
-					'desc'          => __( 'Enable out of stock notifications', 'woocommerce' ),
-					'id'            => 'woocommerce_notify_no_stock',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => '',
-					'autoload'      => false,
-					'class'         => 'manage_stock_field',
-				),
-
-				array(
-					'desc'          => __( 'Enable backorder notifications', 'woocommerce' ),
-					'id'            => 'woocommerce_notify_backorder',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'end',
-					'autoload'      => false,
-					'class'         => 'manage_stock_field',
-				),
-
-				array(
-					'title'    => __( 'Notification recipient(s)', 'woocommerce' ),
-					'desc'     => __( 'Enter recipients (comma separated) that will receive this notification.', 'woocommerce' ),
-					'id'       => 'woocommerce_stock_email_recipient',
-					'type'     => 'text',
-					'default'  => get_option( 'admin_email' ),
-					'css'      => 'width: 250px;',
-					'autoload' => false,
-					'desc_tip' => true,
-					'class'    => 'manage_stock_field',
-				),
-
-				array(
 					'title'             => __( 'Low stock threshold', 'woocommerce' ),
-					'desc'              => __( 'When product stock reaches this amount you will be notified via email.', 'woocommerce' ),
+					'desc'              => sprintf(
+						/* translators: %s: link to the low stock email settings */
+						__( 'When product stock reaches this amount, the product counts as low stock. %s', 'woocommerce' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_low_stock' ) ) . '">' . esc_html__( 'Manage low stock email', 'woocommerce' ) . '</a>'
+					),
 					'id'                => 'woocommerce_notify_low_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
@@ -328,13 +289,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 					'default'           => '2',
 					'autoload'          => false,
-					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
 				),
 
 				array(
 					'title'             => __( 'Out of stock threshold', 'woocommerce' ),
-					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.', 'woocommerce' ),
+					'desc'              => sprintf(
+						/* translators: %s: link to the out of stock email settings */
+						__( 'When product stock reaches this amount, stock status changes to "out of stock". This setting does not affect existing "in stock" products. %s', 'woocommerce' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email&section=wc_email_no_stock' ) ) . '">' . esc_html__( 'Manage out of stock email', 'woocommerce' ) . '</a>'
+					),
 					'id'                => 'woocommerce_notify_no_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',
@@ -343,7 +307,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'step' => 1,
 					),
 					'default'           => '0',
-					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
 				),
 
