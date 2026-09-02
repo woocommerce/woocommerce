@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
+
 if ( class_exists( 'WC_Admin_Permalink_Settings', false ) ) {
 	return new WC_Admin_Permalink_Settings();
 }
@@ -116,9 +118,9 @@ class WC_Admin_Permalink_Settings {
 	 * them separately -- which is what made every predefined structure revert to "Custom base".
 	 * See https://github.com/woocommerce/woocommerce/issues/29050.
 	 *
-	 * Must run inside a wc_switch_to_site_locale() window: the Default base is a translated slug,
-	 * and an administrator whose profile language differs from the site language would otherwise
-	 * store one translation and compare against another.
+	 * The Default base is a translated slug, resolved in the site locale directly so that neither
+	 * an administrator's profile language nor a `locale` filter can make the save path store one
+	 * translation while the comparison expects another.
 	 *
 	 * Sharing the rules is not the same as receiving identical input: the save path runs the
 	 * posted value through sanitize_text_field() first, which strips percent-encoded octets, so a
@@ -130,7 +132,7 @@ class WC_Admin_Permalink_Settings {
 	 * @return string The base as it is stored.
 	 */
 	private function get_stored_product_base( string $posted_base, ?string $posted_structure = null ): string {
-		$default_base = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		$default_base = wc_sanitize_permalink( SiteLocale::translate_slug( 'product' ) );
 
 		if ( 'custom' === $posted_base ) {
 			if ( null === $posted_structure ) {
@@ -192,16 +194,9 @@ class WC_Admin_Permalink_Settings {
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
 		/*
-		 * Resolve the Shop page and the translated slugs inside the same window settings_save()
-		 * opens, so the values compared below are the values a save would store.
-		 *
-		 * wc_get_page_id() is resolved here too because settings_save() resolves it inside its own
-		 * window, and the woocommerce_get_shop_page_id filter multilingual plugins attach to can
-		 * return a different page per locale.
-		 *
-		 * This holds only for a persisted product_base: wc_get_permalink_structure() initializes a
-		 * missing one in the request locale, outside any window, before this screen renders.
-		 * See https://github.com/woocommerce/woocommerce/issues/67507.
+		 * Resolve the Shop page inside the same window settings_save() opens, so the values
+		 * compared below are the values a save would store: the woocommerce_get_shop_page_id
+		 * filter multilingual plugins attach to can return a different page per locale.
 		 */
 		wc_switch_to_site_locale();
 		$shop_page_id = wc_get_page_id( 'shop' );
