@@ -278,7 +278,7 @@ class WC_Shortcode_Checkout {
 		 * @since 2.0.0
 		 * @param string $order_key The order key read from the request, or an empty string.
 		 */
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Bearer-style order-key lookup; the value is compared with hash_equals() below and a nonce cannot apply to links emailed to the customer.
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', ( empty( $_GET['key'] ) || ! is_string( $_GET['key'] ) ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Bearer-style order-key lookup; the value is compared with hash_equals() below and a nonce cannot apply to links emailed to the customer.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );

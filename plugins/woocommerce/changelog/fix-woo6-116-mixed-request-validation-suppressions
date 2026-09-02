@@ -1,4 +1,4 @@
 Significance: patch
-Type: dev
+Type: fix
 
-Replace legacy WPCS suppression comments in the settings save handler, thanks page, conditional tag helpers and terms template with exact PHPCS annotations, and document the hooks on those lines.
+Fix a fatal error on the order received page when the order key is passed as an array, and replace legacy WPCS suppression comments in the settings save handler, thanks page, conditional tag helpers and terms template with exact PHPCS annotations.
