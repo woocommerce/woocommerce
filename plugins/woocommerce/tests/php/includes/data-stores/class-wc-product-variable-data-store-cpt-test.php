@@ -1183,6 +1183,42 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxonomy attribute term order is preserved after save and read for variable products.
+	 */
+	public function test_taxonomy_attribute_term_order_is_preserved_for_variable_product() {
+
+		try {
+			// Create attribute with terms in non-alphabetical order: S, XL, M.
+			$attribute      = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'XL', 'M' ) );
+			$expected_order = $attribute->get_options();
+
+			// Create variable product.
+			$product = new WC_Product_Variable();
+			$product->set_attributes( array( $attribute ) );
+			$product->save();
+
+			wp_cache_delete( $product->get_id(), 'posts' );
+			$product = wc_get_product( $product->get_id() );
+
+			$saved_options = $product->get_attributes()['pa_size']->get_options();
+
+			// Assert insertion order S, XL, M is preserved.
+			$this->assertEquals(
+				$expected_order,
+				$saved_options,
+				'Variable product taxonomy attribute term order should be preserved after save/read.'
+			);
+		} finally {
+			if ( $product ) {
+				$product->delete( true );
+			}
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
+		}
+	}
+
+	/**
 	 * @testdox read_variation_attributes returns an empty array when the product has no variation attributes.
 	 */
 	public function test_read_variation_attributes_returns_empty_for_no_attributes(): void {
@@ -1928,7 +1964,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$sizes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product )['pa_size'];
 
 		$this->assertSame( array( 'small', 'large', 'huge' ), $sizes );
-
 		$product->delete( true );
 	}
 
@@ -1991,5 +2026,80 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Taxonomy attribute term order falls back gracefully for products saved.
+	 */
+	public function test_taxonomy_attribute_term_order_fallback_for_legacy_products() {
+		$product   = null;
+		$attribute = null;
+		try {
+			// Create attribute normally.
+			$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'M', 'L' ) );
+
+			$product = new WC_Product_Variable();
+			$product->set_attributes( array( $attribute ) );
+			$product->save();
+
+			// Simulate legacy product: manually remove 'value' from stored meta.
+			$meta                     = get_post_meta( $product->get_id(), '_product_attributes', true );
+			$meta['pa_size']['value'] = '';
+			// legacy: no stored order
+			update_post_meta( $product->get_id(), '_product_attributes', $meta );
+
+			wp_cache_delete( $product->get_id(), 'posts' );
+			$product = wc_get_product( $product->get_id() );
+
+			// Should fall back to wc_get_object_terms without error.
+			$options = $product->get_attributes()['pa_size']->get_options();
+			$this->assertEquals(
+				array_values( wc_get_object_terms( $product->get_id(), 'pa_size', 'term_id' ) ),
+				array_values( $options ),
+				'Legacy products should load all assigned terms.'
+			);
+		} finally {
+			if ( $product ) {
+				$product->delete( true );
+			}
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
+		}
+	}
+
+	public function test_legacy_value_containing_term_names_does_not_break_load() {
+		$product   = null;
+		$attribute = null;
+		try {
+			$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'S', 'M', 'L' ) );
+
+			$product = new WC_Product_Variable();
+			$product->set_attributes( array( $attribute ) );
+			$product->save();
+
+			// Simulate legacy importer: store term names in value with is_taxonomy=1.
+			$meta                     = get_post_meta( $product->get_id(), '_product_attributes', true );
+			$meta['pa_size']['value'] = 'S|M|L';
+			// names not IDs.
+			update_post_meta( $product->get_id(), '_product_attributes', $meta );
+
+			wp_cache_delete( $product->get_id(), 'posts' );
+			$product = wc_get_product( $product->get_id() );
+
+			// Should load terms from wc_get_object_terms, not ghost terms.
+			$options = $product->get_attributes()['pa_size']->get_options();
+			$this->assertNotEmpty( $options );
+			foreach ( $options as $option ) {
+				$this->assertGreaterThan( 0, $option, 'Options should be valid term IDs, not 0.' );
+			}
+		} finally {
+			if ( $product ) {
+				$product->delete( true );
+			}
+			if ( $attribute ) {
+				WC_Helper_Product::delete_attribute( $attribute->get_id() );
+			}
+		}
 	}
 }

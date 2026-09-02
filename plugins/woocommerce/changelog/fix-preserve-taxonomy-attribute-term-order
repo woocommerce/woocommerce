@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix: Taxonomy attribute term order is now preserved after saving a variable product, resolving alphabetical reordering introduced
