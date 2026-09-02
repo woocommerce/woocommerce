@@ -237,11 +237,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * A match whose product type disagrees with the row type is refused, because
 	 * get_product_object() would otherwise convert the matched product to that type.
 	 *
-	 * @param string $global_unique_id Normalized Global Unique ID.
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
 	 * @param string $type             Row product type, or an empty string when the row has none.
 	 * @return int|WP_Error Product ID, 0 when nothing matches, or WP_Error for a type mismatch.
 	 */
 	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
+		// Match the stored form, which WC_Product::set_global_unique_id() strips the same way.
+		$global_unique_id = (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+
+		if ( '' === $global_unique_id ) {
+			return 0;
+		}
+
 		$product_id = (int) wc_get_product_id_by_global_unique_id( $global_unique_id );
 
 		if ( ! $product_id || '' === $type ) {

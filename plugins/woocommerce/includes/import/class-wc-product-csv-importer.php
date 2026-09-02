@@ -874,10 +874,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'weight'            => array( $this, 'parse_float_field' ),
 			'reviews_allowed'   => array( $this, 'parse_bool_field' ),
 			'purchase_note'     => 'wp_filter_post_kses',
-			'global_unique_id'  => static function ( $value ) {
-				// Keep matching values in the same form stored by WC_Product::set_global_unique_id().
-				return preg_replace( '/[^0-9Xx\-]/', '', (string) $value );
-			},
 			'price'             => 'wc_format_decimal',
 			'regular_price'     => 'wc_format_decimal',
 			'stock_quantity'    => array( $this, 'parse_stock_quantity_field' ),
@@ -1378,7 +1374,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
 	 * update existing is false, and likewise, if updating products, do not
-	 * process rows which do not exist if an ID, SKU, or Global Unique ID is provided.
+	 * process rows which do not exist if an ID, SKU, or non-blank Global Unique ID is provided.
 	 *
 	 * @return array
 	 */
@@ -1403,7 +1399,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id_exists        = false;
 			$sku_exists       = false;
 
-			if ( $update_existing && ! $id && ! $sku && $global_unique_id ) {
+			if ( $update_existing && ! $id && ! $sku && '' !== $global_unique_id ) {
 				$id = $this->match_product_id_by_global_unique_id( $global_unique_id, $parsed_data['type'] ?? '' );
 
 				if ( is_wp_error( $id ) ) {
@@ -1452,7 +1448,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) || isset( $parsed_data['global_unique_id'] ) ) && ! $id_exists && ! $sku_exists ) {
+			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) || '' !== $global_unique_id ) && ! $id_exists && ! $sku_exists ) {
 				$create_variation = false;
 				$refusal          = null;
 

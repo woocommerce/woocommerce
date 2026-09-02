@@ -329,6 +329,45 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A blank Global Unique ID cell creates a product while a matching one updates it when updating existing products.
+	 */
+	public function test_import_creates_products_with_blank_global_unique_id_when_updating_existing_products() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '2223334445556' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-blank-global-unique-id.csv';
+		file_put_contents( $csv_file, "GTIN,Name\n2223334445556,Updated product name\n,Product without an identifier\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'] );
+		$this->assertCount( 1, $data['imported'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Updated product name', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 'Product without an identifier', wc_get_product( $data['imported'][0] )->get_name() );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_global_unique_id() );
+
+		WC_Helper_Product::delete_product( $data['imported'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox A malformed Global Unique ID that matches nothing is skipped when updating existing products.
 	 */
 	public function test_import_skips_invalid_global_unique_id_when_updating_existing_products() {
