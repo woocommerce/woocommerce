@@ -15,9 +15,8 @@
  *     php tools/local-ci-poc/poc.php            publish a receipt for HEAD
  *     php tools/local-ci-poc/poc.php --push     ... and then push the branch
  *
- * Needs `gh`, or any token reachable from GH_TOKEN, GITHUB_TOKEN, or the git
- * credential store. The steps read top to bottom; the plumbing they call is at
- * the bottom of the file.
+ * Requires the GitHub CLI, authenticated (`gh auth login`). The steps read top to
+ * bottom; the plumbing they call is at the bottom of the file.
  */
 
 const REPO = 'woocommerce/woocommerce';
@@ -60,21 +59,14 @@ foreach ( array_slice( $argv, 1 ) as $argument ) {
 remove_the_temporary_ref_however_we_exit();
 
 // ---------------------------------------------------------------------------
-// 1. A token, from whatever is already on the machine.
+// 1. The GitHub CLI, which is the only supported way in.
 // ---------------------------------------------------------------------------
 
-heading( '1 · Resolve a token from what is already on the machine' );
+heading( '1 · Require the GitHub CLI' );
 
-$token = resolve_token();
+$token = require_github_cli_token();
 
-if ( null === $token ) {
-	// Not a failure. A contributor without a token still gets the value of running
-	// the checks locally; they just publish nothing, and CI runs everything.
-	fail( 'no token — a real run would still execute the checks, then exit 0' );
-	exit( 0 );
-}
-
-pass( 'found one (never prompts; no token means publish nothing and exit 0)' );
+pass( 'gh is installed and authenticated' );
 
 // ---------------------------------------------------------------------------
 // 2. Refuse to publish anything the receipt could not honestly describe.
@@ -319,40 +311,33 @@ exit( 0 );
 // ===========================================================================
 
 /**
- * Find a token without ever prompting.
+ * Get a token from the GitHub CLI, or stop.
  *
- * The order matters: an explicitly exported token beats the gh CLI, which beats
- * whatever the git credential store happens to hold. Every source is one a
- * contributor already has, which is the point — this adds no new secret to
- * manage and no new place to configure one.
+ * The CLI is the single supported source. Reading tokens out of the environment
+ * or the git credential store as well would mean this script could authenticate
+ * as one identity while `gh` reports another, and the receipt's creator is the
+ * whole basis for trusting it. One source keeps that unambiguous.
  *
- * @return string|null The token, or null when the machine has none.
+ * `gh auth token` honours GH_TOKEN and GITHUB_TOKEN itself, so exporting either
+ * still works — it just goes through the CLI rather than around it.
  */
-function resolve_token(): ?string {
-	foreach ( array( 'GH_TOKEN', 'GITHUB_TOKEN' ) as $variable ) {
-		$value = getenv( $variable );
-
-		if ( is_string( $value ) && '' !== $value ) {
-			return $value;
-		}
+function require_github_cli_token(): string {
+	if ( '' === shell( 'command -v gh 2>/dev/null' ) ) {
+		fail( 'the GitHub CLI (gh) is not installed' );
+		warn( 'This script requires it. Install from https://cli.github.com, then' );
+		warn( 'run `gh auth login`.' );
+		exit( 1 );
 	}
 
-	$from_gh_cli = shell( 'gh auth token 2>/dev/null' );
+	$token = shell( 'gh auth token 2>/dev/null' );
 
-	if ( '' !== $from_gh_cli ) {
-		return $from_gh_cli;
+	if ( '' === $token ) {
+		fail( 'the GitHub CLI is installed but not authenticated' );
+		warn( 'Run `gh auth login`, then try this again.' );
+		exit( 1 );
 	}
 
-	// GIT_TERMINAL_PROMPT=0 guarantees this cannot block waiting for input.
-	$credential = shell(
-		"printf 'protocol=https\nhost=github.com\n\n' | GIT_TERMINAL_PROMPT=0 git credential fill 2>/dev/null"
-	);
-
-	if ( preg_match( '/^password=(.+)$/m', $credential, $matches ) ) {
-		return trim( $matches[1] );
-	}
-
-	return null;
+	return $token;
 }
 
 /**
