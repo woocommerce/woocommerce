@@ -145,6 +145,9 @@ export type SettingsEditControlField = {
 	placeholder?: string;
 	elements?: SettingsUIOption[];
 	getValue: ( args: { item: SettingsValues } ) => SettingsValue;
+	// Method syntax keeps this assignable from DataForm's signature, which
+	// also receives the normalized field.
+	isDisabled( args: { item: SettingsValues } ): boolean;
 };
 
 export type SettingsEditControlProps = {

@@ -68,6 +68,9 @@ type SettingsEditControlProps = {
 		getValue: ( args: {
 			item: Record< string, string | number | boolean | string[] | null >;
 		} ) => string | number | boolean | string[] | null;
+		isDisabled: ( args: {
+			item: Record< string, string | number | boolean | string[] | null >;
+		} ) => boolean;
 	};
 	onChange: (
 		value: Partial<
@@ -81,6 +84,10 @@ type SettingsEditControlProps = {
 Read the current value with `field.getValue( { item: data } )`. Call
 `onChange()` with an object containing the changed field value. The settings UI
 handles hidden input serialization for the field's save adapter.
+
+Check `field.isDisabled( { item: data } )` and render the control disabled when
+it returns `true`. DataForm applies the disabled state to its own controls only,
+so a registered component has to honor it itself.
 
 ## Example component
 
