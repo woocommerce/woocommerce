@@ -19,7 +19,7 @@ reachable from `GH_TOKEN`, `GITHUB_TOKEN`, or the git credential store.
 
 ## What it proves
 
-```
+```text
 4 · Publish the commit to a ref that triggers nothing
   before: GET /commits/47c51f84… → HTTP 422        ← GitHub has never seen it
   ✓ pushed to refs/local-ci/47c51f84…
@@ -54,11 +54,13 @@ Four findings, each verified by running this:
 
 ## What it does not prove
 
-- **Subtraction.** Nothing here removes a job from the CI matrix. That needs the
-  planner change, and the merge guard must learn the planned set first, or a
-  missing job is indistinguishable from a substituted one.
-- **Trust.** No team membership is checked. `local-ci/v1/poc` here was posted by a
-  script that did run the check, but nothing structurally required it to.
+- **Matrix subtraction.** `poc-local-ci.yml` skips the work inside a job, but the
+  job is still scheduled. Removing it from the matrix needs the planner change, and
+  the merge guard must learn the planned set first, or a missing job is
+  indistinguishable from a substituted one.
+- **Trust.** No team membership is checked. The receipt here was posted by a script
+  that did run the check, but nothing structurally required it to — anyone who can
+  post a status to this repo can suppress the job.
 - **Fidelity.** The check ran against the working tree, not against the merge of
   this branch with trunk, which is what CI actually tests.
 
