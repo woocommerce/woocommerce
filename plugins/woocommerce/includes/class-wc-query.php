@@ -583,7 +583,9 @@ class WC_Query {
 		/**
 		 * Filters the number of products shown per page in a product loop.
 		 *
-		 * Only applies when the query does not already set posts_per_page.
+		 * In WC_Query::product_query() this applies only when the query does not already
+		 * set posts_per_page. Other callers, such as the Product Collection block, apply it
+		 * unconditionally.
 		 *
 		 * @since 1.0.0
 		 *
