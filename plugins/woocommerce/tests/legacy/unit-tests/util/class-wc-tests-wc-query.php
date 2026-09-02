@@ -60,6 +60,8 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'add-payment-method'         => 'add-payment-method',
 			'delete-payment-method'      => 'delete-payment-method',
 			'set-default-payment-method' => 'set-default-payment-method',
+			// Back in Stock Notifications is enabled for the whole suite in bootstrap.php.
+			'stock-notifications'        => 'stock-notifications',
 		);
 		$this->assertEquals( $expected, $default_vars );
 
