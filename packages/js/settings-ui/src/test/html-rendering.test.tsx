@@ -89,6 +89,15 @@ const changeTextInput = ( input: HTMLInputElement, value: string ) => {
 	);
 };
 
+const changeSelect = ( select: HTMLSelectElement, values: string[] ) => {
+	Array.from( select.options ).forEach( ( option ) => {
+		option.selected = values.includes( option.value );
+	} );
+	select.dispatchEvent(
+		new Event( 'change', { bubbles: true, cancelable: true } )
+	);
+};
+
 const getUnsavedChangesActionButton = ( label: string ): HTMLButtonElement => {
 	const button = Array.from(
 		document.body.querySelectorAll< HTMLButtonElement >(
@@ -929,6 +938,96 @@ describe( 'settings HTML rendering', () => {
 			expect(
 				form.querySelector( 'input[name="test_field"]' )
 			).toHaveAttribute( 'value', 'clicked' );
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
+	it( 'serializes edits from built-in controls into the form-post hidden inputs', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'flag',
+							label: 'Flag',
+							type: 'checkbox',
+							value: false,
+						},
+						{
+							id: 'unit',
+							label: 'Unit',
+							type: 'select',
+							value: 'kg',
+							options: [
+								{ label: 'kg', value: 'kg' },
+								{ label: 'lbs', value: 'lbs' },
+							],
+						},
+						{
+							id: 'amount',
+							label: 'Amount',
+							type: 'number',
+							value: '1',
+						},
+						{
+							id: 'countries',
+							label: 'Countries',
+							type: 'array',
+							value: [ 'FR' ],
+							options: [
+								{ label: 'France', value: 'FR' },
+								{ label: 'Spain', value: 'ES' },
+							],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+		const hiddenValues = ( name: string ) =>
+			Array.from(
+				form.querySelectorAll< HTMLInputElement >(
+					`input[type="hidden"][name="${ name }"]`
+				)
+			).map( ( input ) => input.value );
+
+		try {
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'no' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'kg' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '1' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR' ] );
+
+			const checkbox = container.querySelector< HTMLInputElement >(
+				'input[type="checkbox"]'
+			);
+			const selects =
+				container.querySelectorAll< HTMLSelectElement >( 'select' );
+			const number = container.querySelector< HTMLInputElement >(
+				'input[type="number"]'
+			);
+			if ( ! checkbox || selects.length !== 2 || ! number ) {
+				throw new Error( 'Expected one control per built-in type.' );
+			}
+
+			act( () => checkbox.click() );
+			act( () => changeSelect( selects[ 0 ], [ 'lbs' ] ) );
+			act( () => changeTextInput( number, '5' ) );
+			act( () => changeSelect( selects[ 1 ], [ 'FR', 'ES' ] ) );
+
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'yes' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'lbs' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '5' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR', 'ES' ] );
 		} finally {
 			act( () => root.unmount() );
 			form.remove();
