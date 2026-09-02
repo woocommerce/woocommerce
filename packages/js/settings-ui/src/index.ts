@@ -1,13 +1,5 @@
 export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
-export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
-export {
-	registerSettingsExtension,
-	resolveFieldComponent,
-	resolveFieldVisibilityPredicate,
-	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
-	resolveSaveHandler,
-} from './registry';
+export { registerSettingsExtension } from './registry';
 export type {
 	SettingsUIField,
 	SettingsUIGroup,
