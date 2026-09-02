@@ -3204,4 +3204,68 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			"The release cast '{$malformed}' onto post {$decoy_id} and evicted an unrelated page."
 		);
 	}
+
+	/**
+	 * @testdox An id the data store returns twice in one batch is processed once.
+	 */
+	public function test_wc_scheduled_sales_processes_a_duplicated_id_once(): void {
+		// The sales queries join postmeta without a row-identity constraint, so a product
+		// carrying two rows for one of the joined keys comes back twice. Before batching
+		// that meant two saves; the batch now de-duplicates its IDs, and this pins it.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$store = new class( $product->get_id() ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Product id to report twice.
+			 *
+			 * @var int
+			 */
+			private $id;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int $id Product id to report twice.
+			 */
+			public function __construct( $id ) {
+				$this->id = $id;
+			}
+
+			/**
+			 * Report the same product as both an int and the string $wpdb->get_col() returns.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				return array( $this->id, (string) $this->id );
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+
+		$saves = 0;
+		add_action(
+			'woocommerce_update_product',
+			static function ( $updated_id ) use ( $product, &$saves ) {
+				if ( (int) $updated_id === $product->get_id() ) {
+					++$saves;
+				}
+			}
+		);
+
+		wc_scheduled_sales();
+
+		$this->assertSame( 1, $saves, 'A duplicated id must settle with a single save, not one per row.' );
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+	}
 }
