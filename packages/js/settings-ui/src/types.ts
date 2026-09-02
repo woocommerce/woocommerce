@@ -191,15 +191,3 @@ export type SettingsExtensionRegistration = {
 	saveHandlers?: Record< string, SettingsSaveHandler >;
 	regions?: Record< string, SettingsRegionComponent >;
 };
-
-export type SettingsUIRegistry = {
-	registerSettingsExtension: (
-		registration: SettingsExtensionRegistration
-	) => void;
-};
-
-declare global {
-	interface Window {
-		wcSettingsUI?: SettingsUIRegistry;
-	}
-}

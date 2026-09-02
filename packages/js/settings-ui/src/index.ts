@@ -4,7 +4,6 @@ export type {
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUIOption,
-	SettingsUIRegistry,
 	SettingsUISaveSchema,
 	SettingsUISaveStrategy,
 	SettingsUISchema,

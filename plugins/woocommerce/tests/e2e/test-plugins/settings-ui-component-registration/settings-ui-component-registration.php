@@ -41,7 +41,7 @@ final class WC_Settings_UI_Component_Registration_Test_Plugin {
 		wp_add_inline_script(
 			self::REGISTERED_HANDLE,
 			<<<'JS'
-window.wcSettingsUI.registerSettingsExtension( {
+window.wc.settingsUi.registerSettingsExtension( {
 	scope: { page: 'products', section: 'settings_ui_component_registered' },
 	components: {
 		'woocommerce/settings-ui-component-test': function SettingsUIComponentTest( props ) {
