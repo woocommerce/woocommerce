@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# This script mimics the CopyWebpackPlugin behavior from the WooCommerce Blocks webpack configuration
-# to make block.json files available for unit testing without requiring a full build.
-# Ensure that the logic of this script is kept in sync with the logic of the CopyWebpackPlugin in the WooCommerce Blocks webpack configuration:
+# Copies every block.json under the Blocks source tree into the built assets directory so the PHP
+# test suites can read block metadata without a full build. Mirrors the CopyWebpackPlugin rules in
 # https://github.com/woocommerce/woocommerce/blob/84d1da7be3cbd3d8f40b17ad58729f668fd82b6a/plugins/woocommerce/client/blocks/bin/webpack-configs.js#L229-L256
+# and must stay in sync with them. Unlike a plain copy, it first removes the previously generated
+# manifests so an edited or deleted source manifest cannot leave a stale copy behind.
 
 # Move to the project root
 while [ ! -d "plugins/woocommerce" ] || [ ! -f "pnpm-workspace.yaml" ]; do
@@ -20,6 +21,7 @@ const path = require( 'node:path' );
 
 const sourceDirectory = path.resolve( 'plugins/woocommerce/client/blocks/assets/js' );
 const targetDirectory = path.resolve( 'plugins/woocommerce/assets/client/blocks' );
+// Keep in sync with genericBlocks in webpack-entries.js.
 const genericBlocks = new Set( [
 	'accordion-group',
 	'accordion-header',
@@ -27,91 +29,46 @@ const genericBlocks = new Set( [
 	'accordion-panel',
 ] );
 
-function findFiles( directory, fileName ) {
-	return fs
-		.readdirSync( directory, { withFileTypes: true } )
-		.flatMap( ( entry ) => {
-			const entryPath = path.join( directory, entry.name );
+const findManifests = ( directory ) =>
+	fs
+		.readdirSync( directory, { recursive: true } )
+		.filter( ( entry ) => path.basename( entry ) === 'block.json' )
+		.map( ( entry ) => path.join( directory, entry ) );
 
-			if ( entry.isDirectory() ) {
-				return findFiles( entryPath, fileName );
-			}
-
-			return entry.isFile() && entry.name === fileName
-				? [ entryPath ]
-				: [];
-		} );
-}
-
-function removeEmptyDirectories( directory, rootDirectory ) {
-	if ( ! fs.existsSync( directory ) ) {
-		return;
-	}
-
-	for ( const entry of fs.readdirSync( directory, {
-		withFileTypes: true,
-	} ) ) {
-		if ( entry.isDirectory() ) {
-			removeEmptyDirectories(
-				path.join( directory, entry.name ),
-				rootDirectory
-			);
-		}
-	}
-
-	if (
-		directory !== rootDirectory &&
-		fs.readdirSync( directory ).length === 0
-	) {
-		fs.rmdirSync( directory );
-	}
-}
-
-if ( ! fs.existsSync( sourceDirectory ) ) {
-	throw new Error(
-		`Block metadata source directory does not exist: ${ sourceDirectory }`
-	);
-}
-
-const sourceManifests = findFiles( sourceDirectory, 'block.json' );
+const sourceManifests = findManifests( sourceDirectory );
 if ( sourceManifests.length === 0 ) {
-	throw new Error(
-		`No block metadata manifests found in ${ sourceDirectory }`
-	);
+	// Refuse to wipe the target when the source scan found nothing: that is a broken checkout, not an empty one.
+	throw new Error( `No block metadata manifests found in ${ sourceDirectory }` );
 }
 
 fs.mkdirSync( targetDirectory, { recursive: true } );
 
-for ( const targetManifest of findFiles( targetDirectory, 'block.json' ) ) {
+for ( const targetManifest of findManifests( targetDirectory ) ) {
 	fs.unlinkSync( targetManifest );
+	// Prune the directories this copy created once they are empty, so a renamed or removed block leaves nothing behind.
+	let directory = path.dirname( targetManifest );
+	while ( directory !== targetDirectory && fs.readdirSync( directory ).length === 0 ) {
+		fs.rmdirSync( directory );
+		directory = path.dirname( directory );
+	}
 }
 
-const metadataCollection = path.join( targetDirectory, 'blocks-json.php' );
-if ( fs.existsSync( metadataCollection ) ) {
-	fs.unlinkSync( metadataCollection );
-}
-
-removeEmptyDirectories( targetDirectory, targetDirectory );
+// The full build writes a metadata collection that overrides the individual block.json files at
+// registration time; a stale one would mask the fresh copies until the next build, so drop it too.
+fs.rmSync( path.join( targetDirectory, 'blocks-json.php' ), { force: true } );
 
 for ( const sourceManifest of sourceManifests ) {
-	const metadata = JSON.parse(
-		fs.readFileSync( sourceManifest, 'utf8' )
-	);
-
-	if ( typeof metadata.name !== 'string' ) {
-		throw new Error( `Missing block name in ${ sourceManifest }` );
-	}
-
-	const blockName = metadata.name.split( '/' )[ 1 ];
+	const metadata = JSON.parse( fs.readFileSync( sourceManifest, 'utf8' ) );
+	const blockName = String( metadata.name ?? '' ).split( '/' )[ 1 ];
 	if ( ! blockName ) {
 		throw new Error( `Invalid block name in ${ sourceManifest }` );
 	}
 
-	const relativeTarget =
-		metadata.parent && ! genericBlocks.has( blockName )
-			? path.join( 'inner-blocks', blockName, 'block.json' )
-			: path.join( blockName, 'block.json' );
-	const targetManifest = path.join( targetDirectory, relativeTarget );
+	const targetManifest = path.join(
+		targetDirectory,
+		metadata.parent && ! genericBlocks.has( blockName ) ? path.join( 'inner-blocks', blockName ) : blockName,
+		'block.json'
+	);
 
 	fs.mkdirSync( path.dirname( targetManifest ), { recursive: true } );
 	fs.copyFileSync( sourceManifest, targetManifest );
