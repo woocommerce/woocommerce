@@ -606,9 +606,9 @@ describe( 'Form state updates', () => {
 		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
 	} );
 
-	// lodash's toPath() yields no segments for these names, while setWith()
-	// still writes each one as a literal key.
-	it.each( [ '', '[', undefined, null ] )(
+	// lodash's toPath() yields no segments for these names. setWith() writes
+	// each one as a literal key, except an empty array, which it drops.
+	it.each( [ '', '[', undefined, null, [] ] )(
 		'writes the zero-segment name %p under the key it lands on',
 		( name ) => {
 			const initialValues: Record< string, unknown > = { other: 2 };

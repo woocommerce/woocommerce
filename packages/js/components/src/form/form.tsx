@@ -190,9 +190,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 				? [ String( name ) ]
 				: _toPath( name );
 
-			// toPath() yields no segments for a name such as '' or null, while
-			// setWith() still writes those as a literal key. Fall back to the
-			// literal so the entry below reads the key the write landed on.
+			// toPath() yields no segments for a name such as '' or null. Write
+			// those under the literal key instead, and hand setWith() the same
+			// segments so the entry read below is the one the write landed on.
 			const segments = path.length ? path : [ String( name ) ];
 
 			// lodash drops a write whose path steps through one of these keys.
@@ -208,7 +208,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 			const newValues = _setWith(
 				{ ...pendingValuesRef.current },
-				name,
+				segments,
 				value,
 				_clone
 			);
