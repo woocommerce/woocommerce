@@ -199,6 +199,9 @@ function ProductCardFooter( props: { product: Product } ) {
 		);
 	}
 
+	// Ratings run 1-5, so 0 -- like a missing value -- means "no rating".
+	const averageRating = product.averageRating ?? 0;
+
 	return (
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
@@ -230,18 +233,18 @@ function ProductCardFooter( props: { product: Product } ) {
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ product.averageRating !== null && (
+				{ Number.isFinite( averageRating ) && averageRating > 0 && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							<span aria-hidden>{ product.averageRating }</span>
+							<span aria-hidden>{ averageRating }</span>
 							<span className="screen-reader-text">
 								{ sprintf(
 									// translators: %.1f: average rating
 									__( '%.1f stars', 'woocommerce' ),
-									product.averageRating ?? 0
+									averageRating
 								) }
 							</span>
 						</span>
