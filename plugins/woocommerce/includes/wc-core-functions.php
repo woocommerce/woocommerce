@@ -1068,21 +1068,17 @@ function wc_fix_rewrite_rules( $rules ) {
 		return $rules;
 	}
 
-	$shop_page_ids = array(
-		get_option( 'woocommerce_shop_page_id' ),
-		wc_get_page_id( 'shop' ),
-	);
 	/**
 	 * Filters the Shop page IDs used to generate subpage rewrite rules.
 	 *
-	 * The stored `woocommerce_shop_page_id` option is not language-independent under WCML or Polylang for WooCommerce,
-	 * which translate WooCommerce page options at the option level. Multilingual integrations should add the IDs of
-	 * translated Shop pages here so persisted rewrite rules cover every language.
+	 * The default is the Shop page resolved by wc_get_page_id(), which multilingual plugins translate for the
+	 * current request language. Multilingual integrations should add the IDs of every translated Shop page here
+	 * so persisted rewrite rules cover every language.
 	 *
 	 * @since 11.2.0
 	 * @param int[] $shop_page_ids Shop page IDs.
 	 */
-	$filtered_shop_page_ids = apply_filters( 'woocommerce_rewrite_rules_shop_page_ids', $shop_page_ids );
+	$filtered_shop_page_ids = apply_filters( 'woocommerce_rewrite_rules_shop_page_ids', array( wc_get_page_id( 'shop' ) ) );
 	/**
 	 * Filter callbacks can return anything, so validate each value before use.
 	 *

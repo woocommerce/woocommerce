@@ -858,9 +858,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_fix_rewrite_rules uses stored, filtered, and supplied Shop pages.
+	 * @testdox wc_fix_rewrite_rules uses the filtered Shop page and any supplied Shop pages.
 	 */
-	public function test_wc_fix_rewrite_rules_uses_stored_shop_page(): void {
+	public function test_wc_fix_rewrite_rules_uses_filtered_and_supplied_shop_pages(): void {
 		$original_shop_page_id = get_option( 'woocommerce_shop_page_id', null );
 		$original_permalinks   = get_option( 'woocommerce_permalinks', null );
 		$shop_page_id          = wp_insert_post(
@@ -978,8 +978,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			wp_delete_post( $shop_page_id, true );
 		}
 
-		$this->assertArrayHasKey( 'shop/collection/?$', $rules, 'Persisted rules should include descendants of the canonical Shop page.' );
-		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should continue to honor the filtered Shop page.' );
+		$this->assertArrayNotHasKey( 'shop/collection/?$', $rules, 'A Shop page repointed through woocommerce_get_shop_page_id should not keep rules for the stored page.' );
+		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should honor the filtered Shop page.' );
 		$this->assertArrayHasKey( 'tienda/collection-es/?$', $rules, 'Persisted rules should include descendants of additional translated Shop pages supplied by integrations.' );
 		$this->assertArrayNotHasKey( $unrelated_child_rule, $missing_shop_rules, 'Missing and invalid Shop page IDs should not be converted into page ID 1.' );
 	}
