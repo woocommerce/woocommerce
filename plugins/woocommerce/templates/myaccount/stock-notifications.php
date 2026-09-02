@@ -113,8 +113,6 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	/**
 	 * Fires before the stock notifications pagination is rendered on My Account.
 	 *
-	 * Mirrors `woocommerce_before_account_orders_pagination`.
-	 *
 	 * @since 11.2.0
 	 */
 	do_action( 'woocommerce_before_account_customer_stock_notifications_pagination' );
