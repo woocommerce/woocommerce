@@ -88,60 +88,33 @@ class CheckoutLink {
 	/**
 	 * Get the products from the checkout link.
 	 *
-	 * @return array[] Array of products, each containing:
-	 * [
-	 *     'id'             => (int)    Product ID,
-	 *     'quantity'       => (int)    Quantity of the product,
-	 *     'variation'      => (array)  Variation attributes (if any),
-	 *     'cart_item_data' => (array)  Additional cart item data,
-	 * ]
+	 * Products use the format `id-or-sku:quantity:variation-data:cart-item-data`. Quantity and both data groups are optional,
+	 * while an empty variation group separates cart item data. Multiple key-value pairs within a data group use semicolons.
+	 *
+	 * @return array[] Array of product data formatted for CartController::add_to_cart().
 	 */
 	protected function get_products_from_checkout_link() {
 		$raw_products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$products     = [];
 
 		foreach ( $raw_products as $raw_product ) {
-			$cart_item_data = [];
+			$segments           = explode( ':', $raw_product, 4 );
+			$product_identifier = $segments[0] ?? '';
+			$quantity           = '' !== ( $segments[1] ?? '' ) ? absint( $segments[1] ) : 1;
+			$variation_data     = $this->parse_product_data( $segments[2] ?? '' );
+			$cart_item_data     = $this->parse_product_data( $segments[3] ?? '' );
 
-			if ( strpos( $raw_product, ':' ) !== false ) {
-
-				$exploded = explode( ':', $raw_product, 3 );
-
-				$product_id   = $exploded[0] ?? 0;
-				$qty          = $exploded[1] ?? 1;
-				$product_data = $exploded[2] ?? '';
-
-				// If the quantity is not-numeric, it may be key=value pairs.
-				if ( ! is_numeric( $qty ) ) {
-					$product_data = $qty;
-					$qty          = 1;
-				}
-
-				if ( $product_data ) {
-
-					// Parse key=value pairs separated by semicolons.
-					$pairs          = explode( ';', $product_data );
-					$cart_item_data = [];
-
-					foreach ( $pairs as $pair ) {
-						if ( strpos( $pair, '=' ) === false ) {
-							continue;
-						}
-
-						list( $key, $value )                    = explode( '=', $pair, 2 );
-						$cart_item_data[ sanitize_key( $key ) ] = wc_clean( $value );
-					}
-				}
-			} else {
-				// No custom attributes provided, treat as default quantity.
-				$product_id = $raw_product;
-				$qty        = 1;
+			if ( ! $product_identifier || ! $quantity ) {
+				continue;
 			}
 
-			$qty        = absint( $qty );
-
-			if ( ! $product_id || ! $qty ) {
-				continue;
+			if ( is_numeric( $product_identifier ) ) {
+				$product_id = absint( $product_identifier );
+			} else {
+				$product_id = wc_get_product_id_by_sku( $product_identifier );
+				if ( ! $product_id ) {
+					continue;
+				}
 			}
 
 			$variation = array_map(
@@ -151,19 +124,44 @@ class CheckoutLink {
 						'value'     => $value,
 					];
 				},
-				array_keys( $cart_item_data ),
-				$cart_item_data
+				array_keys( $variation_data ),
+				$variation_data
 			);
 
 			$products[] = [
 				'id'             => $product_id,
-				'quantity'       => $qty,
+				'quantity'       => $quantity,
 				'variation'      => $variation,
 				'cart_item_data' => $cart_item_data,
 			];
 		}
 
 		return $products;
+	}
+
+	/**
+	 * Parse a semicolon-separated list of key-value pairs.
+	 *
+	 * @param string $raw_data Raw product data from the checkout link.
+	 * @return array<string, string> Sanitized product data.
+	 */
+	protected function parse_product_data( $raw_data ) {
+		$data = [];
+
+		foreach ( explode( ';', $raw_data ) as $pair ) {
+			if ( false === strpos( $pair, '=' ) ) {
+				continue;
+			}
+
+			list( $key, $value ) = explode( '=', $pair, 2 );
+			$key                 = sanitize_key( $key );
+
+			if ( '' !== $key ) {
+				$data[ $key ] = sanitize_text_field( $value );
+			}
+		}
+
+		return $data;
 	}
 
 	/**
