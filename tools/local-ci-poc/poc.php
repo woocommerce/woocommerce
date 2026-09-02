@@ -21,15 +21,24 @@
 
 const REPO = 'woocommerce/woocommerce';
 
-/** A real check: 17 jest tests, about two seconds, no Docker. */
-const CHECK_PACKAGE = '@woocommerce/number';
+/**
+ * Receipts are named after the CI job they stand in for.
+ *
+ * `ci-jobs` already renames every test job to "<name> - <project> [<testType>]",
+ * which identifies it uniquely, and ci.yml reads the same string from
+ * `matrix.name`. Using it verbatim keeps the two sides in step with no parsing.
+ */
+const RECEIPT_PREFIX = 'local-ci/v1/';
 
 /**
- * The receipt's name. Qualified by project because 21 packages in this monorepo
- * each have a job called "JavaScript", and a bare "JavaScript" receipt would be
- * ambiguous about which one actually ran.
+ * Which planned jobs this POC is willing to run locally.
+ *
+ * JavaScript unit tests only: they need no Docker, no database and no built
+ * plugin, so a laptop runs them the same way CI does. PHP, e2e and performance
+ * jobs are excluded because a local run would not be equivalent.
  */
-const RECEIPT_CONTEXT = 'local-ci/v1/@woocommerce/number::JavaScript';
+const ELIGIBLE_TEST_TYPE = 'unit';
+const ELIGIBLE_NAME_PREFIX = 'JavaScript';
 
 /** Set once the temporary ref exists, so the shutdown handler knows to remove it. */
 $temporary_ref = null;
@@ -115,35 +124,43 @@ pass( 'up to date with trunk — HEAD is the tree CI would merge and test' );
 heading( '3 · Ask the planner what CI would run for this diff' );
 detail( 'the same ci-jobs tool CI uses, run locally:' );
 
-$planned_jobs = plan_jobs_for_this_diff();
+$eligible_jobs = eligible_jobs_for_this_diff();
 
-if ( array() === $planned_jobs ) {
-	detail( '  (no jobs for this diff — it touches no project CI cares about)', 2 );
-} else {
-	foreach ( $planned_jobs as $job ) {
-		detail( $job, 2 );
-	}
+if ( array() === $eligible_jobs ) {
+	detail( 'no JavaScript unit jobs for this diff — nothing to substitute', 2 );
+	warn( 'Change a JS package under packages/js to see this do something.' );
+	exit( 0 );
 }
 
-detail( 'the design reads this list; this POC substitutes the one job below', 2 );
+foreach ( $eligible_jobs as $job ) {
+	detail( $job['name'], 2 );
+}
+
+detail( sprintf( '%d job(s) this POC can run locally', count( $eligible_jobs ) ), 2 );
 
 // ---------------------------------------------------------------------------
 // 4. Run one of those checks for real.
 // ---------------------------------------------------------------------------
 
-heading( '4 · Run an eligible check locally' );
+heading( '4 · Run those checks locally' );
 
-$check = run_the_check();
+$started_all = time();
 
-if ( ! $check['passed'] ) {
-	// The whole point of a receipt is that it means something. A failed check
-	// publishes nothing and stops, so nothing downstream can be skipped.
-	fail( 'check failed — a real run would stop here and not push' );
-	exit( 1 );
+foreach ( $eligible_jobs as $job ) {
+	$check = run_the_check( $job );
+
+	if ( ! $check['passed'] ) {
+		// A receipt has to mean something. One failure publishes nothing at all,
+		// so no part of this diff can be skipped on a bad result.
+		fail( sprintf( '%s failed — publishing nothing', $job['projectName'] ) );
+		warn( 'Fix it and re-run. CI will run every job until a receipt exists.' );
+		exit( 1 );
+	}
+
+	pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
 }
 
-pass( sprintf( '%s passed in %ds — %s', CHECK_PACKAGE, $check['seconds'], $check['summary'] ) );
-detail( "this is the same command CI runs for that package's JavaScript job", 2 );
+detail( sprintf( 'all %d passed in %ds', count( $eligible_jobs ), time() - $started_all ), 2 );
 
 // ---------------------------------------------------------------------------
 // 5. Make the commit known to GitHub without pushing a branch.
@@ -221,38 +238,38 @@ if ( git( 'rev-parse HEAD' ) !== $sha ) {
 	exit( 1 );
 }
 
-$posted = github_api(
-	$token,
-	'POST',
-	sprintf( '/repos/%s/statuses/%s', REPO, $sha ),
-	array(
-		'state'       => 'success',
-		'context'     => RECEIPT_CONTEXT,
-		'description' => CHECK_PACKAGE . ' passed locally',
-	)
-);
+foreach ( $eligible_jobs as $job ) {
+	$posted = github_api(
+		$token,
+		'POST',
+		sprintf( '/repos/%s/statuses/%s', REPO, $sha ),
+		array(
+			'state'       => 'success',
+			'context'     => RECEIPT_PREFIX . $job['name'],
+			'description' => 'passed locally',
+		)
+	);
 
-detail( sprintf( 'POST /statuses → HTTP %d', $posted['status'] ), 2 );
+	if ( 201 !== $posted['status'] ) {
+		// Carrying on would make a failed publish look like a successful one, and
+		// CI would then run a job the contributor believes was covered.
+		fail( sprintf( 'receipt for %s not published (HTTP %d)', $job['projectName'], $posted['status'] ) );
 
-if ( 201 !== $posted['status'] ) {
-	// Printing the code and carrying on would make a failed publish look like a
-	// successful one, and step 8 would then show a stale receipt or none at all.
-	fail( 'the receipt was not published' );
+		$message = (string) ( $posted['body']['message'] ?? '' );
 
-	$message = (string) ( $posted['body']['message'] ?? '' );
+		if ( '' !== $message ) {
+			warn( 'GitHub said: ' . $message );
+		}
 
-	if ( '' !== $message ) {
-		warn( 'GitHub said: ' . $message );
+		if ( 403 === $posted['status'] ) {
+			warn( 'A 403 here usually means the token lacks the repo:status scope.' );
+		}
+
+		exit( 1 );
 	}
-
-	if ( 403 === $posted['status'] ) {
-		warn( 'A 403 here usually means the token lacks the repo:status scope.' );
-	}
-
-	exit( 1 );
 }
 
-pass( 'receipt published' );
+pass( sprintf( '%d receipt(s) published', count( $eligible_jobs ) ) );
 
 // ---------------------------------------------------------------------------
 // 8. Read it back the way the workflow does.
@@ -260,15 +277,21 @@ pass( 'receipt published' );
 
 heading( '8 · Read it back, as CI would' );
 
-foreach ( read_receipts( $token, $sha ) as $receipt ) {
+$receipts = read_receipts( $token, $sha );
+
+foreach ( array_slice( $receipts, 0, 3 ) as $receipt ) {
 	detail(
 		sprintf( '%s  %s  creator=%s', $receipt['context'], $receipt['state'], $receipt['creator'] ),
 		2
 	);
 }
 
-detail( '.github/workflows/poc-local-ci.yml reads exactly this and, when the state is', 2 );
-detail( "success, skips running the package's JavaScript job.", 2 );
+if ( count( $receipts ) > 3 ) {
+	detail( sprintf( '... and %d more', count( $receipts ) - 3 ), 2 );
+}
+
+detail( 'ci.yml reads exactly this, per matrix job, and skips both the install and', 2 );
+detail( 'the test run when it finds a success for that job.', 2 );
 warn( 'Trust is NOT implemented: the workflow does not yet check that creator' );
 warn( 'belongs to a trusted team. That is the next piece.' );
 
@@ -341,39 +364,80 @@ function require_github_cli_token(): string {
 }
 
 /**
- * Ask the monorepo's own CI planner which jobs this diff would produce.
+ * Ask the monorepo's own CI planner which jobs this diff would produce, and keep
+ * the ones this POC can honestly run on a laptop.
  *
- * This is the same tool the CI workflow runs, so the list matches what would
- * actually be scheduled rather than an approximation of it.
+ * The planner only emits the full job matrix when it believes it is running in
+ * Actions, so it is run that way deliberately, with GITHUB_OUTPUT pointed at a
+ * temporary file. That yields the same JSON CI feeds into `matrix`, including
+ * each job's real command — parsing the human-readable listing instead would
+ * mean guessing at commands.
  *
- * @return string[] Job lines, empty when the diff touches nothing CI cares about.
+ * @return array<int, array{name: string, projectName: string, command: string}>
  */
-function plan_jobs_for_this_diff(): array {
-	$output = shell( 'pnpm utils ci-jobs --base-ref trunk 2>/dev/null' );
-	$jobs   = array();
+function eligible_jobs_for_this_diff(): array {
+	$output_file = sys_get_temp_dir() . '/poc-ci-jobs-' . getmypid() . '.txt';
+	touch( $output_file );
 
-	foreach ( explode( "\n", $output ) as $line ) {
-		if ( str_starts_with( $line, '-  ' ) ) {
-			$jobs[] = trim( $line );
-		}
+	shell(
+		sprintf(
+			'GITHUB_ACTIONS=true GITHUB_OUTPUT=%s pnpm utils ci-jobs --base-ref trunk 2>/dev/null',
+			escapeshellarg( $output_file )
+		)
+	);
+
+	$raw = (string) file_get_contents( $output_file );
+	unlink( $output_file );
+
+	// Actions writes multi-line outputs as `name<<DELIMITER ... DELIMITER`.
+	if ( ! preg_match( '/test-jobs<<(\S+)\n(.*?)\n\1/s', $raw, $matches ) ) {
+		return array();
 	}
 
-	return array_slice( $jobs, 0, 10 );
+	$planned  = json_decode( $matches[2], true );
+	$eligible = array();
+
+	foreach ( (array) $planned as $job ) {
+		$name = (string) ( $job['name'] ?? '' );
+
+		if ( ELIGIBLE_TEST_TYPE !== ( $job['testType'] ?? '' ) || ! str_starts_with( $name, ELIGIBLE_NAME_PREFIX ) ) {
+			continue;
+		}
+
+		$eligible[] = array(
+			'name'        => $name,
+			'projectName' => (string) ( $job['projectName'] ?? '' ),
+			'command'     => (string) ( $job['command'] ?? '' ),
+		);
+	}
+
+	return $eligible;
 }
 
 /**
- * Run the package's JavaScript tests and time them.
+ * Run one planned job exactly as CI would, and time it.
+ *
+ * The command comes from the planner rather than being assumed, so this cannot
+ * drift from what CI runs for the same job.
+ *
+ * @param array{name: string, projectName: string, command: string} $job Job to run.
  *
  * @return array{passed: bool, seconds: int, summary: string}
  */
-function run_the_check(): array {
+function run_the_check( array $job ): array {
 	$log     = sys_get_temp_dir() . '/poc-check.log';
 	$started = time();
 
-	$command = sprintf( 'pnpm --filter=%s test:js > %s 2>&1', CHECK_PACKAGE, escapeshellarg( $log ) );
+	$command = sprintf(
+		'pnpm --filter=%s %s > %s 2>&1',
+		escapeshellarg( $job['projectName'] ),
+		$job['command'],
+		escapeshellarg( $log )
+	);
+
 	exec( $command, $ignored, $exit_code );
 
-	$output = is_readable( $log ) ? (string) file_get_contents( $log ) : '';
+	$output  = is_readable( $log ) ? (string) file_get_contents( $log ) : '';
 	$summary = preg_match( '/Tests: +\d+ passed/', $output, $matches ) ? $matches[0] : 'ran';
 
 	return array(

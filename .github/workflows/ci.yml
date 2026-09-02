@@ -292,9 +292,49 @@ jobs:
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
+      # ----------------------------------------------------------------------
+      # POC (not for merge): local-first CI receipts.
+      #
+      # If the contributor already ran this exact job locally and published a
+      # receipt for this commit, skip it here. Fails open in every direction —
+      # a missing receipt, an API error, or malformed JSON all leave
+      # `substituted` false, so the tests run. Uncertainty must never skip.
+      #
+      # The context is matrix.name because that string already identifies the
+      # job uniquely: it carries the project and the test type.
+      # ----------------------------------------------------------------------
+      - name: 'POC: look for a local CI receipt'
+        id: 'local-ci-receipt'
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RECEIPT_CONTEXT: 'local-ci/v1/${{ matrix.name }}'
+        run: |
+          substituted=false
+
+          # The list endpoint, not the combined one: only this shape carries
+          # `creator`. Newest first, so take the most recent entry for the
+          # context and then require success — a later failure must not be
+          # masked by an earlier success.
+          latest=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses"             --jq "[.[] | select(.context == "$RECEIPT_CONTEXT")][0]" 2>/dev/null || true)
+
+          if [ -n "$latest" ] && [ "$(jq -r '.state // empty' <<<"$latest" 2>/dev/null)" = 'success' ]; then
+            substituted=true
+            echo "Receipt found for '$RECEIPT_CONTEXT', posted by $(jq -r '.creator.login // "unknown"' <<<"$latest")."
+            echo "Trust is NOT implemented in this POC: the creator is not checked against a team."
+          else
+            echo "No receipt for '$RECEIPT_CONTEXT'. Running the job normally."
+          fi
+
+          echo "substituted=$substituted" >> "$GITHUB_OUTPUT"
+
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
         id: 'install-monorepo'
+        # POC: a receipt makes the install unnecessary too, which is where most
+        # of this job's time goes. Only JS unit jobs ever carry one.
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
@@ -405,6 +445,8 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        # POC: skipped when a local receipt vouches for this exact job.
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         # `woocommercebot` PRs run on the `WooCommerce Release Checks` group (see `runs-on` above),
         # which is slower than `ubuntu-latest`, so they need a larger e2e budget than other PRs.
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.pull_request.user.login == 'woocommercebot' && 30 || 20 ) ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
