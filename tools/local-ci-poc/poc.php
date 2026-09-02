@@ -234,6 +234,10 @@ run_checks_in_parallel(
 	$eligible_jobs,
 	$concurrency,
 	function ( array $job, array $check ) use ( &$passed_jobs, &$failed_jobs ): void {
+		// Keep the duration on the record so the summary below can compare the
+		// work done against the time it actually took.
+		$job['seconds'] = $check['seconds'];
+
 		if ( $check['passed'] ) {
 			$passed_jobs[] = $job;
 			pass( sprintf( '%s in %ds — %s', $job['projectName'], $check['seconds'], $check['summary'] ) );
