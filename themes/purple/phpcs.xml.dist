@@ -29,5 +29,5 @@
 		</properties>
 	</rule>
 
-	<config name="minimum_wp_version" value="7.0"/>
+	<config name="minimum_wp_version" value="7.1"/>
 </ruleset>

@@ -347,6 +347,13 @@
 					"blockGap": "var(--wp--preset--spacing--30)"
 				}
 			},
+			"core/navigation-link": {
+				"-current": {
+					"typography": {
+						"textDecoration": "underline"
+					}
+				}
+			},
 			"core/post-comments-form": {
 				"css": "& .comment-form { margin-top: var(--wp--preset--spacing--20); }"
 			},
