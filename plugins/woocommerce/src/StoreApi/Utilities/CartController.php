@@ -108,8 +108,7 @@ class CartController {
 			]
 		);
 
-		$request = $this->filter_request_data( $this->parse_variation_data( $this->parse_sku( $request ) ) );
-
+		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
 		$product = $this->get_product_for_cart( $request );
 		$cart_id = $cart->generate_cart_id(
 			$this->get_product_id( $product ),
@@ -1351,38 +1350,6 @@ class CartController {
 	}
 
 	/**
-	 * If product ID is found but does not match a product, check for a SKU match.
-	 *
-	 * @throws RouteException Exception if invalid data is detected.
-	 *
-	 * @param array $request Add to cart request params.
-	 * @return array Updated request array.
-	 */
-	protected function parse_sku( $request ) {
-		$product = wc_get_product( $request['id'] );
-
-		// Get a product by SKU if no product found by ID.
-		if ( ! $product ) {
-			$product_id = wc_get_product_id_by_sku( $request['id'] );
-			if ( ! $product_id ) {
-				throw new RouteException(
-					'woocommerce_rest_cart_invalid_product',
-					sprintf(
-						/* translators: %s: product ID */
-						esc_html__( 'Product with SKU "%s" was not found and cannot be added to the cart.', 'woocommerce' ),
-						esc_html( $request['id'] )
-					),
-					400
-				);
-			}
-			$request['id'] = wc_get_product_id_by_sku( $request['id'] );
-		}
-
-		return $request;
-
-	}
-
-	/**
 	 * Try to match request data to a variation ID and return the ID.
 	 *
 	 * @throws RouteException Exception if variation cannot be found.
@@ -1463,32 +1430,36 @@ class CartController {
 				continue;
 			}
 
-			// Attribute slug e.g. pa_size.
-			$attribute_slug = sanitize_title( $attribute['name'] );
-			if ( isset( $variation_data[ $attribute_slug ] ) ) {
+			// Attribute labels e.g. Size.
+			$attribute_label           = wc_attribute_label( $attribute['name'] );
+			$lowercase_attribute_label = strtolower( $attribute_label );
+			if ( isset( $variation_data[ $attribute_label ] ) || isset( $variation_data[ $lowercase_attribute_label ] ) ) {
+
+				// Check both the original and lowercase attribute label.
+				$attribute_label = isset( $variation_data[ $attribute_label ] ) ? $attribute_label : $lowercase_attribute_label;
+
 				$return[ $variation_attribute_name ] =
 					$attribute['is_taxonomy']
 						?
-						sanitize_title( $variation_data[ $attribute_slug ] )
+						sanitize_title( $variation_data[ $attribute_label ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_slug ] ),
+							wc_clean( $variation_data[ $attribute_label ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
 				continue;
 			}
 
-			// Attribute key e.g. size.
-			$attribute_key = str_replace( array( 'attribute_', 'pa_' ), '', $attribute_slug );
-			if ( isset( $variation_data[ $attribute_key ] ) ) {
+			// Attribute slugs e.g. pa_size.
+			if ( isset( $variation_data[ $attribute['name'] ] ) ) {
 				$return[ $variation_attribute_name ] =
 					$attribute['is_taxonomy']
 						?
-						sanitize_title( $variation_data[ $attribute_key ] )
+						sanitize_title( $variation_data[ $attribute['name'] ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_key ] ),
+							wc_clean( $variation_data[ $attribute['name'] ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
