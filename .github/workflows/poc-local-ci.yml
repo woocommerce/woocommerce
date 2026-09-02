@@ -45,11 +45,16 @@ jobs:
                     echo "No receipt for $CONTEXT on $HEAD_SHA."
                   fi
 
+            - name: 'Set up the monorepo (no valid receipt)'
+              if: steps.receipt.outputs.substituted != 'true'
+              uses: './.github/actions/setup-woocommerce-monorepo'
+              with:
+                  install: '@woocommerce/number...'
+                  php-version: 'false'
+
             - name: 'Run the check (no valid receipt)'
               if: steps.receipt.outputs.substituted != 'true'
-              run: |
-                  corepack pnpm install --filter=@woocommerce/number... --frozen-lockfile
-                  corepack pnpm --filter=@woocommerce/number test:js
+              run: pnpm --filter=@woocommerce/number test:js
 
             - name: 'Skip the check (receipt accepted)'
               if: steps.receipt.outputs.substituted == 'true'
