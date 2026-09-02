@@ -97,7 +97,7 @@ class WC_Tracker {
 		if ( self::MAX_CONSECUTIVE_SEND_FAILURES < $attempts ) {
 			self::finish_snapshot();
 			wc_get_logger()->warning(
-				'WooCommerce tracker snapshot could not be built; giving up until the next interval.',
+				'WooCommerce tracker snapshot attempts ended before recording a result; giving up until the next interval.',
 				array(
 					'source'   => 'woocommerce-tracker',
 					'failures' => $attempts - 1,
