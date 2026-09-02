@@ -179,6 +179,38 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should identify a WooCommerce REST request by the route WordPress resolved.
+	 *
+	 * @dataProvider provider_resolved_routes_for_rest_api_detection
+	 *
+	 * @param string $request_uri    Request URI.
+	 * @param string $resolved_route Route WordPress resolved for the request.
+	 * @param bool   $expected       Expected result.
+	 */
+	public function test_is_request_to_rest_api_checks_resolved_route( string $request_uri, string $resolved_route, bool $expected ): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = $request_uri;
+		$wp->query_vars['rest_route'] = $resolved_route;
+
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * Data provider for resolved REST routes.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_resolved_routes_for_rest_api_detection(): array {
+		return array(
+			'language-prefixed woocommerce route' => array( '/en/wp-json/wc/v3/products', '/wc/v3/products', true ),
+			'route differs from resolved route'   => array( '/en/wp-json/wc/v3/products', '/wp/v2/users', false ),
+			'custom rewrite without REST prefix'  => array( '/shop-api/products', '/wc/v3/products', true ),
+			'resolved route overrides URI route'  => array( '/wp-json/wp/v2/users', '/wc/v3/products', true ),
+		);
+	}
+
+	/**
 	 * @testdox Should detect WooCommerce routes on a subdirectory install, matching how WordPress strips the home path.
 	 *
 	 * @dataProvider provider_subdirectory_request_uris
@@ -465,9 +497,15 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let the authentication fallback through for a WooCommerce route.
+	 * @testdox Should let the authentication fallback through for an in-scope WooCommerce route.
+	 *
+	 * @testWith ["/wp-json/wc/v3/products"]
+	 *           ["/ja/wp-json/wc/v3/products"]
+	 *           ["/shop-api/products"]
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback(): void {
+	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback( string $request_uri ): void {
 		global $wp, $wpdb;
 
 		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
@@ -488,7 +526,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$_SERVER['HTTPS']             = 'on';
 		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
 		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
-		$_SERVER['REQUEST_URI']       = '/wp-json/wc/v3/products';
+		$_SERVER['REQUEST_URI']       = $request_uri;
 		$wp->query_vars['rest_route'] = '/wc/v3/products';
 
 		wp_set_current_user( 0 );
