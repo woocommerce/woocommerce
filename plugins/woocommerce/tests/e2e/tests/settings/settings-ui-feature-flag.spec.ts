@@ -125,29 +125,26 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		const updatedUnit = originalUnit === 'kg' ? 'g' : 'kg';
 		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
 
-		await expect( saveButton ).toBeDisabled();
-		await weightUnit.selectOption( updatedUnit );
-		await expect( saveButton ).toBeEnabled();
-		await saveButton.click();
+		try {
+			await expect( saveButton ).toBeDisabled();
+			await weightUnit.selectOption( updatedUnit );
+			await expect( saveButton ).toBeEnabled();
+			await saveButton.click();
 
-		await expect(
-			page.getByText( 'Your settings have been saved.' )
-		).toBeVisible();
-		await page.reload();
-		await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
-			updatedUnit
-		);
-
-		await settingsUI
-			.getByLabel( 'Weight unit' )
-			.selectOption( originalUnit );
-		await settingsUI.getByRole( 'button', { name: 'Save' } ).click();
-		await expect(
-			page.getByText( 'Your settings have been saved.' )
-		).toBeVisible();
-		await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
-			originalUnit
-		);
+			await expect(
+				page.getByText( 'Your settings have been saved.' )
+			).toBeVisible();
+			await page.reload();
+			await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
+				updatedUnit
+			);
+		} finally {
+			// The save persists a site-wide option, so restore it even when an
+			// assertion fails.
+			await wpCLI(
+				`wp option update woocommerce_weight_unit ${ originalUnit }`
+			);
+		}
 	} );
 
 	test( 'toggles dependent fields with a visibility rule', async ( {
