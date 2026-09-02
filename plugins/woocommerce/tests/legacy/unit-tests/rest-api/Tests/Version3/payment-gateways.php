@@ -51,6 +51,22 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
+		$gateways_by_id = array_column( $gateways, null, 'id' );
+		$setting_types  = array(
+			WC_Gateway_COD::ID => array(
+				'title'              => 'safe_text',
+				'instructions'       => 'textarea',
+				'enable_for_methods' => 'multiselect',
+				'enable_for_virtual' => 'checkbox',
+			),
+		);
+		foreach ( $setting_types as $gateway_id => $expected_settings ) {
+			$this->assertArrayHasKey( $gateway_id, $gateways_by_id );
+			foreach ( $expected_settings as $setting_id => $setting_type ) {
+				$this->assertSame( $setting_type, $gateways_by_id[ $gateway_id ]['settings'][ $setting_id ]['type'] );
+			}
+		}
+
 		$matching_gateway_data = current(
 			array_filter(
 				$gateways,
@@ -270,6 +286,33 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$paypal   = $response->get_data();
 		$this->assertEquals( 'authorization', $paypal['settings']['paymentaction']['value'] );
+	}
+
+	/**
+	 * @testdox Updating a gateway's enabled state persists so a rebuilt gateway registry reads it back.
+	 */
+	public function test_update_payment_gateway_enabled_state() {
+		wp_set_current_user( $this->user );
+
+		$option_key = ( new WC_Gateway_Cheque() )->get_option_key();
+		update_option( $option_key, array( 'enabled' => 'no' ) );
+		WC()->payment_gateways->init();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $response->get_data()['enabled'] );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
+		$request->set_body_params( array( 'enabled' => true ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( 'yes', get_option( $option_key )['enabled'] );
+
+		WC()->payment_gateways->init();
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
 	}
 
 	/**
