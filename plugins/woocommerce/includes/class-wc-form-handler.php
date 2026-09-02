@@ -27,11 +27,18 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
-	 * ID of the order whose cancellation request cancel_order() handled without an explicit redirect.
+	 * ID of the order whose cancellation request cancel_order() already handled in this request.
 	 *
 	 * @var int|null
 	 */
 	private static $handled_cancel_order_id = null;
+
+	/**
+	 * Whether redirect_after_cancel_order() should redirect once wp_loaded finishes.
+	 *
+	 * @var bool
+	 */
+	private static $cancel_order_redirect_pending = false;
 
 	/**
 	 * Hook in methods.
@@ -47,7 +54,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
-		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), PHP_INT_MAX );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
@@ -877,8 +884,13 @@ class WC_Form_Handler {
 			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $_GET['order_id'] );
 
+			if ( doing_action( 'wp_loaded' ) ) {
+				// Only a wp_loaded dispatch arms the deferred clean redirect, so callers outside wp_loaded keep control of the request.
+				self::$cancel_order_redirect_pending = true;
+			}
+
 			if ( self::$handled_cancel_order_id === $order_id ) {
-				// Already handled earlier in this request, for example by a direct call from another wp_loaded callback.
+				// Already handled earlier in this request, for example by a direct call from another callback.
 				return;
 			}
 
@@ -926,20 +938,21 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Redirect to a clean URL after cancel_order() handled a request without an explicit redirect.
+	 * Redirect to a clean URL after cancel_order() handled a request during wp_loaded without an explicit redirect.
 	 *
-	 * This runs on wp_loaded right after cancel_order(). Keeping the redirect out of
-	 * cancel_order() preserves its return behavior for code that calls it directly,
-	 * while browser requests still leave the state-changing cancellation URL.
+	 * This runs at the end of wp_loaded, after any re-registered cancel_order() callback.
+	 * Keeping the redirect out of cancel_order() preserves its return behavior for code
+	 * that calls it directly, while browser requests still leave the state-changing URL.
 	 *
 	 * @since 11.2.0
 	 */
 	public static function redirect_after_cancel_order(): void {
-		if ( null === self::$handled_cancel_order_id ) {
+		if ( ! self::$cancel_order_redirect_pending ) {
 			return;
 		}
 
-		self::$handled_cancel_order_id = null;
+		self::$cancel_order_redirect_pending = false;
+		self::$handled_cancel_order_id       = null;
 
 		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );

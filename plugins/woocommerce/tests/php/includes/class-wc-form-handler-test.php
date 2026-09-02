@@ -162,9 +162,10 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox cancel_order() returns to direct callers when no custom redirect is provided.
+	 * @testdox cancel_order() returns to direct callers outside wp_loaded and does not arm the deferred redirect.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
 	 */
 	public function test_cancel_order_returns_to_direct_callers_without_custom_redirect(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
@@ -175,6 +176,10 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		WC_Form_Handler::cancel_order();
 
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The direct call should cancel the order and return control to the caller.' );
+
+		WC_Form_Handler::redirect_after_cancel_order();
+
+		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The deferred redirect must not run for a request handled outside wp_loaded, so the notice stays in place.' );
 	}
 
 	/**
@@ -232,6 +237,72 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The cancellation notice should be added once.' );
 		$this->assertSame( 0, wc_notice_count( 'error' ), 'The repeated dispatch must not add a "can no longer be cancelled" error.' );
+	}
+
+	/**
+	 * @testdox cancel_order() still handles a different order after it ignored a repeated call.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 */
+	public function test_cancel_order_handles_a_different_order_after_a_repeated_call(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$first_order  = WC_Helper_Order::create_order( $user_id );
+		$second_order = WC_Helper_Order::create_order( $user_id );
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate the handler running inside wp_loaded.
+
+		try {
+			$this->prepare_cancel_order_request( $first_order );
+			WC_Form_Handler::cancel_order();
+			WC_Form_Handler::cancel_order();
+
+			$this->prepare_cancel_order_request( $second_order );
+			WC_Form_Handler::cancel_order();
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
+		}
+
+		$this->assertTrue( wc_get_order( $first_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The first order should be cancelled.' );
+		$this->assertTrue( wc_get_order( $second_order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The second order should be cancelled even though the previous request was deduplicated.' );
+		$this->assertSame( 2, wc_notice_count( 'notice' ), 'Each order should add exactly one cancellation notice.' );
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'No repeated handling should add an error notice.' );
+	}
+
+	/**
+	 * @testdox redirect_after_cancel_order() still redirects when an extension re-adds cancel_order() at priority 20 during a real wp_loaded dispatch.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_redirect_after_cancel_order_runs_after_a_re_added_handler(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		remove_action( 'wp_loaded', 'WC_Form_Handler::cancel_order', 20 );
+		add_action( 'wp_loaded', 'WC_Form_Handler::cancel_order', 20 );
+
+		$this->prepare_cancel_order_request( $order );
+
+		$current_filter_backup = $wp_current_filter;
+
+		try {
+			do_action( 'wp_loaded' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( wp_make_link_relative( $order->get_cancel_endpoint() ), $e->getMessage(), 'The deferred redirect should still run after the re-added handler.' );
+			$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The re-added handler should cancel the order before the redirect.' );
+			return;
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The intercepted redirect unwinds do_action() before it pops the action stack.
+		}
+
+		$this->fail( 'Expected the wp_loaded dispatch to redirect after handling the cancellation request.' );
 	}
 
 	/**
@@ -530,12 +601,19 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @param string $expected_redirect Expected redirect URL.
 	 */
 	private function dispatch_cancel_order_expecting_redirect( string $expected_redirect ): void {
+		global $wp_current_filter;
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The test dispatches the handler in its registered action context.
+
 		try {
 			WC_Form_Handler::cancel_order();
 			WC_Form_Handler::redirect_after_cancel_order();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( $expected_redirect, $e->getMessage(), 'The cancellation request should redirect to a clean URL.' );
 			return;
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
 		}
 
 		$this->fail( 'Expected the cancellation request to redirect after handling.' );
@@ -561,9 +639,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Resets the handled order ID cancel_order() leaves behind so it cannot leak into the next test.
 	 */
 	private function reset_cancel_order_handled_flag(): void {
-		$flag = new ReflectionProperty( WC_Form_Handler::class, 'handled_cancel_order_id' );
-		$flag->setAccessible( true );
-		$flag->setValue( null, null );
+		$handled_id = new ReflectionProperty( WC_Form_Handler::class, 'handled_cancel_order_id' );
+		$handled_id->setAccessible( true );
+		$handled_id->setValue( null, null );
+
+		$pending = new ReflectionProperty( WC_Form_Handler::class, 'cancel_order_redirect_pending' );
+		$pending->setAccessible( true );
+		$pending->setValue( null, false );
 	}
 
 	/**
