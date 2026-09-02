@@ -26,7 +26,7 @@ If an item can't be checked, raise it in `#woo-core-releases` before continuing 
 
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
 - [ ] Verify no open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) exist against the `{release_milestone}` milestone. Ping authors as needed to merge or close.
-- [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
+- [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22+milestone:{release_milestone}) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
 
