@@ -27,10 +27,7 @@
 				}
 			}
 
-			// A row header usually repeats a column that is visible anyway, so it is
-			// hidden here. Product is the only identifying column on the stock
-			// notifications table, so that cell renders like a data cell instead.
-			th:not(.woocommerce-customer-stock-notifications-table__cell-product) {
+			th {
 				display: none;
 			}
 		}
@@ -38,27 +35,22 @@
 		tr {
 			display: block;
 
-			td,
-			th.woocommerce-customer-stock-notifications-table__cell-product {
+			td {
 				display: block;
 				text-align: right !important; // Important to overwrite order status inline styling
+
+				&.order-actions {
+					text-align: left !important; // This must always align left on handheld
+				}
 
 				&::before {
 					content: attr(data-title) ': ';
 					font-weight: 700;
 					float: left;
 				}
-			}
-
-			td {
-				&.order-actions,
-				&.woocommerce-customer-stock-notifications-table__cell-actions {
-					text-align: left !important; // This must always align left on handheld
-				}
 
 				&.product-remove,
-				&.actions,
-				&.woocommerce-customer-stock-notifications-table__cell-actions {
+				&.actions {
 					&::before {
 						display: none;
 					}
@@ -66,8 +58,7 @@
 			}
 
 			&:nth-child( 2n ) {
-				td,
-				th.woocommerce-customer-stock-notifications-table__cell-product {
+				td {
 					background-color: rgba(0, 0, 0, 0.025);
 				}
 			}

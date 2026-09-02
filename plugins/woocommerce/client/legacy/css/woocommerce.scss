@@ -1066,16 +1066,6 @@ p.demo_store,
 		}
 	}
 
-	table.woocommerce-customer-stock-notifications-table {
-		// Variation attributes sit under the product name, inside the row header,
-		// so the bold `tbody th` weight from `shop_table` is undone here.
-		.description {
-			display: block;
-			font-size: 0.9em;
-			font-weight: normal;
-		}
-	}
-
 	table.woocommerce-MyAccount-downloads {
 		td,
 		th {

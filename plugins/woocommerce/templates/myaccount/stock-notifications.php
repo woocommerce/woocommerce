@@ -66,7 +66,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $cancel_label_name );
 			?>
 			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
-				<th class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>" scope="row">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 					<?php
 					/*
 					 * A deleted product still gets a row, rather than being skipped, so the
@@ -82,9 +82,9 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php endif; ?>
 
 					<?php if ( '' !== $variation ) : ?>
-						<span class="description"><?php echo esc_html( $variation ); ?></span>
+						<div class="description"><?php echo esc_html( $variation ); ?></div>
 					<?php endif; ?>
-				</th>
+				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
 					<?php if ( $date_created ) : ?>
 						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>
@@ -92,7 +92,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 						&mdash;
 					<?php endif; ?>
 				</td>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
 					<?php if ( MyAccountEndpoint::is_cancellable( $notification ) ) : ?>
 						<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
 							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
