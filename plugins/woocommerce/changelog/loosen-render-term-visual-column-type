@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow product attribute term columns to preserve non-string content.
