@@ -11,7 +11,7 @@ use WC_Unit_Test_Case;
 /**
  * PushTokenResolution test.
  *
- * @covers PushTokenResolution
+ * @covers \Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution
  */
 class PushTokenResolutionTest extends WC_Unit_Test_Case {
 	/**
