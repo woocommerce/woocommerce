@@ -866,9 +866,12 @@ function wc_scheduled_sales() {
 	 * Relief is partial: each product read leaves a cache-prefix entry nothing releases, and
 	 * saving a variation queues its parent for the unbatched shutdown sync.
 	 *
-	 * @param string[]|int[] $product_ids Products to process, in query order. $wpdb->get_col()
-	 *                                    returns strings; a replaced store may return anything.
-	 * @param string         $mode        'start' or 'end'.
+	 * @param (int|string|float|WC_Product|object)[] $product_ids Products to process, in query order.
+	 *                                                            $wpdb->get_col() returns strings; a
+	 *                                                            replaced store may return anything
+	 *                                                            wc_get_product() resolves, including
+	 *                                                            objects that expose an ID.
+	 * @param string                                 $mode        'start' or 'end'.
 	 */
 	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $flush_product_objects, $flush_shared_groups ): void {
 		// Sliced per iteration: array_chunk() would build every batch before the first runs.
