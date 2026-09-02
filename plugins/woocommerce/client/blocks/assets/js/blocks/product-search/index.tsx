@@ -170,12 +170,20 @@ registerBlockType( SEARCH_VARIATION_NAME, {
 function registerProductSearchNamespace( props: BlockType, blockName: string ) {
 	if ( blockName === 'core/search' ) {
 		// Gracefully handle if settings.attributes is undefined.
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 		// @ts-ignore -- We need this because `attributes` is marked as `readonly`
 		props.attributes = {
 			...props.attributes,
 			namespace: {
 				type: 'string',
+			},
+			/**
+			 * Whether the Product Search variation shows matching products in a
+			 * dropdown while the shopper types (opt-in, frontend only).
+			 */
+			liveResults: {
+				type: 'boolean',
+				default: false,
 			},
 		};
 	}
