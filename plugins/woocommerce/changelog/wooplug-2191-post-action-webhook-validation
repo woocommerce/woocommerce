@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate post-action webhooks using the affected post ID instead of request-global post type state.
