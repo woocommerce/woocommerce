@@ -275,14 +275,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			'info',
 			'recipient resolution found no eligible tokens',
 			array(
-				'source'                          => PushNotifications::FEATURE_NAME,
-				'notification_type'               => 'store_order',
-				'resource_id'                     => $this->order_id,
-				'resolution_outcome'              => $resolution_outcome,
-				'registered_token_owner_count'    => $registered_token_owner_count,
-				'eligible_user_count'             => $eligible_user_count,
-				'resolved_token_count'            => 0,
-				'preference_eligible_token_count' => 0,
+				'source'                       => PushNotifications::FEATURE_NAME,
+				'notification_type'            => 'store_order',
+				'resource_id'                  => $this->order_id,
+				'resolution_outcome'           => $resolution_outcome,
+				'registered_token_owner_count' => $registered_token_owner_count,
+				'eligible_user_count'          => $eligible_user_count,
+				'resolved_token_count'         => 0,
 			)
 		);
 	}
@@ -353,14 +352,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			'info',
 			'recipient resolution found no eligible tokens',
 			array(
-				'source'                          => PushNotifications::FEATURE_NAME,
-				'notification_type'               => 'store_order',
-				'resource_id'                     => $this->order_id,
-				'resolution_outcome'              => PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES,
-				'registered_token_owner_count'    => 1,
-				'eligible_user_count'             => 1,
-				'resolved_token_count'            => 1,
-				'preference_eligible_token_count' => 0,
+				'source'                       => PushNotifications::FEATURE_NAME,
+				'notification_type'            => 'store_order',
+				'resource_id'                  => $this->order_id,
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 1,
 			)
 		);
 	}

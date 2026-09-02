@@ -166,7 +166,7 @@ class NotificationProcessor {
 		 * and return.
 		 */
 		if ( empty( $tokens ) ) {
-			$this->log_empty_recipient_resolution( $notification, $resolution, count( $tokens ) );
+			$this->log_empty_recipient_resolution( $notification, $resolution );
 			$notification->write_meta( self::SENT_META_KEY );
 			$this->cancel_safety_net( $notification );
 			return true;
@@ -194,38 +194,29 @@ class NotificationProcessor {
 	 * expected state for any store that never connected a mobile app, and
 	 * logging it on every event would only add noise.
 	 *
-	 * @param Notification        $notification                   The notification being processed.
-	 * @param PushTokenResolution $resolution                     The role-based token resolution.
-	 * @param int                 $preference_eligible_token_count Number of tokens remaining after preference filtering.
+	 * @param Notification        $notification The notification being processed.
+	 * @param PushTokenResolution $resolution   The role-based token resolution.
 	 * @return void
 	 */
-	private function log_empty_recipient_resolution(
-		Notification $notification,
-		PushTokenResolution $resolution,
-		int $preference_eligible_token_count
-	): void {
+	private function log_empty_recipient_resolution( Notification $notification, PushTokenResolution $resolution ): void {
 		$diagnostics = $resolution->get_diagnostics();
 
 		if ( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS === $diagnostics['resolution_outcome'] ) {
 			return;
 		}
 
-		if ( 0 < $diagnostics['resolved_token_count'] && 0 === $preference_eligible_token_count ) {
+		// Tokens were resolved, so the only way to end up with none is preference filtering.
+		if ( 0 < $diagnostics['resolved_token_count'] ) {
 			$diagnostics['resolution_outcome'] = PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES;
 		}
 
 		wc_get_logger()->info(
 			'Push notification was not dispatched because recipient resolution found no eligible tokens.',
 			array(
-				'source'                          => PushNotifications::FEATURE_NAME,
-				'notification_type'               => $notification->get_type(),
-				'resource_id'                     => $notification->get_resource_id(),
-				'resolution_outcome'              => $diagnostics['resolution_outcome'],
-				'registered_token_owner_count'    => $diagnostics['registered_token_owner_count'],
-				'eligible_user_count'             => $diagnostics['eligible_user_count'],
-				'resolved_token_count'            => $diagnostics['resolved_token_count'],
-				'preference_eligible_token_count' => $preference_eligible_token_count,
-			)
+				'source'            => PushNotifications::FEATURE_NAME,
+				'notification_type' => $notification->get_type(),
+				'resource_id'       => $notification->get_resource_id(),
+			) + $diagnostics
 		);
 	}
 
