@@ -166,6 +166,10 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 
 		// If something went wrong lets just remove the item from the queue.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			if ( is_array( $old_metadata ) ) {
+				wp_update_attachment_metadata( $this->attachment_id, $old_metadata );
+			}
+
 			return false;
 		}
 

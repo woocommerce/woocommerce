@@ -446,6 +446,8 @@ class WC_Regenerate_Images {
 
 		// If something went wrong lets just return the original image.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+
 			return $image;
 		}
 
