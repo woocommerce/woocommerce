@@ -50608,12 +50608,6 @@ parameters:
 			path: src/Blocks/BlockTypes/OrderConfirmation/ShippingAddress.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order\|false \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/Status.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_format_datetime expects WC_DateTime, WC_DateTime\|null given\.$#'
 			identifier: argument.type
 			count: 1
