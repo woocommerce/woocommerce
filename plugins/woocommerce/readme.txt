@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.1.0-rc.2 2026-XX-XX =
+= 11.1.0-rc.2 2026-09-02 =
 
 **WooCommerce**
 
@@ -378,6 +378,15 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Preserve replacement order items saved by extensions during deferred checkout item deletion. [#68103](https://github.com/woocommerce/woocommerce/pull/68103)
 * Fix - Properly strip tags from product names in AJAX responses [#68175](https://github.com/woocommerce/woocommerce/pull/68175)
 * Fix - Temporarily disable Helcim payment provider recommendations. [#68119](https://github.com/woocommerce/woocommerce/pull/68119)
+* Fix - Allow product attribute term columns to preserve non-string content. [#68273](https://github.com/woocommerce/woocommerce/pull/68273)
+* Fix - Fix unnecessary repeated processing of fragments in the GraphQL side of the dual API. [#68241](https://github.com/woocommerce/woocommerce/pull/68241)
+* Fix - Harden order line meta value handling in the REST API. [#68216](https://github.com/woocommerce/woocommerce/pull/68216)
+* Fix - Harden REST API key authentication route handling. [#68199](https://github.com/woocommerce/woocommerce/pull/68199)
+* Fix - Improve REST API key authentication for WooCommerce routes reached through custom URLs. [#68263](https://github.com/woocommerce/woocommerce/pull/68263)
+* Fix - Improve WooPayments onboarding profile data handling. [#68236](https://github.com/woocommerce/woocommerce/pull/68236)
+* Fix - Prevent extension gallery markup from breaking variable product add-to-cart forms. [#68219](https://github.com/woocommerce/woocommerce/pull/68219)
+* Fix - Resolve REST API routes the way WordPress does when the request URI has repeated leading slashes or percent-encoded characters. [#68237](https://github.com/woocommerce/woocommerce/pull/68237)
+* Fix - Restore plain-text product names in AJAX search responses. [#68191](https://github.com/woocommerce/woocommerce/pull/68191)
 * Add - Add a "Send test email" action to the emails listing page (block email editor). [#66405](https://github.com/woocommerce/woocommerce/pull/66405)
 * Add - Add a feature-gated public order withdrawal endpoint. [#66538](https://github.com/woocommerce/woocommerce/pull/66538)
 * Add - Add a filter for product attribute taxonomy row actions in the Attributes admin table. [#66633](https://github.com/woocommerce/woocommerce/pull/66633)
