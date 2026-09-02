@@ -796,9 +796,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @testdox wc_fix_rewrite_rules uses the filtered Shop page and any supplied Shop pages.
 	 */
 	public function test_wc_fix_rewrite_rules_uses_filtered_and_supplied_shop_pages(): void {
-		$original_shop_page_id = get_option( 'woocommerce_shop_page_id', null );
-		$original_permalinks   = get_option( 'woocommerce_permalinks', null );
-		$shop_page_id          = wp_insert_post(
+		$shop_page_id         = wp_insert_post(
 			array(
 				'post_title'  => 'Shop',
 				'post_type'   => 'page',
@@ -806,7 +804,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$child_page_id         = wp_insert_post(
+		$child_page_id        = wp_insert_post(
 			array(
 				'post_parent' => $shop_page_id,
 				'post_title'  => 'Collection',
@@ -815,7 +813,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$translated_shop_id    = wp_insert_post(
+		$translated_shop_id   = wp_insert_post(
 			array(
 				'post_title'  => 'Boutique',
 				'post_type'   => 'page',
@@ -823,7 +821,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$translated_child_id   = wp_insert_post(
+		$translated_child_id  = wp_insert_post(
 			array(
 				'post_parent' => $translated_shop_id,
 				'post_title'  => 'Collection FR',
@@ -832,7 +830,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$additional_shop_id    = wp_insert_post(
+		$additional_shop_id   = wp_insert_post(
 			array(
 				'post_title'  => 'Tienda',
 				'post_type'   => 'page',
@@ -840,7 +838,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$additional_child_id   = wp_insert_post(
+		$additional_child_id  = wp_insert_post(
 			array(
 				'post_parent' => $additional_shop_id,
 				'post_title'  => 'Collection ES',
@@ -849,7 +847,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$unrelated_child_id    = wp_insert_post(
+		$unrelated_child_id   = wp_insert_post(
 			array(
 				'post_parent' => 1,
 				'post_title'  => 'Unrelated child',
@@ -858,7 +856,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$unrelated_child_rule  = get_page_uri( $unrelated_child_id ) . '/?$';
+		$unrelated_child_rule = get_page_uri( $unrelated_child_id ) . '/?$';
 
 		update_option( 'woocommerce_shop_page_id', $shop_page_id );
 		update_option(
@@ -891,35 +889,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
 		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
 
-		try {
-			$rules = wc_fix_rewrite_rules( array() );
+		$rules = wc_fix_rewrite_rules( array() );
 
-			delete_option( 'woocommerce_shop_page_id' );
-			remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
-			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
-			add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
-			$missing_shop_rules = wc_fix_rewrite_rules( array() );
-		} finally {
-			remove_action( 'parse_query', $filter_by_current_language );
-			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
-			remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
-			remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
-			delete_option( 'woocommerce_shop_page_id' );
-			delete_option( 'woocommerce_permalinks' );
-			if ( null !== $original_shop_page_id ) {
-				add_option( 'woocommerce_shop_page_id', $original_shop_page_id );
-			}
-			if ( null !== $original_permalinks ) {
-				add_option( 'woocommerce_permalinks', $original_permalinks );
-			}
-			wp_delete_post( $unrelated_child_id, true );
-			wp_delete_post( $additional_child_id, true );
-			wp_delete_post( $additional_shop_id, true );
-			wp_delete_post( $translated_child_id, true );
-			wp_delete_post( $translated_shop_id, true );
-			wp_delete_post( $child_page_id, true );
-			wp_delete_post( $shop_page_id, true );
-		}
+		// Without any Shop page, only IDs supplied through the filter remain, and invalid ones must be dropped.
+		delete_option( 'woocommerce_shop_page_id' );
+		remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+		remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
+		$missing_shop_rules = wc_fix_rewrite_rules( array() );
 
 		$this->assertArrayNotHasKey( 'shop/collection/?$', $rules, 'A Shop page repointed through woocommerce_get_shop_page_id should not keep rules for the stored page.' );
 		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should honor the filtered Shop page regardless of page query filters.' );

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Generate Shop sub-page rewrite rules for every translated Shop page instead of only the current request language, and add the woocommerce_rewrite_rules_shop_page_ids filter so multilingual integrations can supply additional Shop page IDs.
+Generate Shop sub-page rewrite rules for the Shop page regardless of the request language, and add the woocommerce_rewrite_rules_shop_page_ids filter so multilingual integrations can supply translated Shop page IDs.
