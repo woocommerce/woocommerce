@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a critical error when adding terms to Color/Image product attributes.
