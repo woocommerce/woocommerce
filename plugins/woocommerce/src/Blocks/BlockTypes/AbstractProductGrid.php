@@ -349,9 +349,9 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		/**
 		 * Filters whether or not the product grid is cacheable.
 		 *
-		 * @param boolean $is_cacheable The list of script dependencies.
+		 * @param boolean $is_cacheable Whether the product grid is cacheable. True to enable cache, false to disable.
 		 * @param array $query_args Query args for the products query passed to BlocksWpQuery.
-		 * @return array True to enable cache, false to disable cache.
+		 * @return boolean True to enable cache, false to disable cache.
 		 *
 		 * @since 2.5.0
 		 */

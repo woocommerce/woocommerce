@@ -580,6 +580,15 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
+		/**
+		 * Filters the number of products shown per page in a product loop.
+		 *
+		 * Only applies when the query does not already set posts_per_page.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $per_page Products per page. Defaults to the store's columns times its rows setting.
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.

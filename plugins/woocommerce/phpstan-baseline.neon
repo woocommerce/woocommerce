@@ -49438,12 +49438,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductItem.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductItemSelector.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\GroupedProductItemSelector\:\:get_button_markup\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1

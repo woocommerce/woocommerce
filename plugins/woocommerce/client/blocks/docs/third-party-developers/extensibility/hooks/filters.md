@@ -564,7 +564,20 @@ apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array $d
 
 ### Description
 
-Accepts an array of hooked data. The array should be in the following format: [ [ hook => `<hook-name>`, function => `<function-name>`, priority => `<priority>`, ], ... ] Where:
+Accepts an array of hooked data. The array should be in the following format:
+
+```text
+[
+  [
+    hook => <hook-name>,
+    function => <function-name>,
+    priority => <priority>,
+ ],
+ ...
+]
+```
+
+Where:
 
 - hook-name is the name of the hook that have the functions hooked to.
 - function-name is the hooked function name.
@@ -661,13 +674,13 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', bool $is_cacheabl
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $is_cacheable | bool | The list of script dependencies. |
+| $is_cacheable | bool | Whether the product grid is cacheable. True to enable cache, false to disable. |
 | $query_args | array | Query args for the products query passed to BlocksWpQuery. |
 
 ### Returns
 
 
-`array` True to enable cache, false to disable cache.
+`bool` True to enable cache, false to disable cache.
 
 ### Source
 
@@ -1175,8 +1188,15 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 Allow filtering of the add to cart button arguments.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args' )
+apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $args | array | Button arguments, with a `class` string and an `attributes` array. |
+| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -1452,17 +1472,17 @@ apply_filters( 'woocommerce_product_tabs', array $tabs )
 ## woocommerce_quantity_input_placeholder
 
 
-Filter the placeholder value allowed for the product.
+Filter the placeholder shown in the quantity input.
 
 ```php
-apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Product $product )
+apply_filters( 'woocommerce_quantity_input_placeholder', int $placeholder, \WC_Product $product )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $max_value | int | Maximum quantity value. |
+| $placeholder | int | Placeholder for the quantity input. |
 | $product | \WC_Product | Product object. |
 
 ### Source
