@@ -88,6 +88,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
+		$this->invalidate_token_caches();
+
 		return $push_token;
 	}
 
@@ -181,6 +183,8 @@ class PushTokensDataStore {
 			delete_post_meta( (int) $push_token->get_id(), 'device_uuid' );
 		}
 
+		$this->invalidate_token_caches();
+
 		return true;
 	}
 
@@ -199,7 +203,13 @@ class PushTokensDataStore {
 			throw new PushTokenNotFoundException();
 		}
 
-		return (bool) wp_delete_post( (int) $id, true );
+		$deleted = (bool) wp_delete_post( (int) $id, true );
+
+		if ( $deleted ) {
+			$this->invalidate_token_caches();
+		}
+
+		return $deleted;
 	}
 
 	/**
@@ -316,6 +326,20 @@ class PushTokensDataStore {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Clears the in-memory token caches after a write, so a later read in the
+	 * same request sees the change. Both caches are derived from the same rows,
+	 * and update() can move a token to a different user, so every write clears
+	 * both.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	private function invalidate_token_caches(): void {
+		$this->users_with_tokens_cache = null;
+		$this->tokens_by_roles_cache   = array();
 	}
 
 	/**
