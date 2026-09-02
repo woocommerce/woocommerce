@@ -27,6 +27,13 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
+	 * Whether cancel_order() handled a cancellation request without an explicit redirect.
+	 *
+	 * @var bool
+	 */
+	private static $cancel_order_handled = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -40,6 +47,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
@@ -902,21 +910,38 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
-			if ( ! $redirect && ! doing_action( 'wp_loaded' ) ) {
-				// Preserve the historical return behavior for extensions that call this public method directly.
-				return;
+			if ( $redirect ) {
+				wp_safe_redirect( $redirect );
+				exit;
 			}
 
-			if ( ! $redirect ) {
-				$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
-			}
-
-			$redirect = $redirect ? $redirect : wc_get_cart_url();
-			$redirect = $redirect ? $redirect : home_url();
-			wp_safe_redirect( $redirect );
-			exit;
+			self::$cancel_order_handled = true;
 		}
+	}
+
+	/**
+	 * Redirect to a clean URL after cancel_order() handled a request without an explicit redirect.
+	 *
+	 * This runs on wp_loaded right after cancel_order(). Keeping the redirect out of
+	 * cancel_order() preserves its return behavior for code that calls it directly,
+	 * while browser requests still leave the state-changing cancellation URL.
+	 *
+	 * @since 11.2.0
+	 */
+	public static function redirect_after_cancel_order(): void {
+		if ( ! self::$cancel_order_handled ) {
+			return;
+		}
+
+		self::$cancel_order_handled = false;
+
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
+		$redirect    = $redirect ? $redirect : wc_get_cart_url();
+		$redirect    = $redirect ? $redirect : home_url();
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**

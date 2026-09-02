@@ -75,6 +75,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		$this->reset_cancel_order_handled_flag();
 
 		$_GET = $this->original_get;
 		if ( null === $this->original_request_uri ) {
@@ -174,6 +175,51 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		WC_Form_Handler::cancel_order();
 
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The direct call should cancel the order and return control to the caller.' );
+	}
+
+	/**
+	 * @testdox cancel_order() returns to direct callers inside a wp_loaded callback, and the redirect completes afterwards.
+	 *
+	 * @covers WC_Form_Handler::cancel_order()
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_cancel_order_returns_to_direct_callers_inside_wp_loaded(): void {
+		global $wp_current_filter;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		$this->prepare_cancel_order_request( $order );
+
+		$current_filter_backup = $wp_current_filter;
+		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate an extension calling the handler from its own wp_loaded callback.
+
+		try {
+			WC_Form_Handler::cancel_order();
+			$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ), 'The nested direct call should cancel the order and return control to the caller.' );
+
+			$this->dispatch_redirect_after_cancel_order_expecting_redirect( wp_make_link_relative( $order->get_cancel_endpoint() ) );
+		} finally {
+			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
+		}
+	}
+
+	/**
+	 * @testdox redirect_after_cancel_order() does nothing when cancel_order() did not handle the request.
+	 *
+	 * @covers WC_Form_Handler::redirect_after_cancel_order()
+	 */
+	public function test_redirect_after_cancel_order_does_nothing_when_handler_did_not_run(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+		$order = WC_Helper_Order::create_order( $user_id );
+
+		// An extension can remove cancel_order() from wp_loaded, so only the redirect callback runs.
+		$this->prepare_cancel_order_request( $order );
+		WC_Form_Handler::redirect_after_cancel_order();
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PENDING ), 'The order should stay untouched when only the redirect callback runs.' );
 	}
 
 	/**
@@ -450,26 +496,45 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Dispatches the cancel-order handler and expects a redirect.
+	 * Dispatches the cancel-order handler and its redirect callback in registration order and expects a redirect.
 	 *
 	 * @param string $expected_redirect Expected redirect URL.
 	 */
 	private function dispatch_cancel_order_expecting_redirect( string $expected_redirect ): void {
-		global $wp_current_filter;
-
-		$current_filter_backup = $wp_current_filter;
-		$wp_current_filter[]   = 'wp_loaded'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The test dispatches the handler in its registered action context.
-
 		try {
 			WC_Form_Handler::cancel_order();
+			WC_Form_Handler::redirect_after_cancel_order();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( $expected_redirect, $e->getMessage(), 'The cancellation request should redirect to a clean URL.' );
 			return;
-		} finally {
-			$wp_current_filter = $current_filter_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action stack after the simulated dispatch.
 		}
 
-		$this->fail( 'Expected cancel_order() to redirect after handling the request.' );
+		$this->fail( 'Expected the cancellation request to redirect after handling.' );
+	}
+
+	/**
+	 * Dispatches only the redirect callback and expects a redirect.
+	 *
+	 * @param string $expected_redirect Expected redirect URL.
+	 */
+	private function dispatch_redirect_after_cancel_order_expecting_redirect( string $expected_redirect ): void {
+		try {
+			WC_Form_Handler::redirect_after_cancel_order();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( $expected_redirect, $e->getMessage(), 'The redirect callback should redirect to a clean URL.' );
+			return;
+		}
+
+		$this->fail( 'Expected redirect_after_cancel_order() to redirect after cancel_order() handled the request.' );
+	}
+
+	/**
+	 * Resets the static flag cancel_order() leaves behind so it cannot leak into the next test.
+	 */
+	private function reset_cancel_order_handled_flag(): void {
+		$flag = new ReflectionProperty( WC_Form_Handler::class, 'cancel_order_handled' );
+		$flag->setAccessible( true );
+		$flag->setValue( null, false );
 	}
 
 	/**
