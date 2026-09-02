@@ -15,7 +15,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
+import {
+	createSettingsHelpElement as getHelp,
+	sanitizeSettingsHtml,
+} from './html';
 import { NumberSpinControl } from './number-spin-control';
 import type { SettingsFieldComponentProps, SettingsValue } from './types';
 
@@ -94,15 +97,6 @@ const getNumberInputAttributes = (
 		inputAttributes,
 	};
 };
-
-const getHelp = ( description?: string ) =>
-	description ? (
-		<span
-			dangerouslySetInnerHTML={ {
-				__html: sanitizeSettingsHtml( description ),
-			} }
-		/>
-	) : undefined;
 
 export const NativeSettingsField = ( {
 	field,

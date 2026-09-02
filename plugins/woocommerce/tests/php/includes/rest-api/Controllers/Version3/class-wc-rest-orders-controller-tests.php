@@ -2314,4 +2314,231 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
 		$this->assertEquals( 10, $data['discount_total'] );
 	}
+
+	/**
+	 * Create an order with a single shipping line that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the shipping item ID.
+	 */
+	private function create_order_with_shipping_line(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Shipping();
+		$item->set_method_id( 'flat_rate' );
+		$item->set_method_title( 'Flat rate' );
+		$item->set_total( '10.00' );
+		$item->set_taxes( array( 'total' => array( 1 => '2.00' ) ) );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Every request key whose order item carries a `taxes` data prop, against each meta key that
+	 * update_meta_data() diverts to that item's set_taxes().
+	 *
+	 * Reading an item adds `_taxes` to its internal meta keys, so the setter resolves from the
+	 * underscore-prefixed key as well as the bare one.
+	 *
+	 * @return array
+	 */
+	public function provide_reserved_meta_key_line_types(): array {
+		$line_types = array(
+			'line items'     => array(
+				'line_items',
+				'create_order_with_line_item',
+				array(
+					'total'    => array( 1 => '2.00' ),
+					'subtotal' => array( 1 => '2.00' ),
+				),
+			),
+			'fee lines'      => array( 'fee_lines', 'create_order_with_fee_line', array( 'total' => array( 1 => '1.00' ) ) ),
+			'shipping lines' => array( 'shipping_lines', 'create_order_with_shipping_line', array( 'total' => array( 1 => '2.00' ) ) ),
+		);
+
+		$cases = array();
+		foreach ( $line_types as $label => $line_type ) {
+			foreach ( array( 'taxes', '_taxes' ) as $meta_key ) {
+				$cases[ "$label, $meta_key" ] = array_merge( $line_type, array( $meta_key ) );
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox PUT /orders/<id> rejects a serialized value under a reserved line meta key and leaves the taxes untouched.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param string $create_order   Factory method building an order with one line of that type.
+	 * @param array  $expected_taxes Taxes the item should still carry after the update is rejected.
+	 * @param string $meta_key       Reserved meta key to post the serialized value under.
+	 */
+	public function test_update_order_rejects_serialized_taxes_line_meta_key( string $line_type, string $create_order, array $expected_taxes, string $meta_key ): void {
+		list( $order, $item_id ) = $this->$create_order();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( $line_type => array( $this->get_order_line_with_serialized_taxes( $item_id, $meta_key ) ) ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Request argument validation wraps the failure in `rest_invalid_param`, under `details`.
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $data['code'] );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $data['data']['details'][ $line_type ]['code'] );
+
+		$item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( $expected_taxes, $item->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * The batch endpoint skips request argument validation, so the prepare-time check has to catch this.
+	 *
+	 * @testdox POST /orders/batch rejects a serialized value under a reserved line meta key and leaves the taxes untouched.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param string $create_order   Factory method building an order with one line of that type.
+	 * @param array  $expected_taxes Taxes the item should still carry after the update is rejected.
+	 * @param string $meta_key       Reserved meta key to post the serialized value under.
+	 */
+	public function test_batch_update_rejects_serialized_taxes_line_meta_key( string $line_type, string $create_order, array $expected_taxes, string $meta_key ): void {
+		list( $order, $item_id ) = $this->$create_order();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'       => $order->get_id(),
+							$line_type => array( $this->get_order_line_with_serialized_taxes( $item_id, $meta_key ) ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $data['update'][0]['error']['code'] );
+
+		$item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( $expected_taxes, $item->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * The reserved key still diverts to set_taxes(), hence the expected _doing_it_wrong notice.
+	 *
+	 * @testdox POST /orders only rejects serialized values, and only under the reserved meta key.
+	 */
+	public function test_create_order_accepts_unguarded_shipping_line_meta(): void {
+		$this->setExpectedIncorrectUsage( 'is_internal_meta_key' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'shipping_lines' => array(
+						array(
+							'method_id' => 'flat_rate',
+							'total'     => '10.00',
+							'meta_data' => array(
+								array(
+									'key'   => 'taxes',
+									'value' => 'not-serialized',
+								),
+								array(
+									'key'   => 'delivery_window',
+									'value' => 'morning',
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'Only serialized values should be rejected.' );
+
+		$shipping_lines = wc_get_order( $response->get_data()['id'] )->get_items( 'shipping' );
+		$shipping_line  = reset( $shipping_lines );
+		$this->assertSame( 'morning', $shipping_line->get_meta( 'delivery_window' ), 'A meta key that is not reserved should be stored.' );
+	}
+
+	/**
+	 * Create an order with a single line item that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the line item ID.
+	 */
+	private function create_order_with_line_item(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( ProductHelper::create_simple_product() );
+		$item->set_quantity( 1 );
+		$item->set_total( '10.00' );
+		$item->set_taxes(
+			array(
+				'total'    => array( 1 => '2.00' ),
+				'subtotal' => array( 1 => '2.00' ),
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Create an order with a single fee line that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the fee item ID.
+	 */
+	private function create_order_with_fee_line(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Fee();
+		$item->set_name( 'Test fee' );
+		$item->set_total( '5.00' );
+		$item->set_taxes( array( 'total' => array( 1 => '1.00' ) ) );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Get an order line payload carrying a serialized object under a reserved meta key.
+	 *
+	 * The non-serialized decoy shares the key: `meta_data` is a list, so a key can repeat and every
+	 * entry reaches the setter.
+	 *
+	 * @param int    $item_id  Order item ID to target.
+	 * @param string $meta_key Meta key to post the serialized value under.
+	 * @return array
+	 */
+	private function get_order_line_with_serialized_taxes( int $item_id, string $meta_key = '_taxes' ): array {
+		return array(
+			'id'        => $item_id,
+			'meta_data' => array(
+				array(
+					'key'   => $meta_key,
+					'value' => 'not-serialized',
+				),
+				array(
+					'key'   => $meta_key,
+					'value' => 'O:8:"stdClass":0:{}',
+				),
+			),
+		);
+	}
 }

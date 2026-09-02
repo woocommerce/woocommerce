@@ -103,6 +103,7 @@ describe( 'createMutationQueue', () => {
 
 			// Should have made exactly ONE fetch call with all 3 requests
 			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
+			expect( mockFetch.mock.calls[ 0 ][ 1 ].keepalive ).toBe( true );
 			const requestBody = JSON.parse(
 				mockFetch.mock.calls[ 0 ][ 1 ].body
 			);
@@ -166,6 +167,27 @@ describe( 'createMutationQueue', () => {
 				);
 			}
 		);
+		it( 'disables keepalive for oversized payloads', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 10 } },
+			] );
+			global.fetch = mockFetch;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			await queue.submit( {
+				path: '/a',
+				method: 'POST',
+				body: { description: '🚀'.repeat( 17_000 ) },
+			} );
+
+			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
+			expect( mockFetch.mock.calls[ 0 ][ 1 ].keepalive ).toBe( false );
+		} );
 
 		it( 'takes snapshot once at start of cycle, not per request', async () => {
 			const mockFetch = createMockFetch( [

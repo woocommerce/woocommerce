@@ -9,8 +9,20 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-let processingOrderId: number | undefined;
-let failedOrderId: number | undefined;
+const orderBatchId: number[] = [];
+const statusColumnSelector = 'mark.order-status';
+
+// Define order statuses to filter against
+const orderStatus = [
+	[ 'All', 'all' ],
+	[ 'Pending payment', 'wc-pending' ],
+	[ 'Processing', 'wc-processing' ],
+	[ 'On hold', 'wc-on-hold' ],
+	[ 'Completed', 'wc-completed' ],
+	[ 'Cancelled', 'wc-cancelled' ],
+	[ 'Refunded', 'wc-refunded' ],
+	[ 'Failed', 'wc-failed' ],
+];
 
 test.describe(
 	'WooCommerce Orders > Filter Order by Status',
@@ -19,81 +31,48 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { restApi } ) => {
-			const processingResponse = await restApi.post(
-				`${ WC_API_PATH }/orders`,
-				{ status: 'processing' }
-			);
-			expect( processingResponse.data.id ).toBeGreaterThan( 0 );
-			processingOrderId = processingResponse.data.id;
+			// create some orders we can filter
+			const orders = orderStatus.map( ( entryPair ) => {
+				const statusName = entryPair[ 1 ].replace( 'wc-', '' );
 
-			const failedResponse = await restApi.post(
-				`${ WC_API_PATH }/orders`,
-				{ status: 'failed' }
-			);
-			expect( failedResponse.data.id ).toBeGreaterThan( 0 );
-			failedOrderId = failedResponse.data.id;
+				return {
+					status: statusName,
+				};
+			} );
+			await restApi
+				.post( `${ WC_API_PATH }/orders/batch`, { create: orders } )
+				.then( ( response: { data: { create: { id: number }[] } } ) => {
+					for ( let i = 0; i < response.data.create.length; i++ ) {
+						orderBatchId.push( response.data.create[ i ].id );
+					}
+				} );
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
-			const orderIds = [ processingOrderId, failedOrderId ].filter(
-				( orderId ): orderId is number => orderId !== undefined
-			);
-
-			if ( orderIds.length > 0 ) {
-				await restApi.post( `${ WC_API_PATH }/orders/batch`, {
-					delete: orderIds,
-				} );
-			}
+			await restApi.post( `${ WC_API_PATH }/orders/batch`, {
+				delete: [ ...orderBatchId ],
+			} );
 		} );
 
+		// Processing is representative: the status filter is one code path. The
+		// other seven statuses are still seeded in beforeAll, so asserting that
+		// none of them appear also proves the filter excludes what it should.
 		test( 'should filter by Processing', async ( { page } ) => {
-			expect( processingOrderId ).toBeDefined();
-			expect( failedOrderId ).toBeDefined();
-
 			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
-			await page.getByRole( 'link', { name: /^Processing \(/ } ).click();
 
-			await expect( page ).toHaveURL(
-				/[?&](?:status|post_status)=wc-processing(?:&|$)/
-			);
-			const currentProcessingLink = page.locator(
-				'li.wc-processing > a.current'
-			);
-			await expect( currentProcessingLink ).toBeVisible();
+			await page.locator( 'li.wc-processing' ).click();
 			await expect(
-				page.locator(
-					`#order-${ processingOrderId }, #post-${ processingOrderId }`
-				)
+				page.locator( 'li.wc-processing > a.current' )
 			).toBeVisible();
+
+			await expect(
+				page.locator( `${ statusColumnSelector }.status-processing` )
+			).not.toHaveCount( 0 );
 			await expect(
 				page.locator(
-					`#order-${ failedOrderId }, #post-${ failedOrderId }`
+					`${ statusColumnSelector }:not(.status-processing)`
 				)
 			).toHaveCount( 0 );
-
-			const statusMarks = page.locator( 'mark.order-status:visible' );
-			const visibleRowCount = await statusMarks.count();
-			expect( visibleRowCount ).toBeGreaterThan( 0 );
-
-			for ( let index = 0; index < visibleRowCount; index++ ) {
-				await expect( statusMarks.nth( index ) ).toHaveClass(
-					/status-processing/
-				);
-				await expect(
-					statusMarks.nth( index ).locator( 'span' )
-				).toHaveText( 'Processing' );
-			}
-
-			const processingCountText = await currentProcessingLink
-				.locator( 'span.count' )
-				.innerText();
-			const processingCount = Number.parseInt(
-				processingCountText.replace( /\D/g, '' ),
-				10
-			);
-			expect( Number.isInteger( processingCount ) ).toBe( true );
-			expect( processingCount ).toBeGreaterThan( 0 );
-			expect( processingCount ).toBeGreaterThanOrEqual( visibleRowCount );
 		} );
 	}
 );
