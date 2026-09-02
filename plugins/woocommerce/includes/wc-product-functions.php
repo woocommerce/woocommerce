@@ -927,8 +927,13 @@ function wc_scheduled_sales() {
 				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 			}
 
-			// posts and post_meta are shared with every other job in this WP-Cron request,
-			// so delete this batch's own IDs rather than flushing the groups whole.
+			// posts and post_meta are shared with every other action in this Action Scheduler
+			// queue-runner request, so delete this batch's own IDs rather than flushing the
+			// groups whole. Deleted directly rather than through clean_post_cache() on
+			// purpose: save() already ran it for every product that changed, and running it
+			// here for the rest would re-read each post and bump the site-wide posts and
+			// terms salts for rows nothing wrote. The trade-off is that entries this batch
+			// only read are evicted too, including from a persistent backend.
 			wp_cache_delete_multiple( $batch_ids, 'posts' );
 			wp_cache_delete_multiple( $batch_ids, 'post_meta' );
 			// Deleted directly rather than through clean_object_term_cache(), which pairs one
