@@ -67,8 +67,8 @@ if ( ! working_tree_is_clean() ) {
 	// The check runs against the working tree, but the receipt names HEAD. Let
 	// those differ and the receipt vouches for code that was never tested.
 	fail( 'working tree has uncommitted changes' );
-	detail( 'The check would run against the working tree while the receipt names', 2 );
-	detail( 'HEAD. Commit or stash first, so the two describe the same code.', 2 );
+	warn( 'The check would run against the working tree while the receipt names' );
+	warn( 'HEAD. Commit or stash first, so the two describe the same code.' );
 	exit( 1 );
 }
 
@@ -85,9 +85,9 @@ if ( 0 !== $behind ) {
 	// CI tests the merge of this branch with trunk, not this commit. Those trees
 	// are identical only while the branch already contains the tip of trunk.
 	fail( sprintf( 'branch is %d commit(s) behind trunk', $behind ) );
-	detail( 'CI tests the merge of this branch with trunk, so a receipt published', 2 );
-	detail( 'now could vouch for a combination CI never tested. Merge trunk and', 2 );
-	detail( 're-run.', 2 );
+	warn( 'CI tests the merge of this branch with trunk, so a receipt published' );
+	warn( 'now could vouch for a combination CI never tested. Merge trunk and' );
+	warn( 're-run.' );
 	exit( 1 );
 }
 
@@ -141,9 +141,9 @@ $known_before = commit_is_known_to_github( $token, $sha );
 detail( sprintf( 'GET /commits/%s → HTTP %d', short( $sha ), $known_before ), 2 );
 
 if ( 200 === $known_before ) {
-	detail( 'NOTE: this commit is already on the remote (pushed, or open in a PR), so', 2 );
-	detail( '      the 422 → 200 transition cannot be shown. To see it, make a local', 2 );
-	detail( '      commit and run this before pushing. Everything below still runs.', 2 );
+	warn( 'NOTE: this commit is already on the remote (pushed, or open in a PR), so' );
+	warn( '      the 422 → 200 transition cannot be shown. To see it, make a local' );
+	warn( '      commit and run this before pushing. Everything below still runs.' );
 }
 
 // Counted before the push so step 5 measures what this push caused, rather than
@@ -227,11 +227,11 @@ if ( 201 !== $posted['status'] ) {
 	$message = (string) ( $posted['body']['message'] ?? '' );
 
 	if ( '' !== $message ) {
-		detail( 'GitHub said: ' . $message, 2 );
+		warn( 'GitHub said: ' . $message );
 	}
 
 	if ( 403 === $posted['status'] ) {
-		detail( 'A 403 here usually means the token lacks the repo:status scope.', 2 );
+		warn( 'A 403 here usually means the token lacks the repo:status scope.' );
 	}
 
 	exit( 1 );
@@ -254,8 +254,8 @@ foreach ( read_receipts( $token, $sha ) as $receipt ) {
 
 detail( '.github/workflows/poc-local-ci.yml reads exactly this and, when the state is', 2 );
 detail( "success, skips running the package's JavaScript job.", 2 );
-detail( 'Trust is NOT implemented: the workflow does not yet check that creator', 2 );
-detail( 'belongs to a trusted team. That is the next piece.', 2 );
+warn( 'Trust is NOT implemented: the workflow does not yet check that creator' );
+warn( 'belongs to a trusted team. That is the next piece.' );
 
 // ---------------------------------------------------------------------------
 // 9. Leave nothing behind but the receipt.
@@ -573,25 +573,76 @@ function short( string $sha ): string {
  * @param string $text Heading text.
  */
 function heading( string $text ): void {
-	printf( "\n\033[1m%s\033[0m\n", $text );
+	printf( "\n%s\n", paint( $text, 'bold' ) );
 }
 
 /**
- * A green tick line.
+ * A green line: something held.
  *
  * @param string $text Message.
  */
 function pass( string $text ): void {
-	printf( "  \033[32m✓\033[0m %s\n", $text );
+	printf( "  %s\n", paint( '✓ ' . $text, 'green' ) );
 }
 
 /**
- * A red cross line.
+ * A red line: something did not hold, and the run stops.
  *
  * @param string $text Message.
  */
 function fail( string $text ): void {
-	printf( "  \033[31m✗\033[0m %s\n", $text );
+	printf( "  %s\n", paint( '✗ ' . $text, 'red' ) );
+}
+
+/**
+ * A yellow line: something the reader should notice but which is not a failure.
+ *
+ * Used for the guidance printed after a refusal, and for the caveats that say
+ * what this POC has not implemented.
+ *
+ * @param string $text   Message.
+ * @param int    $indent Indent level, two spaces each.
+ */
+function warn( string $text, int $indent = 2 ): void {
+	printf( "%s%s\n", str_repeat( '  ', $indent ), paint( $text, 'yellow' ) );
+}
+
+/**
+ * Whether to emit colour at all.
+ *
+ * Off when the output is not a terminal, so piping a run into a file or pasting
+ * it into a ticket gives clean text rather than escape codes, and off when
+ * NO_COLOR is set (https://no-color.org).
+ */
+function colour_is_available(): bool {
+	static $available = null;
+
+	if ( null === $available ) {
+		$available = false === getenv( 'NO_COLOR' ) && stream_isatty( STDOUT );
+	}
+
+	return $available;
+}
+
+/**
+ * Wrap text in an ANSI colour, or return it untouched when colour is off.
+ *
+ * @param string $text   Text to colour.
+ * @param string $colour One of bold, red, green, yellow.
+ */
+function paint( string $text, string $colour ): string {
+	$codes = array(
+		'bold'   => '1',
+		'red'    => '31',
+		'green'  => '32',
+		'yellow' => '33',
+	);
+
+	if ( ! colour_is_available() || ! isset( $codes[ $colour ] ) ) {
+		return $text;
+	}
+
+	return sprintf( "\033[%sm%s\033[0m", $codes[ $colour ], $text );
 }
 
 /**
@@ -603,5 +654,3 @@ function fail( string $text ): void {
 function detail( string $text, int $indent = 1 ): void {
 	printf( "%s%s\n", str_repeat( '  ', $indent ), $text );
 }
-
-// Testings
