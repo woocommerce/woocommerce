@@ -317,7 +317,11 @@ jobs:
           # `creator`. Newest first, so take the most recent entry for the
           # context and then require success — a later failure must not be
           # masked by an earlier success.
-          latest=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses"             --jq "[.[] | select(.context == "$RECEIPT_CONTEXT")][0]" 2>/dev/null || true)
+          # jq --arg, not string interpolation: the context contains spaces and
+          # brackets ("JavaScript - @woocommerce/number [unit]"), which break an
+          # inlined filter.
+          latest=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses" 2>/dev/null \
+            | jq -c --arg ctx "$RECEIPT_CONTEXT" '[.[] | select(.context == $ctx)][0] // empty' 2>/dev/null || true)
 
           if [ -n "$latest" ] && [ "$(jq -r '.state // empty' <<<"$latest" 2>/dev/null)" = 'success' ]; then
             substituted=true
