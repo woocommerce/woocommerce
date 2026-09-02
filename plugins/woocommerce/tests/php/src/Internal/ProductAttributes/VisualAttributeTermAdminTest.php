@@ -237,6 +237,37 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve string content and normalize non-string content when passing through another column.
+	 * @dataProvider column_content_provider
+	 *
+	 * @param mixed  $content Column content.
+	 * @param string $expected Expected content.
+	 */
+	public function test_normalizes_column_content( $content, string $expected ): void {
+		$instance = wc_get_container()->get( VisualAttributeTermAdmin::class );
+
+		$this->assertSame(
+			$expected,
+			$instance->render_term_visual_column( $content, 'another-column', 1, 'pa_color' ),
+			'Column content should remain a string.'
+		);
+	}
+
+	/**
+	 * Data provider for column content normalization.
+	 *
+	 * @return array
+	 */
+	public function column_content_provider(): array {
+		return array(
+			'string content' => array( 'existing content', 'existing content' ),
+			'null content'   => array( null, '' ),
+			'array content'  => array( array(), '' ),
+			'object content' => array( new \stdClass(), '' ),
+		);
+	}
+
+	/**
 	 * @testdox Should not throw a TypeError when the current screen has a non-string id.
 	 *
 	 * Reproduces issue #66528: Visual Composer calls do_action('admin_enqueue_scripts', NULL),
