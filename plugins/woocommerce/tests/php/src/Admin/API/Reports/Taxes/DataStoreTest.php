@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as StatsDataStore;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Helper_Order;
 use WC_Helper_Queue;
@@ -549,6 +550,93 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 215.0, (float) $summed, 'Tax lines sharing a rate id must not multiply the taxable amount.' );
+	}
+
+	/**
+	 * Refund the given order in full, mirroring its items and their taxes.
+	 *
+	 * @param \WC_Order $order Order to refund.
+	 * @return \WC_Order_Refund
+	 */
+	private function refund_order_in_full( \WC_Order $order ): \WC_Order_Refund {
+		$line_items = array();
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE, OrderItemType::SHIPPING ) ) as $item_id => $item ) {
+			$line_items[ $item_id ] = array(
+				'qty'          => is_callable( array( $item, 'get_quantity' ) ) ? $item->get_quantity() : 0,
+				'refund_total' => $item->get_total(),
+				'refund_tax'   => $item->get_taxes()['total'],
+			);
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => $line_items,
+			)
+		);
+		$this->assertNotWPError( $refund, 'The full refund should be created.' );
+
+		return $refund;
+	}
+
+	/**
+	 * @testdox A fully refunded order nets its taxable amount back to zero.
+	 */
+	public function test_refunded_order_nets_taxable_amount_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+		$refund  = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		$sums = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT SUM(total_tax) AS total_tax, SUM(taxable_amount) AS taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+				$order->get_id(),
+				$refund->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 0.0, (float) $sums->total_tax, 'A full refund should net the tax back to zero.' );
+		$this->assertSame( 0.0, (float) $sums->taxable_amount, 'A full refund should net the taxable amount back to zero.' );
+	}
+
+	/**
+	 * @testdox A refund created after a compound rate was deleted still nets the taxable amount to zero.
+	 */
+	public function test_refund_nets_compound_taxable_amount_after_rate_deletion(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id     = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id = $this->insert_tax_rate( '7', 2, 1 );
+		$order            = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// The refund's own tax items re-derive the compound flag from the live rate,
+		// so deleting the rate first exercises the parent-flags fallback.
+		WC_Tax::_delete_tax_rate( $compound_rate_id );
+		$refund = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		foreach ( array( $base_rate_id, $compound_rate_id ) as $rate_id ) {
+			$summed = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT SUM(taxable_amount) FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+					$order->get_id(),
+					$refund->get_id(),
+					$rate_id
+				)
+			);
+			$this->assertSame( 0.0, (float) $summed, "Rate {$rate_id} should net its taxable amount back to zero after a full refund." );
+		}
 	}
 
 	/**
