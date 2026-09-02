@@ -10,7 +10,7 @@ branch is too late — the workflow has already started.
 ## Run it
 
 ```sh
-bash tools/local-ci-poc/poc.sh
+php tools/local-ci-poc/poc.php
 ```
 
 Runs against the real repository. Creates one ref and one commit status, then
@@ -67,5 +67,5 @@ Four findings, each verified by running this:
 ## Note on cleanup
 
 An earlier run was interrupted mid-flight and leaked its temporary ref. The script
-now removes it via a trap on `EXIT`/`INT`/`TERM`. Any real implementation needs the
-same, or abandoned refs accumulate.
+now removes it from a shutdown handler and on `SIGINT`/`SIGTERM`. Any real
+implementation needs the same, or abandoned refs accumulate on the remote.
