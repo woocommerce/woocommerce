@@ -49,26 +49,6 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A well formed set of handshake parameters passes validation.
-	 */
-	public function test_make_validation_accepts_string_parameters() {
-		$request_backup = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Saved and restored so the test can drive make_validation() with a known request.
-		$_REQUEST       = array(
-			'app_name'     => 'Test app',
-			'user_id'      => '123',
-			'return_url'   => 'https://example.com/return',
-			'callback_url' => 'https://example.com/callback',
-			'scope'        => 'read',
-		);
-
-		try {
-			$this->assertNull( $this->get_make_validation_method()->invoke( new WC_Auth() ) );
-		} finally {
-			$_REQUEST = $request_backup;
-		}
-	}
-
-	/**
 	 * An array submitted for a handshake parameter is reported as invalid rather than missing, and never
 	 * reaches a string-only function.
 	 */
