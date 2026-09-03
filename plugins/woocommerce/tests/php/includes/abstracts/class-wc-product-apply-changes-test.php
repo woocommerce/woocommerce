@@ -142,4 +142,54 @@ class WC_Product_Apply_Changes_Test extends WC_Unit_Test_Case {
 			'Unknown nested product properties should retain recursive change application.'
 		);
 	}
+
+	/**
+	 * @testdox Every array-valued product data property should be classified in the whole-value allowlist.
+	 */
+	public function test_array_valued_product_data_props_are_all_classified(): void {
+		$reflection = new ReflectionClass( WC_Product::class );
+
+		$unclassified = array_keys(
+			array_diff_key(
+				array_filter( $reflection->getDefaultProperties()['data'], 'is_array' ),
+				$reflection->getConstant( 'WHOLE_VALUE_PROPS' )
+			)
+		);
+
+		$this->assertSame(
+			array(),
+			$unclassified,
+			'A new array-valued WC_Product data property must be added to WC_Product::WHOLE_VALUE_PROPS, or deliberately left out because its setter accepts partial values.'
+		);
+	}
+
+	/**
+	 * @testdox Every array-valued extra data property on a core product type should be classified in the whole-value allowlist.
+	 */
+	public function test_array_valued_core_product_extra_data_props_are_all_classified(): void {
+		$allowlist    = ( new ReflectionClass( WC_Product::class ) )->getConstant( 'WHOLE_VALUE_PROPS' );
+		$unclassified = array();
+
+		$core_product_classes = array(
+			WC_Product_Simple::class,
+			WC_Product_Grouped::class,
+			WC_Product_External::class,
+			WC_Product_Variable::class,
+			WC_Product_Variation::class,
+		);
+
+		foreach ( $core_product_classes as $product_class ) {
+			$extra_data = ( new ReflectionClass( $product_class ) )->getDefaultProperties()['extra_data'];
+
+			foreach ( array_diff_key( array_filter( $extra_data, 'is_array' ), $allowlist ) as $prop => $ignored ) {
+				$unclassified[] = $product_class . '::' . $prop;
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$unclassified,
+			'A new array-valued extra data property on a core product type must be added to WC_Product::WHOLE_VALUE_PROPS, or deliberately left out because its setter accepts partial values.'
+		);
+	}
 }
