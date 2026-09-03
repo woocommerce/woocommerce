@@ -1337,7 +1337,7 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
-		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 	}
 
 	/**
