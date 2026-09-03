@@ -217,6 +217,6 @@ class WC_Widget_Products extends WC_Widget {
 
 		wp_reset_postdata();
 
-		echo $this->cache_widget( $args, ob_get_clean() ); // WPCS: XSS ok.
+		echo $this->cache_widget( $args, ob_get_clean() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered widget markup; each dynamic value is escaped or annotated where it is rendered.
 	}
 }

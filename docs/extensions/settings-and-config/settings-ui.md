@@ -49,7 +49,7 @@ add_filter(
 
 A `WC_Settings_Page` subclass opts in by returning a settings UI adapter from `get_settings_ui_page()`.
 
-For pages that only need native fields, use `LegacySettingsPageAdapter`:
+For pages that only need built-in fields, use `LegacySettingsPageAdapter`:
 
 ```php
 <?php
@@ -139,9 +139,9 @@ WooCommerce creates the settings UI adapter for registered sections internally. 
 
 Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
 
-### Provide a native Settings UI page for a registered section
+### Provide a custom Settings UI page for a registered section
 
-Sections with custom navigation, save handlers, or native Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
+Sections with custom navigation, save handlers, or custom Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
 
 ```php
 <?php
@@ -159,7 +159,7 @@ final class My_Plugin_Settings_Section extends SettingsSection {
 
 When `get_settings_ui_page()` returns a `SettingsUIPageInterface`, WooCommerce uses it directly for the registered section. Returning `null` keeps the default behavior: WooCommerce converts the section's legacy `get_settings()` array into a Settings UI schema.
 
-### Section navigation on native pages
+### Section navigation on custom pages
 
 The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. How it applies depends on where the page is registered:
 
@@ -178,7 +178,7 @@ $schema['shell']['sectionNavigation'] = array(
 );
 ```
 
-## Native field migration
+## DataForm field migration
 
 The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
 
@@ -332,13 +332,13 @@ $schema['shell']['badges']   = array(
 
 The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.
 
-Use this page to verify the native migration path before testing a plugin-specific page such as WooPayments.
+Use this page to verify the DataForm migration path before testing a plugin-specific page such as WooPayments.
 
 ## Testing an extension integration
 
 1. Enable the `settings-ui` feature flag.
 2. Return a settings UI adapter from your `WC_Settings_Page` subclass.
-3. Start with native fields and confirm the page renders and saves.
+3. Start with built-in fields and confirm the page renders and saves.
 4. Add `component` metadata only for fields that need custom UI.
 5. Register scoped JavaScript components with `registerSettingsExtension()`.
 6. Return custom script handles from `get_script_handles()` so they load before mount.

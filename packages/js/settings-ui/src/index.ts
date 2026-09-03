@@ -1,5 +1,4 @@
 export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
-export { NativeSettingsField } from './native-fields';
 export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
 export {
 	registerSettingsExtension,
@@ -27,8 +26,6 @@ export type {
 	SettingsEditControlProps,
 	SettingsExtensionRegistration,
 	SettingsExtensionScope,
-	SettingsFieldComponent,
-	SettingsFieldComponentProps,
 	SettingsFieldContext,
 	SettingsRegionComponent,
 	SettingsRegionComponentProps,
