@@ -58,9 +58,10 @@ Covers the scenarios from the original plugin test plan that have a target in co
   that already belongs to an account, or one that created an account on signup,
   also takes the logged-in branch. The specs cover it through the shared
   `customer` account (`signUpAsCustomer()`).
-- Account-creation tests register a real customer for the guest's address and
-  delete it in a `finally` block, so a failed assertion doesn't leave the
-  account behind.
+- Account-creation tests register a real customer for the guest's address. The
+  address comes from the `accountEmail` fixture, whose teardown looks it up and
+  deletes any account it finds, so a failed assertion (or a retry with a fresh
+  address) doesn't leave the account behind.
 
 ## Skipped scenarios
 

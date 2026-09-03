@@ -10,7 +10,6 @@ import {
 	bisFormLocator,
 	bisNotice,
 	bisTargetProductInput,
-	deleteCustomer,
 	expectEmailAsAdmin,
 	findCustomerByEmail,
 	resetBISOptions,
@@ -317,9 +316,8 @@ test.describe(
 					page,
 					product,
 					restApi,
+					accountEmail: email,
 				} ) => {
-					const email = uniqueGuestEmail( 'bis-consent-missing' );
-
 					await page.goto( product.permalink );
 
 					const consent = bisConsentCheckbox( page );
@@ -344,9 +342,8 @@ test.describe(
 					product,
 					restApi,
 					browser,
+					accountEmail: email,
 				} ) => {
-					const email = uniqueGuestEmail( 'bis-account-single' );
-
 					await page.goto( product.permalink );
 					await signUpOnProductPage( page, { email, consent: true } );
 
@@ -356,21 +353,18 @@ test.describe(
 						)
 					).toBeVisible();
 
-					const account = await findCustomerByEmail( restApi, email );
-					expect( account ).toBeDefined();
+					expect(
+						await findCustomerByEmail( restApi, email )
+					).toBeDefined();
 
-					try {
-						// The "check your e-mail for details" in the notice is
-						// WooCommerce's own new-account email, sent with the
-						// generated password.
-						await expectEmailAsAdmin(
-							browser,
-							email,
-							/account has been created!/
-						);
-					} finally {
-						await deleteCustomer( restApi, account!.id );
-					}
+					// The "check your e-mail for details" in the notice is
+					// WooCommerce's own new-account email, sent with the
+					// generated password.
+					await expectEmailAsAdmin(
+						browser,
+						email,
+						/account has been created!/
+					);
 				} );
 			} );
 
@@ -389,9 +383,8 @@ test.describe(
 					product,
 					restApi,
 					browser,
+					accountEmail: email,
 				} ) => {
-					const email = uniqueGuestEmail( 'bis-account-double' );
-
 					await page.goto( product.permalink );
 					await signUpOnProductPage( page, { email, consent: true } );
 
@@ -399,18 +392,15 @@ test.describe(
 						page.getByText( bisNotice.accountCreatedDoubleOptIn )
 					).toBeVisible();
 
-					const account = await findCustomerByEmail( restApi, email );
-					expect( account ).toBeDefined();
+					expect(
+						await findCustomerByEmail( restApi, email )
+					).toBeDefined();
 
-					try {
-						await expectEmailAsAdmin(
-							browser,
-							email,
-							bisEmailSubject.verify( product.name )
-						);
-					} finally {
-						await deleteCustomer( restApi, account!.id );
-					}
+					await expectEmailAsAdmin(
+						browser,
+						email,
+						bisEmailSubject.verify( product.name )
+					);
 				} );
 			} );
 		} );

@@ -737,6 +737,17 @@ export function bisAdminListUrl( productId: number ): string {
 }
 
 /**
+ * Generate a unique guest email address for a test so mail-log assertions don't collide.
+ *
+ * @param {string} prefix Short descriptor of the test.
+ */
+export function uniqueGuestEmail( prefix = 'bis' ): string {
+	return `${ prefix }-${ Date.now() }-${ Math.floor(
+		Math.random() * 1000
+	) }@example.com`;
+}
+
+/**
  * Ids of products created by the `product` fixture, deleted in one batch when
  * the worker finishes. A per-test DELETE costs ~0.45s, which is pure overhead
  * on a suite where every test needs its own product.
@@ -774,6 +785,7 @@ export const test = baseTest.extend<
 		product: BISProduct;
 		variableProduct: BISVariableProduct;
 		anyAttributeVariableProduct: BISVariableProduct;
+		accountEmail: string;
 	},
 	{ bisEnvReady: void }
 >( {
@@ -826,6 +838,24 @@ export const test = baseTest.extend<
 		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( product );
 		productsToReap.push( product.id );
+	},
+
+	/**
+	 * A guest email address that a signup may register an account for.
+	 *
+	 * Teardown looks the address up and deletes the account if one exists, so
+	 * the customer is reaped whether the test failed on the notice, on the
+	 * lookup, or on the email — the test itself never has to hold the id.
+	 */
+	accountEmail: async ( { restApi }, use ) => {
+		const email = uniqueGuestEmail( 'bis-account' );
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
+		await use( email );
+
+		const account = await findCustomerByEmail( restApi, email );
+		if ( account ) {
+			await deleteCustomer( restApi, account.id );
+		}
 	},
 } );
 
@@ -1128,15 +1158,4 @@ export async function triggerStockNotificationsBatch(
 	page: Page
 ): Promise< void > {
 	await page.goto( '?process-waiting-actions' );
-}
-
-/**
- * Generate a unique guest email address for a test so mail-log assertions don't collide.
- *
- * @param {string} prefix Short descriptor of the test.
- */
-export function uniqueGuestEmail( prefix = 'bis' ): string {
-	return `${ prefix }-${ Date.now() }-${ Math.floor(
-		Math.random() * 1000
-	) }@example.com`;
 }
