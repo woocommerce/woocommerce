@@ -46,7 +46,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wc_clear_notices();
 		\wp_set_current_user( 0 );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_POST = array();
+		$_GET = array();
 		global $wp;
 		if ( isset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] ) ) {
 			unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
@@ -380,15 +380,16 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( "You haven't signed up", $html );
 
 		// Only the newest pending row survives the limit of 1.
-		$this->assertStringContainsString( 'value="' . $pending_2->get_id() . '"', $html );
-		$this->assertStringNotContainsString( 'value="' . $pending_1->get_id() . '"', $html );
-		$this->assertStringContainsString( 'value="' . $active->get_id() . '"', $html );
+		$this->assertStringContainsString( 'notification_id=' . $pending_2->get_id() . '&', $html );
+		$this->assertStringNotContainsString( 'notification_id=' . $pending_1->get_id() . '&', $html );
+		$this->assertStringContainsString( 'notification_id=' . $active->get_id() . '&', $html );
 
-		// Only the pending row offers a Resend form; it posts back to the endpoint with a resend-scoped nonce.
-		$this->assertSame( 1, substr_count( $html, 'woocommerce-customer-stock-notifications-action-form--resend' ) );
-		$this->assertSame( 2, substr_count( $html, 'woocommerce-customer-stock-notifications-action-form--cancel' ) );
-		$this->assertStringContainsString( 'name="' . MyAccountEndpoint::ACTION_FIELD . '" value="' . MyAccountEndpoint::ACTION_RESEND . '"', $html );
-		$this->assertStringContainsString( 'action="' . esc_url( MyAccountEndpoint::get_endpoint_url() ) . '"', $html );
+		// Only the pending row offers a Resend link; both actions point back at the endpoint.
+		$this->assertSame( 1, substr_count( $html, 'woocommerce-customer-stock-notifications-action-link--resend' ) );
+		$this->assertSame( 2, substr_count( $html, 'woocommerce-customer-stock-notifications-action-link--cancel' ) );
+		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, $pending_2->get_id() ) ), $html );
+		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, $active->get_id() ) ), $html );
+		$this->assertStringNotContainsString( MyAccountEndpoint::ACTION_FIELD . '=' . MyAccountEndpoint::ACTION_RESEND . '&#038;notification_id=' . $active->get_id(), $html );
 		$this->assertStringContainsString( 'aria-label="Resend email for ', $html );
 		$this->assertStringNotContainsString( 'wc_bis_resend_notification=', $html );
 	}
@@ -537,10 +538,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$notification_a = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 		$notification_b = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
-		// Nonce was minted against A's id, but we POST it alongside B's id.
+		// Nonce was minted against A's id, but the request carries B's id.
 		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification_b->get_id(), true );
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$_POST['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification_a->get_id() ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$_GET['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification_a->get_id() ) );
 
 		$this->run_action_expecting_redirect();
 
@@ -644,7 +645,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An anonymous POST with a cancel payload is silently dropped.
+	 * An anonymous request carrying a cancel link's query args is silently dropped.
 	 */
 	public function test_cancel_ignored_when_anonymous(): void {
 		$user_id      = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -661,7 +662,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A valid resend POST from the owner hands the notification to the service and reports success.
+	 * A valid resend link from the owner hands the notification to the service and reports success.
 	 */
 	public function test_resend_with_valid_nonce_sends_verification_email(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -713,7 +714,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A nonce minted for the row's Cancel form does not validate its Resend form.
+	 * A nonce minted for the row's Cancel link does not validate its Resend link.
 	 */
 	public function test_resend_rejects_nonce_minted_for_cancel(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -726,8 +727,8 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 			->method( 'resend_verification_email' );
 
 		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification->get_id(), true );
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$_POST['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id() ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$_GET['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id() ) );
 
 		$this->run_action_expecting_redirect( $service );
 
@@ -757,7 +758,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A valid action POST that lands on any page other than the stock notifications
+	 * A valid action link that lands on any page other than the stock notifications
 	 * endpoint is dropped, so the handler never widens to the whole front end.
 	 */
 	public function test_action_ignored_off_the_endpoint(): void {
@@ -796,6 +797,23 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
+	 * Action links point at the endpoint and carry the action, the id, and a nonce scoped to both.
+	 */
+	public function test_get_action_url_carries_action_id_and_scoped_nonce(): void {
+		$url = MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, 42 );
+
+		$this->assertStringStartsWith( MyAccountEndpoint::get_endpoint_url(), $url );
+		$this->assertStringContainsString( MyAccountEndpoint::ACTION_FIELD . '=' . MyAccountEndpoint::ACTION_RESEND, $url );
+		$this->assertStringContainsString( 'notification_id=42', $url );
+
+		// wp_nonce_url() returns an HTML-escaped URL (`&amp;`), so decode it before parsing the query.
+		$query = array();
+		\wp_parse_str( (string) \wp_parse_url( html_entity_decode( $url ), PHP_URL_QUERY ), $query );
+		$this->assertNotFalse( \wp_verify_nonce( $query['_wpnonce'], MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, 42 ) ) );
+		$this->assertFalse( \wp_verify_nonce( $query['_wpnonce'], MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, 42 ) ) );
 	}
 
 	/**
@@ -838,7 +856,8 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper: fake the global state needed for `maybe_handle_action()` to proceed past guards.
+	 * Helper: fake the global state needed for `maybe_handle_action()` to proceed past guards,
+	 * as if the customer followed a row action link.
 	 *
 	 * @param string $action          One of the `MyAccountEndpoint::ACTION_*` values.
 	 * @param int    $notification_id Notification id.
@@ -851,13 +870,13 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 			? \wp_create_nonce( MyAccountEndpoint::get_nonce_action( $action, $notification_id ) )
 			: 'clearly-not-a-valid-nonce';
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_POST = array(
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.WP.GlobalVariablesOverride.Prohibited
+		$_GET = array(
 			MyAccountEndpoint::ACTION_FIELD => $action,
 			'notification_id'               => (string) $notification_id,
 			'_wpnonce'                      => $nonce,
 		);
-		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**

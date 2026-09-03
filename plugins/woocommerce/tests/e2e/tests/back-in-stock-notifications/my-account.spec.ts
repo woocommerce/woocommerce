@@ -135,12 +135,10 @@ test.describe(
 						} );
 					await expect( pendingRow ).toBeVisible();
 					await expect(
-						pendingRow.getByRole( 'button', {
-							name: 'Resend email',
-						} )
+						pendingRow.getByRole( 'link', { name: 'Resend email' } )
 					).toBeVisible();
 					await expect(
-						pendingRow.getByRole( 'button', { name: 'Cancel' } )
+						pendingRow.getByRole( 'link', { name: 'Cancel' } )
 					).toBeVisible();
 					await expect(
 						pendingTable.locator( 'tbody tr' )
@@ -164,12 +162,10 @@ test.describe(
 						} );
 					await expect( activeRow ).toBeVisible();
 					await expect(
-						activeRow.getByRole( 'button', { name: 'Cancel' } )
+						activeRow.getByRole( 'link', { name: 'Cancel' } )
 					).toBeVisible();
 					await expect(
-						activeRow.getByRole( 'button', {
-							name: 'Resend email',
-						} )
+						activeRow.getByRole( 'link', { name: 'Resend email' } )
 					).toHaveCount( 0 );
 					await expect(
 						activeTable.locator( 'tbody tr' )
@@ -234,10 +230,10 @@ test.describe(
 					await expect( row ).toBeVisible();
 
 					await row
-						.getByRole( 'button', { name: 'Resend email' } )
+						.getByRole( 'link', { name: 'Resend email' } )
 						.click();
 
-					// The redirect after the POST lands us back on the same tab with a notice.
+					// The redirect after the GET lands us back on the clean tab URL with a notice.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Stock notifications',
@@ -252,7 +248,7 @@ test.describe(
 
 					// The row is still pending and still offers the actions.
 					await expect(
-						row.getByRole( 'button', { name: 'Resend email' } )
+						row.getByRole( 'link', { name: 'Resend email' } )
 					).toBeVisible();
 				} finally {
 					await restApi.delete(
@@ -298,9 +294,9 @@ test.describe(
 						} );
 					await expect( row ).toBeVisible();
 
-					await row.getByRole( 'button', { name: 'Cancel' } ).click();
+					await row.getByRole( 'link', { name: 'Cancel' } ).click();
 
-					// The redirect after the POST lands us back on the same tab.
+					// The redirect after the GET lands us back on the clean tab URL.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Stock notifications',

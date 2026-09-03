@@ -29,7 +29,7 @@ class MyAccountEndpoint {
 	public const ENDPOINT = 'stock-notifications';
 
 	/**
-	 * POST field naming the action a row form submits.
+	 * Query argument naming the action a row link triggers.
 	 */
 	public const ACTION_FIELD = 'wc_bis_action';
 
@@ -47,7 +47,7 @@ class MyAccountEndpoint {
 	 * Build the nonce action name for an action on a given notification.
 	 *
 	 * Scoped per action and per notification (`wc_bis_cancel_<id>`), so a nonce minted for one
-	 * row's Cancel form cannot be replayed on another row or on its Resend form.
+	 * row's Cancel link cannot be replayed on another row or on its Resend link.
 	 *
 	 * @param string $action          One of the `ACTION_*` values.
 	 * @param int    $notification_id The notification id.
@@ -55,6 +55,28 @@ class MyAccountEndpoint {
 	 */
 	public static function get_nonce_action( string $action, int $notification_id ): string {
 		return 'wc_bis_' . $action . '_' . $notification_id;
+	}
+
+	/**
+	 * Build the nonce-protected URL a row action link points at.
+	 *
+	 * Same shape as the other My Account action links (cancel order, resend set-password):
+	 * a GET back to the endpoint carrying the action, the id, and a scoped nonce.
+	 *
+	 * @param string $action          One of the `ACTION_*` values.
+	 * @param int    $notification_id The notification id.
+	 * @return string The action URL.
+	 */
+	public static function get_action_url( string $action, int $notification_id ): string {
+		$url = add_query_arg(
+			array(
+				self::ACTION_FIELD => $action,
+				'notification_id'  => $notification_id,
+			),
+			self::get_endpoint_url()
+		);
+
+		return wp_nonce_url( $url, self::get_nonce_action( $action, $notification_id ) );
 	}
 
 	/**
@@ -362,7 +384,7 @@ class MyAccountEndpoint {
 	}
 
 	/**
-	 * Intercept a row-action POST (resend or cancel) from the stock notifications tab.
+	 * Intercept a row-action link (resend or cancel) from the stock notifications tab.
 	 *
 	 * Guards, shared by every action:
 	 * - Must be on the My Account > stock-notifications endpoint.
@@ -370,16 +392,17 @@ class MyAccountEndpoint {
 	 * - Nonce must be scoped to the action and the notification id ({@see ::get_nonce_action()}).
 	 * - The notification must exist and belong to the current user.
 	 *
-	 * Requests that aren't an action submission, or that arrive anonymously, are dropped
-	 * silently. Everything else redirects back to the tab with a notice, so the button
-	 * never looks dead. A missing notification and one owned by someone else share the
-	 * same error, so the response doesn't confirm whether the id exists.
+	 * Requests that aren't an action link, or that arrive anonymously, are dropped
+	 * silently. Everything else redirects back to the clean endpoint URL with a notice,
+	 * so the link never looks dead and a refresh can't replay it. A missing notification
+	 * and one owned by someone else share the same error, so the response doesn't
+	 * confirm whether the id exists.
 	 */
 	public function maybe_handle_action(): void {
 		global $wp;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST[ self::ACTION_FIELD ] ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET[ self::ACTION_FIELD ] ) ) {
 			return;
 		}
 
@@ -391,18 +414,18 @@ class MyAccountEndpoint {
 			return;
 		}
 
-		$action = sanitize_key( wp_unslash( $_POST[ self::ACTION_FIELD ] ) );
+		$action = sanitize_key( wp_unslash( $_GET[ self::ACTION_FIELD ] ) );
 		if ( ! in_array( $action, array( self::ACTION_RESEND, self::ACTION_CANCEL ), true ) ) {
 			return;
 		}
 
-		$notification_id = isset( $_POST['notification_id'] ) ? absint( wp_unslash( $_POST['notification_id'] ) ) : 0;
+		$notification_id = isset( $_GET['notification_id'] ) ? absint( wp_unslash( $_GET['notification_id'] ) ) : 0;
 		if ( $notification_id <= 0 ) {
 			return;
 		}
 
-		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! wp_verify_nonce( $nonce, self::get_nonce_action( $action, $notification_id ) ) ) {
 			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ) );
