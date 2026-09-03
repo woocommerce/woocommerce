@@ -125,6 +125,11 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		wp_enqueue_registered_block_scripts_and_styles();
 		$this->assertSame(
 			array(),
+			array_values( array_intersect( $metadata_style_handles, wp_styles()->queue ) ),
+			'Product Filters metadata styles must not be queued before the block renders.'
+		);
+		$this->assertSame(
+			array(),
 			preg_grep( '#^woocommerce-.+-style$#', wp_styles()->queue ),
 			'Classic pages without WooCommerce blocks must not queue any block style.'
 		);
