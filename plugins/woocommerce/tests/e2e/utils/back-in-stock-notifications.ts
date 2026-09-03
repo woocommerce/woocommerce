@@ -13,9 +13,11 @@ import {
  */
 import { deleteOption, setOption } from './options';
 import { expectEmail } from './email';
+import { setFilterValue } from './filters';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
+import { CUSTOMER_STATE_PATH } from '../playwright.config';
 
 /**
  * Names of the Back in Stock Notifications options in core.
@@ -27,6 +29,8 @@ export const BIS_OPTIONS = {
 	doubleOptIn:
 		'woocommerce_customer_stock_notifications_require_double_opt_in',
 	requireAccount: 'woocommerce_customer_stock_notifications_require_account',
+	createAccountOnSignup:
+		'woocommerce_customer_stock_notifications_create_account_on_signup',
 } as const;
 
 /**
@@ -83,12 +87,13 @@ export async function assertBISEnvReady(): Promise< void > {
 /**
  * Configure the BIS feature options for a test. Omitted keys are left untouched.
  *
- * @param {APIRequest} request                  Playwright request fixture.
- * @param {string}     baseURL                  Test site base URL.
- * @param {Object}     options                  BIS option toggles.
- * @param {boolean}    [options.allowSignups]   Whether the signup form is rendered on product pages.
- * @param {boolean}    [options.doubleOptIn]    Whether signups require email verification before activating.
- * @param {boolean}    [options.requireAccount] Whether signups are limited to logged-in users.
+ * @param {APIRequest} request                         Playwright request fixture.
+ * @param {string}     baseURL                         Test site base URL.
+ * @param {Object}     options                         BIS option toggles.
+ * @param {boolean}    [options.allowSignups]          Whether the signup form is rendered on product pages.
+ * @param {boolean}    [options.doubleOptIn]           Whether signups require email verification before activating.
+ * @param {boolean}    [options.requireAccount]        Whether signups are limited to logged-in users.
+ * @param {boolean}    [options.createAccountOnSignup] Whether a guest signup also registers a customer account.
  */
 export async function setBISOptions(
 	request: APIRequest,
@@ -97,6 +102,7 @@ export async function setBISOptions(
 		allowSignups?: boolean;
 		doubleOptIn?: boolean;
 		requireAccount?: boolean;
+		createAccountOnSignup?: boolean;
 	}
 ): Promise< void > {
 	const toYesNo = ( v: boolean | undefined ): string | undefined => {
@@ -110,6 +116,10 @@ export async function setBISOptions(
 		[ BIS_OPTIONS.allowSignups, toYesNo( options.allowSignups ) ],
 		[ BIS_OPTIONS.doubleOptIn, toYesNo( options.doubleOptIn ) ],
 		[ BIS_OPTIONS.requireAccount, toYesNo( options.requireAccount ) ],
+		[
+			BIS_OPTIONS.createAccountOnSignup,
+			toYesNo( options.createAccountOnSignup ),
+		],
 	];
 
 	for ( const [ name, value ] of entries ) {
@@ -479,16 +489,30 @@ export async function selectVariation(
 }
 
 /**
+ * Locator for the account-creation consent checkbox on the PDP sign-up form.
+ *
+ * Its label is the store's registration privacy text, which the merchant can
+ * edit, so it is located by name rather than by that label.
+ *
+ * @param {Page} page Playwright page on the product detail.
+ */
+export function bisConsentCheckbox( page: Page ) {
+	return page.locator( 'input[name="wc_bis_opt_in"]' );
+}
+
+/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
  *
- * @param {Page}   page         Playwright page on the product detail.
- * @param {Object} [opts]       Fill options.
- * @param {string} [opts.email] Email address to enter (guest flow only; logged-in PDP hides the field).
+ * @param {Page}    page           Playwright page on the product detail.
+ * @param {Object}  [opts]         Fill options.
+ * @param {string}  [opts.email]   Email address to enter (guest flow only; logged-in PDP hides the field).
+ * @param {boolean} [opts.consent] Tick the account-creation consent checkbox (only rendered with `createAccountOnSignup`).
  */
 export async function signUpOnProductPage(
 	page: Page,
 	opts: {
 		email?: string;
+		consent?: boolean;
 	} = {}
 ): Promise< void > {
 	if ( opts.email !== undefined ) {
@@ -499,7 +523,79 @@ export async function signUpOnProductPage(
 			.fill( opts.email );
 	}
 
+	if ( opts.consent ) {
+		await bisConsentCheckbox( page ).check();
+	}
+
 	await page.getByRole( 'button', { name: /Notify me/i } ).click();
+}
+
+/**
+ * Submit the PDP signup form in a fresh browser context and wait for the success notice.
+ *
+ * Runs in its own context so the caller's page (usually an admin session that
+ * goes on to read the mail log) is left untouched.
+ *
+ * @param {Browser} browser                          The test's browser fixture.
+ * @param {string}  permalink                        The product permalink.
+ * @param {Object}  opts                             Signup options.
+ * @param {Object}  [opts.storageState]              Storage state for the signup context; a logged-out guest by default.
+ * @param {string}  [opts.email]                     Email to enter; omit for a logged-in signup, where the field isn't rendered.
+ * @param {boolean} [opts.consent]                   Tick the account-creation consent checkbox before submitting.
+ * @param {RegExp}  [opts.expectedNotice]            Notice to wait for after the post; a generic success match by default.
+ * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
+ * @param {Object}  [opts.selectVariation.product]   The variable product handle.
+ * @param {Object}  [opts.selectVariation.variation] The variation to select.
+ */
+export async function signUpInNewContext(
+	browser: Browser,
+	permalink: string,
+	opts: {
+		storageState?: string | { cookies: []; origins: [] };
+		email?: string;
+		consent?: boolean;
+		expectedNotice?: RegExp;
+		selectVariation?: {
+			product: BISVariableProduct;
+			variation: BISVariation;
+		};
+	} = {}
+): Promise< void > {
+	const context = await browser.newContext( {
+		storageState: opts.storageState ?? { cookies: [], origins: [] },
+	} );
+	const page = await context.newPage();
+
+	// Closed in `finally`: these specs run on a single worker, so a context
+	// left open by a failed signup would otherwise outlive the test.
+	try {
+		await page.goto( permalink );
+
+		if ( opts.selectVariation ) {
+			await selectVariation(
+				page,
+				opts.selectVariation.product,
+				opts.selectVariation.variation
+			);
+		}
+
+		await signUpOnProductPage( page, {
+			email: opts.email,
+			consent: opts.consent,
+		} );
+
+		// The form posts and reloads the PDP with a notice. Wait for that notice
+		// before closing the context, or the submission can be aborted mid-flight
+		// and the spec fails later, looking like a missing email.
+		await expect(
+			page.getByText(
+				opts.expectedNotice ??
+					/You have successfully signed up|Thanks for signing up/i
+			)
+		).toBeVisible();
+	} finally {
+		await context.close();
+	}
 }
 
 /**
@@ -524,33 +620,109 @@ export async function signUpAsGuest(
 		};
 	} = {}
 ): Promise< void > {
-	const guestContext = await browser.newContext( {
-		storageState: { cookies: [], origins: [] },
-	} );
-	const guestPage = await guestContext.newPage();
-	await guestPage.goto( permalink );
-
-	if ( opts.selectVariation ) {
-		await selectVariation(
-			guestPage,
-			opts.selectVariation.product,
-			opts.selectVariation.variation
-		);
-	}
-
-	await signUpOnProductPage( guestPage, { email } );
-
-	// The form posts and reloads the PDP with a notice. Wait for that notice
-	// before closing the context, or the submission can be aborted mid-flight
-	// and the spec fails later, looking like a missing email.
-	await expect(
-		guestPage.getByText(
-			/You have successfully signed up|Thanks for signing up/i
-		)
-	).toBeVisible();
-
-	await guestContext.close();
+	await signUpInNewContext( browser, permalink, { email, ...opts } );
 }
+
+/**
+ * Submit the PDP signup form as the shared logged-in customer, regardless of the test's storageState.
+ *
+ * The signup binds to the customer's account, which is what makes the emails
+ * take their logged-in branch.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {string}  permalink The product permalink.
+ */
+export async function signUpAsCustomer(
+	browser: Browser,
+	permalink: string
+): Promise< void > {
+	await signUpInNewContext( browser, permalink, {
+		storageState: CUSTOMER_STATE_PATH,
+	} );
+}
+
+/**
+ * Find the customer account registered for an email address, if any.
+ *
+ * @param {ApiClient} restApi WP REST client.
+ * @param {string}    email   The email address.
+ */
+export async function findCustomerByEmail(
+	restApi: ApiClient,
+	email: string
+): Promise< BISCustomer | undefined > {
+	const response = await restApi.get< BISCustomer[] >(
+		`${ WC_API_PATH }/customers`,
+		{
+			email,
+			role: 'all',
+		}
+	);
+
+	return response.data.find(
+		( customer: BISCustomer ) => customer.email === email
+	);
+}
+
+/**
+ * A customer account, as far as these specs need to know it.
+ */
+type BISCustomer = { id: number; email: string; username: string };
+
+/**
+ * Permanently delete a customer account created by a signup.
+ *
+ * @param {ApiClient} restApi    WP REST client.
+ * @param {number}    customerId The customer id.
+ */
+export async function deleteCustomer(
+	restApi: ApiClient,
+	customerId: number
+): Promise< void > {
+	await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
+		force: true,
+	} );
+}
+
+/**
+ * Make every verification link look expired to the server for this page's context.
+ *
+ * Expiry is filter-driven rather than an option, so it is set through the
+ * `e2e-filters` cookie the test helper plugin reads. A negative threshold
+ * makes `time() - timestamp > threshold` true for any link, however fresh.
+ *
+ * @param {Page} page Playwright page whose context will follow the link.
+ */
+export async function expireVerificationLinks( page: Page ): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_verification_expiration_time_threshold',
+		-1
+	);
+}
+
+/**
+ * Replace the action key in an email link with one that cannot match.
+ *
+ * @param {string} link The verify or unsubscribe link from the email.
+ */
+export function corruptEmailLinkKey( link: string ): string {
+	const url = new URL( link );
+	url.searchParams.set( 'email_link_action_key', 'not-the-real-key' );
+	return url.toString();
+}
+
+/**
+ * Text the email footer renders for a signup bound to an account.
+ *
+ * @see templates/emails/customer-stock-notification.php
+ * @see templates/emails/customer-stock-notification-verified.php
+ */
+export const BIS_EMAIL_FOOTER = {
+	loggedIn:
+		/To manage your notifications, click here to log in to your account\./,
+	guest: /To stop receiving these messages, click here to unsubscribe\./,
+} as const;
 
 /**
  * Build the admin notifications-list URL, optionally filtered to one product.
@@ -705,6 +877,79 @@ export function bisEmailBody( page: Page ) {
 export function escapeRegExp( value: string ): string {
 	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 }
+
+/**
+ * Sign-up notices core prints on the PDP after the form posts.
+ *
+ * Success notices are bound to the product name where core interpolates it,
+ * so a notice for the wrong product fails instead of passing.
+ *
+ * @see SignupService::get_signup_user_message()
+ * @see SignupService::get_error_message()
+ * @see EmailActionController
+ */
+export const bisNotice = {
+	/**
+	 * Single opt-in success.
+	 *
+	 * @param {string} productName The product name.
+	 */
+	success: ( productName: string ): RegExp =>
+		new RegExp(
+			`You have successfully signed up! You will be notified when "${ escapeRegExp(
+				productName
+			) }" is back in stock\\.`
+		),
+	doubleOptIn:
+		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
+	/**
+	 * Single opt-in success where the signup also registered an account.
+	 *
+	 * @param {string} productName The product name.
+	 */
+	accountCreated: ( productName: string ): RegExp =>
+		new RegExp(
+			`You have successfully signed up and will be notified when "${ escapeRegExp(
+				productName
+			) }" is back in stock! Note that a new account has been created for you; please check your e-mail for details\\.`
+		),
+	accountCreatedDoubleOptIn:
+		/Thanks for signing up! An account has been created for you\. Please complete the sign-up process by following the verification link sent to your e-mail\./,
+	alreadyJoined: /You have already joined this waitlist\./,
+	accountRequired: /Please log in to sign up for stock notifications\./,
+	/**
+	 * Printed on the shop page after a verify link is followed.
+	 *
+	 * @param {string} productName The product name.
+	 */
+	verified: ( productName: string ): RegExp =>
+		new RegExp(
+			`Successfully verified stock notifications for "${ escapeRegExp(
+				productName
+			) }"\\.`
+		),
+	/**
+	 * Printed on the shop page after an unsubscribe link is followed.
+	 *
+	 * @param {string} email       The unsubscribed email address.
+	 * @param {string} productName The product name.
+	 */
+	unsubscribed: ( email: string, productName: string ): RegExp =>
+		new RegExp(
+			`Successfully unsubscribed ${ escapeRegExp(
+				email
+			) }\\. You will not receive a notification when "${ escapeRegExp(
+				productName
+			) }" becomes available\\.`
+		),
+	errors: {
+		invalidEmail: /Invalid email address\./,
+		invalidProduct: /Invalid product\./,
+		missingConsent:
+			/To proceed, please consent to the creation of a new account with your e-mail\./,
+		failed: /Failed to sign up\. Please try again\./,
+	},
+} as const;
 
 /**
  * Subject matchers for the three BIS emails, bound to a specific product.
