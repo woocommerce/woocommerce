@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Add support for exporting HPOS orders via Tools > Export
+
