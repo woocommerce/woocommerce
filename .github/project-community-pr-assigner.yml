@@ -28,60 +28,60 @@
 'plugins/woocommerce/tests/{Tools,bin,cli,e2e,metrics,performance}/**/*':
     - team: monorepo
 
-# Blocks, patterns, products, inventory, search, and storefront (Woo FSE / Kirigami).
+# Blocks, patterns, products, inventory, search, and storefront (Kirigami).
 'packages/js/{block-templates,components,experimental,expression-evaluation,sanitize}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/{.wordpress-org,i18n}/**/*':
     - team: developer-advocacy
 
 'plugins/woocommerce-beta-tester/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/patterns/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/blocks/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/admin/client/{components,error-boundary,hooks,lib,stylesheets,typings,utils,wp-admin-scripts}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/admin/client/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/admin/docs/**/*':
     - team: developer-advocacy
 
 'plugins/woocommerce/client/legacy/**/*{attribute,product,variation}*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/src/{Blocks,LayoutTemplates}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/src/Admin/BlockTemplates/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/src/Internal/{CostOfGoodsSold,Customers,ProductAttributes,ProductAttributesLookup,ProductDownloads,ProductFeed,ProductFilters,ProductGallery,ProductImage,VariationGallery}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/includes/{blocks,customizer,shortcodes,theme-support,walkers,widgets}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/includes/{class-wc-customer*,class-wc-product*,wc-customer*,wc-product*,wc-stock-functions.php}':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/includes/data-stores/class-wc-{customer,product}*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/templates/{auth,block-notices,brands,global,loop,myaccount,notices,parts,product-form,single-product,templates}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/templates/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/packages/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 # Cart, checkout, orders, onboarding, Store API, and shared backend (Rubik).
 'packages/js/{currency,customer-effort-score,date,extend-cart-checkout-block,number,onboarding}/**/*':
@@ -106,7 +106,7 @@
     - team: rubik
 
 'plugins/woocommerce/src/Internal/{AddressProvider,POS}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/src/Internal/Admin/{Logging,Onboarding,Orders,Schedulers}/**/*':
     - team: rubik
@@ -115,7 +115,7 @@
     - team: rubik
 
 'plugins/woocommerce/src/Internal/Admin/{ProductForm,ProductReviews}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/includes/*':
     - team: rubik
@@ -435,27 +435,27 @@
 'packages/js/remote-logging/**/*':
     - team: rubik
 
-# Product and storefront tests mirror the Woo FSE-owned source areas.
+# Product and storefront tests mirror the Kirigami-owned source areas.
 'plugins/woocommerce/tests/php/src/Blocks/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/php/src/Blocks/StoreApi/**/*':
     - team: rubik
 
 'plugins/woocommerce/tests/php/src/Internal/{AddressProvider,CostOfGoodsSold,Customers,POS,ProductAttributes,ProductAttributesLookup,ProductDownloads,ProductFeed,ProductFilters,ProductGallery,VariationGallery}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/php/src/Internal/Admin/{ProductForm,ProductReviews}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/php/src/Internal/{AssignDefaultCategoryTest.php,DownloadPermissionsAdjusterTest.php}':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/legacy/unit-tests/{account,attributes,blocks,customer,product,shortcodes,templates,widgets}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/php/includes/data-stores/class-wc-{customer,product}*':
-    - team: woo-fse
+    - team: kirigami
 
 # Legacy client assets are routed only when their product area is identifiable.
 'plugins/woocommerce/client/legacy/**/*{cart,checkout,order}*':
@@ -500,19 +500,19 @@
     - team: ballade
 
 'plugins/woocommerce/assets/images/{pattern-placeholders,product_data,template-placeholders}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/legacy/css/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/client/legacy/js/frontend/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/assets/{client,fonts}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/assets/images/{icons,pinata,previews}/**/*':
-    - team: woo-fse
+    - team: kirigami
 
 'plugins/woocommerce/tests/php/src/{AutoloaderTest.php,CLAUDE.md}':
     - team: monorepo
