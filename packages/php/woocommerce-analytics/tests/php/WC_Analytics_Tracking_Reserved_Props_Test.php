@@ -50,7 +50,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		$_SERVER = $this->server_snapshot;
-		unset( $_COOKIE['tk_ai'] );
+		unset( $_COOKIE['tk_ai'], $_COOKIE['woocommerceanalytics_session'] );
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
 		$this->reset_cached_ip();
@@ -465,7 +465,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	public function test_client_property_values_are_capped(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
 			array(
-				'pn'    => str_repeat( 'a', 500 ),
+				'pn'    => str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 100 ),
 				'short' => 'kept',
 			)
 		);
@@ -570,8 +570,8 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 	/**
 	 * An ASCII-only fixture hid this: the budget counted characters while the URL
-	 * carries percent-encoded bytes, so `%`, CJK and emoji each cost 3x what the
-	 * budget charged and the same payload built a 12KB URL.
+	 * carries percent-encoded bytes, so `%` costs 3x and CJK and emoji 9x or more
+	 * of what the budget charged, and the same payload built a 12KB URL.
 	 *
 	 * @dataProvider expensive_character_provider
 	 *
@@ -645,8 +645,14 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * `cap_client_value()` counts characters, so a 250-character CJK value must
-	 * come back at 200 characters rather than being cut mid-sequence at 200 bytes.
+	 * The cut is made in characters, never in bytes, so a multibyte value comes
+	 * back shorter but never cut mid-sequence.
+	 *
+	 * No equality against the value cap here: a multibyte value at the cap costs
+	 * several times its length once percent-encoded, so the payload budget trims
+	 * it further, and asserting the cap would be asserting which bound won.
+	 * `test_client_property_values_are_capped()` pins the cap on ASCII, where
+	 * nothing else is in play.
 	 *
 	 * @dataProvider multibyte_value_provider
 	 *
@@ -654,10 +660,15 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 */
 	public function test_value_cap_counts_characters_not_bytes( string $character ): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
-			array( 'pn' => str_repeat( $character, 250 ) )
+			array( 'pn' => str_repeat( $character, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 50 ) )
 		);
 
-		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $sanitized['pn'] ) );
+		$this->assertLessThan(
+			WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 50,
+			mb_strlen( $sanitized['pn'] ),
+			'An over-cap value must come back shorter.'
+		);
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
 		$this->assertSame( $sanitized['pn'], mb_convert_encoding( $sanitized['pn'], 'UTF-8', 'UTF-8' ), 'The cut must not split a character.' );
 	}
 
@@ -752,7 +763,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		WC_Analytics_Tracking::record_client_event(
 			'add_to_cart',
 			array(
-				'pn'        => str_repeat( 'a', 500 ),
+				'pn'        => str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 100 ),
 				'Uppercase' => 'dropped by the name check',
 			)
 		);
@@ -868,6 +879,108 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The session cookie is client-writable and decoded with `json_decode`, so
+	 * every value it carries arrives with a type the client chose. `is_engaged`
+	 * was the one field read straight out of it: a nested array reached
+	 * `implode()` in `get_properties()` and wrote an "Array to string conversion"
+	 * warning to the log from an unauthenticated request.
+	 */
+	public function test_a_non_scalar_session_value_writes_no_warning(): void {
+		$_COOKIE['tk_ai']                        = 'test-visitor-id-1234567890ab';
+		$_COOKIE['woocommerceanalytics_session'] = wp_slash(
+			(string) wp_json_encode( array( 'is_engaged' => array( array( 'nested' ) ) ) )
+		);
+
+		$warnings = array();
+		set_error_handler( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure
+			function ( $errno, $message ) use ( &$warnings ) {
+				$warnings[] = $message;
+				return true;
+			}
+		);
+		WC_Analytics_Tracking::record_client_event( 'product_view', array( 'pi' => 42 ) );
+		restore_error_handler();
+
+		$this->assertSame( array(), $warnings, 'A cookie value must not be able to write PHP warnings.' );
+	}
+
+	/**
+	 * `landing_page` carries a JSON breadcrumb trail. Cutting it as a plain string
+	 * lands mid-token and hands the pipeline something that no longer parses, so
+	 * whole trailing entries go instead.
+	 */
+	public function test_an_oversized_landing_page_stays_valid_json(): void {
+		$trail = array_fill( 0, 200, 'Category' );
+
+		$_COOKIE['woocommerceanalytics_session'] = wp_slash(
+			(string) wp_json_encode( array( 'landing_page' => wp_json_encode( $trail ) ) )
+		);
+
+		$properties = WC_Analytics_Tracking::get_common_properties();
+		$decoded    = json_decode( $properties['landing_page'], true );
+
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH,
+			mb_strlen( $properties['landing_page'] )
+		);
+		$this->assertIsArray( $decoded, 'A trimmed trail must still parse as JSON.' );
+		$this->assertNotEmpty( $decoded );
+		$this->assertSame( 'Category', $decoded[0], 'The leading entries are the ones kept.' );
+	}
+
+	/**
+	 * The referer reaches the pixel twice, as `_dr` and `_via_ref`, and nothing
+	 * bounds an HTTP header. Uncapped, one long one pushed the finished URL past
+	 * MAX_PIXEL_URL_LENGTH and cost the whole event, silently: the client fires
+	 * with `sendBeacon`, which discards the response.
+	 */
+	public function test_a_long_referer_costs_its_own_tail_not_the_event(): void {
+		$_COOKIE['tk_ai']        = 'test-visitor-id-1234567890ab';
+		$_SERVER['HTTP_REFERER'] = 'https://example.com/?q=' . str_repeat( 'a', 5000 );
+		$this->reset_pixel_batch_queue();
+
+		$result = WC_Analytics_Tracking::record_client_event( 'product_view', array( 'pi' => 42 ) );
+
+		$this->assertFalse( is_wp_error( $result ), 'A long request header must not cost the event.' );
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( '42', $props['pi'] ?? null, 'The event payload must survive intact.' );
+		$this->assertStringEndsWith( '…', $props['_dr'] ?? '', 'The referer is what gets trimmed.' );
+
+		$this->reset_pixel_batch_queue();
+	}
+
+	/**
+	 * The fixture is an ordinary paid-traffic landing URL. At the old 200-character
+	 * cap it was truncated, which destroys exactly the campaign attribution the
+	 * event exists to record.
+	 */
+	public function test_an_ad_click_landing_url_survives_untouched(): void {
+		$url = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
+
+		$this->assertGreaterThan( 200, mb_strlen( $url ), 'A fixture under the old cap would prove nothing.' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( '_dl' => $url ) );
+
+		$this->assertSame( $url, $sanitized['_dl'] ?? null );
+	}
+
+	/**
+	 * A value at the character cap can outweigh the whole byte budget once
+	 * percent-encoded. Trimming it keeps the property; dropping it loses a
+	 * product name to an encoding difference.
+	 */
+	public function test_a_value_the_budget_cannot_fit_is_trimmed_not_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'pn' => str_repeat( '漢', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) )
+		);
+
+		$this->assertArrayHasKey( 'pn', $sanitized, 'An over-budget value must be trimmed, not dropped.' );
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
+	}
+
+	/**
 	 * The template must record through the untrusted-client entry point. Nothing
 	 * in the suite executes the template, so asserting on its source text is
 	 * crude, but it is the only thing standing behind that requirement.
@@ -909,7 +1022,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST );
 		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT );
 		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS );
-		$this->assertSame( 200, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		$this->assertSame( 1000, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
 		$this->assertSame( 100, WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH );
 		$this->assertSame( 4096, WC_Analytics_Tracking::MAX_CLIENT_PAYLOAD_LENGTH );
 		$this->assertSame( 8192, WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH );

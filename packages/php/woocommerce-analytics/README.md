@@ -82,18 +82,34 @@ Events arriving through it are untrusted:
     generic names like `url`, `device` and `timezone`. Rename event properties
     that would collide. `_lg`, `_dl` and `_dr` stay the client's: they describe
     the page, not the `/track` request.
--   Input is bounded silently. Over-limit properties are dropped and the event
-    still records; events past the batch limit are not recorded at all.
+-   Input is bounded, and the event still records. An over-long value is trimmed
+    with a trailing `…` rather than dropped, and the encoded payload budget is
+    spent on the cheapest properties first, so one long value costs its own tail
+    instead of every property after it. Trimming is not reported back: an
+    unauthenticated endpoint that says which values it rejected is an oracle for
+    probing the limits.
+-   Two cases do return an error, because the alternative is reporting a success
+    for an event that produced nothing: an unusable `event_name`, and a finished
+    pixel URL over the byte ceiling. Events past the batch limit get no result
+    entry at all.
+-   The same value cap applies to what the server derives from request headers
+    (`_via_ua`, `_dr`, `_via_ref`, `_dl`) and from the session cookie. Those are
+    caller-influenced too, and uncapped they cost the whole event rather than
+    their own tail.
 
 | Limit                     | Value |
 | ------------------------- | ----- |
 | Events per request        | 50    |
 | Properties per event      | 50    |
 | Members per array value   | 50    |
-| Characters per value      | 200   |
+| Characters per value      | 1000  |
 | Characters per name       | 100   |
 | Encoded payload per event | 4096  |
 | Pixel URL bytes           | 8192  |
+
+A value at the character cap can exceed the byte budget on its own once
+percent-encoded, since one CJK character costs nine bytes in a URL. The budget
+wins in that case and trims the value further.
 
 **The filter must resolve to the same value for every request on a site.** One
 that varies by cohort, percentage or geo makes cached pages disagree with what

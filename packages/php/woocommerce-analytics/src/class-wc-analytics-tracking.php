@@ -81,18 +81,23 @@ class WC_Analytics_Tracking {
 	const MAX_CLIENT_PROPERTIES_PER_EVENT = 50;
 
 	/**
-	 * Maximum length of a single client-supplied property value.
+	 * Maximum length of a single property value bound for the pixel URL.
 	 *
-	 * Set for the same reason `Woo_Analytics_Trait::cap_page_string()` bounds
-	 * caller-influenced strings on the page-output path: values reach the pixel
-	 * URL, which is rejected outright once it grows too long. The two are
-	 * independent — a change to one does not imply a change to the other.
+	 * Not the event's size limit — MAX_CLIENT_PAYLOAD_LENGTH is, and it applies
+	 * whatever this is set to. This only stops one value spending the whole
+	 * budget, so it is set well above real values rather than close to them: an
+	 * ad-click landing URL carrying `gclid` and `fbclid` runs past 200
+	 * characters, and truncating it destroys the campaign attribution the event
+	 * exists to record.
+	 *
+	 * Deliberately unlike `Woo_Analytics_Trait::cap_page_string()`, which bounds
+	 * breadcrumb titles and search terms. Those are short by nature; URLs are not.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @var int
 	 */
-	const MAX_CLIENT_PROPERTY_LENGTH = 200;
+	const MAX_CLIENT_PROPERTY_LENGTH = 1000;
 
 	/**
 	 * Maximum length of a client-supplied event or property name.
@@ -108,8 +113,11 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum number of members in a client-supplied array value.
 	 *
-	 * `get_properties()` joins members into one string, which the per-value cap
-	 * never sees, so an array of short members is otherwise unbounded.
+	 * Not a size bound: `fit_client_array()` already drops members until the value
+	 * fits the payload budget, whatever the count. This caps the work that costs,
+	 * since fitting re-measures the whole array on every pop, and an array of
+	 * hundreds of thousands of one-character members would otherwise be measured
+	 * that many times.
 	 *
 	 * @since 0.18.0
 	 *
@@ -124,9 +132,10 @@ class WC_Analytics_Tracking {
 	 * event still built a 512KB pixel URL. This bounds the product.
 	 *
 	 * Counted after percent-encoding, in bytes, unlike the per-value cap which
-	 * counts characters. A `%` or a CJK character costs three bytes in the URL,
-	 * so counting characters here would under-count by 3x and let the budget pass
-	 * a payload that still blows past MAX_PIXEL_URL_LENGTH.
+	 * counts characters. A `%` costs three bytes in the URL and a CJK character
+	 * nine — three UTF-8 bytes, each percent-encoded — so counting characters
+	 * here would under-count by up to 9x and let the budget pass a payload that
+	 * still blows past MAX_PIXEL_URL_LENGTH.
 	 *
 	 * @since 0.18.0
 	 *
@@ -349,10 +358,11 @@ class WC_Analytics_Tracking {
 		}
 
 		if ( strlen( $pixel_url ) > self::MAX_PIXEL_URL_LENGTH ) {
-			// No call site checks this return value, so the log line is the only
-			// signal that an event was dropped.
+			// The proxy endpoint reports this error back to its caller, but no
+			// first-party call site checks the return value, so for those events the
+			// log line is the only signal that one was dropped.
 			$error_message = sprintf(
-				'WooCommerce Analytics: dropped a %d byte tracks pixel, over the %d byte limit.',
+				'WooCommerce Analytics: dropped a %d byte pixel, over the %d byte limit.',
 				strlen( $pixel_url ),
 				self::MAX_PIXEL_URL_LENGTH
 			);
@@ -450,9 +460,9 @@ class WC_Analytics_Tracking {
 		// on every request, and first-party events never meet the client caps, so an
 		// oversized cookie would push their pixel past MAX_PIXEL_URL_LENGTH.
 		return array(
-			'session_id'   => self::cap_client_value( $session_details['session_id'] ?? null ),
-			'landing_page' => self::cap_client_value( $session_details['landing_page'] ?? null ),
-			'is_engaged'   => $session_details['is_engaged'] ?? null,
+			'session_id'   => self::cap_property_value( $session_details['session_id'] ?? null ),
+			'landing_page' => self::cap_json_list_value( $session_details['landing_page'] ?? null ),
+			'is_engaged'   => self::cap_property_value( $session_details['is_engaged'] ?? null ),
 		);
 	}
 
@@ -634,48 +644,65 @@ class WC_Analytics_Tracking {
 			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
 		}
 
-		$budget = self::MAX_CLIENT_PAYLOAD_LENGTH;
+		$values = array();
+		$costs  = array();
 
 		foreach ( $event_properties as $key => $value ) {
 			// Dropped, not truncated: two long names could truncate to the same key.
 			if ( ! self::is_valid_client_name( $key ) || ! Pixel_Builder::prop_name_is_valid( $key ) ) {
-				unset( $event_properties[ $key ] );
 				continue;
 			}
-
-			$was_array = is_array( $value ) && ! empty( $value );
 
 			// Arrays are flattened later by get_properties(); bound their members too.
 			if ( is_array( $value ) ) {
-				if ( count( $value ) > self::MAX_CLIENT_ARRAY_MEMBERS ) {
-					$value = array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true );
-				}
-
-				// Trimmed to fit rather than dropped: losing a few categories is
-				// easier to notice than the whole property disappearing, and the
-				// member cap alone always exceeds the budget.
-				$value = self::fit_client_array(
-					array_map( array( __CLASS__, 'cap_client_value' ), $value ),
-					$budget - strlen( $key )
+				$value = array_map(
+					array( __CLASS__, 'cap_property_value' ),
+					array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true )
 				);
 			} else {
-				$value = self::cap_client_value( $value );
+				$value = self::cap_property_value( $value );
 			}
 
-			$cost = strlen( $key ) + self::measure_client_value( $value );
-
-			// The budget is only spent on properties that survive, or one oversized
-			// value would charge its key against everything after it.
-			if ( ( $was_array && array() === $value ) || $cost > $budget ) {
-				unset( $event_properties[ $key ] );
-				continue;
-			}
-
-			$budget                  -= $cost;
-			$event_properties[ $key ] = $value;
+			$values[ $key ] = $value;
+			$costs[ $key ]  = strlen( $key ) + self::measure_client_value( $value );
 		}
 
-		return $event_properties;
+		// Cheapest first, so one long value costs its own tail rather than every
+		// property that happens to follow it. A product name at the value cap can
+		// still outweigh the whole budget once percent-encoded, and in source order
+		// it would take `pi`, `pp` and `pt` down with it.
+		asort( $costs );
+
+		$budget = self::MAX_CLIENT_PAYLOAD_LENGTH;
+		$kept   = array();
+
+		foreach ( $costs as $key => $cost ) {
+			$value = $values[ $key ];
+
+			// Trimmed to fit rather than dropped, the same way arrays already were.
+			// The value cap counts characters and the budget counts encoded bytes, so
+			// a value at the cap can still be nine times its length here; dropping it
+			// would lose a whole property to an encoding difference.
+			if ( $cost > $budget ) {
+				$room = $budget - strlen( $key );
+
+				$value = is_array( $value )
+					? self::fit_client_array( $value, $room )
+					: self::fit_client_string( (string) $value, $room );
+
+				if ( array() === $value || '' === $value ) {
+					continue;
+				}
+
+				$cost = strlen( $key ) + self::measure_client_value( $value );
+			}
+
+			$budget      -= $cost;
+			$kept[ $key ] = $value;
+		}
+
+		// Back into the order the caller sent, so the pixel is not reordered by cost.
+		return array_replace( array_intersect_key( $values, $kept ), $kept );
 	}
 
 	/**
@@ -743,6 +770,40 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
+	 * Trim a string value until it fits the remaining budget.
+	 *
+	 * The scalar counterpart of `fit_client_array()`. Binary search rather than a
+	 * character-at-a-time walk because each step re-encodes the candidate.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param string $value Already-capped value.
+	 * @param int    $budget Bytes still available for this value.
+	 * @return string The longest prefix that fits, with an ellipsis; empty when
+	 *                even one character does not.
+	 */
+	private static function fit_client_string( $value, $budget ) {
+		if ( $budget <= 0 ) {
+			return '';
+		}
+
+		$low  = 0;
+		$high = mb_strlen( $value );
+
+		while ( $low < $high ) {
+			$mid = (int) ceil( ( $low + $high ) / 2 );
+
+			if ( self::measure_client_value( self::truncate_value( $value, $mid ) ) <= $budget ) {
+				$low = $mid;
+			} else {
+				$high = $mid - 1;
+			}
+		}
+
+		return self::truncate_value( $value, $low );
+	}
+
+	/**
 	 * Drop trailing members until an array value fits the remaining budget.
 	 *
 	 * @since 0.18.0
@@ -760,9 +821,53 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Bound one client-supplied value on its way to the pixel URL.
+	 * Bound a value that carries a JSON list, without invalidating the JSON.
 	 *
-	 * Nested arrays are collapsed to an empty string rather than capped: the
+	 * `landing_page` is a JSON-encoded breadcrumb trail. Capping it as a plain
+	 * string cuts mid-token and hands the pipeline something that no longer
+	 * parses, so drop whole trailing entries instead and re-encode. The leading
+	 * entries are the ones worth keeping: they are the top of the trail.
+	 *
+	 * Anything that is not a JSON list falls back to the plain cap.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param mixed $value Caller-influenced value.
+	 * @return mixed Bounded value, still valid JSON when it arrived as JSON.
+	 */
+	private static function cap_json_list_value( $value ) {
+		if ( ! is_string( $value ) || mb_strlen( $value ) <= self::MAX_CLIENT_PROPERTY_LENGTH ) {
+			return self::cap_property_value( $value );
+		}
+
+		$decoded = json_decode( $value, true );
+		if ( ! is_array( $decoded ) ) {
+			return self::cap_property_value( $value );
+		}
+
+		while ( ! empty( $decoded ) ) {
+			$encoded = wp_json_encode( $decoded );
+
+			if ( is_string( $encoded ) && mb_strlen( $encoded ) <= self::MAX_CLIENT_PROPERTY_LENGTH ) {
+				return $encoded;
+			}
+
+			array_pop( $decoded );
+		}
+
+		return '[]';
+	}
+
+	/**
+	 * Bound one value on its way to the pixel URL.
+	 *
+	 * Applies to anything a caller can influence, which is not only the properties
+	 * a client posts: the session cookie and the request headers behind
+	 * `get_server_details()` are caller-influenced too, and an uncapped one of
+	 * those pushed the finished URL past MAX_PIXEL_URL_LENGTH, costing the whole
+	 * event rather than the oversized value.
+	 *
+	 * Arrays and objects are collapsed to an empty string rather than capped: the
 	 * flattening in `get_properties()` calls `implode()` on array members, which
 	 * emits an "Array to string conversion" warning for a nested one. Letting an
 	 * unauthenticated caller write warnings into the error log is the actual
@@ -770,10 +875,10 @@ class WC_Analytics_Tracking {
 	 *
 	 * @since 0.18.0
 	 *
-	 * @param mixed $value Client-supplied value.
+	 * @param mixed $value Caller-influenced value.
 	 * @return mixed Bounded value.
 	 */
-	private static function cap_client_value( $value ) {
+	private static function cap_property_value( $value ) {
 		if ( is_array( $value ) || is_object( $value ) ) {
 			return '';
 		}
@@ -786,7 +891,27 @@ class WC_Analytics_Tracking {
 			return $value;
 		}
 
-		return mb_substr( $value, 0, self::MAX_CLIENT_PROPERTY_LENGTH - 1 ) . '…';
+		return self::truncate_value( $value, self::MAX_CLIENT_PROPERTY_LENGTH );
+	}
+
+	/**
+	 * Cut a value to a character count, marking that it was cut.
+	 *
+	 * The ellipsis keeps a truncated value distinguishable downstream from one
+	 * that genuinely ended at the limit, and costs one of the characters.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param string $value  Value to cut.
+	 * @param int    $length Characters the result may occupy, ellipsis included.
+	 * @return string The cut value, or an empty string when nothing fits.
+	 */
+	private static function truncate_value( $value, $length ) {
+		if ( $length <= 0 ) {
+			return '';
+		}
+
+		return mb_substr( $value, 0, $length - 1 ) . '…';
 	}
 
 	/**
@@ -845,6 +970,14 @@ class WC_Analytics_Tracking {
 		// Add _via_ref (referrer) for backward compatibility.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+
+		// Headers are caller-supplied, and the referer lands here twice. Uncapped, one
+		// long Referer pushes the finished URL past MAX_PIXEL_URL_LENGTH and costs the
+		// whole event; capped, it costs the tail of one value. `_lg` is already bounded
+		// above and `_via_ip` is validated by get_user_ip_address().
+		foreach ( array( '_via_ua', '_dr', '_dl', '_via_ref' ) as $key ) {
+			$data[ $key ] = self::cap_property_value( $data[ $key ] );
+		}
 
 		return $data;
 	}
