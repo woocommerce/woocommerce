@@ -28,6 +28,13 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	private $original_hpos_usage;
 
 	/**
+	 * Whether the running test switched the store over to HPOS.
+	 *
+	 * @var bool
+	 */
+	private $switched_to_hpos = false;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -47,14 +54,17 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wpdb;
 
-		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
-		// TRUNCATE is DDL and implicitly commits it, leaking every fixture the test wrote.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders_meta" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_operational_data" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_addresses" );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery
+		// Scoped to the test that switches to HPOS, the only one writing to these tables.
+		// A test that never switches keeps an intact transaction, and TRUNCATE is DDL
+		// whose implicit commit would leak its fixtures past the parent rollback.
+		if ( $this->switched_to_hpos ) {
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery
+			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders" );
+			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders_meta" );
+			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_operational_data" );
+			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_addresses" );
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery
+		}
 
 		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		OrderHelper::toggle_cot_feature_and_usage( $this->original_hpos_usage );
@@ -148,6 +158,7 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_sales_report_with_hpos_enabled_and_sync_off(): void {
 		$this->setup_cot();
+		$this->switched_to_hpos = true;
 		$this->disable_cot_sync();
 
 		wp_set_current_user( $this->user );
