@@ -208,22 +208,15 @@ class SignupService {
 			return null;
 		}
 
-		$found = false;
-		if ( ! empty( $user_id ) ) {
-			$found = NotificationQuery::notification_exists_by_user_id( $product_id, $user_id );
-		} else {
-			$found = NotificationQuery::notification_exists_by_email( $product_id, $user_email );
-		}
-
-		if ( ! $found ) {
-			return null;
-		}
-
+		// A customer may have signed up as a guest (user_id 0) before creating an account with the same
+		// email, or vice versa. Match on user ID first, then fall back to the email so both states are found.
 		$query_args = array( 'product_id' => $product_id );
-		if ( ! empty( $user_id ) ) {
+		if ( ! empty( $user_id ) && NotificationQuery::notification_exists_by_user_id( $product_id, $user_id ) ) {
 			$query_args['user_id'] = $user_id;
-		} else {
+		} elseif ( ! empty( $user_email ) && NotificationQuery::notification_exists_by_email( $product_id, $user_email ) ) {
 			$query_args['user_email'] = $user_email;
+		} else {
+			return null;
 		}
 
 		$query_args['return'] = 'ids';
