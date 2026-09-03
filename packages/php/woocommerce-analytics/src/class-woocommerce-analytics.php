@@ -229,8 +229,15 @@ class Woocommerce_Analytics {
 
 		// Track module eligibility so a removed module cannot be reauthorized.
 		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
+		$current    = get_option( self::PROXY_TRACKING_ENABLED_OPTION );
 
-		if ( get_option( self::PROXY_TRACKING_ENABLED_OPTION ) === $authorized ) {
+		if ( $current === $authorized ) {
+			return;
+		}
+
+		// An absent option already means unauthorized, so most sites installing this
+		// package never need a row saying so.
+		if ( false === $current && 'no' === $authorized ) {
 			return;
 		}
 
@@ -389,6 +396,11 @@ class Woocommerce_Analytics {
 	 * Clear its authorization because an undeletable MU-plugin can still load.
 	 */
 	public static function maybe_remove_proxy_speed_module() {
+		// Revoked before anything can fail: WP_Filesystem() returns false outright on
+		// hosts that ask for credentials, and that is exactly the case where the file
+		// survives and keeps loading.
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+
 		if ( ! self::init_filesystem() ) {
 			return;
 		}
@@ -408,7 +420,6 @@ class Woocommerce_Analytics {
 		}
 
 		delete_option( self::PROXY_SPEED_MODULE_VERSION_OPTION );
-		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 	}
 

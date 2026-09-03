@@ -53,6 +53,13 @@ class WooCommerceAnalyticsProxySpeed {
 			return;
 		}
 
+		// Unauthorized means "do not accelerate", not "do not serve". Only the REST
+		// route can tell a disabled feature from a module whose authorization was
+		// revoked while the feature stays on, so fall through and let it answer.
+		if ( ! $this->is_authorized() ) {
+			return;
+		}
+
 		// Handle the request completely and exit.
 		$this->handle_proxy_request();
 		exit;
@@ -145,6 +152,20 @@ class WooCommerceAnalyticsProxySpeed {
 	}
 
 	/**
+	 * Whether this module may serve the request.
+	 *
+	 * Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
+	 * registered that filter this early, so it reads false everywhere. Only an
+	 * explicit yes serves, so a network-wide module file cannot answer for a site
+	 * that never authorized it.
+	 *
+	 * @return bool
+	 */
+	private function is_authorized() {
+		return 'yes' === get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+	}
+
+	/**
 	 * Handle the proxy request completely.
 	 *
 	 * Processes the events and sends the response without loading
@@ -178,22 +199,6 @@ class WooCommerceAnalyticsProxySpeed {
 	 * @return void
 	 */
 	private function process_proxy_request() {
-		// Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
-		// registered that filter this early, so it reads false everywhere.
-		if ( 'yes' !== get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
-			// Same body the REST controller's WP_Error produces, so a client has one
-			// shape to recognise whichever path answered.
-			$this->send_json_response(
-				array(
-					'code'    => 'proxy_tracking_disabled',
-					'message' => 'Proxy tracking is not enabled on this site.',
-					'data'    => array( 'status' => 403 ),
-				),
-				403
-			);
-			return;
-		}
-
 		// Apply magic quotes to superglobals ($_GET, $_POST, $_COOKIE, $_REQUEST) for compatibility with the regular API flow.
 		if ( function_exists( 'wp_magic_quotes' ) ) {
 			wp_magic_quotes();

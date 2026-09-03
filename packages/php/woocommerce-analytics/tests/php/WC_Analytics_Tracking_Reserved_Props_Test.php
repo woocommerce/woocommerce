@@ -936,24 +936,27 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'The template must not call the trusted entry point.'
 		);
 
-		// Nothing executes the template, so the direction of the comparison has to
-		// be asserted literally: inverting it serves exactly the requests it is
-		// there to refuse, and every other test stays green.
+		// Nothing executes the template, so the direction of the comparison has to be
+		// asserted literally: inverting it serves exactly the requests it is there to
+		// refuse, and every other test stays green.
 		$this->assertStringContainsString(
-			"if ( 'yes' !== get_option( \\Automattic\\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {",
+			"return 'yes' === get_option( \\Automattic\\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );",
 			$template,
-			'The template must refuse unless the option says yes; the REST gate cannot reach it.'
+			'Only an explicit yes may authorize the module; an absent option must not serve.'
 		);
-		$this->assertStringContainsString(
-			"'code'    => 'proxy_tracking_disabled',",
-			$template,
-			'Both paths must refuse with one body shape, or a client has two to recognise.'
+		// Position, not presence: a check that runs after the events are recorded is
+		// not a check, and a string match alone cannot tell the two apart.
+		$this->assertLessThan(
+			strpos( $template, '$this->handle_proxy_request();' ),
+			strpos( $template, 'if ( ! $this->is_authorized() ) {' ),
+			'The authorization check must run before the request is handled.'
 		);
-		// Without the return, the module answers 403 and records the event anyway.
-		$this->assertStringContainsString(
-			"\t\t\t\t403\n\t\t\t);\n\t\t\treturn;",
+		// Falling through is what lets the REST route separate a disabled feature from
+		// a module whose authorization was revoked while the feature stays on.
+		$this->assertStringNotContainsString(
+			'proxy_tracking_disabled',
 			$template,
-			'The refusal must stop the request, not just write a 403 body.'
+			'Refusing is the REST route\'s job; an unauthorized module returns so the route can answer.'
 		);
 
 		$this->assertStringContainsString(

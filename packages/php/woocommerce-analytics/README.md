@@ -99,13 +99,27 @@ request-derived values and the session cookie.
 Invalid event names and oversized pixel URLs return an error. Events beyond the
 batch limit are ignored.
 
-The filter's value is mirrored into the `woocommerce_analytics_proxy_tracking_enabled`
-option because the optional MU-plugin speed module loads before plugins register filters.
+Two options carry this state, because the optional MU-plugin speed module loads
+before plugins register filters and cannot read them:
 
-**The filter must resolve to the same value for every request on a site.** One
-that varies by cohort, percentage or geo makes cached pages disagree with what
-`/track` decides, and makes the speed module install and uninstall itself on
-alternate runs.
+-   `woocommerce_analytics_proxy_tracking_ever_enabled` is sticky and decides
+    whether the route is registered at all. Nothing in the package clears it:
+    `Woocommerce_Analytics::reset_proxy_tracking_state()` is the only way, and it
+    has no caller, so a host that wants the endpoint gone has to call it from its
+    own deactivation or uninstall routine once the cached pages have expired.
+-   `woocommerce_analytics_proxy_tracking_enabled` records whether the speed
+    module may serve. Despite the name it holds `should_install_proxy_speed_module()`,
+    which is proxy tracking **and** the module's own opt-in, so a revoked module is
+    not reauthorized by the next request. An unauthorized module falls through to
+    the REST route rather than answering itself, so the `403` always comes from one
+    place.
+
+**The filter must resolve to the same value for every request on a site, and must
+be registered before `init` priority 20.** A value that varies by cohort,
+percentage or geo makes cached pages disagree with what `/track` decides, and makes
+the speed module install and uninstall itself on alternate runs. A callback added
+after `init` priority 20 is never seen: the route is registered from the option,
+not from the filter, and the option is written there.
 
 ## Privacy & Consent Management
 

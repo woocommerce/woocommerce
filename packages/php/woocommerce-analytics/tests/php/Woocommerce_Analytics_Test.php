@@ -210,6 +210,103 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The module fails closed on the authorization option, so it has to be written
+	 * before the file can exist. Asserted on an install that fails after that point,
+	 * because the ordering is not observable once both have succeeded.
+	 */
+	public function test_the_install_path_authorizes_before_it_writes_the_file(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+		add_filter( 'filesystem_method', array( $this, 'force_unusable_filesystem' ) );
+
+		Woocommerce_Analytics::maybe_add_proxy_speed_module();
+
+		remove_filter( 'filesystem_method', array( $this, 'force_unusable_filesystem' ) );
+
+		$this->assertSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'A module written before this option exists refuses every request until the next init.'
+		);
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
+			'No version may be recorded for a module that was never written.'
+		);
+	}
+
+	/**
+	 * The sync runs on `init` for every request on every site carrying this package,
+	 * and the module already treats an absent option as unauthorized. Writing `no`
+	 * anyway puts an autoloaded row on the overwhelming majority of installs that
+	 * will never turn proxy tracking on.
+	 */
+	public function test_a_site_that_never_authorized_the_module_gets_no_row(): void {
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'An absent option already means unauthorized; the row buys nothing.'
+		);
+	}
+
+	/**
+	 * Revoking still has to leave a value behind, since the module reads the option
+	 * and an absent one is only safe while no module was ever authorized.
+	 */
+	public function test_revoking_an_authorized_module_writes_no(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		remove_all_filters( 'woocommerce_analytics_auto_install_proxy_speed_module' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame(
+			'no',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'A module already on disk must be told to stop, not merely left unmentioned.'
+		);
+	}
+
+	/**
+	 * The MU-plugin reads what this writes, and the conditions the early returns in
+	 * should_track_store() test say nothing about whether the feature is on. Losing
+	 * the registration, or moving it below one of them, leaves the module serving on
+	 * a stale value with the whole suite green.
+	 */
+	public function test_the_state_sync_is_registered_even_when_tracking_bails(): void {
+		remove_all_actions( 'init' );
+
+		$this->assertFalse(
+			Woocommerce_Analytics::should_track_store(),
+			'This test is only meaningful while should_track_store() takes an early return.'
+		);
+		$this->assertSame(
+			20,
+			has_action( 'init', array( Woocommerce_Analytics::class, 'sync_proxy_tracking_state' ) ),
+			'The sync must be registered before the early returns, at the priority rest_api_init depends on.'
+		);
+	}
+
+	/**
+	 * The registration is only worth anything if `init` actually writes the state.
+	 */
+	public function test_the_init_action_writes_the_state(): void {
+		remove_all_actions( 'init' );
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+
+		Woocommerce_Analytics::should_track_store();
+		do_action( 'init' );
+
+		$this->assertSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ),
+			'Without this the REST route is never registered on a site that enabled the feature.'
+		);
+	}
+
+	/**
 	 * Test that MU-plugin is removed when feature flag is disabled and version exists.
 	 */
 	public function test_maybe_update_proxy_speed_module_removes_when_flag_disabled(): void {
@@ -287,23 +384,58 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
 
-		remove_all_filters( 'woocommerce_analytics_auto_install_proxy_speed_module' );
+		// Both filters stay on, so a later sync cannot be what clears the option: the
+		// removal itself has to, or a module file that outlives a deactivation keeps
+		// serving on the last value written.
 		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
-
-		// The whole point of the revocation: proxy tracking is still on, so the old
-		// behaviour wrote the authorization straight back on the next request.
-		Woocommerce_Analytics::sync_proxy_tracking_state();
 
 		$this->assertNotSame(
 			'yes',
 			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
-			'The module reads this to decide whether to serve; it must not survive removal.'
+			'Removal must revoke immediately, before any later init can run.'
 		);
 		$this->assertSame(
 			'yes',
 			get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ),
 			'The sticky option records that cached pages may exist, which removal does not undo.'
 		);
+	}
+
+	/**
+	 * WP_Filesystem() returns false outright on hosts that ask for credentials, and
+	 * that is precisely when the module file survives and keeps loading. Revoking
+	 * has to happen anyway, since it needs no filesystem at all.
+	 */
+	public function test_removal_revokes_even_when_the_filesystem_is_unavailable(): void {
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
+
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+
+		add_filter( 'filesystem_method', array( $this, 'force_unusable_filesystem' ) );
+		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
+		remove_filter( 'filesystem_method', array( $this, 'force_unusable_filesystem' ) );
+
+		$this->assertNotSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			'An undeletable module must not be left holding its authorization.'
+		);
+		$this->assertNotFalse(
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
+			'The version option is what schedules the retry, so a failed removal must keep it.'
+		);
+	}
+
+	/**
+	 * Makes WP_Filesystem() fail the way a host requiring credentials does.
+	 *
+	 * @return string
+	 */
+	public function force_unusable_filesystem() {
+		return 'ftpext';
 	}
 
 	/**
