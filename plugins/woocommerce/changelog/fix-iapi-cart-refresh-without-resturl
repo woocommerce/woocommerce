@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the iAPI cart store from firing a malformed cart fetch retry loop on pages where its interactivity state is not registered, such as cart and checkout.
