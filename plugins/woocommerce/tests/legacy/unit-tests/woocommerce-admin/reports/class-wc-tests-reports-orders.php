@@ -482,8 +482,8 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$data_store = new OrdersDataStore();
 		$data       = $data_store->get_data(
 			array(
-				'after'          => gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() ),
-				'before'         => gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() ),
+				'after'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getOffsetTimestamp() - DAY_IN_SECONDS ),
+				'before'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getOffsetTimestamp() + DAY_IN_SECONDS ),
 				'extended_info'  => 1,
 				'order_includes' => $order_ids,
 			)
