@@ -142,10 +142,10 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not fatal on a non-string phone.
+	 * @testdox Should return a string phone whatever type the request sent.
 	 *
-	 * The cart/update-customer route registers neither a sanitize nor a validate callback of
-	 * its own, so it calls this method with whatever the request body contained.
+	 * The schema sanitizer coerces the value before the strip runs, so a null or numeric
+	 * phone has to reach wc_remove_non_displayable_chars() as a string.
 	 */
 	public function test_handles_non_string_phone(): void {
 		foreach ( array( null, 42 ) as $phone ) {
@@ -153,7 +153,7 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
 			$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
 
-			$this->assertArrayHasKey( 'phone', $result );
+			$this->assertIsString( $result['phone'] );
 		}
 	}
 

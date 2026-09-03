@@ -1666,8 +1666,8 @@ function wc_sanitize_endpoint_slug( $raw_value ) {
  * @since 9.9.0
  */
 function wc_remove_non_displayable_chars( string $raw_value ): string {
-	// Ranges rather than Unicode property names: \p{Default_Ignorable_Code_Point} needs
-	// PCRE2 10.43, and PHP ships older builds than that as of 8.3. An unsupported property
+	// Ranges rather than \p{Default_Ignorable_Code_Point}: that property needs PCRE2 10.43,
+	// newer than the build many supported installs link against. An unsupported property
 	// makes preg_replace return null instead of failing loudly.
 	$pattern = '/['
 		. '\x{00AD}\x{034F}\x{061C}\x{115F}\x{1160}\x{17B4}\x{17B5}\x{180B}-\x{180F}'

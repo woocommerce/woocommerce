@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Strip invisible Unicode characters from phone numbers so pasted numbers are not rejected over characters the customer cannot see, store the cleaned number from the Checkout block and the My Account address form, and stop the classic checkout marking the field invalid.
+Strip invisible Unicode characters from phone numbers so pasted numbers are not rejected over characters the customer cannot see, store the cleaned number from the Checkout block and the My Account address form, and stop the classic checkout marking the field invalid. wc_remove_non_displayable_chars() now removes every Unicode default-ignorable code point, including the word joiner (U+2060) and the variation selectors it used to keep.

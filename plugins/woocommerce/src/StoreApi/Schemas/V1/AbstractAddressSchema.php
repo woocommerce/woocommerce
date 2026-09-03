@@ -147,9 +147,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			[]
 		);
 
-		// Done outside the loop above so the value is guarded by type: this route's callers
-		// include CartUpdateCustomer, which registers no sanitize or validate callback of its
-		// own and hands whatever the request contained straight through.
+		// After the loop, so this cleans the value the schema sanitizer produced rather than
+		// the raw one from the request.
 		if ( isset( $address['phone'] ) && is_string( $address['phone'] ) ) {
 			$address['phone'] = wc_remove_non_displayable_chars( $address['phone'] );
 		}
