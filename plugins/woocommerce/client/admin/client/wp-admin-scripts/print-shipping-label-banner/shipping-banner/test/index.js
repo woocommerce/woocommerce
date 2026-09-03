@@ -156,7 +156,7 @@ describe( 'Tracking clicks in shippingBanner', () => {
 		await waitFor( () =>
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'banner_element_clicked',
-				getExpectedTrackingData( 'shipping_banner_dismiss', false )
+				getExpectedTrackingData( 'shipping_banner_dimiss', false )
 			)
 		);
 	} );
