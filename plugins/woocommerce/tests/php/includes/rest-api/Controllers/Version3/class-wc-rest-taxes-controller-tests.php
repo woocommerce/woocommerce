@@ -84,6 +84,7 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'class'     => $class_slug,
 			)
 		);
+		$this->assertSame( 201, $response->get_status() );
 		$data     = $response->get_data();
 		$rate_id  = $data['id'];
 		$expected = array(
@@ -102,7 +103,6 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'postcodes' => array( '90001' ),
 			'cities'    => array( 'LOS ANGELES' ),
 		);
-		$this->assertSame( 201, $response->get_status() );
 		$this->assertIsInt( $rate_id );
 		$this->assertSame( $expected, array_intersect_key( $data, $expected ) );
 
@@ -189,9 +189,9 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
+		$this->assertSame( 200, $response->get_status() );
 		$created  = $response->get_data()['create'];
 		$rate_ids = wp_list_pluck( $created, 'id' );
-		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 2, array_unique( $rate_ids ) );
 		$this->assertContainsOnly( 'int', $rate_ids );
 		$this->assertSame( array( 'Batch One', 'Batch Two' ), wp_list_pluck( $created, 'name' ) );
@@ -218,8 +218,8 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
-		$updated  = $response->get_data()['update'];
 		$this->assertSame( 200, $response->get_status() );
+		$updated = $response->get_data()['update'];
 		$this->assertSame( $rate_ids, wp_list_pluck( $updated, 'id' ) );
 		$this->assertSame( array( '4.1111', '6.2222' ), wp_list_pluck( $updated, 'rate' ) );
 		$this->assertSame( array( 'Batch One Updated', 'Batch Two Updated' ), wp_list_pluck( $updated, 'name' ) );
