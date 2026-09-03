@@ -204,7 +204,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Get all expected fields.
 	 *
-	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
+	 * @param bool $with_cogs_enabled True to get the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
 	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
@@ -297,7 +297,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -341,7 +341,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -2035,6 +2035,22 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$duplicated_product = wc_get_product( $response_data['id'] );
 		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicated_product->get_name() );
 		$this->assertEquals( ProductStatus::DRAFT, $duplicated_product->get_status() );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_duplicate_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $variation_id . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
 
 	/**

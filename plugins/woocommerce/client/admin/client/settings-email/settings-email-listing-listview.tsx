@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useState, useMemo } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
 import { pencil, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
@@ -23,24 +24,45 @@ import {
 	useSendTestEmail,
 } from './settings-email-send-test';
 
+/**
+ * Send-test form for a listing row. A published post renders the saved
+ * content; any other state (no post, unpublished scratchpad) sends by email
+ * type and the server renders the file template — in both cases the test
+ * email matches what customers receive.
+ */
 const SendTestEmailModalContent = ( {
-	postId,
-	emailClassName,
+	email,
 	onClose,
 }: {
-	postId: number;
-	emailClassName: string;
+	email: EmailType;
 	onClose: () => void;
 } ) => {
-	const { email, setEmail, isSending, notice, noticeType, sendEmail } =
-		useSendTestEmail(
-			{ endpoint: 'editor', postId, emailType: emailClassName },
-			'email_listing'
-		);
+	const parsedPostId = parseInt( email.post_id, 10 );
+	const postId =
+		email.postStatus === 'publish' && Number.isFinite( parsedPostId )
+			? parsedPostId
+			: null;
+
+	const {
+		email: recipient,
+		setEmail,
+		isSending,
+		notice,
+		noticeType,
+		sendEmail,
+	} = useSendTestEmail(
+		{
+			endpoint: 'editor',
+			postId,
+			emailType: email.email_class_name,
+			emailTypeId: email.id,
+		},
+		'email_listing'
+	);
 
 	return (
 		<SendTestEmailForm
-			email={ email }
+			email={ recipient }
 			onEmailChange={ setEmail }
 			isSending={ isSending }
 			notice={ notice }
@@ -173,7 +195,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Edit', 'woocommerce' ),
 				icon: <Icon icon={ pencil } />,
 				supportsBulk: false,
-				callback: ( items: EmailType[] ) => {
+				callback: async ( items: EmailType[] ) => {
 					const email = items[ 0 ];
 					if ( email.post_id ) {
 						window.location.href = getAdminLink(
@@ -181,13 +203,25 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 								email.post_id
 							) }&action=edit`
 						);
-					} else {
-						window.location.href = getAdminLink(
-							`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
-								email.email_key
-							) }`
-						);
+						return;
 					}
+					// Lazily create the post (a draft with the file
+					// template content) and open it in the editor.
+					const response = await recreateEmailPost( email.id );
+					if ( response?.post_id ) {
+						window.location.href = getAdminLink(
+							`post.php?post=${ encodeURIComponent(
+								response.post_id
+							) }&action=edit`
+						);
+						return;
+					}
+					void dispatch( 'core/notices' ).createErrorNotice(
+						__(
+							'Could not prepare the email for editing. Please try again.',
+							'woocommerce'
+						)
+					);
 				},
 			},
 			{
@@ -195,21 +229,33 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Preview', 'woocommerce' ),
 				icon: <Icon icon={ external } />,
 				supportsBulk: false,
+				// A published post previews through its permalink (the saved
+				// content customers receive). Any other state — no post, or an
+				// unpublished draft — previews the file template via the admin
+				// preview page, matching what customers receive until the
+				// email is saved.
 				callback: ( items: EmailType[] ) => {
-					window.open( items[ 0 ].link );
+					const email = items[ 0 ];
+					const isPublished =
+						!! email.post_id && email.postStatus === 'publish';
+					const previewUrl = isPublished
+						? email.link
+						: email.file_template_preview_url;
+					if ( previewUrl ) {
+						window.open( previewUrl );
+					}
 				},
-				isEligible: ( item: EmailType ) => !! item.post_id,
+				isEligible: ( item: EmailType ) =>
+					( !! item.post_id &&
+						item.postStatus === 'publish' &&
+						!! item.link ) ||
+					!! item.file_template_preview_url,
 				isPrimary: true,
 			},
 			{
 				id: 'test',
 				label: __( 'Send test email', 'woocommerce' ),
 				supportsBulk: false,
-				// The editor's send_preview_email endpoint renders the
-				// woo_email post, so a numeric post ID is required — rows
-				// without one offer the "Recreate email post" action instead.
-				isEligible: ( item: EmailType ) =>
-					Number.isFinite( parseInt( item.post_id, 10 ) ),
 				modalHeader: __( 'Send a test email', 'woocommerce' ),
 				RenderModal: ( {
 					items,
@@ -219,8 +265,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					closeModal?: () => void;
 				} ) => (
 					<SendTestEmailModalContent
-						postId={ parseInt( items[ 0 ].post_id, 10 ) }
-						emailClassName={ items[ 0 ].email_class_name }
+						email={ items[ 0 ] }
 						onClose={ closeModal ?? ( () => {} ) }
 					/>
 				),
@@ -235,21 +280,10 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				isEligible: ( item: EmailType ) =>
 					item.status === 'enabled' || item.status === 'disabled',
 				callback: ( items: EmailType[] ) => {
-					updateEmailEnabledStatus(
+					void updateEmailEnabledStatus(
 						items[ 0 ].id,
 						! items[ 0 ].enabled
 					);
-				},
-			},
-			{
-				id: 'recreate-email-post',
-				label: __( 'Recreate email post', 'woocommerce' ),
-				disabled: false,
-				supportsBulk: false,
-				isEligible: ( item: EmailType ) => ! item?.post_id,
-				callback: ( items: EmailType[] ) => {
-					void recreateEmailPost( items[ 0 ].id );
-					return true;
 				},
 			},
 		],

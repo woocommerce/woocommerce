@@ -11,6 +11,11 @@ use Automattic\Woocommerce_Analytics;
 use WorDBless\BaseTestCase;
 
 /**
+ * WooCommerce test double.
+ */
+class WooCommerce_Test_Double {}
+
+/**
  * Tests for the Woocommerce_Analytics class.
  *
  * Focuses on testing the MU-plugin auto-update mechanism.
@@ -135,7 +140,6 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * Test that update is skipped when version matches current package version.
 	 */
 	public function test_maybe_update_proxy_speed_module_skips_when_version_matches(): void {
-		// Enable the feature flag so the update path is checked.
 		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
 
 		// Set version to match current.

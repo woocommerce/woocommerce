@@ -17,6 +17,7 @@ const {
 	productAttributes,
 	sampleVariations,
 	createVariations,
+	generateVariationsFromAttributes,
 } = utils;
 const variationOnePrice = '9.99';
 const variationTwoPrice = '11.99';
@@ -30,21 +31,67 @@ const lowStockAmount = '10';
 
 let productId_indivEdit: number,
 	productId_bulkEdit: number,
+	productId_bulkEditAfterSave: number,
+	productId_bulkEditAfterFailedSave: number,
 	productId_deleteAll: number,
 	productId_manageStock: number,
 	productId_variationDefaults: number,
 	productId_removeVariation: number,
+	productId_paginationCancel: number,
 	defaultVariation,
 	variationIds_indivEdit: number[];
+
+const paginatedProductAttributes = [
+	{
+		name: 'Colour',
+		visible: true,
+		variation: true,
+		options: [ 'Red', 'Green', 'Blue', 'Black' ],
+	},
+	{
+		name: 'Size',
+		visible: true,
+		variation: true,
+		options: [ 'Small', 'Medium', 'Large', 'XL' ],
+	},
+];
+
+const paginatedProductVariations = generateVariationsFromAttributes(
+	paginatedProductAttributes
+).map( ( values ) => ( {
+	regular_price: variationOnePrice,
+	attributes: values.map( ( option, index ) => ( {
+		name: paginatedProductAttributes[ index ].name,
+		option,
+	} ) ),
+} ) );
+
+async function gotToVariationsTab( page: Page ) {
+	await test.step( 'Click on the "Variations" tab.', async () => {
+		await expect( async () => {
+			await page
+				.getByRole( 'link', { name: 'Variations' } )
+				.last()
+				.click();
+
+			// Sometimes the click on link is too fast and the initial tab (General) is still visible
+			// so we need to wait make sure some content from the variations tab is visible.
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+
+			await expect( expandButton ).toBeVisible();
+		} ).toPass();
+	} );
+}
 
 test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async ( { browser } ) => {
 		await test.step( 'Create variable product for individual edit test', async () => {
-			productId_indivEdit = await createVariableProduct(
-				productAttributes
-			);
+			productId_indivEdit =
+				await createVariableProduct( productAttributes );
 
 			variationIds_indivEdit = await createVariations(
 				productId_indivEdit,
@@ -53,25 +100,42 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Create variable product for bulk edit test', async () => {
-			productId_bulkEdit = await createVariableProduct(
-				productAttributes
-			);
+			productId_bulkEdit =
+				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_bulkEdit, sampleVariations );
 		} );
 
-		await test.step( 'Create variable product for "delete all" test', async () => {
-			productId_deleteAll = await createVariableProduct(
-				productAttributes
+		await test.step( 'Create variable product for bulk edit after save test', async () => {
+			productId_bulkEditAfterSave =
+				await createVariableProduct( productAttributes );
+
+			await createVariations(
+				productId_bulkEditAfterSave,
+				sampleVariations
 			);
+		} );
+
+		await test.step( 'Create variable product for failed save before bulk edit test', async () => {
+			productId_bulkEditAfterFailedSave =
+				await createVariableProduct( productAttributes );
+
+			await createVariations(
+				productId_bulkEditAfterFailedSave,
+				sampleVariations
+			);
+		} );
+
+		await test.step( 'Create variable product for "delete all" test', async () => {
+			productId_deleteAll =
+				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_deleteAll, sampleVariations );
 		} );
 
 		await test.step( 'Create variable product for "manage stock" test', async () => {
-			productId_manageStock = await createVariableProduct(
-				productAttributes
-			);
+			productId_manageStock =
+				await createVariableProduct( productAttributes );
 
 			const variation = sampleVariations.slice( -1 );
 
@@ -79,9 +143,8 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Create variable product for "variation defaults" test', async () => {
-			productId_variationDefaults = await createVariableProduct(
-				productAttributes
-			);
+			productId_variationDefaults =
+				await createVariableProduct( productAttributes );
 
 			await createVariations(
 				productId_variationDefaults,
@@ -92,13 +155,23 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Create variable product with 1 variation for "remove variation" test', async () => {
-			productId_removeVariation = await createVariableProduct(
-				productAttributes
-			);
+			productId_removeVariation =
+				await createVariableProduct( productAttributes );
 
 			await createVariations(
 				productId_removeVariation,
 				sampleVariations.slice( -1 )
+			);
+		} );
+
+		await test.step( 'Create variable product for pagination cancel test', async () => {
+			productId_paginationCancel = await createVariableProduct(
+				paginatedProductAttributes
+			);
+
+			await createVariations(
+				productId_paginationCancel,
+				paginatedProductVariations
 			);
 		} );
 
@@ -110,25 +183,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.afterAll( async () => {
 		await deleteProductsAddedByTests();
 	} );
-
-	async function gotToVariationsTab( page: Page ) {
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await expect( async () => {
-				await page
-					.getByRole( 'link', { name: 'Variations' } )
-					.last()
-					.click();
-
-				// Sometimes the click on link is too fast and the initial tab (General) is still visible
-				// so we need to wait make sure some content from the variations tab is visible.
-				const expandButton = page
-					.getByRole( 'link', { name: 'Expand' } )
-					.first();
-
-				await expect( expandButton ).toBeVisible();
-			} ).toPass();
-		} );
-	}
 
 	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
@@ -345,6 +399,163 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 	} );
 
+	test( 'waits for unsaved variation changes before bulk editing', async ( {
+		page,
+	} ) => {
+		let saveRequestStarted = false;
+		let bulkRequestCount = 0;
+		let releaseSaveRequest: () => void = () => {};
+		const saveRequestReleased = new Promise< void >( ( resolve ) => {
+			releaseSaveRequest = resolve;
+		} );
+
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			const data = new URLSearchParams(
+				route.request().postData() ?? ''
+			);
+			const action = data.get( 'action' );
+
+			if ( action === 'woocommerce_save_variations' ) {
+				saveRequestStarted = true;
+				await saveRequestReleased;
+			} else if ( action === 'woocommerce_bulk_edit_variations' ) {
+				bulkRequestCount++;
+			}
+
+			await route.continue();
+		} );
+
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_bulkEditAfterSave }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		await test.step( 'Edit a variation without saving.', async () => {
+			const firstVariation = page
+				.locator( '.woocommerce_variation' )
+				.first();
+
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			await firstVariation
+				.getByRole( 'textbox', { name: 'Regular price' } )
+				.fill( variationTwoPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Start a bulk price update.', async () => {
+			page.on( 'dialog', async ( dialog ) => {
+				await dialog.accept(
+					dialog.type() === 'prompt' ? variationThreePrice : undefined
+				);
+			} );
+
+			await page
+				.locator( '#field_to_edit' )
+				.selectOption( 'variable_regular_price' );
+		} );
+
+		await test.step( 'Confirm the bulk request waits for the variation save.', async () => {
+			await expect.poll( () => saveRequestStarted ).toBe( true );
+
+			try {
+				await page.evaluate(
+					() =>
+						new Promise( ( resolve ) =>
+							requestAnimationFrame( () =>
+								requestAnimationFrame( resolve )
+							)
+						)
+				);
+				expect( bulkRequestCount ).toBe( 0 );
+			} finally {
+				releaseSaveRequest();
+			}
+
+			await expect.poll( () => bulkRequestCount ).toBe( 1 );
+			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
+				'bulk_actions'
+			);
+		} );
+	} );
+
+	test( 'does not bulk edit when saving variation changes fails', async ( {
+		page,
+	} ) => {
+		let bulkRequestCount = 0;
+
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			const data = new URLSearchParams(
+				route.request().postData() ?? ''
+			);
+			const action = data.get( 'action' );
+
+			if ( action === 'woocommerce_save_variations' ) {
+				await route.fulfill( {
+					status: 500,
+					contentType: 'text/plain',
+					body: 'Variation save failed',
+				} );
+				return;
+			}
+
+			if ( action === 'woocommerce_bulk_edit_variations' ) {
+				bulkRequestCount++;
+			}
+
+			await route.continue();
+		} );
+
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_bulkEditAfterFailedSave }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		const firstVariation = page.locator( '.woocommerce_variation' ).first();
+
+		await test.step( 'Edit a variation without saving.', async () => {
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			await firstVariation
+				.getByRole( 'textbox', { name: 'Regular price' } )
+				.fill( variationTwoPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Start a bulk price update.', async () => {
+			page.on( 'dialog', async ( dialog ) => {
+				await dialog.accept(
+					dialog.type() === 'prompt' ? variationThreePrice : undefined
+				);
+			} );
+
+			await page
+				.locator( '#field_to_edit' )
+				.selectOption( 'variable_regular_price' );
+		} );
+
+		await test.step( 'Keep the bulk action cancelled after the save fails.', async () => {
+			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
+				'bulk_actions'
+			);
+			await expect(
+				page.locator( '#woocommerce-product-data .blockUI' )
+			).toHaveCount( 0 );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+			expect( bulkRequestCount ).toBe( 0 );
+		} );
+	} );
+
 	test( 'can delete all variations', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
@@ -362,6 +573,73 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await expect(
 				page.locator( '.woocommerce_variation' )
 			).toHaveCount( 0 );
+		} );
+	} );
+
+	test( 'dismissed pagination warning keeps unsaved variation edits on the current page', async ( {
+		page,
+	} ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_paginationCancel }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		const pageSelector = page.getByLabel( 'Select Page' ).first();
+
+		await test.step( 'Confirm the first variation page is selected.', async () => {
+			await expect( pageSelector ).toHaveValue( '1' );
+		} );
+
+		const firstVariation = page.locator( '.woocommerce_variation' ).first();
+		const unsavedPrice = '42.42';
+		const priceInput = firstVariation.getByRole( 'textbox', {
+			name: 'Regular price',
+		} );
+
+		await test.step( 'Expand the first variation and edit it without saving.', async () => {
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+
+			await priceInput.fill( unsavedPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Dismiss the save warning raised by paginating.', async () => {
+			// Awaited rather than handled via a `page.on( 'dialog', … )` listener (the
+			// convention elsewhere in this suite) because the assertions below are all
+			// true *before* the click too. Racing the click against the dialog promise
+			// is what proves the dialog was actually raised and dismissed; a listener
+			// that is not awaited would let this test pass without exercising the
+			// cancel path at all.
+			const dialogPromise = page
+				.waitForEvent( 'dialog' )
+				.then( async ( dialog ) => {
+					expect( dialog.type() ).toBe( 'confirm' );
+					await dialog.dismiss();
+				} );
+
+			await Promise.all( [
+				dialogPromise,
+				page
+					.locator( '.variations-pagenav .next-page' )
+					.first()
+					.click(),
+			] );
+		} );
+
+		await test.step( 'Confirm the page, the edit and its dirty state are preserved.', async () => {
+			await expect( pageSelector ).toHaveValue( '1' );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+			await expect( priceInput ).toHaveValue( unsavedPrice );
+			await expect(
+				page.getByRole( 'button', { name: 'Save changes' } )
+			).toBeEnabled();
 		} );
 	} );
 
@@ -424,7 +702,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await test.step( 'Click "Save changes"', async () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 			await page.waitForFunction(
-				() => ! Boolean( document.querySelector( '.blockUI' ) )
+				() => ! document.querySelector( '.blockUI' )
 			);
 		} );
 

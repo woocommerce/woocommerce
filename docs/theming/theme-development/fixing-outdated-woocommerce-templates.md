@@ -28,7 +28,7 @@ You need to determine what templates to update, make a backup of the old templat
 1. Go to WooCommerce > Status > System Status. Scroll to the end of the page where there is a list of templates overridden by your theme/child theme and a warning message that they need to be updated.
 2. Save a backup of the outdated template.
 3. Copy the default template from `wp-content/plugins/woocommerce/templates/[path-to-the-template]` and paste it in your theme folder found at `wp-content/themes/[path-to-theme]`.
-4. Open the template you pasted into the theme folder with a text editor, such as Sublime, Visual Code, BBEdit, Notepad++, and replicate any changes that you had to the previous template in your new, updated template file.
+4. Open the template you pasted into the theme folder with a text editor, such as Sublime, Visual Studio Code, BBEdit, Notepad++, and replicate any changes that you had to the previous template in your new, updated template file.
 
 We recognize that it can be time-consuming. This is why we try to avoid changing WooCommerce templates, but sometimes it is wise to break backward compatibility.
 

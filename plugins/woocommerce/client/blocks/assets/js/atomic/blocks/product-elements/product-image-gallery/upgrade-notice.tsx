@@ -3,48 +3,38 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
-import { select } from '@wordpress/data';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
-import { findBlock } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import metadata from './block.json';
-import { replaceBlockWithProductGallery } from '../../../../blocks/product-gallery/edit-utils';
-
-const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
-	const blocks = select( 'core/block-editor' ).getBlocks();
-	const foundBlock = findBlock( {
-		blocks,
-		findCondition: ( block ) =>
-			block.name === metadata.name && block.clientId === blockClientId,
-	} );
-
-	if ( foundBlock ) {
-		return replaceBlockWithProductGallery( foundBlock.clientId );
-	}
-	return false;
-};
+import { upgradeToBlockifiedProductGallery } from './edit-utils';
 
 export const UpgradeNotice = ( {
 	blockClientId,
+	showAddToCartWithOptionsCompatibilityNotice,
 }: {
 	blockClientId: string;
+	showAddToCartWithOptionsCompatibilityNotice: boolean;
 } ) => {
-	const notice = createInterpolateElement(
-		__(
-			'Upgrade to the <strongText /> for more flexibility.',
-			'woocommerce'
-		),
-		{
-			strongText: (
-				<strong>
-					{ __( `Product Gallery block`, 'woocommerce' ) }
-				</strong>
-			),
-		}
-	);
+	const notice = showAddToCartWithOptionsCompatibilityNotice
+		? __(
+				'The classic Product Image Gallery block is not compatible with the Add to Cart + Options block in this template. Switch to the new Product Gallery block for a better experience.',
+				'woocommerce'
+		  )
+		: createInterpolateElement(
+				__(
+					'Upgrade to the <strongText /> for more flexibility.',
+					'woocommerce'
+				),
+				{
+					strongText: (
+						<strong>
+							{ __( `Product Gallery block`, 'woocommerce' ) }
+						</strong>
+					),
+				}
+		  );
 
 	const buttonLabel = __( 'Use the Product Gallery block', 'woocommerce' );
 
@@ -54,6 +44,9 @@ export const UpgradeNotice = ( {
 			actionLabel={ buttonLabel }
 			onActionClick={ () =>
 				upgradeToBlockifiedProductGallery( blockClientId )
+			}
+			status={
+				showAddToCartWithOptionsCompatibilityNotice ? 'warning' : 'info'
 			}
 		>
 			{ notice }

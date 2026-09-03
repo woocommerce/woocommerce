@@ -90,7 +90,7 @@ const CategorySection = ( {
 												<Button
 													variant="link"
 													onClick={ () => {
-														updateBlockAttributes(
+														void updateBlockAttributes(
 															selectedBlockId,
 															{
 																url: item.valueToInsert,

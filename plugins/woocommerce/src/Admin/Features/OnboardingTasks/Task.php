@@ -218,6 +218,24 @@ abstract class Task {
 	}
 
 	/**
+	 * Contextual image URL for the task.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return '';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return '';
+	}
+
+	/**
 	 * Check if a task is dismissable.
 	 *
 	 * @return bool
@@ -534,6 +552,8 @@ abstract class Task {
 			'additionalInfo'  => $this->get_additional_info(),
 			'actionLabel'     => $this->get_action_label(),
 			'actionUrl'       => $this->get_action_url(),
+			'imageUrl'        => $this->get_image_url(),
+			'imageAlt'        => $this->get_image_alt(),
 			'isComplete'      => $is_complete,
 			'isInProgress'    => $this->is_in_progress(),
 			'inProgressLabel' => $this->in_progress_label(),
