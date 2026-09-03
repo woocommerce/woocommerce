@@ -9,19 +9,20 @@ jQuery( function ( $ ) {
 
 	// A paste can carry characters that render as nothing. The server strips them
 	// before validating, so flagging the field here would blame the customer for
-	// something invisible. This matches the same code points as
-	// wc_remove_non_displayable_chars(), which has to spell the ranges out because
-	// the property name needs a newer PCRE2 than PHP ships.
-	var invisible_chars = null;
-
-	try {
-		invisible_chars = new RegExp(
-			'\\p{Default_Ignorable_Code_Point}|[\\uFFF9-\\uFFFB]',
-			'gu'
-		);
-	} catch ( e ) {
-		// Browsers without Unicode property escapes throw here.
-	}
+	// something invisible. Spelled out the same way as
+	// wc_remove_non_displayable_chars() because the two sides have to agree: strip
+	// more than the server does and the browser waves through a number the server
+	// then rejects. No "u" flag, and surrogate pairs for the ranges above U+FFFF,
+	// so the pattern builds on any browser.
+	var invisible_chars = new RegExp(
+		'[\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F' +
+			'\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\u3164' +
+			'\\uFE00-\\uFE0F\\uFEFF\\uFFA0\\uFFF0-\\uFFFB]' +
+			'|\\uD82F[\\uDCA0-\\uDCA3]' +
+			'|\\uD834[\\uDD73-\\uDD7A]' +
+			'|[\\uDB40-\\uDB43][\\uDC00-\\uDFFF]',
+		'g'
+	);
 
 	/**
 	 * Create the API object passed to custom place order button render callbacks.
@@ -595,9 +596,7 @@ jQuery( function ( $ ) {
 					}
 				}
 
-				// With no pattern the check would flag invisible characters the server
-				// accepts, so skip it and let the server be the only judge.
-				if ( validate_phone && invisible_chars ) {
+				if ( validate_phone ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
 					if (
