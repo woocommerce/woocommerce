@@ -36,6 +36,7 @@ test.describe(
 				allowSignups: true,
 				doubleOptIn: true,
 				requireAccount: false,
+				createAccountOnSignup: false,
 			} );
 		} );
 
