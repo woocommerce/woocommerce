@@ -183,8 +183,14 @@ class Email_Editor {
 	 * @phpstan-return EmailPostType[]
 	 */
 	private static function get_post_types(): array {
-		$post_types = array();
-		return apply_filters( 'woocommerce_email_editor_post_types', $post_types );
+		$post_types = apply_filters( 'woocommerce_email_editor_post_types', array() );
+		/**
+		 * Non-array filter results mean no email post types.
+		 *
+		 * @var EmailPostType[] $post_types
+		 */
+		$post_types = is_array( $post_types ) ? $post_types : array();
+		return $post_types;
 	}
 
 	/**
