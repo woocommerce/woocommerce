@@ -44,7 +44,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'formats as the user types and reports the unmasked value', () => {
-		const { input, type, last } = setup( '+## [###] (###) {###}' );
+		const { input, type, last } = setup( '+00 [000] (000) {000}' );
 		type( '346' );
 		expect( input.value ).toBe( '+34 [6' );
 		expect( input.selectionStart ).toBe( 6 );
@@ -55,7 +55,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'lets the user type literals', () => {
-		const { input, type, backspace, last } = setup( '+## [###]' );
+		const { input, type, backspace, last } = setup( '+00 [000]' );
 		type( '+34 [6' );
 		expect( input.value ).toBe( '+34 [6' );
 		expect( last() ).toBe( '346' );
@@ -66,7 +66,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'deletes through inserted literals', () => {
-		const { input, type, backspace, last } = setup( '###-###' );
+		const { input, type, backspace, last } = setup( '000-000' );
 		type( '1234' );
 		expect( input.value ).toBe( '123-4' );
 		backspace();
@@ -78,7 +78,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'deletes a typed character with its trailing inserted literals', () => {
-		const { input, type, backspace, last } = setup( '{###}' );
+		const { input, type, backspace, last } = setup( '{000}' );
 		type( '123' );
 		expect( input.value ).toBe( '{123}' );
 		backspace();
@@ -87,7 +87,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'shows text as typed when it stops fitting and recovers', () => {
-		const { input, type, backspace, last } = setup( '###-###' );
+		const { input, type, backspace, last } = setup( '000-000' );
 		type( '123a' );
 		expect( input.value ).toBe( '123a' );
 		expect( last() ).toBe( '123a' );
@@ -97,7 +97,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'edits in the middle and keeps the caret', () => {
-		const { input, edit, type, last } = setup( '###-###' );
+		const { input, edit, type, last } = setup( '000-000' );
 		type( '1245' );
 		edit( '12-45', 2 );
 		edit( '123-45', 3 );
@@ -107,14 +107,14 @@ describe( 'bind', () => {
 	} );
 
 	it( 'accepts a pasted or autofilled formatted value', () => {
-		const { input, edit, last } = setup( '###.###.###-##' );
+		const { input, edit, last } = setup( '000.000.000-00' );
 		edit( '123.456.789-01', 14 );
 		expect( input.value ).toBe( '123.456.789-01' );
 		expect( last() ).toBe( '12345678901' );
 	} );
 
 	it( 'formats the initial value and values set from outside', () => {
-		const { input, bound, last } = setup( '###-###', '123456' );
+		const { input, bound, last } = setup( '000-000', '123456' );
 		expect( input.value ).toBe( '123-456' );
 		expect( last() ).toBeUndefined();
 		bound.setValue( '654321' );
@@ -122,7 +122,7 @@ describe( 'bind', () => {
 	} );
 
 	it( 'stops after destroy', () => {
-		const { input, bound, type } = setup( '###-###' );
+		const { input, bound, type } = setup( '000-000' );
 		bound.destroy();
 		type( '1234' );
 		expect( input.value ).toBe( '1234' );

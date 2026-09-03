@@ -1498,16 +1498,16 @@ class CheckoutFields {
 	 * Returns the value unchanged when it does not fit.
 	 *
 	 * @param string $value Raw value to format.
-	 * @param string $mask  Mask pattern. `#` matches a digit, `@` matches a letter, `*` matches
-	 *                      a letter or digit, `!` escapes the next character as a literal, and
+	 * @param string $mask  Mask pattern. `0` matches a digit, `a` matches a letter, `*` matches
+	 *                      any character, `\` escapes the next character as a literal, and
 	 *                      any other character is a literal.
 	 * @return string
 	 */
 	private function apply_mask_to_value( string $value, string $mask ): string {
 		$slot_patterns = array(
-			'#' => '/^[0-9]$/u',
-			'@' => '/^\p{L}$/u',
-			'*' => '/^[\p{L}0-9]$/u',
+			'0' => '/^[0-9]$/u',
+			'a' => '/^\p{L}$/u',
+			'*' => '/^.$/su',
 		);
 
 		$mask_chars = preg_split( '//u', $mask, -1, PREG_SPLIT_NO_EMPTY );
@@ -1515,7 +1515,7 @@ class CheckoutFields {
 		$tokens     = array();
 
 		for ( $i = 0, $count = count( $mask_chars ); $i < $count; $i++ ) {
-			if ( '!' === $mask_chars[ $i ] && $i + 1 < $count ) {
+			if ( '\\' === $mask_chars[ $i ] && $i + 1 < $count ) {
 				$tokens[] = array(
 					'type'  => 'literal',
 					'value' => $mask_chars[ ++$i ],

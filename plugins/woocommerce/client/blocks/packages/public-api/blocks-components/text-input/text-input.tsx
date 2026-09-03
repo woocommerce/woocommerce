@@ -112,7 +112,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				{ !! mask && (
 					<span id={ hintId } className="screen-reader-text">
 						{ sprintf(
-							/* translators: %s: expected input format, e.g. ###-### where # is a digit */
+							/* translators: %s: expected input format, e.g. 000-000 where 0 is a digit */
 							__( 'Expected format: %s', 'woocommerce' ),
 							unescapeMask( mask )
 						) }

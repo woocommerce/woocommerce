@@ -224,11 +224,11 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'id'       => 'test-namespace/masked',
 				'label'    => 'Masked',
 				'location' => 'order',
-				'mask'     => '###-###',
+				'mask'     => '000-000',
 			)
 		);
 
-		$this->assertSame( '###-###', $this->controller->get_additional_fields()['test-namespace/masked']['mask'] );
+		$this->assertSame( '000-000', $this->controller->get_additional_fields()['test-namespace/masked']['mask'] );
 	}
 
 	/**
@@ -243,7 +243,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'label'    => 'Masked checkbox',
 				'location' => 'order',
 				'type'     => 'checkbox',
-				'mask'     => '###-###',
+				'mask'     => '000-000',
 			)
 		);
 
@@ -261,7 +261,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'id'       => 'test-namespace/masked-array',
 				'label'    => 'Masked array',
 				'location' => 'order',
-				'mask'     => array( '###-###' ),
+				'mask'     => array( '000-000' ),
 			)
 		);
 
@@ -292,14 +292,14 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	 * @return array<string, array<string>>
 	 */
 	public function provider_mask_values_that_fit(): array {
-		$phone = '+## [###] (###) {###}';
+		$phone = '+00 [000] (000) {000}';
 
 		return array(
 			'raw digits are formatted with the mask literals' => array( $phone, '34697745564', '+34 [697] (745) {564}' ),
 			'an already formatted value is left as is'     => array( $phone, '+34 [697] (745) {564}', '+34 [697] (745) {564}' ),
-			'a CPF number'                                 => array( '###.###.###-##', '12345678901', '123.456.789-01' ),
-			'a leading literal is filled in automatically' => array( '1##', '2', '12' ),
-			'an escaped literal is filled in automatically' => array( '!###', '12', '#12' ),
+			'a CPF number'                                 => array( '000.000.000-00', '12345678901', '123.456.789-01' ),
+			'a leading literal is filled in automatically' => array( '100', '2', '12' ),
+			'an escaped literal is filled in automatically' => array( '\\000', '12', '012' ),
 		);
 	}
 
@@ -309,7 +309,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	public function test_mask_leaves_value_unchanged_when_it_does_not_fit_or_is_absent() {
 		$field_with_mask = array(
 			'type' => 'text',
-			'mask' => '###-###',
+			'mask' => '000-000',
 		);
 
 		$this->assertSame( 'not-digits', $this->controller->format_additional_field_value( 'not-digits', $field_with_mask ) );
@@ -328,7 +328,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	public function test_mask_formats_non_string_value() {
 		$field = array(
 			'type' => 'text',
-			'mask' => '###-###',
+			'mask' => '000-000',
 		);
 
 		$this->assertSame( '123-456', $this->controller->format_additional_field_value( 123456, $field ) );

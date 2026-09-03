@@ -12,13 +12,17 @@ pnpm install @woocommerce/input-mask --save
 
 ## Mask syntax
 
+The tokens are the default definitions of [imask](https://imask.js.org/), the most used mask library.
+
 | Character | Accepts |
 | --- | --- |
-| `#` | a digit |
-| `@` | a letter |
-| `*` | a letter or a digit |
-| `!` | escapes the next character |
+| `0` | a digit |
+| `a` | a letter |
+| `*` | any character |
+| `\` | escapes the next character, so `\0` is a literal `0` |
 | anything else | a literal, shown but not stored |
+
+imask's `[]`, `{}` and backtick modifiers are not supported. Those characters are plain literals.
 
 A literal appears once the user types a character after it, or when the mask is complete. The user can also type a literal, and the engine consumes it in place.
 
@@ -30,7 +34,7 @@ A literal appears once the user types a character after it, or when the mask is 
 import { bind } from '@woocommerce/input-mask';
 
 const bound = bind( input, {
-	mask: '###.###.###-##',
+	mask: '000.000.000-00',
 	onChange: ( unmasked ) => save( unmasked ),
 } );
 
@@ -45,7 +49,7 @@ bound.destroy();
 ```js
 import { format } from '@woocommerce/input-mask';
 
-format( '12345678901', '###.###.###-##' );
+format( '12345678901', '000.000.000-00' );
 // { display: '123.456.789-01', unmasked: '12345678901', fits: true, map: [ 0, 1, 2, -1, ... ] }
 ```
 
@@ -58,7 +62,7 @@ format( '12345678901', '###.###.###-##' );
 ```js
 import { unescapeMask } from '@woocommerce/input-mask';
 
-unescapeMask( '!##-##' ); // '##-##', for a format hint.
+unescapeMask( '\\00-00' ); // '00-00', for a format hint.
 ```
 
 ## Editing rules

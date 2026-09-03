@@ -247,13 +247,13 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-Text fields support an input mask that formats the value as the shopper types.
+Text fields support an input mask that formats the value as the shopper types. The mask syntax matches the default definitions of the [imask](https://imask.js.org/) library. imask's `[]`, `{}` and backtick modifiers are not supported, those characters are plain literals.
 
 | Option name | Description | Required? | Example | Default value |
 | --- | --- | --- | --- | --- |
-| `mask` | An input mask: `#` accepts a digit, `@` a letter, `*` a letter or digit, `!` escapes the next character. Any other character is a literal that the checkout shows but never stores. | No | `###.###.###-##` | No mask |
+| `mask` | An input mask: `0` accepts a digit, `a` a letter, `*` any character, `\` escapes the next character. Any other character is a literal that the checkout shows but never stores. | No | `000.000.000-00` | No mask |
 
-The checkout loads the mask script only when a field with a mask is registered. If the script does not load, the field works as a plain text input. The shopper types the characters that fill the slots; a literal appears once the shopper types the character after it, or when the mask is complete. The shopper can also type the literals themselves. The mask never blocks typing: when the text stops fitting the mask, the field shows the text as typed until the shopper fixes it. Only the typed characters are stored and sent to the Store API. For the mask `###.###.###-##`, a filled field stores `12345678901`. The mask does not validate anything on the server: use `validation`, `validate_callback`, or `pattern` for that. On the order confirmation page, in emails, and in the admin, the stored value is shown with the mask applied when it fits the mask, and as stored otherwise. The input gets a visually hidden hint with the expected format, linked through `aria-describedby`.
+The checkout loads the mask script only when a field with a mask is registered. If the script does not load, the field works as a plain text input. The shopper types the characters that fill the slots; a literal appears once the shopper types the character after it, or when the mask is complete. The shopper can also type the literals themselves. The mask never blocks typing: when the text stops fitting the mask, the field shows the text as typed until the shopper fixes it. Only the typed characters are stored and sent to the Store API. For the mask `000.000.000-00`, a filled field stores `12345678901`. The mask does not validate anything on the server: use `validation`, `validate_callback`, or `pattern` for that. On the order confirmation page, in emails, and in the admin, the stored value is shown with the mask applied when it fits the mask, and as stored otherwise. The input gets a visually hidden hint with the expected format, linked through `aria-describedby`.
 
 ##### Masks and other validation
 
