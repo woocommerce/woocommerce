@@ -2163,6 +2163,8 @@ function wc_get_permalink_structure() {
 			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
 			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
 			'attribute_base'         => '',
+			// Kept so the returned array shape stays stable for extensions. Nothing reads it:
+			// wc_fix_rewrite_rules() derives Shop subpage rules from the current paths instead.
 			'use_verbose_page_rules' => false,
 		)
 	);
