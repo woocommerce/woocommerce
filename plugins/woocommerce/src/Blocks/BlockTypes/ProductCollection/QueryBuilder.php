@@ -11,6 +11,7 @@ use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\CatalogSortOrder;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
@@ -451,7 +452,7 @@ class QueryBuilder {
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'name',
-					'terms'    => 'featured',
+					'terms'    => ProductVisibility::FEATURED,
 					'operator' => 'IN',
 				),
 			),
@@ -810,7 +811,7 @@ class QueryBuilder {
 	 */
 	private function get_product_visibility_query( $stock_query, $stock_status ) {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
-		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+		$product_visibility_not_in = array( is_search() ? $product_visibility_terms[ ProductVisibility::EXCLUDE_FROM_SEARCH ] : $product_visibility_terms[ ProductVisibility::EXCLUDE_FROM_CATALOG ] );
 
 		// Hide out of stock products.
 		if ( empty( $stock_query ) && ! in_array( ProductStockStatus::OUT_OF_STOCK, $stock_status, true ) ) {

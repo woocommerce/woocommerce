@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -122,7 +123,7 @@ class TermCount {
 		 * @var array $visibility_term_ids
 		 */
 		$visibility_term_ids = wc_get_product_visibility_term_ids();
-		$counting_tt_ids     = array( $visibility_term_ids['exclude-from-catalog'] ?? 0 );
+		$counting_tt_ids     = array( $visibility_term_ids[ ProductVisibility::EXCLUDE_FROM_CATALOG ] ?? 0 );
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$counting_tt_ids[] = $visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ] ?? 0;
