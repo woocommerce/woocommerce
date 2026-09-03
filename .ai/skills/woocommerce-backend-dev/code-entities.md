@@ -92,14 +92,9 @@ Add concise docblocks to all hooks and methods. One line is ideal. The descripti
 
 ### Public, Protected Methods, and Hooks
 
-Must include a `@since` annotation with the next WooCommerce version number.
+Must include a `@since` annotation with the next WooCommerce version number: the version from `includes/class-woocommerce.php` on trunk, with the `-dev` suffix removed (e.g., if trunk shows `10.4.0-dev`, use `@since 10.4.0`).
 
-Place it where [WordPress's inline documentation standards](https://developer.wordpress.org/coding-standards/inline-documentation-standards/php/) put it:
-
-- Directly after the description, separated by a blank comment line
-- Before `@param` and `@return`, separated from them by a blank comment line
-- Use the version from `includes/class-woocommerce.php` on trunk, removing the `-dev` suffix
-  (e.g., if trunk shows `10.4.0-dev`, use `@since 10.4.0`)
+Place it where [WordPress's inline documentation standards](https://developer.wordpress.org/coding-standards/inline-documentation-standards/php/) put it: directly after the description and before any `@param` and `@return` tags, with a blank comment line on either side.
 
 Some older docblocks put `@since` last instead. Leave those alone; reordering them on its own is just diff noise.
 

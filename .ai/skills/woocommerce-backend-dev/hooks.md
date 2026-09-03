@@ -30,11 +30,12 @@ public function handle_woocommerce_before_checkout( $checkout ) {
 
 ## Hook Docblocks
 
-If you modify a line that fires a hook without a docblock:
+All hooks must have a docblock with a description of when the hook fires, a `@since` annotation, and `@param` tags for each parameter. Formatting and `@since` placement follow the same rules as method docblocks — see `code-entities.md` in this skill.
 
-1. Add docblock with description and `@param` tags
-2. Use `git log -S "hook_name"` to find when it was introduced
-3. Add `@since` annotation with that version
+For the `@since` version:
+
+- New hooks: use the version from `includes/class-woocommerce.php` on trunk, removing the `-dev` suffix
+- Existing hooks missing a docblock: use `git log -S "hook_name"` to find the version that introduced the hook
 
 ```php
 /**
@@ -46,44 +47,6 @@ If you modify a line that fires a hook without a docblock:
  * @param array $order_data The order data.
  */
 do_action( 'woocommerce_order_processed', $order_id, $order_data );
-```
-
-## Hook Documentation Requirements
-
-All hooks must have docblocks that include, in this order:
-
-- Description of when the hook fires
-- `@since` annotation with the version number, right after the description and before the `@param` tags, with a blank comment line on either side, as in [WordPress's inline documentation standards](https://developer.wordpress.org/coding-standards/inline-documentation-standards/php/#4-hooks-actions-and-filters)
-    - For new hooks: Use the version from `includes/class-woocommerce.php` on trunk, removing `-dev` suffix
-    - For existing hooks: Use `git log -S "hook_name"` to find when it was introduced
-- `@param` tags for each parameter passed to the hook
-
-**Action hook example:**
-
-```php
-/**
- * Fires after a product is saved.
- *
- * @since 9.5.0
- *
- * @param int        $product_id The product ID.
- * @param WC_Product $product    The product object.
- */
-do_action( 'woocommerce_product_saved', $product_id, $product );
-```
-
-**Filter hook example:**
-
-```php
-/**
- * Filters the product price before display.
- *
- * @since 9.5.0
- *
- * @param string     $price   The formatted price.
- * @param WC_Product $product The product object.
- */
-$price = apply_filters( 'woocommerce_product_price', $price, $product );
 ```
 
 ## Regenerating the Published Hook Docs
