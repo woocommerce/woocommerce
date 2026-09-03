@@ -62,9 +62,6 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	 * Restores the block registry and style queue a test may have rebuilt.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
-		remove_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
-
 		$registry = \WP_Block_Type_Registry::get_instance();
 		foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
 			if ( str_starts_with( $name, 'woocommerce/' ) ) {
