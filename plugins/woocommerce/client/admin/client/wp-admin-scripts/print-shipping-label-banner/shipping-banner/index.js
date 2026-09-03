@@ -64,7 +64,7 @@ export class ShippingBanner extends Component {
 
 	openDismissModal = () => {
 		this.setState( { isDismissModalOpen: true } );
-		this.trackElementClicked( 'shipping_banner_dismiss' );
+		this.trackElementClicked( 'shipping_banner_dimiss' );
 	};
 
 	hideBanner = () => {
