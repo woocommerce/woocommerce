@@ -261,6 +261,11 @@ class WC_Helper_Updater {
 			return;
 		}
 
+		// The Update Manager is what delivers the updates this notice is about, so prompting on its own row reads as circular.
+		if ( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE === $plugin_file ) {
+			return;
+		}
+
 		$woo_plugins = WC_Helper::get_local_woo_plugins();
 		if ( ! isset( $woo_plugins[ $plugin_file ] ) ) {
 			return;

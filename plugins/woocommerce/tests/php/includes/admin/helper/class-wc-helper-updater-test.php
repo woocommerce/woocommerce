@@ -649,6 +649,25 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Connect notice is skipped on the Woo Update Manager row.
+	 */
+	public function test_connect_notice_is_skipped_for_the_woo_update_manager(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice(
+			WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE,
+			array(
+				'Name'    => 'WooCommerce.com Update Manager',
+				'Version' => '1.0.3',
+				'Woo'     => '18734003407318:abcdef',
+			)
+		);
+
+		$this->assertSame( '', $output, 'The Update Manager delivers these updates, so it gets no prompt of its own.' );
+	}
+
+	/**
 	 * Plugin metadata for the WooCommerce.com hosted plugin used by these tests.
 	 *
 	 * @return array
