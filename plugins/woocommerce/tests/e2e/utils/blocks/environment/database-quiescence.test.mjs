@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { setTimeout } from 'node:timers/promises';
 import { promisify } from 'node:util';
 import { after, before, test } from 'node:test';
 
@@ -58,7 +59,7 @@ function baseUrl( pathname ) {
 	return new URL( pathname, BASE_URL );
 }
 
-async function discoverContainer( service ) {
+async function discoverContainerOnce( service ) {
 	const { stdout, stderr } = await execFileAsync( 'npm', [
 		'run',
 		'wp-env:e2e',
@@ -78,6 +79,35 @@ async function discoverContainer( service ) {
 	}
 
 	return containerId;
+}
+
+/**
+ * Resolves a running container's ID through wp-env, retrying a failed attempt.
+ *
+ * wp-env reports every failure to read its own cache file as "Environment not
+ * initialized", so a transient read against a healthy environment is
+ * indistinguishable from a genuinely stopped one. `wp-cli.ts` absorbs the same
+ * failure by discarding a rejected discovery so the next snapshot operation
+ * retries; without an equivalent here one blip fails the whole file.
+ *
+ * @param {string} service The wp-env service name, such as `cli` or `wordpress`.
+ */
+async function discoverContainer( service ) {
+	let lastError;
+
+	for ( let attempt = 1; attempt <= 3; attempt++ ) {
+		if ( attempt > 1 ) {
+			await setTimeout( ( attempt - 1 ) * 1000 );
+		}
+
+		try {
+			return await discoverContainerOnce( service );
+		} catch ( error ) {
+			lastError = error;
+		}
+	}
+
+	throw lastError;
 }
 
 async function dockerExec( containerId, args ) {
@@ -129,10 +159,11 @@ async function runCoordinator( operation, snapshotPath, environment = {} ) {
 }
 
 before( async () => {
-	[ cliContainerId, wordpressContainerId ] = await Promise.all( [
-		discoverContainer( 'cli' ),
-		discoverContainer( 'wordpress' ),
-	] );
+	// Sequential rather than concurrent: two wp-env processes starting together
+	// buy nothing here and only add contention to the step that already proved
+	// fragile.
+	cliContainerId = await discoverContainer( 'cli' );
+	wordpressContainerId = await discoverContainer( 'wordpress' );
 	testRoot = `/var/www/html/.woocommerce-blocks-e2e-quiescence-${ process.pid }-${ randomUUID() }`;
 	callLog = `${ testRoot }/wp-calls.jsonl`;
 
