@@ -21,5 +21,5 @@ const ACTION_NAME = 'import_products';
 		return;
 	}
 
-	addExitPage( ACTION_NAME );
+	void addExitPage( ACTION_NAME );
 } )();

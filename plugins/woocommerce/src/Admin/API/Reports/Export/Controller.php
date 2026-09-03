@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Export;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Admin\ReportCSVExporter;
 
 /**
  * Reports Export controller.
@@ -70,7 +71,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$params['report_args'] = array(
 			'description'       => __( 'Parameters to pass on to the exported report.', 'woocommerce' ),
 			'type'              => 'object',
-			'validate_callback' => 'rest_validate_request_arg', // @todo: use each controller's schema?
+			'validate_callback' => array( $this, 'validate_report_args' ),
 		);
 		$params['email']       = array(
 			'description'       => __( 'When true, email a link to download the export to the requesting user.', 'woocommerce' ),
@@ -78,6 +79,43 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
+	}
+
+	/**
+	 * Validate report_args against the target report's own collection schema.
+	 *
+	 * The export route accepts report_args as a free-form object, so its keys
+	 * (e.g. orderby) must be validated against the schema of the report being
+	 * exported the same way the non-export report route validates them.
+	 *
+	 * @since 11.0.1
+	 * @param  mixed                                  $value   The report_args value.
+	 * @param  \WP_REST_Request<array<string, mixed>> $request The request.
+	 * @param  string                                 $param   The parameter name.
+	 * @return true|\WP_Error
+	 */
+	public function validate_report_args( $value, $request, $param ) {
+		$validity = rest_validate_request_arg( $value, $request, $param );
+		if ( true !== $validity ) {
+			return $validity;
+		}
+
+		$report_controller = ReportCSVExporter::get_report_controller( $request['type'] );
+		if ( ! $report_controller ) {
+			// Fail closed: an unresolved report type cannot be validated, and
+			// exporting it would otherwise run with unvalidated arguments.
+			return new \WP_Error(
+				'woocommerce_rest_invalid_report_type',
+				__( 'Invalid report type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$schema_check = new \WP_REST_Request();
+		$schema_check->set_attributes( array( 'args' => $report_controller->get_collection_params() ) );
+		$schema_check->set_query_params( is_array( $value ) ? $value : array() );
+
+		return $schema_check->has_valid_params();
 	}
 
 	/**

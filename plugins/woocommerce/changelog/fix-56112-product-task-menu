@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correctly highlight Products submenu items throughout the empty All Products add-product flow.

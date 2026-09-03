@@ -118,6 +118,8 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', $this->response_mock_ref );
+
+		parent::tearDown();
 	}
 
 	/**

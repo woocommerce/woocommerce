@@ -91,6 +91,18 @@ export const getPages = ( reports = [] ) => {
 		capability: 'manage_woocommerce',
 	} );
 
+	pages.push( {
+		container: Homescreen,
+		path: '/add-product',
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Products', 'woocommerce' ) ],
+		wpMenuUrl: 'edit.php?post_type=product',
+		wpOpenMenu: 'menu-posts-product',
+		navArgs: {
+			id: 'woocommerce-home',
+		},
+		capability: 'manage_woocommerce',
+	} );
+
 	if ( isFeatureEnabled( 'analytics' ) ) {
 		pages.push( {
 			container: Dashboard,
@@ -493,6 +505,10 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
+
+	if ( page.wpMenuUrl ) {
+		currentItemsSelector = `li > a[href$="${ page.wpMenuUrl }"]`;
+	}
 
 	// 3. Handle parent paths with proper hierarchy
 	const parentPath = page.navArgs?.parentPath;

@@ -190,7 +190,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Brands' );
+		await pageObject.addFilter( 'Show Product Brands' );
 		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Album',

@@ -175,7 +175,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @return void
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function apply_changes() {
 		$whole_value_changes = array_intersect_key( $this->changes, self::WHOLE_VALUE_PROPS );

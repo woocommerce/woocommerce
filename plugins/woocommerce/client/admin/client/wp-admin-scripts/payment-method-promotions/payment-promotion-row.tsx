@@ -112,7 +112,7 @@ export const PaymentPromotionRow = ( {
 		recordEvent( 'settings_payments_promotions_dismiss', {
 			id: gatewayId,
 		} );
-		updatePaymentGateway( gatewayId, {
+		void updatePaymentGateway( gatewayId, {
 			settings: {
 				is_dismissed: 'yes',
 			},

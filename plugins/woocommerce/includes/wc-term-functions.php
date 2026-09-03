@@ -152,7 +152,7 @@ function wc_get_object_terms( $object_id, $taxonomy, $field = null, $index_key =
  * @return array
  */
 function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() ) {
-	$cache_key   = 'wc_' . $taxonomy . md5( wp_json_encode( $args ) );
+	$cache_key   = WC_Cache_Helper::get_cache_prefix( 'product_terms_' . $taxonomy ) . 'wc_' . $taxonomy . md5( wp_json_encode( $args ) );
 	$cache_group = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . $product_id;
 	$terms       = wp_cache_get( $cache_key, $cache_group );
 
@@ -569,6 +569,11 @@ function wc_recount_after_stock_change( $product_id ) {
 		if ( is_array( $product_terms ) ) {
 			wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_tag' );
 		}
+
+		$product_terms = get_the_terms( $product_id, 'product_brand' );
+		if ( is_array( $product_terms ) ) {
+			wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_brand' );
+		}
 	} else {
 		_wc_recount_terms_by_product( $product_id );
 	}
@@ -577,7 +582,7 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
 
 
 /**
- * Overrides the original term count for product categories and tags with the product count.
+ * Overrides the original term count for product categories, tags, and brands with the product count
  * that takes catalog visibility into account.
  *
  * @param array        $terms      List of terms.
@@ -719,7 +724,7 @@ function wc_get_product_visibility_term_ids() {
 }
 
 /**
- * Recounts all terms for product categories and product tags.
+ * Recounts all terms for product categories, tags, and brands.
  *
  * @since 5.2
  *
@@ -746,10 +751,23 @@ function wc_recount_all_terms( bool $include_callback = true ) {
 		)
 	);
 	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), $include_callback, false );
+
+	$product_brands         = get_terms(
+		array(
+			'taxonomy'   => 'product_brand',
+			'hide_empty' => false,
+			'fields'     => 'id=>parent',
+		)
+	);
+	$product_brand_taxonomy = get_taxonomy( 'product_brand' );
+
+	if ( is_array( $product_brands ) && $product_brand_taxonomy instanceof WP_Taxonomy ) {
+		_wc_term_recount( $product_brands, $product_brand_taxonomy, $include_callback, false );
+	}
 }
 
 /**
- * Recounts terms by product.
+ * Recounts product category, tag, and brand terms by product.
  *
  * @since 5.2
  * @param int $product_id The ID of the product.
@@ -782,5 +800,21 @@ function _wc_recount_terms_by_product( $product_id = '' ) {
 		}
 
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), false, false );
+	}
+
+	$product_terms = get_the_terms( $product_id, 'product_brand' );
+
+	if ( is_array( $product_terms ) ) {
+		$product_brands = array();
+
+		foreach ( $product_terms as $term ) {
+			$product_brands[ $term->term_id ] = $term->parent;
+		}
+
+		$product_brand_taxonomy = get_taxonomy( 'product_brand' );
+
+		if ( $product_brand_taxonomy instanceof WP_Taxonomy ) {
+			_wc_term_recount( $product_brands, $product_brand_taxonomy, false, false );
+		}
 	}
 }

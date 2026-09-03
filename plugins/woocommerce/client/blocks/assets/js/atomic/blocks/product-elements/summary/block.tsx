@@ -116,6 +116,8 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 		return (
 			<div
 				className={ clsx( className, summaryClassName, {
+					'wp-block-woocommerce-product-summary':
+						isDescendantOfAllProducts,
 					[ `${ parentClassName }__product-summary` ]:
 						parentClassName,
 				} ) }
@@ -139,6 +141,8 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 					styleProps.className,
 					summaryClassName,
 					{
+						'wp-block-woocommerce-product-summary':
+							isDescendantOfAllProducts,
 						[ `${ parentClassName }__product-summary` ]:
 							parentClassName,
 					}
@@ -161,7 +165,7 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 };
 
 export default ( props: BlockProps ) => {
-	// It is necessary because this block has to support serveral contexts:
+	// It is necessary because this block has to support several contexts:
 	// - Inside `All Products Block` -> `withProductDataContext` HOC
 	// - Inside `Products Block` -> Gutenberg Context
 	// - Inside `Single Product Template` -> Gutenberg Context

@@ -195,7 +195,7 @@ class WC_Form_Handler {
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
-			if ( ! empty( $field['required'] ) && empty( $value ) ) {
+			if ( ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false ) && empty( $value ) ) {
 				/* translators: %s: Field name. */
 				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $key ) );
 			}
@@ -882,6 +882,10 @@ class WC_Form_Handler {
 			$order_can_cancel = $order->has_status( $valid_statuses );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+			if ( WC()->session instanceof WC_Session_Handler && ! WC()->session->has_session() ) {
+				WC()->session->set_customer_session_cookie( true );
+			}
+
 			if ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				// Cancel the order + restore stock.
@@ -898,10 +902,20 @@ class WC_Form_Handler {
 				wc_add_notice( __( 'Invalid order.', 'woocommerce' ), 'error' );
 			}
 
-			if ( $redirect ) {
-				wp_safe_redirect( $redirect );
-				exit;
+			if ( ! $redirect && ! doing_action( 'wp_loaded' ) ) {
+				// Preserve the historical return behavior for extensions that call this public method directly.
+				return;
 			}
+
+			if ( ! $redirect ) {
+				$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
+			}
+
+			$redirect = $redirect ? $redirect : wc_get_cart_url();
+			$redirect = $redirect ? $redirect : home_url();
+			wp_safe_redirect( $redirect );
+			exit;
 		}
 	}
 
@@ -1131,21 +1145,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				}
 
-				// On multisite, ensure user exists on current site, if not add them before allowing login.
-				if ( is_multisite() ) {
-					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
-
-					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
-					}
-				}
-
 				// Perform the login.
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					throw new Exception( $user->get_error_message() );
 				} else {
+
+					// On multisite, ensure user exists on current site, if not add them.
+					if ( is_multisite() && ! is_user_member_of_blog( $user->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user->ID, 'customer' );
+					}
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = wp_unslash( $_POST['redirect'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

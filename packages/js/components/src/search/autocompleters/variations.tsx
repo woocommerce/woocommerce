@@ -30,7 +30,7 @@ function getVariationName( {
 	name: string;
 } ) {
 	const separator =
-		window.wcSettings.variationTitleAttributesSeparator || ' - ';
+		window.wcSettings?.variationTitleAttributesSeparator || ' - ';
 
 	if ( name.indexOf( separator ) > -1 ) {
 		return name;

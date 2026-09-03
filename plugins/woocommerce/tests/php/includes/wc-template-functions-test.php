@@ -7,6 +7,31 @@ declare( strict_types = 1 );
  * @package WooCommerce\Tests\Includes
  */
 class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
+	/**
+	 * Render the loop add-to-cart template for a product.
+	 *
+	 * @param WC_Product $test_product Product to render.
+	 * @return string Rendered template markup.
+	 */
+	private function render_loop_add_to_cart( WC_Product $test_product ): string {
+		global $product;
+
+		$previous_product = $product;
+		$product          = $test_product;
+		$buffer_level     = ob_get_level();
+
+		ob_start();
+		try {
+			woocommerce_template_loop_add_to_cart();
+
+			return (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			$product = $previous_product;
+		}
+	}
 
 	/**
 	 * Helper: create a parent product category with child categories and products.
@@ -144,5 +169,113 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$cached = wp_cache_get( $cache_key, 'product_cat' );
 		$this->assertNotFalse( $cached );
 		$this->assertCount( 3, $cached );
+	}
+
+	/**
+	 * @testdox Loop buttons do not add nofollow to product permalink links.
+	 */
+	public function test_loop_button_product_permalink_does_not_include_nofollow(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$markup  = $this->render_loop_add_to_cart( $product );
+
+		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '"', $markup );
+		$this->assertStringContainsString( 'rel=""', $markup );
+	}
+
+	/**
+	 * @testdox Loop button filter arguments retain an empty rel attribute for product permalink links.
+	 */
+	public function test_loop_button_product_permalink_filter_args_include_empty_rel(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$filtered_args = null;
+		$filter        = static function ( array $args ) use ( &$filtered_args ): array {
+			$filtered_args = $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertIsArray( $filtered_args );
+		$this->assertArrayHasKey( 'rel', $filtered_args['attributes'] );
+		$this->assertSame( '', $filtered_args['attributes']['rel'] );
+	}
+
+	/**
+	 * @testdox Loop buttons retain nofollow on direct add-to-cart links.
+	 */
+	public function test_loop_button_direct_add_to_cart_link_retains_nofollow(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$markup  = $this->render_loop_add_to_cart( $product );
+
+		$this->assertStringContainsString( 'rel="nofollow"', $markup );
+	}
+
+	/**
+	 * @testdox Loop buttons retain nofollow on external product links.
+	 */
+	public function test_loop_button_external_product_link_retains_nofollow(): void {
+		$product = WC_Helper_Product::create_external_product();
+		$markup  = $this->render_loop_add_to_cart( $product );
+
+		$this->assertStringContainsString( 'rel="nofollow"', $markup );
+	}
+
+	/**
+	 * @testdox Pagination defaults link page one to the canonical archive URL.
+	 */
+	public function test_pagination_defaults_link_page_one_to_canonical_archive_url(): void {
+		global $wp_rewrite;
+
+		$original_permalink_structure = $wp_rewrite->permalink_structure;
+		$buffer_level                 = ob_get_level();
+		$previous_loop                = $GLOBALS['woocommerce_loop'] ?? null;
+		$pagination_args              = null;
+		$get_pagenum_link_filter      = static function ( $link, $pagenum ) {
+			return 'https://example.test/shop/page/' . $pagenum . '/';
+		};
+		$pagination_args_filter       = static function ( $args ) use ( &$pagination_args ) {
+			$pagination_args = $args;
+			return $args;
+		};
+
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		wc_setup_loop(
+			array(
+				'is_shortcode' => false,
+				'is_paginated' => true,
+				'total'        => 2,
+				'total_pages'  => 2,
+				'current_page' => 2,
+			)
+		);
+		add_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10, 2 );
+		add_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+
+		ob_start();
+		try {
+			woocommerce_pagination();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10 );
+			remove_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+			$wp_rewrite->set_permalink_structure( $original_permalink_structure );
+			if ( null === $previous_loop ) {
+				wc_reset_loop();
+			} else {
+				$GLOBALS['woocommerce_loop'] = $previous_loop;
+			}
+		}
+
+		$this->assertSame( 'https://example.test/shop/%_%', $pagination_args['base'] );
+		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
+		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
 	}
 }
