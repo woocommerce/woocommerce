@@ -128,6 +128,12 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
+		// Avoid a 500 when an older package lacks the bound constant.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates the client input bounds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
 		return true;
 	}
 
@@ -197,6 +203,12 @@ class WooCommerceAnalyticsProxySpeed {
 		// Normalize: wrap a single event object or unexpected scalar in an array.
 		if ( ! is_array( $events ) || isset( $events['event_name'] ) ) {
 			$events = array( $events );
+		}
+
+		// Use the same batch limit as the REST controller.
+		$max_events = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST;
+		if ( count( $events ) > $max_events ) {
+			$events = array_slice( $events, 0, $max_events, true );
 		}
 
 		$results    = array();

@@ -50,7 +50,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		$_SERVER = $this->server_snapshot;
-		unset( $_COOKIE['tk_ai'] );
+		unset( $_COOKIE['tk_ai'], $_COOKIE['woocommerceanalytics_session'] );
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
 		$this->reset_cached_ip();
@@ -365,9 +365,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The third argument tells a callback whether the properties it is looking
-	 * at came from an untrusted client, which is the only way it can know to
-	 * assign unconditionally.
+	 * Pass whether properties came from an untrusted client to filter callbacks.
 	 */
 	public function test_filter_receives_the_client_supplied_flag(): void {
 		$seen     = array();
@@ -392,12 +390,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A callback that defers to an existing value hands a *reserved* property
-	 * straight back to the client that supplied it. The strip runs before the
-	 * filter, so it cannot see this; get_properties() re-asserts the server's
-	 * values afterwards. Contrast with
-	 * test_filter_callback_deferring_to_an_existing_value_loses_to_the_client(),
-	 * which covers a name the filter invents — still the client's to win.
+	 * Reassert server-owned values after filters run on client properties.
 	 */
 	public function test_filter_callback_cannot_hand_a_reserved_property_back_to_the_client(): void {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
@@ -420,9 +413,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The trusted path must keep its escape hatch: a server-side caller can still
-	 * set a property that collides with a common one, and the post-filter
-	 * re-assertion must not take that away.
+	 * Allow trusted callers to override common properties.
 	 */
 	public function test_reserved_properties_are_not_re_asserted_for_trusted_callers(): void {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
@@ -437,8 +428,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * `_ts` is in $required_properties and in RESERVED_IDENTITY_PROPERTIES, so a
-	 * client cannot forge the event timestamp at either layer.
+	 * Use the server timestamp for client events.
 	 */
 	public function test_client_cannot_forge_the_event_timestamp(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -457,9 +447,310 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A JSON array survives the consumers' truthiness check and reaches
-	 * `PREFIX . $event_name`, where PHP writes a warning to the log on an
-	 * unauthenticated request. `failOnWarning` makes that warning fail the test.
+	 * Truncate oversized client values.
+	 */
+	public function test_client_property_values_are_capped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'pn'    => str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 100 ),
+				'short' => 'kept',
+			)
+		);
+
+		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $sanitized['pn'] ) );
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
+		$this->assertSame( 'kept', $sanitized['short'], 'Values within the limit must be untouched.' );
+	}
+
+	/**
+	 * Limit client properties per event.
+	 */
+	public function test_client_property_count_is_capped(): void {
+		$properties = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT + 25; $i++ ) {
+			$properties[ 'p' . $i ] = $i;
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertCount( WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT, $sanitized );
+	}
+
+	/**
+	 * Prevent nested arrays from generating warnings while flattening values.
+	 */
+	public function test_nested_client_arrays_do_not_reach_the_flattening_step(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'foo' => array( array( 1, 2 ), 'ok' ) )
+		);
+
+		$this->assertSame( array( '', 'ok' ), $sanitized['foo'] );
+	}
+
+	/**
+	 * Limit client array members before flattening them.
+	 */
+	public function test_client_array_member_count_is_capped(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 25, 'abcdefghij' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+
+		$this->assertCount( WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, $sanitized['pc'] );
+
+		$props = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThan(
+			2000,
+			strlen( $props['pc'] ),
+			'The flattened value is what reaches the pixel URL, so the cap must survive flattening.'
+		);
+	}
+
+	/**
+	 * Keep capped indexed arrays indexed so they continue to flatten correctly.
+	 */
+	public function test_capped_arrays_still_flatten_with_implode(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 5, 'a' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+		$props     = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertSame(
+			rawurlencode( implode( ',', array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, 'a' ) ) ),
+			$props['pc']
+		);
+	}
+
+	/**
+	 * Keep client payloads within the pixel URL limit.
+	 */
+	public function test_client_payload_total_is_capped( string $character = 'a' ): void {
+		$properties = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $i++ ) {
+			$properties[ 'p' . $i ] = str_repeat( $character, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertNotEmpty( $sanitized, 'The budget drops the tail, it does not empty the event.' );
+
+		// Verify the final URL, not just the budget constant.
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$props            = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH,
+			strlen( Pixel_Builder::build_tracks_url( $props ) )
+		);
+
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * Measure encoded bytes rather than character counts.
+	 *
+	 * @dataProvider expensive_character_provider
+	 *
+	 * @param string $character One character whose encoded form is longer than itself.
+	 */
+	public function test_client_payload_budget_counts_encoded_bytes( string $character ): void {
+		$this->test_client_payload_total_is_capped( $character );
+	}
+
+	/**
+	 * Characters that cost more in the URL than they do in the payload.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function expensive_character_provider(): array {
+		return array(
+			'percent' => array( '%' ),
+			'CJK'     => array( '漢' ),
+			'emoji'   => array( '😀' ),
+			'space'   => array( ' ' ),
+			'tilde'   => array( '~' ),
+		);
+	}
+
+	/**
+	 * Include associative-array keys when measuring payload size.
+	 */
+	public function test_associative_array_keys_are_charged_to_the_budget(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+
+		$properties = array();
+		for ( $p = 0; $p < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $p++ ) {
+			$members = array();
+			for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS; $i++ ) {
+				$members[ str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) . $i ] = 'v';
+			}
+			$properties[ 'p' . $p ] = $members;
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+		$props     = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
+
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH,
+			strlen( Pixel_Builder::build_tracks_url( $props ) )
+		);
+
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * Do not charge the budget for properties that are dropped.
+	 */
+	public function test_a_dropped_property_does_not_spend_the_budget(): void {
+		// Long names ensure this exercises each dropped key's cost.
+		$properties = array();
+		for ( $i = 0; $i < 40; $i++ ) {
+			$name                = str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH - 12 ) . $i;
+			$properties[ $name ] = str_repeat( 'y', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+		$properties['last'] = 'short';
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertSame( 'short', $sanitized['last'] ?? null, 'A property that fits must not be refused for a dropped one.' );
+	}
+
+	/**
+	 * Truncate multibyte values without splitting characters.
+	 *
+	 * @dataProvider multibyte_value_provider
+	 *
+	 * @param string $character One multibyte character.
+	 */
+	public function test_value_cap_counts_characters_not_bytes( string $character ): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'pn' => str_repeat( $character, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 50 ) )
+		);
+
+		$this->assertLessThan(
+			WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 50,
+			mb_strlen( $sanitized['pn'] ),
+			'An over-cap value must come back shorter.'
+		);
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
+		$this->assertSame( $sanitized['pn'], mb_convert_encoding( $sanitized['pn'], 'UTF-8', 'UTF-8' ), 'The cut must not split a character.' );
+	}
+
+	/**
+	 * Provide multibyte characters for truncation tests.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function multibyte_value_provider(): array {
+		return array(
+			'CJK'    => array( '漢' ),
+			'emoji'  => array( '😀' ),
+			'accent' => array( 'é' ),
+		);
+	}
+
+	/**
+	 * Keep values at the length limit.
+	 */
+	public function test_a_value_at_the_length_limit_is_untouched(): void {
+		$exact = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pn' => $exact ) );
+
+		$this->assertSame( $exact, $sanitized['pn'] );
+	}
+
+	/**
+	 * Keep oversized arrays by removing trailing members.
+	 */
+	public function test_oversized_arrays_lose_members_not_the_property(): void {
+		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( 'pc' => $members ) );
+
+		$this->assertArrayHasKey( 'pc', $sanitized, 'The property must survive with fewer members.' );
+		$this->assertLessThan( count( $members ), count( $sanitized['pc'] ) );
+	}
+
+	/**
+	 * Do not queue pixel URLs that exceed the final URL limit.
+	 */
+	public function test_oversized_pixel_urls_are_not_fired(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		$result = WC_Analytics_Tracking::record_event(
+			'add_to_cart',
+			array( 'pn' => str_repeat( 'a', WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH * 2 ) )
+		);
+
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertSame( 'pixel_too_long', $result->get_error_code() );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'Nothing may be queued.' );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * Keep typical client payloads unchanged.
+	 */
+	public function test_a_realistic_client_payload_is_not_capped(): void {
+		$properties = array(
+			'pi'  => 731,
+			'pn'  => 'Some Reasonably Long Product Name With Words',
+			'pt'  => 'simple',
+			'pc'  => array( 'Clothing', 'Shirts', 'Sale' ),
+			'pp'  => 115.81,
+			'_lg' => 'en-GB',
+			'_dl' => 'https://example.com/product/some-reasonably-long-product-slug/?utm_source=x',
+			'_dr' => 'https://example.com/shop/page/3/',
+		);
+
+		$this->assertSame( $properties, WC_Analytics_Tracking::sanitize_client_properties( $properties ) );
+	}
+
+	/**
+	 * Apply bounds when recording a client event.
+	 */
+	public function test_record_client_event_actually_applies_the_bounds(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_client_event(
+			'add_to_cart',
+			array(
+				'pn'        => str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH + 100 ),
+				'Uppercase' => 'dropped by the name check',
+			)
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $props['pn'] ?? '' ) );
+		$this->assertArrayNotHasKey( 'Uppercase', $props );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * Preserve scalar value types.
+	 */
+	public function test_client_scalar_values_keep_their_type(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'pi' => 42,
+				'ch' => true,
+			)
+		);
+
+		$this->assertSame( 42, $sanitized['pi'] );
+		$this->assertTrue( $sanitized['ch'] );
+	}
+
+	/**
+	 * Reject unusable client event names.
 	 *
 	 * @dataProvider unusable_client_event_name_provider
 	 *
@@ -486,13 +777,148 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'array'      => array( array( 'product_view' ) ),
 			'nested map' => array( array( 'name' => 'product_view' ) ),
 			'empty'      => array( '' ),
+			'oversized'  => array( str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH + 1 ) ),
 		);
 	}
 
 	/**
-	 * The template must record through the untrusted-client entry point. Nothing
-	 * in the suite executes the template, so asserting on its source text is
-	 * crude, but it is the only thing standing behind that requirement.
+	 * Keep event names at the length limit.
+	 */
+	public function test_client_event_name_at_the_length_limit_is_recorded(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		$name = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH );
+
+		WC_Analytics_Tracking::record_client_event( $name, array() );
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( WC_Analytics_Tracking::PREFIX . $name, $props['_en'] ?? null );
+	}
+
+	/**
+	 * Drop invalid client property names.
+	 */
+	public function test_unusable_client_property_names_are_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH + 1 ) => 'oversized',
+				'Uppercase' => 'bad charset',
+				'has space' => 'bad charset',
+				'pi'        => 42,
+				'_lg'       => 'en-GB',
+			)
+		);
+
+		$this->assertSame( array( 'pi' => 42, '_lg' => 'en-GB' ), $sanitized );
+	}
+
+	/**
+	 * Drop numeric client property names.
+	 */
+	public function test_numeric_client_property_names_are_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'0'  => 'dropped',
+				'pi' => 42,
+			)
+		);
+
+		$this->assertSame( array( 'pi' => 42 ), $sanitized );
+	}
+
+	/**
+	 * Do not generate warnings for non-scalar session values.
+	 */
+	public function test_a_non_scalar_session_value_writes_no_warning(): void {
+		$_COOKIE['tk_ai']                        = 'test-visitor-id-1234567890ab';
+		$_COOKIE['woocommerceanalytics_session'] = wp_slash(
+			(string) wp_json_encode( array( 'is_engaged' => array( array( 'nested' ) ) ) )
+		);
+
+		$warnings = array();
+		set_error_handler( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure
+			function ( $errno, $message ) use ( &$warnings ) {
+				$warnings[] = $message;
+				return true;
+			}
+		);
+		WC_Analytics_Tracking::record_client_event( 'product_view', array( 'pi' => 42 ) );
+		restore_error_handler();
+
+		$this->assertSame( array(), $warnings, 'A cookie value must not be able to write PHP warnings.' );
+	}
+
+	/**
+	 * Keep oversized landing-page trails valid JSON.
+	 */
+	public function test_an_oversized_landing_page_stays_valid_json(): void {
+		$trail = array_fill( 0, 200, 'Category' );
+
+		$_COOKIE['woocommerceanalytics_session'] = wp_slash(
+			(string) wp_json_encode( array( 'landing_page' => wp_json_encode( $trail ) ) )
+		);
+
+		$properties = WC_Analytics_Tracking::get_common_properties();
+		$decoded    = json_decode( $properties['landing_page'], true );
+
+		$this->assertLessThanOrEqual(
+			WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH,
+			mb_strlen( $properties['landing_page'] )
+		);
+		$this->assertIsArray( $decoded, 'A trimmed trail must still parse as JSON.' );
+		$this->assertNotEmpty( $decoded );
+		$this->assertSame( 'Category', $decoded[0], 'The leading entries are the ones kept.' );
+	}
+
+	/**
+	 * Trim long referrers without dropping the event.
+	 */
+	public function test_a_long_referer_costs_its_own_tail_not_the_event(): void {
+		$_COOKIE['tk_ai']        = 'test-visitor-id-1234567890ab';
+		$_SERVER['HTTP_REFERER'] = 'https://example.com/?q=' . str_repeat( 'a', 5000 );
+		$this->reset_pixel_batch_queue();
+
+		$result = WC_Analytics_Tracking::record_client_event( 'product_view', array( 'pi' => 42 ) );
+
+		$this->assertFalse( is_wp_error( $result ), 'A long request header must not cost the event.' );
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( '42', $props['pi'] ?? null, 'The event payload must survive intact.' );
+		$this->assertStringEndsWith( '…', $props['_dr'] ?? '', 'The referer is what gets trimmed.' );
+
+		$this->reset_pixel_batch_queue();
+	}
+
+	/**
+	 * Preserve common ad-click landing URLs.
+	 */
+	public function test_an_ad_click_landing_url_survives_untouched(): void {
+		$url = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
+
+		$this->assertGreaterThan( 200, mb_strlen( $url ), 'A fixture under the old cap would prove nothing.' );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( '_dl' => $url ) );
+
+		$this->assertSame( $url, $sanitized['_dl'] ?? null );
+	}
+
+	/**
+	 * Trim values that exceed the encoded payload budget.
+	 */
+	public function test_a_value_the_budget_cannot_fit_is_trimmed_not_dropped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'pn' => str_repeat( '漢', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) )
+		);
+
+		$this->assertArrayHasKey( 'pn', $sanitized, 'An over-budget value must be trimmed, not dropped.' );
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
+	}
+
+	/**
+	 * Keep the MU-plugin template aligned with the package API.
 	 */
 	public function test_mu_plugin_template_stays_in_step_with_the_package(): void {
 		$template = file_get_contents(
@@ -509,5 +935,95 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			$template,
 			'The template must not call the trusted entry point.'
 		);
+
+		$this->assertStringContainsString(
+			'MAX_CLIENT_EVENTS_PER_REQUEST',
+			$template,
+			'The template must cap the batch with the same constant as the REST controller.'
+		);
+		$this->assertSame(
+			1,
+			preg_match( '/defined\( \'([^\']*::[^\']+)\' \)/', $template, $matches ),
+			'The template must check the constant exists before reading it, since the autoloader can resolve an older package.'
+		);
+		$this->assertTrue(
+			defined( $matches[1] ),
+			"The guarded name must resolve, or load_autoloader() always returns false and the module never serves. Reviewers read the leading backslash in {$matches[1]} as breaking defined(); it does not, on any PHP this package supports."
+		);
+	}
+
+	/**
+	 * Keep the documented bounds in sync with their constants.
+	 */
+	public function test_client_bounds_have_their_documented_values(): void {
+		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST );
+		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT );
+		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS );
+		$this->assertSame( 1000, WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		$this->assertSame( 100, WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH );
+		$this->assertSame( 4096, WC_Analytics_Tracking::MAX_CLIENT_PAYLOAD_LENGTH );
+		$this->assertSame( 8192, WC_Analytics_Tracking::MAX_PIXEL_URL_LENGTH );
+	}
+
+	/**
+	 * Keep the largest permitted payload below the fixed pixel URL limit.
+	 */
+	public function test_a_maximal_client_payload_stays_under_eight_kilobytes(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+
+		$properties = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $i++ ) {
+			$key                = str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH - 3 ) . sprintf( '%03d', $i );
+			$properties[ $key ] = str_repeat( '漢', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+
+		$all = WC_Analytics_Tracking::get_properties(
+			WC_Analytics_Tracking::PREFIX . 'bounds_probe',
+			WC_Analytics_Tracking::sanitize_client_properties( $properties ),
+			true
+		);
+
+		$this->assertLessThanOrEqual(
+			8192,
+			strlen( Pixel_Builder::build_tracks_url( $all ) ),
+			'The per-axis caps must not multiply past the pixel URL ceiling.'
+		);
+
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * Include property names in the payload budget.
+	 */
+	public function test_property_names_are_charged_to_the_payload_budget(): void {
+		$short = array();
+		$long  = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT; $i++ ) {
+			$value                = str_repeat( 'v', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+			$short[ 's' . $i ]    = $value;
+			$key                  = str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH - 3 ) . sprintf( '%03d', $i );
+			$long[ $key ]         = $value;
+		}
+
+		$this->assertLessThan(
+			count( WC_Analytics_Tracking::sanitize_client_properties( $short ) ),
+			count( WC_Analytics_Tracking::sanitize_client_properties( $long ) ),
+			'Long property names must consume budget, or the cap under-counts the URL.'
+		);
+	}
+
+	/**
+	 * Drop arrays that cannot retain a member within the payload budget.
+	 */
+	public function test_an_array_that_cannot_fit_even_one_member_is_dropped(): void {
+		$properties = array();
+		for ( $i = 0; $i < 20; $i++ ) {
+			$properties[ 'p' . $i ] = str_repeat( 'v', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
+		}
+		$properties['pc'] = array( str_repeat( 'm', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) );
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertArrayNotHasKey( 'pc', $sanitized, 'An emptied array must be dropped, not sent as an empty value.' );
 	}
 }

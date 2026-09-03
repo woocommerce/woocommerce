@@ -280,4 +280,36 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		$this->assertSame( '2', $props['pi'] ?? null );
 	}
 
+	/**
+	 * Every event becomes an outbound pixel request, so an unauthenticated caller
+	 * must not be able to fan out an unbounded batch.
+	 */
+	public function test_batch_size_is_capped(): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
+
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::register_rest_routes();
+
+		$events = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST + 10; $i++ ) {
+			$events[] = array(
+				'event_name' => 'add_to_cart',
+				'properties' => array( 'pi' => $i ),
+			);
+		}
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $events ) );
+
+		rest_do_request( $request );
+
+		$this->assertCount(
+			WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST,
+			$this->get_pixel_batch_queue(),
+			'The batch must be truncated to MAX_CLIENT_EVENTS_PER_REQUEST.'
+		);
+	}
 }
