@@ -13,7 +13,6 @@ import {
 } from '@wordpress/components';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { partial, isEqual } from 'lodash';
-import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
 import {
 	getActiveFiltersFromQuery,
@@ -30,6 +29,69 @@ import Link from '../link';
 import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
 import { backwardsCompatibleCreateInterpolateElement as createInterpolateElement } from './utils';
+import type {
+	ActiveFilter,
+	AdvancedFilterAction,
+	AdvancedFilterConfig,
+	Currency,
+	FilterChange,
+	FilterConfig,
+	Query,
+} from './types';
+
+export type {
+	ActiveFilter,
+	ActiveFilterValue,
+	AdvancedFilterAction,
+	AdvancedFilterConfig,
+	FilterChange,
+	FilterConfig,
+	FilterInput,
+	FilterLabels,
+	FilterOption,
+	FilterRule,
+} from './types';
+
+type AdvancedFiltersDefaultProps = {
+	/**
+	 * The query string represented in object form.
+	 */
+	query: Query;
+	/**
+	 * Function to be called after an advanced filter action has been taken.
+	 */
+	onAdvancedFilterAction: (
+		action: AdvancedFilterAction,
+		data?: ActiveFilter | Record< string, unknown >
+	) => void;
+	/**
+	 * The locale for the site.
+	 */
+	siteLocale: string;
+};
+
+export type AdvancedFiltersProps = {
+	/**
+	 * The configuration object required to render filters.
+	 */
+	config: AdvancedFilterConfig;
+	/**
+	 * Name of this filter, used in translations.
+	 */
+	path: string;
+	/**
+	 * The currency formatting instance for the site.
+	 */
+	currency: Currency;
+} & Partial< AdvancedFiltersDefaultProps >;
+
+// Inside the class the defaulted props are always present.
+type Props = AdvancedFiltersProps & AdvancedFiltersDefaultProps;
+
+type AdvancedFiltersState = {
+	match: string;
+	activeFilters: ActiveFilter[];
+};
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce' ) },
@@ -39,12 +101,22 @@ const matches = [
 /**
  * Displays a configurable set of filters which can modify query parameters.
  */
-class AdvancedFilters extends Component {
-	constructor( { query, config } ) {
-		super( ...arguments );
-		this.instanceCounts = {};
+class AdvancedFilters extends Component< Props, AdvancedFiltersState > {
+	static defaultProps: AdvancedFiltersDefaultProps = {
+		query: {},
+		onAdvancedFilterAction: () => {},
+		siteLocale: 'en_US',
+	};
 
-		const filtersFromQuery = getActiveFiltersFromQuery(
+	instanceCounts: Record< string, number > = {};
+
+	filterListRef = createRef< HTMLUListElement >();
+
+	constructor( props: Props ) {
+		super( props );
+		const { query, config } = props;
+
+		const filtersFromQuery: ActiveFilter[] = getActiveFiltersFromQuery(
 			query,
 			config.filters
 		);
@@ -58,11 +130,12 @@ class AdvancedFilters extends Component {
 		} );
 
 		this.state = {
-			match: query.match || 'all',
+			match:
+				typeof query.match === 'string' && query.match
+					? query.match
+					: 'all',
 			activeFilters,
 		};
-
-		this.filterListRef = createRef();
 
 		this.onMatchChange = this.onMatchChange.bind( this );
 		this.onFilterChange = this.onFilterChange.bind( this );
@@ -74,12 +147,12 @@ class AdvancedFilters extends Component {
 		this.onFilter = this.onFilter.bind( this );
 	}
 
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate( prevProps: Props ) {
 		const { config, query } = this.props;
 		const { query: prevQuery } = prevProps;
 
 		if ( ! isEqual( prevQuery, query ) ) {
-			const filtersFromQuery = getActiveFiltersFromQuery(
+			const filtersFromQuery: ActiveFilter[] = getActiveFiltersFromQuery(
 				query,
 				config.filters
 			);
@@ -95,13 +168,11 @@ class AdvancedFilters extends Component {
 				return filter;
 			} );
 
-			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { activeFilters } );
-			/* eslint-enable react/no-did-update-set-state */
 		}
 	}
 
-	getInstanceNumber( key ) {
+	getInstanceNumber( key: string ) {
 		if ( ! this.instanceCounts.hasOwnProperty( key ) ) {
 			this.instanceCounts[ key ] = 1;
 		}
@@ -109,7 +180,7 @@ class AdvancedFilters extends Component {
 		return this.instanceCounts[ key ]++;
 	}
 
-	onMatchChange( match ) {
+	onMatchChange( match: string ) {
 		const { onAdvancedFilterAction } = this.props;
 
 		this.setState( { match } );
@@ -117,7 +188,10 @@ class AdvancedFilters extends Component {
 		onAdvancedFilterAction( 'match', { match } );
 	}
 
-	onFilterChange( index, { property, value, shouldResetValue = false } ) {
+	onFilterChange(
+		index: number,
+		{ property, value, shouldResetValue = false }: FilterChange
+	) {
 		const newActiveFilters = [ ...this.state.activeFilters ];
 		newActiveFilters[ index ] = {
 			...newActiveFilters[ index ],
@@ -128,7 +202,7 @@ class AdvancedFilters extends Component {
 		this.setState( { activeFilters: newActiveFilters } );
 	}
 
-	removeFilter( index ) {
+	removeFilter( index: number ) {
 		const { onAdvancedFilterAction } = this.props;
 		const activeFilters = [ ...this.state.activeFilters ];
 		onAdvancedFilterAction( 'remove', activeFilters[ index ] );
@@ -186,10 +260,10 @@ class AdvancedFilters extends Component {
 		return availableFilters;
 	}
 
-	addFilter( key, onClose ) {
+	addFilter( key: string, onClose: () => void ) {
 		const { onAdvancedFilterAction, config } = this.props;
-		const filterConfig = config.filters[ key ];
-		const newFilter = { key };
+		const filterConfig: FilterConfig = config.filters[ key ];
+		const newFilter: ActiveFilter = { key };
 		if (
 			Array.isArray( filterConfig.rules ) &&
 			filterConfig.rules.length
@@ -217,10 +291,11 @@ class AdvancedFilters extends Component {
 		onClose();
 		// after render, focus the newly added filter's first focusable element
 		setTimeout( () => {
-			const addedFilter = this.filterListRef.current.querySelector(
-				'li:last-of-type fieldset'
-			);
-			addedFilter.focus();
+			const addedFilter =
+				this.filterListRef.current?.querySelector< HTMLElement >(
+					'li:last-of-type fieldset'
+				);
+			addedFilter?.focus();
 		} );
 	}
 
@@ -233,7 +308,7 @@ class AdvancedFilters extends Component {
 		} );
 	}
 
-	getUpdateHref( activeFilters, matchValue ) {
+	getUpdateHref( activeFilters: ActiveFilter[], matchValue?: string ) {
 		const { path, query, config } = this.props;
 		const updatedQuery = getQueryFromActiveFilters(
 			activeFilters,
@@ -259,7 +334,7 @@ class AdvancedFilters extends Component {
 		onAdvancedFilterAction( 'filter', { ...updatedQuery, match } );
 	}
 
-	orderFilters( a, b ) {
+	orderFilters( a: ActiveFilter, b: ActiveFilter ) {
 		const qs = window.location.search;
 		const aPos = qs.indexOf( a.key );
 		const bPos = qs.indexOf( b.key );
@@ -282,6 +357,8 @@ class AdvancedFilters extends Component {
 		const isEnglish = this.isEnglish();
 		return (
 			<Card className="woocommerce-filters-advanced" size="small">
+				{ /* CardHeader forwards unknown props to Flex, so `justify` works but isn't typed. */ }
+				{ /* @ts-expect-error: justify is not a declared CardHeader prop. */ }
 				<CardHeader justify="flex-start">
 					<Text
 						variant="subtitle.small"
@@ -295,6 +372,8 @@ class AdvancedFilters extends Component {
 					</Text>
 				</CardHeader>
 				{ !! activeFilters.length && (
+					// An unknown size maps to no padding class, which is what the list relies on.
+					// @ts-expect-error: size must be one of small, medium, large, xSmall, extraSmall.
 					<CardBody size="none">
 						<ul
 							className="woocommerce-filters-advanced__list"
@@ -364,6 +443,8 @@ class AdvancedFilters extends Component {
 						</div>
 					</CardBody>
 				) }
+				{ /* CardFooter forwards unknown props to Flex, so `align` works but isn't typed. */ }
+				{ /* @ts-expect-error: align is not a declared CardFooter prop. */ }
 				<CardFooter align="center">
 					<div className="woocommerce-filters-advanced__controls">
 						{ updateDisabled && (
@@ -396,53 +477,5 @@ class AdvancedFilters extends Component {
 		);
 	}
 }
-
-AdvancedFilters.propTypes = {
-	/**
-	 * The configuration object required to render filters.
-	 */
-	config: PropTypes.shape( {
-		title: PropTypes.string,
-		filters: PropTypes.objectOf(
-			PropTypes.shape( {
-				labels: PropTypes.shape( {
-					add: PropTypes.string,
-					remove: PropTypes.string,
-					rule: PropTypes.string,
-					title: PropTypes.string,
-					filter: PropTypes.string,
-				} ),
-				rules: PropTypes.arrayOf( PropTypes.object ),
-				input: PropTypes.object,
-			} )
-		),
-	} ).isRequired,
-	/**
-	 * Name of this filter, used in translations.
-	 */
-	path: PropTypes.string.isRequired,
-	/**
-	 * The query string represented in object form.
-	 */
-	query: PropTypes.object,
-	/**
-	 * Function to be called after an advanced filter action has been taken.
-	 */
-	onAdvancedFilterAction: PropTypes.func,
-	/**
-	 * The locale for the site.
-	 */
-	siteLocale: PropTypes.string,
-	/**
-	 * The currency formatting instance for the site.
-	 */
-	currency: PropTypes.object.isRequired,
-};
-
-AdvancedFilters.defaultProps = {
-	query: {},
-	onAdvancedFilterAction: () => {},
-	siteLocale: 'en_US',
-};
 
 export default AdvancedFilters;

@@ -8,6 +8,8 @@ import clsx from 'clsx';
 import { __, _x } from '@wordpress/i18n';
 import { isoDateFormat, toMoment } from '@woocommerce/date';
 import moment from 'moment';
+import type { Moment } from 'moment';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -17,13 +19,35 @@ import {
 	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
 	textContent,
 } from './utils';
+import type { FilterComponentProps, FilterConfig, FilterRule } from './types';
 
 const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce' );
 const dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
 
-class DateFilter extends Component {
-	constructor( { filter } ) {
-		super( ...arguments );
+export type DateFilterProps = FilterComponentProps;
+
+type DateUpdate = {
+	date: Moment | null;
+	text: string;
+	error: string | null;
+};
+
+type RangeInput = 'after' | 'before';
+
+type DateFilterState = {
+	before: Moment | null;
+	beforeText: string;
+	beforeError: string | null;
+	after: Moment | null;
+	afterText: string;
+	afterError: string | null;
+	rule?: string;
+};
+
+class DateFilter extends Component< DateFilterProps, DateFilterState > {
+	constructor( props: DateFilterProps ) {
+		super( props );
+		const { filter } = props;
 
 		const [ isoAfter, isoBefore ] = Array.isArray( filter.value )
 			? filter.value
@@ -54,8 +78,12 @@ class DateFilter extends Component {
 		);
 	}
 
-	getScreenReaderText( filterRule, config ) {
-		const rule = find( config.rules, { value: filterRule } ) || {};
+	getScreenReaderText(
+		filterRule: string | undefined,
+		config: FilterConfig
+	) {
+		const rule: Partial< FilterRule > =
+			find( config.rules, { value: filterRule } ) || {};
 
 		const { before, after } = this.state;
 
@@ -64,9 +92,9 @@ class DateFilter extends Component {
 			return '';
 		}
 
-		let filterStr = before.format( dateStringFormat );
+		let filterStr: ReactNode = before.format( dateStringFormat );
 
-		if ( rule.value === 'between' ) {
+		if ( rule.value === 'between' && after ) {
 			filterStr = createInterpolateElement( this.getBetweenString(), {
 				after: (
 					<Fragment>{ after.format( dateStringFormat ) }</Fragment>
@@ -87,7 +115,7 @@ class DateFilter extends Component {
 		);
 	}
 
-	onSingleDateChange( { date, text, error } ) {
+	onSingleDateChange( { date, text, error }: DateUpdate ) {
 		const { onFilterChange } = this.props;
 		this.setState( { before: date, beforeText: text, beforeError: error } );
 
@@ -99,14 +127,22 @@ class DateFilter extends Component {
 		}
 	}
 
-	onRangeDateChange( input, { date, text, error } ) {
+	onRangeDateChange( input: RangeInput, { date, text, error }: DateUpdate ) {
 		const { onFilterChange } = this.props;
 
-		this.setState( {
-			[ input ]: date,
-			[ input + 'Text' ]: text,
-			[ input + 'Error' ]: error,
-		} );
+		if ( input === 'after' ) {
+			this.setState( {
+				after: date,
+				afterText: text,
+				afterError: error,
+			} );
+		} else {
+			this.setState( {
+				before: date,
+				beforeText: text,
+				beforeError: error,
+			} );
+		}
 
 		if ( date ) {
 			const { before, after } = this.state;
@@ -132,30 +168,25 @@ class DateFilter extends Component {
 		}
 	}
 
-	onRuleChange( newRule ) {
+	onRuleChange( newRule: string ) {
 		const { onFilterChange } = this.props;
 		const { rule } = this.state;
 
-		let newDateState = null;
-		let shouldResetValue = false;
+		const shouldResetValue = [ rule, newRule ].includes( 'between' );
 
-		if ( [ rule, newRule ].includes( 'between' ) ) {
-			newDateState = {
+		if ( shouldResetValue ) {
+			this.setState( {
+				rule: newRule,
 				before: null,
 				beforeText: '',
 				beforeError: null,
 				after: null,
 				afterText: '',
 				afterError: null,
-			};
-
-			shouldResetValue = true;
+			} );
+		} else {
+			this.setState( { rule: newRule } );
 		}
-
-		this.setState( {
-			rule: newRule,
-			...newDateState,
-		} );
 
 		onFilterChange( {
 			property: 'rule',
@@ -164,11 +195,16 @@ class DateFilter extends Component {
 		} );
 	}
 
-	isFutureDate( dateString ) {
-		return moment().isBefore( moment( dateString ), 'day' );
+	isFutureDate( date: Date ) {
+		return moment().isBefore( moment( date ), 'day' );
 	}
 
-	getFormControl( { date, error, onUpdate, text } ) {
+	getFormControl( {
+		date,
+		error,
+		onUpdate,
+		text,
+	}: DateUpdate & { onUpdate: ( update: DateUpdate ) => void } ) {
 		return (
 			<DatePicker
 				date={ date }
@@ -256,11 +292,11 @@ class DateFilter extends Component {
 				</div>
 			),
 		} );
-		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
+
 		return (
 			<fieldset
 				className="woocommerce-filters-advanced__line-item"
-				tabIndex="0"
+				tabIndex={ 0 }
 			>
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
@@ -282,7 +318,6 @@ class DateFilter extends Component {
 				) }
 			</fieldset>
 		);
-		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 
