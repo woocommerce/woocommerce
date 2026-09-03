@@ -2281,22 +2281,26 @@ class WC_Helper {
 
 		if ( empty( $installed_product ) ) {
 			return array(
-				'installed' => false,
-				'active'    => false,
-				'version'   => null,
-				'type'      => null,
-				'slug'      => null,
-				'path'      => null,
+				'installed'              => false,
+				'active'                 => false,
+				'version'                => null,
+				'type'                   => null,
+				'slug'                   => null,
+				'path'                   => null,
+				'auto_update'            => false,
+				'auto_update_manageable' => false,
 			);
 		}
 
 		$local_data = array(
-			'installed' => true,
-			'active'    => false,
-			'version'   => $installed_product['Version'],
-			'type'      => $installed_product['_type'],
-			'slug'      => null,
-			'path'      => $installed_product['_filename'],
+			'installed'              => true,
+			'active'                 => false,
+			'version'                => $installed_product['Version'],
+			'type'                   => $installed_product['_type'],
+			'slug'                   => null,
+			'path'                   => $installed_product['_filename'],
+			'auto_update'            => false,
+			'auto_update_manageable' => false,
 		);
 
 		if ( 'plugin' === $installed_product['_type'] ) {
@@ -2306,6 +2310,8 @@ class WC_Helper {
 			} elseif ( is_multisite() && is_plugin_active_for_network( $installed_product['_filename'] ) ) {
 				$local_data['active'] = true;
 			}
+
+			$local_data = array_merge( $local_data, self::get_plugin_auto_update_data( $installed_product['_filename'] ) );
 		} elseif ( 'theme' === $installed_product['_type'] ) {
 			$local_data['slug'] = $installed_product['_stylesheet'];
 			if ( in_array( $installed_product['_stylesheet'], array( get_stylesheet(), get_template() ), true ) ) {
@@ -2314,6 +2320,137 @@ class WC_Helper {
 		}
 
 		return $local_data;
+	}
+
+	/**
+	 * Turn plugin auto-updates on or off for the plugin backing a subscription.
+	 *
+	 * Writes the same auto_update_plugins site option WordPress core's Plugins screen writes, so
+	 * the change is identical to making it there.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $product_key Subscription product key.
+	 * @param bool   $enabled     Whether auto-updates should be on.
+	 *
+	 * @throws Exception If the subscription, or the plugin backing it, can't be acted on.
+	 *
+	 * @return void
+	 */
+	public static function set_subscription_plugin_auto_update( string $product_key, bool $enabled ): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$subscription = self::get_subscription( $product_key );
+		if ( ! is_array( $subscription ) ) {
+			throw new Exception( esc_html__( 'Subscription not found.', 'woocommerce' ) );
+		}
+
+		$local = self::_get_local_from_product_id( $subscription['product_id'] ?? 0 );
+		if ( ! is_array( $local ) || 'plugin' !== ( $local['_type'] ?? '' ) ) {
+			throw new Exception( esc_html__( 'This subscription has no installed plugin to update.', 'woocommerce' ) );
+		}
+
+		$plugin_file = (string) $local['_filename'];
+		$auto_update = self::get_plugin_auto_update_data( $plugin_file );
+		if ( ! $auto_update['auto_update_manageable'] ) {
+			throw new Exception( esc_html__( "Auto-updates for this plugin can't be changed from here.", 'woocommerce' ) );
+		}
+
+		// Core's own filter, documented in wp-admin/includes/class-wp-plugins-list-table.php; applied here so this
+		// path sees the same plugin list core's auto-update toggle does.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Not a WooCommerce hook.
+		$all_plugins = (array) apply_filters( 'all_plugins', get_plugins() );
+		if ( ! array_key_exists( $plugin_file, $all_plugins ) ) {
+			throw new Exception( esc_html__( 'The plugin for this subscription is no longer installed.', 'woocommerce' ) );
+		}
+
+		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
+
+		if ( $enabled ) {
+			$auto_updates[] = $plugin_file;
+			$auto_updates   = array_unique( $auto_updates );
+		} else {
+			$auto_updates = array_diff( $auto_updates, array( $plugin_file ) );
+		}
+
+		// Drop entries for plugins deleted since the option was last written, as core does.
+		$auto_updates = array_intersect( $auto_updates, array_keys( $all_plugins ) );
+
+		update_site_option( 'auto_update_plugins', array_values( $auto_updates ) );
+	}
+
+	/**
+	 * Auto-update state of an installed plugin, following the same rules as WordPress core's
+	 * Plugins screen so the two screens never describe the same plugin differently.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 *
+	 * @return array{auto_update: bool, auto_update_manageable: bool}
+	 */
+	public static function get_plugin_auto_update_data( string $plugin_file ): array {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+
+		// AUTOMATIC_UPDATER_DISABLED, or a plugins_auto_update_enabled filter, turns the whole
+		// feature off; nothing is auto-updating and nothing here can turn it back on.
+		if ( ! wp_is_auto_update_enabled_for_type( 'plugin' ) ) {
+			return array(
+				'auto_update'            => false,
+				'auto_update_manageable' => false,
+			);
+		}
+
+		$forced = wp_is_auto_update_forced_for_item( 'plugin', null, self::get_auto_update_filter_payload( $plugin_file ) );
+		if ( ! is_null( $forced ) ) {
+			return array(
+				'auto_update'            => (bool) $forced,
+				'auto_update_manageable' => false,
+			);
+		}
+
+		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
+
+		return array(
+			'auto_update'            => in_array( $plugin_file, $auto_updates, true ),
+			// auto_update_plugins is a network option, and core only offers the toggle from network
+			// admin on multisite. My Subscriptions is a site-level screen, so it reads only there.
+			'auto_update_manageable' => ! is_multisite() && current_user_can( 'update_plugins' ),
+		);
+	}
+
+	/**
+	 * Payload for the auto_update_plugin filter, matching what WP_Plugins_List_Table passes so
+	 * third-party callbacks see the same shape on both screens.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 *
+	 * @return object
+	 */
+	private static function get_auto_update_filter_payload( string $plugin_file ) {
+		$defaults = array(
+			'id'            => $plugin_file,
+			'slug'          => '',
+			'plugin'        => $plugin_file,
+			'new_version'   => '',
+			'url'           => '',
+			'package'       => '',
+			'icons'         => array(),
+			'banners'       => array(),
+			'banners_rtl'   => array(),
+			'tested'        => '',
+			'requires_php'  => '',
+			'compatibility' => new stdClass(),
+		);
+
+		$updates     = get_site_transient( 'update_plugins' );
+		$update_item = $updates->response[ $plugin_file ] ?? $updates->no_update[ $plugin_file ] ?? null;
+		$plugin_data = is_object( $update_item ) ? (array) $update_item : array();
+
+		return (object) wp_parse_args( $plugin_data, $defaults );
 	}
 
 	/**

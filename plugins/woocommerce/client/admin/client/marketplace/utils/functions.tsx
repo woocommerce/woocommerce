@@ -309,6 +309,29 @@ function activateProductPlugin( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+/**
+ * Turn plugin auto-updates on or off for a subscription's installed plugin.
+ *
+ * Writes the same `auto_update_plugins` option the WordPress Plugins screen writes.
+ */
+function setProductAutoUpdate(
+	subscription: Subscription,
+	enabled: boolean
+): Promise< void > {
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	data.append( 'enabled', enabled ? '1' : '0' );
+
+	return apiFetch( {
+		path: '/wc/v3/marketplace/subscriptions/auto-update',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 function disconnectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === false ) {
 		return Promise.resolve();
@@ -575,6 +598,7 @@ export {
 	appendURLParams,
 	connectProduct,
 	activateProductPlugin,
+	setProductAutoUpdate,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,

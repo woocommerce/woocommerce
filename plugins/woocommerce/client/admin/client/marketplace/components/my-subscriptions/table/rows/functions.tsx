@@ -18,6 +18,7 @@ import AutoRenewButton from '../actions/auto-renew-button';
 import SubscribeButton from '../actions/subscribe-button';
 import Update from '../actions/update';
 import StatusPopover from './status-popover';
+import AutoUpdateStatus from './auto-update-status';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import Version from './version';
 import {
@@ -288,6 +289,7 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.product_name }
 			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
+				<AutoUpdateStatus subscription={ subscription } />
 				{ subscription.is_shared && (
 					<StatusPopover
 						text={ __( 'Shared with you', 'woocommerce' ) }

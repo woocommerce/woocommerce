@@ -112,6 +112,26 @@ class WC_Helper_Subscriptions_API {
 
 		register_rest_route(
 			'wc/v3',
+			'/marketplace/subscriptions/auto-update',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'set_auto_update' ),
+				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'args'                => array(
+					'product_key' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'enabled'     => array(
+						'required' => true,
+						'type'     => 'boolean',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			'wc/v3',
 			'/marketplace/subscriptions/install-url',
 			array(
 				'methods'             => 'GET',
@@ -249,6 +269,43 @@ class WC_Helper_Subscriptions_API {
 				400
 			);
 		}
+	}
+
+	/**
+	 * Turn plugin auto-updates on or off for a subscription's installed plugin.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Request object.
+	 *
+	 * @return void
+	 */
+	public static function set_auto_update( $request ): void {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Sorry, you are not allowed to modify plugins.', 'woocommerce' ),
+				),
+				403
+			);
+		}
+
+		try {
+			WC_Helper::set_subscription_plugin_auto_update( $request->get_param( 'product_key' ), (bool) $request->get_param( 'enabled' ) );
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				array(
+					'message' => $e->getMessage(),
+				),
+				400
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'message' => $request->get_param( 'enabled' )
+					? __( 'Auto-updates are now on for this extension.', 'woocommerce' )
+					: __( 'Auto-updates are now off for this extension.', 'woocommerce' ),
+			)
+		);
 	}
 
 	/**
