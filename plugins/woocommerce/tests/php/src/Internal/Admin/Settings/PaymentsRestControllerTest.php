@@ -979,7 +979,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 				'_order'      => $order++,
 				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Direct bank transfer',
-				'description' => 'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+				'description' => 'Accept offline bank-to-bank and wire transfer payments such as BACS, SEPA, and SWIFT.',
 				'supports'    => array(
 					'products',
 				),
