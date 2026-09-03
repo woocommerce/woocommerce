@@ -748,13 +748,14 @@ class StyleAttributesUtils {
 		if ( ! empty( $properties ) ) {
 			$class_style_map = array_intersect_key( $class_style_map, array_flip( $properties ) );
 		}
+
 		if ( ! empty( $exclude ) ) {
 			$class_style_map = array_diff_key( $class_style_map, array_flip( $exclude ) );
 		}
 
 		$classes_and_styles = array();
 		foreach ( $class_style_map as $key => $method ) {
-			$classes_and_styles[ $key ] = self::$method( $attributes );
+			$classes_and_styles[ $key ] = call_user_func( array( self::class, $method ), $attributes );
 		}
 
 		$classes_and_styles = array_filter( $classes_and_styles );
