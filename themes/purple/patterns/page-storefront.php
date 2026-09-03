@@ -3,7 +3,8 @@
  * Title: Storefront
  * Slug: purple/storefront
  * Categories: purple
- * Template Types: front-page
+ * Block Types: core/post-content
+ * Post Types: page, wp_template
  *
  * @package purple
  */
