@@ -165,6 +165,12 @@
 		],
 		"phpstan:baseline": [
 			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
+		],
+		"phpstan:api": [
+			"vendor/bin/phpstan analyse --configuration=phpstan-api.neon --memory-limit=4G"
+		],
+		"phpstan:api:baseline": [
+			"vendor/bin/phpstan analyse --configuration=phpstan-api.neon --memory-limit=4G --generate-baseline=phpstan-api-baseline.neon"
 		]
 	},
 	"extra": {
@@ -181,6 +187,8 @@
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
 			"phpstan": "Run PHPStan static analysis on the WooCommerce plugin",
 			"phpstan:baseline": "Generate a PHPStan baseline file to ignore existing errors",
+			"phpstan:api": "Run PHPStan static analysis on the PHP 8.1+ Code API",
+			"phpstan:api:baseline": "Generate a PHPStan baseline file for the Code API",
 			"makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
 			"makepot": "Generate i18n/languages/woocommerce.pot file"
 		},
