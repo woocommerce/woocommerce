@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { addFilter, removeFilter } from '@wordpress/hooks';
+
+/**
  * Internal dependencies
  */
 import {
@@ -54,6 +59,41 @@ describe( 'usesServerSideSearch', () => {
 		expect( usesServerSideSearch( limitProperties( 'products' ) ) ).toBe(
 			false
 		);
+	} );
+
+	describe( 'woocommerce_admin_report_server_side_search_item_types', () => {
+		const hook = 'woocommerce_admin_report_server_side_search_item_types';
+
+		afterEach( () => {
+			removeFilter( hook, 'test' );
+		} );
+
+		it( 'should let an integration opt an item type out', () => {
+			// An integration replacing the products report route with a handler that does
+			// not read `search` needs the client to resolve the term into IDs instead.
+			addFilter( hook, 'test', ( itemTypes: string[] ) =>
+				itemTypes.filter( ( itemType ) => itemType !== 'products' )
+			);
+
+			expect( usesServerSideSearch( [ 'products' ] ) ).toBe( false );
+		} );
+
+		it( 'should take a callback registered after the module loaded into account', () => {
+			expect( usesServerSideSearch( [ 'coupons' ] ) ).toBe( false );
+
+			addFilter( hook, 'test', ( itemTypes: string[] ) => [
+				...itemTypes,
+				'coupons',
+			] );
+
+			expect( usesServerSideSearch( [ 'coupons' ] ) ).toBe( true );
+		} );
+
+		it( 'should be false when a callback returns something other than a list', () => {
+			addFilter( hook, 'test', () => undefined );
+
+			expect( usesServerSideSearch( [ 'products' ] ) ).toBe( false );
+		} );
 	} );
 } );
 

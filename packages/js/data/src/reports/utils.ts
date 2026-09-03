@@ -17,6 +17,7 @@ import {
 } from '@woocommerce/navigation';
 import deprecated from '@wordpress/deprecated';
 import { select as WPSelect } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -162,6 +163,9 @@ export function getQueryFromConfig(
 	};
 }
 
+const SERVER_SIDE_SEARCH_ITEM_TYPES_FILTER =
+	'woocommerce_admin_report_server_side_search_item_types';
+
 // Item types whose report endpoints resolve a `search` argument themselves. For every other
 // type the client has to turn the search into a list of matching item IDs first and pass
 // those as the limit-by parameter, which caps the report at one page of search results.
@@ -182,7 +186,30 @@ export function usesServerSideSearch( limitProperties: string[] ) {
 		return false;
 	}
 
-	return includes( serverSideSearchItemTypes, limitProperties[ 0 ] );
+	/**
+	 * Item types whose report endpoint resolves a `search` argument itself.
+	 *
+	 * An integration that replaces one of these report routes with a handler that does not
+	 * read `search` should remove that type, so the client goes back to resolving the term
+	 * into item IDs and sending those as the limit-by parameter instead.
+	 *
+	 * The filter is applied per call rather than once, so a callback registered after this
+	 * module loads is still taken into account.
+	 *
+	 * @filter woocommerce_admin_report_server_side_search_item_types
+	 * @param {Array.<string>} itemTypes Item types the report endpoints search themselves.
+	 */
+	const itemTypes = applyFilters(
+		SERVER_SIDE_SEARCH_ITEM_TYPES_FILTER,
+		serverSideSearchItemTypes
+	);
+
+	// A callback is free to return anything, and every report search runs through here.
+	if ( ! Array.isArray( itemTypes ) ) {
+		return false;
+	}
+
+	return includes( itemTypes, limitProperties[ 0 ] );
 }
 
 /**

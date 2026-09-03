@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the `woocommerce_admin_report_server_side_search_item_types` filter, so an integration that overrides a report route with a handler that does not read `search` can opt out and keep receiving resolved item IDs.
