@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -185,7 +187,7 @@ class CartExtensions extends ControllerTestCase {
 		$shipping_item->set_total( 10 );
 		$order->add_item( $shipping_item );
 
-		$order->set_status( 'pending' );
+		$order->set_status( OrderStatus::PENDING );
 		$order->set_cart_hash( wc()->cart->get_cart_hash() );
 		$order->update_meta_data( '_shipping_hash', 'hash-from-calculated-shipping' );
 		$order->calculate_totals();
@@ -219,7 +221,7 @@ class CartExtensions extends ControllerTestCase {
 	 */
 	private function assertPendingOrderRetainsShipping( $order ) {
 		$reloaded_order = wc_get_order( $order->get_id() );
-		$this->assertCount( 1, $reloaded_order->get_items( 'shipping' ) );
+		$this->assertCount( 1, $reloaded_order->get_items( OrderItemType::SHIPPING ) );
 		$this->assertEquals( 20.0, (float) $reloaded_order->get_total() );
 	}
 }
