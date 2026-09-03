@@ -289,6 +289,25 @@ if ( Git::head_sha() !== $sha ) {
 	exit( 1 );
 }
 
+// Trunk moving has the same effect as HEAD moving, just from the other side: CI
+// merges this branch with whatever trunk is at the time, so commits that landed
+// during the run put CI on a tree these checks never saw. Step 2 established
+// this at the start; a long run can outlive that.
+if ( ! Git::fetch_trunk( TRUNK_BRANCH ) ) {
+	Output::fail( 'could not re-check trunk — publishing nothing' );
+	exit( 1 );
+}
+
+$drifted = Git::commits_behind_trunk();
+
+if ( 0 !== $drifted ) {
+	Output::fail( sprintf( 'trunk moved %d commit(s) while the checks were running', $drifted ) );
+	Output::warn( 'CI would merge those commits and build a tree these checks never saw.' );
+	Output::warn( 'Merge trunk and run again. A long run loses this race more often, so' );
+	Output::warn( '--only=<substring> is worth using on a busy trunk.' );
+	exit( 1 );
+}
+
 foreach ( $passed_jobs as $job ) {
 	$posted = $receipts->publish( $sha, $job );
 
