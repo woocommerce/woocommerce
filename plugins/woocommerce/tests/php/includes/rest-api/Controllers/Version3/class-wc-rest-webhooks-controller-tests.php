@@ -7,14 +7,24 @@ declare( strict_types = 1 );
 class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * The prefix every webhook delivery URL in this class shares.
+	 */
+	private const PING_URL_PREFIX = 'https://example.com/';
+
+	/**
+	 * Answer webhook pings through the HTTP fixture inherited from WP_HTTP_TestCase.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->http_responder = array( $this, 'respond_to_ping' );
+	}
+
+	/**
 	 * @testdox A webhook completes its registered V3 CRUD lifecycle and sends one create ping.
 	 */
 	public function test_webhook_crud_lifecycle(): void {
-		$pings        = array();
-		$delivery_url = 'https://example.com/crud-webhook';
-		$interceptor  = $this->create_ping_interceptor( $pings );
-
-		add_filter( 'pre_http_request', $interceptor, 10, 3 );
+		$delivery_url = self::PING_URL_PREFIX . 'crud-webhook';
 
 		wp_set_current_user( 1 );
 
@@ -61,7 +71,7 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'active', $fresh_webhook->get_status() );
 		$this->assertSame( 'order.updated', $fresh_webhook->get_topic() );
 		$this->assertSame( $delivery_url, $fresh_webhook->get_delivery_url() );
-		$this->assert_ping_contract( $pings, $delivery_url, $webhook_id );
+		$this->assert_ping_contract( $delivery_url, $webhook_id );
 
 		$response = $this->do_rest_get_request( 'webhooks/' . $webhook_id );
 		$this->assertSame( 200, $response->get_status() );
@@ -110,13 +120,9 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Webhooks complete registered V3 batch create, mixed, and delete lifecycles.
 	 */
 	public function test_webhook_batch_lifecycle(): void {
-		$pings       = array();
-		$first_url   = 'https://example.com/batch-first';
-		$second_url  = 'https://example.com/batch-second';
-		$third_url   = 'https://example.com/batch-third';
-		$interceptor = $this->create_ping_interceptor( $pings );
-
-		add_filter( 'pre_http_request', $interceptor, 10, 3 );
+		$first_url  = self::PING_URL_PREFIX . 'batch-first';
+		$second_url = self::PING_URL_PREFIX . 'batch-second';
+		$third_url  = self::PING_URL_PREFIX . 'batch-third';
 
 		wp_set_current_user( 1 );
 
@@ -150,9 +156,9 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 'coupon created', 'customer deleted' ), wp_list_pluck( $data['create'], 'name' ) );
 		$this->assertSame( array( 'coupon.created', 'customer.deleted' ), wp_list_pluck( $data['create'], 'topic' ) );
 		$this->assertSame( array( $first_url, $second_url ), wp_list_pluck( $data['create'], 'delivery_url' ) );
-		$this->assertCount( 2, $pings );
-		$this->assert_ping_contract( $pings, $first_url, $first_id );
-		$this->assert_ping_contract( $pings, $second_url, $second_id );
+		$this->assertCount( 2, $this->captured_pings() );
+		$this->assert_ping_contract( $first_url, $first_id );
+		$this->assert_ping_contract( $second_url, $second_id );
 
 		$first_webhook  = wc_get_webhook( $first_id );
 		$second_webhook = wc_get_webhook( $second_id );
@@ -197,8 +203,8 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'paused coupon created', $data['update'][0]['name'] );
 		$this->assertSame( 'paused', $data['update'][0]['status'] );
 		$this->assertSame( $second_id, $data['delete'][0]['id'] );
-		$this->assertCount( 3, $pings );
-		$this->assert_ping_contract( $pings, $third_url, $third_id );
+		$this->assertCount( 3, $this->captured_pings() );
+		$this->assert_ping_contract( $third_url, $third_id );
 
 		$first_webhook = wc_get_webhook( $first_id );
 		$third_webhook = wc_get_webhook( $third_id );
@@ -227,45 +233,54 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create an HTTP interceptor that captures the webhook pings sent to example.com.
+	 * Answer a webhook ping with a 200 so no delivery leaves the test.
 	 *
-	 * @param array $pings Captured ping requests.
-	 * @return Closure
+	 * @param array  $request Request arguments.
+	 * @param string $url Request URL.
+	 * @return array|false
 	 */
-	private function create_ping_interceptor( array &$pings ): Closure {
-		return static function ( $preempt, $args, $url ) use ( &$pings ) {
-			if ( 0 !== strpos( $url, 'https://example.com/' ) ) {
-				return $preempt;
-			}
+	public function respond_to_ping( $request, $url ) {
+		if ( 0 !== strpos( $url, self::PING_URL_PREFIX ) ) {
+			return false;
+		}
 
-			$pings[] = array(
-				'url'  => $url,
-				'args' => $args,
-			);
+		return array(
+			'headers'  => array(),
+			'body'     => '',
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'cookies'  => array(),
+		);
+	}
 
-			return array(
-				'headers'  => array(),
-				'body'     => '',
-				'response' => array(
-					'code'    => 200,
-					'message' => 'OK',
-				),
-				'cookies'  => array(),
-			);
-		};
+	/**
+	 * The webhook pings the inherited fixture captured.
+	 *
+	 * @return array
+	 */
+	private function captured_pings(): array {
+		return array_values(
+			array_filter(
+				$this->http_requests,
+				static function ( array $request ): bool {
+					return 0 === strpos( $request['url'], self::PING_URL_PREFIX );
+				}
+			)
+		);
 	}
 
 	/**
 	 * Assert one exact webhook ping contract.
 	 *
-	 * @param array  $pings Captured ping requests.
 	 * @param string $url Expected delivery URL.
 	 * @param int    $webhook_id Expected webhook ID.
 	 */
-	private function assert_ping_contract( array $pings, string $url, int $webhook_id ): void {
+	private function assert_ping_contract( string $url, int $webhook_id ): void {
 		$matches = array_values(
 			array_filter(
-				$pings,
+				$this->captured_pings(),
 				static function ( array $ping ) use ( $url ): bool {
 					return $url === $ping['url'];
 				}
@@ -273,6 +288,6 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $matches );
-		$this->assertSame( 'webhook_id=' . $webhook_id, $matches[0]['args']['body'] );
+		$this->assertSame( 'webhook_id=' . $webhook_id, $matches[0]['request']['body'] );
 	}
 }
