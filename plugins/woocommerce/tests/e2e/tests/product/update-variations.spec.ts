@@ -31,6 +31,8 @@ const lowStockAmount = '10';
 
 let productId_indivEdit: number,
 	productId_bulkEdit: number,
+	productId_bulkEditAfterSave: number,
+	productId_bulkEditAfterFailedSave: number,
 	productId_deleteAll: number,
 	productId_manageStock: number,
 	productId_variationDefaults: number,
@@ -102,6 +104,26 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_bulkEdit, sampleVariations );
+		} );
+
+		await test.step( 'Create variable product for bulk edit after save test', async () => {
+			productId_bulkEditAfterSave =
+				await createVariableProduct( productAttributes );
+
+			await createVariations(
+				productId_bulkEditAfterSave,
+				sampleVariations
+			);
+		} );
+
+		await test.step( 'Create variable product for failed save before bulk edit test', async () => {
+			productId_bulkEditAfterFailedSave =
+				await createVariableProduct( productAttributes );
+
+			await createVariations(
+				productId_bulkEditAfterFailedSave,
+				sampleVariations
+			);
 		} );
 
 		await test.step( 'Create variable product for "delete all" test', async () => {
@@ -374,6 +396,163 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			for ( let i = 0; i < count; i++ ) {
 				await expect( checkBoxes.nth( i ) ).toBeChecked();
 			}
+		} );
+	} );
+
+	test( 'waits for unsaved variation changes before bulk editing', async ( {
+		page,
+	} ) => {
+		let saveRequestStarted = false;
+		let bulkRequestCount = 0;
+		let releaseSaveRequest: () => void = () => {};
+		const saveRequestReleased = new Promise< void >( ( resolve ) => {
+			releaseSaveRequest = resolve;
+		} );
+
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			const data = new URLSearchParams(
+				route.request().postData() ?? ''
+			);
+			const action = data.get( 'action' );
+
+			if ( action === 'woocommerce_save_variations' ) {
+				saveRequestStarted = true;
+				await saveRequestReleased;
+			} else if ( action === 'woocommerce_bulk_edit_variations' ) {
+				bulkRequestCount++;
+			}
+
+			await route.continue();
+		} );
+
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_bulkEditAfterSave }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		await test.step( 'Edit a variation without saving.', async () => {
+			const firstVariation = page
+				.locator( '.woocommerce_variation' )
+				.first();
+
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			await firstVariation
+				.getByRole( 'textbox', { name: 'Regular price' } )
+				.fill( variationTwoPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Start a bulk price update.', async () => {
+			page.on( 'dialog', async ( dialog ) => {
+				await dialog.accept(
+					dialog.type() === 'prompt' ? variationThreePrice : undefined
+				);
+			} );
+
+			await page
+				.locator( '#field_to_edit' )
+				.selectOption( 'variable_regular_price' );
+		} );
+
+		await test.step( 'Confirm the bulk request waits for the variation save.', async () => {
+			await expect.poll( () => saveRequestStarted ).toBe( true );
+
+			try {
+				await page.evaluate(
+					() =>
+						new Promise( ( resolve ) =>
+							requestAnimationFrame( () =>
+								requestAnimationFrame( resolve )
+							)
+						)
+				);
+				expect( bulkRequestCount ).toBe( 0 );
+			} finally {
+				releaseSaveRequest();
+			}
+
+			await expect.poll( () => bulkRequestCount ).toBe( 1 );
+			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
+				'bulk_actions'
+			);
+		} );
+	} );
+
+	test( 'does not bulk edit when saving variation changes fails', async ( {
+		page,
+	} ) => {
+		let bulkRequestCount = 0;
+
+		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
+			const data = new URLSearchParams(
+				route.request().postData() ?? ''
+			);
+			const action = data.get( 'action' );
+
+			if ( action === 'woocommerce_save_variations' ) {
+				await route.fulfill( {
+					status: 500,
+					contentType: 'text/plain',
+					body: 'Variation save failed',
+				} );
+				return;
+			}
+
+			if ( action === 'woocommerce_bulk_edit_variations' ) {
+				bulkRequestCount++;
+			}
+
+			await route.continue();
+		} );
+
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productId_bulkEditAfterFailedSave }&action=edit#variable_product_options`
+			);
+		} );
+
+		await gotToVariationsTab( page );
+
+		const firstVariation = page.locator( '.woocommerce_variation' ).first();
+
+		await test.step( 'Edit a variation without saving.', async () => {
+			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			await firstVariation
+				.getByRole( 'textbox', { name: 'Regular price' } )
+				.fill( variationTwoPrice );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+		} );
+
+		await test.step( 'Start a bulk price update.', async () => {
+			page.on( 'dialog', async ( dialog ) => {
+				await dialog.accept(
+					dialog.type() === 'prompt' ? variationThreePrice : undefined
+				);
+			} );
+
+			await page
+				.locator( '#field_to_edit' )
+				.selectOption( 'variable_regular_price' );
+		} );
+
+		await test.step( 'Keep the bulk action cancelled after the save fails.', async () => {
+			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
+				'bulk_actions'
+			);
+			await expect(
+				page.locator( '#woocommerce-product-data .blockUI' )
+			).toHaveCount( 0 );
+			await expect( firstVariation ).toHaveClass(
+				/variation-needs-update/
+			);
+			expect( bulkRequestCount ).toBe( 0 );
 		} );
 	} );
 

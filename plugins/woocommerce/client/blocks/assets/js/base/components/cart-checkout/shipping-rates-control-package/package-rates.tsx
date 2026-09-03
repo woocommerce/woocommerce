@@ -50,7 +50,7 @@ const PackageRates = ( {
 			onSelectRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
-		// shipping rate selection to end up in inifite loop
+		// shipping rate selection to end up in infinite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
