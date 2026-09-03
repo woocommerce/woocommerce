@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use WC_Unit_Test_Case;
@@ -727,6 +728,135 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $tokens );
 		$this->assertInstanceOf( PushToken::class, $tokens[0] );
 		$this->assertSame( $admin_id, $tokens[0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should report when no push token records are registered.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_registered_tokens(): void {
+		$sut = new PushTokensDataStore();
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve when none are registered.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, $resolution->get_outcome(), 'The outcome should identify the empty registry.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS,
+				'registered_token_owner_count' => 0,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should report zero registered and eligible token owners.'
+		);
+	}
+
+	/**
+	 * @testdox Should report when no roles are requested.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_requested_roles(): void {
+		$sut = new PushTokensDataStore();
+
+		$resolution = $sut->resolve_tokens_for_roles( array() );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve without requested roles.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_ROLES, $resolution->get_outcome(), 'The outcome should identify the missing roles.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_ROLES,
+				'registered_token_owner_count' => 0,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should report that role resolution did not run.'
+		);
+	}
+
+	/**
+	 * @testdox Should report when registered token owners do not match the eligible roles.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_eligible_users(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$sut           = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $sut, $subscriber_id );
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'No tokens should resolve for users outside the requested roles.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS, $resolution->get_outcome(), 'The outcome should identify the role mismatch.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_ELIGIBLE_USERS,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 0,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should distinguish registered owners from eligible users.'
+		);
+	}
+
+	/**
+	 * @testdox Should report when eligible users have no valid push tokens.
+	 */
+	public function test_resolve_tokens_for_roles_reports_no_valid_tokens(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$sut      = new PushTokensDataStore();
+
+		wp_insert_post(
+			array(
+				'post_author' => $admin_id,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform' => PushToken::PLATFORM_APPLE,
+					'token'    => 'partial_token',
+				),
+			)
+		);
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $resolution->get_tokens(), 'Malformed token records should not resolve.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_NO_VALID_TOKENS, $resolution->get_outcome(), 'The outcome should identify invalid token records.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_NO_VALID_TOKENS,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 0,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should retain owner and eligibility counts when token hydration fails.'
+		);
+	}
+
+	/**
+	 * @testdox Should report counts for successfully resolved token recipients.
+	 */
+	public function test_resolve_tokens_for_roles_reports_resolved_counts(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$sut      = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $sut, $admin_id );
+
+		$resolution = $sut->resolve_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $resolution->get_tokens(), 'The eligible token should resolve.' );
+		$this->assertSame( PushTokenResolution::OUTCOME_RESOLVED, $resolution->get_outcome(), 'The outcome should identify successful resolution.' );
+		$this->assertSame(
+			array(
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_RESOLVED,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 1,
+			),
+			$resolution->get_diagnostics(),
+			'Diagnostics should report exact counts for the core data store.'
+		);
 	}
 
 	/**
