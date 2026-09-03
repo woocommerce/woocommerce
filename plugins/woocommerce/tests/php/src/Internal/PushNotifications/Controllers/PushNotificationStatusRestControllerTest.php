@@ -154,7 +154,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
 
-		$this->assertTrue( $controller->authorize_as_from_wpcom_or_authenticated( $request ) );
+		$this->assertTrue( $controller->authorize_as_from_wpcom_or_allowed_user( $request ) );
 	}
 
 	/**

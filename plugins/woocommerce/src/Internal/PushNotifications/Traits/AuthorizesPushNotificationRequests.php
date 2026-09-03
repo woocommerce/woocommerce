@@ -30,6 +30,7 @@ trait AuthorizesPushNotificationRequests {
 	 */
 	public function authorize_as_authenticated( WP_REST_Request $request ) {
 		$authorized = $this->authorize_as_authenticated_ignoring_enablement( $request );
+
 		if ( true !== $authorized ) {
 			return $authorized;
 		}
@@ -38,7 +39,7 @@ trait AuthorizesPushNotificationRequests {
 	}
 
 	/**
-	 * Checks the caller is either WPCOM or an authorized user, without requiring
+	 * Checks the caller is either WPCOM or an allowed user, without requiring
 	 * the module to be enabled.
 	 *
 	 * WPCOM reads this endpoint to decide how to reach a store, and signs those
@@ -51,7 +52,7 @@ trait AuthorizesPushNotificationRequests {
 	 *
 	 * @since 11.2.0
 	 */
-	public function authorize_as_from_wpcom_or_authenticated( WP_REST_Request $request ) {
+	public function authorize_as_from_wpcom_or_allowed_user( WP_REST_Request $request ) {
 		if ( $this->is_signed_with_blog_token() ) {
 			return true;
 		}

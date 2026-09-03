@@ -97,7 +97,7 @@ class PushNotificationStatusRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'get_status' ),
-					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_authenticated' ),
+					'permission_callback' => array( $this, 'authorize_as_from_wpcom_or_allowed_user' ),
 				),
 				// A sibling of the endpoint array, not a key inside it. WP_REST_Server
 				// promotes only non-numeric top-level keys into its route options, and
