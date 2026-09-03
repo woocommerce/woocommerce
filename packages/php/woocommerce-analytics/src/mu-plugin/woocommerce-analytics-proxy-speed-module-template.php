@@ -128,6 +128,13 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
+		// Same skew, different symbol: process_proxy_request() reads this constant, and an
+		// older copy throws inside the catch, answering 500 rather than falling back here.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates the client input bounds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
 		return true;
 	}
 
