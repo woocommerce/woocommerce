@@ -205,30 +205,42 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 		public function test_new_order_persists_prices_include_tax_setting(): void {
 			global $pagenow, $plugin_page, $theorder;
 
-			$this->toggle_cot_feature_and_usage( true );
-			update_option( 'woocommerce_prices_include_tax', 'yes' );
-			set_current_screen();
+			$previous_theorder = $theorder ?? null;
+			$order_id          = 0;
 
-			$pagenow        = 'admin.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$plugin_page    = 'wc-orders'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$_GET['action'] = 'new';
+			try {
+				$this->toggle_cot_feature_and_usage( true );
+				update_option( 'woocommerce_prices_include_tax', 'yes' );
+				set_current_screen();
 
-			$controller = new PageController();
-			$controller->setup();
-			$controller->handle_load_page_action();
+				$pagenow        = 'admin.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$plugin_page    = 'wc-orders'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$_GET['action'] = 'new';
 
-			$order_id = $theorder->get_id();
-			update_option( 'woocommerce_prices_include_tax', 'no' );
-			wp_cache_flush();
+				$controller = new PageController();
+				$controller->setup();
+				$controller->handle_load_page_action();
 
-			$read_order = wc_get_order( $order_id );
+				$order_id = $theorder->get_id();
+				update_option( 'woocommerce_prices_include_tax', 'no' );
+				wp_cache_flush();
 
-			$this->assertTrue(
-				$read_order->get_prices_include_tax(),
-				'The saved order should keep its creation-time setting after the store setting changes.'
-			);
+				$read_order = wc_get_order( $order_id );
 
-			$read_order->delete( true );
+				$this->assertTrue(
+					$read_order->get_prices_include_tax(),
+					'The saved order should keep its creation-time setting after the store setting changes.'
+				);
+			} finally {
+				if ( $order_id ) {
+					$created_order = wc_get_order( $order_id );
+					if ( $created_order ) {
+						$created_order->delete( true );
+					}
+				}
+
+				$theorder = $previous_theorder;
+			}
 		}
 	}
 }
