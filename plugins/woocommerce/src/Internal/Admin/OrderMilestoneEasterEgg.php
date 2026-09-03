@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -335,8 +336,8 @@ class OrderMilestoneEasterEgg {
 					LIMIT %d',
 					OrdersTableDataStore::get_orders_table_name(),
 					'shop_order',
-					'wc-processing',
-					'wc-completed',
+					OrderInternalStatus::PROCESSING,
+					OrderInternalStatus::COMPLETED,
 					'',
 					self::MAX_QUALIFYING_ORDERS
 				)
