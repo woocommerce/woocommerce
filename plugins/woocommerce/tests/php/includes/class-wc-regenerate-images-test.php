@@ -61,7 +61,8 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 		$image    = array( wp_get_attachment_url( $attachment_id ), 900, 300, false );
 		$returned = WC_Regenerate_Images::maybe_resize_image( $image, $attachment_id, 'woocommerce_thumbnail', false );
 
-		$target = wc_get_image_size( 'woocommerce_thumbnail' );
+		// The registered size, not wc_get_image_size(), is what regeneration produces.
+		$target = wp_get_registered_image_subsizes()['woocommerce_thumbnail'];
 
 		$this->assertSame(
 			array( (int) $target['width'], (int) $target['height'] ),
