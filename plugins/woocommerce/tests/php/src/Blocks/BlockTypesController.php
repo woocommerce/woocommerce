@@ -86,6 +86,10 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		$block_name = 'woocommerce/product-filters';
 		$registry   = \WP_Block_Type_Registry::get_instance();
 
+		// The fallback under test only runs for classic themes, and the suite's active theme depends on
+		// the WordPress version, so pin a classic theme rather than relying on the ambient one.
+		switch_theme( 'storefront' );
+
 		$this->assertFalse( is_admin(), 'The test must run in a frontend context.' );
 		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
 
