@@ -14,14 +14,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  */
 class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	/**
-	 * TearDown.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-	}
-
-	/**
 	 * Setup.
 	 */
 	public function setUp(): void {

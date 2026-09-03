@@ -32,7 +32,7 @@ export const normalizeIconConfig = (
 		}
 
 		if ( icon.id && isString( icon.id ) && ! normalizedIcons[ icon.id ] ) {
-			normalizedIcons[ icon.id ] = <PaymentMethodIcon>icon;
+			normalizedIcons[ icon.id ] = < PaymentMethodIcon >icon;
 		}
 	} );
 

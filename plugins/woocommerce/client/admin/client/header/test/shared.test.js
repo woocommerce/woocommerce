@@ -1,15 +1,14 @@
 /**
  * External dependencies
  */
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { useSlot } from '@woocommerce/experimental';
 import React from 'react';
 
 /**
  * Internal dependencies
  */
-import useIsScrolled from '~/hooks/useIsScrolled';
-import { getPageTitle, useUpdateBodyMargin, BaseHeader } from '../shared';
+import { getPageTitle, BaseHeader } from '../shared';
 
 // Mock dependencies
 jest.mock( '@woocommerce/experimental', () => ( {
@@ -27,11 +26,6 @@ jest.mock( '@woocommerce/experimental', () => ( {
 			</Element>
 		);
 	},
-} ) );
-
-jest.mock( '~/hooks/useIsScrolled', () => ( {
-	__esModule: true,
-	default: jest.fn(),
 } ) );
 
 jest.mock( '@wordpress/html-entities', () => ( {
@@ -117,178 +111,9 @@ describe( 'getPageTitle', () => {
 	} );
 } );
 
-describe( 'useUpdateBodyMargin', () => {
-	beforeEach( () => {
-		// Setup DOM elements needed for the tests
-		document.body.innerHTML = '<div id="wpbody"></div>';
-
-		// Reset mocks
-		jest.useFakeTimers();
-	} );
-
-	afterEach( () => {
-		jest.clearAllMocks();
-		jest.clearAllTimers();
-		document.body.innerHTML = '';
-	} );
-
-	test( 'should update wpbody margin top based on header height', () => {
-		// Create a mock ref with clientHeight
-		const headerElement = { current: { clientHeight: 100 } };
-		const headerItemSlot = { fills: [] };
-
-		// Create a test component to use the hook.
-		// The hook's useLayoutEffect triggers updateBodyMargin on mount.
-		const TestComponent = () => {
-			useUpdateBodyMargin( {
-				headerElement,
-				headerItemSlot,
-			} );
-			return null;
-		};
-
-		render( <TestComponent /> );
-
-		// Fast-forward timers to trigger the debounced function
-		act( () => {
-			jest.advanceTimersByTime( 200 );
-		} );
-
-		const wpBody = document.querySelector( '#wpbody' );
-		expect( wpBody.style.marginTop ).toBe( '100px' );
-	} );
-
-	test( 'should clean up event listeners and reset margin on unmount', () => {
-		// Create a mock ref with clientHeight
-		const headerElement = { current: { clientHeight: 100 } };
-		const headerItemSlot = { fills: [] };
-
-		// Spy on event listeners
-		const addEventListenerSpy = jest.spyOn( window, 'addEventListener' );
-		const removeEventListenerSpy = jest.spyOn(
-			window,
-			'removeEventListener'
-		);
-
-		// Create a test component to use the hook
-		const TestComponent = () => {
-			useUpdateBodyMargin( {
-				headerElement,
-				headerItemSlot,
-			} );
-			return null;
-		};
-
-		const { unmount } = render( <TestComponent /> );
-
-		// Verify event listener was added
-		expect( addEventListenerSpy ).toHaveBeenCalledWith(
-			'resize',
-			expect.any( Function )
-		);
-
-		// Fast-forward timers to trigger the debounced function
-		act( () => {
-			jest.advanceTimersByTime( 200 );
-		} );
-
-		// Verify margin was set
-		const wpBody = document.querySelector( '#wpbody' );
-		expect( wpBody.style.marginTop ).toBe( '100px' );
-
-		// Unmount component
-		unmount();
-
-		// Verify event listener was removed
-		expect( removeEventListenerSpy ).toHaveBeenCalledWith(
-			'resize',
-			expect.any( Function )
-		);
-	} );
-
-	test( 'should handle null wpbody or headerElement', () => {
-		// Remove wpbody from DOM
-		document.body.innerHTML = '';
-
-		// Create a mock ref with null current
-		const headerElement = { current: null };
-		const headerItemSlot = { fills: [] };
-
-		// Create a test component to use the hook.
-		// The hook's useLayoutEffect triggers updateBodyMargin on mount.
-		const TestComponent = () => {
-			useUpdateBodyMargin( {
-				headerElement,
-				headerItemSlot,
-			} );
-			return null;
-		};
-
-		render( <TestComponent /> );
-
-		// Fast-forward timers to trigger the debounced function
-		act( () => {
-			jest.advanceTimersByTime( 200 );
-		} );
-
-		// Should not throw errors
-		expect( true ).toBe( true );
-	} );
-
-	test( 'should debounce multiple rapid resizes', () => {
-		// NOTE: This test couples to the hook's mount-time behavior.
-		// useUpdateBodyMargin's initial measurement runs through the same
-		// 200ms debounce path, so clientHeight is not read until timers
-		// advance. If a future refactor switches to a synchronous mount-time
-		// measurement, the pre-advance assertion below will need updating.
-
-		// Spy on clientHeight reads so we can assert the debounced update
-		// runs exactly once, not once per resize event.
-		const clientHeightGetter = jest.fn( () => 100 );
-		const headerElement = { current: {} };
-		Object.defineProperty( headerElement.current, 'clientHeight', {
-			get: clientHeightGetter,
-		} );
-		const headerItemSlot = { fills: [] };
-
-		const TestComponent = () => {
-			useUpdateBodyMargin( {
-				headerElement,
-				headerItemSlot,
-			} );
-			return null;
-		};
-
-		render( <TestComponent /> );
-
-		// Fire multiple rapid resize events without advancing timers.
-		// Each resize resets the 200ms debounce timer.
-		act( () => {
-			window.dispatchEvent( new Event( 'resize' ) );
-			window.dispatchEvent( new Event( 'resize' ) );
-			window.dispatchEvent( new Event( 'resize' ) );
-		} );
-
-		// Before the debounce window elapses, nothing should have run yet:
-		// margin should not be set and clientHeight should not have been read.
-		const wpBody = document.querySelector( '#wpbody' );
-		expect( wpBody.style.marginTop ).toBe( '' );
-		expect( clientHeightGetter ).not.toHaveBeenCalled();
-
-		// After advancing past the debounce window, margin is applied once
-		// and clientHeight is read exactly once — proving coalescence.
-		act( () => {
-			jest.advanceTimersByTime( 200 );
-		} );
-		expect( wpBody.style.marginTop ).toBe( '100px' );
-		expect( clientHeightGetter ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
-
 describe( 'BaseHeader', () => {
 	beforeEach( () => {
 		// Setup mocks
-		useIsScrolled.mockReturnValue( { isScrolled: false } );
 		useSlot.mockImplementation( ( slotName ) => {
 			if ( slotName === 'wc-header-page-title' ) {
 				return { fills: [] };
@@ -318,25 +143,6 @@ describe( 'BaseHeader', () => {
 
 		// Check page title
 		expect( header.textContent ).toBe( 'WooCommerce' );
-	} );
-
-	test( 'should render with is-scrolled class when isScrolled is true', () => {
-		// Mock isScrolled to return true
-		useIsScrolled.mockReturnValue( { isScrolled: true } );
-
-		const props = {
-			isEmbedded: false,
-			query: {},
-			sections: [ 'WooCommerce' ],
-		};
-
-		render( <BaseHeader { ...props } /> );
-
-		// Check header has is-scrolled class
-		const headerContainer = document.querySelector(
-			'.woocommerce-layout__header'
-		);
-		expect( headerContainer ).toHaveClass( 'is-scrolled' );
 	} );
 
 	test( 'should render with right alignment when leftAlign is false', () => {

@@ -79,8 +79,8 @@ export const useRecommendedPluginsWithoutChannels =
 		);
 
 		const installAndActivate = ( slug: string ) => {
-			installAndActivateRecommendedPlugin( slug, category );
-			invalidateResolution( selector, [ category ] );
+			void installAndActivateRecommendedPlugin( slug, category );
+			void invalidateResolution( selector, [ category ] );
 		};
 
 		return {

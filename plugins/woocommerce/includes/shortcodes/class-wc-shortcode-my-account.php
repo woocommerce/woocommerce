@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -59,6 +61,12 @@ class WC_Shortcode_My_Account {
 		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
 		if ( isset( $wp->query_vars['lost-password'] ) ) {
 			self::lost_password();
+			return;
+		}
+
+		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
+			// Order withdrawal is an EU regulation requirement which needs standalone access.
+			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
 			return;
 		}
 
@@ -254,14 +262,14 @@ class WC_Shortcode_My_Account {
 		/**
 		 * After sending the reset link, don't show the form again.
 		 */
-		if ( ! empty( $_GET['reset-link-sent'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['reset-link-sent'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only UI selector; login and path are normalized downstream.
 			wc_get_template( 'myaccount/lost-password-confirmation.php' );
 			return;
 
 			/**
 			 * Process reset key / login from email confirmation link
 			 */
-		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
+		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only UI selector; login and path are normalized downstream.
 			$has_reset_credentials = false;
 			$bridge_credentials    = false;
 
@@ -274,7 +282,6 @@ class WC_Shortcode_My_Account {
 			if ( ! $bridge_credentials ) {
 				$bridge_credentials = self::get_posted_password_reset_bridge_credentials();
 			}
-
 			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
 				$has_reset_credentials = true;
 
@@ -330,7 +337,7 @@ class WC_Shortcode_My_Account {
 	 * @return bool True: when finish. False: on error
 	 */
 	public static function retrieve_password() {
-		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$login = isset( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read-only UI selector; login and path are normalized downstream.
 
 		if ( empty( $login ) ) {
 
@@ -426,7 +433,7 @@ class WC_Shortcode_My_Account {
 	 * state are stored. The handle is consumed when it is exchanged for a separate signed
 	 * form token, so the rendered page URL is not a reusable password-reset credential.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @internal
 	 *
 	 * @param WP_User $user User with an active WordPress password-reset key.
@@ -725,7 +732,7 @@ class WC_Shortcode_My_Account {
 	 */
 	public static function set_reset_password_cookie( $value = '' ) {
 		$rp_cookie = 'wp-resetpass-' . COOKIEHASH;
-		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // WPCS: input var ok, sanitization ok.
+		$rp_path   = isset( $_SERVER['REQUEST_URI'] ) ? current( explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only UI selector; login and path are normalized downstream.
 
 		if ( $value ) {
 			setcookie( $rp_cookie, $value, 0, $rp_path, COOKIE_DOMAIN, is_ssl(), true );

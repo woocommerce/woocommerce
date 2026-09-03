@@ -25,7 +25,7 @@
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @usedby  [product_brand]
- * @version 9.4.0
+ * @version 11.1.0
  */
 
 declare( strict_types = 1);
@@ -34,5 +34,8 @@ declare( strict_types = 1);
 	<img src="<?php echo esc_url( $thumbnail ); ?>"
 	     alt="<?php echo esc_attr( $term->name ); ?>"
 	     class="<?php echo esc_attr( $class ); ?>"
-	     style="width: <?php echo esc_attr( $width ); ?>; height: <?php echo esc_attr( $height ); ?>;"/>
+		<?php if ( '' !== $width || '' !== $height ) : ?>
+	     style="width: <?php echo esc_attr( $width ); ?>; height: <?php echo esc_attr( $height ); ?>;"
+		<?php endif; ?>
+	/>
 </a>

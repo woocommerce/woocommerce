@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the dropdown button arrow in place when open in RTL languages

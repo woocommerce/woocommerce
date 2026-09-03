@@ -116,7 +116,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	 * Clean up after test.
 	 */
 	public function tearDown(): void {
-		WC()->cart->empty_cart();
 		WC()->session->set( 'chosen_shipping_methods', array() );
 		WC_Helper_Shipping::delete_simple_flat_rate();
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );

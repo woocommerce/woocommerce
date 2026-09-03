@@ -7,7 +7,7 @@ import { test, expect, request } from '@playwright/test';
  * Internal dependencies
  */
 import { setOption } from '../../utils/options';
-import { getWooEmails } from '../../utils/email';
+import { accessTheEmailEditor } from '../../utils/email';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const setFeatureFlag = async ( baseURL: string | undefined, value: string ) => {
@@ -40,13 +40,9 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 	} ) => {
 		await setFeatureFlag( baseURL, 'yes' );
 
-		// Navigate to WooCommerce Email Settings page to generate email posts
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-		const emails = await getWooEmails();
-
-		await page.goto(
-			`wp-admin/post.php?post=${ emails.data[ 0 ].id }&action=edit`
-		);
+		// Open an email through the listing — with lazy post creation the
+		// Edit action creates the post on demand before opening the editor.
+		await accessTheEmailEditor( page, 'New order' );
 
 		// Check that the Editor is present
 		const editorLocator = page.locator( '#woocommerce-email-editor' );
@@ -104,9 +100,18 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 		await editorLocator
 			.locator( '.editor-preview-dropdown__toggle' )
 			.click();
-		// Check open in new tab selector
+		// Check open in new tab selector.
+		// Mirrors the selector the email editor telemetry and preview save
+		// guard rely on (packages/js/email-editor). WP 7.1 dropped the
+		// `.editor-preview-dropdown__button-external` class; the entry is now a
+		// menu item anchor with target="wp-preview-<postId>". Assert the same
+		// selector so this canary stays faithful to what the product code
+		// matches. Drop the old class once WP 7.1 is the minimum supported
+		// version.
 		await expect(
-			page.locator( '.editor-preview-dropdown__button-external' )
+			page.locator(
+				'.editor-preview-dropdown__button-external, a[role="menuitem"][target^="wp-preview-"]'
+			)
 		).toBeVisible();
 		// Close preview dropdown
 		await editorLocator

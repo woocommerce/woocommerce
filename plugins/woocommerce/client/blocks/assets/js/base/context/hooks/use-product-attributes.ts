@@ -64,7 +64,7 @@ export default function useProductAttributes( shouldLoadAttributes: boolean ) {
 			}
 		}
 
-		fetchAttributesWithTerms();
+		void fetchAttributesWithTerms();
 
 		return () => {
 			hasLoadedAttributes.current = true;

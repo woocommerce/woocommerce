@@ -104,11 +104,11 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array(),
-			'tax_query'      => array(
+			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The empty query container does not add a database join.
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- The empty query container does not add a database join.
 				'relation' => 'AND',
 			),
-		); // WPCS: slow query ok.
+		);
 
 		if ( empty( $instance['show_hidden'] ) ) {
 			$query_args['tax_query'][] = array(
@@ -217,6 +217,6 @@ class WC_Widget_Products extends WC_Widget {
 
 		wp_reset_postdata();
 
-		echo $this->cache_widget( $args, ob_get_clean() ); // WPCS: XSS ok.
+		echo $this->cache_widget( $args, ob_get_clean() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered widget markup; each dynamic value is escaped or annotated where it is rendered.
 	}
 }

@@ -94,6 +94,21 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A different well-formed handle cannot consume another bridge.
+	 */
+	public function test_unrelated_handle_cannot_consume_valid_bridge(): void {
+		$handle           = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$unrelated_handle = ( 'a' === $handle[0] ? 'b' : 'a' ) . substr( $handle, 1 );
+
+		$unrelated_template = $this->render_bridge_handle( $unrelated_handle );
+		$this->assertSame( 'myaccount/form-lost-password.php', $unrelated_template['name'] );
+
+		wc_clear_notices();
+		$valid_template = $this->render_bridge_handle( $handle );
+		$this->assertSame( 'myaccount/form-reset-password.php', $valid_template['name'] );
+	}
+
+	/**
 	 * @testdox A stale well-formed cookie does not suppress a valid bridge.
 	 */
 	public function test_stale_cookie_falls_back_to_valid_bridge(): void {
@@ -172,6 +187,40 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A different logged-in user cannot consume another account's handle.
+	 */
+	public function test_logged_in_user_cannot_consume_another_users_handle(): void {
+		$handle        = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$other_user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $other_user_id );
+
+		$mismatched_template = $this->render_bridge_handle( $handle );
+		$this->assertSame( 'myaccount/form-lost-password.php', $mismatched_template['name'] );
+
+		wp_set_current_user( 0 );
+		wc_clear_notices();
+		$replayed_template = $this->render_bridge_handle( $handle );
+		$this->assertSame( 'myaccount/form-lost-password.php', $replayed_template['name'] );
+	}
+
+	/**
+	 * @testdox A different logged-in user cannot validate another account's form token.
+	 */
+	public function test_logged_in_user_cannot_validate_another_users_form_token(): void {
+		$handle        = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$template      = $this->render_bridge_handle( $handle );
+		$token         = $template['args']['key'];
+		$other_user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $other_user_id );
+
+		$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $token, $this->user->user_login ) );
+
+		wp_set_current_user( 0 );
+		wc_clear_notices();
+		$this->assertSame( $this->user->ID, WC_Shortcode_My_Account::check_password_reset_key( $token, $this->user->user_login )->ID );
+	}
+
+	/**
 	 * @testdox Changing the password invalidates the bridge with WordPress reset state.
 	 */
 	public function test_password_change_invalidates_bridge(): void {
@@ -196,6 +245,77 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$template = $this->render_bridge_handle( $handle );
 
 		$this->assertSame( 'myaccount/form-lost-password.php', $template['name'] );
+	}
+
+	/**
+	 * @testdox Bridge expiry honors the ten-minute bound and a shorter WordPress policy.
+	 */
+	public function test_bridge_expiration_honors_both_lifetime_bounds(): void {
+		$transient_expirations        = array();
+		$short_expiration             = static function (): int {
+			return 30;
+		};
+		$capture_transient_expiration = static function ( string $transient, $value, int $expiration ) use ( &$transient_expirations ): void {
+			unset( $transient, $value );
+			$transient_expirations[] = $expiration;
+		};
+
+		add_action( 'set_transient', $capture_transient_expiration, 10, 3 );
+		try {
+			$default_handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+			$default_template = $this->render_bridge_handle( $default_handle );
+			$default_claims   = explode( '.', $default_template['args']['key'] );
+
+			add_filter( 'password_reset_expiration', $short_expiration );
+			try {
+				$short_handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+				$short_template = $this->render_bridge_handle( $short_handle );
+				$short_claims   = explode( '.', $short_template['args']['key'] );
+			} finally {
+				remove_filter( 'password_reset_expiration', $short_expiration );
+			}
+		} finally {
+			remove_action( 'set_transient', $capture_transient_expiration, 10 );
+		}
+
+		$this->assertCount( 2, $transient_expirations );
+		$this->assertGreaterThan( 0, $transient_expirations[0] );
+		$this->assertLessThanOrEqual( 10 * MINUTE_IN_SECONDS, $transient_expirations[0] );
+		$this->assertLessThanOrEqual( 30, $transient_expirations[1] );
+		$this->assertLessThanOrEqual( time() + 10 * MINUTE_IN_SECONDS, (int) $default_claims[2] );
+		$this->assertLessThanOrEqual( time() + 30, (int) $short_claims[2] );
+		$this->assertLessThan( (int) $default_claims[2], (int) $short_claims[2] );
+	}
+
+	/**
+	 * @testdox A core-approved old-style reset key can create and exchange a bridge.
+	 */
+	public function test_old_style_reset_key_compatibility(): void {
+		$old_style_key = 'oldstyleresetkey';
+		$result        = wp_update_user(
+			array(
+				'ID'                  => $this->user->ID,
+				'user_activation_key' => $old_style_key,
+			)
+		);
+		$this->assertSame( $this->user->ID, $result );
+
+		$accept_old_style_key = static function ( WP_Error $error, int $user_id ) {
+			unset( $error );
+			return get_userdata( $user_id );
+		};
+		add_filter( 'password_reset_key_expired', $accept_old_style_key, 10, 2 );
+		try {
+			$validated_user = check_password_reset_key( $old_style_key, $this->user->user_login );
+			$this->assertInstanceOf( WP_User::class, $validated_user );
+			$handle = WC_Shortcode_My_Account::create_password_reset_bridge_token( $validated_user );
+		} finally {
+			remove_filter( 'password_reset_key_expired', $accept_old_style_key, 10 );
+		}
+
+		$template = $this->render_bridge_handle( $handle );
+		$this->assertSame( 'myaccount/form-reset-password.php', $template['name'] );
+		$this->assertSame( $this->user->ID, WC_Shortcode_My_Account::check_password_reset_key( $template['args']['key'], $this->user->user_login )->ID );
 	}
 
 	/**
@@ -226,6 +346,26 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'myaccount/form-reset-password.php', $rerendered['name'] );
 		$this->assertSame( $token, $rerendered['args']['key'] );
 		$this->assertSame( $this->user->user_login, $rerendered['args']['login'] );
+	}
+
+	/**
+	 * @testdox Invalid nonce candidates cannot recover a consumed bridge form.
+	 */
+	public function test_invalid_nonces_do_not_recover_consumed_bridge_form(): void {
+		$handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$template = $this->render_bridge_handle( $handle );
+		$token    = $template['args']['key'];
+
+		$_GET  = array( 'show-reset-form' => 'true' );
+		$_POST = array(
+			'woocommerce-reset-password-nonce' => 'invalid-woocommerce-nonce',
+			'_wpnonce'                         => 'invalid-generic-nonce',
+			'reset_key'                        => $token,
+			'reset_login'                      => $this->user->user_login,
+		);
+
+		$rerendered = $this->render_lost_password_page();
+		$this->assertSame( 'myaccount/form-lost-password.php', $rerendered['name'] );
 	}
 
 	/**
@@ -352,7 +492,11 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_bridge_response_headers_are_private(): void {
 		$original_headers = array( 'Cache-Control' => 'public, max-age=600' );
-		$_GET             = array(
+
+		$_GET = array();
+		$this->assertSame( $original_headers, WC_Form_Handler::set_reset_password_bridge_headers( $original_headers ) );
+
+		$_GET = array(
 			'show-reset-form' => 'true',
 			'reset-token'     => str_repeat( 'a', 32 ),
 		);
@@ -369,6 +513,41 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'no-store', $headers['Cache-Control'] );
 		$this->assertStringContainsString( 'private', $headers['Cache-Control'] );
 		$this->assertSame( 'no-referrer', $headers['Referrer-Policy'] );
+	}
+
+	/**
+	 * @testdox Malformed bridge handles do not receive private reset headers.
+	 * @dataProvider malformed_bridge_handle_provider
+	 *
+	 * @param string $handle Malformed bridge handle.
+	 */
+	public function test_malformed_bridge_handles_do_not_receive_private_headers( string $handle ): void {
+		$original_headers = array( 'Cache-Control' => 'public, max-age=600' );
+		$_GET             = array(
+			'show-reset-form' => 'true',
+			'reset-token'     => $handle,
+		);
+
+		add_filter( 'woocommerce_is_account_page', '__return_true' );
+		try {
+			$headers = WC_Form_Handler::set_reset_password_bridge_headers( $original_headers );
+		} finally {
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+		}
+
+		$this->assertSame( $original_headers, $headers );
+	}
+
+	/**
+	 * Provide malformed bridge handles with extra leading or trailing characters.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function malformed_bridge_handle_provider(): array {
+		return array(
+			'extra leading character'  => array( '!' . str_repeat( 'a', 32 ) ),
+			'extra trailing character' => array( str_repeat( 'a', 32 ) . '!' ),
+		);
 	}
 
 	/**

@@ -55,10 +55,10 @@ function wc_get_raw_referer() {
 		return wp_get_raw_referer();
 	}
 
-	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
-	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) { // WPCS: input var ok, CSRF ok.
-		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+	if ( ! empty( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only fallback that only reports where the request came from; no state changes here.
+		return wp_unslash( $_REQUEST['_wp_http_referer'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
+	} elseif ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+		return wp_unslash( $_SERVER['HTTP_REFERER'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This function is documented to return the referer unvalidated; every caller passes the result through wp_validate_redirect().
 	}
 
 	return false;
@@ -183,7 +183,7 @@ function wc_clear_cart_after_payment() {
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
-		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Raw referer is sanitized and validated by its consumers.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
@@ -211,6 +211,11 @@ function wc_clear_cart_after_payment() {
 		return;
 	}
 
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+	}
+
 	/**
 	 * Determine whether the cart should be cleared after payment.
 	 *
@@ -218,11 +223,6 @@ function wc_clear_cart_after_payment() {
 	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
 	 */
 	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
-
-	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
-	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
-	}
 
 	if ( $should_clear_cart_after_payment ) {
 		WC()->cart->empty_cart();

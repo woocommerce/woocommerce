@@ -23,6 +23,7 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 
 - ❌ **camelCase naming** - Must use snake_case for methods/variables/hooks ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 - ❌ **Yoda condition violations** - Must follow WordPress Coding Standards ([coding-conventions.md](../woocommerce-backend-dev/coding-conventions.md))
+- ❌ **Magic strings with an existing enum constant** - New code comparing or assigning enumerated values (order statuses, product types, ...) must use the `Automattic\WooCommerce\Enums` constants, not raw literals — except in code that can run during install/upgrade ([coding-conventions.md](../woocommerce-backend-dev/coding-conventions.md))
 
 **Documentation:**
 
@@ -39,6 +40,7 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Using `$instance` in tests** - Must use `$sut` variable name ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Missing `@testdox`** - Required in test method docblocks ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Test file naming** - Must follow convention for `includes/` vs `src/` ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
+- ❌ **Cleanup that duplicates the base lifecycle** - Identify the test's base class before requesting post-assertion fixture deletion or state restoration; flag cleanup already covered by its transaction or teardown ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md#fixture-lifecycle-and-cleanup))
 
 ### Frontend JS/TS Code
 

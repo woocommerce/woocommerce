@@ -4,8 +4,8 @@
 import { warn } from './diagnostics';
 import type {
 	SettingsUIField,
+	SettingsEditControl,
 	SettingsExtensionRegistration,
-	SettingsFieldComponent,
 	SettingsFieldContext,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
@@ -181,7 +181,7 @@ export const __resetRegistry = () => {
 export const resolveFieldComponent = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
-): SettingsFieldComponent | undefined => {
+): SettingsEditControl | undefined => {
 	const componentName = field.component;
 	const component = componentName
 		? findInMatchingRegistrations(

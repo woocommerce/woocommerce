@@ -4,6 +4,13 @@
 /* This is imported here to avoid build errors when importing the same file in multiple places. */
 @import "./components/modals/modals.scss";
 
+// Every Payments screen lays its header title out on a row this tall — the
+// height of the business location control, which is the tallest thing any of
+// these headers carries. Stated once and applied to each header, so the title
+// and the divider below it land in the same place on all of them and nothing
+// shifts when moving between screens.
+$payments-header-row-height: 38px;
+
 /* These keyframes and spinner style are copied from the Stripe Spinner component https://docs.stripe.com/stripe-apps/components/spinner?app-sdk-version=8  */
 @keyframes SpinnerAnimationShow {
 	0% {
@@ -53,6 +60,12 @@
 			justify-content: space-between;
 			padding: $gap-smaller 48px $gap-large;
 			align-items: center;
+			// Every header on this screen closes itself off with this line,
+			// rather than leaving it to whatever renders below. What renders
+			// below varies — the provider list, or the skeleton while they
+			// load — and each drawing its own top border is how the line ended
+			// up doubled in one state and missing in another.
+			border-bottom: 1px solid $gray-200;
 
 			@media screen and (max-width: $break-xlarge) {
 				padding: $gap-smaller $gap-large $gap-large;
@@ -68,9 +81,15 @@
 		}
 
 		&__header-title {
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
 			font-size: 16px;
 			font-weight: 600;
 			line-height: 24px;
+			// Without this it inherits wp-admin's body grey, which is lighter
+			// than every other heading on the screen.
+			color: $gray-900;
 		}
 
 		&__header-select-container {
@@ -101,12 +120,33 @@
 				height: 28px;
 				cursor: pointer;
 				padding-top: 8px;
-				margin-left: auto;
+				// This 1px is the gap the divider is drawn into. It belongs to
+				// the indicator so that it disappears along with it when the
+				// business location matches the store's country.
+				margin-left: 1px;
 				border-radius: 2px;
+				position: relative;
 
+				// Drawn into that gap rather than as a border inside either box.
+				// A border would sit inside this element, pushing the icon
+				// off-centre and leaving the focus ring 1px closer to the
+				// divider than to the other three sides.
+				&::before {
+					content: "";
+					position: absolute;
+					left: -1px;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 1px;
+					height: 20px;
+					background-color: $gray-200;
+				}
+
+				// Matches the select segment's inset so both rings sit clear of
+				// the container border and the divider between them.
 				&:focus {
-					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
-					outline-offset: -1.5px;
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
 				}
 
 				&:focus:not(:focus-visible) {
@@ -114,14 +154,14 @@
 				}
 
 				&:focus-visible {
-					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
-					outline-offset: -1.5px;
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -4px;
 				}
 
 				&-icon {
-					border-left: 1px solid $gray-200;
 					height: 20px;
-					padding: 0 5px;
+					// Wide enough that the inset ring clears the icon.
+					padding: 0 8px;
 
 					svg {
 						fill: $alert-yellow;
@@ -158,14 +198,38 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			width: 100%;
 			background: none;
 			border: none;
-			padding: 0;
+			// Nested corners follow inner = outer - gap. The card is 4px and the
+			// ring clears it by more than that, so the ring wants to be square;
+			// 0 here is as close as it gets, since the ring's own radius is this
+			// value plus the 2px offset. Anything larger reads rounder than the
+			// card that contains it.
+			border-radius: 0;
 			cursor: pointer;
 			text-align: left;
 
+			// A ring's corner radius is border-radius + outline-offset, so the
+			// offset cannot be used to buy clearance without also rounding the
+			// ring past the 4px every other control on this screen uses.
+			// Grow the box with padding instead and cancel it with a matching
+			// negative margin, which leaves the title and chevron in place.
+			// $grid-unit-10 of clearance fits inside the card's padding at every
+			// breakpoint, so it needs no responsive override.
+			width: calc(100% + 2 * #{$grid-unit-10});
+			margin: -$grid-unit-10;
+			padding: $grid-unit-10;
+
 			&:focus {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: 2px;
+			}
+
+			&:focus:not(:focus-visible) {
+				outline: none;
+			}
+
+			&:focus-visible {
 				outline: 2px solid var(--wp-admin-theme-color, #007cba);
 				outline-offset: 2px;
 			}
@@ -177,6 +241,10 @@
 				font-weight: 600;
 				line-height: 24px;
 				align-items: center;
+				// The header is a bare <button>, so without this the title
+				// falls to the browser's black rather than the heading colour
+				// used elsewhere on the screen.
+				color: $gray-900;
 
 				&-image {
 					width: $icon-size;
@@ -220,7 +288,9 @@
 
 		&.is-expanded {
 			.other-payment-gateways__header {
-				margin-bottom: $grid-unit-40;
+				// The header's $grid-unit-10 of padding contributes the rest, so
+				// the content still sits $grid-unit-40 below the title.
+				margin-bottom: $grid-unit-30;
 			}
 		}
 
@@ -259,6 +329,21 @@
 				&__icon-container {
 					height: 16px;
 					cursor: pointer;
+					border-radius: 2px;
+
+					&:focus {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
+
+					&:focus:not(:focus-visible) {
+						outline: none;
+					}
+
+					&:focus-visible {
+						outline: 2px solid var(--wp-admin-theme-color, #007cba);
+						outline-offset: 0;
+					}
 				}
 
 				&__icon {
@@ -384,7 +469,10 @@
 
 		@media screen and (max-width: $break-medium) {
 			margin: 32px $gap 0 $gap;
-			padding: $gap-smaller $gap;
+			// One step down from the desktop $grid-unit-30, and uniform: the
+			// former $gap-smaller left the title crowded against the top border
+			// while the sides kept a full $gap.
+			padding: $gap;
 		}
 	}
 
@@ -468,6 +556,21 @@
 		align-items: center;
 		gap: 2px;
 		padding: 2px 4px 2px 2px;
+		border-radius: 2px;
+
+		&:focus {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
 
 		> img {
 			height: 16px;
@@ -528,16 +631,30 @@
 		display: flex;
 		padding: 8px 48px 24px;
 		align-items: center;
+		// Same ownership as the main screen's header: the line belongs to the
+		// header, on both the methods list and an individual method's page.
+		border-bottom: 1px solid $gray-200;
 
 		h1 {
-			padding-left: $gap-smaller * 2;
 			// This heading renders outside the floating header, so the shared
-			// header typography doesn't reach it — restate it to match the other
-			// settings headers. padding-top trims wp-admin's default h1 padding
-			// so the title centers against the back button.
-			padding-top: 4px;
-			font-size: 15px;
-			font-weight: 500;
+			// header typography doesn't reach it. It occupies the slot the main
+			// screen gives "Payment providers", so it takes that heading's
+			// scale — the floating header's lighter 15px/500 left this h1
+			// smaller than the section headings and list rows beneath it.
+			// The gap to the chevron lives inside the back button, which sits
+			// within this heading.
+			// Laying the title out as a centred flex row, rather than letting
+			// it sit on a text baseline, is what keeps it level with the main
+			// screen's title: the back button is an inline-flex box, so a
+			// baseline would leave the descender gap below it in the heading's
+			// height. Zeroing the padding drops wp-admin's own h1 padding,
+			// which the row height now covers.
+			display: flex;
+			align-items: center;
+			min-height: $payments-header-row-height;
+			padding: 0;
+			font-size: 16px;
+			font-weight: 600;
 			color: $gray-900;
 
 			.woocommerce-settings-payments-header__title {

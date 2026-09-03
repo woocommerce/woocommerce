@@ -9,10 +9,12 @@ import {
 	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
+// The Cap is the only seeded product in this bucket: its reviews are rated 1
+// and 2, averaging 1.5.
 const blockData = {
 	name: 'Filter by Rating',
 	slug: 'woocommerce/rating-filter',
-	urlSearchParamWhenFilterIsApplied: 'rating_filter=1',
+	urlSearchParamWhenFilterIsApplied: 'rating_filter=2',
 };
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
@@ -58,7 +60,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.selectBlocks( stockFilter );
 
 		await expect(
-			editor.canvas.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 		).toBeVisible();
 
 		await page.getByLabel( 'DropDown' ).click();
@@ -70,7 +72,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		).toBeHidden();
 
 		await expect(
-			editor.canvas.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 		).toBeHidden();
 
 		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
@@ -141,7 +143,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await expect( products ).toHaveCount( 16 );
 
 		await expect(
-			page.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			page.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 		).toBeVisible();
 	} );
 
@@ -150,7 +152,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		page,
 	} ) => {
 		await page
-			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 			.click();
 
 		const legacyTemplate = await frontendUtils.getBlockByName(
@@ -189,7 +191,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await page.goto( '/shop' );
 		await page
-			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 			.click();
 
 		await expect( page ).toHaveURL(
@@ -231,7 +233,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.goto( '/shop' );
 
 		await page
-			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			.getByRole( 'checkbox', { name: 'Rated 2 out of 5' } )
 			.click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
