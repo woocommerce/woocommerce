@@ -136,9 +136,12 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 		foreach ( array( 'total_sales', 'net_sales', 'average_sales', 'total_tax', 'total_shipping', 'total_discount' ) as $key ) {
 			$this->assertIsString( $report[ $key ], $key . ' should be serialized as a decimal string.' );
 		}
-		foreach ( array( 'total_orders', 'total_items', 'total_refunds', 'total_customers' ) as $key ) {
+		foreach ( array( 'total_orders', 'total_items', 'total_customers' ) as $key ) {
 			$this->assertIsInt( $report[ $key ], $key . ' should be serialized as an integer.' );
 		}
+		// Kept out of the loop above because total_refunds is an integer only while it is
+		// zero. test_sales_refund_totals_contract() covers what a real refund returns.
+		$this->assertSame( 0, $report['total_refunds'] );
 
 		$this->assertSame( 'day', $report['totals_grouped_by'] );
 		$this->assertArrayHasKey( $date, $report['totals'] );
@@ -151,6 +154,54 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 		foreach ( array( 'orders', 'items', 'customers' ) as $key ) {
 			$this->assertIsInt( $period[ $key ], $key . ' should be serialized as an integer.' );
 		}
+	}
+
+	/**
+	 * @testdox A refund is subtracted from sales totals and comes back as a float, not the integer the schema declares.
+	 */
+	public function test_sales_refund_totals_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.50' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 3.25,
+			)
+		);
+
+		$this->clear_sales_report_cache();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_query_params(
+			array(
+				'date_min' => gmdate( 'Y-m-d', strtotime( '-1 day' ) ),
+				'date_max' => gmdate( 'Y-m-d', strtotime( '+1 day' ) ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data()[0];
+
+		$this->assertSame( 200, $response->get_status() );
+
+		// WC_Report_Sales_By_Date::get_report_data() accumulates this with floatval(),
+		// while the inherited V1 schema declares total_refunds an integer. Pin what
+		// clients actually receive: casting it to match the schema would round money
+		// away and change a published response type.
+		$this->assertIsFloat( $report['total_refunds'] );
+		$this->assertSame( 3.25, $report['total_refunds'] );
+
+		$this->assertSame( wc_format_decimal( 7.25, 2 ), $report['total_sales'], 'Sales totals should be net of the refund.' );
 	}
 
 	/**
