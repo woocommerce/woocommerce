@@ -121,5 +121,5 @@
 
 .woocommerce-search__result-name {
 	text-decoration: underline; // @todo Not actually a link, should underline?
-	overflow-wrap: anywhere;
+	word-break: break-all;
 }
