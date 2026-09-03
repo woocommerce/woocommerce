@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Show a connect prompt on WooCommerce.com extension rows in the plugins list when the store isn't connected and no update notice is present

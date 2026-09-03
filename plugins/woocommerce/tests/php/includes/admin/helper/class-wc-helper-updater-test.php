@@ -47,6 +47,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_transients();
+		$this->cleanup_plugins_screen();
 
 		parent::tearDown();
 	}
@@ -573,6 +574,157 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			$this->call_should_use_cached_update_data( $data, $hash ),
 			'Should accept valid data with extra keys'
 		);
+	}
+
+	/**
+	 * Plugin list entry for a WooCommerce.com hosted plugin.
+	 *
+	 * @var array
+	 */
+	private $woo_plugin_file = 'test-woo-extension/test-woo-extension.php';
+
+	/**
+	 * @testdox Connect notice renders on a Woo plugin row that has no pending update.
+	 */
+	public function test_connect_notice_renders_without_pending_update(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'woo-connect-notice', $output, 'The notice row should be rendered.' );
+		$this->assertStringContainsString( 'woocommerce-connect-your-store', $output, 'The notice should link to the connect page.' );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
+	 */
+	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->prepare_plugins_screen();
+
+		$transient                                     = new stdClass();
+		$transient->response                           = array();
+		$transient->response[ $this->woo_plugin_file ] = (object) array(
+			'id'          => 'woocommerce-com-123',
+			'new_version' => '2.0.0',
+			'package'     => '',
+		);
+		set_site_transient( 'update_plugins', $transient );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Core already carries the connect prompt on its update row.' );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped for plugins that are not hosted on WooCommerce.com.
+	 */
+	public function test_connect_notice_is_skipped_for_non_woo_plugins(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+
+		$output = $this->render_connect_notice(
+			'some-other-plugin/some-other-plugin.php',
+			array(
+				'Name'    => 'Some Other Plugin',
+				'Version' => '1.0.0',
+				'Woo'     => '',
+			)
+		);
+
+		$this->assertSame( '', $output, 'Only WooCommerce.com hosted plugins should get the notice.' );
+	}
+
+	/**
+	 * @testdox Connect notice is skipped for users who cannot update plugins.
+	 */
+	public function test_connect_notice_is_skipped_without_the_update_plugins_capability(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$output = $this->render_connect_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertSame( '', $output, 'Core renders no update row for these users either.' );
+	}
+
+	/**
+	 * Plugin metadata for the WooCommerce.com hosted plugin used by these tests.
+	 *
+	 * @return array
+	 */
+	private function woo_plugin_data(): array {
+		return array(
+			'Name'    => 'Test Woo Extension',
+			'Version' => '1.0.0',
+			'Woo'     => '123:abcdef',
+		);
+	}
+
+	/**
+	 * Set up the plugins screen state that the after_plugin_row callback reads from.
+	 *
+	 * get_plugins() returns whatever is in the 'plugins' cache group, which lets these tests
+	 * stand in a plugin list without touching the filesystem.
+	 *
+	 * @return void
+	 */
+	private function prepare_plugins_screen(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin    = new WP_User( $admin_id );
+		$admin->add_cap( 'update_plugins' );
+		wp_set_current_user( $admin_id );
+
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$this->woo_plugin_file => $this->woo_plugin_data(),
+					'some-other-plugin/some-other-plugin.php' => array(
+						'Name'    => 'Some Other Plugin',
+						'Version' => '1.0.0',
+						'Woo'     => '',
+					),
+				),
+			),
+			'plugins'
+		);
+
+		$list_table = $this->getMockBuilder( stdClass::class )
+			->addMethods( array( 'get_column_count' ) )
+			->getMock();
+		$list_table->method( 'get_column_count' )->willReturn( 4 );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stands in for the plugins screen list table; cleanup_plugins_screen() unsets it.
+		$GLOBALS['wp_list_table'] = $list_table;
+	}
+
+	/**
+	 * Capture what the after_plugin_row callback prints for a plugin row.
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 * @return string
+	 */
+	private function render_connect_notice( string $plugin_file, array $plugin_data ): string {
+		ob_start();
+		WC_Helper_Updater::display_connect_notice_for_woo_plugins( $plugin_file, $plugin_data );
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Clean up the plugins screen state set up by prepare_plugins_screen().
+	 *
+	 * @return void
+	 */
+	private function cleanup_plugins_screen(): void {
+		wp_cache_delete( 'plugins', 'plugins' );
+		delete_site_transient( 'update_plugins' );
+		unset( $GLOBALS['wp_list_table'] );
+		wp_set_current_user( 0 );
 	}
 
 	/**

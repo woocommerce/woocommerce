@@ -41,6 +41,8 @@ class WC_Helper_Updater {
 		if ( WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_plugins_without_subscription' ), 11 );
+		} else {
+			add_action( 'after_plugin_row', array( __CLASS__, 'display_connect_notice_for_woo_plugins' ), 10, 2 );
 		}
 	}
 
@@ -229,6 +231,78 @@ class WC_Helper_Updater {
 				)
 			),
 			esc_url( $connect_page_url ),
+		);
+	}
+
+	/**
+	 * Runs on after_plugin_row, show a connect message on WooCommerce.com plugin rows that Core
+	 * renders no update notice for.
+	 *
+	 * Core only renders its update row -- and with it the message appended by
+	 * add_connect_woocom_plugin_message() -- when an update is pending, so an up-to-date plugin
+	 * gives an unconnected store no indication that it won't receive updates.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data An array of plugin metadata.
+	 *
+	 * @return void
+	 */
+	public static function display_connect_notice_for_woo_plugins( $plugin_file, $plugin_data ): void {
+		global $wp_list_table;
+
+		// Core skips its own update rows for these users, so there is nothing to connect for here either.
+		if ( is_null( $wp_list_table ) || ! current_user_can( 'update_plugins' ) ) {
+			return;
+		}
+
+		if ( empty( $plugin_data['Woo'] ) ) {
+			return;
+		}
+
+		$woo_plugins = WC_Helper::get_local_woo_plugins();
+		if ( ! isset( $woo_plugins[ $plugin_file ] ) ) {
+			return;
+		}
+
+		// Core renders an update row for this plugin, and add_connect_woocom_plugin_message() puts the prompt there.
+		$updates = get_site_transient( 'update_plugins' );
+		if ( isset( $updates->response[ $plugin_file ] ) ) {
+			return;
+		}
+
+		$connect_page_url = add_query_arg(
+			array(
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_row_connect',
+			),
+			admin_url( 'admin.php' )
+		);
+
+		$notice = sprintf(
+			/* translators: 1: URL of the WooCommerce.com connect page */
+			__( '<a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to get updates and streamlined support for this extension.', 'woocommerce' ),
+			esc_url( $connect_page_url )
+		);
+
+		printf(
+			'<tr class="plugin-update-tr %1$s" data-plugin="%2$s" data-plugin-row-type="woo-connect-notice"><td colspan="%3$s" class="plugin-update colspanchange"><div class="update-message notice inline notice-warning notice-alt"><p>%4$s</p></div></td></tr>',
+			esc_attr( is_plugin_active( $plugin_file ) ? 'active' : 'inactive' ),
+			esc_attr( $plugin_file ),
+			esc_attr( (string) $wp_list_table->get_column_count() ),
+			wp_kses(
+				$notice,
+				array(
+					'a' => array(
+						'href'  => array(),
+						'class' => array(),
+					),
+				)
+			)
 		);
 	}
 
