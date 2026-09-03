@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Strip disallowed attributes from product summary HTML before rendering.

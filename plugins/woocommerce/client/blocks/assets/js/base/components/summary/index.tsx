@@ -4,7 +4,7 @@
 import { RawHTML, useMemo } from '@wordpress/element';
 import { WordCountType } from '@woocommerce/block-settings';
 import { sanitizeHTML } from '@woocommerce/sanitize';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 
 /**
  * Internal dependencies
@@ -53,6 +53,24 @@ const allowedAttributes = [
 	'style',
 ];
 
+const allowedAttributeSet = new Set( allowedAttributes );
+
+// Re-check parsed attributes before RawHTML renders the summary, because malformed product HTML can survive string sanitization with event handlers attached.
+const enforceAllowedAttributes = ( html: string ) => {
+	const element = document.createElement( 'div' );
+
+	element.innerHTML = html;
+	element.querySelectorAll( '*' ).forEach( ( node ) => {
+		Array.from( node.attributes ).forEach( ( attribute ) => {
+			if ( ! allowedAttributeSet.has( attribute.name.toLowerCase() ) ) {
+				node.removeAttribute( attribute.name );
+			}
+		} );
+	} );
+
+	return element.innerHTML;
+};
+
 /**
  * Summary component.
  *
@@ -62,7 +80,6 @@ const allowedAttributes = [
  * @param {string}        props.countType One of words, characters_excluding_spaces, or characters_including_spaces.
  * @param {string}        props.className Class name for rendered component.
  * @param {CSSProperties} props.style     Style Object for rendered component.
- *
  */
 export const Summary = ( {
 	source,
@@ -70,17 +87,22 @@ export const Summary = ( {
 	countType = 'words',
 	className = '',
 	style = {},
-}: SummaryProps ): JSX.Element => {
+}: SummaryProps ): ReactElement => {
 	const summaryText = useMemo( () => {
 		return generateSummary( source, maxLength, countType );
 	}, [ source, maxLength, countType ] );
+	const sanitizedSummary = useMemo( () => {
+		return enforceAllowedAttributes(
+			sanitizeHTML( summaryText, {
+				tags: allowedTags,
+				attr: allowedAttributes,
+			} )
+		);
+	}, [ summaryText ] );
 
 	return (
 		<RawHTML style={ style } className={ className }>
-			{ sanitizeHTML( summaryText, {
-				tags: allowedTags,
-				attr: allowedAttributes,
-			} ) }
+			{ sanitizedSummary }
 		</RawHTML>
 	);
 };
