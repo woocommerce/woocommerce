@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Back in Stock duplicate signup detection missing existing guest signups when the same email later signs up as a logged-in user.
