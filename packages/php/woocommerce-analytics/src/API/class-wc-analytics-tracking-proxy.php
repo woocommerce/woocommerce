@@ -77,6 +77,11 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			$events = array( $events );
 		}
 
+		// Limit unauthenticated callers to a bounded number of pixel requests.
+		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
+			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
+		}
+
 		$results    = array();
 		$has_errors = false;
 
