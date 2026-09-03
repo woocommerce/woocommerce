@@ -578,8 +578,8 @@ final class WC_Cart_Session {
 			$cart = array();
 		}
 
-		$inital_cart_size = count( $cart );
-		$order_items      = $order->get_items();
+		$initial_cart_size = count( $cart );
+		$order_items       = $order->get_items();
 
 		foreach ( $order_items as $item ) {
 			$product_id     = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
@@ -663,7 +663,7 @@ final class WC_Cart_Session {
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
-		$num_items_added             = $num_items_in_cart - $inital_cart_size;
+		$num_items_added             = $num_items_in_cart - $initial_cart_size;
 
 		if ( $num_items_in_original_order > $num_items_added ) {
 			wc_add_notice(
