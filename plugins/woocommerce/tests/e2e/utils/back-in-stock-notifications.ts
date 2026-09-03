@@ -737,6 +737,39 @@ export function bisAdminListUrl( productId: number ): string {
 }
 
 /**
+ * Assert the product's notifications list holds no row for an email address.
+ *
+ * Opens its own admin context because the list is an admin-only screen, and
+ * closes it in `finally` so a failure doesn't leak a context into the run.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {number}  productId Product the list is filtered by.
+ * @param {string}  email     The signup email address that must not be listed.
+ */
+export async function expectNoSignupAsAdmin(
+	browser: Browser,
+	productId: number,
+	email: string
+): Promise< void > {
+	const adminContext = await browser.newContext( {
+		storageState: ADMIN_STATE_PATH,
+	} );
+
+	try {
+		const adminPage = await adminContext.newPage();
+		await adminPage.goto( bisAdminListUrl( productId ) );
+
+		await expect(
+			adminPage.getByRole( 'row' ).filter( {
+				has: adminPage.getByText( email, { exact: true } ),
+			} )
+		).toHaveCount( 0 );
+	} finally {
+		await adminContext.close();
+	}
+}
+
+/**
  * Generate a unique guest email address for a test so mail-log assertions don't collide.
  *
  * @param {string} prefix Short descriptor of the test.

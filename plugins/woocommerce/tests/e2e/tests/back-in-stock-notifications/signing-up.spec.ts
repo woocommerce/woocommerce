@@ -11,6 +11,7 @@ import {
 	bisNotice,
 	bisTargetProductInput,
 	expectEmailAsAdmin,
+	expectNoSignupAsAdmin,
 	findCustomerByEmail,
 	resetBISOptions,
 	setBISOptions,
@@ -316,6 +317,7 @@ test.describe(
 					page,
 					product,
 					restApi,
+					browser,
 					accountEmail: email,
 				} ) => {
 					await page.goto( product.permalink );
@@ -335,6 +337,7 @@ test.describe(
 					expect(
 						await findCustomerByEmail( restApi, email )
 					).toBeUndefined();
+					await expectNoSignupAsAdmin( browser, product.id, email );
 				} );
 
 				test( 'ticking consent signs up, registers an account and sends the welcome email', async ( {
