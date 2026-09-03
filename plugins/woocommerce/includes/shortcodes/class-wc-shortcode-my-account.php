@@ -33,6 +33,11 @@ class WC_Shortcode_My_Account {
 	private const PASSWORD_RESET_BRIDGE_TRANSIENT_PREFIX = 'wc_password_reset_bridge_';
 
 	/**
+	 * Character length of a password-reset bridge handle.
+	 */
+	private const PASSWORD_RESET_BRIDGE_HANDLE_LENGTH = 32;
+
+	/**
 	 * Get the shortcode content.
 	 *
 	 * @param array $atts Shortcode attributes.
@@ -270,51 +275,50 @@ class WC_Shortcode_My_Account {
 			 * Process reset key / login from email confirmation link
 			 */
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only UI selector; login and path are normalized downstream.
-			$has_reset_credentials = false;
-			$bridge_credentials    = false;
 
-			if ( ! empty( $_GET['reset-token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$has_reset_credentials = true;
-				$bridge_handle         = wc_clean( wp_unslash( $_GET['reset-token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$bridge_credentials    = is_string( $bridge_handle ) ? self::consume_password_reset_bridge_token( $bridge_handle ) : false;
-			}
+			/*
+			 * Three sources can carry reset credentials onto this page, in this order of precedence:
+			 * WordPress's own wp-resetpass-* cookie, a single-use bridge handle in the URL (used when
+			 * the cookie is SameSite=Strict and so does not survive the click from the email client),
+			 * and the signed token re-posted by the form when password validation rejects a submission.
+			 */
+			$reset_cookie      = isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) ? wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) : ''; // @codingStandardsIgnoreLine
+			$has_reset_cookie  = is_string( $reset_cookie ) && 0 < strpos( $reset_cookie, ':' );
+			$bridge_handle     = isset( $_GET['reset-token'] ) ? wc_clean( wp_unslash( $_GET['reset-token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$has_bridge_handle = is_string( $bridge_handle ) && '' !== $bridge_handle;
+			$form_args         = false;
 
-			if ( ! $bridge_credentials ) {
-				$bridge_credentials = self::get_posted_password_reset_bridge_credentials();
-			}
-			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
-				$has_reset_credentials = true;
-
-				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
+			if ( $has_reset_cookie ) {
+				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', $reset_cookie, 2 ) );
 				$userdata               = get_userdata( absint( $rp_id ) );
 				$rp_login               = $userdata ? $userdata->user_login : '';
-				$user                   = is_string( $rp_key ) ? check_password_reset_key( $rp_key, $rp_login ) : false;
 
 				// Reset key / login is correct, display reset password form with hidden key / login values.
-				if ( $user instanceof WP_User ) {
-					wc_get_template(
-						'myaccount/form-reset-password.php',
-						array(
-							'key'   => $rp_key,
-							'login' => $rp_login,
-						)
+				if ( is_string( $rp_key ) && check_password_reset_key( $rp_key, $rp_login ) instanceof WP_User ) {
+					$form_args = array(
+						'key'   => $rp_key,
+						'login' => $rp_login,
 					);
-					return;
 				}
 			}
 
-			if ( is_array( $bridge_credentials ) ) {
-				wc_get_template(
-					'myaccount/form-reset-password.php',
-					array(
-						'key'   => $bridge_credentials['token'],
-						'login' => $bridge_credentials['user']->user_login,
-					)
-				);
+			if ( $form_args ) {
+				// The cookie won, but a handle is single-use either way so it cannot be replayed.
+				self::discard_password_reset_bridge_token( $bridge_handle );
+			} else {
+				$form_args = self::consume_password_reset_bridge_token( $bridge_handle );
+
+				if ( ! $form_args ) {
+					$form_args = self::get_posted_password_reset_bridge_credentials();
+				}
+			}
+
+			if ( $form_args ) {
+				wc_get_template( 'myaccount/form-reset-password.php', $form_args );
 				return;
 			}
 
-			if ( $has_reset_credentials ) {
+			if ( $has_reset_cookie || $has_bridge_handle ) {
 				self::add_password_reset_key_error_notice();
 			}
 		}
@@ -404,8 +408,13 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Retrieves a user row based on password reset key and login.
 	 *
+	 * Since 11.2.0 the key may also be a signed WooCommerce reset-form token, which is what the
+	 * reset form carries when the WordPress reset cookie did not survive the click from the email
+	 * client. Both formats are accepted so that anything reading the key handed to
+	 * `myaccount/form-reset-password.php` keeps validating through this method.
+	 *
 	 * @uses $wpdb WordPress Database object.
-	 * @param string $key   Hash to validate sending user's password.
+	 * @param string $key   WordPress password reset key, or a signed WooCommerce reset-form token.
 	 * @param string $login The user login.
 	 * @return WP_User|bool User's database row on success, false for invalid keys
 	 */
@@ -436,7 +445,9 @@ class WC_Shortcode_My_Account {
 	 * @since 11.2.0
 	 * @internal
 	 *
-	 * @param WP_User $user User with an active WordPress password-reset key.
+	 * @param WP_User|WP_Error|null $user User with an active WordPress password-reset key. Anything
+	 *                                    else yields an empty handle, so callers can pass the raw
+	 *                                    result of check_password_reset_key().
 	 * @return string Random bridge handle, or an empty string when no reset state exists.
 	 */
 	public static function create_password_reset_bridge_token( $user ) {
@@ -444,27 +455,27 @@ class WC_Shortcode_My_Account {
 			return '';
 		}
 
-		$expiration = min( time() + self::PASSWORD_RESET_BRIDGE_EXPIRATION, self::get_password_reset_state_expiration( $user ) );
-		if ( $expiration <= time() ) {
+		$now        = time();
+		$expiration = min( $now + self::PASSWORD_RESET_BRIDGE_EXPIRATION, self::get_password_reset_state_expiration( $user ) );
+		if ( $expiration <= $now ) {
 			return '';
 		}
 
-		$expiration_duration = max( 1, $expiration - time() );
-		$payload             = array(
+		$payload = array(
 			'user_id'         => $user->ID,
 			'expiration'      => $expiration,
 			'state_signature' => self::get_password_reset_state_signature( $user ),
 		);
 
 		for ( $attempt = 0; $attempt < 3; $attempt++ ) {
-			$handle         = wp_generate_password( 32, false, false );
+			$handle         = wp_generate_password( self::PASSWORD_RESET_BRIDGE_HANDLE_LENGTH, false, false );
 			$transient_name = self::get_password_reset_bridge_transient_name( $handle );
 
 			if ( false !== get_transient( $transient_name ) ) {
 				continue;
 			}
 
-			if ( set_transient( $transient_name, $payload, $expiration_duration ) ) {
+			if ( set_transient( $transient_name, $payload, $expiration - $now ) ) {
 				return $handle;
 			}
 		}
@@ -473,13 +484,38 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
+	 * Check whether a value has the shape of a password-reset bridge handle.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param mixed $handle Candidate handle.
+	 * @return bool Whether the value is a well-formed handle.
+	 */
+	public static function is_password_reset_bridge_handle( $handle ) {
+		return is_string( $handle )
+			&& 1 === preg_match( '/^[A-Za-z0-9]{' . self::PASSWORD_RESET_BRIDGE_HANDLE_LENGTH . '}$/D', $handle );
+	}
+
+	/**
+	 * Delete a bridge handle without exchanging it, so it cannot be replayed.
+	 *
+	 * @param mixed $handle URL bridge handle.
+	 */
+	private static function discard_password_reset_bridge_token( $handle ): void {
+		if ( self::is_password_reset_bridge_handle( $handle ) ) {
+			delete_transient( self::get_password_reset_bridge_transient_name( $handle ) );
+		}
+	}
+
+	/**
 	 * Consume a URL bridge handle and exchange it for signed form credentials.
 	 *
-	 * @param string $handle URL bridge handle.
-	 * @return array{user: WP_User, token: string}|false Form credentials on success, false otherwise.
+	 * @param mixed $handle URL bridge handle.
+	 * @return array{key: string, login: string}|false Form credentials on success, false otherwise.
 	 */
 	private static function consume_password_reset_bridge_token( $handle ) {
-		if ( ! preg_match( '/^[A-Za-z0-9]{32}$/D', $handle ) ) {
+		if ( ! self::is_password_reset_bridge_handle( $handle ) ) {
 			return false;
 		}
 
@@ -495,11 +531,40 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$user_id    = absint( $payload['user_id'] );
 		$expiration = absint( $payload['expiration'] );
-		$user       = get_userdata( $user_id );
+		$user       = self::get_eligible_password_reset_user( absint( $payload['user_id'] ), $expiration );
 
-		if ( ! $user || empty( $user->user_activation_key ) || $expiration <= time() || self::get_password_reset_state_expiration( $user ) <= time() ) {
+		if ( ! $user ) {
+			return false;
+		}
+
+		if ( ! hash_equals( self::get_password_reset_state_signature( $user ), $payload['state_signature'] ) ) {
+			return false;
+		}
+
+		return array(
+			'key'   => self::create_password_reset_form_token( $user, $expiration ),
+			'login' => $user->user_login,
+		);
+	}
+
+	/**
+	 * Resolve the user a bridge claim refers to, while the reset state and the viewer still allow it.
+	 *
+	 * @param int    $user_id    Claimed user ID.
+	 * @param int    $expiration Claimed Unix expiry timestamp.
+	 * @param string $login      Optional login the claim must match.
+	 * @return WP_User|false User on success, false otherwise.
+	 */
+	private static function get_eligible_password_reset_user( $user_id, $expiration, $login = '' ) {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user || empty( $user->user_activation_key ) || ( $login && $login !== $user->user_login ) ) {
+			return false;
+		}
+
+		$now = time();
+		if ( $expiration <= $now || self::get_password_reset_state_expiration( $user ) <= $now ) {
 			return false;
 		}
 
@@ -508,43 +573,32 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$expected_state_signature = self::get_password_reset_state_signature( $user );
-		if ( ! hash_equals( $expected_state_signature, $payload['state_signature'] ) ) {
-			return false;
-		}
-
-		return array(
-			'user'  => $user,
-			'token' => self::create_password_reset_form_token( $user, $expiration ),
-		);
+		return $user;
 	}
 
 	/**
 	 * Recover validated form credentials after password validation leaves the POST in place.
 	 *
-	 * @return array{user: WP_User, token: string}|false Form credentials on success, false otherwise.
+	 * @return array{key: string, login: string}|false Form credentials on success, false otherwise.
 	 */
 	private static function get_posted_password_reset_bridge_credentials() {
-		$nonce_value = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-		$nonce_value = isset( $_POST['woocommerce-reset-password-nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['woocommerce-reset-password-nonce'] ) ) : $nonce_value;
+		$nonce_value = wc_get_var( $_POST['woocommerce-reset-password-nonce'], wc_get_var( $_POST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
 		if ( ! wp_verify_nonce( $nonce_value, 'reset_password' ) || ! isset( $_POST['reset_key'], $_POST['reset_login'] ) ) {
 			return false;
 		}
 
 		$token = wc_clean( wp_unslash( $_POST['reset_key'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$login = sanitize_user( wp_unslash( $_POST['reset_login'] ) );
-		if ( ! is_string( $token ) ) {
-			return false;
-		}
+		$user  = is_string( $token ) ? self::get_password_reset_bridge_user( $token, $login ) : false;
 
-		$user = self::get_password_reset_bridge_user( $token, $login );
 		if ( ! $user ) {
 			return false;
 		}
 
 		return array(
-			'user'  => $user,
-			'token' => $token,
+			'key'   => $token,
+			'login' => $user->user_login,
 		);
 	}
 
@@ -580,22 +634,12 @@ class WC_Shortcode_My_Account {
 		$nonce      = $matches[3];
 		$signature  = $matches[4];
 
-		$user = get_userdata( $user_id );
-		if ( ! $user || empty( $user->user_activation_key ) || ( $login && $login !== $user->user_login ) ) {
+		$user = self::get_eligible_password_reset_user( $user_id, $expiration, $login );
+		if ( ! $user ) {
 			return false;
 		}
 
-		if ( $expiration <= time() || self::get_password_reset_state_expiration( $user ) <= time() ) {
-			return false;
-		}
-
-		$logged_in_user_id = get_current_user_id();
-		if ( $logged_in_user_id && $logged_in_user_id !== $user_id ) {
-			return false;
-		}
-
-		$expected_signature = self::get_password_reset_bridge_signature( $user, $expiration, $nonce );
-		if ( ! hash_equals( $expected_signature, $signature ) ) {
+		if ( ! hash_equals( self::get_password_reset_bridge_signature( $user, $expiration, $nonce ), $signature ) ) {
 			return false;
 		}
 
@@ -611,9 +655,17 @@ class WC_Shortcode_My_Account {
 	 * @return string HMAC signature.
 	 */
 	private static function get_password_reset_bridge_signature( $user, $expiration, $nonce ) {
-		$claims = implode( '|', array( self::PASSWORD_RESET_FORM_TOKEN_VERSION, $user->ID, $expiration, $nonce, $user->user_activation_key ) );
+		return self::sign_password_reset_claims( array( self::PASSWORD_RESET_FORM_TOKEN_VERSION, $user->ID, $expiration, $nonce, $user->user_activation_key ) );
+	}
 
-		return hash_hmac( 'sha256', $claims, wp_salt( 'nonce' ) );
+	/**
+	 * Sign password-reset bridge claims with the site's nonce salt.
+	 *
+	 * @param array<int, int|string> $claims Claims to sign.
+	 * @return string HMAC signature.
+	 */
+	private static function sign_password_reset_claims( $claims ) {
+		return hash_hmac( 'sha256', implode( '|', $claims ), wp_salt( 'nonce' ) );
 	}
 
 	/**
@@ -623,9 +675,7 @@ class WC_Shortcode_My_Account {
 	 * @return string Transient name.
 	 */
 	private static function get_password_reset_bridge_transient_name( $handle ) {
-		$digest = hash_hmac( 'sha256', $handle, wp_salt( 'nonce' ) );
-
-		return self::PASSWORD_RESET_BRIDGE_TRANSIENT_PREFIX . $digest;
+		return self::PASSWORD_RESET_BRIDGE_TRANSIENT_PREFIX . self::sign_password_reset_claims( array( $handle ) );
 	}
 
 	/**
@@ -635,9 +685,7 @@ class WC_Shortcode_My_Account {
 	 * @return string Reset-state signature.
 	 */
 	private static function get_password_reset_state_signature( $user ) {
-		$state = implode( '|', array( $user->ID, $user->user_activation_key ) );
-
-		return hash_hmac( 'sha256', $state, wp_salt( 'nonce' ) );
+		return self::sign_password_reset_claims( array( $user->ID, $user->user_activation_key ) );
 	}
 
 	/**

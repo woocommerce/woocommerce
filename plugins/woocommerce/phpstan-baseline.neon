@@ -31194,7 +31194,7 @@ parameters:
 		-
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
-			count: 4
+			count: 3
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-
@@ -31254,12 +31254,6 @@ parameters:
 		-
 			message: '#^Method WC_Shortcode_My_Account\:\:view_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
-			message: '#^Parameter \#1 \$key of static method WC_Shortcode_My_Account\:\:check_password_reset_key\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 

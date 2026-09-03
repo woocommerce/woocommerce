@@ -39,32 +39,35 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->user = new WP_User( $user_id );
-		$reset_key  = get_password_reset_key( $this->user );
+		$user      = new WP_User( $user_id );
+		$reset_key = get_password_reset_key( $user );
 		$this->assertIsString( $reset_key );
 		$this->reset_key = $reset_key;
-		$this->user      = new WP_User( $user_id );
+		// Refetched so user_activation_key, written by get_password_reset_key(), is populated.
+		$this->user = new WP_User( $user_id );
 
-		wp_set_current_user( 0 );
-		wc_clear_notices();
-		$_GET     = array();
-		$_POST    = array();
-		$_REQUEST = array();
-		$_COOKIE  = array();
+		$this->reset_request_state();
 	}
 
 	/**
 	 * Clean up request state.
 	 */
 	public function tearDown(): void {
+		$this->reset_request_state();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Return the request to a signed-out state with no reset credentials or notices.
+	 */
+	private function reset_request_state(): void {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
 		$_GET     = array();
 		$_POST    = array();
 		$_REQUEST = array();
 		$_COOKIE  = array();
-
-		parent::tearDown();
 	}
 
 	/**
@@ -162,21 +165,38 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tampered, expired, and cross-user bridge tokens fail closed.
+	 * @testdox A tampered signature fails closed.
 	 */
-	public function test_invalid_bridge_tokens_fail_closed(): void {
-		$handle         = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
-		$template       = $this->render_bridge_handle( $handle );
-		$token          = $template['args']['key'];
+	public function test_tampered_bridge_token_fails_closed(): void {
+		$token          = $this->create_exchanged_form_token();
 		$tampered_token = substr( $token, 0, -1 ) . ( 'a' === substr( $token, -1 ) ? 'b' : 'a' );
-		$expired_token  = $this->create_signed_token( $this->user, time() - 1 );
 
 		$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $tampered_token, $this->user->user_login ) );
-		wc_clear_notices();
+	}
+
+	/**
+	 * @testdox An expired claim fails closed.
+	 */
+	public function test_expired_bridge_token_fails_closed(): void {
+		$expired_token = $this->create_signed_token( $this->user, time() - 1 );
+
 		$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $expired_token, $this->user->user_login ) );
-		wc_clear_notices();
+	}
+
+	/**
+	 * @testdox A token bound to a different login fails closed.
+	 */
+	public function test_bridge_token_bound_to_other_login_fails_closed(): void {
+		$token = $this->create_exchanged_form_token();
+
 		$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $token, 'another-customer' ) );
-		wc_clear_notices();
+	}
+
+	/**
+	 * @testdox A shortened WordPress reset policy fails an otherwise valid token closed.
+	 */
+	public function test_shortened_reset_policy_fails_bridge_token_closed(): void {
+		$token = $this->create_exchanged_form_token();
 
 		add_filter( 'password_reset_expiration', '__return_zero' );
 		try {
@@ -402,36 +422,31 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	 * @testdox The legacy reset link redirects with a bridge and without its original credentials.
 	 */
 	public function test_legacy_reset_link_redirects_with_bridge(): void {
-		add_filter( 'woocommerce_is_account_page', '__return_true' );
-		try {
-			$identifiers = array(
-				'id'    => (string) $this->user->ID,
-				'login' => $this->user->user_login,
+		$identifiers = array(
+			'id'    => (string) $this->user->ID,
+			'login' => $this->user->user_login,
+		);
+
+		foreach ( $identifiers as $name => $identifier ) {
+			$_GET = array(
+				'key'    => $this->reset_key,
+				$name    => $identifier,
+				'action' => 'rp',
 			);
 
-			foreach ( $identifiers as $name => $identifier ) {
-				$_GET = array(
-					'key'    => $this->reset_key,
-					$name    => $identifier,
-					'action' => 'rp',
-				);
+			$location = $this->intercept_reset_link_redirect();
+			$query    = wp_parse_url( $location, PHP_URL_QUERY );
+			parse_str( is_string( $query ) ? $query : '', $args );
 
-				$location = $this->intercept_reset_link_redirect();
-				$query    = wp_parse_url( $location, PHP_URL_QUERY );
-				parse_str( is_string( $query ) ? $query : '', $args );
-
-				$this->assertSame( 'true', $args['show-reset-form'] );
-				$this->assertSame( 'rp', $args['action'] );
-				$this->assertArrayHasKey( 'reset-token', $args );
-				$this->assertArrayNotHasKey( 'key', $args );
-				$this->assertArrayNotHasKey( 'id', $args );
-				$this->assertArrayNotHasKey( 'login', $args );
-				$this->assertMatchesRegularExpression( '/^[A-Za-z0-9]{32}$/', $args['reset-token'] );
-				$template = $this->render_bridge_handle( $args['reset-token'] );
-				$this->assertSame( $this->user->ID, WC_Shortcode_My_Account::check_password_reset_key( $template['args']['key'], $this->user->user_login )->ID );
-			}
-		} finally {
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+			$this->assertSame( 'true', $args['show-reset-form'] );
+			$this->assertSame( 'rp', $args['action'] );
+			$this->assertArrayHasKey( 'reset-token', $args );
+			$this->assertArrayNotHasKey( 'key', $args );
+			$this->assertArrayNotHasKey( 'id', $args );
+			$this->assertArrayNotHasKey( 'login', $args );
+			$this->assertMatchesRegularExpression( '/^[A-Za-z0-9]{32}$/', $args['reset-token'] );
+			$template = $this->render_bridge_handle( $args['reset-token'] );
+			$this->assertSame( $this->user->ID, WC_Shortcode_My_Account::check_password_reset_key( $template['args']['key'], $this->user->user_login )->ID );
 		}
 	}
 
@@ -444,14 +459,8 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 			'id'  => (string) $this->user->ID,
 		);
 
-		add_filter( 'woocommerce_is_account_page', '__return_true' );
-		try {
-			$location = $this->intercept_reset_link_redirect();
-		} finally {
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
-		}
-
-		$query = wp_parse_url( $location, PHP_URL_QUERY );
+		$location = $this->intercept_reset_link_redirect();
+		$query    = wp_parse_url( $location, PHP_URL_QUERY );
 		parse_str( is_string( $query ) ? $query : '', $args );
 
 		$this->assertArrayNotHasKey( 'reset-token', $args );
@@ -474,13 +483,11 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 			$redirected = true;
 		};
 
-		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		add_filter( 'wp_redirect', $capture );
 		try {
-			WC_Form_Handler::redirect_reset_password_link();
+			$this->on_account_page( array( WC_Form_Handler::class, 'redirect_reset_password_link' ) );
 		} finally {
 			remove_filter( 'wp_redirect', $capture );
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
 
 		$this->assertFalse( $redirected );
@@ -503,12 +510,9 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $original_headers, WC_Form_Handler::set_reset_password_bridge_headers( $original_headers ) );
 
-		add_filter( 'woocommerce_is_account_page', '__return_true' );
-		try {
-			$headers = WC_Form_Handler::set_reset_password_bridge_headers( $original_headers );
-		} finally {
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
-		}
+		$headers = $this->on_account_page(
+			static fn() => WC_Form_Handler::set_reset_password_bridge_headers( $original_headers )
+		);
 
 		$this->assertStringContainsString( 'no-store', $headers['Cache-Control'] );
 		$this->assertStringContainsString( 'private', $headers['Cache-Control'] );
@@ -528,12 +532,9 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 			'reset-token'     => $handle,
 		);
 
-		add_filter( 'woocommerce_is_account_page', '__return_true' );
-		try {
-			$headers = WC_Form_Handler::set_reset_password_bridge_headers( $original_headers );
-		} finally {
-			remove_filter( 'woocommerce_is_account_page', '__return_true' );
-		}
+		$headers = $this->on_account_page(
+			static fn() => WC_Form_Handler::set_reset_password_bridge_headers( $original_headers )
+		);
 
 		$this->assertSame( $original_headers, $headers );
 	}
@@ -573,12 +574,42 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		};
 
 		add_action( 'woocommerce_before_template_part', $capture, 10, 4 );
-		ob_start();
-		WC_Shortcode_My_Account::lost_password();
-		ob_end_clean();
-		remove_action( 'woocommerce_before_template_part', $capture, 10 );
+		try {
+			ob_start();
+			WC_Shortcode_My_Account::lost_password();
+			ob_end_clean();
+		} finally {
+			remove_action( 'woocommerce_before_template_part', $capture, 10 );
+		}
 
 		return $rendered;
+	}
+
+	/**
+	 * Run a callback with WooCommerce treating the request as an account page.
+	 *
+	 * @param callable $callback Callback to run.
+	 * @return mixed The callback's return value.
+	 */
+	private function on_account_page( callable $callback ) {
+		add_filter( 'woocommerce_is_account_page', '__return_true' );
+		try {
+			return $callback();
+		} finally {
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
+		}
+	}
+
+	/**
+	 * Mint a bridge handle and exchange it for the signed form token the reset form carries.
+	 *
+	 * @return string Signed form token.
+	 */
+	private function create_exchanged_form_token(): string {
+		$handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$template = $this->render_bridge_handle( $handle );
+
+		return $template['args']['key'];
 	}
 
 	/**
@@ -618,6 +649,7 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	 * @return string Redirect location.
 	 */
 	private function intercept_reset_link_redirect(): string {
+		add_filter( 'woocommerce_is_account_page', '__return_true' );
 		$location = '';
 		$abort    = static function ( string $redirect ) use ( &$location ): void {
 			$location = $redirect;
@@ -639,6 +671,7 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		} finally {
 			restore_error_handler();
 			remove_filter( 'wp_redirect', $abort );
+			remove_filter( 'woocommerce_is_account_page', '__return_true' );
 		}
 
 		return $location;
