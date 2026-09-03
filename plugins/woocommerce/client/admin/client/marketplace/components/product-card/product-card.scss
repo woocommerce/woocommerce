@@ -96,6 +96,9 @@
 			flex-wrap: wrap;
 			justify-content: space-between;
 			align-items: center;
+			/* Pack rows to the bottom so the price row sits at the same height
+			   whether or not the badge row is present above it. */
+			align-content: flex-end;
 			row-gap: $grid-unit-10;
 			min-height: 36px;
 		}
