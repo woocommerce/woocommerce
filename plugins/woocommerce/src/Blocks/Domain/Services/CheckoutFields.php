@@ -1484,7 +1484,94 @@ class CheckoutFields {
 			$value   = isset( $options[ $value ] ) ? $options[ $value ] : $value;
 		}
 
+		if ( 'text' === $field['type'] && ! empty( $field['mask'] ) && is_scalar( $value ) ) {
+			$value = $this->apply_mask_to_value( (string) $value, $field['mask'] );
+		}
+
 		return $value;
+	}
+
+	/**
+	 * Formats a value against a mask, the same way the @woocommerce/input-mask JS package does.
+	 *
+	 * Returns the value formatted with the mask's literal characters when it fits the mask.
+	 * Returns the value unchanged when it does not fit.
+	 *
+	 * @param string $value Raw value to format.
+	 * @param string $mask  Mask pattern. `#` matches a digit, `@` matches a letter, `*` matches
+	 *                      a letter or digit, `!` escapes the next character as a literal, and
+	 *                      any other character is a literal.
+	 * @return string
+	 */
+	private function apply_mask_to_value( string $value, string $mask ): string {
+		$slot_patterns = array(
+			'#' => '/^[0-9]$/u',
+			'@' => '/^\p{L}$/u',
+			'*' => '/^[\p{L}0-9]$/u',
+		);
+
+		$mask_chars = preg_split( '//u', $mask, -1, PREG_SPLIT_NO_EMPTY );
+		$mask_chars = false === $mask_chars ? array() : $mask_chars;
+		$tokens     = array();
+
+		for ( $i = 0, $count = count( $mask_chars ); $i < $count; $i++ ) {
+			if ( '!' === $mask_chars[ $i ] && $i + 1 < $count ) {
+				$tokens[] = array(
+					'type'  => 'literal',
+					'value' => $mask_chars[ ++$i ],
+				);
+			} elseif ( isset( $slot_patterns[ $mask_chars[ $i ] ] ) ) {
+				$tokens[] = array(
+					'type'  => 'test',
+					'value' => $slot_patterns[ $mask_chars[ $i ] ],
+				);
+			} else {
+				$tokens[] = array(
+					'type'  => 'literal',
+					'value' => $mask_chars[ $i ],
+				);
+			}
+		}
+
+		$typed = preg_split( '//u', $value, -1, PREG_SPLIT_NO_EMPTY );
+		$typed = false === $typed ? array() : $typed;
+
+		$typed_length = count( $typed );
+		$display      = '';
+		$pending      = '';
+		$t            = 0;
+
+		foreach ( $tokens as $token ) {
+			if ( 'literal' === $token['type'] ) {
+				if ( isset( $typed[ $t ] ) && $typed[ $t ] === $token['value'] ) {
+					$display .= $pending . $token['value'];
+					$pending  = '';
+					++$t;
+				} else {
+					$pending .= $token['value'];
+				}
+				continue;
+			}
+
+			if ( $t >= $typed_length ) {
+				$pending = '';
+				break;
+			}
+
+			if ( ! preg_match( $token['value'], $typed[ $t ] ) ) {
+				return $value;
+			}
+
+			$display .= $pending . $typed[ $t ];
+			$pending  = '';
+			++$t;
+		}
+
+		if ( $t < $typed_length ) {
+			return $value;
+		}
+
+		return $display . $pending;
 	}
 
 	/**
