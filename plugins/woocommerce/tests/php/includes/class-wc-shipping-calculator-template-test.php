@@ -68,8 +68,12 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
-		$this->assertMatchesRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+class="[^"]*country_to_state--single[^"]*"/', $output );
-		$this->assertDoesNotMatchRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+disabled=/', $output );
+		$select = new WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $select->next_tag( array( 'tag_name' => 'select' ) ) );
+		$this->assertSame( 'calc_shipping_country', $select->get_attribute( 'name' ) );
+		$this->assertTrue( $select->has_class( 'country_to_state--single' ) );
+		$this->assertFalse( $select->has_class( 'country_select' ) );
+		$this->assertNull( $select->get_attribute( 'disabled' ) );
 		$this->assertStringContainsString( '<option value="GR" selected=\'selected\'>Greece</option>', $output );
 		$this->assertStringNotContainsString( '<input type="hidden" name="calc_shipping_country"', $output );
 		$this->assertStringNotContainsString( 'Select a country / region', $output );
@@ -109,7 +113,12 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
-		$this->assertDoesNotMatchRegularExpression( '/<select[^>]+name="calc_shipping_country"[^>]+disabled=/', $output );
+		$select = new WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $select->next_tag( array( 'tag_name' => 'select' ) ) );
+		$this->assertSame( 'calc_shipping_country', $select->get_attribute( 'name' ) );
+		$this->assertTrue( $select->has_class( 'country_select' ) );
+		$this->assertFalse( $select->has_class( 'country_to_state--single' ) );
+		$this->assertNull( $select->get_attribute( 'disabled' ) );
 		$this->assertStringContainsString( 'Select a country / region', $output );
 		$this->assertStringNotContainsString( '<input type="hidden" name="calc_shipping_country"', $output );
 	}
