@@ -757,6 +757,29 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A valid action POST that lands on any page other than the stock notifications
+	 * endpoint is dropped, so the handler never widens to the whole front end.
+	 */
+	public function test_action_ignored_off_the_endpoint(): void {
+		global $wp;
+
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
+		unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
+
+		$this->make_endpoint()->maybe_handle_action();
+
+		$this->assertNull( $this->redirect_location );
+		$this->assertEmpty( \wc_get_notices() );
+
+		$updated = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
 	 * An unknown action value is dropped before any nonce or database work.
 	 */
 	public function test_unknown_action_is_ignored(): void {
