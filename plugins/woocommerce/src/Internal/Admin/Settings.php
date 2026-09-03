@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -105,8 +106,8 @@ class Settings {
 				'precision'         => wc_get_price_decimals(),
 				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $code ) ),
 				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-				'decimalSeparator'  => wc_get_price_decimal_separator(),
-				'thousandSeparator' => wc_get_price_thousand_separator(),
+				'decimalSeparator'  => PriceSeparators::get_decimal(),
+				'thousandSeparator' => PriceSeparators::get_thousand(),
 				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
 			)
 		);
@@ -352,6 +353,7 @@ class Settings {
 			'option_key'  => 'woocommerce_date_type',
 			'label'       => __( 'Date Type', 'woocommerce' ),
 			'description' => __( 'Database date field considered for Revenue and Orders reports', 'woocommerce' ),
+			'default'     => 'date_paid',
 			'type'        => 'select',
 			'options'     => array(
 				'date_created'   => 'date_created',
@@ -429,13 +431,17 @@ class Settings {
 			return $settings;
 		}
 
-		$schema = $context->get_schema();
-		if ( ! is_array( $schema ) ) {
+		try {
+			$schema = $context->get_schema();
+			if ( ! is_array( $schema ) ) {
+				return $settings;
+			}
+
+			$page_id     = $context->get_page_id();
+			$section_key = $context->get_current_section_key();
+		} catch ( \Throwable $e ) {
 			return $settings;
 		}
-
-		$page_id     = $context->get_page_id();
-		$section_key = $context->get_current_section_key();
 
 		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
 			$settings['settingsUI'] = array();
@@ -444,6 +450,8 @@ class Settings {
 			$settings['settingsUI'][ $page_id ] = array();
 		}
 
+		// PHP converts numeric-string array keys to integers. Keep groups as a JSON object for the client.
+		$schema['groups']                                   = (object) $schema['groups'];
 		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
 
 		return $settings;

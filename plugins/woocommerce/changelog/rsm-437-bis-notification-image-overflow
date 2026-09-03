@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Constrain the product image on the stock notification edit screen so it no longer overflows its column and overlaps the Update button.

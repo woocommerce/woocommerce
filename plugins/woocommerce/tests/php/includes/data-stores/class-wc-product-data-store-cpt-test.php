@@ -76,6 +76,257 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a simple product with the given name and status, for OR-term search tests.
+	 *
+	 * @param string $name   Product name.
+	 * @param string $status Post status.
+	 * @return WC_Product_Simple The saved product.
+	 */
+	private function create_search_test_product( string $name, string $status = 'publish' ): WC_Product_Simple {
+		$product = new WC_Product_Simple();
+		$product->set_name( $name );
+		$product->set_status( $status );
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the exclude list to every OR group.
+	 */
+	public function test_search_products_or_term_applies_exclude(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true, null, null, array( $alpha->get_id() ) );
+
+		$this->assertNotContains( $alpha->get_id(), $results, 'Excluded product matched by the first OR group should not be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Non-excluded product should still be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the include list to every OR group.
+	 */
+	public function test_search_products_or_term_applies_include(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true, null, array( $beta->get_id() ) );
+
+		$this->assertNotContains( $alpha->get_id(), $results, 'Product outside the include list matched by the first OR group should not be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Included product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the status filter to every OR group.
+	 */
+	public function test_search_products_or_term_applies_status_filter(): void {
+		$draft = $this->create_search_test_product( 'Searchable gamma product', 'draft' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable gamma product or Searchable beta product', '', false, false );
+
+		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the first OR group should not be returned when searching published only' );
+		$this->assertContains( $beta->get_id(), $results, 'Published product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the product type filter to every OR group.
+	 */
+	public function test_search_products_or_term_applies_type_filter(): void {
+		$plain        = $this->create_search_test_product( 'Searchable alpha product' );
+		$downloadable = $this->create_search_test_product( 'Searchable beta product' );
+		$downloadable->set_downloadable( true );
+		$downloadable->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', 'downloadable', false, true );
+
+		$this->assertNotContains( $plain->get_id(), $results, 'Non-downloadable product matched by the first OR group should not be returned for a downloadable search' );
+		$this->assertContains( $downloadable->get_id(), $results, 'Downloadable product should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term including variations should apply the type and status filters to every OR group.
+	 */
+	public function test_search_products_or_term_applies_filters_with_variations(): void {
+		$plain = $this->create_search_test_product( 'Searchable alpha product' );
+
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Searchable beta product' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_downloadable( true );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', 'downloadable', true, false );
+
+		$this->assertNotContains( $plain->get_id(), $results, 'Non-downloadable product matched by the first OR group should not be returned for a downloadable variations search' );
+		$this->assertContains( $variation->get_id(), $results, 'Downloadable variation matched by the second OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term should apply the post type constraint to every OR group.
+	 */
+	public function test_search_products_or_term_applies_post_type(): void {
+		$alpha   = $this->create_search_test_product( 'Searchable alpha product' );
+		$page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Searchable beta product page',
+			)
+		);
+
+		$this->assertGreaterThan( 0, $page_id, 'Page fixture should have been created' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product page', '', false, true );
+
+		$this->assertNotContains( $page_id, $results, 'A page matched by the last OR group should not be returned from a product search' );
+		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Search with a three-group OR term should apply the status filter to the middle group.
+	 */
+	public function test_search_products_or_term_applies_status_filter_to_middle_group(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$draft = $this->create_search_test_product( 'Searchable gamma product', 'draft' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable gamma product or Searchable beta product', '', false, false );
+
+		$this->assertNotContains( $draft->get_id(), $results, 'Draft product matched by the middle OR group should not be returned when searching published only' );
+		$this->assertContains( $alpha->get_id(), $results, 'Published product matched by the first OR group should be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Published product matched by the last OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Search with an OR term without extra filters should return matches from every OR group.
+	 */
+	public function test_search_products_or_term_returns_all_groups(): void {
+		$alpha = $this->create_search_test_product( 'Searchable alpha product' );
+		$beta  = $this->create_search_test_product( 'Searchable beta product' );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$results    = $data_store->search_products( 'Searchable alpha product or Searchable beta product', '', false, true );
+
+		$this->assertContains( $alpha->get_id(), $results, 'Product matched by the first OR group should be returned' );
+		$this->assertContains( $beta->get_id(), $results, 'Product matched by the second OR group should be returned' );
+	}
+
+	/**
+	 * @testdox Excluded variable products should not be re-added to search results by their matching variations.
+	 */
+	public function test_search_products_excludes_variable_products_with_matching_variations(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Excludable variable product' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true );
+		$this->assertContains( $parent->get_id(), $results );
+		$this->assertContains( $variation->get_id(), $results );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added through its matching variations' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding a parent must not exclude its variations' );
+
+		$results = $data_store->search_products( 'Excludable variable', '', true, true, null, null, array( $variation->get_id() ) );
+		$this->assertNotContains( $variation->get_id(), $results, 'An excluded variation must not be returned' );
+		$this->assertContains( $parent->get_id(), $results, 'Excluding a variation must not exclude its parent' );
+	}
+
+	/**
+	 * @testdox Excluded products should not be re-added to search results when the search term is their numeric ID.
+	 */
+	public function test_search_products_excludes_numeric_term_matches() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Numeric term widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true );
+		$this->assertContains( $product->get_id(), $results );
+
+		$results = $data_store->search_products( (string) $product->get_id(), '', false, true, null, null, array( $product->get_id() ) );
+		$this->assertNotContains( $product->get_id(), $results, 'An excluded product must not be re-added by the numeric term match' );
+	}
+
+	/**
+	 * A numeric term appends both the searched ID and its parent, so the parent needs its own
+	 * exclusion check. Searching a variation by ID is the case that exercises it, since a
+	 * top-level product has no parent to re-add.
+	 *
+	 * @testdox Excluded parents should not be re-added when the search term is a variation's numeric ID.
+	 */
+	public function test_search_products_excludes_parent_for_numeric_variation_term() {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Numeric parent widget' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true );
+		$this->assertContains( $variation->get_id(), $results );
+		$this->assertContains( $parent->get_id(), $results, 'A numeric variation term should surface its parent' );
+
+		$results = $data_store->search_products( (string) $variation->get_id(), '', true, true, null, null, array( $parent->get_id() ) );
+		$this->assertNotContains( $parent->get_id(), $results, 'An excluded parent must not be re-added by a numeric variation term' );
+		$this->assertContains( $variation->get_id(), $results, 'Excluding the parent must not drop the searched variation' );
+	}
+
+	/**
+	 * absint() maps any non-numeric exclude value to 0, and 0 is the post_parent every top-level
+	 * product carries. Zeros are filtered out of the exclusion list so that such input stays the
+	 * no-op it has always been, rather than matching every top-level row.
+	 *
+	 * @testdox Exclude values that normalise to zero should leave search results untouched.
+	 */
+	public function test_search_products_ignores_zero_exclude_values() {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Zero exclude widget' );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$baseline = $data_store->search_products( 'Zero exclude', '', true, true );
+		$this->assertContains( $product->get_id(), $baseline );
+
+		$zero_like = array(
+			'integer zero'      => 0,
+			'string zero'       => '0',
+			'non-numeric value' => 'abc',
+			'empty string'      => '',
+		);
+
+		foreach ( $zero_like as $label => $value ) {
+			$results = $data_store->search_products( 'Zero exclude', '', true, true, null, null, array( $value ) );
+			$this->assertEqualSets( $baseline, $results, "An exclude list holding a {$label} must not change the results" );
+		}
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void
@@ -360,6 +611,108 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '20.000000', get_post_meta( $product_id, '_stock', true ) );
 		$store->update_product_stock( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.000000', get_post_meta( $product_id, '_stock', true ) );
+	}
+
+	/**
+	 * @testdox update_version_and_type sets the product_type term when the type changes, skips it when unchanged, and writes _product_version when stale.
+	 */
+	public function test_update_version_and_type_fires_when_type_changes(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			public function update_version_and_type( &$product ): void { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				parent::update_version_and_type( $product );
+			}
+		};
+
+		$product = new WC_Product_Simple();
+		$product->save();
+		$product_id       = $product->get_id();
+		$external_product = new WC_Product_External( $product_id );
+
+		update_post_meta( $product_id, '_product_version', '1.0.0-stale' );
+
+		$store->update_version_and_type( $external_product );
+
+		$this->assertSame( 'external', get_the_terms( $product_id, 'product_type' )[0]->slug );
+		$this->assertSame( WC_VERSION, get_post_meta( $product_id, '_product_version', true ) );
+
+		// Type is now unchanged — calling again must not alter the term or the version.
+		$store->update_version_and_type( $external_product );
+
+		$this->assertSame( 'external', get_the_terms( $product_id, 'product_type' )[0]->slug );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox update_version_and_type uses the filtered product type as $old_type, not the stored term.
+	 */
+	public function test_update_version_and_type_respects_product_type_query_filter(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			public function update_version_and_type( &$product ): void { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				parent::update_version_and_type( $product );
+			}
+		};
+
+		// Mimics WC_Product_Booking: stored as 'variable' term, but filter overrides type to 'booking' at runtime.
+		$product = new WC_Product_Variable();
+		$product->save();
+		$product_id = $product->get_id();
+
+		$external = new WC_Product_External( $product_id );
+		$filter   = static fn ( $override, $id ) => $id === $product_id ? 'external' : false;
+		add_filter( 'woocommerce_product_type_query', $filter, 10, 2 );
+
+		$fired_args = null;
+		$tracker    = function ( $p, $from, $to ) use ( &$fired_args ) {
+			$fired_args = array( $from, $to );
+		};
+		add_action( 'woocommerce_product_type_changed', $tracker, 10, 3 );
+
+		try {
+			$store->update_version_and_type( $external );
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $filter, 10 );
+			remove_action( 'woocommerce_product_type_changed', $tracker, 10 );
+		}
+
+		// Filter overrides old type to 'external', matching new type — no transition expected.
+		$this->assertNull( $fired_args );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox update_version_and_type corrects a stale stored term when a filter makes $old_type match $new_type but the DB term differs.
+	 */
+	public function test_update_version_and_type_corrects_stale_term_under_filter(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			public function update_version_and_type( &$product ): void { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				parent::update_version_and_type( $product );
+			}
+		};
+
+		// Create a variable product — stored term is 'variable'.
+		$product = new WC_Product_Variable();
+		$product->save();
+		$product_id = $product->get_id();
+		$this->assertSame( 'variable', get_the_terms( $product_id, 'product_type' )[0]->slug );
+
+		// Filter makes old_type match new_type ('external'), but stored term is still 'variable' — must be corrected.
+		$external = new WC_Product_External( $product_id );
+		$filter   = static fn ( $override, $id ) => $id === $product_id ? 'external' : false;
+		add_filter( 'woocommerce_product_type_query', $filter, 10, 2 );
+
+		try {
+			$store->update_version_and_type( $external );
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $filter, 10 );
+		}
+
+		// The stored term must now be 'external', not the stale 'variable'.
+		$terms = get_the_terms( $product_id, 'product_type' );
+		$this->assertSame( 'external', $terms[0]->slug, 'Stored term should be corrected to match $new_type even when the filter masks the mismatch.' );
+
+		$product->delete( true );
 	}
 
 	/**

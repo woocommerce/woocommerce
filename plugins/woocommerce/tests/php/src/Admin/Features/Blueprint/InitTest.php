@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Init;
 use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\DummyExporter;
 use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\ThemeStub;
@@ -130,6 +131,52 @@ class InitTest extends MockeryTestCase {
 	}
 
 	/**
+	 * A third party filtering plugins_api can throw. The export group should still list the installed plugins.
+	 */
+	public function test_get_plugins_for_export_group_falls_back_when_plugins_api_throws() {
+		delete_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
+
+		$mock_plugins = array(
+			'plugin-1/plugin.php' => array( 'Name' => 'Plugin One' ),
+			'plugin-2/plugin.php' => array( 'Name' => 'Plugin Two' ),
+		);
+
+		$this->init->shouldReceive( 'wp_get_plugins' )->andReturn( $mock_plugins );
+		$this->init->shouldReceive( 'wp_get_option' )->andReturn( array( 'plugin-1/plugin.php' ) );
+		$this->init->shouldReceive( 'wp_plugins_api' )->once()->andThrow( new \TypeError( 'Argument #1 ($slug) must be of type string, null given' ) );
+
+		$result = $this->init->get_plugins_for_export_group();
+
+		$this->assertSame( array( 'plugin-1/plugin.php', 'plugin-2/plugin.php' ), wp_list_pluck( $result, 'id' ) );
+		$this->assertFalse( get_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT ) );
+	}
+
+	/**
+	 * A third party filtering themes_api can throw. The export group should still list the installed themes.
+	 */
+	public function test_get_themes_for_export_group_falls_back_when_themes_api_throws() {
+		delete_transient( $this->init::INSTALLED_WP_ORG_THEMES_TRANSIENT );
+
+		$mock_theme_1      = $this->createThemeStub( 'theme-one', 'Theme One' );
+		$mock_theme_2      = $this->createThemeStub( 'custom-theme', 'Custom Theme' );
+		$mock_active_theme = $this->createThemeStub( 'theme-one', 'Theme One' );
+
+		$this->init->shouldReceive( 'wp_get_themes' )->andReturn(
+			array(
+				'theme-one'    => $mock_theme_1,
+				'custom-theme' => $mock_theme_2,
+			)
+		);
+		$this->init->shouldReceive( 'wp_get_theme' )->andReturn( $mock_active_theme );
+		$this->init->shouldReceive( 'wp_themes_api' )->once()->andThrow( new \TypeError( 'Argument #1 ($slug) must be of type string, null given' ) );
+
+		$result = $this->init->get_themes_for_export_group();
+
+		$this->assertSame( array( 'theme-one', 'custom-theme' ), wp_list_pluck( $result, 'id' ) );
+		$this->assertFalse( get_transient( $this->init::INSTALLED_WP_ORG_THEMES_TRANSIENT ) );
+	}
+
+	/**
 	 * Test the get_step_groups_for_js method.
 	 */
 	public function test_get_step_groups_for_js() {
@@ -158,7 +205,7 @@ class InitTest extends MockeryTestCase {
 		$expected = array(
 			array(
 				'id'          => 'settings',
-				'description' => 'Includes all the items featured in WooCommerce | Settings.',
+				'description' => 'Includes WooCommerce settings except payment settings, which must be configured manually after import.',
 				'label'       => 'WooCommerce Settings',
 				'icon'        => 'settings',
 				'items'       => array(
@@ -187,6 +234,15 @@ class InitTest extends MockeryTestCase {
 		);
 
 		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * @testdox Should not register payment settings for Blueprint export.
+	 */
+	public function test_get_woo_exporters_excludes_payment_settings(): void {
+		$exporter_classes = array_map( 'get_class', $this->init->get_woo_exporters() );
+
+		$this->assertNotContains( ExportWCPaymentGateways::class, $exporter_classes, 'Payment settings must not be available as a Blueprint export step.' );
 	}
 
 	/**

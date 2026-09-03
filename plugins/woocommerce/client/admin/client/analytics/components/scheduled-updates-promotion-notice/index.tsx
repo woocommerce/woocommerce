@@ -33,7 +33,7 @@ export default function ScheduledUpdatesPromotionNotice() {
 	}
 
 	const onDismiss = () => {
-		updateUserPreferences( {
+		void updateUserPreferences( {
 			scheduled_updates_promotion_notice_dismissed: 'yes',
 		} );
 		recordEvent( 'scheduled_updates_promotion_notice_dismissed' );

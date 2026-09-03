@@ -87,7 +87,7 @@ class SystemStatusReport {
 				<td data-export-label="Enabled Features">
 					<?php esc_html_e( 'Enabled Features', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Which features are enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Which features are enabled?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 						echo esc_html( implode( ', ', array_keys( $enabled_features ) ) )
@@ -99,7 +99,7 @@ class SystemStatusReport {
 				<td data-export-label="Disabled Features">
 					<?php esc_html_e( 'Disabled Features', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Which features are disabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Which features are disabled?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 						echo esc_html( implode( ', ', array_keys( $disabled_features ) ) )
@@ -122,7 +122,7 @@ class SystemStatusReport {
 				<td data-export-label="Daily Cron">
 					<?php esc_html_e( 'Daily Cron', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the daily cron job active, when does it next run?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the daily cron job active, when does it next run?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 					if ( $next_action_time ) {
@@ -155,7 +155,7 @@ class SystemStatusReport {
 				<td data-export-label="Options">
 					<?php esc_html_e( 'Options', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Do the important options return expected values?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Do the important options return expected values?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 					if ( $all_options_expected ) {
@@ -180,7 +180,7 @@ class SystemStatusReport {
 				<td data-export-label="Notes">
 					<?php esc_html_e( 'Notes', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'How many notes in the database?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'How many notes in the database?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 						echo esc_html( $notes_count )
@@ -210,7 +210,7 @@ class SystemStatusReport {
 				<td data-export-label="Onboarding">
 					<?php esc_html_e( 'Onboarding', 'woocommerce' ); ?>:
 				</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Was onboarding completed or skipped?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Was onboarding completed or skipped?', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 						echo esc_html( $onboarding_state )

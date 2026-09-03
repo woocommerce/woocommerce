@@ -9,7 +9,12 @@ import {
 	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
-import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
+import {
+	dispatch,
+	resolveSelect,
+	useDispatch,
+	useSelect,
+} from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -37,6 +42,8 @@ import {
 	isActionIncentive,
 	recordPaymentsEvent,
 	recordPaymentsOnboardingEvent,
+	getPluginActionErrorMessage,
+	getFailedPluginAction,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -157,7 +164,7 @@ export const SettingsPaymentsMain = () => {
 	const dismissIncentive = useCallback(
 		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
-			apiFetch( {
+			void apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
@@ -170,7 +177,7 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const acceptIncentive = useCallback( ( id: string ) => {
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ id }`,
 			method: 'POST',
 		} );
@@ -195,7 +202,7 @@ export const SettingsPaymentsMain = () => {
 			orderMap[ provider.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update
 		setSortedProviders( sorted );
@@ -317,7 +324,7 @@ export const SettingsPaymentsMain = () => {
 
 			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
 				// We are not interested in the response; we just want to trigger the preload.
-				apiFetch( {
+				void apiFetch( {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
@@ -342,11 +349,11 @@ export const SettingsPaymentsMain = () => {
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
-						attachPaymentExtensionSuggestion( attachUrl );
+						void attachPaymentExtensionSuggestion( attachUrl );
 					}
 
 					createNoticesFromResponse( response );
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
 					);
 
@@ -416,21 +423,35 @@ export const SettingsPaymentsMain = () => {
 						}
 					}
 				} )
-				.catch( ( response: { errors: Record< string, string > } ) => {
-					let eventName = 'provider_extension_installation_failed';
-					if ( paymentsEntity.plugin.status !== 'not_installed' ) {
-						eventName = 'provider_extension_activation_failed';
-					}
-					recordPaymentsEvent( eventName, {
-						provider_id: paymentsEntity.id,
-						suggestion_id:
-							paymentsEntity?._suggestion_id ?? 'unknown',
-						provider_extension_slug: paymentsEntity.plugin.slug,
-						from: context,
-						source: wooPaymentsOnboardingSessionEntrySettings,
-						reason: 'error',
-					} );
-					createNoticesFromResponse( response );
+				.catch( ( error: unknown ) => {
+					const actionType = getFailedPluginAction(
+						error,
+						paymentsEntity.plugin.status === 'not_installed'
+							? 'install'
+							: 'activate'
+					);
+					recordPaymentsEvent(
+						actionType === 'install'
+							? 'provider_extension_installation_failed'
+							: 'provider_extension_activation_failed',
+						{
+							provider_id: paymentsEntity.id,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							provider_extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+							source: wooPaymentsOnboardingSessionEntrySettings,
+							reason: 'error',
+						}
+					);
+					dispatch( 'core/notices' ).createNotice(
+						'error',
+						getPluginActionErrorMessage(
+							actionType,
+							paymentsEntity.title,
+							error
+						)
+					);
 					setInstallingPlugin( null );
 				} );
 		},

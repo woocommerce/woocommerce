@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -41,6 +42,18 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Static because it mirrors the WordPress block-type registry, which is a process-global singleton: once
+	 * any controller has registered the blocks they are registered for the whole request, regardless of which
+	 * container instance owns the controller. Only tracks the AbstractBlock-based block types registered by
+	 * register_blocks(); blocks registered through other paths are not reflected here.
+	 *
+	 * @var bool
+	 */
+	private static $register_blocks_has_run = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -62,7 +75,10 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
+		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
+		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
 
 	/**
@@ -108,6 +124,9 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		// Set before registering rather than after: it guards against re-entry through the on-demand
+		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
+		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -116,6 +135,22 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Whether register_blocks() has run in this request.
+	 *
+	 * Covers only the AbstractBlock-based block types that register_blocks() registers — blocks registered
+	 * through other paths are not tracked. Used by the on-demand registration on the
+	 * woocommerce_short_description filter (see Bootstrap::maybe_register_blocks_from_content) to avoid
+	 * re-registering the block set when eager registration already ran on init.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool True if register_blocks() has already run.
+	 */
+	public function register_blocks_has_run() {
+		return self::$register_blocks_has_run;
 	}
 
 	/**
@@ -206,6 +241,24 @@ final class BlockTypesController {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
+		$shop_permalink = WC()->call_function( 'wc_get_page_permalink', 'shop' );
+		register_block_pattern(
+			'woocommerce/cart-empty-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading --><!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/cart-new-in-store-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
@@ -493,9 +546,11 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
-			$block_types[] = 'SavedForLater';
-		}
+		// Registered unconditionally so content saved while the feature was on
+		// doesn't surface an "unsupported block" notice once it's disabled. The
+		// block gates its own auto-injection, rendering, and inserter visibility
+		// on the `saved-for-later` feature (see SavedForLater).
+		$block_types[] = 'SavedForLater';
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
 			$block_types[] = 'Wishlist';
@@ -580,5 +635,88 @@ final class BlockTypesController {
 		$args['style']         = array();
 
 		return $args;
+	}
+
+	/**
+	 * Use one shared editor stylesheet for WooCommerce blocks.
+	 *
+	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
+	 * keeps those per-block handles for frontend performance, but removes them in
+	 * admin so the block editor loads the combined stylesheet only.
+	 *
+	 * @internal
+	 *
+	 * @param array $settings Block settings.
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return array Block settings.
+	 */
+	public function use_single_block_editor_style( $settings, $metadata ) {
+		if (
+			! BlockEditorUnifiedAssets::is_enabled() ||
+			! is_admin() ||
+			! $this->is_woocommerce_block_metadata( $metadata ) ) {
+			return $settings;
+		}
+
+		$settings['style_handles']        = array();
+		$settings['style']                = array();
+		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+		$settings['editor_style']         = array( 'wc-block-library-style' );
+
+		return $settings;
+	}
+
+	/**
+	 * Check whether block metadata belongs to a block bundled with WooCommerce.
+	 *
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return bool Whether the metadata file is in the WooCommerce blocks directory.
+	 */
+	private function is_woocommerce_block_metadata( $metadata ) {
+		static $blocks_path = null;
+
+		if ( null === $blocks_path ) {
+			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
+			$blocks_path   = false === $resolved_path
+				? ''
+				: trailingslashit( wp_normalize_path( $resolved_path ) );
+		}
+
+		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
+			return false;
+		}
+
+		return str_starts_with(
+			wp_normalize_path( $metadata['file'] ),
+			$blocks_path
+		);
+	}
+
+	/**
+	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
+	 *
+	 * @internal
+	 *
+	 * @param array  $settings The settings for the breadcrumbs block.
+	 * @param string $post_type The post type.
+	 * @param int    $post_id The current post ID.
+	 * @return array The settings for the breadcrumbs block.
+	 */
+	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id );
+	}
+
+	/**
+	 * Apply WooCommerce compatibility behavior to Core breadcrumb items.
+	 *
+	 * @internal
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 */
+	public function apply_woocommerce_breadcrumb_filters( $items ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->apply_woocommerce_breadcrumb_filters( $items );
 	}
 }

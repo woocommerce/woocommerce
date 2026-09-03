@@ -21,6 +21,7 @@ class WC_Helper_Reports {
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
+		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		$wpdb->query( "DELETE FROM {$wpdb->wc_category_lookup}" ); // @codingStandardsIgnoreLine.
 
 		$category_lookup = \Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();

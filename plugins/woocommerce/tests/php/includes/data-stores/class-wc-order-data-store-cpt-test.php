@@ -583,6 +583,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox delete_items_by_ids() should reject invalid IDs and preserve items belonging to other orders.
+	 */
+	public function test_delete_items_by_ids_sanitizes_and_scopes_ids_to_order() {
+		$order_1         = WC_Helper_Order::create_order();
+		$order_2         = WC_Helper_Order::create_order();
+		$order_1_item_id = array_key_first( $order_1->get_items() );
+		$order_2_item_id = array_key_first( $order_2->get_items() );
+		$data_store      = $order_1->get_data_store();
+
+		$data_store->delete_items_by_ids( $order_1, array( -$order_1_item_id, 0 ) );
+
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_1_item_id ), 'Negative and zero IDs should be rejected.' );
+
+		$data_store->delete_items_by_ids( $order_1, array( $order_1_item_id, $order_1_item_id, $order_2_item_id ) );
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $order_1_item_id ), 'A valid item belonging to the target order should be deleted.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_2_item_id ), 'An item belonging to another order should remain.' );
+	}
+
+	/**
 	 * @testDox Deleting order item should delete items from only that order.
 	 */
 	public function test_delete_items_multi_order() {

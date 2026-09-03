@@ -71,12 +71,14 @@
 div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	form.cart {
 		div.wc-block-components-quantity-selector.quantity {
-			display: inline-flex;
-			width: unset;
-			background-color: #fff;
-			margin-right: 0.5em;
-			margin-bottom: 0;
-			grid-column: 1;
+			&:where(:has(input:not([type="hidden"]))) {
+				display: inline-flex;
+				width: unset;
+				background-color: #fff;
+				margin-right: 0.5em;
+				margin-bottom: 0;
+				grid-column: 1;
+			}
 		}
 	}
 
@@ -135,7 +137,9 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 .wp-block-woocommerce-single-product {
 	.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 		.wc-block-components-quantity-selector {
-			width: 107px;
+			&:where(:has(input:not([type="hidden"]))) {
+				width: 107px;
+			}
 		}
 	}
 }

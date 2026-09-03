@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Escape settings field attributes and currency symbols in legacy report scripts.

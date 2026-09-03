@@ -34,10 +34,10 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 -   [Blocks](internal-developers/blocks/README.md)
     -   [Stock Reservation during Checkout](internal-developers/blocks/stock-reservation.md)
     -   [Features Flags and Experimental interfaces](internal-developers/blocks/feature-flags-and-experimental-interfaces.md)
--   [Block Data](../assets/js/data/README.md)
-    -   [Collections Store](../assets/js/data/collections/README.md)
-    -   [Query State Store](../assets/js/data/query-state/README.md)
-    -   [Schema Store](../assets/js/data/schema/README.md)
+-   [Block Data](../packages/public-api/block-data/README.md)
+    -   [Collections Store](../packages/public-api/block-data/collections/README.md)
+    -   [Query State Store](../packages/public-api/block-data/query-state/README.md)
+    -   [Schema Store](../packages/public-api/block-data/schema/README.md)
 -   [Block Client APIs](internal-developers/block-client-apis/README.md)
     -   [Checkout API interface](internal-developers/block-client-apis/checkout/checkout-api.md)
     -   [Notices](internal-developers/block-client-apis/notices.md)
@@ -80,6 +80,8 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 > Are you a third-party developer? The following documents explain how to extend the WooCommerce Blocks plugin with your custom extension.
 
+-   [JavaScript public API packages](../packages/public-api/README.md)
+
 ### Extensibility
 
 -   Hooks
@@ -94,11 +96,11 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 -   Checkout Payment Methods
     -   [Check out more in the WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/payment-methods/)
 -   Cart and Checkout Blocks
-    -   [Blocks Registry](../packages/checkout/blocks-registry/README.md)
-    -   [Components](../packages/checkout/components/README.md)
-    -   [Filter Registry](../packages/checkout/filter-registry/README.md)
-    -   [Slot and Fill](../packages/checkout/slot/README.md)
-    -   [Utilities](../packages/checkout/utils/README.md)
+    -   [Blocks Registry](../packages/public-api/blocks-checkout/blocks-registry/README.md)
+    -   [Components](../packages/public-api/blocks-checkout/components/README.md)
+    -   [Filter Registry](../packages/public-api/blocks-checkout/filter-registry/README.md)
+    -   [Slot and Fill](../packages/public-api/blocks-checkout/slot/README.md)
+    -   [Utilities](../packages/public-api/blocks-checkout/utils/README.md)
     -   [Check out more in WooCommerce Developer Documentation](https://developer.woocommerce.com/docs/category/cart-and-checkout-blocks/)
 
 ## Designers and theme developers

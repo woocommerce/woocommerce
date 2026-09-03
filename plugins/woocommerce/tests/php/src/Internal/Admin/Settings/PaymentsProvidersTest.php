@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\CorePayPalGatewayTrait;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -22,6 +23,7 @@ use WC_Gateway_Paypal;
  * @class PaymentsProviders
  */
 class PaymentsProvidersTest extends WC_Unit_Test_Case {
+	use CorePayPalGatewayTrait;
 
 	/**
 	 * @var PaymentsProviders
@@ -41,13 +43,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
-	 * The previous store currency value to restore in tearDown.
-	 *
-	 * @var string|null
-	 */
-	private $prev_currency;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -56,32 +51,26 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		// Save the current currency to restore in tearDown.
-		$this->prev_currency = get_option( 'woocommerce_currency', null );
-
 		$this->mock_extension_suggestions = $this->getMockBuilder( ExtensionSuggestions::class )
 			->disableOriginalConstructor()
 			->getMock();
 
 		$this->sut = new PaymentsProviders();
-		$this->sut->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
+		$this->sut->init(
+			$this->mock_extension_suggestions,
+			wc_get_container()->get( LegacyProxy::class )
+		);
 	}
 
 	/**
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		// Reset gateways/hooks and controller memo between tests.
+		// Reset gateways, hooks, and cached provider data between tests.
 		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 		if ( isset( $this->sut ) ) {
-			$this->sut->reset_memo();
-		}
-
-		// Restore the previous currency to prevent test leakage.
-		if ( null !== $this->prev_currency ) {
-			update_option( 'woocommerce_currency', $this->prev_currency );
+			$this->sut->clear_cache();
 		}
 
 		parent::tearDown();
@@ -443,6 +432,25 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			PaymentsProviders\Stripe::class,
 			$provider,
 			'Should return Stripe provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns the KOMOJU provider for a per-method wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_komoju_provider_for_wildcard() {
+		// Arrange - komoju_* pattern matches komoju_konbini, and should return the Komoju provider,
+		// same as the exact 'komoju' gateway ID.
+		$gateway_id = 'komoju_konbini';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Komoju::class,
+			$provider,
+			'Should return Komoju provider for wildcard match'
 		);
 	}
 
@@ -862,7 +870,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.
@@ -962,6 +976,174 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
 		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
 		$this->assertSame( 'Special offer', $gateway_details['_incentive']['description'], 'Incentive description should match' );
+	}
+
+	/**
+	 * @testdox Gateway details are derived once with a neutral order and receive the requested order on every call.
+	 */
+	public function test_get_payment_gateway_details_is_cached(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->once() )
+			->method( 'get_details' )
+			->with( $fake_gateway, 0, 'US' )
+			->willReturn(
+				array(
+					'id'     => 'fake-gateway-id',
+					'_order' => 0,
+					'title'  => 'Derived details',
+					'plugin' => array(
+						'slug' => 'fake-plugin-slug',
+					),
+				)
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first  = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$second = $this->sut->get_payment_gateway_details( $fake_gateway, 5, 'US' );
+
+		$this->assertSame( 1, $first['_order'], 'The first call should use the requested order' );
+		$this->assertSame( 5, $second['_order'], 'Cached details should use the latest requested order' );
+		unset( $first['_order'], $second['_order'] );
+		$this->assertSame( $first, $second, 'Cached details should match the originally derived details' );
+	}
+
+	/**
+	 * @testdox Gateway details are cached separately for each user.
+	 */
+	public function test_get_payment_gateway_details_cache_per_user(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order ) {
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => (string) get_current_user_id(),
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'US' );
+
+		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $second_user_id );
+		$second_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$second_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( (string) $this->store_admin_id, $first_user_details['title'] );
+		$this->assertSame( (string) $this->store_admin_id, $first_user_cached_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_cached_details['title'] );
+		$this->assertSame( 2, $first_user_cached_details['_order'] );
+		$this->assertSame( 4, $second_user_cached_details['_order'] );
+	}
+
+	/**
+	 * @testdox Gateway details are cached per country and recomputed after the cache is cleared.
+	 */
+	public function test_get_payment_gateway_details_cache_per_country_and_clear(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$generation = 0;
+		$provider   = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order, $country_code ) use ( &$generation ) {
+					$this->assertSame( 0, $order, 'Gateway details should always be derived with a neutral order' );
+					++$generation;
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => $country_code . '-' . $generation,
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_us = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_de = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'DE' );
+		$this->sut->clear_cache();
+		$second_us = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$this->setExpectedDeprecated( PaymentsProviders::class . '::reset_memo' );
+		$this->sut->reset_memo();
+		$third_us = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( 'US-1', $first_us['title'] );
+		$this->assertSame( 'DE-2', $first_de['title'] );
+		$this->assertSame( 'US-3', $second_us['title'] );
+		$this->assertSame( 'US-4', $third_us['title'] );
+		$this->assertSame( 1, $first_us['_order'] );
+		$this->assertSame( 2, $first_de['_order'] );
+		$this->assertSame( 3, $second_us['_order'] );
+		$this->assertSame( 4, $third_us['_order'] );
+	}
+
+	/**
+	 * @testdox clear_cache removes provider lists cached by the Payments service.
+	 */
+	public function test_clear_cache_removes_cached_provider_lists(): void {
+		wp_cache_set(
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY,
+			array( 'US_display' => array( array( 'id' => 'stale-provider' ) ) ),
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP
+		);
+
+		$this->sut->clear_cache();
+
+		$this->assertFalse(
+			wp_cache_get( PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY, PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP ),
+			'Provider lists derived from gateway data must not survive a providers cache clear.'
+		);
 	}
 
 	/**
@@ -2878,7 +3060,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		WC()->payment_gateways()->init();
 
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 	}
 
 	/**
@@ -5952,59 +6134,27 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Load the WC core PayPal gateway but not enable it.
+	 * Set a payment gateway provider instance for testing.
 	 *
-	 * @return void
+	 * @param string                 $gateway_id The gateway ID.
+	 * @param PaymentGateway         $provider   The provider instance.
+	 * @param PaymentsProviders|null $service    Optional service instance to update.
 	 */
-	private function load_core_paypal_pg() {
-		// Make sure the WC core PayPal gateway is loaded.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'no',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
+	private function set_payment_gateway_provider_instance( string $gateway_id, PaymentGateway $provider, ?PaymentsProviders $service = null ): void {
+		$service    = $service ?? $this->sut;
+		$reflection = new \ReflectionClass( $service );
+		$property   = $reflection->getProperty( 'instances' );
+		$property->setAccessible( true );
+		$property->setValue( $service, array( $gateway_id => $provider ) );
 	}
 
 	/**
-	 * Enable the WC core PayPal gateway.
+	 * The payment providers service the core PayPal gateway helpers must invalidate.
 	 *
-	 * @return void
+	 * @return PaymentsProviders
 	 */
-	private function enable_core_paypal_pg() {
-		// Enable the WC core PayPal gateway.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'yes',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Reset the controller memo to pick up the new gateway details.
-		$this->sut->reset_memo();
-	}
-
-	/**
-	 * Cleanup the core PayPal gateway.
-	 */
-	private function unload_core_paypal_pg() {
-		delete_option( 'woocommerce_paypal_settings' );
-		delete_option( 'woocommerce_currency' );
-
-		$this->sut->reset_memo();
+	protected function get_payments_providers_service(): PaymentsProviders {
+		return $this->sut;
 	}
 
 	/**
