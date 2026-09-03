@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Products;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -13,6 +15,8 @@ use WC_Unit_Test_Case;
  * Tests for Products report DataStore.
  */
 class DataStoreTest extends WC_Unit_Test_Case {
+
+	use HPOSToggleTrait;
 
 	/**
 	 * Custom status slug that exceeds the 20-char status column once 'wc-' prefixed.
@@ -22,10 +26,26 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $long_status = 'competition-completed';
 
 	/**
+	 * Whether the store used HPOS before these tests pinned it.
+	 *
+	 * @var bool
+	 */
+	private $original_hpos_usage;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// A slug this long only survives a save under HPOS, which truncates it to fit the
+		// 20-char status column. The CPT store discards the change and leaves the order in
+		// its previous status instead, so these tests pin the store rather than inherit
+		// whichever one the suite is running. See #68358.
+		$this->original_hpos_usage = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_authoritative( true );
+
 		register_post_status( 'wc-' . $this->long_status, array( 'public' => true ) );
 		add_filter( 'wc_order_statuses', array( $this, 'add_custom_status' ) );
 	}
@@ -37,6 +57,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		remove_filter( 'wc_order_statuses', array( $this, 'add_custom_status' ) );
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
 		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $this->long_status ] );
+		$this->toggle_cot_authoritative( $this->original_hpos_usage );
 		parent::tearDown();
 	}
 
