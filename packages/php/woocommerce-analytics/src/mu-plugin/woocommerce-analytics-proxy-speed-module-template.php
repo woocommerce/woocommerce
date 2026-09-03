@@ -61,8 +61,8 @@ class WooCommerceAnalyticsProxySpeed {
 	/**
 	 * Check if current request is a proxy request.
 	 *
-	 * Cannot delegate to WC_Analytics_Tracking::is_proxy_tracking_request(): init()
-	 * calls this before load_autoloader(). A test pins both copies together.
+	 * Self-contained on purpose: init() calls this before load_autoloader(), so no
+	 * package class exists yet to delegate to.
 	 *
 	 * @return bool
 	 */

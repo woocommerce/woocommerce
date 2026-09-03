@@ -59,20 +59,6 @@ class WC_Analytics_Tracking {
 	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', '_ts', 'browser_type' );
 
 	/**
-	 * Path suffix of the proxy tracking endpoint.
-	 *
-	 * The MU-plugin speed module template declares its own copy: it tests the
-	 * request shape before loading the autoloader, so no package class exists yet.
-	 * Change both together; `test_mu_plugin_template_stays_in_step_with_the_package()`
-	 * fails if you do not.
-	 *
-	 * @since 0.18.0
-	 *
-	 * @var string
-	 */
-	const PROXY_REQUEST_PATH = 'woocommerce-analytics/v1/track';
-
-	/**
 	 * Event queue.
 	 *
 	 * @var array
@@ -144,9 +130,6 @@ class WC_Analytics_Tracking {
 		if ( empty( self::get_visitor_id() ) ) {
 			return true;
 		}
-
-		// The guard covers MU-plugin copies predating record_client_event(); see is_proxy_tracking_request().
-		$is_client_supplied = $is_client_supplied || self::is_proxy_tracking_request();
 
 		if ( $is_client_supplied ) {
 			// An error rather than a silent skip: an unusable name produces no pixel,
@@ -542,64 +525,6 @@ class WC_Analytics_Tracking {
 	 */
 	private static function is_valid_client_name( $name ) {
 		return is_string( $name ) && '' !== $name;
-	}
-
-	/**
-	 * Whether the current request is a POST to the proxy tracking endpoint.
-	 *
-	 * Worth explaining because a URL-shape test does not belong in a security path:
-	 * this is a safety net, not the boundary. The boundary is `record_client_event()`,
-	 * which survives subdirectory installs, rewrites and proxying. This exists only
-	 * because an MU-plugin copy installed before that method existed calls
-	 * `record_event()` directly, and rewriting an installed copy needs admin traffic,
-	 * an expired transient and a writable mu-plugins directory, none of them
-	 * guaranteed. Remove once a package-version floor rules such a copy out.
-	 *
-	 * Matches `is_proxy_request()` in the MU-plugin template; see PROXY_REQUEST_PATH.
-	 *
-	 * @since 0.18.0
-	 *
-	 * @return bool True when the request shape matches the proxy endpoint.
-	 */
-	public static function is_proxy_tracking_request() {
-		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) ) {
-			return false;
-		}
-
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Compared against a fixed string below; unsanitized on purpose to stay byte-for-byte in step with the MU-plugin template's read.
-		$raw_method = wp_unslash( $_SERVER['REQUEST_METHOD'] );
-		if ( ! is_string( $raw_method ) || 'POST' !== strtoupper( $raw_method ) ) {
-			return false;
-		}
-
-		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
-			return false;
-		}
-
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and character-restricted below; sanitizing first would mangle the path.
-		$raw_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
-		if ( ! is_string( $raw_uri ) || '' === $raw_uri ) {
-			return false;
-		}
-
-		$path = wp_parse_url( $raw_uri, PHP_URL_PATH );
-		if ( ! is_string( $path ) ) {
-			return false;
-		}
-
-		// Reject anything outside expected URL path characters, matching the template.
-		if ( preg_match( '/[^A-Za-z0-9\-._~\/]/', $path ) ) {
-			return false;
-		}
-
-		$normalized_path = rtrim( $path, '/' );
-		$proxy_suffix    = '/' . ltrim( self::PROXY_REQUEST_PATH, '/' );
-
-		if ( strlen( $normalized_path ) < strlen( $proxy_suffix ) ) {
-			return false;
-		}
-
-		return substr( $normalized_path, -strlen( $proxy_suffix ) ) === $proxy_suffix;
 	}
 
 	/**

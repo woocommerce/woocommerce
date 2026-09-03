@@ -18,12 +18,10 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	/**
 	 * Snapshot of $_SERVER taken in set_up(), restored in tear_down().
 	 *
-	 * Several tests mutate REQUEST_METHOD/REQUEST_URI to exercise
-	 * is_proxy_tracking_request(). Restoring the full array — rather than
-	 * unset()-ing the specific keys a test touched — puts back whatever the
-	 * WordPress bootstrap actually populated (e.g. REQUEST_URI defaults to
-	 * '', not "absent"), and does so from tear_down() so a failed assertion
-	 * mid-test cannot skip cleanup and leak state into the next test.
+	 * Restoring the full array — rather than unset()-ing the specific keys a
+	 * test touched — puts back whatever the WordPress bootstrap actually
+	 * populated, and does so from tear_down() so a failed assertion mid-test
+	 * cannot skip cleanup and leak state into the next test.
 	 *
 	 * @var array
 	 */
@@ -320,142 +318,6 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Simulates a stale MU-plugin copy: it calls record_event() with no flag,
-	 * during a POST to the track endpoint. The guard must strip anyway.
-	 *
-	 * `woocommerce_store_id` is seeded so the assertion proves the server's value
-	 * replaced the forged one. Without it the property is absent from the pixel
-	 * entirely — `get_option()` returns null and `http_build_query()` drops nulls
-	 * — and an assertNotSame() would pass on absence alone.
-	 */
-	public function test_record_event_strips_during_a_proxy_request(): void {
-		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
-		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$_SERVER['REQUEST_URI']    = '/wp-json/woocommerce-analytics/v1/track';
-		update_option( 'woocommerce_store_id', 'real-store-id' );
-		$this->reset_pixel_batch_queue();
-
-		WC_Analytics_Tracking::record_event(
-			'add_to_cart',
-			array( 'store_id' => 'someone-elses-store' )
-		);
-
-		$props = $this->get_queued_pixel_props();
-
-		$this->assertSame( 'real-store-id', $props['store_id'] ?? null, 'The server value must replace the forged one, not merely be absent.' );
-	}
-
-	/**
-	 * The over-stripping guard. If the path or method test is ever loosened,
-	 * this is what fails — trusted server-side callers must keep their
-	 * properties on every request that is not a proxy POST.
-	 *
-	 * @dataProvider non_proxy_request_provider
-	 *
-	 * @param string $method Request method.
-	 * @param string $uri    Request URI.
-	 */
-	public function test_record_event_does_not_strip_outside_a_proxy_request( string $method, string $uri ): void {
-		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
-		$_SERVER['REQUEST_METHOD'] = $method;
-		$_SERVER['REQUEST_URI']    = $uri;
-		$this->reset_pixel_batch_queue();
-
-		WC_Analytics_Tracking::record_event(
-			'add_to_cart',
-			array( 'store_id' => 'set-by-trusted-caller' )
-		);
-
-		$props = $this->get_queued_pixel_props();
-
-		$this->assertSame( 'set-by-trusted-caller', $props['store_id'] ?? null );
-
-		$this->reset_pixel_batch_queue();
-		unset( $_COOKIE['tk_ai'] );
-	}
-
-	/**
-	 * Requests that must not trigger the guard.
-	 *
-	 * The `?rest_route=` case is load-bearing, not incidental: on a
-	 * plain-permalink site `rest_url()` produces exactly this shape, whose
-	 * parsed path is `/`, so the guard correctly does not match it — and
-	 * neither does `WooCommerceAnalyticsProxySpeed::is_proxy_request()` in the
-	 * MU-plugin template. The two copies agreeing here is what keeps a stale
-	 * template from intercepting a request this guard would not recognise. On
-	 * such sites `record_client_event()` — not this guard — is the only thing
-	 * stripping reserved properties.
-	 *
-	 * @return array<string, array{0: string, 1: string}>
-	 */
-	public function non_proxy_request_provider(): array {
-		return array(
-			'GET to the track path'          => array( 'GET', '/wp-json/woocommerce-analytics/v1/track' ),
-			'POST to the Store API'          => array( 'POST', '/wp-json/wc/store/v1/checkout' ),
-			'POST to a lookalike suffix'     => array( 'POST', '/wp-json/other/woocommerce-analytics/v1/tracking' ),
-			'POST to the site root'          => array( 'POST', '/' ),
-			'POST with rest_route query var' => array( 'POST', '/?rest_route=/woocommerce-analytics/v1/track' ),
-		);
-	}
-
-	/**
-	 * Shapes that must still match, so the safety net is not defeated by a
-	 * query string, a trailing slash, or a subdirectory install.
-	 *
-	 * @dataProvider proxy_request_shape_provider
-	 *
-	 * @param string $uri Request URI.
-	 */
-	public function test_is_proxy_tracking_request_matches_real_world_shapes( string $uri ): void {
-		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$_SERVER['REQUEST_URI']    = $uri;
-
-		$this->assertTrue( WC_Analytics_Tracking::is_proxy_tracking_request(), $uri );
-	}
-
-	/**
-	 * URIs that must match.
-	 *
-	 * Note what is deliberately absent: the genuine `?rest_route=` query-var
-	 * form (e.g. `/?rest_route=/woocommerce-analytics/v1/track`, what
-	 * `rest_url()` produces on a plain-permalink site) does NOT match this
-	 * guard — its parsed path is just `/`. That is covered as a non-matching
-	 * case in non_proxy_request_provider(), not here.
-	 *
-	 * @return array<string, array{0: string}>
-	 */
-	public function proxy_request_shape_provider(): array {
-		return array(
-			'plain'                                    => array( '/wp-json/woocommerce-analytics/v1/track' ),
-			'trailing slash'                           => array( '/wp-json/woocommerce-analytics/v1/track/' ),
-			'query string'                             => array( '/wp-json/woocommerce-analytics/v1/track?_wpnonce=abc123' ),
-			'subdirectory'                             => array( '/shop/wp-json/woocommerce-analytics/v1/track' ),
-			'index.php-prefixed pretty-permalink form' => array( '/index.php/wp-json/woocommerce-analytics/v1/track' ),
-		);
-	}
-
-	/**
-	 * The character restriction on the path must reject anything outside the
-	 * allowed set, matching the MU-plugin template's is_proxy_request(). This
-	 * is the one piece of the "kept in step with the template" claim that was
-	 * previously covered only by inspection, not by an assertion.
-	 *
-	 * The disallowed '%' sits mid-path, not at the end, on purpose: the path
-	 * still ends with the exact proxy suffix, so the suffix comparison alone
-	 * would accept this request. Only the character-restriction check can
-	 * reject it. A trailing disallowed character (e.g. a suffix of
-	 * "/track%20") would also break the suffix match by itself, so it would
-	 * return false regardless of whether the character check exists — that
-	 * shape cannot isolate the regex, and must not be used here.
-	 */
-	public function test_is_proxy_tracking_request_rejects_disallowed_characters(): void {
-		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$_SERVER['REQUEST_URI']    = '/wp%20json/woocommerce-analytics/v1/track';
-
-		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
-	}
-
-	/**
 	 * A callback that assigns unconditionally beats a client value of the same
 	 * name. This is the pattern the filter docblock tells extensions to use.
 	 */
@@ -628,86 +490,13 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The guard's defensive early returns, none of which a data provider typed
-	 * `string` can reach. WorDBless leaves REQUEST_METHOD absent and REQUEST_URI
-	 * empty, so without this the `! isset()` branches are never executed and
-	 * could be deleted with the suite still green.
-	 *
-	 * @dataProvider malformed_request_provider
-	 *
-	 * @param array $server Superglobal overrides; a null value means unset the key.
-	 */
-	public function test_is_proxy_tracking_request_is_false_for_malformed_requests( array $server ): void {
-		foreach ( $server as $key => $value ) {
-			if ( null === $value ) {
-				unset( $_SERVER[ $key ] );
-				continue;
-			}
-			$_SERVER[ $key ] = $value;
-		}
-
-		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
-	}
-
-	/**
-	 * Malformed request shapes that must not reach the suffix comparison.
-	 *
-	 * @return array<string, array{0: array}>
-	 */
-	public function malformed_request_provider(): array {
-		$uri = '/wp-json/woocommerce-analytics/v1/track';
-
-		return array(
-			'no REQUEST_METHOD (WP-CLI, cron)' => array(
-				array(
-					'REQUEST_METHOD' => null,
-					'REQUEST_URI'    => $uri,
-				),
-			),
-			'no REQUEST_URI'                   => array(
-				array(
-					'REQUEST_METHOD' => 'POST',
-					'REQUEST_URI'    => null,
-				),
-			),
-			'empty REQUEST_URI'                => array(
-				array(
-					'REQUEST_METHOD' => 'POST',
-					'REQUEST_URI'    => '',
-				),
-			),
-			'non-string REQUEST_URI'           => array(
-				array(
-					'REQUEST_METHOD' => 'POST',
-					'REQUEST_URI'    => array( $uri ),
-				),
-			),
-		);
-	}
-
-	/**
-	 * The two copies of the request-shape logic must not drift: the template's
-	 * copy is the first thing that decides whether a request is a proxy POST, it
-	 * runs before the autoloader so it cannot delegate, and nothing else in the
-	 * suite executes it. Asserting on the source text is crude, but it is the
-	 * only thing standing behind the "Change both together" comments.
+	 * The template must record through the untrusted-client entry point. Nothing
+	 * in the suite executes the template, so asserting on its source text is
+	 * crude, but it is the only thing standing behind that requirement.
 	 */
 	public function test_mu_plugin_template_stays_in_step_with_the_package(): void {
 		$template = file_get_contents(
 			dirname( __DIR__, 2 ) . '/src/mu-plugin/woocommerce-analytics-proxy-speed-module-template.php'
-		);
-
-		$this->assertSame(
-			1,
-			preg_match( "/const PROXY_REQUEST_PATH = '([^']+)';/", $template, $matches ),
-			'The template must declare PROXY_REQUEST_PATH.'
-		);
-		$this->assertSame( WC_Analytics_Tracking::PROXY_REQUEST_PATH, $matches[1] );
-
-		$this->assertStringContainsString(
-			'preg_match( \'/[^A-Za-z0-9\-._~\/]/\', $path )',
-			$template,
-			'The template must keep the same character restriction as is_proxy_tracking_request().'
 		);
 
 		$this->assertStringContainsString(
