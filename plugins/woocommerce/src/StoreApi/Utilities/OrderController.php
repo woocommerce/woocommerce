@@ -839,6 +839,8 @@ class OrderController {
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
+		// Shipping is evaluated after calculation, or when no shipping is needed and methods were initialized.
+		// A non-null methods value means evaluation ran; it may still be an empty array.
 		$shipping_evaluated = $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
 
 		if ( $shipping_evaluated && $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
