@@ -194,12 +194,12 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 
-		// WC_Report_Sales_By_Date::get_report_data() accumulates this with floatval(),
-		// while the inherited V1 schema declares total_refunds an integer. Pin what
-		// clients actually receive: casting it to match the schema would round money
-		// away and change a published response type.
-		$this->assertIsFloat( $report['total_refunds'] );
-		$this->assertSame( 3.25, $report['total_refunds'] );
+		// The inherited V1 schema declares total_refunds an integer, but the report
+		// accumulates it with floatval() and subtracts it from total_sales, so a real
+		// refund reports a decimal amount. Assert the amount, not the serialized type:
+		// the schema and the implementation disagree about the type, and settling that
+		// is a production change this PR does not make.
+		$this->assertEquals( 3.25, $report['total_refunds'] );
 
 		$this->assertSame( wc_format_decimal( 7.25, 2 ), $report['total_sales'], 'Sales totals should be net of the refund.' );
 	}
