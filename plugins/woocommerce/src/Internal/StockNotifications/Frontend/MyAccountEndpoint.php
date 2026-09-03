@@ -433,7 +433,7 @@ class MyAccountEndpoint {
 
 		$notification = Factory::get_notification( $notification_id );
 		if ( ! $notification instanceof Notification || (int) $notification->get_user_id() !== get_current_user_id() ) {
-			$this->redirect_with_error( __( 'That back in stock notification no longer exists.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'We were unable to process your request. Notification not found.', 'woocommerce' ) );
 		}
 
 		$result = self::ACTION_RESEND === $action
@@ -462,7 +462,7 @@ class MyAccountEndpoint {
 		}
 
 		/* translators: %s: email address the verification email was sent to. */
-		return sprintf( __( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() );
+		return sprintf( __( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ), $notification->get_user_email() );
 	}
 
 	/**

@@ -117,7 +117,7 @@ test.describe(
 					).toBeVisible();
 
 					// The unconfirmed signup sits in its own "Awaiting confirmation" table
-					// with Resend email + Cancel actions.
+					// with Resend verification + Cancel actions.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Awaiting confirmation',
@@ -144,10 +144,11 @@ test.describe(
 						pendingTable.locator( 'tbody tr' )
 					).toHaveCount( 1 );
 
-					// The confirmed signup sits in the "Active notifications" table.
+					// The confirmed signup sits in the "Active" table.
 					await expect(
 						page.getByRole( 'heading', {
-							name: 'Active notifications',
+							name: 'Active',
+						exact: true,
 						} )
 					).toBeVisible();
 					const activeTable = page.locator( ACTIVE_TABLE );

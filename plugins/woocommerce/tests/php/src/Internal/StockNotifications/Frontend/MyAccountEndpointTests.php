@@ -376,7 +376,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
 		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
 		$this->assertStringContainsString( 'Awaiting confirmation', $html );
-		$this->assertStringContainsString( 'Active notifications', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
 		$this->assertStringNotContainsString( "You haven't signed up", $html );
 
 		// Only the newest pending row survives the limit of 1.
@@ -408,12 +408,12 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
 		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
-		$this->assertStringNotContainsString( 'Active notifications', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
 		$this->assertStringNotContainsString( "You haven't signed up", $html );
 	}
 
 	/**
-	 * With no pending rows the active table renders without the "Active notifications" heading,
+	 * With no pending rows the active table renders without the "Active" heading,
 	 * so a store without double opt-in sees the single table it always had.
 	 */
 	public function test_render_endpoint_without_pending_rows_omits_active_heading(): void {
@@ -428,7 +428,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
 		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
 		$this->assertStringNotContainsString( 'Awaiting confirmation', $html );
-		$this->assertStringNotContainsString( 'Active notifications', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
 	}
 
 	/**

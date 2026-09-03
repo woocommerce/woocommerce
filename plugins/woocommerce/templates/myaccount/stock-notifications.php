@@ -62,7 +62,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></span></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date', 'woocommerce' ); ?></span></th>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></span></th>
 			</tr>
 		</thead>
@@ -97,7 +97,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 						<div class="description"><?php echo esc_html( $variation ); ?></div>
 					<?php endif; ?>
 				</td>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>">
 					<?php if ( $date_created ) : ?>
 						<time datetime="<?php echo esc_attr( $date_created->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $date_created ) ); ?></time>
 					<?php else : ?>
@@ -105,7 +105,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend email', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend verification', 'woocommerce' ); ?></a>
 					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 				</td>
 			</tr>
@@ -129,7 +129,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 <?php if ( ! empty( $notifications ) ) : ?>
 
 	<?php if ( $has_pending ) : ?>
-		<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--active"><?php esc_html_e( 'Active notifications', 'woocommerce' ); ?></h2>
+		<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--active"><?php esc_html_e( 'Active', 'woocommerce' ); ?></h2>
 	<?php endif; ?>
 
 	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--active woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
