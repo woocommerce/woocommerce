@@ -120,10 +120,15 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 
 	$ids = wp_cache_get( $cache_key, $cache_group );
 
-	if ( false === $ids ) {
+	// A cached entry is only trusted while all of its coupons are still published, whichever key it was cached under.
+	$is_stale = false !== $ids && $invalidator->is_lookup_entry_stale( (array) $ids );
+
+	if ( false === $ids || $is_stale ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
 			wp_cache_set( $cache_key, $ids, $cache_group );
+		} elseif ( $is_stale ) {
+			wp_cache_delete( $cache_key, $cache_group );
 		}
 	}
 

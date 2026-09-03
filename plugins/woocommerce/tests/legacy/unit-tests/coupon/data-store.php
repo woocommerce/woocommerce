@@ -72,7 +72,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 		$coupon->delete( true );
 
-		// Deletion rotates the lookup namespace, so the code no longer resolves from the object cache.
+		// Deleting a published coupon removes its lookup entry, so the code no longer resolves from the object cache.
 		$ids = wp_cache_get( $invalidator->get_cache_key( $code ), 'coupons' );
 
 		$this->assertEquals( false, $ids, 'Object cache should not resolve the coupon code after deletion.' );

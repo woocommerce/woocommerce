@@ -218,7 +218,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 *
 		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status` listener:
 		 * the `doing_action( 'save_post' )` branch above writes the status with $wpdb directly, so no
-		 * transition fires and this is the only invalidation on that path.
+		 * transition fires and this is the only write-side invalidation on that path.
 		 */
 		if ( 'publish' !== $coupon->get_status() ) {
 			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( $coupon->get_code() );
