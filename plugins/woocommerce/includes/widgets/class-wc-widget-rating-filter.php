@@ -131,7 +131,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				)
 			);
 
-			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // WPCS: XSS ok.
+			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star rating markup from wc_get_star_rating_html() and a count already run through wp_kses().
 		}
 
 		echo '</ul>';
@@ -141,7 +141,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		if ( ! $found ) {
 			ob_end_clean();
 		} else {
-			echo ob_get_clean(); // WPCS: XSS ok.
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered widget markup; each dynamic value is escaped or annotated where it is rendered.
 		}
 	}
 }
