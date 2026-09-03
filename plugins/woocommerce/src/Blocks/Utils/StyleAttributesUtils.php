@@ -246,13 +246,13 @@ class StyleAttributesUtils {
 	public static function get_border_width_class_and_style( $attributes ) {
 		$custom_border = $attributes['style']['border'] ?? '';
 
-		if ( '' === $custom_border ) {
+		if ( ! is_array( $custom_border ) ) {
 			return self::EMPTY_STYLE;
 		}
 
 		$style = '';
 
-		if ( array_key_exists( 'width', ( $custom_border ) ) && ! empty( $custom_border['width'] ) ) {
+		if ( ! empty( $custom_border['width'] ) ) {
 			// Linked sides.
 			$style = 'border-width:' . $custom_border['width'] . ';';
 		} else {
@@ -279,13 +279,13 @@ class StyleAttributesUtils {
 	public static function get_border_style_class_and_style( $attributes ) {
 		$custom_border = $attributes['style']['border'] ?? '';
 
-		if ( '' === $custom_border ) {
+		if ( ! is_array( $custom_border ) ) {
 			return self::EMPTY_STYLE;
 		}
 
 		$style = '';
 
-		if ( array_key_exists( 'style', ( $custom_border ) ) && ! empty( $custom_border['style'] ) ) {
+		if ( ! empty( $custom_border['style'] ) ) {
 			$style = 'border-style:' . $custom_border['style'] . ';';
 		} else {
 			foreach ( $custom_border as $side => $value ) {
