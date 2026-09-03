@@ -148,7 +148,7 @@ test.describe(
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Active',
-						exact: true,
+							exact: true,
 						} )
 					).toBeVisible();
 					const activeTable = page.locator( ACTIVE_TABLE );
