@@ -39,6 +39,44 @@ class Woocommerce_Analytics {
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
 
 	/**
+	 * Whether the MU-plugin speed module is authorized to serve on this site.
+	 *
+	 * The module runs before plugins load, where the proxy tracking filter reads
+	 * false everywhere. Only `yes` serves: the module is installed from a request
+	 * that already wrote this, and on multisite one network-wide module file
+	 * answers for sites that never enabled anything.
+	 *
+	 * Tracks `should_install_proxy_speed_module()` rather than proxy tracking
+	 * alone, so revoking it in `maybe_remove_proxy_speed_module()` is not undone
+	 * by the next `init` while proxy tracking is still on.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
+
+	/**
+	 * Whether proxy tracking has ever been enabled on this site.
+	 *
+	 * Decides whether the REST route exists at all. Turning the feature off cannot
+	 * unregister it, because pages cached while it was on still tell their visitors
+	 * to POST events: a 404 loses every one of those silently, while the registered
+	 * route answers 403 with a reason. Sites that never turned it on never get the
+	 * endpoint.
+	 *
+	 * Sticky on purpose — it records that cached pages may exist, which staying off
+	 * for a while does not undo. `reset_proxy_tracking_state()` is the way to clear
+	 * it, for an uninstall routine or a site that wants the endpoint gone once the
+	 * caches holding those pages have expired.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
+
+	/**
 	 * Initializer.
 	 * Used to configure the WooCommerce Analytics package.
 	 *
@@ -80,6 +118,11 @@ class Woocommerce_Analytics {
 	 * @return bool
 	 */
 	public static function should_track_store() {
+		// Registered before any early return below: the MU-plugin speed module reads
+		// the mirrored option and keeps serving on its stale value otherwise, and the
+		// conditions those returns test say nothing about whether the feature is on.
+		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
+
 		// Ensure this is available, even with mu-plugins.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -176,11 +219,13 @@ class Woocommerce_Analytics {
 	 * Register REST API routes.
 	 *
 	 * The tracking proxy endpoint is unauthenticated by design — it exists to
-	 * receive front-end events — so it is registered only while proxy tracking is
-	 * enabled, rather than on every site running the package.
+	 * receive front-end events — so a site that has never used proxy tracking never
+	 * gets it. Once a site has used it the route stays registered and refuses while
+	 * the feature is off, rather than disappearing; see
+	 * PROXY_TRACKING_EVER_ENABLED_OPTION and `WC_Analytics_Tracking_Proxy::track_events()`.
 	 */
 	public static function register_rest_routes() {
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+		if ( 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
 			return;
 		}
 
@@ -189,7 +234,54 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Mirror the resolved proxy tracking state into PROXY_TRACKING_ENABLED_OPTION.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return void
+	 */
+	public static function sync_proxy_tracking_state() {
+		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
+			&& 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
+		}
+
+		// The module's authorization, not the feature's state: a module that should
+		// not be installed must not serve either, and this is what keeps a failed
+		// deletion from being re-authorized on the next request.
+		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
+
+		if ( get_option( self::PROXY_TRACKING_ENABLED_OPTION ) === $authorized ) {
+			return;
+		}
+
+		update_option( self::PROXY_TRACKING_ENABLED_OPTION, $authorized );
+	}
+
+	/**
+	 * Forget that proxy tracking was ever enabled, so the REST route stops being
+	 * registered.
+	 *
+	 * Separate from `maybe_remove_proxy_speed_module()`, which clears the module's
+	 * authorization but deliberately leaves this alone: removing the module does
+	 * not expire the cached pages this records.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return void
+	 */
+	public static function reset_proxy_tracking_state() {
+		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+	}
+
+	/**
 	 * Maybe update proxy speed module.
+	 *
+	 * Turning proxy tracking off uninstalls the module, and the REST route starts
+	 * refusing, so both halves stop serving. The module refuses on its own too,
+	 * because this runs on `admin_init` behind a day-long transient and cannot be
+	 * relied on to take effect promptly.
 	 */
 	public static function maybe_update_proxy_speed_module() {
 		// Skip if we've already checked recently.
@@ -199,7 +291,7 @@ class Woocommerce_Analytics {
 
 		$version = get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false );
 
-		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( self::should_install_proxy_speed_module() ) {
 			if ( $version !== self::PACKAGE_VERSION ) {
 				self::maybe_add_proxy_speed_module();
 			}
@@ -213,14 +305,38 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Whether the proxy speed module belongs on this site.
+	 *
+	 * It is an accelerator for the tracking proxy, so it needs both its own
+	 * opt-in and the feature it accelerates. Without the second condition,
+	 * turning proxy tracking off would leave an installed module answering
+	 * requests the REST route no longer serves.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return bool
+	 */
+	private static function should_install_proxy_speed_module() {
+		return \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
+			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+	}
+
+	/**
 	 * Maybe add proxy speed module.
 	 */
 	public static function maybe_add_proxy_speed_module() {
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( ! self::should_install_proxy_speed_module() ) {
 			return;
 		}
 
+		// The module fails closed on this option, so it must be written before the
+		// file exists, not merely on the next `init`.
+		self::sync_proxy_tracking_state();
+
 		if ( ! self::init_filesystem() ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: filesystem unavailable.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 
@@ -233,6 +349,9 @@ class Woocommerce_Analytics {
 
 		// If the mu-plugin directory doesn't exist, we can't copy the files.
 		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory could not be created.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 
@@ -296,6 +415,11 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Maybe removes the proxy speed module. This should be invoked when the plugin is deactivated.
+	 *
+	 * Also drops the module's authorization. MU-plugins load whether or not the
+	 * plugin carrying this package is active, so an undeletable module file left
+	 * behind by a deactivation would keep answering on a stale `yes`. The sticky
+	 * option is left alone: pages cached while the feature was on outlive both.
 	 */
 	public static function maybe_remove_proxy_speed_module() {
 		if ( ! self::init_filesystem() ) {
@@ -317,6 +441,7 @@ class Woocommerce_Analytics {
 		}
 
 		delete_option( self::PROXY_SPEED_MODULE_VERSION_OPTION );
+		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
 		delete_transient( self::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 	}
 

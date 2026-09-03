@@ -42,7 +42,8 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'track_events' ),
 					// Unauthenticated by design: this receives front-end events. The route
-					// is registered only while proxy tracking is enabled, and records via
+					// exists only on sites that have used proxy tracking, track_events()
+					// refuses while the feature is off, and it records via
 					// record_client_event(), which strips server-owned properties.
 					'permission_callback' => '__return_true',
 					'schema'              => array( $this, 'get_public_item_schema' ),
@@ -58,6 +59,17 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function track_events( $request ) {
+		// Refused rather than unregistered: pages cached while the feature was on
+		// still tell their visitors to POST here, and a 404 loses those events with
+		// no signal anywhere. Matches the MU-plugin speed module's own refusal.
+		if ( ! Features::is_proxy_tracking_enabled() ) {
+			return new \WP_Error(
+				'proxy_tracking_disabled',
+				'Proxy tracking is not enabled on this site.',
+				array( 'status' => 403 )
+			);
+		}
+
 		// Check consent before processing any events
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return new \WP_REST_Response(

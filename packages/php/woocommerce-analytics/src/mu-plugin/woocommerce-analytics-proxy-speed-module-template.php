@@ -134,6 +134,13 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
+		// Same skew, other class: process_proxy_request() reads this to decide whether
+		// to serve, and an older package lacking it throws where nothing can fall back.
+		if ( ! defined( '\Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded Woocommerce_Analytics predates the proxy tracking state option.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
 		return true;
 	}
 
@@ -171,6 +178,22 @@ class WooCommerceAnalyticsProxySpeed {
 	 * @return void
 	 */
 	private function process_proxy_request() {
+		// Features::is_proxy_tracking_enabled() cannot be used here: no plugin has
+		// registered that filter this early, so it reads false everywhere.
+		if ( 'yes' !== get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {
+			// Same body the REST controller's WP_Error produces, so a client has one
+			// shape to recognise whichever path answered.
+			$this->send_json_response(
+				array(
+					'code'    => 'proxy_tracking_disabled',
+					'message' => 'Proxy tracking is not enabled on this site.',
+					'data'    => array( 'status' => 403 ),
+				),
+				403
+			);
+			return;
+		}
+
 		// Apply magic quotes to superglobals ($_GET, $_POST, $_COOKIE, $_REQUEST) for compatibility with the regular API flow.
 		if ( function_exists( 'wp_magic_quotes' ) ) {
 			wp_magic_quotes();

@@ -936,20 +936,51 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'The template must not call the trusted entry point.'
 		);
 
+		// Nothing executes the template, so the direction of the comparison has to
+		// be asserted literally: inverting it serves exactly the requests it is
+		// there to refuse, and every other test stays green.
+		$this->assertStringContainsString(
+			"if ( 'yes' !== get_option( \\Automattic\\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) ) {",
+			$template,
+			'The template must refuse unless the option says yes; the REST gate cannot reach it.'
+		);
+		$this->assertStringContainsString(
+			"'code'    => 'proxy_tracking_disabled',",
+			$template,
+			'Both paths must refuse with one body shape, or a client has two to recognise.'
+		);
+		// Without the return, the module answers 403 and records the event anyway.
+		$this->assertStringContainsString(
+			"\t\t\t\t403\n\t\t\t);\n\t\t\treturn;",
+			$template,
+			'The refusal must stop the request, not just write a 403 body.'
+		);
+
 		$this->assertStringContainsString(
 			'MAX_CLIENT_EVENTS_PER_REQUEST',
 			$template,
 			'The template must cap the batch with the same constant as the REST controller.'
 		);
-		$this->assertSame(
-			1,
-			preg_match( '/defined\( \'([^\']*::[^\']+)\' \)/', $template, $matches ),
-			'The template must check the constant exists before reading it, since the autoloader can resolve an older package.'
-		);
-		$this->assertTrue(
-			defined( $matches[1] ),
-			"The guarded name must resolve, or load_autoloader() always returns false and the module never serves. Reviewers read the leading backslash in {$matches[1]} as breaking defined(); it does not, on any PHP this package supports."
-		);
+		// The autoloader resolves the highest version across active plugins, which can
+		// predate this file, so every package constant it reads needs a defined() guard
+		// in load_autoloader(). Collected rather than listed: a constant added to the
+		// template without a guard is a 500 nothing can fall back from.
+		preg_match_all( '/\\\\Automattic\\\\[A-Za-z_\\\\]*::[A-Z][A-Z0-9_]*/', $template, $reads );
+		preg_match_all( '/defined\\( \'([^\']+)\' \)/', $template, $guards );
+
+		$this->assertNotEmpty( $reads[0], 'The template is expected to read package constants.' );
+
+		foreach ( array_unique( $reads[0] ) as $constant ) {
+			$this->assertContains(
+				$constant,
+				$guards[1],
+				"load_autoloader() must check {$constant} exists before process_proxy_request() reads it."
+			);
+			$this->assertTrue(
+				defined( $constant ),
+				"The guarded name must resolve, or load_autoloader() always returns false and the module never serves. Reviewers read the leading backslash in {$constant} as breaking defined(); it does not, on any PHP this package supports."
+			);
+		}
 	}
 
 	/**

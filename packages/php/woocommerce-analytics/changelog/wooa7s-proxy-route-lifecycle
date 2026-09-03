@@ -1,0 +1,4 @@
+Significance: minor
+Type: security
+
+Keep the tracking proxy route registered once a site has used proxy tracking and answer 403 while the feature is off, so events from pages still held in a cache fail visibly instead of disappearing into a 404. Mirrors the module's authorization into an option the MU-plugin speed module can read before plugins load.
