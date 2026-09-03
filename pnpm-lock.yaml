@@ -3304,6 +3304,9 @@ importers:
       '@woocommerce/email-editor':
         specifier: workspace:*
         version: link:../../../../packages/js/email-editor
+      '@woocommerce/input-mask':
+        specifier: workspace:*
+        version: link:../../../../packages/js/input-mask
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../../../../packages/js/sanitize

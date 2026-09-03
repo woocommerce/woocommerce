@@ -212,6 +212,7 @@ class CheckoutFields {
 				'hidden'                     => false,
 				'required'                   => false,
 				'attributes'                 => [],
+				'mask'                       => '',
 				'show_in_order_confirmation' => true,
 				'sanitize_callback'          => array( $this, 'default_sanitize_callback' ),
 				'validate_callback'          => array( $this, 'default_validate_callback' ),
@@ -440,6 +441,12 @@ class CheckoutFields {
 				_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '8.6.0' );
 				return false;
 			}
+		}
+
+		if ( ! empty( $options['mask'] ) && ( ! is_string( $options['mask'] ) || 'text' !== ( $options['type'] ?? 'text' ) ) ) {
+			$message = sprintf( 'The mask for field "%s" must be a string on a text field. It will be ignored.', $id );
+			_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '11.2.0' );
+			unset( $options['mask'] );
 		}
 
 		if ( ! empty( $options['sanitize_callback'] ) && ! is_callable( $options['sanitize_callback'] ) ) {

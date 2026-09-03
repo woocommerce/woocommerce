@@ -214,4 +214,57 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			__internal_woocommerce_blocks_deregister_checkout_field( 'test-namespace/early-field' );
 		}
 	}
+
+	/**
+	 * A mask on a text field is kept.
+	 */
+	public function test_mask_is_kept_on_text_field() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked',
+				'label'    => 'Masked',
+				'location' => 'order',
+				'mask'     => '###-###',
+			)
+		);
+
+		$this->assertSame( '###-###', $this->controller->get_additional_fields()['test-namespace/masked']['mask'] );
+	}
+
+	/**
+	 * A mask on a non-text field warns the developer and is dropped.
+	 */
+	public function test_mask_on_non_text_field_is_dropped() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked-checkbox',
+				'label'    => 'Masked checkbox',
+				'location' => 'order',
+				'type'     => 'checkbox',
+				'mask'     => '###-###',
+			)
+		);
+
+		$this->assertSame( '', $this->controller->get_additional_fields()['test-namespace/masked-checkbox']['mask'] );
+	}
+
+	/**
+	 * A mask that is not a string warns the developer and is dropped.
+	 */
+	public function test_non_string_mask_is_dropped() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked-array',
+				'label'    => 'Masked array',
+				'location' => 'order',
+				'mask'     => array( '###-###' ),
+			)
+		);
+
+		$this->assertSame( '', $this->controller->get_additional_fields()['test-namespace/masked-array']['mask'] );
+	}
 }
