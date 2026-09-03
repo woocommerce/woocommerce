@@ -164,7 +164,9 @@ before( async () => {
 	// fragile.
 	cliContainerId = await discoverContainer( 'cli' );
 	wordpressContainerId = await discoverContainer( 'wordpress' );
-	testRoot = `/var/www/html/.woocommerce-blocks-e2e-quiescence-${ process.pid }-${ randomUUID() }`;
+	testRoot = `/var/www/html/.woocommerce-blocks-e2e-quiescence-${
+		process.pid
+	}-${ randomUUID() }`;
 	callLog = `${ testRoot }/wp-calls.jsonl`;
 
 	await dockerExec( cliContainerId, [
@@ -266,7 +268,9 @@ test( 'a held exclusive lock rejects requests with 503 until it is released', as
 	] );
 	assert.match( stdout, /^HTTP\/1\.[01] 503 / );
 	assert.ok(
-		stdout.includes( 'WooCommerce Blocks E2E database snapshot in progress.' )
+		stdout.includes(
+			'WooCommerce Blocks E2E database snapshot in progress.'
+		)
 	);
 
 	// The holder has exited, so the lock is released.
@@ -294,7 +298,8 @@ test( 'htaccess-lock-block.php removes any marker block and installs exactly one
 		] );
 	const readHtaccess = async () =>
 		( await dockerExec( cliContainerId, [ 'cat', htaccess ] ) ).stdout;
-	const run = ( mode ) => dockerExec( cliContainerId, [ 'php', script, mode ] );
+	const run = ( mode ) =>
+		dockerExec( cliContainerId, [ 'php', script, mode ] );
 
 	// Point a copy of the script at a scratch .htaccess so the live one is untouched.
 	await dockerExec( cliContainerId, [
