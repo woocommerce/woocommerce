@@ -1,0 +1,5 @@
+Significance: patch
+Type: performance
+Comment: Optimize StyleAttributesUtils so unused styles aren't computed
+
+
