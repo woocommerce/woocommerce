@@ -62593,6 +62593,12 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/Filterer.php
 
 		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\Filterer\:\:\$data_store is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Internal/ProductAttributesLookup/Filterer.php
+
+		-
 			message: '#^Call to an undefined method object\:\:schedule_single\(\)\.$#'
 			identifier: method.notFound
 			count: 1

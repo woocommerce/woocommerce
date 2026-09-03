@@ -5,16 +5,13 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 
 /**
  * Helper class for filtering products using the product attributes lookup table.
  */
-class Filterer implements RegisterHooksInterface {
+class Filterer {
 
 	/**
 	 * The product attributes lookup data store to use.
@@ -31,102 +28,14 @@ class Filterer implements RegisterHooksInterface {
 	private $lookup_table_name;
 
 	/**
-	 * Invalidations already performed in this request, keyed by product ID and the change that triggered them.
-	 *
-	 * @var array<string, true>
-	 */
-	private $performed_invalidations = array();
-
-	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 *
 	 * @param LookupDataStore $data_store The data store to use.
 	 */
 	final public function init( LookupDataStore $data_store ) {
 		$this->data_store        = $data_store;
 		$this->lookup_table_name = $data_store->get_lookup_table_name();
-	}
-
-	/**
-	 * Register this class instance to the appropriate hooks.
-	 *
-	 * @return void
-	 */
-	public function register() {
-		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
-		add_action( 'before_delete_post', array( $this, 'handle_before_delete_post' ), 10, 2 );
-	}
-
-	/**
-	 * Invalidate affected layered navigation counts when a product crosses the publish boundary.
-	 *
-	 * @internal
-	 *
-	 * @param string $new_status New post status.
-	 * @param string $old_status Old post status.
-	 * @param mixed  $post       Post object.
-	 *
-	 * @since 11.2.0
-	 */
-	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		if ( ! is_string( $new_status ) || ! is_string( $old_status ) ) {
-			return;
-		}
-
-		$was_published = ProductStatus::PUBLISH === $old_status;
-		$is_published  = ProductStatus::PUBLISH === $new_status;
-
-		if ( $was_published !== $is_published ) {
-			$this->maybe_invalidate_attribute_count_for_post( $post, "{$old_status}:{$new_status}" );
-		}
-	}
-
-	/**
-	 * Invalidate affected layered navigation counts before a product is permanently deleted.
-	 *
-	 * @internal
-	 *
-	 * @param int   $post_id Post ID.
-	 * @param mixed $post    Post object.
-	 *
-	 * @since 11.2.0
-	 */
-	public function handle_before_delete_post( $post_id, $post ): void {
-		$this->maybe_invalidate_attribute_count_for_post( $post, 'delete' );
-	}
-
-	/**
-	 * Invalidate layered navigation counts for the taxonomies a product or variation contributes to.
-	 *
-	 * One change to a variable product reaches this method once for the parent and once per variation, which all
-	 * resolve to the same parent. Repeats of the same change are skipped so the parent is only looked up once,
-	 * while a later, different change to the same product still invalidates.
-	 *
-	 * @param mixed  $post  Post object.
-	 * @param string $event The change being handled.
-	 */
-	private function maybe_invalidate_attribute_count_for_post( $post, string $event ): void {
-		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
-		$product_or_parent_id = 'product_variation' === $post->post_type ? (int) $post->post_parent : (int) $post->ID;
-
-		if ( 0 === $product_or_parent_id ) {
-			return;
-		}
-
-		$invalidation_key = $product_or_parent_id . ':' . $event;
-
-		if ( isset( $this->performed_invalidations[ $invalidation_key ] ) ) {
-			return;
-		}
-
-		$this->performed_invalidations[ $invalidation_key ] = true;
-
-		\WC_Cache_Helper::invalidate_attribute_count( $this->data_store->get_taxonomies_for_product( $product_or_parent_id ) );
 	}
 
 	/**
@@ -182,7 +91,6 @@ class Filterer implements RegisterHooksInterface {
 		} else {
 			$in_stock_clause = '';
 		}
-		$filterable_attribute_where_clause = $this->data_store->get_filterable_attribute_where_clause( 'lt' );
 
 		$attribute_ids_for_and_filtering = array();
 		$clauses                         = array();
@@ -205,7 +113,6 @@ class Filterer implements RegisterHooksInterface {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE term_id in {$term_ids_to_filter_by_list}
-							AND {$filterable_attribute_where_clause}
 							{$in_stock_clause}
 						)";
 				}
@@ -215,7 +122,6 @@ class Filterer implements RegisterHooksInterface {
 		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
 			$count                      = count( $attribute_ids_for_and_filtering );
 			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
-			$published_variation_exists = $this->data_store->get_published_variation_exists_clause( 'lt' );
 			$clauses[]                  = "
 				{$clause_root}
 				SELECT product_or_parent_id
@@ -229,7 +135,6 @@ class Filterer implements RegisterHooksInterface {
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=1
-				AND {$published_variation_exists}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_or_parent_id
@@ -375,9 +280,8 @@ class Filterer implements RegisterHooksInterface {
 		 *
 		 * @since 9.5.0.
 		 */
-		$hide_out_of_stock                 = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-		$in_stock_clause                   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
-		$filterable_attribute_where_clause = $this->data_store->get_filterable_attribute_where_clause( $this->lookup_table_name );
+		$hide_out_of_stock = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
 
 		$query           = array();
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
@@ -394,7 +298,6 @@ class Filterer implements RegisterHooksInterface {
 			{$tax_query_sql['where']} {$meta_query_sql['where']}
 			AND {$this->lookup_table_name}.taxonomy='{$encoded_taxonomy}'
 			AND {$this->lookup_table_name}.term_id IN $term_ids_sql
-			AND {$filterable_attribute_where_clause}
 			{$in_stock_clause}";
 
 		if ( ! empty( $term_ids ) ) {
@@ -414,9 +317,8 @@ class Filterer implements RegisterHooksInterface {
 				}
 
 				if ( ! empty( $and_term_ids ) ) {
-					$terms_count                = count( $and_term_ids );
-					$term_ids_list              = '(' . join( ',', $and_term_ids ) . ')';
-					$published_variation_exists = $this->data_store->get_published_variation_exists_clause( 'lt' );
+					$terms_count   = count( $and_term_ids );
+					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 					// (causes the filtering subquery to be executed only once).
 					$query['where'] .= "
@@ -432,7 +334,6 @@ class Filterer implements RegisterHooksInterface {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=1
-							AND {$published_variation_exists}
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 							GROUP BY product_or_parent_id

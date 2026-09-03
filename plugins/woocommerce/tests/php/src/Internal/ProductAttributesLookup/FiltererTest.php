@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -88,11 +87,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
-			delete_transient( 'wc_layered_nav_counts_' . $taxonomy_name );
 			unregister_taxonomy( $taxonomy_name );
 		}
 
-		\WC_Cache_Helper::delete_transients_on_shutdown();
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
 		parent::tearDown();
@@ -118,32 +115,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				'third'  => array( 3 => 3 ),
 			),
 			$limited_counts
-		);
-	}
-
-	/**
-	 * @testdox Status-transition hooks with non-string statuses are ignored without errors.
-	 * @dataProvider non_string_status_transition_provider
-	 *
-	 * @param mixed $new_status New post status.
-	 * @param mixed $old_status Old post status.
-	 */
-	public function test_transition_callback_ignores_non_string_status_values( $new_status, $old_status ): void {
-		$this->expectNotToPerformAssertions();
-
-		$filterer = new Filterer();
-		$filterer->handle_transition_post_status( $new_status, $old_status, null );
-	}
-
-	/**
-	 * Non-string status values passed to the transition callback.
-	 *
-	 * @return array<string, array{mixed, mixed}>
-	 */
-	public static function non_string_status_transition_provider(): array {
-		return array(
-			'non-string new status' => array( new \stdClass(), ProductStatus::PUBLISH ),
-			'non-string old status' => array( ProductStatus::PUBLISH, new \stdClass() ),
 		);
 	}
 
@@ -556,14 +527,14 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Assert that the filter by attribute widget lists a given set of terms for an attribute.
+	 * Assert that the filter by attribute widget lists a given set of terms for an attribute
+	 * (with a count of 1 each)
 	 *
 	 * @param string $attribute_name The attribute name the terms belong to.
-	 * @param array  $expected_terms The labels of the terms that are expected to be listed.
+	 * @param array  $expected_terms The labelss of the terms that are expected to be listed.
 	 * @param string $filter_type The filter type in use, "and" or "or".
-	 * @param int    $expected_count Expected count for each listed term.
 	 */
-	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and', $expected_count = 1 ) {
+	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
 		global $wpdb;
 
 		$widget = new class() extends \WC_Widget_Layered_Nav {
@@ -574,18 +545,12 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			// phpcs:enable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 		};
 
-		$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
-		$terms    = get_terms(
-			array(
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => true,
-			)
-		);
+		$taxonomy         = wc_attribute_taxonomy_name( $attribute_name );
+		$term_ids_by_name = wp_list_pluck( get_terms( $taxonomy, array( 'hide_empty' => '1' ) ), 'term_id', 'name' );
 
-		$term_ids_by_name = wp_list_pluck( $terms, 'term_id', 'name' );
-		$expected         = array();
+		$expected = array();
 		foreach ( $expected_terms as $term ) {
-			$expected[ $term_ids_by_name[ $term ] ] = $expected_count;
+			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
 		$scope_to_owned_products = function ( $query ) use ( $wpdb ) {
@@ -601,137 +566,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
 		}
-
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
-	}
-
-	/**
-	 * Create a variable product with a single Color variation.
-	 *
-	 * @param array       $colors Color terms configured on the parent.
-	 * @param string|null $defining_color The variation's defining Color term, or null for an "Any Color" variation.
-	 * @param array       $other_attributes Non-variation attributes configured on the parent.
-	 * @return array Product and variation IDs.
-	 */
-	private function create_variable_product_with_color_variation( $colors, $defining_color = null, $other_attributes = array() ) {
-		return $this->create_variable_product(
-			array(
-				'variation_attributes'     => array( 'Color' => $colors ),
-				'non_variation_attributes' => $other_attributes,
-				'variations'               => array(
-					array(
-						'in_stock'            => true,
-						'defining_attributes' => array( 'Color' => $defining_color ),
-					),
-				),
-			)
-		);
-	}
-
-	/**
-	 * Create two published Red variable products and prime the cached layered nav counts from them.
-	 *
-	 * @return array The created products.
-	 */
-	private function create_red_products_and_prime_counts() {
-		$this->set_use_lookup_table( true );
-		$this->create_product_attribute( 'Color', array( 'Red' ) );
-		$products = array(
-			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
-			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
-		);
-		\WC_Cache_Helper::delete_transients_on_shutdown();
-
-		$this->do_product_request( array() );
-		$this->assert_counters( 'Color', array( 'Red' ), 'and', 2 );
-
-		return $products;
-	}
-
-	/**
-	 * Assert that a private variation's lookup rows are retained.
-	 *
-	 * @param int $variation_id Variation ID.
-	 * @param int $expected_row_count Expected retained row count.
-	 */
-	private function assert_private_variation_lookup_rows_are_retained( $variation_id, $expected_row_count = 1 ) {
-		global $wpdb;
-
-		$this->assertSame( 'private', get_post_status( $variation_id ) );
-		$this->assertSame(
-			$expected_row_count,
-			(int) $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND taxonomy = %s AND is_variation_attribute = 1",
-					$variation_id,
-					wc_attribute_taxonomy_name( 'Color' )
-				)
-			)
-		);
-	}
-
-	/**
-	 * @testdox Private variations are excluded from lookup filtering and cached layered-nav counts.
-	 */
-	public function test_lookup_filtering_and_counts_exclude_private_variations() {
-		$products = $this->create_red_products_and_prime_counts();
-
-		wp_update_post(
-			array(
-				'ID'          => $products[0]['variation_ids'][0],
-				'post_status' => 'private',
-			)
-		);
-		$this->assert_private_variation_lookup_rows_are_retained( $products[0]['variation_ids'][0] );
-		\WC_Cache_Helper::delete_transients_on_shutdown();
-
-		$this->do_product_request( array() );
-		$this->assert_counters( 'Color', array( 'Red' ) );
-		\WC_Query::reset_chosen_attributes();
-		$this->assertSame( array( $products[1]['id'] ), $this->do_product_request( array( 'Color' => array( 'Red' ) ) ) );
-	}
-
-	/**
-	 * @testdox Permanently deleting a published variation invalidates cached layered-nav counts.
-	 */
-	public function test_deleting_published_variation_invalidates_cached_counts() {
-		$products = $this->create_red_products_and_prime_counts();
-
-		$variation = wc_get_product( $products[0]['variation_ids'][0] );
-		$this->assertInstanceOf( \WC_Product_Variation::class, $variation );
-		$variation->delete( true );
-		\WC_Cache_Helper::delete_transients_on_shutdown();
-
-		$this->do_product_request( array() );
-		$this->assert_counters( 'Color', array( 'Red' ) );
-	}
-
-	/**
-	 * @testdox A private Any variation is excluded from multi-term AND filtering and cross-taxonomy counts.
-	 */
-	public function test_multi_term_and_filtering_excludes_private_any_variations() {
-		$this->set_use_lookup_table( true );
-		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
-		$this->create_product_attribute( 'Features', array( 'Washable' ) );
-		$products = array(
-			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
-			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
-		);
-
-		wp_update_post(
-			array(
-				'ID'          => $products[0]['variation_ids'][0],
-				'post_status' => 'private',
-			)
-		);
-		$this->assert_private_variation_lookup_rows_are_retained( $products[0]['variation_ids'][0], 2 );
-
-		$this->assertSame(
-			array( $products[1]['id'] ),
-			$this->do_product_request( array( 'Color' => array( 'Blue', 'Red' ) ), array( 'Color' => 'and' ) )
-		);
-
-		$this->assert_counters( 'Features', array( 'Washable' ) );
 	}
 
 	/**
