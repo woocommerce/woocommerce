@@ -1725,6 +1725,48 @@ importers:
 
   packages/js/extend-cart-checkout-block: {}
 
+  packages/js/input-mask:
+    devDependencies:
+      '@babel/core':
+        specifier: catalog:tooling
+        version: 7.25.7
+      '@types/jest':
+        specifier: 29.5.x
+        version: 29.5.14
+      '@woocommerce/eslint-config':
+        specifier: workspace:*
+        version: link:../../../tools/eslint-config
+      '@woocommerce/eslint-plugin':
+        specifier: workspace:*
+        version: link:../eslint-plugin
+      '@woocommerce/internal-build':
+        specifier: workspace:*
+        version: link:../internal-build
+      '@woocommerce/internal-js-tests':
+        specifier: workspace:*
+        version: link:../internal-js-tests
+      eslint:
+        specifier: ^10.0.0
+        version: 10.7.0(jiti@2.6.1)
+      jest:
+        specifier: 29.5.x
+        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      jest-cli:
+        specifier: 29.5.x
+        version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      jest-environment-jsdom:
+        specifier: 29.5.x
+        version: 29.5.0
+      rimraf:
+        specifier: 5.0.5
+        version: 5.0.5
+      ts-jest:
+        specifier: 29.1.x
+        version: 29.1.5(@babel/core@7.25.7)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.25.7))(esbuild@0.27.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(typescript@5.7.3)
+      typescript:
+        specifier: 5.7.x
+        version: 5.7.3
+
   packages/js/internal-build:
     dependencies:
       '@automattic/color-studio':
