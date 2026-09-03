@@ -12,11 +12,11 @@ import {
 	getProductLabels,
 } from '../../../lib/async-requests';
 
-const DOWLOADS_REPORT_CHARTS_FILTER =
+const DOWNLOADS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_downloads_report_charts';
-const DOWLOADS_REPORT_FILTERS_FILTER =
+const DOWNLOADS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_downloads_report_filters';
-const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
+const DOWNLOADS_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_downloads_report_advanced_filters';
 
 /**
@@ -29,7 +29,7 @@ const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
  * @filter woocommerce_admin_downloads_report_charts
  * @param {Array.<chart>} charts Report charts.
  */
-export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
+export const charts = applyFilters( DOWNLOADS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'download_count',
 		label: __( 'Downloads', 'woocommerce' ),
@@ -47,7 +47,7 @@ export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
  * @filter woocommerce_admin_downloads_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters( DOWNLOADS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
@@ -74,7 +74,7 @@ export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
  * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
  */
 export const advancedFilters = applyFilters(
-	DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER,
+	DOWNLOADS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
 			'Downloads match <select/> filters',

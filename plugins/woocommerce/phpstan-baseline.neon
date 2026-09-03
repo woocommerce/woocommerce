@@ -24223,12 +24223,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
 
 		-
-			message: '#^Parameter \#1 \$commentarr of function wp_update_comment expects array, array\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
-
-		-
 			message: '#^Parameter \#1 \$data_object of method WP_REST_Controller\:\:update_additional_fields_for_object\(\) expects object, WP_Comment\|null given\.$#'
 			identifier: argument.type
 			count: 2

@@ -51,8 +51,12 @@ window.wcSettingsUI.registerSettingsExtension( {
 				'Registered settings UI component',
 				window.wp.element.createElement( 'input', {
 					'aria-label': 'Registered component value',
-					onChange: function ( event ) { props.onChange( event.target.value ); },
-					value: typeof props.value === 'string' ? props.value : '',
+					onChange: function ( event ) {
+						var change = {};
+						change[ props.field.id ] = event.target.value;
+						props.onChange( change );
+					},
+					value: String( props.field.getValue( { item: props.data } ) ?? '' ),
 				} )
 			);
 		},

@@ -184,7 +184,7 @@ class Features {
 	/**
 	 * Gets a build configured array of enabled WooCommerce Admin features/sections, but does not respect optionally disabled features.
 	 *
-	 * @return array Enabled Woocommerce Admin features/sections.
+	 * @return array Enabled WooCommerce Admin features/sections.
 	 */
 	public static function get_features() {
 		return apply_filters( 'woocommerce_admin_features', array() );
@@ -310,7 +310,7 @@ class Features {
 	/**
 	 * Gets a build configured array of enabled WooCommerce Admin respecting optionally disabled features.
 	 *
-	 * @return array Enabled Woocommerce Admin features/sections.
+	 * @return array Enabled WooCommerce Admin features/sections.
 	 */
 	public static function get_available_features() {
 		$features                     = self::get_features_with_legacy_compatibility_defaults();
@@ -518,7 +518,7 @@ class Features {
 	/**
 	 * Gets WooCommerce Admin features with legacy compatibility defaults before public filtering.
 	 *
-	 * @return array Enabled Woocommerce Admin features/sections.
+	 * @return array Enabled WooCommerce Admin features/sections.
 	 */
 	private static function get_features_with_legacy_compatibility_defaults() {
 		/**
