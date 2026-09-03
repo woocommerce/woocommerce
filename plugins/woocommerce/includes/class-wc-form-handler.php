@@ -940,7 +940,7 @@ class WC_Form_Handler {
 	/**
 	 * Redirect to a clean URL after cancel_order() handled a request during wp_loaded without an explicit redirect.
 	 *
-	 * This runs at the end of wp_loaded, after any re-registered cancel_order() callback.
+	 * This runs at the end of wp_loaded, after a re-registered priority-20 cancel_order() callback.
 	 * Keeping the redirect out of cancel_order() preserves its return behavior for code
 	 * that calls it directly without an explicit redirect, while browser requests still
 	 * leave the state-changing URL.
