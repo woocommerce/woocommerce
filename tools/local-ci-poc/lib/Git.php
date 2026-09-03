@@ -63,6 +63,18 @@ final class Git {
 	}
 
 	/**
+	 * The SHA of the trunk that was just fetched.
+	 *
+	 * Callers must diff against this rather than against the branch *name*. A
+	 * local branch called trunk can be many commits stale, and diffing against it
+	 * reports files as changed that the pull request never touched — which makes
+	 * the planner schedule work CI would not.
+	 */
+	public static function fetched_trunk_sha(): string {
+		return self::output( 'rev-parse FETCH_HEAD' );
+	}
+
+	/**
 	 * How many commits trunk has that this branch does not.
 	 *
 	 * Reads FETCH_HEAD rather than a remote-tracking ref, because that is what

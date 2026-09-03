@@ -135,7 +135,7 @@ Output::pass( 'up to date with trunk — HEAD is the tree CI would merge and tes
 Output::heading( '3 · Ask the planner what CI would run for this diff' );
 Output::detail( 'the same ci-jobs tool CI uses, run locally:' );
 
-$planner       = new JobPlanner( TRUNK_BRANCH );
+$planner       = new JobPlanner( Git::fetched_trunk_sha() );
 $eligible_jobs = $planner->eligible_jobs();
 $planned_count = count( $eligible_jobs );
 $eligible_jobs = JobPlanner::only( $eligible_jobs, $options->only );

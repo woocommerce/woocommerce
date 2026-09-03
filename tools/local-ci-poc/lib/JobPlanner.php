@@ -30,17 +30,21 @@ final class JobPlanner {
 	private const ELIGIBLE_NAME_PREFIX = 'JavaScript';
 
 	/**
-	 * Branch the planner compares against.
+	 * Commit the planner compares against.
+	 *
+	 * A resolved SHA, never a branch name: a local branch called trunk can be
+	 * stale, and diffing against a stale base plans jobs the pull request does
+	 * not actually require.
 	 *
 	 * @var string
 	 */
-	private $trunk;
+	private $base_sha;
 
 	/**
-	 * @param string $trunk Branch the planner compares against.
+	 * @param string $base_sha Commit the planner compares against.
 	 */
-	public function __construct( string $trunk ) {
-		$this->trunk = $trunk;
+	public function __construct( string $base_sha ) {
+		$this->base_sha = $base_sha;
 	}
 
 	/**
@@ -127,7 +131,7 @@ final class JobPlanner {
 			sprintf(
 				'GITHUB_ACTIONS=true GITHUB_OUTPUT=%s pnpm utils ci-jobs --base-ref %s 2>/dev/null',
 				escapeshellarg( $output_file ),
-				escapeshellarg( $this->trunk )
+				escapeshellarg( $this->base_sha )
 			)
 		);
 
