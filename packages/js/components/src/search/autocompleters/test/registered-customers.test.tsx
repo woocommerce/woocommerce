@@ -9,15 +9,13 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import customerNames from '../customer-names';
-import customers from '../customers';
 import registeredCustomers from '../registered-customers';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 const mockedApiFetch = apiFetch as unknown as jest.Mock;
 
-describe( 'customers autocompleter', () => {
+describe( 'registered customers autocompleter', () => {
 	const named = {
 		id: 1,
 		name: 'Zoe Bloggs',
@@ -38,27 +36,12 @@ describe( 'customers autocompleter', () => {
 
 	const getLabelText = ( customer: unknown, query: string ) => {
 		const { container } = render(
-			<>{ customers.getOptionLabel( customer, query ) }</>
+			<>{ registeredCustomers.getOptionLabel( customer, query ) }</>
 		);
 		return container.textContent;
 	};
 
-	it( 'searches every customer field, unlike the name-only completer', () => {
-		customers.options( 'zoe' );
-		expect(
-			getQueryArg( mockedApiFetch.mock.calls[ 0 ][ 0 ].path, 'searchby' )
-		).toBe( 'all' );
-
-		mockedApiFetch.mockReset();
-		mockedApiFetch.mockResolvedValue( [] );
-
-		customerNames.options( 'zoe' );
-		expect(
-			getQueryArg( mockedApiFetch.mock.calls[ 0 ][ 0 ].path, 'searchby' )
-		).toBe( 'name' );
-	} );
-
-	it( 'excludes guests from the registered-only completer', () => {
+	it( 'searches every customer field, and excludes guests', () => {
 		registeredCustomers.options( 'zoe' );
 		const path = mockedApiFetch.mock.calls[ 0 ][ 0 ].path;
 
@@ -67,7 +50,7 @@ describe( 'customers autocompleter', () => {
 	} );
 
 	it( 'matches customers on their name, username and email', () => {
-		expect( customers.getOptionKeywords( named ) ).toEqual( [
+		expect( registeredCustomers.getOptionKeywords( named ) ).toEqual( [
 			'Zoe Bloggs',
 			'bloggs',
 			'zoe@example.test',
@@ -78,7 +61,7 @@ describe( 'customers autocompleter', () => {
 	} );
 
 	it( 'keeps the joined keyword usable when the customer has no name', () => {
-		expect( customers.getOptionKeywords( unnamed ) ).toContain(
+		expect( registeredCustomers.getOptionKeywords( unnamed ) ).toContain(
 			'zoemarketing hello@zoeshop.test'
 		);
 	} );
@@ -97,45 +80,34 @@ describe( 'customers autocompleter', () => {
 		expect( getLabelText( unnamed, 'zoemarketing' ) ).toBe(
 			'zoemarketing'
 		);
-		expect( customers.getOptionCompletion( unnamed ) ).toEqual( {
+		expect( registeredCustomers.getOptionCompletion( unnamed ) ).toEqual( {
 			key: 2,
 			label: 'zoemarketing',
 		} );
 	} );
 
 	it( 'highlights the part of the suggestion that matched', () => {
-		render( <>{ customers.getOptionLabel( named, 'Blog' ) }</> );
+		render( <>{ registeredCustomers.getOptionLabel( named, 'Blog' ) }</> );
 
 		expect( screen.getByText( 'Blog' ).tagName ).toBe( 'STRONG' );
+	} );
+
+	it( 'highlights the match inside the appended field', () => {
+		render( <>{ registeredCustomers.getOptionLabel( named, 'example' ) }</> );
+
+		expect( screen.getByText( 'example' ).tagName ).toBe( 'STRONG' );
 	} );
 
 	it( 'skips the highlight when the match spans two fields', () => {
 		// 'Bloggs bloggs' only matches the name and username joined together,
 		// so there is no match to highlight in the suggestion.
 		const { container } = render(
-			<>{ customers.getOptionLabel( named, 'Bloggs bloggs' ) }</>
+			<>
+				{ registeredCustomers.getOptionLabel( named, 'Bloggs bloggs' ) }
+			</>
 		);
 
 		expect( container.textContent ).toBe( 'Zoe Bloggs' );
 		expect( container.querySelector( 'strong' ) ).toBeNull();
-	} );
-
-	it( 'offers a free text option worded for the fields it searches', () => {
-		const getFreeTextLabel = (
-			completer: typeof customers,
-			query: string
-		) => {
-			const { container } = render(
-				<>{ completer.getFreeTextOptions?.( query )[ 0 ].label }</>
-			);
-			return container.textContent;
-		};
-
-		expect( getFreeTextLabel( customers, 'zoe' ) ).toBe(
-			'All customers matching zoe'
-		);
-		expect( getFreeTextLabel( customerNames, 'zoe' ) ).toBe(
-			'All customers with names that include zoe'
-		);
 	} );
 } );

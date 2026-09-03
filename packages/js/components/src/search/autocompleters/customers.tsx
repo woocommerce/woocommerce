@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import { decodeEntities } from '@wordpress/html-entities';
 import apiFetch from '@wordpress/api-fetch';
 import interpolateComponents from '@automattic/interpolate-components';
 import { createElement } from '@wordpress/element';
@@ -14,64 +13,14 @@ import { createElement } from '@wordpress/element';
 import { computeSuggestionMatch } from './utils';
 import { AutoCompleter } from './types';
 
-type Customer = {
-	id: number;
-	name?: string;
-	username?: string;
-	email?: string;
-};
-
-/**
- * Get the name to display for a customer. Customers can be registered without a
- * first or last name, so fall back to the fields that are always set.
- *
- * @param customer Customer as returned by the API.
- * @return The customer's display name.
- */
-const getCustomerName = ( customer: Customer ) =>
-	customer.name || customer.username || customer.email || '';
-
-/**
- * Get the text of a suggestion. The name is used on its own when it matches the
- * search term, otherwise the username or email that did match is appended so
- * it's clear why the customer is listed.
- *
- * @param customer Customer as returned by the API.
- * @param query    The search term.
- * @return The suggestion text.
- */
-const getSuggestion = ( customer: Customer, query: string ) => {
-	const name = getCustomerName( customer );
-	const search = query.toLocaleLowerCase();
-
-	if ( name.toLocaleLowerCase().includes( search ) ) {
-		return name;
-	}
-
-	const matched = [ customer.username, customer.email ].find(
-		( field ) => field?.toLocaleLowerCase().includes( search )
-	);
-
-	if ( ! matched ) {
-		return name;
-	}
-
-	return sprintf(
-		/* translators: 1: Customer name. 2: The customer username or email address that matched the search term. */
-		__( '%1$s (%2$s)', 'woocommerce' ),
-		name,
-		matched
-	);
-};
-
 const completer: AutoCompleter = {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
-	options( search ) {
-		const query = search
+	options( name ) {
+		const query = name
 			? {
-					search,
-					searchby: 'all',
+					search: name,
+					searchby: 'name',
 					per_page: 10,
 			  }
 			: {};
@@ -84,18 +33,14 @@ const completer: AutoCompleter = {
 		return customer.id;
 	},
 	getOptionKeywords( customer ) {
-		const fields = [ customer.name, customer.username, customer.email ];
-		// The API matches the search term against these fields joined together,
-		// so the joined string has to be a keyword too. Without it a term that
-		// spans two fields is matched by the API and then filtered back out.
-		return [ ...fields, fields.filter( Boolean ).join( ' ' ) ];
+		return [ customer.name ];
 	},
 	getFreeTextOptions( query ) {
 		const label = (
 			<span key="name" className="woocommerce-search__result-name">
 				{ interpolateComponents( {
 					mixedString: __(
-						'All customers matching {{query /}}',
+						'All customers with names that include {{query /}}',
 						'woocommerce'
 					),
 					components: {
@@ -117,33 +62,12 @@ const completer: AutoCompleter = {
 		return [ nameOption ];
 	},
 	getOptionLabel( customer, query ) {
-		const suggestion = getSuggestion( customer, query );
-
-		// A term can match the customer's fields joined together without
-		// appearing in any single one (see getOptionKeywords). There is no
-		// match to highlight in the suggestion then, so render it plain.
-		if (
-			! suggestion
-				.toLocaleLowerCase()
-				.includes( query.toLocaleLowerCase() )
-		) {
-			return (
-				<span
-					key="name"
-					className="woocommerce-search__result-name"
-					aria-label={ suggestion }
-				>
-					{ decodeEntities( suggestion ) }
-				</span>
-			);
-		}
-
-		const match = computeSuggestionMatch( suggestion, query );
+		const match = computeSuggestionMatch( customer.name, query );
 		return (
 			<span
 				key="name"
 				className="woocommerce-search__result-name"
-				aria-label={ suggestion }
+				aria-label={ customer.name }
 			>
 				{ match?.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
@@ -158,7 +82,7 @@ const completer: AutoCompleter = {
 	getOptionCompletion( customer ) {
 		return {
 			key: customer.id,
-			label: getCustomerName( customer ),
+			label: customer.name,
 		};
 	},
 };

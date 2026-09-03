@@ -9,11 +9,7 @@ import { useSelect } from '@wordpress/data';
  */
 import CustomersReportTable from '../table';
 
-const captured = {
-	getRowsContent: null,
-	getHeadersContent: null,
-	props: null,
-};
+const captured = { getRowsContent: null, getHeadersContent: null };
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -54,7 +50,6 @@ jest.mock( '../../../components/report-table', () => ( {
 	default: ( props ) => {
 		captured.getRowsContent = props.getRowsContent;
 		captured.getHeadersContent = props.getHeadersContent;
-		captured.props = props;
 		return null;
 	},
 } ) );
@@ -273,27 +268,5 @@ describe( 'CustomersReportTable phone cells', () => {
 
 		expect( headers[ BILLING_PHONE_COL ].key ).toBe( 'billing_phone' );
 		expect( headers[ SHIPPING_PHONE_COL ].key ).toBe( 'shipping_phone' );
-	} );
-} );
-
-describe( 'CustomersReportTable search', () => {
-	beforeEach( () => {
-		jest.clearAllMocks();
-		mockCountriesStore( [] );
-		captured.props = null;
-		render( <CustomersReportTable query={ {} } /> );
-	} );
-
-	it( 'searches by customer name only', () => {
-		// The picked label is resolved back to ids through
-		// /wc-analytics/customers?search=<label>, which matches on name alone.
-		// A completer that also matched usernames and emails would offer
-		// customers registered without a name, and picking one would then
-		// resolve to nothing and empty the table.
-		expect( captured.props.searchType ).toBe( 'customerNames' );
-	} );
-
-	it( 'keeps customers as the query parameter for picked rows', () => {
-		expect( captured.props.searchBy ).toBe( 'customers' );
 	} );
 } );

@@ -329,7 +329,6 @@ function CustomersReportTable( {
 				placeholder: __( 'Search by customer name', 'woocommerce' ),
 			} }
 			searchBy="customers"
-			searchType="customerNames"
 			title={ __( 'Customers', 'woocommerce' ) }
 			columnPrefsKey="customers_report_columns"
 			filters={ filters }
