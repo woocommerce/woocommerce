@@ -696,9 +696,10 @@ jQuery( function ( $ ) {
 		 * Check if have some changes before leave the page
 		 *
 		 * @param {Function} callback Called once saving is complete
+		 * @param {Function} onError  Called when saving fails
 		 * @return {Bool}
 		 */
-		check_for_changes: function ( callback ) {
+		check_for_changes: function ( callback, onError ) {
 			var need_update = $( '#variable_product_options' ).find(
 				'.woocommerce_variations .variation-needs-update'
 			);
@@ -710,15 +711,8 @@ jQuery( function ( $ ) {
 					)
 				) {
 					wc_meta_boxes_product_variations_ajax.save_changes(
-						function ( response, success ) {
-							if ( typeof callback === 'function' ) {
-								window.setTimeout( function () {
-									callback(
-										false === success ? false : response
-									);
-								}, 0 );
-							}
-						}
+						callback,
+						onError
 					);
 				} else {
 					need_update.removeClass( 'variation-needs-update' );
@@ -846,13 +840,15 @@ jQuery( function ( $ ) {
 		 * Save variations changes
 		 *
 		 * @param {Function} callback Called once saving is complete
+		 * @param {Function} onError  Called when saving fails
 		 */
-		save_changes: function ( callback ) {
+		save_changes: function ( callback, onError ) {
 			var wrapper = $( '#variable_product_options' ).find(
 					'.woocommerce_variations'
 				),
 				need_update = $( '.variation-needs-update', wrapper ),
-				data = {};
+				data = {},
+				request;
 
 			// Save only with products need update.
 			if ( 0 < need_update.length ) {
@@ -868,11 +864,11 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes_variations.post_id;
 				data[ 'product-type' ] = $( '#product-type' ).val();
 
-				$.ajax( {
+				request = $.ajax( {
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,
 					data: data,
 					type: 'POST',
-					success: function ( response ) {
+					success: function () {
 						// Allow change page, delete and add new variations
 						need_update.removeClass( 'variation-needs-update' );
 						$(
@@ -882,20 +878,20 @@ jQuery( function ( $ ) {
 						$( '#woocommerce-product-data' ).trigger(
 							'woocommerce_variations_saved'
 						);
-
-						if ( typeof callback === 'function' ) {
-							callback( response, true );
-						}
-					},
-					error: function () {
-						if ( typeof callback === 'function' ) {
-							callback( null, false );
-						}
-					},
-					complete: function () {
-						wc_meta_boxes_product_variations_ajax.unblock();
 					},
 				} );
+
+				request.always( function () {
+					wc_meta_boxes_product_variations_ajax.unblock();
+				} );
+
+				if ( typeof callback === 'function' ) {
+					request.done( callback );
+				}
+
+				if ( typeof onError === 'function' ) {
+					request.fail( onError );
+				}
 			}
 		},
 
@@ -910,13 +906,8 @@ jQuery( function ( $ ) {
 			);
 
 			wc_meta_boxes_product_variations_ajax.save_changes( function (
-				error,
-				success
+				error
 			) {
-				if ( false === success ) {
-					return;
-				}
-
 				var wrapper = $( '#variable_product_options' ).find(
 						'.woocommerce_variations'
 					),
@@ -962,11 +953,7 @@ jQuery( function ( $ ) {
 		/**
 		 * After saved, continue with form submission
 		 */
-		save_on_submit_done: function ( response, success ) {
-			if ( false === success ) {
-				return;
-			}
-
+		save_on_submit_done: function () {
 			var postForm = $( 'form#post' ),
 				callerid = postForm.data( 'callerid' );
 
@@ -1408,12 +1395,7 @@ jQuery( function ( $ ) {
 					break;
 			}
 
-			var run_bulk_action = function ( response ) {
-				if ( false === response ) {
-					$( '#field_to_edit' ).val( 'bulk_actions' );
-					return;
-				}
-
+			var run_bulk_action = function () {
 				wc_meta_boxes_product_variations_ajax.block();
 
 				$.ajax( {
@@ -1453,7 +1435,10 @@ jQuery( function ( $ ) {
 					run_bulk_action();
 				} else if (
 					! wc_meta_boxes_product_variations_ajax.check_for_changes(
-						run_bulk_action
+						run_bulk_action,
+						function () {
+							$( '#field_to_edit' ).val( 'bulk_actions' );
+						}
 					)
 				) {
 					need_update.addClass( 'variation-needs-update' );
