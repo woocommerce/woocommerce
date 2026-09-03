@@ -24,7 +24,7 @@ class WCAdminUser {
 	/**
 	 * Get class instance.
 	 *
-	 * @return object Instance.
+	 * @return WCAdminUser Instance.
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -160,6 +160,12 @@ class WCAdminUser {
 	 * @return array User data.
 	 */
 	public static function get_user_data() {
+		// The controller below reads $wp_rest_additional_fields, which is only filled once
+		// rest_api_init has fired. On a wp-admin request it has not, so register our fields
+		// explicitly instead of relying on something else having booted the REST server first.
+		// register_rest_field() only writes to that global, so this does not build the server.
+		self::get_instance()->register_user_data();
+
 		$user_controller = new \WP_REST_Users_Controller();
 		$request         = new \WP_REST_Request();
 		$request->set_query_params( array( 'context' => 'edit' ) );
