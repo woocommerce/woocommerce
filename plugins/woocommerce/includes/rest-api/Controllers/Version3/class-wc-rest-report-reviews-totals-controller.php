@@ -44,9 +44,8 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 		$counts = array_fill_keys( range( 1, 5 ), 0 );
 
 		// Same cache group and invalidation signal get_comments() used, so ratings written outside WooCommerce still refresh the totals.
-		$cache_key    = 'wc_report_reviews_totals';
-		$last_changed = wp_cache_get_last_changed( 'comment' );
-		$cached       = wp_cache_get_salted( $cache_key, 'comment-queries', $last_changed );
+		$cache_key = 'wc_report_reviews_totals_' . wp_cache_get_last_changed( 'comment' );
+		$cached    = wp_cache_get( $cache_key, 'comment-queries' );
 
 		if ( is_array( $cached ) ) {
 			$counts = $cached;
@@ -113,7 +112,7 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 
 				// Never cache a failed aggregate; a zeroed report would stick until the next comment changed.
 				if ( '' === $wpdb->last_error ) {
-					wp_cache_set_salted( $cache_key, $counts, 'comment-queries', $last_changed );
+					wp_cache_set( $cache_key, $counts, 'comment-queries' );
 				}
 			}
 		}

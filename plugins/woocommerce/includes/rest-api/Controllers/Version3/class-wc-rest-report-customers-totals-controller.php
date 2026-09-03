@@ -53,9 +53,8 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 		}
 
 		// Same cache group and invalidation signal WP_User_Query used, so meta written outside WooCommerce still refreshes the total.
-		$cache_key    = 'wc_report_customers_totals_paying_' . get_current_blog_id();
-		$last_changed = wp_cache_get_last_changed( 'users' );
-		$total_paying = wp_cache_get_salted( $cache_key, 'user-queries', $last_changed );
+		$cache_key    = 'wc_report_customers_totals_paying_' . get_current_blog_id() . '_' . wp_cache_get_last_changed( 'users' );
+		$total_paying = wp_cache_get( $cache_key, 'user-queries' );
 
 		if ( false === $total_paying ) {
 			/*
@@ -86,7 +85,7 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 			if ( null !== $total_paying ) {
 				$total_paying = (int) $total_paying;
 
-				wp_cache_set_salted( $cache_key, $total_paying, 'user-queries', $last_changed );
+				wp_cache_set( $cache_key, $total_paying, 'user-queries' );
 			}
 		}
 
