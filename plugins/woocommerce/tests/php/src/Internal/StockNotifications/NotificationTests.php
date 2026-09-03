@@ -105,6 +105,31 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should include both the variation's own attributes and the posted "Any" attributes in the permalink.
+	 */
+	public function test_get_product_permalink_with_posted_attributes(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation only sets "size"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->update_meta_data( 'posted_attributes', array( 'attribute_pa_colour' => 'red' ) );
+		$notification->save();
+
+		$expected = add_query_arg(
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => 'red',
+			),
+			get_permalink( $variable_product->get_id() )
+		);
+
+		$this->assertSame( $expected, $notification->get_product_permalink(), 'Permalink should carry both the variation attribute and the posted "Any" attribute' );
+	}
+
+	/**
 	 * Test the get_product_name method.
 	 */
 	public function test_get_product_name() {
