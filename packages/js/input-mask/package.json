@@ -1,0 +1,117 @@
+{
+	"name": "@woocommerce/input-mask",
+	"version": "1.0.0-beta.0",
+	"description": "Input mask engine for text inputs.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"input",
+		"mask"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/input-mask/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
+	"react-native": "src/index",
+	"sideEffects": false,
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
+	"publishConfig": {
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
+	},
+	"scripts": {
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
+		"build:project:esm": "node build.mjs",
+		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
+		"build:publish:project:cjs": "node build.mjs --commonjs",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
+		"build:publish:project:runtime": "pnpm build:project",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
+		"prepack": "pnpm build:publish:project",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
+		"watch:build": "pnpm watch:build:project",
+		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
+		"watch:build:project:esm": "node build.mjs --watch"
+	},
+	"devDependencies": {
+		"@babel/core": "catalog:tooling",
+		"@types/jest": "29.5.x",
+		"@woocommerce/eslint-config": "workspace:*",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"eslint": "^10.0.0",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
+		"rimraf": "5.0.5",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	}
+}
