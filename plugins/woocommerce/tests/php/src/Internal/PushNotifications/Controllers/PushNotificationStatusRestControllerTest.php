@@ -44,6 +44,13 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 	private static $fixture_subscriber_id;
 
 	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_administrator_id;
+
+	/**
 	 * Shop manager user ID for testing.
 	 *
 	 * @var int
@@ -58,13 +65,21 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
+	 * Administrator user ID for testing.
+	 *
+	 * @var int
+	 */
+	private $administrator_id;
+
+	/**
 	 * Create immutable users shared by the test class.
 	 *
 	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$fixture_user_id       = $factory->user->create( array( 'role' => 'shop_manager' ) );
-		self::$fixture_subscriber_id = $factory->user->create( array( 'role' => 'subscriber' ) );
+		self::$fixture_user_id          = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id    = $factory->user->create( array( 'role' => 'subscriber' ) );
+		self::$fixture_administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
 	}
 
 	/**
@@ -75,20 +90,47 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->reset_push_notifications_cache();
 
-		$this->user_id       = self::$fixture_user_id;
-		$this->subscriber_id = self::$fixture_subscriber_id;
+		$this->user_id          = self::$fixture_user_id;
+		$this->subscriber_id    = self::$fixture_subscriber_id;
+		$this->administrator_id = self::$fixture_administrator_id;
 	}
 
 	/**
-	 * Register the controller's routes using the container so init() auto-wires
-	 * the push-notifications dependencies.
+	 * Register the controller's routes, defaulting to the container instance so
+	 * init() auto-wires the push-notifications dependencies.
+	 *
+	 * @param PushNotificationStatusRestController|null $controller Controller to register, or null for the container instance.
 	 */
-	private function register_routes(): void {
-		$controller   = wc_get_container()->get( PushNotificationStatusRestController::class );
+	private function register_routes( ?PushNotificationStatusRestController $controller = null ): void {
+		$controller ??= wc_get_container()->get( PushNotificationStatusRestController::class );
 		$this->server = $this->create_rest_server_with_routes(
 			array( array( $controller, 'register_routes' ) ),
 			true
 		);
+	}
+
+	/**
+	 * Builds a controller that reports every request as signed with the Jetpack
+	 * blog token, wired up by hand because the container cannot resolve a
+	 * subclass declared here.
+	 *
+	 * @return PushNotificationStatusRestController
+	 */
+	private function create_blog_token_signed_controller(): PushNotificationStatusRestController {
+		$controller = new class() extends PushNotificationStatusRestController {
+			/**
+			 * Stands in for a request WPCOM signed with the Jetpack blog token.
+			 *
+			 * @return bool
+			 */
+			protected function is_signed_with_blog_token(): bool {
+				return true;
+			}
+		};
+
+		$controller->init( wc_get_container()->get( DriverAvailabilityService::class ) );
+
+		return $controller;
 	}
 
 	/**
@@ -130,31 +172,45 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'installed_drivers', $data );
+		$this->assertArrayNotHasKey( 'preferred_driver', $data );
+	}
+
+	/**
+	 * @testdox GET should accept an administrator.
+	 */
+	public function test_get_status_accepts_administrators() {
+		wp_set_current_user( $this->administrator_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+		$this->assertArrayHasKey( 'installed_drivers', $response->get_data() );
 	}
 
 	/**
 	 * WPCOM signs its requests with the Jetpack blog token, which identifies no
-	 * user, so the endpoint has to authorize them without one.
+	 * user, so the endpoint has to authorize them without one. Dispatched through
+	 * the registered route so that the route's permission callback is the one
+	 * under test.
 	 *
 	 * @testdox GET should accept a blog token signed request that carries no user.
 	 */
 	public function test_get_status_accepts_a_blog_token_signed_request_without_a_user() {
 		wp_set_current_user( 0 );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes( $this->create_blog_token_signed_controller() );
 
-		$controller = new class() extends PushNotificationStatusRestController {
-			/**
-			 * Stands in for a request WPCOM signed with the Jetpack blog token.
-			 *
-			 * @return bool
-			 */
-			protected function is_signed_with_blog_token(): bool {
-				return true;
-			}
-		};
+		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
+		$response = $this->server->dispatch( $request );
 
-		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
-
-		$this->assertTrue( $controller->authorize_as_from_wpcom_or_allowed_user( $request ) );
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+		$this->assertArrayHasKey( 'installed_drivers', $response->get_data() );
 	}
 
 	/**
