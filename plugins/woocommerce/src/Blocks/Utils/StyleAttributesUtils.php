@@ -346,16 +346,14 @@ class StyleAttributesUtils {
 
 		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
 
-		if ( ! $font_size && '' === $custom_font_size ) {
-			return self::EMPTY_STYLE;
-		}
-
 		if ( $font_size ) {
 			return array(
 				'class' => sprintf( 'has-font-size has-%s-font-size', $font_size ),
 				'style' => null,
 			);
-		} elseif ( '' !== $custom_font_size ) {
+		}
+
+		if ( '' !== $custom_font_size ) {
 			return array(
 				'class' => null,
 				'style' => sprintf( 'font-size: %s;', $custom_font_size ),
@@ -635,17 +633,15 @@ class StyleAttributesUtils {
 
 		$custom_text_color = $attributes['style']['color']['text'] ?? '';
 
-		if ( ! $text_color && ! $custom_text_color ) {
-			return self::EMPTY_STYLE;
-		}
-
 		if ( $text_color ) {
 			return array(
 				'class' => sprintf( 'has-text-color has-%s-color', $text_color ),
 				'style' => null,
 				'value' => self::get_preset_value( $text_color ),
 			);
-		} elseif ( $custom_text_color ) {
+		}
+
+		if ( $custom_text_color ) {
 			return array(
 				'class' => null,
 				'style' => sprintf( 'color: %s;', $custom_text_color ),
