@@ -466,8 +466,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 
 			// A row the order no longer carries goes on being counted by the reports, so a prune
-			// that failed is not a sync that succeeded. Nothing reads this return value on the
-			// import path, so say so in the log too.
+			// that failed is not a sync that succeeded.
 			if ( false === $deleted ) {
 				wc_get_logger()->error(
 					"Could not drop the analytics tax lookup rows order {$order->get_id()} no longer carries. Its old rows stand beside the rows just written, so the reports count those tax lines twice until the order is synced again.",
