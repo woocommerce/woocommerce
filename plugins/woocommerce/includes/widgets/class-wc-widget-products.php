@@ -233,7 +233,9 @@ class WC_Widget_Products extends WC_Widget {
 				$clauses['join'] .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
 			}
 
-			$clauses['orderby'] = " wc_product_meta_lookup.total_sales {$order}, wc_product_meta_lookup.product_id {$order} ";
+			// The IS NULL term sorts ascending in both directions, so products that have no lookup row
+			// (a partly regenerated table, say) always land last instead of leading an ascending list.
+			$clauses['orderby'] = " wc_product_meta_lookup.total_sales IS NULL, wc_product_meta_lookup.total_sales {$order}, wc_product_meta_lookup.product_id {$order} ";
 
 			return $clauses;
 		};

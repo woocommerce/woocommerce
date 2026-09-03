@@ -41,5 +41,33 @@ class WC_Widget_Products_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $ids[2], $ids[1], $ids[0] ), wp_list_pluck( $query->posts, 'ID' ) );
+
+		// A product with no lookup row at all, as happens while the lookup table is being regenerated,
+		// sorts last whichever way round the widget is ordered.
+		$wpdb->delete( $wpdb->wc_product_meta_lookup, array( 'product_id' => $ids[2] ) );
+
+		// The lookup table is not part of the post cache, so WP_Query would otherwise hand back the
+		// result ids it cached for the identical query above.
+		wp_cache_flush();
+
+		$descending = $widget->get_products(
+			array(),
+			array(
+				'number'  => 3,
+				'orderby' => 'sales',
+				'order'   => 'desc',
+			)
+		);
+		$ascending  = $widget->get_products(
+			array(),
+			array(
+				'number'  => 3,
+				'orderby' => 'sales',
+				'order'   => 'asc',
+			)
+		);
+
+		$this->assertSame( array( $ids[1], $ids[0], $ids[2] ), wp_list_pluck( $descending->posts, 'ID' ) );
+		$this->assertSame( array( $ids[0], $ids[1], $ids[2] ), wp_list_pluck( $ascending->posts, 'ID' ) );
 	}
 }
