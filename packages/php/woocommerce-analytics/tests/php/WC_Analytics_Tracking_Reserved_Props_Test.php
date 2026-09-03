@@ -1006,10 +1006,14 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			$template,
 			'The template must cap the batch with the same constant as the REST controller.'
 		);
-		$this->assertStringContainsString(
-			'defined( \'\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST\' )',
-			$template,
-			'The template must check that constant exists before reading it, since the autoloader can resolve an older package.'
+		$this->assertSame(
+			1,
+			preg_match( '/defined\( \'([^\']*::[^\']+)\' \)/', $template, $matches ),
+			'The template must check the constant exists before reading it, since the autoloader can resolve an older package.'
+		);
+		$this->assertTrue(
+			defined( $matches[1] ),
+			"The guarded name must resolve, or load_autoloader() always returns false and the module never serves. Reviewers read the leading backslash in {$matches[1]} as breaking defined(); it does not, on any PHP this package supports."
 		);
 	}
 
