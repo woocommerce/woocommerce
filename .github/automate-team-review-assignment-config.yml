@@ -9,12 +9,12 @@ when:
         - rubik
   - author:
       teamIs:
-        - woo-fse
+        - kirigami
       ignore:
         nameIs:
     assign:
       teams:
-        - woo-fse
+        - kirigami
   - author:
       teamIs:
         - ballade
