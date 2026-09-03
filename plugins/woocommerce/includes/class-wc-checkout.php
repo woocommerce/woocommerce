@@ -35,6 +35,21 @@ class WC_Checkout {
 	);
 
 	/**
+	 * Shipping address fields that WC_AJAX::update_order_review() copies the billing address into while
+	 * "Ship to a different address?" is unticked.
+	 *
+	 * @var string[]
+	 */
+	private const BILLING_MIRRORED_ADDRESS_FIELDS = array(
+		'country',
+		'state',
+		'postcode',
+		'city',
+		'address_1',
+		'address_2',
+	);
+
+	/**
 	 * The single instance of the class.
 	 *
 	 * @var WC_Checkout|null
@@ -61,6 +76,14 @@ class WC_Checkout {
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
+
+	/**
+	 * Caches the customer read from the database, without the session applied on top. False once
+	 * it is known to be unusable. @see get_account_customer_for_shipping_input.
+	 *
+	 * @var WC_Customer|false|null
+	 */
+	private $account_customer = null;
 
 	/**
 	 * Gets the main WC_Checkout Instance.
@@ -1504,19 +1527,22 @@ class WC_Checkout {
 			return $value;
 		}
 
-		/**
-		 * For logged in customers, pull data from their account rather than the session which may contain incomplete data.
-		 * Another reason is that WC sets shipping address to the billing address on the checkout updates unless the
-		 * "ship to another address" box is checked. @see issue #20975.
-		 */
 		$customer_object = false;
 
 		if ( is_user_logged_in() ) {
 			// Load customer object, but keep it cached to avoid reloading it multiple times.
 			if ( is_null( $this->logged_in_customer ) ) {
+				// Account data with the session applied on top, so anything the customer changed earlier
+				// in the session wins over what their account has stored.
 				$this->logged_in_customer = new WC_Customer( get_current_user_id(), true );
 			}
 			$customer_object = $this->logged_in_customer;
+
+			$account_customer = $this->get_account_customer_for_shipping_input( $input );
+
+			if ( $account_customer ) {
+				$customer_object = $account_customer;
+			}
 		}
 
 		if ( ! $customer_object ) {
@@ -1534,5 +1560,53 @@ class WC_Checkout {
 		}
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );
+	}
+
+	/**
+	 * Get the account address to prefill a shipping field from, when the session copy can't be trusted.
+	 *
+	 * While "Ship to a different address?" is unticked every checkout update posts the billing address as
+	 * the shipping address, and WC_AJAX::update_order_review() stores that copy on the customer, so it
+	 * prefills the shipping fields on the next page load. @see issue #30258. Only applies when the session
+	 * address still looks like that copy, so an address the customer entered themselves is never discarded,
+	 * and only when the account address is complete enough to calculate rates from.
+	 *
+	 * @param string $input Name of the input we want to grab data for. e.g. shipping_country.
+	 * @return WC_Customer|false The customer read from the database, or false to keep using the session.
+	 */
+	private function get_account_customer_for_shipping_input( $input ) {
+		if ( 0 !== strpos( $input, 'shipping_' ) || ! in_array( substr( $input, 9 ), self::BILLING_MIRRORED_ADDRESS_FIELDS, true ) ) {
+			return false;
+		}
+
+		if ( is_null( $this->account_customer ) ) {
+			// Assigned first: reading the customer fires filters that can re-enter get_value().
+			$this->account_customer = false;
+
+			if ( $this->session_shipping_address_is_copy_of_billing() ) {
+				$account_customer = new WC_Customer( get_current_user_id() );
+
+				if ( $account_customer->has_full_shipping_address() ) {
+					$this->account_customer = $account_customer;
+				}
+			}
+		}
+
+		return $this->account_customer;
+	}
+
+	/**
+	 * Check whether the session's shipping address is the billing copy update_order_review() writes.
+	 *
+	 * @return bool
+	 */
+	private function session_shipping_address_is_copy_of_billing() {
+		foreach ( self::BILLING_MIRRORED_ADDRESS_FIELDS as $field ) {
+			if ( $this->logged_in_customer->{"get_shipping_$field"}( 'edit' ) !== $this->logged_in_customer->{"get_billing_$field"}( 'edit' ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

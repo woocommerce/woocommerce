@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the classic checkout prefilling the shipping fields with the billing address when the customer has a different shipping address saved to their account.
