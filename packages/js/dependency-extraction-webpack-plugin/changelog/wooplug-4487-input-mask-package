@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `@woocommerce/input-mask` to the package list.
