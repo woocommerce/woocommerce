@@ -290,7 +290,7 @@ class WC_Helper_Updater {
 
 		$notice = sprintf(
 			/* translators: 1: URL of the WooCommerce.com connect page */
-			__( '<a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to get updates and streamlined support for this extension.', 'woocommerce' ),
+			__( 'Extension distributed via WooCommerce.com. <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to get updates and support.', 'woocommerce' ),
 			esc_url( $connect_page_url )
 		);
 
