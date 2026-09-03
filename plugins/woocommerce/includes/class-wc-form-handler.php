@@ -885,7 +885,7 @@ class WC_Form_Handler {
 			$order_id  = absint( $_GET['order_id'] );
 
 			if ( doing_action( 'wp_loaded' ) ) {
-				// Only a wp_loaded dispatch arms the deferred clean redirect, so callers outside wp_loaded keep control of the request.
+				// Only a wp_loaded dispatch arms the deferred clean redirect. Without an explicit redirect, callers outside wp_loaded keep control of the request.
 				self::$cancel_order_redirect_pending = true;
 			}
 
@@ -942,7 +942,8 @@ class WC_Form_Handler {
 	 *
 	 * This runs at the end of wp_loaded, after any re-registered cancel_order() callback.
 	 * Keeping the redirect out of cancel_order() preserves its return behavior for code
-	 * that calls it directly, while browser requests still leave the state-changing URL.
+	 * that calls it directly without an explicit redirect, while browser requests still
+	 * leave the state-changing URL.
 	 *
 	 * @since 11.2.0
 	 */
