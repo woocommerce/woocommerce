@@ -435,6 +435,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
