@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop the classic checkout marking a phone field invalid over invisible characters the server already strips.

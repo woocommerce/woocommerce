@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Strip invisible Unicode characters from phone numbers so pasted numbers are not rejected over characters the customer cannot see, and store the cleaned number from the Checkout block and the My Account address form.
+Strip invisible Unicode characters from phone numbers so pasted numbers are not rejected over characters the customer cannot see, store the cleaned number from the Checkout block and the My Account address form, and stop the classic checkout marking the field invalid.
