@@ -59,6 +59,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	<h2 class="woocommerce-customer-stock-notifications-heading woocommerce-customer-stock-notifications-heading--pending"><?php esc_html_e( 'Awaiting confirmation', 'woocommerce' ); ?></h2>
 
 	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--pending woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
+		<caption class="screen-reader-text"><?php esc_html_e( 'Stock notifications awaiting confirmation', 'woocommerce' ); ?></caption>
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
@@ -143,6 +144,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	<?php endif; ?>
 
 	<table class="woocommerce-customer-stock-notifications-table woocommerce-customer-stock-notifications-table--active woocommerce-MyAccount-customerStockNotifications shop_table shop_table_responsive">
+		<caption class="screen-reader-text"><?php esc_html_e( 'Active stock notifications', 'woocommerce' ); ?></caption>
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
@@ -219,7 +221,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 	?>
 
 	<?php if ( $total_pages > 1 ) : ?>
-		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
+		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination" role="navigation" aria-label="<?php esc_attr_e( 'Active stock notifications pagination', 'woocommerce' ); ?>">
 			<?php if ( 1 !== $current_page ) : ?>
 				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, (string) ( $current_page - 1 ), wc_get_page_permalink( 'myaccount' ) ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
 			<?php endif; ?>
