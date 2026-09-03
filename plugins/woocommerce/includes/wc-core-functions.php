@@ -1054,12 +1054,26 @@ function wc_fix_rewrite_rules( $rules ) {
 		}
 	}
 
-	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
-	if ( ! $permalinks['use_verbose_page_rules'] ) {
+	$shop_page_id      = wc_get_page_id( 'shop' );
+	$product_base      = trim( rawurldecode( $permalinks['product_base'] ), '/' );
+	$uses_shop_as_base = false;
+
+	// The product base is site-wide, while multilingual extensions can filter the Shop page for the current request.
+	$shop_page_ids = array_unique( array( absint( get_option( 'woocommerce_shop_page_id' ) ), $shop_page_id ) );
+	foreach ( $shop_page_ids as $candidate_shop_page_id ) {
+		$shop_page = $candidate_shop_page_id > 0 ? get_post( $candidate_shop_page_id ) : null;
+		$shop_base = $shop_page instanceof WP_Post && 'page' === $shop_page->post_type ? trim( rawurldecode( (string) get_page_uri( $candidate_shop_page_id ) ), '/' ) : '';
+
+		if ( '' !== $shop_base && ( $shop_base === $product_base || 0 === strpos( $product_base, $shop_base . '/' ) ) ) {
+			$uses_shop_as_base = true;
+			break;
+		}
+	}
+
+	if ( ! $uses_shop_as_base ) {
 		return $rules;
 	}
 
-	$shop_page_id = wc_get_page_id( 'shop' );
 	if ( $shop_page_id ) {
 		$page_rewrite_rules = array();
 		$subpages           = wc_get_page_children( $shop_page_id );

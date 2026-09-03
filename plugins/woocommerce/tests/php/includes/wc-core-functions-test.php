@@ -11,6 +11,134 @@
 class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Create a Shop page with one child.
+	 *
+	 * @param int    $parent_id Shop page parent ID.
+	 * @param string $shop_slug Shop page slug.
+	 * @return int Shop page ID.
+	 */
+	private function create_shop_page_tree( int $parent_id = 0, string $shop_slug = 'shop' ): int {
+		$shop_page_id = self::factory()->post->create(
+			array(
+				'post_parent' => $parent_id,
+				'post_type'   => 'page',
+				'post_name'   => $shop_slug,
+				'post_status' => 'publish',
+			)
+		);
+		self::factory()->post->create(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_type'   => 'page',
+				'post_name'   => 'sale',
+				'post_status' => 'publish',
+			)
+		);
+
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		return $shop_page_id;
+	}
+
+	/**
+	 * @testdox Shop subpage rules should follow the current paths instead of the stored derived flag.
+	 *
+	 * @testWith ["/shop", true]
+	 *           ["/shop/%product_cat%", true]
+	 *           ["/webshop", false]
+	 *           ["/shopper", false]
+	 *           ["/catalog/shop", false]
+	 *
+	 * @param string $product_base Product permalink base.
+	 * @param bool   $expected     Whether the Shop child rule should be added.
+	 */
+	public function test_wc_fix_rewrite_rules_derives_shop_subpage_rules_from_paths( string $product_base, bool $expected ): void {
+		$this->create_shop_page_tree();
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => $product_base,
+				'use_verbose_page_rules' => ! $expected,
+			)
+		);
+
+		$original_rules = array( 'fallback/?$' => 'index.php?fallback=1' );
+		$rules          = wc_fix_rewrite_rules( $original_rules );
+
+		if ( $expected ) {
+			$this->assertSame( 'shop/sale/?$', array_key_first( $rules ), 'The Shop child rule should take priority over product rules.' );
+			$this->assertSame( 'index.php?pagename=shop/sale', $rules['shop/sale/?$'] );
+		} else {
+			$this->assertSame( $original_rules, $rules, 'Unrelated product paths should not add Shop child rules.' );
+		}
+	}
+
+	/**
+	 * @testdox Shop subpage rules should follow a changed Shop page path.
+	 */
+	public function test_wc_fix_rewrite_rules_follows_shop_page_reparenting(): void {
+		$catalog_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_name'   => 'catalog',
+				'post_status' => 'publish',
+			)
+		);
+		$shop_page_id    = $this->create_shop_page_tree();
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => '/catalog/shop',
+				'use_verbose_page_rules' => false,
+			)
+		);
+
+		$original_rules = array( 'fallback/?$' => 'index.php?fallback=1' );
+		$this->assertSame( $original_rules, wc_fix_rewrite_rules( $original_rules ) );
+
+		wp_update_post(
+			array(
+				'ID'          => $shop_page_id,
+				'post_parent' => $catalog_page_id,
+			)
+		);
+
+		$rules = wc_fix_rewrite_rules( $original_rules );
+
+		$this->assertSame( 'catalog/shop/sale/?$', array_key_first( $rules ), 'The new Shop child path should take priority over product rules.' );
+		$this->assertSame( 'index.php?pagename=catalog/shop/sale', $rules['catalog/shop/sale/?$'] );
+	}
+
+	/**
+	 * @testdox Shop subpage rules should keep using a filtered Shop page after matching the configured Shop path.
+	 */
+	public function test_wc_fix_rewrite_rules_preserves_filtered_shop_page_rules(): void {
+		$configured_shop_page_id = $this->create_shop_page_tree();
+		$filtered_shop_page_id   = $this->create_shop_page_tree( 0, 'boutique' );
+		update_option( 'woocommerce_shop_page_id', $configured_shop_page_id );
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => '/shop/%product_cat%',
+				'use_verbose_page_rules' => true,
+			)
+		);
+
+		$filter_shop_page_id = static function () use ( $filtered_shop_page_id ) {
+			return $filtered_shop_page_id;
+		};
+		add_filter( 'woocommerce_get_shop_page_id', $filter_shop_page_id );
+
+		try {
+			$rules = wc_fix_rewrite_rules( array() );
+		} finally {
+			remove_filter( 'woocommerce_get_shop_page_id', $filter_shop_page_id );
+		}
+
+		$this->assertSame( 'index.php?pagename=boutique/sale', $rules['boutique/sale/?$'] );
+	}
+
+	/**
 	 * Test wc_ascii_uasort_comparison() function.
 	 */
 	public function test_wc_ascii_uasort_comparison() {
