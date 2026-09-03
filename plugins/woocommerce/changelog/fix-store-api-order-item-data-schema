@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Store API: the order endpoint now returns item_data as a list, matching the cart endpoint and its own documented schema. The order item meta ID moves into a new `id` property.
+Store API: the order endpoint now returns item_data as a list, matching the cart endpoint and its own documented schema. Each entry carries its metadata row ID in a new `id` property, null when an extension added the entry without a stored row.

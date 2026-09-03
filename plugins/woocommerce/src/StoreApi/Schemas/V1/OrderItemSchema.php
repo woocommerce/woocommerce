@@ -33,8 +33,8 @@ class OrderItemSchema extends ItemSchema {
 	/**
 	 * Item schema properties.
 	 *
-	 * Order item metadata carries a meta row ID and a display key, unlike the cart's `item_data`,
-	 * so the inherited schema does not describe it.
+	 * The inherited `item_data` describes the cart's display data. Order items carry stored meta
+	 * rows, which have different properties.
 	 *
 	 * @return array
 	 *
@@ -52,8 +52,8 @@ class OrderItemSchema extends ItemSchema {
 				'type'       => 'object',
 				'properties' => [
 					'id'            => [
-						'description' => __( 'Order item metadata ID.', 'woocommerce' ),
-						'type'        => 'integer',
+						'description' => __( 'Order item metadata ID. Null for entries an extension added that have no stored metadata row.', 'woocommerce' ),
+						'type'        => [ 'integer', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
@@ -91,8 +91,7 @@ class OrderItemSchema extends ItemSchema {
 	/**
 	 * Get order item metadata as a list.
 	 *
-	 * `get_all_formatted_meta_data()` keys by meta row ID. The Store API sends a list, so the ID
-	 * moves into an `id` property rather than being lost.
+	 * Keyed by meta row ID at source; the Store API sends a list, so the ID moves into `id`.
 	 *
 	 * @param \WC_Order_Item $order_item Order item instance.
 	 * @return array
@@ -101,22 +100,23 @@ class OrderItemSchema extends ItemSchema {
 		$formatted_meta_data = $order_item->get_all_formatted_meta_data();
 		$item_data           = [];
 
-		// `woocommerce_order_item_get_formatted_meta_data` callbacks can return anything, and a bad
+		// A `woocommerce_order_item_get_formatted_meta_data` callback can return anything, and a bad
 		// one must not take the endpoint down.
 		if ( ! is_array( $formatted_meta_data ) ) {
 			return $item_data;
 		}
 
+		// A callback appending with `$formatted_meta[] =` gets PHP's next integer key, not a row ID.
+		// Same source the formatted metadata is built from, so matching costs no query.
+		$meta_row_ids = array_flip( array_filter( wp_list_pluck( $order_item->get_meta_data(), 'id' ) ) );
+
 		foreach ( $formatted_meta_data as $meta_id => $meta ) {
-			// A callback can key an entry by something other than a meta row ID, which would
-			// publish an `id` that is not the integer the schema promises.
-			if ( ! is_int( $meta_id ) || ( ! is_object( $meta ) && ! is_array( $meta ) ) ) {
+			if ( ! is_object( $meta ) && ! is_array( $meta ) ) {
 				continue;
 			}
 
-			// Union keeps the left operand on a key collision, so a callback's own `id` cannot
-			// shadow the row ID.
-			$item_data[] = [ 'id' => $meta_id ] + (array) $meta;
+			// Union keeps the left operand, so a callback's own `id` cannot shadow the row ID.
+			$item_data[] = [ 'id' => isset( $meta_row_ids[ $meta_id ] ) ? $meta_id : null ] + (array) $meta;
 		}
 
 		return $item_data;

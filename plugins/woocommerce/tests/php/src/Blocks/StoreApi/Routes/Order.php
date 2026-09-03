@@ -139,8 +139,7 @@ class Order extends ControllerTestCase {
 	/**
 	 * The Order route has no other schema validation coverage.
 	 *
-	 * The order item is given metadata on purpose: every other fixture leaves item_data empty, and
-	 * an empty item_data exercises none of the nested schema.
+	 * The item needs metadata, or the nested item_data schema is never exercised.
 	 *
 	 * @testdox Order response matches the published schema.
 	 */
@@ -166,9 +165,8 @@ class Order extends ControllerTestCase {
 		$data = $response->get_data();
 		$diff = $validate->get_diff_from_object( $data );
 
-		// The order response has other schema mismatches that are out of scope here (a missing `type`
-		// and `extensions` on items, `quantity_limits` returned as a PHP array, an undeclared `fees`).
-		// Assert on item_data alone so this stays a regression test rather than a snapshot of them.
+		// Other mismatches on this response are out of scope (items' `type` and `extensions`,
+		// `quantity_limits`, `fees`). Filter to item_data so this does not snapshot them.
 		$item_data_diff = array_values(
 			array_filter(
 				array_merge( $diff['missing'] ?? array(), $diff['invalid_type'] ?? array(), $diff['no_schema'] ?? array() ),
@@ -181,7 +179,7 @@ class Order extends ControllerTestCase {
 		$this->assertEmpty( $item_data_diff, print_r( $item_data_diff, true ) );
 
 		$item_data = $data['items'][0]['item_data'];
-		$this->assertNotEmpty( $item_data, 'The fixture must produce item metadata, or the nested schema is never exercised.' );
+		$this->assertNotEmpty( $item_data );
 
 		// ValidateSchema only recurses into the first entry, so pin the exact public shape here.
 		$entry = $item_data[0];
@@ -191,8 +189,7 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * item_data must serialize as a JSON list, matching the cart endpoint, with the meta row ID
-	 * carried in `id` rather than used as the key.
+	 * Consumers read this as a list, the way the cart endpoint sends it.
 	 *
 	 * @testdox Order item_data serializes as a JSON list carrying the meta row ID.
 	 */
@@ -217,8 +214,7 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * Callbacks on `woocommerce_order_item_get_formatted_meta_data` can add their own fields, which
-	 * the endpoint sends. Reshaping the container must not drop them.
+	 * Callbacks can add their own fields; reshaping the container must not drop them.
 	 *
 	 * @testdox Order item_data keeps fields added by extensions.
 	 */
@@ -310,12 +306,11 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * `id` is declared as an integer, so an entry a callback keyed by something else has no row ID
-	 * to report and must not be published with a string in its place.
+	 * Still metadata the store wants shown, so it is published with a null `id` rather than dropped.
 	 *
-	 * @testdox Order item_data skips metadata entries not keyed by a meta row ID.
+	 * @testdox Order item_data reports a null id for an entry not keyed by a meta row ID.
 	 */
-	public function test_item_data_skips_entries_not_keyed_by_a_meta_row_id(): void {
+	public function test_item_data_reports_null_id_for_entries_not_keyed_by_a_meta_row_id(): void {
 		$order = $this->create_guest_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
@@ -342,10 +337,50 @@ class Order extends ControllerTestCase {
 
 		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
 
-		$this->assertCount( 1, $item_data, 'The entry without a meta row ID must be skipped.' );
-		$this->assertSame( 'Gift message', $item_data[0]['key'] );
-		$this->assertIsInt( $item_data[0]['id'] );
+		$this->assertCount( 2, $item_data, 'The entry must be kept, not dropped.' );
+		$this->assertSame( current( $item->get_meta_data() )->id, $item_data[0]['id'] );
+		$this->assertSame( 'Injected', $item_data[1]['key'] );
+		$this->assertNull( $item_data[1]['id'], 'An entry with no stored row has no ID to report.' );
 	}
+
+	/**
+	 * Appending gets PHP's next integer key. Publishing that as `id` would point consumers at
+	 * another item's row.
+	 *
+	 * @testdox Order item_data reports a null id for an appended entry.
+	 */
+	public function test_item_data_reports_null_id_for_an_appended_entry(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = (object) array(
+					'key'           => 'Appended',
+					'value'         => 'value',
+					'display_key'   => 'Appended',
+					'display_value' => 'value',
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 2, $item_data, 'The appended entry must be kept, not dropped.' );
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertNull( $item_data[1]['id'], 'An appended entry has no stored row, so no ID.' );
+	}
+
 
 	/**
 	 * Test that a guest can access a guest order with valid order key and billing email.
