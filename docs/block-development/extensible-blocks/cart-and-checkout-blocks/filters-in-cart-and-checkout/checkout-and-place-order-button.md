@@ -274,7 +274,7 @@ The Cart Item object of the filters above has the following keys:
 
 -   _backorders_allowed_ `boolean` - Whether backorders are allowed.
 -   _catalog_visibility_ `string` - The catalog visibility.
--   _decsription_ `string` - The cart item description.
+-   _description_ `string` - The cart item description.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _id_ `number` - The item ID.
 -   _images_ `array` - The item images array.

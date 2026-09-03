@@ -22,7 +22,7 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
  */
 class DocumentObject {
 	/**
-	 * Docuemnt object context which may adjust the schema response.
+	 * Document object context which may adjust the schema response.
 	 *
 	 * @var null|string
 	 */
