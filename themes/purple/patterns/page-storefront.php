@@ -3,8 +3,11 @@
  * Title: Storefront
  * Slug: purple/storefront
  * Categories: purple
+ * Keywords: starter
+ * Description: A shop homepage with hero, new arrivals, product categories, best sellers, posts, testimonials, and store features.
  * Block Types: core/post-content
  * Post Types: page, wp_template
+ * Viewport width: 1440
  *
  * @package purple
  */
