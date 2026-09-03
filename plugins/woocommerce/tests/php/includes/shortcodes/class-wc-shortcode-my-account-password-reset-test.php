@@ -467,6 +467,18 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An array-valued legacy reset key is rejected before redirecting.
+	 */
+	public function test_array_legacy_reset_key_is_rejected_before_redirect(): void {
+		$_GET = array(
+			'key' => array( 'malformed' ),
+			'id'  => (string) $this->user->ID,
+		);
+
+		$this->assertSame( '', $this->intercept_reset_link_redirect() );
+	}
+
+	/**
 	 * @testdox A logged-in user cannot create a bridge for another account.
 	 */
 	public function test_logged_in_user_mismatch_still_stops_redirect(): void {
