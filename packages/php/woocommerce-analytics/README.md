@@ -75,12 +75,25 @@ add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__retu
 This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
 endpoint. Sites without proxy tracking enabled do not get it.
 
-Events arriving through it are untrusted: server-derived properties are replaced
-with the server's own values. The set is
-`WC_Analytics_Tracking::get_reserved_property_names()`, which includes generic
-names like `url`, `device` and `timezone` — rename event properties that would
-collide. `_lg`, `_dl` and `_dr` stay the client's, because they describe the page
-the event happened on rather than the `/track` request.
+Events arriving through it are untrusted:
+
+-   Server-derived properties are replaced with the server's own values. The set
+    is `WC_Analytics_Tracking::get_reserved_property_names()`, which includes
+    generic names like `url`, `device` and `timezone`. Rename event properties
+    that would collide. `_lg`, `_dl` and `_dr` stay the client's: they describe
+    the page, not the `/track` request.
+-   Input is bounded silently. Over-limit properties are dropped and the event
+    still records; events past the batch limit are not recorded at all.
+
+| Limit                     | Value |
+| ------------------------- | ----- |
+| Events per request        | 50    |
+| Properties per event      | 50    |
+| Members per array value   | 50    |
+| Characters per value      | 200   |
+| Characters per name       | 100   |
+| Encoded payload per event | 4096  |
+| Pixel URL bytes           | 8192  |
 
 **The filter must resolve to the same value for every request on a site.** One
 that varies by cohort, percentage or geo makes cached pages disagree with what

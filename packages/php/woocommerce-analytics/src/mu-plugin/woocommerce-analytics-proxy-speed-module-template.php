@@ -199,6 +199,14 @@ class WooCommerceAnalyticsProxySpeed {
 			$events = array( $events );
 		}
 
+		// Same bound as the REST controller. The constant lives in the package rather
+		// than being restated here: unlike is_proxy_request(), this runs after the
+		// autoloader, so the class is available.
+		$max_events = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST;
+		if ( count( $events ) > $max_events ) {
+			$events = array_slice( $events, 0, $max_events, true );
+		}
+
 		$results    = array();
 		$has_errors = false;
 

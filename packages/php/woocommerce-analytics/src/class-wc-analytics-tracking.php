@@ -59,6 +59,96 @@ class WC_Analytics_Tracking {
 	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', '_ts', 'browser_type' );
 
 	/**
+	 * Maximum number of events a single client request may record.
+	 *
+	 * Each event becomes an outbound pixel request, so an unbounded batch turns
+	 * the unauthenticated endpoint into an amplifier. The client's own batch size
+	 * is 10 (see `api-client.ts`); the headroom is for retries coalescing.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_EVENTS_PER_REQUEST = 50;
+
+	/**
+	 * Maximum number of properties a client may set on one event.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PROPERTIES_PER_EVENT = 50;
+
+	/**
+	 * Maximum length of a single client-supplied property value.
+	 *
+	 * Set for the same reason `Woo_Analytics_Trait::cap_page_string()` bounds
+	 * caller-influenced strings on the page-output path: values reach the pixel
+	 * URL, which is rejected outright once it grows too long. The two are
+	 * independent — a change to one does not imply a change to the other.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PROPERTY_LENGTH = 200;
+
+	/**
+	 * Maximum length of a client-supplied event or property name.
+	 *
+	 * `Pixel_Builder` checks a name's characters but not its length.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_NAME_LENGTH = 100;
+
+	/**
+	 * Maximum number of members in a client-supplied array value.
+	 *
+	 * `get_properties()` joins members into one string, which the per-value cap
+	 * never sees, so an array of short members is otherwise unbounded.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_ARRAY_MEMBERS = 50;
+
+	/**
+	 * Maximum total length of one event's client-supplied properties.
+	 *
+	 * The other caps bound each axis separately and multiply: at their limits one
+	 * event still built a 512KB pixel URL. This bounds the product.
+	 *
+	 * Counted after percent-encoding, in bytes, unlike the per-value cap which
+	 * counts characters. A `%` or a CJK character costs three bytes in the URL,
+	 * so counting characters here would under-count by 3x and let the budget pass
+	 * a payload that still blows past MAX_PIXEL_URL_LENGTH.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PAYLOAD_LENGTH = 4096;
+
+	/**
+	 * Maximum length of a pixel URL this package will fire.
+	 *
+	 * The backstop for every other cap. It is the only bound that sees the final
+	 * URL, so it is also the only one covering properties a
+	 * `jetpack_woocommerce_analytics_event_props` callback added after the
+	 * client-side caps ran.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var int
+	 */
+	const MAX_PIXEL_URL_LENGTH = 8192;
+
+	/**
 	 * Event queue.
 	 *
 	 * @var array
@@ -108,8 +198,9 @@ class WC_Analytics_Tracking {
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted
-	 *                                   client. Reserved property names are stripped when
-	 *                                   true. Defaults to false for server-side callers.
+	 *                                   client. Reserved property names are stripped and the
+	 *                                   rest are bounded when true. Defaults to false for
+	 *                                   server-side callers.
 	 *
 	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA, or
 	 *                       cookie-less context); WP_Error for an unusable client
@@ -132,13 +223,15 @@ class WC_Analytics_Tracking {
 		}
 
 		if ( $is_client_supplied ) {
-			// An error rather than a silent skip: an unusable name produces no pixel,
-			// and reporting success for it is what makes the loss invisible.
+			// An error rather than a silent skip: the caller sent a name that cannot
+			// be recorded, and reporting success for an event that produced no pixel
+			// is what makes the loss invisible. Telling a client about its own
+			// malformed input leaks nothing.
 			if ( ! self::is_valid_client_name( $event_name ) ) {
-				return new WP_Error( 'invalid_event_name', 'the event name is empty or not a string', array( 'status' => 400 ) );
+				return new WP_Error( 'invalid_event_name', 'the event name is empty, too long, or not a string', 400 );
 			}
 
-			$event_properties = self::strip_reserved_properties( $event_properties );
+			$event_properties = self::sanitize_client_properties( $event_properties );
 		}
 
 		$prefixed_event_name = self::PREFIX . $event_name;
@@ -255,6 +348,25 @@ class WC_Analytics_Tracking {
 			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
 		}
 
+		if ( strlen( $pixel_url ) > self::MAX_PIXEL_URL_LENGTH ) {
+			// No call site checks this return value, so the log line is the only
+			// signal that an event was dropped.
+			$error_message = sprintf(
+				'WooCommerce Analytics: dropped a %d byte tracks pixel, over the %d byte limit.',
+				strlen( $pixel_url ),
+				self::MAX_PIXEL_URL_LENGTH
+			);
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->warning( $error_message, array( 'source' => 'woocommerce-analytics' ) );
+			} else {
+				// Fallback for MU-plugin stage when WooCommerce logger is not available.
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( $error_message );
+			}
+
+			return new WP_Error( 'pixel_too_long', 'tracks pixel URL exceeds the maximum length', 400 );
+		}
+
 		// Check if batching is supported.
 		$can_batch = ( class_exists( 'WpOrg\Requests\Requests' ) && method_exists( 'WpOrg\Requests\Requests', 'request_multiple' ) )
 			|| ( class_exists( 'Requests' ) && method_exists( 'Requests', 'request_multiple' ) );
@@ -334,9 +446,12 @@ class WC_Analytics_Tracking {
 	private static function get_session_properties() {
 		$session_details = self::get_session_details();
 
+		// Capped here rather than only on the proxy path: the cookie is client-writable
+		// on every request, and first-party events never meet the client caps, so an
+		// oversized cookie would push their pixel past MAX_PIXEL_URL_LENGTH.
 		return array(
-			'session_id'   => $session_details['session_id'] ?? null,
-			'landing_page' => $session_details['landing_page'] ?? null,
+			'session_id'   => self::cap_client_value( $session_details['session_id'] ?? null ),
+			'landing_page' => self::cap_client_value( $session_details['landing_page'] ?? null ),
 			'is_engaged'   => $session_details['is_engaged'] ?? null,
 		);
 	}
@@ -433,26 +548,8 @@ class WC_Analytics_Tracking {
 
 		$all_properties = array_merge( $properties, $required_properties );
 
-		// Convert array values to a comma-separated string and URL-encode them to ensure compatibility with JavaScript's encodeURIComponent() for pixel URL transmission.
 		foreach ( $all_properties as $key => $value ) {
-			if ( ! is_array( $value ) ) {
-				continue;
-			}
-
-			if ( empty( $value ) ) {
-				$all_properties[ $key ] = '';
-				continue;
-			}
-
-			$is_indexed_array = array_keys( $value ) === range( 0, count( $value ) - 1 );
-			if ( $is_indexed_array ) {
-				$value_string           = implode( ',', $value );
-				$all_properties[ $key ] = rawurlencode( $value_string );
-				continue;
-			}
-
-			// Serialize non-indexed arrays to JSON strings.
-			$all_properties[ $key ] = wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
+			$all_properties[ $key ] = self::flatten_property_value( $value );
 		}
 
 		return $all_properties;
@@ -513,6 +610,75 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
+	 * Strip and bound a client-supplied property array.
+	 *
+	 * The single place the untrusted-input rules are applied, so that the REST
+	 * controller, the MU-plugin speed module and the stale-template safety net
+	 * cannot drift apart on what "sanitized" means.
+	 *
+	 * Capping is silent and lossy for the same reason stripping is: an
+	 * unauthenticated endpoint that reports which values it rejected is an oracle,
+	 * and analytics should not fail loudly on a malformed client. Truncated values
+	 * keep an ellipsis so they stay distinguishable downstream from a value that
+	 * genuinely ended at the limit, matching `Woo_Analytics_Trait::cap_page_string()`.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param array $event_properties Client-supplied properties.
+	 * @return array Sanitized properties.
+	 */
+	public static function sanitize_client_properties( $event_properties ) {
+		$event_properties = self::strip_reserved_properties( $event_properties );
+
+		if ( count( $event_properties ) > self::MAX_CLIENT_PROPERTIES_PER_EVENT ) {
+			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
+		}
+
+		$budget = self::MAX_CLIENT_PAYLOAD_LENGTH;
+
+		foreach ( $event_properties as $key => $value ) {
+			// Dropped, not truncated: two long names could truncate to the same key.
+			if ( ! self::is_valid_client_name( $key ) || ! Pixel_Builder::prop_name_is_valid( $key ) ) {
+				unset( $event_properties[ $key ] );
+				continue;
+			}
+
+			$was_array = is_array( $value ) && ! empty( $value );
+
+			// Arrays are flattened later by get_properties(); bound their members too.
+			if ( is_array( $value ) ) {
+				if ( count( $value ) > self::MAX_CLIENT_ARRAY_MEMBERS ) {
+					$value = array_slice( $value, 0, self::MAX_CLIENT_ARRAY_MEMBERS, true );
+				}
+
+				// Trimmed to fit rather than dropped: losing a few categories is
+				// easier to notice than the whole property disappearing, and the
+				// member cap alone always exceeds the budget.
+				$value = self::fit_client_array(
+					array_map( array( __CLASS__, 'cap_client_value' ), $value ),
+					$budget - strlen( $key )
+				);
+			} else {
+				$value = self::cap_client_value( $value );
+			}
+
+			$cost = strlen( $key ) + self::measure_client_value( $value );
+
+			// The budget is only spent on properties that survive, or one oversized
+			// value would charge its key against everything after it.
+			if ( ( $was_array && array() === $value ) || $cost > $budget ) {
+				unset( $event_properties[ $key ] );
+				continue;
+			}
+
+			$budget                  -= $cost;
+			$event_properties[ $key ] = $value;
+		}
+
+		return $event_properties;
+	}
+
+	/**
 	 * Whether a client-supplied event or property name is usable.
 	 *
 	 * Without the type check an array name reaches `PREFIX . $event_name` and writes
@@ -521,10 +687,106 @@ class WC_Analytics_Tracking {
 	 * @since 0.18.0
 	 *
 	 * @param mixed $name Client-supplied name.
-	 * @return bool True when the name is a non-empty string.
+	 * @return bool True when the name is a non-empty string within the length bound.
 	 */
 	private static function is_valid_client_name( $name ) {
-		return is_string( $name ) && '' !== $name;
+		return is_string( $name )
+			&& '' !== $name
+			&& mb_strlen( $name ) <= self::MAX_CLIENT_NAME_LENGTH;
+	}
+
+	/**
+	 * Reduce one property value to the string that goes into the pixel URL.
+	 *
+	 * Array values are joined and encoded for compatibility with the client's
+	 * `encodeURIComponent()`; an associative array becomes JSON, which carries its
+	 * keys. The single definition matters: the payload budget measures a value by
+	 * running it through here, and an approximation that missed the JSON branch
+	 * charged nothing for those keys.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param mixed $value Property value.
+	 * @return mixed The scalar it serializes to; non-array values are returned as-is.
+	 */
+	private static function flatten_property_value( $value ) {
+		if ( ! is_array( $value ) ) {
+			return $value;
+		}
+
+		if ( empty( $value ) ) {
+			return '';
+		}
+
+		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
+			return rawurlencode( implode( ',', $value ) );
+		}
+
+		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
+	 * Bytes one value contributes to the pixel URL.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param mixed $value Already-capped client value.
+	 * @return int Byte count after `flatten_property_value()` and the encoding
+	 *             `http_build_query()` applies on top of it.
+	 */
+	private static function measure_client_value( $value ) {
+		// urlencode(), not rawurlencode(): http_build_query() defaults to RFC1738,
+		// which writes `~` as %7E. Measuring with rawurlencode() under-counted a
+		// tilde threefold, the same way counting characters under-counted a `%`.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- Deliberate: mirrors http_build_query()'s RFC1738 encoding so the budget measures the bytes the finished URL carries.
+		return strlen( urlencode( (string) self::flatten_property_value( $value ) ) );
+	}
+
+	/**
+	 * Drop trailing members until an array value fits the remaining budget.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param array $members Already-capped members.
+	 * @param int   $budget Bytes still available for this value.
+	 * @return array Members that fit; empty when even one does not.
+	 */
+	private static function fit_client_array( $members, $budget ) {
+		while ( ! empty( $members ) && self::measure_client_value( $members ) > $budget ) {
+			array_pop( $members );
+		}
+
+		return $members;
+	}
+
+	/**
+	 * Bound one client-supplied value on its way to the pixel URL.
+	 *
+	 * Nested arrays are collapsed to an empty string rather than capped: the
+	 * flattening in `get_properties()` calls `implode()` on array members, which
+	 * emits an "Array to string conversion" warning for a nested one. Letting an
+	 * unauthenticated caller write warnings into the error log is the actual
+	 * problem; the value itself is meaningless either way.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param mixed $value Client-supplied value.
+	 * @return mixed Bounded value.
+	 */
+	private static function cap_client_value( $value ) {
+		if ( is_array( $value ) || is_object( $value ) ) {
+			return '';
+		}
+
+		if ( ! is_string( $value ) ) {
+			return $value;
+		}
+
+		if ( mb_strlen( $value ) <= self::MAX_CLIENT_PROPERTY_LENGTH ) {
+			return $value;
+		}
+
+		return mb_substr( $value, 0, self::MAX_CLIENT_PROPERTY_LENGTH - 1 ) . '…';
 	}
 
 	/**
