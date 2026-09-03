@@ -1498,9 +1498,7 @@ class CheckoutFields {
 	 * Returns the value unchanged when it does not fit.
 	 *
 	 * @param string $value Raw value to format.
-	 * @param string $mask  Mask pattern. `0` matches a digit, `a` matches a letter, `*` matches
-	 *                      any character, `\` escapes the next character as a literal, and
-	 *                      any other character is a literal.
+	 * @param string $mask  Mask pattern. Refer to docs.
 	 * @return string
 	 */
 	private function apply_mask_to_value( string $value, string $mask ): string {

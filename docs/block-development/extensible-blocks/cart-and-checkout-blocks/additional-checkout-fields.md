@@ -247,17 +247,23 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-Text fields support an input mask that formats the value as the shopper types. The mask syntax matches the default definitions of the [imask](https://imask.js.org/) library. imask's `[]`, `{}` and backtick modifiers are not supported, those characters are plain literals.
+Text fields support an input `mask` that formats the value as the shopper types, and also format complaint values at render time (in emails, orders, and admin).
+
+The sytanx for a mask follow  a subset of `imask` syntax.
 
 | Option name | Description | Required? | Example | Default value |
 | --- | --- | --- | --- | --- |
 | `mask` | An input mask: `0` accepts a digit, `a` a letter, `*` any character, `\` escapes the next character. Any other character is a literal that the checkout shows but never stores. | No | `000.000.000-00` | No mask |
 
-The checkout loads the mask script only when a field with a mask is registered. If the script does not load, the field works as a plain text input. The shopper types the characters that fill the slots; a literal appears once the shopper types the character after it, or when the mask is complete. The shopper can also type the literals themselves. The mask never blocks typing: when the text stops fitting the mask, the field shows the text as typed until the shopper fixes it. Only the typed characters are stored and sent to the Store API. For the mask `000.000.000-00`, a filled field stores `12345678901`. The mask does not validate anything on the server: use `validation`, `validate_callback`, or `pattern` for that. On the order confirmation page, in emails, and in the admin, the stored value is shown with the mask applied when it fits the mask, and as stored otherwise. The input gets a visually hidden hint with the expected format, linked through `aria-describedby`.
+Mask are only for formating and not for validation. As the shopper types, their input is matched against the mask partially (or fully). If the inputted value differs from the mask, the mask will be removed.
+
+To validate, use `validation` schema rules.
 
 ##### Masks and other validation
 
-The browser checks the `pattern` and `maxLength` attributes against the formatted text, so they must match the shape of the mask. For the mask above, use `pattern="[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}"` and `maxLength=14`. The `validation` JSON schema, `validate_callback`, and `sanitize_callback` run against the raw value, so `^[0-9]{11}$` is the right schema pattern.
+If your field uses `pattern` or `maxLength` attributes, then those must account for the mask literals.
+
+However, `validation` JSON schema, `validate_callback`, and `sanitize_callback` run against the raw value.
 
 #### Options for `select` fields
 
@@ -318,8 +324,6 @@ The supported attributes are:
 - `readOnly` (equivalent to `readonly` HTML attribute)
 
 `maxLength` and `readOnly` are in camelCase because the attributes are rendered on a React element which must receive them in this format.
-
-`pattern` and `maxLength` are checked by the browser against the text in the input. On a field with a `mask`, that text includes the mask's literal characters, so both attributes must match the formatted shape. See [Masks and other validation](#masks-and-other-validation).
 
 Certain attributes are not passed through to the field intentionally, these are `autofocus` and `disabled`. We are welcome to hear feedback and adjust this behaviour if valid use cases are provided.
 
