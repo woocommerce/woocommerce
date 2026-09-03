@@ -1,7 +1,7 @@
 const SLOTS: Record< string, RegExp > = {
-	'#': /[0-9]/,
-	'@': /\p{L}/u,
-	'*': /[\p{L}0-9]/u,
+	0: /[0-9]/,
+	a: /\p{L}/u,
+	'*': /[\s\S]/,
 };
 
 type Token = { test: RegExp } | { literal: string };
@@ -18,7 +18,7 @@ export interface FormatResult {
 const parseMask = ( mask: string ): Token[] => {
 	const tokens: Token[] = [];
 	for ( let i = 0; i < mask.length; i++ ) {
-		if ( mask[ i ] === '!' && i + 1 < mask.length ) {
+		if ( mask[ i ] === '\\' && i + 1 < mask.length ) {
 			tokens.push( { literal: mask[ ++i ] } );
 		} else if ( SLOTS[ mask[ i ] ] ) {
 			tokens.push( { test: SLOTS[ mask[ i ] ] } );
@@ -30,7 +30,7 @@ const parseMask = ( mask: string ): Token[] => {
 };
 
 export const unescapeMask = ( mask: string ): string =>
-	mask.replace( /!(.)/g, '$1' );
+	mask.replace( /\\(.)/g, '$1' );
 
 /**
  * Formats the typed text against the mask.

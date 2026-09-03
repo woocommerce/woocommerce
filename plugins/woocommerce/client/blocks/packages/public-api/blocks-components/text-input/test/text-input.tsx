@@ -30,7 +30,7 @@ describe( 'TextInput with a mask', () => {
 				label="Phone"
 				value=""
 				onChange={ onChange }
-				mask="###-###"
+				mask="000-000"
 			/>
 		);
 
@@ -40,7 +40,7 @@ describe( 'TextInput with a mask', () => {
 		expect( input ).toHaveValue( '123-4' );
 		expect( onChange ).toHaveBeenLastCalledWith( '1234' );
 		expect( input ).toHaveAccessibleDescription(
-			'Expected format: ###-###'
+			'Expected format: 000-000'
 		);
 	} );
 
@@ -53,7 +53,7 @@ describe( 'TextInput with a mask', () => {
 				label="CPF"
 				value="12345678901"
 				onChange={ () => void 0 }
-				mask="###.###.###-##"
+				mask="000.000.000-00"
 			/>
 		);
 
@@ -72,7 +72,7 @@ describe( 'TextInput with a mask', () => {
 				label="Phone"
 				value=""
 				onChange={ onChange }
-				mask="###-###"
+				mask="000-000"
 			/>
 		);
 
