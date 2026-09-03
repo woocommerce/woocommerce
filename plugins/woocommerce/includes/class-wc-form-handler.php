@@ -885,7 +885,7 @@ class WC_Form_Handler {
 			$order_id  = absint( $_GET['order_id'] );
 
 			if ( doing_action( 'wp_loaded' ) ) {
-				// Only a wp_loaded dispatch arms the deferred clean redirect. Without an explicit redirect, callers outside wp_loaded keep control of the request.
+				// Only a wp_loaded dispatch arms the deferred clean redirect. Without an explicit redirect, calls outside wp_loaded return control to the caller.
 				self::$cancel_order_redirect_pending = true;
 			}
 
