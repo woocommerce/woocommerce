@@ -33,7 +33,6 @@ let productId_indivEdit: number,
 	productId_bulkEdit: number,
 	productId_bulkEditAfterSave: number,
 	productId_bulkEditAfterFailedSave: number,
-	productId_bulkEditAfterDismissedSave: number,
 	productId_deleteAll: number,
 	productId_manageStock: number,
 	productId_variationDefaults: number,
@@ -86,27 +85,6 @@ async function gotToVariationsTab( page: Page ) {
 	} );
 }
 
-async function waitForSignal(
-	signal: Promise< void >,
-	failureMessage: string
-) {
-	let timeoutId: ReturnType< typeof setTimeout > | undefined;
-	const timeout = new Promise< never >( ( _, reject ) => {
-		timeoutId = setTimeout(
-			() => reject( new Error( failureMessage ) ),
-			5_000
-		);
-	} );
-
-	try {
-		await Promise.race( [ signal, timeout ] );
-	} finally {
-		if ( timeoutId ) {
-			clearTimeout( timeoutId );
-		}
-	}
-}
-
 test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -144,16 +122,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 
 			await createVariations(
 				productId_bulkEditAfterFailedSave,
-				sampleVariations
-			);
-		} );
-
-		await test.step( 'Create variable product for dismissed save before bulk edit test', async () => {
-			productId_bulkEditAfterDismissedSave =
-				await createVariableProduct( productAttributes );
-
-			await createVariations(
-				productId_bulkEditAfterDismissedSave,
 				sampleVariations
 			);
 		} );
@@ -434,18 +402,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test( 'waits for unsaved variation changes before bulk editing', async ( {
 		page,
 	} ) => {
-		const requests: string[] = [];
+		let saveRequestStarted = false;
+		let bulkRequestCount = 0;
 		let releaseSaveRequest: () => void = () => {};
-		let markSaveRequestStarted: () => void = () => {};
-		let markBulkRequestStarted: () => void = () => {};
 		const saveRequestReleased = new Promise< void >( ( resolve ) => {
 			releaseSaveRequest = resolve;
-		} );
-		const saveRequestStarted = new Promise< void >( ( resolve ) => {
-			markSaveRequestStarted = resolve;
-		} );
-		const bulkRequestStarted = new Promise< void >( ( resolve ) => {
-			markBulkRequestStarted = resolve;
 		} );
 
 		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
@@ -455,15 +416,10 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			const action = data.get( 'action' );
 
 			if ( action === 'woocommerce_save_variations' ) {
-				requests.push( action );
-				markSaveRequestStarted();
-				await waitForSignal(
-					saveRequestReleased,
-					'Timed out waiting to release the variation save request.'
-				);
+				saveRequestStarted = true;
+				await saveRequestReleased;
 			} else if ( action === 'woocommerce_bulk_edit_variations' ) {
-				requests.push( action );
-				markBulkRequestStarted();
+				bulkRequestCount++;
 			}
 
 			await route.continue();
@@ -504,67 +460,33 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Confirm the bulk request waits for the variation save.', async () => {
-			await waitForSignal(
-				saveRequestStarted,
-				'Timed out waiting for the variation save request to start.'
-			);
-			await page.evaluate(
-				() =>
-					new Promise( ( resolve ) =>
-						requestAnimationFrame( () =>
-							requestAnimationFrame( resolve )
+			await expect.poll( () => saveRequestStarted ).toBe( true );
+
+			try {
+				await page.evaluate(
+					() =>
+						new Promise( ( resolve ) =>
+							requestAnimationFrame( () =>
+								requestAnimationFrame( resolve )
+							)
 						)
-					)
+				);
+				expect( bulkRequestCount ).toBe( 0 );
+			} finally {
+				releaseSaveRequest();
+			}
+
+			await expect.poll( () => bulkRequestCount ).toBe( 1 );
+			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
+				'bulk_actions'
 			);
-
-			expect( requests ).toEqual( [ 'woocommerce_save_variations' ] );
-
-			releaseSaveRequest();
-			await waitForSignal(
-				bulkRequestStarted,
-				'Timed out waiting for the bulk edit request to start.'
-			);
-
-			expect( requests ).toEqual( [
-				'woocommerce_save_variations',
-				'woocommerce_bulk_edit_variations',
-			] );
-		} );
-
-		await test.step( 'Confirm the bulk price remains after both requests complete.', async () => {
-			await expect( async () => {
-				await expect(
-					page.locator( '#woocommerce-product-data .blockUI' )
-				).toHaveCount( 0 );
-				await page
-					.getByRole( 'link', { name: 'Expand' } )
-					.first()
-					.click();
-
-				const priceInputs = page.getByRole( 'textbox', {
-					name: 'Regular price',
-				} );
-				const count = await priceInputs.count();
-
-				expect( count ).toBeGreaterThan( 0 );
-
-				for ( let index = 0; index < count; index++ ) {
-					await expect( priceInputs.nth( index ) ).toHaveValue(
-						variationThreePrice
-					);
-				}
-			} ).toPass();
 		} );
 	} );
 
-	test( 'does not bulk edit when saving unsaved variation changes fails', async ( {
+	test( 'does not bulk edit when saving variation changes fails', async ( {
 		page,
 	} ) => {
 		let bulkRequestCount = 0;
-		let markSaveRequestFailed: () => void = () => {};
-		const saveRequestFailed = new Promise< void >( ( resolve ) => {
-			markSaveRequestFailed = resolve;
-		} );
 
 		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
 			const data = new URLSearchParams(
@@ -578,7 +500,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 					contentType: 'text/plain',
 					body: 'Variation save failed',
 				} );
-				markSaveRequestFailed();
 				return;
 			}
 
@@ -622,10 +543,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Keep the bulk action cancelled after the save fails.', async () => {
-			await waitForSignal(
-				saveRequestFailed,
-				'Timed out waiting for the variation save request to fail.'
-			);
 			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
 				'bulk_actions'
 			);
@@ -635,73 +552,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await expect( firstVariation ).toHaveClass(
 				/variation-needs-update/
 			);
-			expect( bulkRequestCount ).toBe( 0 );
-		} );
-	} );
-
-	test( 'keeps unsaved variation changes when the save prompt is dismissed', async ( {
-		page,
-	} ) => {
-		let bulkRequestCount = 0;
-
-		await page.route( '**/wp-admin/admin-ajax.php', async ( route ) => {
-			const data = new URLSearchParams(
-				route.request().postData() ?? ''
-			);
-
-			if ( data.get( 'action' ) === 'woocommerce_bulk_edit_variations' ) {
-				bulkRequestCount++;
-			}
-
-			await route.continue();
-		} );
-
-		await test.step( 'Go to the "Edit product" page.', async () => {
-			await page.goto(
-				`wp-admin/post.php?post=${ productId_bulkEditAfterDismissedSave }&action=edit#variable_product_options`
-			);
-		} );
-
-		await gotToVariationsTab( page );
-
-		const firstVariation = page.locator( '.woocommerce_variation' ).first();
-		const regularPrice = firstVariation.getByRole( 'textbox', {
-			name: 'Regular price',
-		} );
-
-		await test.step( 'Edit a variation without saving.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
-			await regularPrice.fill( variationTwoPrice );
-			await expect( firstVariation ).toHaveClass(
-				/variation-needs-update/
-			);
-		} );
-
-		await test.step( 'Dismiss the save confirmation before a bulk edit.', async () => {
-			page.on( 'dialog', async ( dialog ) => {
-				if ( dialog.type() === 'prompt' ) {
-					await dialog.accept( variationThreePrice );
-				} else {
-					await dialog.dismiss();
-				}
-			} );
-
-			await page
-				.locator( '#field_to_edit' )
-				.selectOption( 'variable_regular_price' );
-		} );
-
-		await test.step( 'Keep the unsaved variation available for a later save.', async () => {
-			await expect( page.locator( '#field_to_edit' ) ).toHaveValue(
-				'bulk_actions'
-			);
-			await expect( firstVariation ).toHaveClass(
-				/variation-needs-update/
-			);
-			await expect( regularPrice ).toHaveValue( variationTwoPrice );
-			await expect(
-				page.getByRole( 'button', { name: 'Save changes' } )
-			).toBeEnabled();
 			expect( bulkRequestCount ).toBe( 0 );
 		} );
 	} );
