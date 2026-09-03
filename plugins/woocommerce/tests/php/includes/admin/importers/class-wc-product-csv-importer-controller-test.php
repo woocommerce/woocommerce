@@ -100,7 +100,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$variation = new WC_Product_Variation();
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_sku( 'IMPORT-CLEANUP-VARIATION' );
-		$variation->set_status( 'importing' );
+		$variation->set_status( 'publish' );
 		$variation->save();
 
 		$term_id = self::factory()->term->create(
@@ -113,34 +113,20 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 		$product_id   = $product->get_id();
 		$variation_id = $variation->get_id();
-		$deleted_ids  = array();
-		$record_id    = static function ( $post_id ) use ( &$deleted_ids ): void {
-			$deleted_ids[] = (int) $post_id;
-		};
-		add_action( 'delete_post', $record_id, 1 );
 
-		try {
-			$this->assertSame( 1, $this->get_product_lookup_row_count( $product_id ) );
-			$this->assertSame( 1, $this->get_product_lookup_row_count( $variation_id ) );
+		$this->assertSame( 1, $this->get_product_lookup_row_count( $product_id ) );
+		$this->assertSame( 1, $this->get_product_lookup_row_count( $variation_id ) );
 
-			$this->invoke_cleanup_after_import();
+		$this->invoke_cleanup_after_import();
 
-			$this->assertNull( get_post( $product_id ) );
-			$this->assertNull( get_post( $variation_id ) );
-			$this->assertContains( $product_id, $deleted_ids );
-			$this->assertContains( $variation_id, $deleted_ids );
-			$this->assertSame( 0, $this->get_product_lookup_row_count( $product_id ) );
-			$this->assertSame( 0, $this->get_product_lookup_row_count( $variation_id ) );
-			$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id IN ( %d, %d )", $product_id, $variation_id ) ) );
-			$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_relationships} WHERE object_id = %d", $product_id ) ) );
-			$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CLEANUP-PARENT' ) );
-			$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CLEANUP-VARIATION' ) );
-		} finally {
-			remove_action( 'delete_post', $record_id, 1 );
-			wp_delete_post( $variation_id, true );
-			wp_delete_post( $product_id, true );
-			wp_delete_term( $term_id, 'product_cat' );
-		}
+		$this->assertNull( get_post( $product_id ) );
+		$this->assertNull( get_post( $variation_id ) );
+		$this->assertSame( 0, $this->get_product_lookup_row_count( $product_id ) );
+		$this->assertSame( 0, $this->get_product_lookup_row_count( $variation_id ) );
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id IN ( %d, %d )", $product_id, $variation_id ) ) );
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_relationships} WHERE object_id = %d", $product_id ) ) );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CLEANUP-PARENT' ) );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-CLEANUP-VARIATION' ) );
 	}
 
 	/**
@@ -158,16 +144,52 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$parent_id    = $parent->get_id();
 		$variation_id = $variation->get_id();
 
-		try {
-			$this->invoke_cleanup_after_import();
+		$this->invoke_cleanup_after_import();
 
-			$this->assertNotNull( get_post( $parent_id ) );
-			$this->assertNull( get_post( $variation_id ) );
-			$this->assertSame( 0, $this->get_product_lookup_row_count( $variation_id ) );
-		} finally {
-			wp_delete_post( $variation_id, true );
-			wp_delete_post( $parent_id, true );
-		}
+		$this->assertNotNull( get_post( $parent_id ) );
+		$this->assertNull( get_post( $variation_id ) );
+		$this->assertSame( 0, $this->get_product_lookup_row_count( $variation_id ) );
+	}
+
+	/**
+	 * @testdox Import cleanup should preserve a placeholder completed after candidate selection.
+	 */
+	public function test_cleanup_after_import_rechecks_placeholder_status_before_deletion(): void {
+		$post_ids                  = array(
+			wp_insert_post(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'importing',
+					'post_title'  => 'First import cleanup placeholder',
+				)
+			),
+			wp_insert_post(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'importing',
+					'post_title'  => 'Second import cleanup placeholder',
+				)
+			),
+		);
+		$completed_id              = 0;
+		$complete_next_placeholder = static function ( $deleted_post_id ) use ( $post_ids, &$completed_id ): void {
+			if ( in_array( $deleted_post_id, $post_ids, true ) && ! $completed_id ) {
+				$completed_id = current( array_diff( $post_ids, array( $deleted_post_id ) ) );
+				wp_update_post(
+					array(
+						'ID'          => $completed_id,
+						'post_status' => 'publish',
+					)
+				);
+			}
+		};
+		add_action( 'delete_post', $complete_next_placeholder, 1 );
+
+		$this->invoke_cleanup_after_import();
+
+		$this->assertNotSame( 0, $completed_id );
+		$this->assertNotNull( get_post( $completed_id ) );
+		$this->assertSame( 'publish', get_post_status( $completed_id ) );
 	}
 
 	/**
@@ -215,19 +237,12 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 
-		try {
-			$this->invoke_cleanup_after_import();
+		$this->invoke_cleanup_after_import();
 
-			$this->assertNotNull( get_post( $variation_id ) );
-			$this->assertSame( 'preserve', get_post_meta( $variation_id, '_unrelated_orphan_marker', true ) );
-			$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d", $missing_post_id ) ) );
-			$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_relationships} WHERE object_id = %d", $missing_post_id ) ) );
-		} finally {
-			wp_delete_post( $variation_id, true );
-			$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $missing_post_id ) );
-			$wpdb->delete( $wpdb->term_relationships, array( 'object_id' => $missing_post_id ) );
-			wp_delete_term( $term_id, 'product_cat' );
-		}
+		$this->assertNotNull( get_post( $variation_id ) );
+		$this->assertSame( 'preserve', get_post_meta( $variation_id, '_unrelated_orphan_marker', true ) );
+		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d", $missing_post_id ) ) );
+		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->term_relationships} WHERE object_id = %d", $missing_post_id ) ) );
 	}
 
 	/**
@@ -240,16 +255,12 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$product_id = $product->get_id();
 		add_post_meta( $product_id, '_original_id', '12345' );
 
-		try {
-			$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_original_id'", $product_id ) ) );
+		$this->assertSame( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_original_id'", $product_id ) ) );
 
-			$this->invoke_cleanup_after_import();
+		$this->invoke_cleanup_after_import();
 
-			$this->assertNotNull( get_post( $product_id ) );
-			$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_original_id'", $product_id ) ) );
-		} finally {
-			wp_delete_post( $product_id, true );
-		}
+		$this->assertNotNull( get_post( $product_id ) );
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_original_id'", $product_id ) ) );
 	}
 
 	/**

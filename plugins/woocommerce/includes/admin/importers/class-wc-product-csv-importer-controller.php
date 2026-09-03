@@ -337,8 +337,16 @@ class WC_Product_CSV_Importer_Controller {
 				)
 			);
 
+			_prime_post_caches( $post_ids, false, false );
+
 			foreach ( $post_ids as $post_id ) {
-				wp_delete_post( absint( $post_id ), true );
+				$post = get_post( $post_id );
+
+				if ( ! $post || $post_type !== $post->post_type || 'importing' !== $post->post_status ) {
+					continue;
+				}
+
+				wp_delete_post( $post->ID, true );
 			}
 		}
 	}
