@@ -27,7 +27,7 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
-	 * IDs of the orders whose cancellation requests cancel_order() already handled in this request, as keys.
+	 * IDs of orders whose cancellation requests cancel_order() handled without an explicit redirect in this request, as keys.
 	 *
 	 * @var array<int, true>
 	 */
