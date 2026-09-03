@@ -73,10 +73,9 @@ add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__retu
 ```
 
 This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
-endpoint. Sites that have never enabled proxy tracking do not get it. Once
-enabled, the route stays registered and answers `403 proxy_tracking_disabled`
-while the filter is `false`, so events from pages still held in a cache fail
-visibly instead of disappearing into a `404`.
+endpoint. Sites that have never enabled proxy tracking do not get it. After it
+has been enabled, the route returns `403 proxy_tracking_disabled` while the
+filter is `false`, so cached pages fail visibly instead of receiving a `404`.
 
 Events arriving through it are untrusted. Server-derived properties replace
 client values; the reserved set is
@@ -101,8 +100,7 @@ Invalid event names and oversized pixel URLs return an error. Events beyond the
 batch limit are ignored.
 
 The filter's value is mirrored into the `woocommerce_analytics_proxy_tracking_enabled`
-option, which the optional MU-plugin speed module reads because it runs before
-plugins register filters.
+option because the optional MU-plugin speed module loads before plugins register filters.
 
 **The filter must resolve to the same value for every request on a site.** One
 that varies by cohort, percentage or geo makes cached pages disagree with what
