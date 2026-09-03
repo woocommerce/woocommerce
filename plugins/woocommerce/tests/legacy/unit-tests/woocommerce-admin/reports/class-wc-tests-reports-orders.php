@@ -166,6 +166,40 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to a guest order's shipping name when it has no billing name.
+	 */
+	public function test_extended_info_falls_back_to_shipping_name_for_a_guest_order(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$named_order = $this->create_guest_order( $product, 'warehouse@example.org' );
+		$named_order->set_billing_first_name( 'Katherine' );
+		$named_order->set_billing_last_name( 'Johnson' );
+		$named_order->save();
+
+		// Orders taken in person or over the API can reach Analytics with a shipping name only.
+		$shipping_only_order = $this->create_guest_order( $product, 'warehouse@example.org' );
+		$shipping_only_order->set_billing_first_name( '' );
+		$shipping_only_order->set_billing_last_name( '' );
+		$shipping_only_order->set_shipping_first_name( 'Mary' );
+		$shipping_only_order->set_shipping_last_name( 'Jackson' );
+		$shipping_only_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$named_order,
+			array( $named_order->get_id(), $shipping_only_order->get_id() )
+		);
+
+		$this->assertSame( 'Mary', $rows[ $shipping_only_order->get_id() ]['extended_info']['customer']['first_name'], 'An order without a billing first name should use its own shipping first name' );
+		$this->assertSame( 'Jackson', $rows[ $shipping_only_order->get_id() ]['extended_info']['customer']['last_name'], 'An order without a billing last name should use its own shipping last name' );
+		$this->assertSame( 'Katherine', $rows[ $named_order->get_id() ]['extended_info']['customer']['first_name'], 'The billing name should still win when the order has one' );
+		$this->assertSame( 'Johnson', $rows[ $named_order->get_id() ]['extended_info']['customer']['last_name'], 'The billing name should still win when the order has one' );
+	}
+
+	/**
 	 * @testdox Should keep the profile name for a registered customer's order.
 	 */
 	public function test_extended_info_keeps_registered_customer_profile_name(): void {
