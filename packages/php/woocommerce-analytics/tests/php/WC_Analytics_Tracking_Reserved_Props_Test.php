@@ -42,13 +42,13 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Clear the memoized reserved-name list after each test.
+	 * Reset the process-global state WorDBless does not.
 	 *
-	 * Runs unconditionally regardless of the test outcome, so a seeded
-	 * `woocommerce_store_id` option, the blog-details transient, or the cached
-	 * IP address set up for one test (to prove substitution rather than mere
-	 * absence, see test_record_client_event_drops_client_supplied_server_properties())
-	 * cannot leak into the next test even if an assertion fails first.
+	 * Options and transients are cleared by `BaseTestCase`, so the seeded
+	 * `woocommerce_store_id` is already handled. The memoized reserved-name list,
+	 * the pixel queue and the cached IP are static properties WorDBless never
+	 * sees, and they would otherwise carry one test's environment into the next.
+	 * Runs unconditionally, so a failed assertion cannot skip the reset.
 	 */
 	public function tear_down(): void {
 		$_SERVER = $this->server_snapshot;
