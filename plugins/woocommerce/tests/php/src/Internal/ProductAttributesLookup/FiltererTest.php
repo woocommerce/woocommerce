@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
@@ -567,6 +568,105 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
 		}
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
+	}
+
+	/**
+	 * Create a variable product with a single Color variation.
+	 *
+	 * @param array       $colors Color terms configured on the parent.
+	 * @param string|null $defining_color The variation's defining Color term, or null for an "Any Color" variation.
+	 * @param array       $other_attributes Non-variation attributes configured on the parent.
+	 * @return array Product and variation IDs.
+	 */
+	private function create_variable_product_with_color_variation( $colors, $defining_color = null, $other_attributes = array() ) {
+		return $this->create_variable_product(
+			array(
+				'variation_attributes'     => array( 'Color' => $colors ),
+				'non_variation_attributes' => $other_attributes,
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'Color' => $defining_color ),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Assert that a private variation's lookup rows are retained.
+	 *
+	 * @param int $variation_id Variation ID.
+	 * @param int $expected_row_count Expected retained row count.
+	 */
+	private function assert_private_variation_lookup_rows_are_retained( $variation_id, $expected_row_count = 1 ) {
+		global $wpdb;
+
+		$this->assertSame( ProductStatus::PRIVATE, get_post_status( $variation_id ) );
+		$this->assertSame(
+			$expected_row_count,
+			(int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND taxonomy = %s AND is_variation_attribute = 1",
+					$variation_id,
+					wc_attribute_taxonomy_name( 'Color' )
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Lookup table filtering excludes private variations while their lookup rows are retained.
+	 */
+	public function test_lookup_filtering_excludes_private_variations() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+		$products = array(
+			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
+			$this->create_variable_product_with_color_variation( array( 'Red' ), 'Red' ),
+		);
+
+		$this->assertEqualsCanonicalizing(
+			array( $products[0]['id'], $products[1]['id'] ),
+			$this->do_product_request( array( 'Color' => array( 'Red' ) ) )
+		);
+		\WC_Query::reset_chosen_attributes();
+
+		wp_update_post(
+			array(
+				'ID'          => $products[0]['variation_ids'][0],
+				'post_status' => ProductStatus::PRIVATE,
+			)
+		);
+		$this->assert_private_variation_lookup_rows_are_retained( $products[0]['variation_ids'][0] );
+
+		$this->assertSame( array( $products[1]['id'] ), $this->do_product_request( array( 'Color' => array( 'Red' ) ) ) );
+	}
+
+	/**
+	 * @testdox A private Any variation is excluded from multi-term AND filtering.
+	 */
+	public function test_multi_term_and_filtering_excludes_private_any_variations() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable' ) );
+		$products = array(
+			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
+			$this->create_variable_product_with_color_variation( array( 'Blue', 'Red' ), null, array( 'Features' => array( 'Washable' ) ) ),
+		);
+
+		wp_update_post(
+			array(
+				'ID'          => $products[0]['variation_ids'][0],
+				'post_status' => ProductStatus::PRIVATE,
+			)
+		);
+		$this->assert_private_variation_lookup_rows_are_retained( $products[0]['variation_ids'][0], 2 );
+
+		$this->assertSame(
+			array( $products[1]['id'] ),
+			$this->do_product_request( array( 'Color' => array( 'Blue', 'Red' ) ), array( 'Color' => 'and' ) )
+		);
 	}
 
 	/**
