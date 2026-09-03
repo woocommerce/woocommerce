@@ -42,7 +42,8 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null;
+		// Stored verbatim so teardown can put back exactly what was there; never used as input.
+		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
 		// in production code never runs during the test.

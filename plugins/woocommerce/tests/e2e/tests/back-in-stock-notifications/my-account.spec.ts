@@ -20,6 +20,8 @@ const MY_ACCOUNT_ENDPOINT = 'my-account/stock-notifications/';
 const TABLE = '.woocommerce-customer-stock-notifications-table';
 const PENDING_TABLE = `${ TABLE }--pending`;
 const ACTIVE_TABLE = `${ TABLE }--active`;
+// The link's aria-label ("Resend verification email for <product>") is its accessible name.
+const RESEND_LINK = /^Resend verification email for /;
 
 /**
  * A customer account owned by a single test.
@@ -135,7 +137,7 @@ test.describe(
 						} );
 					await expect( pendingRow ).toBeVisible();
 					await expect(
-						pendingRow.getByRole( 'link', { name: 'Resend email' } )
+						pendingRow.getByRole( 'link', { name: RESEND_LINK } )
 					).toBeVisible();
 					await expect(
 						pendingRow.getByRole( 'button', { name: 'Cancel' } )
@@ -165,7 +167,7 @@ test.describe(
 						activeRow.getByRole( 'button', { name: 'Cancel' } )
 					).toBeVisible();
 					await expect(
-						activeRow.getByRole( 'link', { name: 'Resend email' } )
+						activeRow.getByRole( 'link', { name: RESEND_LINK } )
 					).toHaveCount( 0 );
 					await expect(
 						activeTable.locator( 'tbody tr' )
@@ -230,7 +232,7 @@ test.describe(
 					await expect( row ).toBeVisible();
 
 					await row
-						.getByRole( 'link', { name: 'Resend email' } )
+						.getByRole( 'link', { name: RESEND_LINK } )
 						.click();
 
 					// The redirect after the GET lands us back on the same tab, with a
@@ -249,7 +251,7 @@ test.describe(
 
 					// The row is still pending and still offers the actions.
 					await expect(
-						row.getByRole( 'link', { name: 'Resend email' } )
+						row.getByRole( 'link', { name: RESEND_LINK } )
 					).toBeVisible();
 				} finally {
 					await restApi.delete(
