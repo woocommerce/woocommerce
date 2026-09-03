@@ -32,7 +32,6 @@ export interface ValidatedTextInputProps
 	customValidityMessage?: ( validity: ValidityState ) => string;
 	// Custom formatted to format values as they are typed.
 	customFormatter?: ( value: string ) => string;
-	// Input mask, see @woocommerce/input-mask. `value` and `onChange` carry the unmasked value.
 	mask?: string;
 	// Whether validation should run when mounted - only has an effect when focusOnMount is also true.
 	validateOnMount?: boolean;
