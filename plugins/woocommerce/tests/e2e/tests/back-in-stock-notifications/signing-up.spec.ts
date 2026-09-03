@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { expect, request, tags } from '../../fixtures/fixtures';
-import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
+import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
 	bisConsentCheckbox,
@@ -11,6 +11,7 @@ import {
 	bisNotice,
 	bisTargetProductInput,
 	deleteCustomer,
+	expectEmailAsAdmin,
 	findCustomerByEmail,
 	resetBISOptions,
 	setBISOptions,
@@ -18,7 +19,6 @@ import {
 	test,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
-import { expectEmail } from '../../utils/email';
 import { clearFilters, setFilterValue } from '../../utils/filters';
 
 test.describe(
@@ -35,6 +35,7 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
+					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -74,6 +75,7 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
+					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -191,6 +193,7 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
+					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -271,6 +274,7 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: true,
 					requireAccount: false,
+					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -288,18 +292,13 @@ test.describe(
 					page.getByText( bisNotice.doubleOptIn )
 				).toBeVisible();
 
-				// Switch to an admin context to inspect the mail log —
-				// WP Mail Logging is an admin-only screen.
-				const adminContext = await browser.newContext( {
-					storageState: ADMIN_STATE_PATH,
-				} );
-				const adminPage = await adminContext.newPage();
-				await expectEmail(
-					adminPage,
+				// WP Mail Logging is an admin-only screen, so the log is read
+				// from a separate admin context.
+				await expectEmailAsAdmin(
+					browser,
 					email,
 					bisEmailSubject.verify( product.name )
 				);
-				await adminContext.close();
 			} );
 		} );
 
@@ -364,16 +363,11 @@ test.describe(
 						// The "check your e-mail for details" in the notice is
 						// WooCommerce's own new-account email, sent with the
 						// generated password.
-						const adminContext = await browser.newContext( {
-							storageState: ADMIN_STATE_PATH,
-						} );
-						const adminPage = await adminContext.newPage();
-						await expectEmail(
-							adminPage,
+						await expectEmailAsAdmin(
+							browser,
 							email,
 							/account has been created!/
 						);
-						await adminContext.close();
 					} finally {
 						await deleteCustomer( restApi, account!.id );
 					}
@@ -409,16 +403,11 @@ test.describe(
 					expect( account ).toBeDefined();
 
 					try {
-						const adminContext = await browser.newContext( {
-							storageState: ADMIN_STATE_PATH,
-						} );
-						const adminPage = await adminContext.newPage();
-						await expectEmail(
-							adminPage,
+						await expectEmailAsAdmin(
+							browser,
 							email,
 							bisEmailSubject.verify( product.name )
 						);
-						await adminContext.close();
 					} finally {
 						await deleteCustomer( restApi, account!.id );
 					}
@@ -432,6 +421,7 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: true,
+					createAccountOnSignup: false,
 				} );
 			} );
 

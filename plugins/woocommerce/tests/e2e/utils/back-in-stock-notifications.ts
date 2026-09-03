@@ -17,7 +17,7 @@ import { setFilterValue } from './filters';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
-import { CUSTOMER_STATE_PATH } from '../playwright.config';
+import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../playwright.config';
 
 /**
  * Names of the Back in Stock Notifications options in core.
@@ -987,6 +987,41 @@ export const bisEmailSubject = {
 	backInStock: ( productName: string ): RegExp =>
 		subjectMatcher( `"${ productName }" is back in stock!` ),
 } as const;
+
+/**
+ * Assert an email landed in the mail log, from a throwaway admin context.
+ *
+ * For specs whose own page is a guest or customer session: WP Mail Logging
+ * is an admin-only screen. The context is closed in `finally` so a missing
+ * email fails the test without leaking a context into the rest of the run.
+ *
+ * @param {Browser} browser              The test's browser fixture.
+ * @param {string}  receiverEmailAddress The recipient email address.
+ * @param {RegExp}  subject              The email subject (regular expression).
+ * @param {number}  [expectedCount]      Expected number of matching rows. Defaults to 1.
+ */
+export async function expectEmailAsAdmin(
+	browser: Browser,
+	receiverEmailAddress: string,
+	subject: RegExp,
+	expectedCount = 1
+): Promise< void > {
+	const adminContext = await browser.newContext( {
+		storageState: ADMIN_STATE_PATH,
+	} );
+
+	try {
+		const adminPage = await adminContext.newPage();
+		await expectEmail(
+			adminPage,
+			receiverEmailAddress,
+			subject,
+			expectedCount
+		);
+	} finally {
+		await adminContext.close();
+	}
+}
 
 /**
  * Open the WP Mail Logging entry for a given recipient and subject, leaving its modal open.
