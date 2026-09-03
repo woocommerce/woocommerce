@@ -128,7 +128,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			$matching_customer_data
 		);
 
-		update_option( 'timezone_tring', 'America/New York' );
+		update_option( 'timezone_string', 'America/New_York' );
 		$customer_3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'timezonetest', 'timezonetest', 'timezonetest@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
