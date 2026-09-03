@@ -43696,12 +43696,6 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:add_from_sql_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

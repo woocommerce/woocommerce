@@ -363,7 +363,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'sanitizes native field descriptions before rendering', () => {
+	it( 'sanitizes field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -394,7 +394,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'hides fields with unmet native visibility rules', () => {
+	it( 'hides fields with unmet schema visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -1154,8 +1154,7 @@ describe( 'settings HTML rendering', () => {
 		).toHaveLength( 2 );
 
 		// The info description keeps sanitized markup while the group
-		// description renders as plain text, so the only strong tag left is
-		// the one from the info description.
+		// description and the DataForm field label render as plain text.
 		const strongTexts = Array.from(
 			container.querySelectorAll( 'strong' )
 		).map( ( el ) => el.textContent );
