@@ -216,9 +216,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
 		 * published, otherwise the coupon will remain available for use.
 		 *
-		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status` listener:
-		 * the `doing_action( 'save_post' )` branch above writes the status with $wpdb directly, so no
-		 * transition fires and this is the only write-side invalidation on that path.
+		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status`
+		 * listener. The `doing_action( 'save_post' )` branch above writes the status with $wpdb
+		 * directly, so that write fires no transition. Core already transitioned the post to the
+		 * status it saved just before `save_post`, but the CRUD can write a different one here (a
+		 * `save_post` callback setting the coupon to draft, say), and this covers the difference.
 		 */
 		if ( 'publish' !== $coupon->get_status() ) {
 			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( $coupon->get_code() );
