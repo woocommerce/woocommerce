@@ -47,11 +47,13 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wpdb;
 
+		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
+		// TRUNCATE is DDL and implicitly commits it, leaking every fixture the test wrote.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders_meta" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_operational_data" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_addresses" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders_meta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_operational_data" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_addresses" );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 
 		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
