@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `mask` option to the additional checkout fields API so text fields can format input as the shopper types while only the raw value is stored.
