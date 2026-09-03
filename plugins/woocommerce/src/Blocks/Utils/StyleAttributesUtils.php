@@ -88,37 +88,9 @@ class StyleAttributesUtils {
 	public static function get_align_class_and_style( $attributes ) {
 		$align_attribute = $attributes['align'] ?? null;
 
-		if ( 'wide' === $align_attribute ) {
+		if ( in_array( $align_attribute, array( 'wide', 'full', 'left', 'right', 'center' ), true ) ) {
 			return array(
-				'class' => 'alignwide',
-				'style' => null,
-			);
-		}
-
-		if ( 'full' === $align_attribute ) {
-			return array(
-				'class' => 'alignfull',
-				'style' => null,
-			);
-		}
-
-		if ( 'left' === $align_attribute ) {
-			return array(
-				'class' => 'alignleft',
-				'style' => null,
-			);
-		}
-
-		if ( 'right' === $align_attribute ) {
-			return array(
-				'class' => 'alignright',
-				'style' => null,
-			);
-		}
-
-		if ( 'center' === $align_attribute ) {
-			return array(
-				'class' => 'aligncenter',
+				'class' => 'align' . $align_attribute,
 				'style' => null,
 			);
 		}
