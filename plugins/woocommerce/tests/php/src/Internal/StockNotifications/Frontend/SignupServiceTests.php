@@ -121,6 +121,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
 		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
 
 		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
 		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
@@ -159,6 +160,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
 		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
 
 		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com', array( 'attribute_pa_color' => 'red' ) );
 		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
