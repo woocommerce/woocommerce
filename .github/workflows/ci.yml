@@ -71,6 +71,7 @@ jobs:
     name: 'Analyze changes'
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     outputs:
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
       needs-changelog-validation: ${{ steps.target-changes.outputs.needs-changelog-validation }}
@@ -103,6 +104,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
@@ -154,6 +156,7 @@ jobs:
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
@@ -175,13 +178,59 @@ jobs:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
           php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
+          # cs2pr turns the PHPCS checkstyle report into inline annotations in the
+          # 'Lint: PHP inline annotations' step; installed here alongside PHP (and
+          # only where PHP installs) rather than in a second setup-php invocation.
+          php-tools: 'cs2pr'
+
+      # On PHPCS failure, lint-branch.sh writes the findings to this path as a
+      # checkstyle report, so the annotation step after 'Lint' can surface them as
+      # inline annotations on 'Files changed' while the Lint log keeps the readable
+      # output. Set via GITHUB_ENV so the path is defined exactly once: the runner
+      # context isn't available in job-level env, and step-level env (where runner
+      # IS available) would have to repeat the path on every step that needs it.
+      # The file's presence is what triggers the annotation, so it must mean exactly
+      # "phpcs failed": if another linter ever emits a checkstyle report, it needs
+      # its own variable and file, never this one.
+      - name: 'Set the PHPCS report path'
+        run: echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
 
       - name: 'Lint'
+        id: 'lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+
+      # Gate on the Lint step's own outcome (not job-level failure()) so this step
+      # reacts only to a lint failure, never to an unrelated step failing;
+      # !cancelled() is required because after a failure GitHub skips later steps
+      # unless told otherwise. The report only exists when PHPCS itself failed, so
+      # a JS-only failure (or another project's) takes the empty branch.
+      - name: 'Lint: PHP inline annotations'
+        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
+        # cs2pr exits non-zero whenever the report contains errors; finish green
+        # regardless: the Lint step already set the verdict, and a second red step
+        # would be noise. The totals are stated first because GitHub renders roughly
+        # the first 10 error and 10 warning annotations per step; past that, findings
+        # exist only in this log, and a capped diff view shouldn't read as the full list.
+        # The XML check guards against the report holding composer chatter or a partial
+        # write instead of checkstyle: cs2pr would fail to parse it, and the || true
+        # would turn that into a silently empty step.
+        run: |
+          if [[ ! -s "$WC_PHPCS_CHECKSTYLE_FILE" ]]; then
+            echo 'No PHPCS checkstyle report to annotate.'
+          elif ! head -n1 "$WC_PHPCS_CHECKSTYLE_FILE" | grep -q '<?xml'; then
+            echo 'The PHPCS report exists but does not look like checkstyle XML; skipping annotations. First lines:'
+            head -n5 "$WC_PHPCS_CHECKSTYLE_FILE"
+          else
+            errors=$(grep -c 'severity="error"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
+            warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
+            echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
+            cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
+          fi
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
     # The `needs-code-validation` clause mirrors `project-test-jobs`: without it this job builds a
     # plugin zip for consumers that are themselves gated off, which is pure waste on docs-only PRs.
@@ -228,6 +277,7 @@ jobs:
     # While the CI_QUEUE_OVERFLOW repository variable is '1', e2e jobs route to the
     # dedicated group. Fork PRs are excluded.
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-latest' }}
+    timeout-minutes: 35
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
@@ -432,6 +482,7 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
     if: ${{ !cancelled() }}
@@ -464,6 +515,7 @@ jobs:
   alert-on-failure:
     name: 'Report results on Slack'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     env:
@@ -520,6 +572,7 @@ jobs:
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
@@ -602,6 +655,7 @@ jobs:
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: read
 
@@ -639,6 +693,7 @@ jobs:
       }}
     needs: [ 'identify-jobs-to-run' ]
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: read
 
@@ -695,6 +750,7 @@ jobs:
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: read
 

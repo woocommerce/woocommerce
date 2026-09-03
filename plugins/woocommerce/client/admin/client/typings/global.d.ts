@@ -115,14 +115,12 @@ declare global {
 			};
 		};
 		wcAdminFeatures: DeprecatedWcAdminFeatureFlags & {
-			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			'settings-ui': boolean;
 			'store-alerts': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
-			'product-variations-classic-redesign': boolean;
 		};
 		wp: {
 			updates?: {

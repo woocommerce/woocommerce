@@ -22,7 +22,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Package version.
 	 */
-	const PACKAGE_VERSION = '0.16.3';
+	const PACKAGE_VERSION = '0.18.0';
 
 	/**
 	 * Proxy speed module version option.
@@ -174,8 +174,16 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Register REST API routes.
+	 *
+	 * The tracking proxy endpoint is unauthenticated by design — it exists to
+	 * receive front-end events — so it is registered only while proxy tracking is
+	 * enabled, rather than on every site running the package.
 	 */
 	public static function register_rest_routes() {
+		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			return;
+		}
+
 		$controller = new WC_Analytics_Tracking_Proxy();
 		$controller->register_routes();
 	}

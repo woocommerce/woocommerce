@@ -140,6 +140,28 @@ describe( 'product filters interactivity store', () => {
 		expect( mockRegisteredStore.state.selectableItems ).toEqual( [] );
 	} );
 
+	it( 'closes from the backdrop but not the dialog', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		const context = { isOverlayOpened: true };
+		const wrapper = document.createElement( 'div' );
+		const dialog = document.createElement( 'div' );
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+			target: dialog,
+			currentTarget: wrapper,
+		} as unknown as MouseEvent );
+		expect( context.isOverlayOpened ).toBe( true );
+
+		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+			target: wrapper,
+			currentTarget: wrapper,
+		} as unknown as MouseEvent );
+		expect( context.isOverlayOpened ).toBe( false );
+	} );
+
 	it( 'does not add child-owned index metadata to selectable items', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Product filters store was not registered.' );
@@ -270,7 +292,7 @@ describe( 'product filters interactivity store', () => {
 						actions: {
 							navigate: routerNavigate,
 						},
-					} );
+					} as unknown as typeof import('@wordpress/interactivity-router') );
 
 					expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
 					const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
@@ -434,7 +456,7 @@ describe( 'product filters interactivity store', () => {
 			expect( firstYield.done ).toBe( false );
 			iterator.next( {
 				actions: { navigate: routerNavigate },
-			} );
+			} as unknown as typeof import('@wordpress/interactivity-router') );
 
 			expect( mockReload ).not.toHaveBeenCalled();
 			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );

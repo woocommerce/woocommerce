@@ -89,7 +89,7 @@ if ( process.env.CI ) {
 	] );
 }
 
-export const setupProjects = [
+export const coreSetupProjects = [
 	{
 		name: 'install wc',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
@@ -107,12 +107,13 @@ export const setupProjects = [
 		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
-	{
-		name: 'blocks setup',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'blocks-setup.ts',
-	},
 ];
+
+const blocksSetupProject = {
+	name: 'blocks setup',
+	testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+	testMatch: 'blocks-setup.ts',
+};
 
 /**
  * Spec folders that must run serially in `core-serial` (they mutate global
@@ -131,6 +132,13 @@ const serialRunSpecs = [
 	// the order-import mode, and this serial job never runs concurrently with the
 	// parallel one.)
 	'**/tests/analytics/analytics-settings.spec.ts',
+	// Every spec sets the global `woocommerce_customer_stock_notifications_*`
+	// options in beforeAll (allow_signups / double_opt_in / require_account) and
+	// deletes them in afterAll. Run in parallel the files demand conflicting global
+	// config and race on those options: concurrent identical writes make
+	// `update_option` return false (`e2e-options/update` 400 "Update option FAILED"),
+	// and one file's afterAll strips the signup form mid-test for the others.
+	'**/tests/back-in-stock-notifications/**/*.spec.ts',
 	// Flips the global `woocommerce_default_customer_address` (geolocation) and
 	// `woocommerce_enable_ajax_add_to_cart` settings, which change add-to-cart
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
@@ -171,13 +179,12 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
+	// Mutates the global woocommerce_permalinks option (product base and the
+	// derived use_verbose_page_rules flag) and restores it in teardown.
+	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
-	// Unchecks and saves `woocommerce_enable_reviews`, flipping that global option
-	// to `no` mid-run (restored only in afterAll). While off, the front-end Reviews
-	// tab and admin review management disappear — proven to deterministically fail 3
-	// `product/product-reviews.spec.ts` tests (shopper post + the edit/reply Reviews
-	// tab assertions). Also toggles the global `settings-ui` feature flag and resets
-	// ALL e2e feature flags in afterAll.
+	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
+	// in afterAll.
 	'**/tests/settings/settings-ui-feature-flag.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
@@ -228,7 +235,8 @@ export default defineConfig( {
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 
 	projects: [
-		...setupProjects,
+		...coreSetupProjects,
+		blocksSetupProject,
 		{
 			name: 'core-serial',
 			testMatch: serialRunSpecs,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent recursive product description formatting between the Product Description block and Store API product schema.

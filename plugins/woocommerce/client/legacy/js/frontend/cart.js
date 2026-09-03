@@ -642,6 +642,11 @@ jQuery( function ( $ ) {
 						if ( $coupon_wrapper.length > 0 ) {
 							show_coupon_error( response, $coupon_wrapper, false );
 						}
+
+						$( document.body ).trigger( 'errored_coupon', [
+							coupon_code,
+							response,
+						] );
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [

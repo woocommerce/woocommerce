@@ -68,6 +68,38 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Dispatches a v1 line-item update after deleting its variation during product resolution.
+	 *
+	 * @param WC_Order                  $order Order to update.
+	 * @param WC_Order_Item_Product     $item Line item to update.
+	 * @param WC_Product_Variation      $variation Variation to delete.
+	 * @param array<string, int|string> $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update_after_deleting_variation( WC_Order $order, WC_Order_Item_Product $item, WC_Product_Variation $variation, array $line_item ): WP_REST_Response {
+		$delete_variation = static function ( $product, $order_item ) use ( $item, $variation ) {
+			static $deleted = false;
+
+			if ( ! $deleted && $item->get_id() === $order_item->get_id() ) {
+				$deleted = true;
+				wp_delete_post( $variation->get_id(), true );
+			}
+
+			return $product;
+		};
+		add_filter( 'woocommerce_get_product_from_item', $delete_variation, 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'line_items' => array( array_merge( array( 'id' => $item->get_id() ), $line_item ) ) ) );
+
+		try {
+			return $this->server->dispatch( $request );
+		} finally {
+			remove_filter( 'woocommerce_get_product_from_item', $delete_variation, 10 );
+		}
+	}
+
+	/**
 	 * Test that an order can be fetched via REST API V1 without triggering a deprecation notice.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/39006
@@ -184,6 +216,60 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+	}
+
+	/**
+	 * @testdox Updating with the unchanged parent demotes the line item if its variation is deleted after loading.
+	 */
+	public function test_update_line_item_demotes_when_variation_is_deleted_after_loading(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$response = $this->dispatch_line_item_update_after_deleting_variation(
+			$order,
+			$item,
+			$variation,
+			array(
+				'product_id' => $parent->get_id(),
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'A variation deleted after item loading should not reject the order update.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+	}
+
+	/**
+	 * @testdox Updating with an echoed variation ID demotes the line item if the variation is deleted after loading.
+	 */
+	public function test_update_line_item_with_echoed_variation_id_demotes_when_variation_is_deleted_after_loading(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$parent_sku = 'REST-V1-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+
+		$response = $this->dispatch_line_item_update_after_deleting_variation(
+			$order,
+			$item,
+			$variation,
+			array(
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $variation->get_id(),
+				'sku'          => $parent_sku,
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'Echoing the stored variation ID back should not reject the order update.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the dir and translate attributes wc_price() puts on the currency symbol when Product Elements, Wishlist, and Save for later swap price_html client-side, so RTL-script currency symbols keep honoring the currency position setting after hydration.
