@@ -53260,12 +53260,6 @@ parameters:
 			path: src/Blocks/Integrations/IntegrationInterface.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Integrations/IntegrationRegistry.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -68353,18 +68347,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool The WP_DEBUG mode\.\)\: Unexpected token "The", expected variable at offset 115 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^PHPDoc tag @return has invalid value \(\\WC_Order\|null;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 99 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -68577,18 +68559,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:validate_billing_email_matches_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool The WP_DEBUG mode\.\)\: Unexpected token "The", expected variable at offset 115 on line 4$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

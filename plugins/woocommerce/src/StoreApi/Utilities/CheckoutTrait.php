@@ -124,7 +124,7 @@ trait CheckoutTrait {
 			/**
 			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 			 *
-			 * @param bool The WP_DEBUG mode.
+			 * @param bool $return_previous_exceptions Whether to include the previous exception. Defaults to the WP_DEBUG value.
 			 */
 			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [
