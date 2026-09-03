@@ -22,9 +22,18 @@
 	align-items: center;
 	max-width: 80ch;
 
-	// Enough room that the name beside a badge doesn't shred into three lines.
-	// Scoped so the Coupons cell — same class, usually empty — is left alone.
-	&:has(.woocommerce-view-more-list) {
+	// A name with no spaces has a min-content width of the whole name, which
+	// would otherwise set the column's floor and widen the table. Allowing a
+	// break anywhere lets it wrap inside the bounds here instead.
+	> a {
+		overflow-wrap: anywhere;
+	}
+
+	// Enough room that the name beside a badge doesn't shred into short lines.
+	// On the link rather than the wrapper, so the badge's fixed width isn't
+	// taken out of the name's share. Scoped so the Coupons cell — same class,
+	// usually empty — is left alone.
+	&:has(.woocommerce-view-more-list) > a {
 		min-width: 20ch;
 	}
 
