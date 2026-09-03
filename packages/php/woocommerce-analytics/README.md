@@ -75,27 +75,14 @@ add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__retu
 This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
 endpoint. Sites without proxy tracking enabled do not get it.
 
-Events arriving through it are untrusted:
+Events arriving through it are untrusted. Server-derived properties replace
+client values; the reserved set is
+`WC_Analytics_Tracking::get_reserved_property_names()`. `_lg`, `_dl`, and
+`_dr` are client values because they describe the page, not the `/track` request.
 
--   Server-derived properties are replaced with the server's own values. The set
-    is `WC_Analytics_Tracking::get_reserved_property_names()`, which includes
-    generic names like `url`, `device` and `timezone`. Rename event properties
-    that would collide. `_lg`, `_dl` and `_dr` stay the client's: they describe
-    the page, not the `/track` request.
--   Input is bounded, and the event still records. An over-long value is trimmed
-    with a trailing `…` rather than dropped, and the encoded payload budget is
-    spent on the cheapest properties first, so one long value costs its own tail
-    instead of every property after it. Trimming is not reported back: an
-    unauthenticated endpoint that says which values it rejected is an oracle for
-    probing the limits.
--   Two cases do return an error, because the alternative is reporting a success
-    for an event that produced nothing: an unusable `event_name`, and a finished
-    pixel URL over the byte ceiling. Events past the batch limit get no result
-    entry at all.
--   The same value cap applies to what the server derives from request headers
-    (`_via_ua`, `_dr`, `_via_ref`, `_dl`) and from the session cookie. Those are
-    caller-influenced too, and uncapped they cost the whole event rather than
-    their own tail.
+Input is limited. Long values are truncated with `…`, and the payload budget
+keeps the cheapest properties first. The same value limit applies to
+request-derived values and the session cookie.
 
 | Limit                     | Value |
 | ------------------------- | ----- |
@@ -107,9 +94,8 @@ Events arriving through it are untrusted:
 | Encoded payload per event | 4096  |
 | Pixel URL bytes           | 8192  |
 
-A value at the character cap can exceed the byte budget on its own once
-percent-encoded, since one CJK character costs nine bytes in a URL. The budget
-wins in that case and trims the value further.
+Invalid event names and oversized pixel URLs return an error. Events beyond the
+batch limit are ignored.
 
 **The filter must resolve to the same value for every request on a site.** One
 that varies by cohort, percentage or geo makes cached pages disagree with what

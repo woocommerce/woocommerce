@@ -128,8 +128,7 @@ class WooCommerceAnalyticsProxySpeed {
 			return false;
 		}
 
-		// Same skew, different symbol: process_proxy_request() reads this constant, and an
-		// older copy throws inside the catch, answering 500 rather than falling back here.
+		// Avoid a 500 when an older package lacks the bound constant.
 		if ( ! defined( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST' ) ) {
 			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates the client input bounds.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
@@ -206,9 +205,7 @@ class WooCommerceAnalyticsProxySpeed {
 			$events = array( $events );
 		}
 
-		// Same bound as the REST controller. The constant lives in the package rather
-		// than being restated here: unlike is_proxy_request(), this runs after the
-		// autoloader, so the class is available.
+		// Use the same batch limit as the REST controller.
 		$max_events = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST;
 		if ( count( $events ) > $max_events ) {
 			$events = array_slice( $events, 0, $max_events, true );

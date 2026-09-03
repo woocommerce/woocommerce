@@ -365,9 +365,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The third argument tells a callback whether the properties it is looking
-	 * at came from an untrusted client, which is the only way it can know to
-	 * assign unconditionally.
+	 * Pass whether properties came from an untrusted client to filter callbacks.
 	 */
 	public function test_filter_receives_the_client_supplied_flag(): void {
 		$seen     = array();
@@ -392,12 +390,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A callback that defers to an existing value hands a *reserved* property
-	 * straight back to the client that supplied it. The strip runs before the
-	 * filter, so it cannot see this; get_properties() re-asserts the server's
-	 * values afterwards. Contrast with
-	 * test_filter_callback_deferring_to_an_existing_value_loses_to_the_client(),
-	 * which covers a name the filter invents — still the client's to win.
+	 * Reassert server-owned values after filters run on client properties.
 	 */
 	public function test_filter_callback_cannot_hand_a_reserved_property_back_to_the_client(): void {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
@@ -420,9 +413,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The trusted path must keep its escape hatch: a server-side caller can still
-	 * set a property that collides with a common one, and the post-filter
-	 * re-assertion must not take that away.
+	 * Allow trusted callers to override common properties.
 	 */
 	public function test_reserved_properties_are_not_re_asserted_for_trusted_callers(): void {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
@@ -437,8 +428,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * `_ts` is in $required_properties and in RESERVED_IDENTITY_PROPERTIES, so a
-	 * client cannot forge the event timestamp at either layer.
+	 * Use the server timestamp for client events.
 	 */
 	public function test_client_cannot_forge_the_event_timestamp(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -457,10 +447,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The endpoint is unauthenticated and every property reaches the pixel URL,
-	 * which is rejected outright once it grows too long. Values are truncated
-	 * with an ellipsis so a capped value stays distinguishable from one that
-	 * genuinely ended at the limit.
+	 * Truncate oversized client values.
 	 */
 	public function test_client_property_values_are_capped(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -476,7 +463,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A client cannot widen its own footprint by sending hundreds of properties.
+	 * Limit client properties per event.
 	 */
 	public function test_client_property_count_is_capped(): void {
 		$properties = array();
@@ -490,10 +477,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * get_properties() flattens array values with implode(), which emits an
-	 * "Array to string conversion" warning for a nested array. Letting an
-	 * unauthenticated caller write warnings into the error log is the problem
-	 * worth closing; the value itself is meaningless either way.
+	 * Prevent nested arrays from generating warnings while flattening values.
 	 */
 	public function test_nested_client_arrays_do_not_reach_the_flattening_step(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -504,9 +488,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The per-value cap runs on each member, never on the string
-	 * `get_properties()` joins them into: 20,000 ten-character members produced a
-	 * 300KB pixel URL, which nothing downstream rejects.
+	 * Limit client array members before flattening them.
 	 */
 	public function test_client_array_member_count_is_capped(): void {
 		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 25, 'abcdefghij' );
@@ -525,8 +507,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Slicing must not turn an indexed array into an associative one:
-	 * `get_properties()` picks `implode()` over `wp_json_encode()` on that test.
+	 * Keep capped indexed arrays indexed so they continue to flatten correctly.
 	 */
 	public function test_capped_arrays_still_flatten_with_implode(): void {
 		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS + 5, 'a' );
@@ -541,9 +522,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The per-axis caps multiply: at their limits one event built a 512KB pixel
-	 * URL, so the product needs its own bound. Properties are dropped from the
-	 * tail once the budget is spent.
+	 * Keep client payloads within the pixel URL limit.
 	 */
 	public function test_client_payload_total_is_capped( string $character = 'a' ): void {
 		$properties = array();
@@ -555,8 +534,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 		$this->assertNotEmpty( $sanitized, 'The budget drops the tail, it does not empty the event.' );
 
-		// The pixel URL is what the budget exists to bound, so assert on it rather
-		// than on the constant.
+		// Verify the final URL, not just the budget constant.
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
 		$props            = WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_product_view', $sanitized, true );
 
@@ -569,9 +547,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * An ASCII-only fixture hid this: the budget counted characters while the URL
-	 * carries percent-encoded bytes, so `%` costs 3x and CJK and emoji 9x or more
-	 * of what the budget charged, and the same payload built a 12KB URL.
+	 * Measure encoded bytes rather than character counts.
 	 *
 	 * @dataProvider expensive_character_provider
 	 *
@@ -597,9 +573,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * An associative array serializes to JSON, which carries its keys, while an
-	 * indexed one is joined and drops them. Measuring both as a joined list
-	 * charged nothing for the keys, and 50 such properties built a 152KB URL.
+	 * Include associative-array keys when measuring payload size.
 	 */
 	public function test_associative_array_keys_are_charged_to_the_budget(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -625,13 +599,10 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * One oversized value used to charge its key against the budget and then be
-	 * dropped anyway, so short properties after it were refused for space that
-	 * nothing occupied.
+	 * Do not charge the budget for properties that are dropped.
 	 */
 	public function test_a_dropped_property_does_not_spend_the_budget(): void {
-		// Long names on purpose: the leak is the key's own cost, so short keys hide
-		// it however many properties are dropped.
+		// Long names ensure this exercises each dropped key's cost.
 		$properties = array();
 		for ( $i = 0; $i < 40; $i++ ) {
 			$name                = str_repeat( 'k', WC_Analytics_Tracking::MAX_CLIENT_NAME_LENGTH - 12 ) . $i;
@@ -645,14 +616,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The cut is made in characters, never in bytes, so a multibyte value comes
-	 * back shorter but never cut mid-sequence.
-	 *
-	 * No equality against the value cap here: a multibyte value at the cap costs
-	 * several times its length once percent-encoded, so the payload budget trims
-	 * it further, and asserting the cap would be asserting which bound won.
-	 * `test_client_property_values_are_capped()` pins the cap on ASCII, where
-	 * nothing else is in play.
+	 * Truncate multibyte values without splitting characters.
 	 *
 	 * @dataProvider multibyte_value_provider
 	 *
@@ -673,7 +637,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Multibyte characters whose byte length differs from their character length.
+	 * Provide multibyte characters for truncation tests.
 	 *
 	 * @return array<string, array{0: string}>
 	 */
@@ -686,7 +650,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The bound is a limit, not an off-by-one rejection of the longest legal value.
+	 * Keep values at the length limit.
 	 */
 	public function test_a_value_at_the_length_limit_is_untouched(): void {
 		$exact = str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH );
@@ -697,8 +661,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * An array that hits the member cap always exceeded the budget, so the whole
-	 * property used to vanish. Losing a few categories is easier to notice.
+	 * Keep oversized arrays by removing trailing members.
 	 */
 	public function test_oversized_arrays_lose_members_not_the_property(): void {
 		$members = array_fill( 0, WC_Analytics_Tracking::MAX_CLIENT_ARRAY_MEMBERS, str_repeat( 'a', WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH ) );
@@ -710,9 +673,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The last bound, and the only one that sees the final URL — so the only one
-	 * covering properties a filter callback added after the client caps ran.
-	 * Driven through the trusted path, where no client cap applies.
+	 * Do not queue pixel URLs that exceed the final URL limit.
 	 */
 	public function test_oversized_pixel_urls_are_not_fired(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -732,8 +693,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A realistic event must pass through untouched, or the budget is capping
-	 * first-party analytics rather than an attacker's payload.
+	 * Keep typical client payloads unchanged.
 	 */
 	public function test_a_realistic_client_payload_is_not_capped(): void {
 		$properties = array(
@@ -751,10 +711,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Every other bounds test calls `sanitize_client_properties()` directly, so
-	 * removing its call site in `record_event()` left the suite green while the
-	 * bounds silently stopped applying. This drives one through the real entry
-	 * point instead.
+	 * Apply bounds when recording a client event.
 	 */
 	public function test_record_client_event_actually_applies_the_bounds(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -778,8 +735,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Non-string scalars are analytics payload, not text: capping them would
-	 * change their type on the way to the pixel.
+	 * Preserve scalar value types.
 	 */
 	public function test_client_scalar_values_keep_their_type(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -794,9 +750,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A JSON array survives the consumers' truthiness check and reaches
-	 * `PREFIX . $event_name`, where PHP writes a warning to the log on an
-	 * unauthenticated request. `failOnWarning` makes that warning fail the test.
+	 * Reject unusable client event names.
 	 *
 	 * @dataProvider unusable_client_event_name_provider
 	 *
@@ -828,8 +782,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A name at the limit is still recorded: the bound is a limit, not an
-	 * off-by-one rejection of the longest legal name.
+	 * Keep event names at the length limit.
 	 */
 	public function test_client_event_name_at_the_length_limit_is_recorded(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -845,9 +798,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Names are the one axis left unbounded once values and counts are capped.
-	 * The charset check is `Pixel_Builder`'s own, so this drops exactly what it
-	 * would reject — but rejecting there loses the whole event, not one property.
+	 * Drop invalid client property names.
 	 */
 	public function test_unusable_client_property_names_are_dropped(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -864,8 +815,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A JSON object key that is all digits becomes an integer array key in PHP,
-	 * which `Pixel_Builder` would reject for the whole event.
+	 * Drop numeric client property names.
 	 */
 	public function test_numeric_client_property_names_are_dropped(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -879,11 +829,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The session cookie is client-writable and decoded with `json_decode`, so
-	 * every value it carries arrives with a type the client chose. `is_engaged`
-	 * was the one field read straight out of it: a nested array reached
-	 * `implode()` in `get_properties()` and wrote an "Array to string conversion"
-	 * warning to the log from an unauthenticated request.
+	 * Do not generate warnings for non-scalar session values.
 	 */
 	public function test_a_non_scalar_session_value_writes_no_warning(): void {
 		$_COOKIE['tk_ai']                        = 'test-visitor-id-1234567890ab';
@@ -905,9 +851,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * `landing_page` carries a JSON breadcrumb trail. Cutting it as a plain string
-	 * lands mid-token and hands the pipeline something that no longer parses, so
-	 * whole trailing entries go instead.
+	 * Keep oversized landing-page trails valid JSON.
 	 */
 	public function test_an_oversized_landing_page_stays_valid_json(): void {
 		$trail = array_fill( 0, 200, 'Category' );
@@ -929,10 +873,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The referer reaches the pixel twice, as `_dr` and `_via_ref`, and nothing
-	 * bounds an HTTP header. Uncapped, one long one pushed the finished URL past
-	 * MAX_PIXEL_URL_LENGTH and cost the whole event, silently: the client fires
-	 * with `sendBeacon`, which discards the response.
+	 * Trim long referrers without dropping the event.
 	 */
 	public function test_a_long_referer_costs_its_own_tail_not_the_event(): void {
 		$_COOKIE['tk_ai']        = 'test-visitor-id-1234567890ab';
@@ -952,9 +893,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The fixture is an ordinary paid-traffic landing URL. At the old 200-character
-	 * cap it was truncated, which destroys exactly the campaign attribution the
-	 * event exists to record.
+	 * Preserve common ad-click landing URLs.
 	 */
 	public function test_an_ad_click_landing_url_survives_untouched(): void {
 		$url = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
@@ -967,9 +906,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A value at the character cap can outweigh the whole byte budget once
-	 * percent-encoded. Trimming it keeps the property; dropping it loses a
-	 * product name to an encoding difference.
+	 * Trim values that exceed the encoded payload budget.
 	 */
 	public function test_a_value_the_budget_cannot_fit_is_trimmed_not_dropped(): void {
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
@@ -981,9 +918,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The template must record through the untrusted-client entry point. Nothing
-	 * in the suite executes the template, so asserting on its source text is
-	 * crude, but it is the only thing standing behind that requirement.
+	 * Keep the MU-plugin template aligned with the package API.
 	 */
 	public function test_mu_plugin_template_stays_in_step_with_the_package(): void {
 		$template = file_get_contents(
@@ -1018,9 +953,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The bounds are the contract this endpoint is documented with, and every
-	 * other assertion about them compares against the constant itself, so a
-	 * changed number would go unnoticed. These literals are the tripwire.
+	 * Keep the documented bounds in sync with their constants.
 	 */
 	public function test_client_bounds_have_their_documented_values(): void {
 		$this->assertSame( 50, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST );
@@ -1033,9 +966,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The worst input the per-axis caps allow must still fit the pixel URL. The
-	 * literal 8192 is deliberate: asserting against MAX_PIXEL_URL_LENGTH makes
-	 * the assertion move with the constant and pass whatever it is set to.
+	 * Keep the largest permitted payload below the fixed pixel URL limit.
 	 */
 	public function test_a_maximal_client_payload_stays_under_eight_kilobytes(): void {
 		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
@@ -1062,8 +993,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Long property names cost budget too. Without charging the key, the budget
-	 * under-counts by up to MAX_CLIENT_PROPERTIES_PER_EVENT x MAX_CLIENT_NAME_LENGTH.
+	 * Include property names in the payload budget.
 	 */
 	public function test_property_names_are_charged_to_the_payload_budget(): void {
 		$short = array();
@@ -1083,8 +1013,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * An array trimmed until nothing fits is dropped rather than sent as an
-	 * empty value, so the pixel does not carry a meaningless parameter.
+	 * Drop arrays that cannot retain a member within the payload budget.
 	 */
 	public function test_an_array_that_cannot_fit_even_one_member_is_dropped(): void {
 		$properties = array();

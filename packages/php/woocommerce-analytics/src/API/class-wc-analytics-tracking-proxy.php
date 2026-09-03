@@ -77,9 +77,7 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			$events = array( $events );
 		}
 
-		// Bound the batch: every event becomes an outbound pixel request, and this
-		// endpoint is unauthenticated. Dropping the tail is silent on purpose — see
-		// WC_Analytics_Tracking::sanitize_client_properties().
+		// Limit unauthenticated callers to a bounded number of pixel requests.
 		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
 			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
 		}

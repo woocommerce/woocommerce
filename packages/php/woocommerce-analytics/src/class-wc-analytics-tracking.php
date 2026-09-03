@@ -61,9 +61,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum number of events a single client request may record.
 	 *
-	 * Each event becomes an outbound pixel request, so an unbounded batch turns
-	 * the unauthenticated endpoint into an amplifier. The client's own batch size
-	 * is 10 (see `api-client.ts`); the headroom is for retries coalescing.
+	 * Prevents the unauthenticated endpoint from creating unbounded pixel requests.
 	 *
 	 * @since 0.18.0
 	 *
@@ -83,15 +81,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum length of a single property value bound for the pixel URL.
 	 *
-	 * Not the event's size limit — MAX_CLIENT_PAYLOAD_LENGTH is, and it applies
-	 * whatever this is set to. This only stops one value spending the whole
-	 * budget, so it is set well above real values rather than close to them: an
-	 * ad-click landing URL carrying `gclid` and `fbclid` runs past 200
-	 * characters, and truncating it destroys the campaign attribution the event
-	 * exists to record.
-	 *
-	 * Deliberately unlike `Woo_Analytics_Trait::cap_page_string()`, which bounds
-	 * breadcrumb titles and search terms. Those are short by nature; URLs are not.
+	 * The payload limit still caps the full event, while this preserves attribution URLs.
 	 *
 	 * @since 0.18.0
 	 *
@@ -102,7 +92,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum length of a client-supplied event or property name.
 	 *
-	 * `Pixel_Builder` checks a name's characters but not its length.
+	 * `Pixel_Builder` validates characters but not length.
 	 *
 	 * @since 0.18.0
 	 *
@@ -113,11 +103,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum number of members in a client-supplied array value.
 	 *
-	 * Not a size bound: `fit_client_array()` already drops members until the value
-	 * fits the payload budget, whatever the count. This caps the work that costs,
-	 * since fitting re-measures the whole array on every pop, and an array of
-	 * hundreds of thousands of one-character members would otherwise be measured
-	 * that many times.
+	 * Avoids excessive work while fitting an array into the payload budget.
 	 *
 	 * @since 0.18.0
 	 *
@@ -128,14 +114,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum total length of one event's client-supplied properties.
 	 *
-	 * The other caps bound each axis separately and multiply: at their limits one
-	 * event still built a 512KB pixel URL. This bounds the product.
-	 *
-	 * Counted after percent-encoding, in bytes, unlike the per-value cap which
-	 * counts characters. A `%` costs three bytes in the URL and a CJK character
-	 * nine — three UTF-8 bytes, each percent-encoded — so counting characters
-	 * here would under-count by up to 9x and let the budget pass a payload that
-	 * still blows past MAX_PIXEL_URL_LENGTH.
+	 * Counts percent-encoded URL bytes, which can exceed a value's character count.
 	 *
 	 * @since 0.18.0
 	 *
@@ -146,10 +125,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Maximum length of a pixel URL this package will fire.
 	 *
-	 * The backstop for every other cap. It is the only bound that sees the final
-	 * URL, so it is also the only one covering properties a
-	 * `jetpack_woocommerce_analytics_event_props` callback added after the
-	 * client-side caps ran.
+	 * This also bounds properties added after client properties are sanitized.
 	 *
 	 * @since 0.18.0
 	 *
@@ -232,10 +208,7 @@ class WC_Analytics_Tracking {
 		}
 
 		if ( $is_client_supplied ) {
-			// An error rather than a silent skip: the caller sent a name that cannot
-			// be recorded, and reporting success for an event that produced no pixel
-			// is what makes the loss invisible. Telling a client about its own
-			// malformed input leaks nothing.
+			// Report invalid names because they cannot produce an event.
 			if ( ! self::is_valid_client_name( $event_name ) ) {
 				return new WP_Error( 'invalid_event_name', 'the event name is empty, too long, or not a string', 400 );
 			}
@@ -456,9 +429,7 @@ class WC_Analytics_Tracking {
 	private static function get_session_properties() {
 		$session_details = self::get_session_details();
 
-		// Capped here rather than only on the proxy path: the cookie is client-writable
-		// on every request, and first-party events never meet the client caps, so an
-		// oversized cookie would push their pixel past MAX_PIXEL_URL_LENGTH.
+		// The client-writable cookie also affects first-party events.
 		return array(
 			'session_id'   => self::cap_property_value( $session_details['session_id'] ?? null ),
 			'landing_page' => self::cap_json_list_value( $session_details['landing_page'] ?? null ),
@@ -622,15 +593,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Strip and bound a client-supplied property array.
 	 *
-	 * The single place the untrusted-input rules are applied, so that the REST
-	 * controller, the MU-plugin speed module and the stale-template safety net
-	 * cannot drift apart on what "sanitized" means.
-	 *
-	 * Capping is silent and lossy for the same reason stripping is: an
-	 * unauthenticated endpoint that reports which values it rejected is an oracle,
-	 * and analytics should not fail loudly on a malformed client. Truncated values
-	 * keep an ellipsis so they stay distinguishable downstream from a value that
-	 * genuinely ended at the limit, matching `Woo_Analytics_Trait::cap_page_string()`.
+	 * Keep rejected properties silent so the unauthenticated endpoint cannot expose its limits.
 	 *
 	 * @since 0.18.0
 	 *
@@ -667,10 +630,7 @@ class WC_Analytics_Tracking {
 			$costs[ $key ]  = strlen( $key ) + self::measure_client_value( $value );
 		}
 
-		// Cheapest first, so one long value costs its own tail rather than every
-		// property that happens to follow it. A product name at the value cap can
-		// still outweigh the whole budget once percent-encoded, and in source order
-		// it would take `pi`, `pp` and `pt` down with it.
+		// Preserve more properties by fitting the cheapest values first.
 		asort( $costs );
 
 		$budget = self::MAX_CLIENT_PAYLOAD_LENGTH;
@@ -679,10 +639,7 @@ class WC_Analytics_Tracking {
 		foreach ( $costs as $key => $cost ) {
 			$value = $values[ $key ];
 
-			// Trimmed to fit rather than dropped, the same way arrays already were.
-			// The value cap counts characters and the budget counts encoded bytes, so
-			// a value at the cap can still be nine times its length here; dropping it
-			// would lose a whole property to an encoding difference.
+			// Trim values to keep them when their encoded form exceeds the remaining budget.
 			if ( $cost > $budget ) {
 				$room = $budget - strlen( $key );
 
@@ -725,11 +682,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Reduce one property value to the string that goes into the pixel URL.
 	 *
-	 * Array values are joined and encoded for compatibility with the client's
-	 * `encodeURIComponent()`; an associative array becomes JSON, which carries its
-	 * keys. The single definition matters: the payload budget measures a value by
-	 * running it through here, and an approximation that missed the JSON branch
-	 * charged nothing for those keys.
+	 * The payload budget uses this same conversion to measure array values accurately.
 	 *
 	 * @since 0.18.0
 	 *
@@ -762,9 +715,7 @@ class WC_Analytics_Tracking {
 	 *             `http_build_query()` applies on top of it.
 	 */
 	private static function measure_client_value( $value ) {
-		// urlencode(), not rawurlencode(): http_build_query() defaults to RFC1738,
-		// which writes `~` as %7E. Measuring with rawurlencode() under-counted a
-		// tilde threefold, the same way counting characters under-counted a `%`.
+		// Match http_build_query()'s RFC1738 encoding.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- Deliberate: mirrors http_build_query()'s RFC1738 encoding so the budget measures the bytes the finished URL carries.
 		return strlen( urlencode( (string) self::flatten_property_value( $value ) ) );
 	}
@@ -772,8 +723,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Trim a string value until it fits the remaining budget.
 	 *
-	 * The scalar counterpart of `fit_client_array()`. Binary search rather than a
-	 * character-at-a-time walk because each step re-encodes the candidate.
+	 * Uses binary search because each candidate must be encoded again.
 	 *
 	 * @since 0.18.0
 	 *
@@ -823,12 +773,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Bound a value that carries a JSON list, without invalidating the JSON.
 	 *
-	 * `landing_page` is a JSON-encoded breadcrumb trail. Capping it as a plain
-	 * string cuts mid-token and hands the pipeline something that no longer
-	 * parses, so drop whole trailing entries instead and re-encode. The leading
-	 * entries are the ones worth keeping: they are the top of the trail.
-	 *
-	 * Anything that is not a JSON list falls back to the plain cap.
+	 * Preserve valid JSON by removing trailing list entries instead of cutting text.
 	 *
 	 * @since 0.18.0
 	 *
@@ -861,17 +806,7 @@ class WC_Analytics_Tracking {
 	/**
 	 * Bound one value on its way to the pixel URL.
 	 *
-	 * Applies to anything a caller can influence, which is not only the properties
-	 * a client posts: the session cookie and the request headers behind
-	 * `get_server_details()` are caller-influenced too, and an uncapped one of
-	 * those pushed the finished URL past MAX_PIXEL_URL_LENGTH, costing the whole
-	 * event rather than the oversized value.
-	 *
-	 * Arrays and objects are collapsed to an empty string rather than capped: the
-	 * flattening in `get_properties()` calls `implode()` on array members, which
-	 * emits an "Array to string conversion" warning for a nested one. Letting an
-	 * unauthenticated caller write warnings into the error log is the actual
-	 * problem; the value itself is meaningless either way.
+	 * Arrays and objects become empty strings to avoid warnings during flattening.
 	 *
 	 * @since 0.18.0
 	 *
@@ -896,9 +831,6 @@ class WC_Analytics_Tracking {
 
 	/**
 	 * Cut a value to a character count, marking that it was cut.
-	 *
-	 * The ellipsis keeps a truncated value distinguishable downstream from one
-	 * that genuinely ended at the limit, and costs one of the characters.
 	 *
 	 * @since 0.18.0
 	 *
