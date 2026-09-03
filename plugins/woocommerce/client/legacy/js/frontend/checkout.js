@@ -7,6 +7,22 @@ jQuery( function ( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
+	// A paste can carry characters that render as nothing. The server strips them
+	// before validating, so flagging the field here would blame the customer for
+	// something invisible. This matches the same code points as
+	// wc_remove_non_displayable_chars(), which has to spell the ranges out because
+	// the property name needs a newer PCRE2 than PHP ships.
+	var invisible_chars = null;
+
+	try {
+		invisible_chars = new RegExp(
+			'\\p{Default_Ignorable_Code_Point}|[\\uFFF9-\\uFFFB]',
+			'gu'
+		);
+	} catch ( e ) {
+		// Browsers without Unicode property escapes throw here.
+	}
+
 	/**
 	 * Create the API object passed to custom place order button render callbacks.
 	 * This is checkout-specific and includes form validation.
@@ -579,25 +595,16 @@ jQuery( function ( $ ) {
 					}
 				}
 
-				if ( validate_phone ) {
+				// With no pattern the check would flag invisible characters the server
+				// accepts, so skip it and let the server be the only judge.
+				if ( validate_phone && invisible_chars ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
-
-					// Mirrors wc_remove_non_displayable_chars(). A paste can carry characters
-					// that render as nothing, and the server strips them before validating, so
-					// flagging the field here would blame the customer for something invisible.
-					var invisible = new RegExp(
-						'[\\u{00AD}\\u{034F}\\u{061C}\\u{115F}\\u{1160}\\u{17B4}\\u{17B5}\\u{180B}-\\u{180F}' +
-							'\\u{200B}-\\u{200F}\\u{202A}-\\u{202E}\\u{2060}-\\u{206F}\\u{3164}' +
-							'\\u{FE00}-\\u{FE0F}\\u{FEFF}\\u{FFA0}\\u{FFF0}-\\u{FFFB}' +
-							'\\u{1BCA0}-\\u{1BCA3}\\u{1D173}-\\u{1D17A}\\u{E0000}-\\u{E0FFF}]',
-						'gu'
-					);
 
 					if (
 						0 <
 						$this
 							.val()
-							.replace( invisible, '' )
+							.replace( invisible_chars, '' )
 							.replace( pattern, '' ).length
 					) {
 						$this.attr( 'aria-invalid', 'true' );
