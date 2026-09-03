@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -104,8 +106,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$logger_mock->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				$this->stringContains( 'Error determining if PushNotifications feature should be enabled' ),
-				$this->anything()
+				$this->stringContains( 'Error determining Jetpack connection state for push notifications' ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
 
 		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
@@ -221,6 +223,35 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			post_type_exists( PushToken::POST_TYPE ),
 			'Push token post type should not be registered when disabled'
 		);
+	}
+
+	/**
+	 * @testdox Tests that on_init registers the status controller but no other controllers when disabled.
+	 */
+	public function test_on_init_registers_only_status_controller_when_disabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->on_init();
+
+		// The status controller registers on rest_api_init rather than during
+		// on_init, so a front-end request does not resolve it for nothing. WooCommerce
+		// applies the namespaces filter on rest_api_init at priority 10, and the
+		// controller registers at priority 0, so it is always in place in time.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering a WordPress core hook, not defining one.
+		do_action( 'rest_api_init' );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering an existing filter from RestApiControllerBase, not defining one.
+		$namespaces = apply_filters( 'woocommerce_rest_api_get_rest_namespaces', array( 'wc/v3' => array() ) );
+		$registered = array_values( $namespaces['wc/v3'] );
+
+		$this->assertContains( PushNotificationStatusRestController::class, $registered );
+		$this->assertNotContains( PushTokenRestController::class, $registered );
 	}
 
 	/**
