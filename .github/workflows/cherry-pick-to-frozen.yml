@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 5
     steps:
 
-      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preperation for the same release.
+      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preparation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0

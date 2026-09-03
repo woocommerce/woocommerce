@@ -34,7 +34,7 @@ class WC_Download_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Emailed download links are bearer URLs; download_product() verifies the order key and email hash.
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -47,7 +47,15 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Emailed download links are bearer URLs: authorization is the order key plus the billing email or its hash, both verified below, so no nonce can be issued for them.
+
+		// Download links only ever carry scalar values, so reject array input instead of passing it to the string handling below.
+		foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $download_arg ) {
+			if ( isset( $_GET[ $download_arg ] ) && ! is_scalar( $_GET[ $download_arg ] ) ) {
+				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+			}
+		}
+
 		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
 		$downloads  = $product ? $product->get_downloads() : array();
@@ -66,16 +74,15 @@ class WC_Download_Handler {
 		}
 
 		// Fallback, accept email address if it's passed.
-		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
+		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
 		$order    = wc_get_order( $order_id );
 
-		if ( isset( $_GET['email'] ) ) { // WPCS: input var ok, CSRF ok.
-			$email_address = wp_unslash( $_GET['email'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+		if ( isset( $_GET['email'] ) ) {
+			$email_address = wp_unslash( $_GET['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The raw value is needed so spaces can be restored to "+" below; sanitize_email() is applied before the lookup.
 		} else {
 			// Get email address from order to verify hash.
 			$email_address = is_a( $order, 'WC_Order' ) ? $order->get_billing_email() : null;
@@ -83,7 +90,7 @@ class WC_Download_Handler {
 			// Prepare email address hash.
 			$email_hash = function_exists( 'hash' ) ? hash( 'sha256', $email_address ) : sha1( $email_address );
 
-			if ( is_null( $email_address ) || ! hash_equals( wp_unslash( $_GET['uid'] ), $email_hash ) ) { // WPCS: input var ok, CSRF ok, sanitization ok.
+			if ( is_null( $email_address ) || ! hash_equals( wp_unslash( $_GET['uid'] ), $email_hash ) ) {
 				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 			}
 		}
@@ -91,15 +98,16 @@ class WC_Download_Handler {
 		$download_ids = $data_store->get_downloads(
 			array(
 				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ), // WPCS: input var ok, CSRF ok.
+				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
 				'product_id'  => $product_id,
-				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // WPCS: input var ok, CSRF ok, sanitization ok.
+				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
 				'order'       => 'DESC',
 				'limit'       => 1,
 				'return'      => 'ids',
 			)
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $download_ids ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
