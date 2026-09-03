@@ -74,6 +74,42 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shop subpage rules should match a non-Latin Shop path in either encoded or decoded form.
+	 *
+	 * @testWith ["encoded"]
+	 *           ["decoded"]
+	 *
+	 * @param string $product_base_form Form the product base is stored in.
+	 */
+	public function test_wc_fix_rewrite_rules_matches_a_non_latin_shop_path( string $product_base_form ): void {
+		// WordPress stores a non-Latin page slug percent-encoded, while the product base is stored
+		// as the merchant typed it, so the two only line up once both have been decoded.
+		$shop_page_id = $this->create_shop_page_tree( 0, 'магазин' );
+		$shop_uri     = (string) get_page_uri( $shop_page_id );
+		$this->assertStringContainsString( '%d0%', $shop_uri, 'WordPress should store the non-Latin Shop slug percent-encoded.' );
+
+		$product_base = 'encoded' === $product_base_form ? $shop_uri : rawurldecode( $shop_uri );
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => '/' . $product_base . '/%product_cat%',
+				'use_verbose_page_rules' => false,
+			)
+		);
+
+		$rules = wc_fix_rewrite_rules( array( 'fallback/?$' => 'index.php?fallback=1' ) );
+
+		// Only the presence of the rule is asserted. WP_Rewrite::generate_rewrite_rules() reads the
+		// `%d0%` byte pairs of a percent-encoded slug as rewrite tags, so the target it builds for
+		// one is malformed. That predates deriving the match from the current paths.
+		$this->assertArrayHasKey(
+			$shop_uri . '/sale/?$',
+			$rules,
+			'A non-Latin Shop path should still add the Shop child rule.'
+		);
+	}
+
+	/**
 	 * @testdox Shop subpage rules should follow a changed Shop page path.
 	 */
 	public function test_wc_fix_rewrite_rules_follows_shop_page_reparenting(): void {
