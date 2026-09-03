@@ -81,7 +81,13 @@ After all commits, show `git log --oneline -n <number of new commits>` to confir
 
 ## Changelog Entry Files
 
-`pnpm --filter=<project> changelog add` creates a file under `<package>/changelog/`. Fill it in as follows:
+Create one entry per affected package under `<package>/changelog/`. The interactive `pnpm --filter=<project> changelog add` prompts for its answers, so either run it non-interactively with its flags (`-s` significance, `-t` type, `-e` entry, `-c` comment, `-f` filename):
+
+```sh
+pnpm --filter=<project> changelog add --no-interaction -s patch -t fix -e "One user-facing sentence."
+```
+
+or write the file directly, in this format:
 
 - `Significance:` — `patch`, `minor`, or `major`.
 - `Type:` — one of the types declared in the package's `composer.json` under `extra.changelogger.types`. For WooCommerce Core: `fix`, `add`, `update`, `dev`, `tweak`, `performance`, `enhancement`.
