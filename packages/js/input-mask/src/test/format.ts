@@ -3,7 +3,7 @@
  */
 import { format, unescapeMask } from '../format';
 
-const PHONE = '+## [###] (###) {###}';
+const PHONE = '+00 [000] (000) {000}';
 
 describe( 'format', () => {
 	it.each( [
@@ -41,32 +41,36 @@ describe( 'format', () => {
 		expect( format( '34 [6', PHONE ).map ).toEqual( [ -1, 0, 1, 2, 3, 4 ] );
 	} );
 
-	it( 'supports letters, either, escapes and digit literals', () => {
-		expect( format( 'ab1', '@@#' ) ).toMatchObject( {
+	it( 'supports letters, any character, escapes and digit literals', () => {
+		expect( format( 'ab1', 'aa0' ) ).toMatchObject( {
 			display: 'ab1',
 			fits: true,
 		} );
-		expect( format( 'é1', '@#' ) ).toMatchObject( { fits: true } );
+		expect( format( 'é1', 'a0' ) ).toMatchObject( { fits: true } );
 		expect( format( 'a1', '**' ) ).toMatchObject( {
 			display: 'a1',
 			fits: true,
 		} );
-		expect( format( '12', '!###' ) ).toMatchObject( {
-			display: '#12',
+		expect( format( '-!', '**' ) ).toMatchObject( {
+			display: '-!',
+			fits: true,
+		} );
+		expect( format( '12', '\\000' ) ).toMatchObject( {
+			display: '012',
 			unmasked: '12',
 		} );
-		expect( format( '2', '1##' ) ).toMatchObject( {
+		expect( format( '2', '100' ) ).toMatchObject( {
 			display: '12',
 			unmasked: '2',
 		} );
-		expect( format( '12', '1##' ) ).toMatchObject( {
+		expect( format( '12', '100' ) ).toMatchObject( {
 			display: '12',
 			unmasked: '2',
 		} );
 	} );
 
 	it( 'formats a CPF', () => {
-		expect( format( '12345678901', '###.###.###-##' ) ).toMatchObject( {
+		expect( format( '12345678901', '000.000.000-00' ) ).toMatchObject( {
 			display: '123.456.789-01',
 			unmasked: '12345678901',
 		} );
@@ -75,6 +79,6 @@ describe( 'format', () => {
 
 describe( 'unescapeMask', () => {
 	it( 'removes escapes', () => {
-		expect( unescapeMask( '!##-!@' ) ).toBe( '##-@' );
+		expect( unescapeMask( '\\00-\\a' ) ).toBe( '00-a' );
 	} );
 } );
