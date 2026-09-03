@@ -119,9 +119,9 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox GET should accept a logged in user who holds no push-notifications role.
+	 * @testdox GET should reject a logged in user who holds no push-notifications role.
 	 */
-	public function test_get_status_accepts_users_without_role() {
+	public function test_get_status_rejects_users_without_role() {
 		wp_set_current_user( $this->subscriber_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
 		$this->register_routes();
@@ -129,7 +129,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( WP_Http::OK, $response->get_status() );
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 	}
 
 	/**
@@ -152,7 +152,9 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 			}
 		};
 
-		$this->assertTrue( $controller->authorize_as_from_wpcom_or_logged_in_user() );
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
+
+		$this->assertTrue( $controller->authorize_as_from_wpcom_or_authenticated( $request ) );
 	}
 
 	/**
