@@ -343,7 +343,7 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Gets product categories or varation attributes as a formatted concatenated string
+	 * Gets product categories or variation attributes as a formatted concatenated string
 	 *
 	 * @param object $product WC_Product.
 	 * @return string
