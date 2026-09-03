@@ -264,6 +264,57 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Import cleanup should delete more placeholders than fit in a single batch.
+	 */
+	public function test_cleanup_after_import_deletes_more_placeholders_than_one_batch(): void {
+		$post_ids = array();
+
+		for ( $index = 0; $index < 101; $index++ ) {
+			$post_ids[] = wp_insert_post(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'importing',
+					'post_title'  => 'Import cleanup batch placeholder ' . $index,
+				)
+			);
+		}
+
+		$this->invoke_cleanup_after_import();
+
+		foreach ( $post_ids as $post_id ) {
+			$this->assertNull( get_post( $post_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Import cleanup should stop when a placeholder cannot be deleted.
+	 */
+	public function test_cleanup_after_import_stops_when_a_placeholder_cannot_be_deleted(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+				'post_title'  => 'Import cleanup undeletable placeholder',
+			)
+		);
+
+		$block_deletion = static function () {
+			return false;
+		};
+
+		add_filter( 'pre_delete_post', $block_deletion );
+
+		try {
+			$this->invoke_cleanup_after_import();
+		} finally {
+			remove_filter( 'pre_delete_post', $block_deletion );
+		}
+
+		$this->assertNotNull( get_post( $post_id ) );
+		$this->assertSame( 'importing', get_post_status( $post_id ) );
+	}
+
+	/**
 	 * Invoke the import cleanup routine.
 	 */
 	private function invoke_cleanup_after_import(): void {

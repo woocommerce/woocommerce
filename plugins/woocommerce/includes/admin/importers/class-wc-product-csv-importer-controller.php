@@ -27,6 +27,11 @@ if ( ! class_exists( 'WP_Importer' ) ) {
 class WC_Product_CSV_Importer_Controller {
 
 	/**
+	 * Number of temporary products deleted per query when cleaning up after an import.
+	 */
+	private const CLEANUP_BATCH_SIZE = 100;
+
+	/**
 	 * The path to the current file.
 	 *
 	 * @var string
@@ -327,26 +332,42 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Delete products first so WooCommerce can remove their variations through the normal lifecycle.
 		foreach ( array( 'product', 'product_variation' ) as $post_type ) {
-			// Query the exact type and status so MySQL can use the wp_posts type_status_date index.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$post_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
-					$post_type,
-					'importing'
-				)
-			);
+			while ( true ) {
+				// Query the exact type and status so MySQL can use the wp_posts type_status_date index.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$post_ids = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s LIMIT %d",
+						$post_type,
+						'importing',
+						self::CLEANUP_BATCH_SIZE
+					)
+				);
 
-			_prime_post_caches( $post_ids, false, false );
-
-			foreach ( $post_ids as $post_id ) {
-				$post = get_post( $post_id );
-
-				if ( ! $post || $post_type !== $post->post_type || 'importing' !== $post->post_status ) {
-					continue;
+				if ( ! $post_ids ) {
+					break;
 				}
 
-				wp_delete_post( $post->ID, true );
+				_prime_post_caches( $post_ids, false, false );
+
+				$deleted = 0;
+
+				foreach ( $post_ids as $post_id ) {
+					$post = get_post( $post_id );
+
+					if ( ! $post || $post_type !== $post->post_type || 'importing' !== $post->post_status ) {
+						continue;
+					}
+
+					if ( wp_delete_post( $post->ID, true ) ) {
+						++$deleted;
+					}
+				}
+
+				// Stop if nothing in the batch could be deleted, so a post another plugin keeps alive cannot loop forever.
+				if ( 0 === $deleted ) {
+					break;
+				}
 			}
 		}
 	}
