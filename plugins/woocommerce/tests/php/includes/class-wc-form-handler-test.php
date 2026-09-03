@@ -179,7 +179,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		WC_Form_Handler::redirect_after_cancel_order();
 
-		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The deferred redirect must not run for a request handled outside wp_loaded, so the notice stays in place.' );
+		$this->assertSame( 1, wc_notice_count( 'notice' ), 'The cancellation notice should remain after an unarmed redirect callback.' );
 	}
 
 	/**
