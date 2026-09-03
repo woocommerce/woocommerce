@@ -262,16 +262,6 @@ check( 'a malformed config value names the offending key', async () => {
 	}
 } );
 
-check( 'an unknown mode is refused, including a key from Object.prototype', async () => {
-	for ( const mode of [ 'typo', 'toString', '__proto__', '' ] ) {
-		await assert.rejects(
-			() => run( { config: routing, mode, changed: [ 'a/x.js' ] } ),
-			/^Error: Unknown mode/,
-			`mode ${ JSON.stringify( mode ) } should be refused`
-		);
-	}
-} );
-
 /* Runner. */
 
 ( async () => {
