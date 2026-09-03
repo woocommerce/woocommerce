@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -15,6 +16,15 @@ use WP_Error;
  * Tests for Orders Stats DataStore.
  */
 class DataStoreTest extends WC_Unit_Test_Case {
+
+	use HPOSToggleTrait;
+
+	/**
+	 * Whether the store used HPOS before a test pinned it.
+	 *
+	 * @var bool
+	 */
+	private $original_hpos_usage;
 
 	/**
 	 * Previous woocommerce_db_version for restore.
@@ -35,6 +45,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		$this->original_hpos_usage           = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->previous_db_version           = get_option( 'woocommerce_db_version' );
 		$this->previous_old_full_refund_flag = get_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
@@ -53,6 +66,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		} else {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 		}
+		$this->toggle_cot_authoritative( $this->original_hpos_usage );
 		parent::tearDown();
 	}
 
@@ -569,6 +583,12 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function test_returning_customer_recalculated_for_long_excluded_status(): void {
 		global $wpdb;
+
+		// A slug this long only survives a save under HPOS, which truncates it to fit the
+		// 20-char status column. The CPT store discards the change and leaves the order in
+		// its previous status instead, so pin the store rather than inherit whichever one
+		// the suite is running. See #68358.
+		$this->toggle_cot_authoritative( true );
 
 		$long_status = 'competition-completed';
 		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
