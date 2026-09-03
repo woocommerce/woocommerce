@@ -47,11 +47,15 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wpdb;
 
+		// DELETE rather than TRUNCATE, which is DDL: its implicit commit persisted the
+		// HPOS switch setup_cot() makes, while the restore below landed in a fresh
+		// transaction the parent rollback discarded. Every test after this class then
+		// ran against HPOS, including in the HPOS-off job. See #68358.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders_meta" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_operational_data" );
-		$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_addresses" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders_meta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_operational_data" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_addresses" );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 
 		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
