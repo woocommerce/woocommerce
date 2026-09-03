@@ -3221,6 +3221,51 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Sale Prices from Regular Prices.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 *
+	 * @return void
+	 */
+	private static function variation_bulk_action_variable_sale_price_from_regular_price( $variations, $data ) {
+		$value = $data['value'] ?? null;
+		if ( ! is_scalar( $value ) ) {
+			return;
+		}
+
+		$value = wc_clean( (string) $value );
+		if ( ! is_string( $value ) ) {
+			return;
+		}
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$regular_price = $variation->get_regular_price( 'edit' );
+
+			if ( '' === $regular_price || null === $regular_price ) {
+				continue;
+			}
+
+			if ( '%' === substr( $value, -1 ) ) {
+				$percent    = wc_format_decimal( substr( $value, 0, -1 ) );
+				$sale_price = (float) $regular_price - NumberUtil::round( ( (float) $regular_price / 100 ) * (float) $percent, wc_get_price_decimals() );
+			} else {
+				$sale_price = (float) $regular_price - (float) $value;
+			}
+
+			$variation->set_sale_price( (string) NumberUtil::round( max( 0, $sale_price ), wc_get_price_decimals() ) );
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Stock Status as In Stock.
 	 *
 	 * @param array $variations List of variations.
@@ -3609,6 +3654,7 @@ class WC_AJAX {
 	 *
 	 * @uses WC_AJAX::variation_bulk_set()
 	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_from_regular_price()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
 	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()
