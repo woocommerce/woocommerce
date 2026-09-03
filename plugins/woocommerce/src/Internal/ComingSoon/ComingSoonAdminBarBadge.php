@@ -15,7 +15,8 @@ class ComingSoonAdminBarBadge {
 	 * @return bool
 	 */
 	private function is_badge_enabled(): bool {
-		return 'yes' === get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' );
+		return 'yes' === get_option( 'woocommerce_coming_soon' )
+			|| 'yes' === get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'no' );
 	}
 
 	/**

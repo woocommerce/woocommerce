@@ -3703,3 +3703,14 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 
 	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
 }
+
+/**
+ * Disable the site visibility badge by default for existing stores.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_disable_site_visibility_badge(): void {
+	update_option( 'woocommerce_feature_site_visibility_badge_enabled', 'no' );
+}

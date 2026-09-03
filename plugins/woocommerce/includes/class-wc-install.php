@@ -353,6 +353,7 @@ class WC_Install {
 		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
+			'wc_update_1120_disable_site_visibility_badge',
 		),
 	);
 
