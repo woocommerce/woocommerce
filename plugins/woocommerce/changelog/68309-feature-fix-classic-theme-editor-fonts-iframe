@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix classic theme editor fonts stylesheet being added to the block editor iframe incorrectly.

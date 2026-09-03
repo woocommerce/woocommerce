@@ -126,4 +126,34 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'id="wc-lost-connection-notice"', $output );
 	}
+
+	/**
+	 * @testdox Should set up the classic-theme editor fonts stylesheet correctly per theme and screen.
+	 * @testWith ["theme1", true, true]
+	 *           ["theme1", false, false]
+	 *           ["twentytwentyfour", true, false]
+	 *           ["twentytwentyfour", false, false]
+	 *
+	 * @param string $theme           Theme to switch to (`theme1` is classic, `twentytwentyfour` is a block theme).
+	 * @param bool   $is_block_editor Whether the current screen is a block editor screen.
+	 * @param bool   $expected        Whether the stylesheet should be enqueued.
+	 */
+	public function test_enqueue_classic_theme_editor_fonts( string $theme, bool $is_block_editor, bool $expected ): void {
+		$original_theme = wp_get_theme()->get_stylesheet();
+		register_theme_directory( DIR_TESTDATA . '/themedir1' );
+
+		try {
+			switch_theme( $theme );
+
+			set_current_screen( 'post' );
+			get_current_screen()->is_block_editor( $is_block_editor );
+
+			$this->sut->enqueue_classic_theme_editor_fonts();
+
+			$this->assertSame( $expected, wp_style_is( 'woocommerce-classictheme-editor-fonts', 'enqueued' ) );
+		} finally {
+			wp_dequeue_style( 'woocommerce-classictheme-editor-fonts' );
+			switch_theme( $original_theme );
+		}
+	}
 }
