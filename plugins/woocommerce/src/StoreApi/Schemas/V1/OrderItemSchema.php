@@ -111,6 +111,12 @@ class OrderItemSchema extends ItemSchema {
 		$meta_row_ids = array_flip( array_filter( wp_list_pluck( $order_item->get_meta_data(), 'id' ) ) );
 
 		foreach ( $formatted_meta_data as $meta_id => $meta ) {
+			// Casting an object whose fields are not public, such as `WC_Meta_Data`, would publish
+			// mangled property names. Let it serialize itself first.
+			if ( $meta instanceof \JsonSerializable ) {
+				$meta = $meta->jsonSerialize();
+			}
+
 			if ( ! is_object( $meta ) && ! is_array( $meta ) ) {
 				continue;
 			}

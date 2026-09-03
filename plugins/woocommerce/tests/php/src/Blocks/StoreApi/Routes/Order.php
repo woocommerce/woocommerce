@@ -344,6 +344,46 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * `WC_Meta_Data` keeps its fields protected, so casting one publishes mangled property names.
+	 * Trunk serialized it through `JsonSerializable`, and so must this.
+	 *
+	 * @testdox Order item_data serializes an appended WC_Meta_Data through JsonSerializable.
+	 */
+	public function test_item_data_serializes_an_appended_wc_meta_data(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = new \WC_Meta_Data(
+					array(
+						'id'    => 0,
+						'key'   => 'Appended',
+						'value' => 'value',
+					)
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertSame( 'value', $item_data[1]['value'] );
+		$this->assertNull( $item_data[1]['id'], 'The wrapped id is 0, not a row on this item.' );
+		$this->assertStringNotContainsString( "\0", wp_json_encode( $item_data ), 'Protected property names must not reach the response.' );
+	}
+
+	/**
 	 * Appending gets PHP's next integer key. Publishing that as `id` would point consumers at
 	 * another item's row.
 	 *
