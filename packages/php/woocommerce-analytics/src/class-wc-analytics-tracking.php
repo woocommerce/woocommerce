@@ -33,6 +33,46 @@ class WC_Analytics_Tracking {
 	const DAILY_SALT_OPTION = 'woocommerce_analytics_daily_salt';
 
 	/**
+	 * Property names a client is authoritative for on the proxy path.
+	 *
+	 * The server's own values for these describe the /track request, not the page
+	 * the event happened on. `_via_ref` is excluded despite sharing a header with
+	 * `_dr`: it records what fired the pixel, and is not used for page attribution.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string[]
+	 */
+	const CLIENT_OVERRIDABLE_PROPERTIES = array( '_lg', '_dl', '_dr' );
+
+	/**
+	 * Identity and envelope property names a client may never set.
+	 *
+	 * Each is already protected by merge ordering in `get_properties()` or by
+	 * `Pixel_Builder::validate_and_sanitize()`. Listed anyway so that neither is
+	 * the only thing standing between a client and the visitor id.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string[]
+	 */
+	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', '_ts', 'browser_type' );
+
+	/**
+	 * Path suffix of the proxy tracking endpoint.
+	 *
+	 * The MU-plugin speed module template declares its own copy: it tests the
+	 * request shape before loading the autoloader, so no package class exists yet.
+	 * Change both together; `test_mu_plugin_template_stays_in_step_with_the_package()`
+	 * fails if you do not.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string
+	 */
+	const PROXY_REQUEST_PATH = 'woocommerce-analytics/v1/track';
+
+	/**
 	 * Event queue.
 	 *
 	 * @var array
@@ -68,15 +108,28 @@ class WC_Analytics_Tracking {
 	private static $cached_visitor_id = null;
 
 	/**
+	 * Memoized reserved property names for the current request.
+	 *
+	 * @var string[]|null
+	 */
+	private static $reserved_property_names = null;
+
+	/**
 	 * Record an event in Tracks and ClickHouse (If enabled).
+	 *
+	 * @since 0.18.0 Added the `$is_client_supplied` parameter.
 	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
+	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted
+	 *                                   client. Reserved property names are stripped when
+	 *                                   true. Defaults to false for server-side callers.
 	 *
-	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
-	 *                       or cookie-less context); WP_Error if pixel firing failed.
+	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA, or
+	 *                       cookie-less context); WP_Error for an unusable client
+	 *                       event name, or if the pixel could not be built or fired.
 	 */
-	public static function record_event( $event_name, $event_properties = array() ) {
+	public static function record_event( $event_name, $event_properties = array(), $is_client_supplied = false ) {
 		// Check consent before recording any event.
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
@@ -92,8 +145,21 @@ class WC_Analytics_Tracking {
 			return true;
 		}
 
+		// The guard covers MU-plugin copies predating record_client_event(); see is_proxy_tracking_request().
+		$is_client_supplied = $is_client_supplied || self::is_proxy_tracking_request();
+
+		if ( $is_client_supplied ) {
+			// An error rather than a silent skip: an unusable name produces no pixel,
+			// and reporting success for it is what makes the loss invisible.
+			if ( ! self::is_valid_client_name( $event_name ) ) {
+				return new WP_Error( 'invalid_event_name', 'the event name is empty or not a string', array( 'status' => 400 ) );
+			}
+
+			$event_properties = self::strip_reserved_properties( $event_properties );
+		}
+
 		$prefixed_event_name = self::PREFIX . $event_name;
-		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
+		$properties          = self::get_properties( $prefixed_event_name, $event_properties, $is_client_supplied );
 
 		// Record Tracks event.
 		$tracks_error  = null;
@@ -121,6 +187,24 @@ class WC_Analytics_Tracking {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Record an event whose properties came from an untrusted client.
+	 *
+	 * The entry point for the tracking proxy: the REST controller and the MU-plugin
+	 * speed module both come through here. A distinct method rather than a sanitizer
+	 * callers must remember to invoke, so a wrong choice is visible at the call site.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param string $event_name The name of the event.
+	 * @param array  $event_properties Client-supplied properties.
+	 *
+	 * @return bool|WP_Error True on emit or deliberate skip; WP_Error if pixel firing failed.
+	 */
+	public static function record_client_event( $event_name, $event_properties = array() ) {
+		return self::record_event( $event_name, $event_properties, true );
 	}
 
 	/**
@@ -313,23 +397,47 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get all properties for the event including filtered and identity properties.
 	 *
+	 * @since 0.18.0 Added the `$is_client_supplied` parameter.
+	 *
 	 * @param string $event_name Event name.
 	 * @param array  $event_properties Event specific properties.
+	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted client.
 	 * @return array
 	 */
-	public static function get_properties( $event_name, $event_properties ) {
+	public static function get_properties( $event_name, $event_properties, $is_client_supplied = false ) {
 		$common_properties = self::get_common_properties();
 
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
 		 *
+		 * On the proxy path (`$is_client_supplied`) a reserved name a callback returns
+		 * is discarded, because the server re-asserts its own value below. Names a
+		 * callback introduces are not reserved and are kept.
+		 *
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
+		 * @since 0.18.0 Added the `$is_client_supplied` parameter.
 		 *
-		 * @param array $all_props Array of event props to be filtered.
+		 * @param array  $all_props Array of event props to be filtered.
+		 * @param string $event_name Event name.
+		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
-		$properties = apply_filters( 'jetpack_woocommerce_analytics_event_props', array_merge( $common_properties, $event_properties ), $event_name );
+		$properties = apply_filters(
+			'jetpack_woocommerce_analytics_event_props',
+			array_merge( $common_properties, $event_properties ),
+			$event_name,
+			$is_client_supplied
+		);
+
+		if ( $is_client_supplied ) {
+			// A callback that defers to an existing value hands a reserved property
+			// back to the client, which supplied it. Re-assert the server's own.
+			$properties = array_merge(
+				$properties,
+				array_intersect_key( $common_properties, array_flip( self::get_reserved_property_names() ) )
+			);
+		}
 
 		$required_properties = $event_name
 			? array(
@@ -365,6 +473,133 @@ class WC_Analytics_Tracking {
 		}
 
 		return $all_properties;
+	}
+
+	/**
+	 * Get the property names a client may not set.
+	 *
+	 * Derived from `get_common_properties()` rather than restated as a literal, so a
+	 * newly added common property is protected with no edit here. The pinned list in
+	 * `WC_Analytics_Tracking_Reserved_Props_Test` still fails on the addition, on
+	 * purpose: protection is automatic, granting an exemption is not. Memoized because
+	 * a batch would otherwise recompute the common properties once per event.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return string[] Reserved property names.
+	 */
+	public static function get_reserved_property_names() {
+		if ( null !== self::$reserved_property_names ) {
+			return self::$reserved_property_names;
+		}
+
+		$server_owned = array_diff(
+			array_keys( self::get_common_properties() ),
+			self::CLIENT_OVERRIDABLE_PROPERTIES
+		);
+
+		self::$reserved_property_names = array_values(
+			array_unique( array_merge( $server_owned, self::RESERVED_IDENTITY_PROPERTIES ) )
+		);
+
+		return self::$reserved_property_names;
+	}
+
+	/**
+	 * Remove server-owned properties from a client-supplied property array.
+	 *
+	 * Stripping is silent and the event still records: rejecting it would turn the
+	 * endpoint into an oracle for probing the reserved list.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param array $event_properties Client-supplied properties. A non-array is
+	 *                                tolerated, since the REST body is attacker-shaped.
+	 * @return array Properties with reserved names removed; empty array for empty or
+	 *               non-array input.
+	 */
+	public static function strip_reserved_properties( $event_properties ) {
+		if ( ! is_array( $event_properties ) || empty( $event_properties ) ) {
+			return array();
+		}
+
+		return array_diff_key(
+			$event_properties,
+			array_flip( self::get_reserved_property_names() )
+		);
+	}
+
+	/**
+	 * Whether a client-supplied event or property name is usable.
+	 *
+	 * Without the type check an array name reaches `PREFIX . $event_name` and writes
+	 * a PHP warning to the log, unauthenticated.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @param mixed $name Client-supplied name.
+	 * @return bool True when the name is a non-empty string.
+	 */
+	private static function is_valid_client_name( $name ) {
+		return is_string( $name ) && '' !== $name;
+	}
+
+	/**
+	 * Whether the current request is a POST to the proxy tracking endpoint.
+	 *
+	 * Worth explaining because a URL-shape test does not belong in a security path:
+	 * this is a safety net, not the boundary. The boundary is `record_client_event()`,
+	 * which survives subdirectory installs, rewrites and proxying. This exists only
+	 * because an MU-plugin copy installed before that method existed calls
+	 * `record_event()` directly, and rewriting an installed copy needs admin traffic,
+	 * an expired transient and a writable mu-plugins directory, none of them
+	 * guaranteed. Remove once a package-version floor rules such a copy out.
+	 *
+	 * Matches `is_proxy_request()` in the MU-plugin template; see PROXY_REQUEST_PATH.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return bool True when the request shape matches the proxy endpoint.
+	 */
+	public static function is_proxy_tracking_request() {
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Compared against a fixed string below; unsanitized on purpose to stay byte-for-byte in step with the MU-plugin template's read.
+		$raw_method = wp_unslash( $_SERVER['REQUEST_METHOD'] );
+		if ( ! is_string( $raw_method ) || 'POST' !== strtoupper( $raw_method ) ) {
+			return false;
+		}
+
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Parsed and character-restricted below; sanitizing first would mangle the path.
+		$raw_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
+		if ( ! is_string( $raw_uri ) || '' === $raw_uri ) {
+			return false;
+		}
+
+		$path = wp_parse_url( $raw_uri, PHP_URL_PATH );
+		if ( ! is_string( $path ) ) {
+			return false;
+		}
+
+		// Reject anything outside expected URL path characters, matching the template.
+		if ( preg_match( '/[^A-Za-z0-9\-._~\/]/', $path ) ) {
+			return false;
+		}
+
+		$normalized_path = rtrim( $path, '/' );
+		$proxy_suffix    = '/' . ltrim( self::PROXY_REQUEST_PATH, '/' );
+
+		if ( strlen( $normalized_path ) < strlen( $proxy_suffix ) ) {
+			return false;
+		}
+
+		return substr( $normalized_path, -strlen( $proxy_suffix ) ) === $proxy_suffix;
 	}
 
 	/**

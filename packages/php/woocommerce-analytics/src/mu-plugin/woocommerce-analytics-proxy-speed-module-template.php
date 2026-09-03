@@ -61,6 +61,9 @@ class WooCommerceAnalyticsProxySpeed {
 	/**
 	 * Check if current request is a proxy request.
 	 *
+	 * Cannot delegate to WC_Analytics_Tracking::is_proxy_tracking_request(): init()
+	 * calls this before load_autoloader(). A test pins both copies together.
+	 *
 	 * @return bool
 	 */
 	private function is_proxy_request() {
@@ -115,6 +118,13 @@ class WooCommerceAnalyticsProxySpeed {
 
 		if ( ! class_exists( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking' ) ) {
 			error_log( 'WooCommerce Analytics Proxy Speed Module: WC_Analytics_Tracking class not found after loading autoloader.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
+		// The autoloader resolves the highest version across active plugins, which can
+		// be older than the one that wrote this file. Fall back rather than fatal.
+		if ( ! method_exists( '\Automattic\Woocommerce_Analytics\WC_Analytics_Tracking', 'record_client_event' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded WC_Analytics_Tracking predates record_client_event().' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
 		}
 
@@ -205,7 +215,7 @@ class WooCommerceAnalyticsProxySpeed {
 			$event_name = $event['event_name'] ?? null;
 			$properties = $event['properties'] ?? array();
 
-			if ( ! $event_name || ! is_array( $properties ) ) {
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
 				$results[ $index ] = array(
 					'success' => false,
 					'error'   => 'Missing event_name or invalid properties',
@@ -214,7 +224,7 @@ class WooCommerceAnalyticsProxySpeed {
 				continue;
 			}
 
-			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_event( $event_name, $properties );
+			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_client_event( $event_name, $properties );
 
 			if ( is_wp_error( $result ) ) {
 				$results[ $index ] = array(
