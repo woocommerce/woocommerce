@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
 /**
  * Registers the "Stock notifications" My Account endpoint and handles
- * the cancel action for customer-owned notifications.
+ * the resend and cancel actions for customer-owned notifications.
  *
  * @internal
  */
@@ -29,27 +29,62 @@ class MyAccountEndpoint {
 	public const ENDPOINT = 'stock-notifications';
 
 	/**
-	 * Query argument triggered by the cancel form post.
+	 * Query argument naming the action a row link triggers.
 	 */
-	public const CANCEL_ACTION = 'wc_bis_cancel_notification';
+	public const ACTION_FIELD = 'wc_bis_action';
 
 	/**
-	 * Build the nonce action name for a given notification id.
+	 * Action value: send the verification email again for a pending notification.
+	 */
+	public const ACTION_RESEND = 'resend';
+
+	/**
+	 * Action value: cancel a pending or active notification.
+	 */
+	public const ACTION_CANCEL = 'cancel';
+
+	/**
+	 * Build the nonce action name for an action on a given notification.
 	 *
-	 * Same shape as the admin-side scoping from #64348: `wc_bis_cancel_<id>`.
+	 * Scoped per action and per notification (`wc_bis_cancel_<id>`), so a nonce minted for one
+	 * row's Cancel link cannot be replayed on another row or on its Resend link.
 	 *
-	 * @param int $notification_id The notification id.
+	 * @param string $action          One of the `ACTION_*` values.
+	 * @param int    $notification_id The notification id.
 	 * @return string The nonce action name.
 	 */
-	public static function get_cancel_nonce_action( int $notification_id ): string {
-		return 'wc_bis_cancel_' . $notification_id;
+	public static function get_nonce_action( string $action, int $notification_id ): string {
+		return 'wc_bis_' . $action . '_' . $notification_id;
+	}
+
+	/**
+	 * Build the nonce-protected URL a row action link points at.
+	 *
+	 * Same shape as the other My Account action links (cancel order, resend set-password):
+	 * a GET back to the endpoint carrying the action, the id, and a scoped nonce.
+	 *
+	 * @param string $action          One of the `ACTION_*` values.
+	 * @param int    $notification_id The notification id.
+	 * @return string The action URL.
+	 */
+	public static function get_action_url( string $action, int $notification_id ): string {
+		$url = add_query_arg(
+			array(
+				self::ACTION_FIELD => $action,
+				'notification_id'  => $notification_id,
+			),
+			self::get_endpoint_url()
+		);
+
+		return wp_nonce_url( $url, self::get_nonce_action( $action, $notification_id ) );
 	}
 
 	/**
 	 * Statuses a customer can still cancel from My Account.
 	 *
-	 * The same list backs the listing query, the Cancel button in the template
-	 * and the cancel request handler, so the three can't drift apart.
+	 * Backs the Cancel button in the template and the cancel request handler,
+	 * so the two can't drift apart. The listing itself splits into a pending
+	 * table and an active table, each querying a single status.
 	 *
 	 * @return string[] List of {@see NotificationStatus} values.
 	 */
@@ -68,6 +103,13 @@ class MyAccountEndpoint {
 	}
 
 	/**
+	 * Notification management service, owns the resend-verification domain logic.
+	 *
+	 * @var NotificationManagementService
+	 */
+	private NotificationManagementService $notification_management_service;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -75,7 +117,18 @@ class MyAccountEndpoint {
 		add_filter( 'woocommerce_account_menu_items', array( $this, 'register_menu_item' ), 10, 2 );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT . '_title', array( $this, 'filter_endpoint_title' ) );
 		add_action( 'woocommerce_account_' . self::ENDPOINT . '_endpoint', array( $this, 'render_endpoint' ) );
-		add_action( 'template_redirect', array( $this, 'maybe_handle_cancel' ) );
+		add_action( 'template_redirect', array( $this, 'maybe_handle_action' ) );
+	}
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationManagementService $notification_management_service The notification management service.
+	 */
+	final public function init( NotificationManagementService $notification_management_service ): void {
+		$this->notification_management_service = $notification_management_service;
 	}
 
 	/**
@@ -201,23 +254,74 @@ class MyAccountEndpoint {
 		$per_page = (int) apply_filters( 'woocommerce_account_customer_stock_notifications_per_page', self::DEFAULT_PER_PAGE );
 		$per_page = max( 1, $per_page );
 
-		$page = $this->get_current_user_notifications_page( $current_page, $per_page );
+		/**
+		 * Filter how many pending (awaiting confirmation) notifications the My Account
+		 * stock-notifications tab lists above the active table.
+		 *
+		 * The pending table is not paginated, so this is a hard cap.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $limit Maximum number of pending notifications shown. Default {@see self::DEFAULT_PER_PAGE}.
+		 */
+		$pending_limit = (int) apply_filters( 'woocommerce_account_customer_stock_notifications_pending_limit', self::DEFAULT_PER_PAGE );
+		$pending_limit = max( 1, $pending_limit );
+
+		$pending = $this->get_current_user_pending_notifications( $pending_limit );
+		$page    = $this->get_current_user_notifications_page( $current_page, $per_page );
+
+		// Both lists come from raw SQL selects, so nothing has primed the post cache
+		// for the products the rows render. Prime it once here instead of letting
+		// each row's wc_get_product() call issue its own query.
+		$product_ids = array_filter( array_map( static fn( $notification ) => (int) $notification->get_product_id(), array_merge( $pending, $page['notifications'] ) ) );
+		if ( $product_ids ) {
+			_prime_post_caches( array_values( array_unique( $product_ids ) ) );
+		}
 
 		\wc_get_template(
 			'myaccount/stock-notifications.php',
 			array(
-				'notifications' => $page['notifications'],
-				'has_items'     => ! empty( $page['notifications'] ),
-				'current_page'  => $page['current_page'],
-				'total_pages'   => $page['total_pages'],
-				'total_items'   => $page['total_items'],
-				'per_page'      => $per_page,
+				'notifications'         => $page['notifications'],
+				'pending_notifications' => $pending,
+				'has_pending'           => ! empty( $pending ),
+				'has_items'             => ! empty( $pending ) || ! empty( $page['notifications'] ),
+				'current_page'          => $page['current_page'],
+				'total_pages'           => $page['total_pages'],
+				'total_items'           => $page['total_items'],
+				'per_page'              => $per_page,
 			)
 		);
 	}
 
 	/**
-	 * Return one page of the current user's notifications, newest first.
+	 * Return the current user's pending (awaiting confirmation) notifications, newest first.
+	 *
+	 * Always scopes to `get_current_user_id()` — the caller is never trusted.
+	 *
+	 * @param int $limit Maximum number of notifications to return.
+	 * @return array<Notification>
+	 */
+	public function get_current_user_pending_notifications( int $limit ): array {
+		$limit = max( 1, $limit );
+
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return array();
+		}
+
+		return NotificationQuery::get_notifications(
+			array(
+				'user_id'  => $user_id,
+				'status'   => NotificationStatus::PENDING,
+				'order_by' => array( 'id' => 'DESC' ),
+				'return'   => 'objects',
+				'limit'    => $limit,
+			)
+		);
+	}
+
+	/**
+	 * Return one page of the current user's active notifications, newest first.
 	 *
 	 * Always scopes to `get_current_user_id()` — the caller is never trusted.
 	 *
@@ -239,10 +343,11 @@ class MyAccountEndpoint {
 			);
 		}
 
-		// Only the statuses the customer can act on. SENT and CANCELLED rows are
-		// noise here; merchants who want a full history can build their own view
-		// via {@see NotificationQuery::get_notifications()}.
-		$statuses = self::get_cancellable_statuses();
+		// Only confirmed sign-ups. PENDING rows render in their own table above this
+		// one ({@see self::get_current_user_pending_notifications()}); SENT and
+		// CANCELLED rows are noise here, and merchants who want a full history can
+		// build their own view via {@see NotificationQuery::get_notifications()}.
+		$statuses = array( NotificationStatus::ACTIVE );
 
 		$total_items = NotificationQuery::count_notifications(
 			array(
@@ -270,13 +375,6 @@ class MyAccountEndpoint {
 			)
 		) : array();
 
-		// The notifications come from a raw SQL select, so nothing has primed the
-		// post cache for the products the rows render. Prime it once here instead
-		// of letting each row's wc_get_product() call issue its own query.
-		if ( $notifications ) {
-			_prime_post_caches( array_filter( array_map( static fn( $notification ) => (int) $notification->get_product_id(), $notifications ) ) );
-		}
-
 		return array(
 			'notifications' => $notifications,
 			'current_page'  => $current_page,
@@ -286,24 +384,25 @@ class MyAccountEndpoint {
 	}
 
 	/**
-	 * Intercept a cancel POST to flip a notification to `cancelled`.
+	 * Intercept a row-action link (resend or cancel) from the stock notifications tab.
 	 *
-	 * Guards:
+	 * Guards, shared by every action:
 	 * - Must be on the My Account > stock-notifications endpoint.
 	 * - Must be authenticated.
-	 * - Nonce must be scoped to the specific notification id ({@see ::get_cancel_nonce_action()}).
-	 * - The notification must belong to the current user.
+	 * - Nonce must be scoped to the action and the notification id ({@see ::get_nonce_action()}).
+	 * - The notification must exist and belong to the current user.
 	 *
-	 * Requests that aren't a cancel submission, and ones whose notification isn't the
-	 * current user's, are dropped silently. A cancel the customer can act on — an expired
-	 * nonce, a notification that's gone or already cancelled, a save that fails — redirects
-	 * back with an error notice instead, so the button never looks dead.
+	 * Requests that aren't an action link, or that arrive anonymously, are dropped
+	 * silently. Everything else redirects back to the clean endpoint URL with a notice,
+	 * so the link never looks dead and a refresh can't replay it. A missing notification
+	 * and one owned by someone else share the same error, so the response doesn't
+	 * confirm whether the id exists.
 	 */
-	public function maybe_handle_cancel(): void {
+	public function maybe_handle_action(): void {
 		global $wp;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST[ self::CANCEL_ACTION ] ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET[ self::ACTION_FIELD ] ) ) {
 			return;
 		}
 
@@ -315,29 +414,66 @@ class MyAccountEndpoint {
 			return;
 		}
 
-		$notification_id = isset( $_POST['notification_id'] ) ? absint( wp_unslash( $_POST['notification_id'] ) ) : 0;
+		$action = sanitize_key( wp_unslash( $_GET[ self::ACTION_FIELD ] ) );
+		if ( ! in_array( $action, array( self::ACTION_RESEND, self::ACTION_CANCEL ), true ) ) {
+			return;
+		}
+
+		$notification_id = isset( $_GET['notification_id'] ) ? absint( wp_unslash( $_GET['notification_id'] ) ) : 0;
 		if ( $notification_id <= 0 ) {
 			return;
 		}
 
-		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		if ( ! wp_verify_nonce( $nonce, self::get_cancel_nonce_action( $notification_id ) ) ) {
+		if ( ! wp_verify_nonce( $nonce, self::get_nonce_action( $action, $notification_id ) ) ) {
 			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ) );
 		}
 
 		$notification = Factory::get_notification( $notification_id );
-		if ( ! $notification instanceof Notification ) {
-			$this->redirect_with_error( __( 'That back in stock notification no longer exists.', 'woocommerce' ) );
+		if ( ! $notification instanceof Notification || (int) $notification->get_user_id() !== get_current_user_id() ) {
+			$this->redirect_with_error( __( 'We were unable to process your request. Notification not found.', 'woocommerce' ) );
 		}
 
-		if ( (int) $notification->get_user_id() !== get_current_user_id() ) {
-			return;
+		$result = self::ACTION_RESEND === $action
+			? $this->resend( $notification )
+			: $this->cancel( $notification );
+
+		if ( is_wp_error( $result ) ) {
+			$this->redirect_with_error( $result->get_error_message() );
 		}
 
+		\wc_add_notice( esc_html( $result ) );
+		wp_safe_redirect( self::get_endpoint_url() );
+		exit;
+	}
+
+	/**
+	 * Send the verification email again for a pending notification.
+	 *
+	 * @param Notification $notification The notification, already checked to belong to the current user.
+	 * @return string|\WP_Error Success notice text, or the error to show instead.
+	 */
+	private function resend( Notification $notification ) {
+		$result = $this->notification_management_service->resend_verification_email( $notification );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		/* translators: %s: email address the verification email was sent to. */
+		return sprintf( __( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ), $notification->get_user_email() );
+	}
+
+	/**
+	 * Flip a pending or active notification to `cancelled` on the customer's behalf.
+	 *
+	 * @param Notification $notification The notification, already checked to belong to the current user.
+	 * @return string|\WP_Error Success notice text, or the error to show instead.
+	 */
+	private function cancel( Notification $notification ) {
 		if ( ! self::is_cancellable( $notification ) ) {
-			$this->redirect_with_error( __( 'That back in stock notification has already been cancelled.', 'woocommerce' ) );
+			return new \WP_Error( 'wc_bis_cancel_not_cancellable', __( 'That back in stock notification has already been cancelled.', 'woocommerce' ) );
 		}
 
 		$notification->set_status( NotificationStatus::CANCELLED );
@@ -350,24 +486,16 @@ class MyAccountEndpoint {
 		// reaches us as a successful save. Read the row back to confirm it really changed.
 		$saved = Factory::get_notification( $notification->get_id() );
 		if ( ! $saved instanceof Notification || NotificationStatus::CANCELLED !== $saved->get_status() ) {
-			$this->redirect_with_error( __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ) );
+			return new \WP_Error( 'wc_bis_cancel_failed', __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ) );
 		}
 
 		$product_name = $notification->get_product_name();
-		if ( '' !== $product_name ) {
-			\wc_add_notice(
-				sprintf(
-					/* translators: %s: product name */
-					esc_html__( 'Back in stock notification for "%s" cancelled.', 'woocommerce' ),
-					esc_html( $product_name )
-				)
-			);
-		} else {
-			\wc_add_notice( esc_html__( 'Back in stock notification cancelled.', 'woocommerce' ) );
+		if ( '' === $product_name ) {
+			return __( 'Back in stock notification cancelled.', 'woocommerce' );
 		}
 
-		wp_safe_redirect( self::get_endpoint_url() );
-		exit;
+		/* translators: %s: product name */
+		return sprintf( __( 'Back in stock notification for "%s" cancelled.', 'woocommerce' ), $product_name );
 	}
 
 	/**
@@ -387,7 +515,7 @@ class MyAccountEndpoint {
 	 *
 	 * @return string
 	 */
-	private static function get_endpoint_url(): string {
+	public static function get_endpoint_url(): string {
 		return \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) );
 	}
 }

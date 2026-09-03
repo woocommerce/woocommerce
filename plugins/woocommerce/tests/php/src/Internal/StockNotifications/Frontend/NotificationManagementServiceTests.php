@@ -55,6 +55,7 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
 		unset( $_GET['_wpnonce'], $_GET[ NotificationManagementService::RESEND_QUERY_ARG ] );
+		wp_set_current_user( 0 );
 
 		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
 		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
@@ -87,6 +88,53 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( NotificationManagementService::RESEND_QUERY_ARG . '=' . $notification->get_id(), $url );
 		$this->assertStringContainsString( '_wpnonce=', $url );
+	}
+
+	/**
+	 * @testdox Should silently drop a resend request from a logged-in user who does not own the notification.
+	 */
+	public function test_resend_request_ignores_other_users_notification() {
+		$owner_id    = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$attacker_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$notification = $this->build_pending_notification();
+		$notification->set_user_id( $owner_id );
+		$notification->save();
+
+		wp_set_current_user( $attacker_id );
+		$this->seed_resend_request( $notification->get_id() );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		// Must return before the redirect path; a redirect would throw.
+		$this->sut->maybe_process_resend_request();
+
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( '', (string) $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+		$this->assertEmpty( wc_get_notices() );
+	}
+
+	/**
+	 * @testdox Should let the owner resend a notification linked to their account.
+	 */
+	public function test_resend_request_allows_owner() {
+		$owner_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$notification = $this->build_pending_notification();
+		$notification->set_user_id( $owner_id );
+		$notification->save();
+
+		wp_set_current_user( $owner_id );
+		$this->seed_resend_request( $notification->get_id() );
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->sut->maybe_process_resend_request();
 	}
 
 	/**
@@ -240,6 +288,69 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 			->method( 'send_verify_email' );
 
 		$this->sut->maybe_process_resend_request();
+	}
+
+	/**
+	 * @testdox resend_verification_email() should send the verify email and persist the last-sent timestamp.
+	 */
+	public function test_resend_verification_email_sends_and_persists_timestamp() {
+		$notification = $this->build_pending_notification();
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' )
+			->with(
+				$this->callback(
+					static function ( $arg ) use ( $notification ) {
+						return $arg instanceof Notification && $arg->get_id() === $notification->get_id();
+					}
+				)
+			);
+
+		$this->assertTrue( $this->sut->resend_verification_email( $notification ) );
+
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertNotEmpty( $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+		$this->assertEmpty( wc_get_notices() );
+	}
+
+	/**
+	 * @testdox resend_verification_email() should refuse a notification that is no longer pending.
+	 */
+	public function test_resend_verification_email_rejects_non_pending() {
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_user_email( 'customer@example.com' );
+		$notification->save();
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->resend_verification_email( $notification );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( NotificationManagementService::RESEND_ERROR_NOT_PENDING, $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox resend_verification_email() should refuse a send inside the rate-limit window.
+	 */
+	public function test_resend_verification_email_rate_limited() {
+		$notification = $this->build_pending_notification();
+		$notification->update_meta_data( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META, time() );
+		$notification->save();
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->resend_verification_email( $notification );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( NotificationManagementService::RESEND_ERROR_RATE_LIMITED, $result->get_error_code() );
 	}
 
 	/**

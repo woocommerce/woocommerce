@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use WC_Helper_Product;
 
@@ -45,7 +46,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wc_clear_notices();
 		\wp_set_current_user( 0 );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_POST = array();
+		$_GET = array();
 		global $wp;
 		if ( isset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] ) ) {
 			unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
@@ -95,15 +96,30 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Run the cancel handler expecting it to redirect, and assert the target.
+	 * Build an endpoint wired to the given management service, or the real one.
+	 *
+	 * @param NotificationManagementService|null $service Service to inject; defaults to the container's.
+	 * @return MyAccountEndpoint
+	 */
+	private function make_endpoint( ?NotificationManagementService $service = null ): MyAccountEndpoint {
+		$endpoint = new MyAccountEndpoint();
+		$endpoint->init( $service ?? wc_get_container()->get( NotificationManagementService::class ) );
+
+		return $endpoint;
+	}
+
+	/**
+	 * Run the action handler expecting it to redirect, and assert the target.
 	 *
 	 * `capture_redirect()` throws in place of the `exit` that follows the redirect
 	 * in production, so the call has to be wrapped.
+	 *
+	 * @param NotificationManagementService|null $service Service to inject; defaults to the container's.
 	 */
-	private function run_cancel_expecting_redirect(): void {
+	private function run_action_expecting_redirect( ?NotificationManagementService $service = null ): void {
 		try {
-			( new MyAccountEndpoint() )->maybe_handle_cancel();
-			$this->fail( 'Expected the cancel handler to redirect.' );
+			$this->make_endpoint( $service )->maybe_handle_action();
+			$this->fail( 'Expected the action handler to redirect.' );
 		} catch ( \RuntimeException $e ) {
 			unset( $e );
 		}
@@ -175,7 +191,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$user_b = $this->factory->user->create( array( 'role' => 'customer' ) );
 
 		$this->create_notification( $user_a, NotificationStatus::ACTIVE );
-		$b_notification = $this->create_notification( $user_b, NotificationStatus::PENDING );
+		$b_notification = $this->create_notification( $user_b, NotificationStatus::ACTIVE );
 
 		\wp_set_current_user( $user_b );
 		$endpoint = new MyAccountEndpoint();
@@ -236,23 +252,183 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * SENT and CANCELLED notifications are filtered out — only ACTIVE/PENDING render in the My Account view.
+	 * Only ACTIVE notifications render in the main My Account table. PENDING rows
+	 * have their own table, and SENT / CANCELLED rows are filtered out entirely.
 	 */
-	public function test_get_current_user_notifications_page_excludes_sent_and_cancelled(): void {
+	public function test_get_current_user_notifications_page_lists_active_only(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		\wp_set_current_user( $user_id );
 
-		$active  = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
-		$pending = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$active = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
 		$this->create_notification( $user_id, NotificationStatus::SENT );
 		$this->create_notification( $user_id, NotificationStatus::CANCELLED );
 
 		$endpoint = new MyAccountEndpoint();
 		$page     = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE );
 
-		$this->assertSame( 2, $page['total_items'] );
-		$visible_ids = array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] );
-		$this->assertEqualsCanonicalizing( array( $active->get_id(), $pending->get_id() ), $visible_ids );
+		$this->assertSame( 1, $page['total_items'] );
+		$this->assertSame( array( $active->get_id() ), array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] ) );
+	}
+
+	/**
+	 * Pagination counts only ACTIVE rows, so pending sign-ups never shift the active pages.
+	 */
+	public function test_get_current_user_notifications_page_paginates_active_only(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->create_notification( $user_id, NotificationStatus::ACTIVE );
+			$this->create_notification( $user_id, NotificationStatus::PENDING );
+		}
+
+		$endpoint = new MyAccountEndpoint();
+		$page     = $endpoint->get_current_user_notifications_page( 1, 2 );
+
+		$this->assertSame( 3, $page['total_items'] );
+		$this->assertSame( 2, $page['total_pages'] );
+		$this->assertCount( 2, $page['notifications'] );
+		foreach ( $page['notifications'] as $notification ) {
+			$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+		}
+	}
+
+	/**
+	 * The pending fetcher returns only the current user's PENDING rows, newest first.
+	 */
+	public function test_get_current_user_pending_notifications_returns_users_pending_rows_newest_first(): void {
+		$user_a = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$user_b = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$first  = $this->create_notification( $user_a, NotificationStatus::PENDING );
+		$second = $this->create_notification( $user_a, NotificationStatus::PENDING );
+		$this->create_notification( $user_a, NotificationStatus::ACTIVE );
+		$this->create_notification( $user_a, NotificationStatus::SENT );
+		$this->create_notification( $user_a, NotificationStatus::CANCELLED );
+		$this->create_notification( $user_b, NotificationStatus::PENDING );
+
+		\wp_set_current_user( $user_a );
+		$endpoint = new MyAccountEndpoint();
+		$pending  = $endpoint->get_current_user_pending_notifications( MyAccountEndpoint::DEFAULT_PER_PAGE );
+
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_map( static fn ( $n ) => $n->get_id(), $pending ) );
+		foreach ( $pending as $notification ) {
+			$this->assertSame( $user_a, (int) $notification->get_user_id() );
+			$this->assertSame( NotificationStatus::PENDING, $notification->get_status() );
+		}
+	}
+
+	/**
+	 * The pending fetcher caps the result set at the requested limit.
+	 */
+	public function test_get_current_user_pending_notifications_respects_limit(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		for ( $i = 0; $i < 4; $i++ ) {
+			$this->create_notification( $user_id, NotificationStatus::PENDING );
+		}
+
+		$endpoint = new MyAccountEndpoint();
+
+		$this->assertCount( 2, $endpoint->get_current_user_pending_notifications( 2 ) );
+		// A non-positive limit is clamped to 1 rather than dropping the LIMIT clause.
+		$this->assertCount( 1, $endpoint->get_current_user_pending_notifications( 0 ) );
+	}
+
+	/**
+	 * Anonymous visitors get no pending rows without querying by user-supplied ids.
+	 */
+	public function test_get_current_user_pending_notifications_returns_empty_for_anonymous(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		\wp_set_current_user( 0 );
+
+		$endpoint = new MyAccountEndpoint();
+		$this->assertSame( array(), $endpoint->get_current_user_pending_notifications( MyAccountEndpoint::DEFAULT_PER_PAGE ) );
+	}
+
+	/**
+	 * The rendered endpoint splits pending and active rows into their own tables, links
+	 * each pending row to a resend URL that returns to the endpoint, and honours the
+	 * pending-limit filter.
+	 */
+	public function test_render_endpoint_splits_pending_and_active_tables(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		$active    = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$pending_1 = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$pending_2 = $this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		$limit_filter = static fn () => 1;
+		add_filter( 'woocommerce_account_customer_stock_notifications_pending_limit', $limit_filter );
+		try {
+			ob_start();
+			wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+			$html = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_account_customer_stock_notifications_pending_limit', $limit_filter );
+		}
+
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringContainsString( 'Awaiting confirmation', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
+		$this->assertStringNotContainsString( "You haven't signed up", $html );
+
+		// Only the newest pending row survives the limit of 1.
+		$this->assertStringContainsString( 'notification_id=' . $pending_2->get_id() . '&', $html );
+		$this->assertStringNotContainsString( 'notification_id=' . $pending_1->get_id() . '&', $html );
+		$this->assertStringContainsString( 'notification_id=' . $active->get_id() . '&', $html );
+
+		// Only the pending row offers a Resend link; both actions point back at the endpoint.
+		$this->assertSame( 1, substr_count( $html, 'woocommerce-customer-stock-notifications-action-link--resend' ) );
+		$this->assertSame( 2, substr_count( $html, 'woocommerce-customer-stock-notifications-action-link--cancel' ) );
+		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, $pending_2->get_id() ) ), $html );
+		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, $active->get_id() ) ), $html );
+		$this->assertStringNotContainsString( MyAccountEndpoint::ACTION_FIELD . '=' . MyAccountEndpoint::ACTION_RESEND . '&#038;notification_id=' . $active->get_id(), $html );
+		$this->assertStringContainsString( 'aria-label="Resend email for ', $html );
+		$this->assertStringNotContainsString( 'wc_bis_resend_notification=', $html );
+	}
+
+	/**
+	 * A customer with only pending sign-ups sees the pending table, not the empty state.
+	 */
+	public function test_render_endpoint_with_only_pending_rows_hides_empty_state(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		ob_start();
+		wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
+		$this->assertStringNotContainsString( "You haven't signed up", $html );
+	}
+
+	/**
+	 * With no pending rows the active table renders without the "Active" heading,
+	 * so a store without double opt-in sees the single table it always had.
+	 */
+	public function test_render_endpoint_without_pending_rows_omits_active_heading(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		ob_start();
+		wc_get_container()->get( MyAccountEndpoint::class )->render_endpoint( 1 );
+		$html = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-table--pending', $html );
+		$this->assertStringContainsString( 'woocommerce-customer-stock-notifications-table--active', $html );
+		$this->assertStringNotContainsString( 'Awaiting confirmation', $html );
+		$this->assertStringNotContainsString( 'woocommerce-customer-stock-notifications-heading--active', $html );
 	}
 
 	/**
@@ -282,9 +458,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( $user_id );
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
-		$this->simulate_cancel_request( $notification->get_id(), true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
 
-		$this->run_cancel_expecting_redirect();
+		$this->run_action_expecting_redirect();
 
 		$this->assertEmpty( \wc_get_notices( 'error' ) );
 
@@ -309,9 +485,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( $user_id );
 		$notification = $this->create_notification( $user_id, $status );
 
-		$this->simulate_cancel_request( $notification->get_id(), true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
 
-		$this->run_cancel_expecting_redirect();
+		$this->run_action_expecting_redirect();
 
 		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
@@ -321,7 +497,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The cancellable statuses are the ones the My Account view lists.
+	 * Both PENDING and ACTIVE rows keep their Cancel button; SENT and CANCELLED never get one.
 	 */
 	public function test_is_cancellable_matches_listed_statuses(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -341,9 +517,9 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( $user_id );
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
-		$this->simulate_cancel_request( $notification->get_id(), false );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), false );
 
-		$this->run_cancel_expecting_redirect();
+		$this->run_action_expecting_redirect();
 
 		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
@@ -362,19 +538,12 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$notification_a = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 		$notification_b = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
-		// Nonce was minted against A's id, but we POST it alongside B's id.
-		$nonce = \wp_create_nonce( MyAccountEndpoint::get_cancel_nonce_action( $notification_a->get_id() ) );
+		// Nonce was minted against A's id, but the request carries B's id.
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification_b->get_id(), true );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$_GET['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification_a->get_id() ) );
 
-		$this->set_endpoint_query_var();
-		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_POST = array(
-			MyAccountEndpoint::CANCEL_ACTION => '1',
-			'notification_id'                => (string) $notification_b->get_id(),
-			'_wpnonce'                       => $nonce,
-		);
-		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$this->run_cancel_expecting_redirect();
+		$this->run_action_expecting_redirect();
 
 		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
@@ -397,10 +566,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 		$id           = $notification->get_id();
 
-		$this->simulate_cancel_request( $id, true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $id, true );
 		$notification->delete( true );
 
-		$this->run_cancel_expecting_redirect();
+		$this->run_action_expecting_redirect();
 
 		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 	}
@@ -414,12 +583,12 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( $user_id );
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
-		$this->simulate_cancel_request( $notification->get_id(), true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
 
 		$neutralize_update = array( $this, 'neutralize_notification_update' );
 		add_filter( 'query', $neutralize_update );
 		try {
-			$this->run_cancel_expecting_redirect();
+			$this->run_action_expecting_redirect();
 		} finally {
 			remove_filter( 'query', $neutralize_update );
 		}
@@ -453,7 +622,8 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * User A cannot cancel user B's notification even when the nonce validates against B's action name
 	 * (WordPress nonces bind to the current user, so this effectively asserts the ownership check).
 	 *
-	 * This one stays silent: an error notice would confirm that the id exists.
+	 * The response is the same "no longer exists" error a missing id gets, so it
+	 * doesn't confirm that the notification exists.
 	 */
 	public function test_cancel_does_not_touch_other_users_notification(): void {
 		$user_a = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -463,12 +633,11 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		// User A logs in and tries to cancel B's notification.
 		\wp_set_current_user( $user_a );
-		$this->simulate_cancel_request( $notification_b->get_id(), true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification_b->get_id(), true );
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		$this->run_action_expecting_redirect();
 
-		$this->assertNull( $this->redirect_location );
-		$this->assertEmpty( \wc_get_notices( 'error' ) );
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
 
 		$updated_b = Factory::get_notification( $notification_b->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated_b );
@@ -476,20 +645,175 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An anonymous POST with a cancel payload is silently dropped.
+	 * An anonymous request carrying a cancel link's query args is silently dropped.
 	 */
 	public function test_cancel_ignored_when_anonymous(): void {
 		$user_id      = $this->factory->user->create( array( 'role' => 'customer' ) );
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
 		\wp_set_current_user( 0 );
-		$this->simulate_cancel_request( $notification->get_id(), true );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
 
-		( new MyAccountEndpoint() )->maybe_handle_cancel();
+		$this->make_endpoint()->maybe_handle_action();
 
 		$updated = Factory::get_notification( $notification->get_id() );
 		$this->assertInstanceOf( Notification::class, $updated );
 		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
+	 * A valid resend link from the owner hands the notification to the service and reports success.
+	 */
+	public function test_resend_with_valid_nonce_sends_verification_email(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		$service = $this->createMock( NotificationManagementService::class );
+		$service
+			->expects( $this->once() )
+			->method( 'resend_verification_email' )
+			->with(
+				$this->callback(
+					static function ( $arg ) use ( $notification ) {
+						return $arg instanceof Notification && $arg->get_id() === $notification->get_id();
+					}
+				)
+			)
+			->willReturn( true );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification->get_id(), true );
+
+		$this->run_action_expecting_redirect( $service );
+
+		$this->assertEmpty( \wc_get_notices( 'error' ) );
+		$this->assertCount( 1, \wc_get_notices( 'success' ) );
+	}
+
+	/**
+	 * A resend the service refuses (already verified, rate limited) surfaces its message as an error notice.
+	 */
+	public function test_resend_reports_service_error(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		$service = $this->createMock( NotificationManagementService::class );
+		$service
+			->method( 'resend_verification_email' )
+			->willReturn( new \WP_Error( NotificationManagementService::RESEND_ERROR_RATE_LIMITED, 'Please wait.' ) );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification->get_id(), true );
+
+		$this->run_action_expecting_redirect( $service );
+
+		$this->assertEmpty( \wc_get_notices( 'success' ) );
+		$errors = \wc_get_notices( 'error' );
+		$this->assertCount( 1, $errors );
+		$this->assertSame( 'Please wait.', $errors[0]['notice'] );
+	}
+
+	/**
+	 * A nonce minted for the row's Cancel link does not validate its Resend link.
+	 */
+	public function test_resend_rejects_nonce_minted_for_cancel(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::PENDING );
+
+		$service = $this->createMock( NotificationManagementService::class );
+		$service
+			->expects( $this->never() )
+			->method( 'resend_verification_email' );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification->get_id(), true );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$_GET['_wpnonce'] = \wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id() ) );
+
+		$this->run_action_expecting_redirect( $service );
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
+	}
+
+	/**
+	 * User A cannot trigger a verification email for user B's notification.
+	 */
+	public function test_resend_does_not_touch_other_users_notification(): void {
+		$user_a = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$user_b = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$notification_b = $this->create_notification( $user_b, NotificationStatus::PENDING );
+
+		$service = $this->createMock( NotificationManagementService::class );
+		$service
+			->expects( $this->never() )
+			->method( 'resend_verification_email' );
+
+		\wp_set_current_user( $user_a );
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification_b->get_id(), true );
+
+		$this->run_action_expecting_redirect( $service );
+
+		$this->assertCount( 1, \wc_get_notices( 'error' ) );
+	}
+
+	/**
+	 * A valid action link that lands on any page other than the stock notifications
+	 * endpoint is dropped, so the handler never widens to the whole front end.
+	 */
+	public function test_action_ignored_off_the_endpoint(): void {
+		global $wp;
+
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true );
+		unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
+
+		$this->make_endpoint()->maybe_handle_action();
+
+		$this->assertNull( $this->redirect_location );
+		$this->assertEmpty( \wc_get_notices() );
+
+		$updated = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
+	 * An unknown action value is dropped before any nonce or database work.
+	 */
+	public function test_unknown_action_is_ignored(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_action_request( 'delete', $notification->get_id(), true );
+
+		$this->make_endpoint()->maybe_handle_action();
+
+		$this->assertNull( $this->redirect_location );
+		$this->assertEmpty( \wc_get_notices() );
+
+		$updated = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $updated->get_status() );
+	}
+
+	/**
+	 * Action links point at the endpoint and carry the action, the id, and a nonce scoped to both.
+	 */
+	public function test_get_action_url_carries_action_id_and_scoped_nonce(): void {
+		$url = MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, 42 );
+
+		$this->assertStringStartsWith( MyAccountEndpoint::get_endpoint_url(), $url );
+		$this->assertStringContainsString( MyAccountEndpoint::ACTION_FIELD . '=' . MyAccountEndpoint::ACTION_RESEND, $url );
+		$this->assertStringContainsString( 'notification_id=42', $url );
+
+		// wp_nonce_url() returns an HTML-escaped URL (`&amp;`), so decode it before parsing the query.
+		$query = array();
+		\wp_parse_str( (string) \wp_parse_url( html_entity_decode( $url ), PHP_URL_QUERY ), $query );
+		$this->assertNotFalse( \wp_verify_nonce( $query['_wpnonce'], MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, 42 ) ) );
+		$this->assertFalse( \wp_verify_nonce( $query['_wpnonce'], MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, 42 ) ) );
 	}
 
 	/**
@@ -532,25 +856,27 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper: fake the global state needed for `maybe_handle_cancel()` to proceed past guards.
+	 * Helper: fake the global state needed for `maybe_handle_action()` to proceed past guards,
+	 * as if the customer followed a row action link.
 	 *
-	 * @param int  $notification_id Notification id.
-	 * @param bool $valid_nonce     Whether to mint a nonce that validates for this id.
+	 * @param string $action          One of the `MyAccountEndpoint::ACTION_*` values.
+	 * @param int    $notification_id Notification id.
+	 * @param bool   $valid_nonce     Whether to mint a nonce that validates for this action and id.
 	 */
-	private function simulate_cancel_request( int $notification_id, bool $valid_nonce ): void {
+	private function simulate_action_request( string $action, int $notification_id, bool $valid_nonce ): void {
 		$this->set_endpoint_query_var();
 
 		$nonce = $valid_nonce
-			? \wp_create_nonce( MyAccountEndpoint::get_cancel_nonce_action( $notification_id ) )
+			? \wp_create_nonce( MyAccountEndpoint::get_nonce_action( $action, $notification_id ) )
 			: 'clearly-not-a-valid-nonce';
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_POST = array(
-			MyAccountEndpoint::CANCEL_ACTION => '1',
-			'notification_id'                => (string) $notification_id,
-			'_wpnonce'                       => $nonce,
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.WP.GlobalVariablesOverride.Prohibited
+		$_GET = array(
+			MyAccountEndpoint::ACTION_FIELD => $action,
+			'notification_id'               => (string) $notification_id,
+			'_wpnonce'                      => $nonce,
 		);
-		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**

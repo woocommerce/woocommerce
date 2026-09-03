@@ -1087,6 +1087,21 @@ p.demo_store,
 		}
 	}
 
+	table.woocommerce-MyAccount-customerStockNotifications {
+		.woocommerce-customer-stock-notifications-table__cell-actions {
+			.woocommerce-customer-stock-notifications-action-link {
+				display: inline-block;
+				vertical-align: middle;
+				margin-block: 0.25em;
+				margin-inline-end: 0.5em;
+
+				&:last-child {
+					margin-inline-end: 0;
+				}
+			}
+		}
+	}
+
 	td.product-name {
 		dl.variation,
 		.wc-item-meta {
