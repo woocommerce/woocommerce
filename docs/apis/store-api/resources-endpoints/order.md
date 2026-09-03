@@ -20,6 +20,8 @@ Returns the full order object response (see [Order Response](#order-response)).
 
 Order endpoints return responses in the same format as `/cart`; an order object which includes order items, applied coupons, shipping addresses and rates, and non-sensitive customer data.
 
+`item_data` is the exception. Order items carry stored order item metadata; cart items carry display data from the `woocommerce_get_item_data` filter. Both are lists, but the entries hold different properties. See [Item data](#item-data).
+
 ### Order Response
 
 ```json
@@ -118,7 +120,15 @@ Order endpoints return responses in the same format as `/cart`; an order object 
 					"sale_price": "10000000"
 				}
 			},
-			"item_data": [],
+			"item_data": [
+				{
+					"id": 1234,
+					"key": "Gift message",
+					"value": "Happy birthday",
+					"display_key": "Gift message",
+					"display_value": "<p>Happy birthday</p>\n"
+				}
+			],
 			"totals": {
 				"currency_code": "GBP",
 				"currency_symbol": "£",
@@ -222,6 +232,22 @@ Order endpoints return responses in the same format as `/cart`; an order object 
 	"payment_requirements": [ "products" ],
 }
 ```
+
+### Item data
+
+Each order item carries its metadata in `item_data`, a list of entries:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `id` | integer \| null | The order item metadata row ID. `null` when an extension added the entry through `woocommerce_order_item_get_formatted_meta_data` without a stored row behind it. |
+| `key` | string | Metadata key. |
+| `value` | string | Metadata value. |
+| `display_key` | string | Key, formatted for display. |
+| `display_value` | string | Value, formatted for display. |
+
+Most stores return an empty list. Entries appear when an extension writes metadata to the line item, as Product Add-Ons, Deposits, Bundles and Gift Cards do.
+
+Extensions can add properties beyond the five above through the same filter. The endpoint passes them through.
 
 ### Error Response
 
