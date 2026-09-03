@@ -754,43 +754,39 @@ class StyleAttributesUtils {
 	 * @return array
 	 */
 	public static function get_classes_and_styles_by_attributes( $attributes, $properties = array(), $exclude = array() ) {
-		$classes_and_styles = array(
-			'align'            => self::get_align_class_and_style( $attributes ),
-			'background_color' => self::get_background_color_class_and_style( $attributes ),
-			'border_color'     => self::get_border_color_class_and_style( $attributes ),
-			'border_radius'    => self::get_border_radius_class_and_style( $attributes ),
-			'border_width'     => self::get_border_width_class_and_style( $attributes ),
-			'border_style'     => self::get_border_style_class_and_style( $attributes ),
-			'font_family'      => self::get_font_family_class_and_style( $attributes ),
-			'font_size'        => self::get_font_size_class_and_style( $attributes ),
-			'font_style'       => self::get_font_style_class_and_style( $attributes ),
-			'font_weight'      => self::get_font_weight_class_and_style( $attributes ),
-			'letter_spacing'   => self::get_letter_spacing_class_and_style( $attributes ),
-			'line_height'      => self::get_line_height_class_and_style( $attributes ),
-			'margin'           => self::get_margin_class_and_style( $attributes ),
-			'padding'          => self::get_padding_class_and_style( $attributes ),
-			'shadow'           => self::get_shadow_class_and_style( $attributes ),
-			'text_align'       => self::get_text_align_class_and_style( $attributes ),
-			'text_color'       => self::get_text_color_class_and_style( $attributes ),
-			'text_decoration'  => self::get_text_decoration_class_and_style( $attributes ),
-			'text_transform'   => self::get_text_transform_class_and_style( $attributes ),
-			'extra_classes'    => self::get_classes_from_attributes( $attributes ),
+		$class_style_map = array(
+			'align'            => 'get_align_class_and_style',
+			'background_color' => 'get_background_color_class_and_style',
+			'border_color'     => 'get_border_color_class_and_style',
+			'border_radius'    => 'get_border_radius_class_and_style',
+			'border_width'     => 'get_border_width_class_and_style',
+			'border_style'     => 'get_border_style_class_and_style',
+			'font_family'      => 'get_font_family_class_and_style',
+			'font_size'        => 'get_font_size_class_and_style',
+			'font_style'       => 'get_font_style_class_and_style',
+			'font_weight'      => 'get_font_weight_class_and_style',
+			'letter_spacing'   => 'get_letter_spacing_class_and_style',
+			'line_height'      => 'get_line_height_class_and_style',
+			'margin'           => 'get_margin_class_and_style',
+			'padding'          => 'get_padding_class_and_style',
+			'shadow'           => 'get_shadow_class_and_style',
+			'text_align'       => 'get_text_align_class_and_style',
+			'text_color'       => 'get_text_color_class_and_style',
+			'text_decoration'  => 'get_text_decoration_class_and_style',
+			'text_transform'   => 'get_text_transform_class_and_style',
+			'extra_classes'    => 'get_classes_from_attributes',
 		);
 
 		if ( ! empty( $properties ) ) {
-			foreach ( $classes_and_styles as $key => $value ) {
-				if ( ! in_array( $key, $properties, true ) ) {
-					unset( $classes_and_styles[ $key ] );
-				}
-			}
+			$class_style_map = array_intersect_key( $class_style_map, array_flip( $properties ) );
+		}
+		if ( ! empty( $exclude ) ) {
+			$class_style_map = array_diff_key( $class_style_map, array_flip( $exclude ) );
 		}
 
-		if ( ! empty( $exclude ) ) {
-			foreach ( $classes_and_styles as $key => $value ) {
-				if ( in_array( $key, $exclude, true ) ) {
-					unset( $classes_and_styles[ $key ] );
-				}
-			}
+		$classes_and_styles = array();
+		foreach ( $class_style_map as $key => $method ) {
+			$classes_and_styles[ $key ] = self::$method( $attributes );
 		}
 
 		$classes_and_styles = array_filter( $classes_and_styles );
