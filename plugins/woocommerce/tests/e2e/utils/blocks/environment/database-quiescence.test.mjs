@@ -10,7 +10,7 @@ import { after, before, test } from 'node:test';
 /**
  * Internal dependencies
  */
-import { BASE_URL } from './constants.ts';
+import { BASE_URL } from '../constants.ts';
 
 const execFileAsync = promisify( execFile );
 const SNAPSHOT_COORDINATOR =

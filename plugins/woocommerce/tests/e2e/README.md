@@ -45,6 +45,8 @@ To re-create the environment for a fresh state:
 
 Core and Blocks tests reuse the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:e2e:restart` selects a clean Core profile, while `pnpm env:start:blocks` selects and seeds the Blocks profile. Rerun the appropriate setup whenever switching profiles. `pnpm test:e2e:*` runs tests against the environment's current state. Blocks test setup validates the selected profile's request-lock and prepend mechanics and snapshots the current prepared database for test isolation; it does not select or seed the profile. While a snapshot restore holds the lock, new PHP requests are rejected with a 503 rather than queued; the restore waits for requests already admitted, bounded to 60 seconds.
 
+`pnpm test:e2e:blocks:environment` covers that machinery itself — the request lock, the `.htaccess` prepend block, and the snapshot coordinator's child process handling — as `node:test` suites under `tests/e2e/utils/blocks/environment/`. They need a seeded Blocks profile, so run `pnpm env:start:blocks` first. Keep them out of `tests/e2e/utils/blocks/*.test.mjs`: that glob runs before every Playwright shard, so anything placed there needing a live environment runs dozens of times per CI run and turns a single wp-env blip into a failed shard.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
