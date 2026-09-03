@@ -8,12 +8,8 @@ namespace Automattic\WooCommerce\Internal\Caches;
  * Invalidation handler for the coupon code to coupon id lookup cache.
  *
  * The wc_get_coupon_id_by_code() function caches the ids of the published coupons matching a
- * given code. The entries live in the 'coupons' object cache group, and their keys nest a
- * dedicated 'coupon_code_lookups' prefix namespace inside the group prefix. Rotating the inner
- * namespace invalidates every lookup entry at once without flushing the meta cache shared by
- * every WC_Coupon in the same group, while rotating the outer 'coupons' group prefix (what
- * WC_Cache_Helper::invalidate_cache_group( 'coupons' ) does) keeps working as it did before
- * this class existed. Same nesting as WC_Data::generate_meta_cache_key().
+ * given code. The entries live in the 'coupons' object cache group, under the key format this
+ * class owns, so WC_Cache_Helper::invalidate_cache_group( 'coupons' ) still reaches them.
  *
  * Invalidation is per coupon and happens in two layers:
  *
@@ -28,11 +24,12 @@ namespace Automattic\WooCommerce\Internal\Caches;
  *
  * Known limitations:
  *
- * - Both layers assume that only published coupons resolve, because the core coupon data store
- *   only resolves published coupons. A custom data store registered through the
- *   `woocommerce_data_stores` filter that resolves further statuses would see its entries
- *   rejected on every read (correct, but never served from the cache) and would need its own
- *   invalidation for transitions between two non-publish statuses.
+ * - The read layer describes what WC_Coupon_Data_Store_CPT resolves, so wc_get_coupon_id_by_code()
+ *   only runs it while that data store is in use. A custom coupon data store registered through
+ *   the `woocommerce_data_stores` filter may resolve further statuses, or coupons that are not
+ *   posts at all, and keeps the write layer as its only coverage (what it had before this class
+ *   existed). Rejecting its entries instead would disable the lookup cache for those sites, since
+ *   every read would write an entry the next read throws away.
  * - Renaming the code of a coupon that stays published crosses no boundary, so the old code
  *   keeps resolving to the coupon until the cache entry expires or the coupon is unpublished.
  *   This is pre-existing behaviour, not something this class introduced.
@@ -54,13 +51,6 @@ class CouponCodeLookupInvalidator {
 	 * @var string
 	 */
 	private const CACHE_GROUP = 'coupons';
-
-	/**
-	 * The dedicated prefix namespace used to build (and rotate) the lookup keys.
-	 *
-	 * @var string
-	 */
-	private const LOOKUP_CACHE_NAMESPACE = 'coupon_code_lookups';
 
 	/**
 	 * Register the WordPress hooks that cover coupon changes made outside the WC_Coupon CRUD.
@@ -95,10 +85,7 @@ class CouponCodeLookupInvalidator {
 		// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached), hence the hashing.
 		$hashed_code = md5( wc_strtolower( $code ) );
 
-		// The group prefix is nested so a 'coupons' group invalidation still reaches the lookup entries.
-		return \WC_Cache_Helper::get_cache_prefix( self::CACHE_GROUP )
-			. \WC_Cache_Helper::get_cache_prefix( self::LOOKUP_CACHE_NAMESPACE )
-			. 'coupon_id_from_code_' . $hashed_code;
+		return \WC_Cache_Helper::get_cache_prefix( self::CACHE_GROUP ) . 'coupon_id_from_code_' . $hashed_code;
 	}
 
 	/**
@@ -118,15 +105,15 @@ class CouponCodeLookupInvalidator {
 	/**
 	 * Invalidate every code to coupon id lookup entry at once.
 	 *
-	 * Rotates the lookup prefix namespace, which strands all previously cached lookup keys
-	 * (regardless of the code representation they were primed under) while leaving the meta
-	 * cache of every WC_Coupon in the same object cache group untouched. Meant for bulk changes
-	 * such as migrations that rewrite many codes; single coupon changes use invalidate().
+	 * Rotates the 'coupons' group prefix, which strands all previously cached lookup keys
+	 * regardless of the code representation they were primed under, and the meta cache of every
+	 * WC_Coupon along with them. Meant for bulk changes such as migrations that rewrite many
+	 * codes; single coupon changes use invalidate().
 	 *
 	 * @return void
 	 */
-	public function invalidate_lookup_namespace(): void {
-		\WC_Cache_Helper::invalidate_cache_group( self::LOOKUP_CACHE_NAMESPACE );
+	public function invalidate_all(): void {
+		\WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 
 	/**
@@ -137,6 +124,9 @@ class CouponCodeLookupInvalidator {
 	 * through get_post(), which serves it from the core post cache. Every post write cleans that
 	 * cache, so the check costs no query on a warm cache and does not depend on which key the
 	 * entry was cached under.
+	 *
+	 * "Published coupon" is what WC_Coupon_Data_Store_CPT::get_ids_by_code() resolves, so callers
+	 * must only apply this to entries that data store wrote. See the known limitations above.
 	 *
 	 * @param array $ids The coupon ids stored in the lookup entry.
 	 * @return bool True if the entry must not be used.

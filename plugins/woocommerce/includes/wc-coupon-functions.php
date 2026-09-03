@@ -120,8 +120,15 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 
 	$ids = wp_cache_get( $cache_key, $cache_group );
 
-	// A cached entry is only trusted while all of its coupons are still published, whichever key it was cached under.
-	$is_stale = false !== $ids && $invalidator->is_lookup_entry_stale( (array) $ids );
+	/*
+	 * A cached entry is only trusted while all of its coupons are still published, whichever key it
+	 * was cached under. The check describes what the core data store resolves, so a custom coupon
+	 * data store skips it and keeps the write-side invalidation as its only layer. Running it there
+	 * would reject every entry the custom store wrote, disabling the lookup cache for that site.
+	 */
+	$is_stale = false !== $ids
+		&& 'WC_Coupon_Data_Store_CPT' === $data_store->get_current_class_name()
+		&& $invalidator->is_lookup_entry_stale( (array) $ids );
 
 	if ( false === $ids || $is_stale ) {
 		$ids = $data_store->get_ids_by_code( $code );

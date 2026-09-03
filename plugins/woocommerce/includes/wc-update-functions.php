@@ -2291,7 +2291,7 @@ function wc_update_450_sanitize_coupons_code() {
 
 	// Clean coupon code lookup cache.
 	if ( $codes_changed ) {
-		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_lookup_namespace();
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
 	}
 
 	// Start the run again.

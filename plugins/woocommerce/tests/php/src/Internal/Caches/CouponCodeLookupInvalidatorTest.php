@@ -106,7 +106,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( $kept_key, $this->sut->get_cache_key( 'cache-keep-kept' ), 'Unpublishing a coupon should not rotate the lookup namespace' );
+		$this->assertSame( $kept_key, $this->sut->get_cache_key( 'cache-keep-kept' ), 'Unpublishing a coupon should not rotate the coupons group prefix' );
 		$this->assertNotFalse( wp_cache_get( $kept_key, 'coupons' ), "Unpublishing a coupon should not flush another coupon's lookup entry" );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( 'cache-keep-unpublished' ), 'The unpublished coupon should not be resolvable by code' );
 		$this->assertSame( $kept->get_id(), wc_get_coupon_id_by_code( 'cache-keep-kept' ), 'The other coupon should still resolve by code' );
@@ -153,7 +153,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		);
 		wp_delete_post( $doomed_id, true );
 
-		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), "Deleting a {$status} coupon should not rotate the lookup namespace" );
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), "Deleting a {$status} coupon should not rotate the coupons group prefix" );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Deleting a {$status} coupon should not flush an unrelated lookup entry" );
 
 		$coupon->delete( true );
@@ -172,7 +172,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		$other = WC_Helper_Coupon::create_coupon( 'cache-keep-on-create-other' );
 
-		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'Publishing a coupon should not rotate the lookup namespace' );
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'Publishing a coupon should not rotate the coupons group prefix' );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Publishing a coupon should not flush another coupon's lookup entry" );
 
 		$other->delete( true );
@@ -240,16 +240,16 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Rotating the lookup namespace should strand every previously built lookup key.
+	 * @testdox Invalidating every lookup entry at once should strand every previously built lookup key.
 	 */
-	public function test_lookup_namespace_rotation_strands_previous_keys(): void {
+	public function test_invalidate_all_strands_previous_keys(): void {
 		$raw_key_before       = $this->sut->get_cache_key( 'probe&test' );
 		$sanitized_key_before = $this->sut->get_cache_key( 'probe&amp;test' );
 
-		$this->sut->invalidate_lookup_namespace();
+		$this->sut->invalidate_all();
 
-		$this->assertNotSame( $raw_key_before, $this->sut->get_cache_key( 'probe&test' ), 'The raw-alias lookup key should be unreachable after rotation' );
-		$this->assertNotSame( $sanitized_key_before, $this->sut->get_cache_key( 'probe&amp;test' ), 'The sanitized-alias lookup key should be unreachable after rotation' );
+		$this->assertNotSame( $raw_key_before, $this->sut->get_cache_key( 'probe&test' ), 'The raw-alias lookup key should be unreachable afterwards' );
+		$this->assertNotSame( $sanitized_key_before, $this->sut->get_cache_key( 'probe&amp;test' ), 'The sanitized-alias lookup key should be unreachable afterwards' );
 	}
 
 	/**
@@ -270,7 +270,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'The lookup namespace should not rotate when the coupon stays published' );
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'The coupons group prefix should not rotate when the coupon stays published' );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be kept when the coupon stays published' );
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'A published coupon should remain resolvable by code' );
 
@@ -293,6 +293,58 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$queries_before = $wpdb->num_queries;
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The published coupon should resolve by code' );
 		$this->assertSame( $queries_before, $wpdb->num_queries, 'A fresh lookup entry should be served from the object cache without a query' );
+
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox A custom coupon data store should keep serving its lookup entries instead of having them rejected on every read.
+	 */
+	public function test_a_custom_coupon_data_store_keeps_its_lookup_entries(): void {
+		global $wpdb;
+
+		$code   = 'custom-store-code';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+		wp_update_post(
+			array(
+				'ID'          => $coupon->get_id(),
+				'post_status' => 'private',
+			)
+		);
+
+		// A data store that resolves more than the published coupons the read-time check describes.
+		$store = new class() extends \WC_Coupon_Data_Store_CPT {
+			/**
+			 * Resolve private coupons alongside the published ones.
+			 *
+			 * @param string $code Coupon code.
+			 * @return array Array of ids.
+			 */
+			public function get_ids_by_code( $code ) {
+				global $wpdb;
+				return $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT ID FROM $wpdb->posts WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' AND post_status IN ( 'publish', 'private' ) ORDER BY post_date DESC",
+						wc_sanitize_coupon_code( $code )
+					)
+				);
+			}
+		};
+
+		$use_custom_store = function () use ( $store ) {
+			return $store;
+		};
+		add_filter( 'woocommerce_coupon_data_store', $use_custom_store );
+
+		// Prime the lookup entry and the post cache the read-time check would have consulted.
+		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The custom data store should resolve the private coupon' );
+		get_post( $coupon->get_id() );
+
+		$queries_before = $wpdb->num_queries;
+		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The custom data store should resolve the private coupon' );
+		$this->assertSame( $queries_before, $wpdb->num_queries, "A custom data store's lookup entry should be served from the object cache, not thrown away and re-queried on every read" );
+
+		remove_filter( 'woocommerce_coupon_data_store', $use_custom_store );
 
 		$coupon->delete( true );
 	}
