@@ -169,7 +169,7 @@ class StyleAttributesUtils {
 	 * Join classes and styles while removing duplicates and null values.
 	 *
 	 * @param array $rules Array of classes or styles.
-	 * @return array
+	 * @return string
 	 */
 	protected static function join_styles( $rules ) {
 		return implode( ' ', array_unique( array_filter( $rules ) ) );
