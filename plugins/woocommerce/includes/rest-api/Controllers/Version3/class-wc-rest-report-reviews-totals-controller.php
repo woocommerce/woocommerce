@@ -41,38 +41,81 @@ class WC_REST_Report_Reviews_Totals_Controller extends WC_REST_Reports_Controlle
 	protected function get_reports() {
 		global $wpdb;
 
+		$counts = array_fill_keys( range( 1, 5 ), 0 );
+
 		// Same cache group and invalidation signal get_comments() used, so ratings written outside WooCommerce still refresh the totals.
-		$cache_key = 'wc_report_reviews_totals_' . wp_cache_get_last_changed( 'comment' );
-		$counts    = wp_cache_get( $cache_key, 'comment-queries' );
+		$cache_key    = 'wc_report_reviews_totals';
+		$last_changed = wp_cache_get_last_changed( 'comment' );
+		$cached       = wp_cache_get_salted( $cache_key, 'comment-queries', $last_changed );
 
-		if ( false === $counts ) {
-			$counts = array_fill_keys( range( 1, 5 ), 0 );
-
+		if ( is_array( $cached ) ) {
+			$counts = $cached;
+		} else {
 			/*
-			 * A single grouped aggregate in place of one COUNT query per rating. The predicates
-			 * repeat what get_comments() built for these reports: comments awaiting moderation are
-			 * included and only spam and trashed ones are dropped, the post has to be a product,
-			 * and the comment types WooCommerce keeps out of comment queries are excluded. Ratings
-			 * are compared as strings, as the meta query did, so '0' and unrated comments fall out.
+			 * A single grouped aggregate in place of one COUNT query per rating. The clauses below are the
+			 * ones WP_Comment_Query::get_comment_ids() would build for the arguments this report used, and
+			 * they are passed through comments_clauses so WooCommerce's own callbacks -- the ones hiding
+			 * order notes, webhook deliveries and action logs -- and any extension's keep applying.
+			 *
+			 * Two other comment query hooks cannot apply here. comments_pre_query substitutes a list of
+			 * comments or a single count, neither of which describes a per-rating breakdown, and
+			 * pre_get_comments runs before any clause exists and lets callbacks set query vars that a
+			 * grouped aggregate has no way to honour.
 			 */
-			$rows = $wpdb->get_results(
-				"SELECT {$wpdb->commentmeta}.meta_value AS rating, COUNT(*) AS total
-				FROM {$wpdb->comments}
-				INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->comments}.comment_post_ID
-				INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id
-				WHERE {$wpdb->comments}.comment_approved IN ( '0', '1' )
-				AND {$wpdb->comments}.comment_type NOT IN ( 'note', 'order_note', 'webhook_delivery', 'action_log' )
-				AND {$wpdb->posts}.post_type = 'product'
-				AND {$wpdb->commentmeta}.meta_key = 'rating'
-				AND {$wpdb->commentmeta}.meta_value IN ( '1', '2', '3', '4', '5' )
-				GROUP BY {$wpdb->commentmeta}.meta_value"
+			$comment_query = new WP_Comment_Query();
+			$comment_query->parse_query(
+				array(
+					'count'     => true,
+					'post_type' => 'product',
+					'meta_key'  => 'rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a query argument here; it tells comments_clauses callbacks which meta the aggregate below reads.
+					'status'    => 'all',
+				)
 			);
 
-			foreach ( $rows as $row ) {
-				$counts[ (int) $row->rating ] = (int) $row->total;
-			}
+			$clauses = array(
+				'fields'  => "{$wpdb->commentmeta}.meta_value AS rating, COUNT(*) AS total",
+				'join'    => "INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$wpdb->comments}.comment_post_ID"
+					. " INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id",
 
-			wp_cache_set( $cache_key, $counts, 'comment-queries' );
+				/*
+				 * Comments awaiting moderation count, as the 'all' status did; only spam and trashed ones drop
+				 * out. The 'note' type is excluded by WP_Comment_Query itself rather than by any filter, so it
+				 * is mirrored here. Ratings are compared as strings, as the meta query did, so '0' and unrated
+				 * comments fall out.
+				 */
+				'where'   => "{$wpdb->comments}.comment_approved IN ( '0', '1' )"
+					. " AND {$wpdb->comments}.comment_type NOT IN ( 'note' )"
+					. " AND {$wpdb->posts}.post_type = 'product'"
+					. " AND {$wpdb->commentmeta}.meta_key = 'rating'"
+					. " AND {$wpdb->commentmeta}.meta_value IN ( '1', '2', '3', '4', '5' )",
+				'orderby' => '',
+				'limits'  => '',
+				'groupby' => "{$wpdb->commentmeta}.meta_value",
+			);
+
+			/** This filter is documented in wp-includes/class-wp-comment-query.php */
+			$clauses = apply_filters_ref_array( 'comments_clauses', array( $clauses, &$comment_query ) );
+
+			$fields  = isset( $clauses['fields'] ) ? trim( $clauses['fields'] ) : '';
+			$join    = isset( $clauses['join'] ) ? trim( $clauses['join'] ) : '';
+			$where   = isset( $clauses['where'] ) ? trim( $clauses['where'] ) : '';
+			$groupby = isset( $clauses['groupby'] ) ? trim( $clauses['groupby'] ) : '';
+
+			// A callback that empties any of these would leave either invalid SQL or a total with no rating buckets.
+			if ( '' !== $fields && '' !== $join && '' !== $where && '' !== $groupby ) {
+				$rows = $wpdb->get_results( "SELECT {$fields} FROM {$wpdb->comments} {$join} WHERE {$where} GROUP BY {$groupby}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Every clause is either built above from literals and $wpdb table names or supplied by a comments_clauses callback, exactly as WP_Comment_Query assembles them.
+
+				foreach ( $rows as $row ) {
+					if ( isset( $row->rating, $row->total ) && isset( $counts[ (int) $row->rating ] ) ) {
+						$counts[ (int) $row->rating ] = (int) $row->total;
+					}
+				}
+
+				// Never cache a failed aggregate; a zeroed report would stick until the next comment changed.
+				if ( '' === $wpdb->last_error ) {
+					wp_cache_set_salted( $cache_key, $counts, 'comment-queries', $last_changed );
+				}
+			}
 		}
 
 		$data = array();

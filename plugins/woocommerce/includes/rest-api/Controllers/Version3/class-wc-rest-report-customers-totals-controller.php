@@ -53,8 +53,9 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 		}
 
 		// Same cache group and invalidation signal WP_User_Query used, so meta written outside WooCommerce still refreshes the total.
-		$cache_key    = 'wc_report_customers_totals_paying_' . get_current_blog_id() . '_' . wp_cache_get_last_changed( 'users' );
-		$total_paying = wp_cache_get( $cache_key, 'user-queries' );
+		$cache_key    = 'wc_report_customers_totals_paying_' . get_current_blog_id();
+		$last_changed = wp_cache_get_last_changed( 'users' );
+		$total_paying = wp_cache_get_salted( $cache_key, 'user-queries', $last_changed );
 
 		if ( false === $total_paying ) {
 			/*
@@ -79,9 +80,14 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 				)
 			);
 
-			$total_paying = (int) $wpdb->get_var( "SELECT COUNT(*) {$customers_query->query_from} {$customers_query->query_where}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both clauses are built and escaped by WP_User_Query::prepare_query().
+			$total_paying = $wpdb->get_var( "SELECT COUNT(*) {$customers_query->query_from} {$customers_query->query_where}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both clauses are built and escaped by WP_User_Query::prepare_query().
 
-			wp_cache_set( $cache_key, $total_paying, 'user-queries' );
+			// Never cache a failed count; a zeroed total would stick until the next user or user meta changed.
+			if ( null !== $total_paying ) {
+				$total_paying = (int) $total_paying;
+
+				wp_cache_set_salted( $cache_key, $total_paying, 'user-queries', $last_changed );
+			}
 		}
 
 		$total_paying = (int) $total_paying;

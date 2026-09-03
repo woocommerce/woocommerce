@@ -31,6 +31,8 @@ parameters:
 	scanFiles:
 		- php-stubs/wc-admin-feature-config.php
 		- php-stubs/wc-constants.php
+		# WordPress 6.9 cache helpers; wordpress-stubs is pinned to 6.8.3. Drop when it moves past 6.9.
+		- php-stubs/wp-cache-salted.php
 	treatPhpDocTypesAsCertain: false
 	dynamicConstantNames:
 		# WC_TAX_ROUNDING_MODE can be 1, 2 (ints) or 'auto' (string in tests).

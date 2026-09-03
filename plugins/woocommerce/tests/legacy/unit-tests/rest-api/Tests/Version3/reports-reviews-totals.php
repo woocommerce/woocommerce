@@ -113,6 +113,8 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		$this->create_rated_comment( $product->get_id(), '4', array( 'comment_type' => '' ) );
 		$this->create_rated_comment( $product->get_id(), '4', array( 'comment_type' => 'order_note' ) );
 		$this->create_rated_comment( $product->get_id(), '2', array( 'comment_type' => 'webhook_delivery' ) );
+		$this->create_rated_comment( $product->get_id(), '3', array( 'comment_type' => 'note' ) );
+		$this->create_rated_comment( $product->get_id(), '3', array( 'comment_type' => 'action_log' ) );
 		$this->create_rated_comment( $product->get_id(), '0' );
 		$this->create_rated_comment( $product->get_id(), null );
 		$this->create_rated_comment( $page, '3' );
@@ -125,10 +127,45 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		// One four star review: the plain comment counts, the order note does not.
 		$this->assertSame( 1, $totals['rated_4_out_of_5'] );
 
-		// Reviews on other post types, hidden comment types, unrated and zero rated comments are all left out.
+		// Reviews on other post types, all four hidden comment types, unrated and zero rated comments are left out.
 		$this->assertSame( 0, $totals['rated_3_out_of_5'] );
 		$this->assertSame( 0, $totals['rated_2_out_of_5'] );
 		$this->assertSame( 0, $totals['rated_1_out_of_5'] );
+	}
+
+	/**
+	 * A third party narrowing the comment query through comments_clauses still narrows this report.
+	 */
+	public function test_get_reports_applies_comments_clauses_filter() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$this->create_rated_comment( $product->get_id(), '5' );
+		$this->create_rated_comment( $product->get_id(), '4', array( 'comment_type' => '' ) );
+
+		$this->assertSame( 1, $this->get_totals_by_slug()['rated_5_out_of_5'] );
+
+		$hide_reviews = static function ( $clauses ) {
+			$clauses['where'] .= " AND comment_type != 'review' ";
+
+			return $clauses;
+		};
+
+		add_filter( 'comments_clauses', $hide_reviews );
+
+		try {
+			// The filter does not move the comment last_changed value, so the cached totals have to go.
+			wp_cache_flush();
+
+			$totals = $this->get_totals_by_slug();
+		} finally {
+			remove_filter( 'comments_clauses', $hide_reviews );
+		}
+
+		// The review typed comment is filtered out, the plain comment is not.
+		$this->assertSame( 0, $totals['rated_5_out_of_5'] );
+		$this->assertSame( 1, $totals['rated_4_out_of_5'] );
 	}
 
 	/**
