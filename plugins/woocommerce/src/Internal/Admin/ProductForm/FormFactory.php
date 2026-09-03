@@ -2,7 +2,7 @@
 /**
  * WooCommerce Product Form Factory
  *
- * @package Woocommerce ProductForm
+ * @package WooCommerce ProductForm
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\ProductForm;
