@@ -20,8 +20,6 @@ const MY_ACCOUNT_ENDPOINT = 'my-account/stock-notifications/';
 const TABLE = '.woocommerce-customer-stock-notifications-table';
 const PENDING_TABLE = `${ TABLE }--pending`;
 const ACTIVE_TABLE = `${ TABLE }--active`;
-// The link's aria-label ("Resend verification email for <product>") is its accessible name.
-const RESEND_LINK = /^Resend verification email for /;
 
 /**
  * A customer account owned by a single test.
@@ -137,7 +135,9 @@ test.describe(
 						} );
 					await expect( pendingRow ).toBeVisible();
 					await expect(
-						pendingRow.getByRole( 'link', { name: RESEND_LINK } )
+						pendingRow.getByRole( 'button', {
+							name: 'Resend email',
+						} )
 					).toBeVisible();
 					await expect(
 						pendingRow.getByRole( 'button', { name: 'Cancel' } )
@@ -167,7 +167,9 @@ test.describe(
 						activeRow.getByRole( 'button', { name: 'Cancel' } )
 					).toBeVisible();
 					await expect(
-						activeRow.getByRole( 'link', { name: RESEND_LINK } )
+						activeRow.getByRole( 'button', {
+							name: 'Resend email',
+						} )
 					).toHaveCount( 0 );
 					await expect(
 						activeTable.locator( 'tbody tr' )
@@ -232,11 +234,10 @@ test.describe(
 					await expect( row ).toBeVisible();
 
 					await row
-						.getByRole( 'link', { name: RESEND_LINK } )
+						.getByRole( 'button', { name: 'Resend email' } )
 						.click();
 
-					// The redirect after the GET lands us back on the same tab, with a
-					// notice and the resend query args stripped from the URL.
+					// The redirect after the POST lands us back on the same tab with a notice.
 					await expect(
 						page.getByRole( 'heading', {
 							name: 'Stock notifications',
@@ -251,7 +252,7 @@ test.describe(
 
 					// The row is still pending and still offers the actions.
 					await expect(
-						row.getByRole( 'link', { name: RESEND_LINK } )
+						row.getByRole( 'button', { name: 'Resend email' } )
 					).toBeVisible();
 				} finally {
 					await restApi.delete(

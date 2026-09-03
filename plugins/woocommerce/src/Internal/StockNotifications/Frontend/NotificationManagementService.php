@@ -37,6 +37,16 @@ class NotificationManagementService {
 	public const RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
+	 * Error code returned by {@see self::resend_verification_email()} when the notification is no longer pending.
+	 */
+	public const RESEND_ERROR_NOT_PENDING = 'wc_bis_resend_not_pending';
+
+	/**
+	 * Error code returned by {@see self::resend_verification_email()} when a send happened too recently.
+	 */
+	public const RESEND_ERROR_RATE_LIMITED = 'wc_bis_resend_rate_limited';
+
+	/**
 	 * Email manager.
 	 *
 	 * @var EmailManager
@@ -60,19 +70,14 @@ class NotificationManagementService {
 	 * Get resend verification email URL.
 	 *
 	 * @param Notification $notification The notification.
-	 * @param string       $base_url     Optional. URL to append the resend query args to. Defaults to the product permalink.
 	 * @return string The resend verification email URL.
 	 */
-	public function get_resend_verification_email_url( Notification $notification, string $base_url = '' ): string {
-		if ( '' === $base_url ) {
-			$base_url = $notification->get_product_permalink();
-		}
-
+	public function get_resend_verification_email_url( Notification $notification ): string {
 		$url = add_query_arg(
 			array(
 				self::RESEND_QUERY_ARG => $notification->get_id(),
 			),
-			$base_url
+			$notification->get_product_permalink()
 		);
 
 		return wp_nonce_url( $url, self::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
@@ -118,8 +123,7 @@ class NotificationManagementService {
 		}
 
 		// Only the owner may resend a customer-linked notification. Bail silently on a
-		// mismatch, the same way the My Account cancel handler does, so the response
-		// doesn't confirm that the id exists.
+		// mismatch so the response doesn't confirm that the id exists.
 		$owner_id = (int) $notification->get_user_id();
 		if ( $owner_id > 0 && is_user_logged_in() && get_current_user_id() !== $owner_id ) {
 			return;
@@ -127,19 +131,42 @@ class NotificationManagementService {
 
 		$this->ensure_notice_session();
 
-		$redirect_url = $this->get_resend_redirect_url( $notification );
+		$redirect_url = $notification->get_product_permalink();
+		if ( empty( $redirect_url ) ) {
+			$redirect_url = wc_get_page_permalink( 'shop' );
+		}
 
-		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
-			wc_add_notice( esc_html__( 'This notification is already verified or cancelled.', 'woocommerce' ), 'error' );
+		$result = $this->resend_verification_email( $notification );
+		if ( is_wp_error( $result ) ) {
+			$notice_type = self::RESEND_ERROR_RATE_LIMITED === $result->get_error_code() ? 'notice' : 'error';
+			wc_add_notice( esc_html( $result->get_error_message() ), $notice_type );
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 
+		/* translators: %s user email. */
+		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
+	/**
+	 * Send the verification email for a pending notification again.
+	 *
+	 * Pure domain step: checks the status and the rate limit, records the send time,
+	 * and dispatches the email. Callers own authentication, nonces, notices and redirects.
+	 *
+	 * @param Notification $notification The notification to resend for.
+	 * @return true|\WP_Error True on send, or an error carrying one of the `RESEND_ERROR_*` codes.
+	 */
+	public function resend_verification_email( Notification $notification ) {
+		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
+			return new \WP_Error( self::RESEND_ERROR_NOT_PENDING, __( 'This notification is already verified or cancelled.', 'woocommerce' ) );
+		}
+
 		$last_sent_at = (int) $notification->get_meta( self::LAST_VERIFY_EMAIL_SENT_META );
 		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::RESEND_RATE_LIMIT_SECONDS ) {
-			wc_add_notice( esc_html__( 'Please wait a moment before requesting another verification email.', 'woocommerce' ), 'notice' );
-			wp_safe_redirect( $redirect_url );
-			exit;
+			return new \WP_Error( self::RESEND_ERROR_RATE_LIMITED, __( 'Please wait a moment before requesting another verification email.', 'woocommerce' ) );
 		}
 
 		// Persist the rate-limit timestamp before dispatching the email so two near-simultaneous
@@ -149,39 +176,7 @@ class NotificationManagementService {
 
 		$this->email_manager->send_verify_email( $notification );
 
-		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
-		wp_safe_redirect( $redirect_url );
-		exit;
-	}
-
-	/**
-	 * Resolve where to send the customer after a resend request.
-	 *
-	 * Returns to the page the link was clicked on (minus the resend query args) so a
-	 * click from My Account stays on the endpoint, and one from the product page stays
-	 * on the product. Falls back to the product permalink, then the shop page.
-	 *
-	 * @param Notification $notification The notification being resent.
-	 * @return string The redirect URL.
-	 */
-	private function get_resend_redirect_url( Notification $notification ): string {
-		$redirect_url = '';
-
-		if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
-			$request_uri  = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			$redirect_url = remove_query_arg( array( self::RESEND_QUERY_ARG, '_wpnonce' ), $request_uri );
-		}
-
-		if ( empty( $redirect_url ) ) {
-			$redirect_url = $notification->get_product_permalink();
-		}
-
-		if ( empty( $redirect_url ) ) {
-			$redirect_url = wc_get_page_permalink( 'shop' );
-		}
-
-		return $redirect_url;
+		return true;
 	}
 
 	/**

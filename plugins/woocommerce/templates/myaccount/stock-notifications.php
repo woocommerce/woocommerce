@@ -18,7 +18,6 @@
  *
  * @var array $notifications         Array of active Notification objects for the current user (one page).
  * @var array $pending_notifications Array of Notification objects awaiting email confirmation (capped, not paginated).
- * @var array $resend_urls           Resend-verification URLs keyed by pending notification id.
  * @var bool  $has_pending           Whether there are any pending notifications to render.
  * @var bool  $has_items             Whether there are any notifications (pending or active) to render.
  * @var int   $current_page          1-indexed current page number of the active table.
@@ -32,6 +31,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 defined( 'ABSPATH' ) || exit;
 
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+$action_url      = MyAccountEndpoint::get_endpoint_url();
 
 /**
  * Fires before the back in stock notifications table is rendered on My Account.
@@ -73,14 +73,13 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 			$permalink    = $notification->get_product_permalink();
 			$variation    = $notification->get_product_formatted_variation_list( true );
 			$date_created = $notification->get_date_created();
-			$resend_url   = $resend_urls[ $notification->get_id() ] ?? '';
 
 			$action_label_name = '' !== $product_name ? $product_name : __( 'an unavailable product', 'woocommerce' );
 			if ( '' !== $variation ) {
 				$action_label_name .= ' ' . $variation;
 			}
 			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
-			$resend_label = sprintf( __( 'Resend verification email for %s', 'woocommerce' ), $action_label_name );
+			$resend_label = sprintf( __( 'Resend email for %s', 'woocommerce' ), $action_label_name );
 			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
 			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $action_label_name );
 			?>
@@ -106,13 +105,16 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<?php if ( '' !== $resend_url ) : ?>
-						<a href="<?php echo esc_url( $resend_url ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-resend-link<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend email', 'woocommerce' ); ?></a>
-					<?php endif; ?>
-					<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
-						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
+					<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="woocommerce-customer-stock-notifications-action-form woocommerce-customer-stock-notifications-action-form--resend">
+						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::ACTION_FIELD ); ?>" value="<?php echo esc_attr( MyAccountEndpoint::ACTION_RESEND ); ?>" />
 						<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
-						<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
+						<?php wp_nonce_field( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id() ) ); ?>
+						<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend email', 'woocommerce' ); ?></button>
+					</form>
+					<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="woocommerce-customer-stock-notifications-action-form woocommerce-customer-stock-notifications-action-form--cancel">
+						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::ACTION_FIELD ); ?>" value="<?php echo esc_attr( MyAccountEndpoint::ACTION_CANCEL ); ?>" />
+						<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
+						<?php wp_nonce_field( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id() ) ); ?>
 						<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 					</form>
 				</td>
@@ -192,10 +194,10 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
 					<?php if ( MyAccountEndpoint::is_cancellable( $notification ) ) : ?>
-						<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-customer-stock-notifications-cancel-form">
-							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
+						<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="woocommerce-customer-stock-notifications-action-form woocommerce-customer-stock-notifications-action-form--cancel">
+							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::ACTION_FIELD ); ?>" value="<?php echo esc_attr( MyAccountEndpoint::ACTION_CANCEL ); ?>" />
 							<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
-							<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
+							<?php wp_nonce_field( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id() ) ); ?>
 							<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 						</form>
 					<?php else : ?>
