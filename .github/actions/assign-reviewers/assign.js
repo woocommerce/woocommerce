@@ -187,18 +187,16 @@ const assignReviewers = async ( { github, context, core } ) => {
 		core.warning( `Could not request the reviews together: ${ error.message }` );
 	}
 
-	let requested = 0;
 	const rejected = [];
+	const failed = [];
 
 	const alone = async ( body, name ) => request( body ).then(
-		() => { requested += 1; },
+		() => {},
 		( error ) => {
 			// 422 is the API saying it will not accept this reviewer, which means
 			// the config names somebody who no longer exists or lost access. Every
 			// other status is about the token or the rate limit, not the config.
-			if ( error.status === 422 ) {
-				rejected.push( name );
-			}
+			( error.status === 422 ? rejected : failed ).push( name );
 
 			core.warning( `Could not request a review from ${ name }: ${ error.message }` );
 		}
@@ -214,8 +212,10 @@ const assignReviewers = async ( { github, context, core } ) => {
 
 	if ( rejected.length ) {
 		core.setFailed( `The API rejected these reviewers, check the config: ${ rejected.join( ', ' ) }.` );
-	} else if ( ! requested ) {
-		core.setFailed( 'Could not request a review from anybody.' );
+	}
+
+	if ( failed.length ) {
+		core.setFailed( `Could not request a review from: ${ failed.join( ', ' ) }.` );
 	}
 };
 

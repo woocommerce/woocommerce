@@ -170,6 +170,29 @@ check( 'a rejected batch is retried one reviewer at a time', async () => {
 	assert.strictEqual( failed, null, 'both retries landed, so stay green' );
 } );
 
+check( 'a retry that fails for another reason still fails the job', async () => {
+	// The first retry landing must not hide the second one being dropped.
+	let attempts = 0;
+
+	const { failed } = await run( {
+		config: routing,
+		changed: [ 'a/x.js', 'b/y.js' ],
+		requestReviewers: () => {
+			attempts += 1;
+
+			if ( attempts === 1 ) {
+				reject( 422, 'batch rejected' );
+			}
+
+			if ( attempts === 3 ) {
+				reject( 403, 'rate limited' );
+			}
+		},
+	} );
+
+	assert.match( failed, /ballade/ );
+} );
+
 check( 'a reviewer the API will not accept fails the job and is named', async () => {
 	const { failed } = await run( {
 		config: routing,
