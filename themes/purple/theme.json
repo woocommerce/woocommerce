@@ -31,17 +31,17 @@
 					"slug": "theme-2"
 				},
 				{
-					"color": "#243DC8",
+					"color": "#1f0342",
 					"name": "Color 3",
 					"slug": "theme-3"
 				},
 				{
-					"color": "#686868",
+					"color": "#322f37",
 					"name": "Color 4",
 					"slug": "theme-4"
 				},
 				{
-					"color": "#F7F7F7",
+					"color": "#f2edff",
 					"name": "Color 5",
 					"slug": "theme-5"
 				},
@@ -51,7 +51,7 @@
 					"slug": "theme-6"
 				},
 				{
-					"color": "#DC352F",
+					"color": "#720eec",
 					"name": "Color 7",
 					"slug": "theme-7"
 				}
@@ -68,7 +68,7 @@
 				{
 					"colors": [
 						"#111111",
-						"#F7F7F7"
+						"#f2edff"
 					],
 					"name": "Duotone 2",
 					"slug": "duotone-2"
