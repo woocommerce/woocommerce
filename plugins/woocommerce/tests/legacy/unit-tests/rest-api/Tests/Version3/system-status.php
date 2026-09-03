@@ -5,8 +5,6 @@
  * @package Automattic/WooCommerce/Tests
  */
 
-use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
-
 /**
  * System Status REST Tests.
  *
@@ -14,8 +12,6 @@ use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
  * @since 3.5.0
  */
 class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
-	use ArraySubsetAsserts;
-
 	/**
 	 * User variable.
 	 *
@@ -66,8 +62,10 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		static $system_status_data = array();
 		if ( ! isset( $system_status_data[ 'user' . $user ] ) ) {
 			wp_set_current_user( $user );
-			$response                             = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
-			$data                                 = $response->get_data();
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status' ) );
+			$this->assertSame( 200, $response->get_status() );
+			$data = $response->get_data();
+			$this->assertIsArray( $data );
 			$system_status_data[ 'user' . $user ] = $data;
 		}
 		return $system_status_data[ 'user' . $user ];
@@ -102,13 +100,42 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
 		$system_status_data = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user );
-		$this->assertArrayHasKey( 'environment', $system_status_data );
-		$this->assertArrayHasKey( 'database', $system_status_data );
-		$this->assertArrayHasKey( 'active_plugins', $system_status_data );
-		$this->assertArrayHasKey( 'theme', $system_status_data );
-		$this->assertArrayHasKey( 'settings', $system_status_data );
-		$this->assertArrayHasKey( 'security', $system_status_data );
-		$this->assertArrayHasKey( 'pages', $system_status_data );
+		$expected_keys      = array(
+			'environment',
+			'database',
+			'active_plugins',
+			'inactive_plugins',
+			'dropins_mu_plugins',
+			'theme',
+			'settings',
+			'security',
+			'pages',
+			'post_type_counts',
+			'logging',
+		);
+		$actual_keys        = array_keys( $system_status_data );
+
+		sort( $expected_keys );
+		sort( $actual_keys );
+
+		$this->assertSame( $expected_keys, $actual_keys );
+		$this->assertIsArray( $system_status_data['environment'] );
+		$this->assertIsBool( $system_status_data['environment']['wp_multisite'] );
+		$this->assertIsArray( $system_status_data['database'] );
+		$this->assertIsArray( $system_status_data['active_plugins'] );
+		$this->assertIsArray( $system_status_data['inactive_plugins'] );
+		$this->assertIsArray( $system_status_data['dropins_mu_plugins'] );
+		$this->assertIsArray( $system_status_data['theme'] );
+		$this->assertIsArray( $system_status_data['settings'] );
+		$this->assertIsArray( $system_status_data['security'] );
+		$this->assertIsArray( $system_status_data['pages'] );
+		$this->assertIsArray( $system_status_data['post_type_counts'] );
+		$this->assertIsArray( $system_status_data['logging'] );
+		$this->assertIsBool( $system_status_data['logging']['logging_enabled'] );
+		$this->assertIsString( $system_status_data['logging']['default_handler'] );
+		$this->assertIsInt( $system_status_data['logging']['retention_period_days'] );
+		$this->assertIsString( $system_status_data['logging']['level_threshold'] );
+		$this->assertIsString( $system_status_data['logging']['log_directory_size'] );
 	}
 
 	/**
@@ -276,15 +303,36 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 11, count( $properties ) );
-		$this->assertArrayHasKey( 'environment', $properties );
-		$this->assertArrayHasKey( 'database', $properties );
-		$this->assertArrayHasKey( 'active_plugins', $properties );
-		$this->assertArrayHasKey( 'theme', $properties );
-		$this->assertArrayHasKey( 'settings', $properties );
-		$this->assertArrayHasKey( 'security', $properties );
-		$this->assertArrayHasKey( 'pages', $properties );
-		$this->assertArrayHasKey( 'logging', $properties );
+
+		$expected_keys = array(
+			'environment',
+			'database',
+			'active_plugins',
+			'inactive_plugins',
+			'dropins_mu_plugins',
+			'theme',
+			'settings',
+			'security',
+			'pages',
+			'post_type_counts',
+			'logging',
+		);
+		$actual_keys   = array_keys( $properties );
+
+		sort( $expected_keys );
+		sort( $actual_keys );
+
+		$this->assertSame( $expected_keys, $actual_keys );
+		$this->assertSame( 'object', $properties['environment']['type'] );
+		$this->assertSame( 'boolean', $properties['environment']['properties']['wp_multisite']['type'] );
+		$this->assertSame( 'array', $properties['dropins_mu_plugins']['type'] );
+		$this->assertSame( 'array', $properties['post_type_counts']['type'] );
+		$this->assertSame( 'object', $properties['logging']['type'] );
+		$this->assertSame( 'boolean', $properties['logging']['properties']['logging_enabled']['type'] );
+		$this->assertSame( 'string', $properties['logging']['properties']['default_handler']['type'] );
+		$this->assertSame( 'integer', $properties['logging']['properties']['retention_period_days']['type'] );
+		$this->assertSame( 'string', $properties['logging']['properties']['level_threshold']['type'] );
+		$this->assertSame( 'string', $properties['logging']['properties']['log_directory_size']['type'] );
 	}
 
 	/**
@@ -300,36 +348,19 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools' ) );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $raw_tools ), count( $data ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( count( $raw_tools ), $data );
 
-		$matching_tool_data = current(
-			array_filter(
-				$data,
-				function ( $tool ) {
-					return 'regenerate_thumbnails' === $tool['id'];
-				}
-			)
-		);
-		$this->assertIsArray( $matching_tool_data );
-
-		$this->assertArraySubset(
-			array(
-				'id'          => 'regenerate_thumbnails',
-				'name'        => 'Regenerate shop thumbnails',
-				'action'      => 'Regenerate',
-				'description' => 'This will regenerate all shop thumbnails to match your theme and/or image settings.',
-				'_links'      => array(
-					'item' => array(
-						array(
-							'href'       => rest_url( '/wc/v3/system_status/tools/regenerate_thumbnails' ),
-							'embeddable' => 1,
-						),
-					),
-				),
-			),
-			$matching_tool_data
-		);
+		$tools_by_id = array_column( $data, null, 'id' );
+		foreach ( array( 'clear_transients', 'recount_terms' ) as $tool_id ) {
+			$this->assertArrayHasKey( $tool_id, $tools_by_id );
+			$this->assertSame( $tool_id, $tools_by_id[ $tool_id ]['id'] );
+			$this->assertIsString( $tools_by_id[ $tool_id ]['name'] );
+			$this->assertIsString( $tools_by_id[ $tool_id ]['action'] );
+			$this->assertIsString( $tools_by_id[ $tool_id ]['description'] );
+			$this->assertSame( rest_url( '/wc/v3/system_status/tools/' . $tool_id ), $tools_by_id[ $tool_id ]['_links']['item'][0]['href'] );
+			$this->assertTrue( $tools_by_id[ $tool_id ]['_links']['item'][0]['embeddable'] );
+		}
 
 		$query_params = array(
 			'_fields' => 'id,name,nonexisting',
@@ -339,26 +370,13 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $raw_tools ), count( $data ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( count( $raw_tools ), $data );
 
-		$matching_tool_data = current(
-			array_filter(
-				$data,
-				function ( $tool ) {
-					return 'regenerate_thumbnails' === $tool['id'];
-				}
-			)
-		);
-		$this->assertIsArray( $matching_tool_data );
-
-		$this->assertArraySubset(
-			array(
-				'id'   => 'regenerate_thumbnails',
-				'name' => 'Regenerate shop thumbnails',
-			),
-			$matching_tool_data
-		);
+		$tools_by_id = array_column( $data, null, 'id' );
+		$this->assertArrayHasKey( 'clear_transients', $tools_by_id );
+		$this->assertSame( 'clear_transients', $tools_by_id['clear_transients']['id'] );
+		$this->assertIsString( $tools_by_id['clear_transients']['name'] );
 		foreach ( $data as $item ) {
 			// Fields that are not requested are not returned in response.
 			$this->assertArrayNotHasKey( 'action', $item );
@@ -392,41 +410,39 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_tool() {
 		wp_set_current_user( self::$administrator_user );
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$raw_tools        = $tools_controller->get_tools();
-		$raw_tool         = $raw_tools['recount_terms'];
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' ) );
-		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 'recount_terms', $data['id'] );
+		$this->assertSame( 'Term counts', $data['name'] );
+		$this->assertSame( 'Recount terms', $data['action'] );
+		$this->assertSame( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
 
-		$this->assertEquals( 'recount_terms', $data['id'] );
-		$this->assertEquals( 'Term counts', $data['name'] );
-		$this->assertEquals( 'Recount terms', $data['action'] );
-		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+		$links = $response->get_links();
+		$this->assertCount( 1, $links );
+		$this->assertSame( rest_url( '/wc/v3/system_status/tools/recount_terms' ), $links['item'][0]['href'] );
+		$this->assertTrue( $links['item'][0]['attributes']['embeddable'] );
 
 		// Test for _fields query parameter.
-		$query_params = array(
-			'_fields' => 'id,name,nonexisting',
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
+		$request->set_query_params(
+			array(
+				'_fields' => 'id,name,nonexisting',
+			)
 		);
-		$request      = new WP_REST_Request( 'GET', '/wc/v3/system_status/tools/recount_terms' );
-		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-
-		$this->assertEquals( 'recount_terms', $data['id'] );
-		$this->assertEquals( 'Term counts', $data['name'] );
+		$this->assertSame( 'recount_terms', $data['id'] );
+		$this->assertSame( 'Term counts', $data['name'] );
 		$this->assertArrayNotHasKey( 'action', $data );
 		$this->assertArrayNotHasKey( 'description', $data );
 		// Links are part of links, not data in single items.
 		$this->assertArrayNotHasKey( '_links', $data );
-
-		// Links are part of links, not data in single item response.
-		$links = $response->get_links();
-		$this->assertEquals( 1, count( $links ) );
+		$this->assertCount( 1, $response->get_links() );
 	}
 
 	/**
@@ -447,18 +463,17 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_execute_system_tool() {
 		wp_set_current_user( self::$administrator_user );
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$raw_tools        = $tools_controller->get_tools();
-		$raw_tool         = $raw_tools['recount_terms'];
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/recount_terms' ) );
-		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
 
-		$this->assertEquals( 'recount_terms', $data['id'] );
-		$this->assertEquals( 'Term counts', $data['name'] );
-		$this->assertEquals( 'Recount terms', $data['action'] );
-		$this->assertEquals( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
+		$this->assertSame( 'recount_terms', $data['id'] );
+		$this->assertSame( 'Term counts', $data['name'] );
+		$this->assertSame( 'Recount terms', $data['action'] );
+		$this->assertSame( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', $data['description'] );
 		$this->assertTrue( $data['success'] );
+		$this->assertIsString( $data['message'] );
 		$this->assertEquals( 1, did_action( 'woocommerce_rest_insert_system_status_tool' ) );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/system_status/tools/not_a_real_tool' ) );
