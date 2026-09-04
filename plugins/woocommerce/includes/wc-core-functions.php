@@ -2151,6 +2151,10 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  *
  * This is more inline with WP core behavior which does not localize slugs.
  *
+ * The `use_verbose_page_rules` key is kept for backward compatibility only. WooCommerce no longer
+ * writes or reads it - wc_fix_rewrite_rules() derives Shop subpage rules from the current product
+ * base and Shop page path instead - so its stored value is whatever the last save left behind.
+ *
  * @since  3.0.0
  * @return array
  */
@@ -2163,8 +2167,6 @@ function wc_get_permalink_structure() {
 			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
 			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
 			'attribute_base'         => '',
-			// Kept so the returned array shape stays stable for extensions. Nothing reads it:
-			// wc_fix_rewrite_rules() derives Shop subpage rules from the current paths instead.
 			'use_verbose_page_rules' => false,
 		)
 	);
