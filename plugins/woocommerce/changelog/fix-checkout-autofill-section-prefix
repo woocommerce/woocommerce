@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop wrapping block checkout contact and order field autofill hints in a billing/shipping prefix the HTML autofill grammar rejects, so browsers offer saved values on the email field again
