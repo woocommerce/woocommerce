@@ -75,6 +75,7 @@ class PaymentsControllerTest extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_payment_gateways', $this->gateways_filter_callback );
 			$this->gateways_filter_callback = null;
 		}
+		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
 		foreach ( $this->registered_integration_names as $name ) {
