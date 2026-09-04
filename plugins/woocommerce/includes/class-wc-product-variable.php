@@ -395,6 +395,13 @@ class WC_Product_Variable extends WC_Product {
 	private const PURCHASABLE_SCAN_BATCH_SIZE = 50;
 
 	/**
+	 * Request-scoped cache group holding the scan order for a product's children.
+	 *
+	 * @var string
+	 */
+	private const PURCHASABLE_SCAN_CACHE_GROUP = 'wc_purchasable_scan_order';
+
+	/**
 	 * Check if there are variations that can be purchased for the current product.
 	 *
 	 * The children most likely to be purchasable on stored data (published, not out of stock, priced) are
@@ -488,9 +495,17 @@ class WC_Product_Variable extends WC_Product {
 			return null;
 		}
 
+		$cache_key = $this->get_id() . ':' . md5( implode( ',', $variation_ids ) );
+		$cached    = wp_cache_get( $cache_key, self::PURCHASABLE_SCAN_CACHE_GROUP );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
 		// @phpstan-ignore-next-line method.notFound
 		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
 		$candidate_ids = array_values( array_unique( array_intersect( $candidate_ids, $variation_ids ) ) );
+
+		wp_cache_set( $cache_key, $candidate_ids, self::PURCHASABLE_SCAN_CACHE_GROUP );
 
 		return $candidate_ids;
 	}
