@@ -198,6 +198,17 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			hasClass: jest.fn( () => false ),
 		};
 
+		// update_order_review sends these as siblings of post_data, so they have
+		// to carry apostrophes for the test to prove the whole body is encoded.
+		const addressFieldValues = {
+			'#billing_country': 'US',
+			'#billing_state': "O'State",
+			':input#billing_postcode': '12345',
+			'#billing_city': "O'Fallon",
+			':input#billing_address_1': "123 O'Brien Ave",
+			':input#billing_address_2': "Apt O'2",
+		};
+
 		// Mock jQuery - needs to handle document ready pattern: jQuery(function($) { ... })
 		jQueryMock = jest.fn( ( selectorOrCallback ) => {
 			// Handle document ready: jQuery(function($) { ... })
@@ -221,6 +232,13 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			if ( selectorOrCallback === document.body ) {
 				return mockBody;
 			}
+			if ( addressFieldValues[ selectorOrCallback ] !== undefined ) {
+				const addressMock = createDefaultMock();
+				addressMock.val = jest.fn(
+					() => addressFieldValues[ selectorOrCallback ]
+				);
+				return addressMock;
+			}
 			// Return a default mock for any other selector
 			return createDefaultMock();
 		} );
@@ -228,6 +246,31 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		jQueryMock.ajax = jest.fn( ( options ) => {
 			capturedAjaxRequests.push( options );
 			return { abort: jest.fn() };
+		} );
+		jQueryMock.param = jest.fn( ( object ) => {
+			const parts = [];
+			const add = ( key, value ) => {
+				parts.push(
+					encodeURIComponent( key ) +
+						'=' +
+						encodeURIComponent(
+							value === null || value === undefined ? '' : value
+						)
+				);
+			};
+			const buildParams = ( prefix, value ) => {
+				if ( value !== null && typeof value === 'object' ) {
+					Object.keys( value ).forEach( ( key ) =>
+						buildParams( prefix + '[' + key + ']', value[ key ] )
+					);
+					return;
+				}
+				add( prefix, value );
+			};
+			Object.keys( object ).forEach( ( key ) =>
+				buildParams( key, object[ key ] )
+			);
+			return parts.join( '&' ).replace( /%20/g, '+' );
 		} );
 		jQueryMock.ajaxSetup = jest.fn();
 
@@ -374,7 +417,19 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 
 			expect( request ).toBeDefined();
-			expect( request.data.post_data ).toBe( expectedSerializedData );
+			expect( request.data ).not.toContain( "'" );
+
+			// Address fields travel outside post_data and must be encoded too.
+			expect( request.data ).toContain( 'city=O%27Fallon' );
+			expect( request.data ).toContain( 'address=123+O%27Brien+Ave' );
+			expect( request.data ).toContain( 'state=O%27State' );
+
+			// The whole body is encoded, so post_data survives the outer layer
+			// byte-for-byte and raw-string consumers see what serialize() produced.
+			const postData = new URLSearchParams( request.data ).get(
+				'post_data'
+			);
+			expect( postData ).toBe( serializedCheckoutData );
 		} );
 
 		test( 'should encode apostrophes in final checkout data', () => {

@@ -6,13 +6,16 @@ jQuery( function ( $ ) {
 	}
 
 	/**
-	 * Serialize checkout fields while encoding apostrophes for strict intermediaries.
+	 * Percent-encode literal apostrophes in an already URL-encoded request body.
 	 *
-	 * @param {Object} $form Checkout form.
-	 * @return {string} Serialized checkout fields.
+	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
+	 * server with literal apostrophes that some WAF rules reject.
+	 *
+	 * @param {string} data URL-encoded request body.
+	 * @return {string} Body with apostrophes encoded as %27.
 	 */
-	function serializeCheckoutForm( $form ) {
-		return $form.serialize().split( "'" ).join( '%27' );
+	function encodeApostrophes( data ) {
+		return data.split( "'" ).join( '%27' );
 	}
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
@@ -695,7 +698,7 @@ jQuery( function ( $ ) {
 				s_address: s_address,
 				s_address_2: s_address_2,
 				has_full_address: has_full_address,
-				post_data: serializeCheckoutForm( $( 'form.checkout' ) ),
+				post_data: $( 'form.checkout' ).serialize(),
 			};
 
 			if ( false !== args.update_shipping_method ) {
@@ -727,7 +730,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -971,7 +974,7 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: serializeCheckoutForm( $form ),
+					data: encodeApostrophes( $form.serialize() ),
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1277,7 +1280,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1351,7 +1354,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
