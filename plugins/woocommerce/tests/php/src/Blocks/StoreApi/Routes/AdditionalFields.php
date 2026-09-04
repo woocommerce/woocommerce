@@ -627,7 +627,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
+	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox, date).
 	 */
 	public function test_invalid_type_in_registration() {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
@@ -641,7 +641,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						$id,
 						'invalid',
-						implode( ', ', array( 'text', 'select', 'checkbox' ) )
+						implode( ', ', array( 'text', 'select', 'checkbox', 'date' ) )
 					)
 				),
 			)

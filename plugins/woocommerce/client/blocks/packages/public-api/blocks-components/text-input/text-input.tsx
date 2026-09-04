@@ -2,7 +2,12 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { forwardRef, isValidElement, useState } from '@wordpress/element';
+import {
+	forwardRef,
+	isValidElement,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
@@ -58,6 +63,15 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
 
+		// Date-like inputs report a value the browser can't parse (e.g. the 31st of a 30-day month) as an
+		// empty `value`, so the input is asked directly. Focus and blur both re-render, which is when this
+		// can have changed while the field is not active.
+		const isFieldActive = useMemo( () => {
+			const input = typeof ref === 'object' ? ref?.current : null;
+
+			return isActive || !! value || !! input?.validity?.badInput;
+		}, [ isActive, value, ref ] );
+
 		const inputWithLabel = (
 			<>
 				<input
@@ -100,7 +114,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		return (
 			<div
 				className={ clsx( 'wc-block-components-text-input', className, {
-					'is-active': isActive || value,
+					'is-active': isFieldActive,
 				} ) }
 			>
 				{ isValidElement( icon ) ? (

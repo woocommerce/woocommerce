@@ -37,7 +37,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
+	private $supported_field_types = [ 'text', 'select', 'checkbox', 'date' ];
 
 	/**
 	 * Groups of fields to be saved.
@@ -157,7 +157,11 @@ class CheckoutFields {
 	 * @param array $field Field data.
 	 * @return mixed
 	 */
-	public function default_sanitize_callback( $value, $field ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function default_sanitize_callback( $value, $field ) {
+		if ( 'date' === ( $field['type'] ?? '' ) && is_string( $value ) ) {
+			return trim( $value );
+		}
+
 		return $value;
 	}
 
@@ -886,6 +890,39 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Validates a value against the constraints of its field type.
+	 *
+	 * This runs for every field regardless of the validate_callback it was registered with, so type level
+	 * constraints cannot be bypassed by supplying a custom callback.
+	 *
+	 * @param array $field       The field.
+	 * @param mixed $field_value The value of the field.
+	 * @return WP_Error|null Error if the value is not valid for the field type, null otherwise.
+	 */
+	private function validate_field_type( $field, $field_value ) {
+		// An empty value is not a type error. Required fields are handled by the field's validation callback.
+		if ( 'date' !== ( $field['type'] ?? '' ) || null === $field_value || '' === $field_value ) {
+			return null;
+		}
+
+		$date = is_string( $field_value ) ? \DateTime::createFromFormat( '!Y-m-d', $field_value, wp_timezone() ) : false;
+
+		// Comparing the round trip rejects impossible dates such as 2026-02-31, which PHP would otherwise roll forward.
+		if ( ! $date || $date->format( 'Y-m-d' ) !== $field_value ) {
+			return new WP_Error(
+				'woocommerce_invalid_checkout_field',
+				sprintf(
+					/* translators: %s: is the field label */
+					__( 'Please provide a valid %s in YYYY-MM-DD format.', 'woocommerce' ),
+					$field['label']
+				)
+			);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Validate an additional field.
 	 *
 	 * @since 8.6.0
@@ -900,6 +937,13 @@ class CheckoutFields {
 		try {
 			// Only validate if we have a field.
 			if ( ! $field ) {
+				return $errors;
+			}
+
+			$type_error = $this->validate_field_type( $field, $field_value );
+
+			if ( is_wp_error( $type_error ) ) {
+				$errors->merge_from( $type_error );
 				return $errors;
 			}
 
@@ -1475,6 +1519,17 @@ class CheckoutFields {
 		if ( 'select' === $field['type'] ) {
 			$options = array_column( $field['options'], 'label', 'value' );
 			$value   = isset( $options[ $value ] ) ? $options[ $value ] : $value;
+		}
+
+		if ( 'date' === $field['type'] && is_string( $value ) && '' !== $value ) {
+			// Parsed in the site timezone so the stored calendar date cannot shift a day when it is formatted.
+			$date = \DateTime::createFromFormat( '!Y-m-d', $value, wp_timezone() );
+
+			// The round trip check keeps a value PHP would roll forward, such as 2026-02-31, displayed as
+			// stored rather than silently turned into a different date.
+			if ( $date && $date->format( 'Y-m-d' ) === $value ) {
+				$value = wp_date( wc_date_format(), $date->getTimestamp() );
+			}
 		}
 
 		return $value;
