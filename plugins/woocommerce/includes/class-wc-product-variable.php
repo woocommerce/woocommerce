@@ -484,11 +484,25 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	private function variation_may_be_purchasable( int $variation_id ): bool {
 		return WC_Product_Variable_Data_Store_CPT::stored_state_allows_purchase(
-			(string) get_post_status( $variation_id ),
-			(string) get_post_meta( $variation_id, '_stock_status', true ),
-			(string) get_post_meta( $variation_id, '_regular_price', true ),
-			(string) get_post_meta( $variation_id, '_sale_price', true )
+			$this->stored_variation_value( get_post_status( $variation_id ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_stock_status', true ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_regular_price', true ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_sale_price', true ) )
 		);
+	}
+
+	/**
+	 * Cast one stored post or meta value to the string the pre-check expects.
+	 *
+	 * Serialized meta rows arrive as arrays, which casting alone would turn into the string 'Array'
+	 * after a PHP notice. Treating them as absent keeps the pre-check quiet and hands the decision to
+	 * the full is_purchasable() check.
+	 *
+	 * @param mixed $value Stored value.
+	 * @return string
+	 */
+	private function stored_variation_value( $value ): string {
+		return is_scalar( $value ) ? (string) $value : '';
 	}
 
 	/**
