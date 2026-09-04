@@ -80,6 +80,11 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The URL is decoded before asserting on it: on sites without pretty
+	 * permalinks rest_url() returns the `?rest_route=/...` form, and appending
+	 * the token with add_query_arg() re-encodes that existing query string, so
+	 * the raw URL carries `%2F` in place of the endpoint's slashes.
+	 *
 	 * @testdox Should fire a non-blocking POST to the send endpoint URL.
 	 */
 	public function test_dispatch_fires_non_blocking_post_to_send_endpoint(): void {
@@ -89,7 +94,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString(
 			InternalNotificationDispatcher::SEND_ENDPOINT,
-			$this->captured_url,
+			urldecode( (string) $this->captured_url ),
 			'Request URL should contain the send endpoint'
 		);
 		$this->assertFalse(
@@ -133,6 +138,30 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 			$body_hash,
 			$parts->payload->body_hash,
 			'JWT body_hash should match SHA-256 hash of the request body'
+		);
+	}
+
+	/**
+	 * The receiver prefers the Authorization header and falls back to the query
+	 * parameter on hosts that strip it, so the two credentials have to be the
+	 * same token - otherwise the fallback would validate against a different
+	 * body hash than the request it arrived with.
+	 *
+	 * @testdox Should repeat the Authorization header token in the URL query string.
+	 */
+	public function test_dispatch_repeats_token_in_url_query_string(): void {
+		$notifications = array( $this->create_order_mock( 1 ) );
+
+		$this->sut->dispatch( $notifications );
+
+		$header_token = str_replace( 'Bearer ', '', $this->captured_request['headers']['Authorization'] );
+		$query        = array();
+		wp_parse_str( (string) wp_parse_url( (string) $this->captured_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame(
+			$header_token,
+			$query[ InternalNotificationDispatcher::TOKEN_QUERY_PARAM ] ?? null,
+			'URL token should be the same token sent in the Authorization header'
 		);
 	}
 

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -106,7 +107,9 @@ class PushNotificationRestController {
 	}
 
 	/**
-	 * Validates the JWT from the Authorization header.
+	 * Validates the JWT from the Authorization header, falling back to the
+	 * token query parameter on hosts that strip the header before it reaches
+	 * PHP (see {@see InternalNotificationDispatcher::TOKEN_QUERY_PARAM}).
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -117,15 +120,19 @@ class PushNotificationRestController {
 	public function authorize( WP_REST_Request $request ) {
 		$header = trim( (string) $request->get_header( 'authorization' ) );
 
-		if ( empty( $header ) ) {
+		if ( '' !== $header ) {
+			$token = strncasecmp( $header, 'Bearer ', 7 ) === 0 ? substr( $header, 7 ) : $header;
+		} else {
+			$token = trim( (string) $request->get_param( InternalNotificationDispatcher::TOKEN_QUERY_PARAM ) );
+		}
+
+		if ( '' === $token ) {
 			return new WP_Error(
 				'woocommerce_rest_unauthorized',
 				'Missing authorization header.',
 				array( 'status' => WP_Http::UNAUTHORIZED )
 			);
 		}
-
-		$token = strncasecmp( $header, 'Bearer ', 7 ) === 0 ? substr( $header, 7 ) : $header;
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
 			return new WP_Error(
