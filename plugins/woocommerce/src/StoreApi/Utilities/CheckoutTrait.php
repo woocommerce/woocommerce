@@ -266,6 +266,20 @@ trait CheckoutTrait {
 		}
 
 		/*
+		 * Mirror the redirect into the payment details the way Legacy::process_legacy_payment does
+		 * when a gateway returns normally. Client-side gateway handlers read the redirect back out
+		 * of payment_details rather than redirect_url, so a success result without it is incomplete:
+		 * WooPayments reads paymentDetails.redirect and calls String.match() on it, which throws on
+		 * undefined and leaves the shopper on the checkout with a JavaScript error.
+		 */
+		$payment_details = $payment_result->get_payment_details();
+
+		if ( ! isset( $payment_details['redirect'] ) ) {
+			$payment_details['redirect'] = $payment_result->get_redirect_url();
+			$payment_result->set_payment_details( $payment_details );
+		}
+
+		/*
 		 * The gateway did not reach the point where it empties the cart, so do it here. Without
 		 * this the shopper lands on the confirmation page with the order still in their cart, and
 		 * can place it a second time.

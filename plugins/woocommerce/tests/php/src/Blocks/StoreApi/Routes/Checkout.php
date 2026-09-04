@@ -3607,6 +3607,61 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Gateways read the redirect back out of payment_details on the client rather than out of
+	 * redirect_url, so a recovered result has to carry it in both. WooPayments reads
+	 * paymentDetails.redirect and calls String.match() on it, which throws on undefined and
+	 * strands the shopper on the checkout with a JavaScript error even though the recovery
+	 * itself succeeded.
+	 */
+	public function test_recovery_reports_the_redirect_in_the_payment_details() {
+		$this->fail_after_payment_is_taken();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+
+		$details = wp_list_pluck( $data['payment_result']['payment_details'], 'value', 'key' );
+
+		$this->assertArrayHasKey(
+			'redirect',
+			$details,
+			'A success result without a redirect in payment_details breaks gateway client code that reads it from there.'
+		);
+		$this->assertSame(
+			$data['payment_result']['redirect_url'],
+			$details['redirect'],
+			'The redirect reported in payment_details must match the one in redirect_url.'
+		);
+	}
+
+	/**
+	 * A redirect the gateway set before failing is kept in payment_details too, rather than
+	 * being replaced with the order confirmation.
+	 */
+	public function test_recovery_reports_a_gateway_set_redirect_in_the_payment_details() {
+		$gateway_redirect = 'https://example.com/3ds-challenge';
+
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) use ( $gateway_redirect ) {
+				$context->order->update_status( OrderStatus::ON_HOLD );
+				$payment_result->set_redirect_url( $gateway_redirect );
+				throw new \Exception( 'Gateway failed after parking the order for authentication.' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+		$details  = wp_list_pluck( $data['payment_result']['payment_details'], 'value', 'key' );
+
+		$this->assertSame( $gateway_redirect, $details['redirect'] );
+	}
+
+	/**
 	 * @testdox Recovery keeps a redirect the gateway set before it failed.
 	 */
 	public function test_recovery_keeps_a_redirect_the_gateway_already_set() {
