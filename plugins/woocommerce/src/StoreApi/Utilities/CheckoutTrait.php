@@ -63,9 +63,8 @@ trait CheckoutTrait {
 	/**
 	 * For orders which do not require payment, just update status.
 	 *
-	 * There is deliberately no recovery here of the kind process_payment() does. Nothing was
-	 * charged, so a failure costs the shopper only a retry, and reporting success on an order
-	 * whose completion actually failed would be worse than reporting the failure.
+	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
+	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
 	 *
 	 * @throws RouteException If the order is missing.
 	 *
@@ -102,10 +101,9 @@ trait CheckoutTrait {
 		}
 
 		/*
-		 * Recovery writes the success status and redirect onto this instance rather than whatever
-		 * the hook below leaves in $payment_result. The hook takes the result by reference and can
-		 * replace it, including with a value that is not a PaymentResult at all, and the caller
-		 * keeps this instance either way: it is the one serialised into the response.
+		 * The hook below takes the result by reference and can replace it, with anything at all.
+		 * The caller keeps this instance either way, and it is the one serialised into the
+		 * response, so recovery has to write onto it rather than onto whatever the hook left.
 		 */
 		$result_for_recovery = $payment_result;
 
@@ -133,14 +131,13 @@ trait CheckoutTrait {
 			}
 		} catch ( \Throwable $e ) {
 			/*
-			 * The gateway may have taken payment before this failure happened, for example when a
-			 * post-payment integration throws while the order status is transitioning. Reporting a
-			 * failure would send the shopper back to place the order again, and every retry takes
-			 * payment for another order. Record what went wrong and report the success the order
-			 * actually represents.
+			 * The gateway may already have taken payment, for example when a post-payment
+			 * integration throws during the status transition. Reporting a failure would send the
+			 * shopper back to place the order again, and every retry pays for another order.
+			 *
+			 * Re-read first: a gateway that advanced the order may have done so on its own
+			 * instance, leaving the one held above reporting a stale status.
 			 */
-			// Re-read once here: a gateway that advanced the order may have done so on its own
-			// instance, leaving the one held above reporting a stale status.
 			$order = $this->refresh_order( $order );
 
 			if ( $this->order_moved_past_payment( $order ) ) {
@@ -187,19 +184,13 @@ trait CheckoutTrait {
 	/**
 	 * Whether the order has moved beyond the point of awaiting payment.
 	 *
-	 * An order reaches a gateway either awaiting payment or as a draft, so any other status
-	 * means something moved it on. Statuses that represent an order going nowhere are listed
-	 * too, since they are not a payment either.
+	 * An order reaches a gateway awaiting payment or as a draft, so any other status means
+	 * something moved it on. This is about the status, not the money: an order parked on-hold
+	 * for review counts, because sending the shopper back to place it again would be wrong.
 	 *
-	 * The name is deliberately about the status rather than the money: an order parked on-hold
-	 * for manual review counts here even though nothing has been captured yet. What matters to
-	 * the caller is that the order is no longer waiting to be paid, so sending the shopper back
-	 * to place it again would be wrong.
-	 *
-	 * This reads the status the gateway persisted, not the payment processor, which is the same
-	 * signal the rest of the checkout uses. It is a plain status check on purpose: needs_payment()
-	 * would fold in the order total and two filters, so a fully discounted order or a site that
-	 * filters the payable statuses could flip the answer.
+	 * A plain status check on purpose. needs_payment() would fold in the order total and two
+	 * filters, so a fully discounted order, or a site filtering the payable statuses, could
+	 * flip the answer for a live order.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return bool
@@ -227,10 +218,9 @@ trait CheckoutTrait {
 	 */
 	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
 		/*
-		 * The failure is carried in the message rather than the context: the file log handler
-		 * renders context with wp_json_encode(), and neither WC_Order nor Throwable exposes public
-		 * properties, so passing the objects alone would write an empty {}. This is the only log of
-		 * the error, since the checkout now reports success and the route's failure step never runs.
+		 * The failure goes in the message, not the context: the file handler renders context with
+		 * wp_json_encode(), and neither WC_Order nor Throwable exposes public properties, so the
+		 * objects alone would write an empty {}. This is now the only log of the error.
 		 */
 		wc_get_logger()->error(
 			sprintf(
@@ -255,26 +245,20 @@ trait CheckoutTrait {
 		$payment_result->set_status( 'success' );
 
 		/*
-		 * A redirect the gateway set before it threw is kept. It is the only statement of where the
-		 * gateway wanted the shopper, and an order can reach here still needing the shopper to act,
-		 * for example one parked on-hold awaiting a 3DS challenge: overwriting that would walk them
-		 * past the authentication step. The order confirmation is the fallback for the common case,
-		 * where the gateway threw before setting anything.
+		 * Keep a redirect the gateway set before it threw. An order can reach here still needing
+		 * the shopper to act, say one parked on-hold awaiting a 3DS challenge, and overwriting it
+		 * would walk them past that step. Order confirmation is the fallback.
 		 */
 		if ( '' === $payment_result->get_redirect_url() ) {
 			$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
 		}
 
 		/*
-		 * Keep the two redirect fields in sync, the way Legacy::process_legacy_payment does when a
-		 * gateway returns normally: it copies the gateway's redirect into redirect_url and merges
-		 * the same array into the payment details. Recovery setting only one of them leaves a
-		 * success result core would never otherwise emit.
-		 *
-		 * It matters in practice because client-side gateway handlers read the redirect out of the
-		 * payment details rather than redirect_url. An empty payment_details is a legal state that
-		 * such a handler should guard for, but not every gateway does, so emitting one here would
-		 * strand shoppers on the checkout of an order that was in fact paid and recovered.
+		 * Keep both redirect fields in sync, as Legacy::process_legacy_payment does on the normal
+		 * path. Setting only one leaves a success result core would never otherwise emit, and
+		 * gateway client code reads the redirect from the payment details rather than from
+		 * redirect_url: WooPayments and WooCommerce Stripe both call String.match() on it
+		 * unguarded, stranding the shopper on the checkout of an order that was in fact paid.
 		 */
 		$payment_details = $payment_result->get_payment_details();
 
@@ -284,14 +268,10 @@ trait CheckoutTrait {
 		}
 
 		/*
-		 * The gateway did not reach the point where it empties the cart, so do it here. Without
-		 * this the shopper lands on the confirmation page with the order still in their cart, and
-		 * can place it a second time.
-		 *
-		 * Only when the cart is still the one this order was built from. Pay-for-order goes through
-		 * the same trait with a cart that has nothing to do with the order, and a shopper checking
-		 * out in a second tab has moved the cart on. Same guard core uses in wc_clear_cart_after_payment()
-		 * and in the offline gateways.
+		 * The gateway never reached the point where it empties the cart, so do it here: otherwise
+		 * the shopper lands on the confirmation with the order still in their cart and can place
+		 * it again. Only when the cart still belongs to this order, since pay-for-order shares
+		 * this trait with an unrelated cart. Same guard as wc_clear_cart_after_payment().
 		 */
 		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
 			WC()->cart->empty_cart();
