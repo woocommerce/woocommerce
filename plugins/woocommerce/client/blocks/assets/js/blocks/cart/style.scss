@@ -151,16 +151,17 @@
 	.wp-block-woocommerce-filled-cart-block {
 		display: flex;
 		flex-wrap: wrap;
+		column-gap: $gap-largest;
 		margin: 0 auto $gap;
 		position: relative;
 	}
 
+	// Mirrors the loaded layout in sidebar-layout/style.scss.
 	.wp-block-woocommerce-cart-items-block {
 		box-sizing: border-box;
+		flex: 1 1 0%;
 		margin: 0;
-		// ~1060px is the default width of the content area in Storefront.
-		padding-right: math.percentage(math.div($gap-largest, 1060px));
-		width: 65%;
+		min-width: 0;
 		min-height: 10em;
 	}
 
@@ -173,9 +174,9 @@
 
 	.wp-block-woocommerce-cart-totals-block {
 		box-sizing: border-box;
+		flex: 0 0 $cart-checkout-sidebar-width;
 		margin: 0;
-		padding-left: math.percentage(math.div($gap-large, 1060px));
-		width: 35%;
+		width: $cart-checkout-sidebar-width;
 		min-height: 12em;
 	}
 
@@ -206,12 +207,11 @@
 			margin: 0 auto $gap;
 		}
 
-		.wp-block-woocommerce-cart-items-block {
-			padding: 0;
-			width: 100%;
-		}
-
+		// The flex shorthands above size along the main axis, which is now
+		// vertical, so both columns have to opt back out of them.
+		.wp-block-woocommerce-cart-items-block,
 		.wp-block-woocommerce-cart-totals-block {
+			flex: none;
 			padding: 0;
 			width: 100%;
 		}
