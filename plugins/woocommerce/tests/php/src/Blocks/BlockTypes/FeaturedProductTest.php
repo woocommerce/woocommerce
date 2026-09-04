@@ -81,6 +81,30 @@ class FeaturedProductTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not render a password-protected description in the legacy Featured Product block.
+	 */
+	public function test_does_not_render_password_protected_legacy_description(): void {
+		$this->product = WC_Helper_Product::create_simple_product();
+		$this->product->set_description( 'Protected featured product description' );
+		$this->product->set_post_password( 'secret' );
+		$this->product->save();
+
+		$output = $this->render_featured_product(
+			array(
+				'productId' => $this->product->get_id(),
+				'editMode'  => false,
+				'showDesc'  => true,
+			)
+		);
+
+		$this->assertStringNotContainsString(
+			'Protected featured product description',
+			$output,
+			'Legacy Featured Product blocks should not render protected descriptions before password entry.'
+		);
+	}
+
+	/**
 	 * Render a Featured Product block with the given attributes.
 	 *
 	 * @param array $attributes Block attributes.

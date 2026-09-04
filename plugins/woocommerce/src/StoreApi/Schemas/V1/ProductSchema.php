@@ -595,8 +595,7 @@ class ProductSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $product ) {
 		$availability      = ProductAvailabilityUtils::get_product_availability( $product );
-		$password_required = post_password_required( $product->get_id() );
-		$short_description = $password_required ? '' : $this->prepare_html_response(
+		$short_description = $this->prepare_html_response(
 			ProductDescriptionUtils::guarded_format(
 				$product,
 				function () use ( $product ) {
@@ -604,7 +603,7 @@ class ProductSchema extends AbstractSchema {
 				}
 			)
 		);
-		$description       = $password_required ? '' : $this->prepare_html_response(
+		$description       = $this->prepare_html_response(
 			ProductDescriptionUtils::guarded_format(
 				$product,
 				function () use ( $product ) {
