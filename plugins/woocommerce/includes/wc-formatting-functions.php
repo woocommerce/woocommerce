@@ -1205,10 +1205,10 @@ function wc_format_product_short_description( $content ) {
 /**
  * Validates and sanitizes currency separators when saved in settings.
  *
- * @param  string $value     Option value passed through earlier filters.
- * @param  array  $option    Option data including 'id' and 'default'.
- * @param  string $raw_value Raw POST value before any processing.
- * @return string
+ * @param  mixed $value     Option value passed through earlier filters.
+ * @param  array $option    Option data including 'id' and 'default'.
+ * @param  mixed $raw_value Raw request value, null when the field was not submitted.
+ * @return mixed
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
 	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $value, $option, $raw_value );

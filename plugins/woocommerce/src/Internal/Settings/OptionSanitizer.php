@@ -37,107 +37,6 @@ class OptionSanitizer {
 		// Normalize stock threshold settings to non-negative integers.
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_low_stock_amount', 'absint' );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_no_stock_amount', 'absint' );
-
-		// Reject price separators containing digits on any write path, settings screen or not.
-		add_filter( 'sanitize_option_woocommerce_price_decimal_sep', array( $this, 'sanitize_price_separator_option' ), 10, 2 );
-		add_filter( 'sanitize_option_woocommerce_price_thousand_sep', array( $this, 'sanitize_price_separator_option' ), 10, 2 );
-	}
-
-	/**
-	 * Validates a thousand or decimal separator submitted from the settings screen.
-	 * Rejected values add a settings error and fall back to the stored value, or to
-	 * the option default when the stored value is itself invalid.
-	 *
-	 * @since 11.2.0
-	 * @param string $value     Option value passed through earlier filters.
-	 * @param array  $option    Option data including 'id' and 'default'.
-	 * @param mixed  $raw_value Raw POST value before any processing.
-	 * @return string
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function sanitize_price_separator_setting( $value, $option, $raw_value ) {
-		$normalized = $this->normalize_price_separator( $raw_value );
-
-		if ( is_string( $normalized ) && $this->is_valid_price_separator( $normalized ) ) {
-			return $normalized;
-		}
-
-		\WC_Admin_Settings::add_error(
-			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
-		);
-
-		$default = $option['default'] ?? '';
-		$stored  = get_option( $option['id'], $default );
-
-		return $this->is_valid_price_separator( $stored ) ? $stored : $default;
-	}
-
-	/**
-	 * Discards thousand and decimal separators containing numbers on any write path.
-	 *
-	 * The settings screen reports the problem to the user through
-	 * wc_format_option_price_separators(). This filter covers update_option(),
-	 * WP-CLI and REST writes, where there is no settings screen to report an error
-	 * on, so the invalid value is silently replaced by the stored one.
-	 *
-	 * @since 11.2.0
-	 * @param mixed  $value  Option value being saved.
-	 * @param string $option Option name.
-	 * @return mixed
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function sanitize_price_separator_option( $value, $option ) {
-		if ( $this->is_valid_price_separator( $value ) ) {
-			return $value;
-		}
-
-		$default = 'woocommerce_price_decimal_sep' === $option ? '.' : ',';
-		$stored  = get_option( $option, $default );
-
-		return $this->is_valid_price_separator( $stored ) ? $stored : $default;
-	}
-
-	/**
-	 * Strips tags from a submitted separator and collapses whitespace runs into a
-	 * single space, so the common single-space thousand separator survives where
-	 * wc_clean() would trim it away.
-	 *
-	 * @param mixed $raw_value Submitted value.
-	 * @return string|null Normalized value, or null when the value is not a string.
-	 */
-	private function normalize_price_separator( $raw_value ): ?string {
-		if ( ! is_string( $raw_value ) ) {
-			return null;
-		}
-
-		$no_tags = wp_kses( $raw_value, array() );
-
-		return preg_replace( '/\s+/', ' ', $no_tags ) ?? $no_tags;
-	}
-
-	/**
-	 * Checks whether a value can be used as a thousand or decimal separator.
-	 *
-	 * Separators are frequently stored as HTML entities, so the check runs against
-	 * what the value renders as: `&#44;` is a comma and stays valid, while `&#49;`
-	 * is the digit 1 and does not. `\p{N}` rather than `[0-9]` so that fullwidth
-	 * and other localized digits, which would read as part of the amount, are
-	 * rejected as well.
-	 *
-	 * @param mixed $value Value to check.
-	 * @return bool
-	 */
-	private function is_valid_price_separator( $value ): bool {
-		if ( ! is_string( $value ) ) {
-			return false;
-		}
-
-		$decoded = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-
-		// preg_match() returns false on malformed UTF-8, which is not worth storing either.
-		return 0 === preg_match( '/\p{N}/u', $decoded );
 	}
 
 	/**
@@ -165,5 +64,54 @@ class OptionSanitizer {
 		}
 
 		return (string) $value;
+	}
+
+	/**
+	 * Rejects thousand and decimal separators that contain a number.
+	 * Adds a settings error and falls back to the stored value, or to the default if that is invalid too.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value     Option value.
+	 * @param array $option    Option data.
+	 * @param mixed $raw_value Raw request value, null when the field was not submitted.
+	 * @return mixed
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function sanitize_price_separator_setting( $value, $option, $raw_value ) {
+		if ( null === $raw_value ) {
+			return $value;
+		}
+
+		$separator = is_string( $raw_value ) ? preg_replace( '/\s+/', ' ', wp_kses( $raw_value, array() ) ) : null;
+
+		if ( is_string( $separator ) && $this->is_valid_price_separator( $separator ) ) {
+			return $separator;
+		}
+
+		\WC_Admin_Settings::add_error(
+			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
+		);
+
+		$default = $option['default'] ?? '';
+		$stored  = get_option( $option['id'], $default );
+
+		return $this->is_valid_price_separator( $stored ) ? $stored : $default;
+	}
+
+	/**
+	 * Checks that a separator contains no digit, including localized ones and HTML entities that decode to a digit.
+	 *
+	 * @param mixed $value Value to check.
+	 * @return bool
+	 */
+	private function is_valid_price_separator( $value ): bool {
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+
+		$decoded = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+		return 0 === preg_match( '/\p{N}/u', $decoded );
 	}
 }

@@ -13,8 +13,7 @@ declare( strict_types = 1 );
 class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Clears the errors WC_Admin_Settings collects statically, so they cannot leak
-	 * into a later test.
+	 * Resets the static WC_Admin_Settings errors so they do not leak into other tests.
 	 */
 	public function tearDown(): void {
 		$this->wc_admin_settings_errors_property()->setValue( null, array() );
@@ -107,20 +106,20 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_wc_format_option_price_separators(): array {
 		return array(
-			'thousand sep — comma'           => array( 'woocommerce_price_thousand_sep', ',', ',', ',', ',', false ),
-			'thousand sep — period'          => array( 'woocommerce_price_thousand_sep', '.', '.', '.', '.', false ),
-			'thousand sep — space'           => array( 'woocommerce_price_thousand_sep', ',', ',', ' ', ' ', false ),
-			'thousand sep — empty'           => array( 'woocommerce_price_thousand_sep', ',', ',', '', '', false ),
-			'thousand sep — nbsp entity'     => array( 'woocommerce_price_thousand_sep', ',', ',', '&nbsp;', '&nbsp;', false ),
-			'thousand sep — comma entity'    => array( 'woocommerce_price_thousand_sep', ',', ',', '&#44;', '&#044;', false ),
-			'thousand sep — zero digit'      => array( 'woocommerce_price_thousand_sep', ',', ',', '0', ',', true ),
-			'thousand sep — single digit'    => array( 'woocommerce_price_thousand_sep', ',', ',', '1', ',', true ),
-			'thousand sep — digit+symbol'    => array( 'woocommerce_price_thousand_sep', ',', ',', '1,', ',', true ),
-			'thousand sep — digit entity'    => array( 'woocommerce_price_thousand_sep', ',', ',', '&#49;', ',', true ),
-			'thousand sep — fullwidth digit' => array( 'woocommerce_price_thousand_sep', ',', ',', '１', ',', true ),
-			'decimal sep — period'           => array( 'woocommerce_price_decimal_sep', '.', '.', '.', '.', false ),
-			'decimal sep — single digit'     => array( 'woocommerce_price_decimal_sep', '.', '.', '2', '.', true ),
-			'decimal sep — arabic digit'     => array( 'woocommerce_price_decimal_sep', '.', '.', '٢', '.', true ),
+			'thousand sep: comma'           => array( 'woocommerce_price_thousand_sep', ',', ',', ',', ',', false ),
+			'thousand sep: period'          => array( 'woocommerce_price_thousand_sep', '.', '.', '.', '.', false ),
+			'thousand sep: space'           => array( 'woocommerce_price_thousand_sep', ',', ',', ' ', ' ', false ),
+			'thousand sep: empty'           => array( 'woocommerce_price_thousand_sep', ',', ',', '', '', false ),
+			'thousand sep: nbsp entity'     => array( 'woocommerce_price_thousand_sep', ',', ',', '&nbsp;', '&nbsp;', false ),
+			'thousand sep: comma entity'    => array( 'woocommerce_price_thousand_sep', ',', ',', '&#44;', '&#044;', false ),
+			'thousand sep: zero digit'      => array( 'woocommerce_price_thousand_sep', ',', ',', '0', ',', true ),
+			'thousand sep: single digit'    => array( 'woocommerce_price_thousand_sep', ',', ',', '1', ',', true ),
+			'thousand sep: digit+symbol'    => array( 'woocommerce_price_thousand_sep', ',', ',', '1,', ',', true ),
+			'thousand sep: digit entity'    => array( 'woocommerce_price_thousand_sep', ',', ',', '&#49;', ',', true ),
+			'thousand sep: fullwidth digit' => array( 'woocommerce_price_thousand_sep', ',', ',', '１', ',', true ),
+			'decimal sep: period'           => array( 'woocommerce_price_decimal_sep', '.', '.', '.', '.', false ),
+			'decimal sep: single digit'     => array( 'woocommerce_price_decimal_sep', '.', '.', '2', '.', true ),
+			'decimal sep: arabic digit'     => array( 'woocommerce_price_decimal_sep', '.', '.', '٢', '.', true ),
 		);
 	}
 
@@ -186,7 +185,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			'default' => ',',
 		);
 
-		$this->set_option_bypassing_sanitization( 'woocommerce_price_thousand_sep', '1' );
+		update_option( 'woocommerce_price_thousand_sep', '1' );
 
 		$result = wc_format_option_price_separators( '2', $option, '2' );
 
@@ -194,18 +193,20 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Stores a separator that the sanitization would otherwise reject, standing in for
-	 * a value saved before the validation existed.
-	 *
-	 * @param string $option_id Option name.
-	 * @param string $value     Value to store.
+	 * @testdox wc_format_option_price_separators should leave the value alone when the field was not submitted.
 	 */
-	private function set_option_bypassing_sanitization( string $option_id, string $value ): void {
-		$sanitizer = wc_get_container()->get( \Automattic\WooCommerce\Internal\Settings\OptionSanitizer::class );
+	public function test_wc_format_option_price_separators_skips_missing_field(): void {
+		$option = array(
+			'id'      => 'woocommerce_price_thousand_sep',
+			'default' => ',',
+		);
 
-		remove_filter( "sanitize_option_$option_id", array( $sanitizer, 'sanitize_price_separator_option' ), 10 );
-		update_option( $option_id, $value );
-		add_filter( "sanitize_option_$option_id", array( $sanitizer, 'sanitize_price_separator_option' ), 10, 2 );
+		$errors_before = $this->get_wc_admin_settings_errors();
+		$result        = wc_format_option_price_separators( null, $option, null );
+		$errors_after  = $this->get_wc_admin_settings_errors();
+
+		$this->assertNull( $result, 'A null raw value means the field was not submitted, so nothing should be saved.' );
+		$this->assertCount( count( $errors_before ), $errors_after, 'No error should be added for a field that was not submitted.' );
 	}
 
 	/**
