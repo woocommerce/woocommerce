@@ -65,6 +65,19 @@ class SelectFieldType extends AbstractFieldType {
 	}
 
 	/**
+	 * Restricts select values to the registered options in the REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_value_schema( array $field_schema, array $field ): array {
+		$field_schema['enum'] = array_column( $field['options'], 'value' );
+
+		return $field_schema;
+	}
+
+	/**
 	 * Maps the registered options to the value => label format woocommerce_form_field() expects.
 	 *
 	 * @param array $form_field The woocommerce_form_field() arguments built from the field.

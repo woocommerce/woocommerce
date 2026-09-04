@@ -252,6 +252,29 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Converts a set of additional field values into their document object representation.
+	 *
+	 * Each field type decides how its own values are represented.
+	 *
+	 * @param mixed $values Key value pairs of field values, keyed by field ID.
+	 * @return mixed The values, with each registered additional field converted by its type.
+	 */
+	public function prepare_values_for_document_object( $values ) {
+		$prepared = (array) $values;
+
+		foreach ( $prepared as $key => $value ) {
+			$field = $this->additional_fields[ $key ] ?? null;
+
+			if ( $field ) {
+				$prepared[ $key ] = $this->get_field_type( $field )->to_document_value( $value, $field );
+			}
+		}
+
+		// Cast back so an empty set stays an empty object rather than becoming an empty JSON array.
+		return is_object( $values ) ? (object) $prepared : $prepared;
+	}
+
+	/**
 	 * Returns true if the field is required. Takes rules into consideration if a document object is provided.
 	 *
 	 * @param array|string        $field The field array or field key.
@@ -567,20 +590,6 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Validates a value against the constraints of its field type.
-	 *
-	 * This runs for every field regardless of the validate_callback it was registered with, so type level
-	 * constraints cannot be bypassed by supplying a custom callback.
-	 *
-	 * @param array $field       The field.
-	 * @param mixed $field_value The value of the field.
-	 * @return WP_Error|null Error if the value is not valid for the field type, null otherwise.
-	 */
-	private function validate_field_type( $field, $field_value ) {
-		return $this->get_field_type( $field )->validate( $field_value, $field );
-	}
-
-	/**
 	 * Validate an additional field.
 	 *
 	 * @since 8.6.0
@@ -598,7 +607,9 @@ class CheckoutFields {
 				return $errors;
 			}
 
-			$type_error = $this->validate_field_type( $field, $field_value );
+			// Type level constraints run for every field regardless of the validate_callback it was
+			// registered with, so they cannot be bypassed by supplying a custom callback.
+			$type_error = $this->get_field_type( $field )->validate( $field_value, $field );
 
 			if ( is_wp_error( $type_error ) ) {
 				$errors->merge_from( $type_error );
@@ -994,6 +1005,17 @@ class CheckoutFields {
 	 */
 	public function prepare_form_field( array $form_field ): array {
 		return $this->get_field_type( $form_field )->prepare_form_field( $form_field );
+	}
+
+	/**
+	 * Applies type-specific keywords to a field's REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_field_value_schema( array $field_schema, array $field ): array {
+		return $this->get_field_type( $field )->prepare_value_schema( $field_schema, $field );
 	}
 
 	/**

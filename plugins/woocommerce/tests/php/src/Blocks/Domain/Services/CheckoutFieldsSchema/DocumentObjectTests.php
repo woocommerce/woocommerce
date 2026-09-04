@@ -124,6 +124,9 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 		// parent teardown does not reset, so deregister the fields unconditionally.
 		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_field' );
 		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_field' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/contact_date' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/order_date' );
+		$this->additional_fields_controller->deregister_checkout_field( 'namespace/address_date' );
 
 		parent::tearDown();
 	}
@@ -289,6 +292,131 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 				'namespace/order_field' => 'Order field',
 			]
 		);
+	}
+
+	/**
+	 * Registers a date field in each of the three locations date values can reach the document object from.
+	 */
+	private function register_date_fields() {
+		foreach ( array(
+			'namespace/contact_date' => 'contact',
+			'namespace/order_date'   => 'order',
+			'namespace/address_date' => 'address',
+		) as $id => $location ) {
+			\woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => $id,
+					'label'    => 'Date field',
+					'location' => $location,
+					'type'     => 'date',
+				)
+			);
+		}
+	}
+
+	/**
+	 * @testdox Date field values are exposed to rules as YYYYMMDD integers, in every location.
+	 */
+	public function test_date_values_are_converted_to_integers() {
+		$this->register_date_fields();
+
+		$document_object = new DocumentObject(
+			[
+				'customer' => [
+					'additional_fields' => [ 'namespace/contact_date' => '2026-01-15' ],
+					'billing_address'   => [ 'namespace/address_date' => '2026-03-04' ],
+				],
+				'checkout' => [
+					'additional_fields' => [ 'namespace/order_date' => '2026-12-31' ],
+				],
+			]
+		);
+		$document_object->set_customer( new WC_Customer( 0 ) );
+
+		$data = $document_object->get_data();
+
+		$this->assertSame( 20260115, $data['customer']['additional_fields']['namespace/contact_date'] );
+		$this->assertSame( 20260304, $data['customer']['billing_address']['namespace/address_date'] );
+		$this->assertSame( 20261231, $data['checkout']['additional_fields']['namespace/order_date'] );
+	}
+
+	/**
+	 * @testdox A date value that is not a real date becomes null, so numeric rules skip it instead of ordering it.
+	 *
+	 * @testWith [""]
+	 *           ["2026-02-31"]
+	 *
+	 * @param string $value The submitted value.
+	 */
+	public function test_unusable_date_values_become_null( string $value ) {
+		$this->register_date_fields();
+
+		$document_object = new DocumentObject(
+			[
+				'checkout' => [
+					'additional_fields' => [ 'namespace/order_date' => $value ],
+				],
+			]
+		);
+		$document_object->set_customer( new WC_Customer( 0 ) );
+
+		$data = $document_object->get_data();
+
+		$this->assertArrayHasKey( 'namespace/order_date', $data['checkout']['additional_fields'] );
+		$this->assertNull( $data['checkout']['additional_fields']['namespace/order_date'] );
+	}
+
+	/**
+	 * @testdox Values of other field types are passed through untouched.
+	 */
+	public function test_non_date_values_are_untouched() {
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'namespace/order_field',
+				'label'    => 'Order Field',
+				'location' => 'order',
+				'type'     => 'text',
+			)
+		);
+
+		$document_object = new DocumentObject(
+			[
+				'checkout' => [
+					'additional_fields' => [
+						'namespace/order_field' => '2026-01-15',
+						'namespace/unknown'     => '2026-01-15',
+					],
+				],
+			]
+		);
+		$document_object->set_customer( new WC_Customer( 0 ) );
+
+		$fields = $document_object->get_data()['checkout']['additional_fields'];
+
+		$this->assertSame( '2026-01-15', $fields['namespace/order_field'], 'A text field holding a date-like string should not be converted.' );
+		$this->assertSame( '2026-01-15', $fields['namespace/unknown'], 'An unregistered key should not be converted.' );
+	}
+
+	/**
+	 * @testdox Memoized data is rebuilt after the customer, cart, or context changes.
+	 */
+	public function test_memoized_data_is_invalidated() {
+		$document_object = new DocumentObject();
+		$customer        = new WC_Customer( 0 );
+		$customer->set_billing_first_name( 'Jane' );
+		$document_object->set_customer( $customer );
+
+		$this->assertSame( 'Jane', $document_object->get_data()['customer']['billing_address']['first_name'] );
+
+		$updated = new WC_Customer( 0 );
+		$updated->set_billing_first_name( 'John' );
+		$document_object->set_customer( $updated );
+
+		$this->assertSame( 'John', $document_object->get_data()['customer']['billing_address']['first_name'], 'get_data() should not serve a stale cache after the customer changes.' );
+
+		$document_object->set_context( 'billing_address' );
+
+		$this->assertArrayHasKey( 'address', $document_object->get_data()['customer'], 'get_data() should not serve a stale cache after the context changes.' );
 	}
 
 	/**

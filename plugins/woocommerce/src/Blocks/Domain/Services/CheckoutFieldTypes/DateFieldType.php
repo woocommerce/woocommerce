@@ -15,9 +15,11 @@ use WP_Error;
 class DateFieldType extends AbstractFieldType {
 
 	/**
-	 * Matches a date in YYYY-MM-DD format.
+	 * Matches a YYYY-MM-DD date with valid month and day ranges.
+	 *
+	 * Undelimited because a JSON Schema pattern takes a bare expression; the PHP uses add delimiters.
 	 */
-	private const ABSOLUTE_DATE = '/^\d{4}-\d{2}-\d{2}$/';
+	private const DATE_PATTERN = '\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])';
 
 	/**
 	 * Processes the options for a date field and returns the new field_options array.
@@ -177,6 +179,20 @@ class DateFieldType extends AbstractFieldType {
 	}
 
 	/**
+	 * Converts a YYYY-MM-DD date to the YYYYMMDD integer used in schema validation.
+	 *
+	 * @param mixed $value The value.
+	 * @param array $field The field.
+	 * @return int|null The date as YYYYMMDD, or null when there is no date to compare.
+	 */
+	public function to_document_value( $value, array $field ) {
+		$date = is_string( $value ) && '' !== $value ? $this->parse_date( $value ) : null;
+
+		// Null rather than 0, so a blank date is skipped by numeric keywords instead of ordered by them.
+		return null === $date ? null : (int) $date->format( 'Ymd' );
+	}
+
+	/**
 	 * Formats a stored YYYY-MM-DD date using the store's date format.
 	 *
 	 * @param mixed $value The stored value.
@@ -193,6 +209,20 @@ class DateFieldType extends AbstractFieldType {
 		$formatted = wp_date( wc_date_format(), $date->getTimestamp() );
 
 		return false === $formatted ? $value : $formatted;
+	}
+
+	/**
+	 * Constrains date values to YYYY-MM-DD strings in the REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_value_schema( array $field_schema, array $field ): array {
+		// Optional, because an empty value is not a type error.
+		$field_schema['pattern'] = '^(' . self::DATE_PATTERN . ')?$';
+
+		return $field_schema;
 	}
 
 	/**
@@ -289,6 +319,6 @@ class DateFieldType extends AbstractFieldType {
 	 * @return bool
 	 */
 	private function is_absolute_date( $value ): bool {
-		return is_string( $value ) && 1 === preg_match( self::ABSOLUTE_DATE, $value );
+		return is_string( $value ) && 1 === preg_match( '/^' . self::DATE_PATTERN . '$/', $value );
 	}
 }
