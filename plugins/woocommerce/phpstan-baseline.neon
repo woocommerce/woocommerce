@@ -43678,24 +43678,6 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/Controller.php
 
 		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_rate_id\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_shipping_tax_total\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_tax_total\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:add_from_sql_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
