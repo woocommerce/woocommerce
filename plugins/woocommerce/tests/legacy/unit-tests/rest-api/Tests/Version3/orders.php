@@ -179,8 +179,15 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$line_item = new WC_Order_Item_Product();
 		$line_item->set_product( $variation );
+		// set_variation() replaces the item's attributes rather than merging into them, so the
+		// variation's own attribute is passed alongside the site-level one.
 		$line_item->set_props(
-			array( 'variation' => array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug ) )
+			array(
+				'variation' => array_merge(
+					$variation->get_variation_attributes(),
+					array( "attribute_{$site_level_attribute_slug}" => $site_level_term->slug )
+				),
+			)
 		);
 
 		$order = OrderHelper::create_order();
