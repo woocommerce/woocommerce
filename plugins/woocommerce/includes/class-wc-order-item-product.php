@@ -287,11 +287,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 
 		foreach ( $previous as $stale_key => $stale_value ) {
-			if ( array_key_exists( $stale_key, $current ) ) {
-				continue;
+			if ( ! array_key_exists( $stale_key, $current ) ) {
+				$this->delete_recorded_attribute_meta( $stale_key, $stale_value );
 			}
-
-			$this->delete_recorded_attribute_meta( $stale_key, $stale_value );
 		}
 
 		// Written last, and rewritten rather than updated in place, so the record always sits
@@ -340,11 +338,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
-		if ( 1 !== count( $matches ) || null === $oldest ) {
-			return;
-		}
-
-		if ( ! is_scalar( $oldest->value ) || (string) $oldest->value !== $value ) {
+		if ( 1 !== count( $matches ) || $oldest->value !== $matches[0] ) {
 			return;
 		}
 
@@ -376,11 +370,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$recorded = array();
 
 		foreach ( $record as $key => $value ) {
-			if ( ! is_string( $key ) || '' === $key || ! is_scalar( $value ) ) {
-				continue;
+			if ( is_string( $key ) && '' !== $key && is_scalar( $value ) ) {
+				$recorded[ $key ] = (string) $value;
 			}
-
-			$recorded[ $key ] = (string) $value;
 		}
 
 		return $recorded;
