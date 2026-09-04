@@ -19,7 +19,10 @@ class NotesTest extends WC_Unit_Test_Case {
 		$callback = array( Notes::class, 'possibly_delete_survey_notes' );
 
 		$this->assertFalse( has_action( 'admin_init', $callback ), 'Survey cleanup should not run during admin initialization.' );
-		$this->assertSame( 10, has_action( 'wc_admin_daily', $callback ), 'Survey cleanup should run from the daily admin event.' );
+
+		// Priority 9 so the cleanup runs before Events::do_wc_admin_daily, which adds notes and
+		// refreshes the remote data source pollers at the default priority.
+		$this->assertSame( 9, has_action( 'wc_admin_daily', $callback ), 'Survey cleanup should run from the daily admin event, ahead of the fetch.' );
 	}
 
 	/**
