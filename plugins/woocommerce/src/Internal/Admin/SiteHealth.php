@@ -482,10 +482,6 @@ class SiteHealth {
 	 * @return array{order_rows: int, meta_rows: int}|null
 	 */
 	private function get_hpos_table_statistics(): ?array {
-		if ( ! defined( 'DB_NAME' ) ) {
-			return null;
-		}
-
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This bounded query reads database-maintained table statistics during Site Health checks.
@@ -495,16 +491,14 @@ class SiteHealth {
 					(
 						SELECT TABLE_ROWS
 						FROM information_schema.TABLES
-						WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+						WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
 					) AS order_rows,
 					(
 						SELECT TABLE_ROWS
 						FROM information_schema.TABLES
-						WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+						WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
 					) AS meta_rows',
-				DB_NAME,
 				OrdersTableDataStore::get_orders_table_name(),
-				DB_NAME,
 				OrdersTableDataStore::get_meta_table_name()
 			)
 		);
