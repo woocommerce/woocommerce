@@ -386,6 +386,67 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a placeholder Core cannot fill in should be reported when it is in preheader.
+	 */
+	public function test_an_unknown_placeholder_in_preheader_is_reported(): void {
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'preheader' => 'Hi {custom_field}, {product_name} is back' )
+		);
+
+		$counts = $this->build_migrator()->migrate( wc_get_container()->get( Writer::class ) );
+
+		$this->assertGreaterThan( 0, $counts['unknown_placeholder'] ?? 0 );
+	}
+
+	/**
+	 * @testdox email_type, cc, bcc and preheader should migrate to the Core email settings.
+	 */
+	public function test_email_type_cc_bcc_and_preheader_are_migrated(): void {
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array(
+				'email_type' => 'plain',
+				'cc'         => 'cc@example.com',
+				'bcc'        => 'bcc@example.com',
+				'preheader'  => 'Legacy preheader',
+			)
+		);
+
+		$this->migrate();
+
+		$core = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
+
+		$this->assertSame( 'plain', $core['email_type'] );
+		$this->assertSame( 'cc@example.com', $core['cc'] );
+		$this->assertSame( 'bcc@example.com', $core['bcc'] );
+		$this->assertSame( 'Legacy preheader', $core['preheader'] );
+	}
+
+	/**
+	 * @testdox a legacy row without email_type, cc, bcc or preheader should leave the Core email_type alone.
+	 */
+	public function test_absent_email_type_cc_bcc_and_preheader_leave_core_email_type_alone(): void {
+		update_option(
+			'woocommerce_customer_stock_notification_settings',
+			array( 'email_type' => 'html' )
+		);
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'subject' => 'Legacy subject' )
+		);
+
+		$this->migrate();
+
+		$core = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
+
+		$this->assertSame( 'html', $core['email_type'], 'A sub-key the legacy row never stored must not overwrite the Core value.' );
+		$this->assertArrayNotHasKey( 'cc', $core );
+		$this->assertArrayNotHasKey( 'bcc', $core );
+		$this->assertArrayNotHasKey( 'preheader', $core );
+	}
+
+	/**
 	 * Migrate everything with a fresh migrator and a live writer.
 	 *
 	 * @return array<string,int> Outcome counts.

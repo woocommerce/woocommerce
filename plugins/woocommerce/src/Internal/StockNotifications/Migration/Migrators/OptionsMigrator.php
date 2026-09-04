@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Migrates the legacy Back In Stock Notifications settings — general and email alike — to
  * their Core equivalents.
  *
- * Not a `MigratorInterface`: this is a fixed set of twenty values, so there is nothing to
+ * Not a `MigratorInterface`: this is a fixed set of values, so there is nothing to
  * scan, no cursor to keep and no failure marker to write. `MigrationBatchProcessor` calls
  * `migrate()` at the top of every batch instead, which keeps options inside the retry and
  * requirement checks a run already has.
@@ -95,18 +95,21 @@ class OptionsMigrator {
 	/**
 	 * Sub-keys migrated within each email settings array. Shared by legacy and Core: both are
 	 * `WC_Email` subclasses with the same base form fields plus an injected `intro_content`.
+	 * `email_type` keeps a plain-text choice from being overwritten by html and vice versa.
+	 * `cc`, `bcc` and `preheader` only exist when the store saved the screen on a Core with
+	 * those fields, and are skipped like any other sub-key legacy never stored.
 	 *
 	 * @var string[]
 	 */
-	private const SUB_KEYS = array( 'enabled', 'subject', 'heading', 'intro_content', 'additional_content' );
+	private const SUB_KEYS = array( 'enabled', 'subject', 'heading', 'intro_content', 'additional_content', 'email_type', 'cc', 'bcc', 'preheader' );
 
 	/**
 	 * Sub-keys that carry free text and are checked for placeholder tokens outside the
-	 * known set. `enabled` is a toggle, not text.
+	 * known set. `enabled`, `email_type`, `cc` and `bcc` are not free text.
 	 *
 	 * @var string[]
 	 */
-	private const TEXT_SUB_KEYS = array( 'subject', 'heading', 'intro_content', 'additional_content' );
+	private const TEXT_SUB_KEYS = array( 'subject', 'heading', 'intro_content', 'additional_content', 'preheader' );
 
 	/**
 	 * Placeholders every Core stock notification email declares: the two the email classes
