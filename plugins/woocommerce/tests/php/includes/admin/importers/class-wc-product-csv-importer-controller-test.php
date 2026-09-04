@@ -287,9 +287,9 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Import cleanup should stop when a placeholder cannot be deleted.
+	 * @testdox Import cleanup should keep a placeholder it cannot delete.
 	 */
-	public function test_cleanup_after_import_stops_when_a_placeholder_cannot_be_deleted(): void {
+	public function test_cleanup_after_import_keeps_a_placeholder_it_cannot_delete(): void {
 		$post_id = wp_insert_post(
 			array(
 				'post_type'   => 'product',
@@ -312,6 +312,41 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( get_post( $post_id ) );
 		$this->assertSame( 'importing', get_post_status( $post_id ) );
+	}
+
+	/**
+	 * @testdox Import cleanup should delete placeholders queued behind one it cannot delete.
+	 */
+	public function test_cleanup_after_import_continues_past_a_placeholder_it_cannot_delete(): void {
+		$blocked_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+				'post_title'  => 'Import cleanup blocked placeholder',
+			)
+		);
+		$queued_id  = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+				'post_title'  => 'Import cleanup queued placeholder',
+			)
+		);
+
+		$block_first = static function ( $check, $post ) use ( $blocked_id ) {
+			return $post->ID === $blocked_id ? false : $check;
+		};
+
+		add_filter( 'pre_delete_post', $block_first, 10, 2 );
+
+		try {
+			$this->invoke_cleanup_after_import();
+		} finally {
+			remove_filter( 'pre_delete_post', $block_first, 10 );
+		}
+
+		$this->assertNotNull( get_post( $blocked_id ) );
+		$this->assertNull( get_post( $queued_id ) );
 	}
 
 	/**

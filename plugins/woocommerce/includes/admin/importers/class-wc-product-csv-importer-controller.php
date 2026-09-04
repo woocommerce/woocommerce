@@ -330,44 +330,38 @@ class WC_Product_CSV_Importer_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
 
-		// Delete products first so WooCommerce can remove their variations through the normal lifecycle.
-		foreach ( array( 'product', 'product_variation' ) as $post_type ) {
-			while ( true ) {
-				// Query the exact type and status so MySQL can use the wp_posts type_status_date index.
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$post_ids = $wpdb->get_col(
-					$wpdb->prepare(
-						"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s LIMIT %d",
-						$post_type,
-						'importing',
-						self::CLEANUP_BATCH_SIZE
-					)
-				);
+		$cursor = 0;
 
-				if ( ! $post_ids ) {
-					break;
+		// Page by ID so a placeholder that cannot be deleted is passed over instead of being read again.
+		while ( true ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$post_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND post_status = %s AND ID > %d ORDER BY ID ASC LIMIT %d",
+					'importing',
+					$cursor,
+					self::CLEANUP_BATCH_SIZE
+				)
+			);
+
+			if ( ! $post_ids ) {
+				break;
+			}
+
+			$post_ids = array_map( 'absint', $post_ids );
+			$cursor   = (int) end( $post_ids );
+
+			_prime_post_caches( $post_ids, false, false );
+
+			// Ascending IDs delete a placeholder parent before its variations, so WooCommerce removes them through the normal lifecycle.
+			foreach ( $post_ids as $post_id ) {
+				$post = get_post( $post_id );
+
+				if ( ! $post || 'importing' !== $post->post_status ) {
+					continue;
 				}
 
-				_prime_post_caches( $post_ids, false, false );
-
-				$deleted = 0;
-
-				foreach ( $post_ids as $post_id ) {
-					$post = get_post( $post_id );
-
-					if ( ! $post || $post_type !== $post->post_type || 'importing' !== $post->post_status ) {
-						continue;
-					}
-
-					if ( wp_delete_post( $post->ID, true ) ) {
-						++$deleted;
-					}
-				}
-
-				// Stop if nothing in the batch could be deleted, so a post another plugin keeps alive cannot loop forever.
-				if ( 0 === $deleted ) {
-					break;
-				}
+				wp_delete_post( $post->ID, true );
 			}
 		}
 	}
