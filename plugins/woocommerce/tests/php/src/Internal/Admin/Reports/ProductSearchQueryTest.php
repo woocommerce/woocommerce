@@ -368,6 +368,69 @@ class ProductSearchQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honour a pre_get_posts restriction on the products it searches.
+	 *
+	 * A multivendor plugin scopes products to the vendor that authored them. The search resolves
+	 * to a report restriction rather than a listing, so a product left out here is one the report
+	 * cannot reach either.
+	 */
+	public function test_get_ids_subquery_honours_a_pre_get_posts_author_restriction(): void {
+		$vendor = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$own    = $this->create_product( 'Kingston Widget' );
+
+		// Authored by someone else, so the scope drops it.
+		$this->create_product( 'Kingston Gadget' );
+
+		wp_update_post(
+			array(
+				'ID'          => $own,
+				'post_author' => $vendor,
+			)
+		);
+
+		$scope = function ( $query ) use ( $vendor ) {
+			$query->set( 'author', $vendor );
+		};
+
+		add_action( 'pre_get_posts', $scope );
+		$found = $this->run_subquery( ProductSearchQuery::get_ids_subquery( array( 'Kingston' ) ) );
+		remove_action( 'pre_get_posts', $scope );
+
+		$this->assertSame( array( $own ), $found );
+	}
+
+	/**
+	 * @testdox Should apply a pre_get_posts restriction on top of the report's own product filter.
+	 */
+	public function test_get_ids_subquery_keeps_the_report_filter_alongside_a_pre_get_posts_restriction(): void {
+		$vendor       = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$in_both      = $this->create_product( 'Kingston Widget' );
+		$vendors_only = $this->create_product( 'Kingston Gadget' );
+		$report_only  = $this->create_product( 'Kingston Sprocket' );
+
+		foreach ( array( $in_both, $vendors_only ) as $product ) {
+			wp_update_post(
+				array(
+					'ID'          => $product,
+					'post_author' => $vendor,
+				)
+			);
+		}
+
+		$scope = function ( $query ) use ( $vendor ) {
+			$query->set( 'author', $vendor );
+		};
+
+		add_action( 'pre_get_posts', $scope );
+		$found = $this->run_subquery(
+			ProductSearchQuery::get_ids_subquery( array( 'Kingston' ), array( $in_both, $report_only ) )
+		);
+		remove_action( 'pre_get_posts', $scope );
+
+		$this->assertSame( array( $in_both ), $found, 'Only the product both the scope and the report filter allow should match' );
+	}
+
+	/**
 	 * @testdox Should leave queries other than its own alone.
 	 */
 	public function test_get_ids_subquery_does_not_affect_later_queries(): void {

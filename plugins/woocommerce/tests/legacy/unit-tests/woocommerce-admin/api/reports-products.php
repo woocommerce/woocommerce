@@ -470,6 +470,50 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave out a product a scope on the product query excludes.
+	 *
+	 * A searched report joins every match onto the sales data, so a product a plugin scopes out
+	 * would otherwise come back as a row of its own, name included.
+	 */
+	public function test_get_reports_search_param_honours_a_product_query_scope() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$vendor    = $this->factory->user->create( array( 'role' => 'editor' ) );
+		$in_scope  = $this->create_product( 'Kingston Widget' );
+		$out_scope = $this->create_product( 'Kingston Gadget' );
+
+		wp_update_post(
+			array(
+				'ID'          => $in_scope->get_id(),
+				'post_author' => $vendor,
+			)
+		);
+
+		$this->create_completed_order( $in_scope );
+		$this->create_completed_order( $out_scope );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$scope = function ( $query ) use ( $vendor ) {
+			if ( 'product' === $query->get( 'post_type' ) ) {
+				$query->set( 'author', $vendor );
+			}
+		};
+
+		add_action( 'pre_get_posts', $scope );
+		$response = $this->dispatch_report( array( 'search' => 'Kingston' ) );
+		remove_action( 'pre_get_posts', $scope );
+
+		$reports_by_id = array_column( $response->get_data(), null, 'product_id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( $in_scope->get_id(), $reports_by_id );
+		$this->assertArrayNotHasKey( $out_scope->get_id(), $reports_by_id, 'A product outside the scope should not be reported' );
+		$this->assertEquals( 1, $response->get_headers()['X-WP-Total'], 'The row count should leave out the products the scope excludes' );
+	}
+
+	/**
 	 * @testdox Should register the `search` collection param.
 	 */
 	public function test_search_collection_param_is_registered() {
