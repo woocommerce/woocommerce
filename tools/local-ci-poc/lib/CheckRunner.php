@@ -196,6 +196,7 @@ final class CheckRunner {
 				'passed'  => false,
 				'seconds' => $elapsed,
 				'summary' => 'timed out',
+				'output'  => '',
 			);
 		}
 
@@ -205,13 +206,14 @@ final class CheckRunner {
 		$exit_code = $status['exitcode'];
 		proc_close( $process['handle'] );
 
-		$summary = $this->summarise( $process['log'] );
+		$output = is_readable( $process['log'] ) ? (string) file_get_contents( $process['log'] ) : '';
 		self::forget_log( $process['log'] );
 
 		return array(
 			'passed'  => 0 === $exit_code,
 			'seconds' => $elapsed,
-			'summary' => $summary,
+			'summary' => self::summarise( $output ),
+			'output'  => $output,
 		);
 	}
 
@@ -220,9 +222,7 @@ final class CheckRunner {
 	 *
 	 * @param string $log Path to the log file.
 	 */
-	private function summarise( string $log ): string {
-		$output = is_readable( $log ) ? (string) file_get_contents( $log ) : '';
-
+	private static function summarise( string $output ): string {
 		return preg_match( '/Tests: +\d+ passed/', $output, $matches ) ? $matches[0] : 'ran';
 	}
 

@@ -100,18 +100,25 @@ final class GitHubApi {
 	 * @param string $sha         Commit to attach to.
 	 * @param string $context     Status context.
 	 * @param string $description Short human-readable description.
+	 * @param string $target_url  Optional link; this is what the status links to.
 	 *
 	 * @return array{status: int, body: mixed}
 	 */
-	public function post_status( string $sha, string $context, string $description ): array {
+	public function post_status( string $sha, string $context, string $description, string $target_url = '' ): array {
+		$body = array(
+			'state'       => 'success',
+			'context'     => $context,
+			'description' => $description,
+		);
+
+		if ( '' !== $target_url ) {
+			$body['target_url'] = $target_url;
+		}
+
 		return $this->request(
 			'POST',
 			sprintf( '/repos/%s/statuses/%s', $this->repository, $sha ),
-			array(
-				'state'       => 'success',
-				'context'     => $context,
-				'description' => $description,
-			)
+			$body
 		);
 	}
 

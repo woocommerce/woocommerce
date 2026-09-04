@@ -29,6 +29,7 @@ require_once __DIR__ . '/lib/Output.php';
 require_once __DIR__ . '/lib/Git.php';
 require_once __DIR__ . '/lib/GitHubApi.php';
 require_once __DIR__ . '/lib/Receipts.php';
+require_once __DIR__ . '/lib/LogStore.php';
 require_once __DIR__ . '/lib/CheckRunner.php';
 require_once __DIR__ . '/lib/JobPlanner.php';
 require_once __DIR__ . '/lib/TemporaryRef.php';
@@ -174,11 +175,15 @@ Output::detail( sprintf( 'up to %d at a time; results appear as each finishes', 
 $started_all = time();
 $passed_jobs = array();
 $failed_jobs = array();
+$logs        = array();
 
 ( new CheckRunner() )->run(
 	$eligible_jobs,
 	$options->concurrency,
-	static function ( array $job, array $result ) use ( &$passed_jobs, &$failed_jobs ): void {
+	static function ( array $job, array $result ) use ( &$passed_jobs, &$failed_jobs, &$logs ): void {
+		// Kept so a reviewer can read what actually ran, not just that it passed.
+		$logs[ $job['name'] ] = $result['output'];
+
 		// Keep the duration on the record so the summary can compare the work
 		// done against the time it actually took.
 		$job['seconds'] = $result['seconds'];
@@ -308,8 +313,20 @@ if ( 0 !== $drifted ) {
 	exit( 1 );
 }
 
+$log_urls = ( new LogStore( sprintf( 'local-ci run for %s', substr( $sha, 0, 11 ) ) ) )->upload(
+	array_intersect_key( $logs, array_flip( array_column( $passed_jobs, 'name' ) ) )
+);
+
+if ( array() === $log_urls ) {
+	// Not fatal. A receipt without a link still substitutes the job; it just
+	// gives a reviewer nothing to inspect.
+	Output::warn( 'could not upload the run output — receipts will have no link' );
+} else {
+	Output::detail( sprintf( 'output uploaded: %s', strtok( (string) reset( $log_urls ), '#' ) ), 2 );
+}
+
 foreach ( $passed_jobs as $job ) {
-	$posted = $receipts->publish( $sha, $job );
+	$posted = $receipts->publish( $sha, $job, $log_urls[ $job['name'] ] ?? '' );
 
 	if ( 201 !== $posted['status'] ) {
 		// Carrying on would make a failed publish look like a successful one, and

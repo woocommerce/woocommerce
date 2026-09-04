@@ -55,13 +55,14 @@ final class Receipts {
 	/**
 	 * Publish one receipt.
 	 *
-	 * @param string               $sha Commit to attach to.
-	 * @param array{name: string}  $job Job the receipt vouches for.
+	 * @param string              $sha        Commit to attach to.
+	 * @param array{name: string} $job        Job the receipt vouches for.
+	 * @param string              $target_url Optional link to the run's output.
 	 *
 	 * @return array{status: int, body: mixed}
 	 */
-	public function publish( string $sha, array $job ): array {
-		return $this->api->post_status( $sha, self::context_for( $job ), 'passed locally' );
+	public function publish( string $sha, array $job, string $target_url = '' ): array {
+		return $this->api->post_status( $sha, self::context_for( $job ), 'passed locally', $target_url );
 	}
 
 	/**
