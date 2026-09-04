@@ -9,8 +9,10 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Admin\Orders\AdminOrderCreator;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -40,8 +42,10 @@ class WC_Admin_Post_Types {
 		}
 
 		// Load correct list table classes for current screen.
+		add_action( 'current_screen', array( $this, 'maybe_restore_order_create_screen' ), 9 );
 		add_action( 'current_screen', array( $this, 'setup_screen' ) );
 		add_action( 'check_ajax_referer', array( $this, 'setup_screen' ) );
+		add_action( 'load-post-new.php', array( $this, 'maybe_create_order_for_new_screen' ), PHP_INT_MAX );
 
 		// Admin notices.
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
@@ -78,6 +82,77 @@ class WC_Admin_Post_Types {
 		add_action( 'quick_edit_custom_box', array( $this, 'quick_edit' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 		add_action( 'woocommerce_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
+	}
+
+	/**
+	 * Create CPT orders through the WooCommerce data store before opening the editor.
+	 *
+	 * @internal
+	 */
+	public function maybe_create_order_for_new_screen(): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		$post_type = isset( $_GET['post_type'] ) ? sanitize_key( wp_unslash( $_GET['post_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'shop_order' !== $post_type || ! in_array( $post_type, wc_get_order_types( 'admin-menu' ), true ) ) {
+			return;
+		}
+
+		$post_type_object = get_post_type_object( $post_type );
+		if ( ! $post_type_object || ! current_user_can( $post_type_object->cap->edit_posts ) || ! current_user_can( $post_type_object->cap->create_posts ) ) {
+			return;
+		}
+
+		$order = wc_get_container()->get( AdminOrderCreator::class )->create_order( $post_type, get_current_user_id() );
+		if ( ! $order ) {
+			wp_die( esc_html__( 'Unable to create order.', 'woocommerce' ) );
+		}
+
+		$query_args = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		unset( $query_args['post_type'], $query_args['post'], $query_args['action'] );
+		$query_args['wc-new-order'] = wp_create_nonce( 'wc-admin-new-order-' . $order->get_id() );
+
+		$new_url = add_query_arg( $query_args, get_edit_post_link( $order->get_id(), 'url' ) );
+		if ( wp_safe_redirect( $new_url ) ) {
+			exit;
+		}
+
+		wp_die( esc_html__( 'Unable to open the order editor.', 'woocommerce' ) );
+	}
+
+	/**
+	 * Preserve Add Order screen semantics after redirecting a newly-created CPT order to its editor.
+	 *
+	 * @internal
+	 *
+	 * @param WP_Screen $screen Current admin screen.
+	 */
+	public function maybe_restore_order_create_screen( WP_Screen $screen ): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() || 'post' !== $screen->base ) {
+			return;
+		}
+
+		$order_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$nonce    = isset( $_GET['wc-new-order'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-new-order'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$post     = $order_id ? get_post( $order_id ) : null;
+
+		if (
+			! $post ||
+			'auto-draft' !== $post->post_status ||
+			! in_array( $post->post_type, wc_get_order_types( 'admin-menu' ), true ) ||
+			! wp_verify_nonce( $nonce, 'wc-admin-new-order-' . $order_id ) ||
+			! current_user_can( 'edit_post', $order_id )
+		) {
+			return;
+		}
+
+		$screen->action = 'add';
+
+		$post_type_object = get_post_type_object( $post->post_type );
+		if ( $post_type_object ) {
+			$post_type_object->labels->edit_item = $post_type_object->labels->add_new_item;
+		}
 	}
 
 	/**

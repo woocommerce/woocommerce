@@ -57472,36 +57472,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_created_via\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_object_read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_status\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -57563,12 +57533,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept object\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
