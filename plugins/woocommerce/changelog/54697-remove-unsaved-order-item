@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow unsaved order items to be removed using their temporary item keys.

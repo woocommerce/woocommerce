@@ -1029,6 +1029,25 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_taxes removes an obsolete persisted tax item.
+	 */
+	public function test_update_taxes_removes_obsolete_persisted_tax_item(): void {
+		$order    = new WC_Order();
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate_id( 1234 );
+		$tax_item->set_label( 'Obsolete tax' );
+		$order->add_item( $tax_item );
+		$order->save();
+
+		$this->assertGreaterThan( 0, $tax_item->get_id(), 'The tax item should be persisted before update_taxes() removes it.' );
+
+		$order->update_taxes();
+
+		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax item should be removed from the in-memory order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_taxes(), 'The obsolete tax item should be removed from the persisted order.' );
+	}
+
+	/**
 	 * @testdox calculate_taxes handles inherited shipping tax when no taxable product class is available.
 	 * @dataProvider inherited_shipping_tax_without_taxable_products_provider
 	 *
@@ -1292,6 +1311,65 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertContains( 'Fresh A', $names, 'Earlier unsaved fee must survive a later add_item().' );
 		$this->assertContains( 'Fresh B', $names );
 		$this->assertCount( 2, $names );
+	}
+
+	/**
+	 * @testdox Should remove an unsaved item using its temporary key during save.
+	 */
+	public function test_remove_item_removes_unsaved_item(): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Unsaved fee' );
+		$fee->set_amount( '1' );
+		$fee->set_total( '1' );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+
+		$item_id             = array_key_first( $order->get_items( 'fee' ) );
+		$remove_unsaved_item = static function ( $saved_order ) use ( $item_id ) {
+			$saved_order->remove_item( $item_id );
+		};
+
+		add_action( 'woocommerce_before_order_object_save', $remove_unsaved_item );
+
+		try {
+			$order->save();
+
+			$this->assertEmpty( $order->get_items( 'fee' ), 'The unsaved item should be removed from the order during save.' );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $remove_unsaved_item );
+		}
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The removed item should not be persisted when the order is saved.' );
+	}
+
+	/**
+	 * @testdox Should reject a non-integer numeric string as an item ID.
+	 * @testWith ["%s.5"]
+	 *           ["%se0"]
+	 *
+	 * @param string $item_id_format Format for an invalid item ID based on the persisted ID.
+	 */
+	public function test_remove_item_rejects_non_integer_numeric_string( string $item_id_format ): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Persisted fee' );
+		$fee->set_amount( '1' );
+		$fee->set_total( '1' );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+		$order->save();
+
+		$item_id         = $fee->get_id();
+		$invalid_item_id = sprintf( $item_id_format, $item_id );
+
+		$this->assertFalse( $order->get_item( $invalid_item_id, false ), 'A decimal or exponent string should not resolve to a persisted item.' );
+		$this->assertFalse( $order->remove_item( $invalid_item_id ), 'A decimal or exponent string should not remove a persisted item.' );
+		$this->assertArrayHasKey( $item_id, $order->get_items( 'fee' ), 'The item should remain in the in-memory order.' );
+
+		$order->save();
+
+		$this->assertArrayHasKey( $item_id, wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The item should remain in the persisted order.' );
 	}
 
 	/**
