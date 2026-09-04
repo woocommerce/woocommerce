@@ -966,15 +966,22 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		// Restoring the variation ID after set_product() is not enough. Handed the parent, set_product()
-		// takes its non-variation branch, which clears the item's variation attribute meta, and
-		// set_variation_id() puts back only the ID: the item ends up pointing at a variation whose
-		// attributes are gone. Keep the item's variation as it is instead, and refresh only the name
-		// and tax class set_product() resynchronises. The stored variation is still validated through
-		// the item's own setter, which extensions override, and one that no longer exists is demoted
-		// in the catch below, which is what should happen to it.
+		// An update that resolves back to the item's own parent or variation is not a product change,
+		// and set_product() would rewrite the item from present-day catalog state either way: handed
+		// the parent it clears the variation attribute meta, handed the variation it replaces that
+		// meta with whatever the variation reports today. Keep the item's product and variation as
+		// they are instead, and refresh only the name and tax class set_product() resynchronises.
+		// The variation is still validated through the item's own setter, which extensions override,
+		// and one that no longer exists is demoted below, which is what should happen to it.
+		$same_variation_update = 'update' === $action
+			&& $product_item
+			&& $current_variation_id
+			&& $product instanceof WC_Product_Variation
+			&& $product->get_id() === $current_variation_id;
+		$preserve_variation    = $product_item && ( $restore_variation_id || $same_variation_update );
+
 		if ( $product && $product !== $item->get_product() ) {
-			if ( $restore_variation_id && $product_item ) {
+			if ( $preserve_variation && $product_item ) {
 				try {
 					$product_item->set_variation_id( $current_variation_id );
 					$product_item->set_name( $product->get_name() );

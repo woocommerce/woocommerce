@@ -1304,6 +1304,75 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT /orders naming the line item's own variation keeps the attribute meta the order was placed with.
+	 */
+	public function test_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		// The merchant reconfigures the catalog after the order was placed: the parent stops using
+		// "color" for variations, so the variation no longer reports the attribute it was bought with.
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+		// The parent's save invalidates the parent's cached instance, not its children's.
+		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+		);
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $variation->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Re-posting the line item\'s own variation should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'An order records what was bought, so touching the line item must not rewrite its attributes from the catalog as it stands today.' );
+		$this->assertSame(
+			array( 'color' => 'blue' ),
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
+			'The provenance record must survive with the attributes it tracks.'
+		);
+	}
+
+	/**
+	 * @testdox PUT /orders naming only the variation ID keeps the attribute meta the order was placed with.
+	 */
+	public function test_update_line_item_by_variation_id_alone_keeps_historical_attribute_meta(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+		// The parent's save invalidates the parent's cached instance, not its children's.
+		clean_post_cache( $variation->get_id() );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'variation_id' => $variation->get_id(),
+				'quantity'     => 2,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'A payload that omits product_id should still succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 2, $reloaded->get_quantity(), 'The posted quantity should be applied.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Reaching the same variation without naming its parent must preserve the historical attributes too.' );
+	}
+
+	/**
 	 * @testdox PUT /orders with an unchanged parent demotes the line item if its variation is deleted after loading.
 	 */
 	public function test_update_line_item_demotes_when_variation_is_deleted_after_loading(): void {

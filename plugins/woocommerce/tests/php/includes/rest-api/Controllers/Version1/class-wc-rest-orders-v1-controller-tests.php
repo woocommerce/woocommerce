@@ -219,6 +219,46 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating with the line item's own variation keeps the attribute meta the order was placed with.
+	 */
+	public function test_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		// The merchant reconfigures the catalog after the order was placed: the parent stops using
+		// the attribute for variations, so the variation no longer reports what was bought.
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+		// The parent's save invalidates the parent's cached instance, not its children's.
+		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => $variation->get_id(),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Re-posting the line item\'s own variation should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
+		$this->assertSame( 'small', $reloaded->get_meta( 'pa_size' ), 'An order records what was bought, so touching the line item must not rewrite its attributes from the catalog as it stands today.' );
+	}
+
+	/**
 	 * @testdox Updating with the unchanged parent demotes the line item if its variation is deleted after loading.
 	 */
 	public function test_update_line_item_demotes_when_variation_is_deleted_after_loading(): void {
