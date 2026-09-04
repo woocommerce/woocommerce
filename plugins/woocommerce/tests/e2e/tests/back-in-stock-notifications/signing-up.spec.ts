@@ -452,7 +452,13 @@ test.describe(
 				// WordPress guesses the 404 back to the account page. Assert
 				// the landing, or a lost guess would only show up as a
 				// timeout on the login form below.
-				await expect( page ).toHaveURL( /\/my-account\/?$/ );
+				await expect( page ).toHaveURL( ( url ) => {
+					const path = url.pathname.endsWith( '/' )
+						? url.pathname.slice( 0, -1 )
+						: url.pathname;
+
+					return path.endsWith( '/my-account' );
+				} );
 
 				await page.locator( '#username' ).fill( customer.username );
 				await page.locator( '#password' ).fill( customer.password );
