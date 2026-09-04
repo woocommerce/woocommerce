@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Guard against non-array return values from the woocommerce_email_editor_preload_rest_api_routes filter.

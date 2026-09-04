@@ -107,7 +107,7 @@ final class RenewalSelector {
 
 	/**
 	 * Whether a period ending at `$ends_at_gmt` has ended by `$now` - the scheduled due-guard.
-	 * An unparseable end is treated as not ended (never charge ahead on bad data). Internal to
+	 * An unparsable end is treated as not ended (never charge ahead on bad data). Internal to
 	 * selection: `process()` bills whatever cycle it is handed and applies no due policy of its own.
 	 *
 	 * @param string            $ends_at_gmt The head period end (GMT string).

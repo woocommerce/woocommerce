@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat product download links whose query arguments arrive as arrays as invalid links instead of letting them raise a PHP error.

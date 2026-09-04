@@ -14,7 +14,7 @@ describe( 'Navigation', () => {
 		expect( queryByText( 'Skip this step' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should redner provided skip button text', () => {
+	it( 'should render provided skip button text', () => {
 		const { queryByText } = render(
 			<Navigation onSkip={ () => {} } skipText="this is test" />
 		);

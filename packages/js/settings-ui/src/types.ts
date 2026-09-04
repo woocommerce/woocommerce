@@ -43,20 +43,10 @@ export type SettingsUIField = {
 	save?: SettingsUISaveSchema;
 };
 
-export type SettingsUIGroupAction = {
-	id: string;
-	label: string;
-	href: string;
-	variant?: 'primary' | 'secondary' | 'tertiary' | 'link' | string;
-	target?: string;
-	rel?: string;
-};
-
 export type SettingsUIGroup = {
 	id: string;
 	title?: string;
 	description?: string;
-	actions?: SettingsUIGroupAction[];
 	fields: SettingsUIField[];
 };
 
@@ -119,19 +109,31 @@ export type SettingsFieldContext = {
 	section?: string;
 };
 
-export type SettingsFieldComponentProps = {
-	field: SettingsUIField;
-	value: SettingsValue;
-	onChange: ( value: SettingsValue ) => void;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	setValue: ( fieldId: string, value: SettingsValue ) => void;
-	setValues: ( values: Partial< SettingsValues > ) => void;
-	context: SettingsFieldContext;
+/**
+ * The field surface a registered edit control receives. A frozen subset of
+ * the DataForm field, so extensions do not couple to package internals.
+ */
+export type SettingsEditControlField = {
+	id: string;
+	label?: string;
+	description?: string | JSX.Element;
+	placeholder?: string;
+	elements?: SettingsUIOption[];
+	getValue: ( args: { item: SettingsValues } ) => SettingsValue;
+	// Method syntax keeps this assignable from DataForm's signature, which
+	// also receives the normalized field.
+	isDisabled( args: { item: SettingsValues } ): boolean;
 };
 
-export type SettingsFieldComponent = (
-	props: SettingsFieldComponentProps
+export type SettingsEditControlProps = {
+	data: SettingsValues;
+	field: SettingsEditControlField;
+	onChange: ( value: Partial< SettingsValues > ) => void;
+	hideLabelFromVision?: boolean;
+};
+
+export type SettingsEditControl = (
+	props: SettingsEditControlProps
 ) => JSX.Element | null;
 
 export type SettingsVisibilityPredicateArgs = {
@@ -181,23 +183,11 @@ export type SettingsExtensionScope = {
 
 export type SettingsExtensionRegistration = {
 	scope: SettingsExtensionScope;
-	components?: Record< string, SettingsFieldComponent >;
-	fieldOverrides?: Record< string, SettingsFieldComponent >;
-	typeRenderers?: Record< string, SettingsFieldComponent >;
+	components?: Record< string, SettingsEditControl >;
+	fieldOverrides?: Record< string, SettingsEditControl >;
+	typeRenderers?: Record< string, SettingsEditControl >;
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
 	saveHandlers?: Record< string, SettingsSaveHandler >;
 	regions?: Record< string, SettingsRegionComponent >;
 };
-
-export type SettingsUIRegistry = {
-	registerSettingsExtension: (
-		registration: SettingsExtensionRegistration
-	) => void;
-};
-
-declare global {
-	interface Window {
-		wcSettingsUI?: SettingsUIRegistry;
-	}
-}

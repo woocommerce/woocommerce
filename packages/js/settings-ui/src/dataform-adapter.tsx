@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
@@ -13,9 +12,10 @@ import type {
 /**
  * Internal dependencies
  */
-import { error, warn } from './diagnostics';
-import { createSettingsHelpElement } from './html';
+import { error } from './diagnostics';
+import { createSettingsHelpElement, sanitizeSettingsHtml } from './html';
 import {
+	resolveFieldComponent,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 } from './registry';
@@ -30,8 +30,7 @@ import type {
 import { valueMatchesVisibilityRule } from './values';
 
 // The adapter assumes the canonical value vocabulary from the PHP schema
-// builder and how extension components attach is a renderer concern, so
-// neither value coercion nor component registry resolution happens here.
+// builder, so no value coercion happens here.
 
 export type DataFormAdapterOptions = {
 	schema: SettingsUISchema;
@@ -42,6 +41,17 @@ export type DataFormAdapterOptions = {
 export type DataFormAdapter = {
 	fields: Field< SettingsValues >[];
 	getForm: ( values: SettingsValues ) => Form;
+};
+
+// FormField descriptions are plain strings, so group descriptions lose markup.
+const toPlainText = ( html?: string ) => {
+	if ( ! html ) {
+		return undefined;
+	}
+
+	const container = document.createElement( 'div' );
+	container.innerHTML = sanitizeSettingsHtml( html );
+	return container.textContent || undefined;
 };
 
 type SettingsTypeDescriptor = {
@@ -232,6 +242,14 @@ const buildValidationRules = (
 	return rules;
 };
 
+// The control throws when DataForm renders it, so a hidden field with a
+// broken config stays harmless while a visible one still fails closed.
+const createFailingControl =
+	( message: string ): Field< SettingsValues >[ 'Edit' ] =>
+	() => {
+		throw new Error( message );
+	};
+
 export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
@@ -242,6 +260,10 @@ export const buildDataFormField = (
 	)
 		? settingsTypeDescriptors[ settingsField.type ]
 		: undefined;
+	const registeredComponent = resolveFieldComponent(
+		settingsField,
+		options.context
+	);
 
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
@@ -255,27 +277,38 @@ export const buildDataFormField = (
 		isDisabled: isFieldDisabled( settingsField ),
 	};
 
-	if ( settingsField.type === 'info' ) {
-		field.readOnly = true;
-		// DataForm paints the label for a read-only field and drops its
-		// description, so info shows the sanitized element the field already
-		// carries rather than sanitizing the same string again per render.
-		field.render = ( { field: normalizedField } ) =>
-			normalizedField.description ? (
-				<div className="wc-settings-ui__info">
-					{ normalizedField.description }
-				</div>
-			) : null;
+	if ( registeredComponent ) {
+		// A registered control accepts a frozen subset of the DataForm control
+		// props, so the wider package props remain assignable to it.
+		field.Edit = registeredComponent as Field< SettingsValues >[ 'Edit' ];
 		return field;
 	}
 
+	// A field declaring a component requires that custom control. Failing
+	// closed beats silently rendering a built-in control in its place.
+	if ( settingsField.component ) {
+		field.Edit = createFailingControl(
+			`Component "${ settingsField.component }" is not registered.`
+		);
+		return field;
+	}
+
+	if ( settingsField.type === 'info' ) {
+		field.readOnly = true;
+		// The description is already a sanitized element, and DataForm paints
+		// the label for a read-only field, so info reuses it as its body.
+		field.render = ( { field: normalizedField } ) =>
+			normalizedField.description ?? null;
+		return field;
+	}
+
+	// Registered renderers resolve above, so reaching here means nothing can
+	// draw the field. Failing closed beats dropping it beside a live Save
+	// button, and matches the page this renderer replaces.
 	if ( ! descriptor ) {
-		// The renderer resolves registered type renderers before failing, so
-		// unknown types keep Edit and render unset rather than a baked
-		// fallback the adapter cannot decide on.
-		warn( `Field type "${ settingsField.type }" is not supported.`, {
-			field: settingsField,
-		} );
+		field.Edit = createFailingControl(
+			`Field type "${ settingsField.type }" is not supported.`
+		);
 		return field;
 	}
 
@@ -286,11 +319,12 @@ export const buildDataFormField = (
 	return field;
 };
 
-// Group descriptions and actions are HTML chrome that stays with the
-// renderer; FormField.description only accepts a plain string.
+// FormField.description only accepts a plain string, so a group description
+// keeps its text and loses its markup until DataForm accepts an element.
 const buildGroupFormField = ( group: SettingsUIGroup ): FormField => ( {
 	id: group.id,
 	label: group.title || undefined,
+	description: toPlainText( group.description ),
 	layout: group.title
 		? { type: 'card', isCollapsible: false }
 		: { type: 'card', withHeader: false },
