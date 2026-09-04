@@ -15,6 +15,7 @@ import {
 	settingsStore,
 	QUERY_DEFAULTS,
 	optionsStore,
+	userStore,
 } from '@woocommerce/data';
 import {
 	appendTimestamp,
@@ -365,7 +366,18 @@ export default compose(
 			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 		const { getOption } = select( optionsStore );
-		const dateType = getOption( 'woocommerce_date_type' ) || 'date_paid';
+		const currentUser = select( userStore ).getCurrentUser();
+		// The date-type option sits behind the WC Admin options endpoint;
+		// resolving it without that permission only yields a 403, so use the
+		// same default the failed request would have produced.
+		const canReadDateTypeOption = Boolean(
+			currentUser?.is_super_admin ||
+				currentUser?.capabilities?.manage_woocommerce ||
+				currentUser?.capabilities?.edit_others_shop_orders
+		);
+		const dateType = canReadDateTypeOption
+			? getOption( 'woocommerce_date_type' ) || 'date_paid'
+			: 'date_paid';
 		const datesFromQuery = getCurrentDates( query, defaultDateRange );
 		const { getReportStats, getReportStatsError, isResolving } =
 			select( reportsStore );

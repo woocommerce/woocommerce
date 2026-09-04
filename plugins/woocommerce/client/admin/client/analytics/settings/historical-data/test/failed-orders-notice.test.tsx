@@ -4,6 +4,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import apiFetch from '@wordpress/api-fetch';
+import { useUser } from '@woocommerce/data';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -11,6 +13,9 @@ import apiFetch from '@wordpress/api-fetch';
 import FailedOrdersNotice from '../failed-orders-notice';
 
 jest.mock( '@wordpress/api-fetch' );
+jest.mock( '@woocommerce/data', () => ( {
+	useUser: jest.fn(),
+} ) );
 
 const mockCreateNotice = jest.fn();
 jest.mock( '@wordpress/data', () => ( {
@@ -26,7 +31,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 } ) );
 
 jest.mock( '@wordpress/components', () => ( {
-	Notice: ( { children }: { children: React.ReactNode } ) => (
+	Notice: ( { children }: { children: ReactNode } ) => (
 		<div role="status">{ children }</div>
 	),
 	Button: ( {
@@ -35,7 +40,7 @@ jest.mock( '@wordpress/components', () => ( {
 		disabled,
 		'aria-disabled': ariaDisabled,
 	}: {
-		children: React.ReactNode;
+		children: ReactNode;
 		onClick?: () => void;
 		disabled?: boolean;
 		'aria-disabled'?: boolean;
@@ -51,10 +56,27 @@ jest.mock( '@wordpress/components', () => ( {
 } ) );
 
 const mockedApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
+const mockedUseUser = useUser as jest.MockedFunction< typeof useUser >;
 
 describe( 'FailedOrdersNotice', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockedUseUser.mockReturnValue( {
+			currentUserCan: jest.fn().mockReturnValue( true ),
+		} as unknown as ReturnType< typeof useUser > );
+	} );
+
+	it( 'does not fetch status without manage_woocommerce', () => {
+		const currentUserCan = jest.fn().mockReturnValue( false );
+		mockedUseUser.mockReturnValue( {
+			currentUserCan,
+		} as unknown as ReturnType< typeof useUser > );
+
+		const { container } = render( <FailedOrdersNotice /> );
+
+		expect( container ).toBeEmptyDOMElement();
+		expect( currentUserCan ).toHaveBeenCalledWith( 'manage_woocommerce' );
+		expect( mockedApiFetch ).not.toHaveBeenCalled();
 	} );
 
 	it( 'renders nothing when there are no failed orders', async () => {

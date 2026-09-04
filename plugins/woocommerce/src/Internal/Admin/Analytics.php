@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -129,10 +130,13 @@ class Analytics {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$screen_id = ( function_exists( 'get_current_screen' ) && get_current_screen() ) ? get_current_screen()->id : '';
-
-		// Only preload endpoints on wc-admin pages.
-		if ( 'woocommerce_page_wc-admin' === $screen_id ) {
+		// Match the wc-admin page by query arg rather than screen id: users who reach
+		// it through the standalone Analytics menu (view_woocommerce_reports without
+		// the WooCommerce menu) get a different screen id, and skipping the preload
+		// left the Overview page without its indicator data. The capability mirrors
+		// the preloaded endpoints' own REST permission, so unauthorized users never
+		// receive an error payload in place of the expected arrays.
+		if ( PageController::is_admin_page() && current_user_can( 'view_woocommerce_reports' ) ) {
 			$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
 			$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
 		}

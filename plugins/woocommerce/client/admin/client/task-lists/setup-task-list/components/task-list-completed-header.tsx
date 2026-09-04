@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import { useEffect, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { optionsStore, WEEK } from '@woocommerce/data';
+import { optionsStore, useUser, WEEK } from '@woocommerce/data';
 import { Card, CardHeader, DropdownMenu } from '@wordpress/components';
 import { moreVertical } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
@@ -49,6 +49,10 @@ export const TaskListCompletedHeader = ( {
 	customerEffortScore,
 }: TaskListCompletedHeaderProps ) => {
 	const { updateOptions } = useDispatch( optionsStore );
+	const { currentUserCan } = useUser();
+	const canAccessCustomerEffortScore =
+		currentUserCan( 'manage_woocommerce' ) ||
+		currentUserCan( 'edit_others_shop_orders' );
 	const [ showCesModal, setShowCesModal ] = useState( false );
 	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
 	const [ score, setScore ] = useState( NaN );
@@ -60,7 +64,7 @@ export const TaskListCompletedHeader = ( {
 				const { getOption, hasFinishedResolution } =
 					select( optionsStore );
 
-				if ( customerEffortScore ) {
+				if ( customerEffortScore && canAccessCustomerEffortScore ) {
 					const allowTracking = getOption(
 						ALLOW_TRACKING_OPTION_NAME
 					) as string;
@@ -92,7 +96,7 @@ export const TaskListCompletedHeader = ( {
 				}
 				return {};
 			},
-			[ customerEffortScore ]
+			[ canAccessCustomerEffortScore, customerEffortScore ]
 		);
 
 	useEffect( () => {

@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 import { getPath } from '@woocommerce/navigation';
-import { pluginsStore } from '@woocommerce/data';
+import { pluginsStore, useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,29 +27,7 @@ const WC_ANALYTICS_PLUGIN_SLUG = 'woocommerce-analytics';
 const WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL =
 	'admin.php?page=wc-admin&path=/analytics/order-attribution';
 
-/**
- * The banner to prompt users to install the Order Attribution extension.
- *
- * This banner will only appear when the Order Attribution extension is not installed. It can appear in three different ways:
- *
- * - As a big banner in the analytics overview page. (dismissable)
- * - As a header banner in the analytics overview page. (non-dismissable, appear only when the big banner is dismissed)
- * - As a small banner in the order editor. (non-dismissable)
- *
- * @param {Object}  props              Component props.
- * @param {Object}  props.bannerImage  The banner image component.
- * @param {string}  props.bannerType   The type of the banner. Can be BANNER_TYPE_BIG, BANNER_TYPE_SMALL, or BANNER_TYPE_HEADER.
- * @param {string}  props.eventContext The context for the event tracking.
- * @param {boolean} props.dismissable  Whether the banner is dismissable.
- * @param {string}  props.badgeText    The badge text to display on the banner.
- * @param {string}  props.title        The title of the banner.
- * @param {string}  props.description  The description of the banner.
- * @param {string}  props.buttonText   The text for the button.
- *
- * @return {JSX.Element} The rendered component.
- *
- */
-export const OrderAttributionInstallBanner = ( {
+const OrderAttributionInstallBannerContent = ( {
 	bannerImage = null,
 	bannerType = BANNER_TYPE_BIG,
 	eventContext = 'analytics-overview',
@@ -206,4 +184,39 @@ export const OrderAttributionInstallBanner = ( {
 			</CardBody>
 		</Card>
 	);
+};
+
+/**
+ * The banner to prompt users to install the Order Attribution extension.
+ *
+ * This banner will only appear when the Order Attribution extension is not installed. It can appear in three different ways:
+ *
+ * - As a big banner in the analytics overview page. (dismissable)
+ * - As a header banner in the analytics overview page. (non-dismissable, appear only when the big banner is dismissed)
+ * - As a small banner in the order editor. (non-dismissable)
+ *
+ * @param {Object}  props              Component props.
+ * @param {Object}  props.bannerImage  The banner image component.
+ * @param {string}  props.bannerType   The type of the banner. Can be BANNER_TYPE_BIG, BANNER_TYPE_SMALL, or BANNER_TYPE_HEADER.
+ * @param {string}  props.eventContext The context for the event tracking.
+ * @param {boolean} props.dismissable  Whether the banner is dismissable.
+ * @param {string}  props.badgeText    The badge text to display on the banner.
+ * @param {string}  props.title        The title of the banner.
+ * @param {string}  props.description  The description of the banner.
+ * @param {string}  props.buttonText   The text for the button.
+ */
+export const OrderAttributionInstallBanner = ( props ) => {
+	const { currentUserCan } = useUser();
+	// Match the legacy options endpoint permission before resolving the
+	// protected remote variant assignment.
+	const canAccessRemoteVariantAssignment =
+		currentUserCan( 'edit_others_shop_orders' ) ||
+		currentUserCan( 'manage_woocommerce' );
+	const canInstallPlugins = currentUserCan( 'install_plugins' );
+
+	if ( ! canAccessRemoteVariantAssignment || ! canInstallPlugins ) {
+		return null;
+	}
+
+	return <OrderAttributionInstallBannerContent { ...props } />;
 };

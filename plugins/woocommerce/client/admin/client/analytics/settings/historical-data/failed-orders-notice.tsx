@@ -11,6 +11,7 @@ import {
 import apiFetch from '@wordpress/api-fetch';
 import { Button, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
+import { useUser } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 
 const LOG_URL_PATH =
@@ -57,7 +58,7 @@ function getErrorMessage( err: unknown, fallback: string ): string {
  * Renders nothing when there are no recorded failures or when the status
  * request fails (the notice is an auxiliary affordance).
  */
-function FailedOrdersNotice() {
+function FailedOrdersNoticeContent() {
 	const [ status, setStatus ] = useState< FailedImportsStatus | null >(
 		null
 	);
@@ -70,7 +71,7 @@ function FailedOrdersNotice() {
 				path: '/wc-analytics/imports/status',
 			} );
 			setStatus( data );
-		} catch ( err ) {
+		} catch {
 			// Fail silently — the notice is an auxiliary affordance.
 		}
 	}, [] );
@@ -153,6 +154,16 @@ function FailedOrdersNotice() {
 			</Button>
 		</Notice>
 	);
+}
+
+function FailedOrdersNotice() {
+	const { currentUserCan } = useUser();
+
+	if ( ! currentUserCan( 'manage_woocommerce' ) ) {
+		return null;
+	}
+
+	return <FailedOrdersNoticeContent />;
 }
 
 export default FailedOrdersNotice;
