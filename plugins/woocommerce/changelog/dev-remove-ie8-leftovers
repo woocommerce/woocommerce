@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove IE8-era leftovers from the classic-assets build: the ie8 uglify flag, the IE 8/9 browserslist targets, and two dead IE-only CSS hacks. Minified output changes; no behavior change on any supported browser.
