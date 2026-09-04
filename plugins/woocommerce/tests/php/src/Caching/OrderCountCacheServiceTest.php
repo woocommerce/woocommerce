@@ -232,6 +232,8 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 			return $statuses;
 		};
 		add_filter( 'wc_order_statuses', $add_custom_status );
+		// Real plugins also register the post status; without it the status is stored unprefixed.
+		register_post_status( 'wc-partially-paid', array( 'label' => 'Partially Paid' ) );
 		do_action( 'activated_plugin', 'custom-status-plugin/custom-status-plugin.php', false );
 
 		$order = WC_Helper_Order::create_order();
