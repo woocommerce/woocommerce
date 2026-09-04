@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude an order's own tentative coupon hold when Store API order-pay validates usage limits.
