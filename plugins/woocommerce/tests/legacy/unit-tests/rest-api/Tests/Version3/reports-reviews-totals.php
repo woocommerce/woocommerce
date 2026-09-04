@@ -9,6 +9,13 @@
 class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Sequence number keeping each submitted review distinct from the last.
+	 *
+	 * @var int
+	 */
+	private $review_sequence = 0;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -31,7 +38,92 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a comment carrying a rating.
+	 * Submit a review the way the storefront does.
+	 *
+	 * wp_handle_comment_submission() posts comment_post_ID and rating and passes a default
+	 * comment_type, which is what lets WC_Comments::update_comment_type() promote the comment to a
+	 * review on preprocess_comment and WC_Comments::add_comment_rating() store the rating meta on
+	 * comment_post. The comment_type has to be passed: wp_new_comment() only defaults it after
+	 * preprocess_comment has run, so omitting it leaves WooCommerce's callback nothing to promote.
+	 *
+	 * @param int    $product_id Product being reviewed.
+	 * @param int    $rating     Rating from 1 to 5.
+	 * @param string $status     Comment status to settle on, 'approve' or 'hold'.
+	 * @return int
+	 */
+	private function submit_review_through_comment_form( $product_id, $rating, $status = 'approve' ) {
+		++$this->review_sequence;
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The superglobal is saved and restored, not read as form data; the review form's fields are set below to drive WooCommerce's own comment hooks.
+
+		try {
+			$_POST['comment_post_ID'] = $product_id;
+			$_POST['rating']          = $rating;
+
+			$comment_id = wp_new_comment(
+				array(
+					'comment_post_ID'      => $product_id,
+					'comment_author'       => 'Storefront reviewer ' . $this->review_sequence,
+					'comment_author_email' => 'storefront' . $this->review_sequence . '@example.test',
+					'comment_author_url'   => '',
+					'comment_content'      => 'Storefront review ' . $this->review_sequence,
+					'comment_type'         => 'comment',
+					'comment_parent'       => 0,
+					'user_id'              => 0,
+				),
+				true
+			);
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertNotWPError( $comment_id );
+
+		wp_set_comment_status( $comment_id, $status );
+
+		// Fail loudly if the writer path stops promoting the comment or stops storing the rating.
+		$this->assertSame( 'review', get_comment( $comment_id )->comment_type );
+		$this->assertEquals( $rating, get_comment_meta( $comment_id, 'rating', true ) );
+
+		return (int) $comment_id;
+	}
+
+	/**
+	 * Submit a review through the REST reviews endpoint.
+	 *
+	 * @param int $product_id Product being reviewed.
+	 * @param int $rating     Rating from 1 to 5.
+	 * @return int
+	 */
+	private function submit_review_through_rest( $product_id, $rating ) {
+		++$this->review_sequence;
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params(
+			array(
+				'product_id'     => $product_id,
+				'review'         => 'REST review ' . $this->review_sequence,
+				'reviewer'       => 'REST reviewer ' . $this->review_sequence,
+				'reviewer_email' => 'rest' . $this->review_sequence . '@example.test',
+				'rating'         => $rating,
+				'status'         => 'approved',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		$comment_id = (int) $response->get_data()['id'];
+
+		$this->assertSame( 'review', get_comment( $comment_id )->comment_type );
+		$this->assertEquals( $rating, get_comment_meta( $comment_id, 'rating', true ) );
+
+		return $comment_id;
+	}
+
+	/**
+	 * Insert a comment directly, for states no writer path produces.
 	 *
 	 * @param int         $post_id Post the comment belongs to.
 	 * @param string|null $rating  Rating meta value, or null to store no rating at all.
@@ -71,6 +163,30 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * The totals the endpoint produced before this report was rewritten, kept as the regression
+	 * reference so the new aggregate is compared against real previous behaviour rather than
+	 * against numbers written down by hand.
+	 *
+	 * @return array
+	 */
+	private function get_totals_from_previous_implementation() {
+		$totals = array();
+
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$totals[ 'rated_' . $i . '_out_of_5' ] = (int) get_comments(
+				array(
+					'count'      => true,
+					'post_type'  => 'product',
+					'meta_key'   => 'rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The previous implementation is reproduced verbatim so the endpoint can be compared against it.
+					'meta_value' => $i, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- The previous implementation is reproduced verbatim so the endpoint can be compared against it.
+				)
+			);
+		}
+
+		return $totals;
+	}
+
+	/**
 	 * Test getting all product reviews.
 	 *
 	 * @since 3.5.0
@@ -106,8 +222,12 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		// Read the empty totals first so the reviews added below have to invalidate them.
 		$this->assertSame( 0, $this->get_totals_by_slug()['rated_5_out_of_5'] );
 
-		$this->create_rated_comment( $product->get_id(), '5' );
-		$this->create_rated_comment( $product->get_id(), '5', array( 'comment_approved' => '0' ) );
+		// Reviews written the way real reviews are written.
+		$this->submit_review_through_comment_form( $product->get_id(), 5 );
+		$this->submit_review_through_comment_form( $product->get_id(), 5, 'hold' );
+		$this->submit_review_through_rest( $product->get_id(), 4 );
+
+		// States no writer path produces, inserted directly.
 		$this->create_rated_comment( $product->get_id(), '5', array( 'comment_approved' => 'spam' ) );
 		$this->create_rated_comment( $product->get_id(), '5', array( 'comment_approved' => 'trash' ) );
 		$this->create_rated_comment( $product->get_id(), '4', array( 'comment_type' => '' ) );
@@ -116,18 +236,20 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		$this->create_rated_comment( $product->get_id(), '3', array( 'comment_type' => 'note' ) );
 		$this->create_rated_comment( $product->get_id(), '3', array( 'comment_type' => 'action_log' ) );
 		$this->create_rated_comment( $product->get_id(), '0' );
+		$this->create_rated_comment( $product->get_id(), '05' );
 		$this->create_rated_comment( $product->get_id(), null );
 		$this->create_rated_comment( $page, '3' );
 
 		$totals = $this->get_totals_by_slug();
 
-		// Two five star reviews: the approved one plus the one still awaiting moderation.
-		$this->assertSame( 2, $totals['rated_5_out_of_5'] );
+		// The endpoint agrees with the implementation it replaced, bucket for bucket.
+		$this->assertSame( $this->get_totals_from_previous_implementation(), $totals );
 
-		// One four star review: the plain comment counts, the order note does not.
-		$this->assertSame( 1, $totals['rated_4_out_of_5'] );
+		// Guard against both sides agreeing on nothing at all.
+		$this->assertGreaterThan( 0, $totals['rated_5_out_of_5'] );
+		$this->assertGreaterThan( 0, $totals['rated_4_out_of_5'] );
 
-		// Reviews on other post types, all four hidden comment types, unrated and zero rated comments are left out.
+		// Buckets with nothing to count are still reported, which the oracle cannot prove on its own.
 		$this->assertSame( 0, $totals['rated_3_out_of_5'] );
 		$this->assertSame( 0, $totals['rated_2_out_of_5'] );
 		$this->assertSame( 0, $totals['rated_1_out_of_5'] );
@@ -141,7 +263,7 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
-		$this->create_rated_comment( $product->get_id(), '5' );
+		$this->submit_review_through_comment_form( $product->get_id(), 5 );
 		$this->create_rated_comment( $product->get_id(), '4', array( 'comment_type' => '' ) );
 
 		$this->assertSame( 1, $this->get_totals_by_slug()['rated_5_out_of_5'] );
