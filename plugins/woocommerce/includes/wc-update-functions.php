@@ -43,6 +43,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3719,4 +3720,52 @@ function wc_update_11201_invalidate_analytics_reports_cache() {
 	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
 		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
 	}
+}
+
+/**
+ * Reset stale returning-customer markers on refund rows.
+ *
+ * Refund rows in the order stats table are written with a NULL returning_customer, but earlier
+ * first-order recalculations could overwrite that marker and never restore it. Customer aggregates
+ * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
+ * and restores the Orders report fallback to the refunded order's value.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_11202_reset_refund_returning_customer_markers() {
+	global $wpdb;
+
+	$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+	$orders_table      = OrderUtil::get_table_for_orders();
+	$hpos_enabled      = OrderUtil::custom_orders_table_usage_is_enabled();
+	$order_id_column   = $hpos_enabled ? 'id' : 'ID';
+	$order_type_column = $hpos_enabled ? 'type' : 'post_type';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+	$refund_ids = $wpdb->get_col(
+		"SELECT stats.order_id FROM {$order_stats_table} AS stats
+		INNER JOIN {$orders_table} AS orders ON orders.{$order_id_column} = stats.order_id
+		WHERE stats.returning_customer IS NOT NULL AND orders.{$order_type_column} = 'shop_order_refund'
+		LIMIT 250"
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( ! empty( $refund_ids ) ) {
+		$id_placeholders = implode( ', ', array_fill( 0, count( $refund_ids ), '%d' ) );
+		$updated         = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name cannot be prepared; placeholders are generated per ID.
+			$wpdb->prepare( "UPDATE {$order_stats_table} SET returning_customer = NULL WHERE order_id IN ( {$id_placeholders} )", $refund_ids )
+		);
+
+		if ( $updated ) {
+			return true;
+		}
+	}
+
+	// Reports cached against half-migrated data would otherwise keep being served.
+	wc_update_11201_invalidate_analytics_reports_cache();
+
+	return false;
 }

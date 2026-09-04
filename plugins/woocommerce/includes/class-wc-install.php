@@ -358,6 +358,9 @@ class WC_Install {
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
 		),
+		'11.2.0-2' => array(
+			'wc_update_11202_reset_refund_returning_customer_markers',
+		),
 	);
 
 	/**
