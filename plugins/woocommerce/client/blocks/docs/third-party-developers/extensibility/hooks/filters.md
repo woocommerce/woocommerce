@@ -74,6 +74,7 @@
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
+- [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
@@ -1079,7 +1080,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ### Description
 
-Filters the variation option name for custom option slugs.
+Entries are metadata meant for display next to the cart item. Set `raw_key` so clients can find your entry without matching a translated label. Data you do not intend to display belongs in your `extensions` namespace.
 
 ### Parameters
 
@@ -1818,6 +1819,32 @@ apply_filters( 'woocommerce_store_api_rate_limit_options', array $rate_limit_opt
 ### Source
 
 - [StoreApi/Utilities/RateLimits.php](../../../../../../src/StoreApi/Utilities/RateLimits.php)
+
+---
+
+## woocommerce_thankyou_order_failed_text
+
+
+Filters the message shown when an order has failed.
+
+```php
+apply_filters( 'woocommerce_thankyou_order_failed_text', string $message, \WC_Order $order )
+```
+
+### Description
+
+Runs after the legacy order-received filter so callbacks can customize the final failed-order message.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $message | string | The failed order message. |
+| $order | \WC_Order | The failed order. |
+
+### Source
+
+- [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
 
 ---
 

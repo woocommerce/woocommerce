@@ -157,7 +157,9 @@ class CartItemSchema extends ItemSchema {
 		/**
 		 * Filters cart item data.
 		 *
-		 * Filters the variation option name for custom option slugs.
+		 * Entries are metadata meant for display next to the cart item. Set `raw_key` so
+		 * clients can find your entry without matching a translated label. Data you do not
+		 * intend to display belongs in your `extensions` namespace.
 		 *
 		 * @since 4.3.0
 		 *
@@ -170,9 +172,7 @@ class CartItemSchema extends ItemSchema {
 		$item_data       = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
 		$clean_item_data = [];
 		foreach ( $item_data as $data ) {
-			// We will check each piece of data in the item data element to ensure it is scalar. Extensions could add arrays
-			// to this, which would cause a fatal in wp_strip_all_tags. If it is not scalar, we will return an empty array,
-			// which will be filtered out in get_item_data (after this function has run).
+			// A non-scalar value would fatal in wp_strip_all_tags, so drop the whole entry.
 			foreach ( $data as $data_value ) {
 				if ( ! is_scalar( $data_value ) ) {
 					continue 2;
