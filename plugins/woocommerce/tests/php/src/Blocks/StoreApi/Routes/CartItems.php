@@ -399,21 +399,23 @@ class CartItems extends ControllerTestCase {
 		};
 		add_filter( 'woocommerce_get_item_data', $filter );
 
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart       = WC()->cart->get_cart();
-		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 
-		$entry = $response->get_data()['item_data'][0];
-		$this->assertSame( 'gift_message', $entry['raw_key'] );
-		$this->assertSame( 'Gift message', $entry['name'], 'The display label must be left alone.' );
+			$entry = $response->get_data()['item_data'][0];
+			$this->assertSame( 'gift_message', $entry['raw_key'] );
+			$this->assertSame( 'Gift message', $entry['name'], 'The display label must be left alone.' );
 
-		$validate = new ValidateSchema( $controller->get_item_schema() );
-		$diff     = $validate->get_diff_from_object( $response->get_data() );
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
-
-		remove_filter( 'woocommerce_get_item_data', $filter );
+			$validate = new ValidateSchema( $controller->get_item_schema() );
+			$diff     = $validate->get_diff_from_object( $response->get_data() );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertEmpty( $diff, print_r( $diff, true ) );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
 	}
 
 	/**
@@ -435,14 +437,16 @@ class CartItems extends ControllerTestCase {
 		};
 		add_filter( 'woocommerce_get_item_data', $filter );
 
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart       = WC()->cart->get_cart();
-		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 
-		$this->assertSame( 'acme&amp;co_gift', $response->get_data()['item_data'][0]['raw_key'] );
-
-		remove_filter( 'woocommerce_get_item_data', $filter );
+			$this->assertSame( 'acme&amp;co_gift', $response->get_data()['item_data'][0]['raw_key'] );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
 	}
 
 	/**
@@ -463,18 +467,20 @@ class CartItems extends ControllerTestCase {
 		};
 		add_filter( 'woocommerce_get_item_data', $filter );
 
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart       = WC()->cart->get_cart();
-		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 
-		$entry = $response->get_data()['item_data'][0];
-		$this->assertArrayNotHasKey( 'raw_key', $entry, 'raw_key must not be invented.' );
-		$this->assertSame( 'gifting_to_hidden', $entry['name'] );
-		$this->assertSame( 'recipient@example.com', $entry['value'] );
-		$this->assertSame( '1', $entry['hidden'], 'hidden is string-coerced by wp_kses_post().' );
-
-		remove_filter( 'woocommerce_get_item_data', $filter );
+			$entry = $response->get_data()['item_data'][0];
+			$this->assertArrayNotHasKey( 'raw_key', $entry, 'raw_key must not be invented.' );
+			$this->assertSame( 'gifting_to_hidden', $entry['name'] );
+			$this->assertSame( 'recipient@example.com', $entry['value'] );
+			$this->assertSame( '1', $entry['hidden'], 'hidden is string-coerced by wp_kses_post().' );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
 	}
 
 	/**
