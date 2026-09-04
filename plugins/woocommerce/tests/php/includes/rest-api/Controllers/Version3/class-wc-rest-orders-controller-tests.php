@@ -399,6 +399,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		return array(
 			'billing first name'  => array( 'billing_first_name', 'S36BillingFirstName', true ),
 			'billing company'     => array( 'billing_company', 'S36BillingCompany', true ),
+			'billing address 1'   => array( 'billing_address_1', 'S36BillingAddressOne', true ),
 			'billing address 2'   => array( 'billing_address_2', 'S36BillingAddressTwo', true ),
 			'billing city'        => array( 'billing_city', 'S36BillingCity', true ),
 			'billing postcode'    => array( 'billing_postcode', 'S36BillingPostcode', true ),
