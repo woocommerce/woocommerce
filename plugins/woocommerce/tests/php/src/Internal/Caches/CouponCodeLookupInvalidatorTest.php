@@ -415,6 +415,60 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A stale lookup entry whose code still resolves is overwritten with the ids it resolves to now.
+	 */
+	public function test_a_stale_lookup_entry_that_still_resolves_is_overwritten(): void {
+		$code = 'stale-overwrite';
+
+		// Backdated so the "newest wins" ordering of get_ids_by_code() is deterministic.
+		$older_id = wp_insert_post(
+			array(
+				'post_type'     => 'shop_coupon',
+				'post_title'    => $code,
+				'post_status'   => 'publish',
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - HOUR_IN_SECONDS ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ),
+			)
+		);
+		$newer_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => $code,
+				'post_status' => 'publish',
+			)
+		);
+
+		$cache_key = $this->sut->get_cache_key( $code );
+
+		$this->assertSame( $newer_id, wc_get_coupon_id_by_code( $code ), 'The newest coupon should win the lookup while both are published' );
+		$this->assertSame(
+			array( $newer_id, $older_id ),
+			array_map( 'absint', (array) wp_cache_get( $cache_key, 'coupons' ) ),
+			'Both published coupons should be cached under the code'
+		);
+
+		wp_update_post(
+			array(
+				'ID'          => $older_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		// Simulate an in-flight lookup writing the pre-unpublish list back after the invalidation.
+		wp_cache_set( $cache_key, array( $newer_id, $older_id ), 'coupons' );
+
+		$this->assertSame( $newer_id, wc_get_coupon_id_by_code( $code ), 'The still published coupon should resolve once the stale entry is rejected' );
+		$this->assertSame(
+			array( $newer_id ),
+			array_map( 'absint', (array) wp_cache_get( $cache_key, 'coupons' ) ),
+			'A rejected entry whose code still resolves should be overwritten with the remaining ids, not deleted'
+		);
+
+		wp_delete_post( $newer_id, true );
+		wp_delete_post( $older_id, true );
+	}
+
+	/**
 	 * Data provider for the representations of a code that resolve the same coupon but are cached under another key.
 	 *
 	 * Each case gives the stored (sanitized) code and the alias a caller could pass to wc_get_coupon_id_by_code().
