@@ -302,7 +302,7 @@ class ReceiptRenderingEngine {
 			if ( false === $line_item_product ) {
 				$line_item_title = $line_item->get_name();
 			} elseif ( $line_item_product instanceof \WC_Product_Variation ) {
-				$parent_product = wc_get_product( $line_item_product->get_parent_id() );
+				$parent_product   = wc_get_product( $line_item_product->get_parent_id() );
 				$line_item_title = $parent_product instanceof \WC_Product
 					? $parent_product->get_name() . '. ' . $line_item_product->get_attribute_summary()
 					: $line_item->get_name();
