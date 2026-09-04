@@ -225,6 +225,10 @@ final class ExtendSchema {
 				if ( is_null( $callbacks['data_callback'] ) ) {
 					continue;
 				}
+
+				// A callback that throws leaves $data untouched, so reset it or this namespace inherits the previous one's data.
+				$data = [];
+
 				try {
 					$data = $callbacks['data_callback']( ...$passed_args );
 
@@ -259,6 +263,9 @@ final class ExtendSchema {
 				if ( is_null( $callbacks['schema_callback'] ) ) {
 					continue;
 				}
+
+				$schema = [];
+
 				try {
 					$schema = $callbacks['schema_callback']( ...$passed_args );
 
