@@ -490,6 +490,7 @@ class WC_Product_Variable extends WC_Product {
 			return null;
 		}
 
+		// method_exists() rather than has_callable(): is_callable() is true for any store that declares __call(), which then throws for this method.
 		$data_store = $this->data_store;
 		if ( ! $data_store instanceof WC_Data_Store || ! method_exists( $data_store->get_current_class_name(), 'get_purchasable_variation_candidates' ) ) {
 			return null;
@@ -501,7 +502,7 @@ class WC_Product_Variable extends WC_Product {
 			return $cached;
 		}
 
-		// @phpstan-ignore-next-line method.notFound
+		// @phpstan-ignore-next-line method.notFound (Guarded by method_exists() above and called via __call() on the underlying data store instance.)
 		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
 		$candidate_ids = array_values( array_unique( array_intersect( $candidate_ids, $variation_ids ) ) );
 
