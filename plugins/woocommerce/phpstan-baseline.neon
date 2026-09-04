@@ -63055,12 +63055,6 @@ parameters:
 			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
 
 		-
-			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
-
-		-
 			message: '#^Constant Automattic\\WooCommerce\\Internal\\ReceiptRendering\\ReceiptRenderingEngine\:\:KNOWN_CARD_TYPES is unused\.$#'
 			identifier: classConstant.unused
 			count: 1

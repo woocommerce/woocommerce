@@ -319,4 +319,33 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'payment_method_section_title', $rendered );
 	}
+
+	/**
+	 * @testdox 'generate_receipt' falls back to the line item name when the variation parent lookup dangles.
+	 */
+	public function test_generate_receipt_falls_back_to_item_name_when_variation_parent_is_deleted() {
+		global $wpdb;
+		// Arrange - an order holding a variation item whose parent product
+		// lookup dangles (failed cleanup, out-of-band delete, stale cache
+		// serving the variation after its parent is gone). The orphan is
+		// built at the row level on purpose: deleting through the API
+		// cascades to the children, so it cannot produce this state.
+		$parent    = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( current( $parent->get_children() ) );
+
+		$order = OrderHelper::create_order( 1, $variation );
+
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $parent->get_id() ) );
+		clean_post_cache( $parent->get_id() );
+		$this->assertFalse( wc_get_product( $parent->get_id() ) );
+		$items = $order->get_items();
+		$this->assertInstanceOf( \WC_Product_Variation::class, current( $items )->get_product() );
+
+		// Act - rendering must not fatal on the dangling parent lookup.
+		$rendered = $this->render_receipt( $order );
+
+		// Assert - the line item name is used as the title fallback.
+		$item = current( $order->get_items() );
+		$this->assertStringContainsString( $item->get_name(), $rendered );
+	}
 }

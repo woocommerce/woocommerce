@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when generating a receipt for an order containing a variation item whose parent product was deleted. The receipt now falls back to the line item name.
