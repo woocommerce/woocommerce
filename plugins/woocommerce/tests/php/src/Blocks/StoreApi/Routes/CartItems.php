@@ -382,6 +382,102 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * `raw_key` gives extensions a name to match on that is never translated.
+	 *
+	 * @testdox Cart item_data publishes raw_key and it matches the schema.
+	 */
+	public function test_item_data_raw_key_is_published_and_matches_the_schema() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'raw_key' => 'gift_message',
+				'name'    => 'Gift message',
+				'value'   => 'Happy birthday',
+				'display' => 'Happy birthday!',
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart       = WC()->cart->get_cart();
+		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+		$entry = $response->get_data()['item_data'][0];
+		$this->assertSame( 'gift_message', $entry['raw_key'] );
+		$this->assertSame( 'Gift message', $entry['name'], 'The display label must be left alone.' );
+
+		$validate = new ValidateSchema( $controller->get_item_schema() );
+		$diff     = $validate->get_diff_from_object( $response->get_data() );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		$this->assertEmpty( $diff, print_r( $diff, true ) );
+
+		remove_filter( 'woocommerce_get_item_data', $filter );
+	}
+
+	/**
+	 * Extensions are told to keep `raw_key` to lowercase letters, digits, `_`, `-` and `/`.
+	 * This pins what they get if they do not.
+	 *
+	 * @testdox Cart item_data raw_key is entity-encoded like every other value.
+	 */
+	public function test_item_data_raw_key_is_entity_encoded() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'raw_key' => 'acme&co_gift',
+				'name'    => 'Gift message',
+				'value'   => 'Happy birthday',
+				'display' => 'Happy birthday!',
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart       = WC()->cart->get_cart();
+		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+		$this->assertSame( 'acme&amp;co_gift', $response->get_data()['item_data'][0]['raw_key'] );
+
+		remove_filter( 'woocommerce_get_item_data', $filter );
+	}
+
+	/**
+	 * Entries written before `raw_key` existed must keep working. No schema validation
+	 * here on purpose: the validator reports the fields such an entry omits.
+	 *
+	 * @testdox Cart item_data still passes through entries that set no raw_key.
+	 */
+	public function test_item_data_without_raw_key_is_unchanged() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'name'   => 'gifting_to_hidden',
+				'value'  => 'recipient@example.com',
+				'hidden' => true,
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart       = WC()->cart->get_cart();
+		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+		$entry = $response->get_data()['item_data'][0];
+		$this->assertArrayNotHasKey( 'raw_key', $entry, 'raw_key must not be invented.' );
+		$this->assertSame( 'gifting_to_hidden', $entry['name'] );
+		$this->assertSame( 'recipient@example.com', $entry['value'] );
+		$this->assertSame( '1', $entry['hidden'], 'hidden is string-coerced by wp_kses_post().' );
+
+		remove_filter( 'woocommerce_get_item_data', $filter );
+	}
+
+	/**
 	 * Test schema matches responses.
 	 *
 	 * Tests schema of both products in cart to cover as much schema as possible.
