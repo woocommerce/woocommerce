@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { isObject } from '../types/type-guards';
+import { isObject } from '@woocommerce/types/type-guards';
 
 export const isWidgetEditorPage = ( store: unknown ): boolean => {
 	if ( isObject( store ) ) {

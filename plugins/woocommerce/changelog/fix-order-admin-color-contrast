@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve text color contrast on the admin order edit screen so order data, line-item details, and column headers meet WCAG AA accessibility standards.

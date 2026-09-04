@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep unsaved settings retryable after a failed save and clear the stored error once a save succeeds.

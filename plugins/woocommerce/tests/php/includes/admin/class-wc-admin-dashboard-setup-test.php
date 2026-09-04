@@ -262,6 +262,12 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 						public function in_progress_label() {
 							return 'Test account';
 						}
+						public function get_image_url() {
+							return WC()->plugin_url() . '/assets/images/task_list/payment-illustration.svg';
+						}
+						public function get_image_alt() {
+							return 'Payment illustration';
+						}
 					},
 				);
 			}
@@ -308,6 +314,111 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		} else {
 			$this->assertMatchesRegularExpression( "/Step {$step_number} of {$tasks_count}/", $this->get_widget_output() );
 		}
+	}
+
+	/**
+	 * Tests the widget renders a task-provided contextual image.
+	 *
+	 * @testdox Widget output uses the task's own image_url and image_alt when provided.
+	 */
+	public function test_widget_output_uses_task_provided_image() {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
+			public function is_complete() {
+				return false;
+			}
+			public function is_hidden() {
+				return false;
+			}
+			public function get_viewable_tasks() {
+				return array(
+					new class() extends \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task {
+						public function get_id() {
+							return 'third-party-task';
+						}
+						public function get_title() {
+							return 'Third party task';
+						}
+						public function get_content() {
+							return 'A task added by an extension.';
+						}
+						public function get_time() {
+							return '5 minutes';
+						}
+						public function is_complete() {
+							return false;
+						}
+						public function get_image_url() {
+							return 'https://example.com/custom-illustration.png';
+						}
+						public function get_image_alt() {
+							return 'Custom extension illustration';
+						}
+					},
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$widget = $this->get_widget();
+		$widget->set_task_list( $task_list );
+
+		ob_start();
+		$widget->render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'https://example.com/custom-illustration.png', $html );
+		$this->assertStringContainsString( 'Custom extension illustration', $html );
+		$this->assertStringNotContainsString( 'dashboard-widget-setup.png', $html );
+	}
+
+	/**
+	 * Tests the widget falls back to the default image when the task has none.
+	 *
+	 * @testdox Widget output falls back to the generic setup image when the task provides no image.
+	 */
+	public function test_widget_output_falls_back_to_default_image() {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
+			public function is_complete() {
+				return false;
+			}
+			public function is_hidden() {
+				return false;
+			}
+			public function get_viewable_tasks() {
+				return array(
+					new class() extends \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task {
+						public function get_id() {
+							return 'third-party-task';
+						}
+						public function get_title() {
+							return 'Third party task';
+						}
+						public function get_content() {
+							return 'A task added by an extension.';
+						}
+						public function get_time() {
+							return '5 minutes';
+						}
+						public function is_complete() {
+							return false;
+						}
+					},
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$widget = $this->get_widget();
+		$widget->set_task_list( $task_list );
+
+		ob_start();
+		$widget->render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'dashboard-widget-setup.png', $html );
+		$this->assertStringContainsString( 'WooCommerce setup illustration', $html );
 	}
 
 	/**

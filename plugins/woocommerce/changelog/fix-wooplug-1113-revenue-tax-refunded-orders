@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Exclude refunds of never-paid or never-completed orders from Revenue analytics filtered by paid or completed date, so manually refunded failed orders no longer produce phantom returns, negative net sales and uncollected tax amounts. Applies to refunds synced after this fix; previously imported rows update on re-sync or historical data re-import.

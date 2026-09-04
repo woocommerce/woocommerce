@@ -24,7 +24,7 @@ jQuery( function ( $ ) {
 	 * @return {Object} API object with validate and submit methods
 	 */
 	function createCheckoutPlaceOrderApi() {
-		var $form = wc.customPlaceOrderButton.__getForm();
+		var $form = window.wc.customPlaceOrderButton.__getForm();
 
 		return {
 			/**
@@ -124,12 +124,12 @@ jQuery( function ( $ ) {
 	// After the update, init_payment_methods() will trigger payment method selection,
 	// which will call render() again for the active gateway.
 	$( document.body ).on( 'update_checkout', function () {
-		wc.customPlaceOrderButton.__cleanup();
+		window.wc.customPlaceOrderButton.__cleanup();
 	} );
 
 	// When a gateway registers after a page load, render its button if it's selected.
 	$( document.body ).on( 'wc_custom_place_order_button_registered', function ( e, gatewayId ) {
-		wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
+		window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
 	} );
 
 	var wc_checkout_form = {
@@ -162,7 +162,7 @@ jQuery( function ( $ ) {
 				// Initialize the custom place order button for the "order-pay" page
 				var $orderPayMethod = this.$order_review.find( 'input[name="payment_method"]:checked' );
 				if ( $orderPayMethod.length ) {
-					wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
+					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
 					$orderPayMethod.trigger( 'click' );
 				}
 			}
@@ -276,7 +276,7 @@ jQuery( function ( $ ) {
 			// This hides the default button immediately to prevent flash while the gateway JS loads
 			var $selectedMethod = $payment_methods.filter( ':checked' ).eq( 0 );
 			if ( $selectedMethod.length ) {
-				wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $selectedMethod.val() );
+				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $selectedMethod.val() );
 			}
 
 			// Trigger click event for selected method
@@ -327,7 +327,7 @@ jQuery( function ( $ ) {
 
 			// Handle custom place order button
 			var gatewayId = $( this ).val();
-			wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
+			window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
 
 			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
@@ -1097,7 +1097,7 @@ jQuery( function ( $ ) {
 				.find(
 					'.woocommerce-error[tabindex="-1"], .wc-block-components-notice-banner.is-error[tabindex="-1"]'
 				)
-				.focus();
+				.trigger( 'focus' );
 			$( document.body ).trigger( 'checkout_error', [ error_message ] );
 		},
 		wrapMessagesInsideLink: function ( $msgs ) {
@@ -1208,7 +1208,7 @@ jQuery( function ( $ ) {
 
 			$target
 				.find( '#coupon_code' )
-				.focus()
+				.trigger( 'focus' )
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
 				.attr( 'aria-describedby', 'coupon-error-notice' );
@@ -1303,6 +1303,11 @@ jQuery( function ( $ ) {
 							self.show_coupon_error(
 								response,
 								$coupon_field.parent()
+							);
+
+							$( document.body ).trigger(
+								'errored_coupon_in_checkout',
+								[ data.coupon_code, response ]
 							);
 						}
 

@@ -72,6 +72,37 @@ add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 ```
 
+This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
+endpoint. Sites without proxy tracking enabled do not get it.
+
+Events arriving through it are untrusted. Server-derived properties replace
+client values; the reserved set is
+`WC_Analytics_Tracking::get_reserved_property_names()`. `_lg`, `_dl`, and
+`_dr` are client values because they describe the page, not the `/track` request.
+
+Input is limited. Long values are truncated with `…`, and the payload budget
+keeps the cheapest properties first. The same value limit applies to
+request-derived values and the session cookie.
+
+| Limit                     | Value |
+| ------------------------- | ----- |
+| Events per request        | 50    |
+| Properties per event      | 50    |
+| Members per array value   | 50    |
+| Characters per value      | 1000  |
+| Characters per name       | 100   |
+| Encoded payload per event | 4096  |
+| Pixel URL bytes           | 8192  |
+
+Invalid event names and oversized pixel URLs return an error. Events beyond the
+batch limit are ignored.
+
+**The filter must resolve to the same value for every request on a site.** One
+that varies by cohort, percentage or geo makes cached pages disagree with what
+`/track` decides, and makes the speed module install and uninstall itself on
+alternate runs. Turning it off also drops events from pages already held in a
+cache, whose visitors keep posting to an endpoint that no longer exists.
+
 ## Privacy & Consent Management
 
 ### WP Consent API Integration

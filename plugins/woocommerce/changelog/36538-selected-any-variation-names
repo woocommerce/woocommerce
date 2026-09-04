@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Include selected "Any" variation values in classic cart and checkout displays and in new order item names, and stop variation values already shown in an item name from being repeated as cart or order metadata, including on existing orders.

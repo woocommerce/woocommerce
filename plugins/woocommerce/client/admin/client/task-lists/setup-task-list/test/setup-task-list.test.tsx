@@ -33,6 +33,7 @@ jest.mock( '../components/task-headers', () => ( {
 		required: () => <div>required_header</div>,
 		completed: () => <div>completed_header</div>,
 	},
+	DefaultTaskHeader: () => <div>default_header</div>,
 } ) );
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
@@ -287,5 +288,70 @@ describe( 'TaskList', () => {
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should fall back to the DefaultTaskHeader for a task that has an image but no dedicated header or slot fill', () => {
+		const thirdPartyTask = {
+			...tasks.extension[ 0 ],
+			imageUrl: 'https://example.com/custom-illustration.png',
+			imageAlt: 'Custom illustration',
+		};
+		const { queryByText } = render(
+			<SetupTaskList
+				id="extended"
+				tasks={ [ thirdPartyTask ] }
+				title="List title"
+				query={ {} }
+				isComplete={ false }
+				isHidden={ false }
+				eventPrefix={ '' }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+				isVisible={ true }
+			/>
+		);
+		expect( queryByText( 'default_header' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should not render any task header for a task without an image, dedicated header, or slot fill', () => {
+		const { queryByText } = render(
+			<SetupTaskList
+				id="extended"
+				tasks={ [ ...tasks.extension ] }
+				title="List title"
+				query={ {} }
+				isComplete={ false }
+				isHidden={ false }
+				eventPrefix={ '' }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+				isVisible={ true }
+			/>
+		);
+		expect( queryByText( 'default_header' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should prefer a dedicated task header over the DefaultTaskHeader even when the task has an image', () => {
+		const taskWithImage = {
+			...tasks.setup[ 0 ],
+			imageUrl: 'https://example.com/custom-illustration.png',
+			imageAlt: 'Custom illustration',
+		};
+		const { queryByText } = render(
+			<SetupTaskList
+				id="extended"
+				tasks={ [ taskWithImage ] }
+				title="List title"
+				query={ {} }
+				isComplete={ false }
+				isHidden={ false }
+				eventPrefix={ '' }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+				isVisible={ true }
+			/>
+		);
+		expect( queryByText( 'optional_header' ) ).toBeInTheDocument();
+		expect( queryByText( 'default_header' ) ).not.toBeInTheDocument();
 	} );
 } );

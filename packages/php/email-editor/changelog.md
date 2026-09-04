@@ -2,11 +2,62 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.0](https://github.com/woocommerce/email-editor/releases/tag/2.17.0) - 2026-09-03 
+
+-   Patch - Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails. [#67790]
+-   Patch - Guard against non-array return values from the woocommerce_email_editor_preload_rest_api_routes filter. [#68021]
+-   Patch - Preload the recent emails used by the template selection modal, and add the woocommerce_email_editor_preload_rest_api_routes filter. [#67911]
+-   Patch - Render spacing between Social Links icons in emails and match pill-shape icon padding with the editor. [#67642]
+-   Patch - Render the email editor HTML only once per request — a plugin calling WP_Screen::get() from admin_enqueue_scripts (e.g. Yoast SEO Premium) re-fires the replace_editor filter mid-render and echoed a second editor container that broke the editor [#68150]
+-   Minor - Add a value-interception extension point to the Personalizer. [#66874]
+
+## [2.16.1](https://github.com/woocommerce/email-editor/releases/tag/2.16.1) - 2026-08-14 
+
+-   Patch - Render a block's background color once instead of twice, which made a translucent palette color appear darker than intended. [#67673]
+
+## [2.16.0](https://github.com/woocommerce/email-editor/releases/tag/2.16.0) - 2026-08-12 
+
+-   Patch - Center table header cells in rendered emails when no alignment is set, so they match the editor canvas instead of falling back to left. [#67443]
+-   Patch - Prevent inline button wrapper tables from leaving extra baseline space below buttons in rendered block emails. [#67466]
+-   Patch - Prevent long unbreakable words in paragraph, heading, and site title blocks from expanding the wrapping table and breaking the rendered email layout. [#67519]
+-   Patch - Update PHP development dependencies to versions that resolve reported security advisories. [#67595]
+-   Minor - Add Renderer::render_from_content() for rendering block markup that has no backing post, such as file-based templates. See docs/rendering.md. [#67025]
+-   Minor - Add rendering context awareness to the Personalizer: personalize_content() accepts a text/html rendering context which is exposed to tag callbacks, Personalization_Tag supports an optional text value type with automatic escaping in HTML content, and tags embedded inside larger link URLs are now replaced correctly. [#66937]
+-   Minor - Allow integrations to authorize and handle send-preview requests without a backing post [#67025]
+
+## [2.15.1](https://github.com/woocommerce/email-editor/releases/tag/2.15.1) - 2026-07-30 
+
+-   Patch - Ensure block captions keep only the allowed formatting tags and attributes, including when the authored caption markup is malformed. [#67079]
+-   Patch - Update wp-coding-standards/wpcs to 3.4.1 (security release). [#67034]
+
+## [2.15.0](https://github.com/woocommerce/email-editor/releases/tag/2.15.0) - 2026-07-28 
+
+-   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
+-   Patch - Render a Query Loop's post-template grid as an email-safe table of columns. Grid layouts (e.g. a 3-column sponsor logo grid) previously collapsed to a single stacked column in email clients because CSS grid isn't supported; the post-template's items are now re-flowed into table columns matching the author's column count. [#66993]
+
+## [2.14.2](https://github.com/woocommerce/email-editor/releases/tag/2.14.2) - 2026-07-24 
+
+-   Patch - Clamp an oversized raw image width in email galleries down to the cell it renders in (scaling height to keep the aspect ratio), so wide originals no longer blow out the layout in Outlook, and drop the web-only class the sanitizer preserves. [#66824]
+-   Patch - Ensure emails render global font weight, style, and letter spacing. [#66620]
+-   Patch - For image blocks without a set width, only detect the width for local uploads images and fall back to the max width for external images. [#66729]
+-   Patch - Keep email galleries in normal document flow so the block after a gallery (e.g. a heading) keeps its vertical spacing. The gallery wrapper table's align="left" rendered as a float in email clients, pulling the gallery out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS. [#66833]
+-   Patch - Limit the front end email preview to published emails or users who can read the post, so unpublished emails are no longer shown to logged out visitors. [#66727]
+-   Patch - Wrap overflowing button/navigation rows in emails instead of stretching the layout. When auto-width buttons don't fit on one line, they now wrap (Gmail, Apple Mail, webmail) or stack vertically (Outlook) rather than pushing the email past its content width. [#66891]
+-   Patch - Render email galleries with the same number of columns the block author chose (up to 8) instead of clamping to 5. Clamping wide galleries forced extra partial rows whose trailing images stretched to a size the author never set. [#66801]
+
+## [2.14.1](https://github.com/woocommerce/email-editor/releases/tag/2.14.1) - 2026-07-16 
+
+-   Patch - Fix email gallery aspect-ratio crop misclassifying images whose src contains a query-string ampersand (e.g. CDN URLs) as server-cropped, which stamped distorting fixed dimensions on uncropped images. The renderer now detects a server crop by comparing the filter result to the original URL before escaping. [#66739]
+-   Patch - Honor the gallery block aspect ratio (crop) when rendering emails. Cropped images now fall back to CSS cropping and expose the `woocommerce_email_editor_gallery_cropped_image_url` filter so integrations can serve server-side-cropped images that render the crop in every email client. [#66570]
+-   Patch - Improve email editor layout rendering for better parity with the editor: include padding and borders in inner (e.g. image) width calculations so bordered columns no longer overflow, nest a padded group's root and container padding instead of stacking them on each block, and stop using the global vertical block spacing as a horizontal gap between columns. [#66165]
+-   Patch - Preserve percentage widths for email editor columns in previews and rendered emails. [#65868]
+-   Patch - Update Composer dev dependencies. [#65999]
+
 ## [2.14.0](https://github.com/woocommerce/email-editor/releases/tag/2.14.0) - 2026-06-15 
 
 -   Patch - Block email editor: render every child block of a quote, render the citation only once, and stop emitting a quote-within-a-quote. [#64746]
--   Minor - Add support for Vimeo, TikTok, and Dailymotion embeds in the Email Editor package. [#65502]
 -   Patch - Email Editor: fix media-text RTL renderer test assertion. [#65215]
+-   Minor - Add support for Vimeo, TikTok, and Dailymotion embeds in the Email Editor package. [#65502]
 
 ## [2.13.0](https://github.com/woocommerce/email-editor/releases/tag/2.13.0) - 2026-05-04 
 
