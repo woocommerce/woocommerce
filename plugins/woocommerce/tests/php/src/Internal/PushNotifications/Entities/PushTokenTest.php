@@ -6,7 +6,9 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
 /**
@@ -15,6 +17,8 @@ use WC_Unit_Test_Case;
  * @covers PushToken
  */
 class PushTokenTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 	/**
 	 * @testdox Tests it's possible to set and get the ID.
 	 */
@@ -757,5 +761,266 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform' => 'invalid_platform',
 			)
 		);
+	}
+
+	/**
+	 * @testdox Tests GMT datetimes are held as Y-m-d H:i:s and converted for the response.
+	 */
+	public function test_it_converts_gmt_datetimes_for_the_response() {
+		$push_token = new PushToken(
+			array(
+				'created_at_gmt'        => '2026-08-01 09:30:00',
+				'last_confirmed_at_gmt' => '2026-08-11 14:45:12',
+			)
+		);
+
+		$this->assertSame( '2026-08-01 09:30:00', $push_token->get_created_at_gmt() );
+		$this->assertSame( '2026-08-11 14:45:12', $push_token->get_last_confirmed_at_gmt() );
+
+		$rest_format = $push_token->to_rest_format();
+
+		$this->assertSame( '2026-08-01T09:30:00', $rest_format['created_at_gmt'] );
+		$this->assertSame( '2026-08-11T14:45:12', $rest_format['last_confirmed_at_gmt'] );
+	}
+
+	/**
+	 * @testdox Tests a token can be rebuilt from the timestamps in its own REST output.
+	 *
+	 * Anything that stores a serialised token and reconstructs it later, such
+	 * as a queued payload or a cached fixture, would otherwise get null for
+	 * both timestamps with nothing to indicate they were dropped.
+	 */
+	public function test_it_can_be_rebuilt_from_its_own_rest_output() {
+		$original = ( new PushToken(
+			array(
+				'created_at_gmt'        => '2026-08-01 09:30:00',
+				'last_confirmed_at_gmt' => '2026-08-11 14:45:12',
+			)
+		) )->to_rest_format();
+
+		$rebuilt = new PushToken(
+			array(
+				'created_at_gmt'        => $original['created_at_gmt'],
+				'last_confirmed_at_gmt' => $original['last_confirmed_at_gmt'],
+			)
+		);
+
+		$this->assertSame( $original['created_at_gmt'], $rebuilt->to_rest_format()['created_at_gmt'] );
+		$this->assertSame( $original['last_confirmed_at_gmt'], $rebuilt->to_rest_format()['last_confirmed_at_gmt'] );
+	}
+
+	/**
+	 * @testdox Tests timestamps use the same shape as every other Woo REST _gmt field.
+	 *
+	 * `wc_rest_prepare_date_response()` emits `Y-m-d\TH:i:s`, which is what
+	 * `date_created_gmt` and `date_modified_gmt` carry on every other endpoint
+	 * the consumer parses. A different shape under the same `_gmt` suffix would
+	 * be read with the wrong parser.
+	 */
+	public function test_it_emits_timestamps_in_the_woo_rest_shape() {
+		$push_token = new PushToken( array( 'created_at_gmt' => '2026-08-01 09:30:00' ) );
+
+		$this->assertSame(
+			wc_rest_prepare_date_response( '2026-08-01 09:30:00' ),
+			$push_token->to_rest_format()['created_at_gmt']
+		);
+	}
+
+	/**
+	 * @testdox Tests an unparseable stored value normalizes to null rather than fataling.
+	 *
+	 * The parse returns false on input it cannot match, and returning that from
+	 * a `?string` method under strict types raises a TypeError. TypeError
+	 * extends Error, so no catch block on the send path would stop it becoming
+	 * a fatal.
+	 */
+	public function test_it_normalizes_an_unparseable_timestamp_to_null() {
+		$push_token = new PushToken( array( 'created_at_gmt' => 'not a date at all' ) );
+
+		$this->assertNull( $push_token->get_created_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests timestamps are read as UTC regardless of the store's timezone.
+	 *
+	 * Stored values are GMT by construction. Parsing them in the site timezone
+	 * would shift every value by the store's offset, which on a UK store would
+	 * appear only during BST.
+	 */
+	public function test_it_parses_timestamps_as_utc_not_the_site_timezone() {
+		$original = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'Europe/London' );
+
+		$push_token = new PushToken( array( 'created_at_gmt' => '2026-08-01 09:30:00' ) );
+
+		update_option( 'timezone_string', $original );
+
+		$this->assertSame( '2026-08-01T09:30:00', $push_token->to_rest_format()['created_at_gmt'] );
+	}
+
+	/**
+	 * @testdox Tests an impossible calendar date is rejected rather than rolled forward.
+	 *
+	 * PHP's date parsers accept 30 February and silently return 2 March. A
+	 * rolled-forward date is worse than no date, because it looks plausible and
+	 * nothing downstream can tell it was invented.
+	 */
+	public function test_it_rejects_an_impossible_calendar_date() {
+		$push_token = new PushToken( array( 'created_at_gmt' => '2026-02-30 09:30:00' ) );
+
+		$this->assertNull( $push_token->get_created_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests an unparseable timestamp is reported to the log.
+	 *
+	 * A null timestamp on its own is invisible. If the parse starts failing
+	 * across every token, the diagnostic tooling loses both fields and nothing
+	 * records why.
+	 */
+	public function test_it_logs_an_unparseable_timestamp() {
+		new PushToken(
+			array(
+				'id'             => 99,
+				'created_at_gmt' => 'not a date at all',
+			)
+		);
+
+		$this->assertLogged(
+			'warning',
+			'Unparseable push token timestamp.',
+			array(
+				'source'   => PushNotifications::FEATURE_NAME,
+				'token_id' => 99,
+				'value'    => 'not a date at all',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests an unknown timestamp is not reported to the log.
+	 *
+	 * The empty string and the MySQL zero date both mean the date is unknown,
+	 * which is expected rather than a fault. Reporting them would bury the
+	 * entries that matter.
+	 *
+	 * @dataProvider unknown_timestamp_provider
+	 * @param string $stored The stored value standing for an unknown date.
+	 */
+	public function test_it_does_not_log_an_unknown_timestamp( string $stored ) {
+		new PushToken( array( 'created_at_gmt' => $stored ) );
+
+		$this->assertEmpty( $this->captured_logs );
+	}
+
+	/**
+	 * Provides the stored values that mean the date is unknown.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function unknown_timestamp_provider(): array {
+		return array(
+			'empty string' => array( '' ),
+			'zero date'    => array( '0000-00-00 00:00:00' ),
+		);
+	}
+
+	/**
+	 * @testdox Tests a timestamp carrying its own offset is rejected.
+	 *
+	 * These fields are documented as GMT `Y-m-d H:i:s`. An offset in the input
+	 * overrides the timezone the parser is given, so a value written in local
+	 * time would be read as local time and reported as a different instant
+	 * rather than refused. The `T` separator the response emits carries no
+	 * offset and is accepted, covered by
+	 * test_it_can_be_rebuilt_from_its_own_rest_output.
+	 */
+	public function test_it_rejects_a_timestamp_carrying_its_own_offset() {
+		foreach ( array( '2026-08-01T09:30:00+05:00', '2026-08-01 09:30:00 UTC', '2026-08-01T09:30:00Z', '2026-08-01T09:30:00-00:30' ) as $stored ) {
+			$push_token = new PushToken( array( 'created_at_gmt' => $stored ) );
+
+			$this->assertNull(
+				$push_token->get_created_at_gmt(),
+				sprintf( 'Expected null for stored value "%s".', $stored )
+			);
+		}
+	}
+
+	/**
+	 * @testdox Tests timestamps default to null so an unknown date is distinguishable from a real one.
+	 *
+	 * The MySQL zero date and an empty string both mean "we don't know when
+	 * this happened", and must not be surfaced as if they were real dates.
+	 */
+	public function test_it_normalizes_unknown_timestamps_to_null() {
+		$this->assertNull( ( new PushToken() )->get_created_at_gmt() );
+		$this->assertNull( ( new PushToken() )->get_last_confirmed_at_gmt() );
+
+		$push_token = new PushToken(
+			array(
+				'created_at_gmt'        => '0000-00-00 00:00:00',
+				'last_confirmed_at_gmt' => '',
+			)
+		);
+
+		$this->assertNull( $push_token->get_created_at_gmt() );
+		$this->assertNull( $push_token->get_last_confirmed_at_gmt() );
+
+		$push_token->set_created_at_gmt( null );
+		$this->assertNull( $push_token->get_created_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests the REST format adds diagnostic fields without altering the WPCOM send payload.
+	 *
+	 * `to_wpcom_format()` is the per-token payload the dispatcher POSTs to WPCOM
+	 * on every notification, so it must stay unchanged by these additions.
+	 */
+	public function test_rest_format_adds_fields_without_changing_wpcom_format() {
+		$push_token = new PushToken(
+			array(
+				'id'                    => 77,
+				'user_id'               => 42,
+				'token'                 => 'rest_format_token',
+				'platform'              => PushToken::PLATFORM_APPLE,
+				'device_uuid'           => 'rest-format-uuid',
+				'origin'                => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale'         => 'en_US',
+				'metadata'              => array( 'app_version' => '21.1' ),
+				'created_at_gmt'        => '2026-08-01 09:30:00',
+				'last_confirmed_at_gmt' => '2026-08-11 14:45:12',
+			)
+		);
+
+		$wpcom_format = $push_token->to_wpcom_format();
+		$rest_format  = $push_token->to_rest_format();
+
+		$this->assertSame(
+			array( 'user_id', 'token', 'origin', 'device_locale' ),
+			array_keys( $wpcom_format )
+		);
+
+		$this->assertSame( 77, $rest_format['id'] );
+		$this->assertSame( 'rest-format-uuid', $rest_format['device_uuid'] );
+		$this->assertSame( PushToken::PLATFORM_APPLE, $rest_format['platform'] );
+		$this->assertSame( array( 'app_version' => '21.1' ), $rest_format['metadata'] );
+		$this->assertSame( '2026-08-01T09:30:00', $rest_format['created_at_gmt'] );
+		$this->assertSame( '2026-08-11T14:45:12', $rest_format['last_confirmed_at_gmt'] );
+		$this->assertSame( $wpcom_format, array_intersect_key( $rest_format, $wpcom_format ) );
+	}
+
+	/**
+	 * @testdox Tests the REST format reports metadata as an array when a token has none.
+	 *
+	 * Browser tokens and tokens registered before metadata existed have no value
+	 * stored, and the tooling should not have to handle both null and an array.
+	 */
+	public function test_rest_format_reports_absent_metadata_as_an_empty_array() {
+		$rest_format = ( new PushToken() )->to_rest_format();
+
+		$this->assertSame( array(), $rest_format['metadata'] );
+		$this->assertNull( $rest_format['id'] );
+		$this->assertNull( $rest_format['device_uuid'] );
+		$this->assertNull( $rest_format['platform'] );
 	}
 }

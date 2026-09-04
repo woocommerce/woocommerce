@@ -102,7 +102,21 @@ class PushTokenRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
 					'args'                => $this->get_args( 'create' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-					'schema'              => array( $this, 'get_schema' ),
+				),
+				'schema' => fn () => array_merge(
+					$this->get_base_schema(),
+					array(
+						'title'      => 'push_tokens',
+						'properties' => array(
+							'tokens' => array(
+								'description' => __( 'The push tokens registered on this store.', 'woocommerce' ),
+								'type'        => 'array',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+								'items'       => $this->get_schema(),
+							),
+						),
+					)
 				),
 			)
 		);
@@ -116,15 +130,16 @@ class PushTokenRestController extends RestApiControllerBase {
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'args'                => $this->get_args( 'delete' ),
 					'permission_callback' => array( $this, 'authorize_as_authenticated' ),
-					'schema'              => array( $this, 'get_schema' ),
 				),
+				'schema' => array( $this, 'get_schema' ),
 			)
 		);
 	}
 
 	/**
 	 * Returns all push tokens for roles that can receive push notifications,
-	 * formatted for the WPCOM push notifications endpoint.
+	 * along with when each token was registered and when the app last
+	 * confirmed it.
 	 *
 	 * @since 10.8.0
 	 *
@@ -156,7 +171,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		$response = new WP_REST_Response(
 			array(
 				'tokens' => array_map(
-					fn ( $token ) => $token->to_wpcom_format(),
+					fn ( $token ) => $token->to_rest_format(),
 					$result['tokens']
 				),
 			),
@@ -265,30 +280,89 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Get the schema for the POST endpoint.
+	 * Get the schema for a single push token.
+	 *
+	 * Describes the token as the index returns it. The fields a client sends
+	 * when registering one are published separately, through the route `args`
+	 * that OPTIONS reports per endpoint.
 	 *
 	 * @since 10.6.0
 	 *
-	 * @return array[]
+	 * @return array
 	 */
 	public function get_schema(): array {
 		return array_merge(
 			$this->get_base_schema(),
 			array(
 				'title'      => PushToken::POST_TYPE,
-				'properties' => array_map(
-					fn ( $item ) => array_intersect_key(
-						$item,
-						array(
-							'description' => null,
-							'type'        => null,
-							'enum'        => null,
-							'minimum'     => null,
-							'default'     => null,
-							'required'    => null,
-						)
+				'properties' => array(
+					'id'                    => array(
+						'description' => __( 'Unique identifier for the token.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
 					),
-					$this->get_args()
+					'user_id'               => array(
+						'description' => __( 'The user the token belongs to.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'token'                 => array(
+						'description' => __( 'The push token issued by Apple or Google.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'platform'              => array(
+						'description' => __( 'The platform the token was issued for.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => PushToken::PLATFORMS,
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'origin'                => array(
+						'description' => __( 'The app the token was registered from.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => PushToken::ORIGINS,
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'device_uuid'           => array(
+						'description' => __( 'An identifier the app generates for its own install, so a re-registration matches the existing record after the OS issues a new token. Null for browser tokens.', 'woocommerce' ),
+						'type'        => array( 'string', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'device_locale'         => array(
+						'description' => __( 'The locale the device is set to.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'metadata'              => array(
+						'description'          => __( 'Values the app supplies to describe itself and the device, such as the app and OS version.', 'woocommerce' ),
+						'type'                 => 'object',
+						'maxProperties'        => PushTokenValidator::METADATA_MAXIMUM_ITEMS,
+						'additionalProperties' => array(
+							'type'      => array( 'string', 'number', 'boolean' ),
+							'maxLength' => PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH,
+						),
+						'context'              => array( 'view' ),
+						'readonly'             => true,
+					),
+					'created_at_gmt'        => array(
+						'description' => __( 'The date the token was registered, as GMT. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'date-time', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'last_confirmed_at_gmt' => array(
+						'description' => __( 'The date the app last registered this token, as GMT. The app re-sends the token periodically, not only when the token value changes, so this shows how recently the app read the token from the device. Null when the date is unknown.', 'woocommerce' ),
+						'type'        => array( 'date-time', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 				),
 			)
 		);
@@ -380,11 +454,16 @@ class PushTokenRestController extends RestApiControllerBase {
 				'sanitize_callback' => 'wp_unslash',
 			),
 			'metadata'      => array(
-				'description'       => __( 'Metadata', 'woocommerce' ),
-				'type'              => 'object',
-				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_argument' ),
-				'sanitize_callback' => 'wp_unslash',
+				'description'          => __( 'Metadata', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => array( 'create' ),
+				'maxProperties'        => PushTokenValidator::METADATA_MAXIMUM_ITEMS,
+				'additionalProperties' => array(
+					'type'      => array( 'string', 'number', 'boolean' ),
+					'maxLength' => PushTokenValidator::METADATA_VALUE_MAXIMUM_LENGTH,
+				),
+				'validate_callback'    => array( $this, 'validate_argument' ),
+				'sanitize_callback'    => 'wp_unslash',
 			),
 		);
 
