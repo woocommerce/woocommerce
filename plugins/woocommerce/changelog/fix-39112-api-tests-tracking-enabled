@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Run Core API tests with usage tracking enabled in pull request, nightly, and release CI.
