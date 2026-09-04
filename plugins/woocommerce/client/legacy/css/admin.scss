@@ -1186,6 +1186,10 @@ mark.amount {
 	color: inherit;
 }
 
+.woocommerce-Price-amount {
+	white-space: nowrap;
+}
+
 /**
   * Help Tip
   */
@@ -3894,7 +3898,7 @@ table.wp-list-table {
 	}
 
 	.column-price {
-		width: 10ch;
+		width: 12ch;
 	}
 
 	.column-cogs_value {
