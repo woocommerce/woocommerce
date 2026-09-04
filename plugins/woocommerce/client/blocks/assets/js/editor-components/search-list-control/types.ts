@@ -109,8 +109,6 @@ export interface RenderItemArgs< T extends object = object >
 	 * If not provided, a default name will be generated using the controlId.
 	 */
 	name?: string;
-	// Aria label for the input. If not provided, a default label will be generated using the item name.
-	ariaLabel?: string;
 }
 
 export interface SearchListControlProps< T extends object = object > {

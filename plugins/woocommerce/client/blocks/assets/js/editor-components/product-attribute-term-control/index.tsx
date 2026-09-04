@@ -3,15 +3,11 @@
  */
 import clsx from 'clsx';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import {
-	SearchListControl,
-	SearchListItem,
-} from '@woocommerce/editor-components/search-list-control';
-import { SelectControl } from '@wordpress/components';
+import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import { withInstanceId } from '@wordpress/compose';
 import useProductAttributes from '@woocommerce/base-context/hooks/use-product-attributes';
-import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item';
+import ProductTaxonomyControl from '@woocommerce/editor-components/product-taxonomy-control';
 import {
 	RenderItemArgs,
 	SearchListControlProps,
@@ -179,65 +175,52 @@ const ProductAttributeTermControl = ( {
 		...messages,
 	};
 
-	if ( errorLoadingAttributes ) {
-		return <ErrorMessage error={ errorLoadingAttributes } />;
-	}
-
 	return (
-		<>
-			<SearchListControl
-				className="woocommerce-product-attributes"
-				isCompact={ isCompact }
-				isHierarchical
-				isLoading={ isLoadingAttributes }
-				isSingle={ false }
-				list={ list }
-				messages={ messages }
-				onChange={ onChange }
-				renderItem={ renderItem }
-				selected={
-					selected
-						.map( ( { id } ) =>
-							list.find( ( term ) => term.id === id )
-						)
-						.filter( Boolean ) as SearchListItemProps[]
-				}
-				type={ type }
-			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
-					<SelectControl
-						className="woocommerce-product-attributes__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
-							'Pick at least two attributes to use this setting.',
-							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
-							{
-								label: __(
-									'Any selected attributes',
-									'woocommerce'
-								),
-								value: 'any',
-							},
-							{
-								label: __(
+		<ProductTaxonomyControl
+			className="woocommerce-product-attributes"
+			error={ errorLoadingAttributes }
+			isCompact={ isCompact }
+			isHierarchical
+			isLoading={ isLoadingAttributes }
+			isSingle={ false }
+			list={ list }
+			messages={ messages }
+			onChange={ onChange }
+			operator={
+				onOperatorChange
+					? {
+							className:
+								'woocommerce-product-attributes__operator',
+							labels: {
+								all: __(
 									'All selected attributes',
 									'woocommerce'
 								),
-								value: 'all',
+								any: __(
+									'Any selected attributes',
+									'woocommerce'
+								),
+								help: __(
+									'Pick at least two attributes to use this setting.',
+									'woocommerce'
+								),
 							},
-						] }
-					/>
-				</div>
-			) }
-		</>
+							onChange: onOperatorChange,
+							selectedCount: selected.length,
+							value: operator,
+					  }
+					: undefined
+			}
+			renderItem={ renderItem }
+			selected={
+				selected
+					.map( ( { id } ) =>
+						list.find( ( term ) => term.id === id )
+					)
+					.filter( Boolean ) as SearchListItemProps[]
+			}
+			type={ type }
+		/>
 	);
 };
 
