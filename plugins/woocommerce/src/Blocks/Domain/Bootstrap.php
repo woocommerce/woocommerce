@@ -22,7 +22,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
-use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
@@ -92,17 +91,6 @@ class Bootstrap {
 	protected function init() {
 		$this->register_dependencies();
 		$this->register_payment_methods();
-
-		add_action(
-			'admin_init',
-			function () {
-				// Delete this notification because the blocks are included in WC Core now. This will handle any sites
-				// with lingering notices.
-				InboxNotifications::delete_surface_cart_checkout_blocks_notification();
-			},
-			10,
-			0
-		);
 
 		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry at the end of `after_setup_theme`
 		// so themes had the opportunity to declare support for template parts.

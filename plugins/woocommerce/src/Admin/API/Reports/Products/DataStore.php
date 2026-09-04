@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -92,6 +93,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var string
 	 */
 	protected $context = 'products';
+
+	/**
+	 * Whether the query currently being served carries a `search` argument.
+	 *
+	 * @var bool
+	 */
+	private $is_search = false;
+
+	/**
+	 * Last search statement built, with the arguments it was built from.
+	 *
+	 * @var array|null
+	 */
+	private $search_subquery = null;
 
 	/**
 	 * Assign report columns once full table name has been assigned.
@@ -198,10 +213,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
 
-		$included_products = $this->get_included_products( $query_args );
-		if ( $included_products ) {
+		$included_products = $this->get_included_products_array( $query_args );
+		$product_id_filter = ProductSearchQuery::get_id_condition(
+			"{$order_product_lookup_table}.product_id",
+			$this->get_search_subquery( $query_args, $included_products ),
+			$included_products
+		);
+		if ( $product_id_filter ) {
 			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$product_id_filter}" );
 		} else {
 			$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
 		}
@@ -216,6 +236,73 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
+	}
+
+	/**
+	 * Returns the statement the query's `search` argument resolves to.
+	 *
+	 * Serving one report needs it twice, once for the restriction and once for the row count, and
+	 * building it runs a WP_Query, so the last one is kept for as long as the arguments match.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $query_args        Query parameters.
+	 * @param array $included_products Product IDs the `categories` and `products` filters resolve to.
+	 * @return string SQL statement, or an empty string when the query carries no search.
+	 */
+	private function get_search_subquery( $query_args, array $included_products ): string {
+		$terms = $query_args['search'] ?? array();
+
+		if ( null === $this->search_subquery
+			|| $this->search_subquery['terms'] !== $terms
+			|| $this->search_subquery['included_products'] !== $included_products
+		) {
+			$this->search_subquery = array(
+				'terms'             => $terms,
+				'included_products' => $included_products,
+				'subquery'          => ProductSearchQuery::get_ids_subquery( $terms, $included_products ),
+			);
+		}
+
+		return $this->search_subquery['subquery'];
+	}
+
+	/**
+	 * Returns the cache key for a query, and records whether it carries a search.
+	 *
+	 * `should_use_cache()` decides whether the response is cached but only receives the key, so the
+	 * search has to be noted here, where the query arguments are still around.
+	 *
+	 * @override ReportsDataStore::get_cache_key()
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $params Query parameters.
+	 * @return string Cache key.
+	 */
+	protected function get_cache_key( $params ) {
+		$this->is_search = ! empty( $params['search'] );
+
+		return parent::get_cache_key( $params );
+	}
+
+	/**
+	 * Whether the report should be read from and written to the report cache.
+	 *
+	 * @override ReportsDataStore::should_use_cache()
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	protected function should_use_cache() {
+		// Run the parent first, since it applies the filter plugins opt out of the cache through.
+		$use_cache = parent::should_use_cache();
+
+		// A search is resolved against product titles and SKUs while the report runs, and nothing
+		// invalidates the report cache when one is renamed, so a cached response would keep
+		// answering with the old matches for up to a week.
+		return $this->is_search ? false : $use_cache;
 	}
 
 	/**
@@ -340,6 +427,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults                      = parent::get_default_query_vars();
 		$defaults['category_includes'] = array();
 		$defaults['product_includes']  = array();
+		$defaults['search']            = array();
 		$defaults['extended_info']     = false;
 
 		return $defaults;
@@ -371,13 +459,23 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$selections        = $this->selected_columns( $query_args );
 		$included_products = $this->get_included_products_array( $query_args );
+		$search_subquery   = $this->get_search_subquery( $query_args, $included_products );
 		$params            = $this->get_limit_params( $query_args );
 		$this->add_sql_query_params( $query_args );
 
-		if ( count( $included_products ) > 0 ) {
-			$filtered_products = array_diff( $included_products, array( '-1' ) );
-			$total_results     = count( $filtered_products );
-			$total_pages       = (int) ceil( $total_results / $params['per_page'] );
+		if ( $search_subquery || count( $included_products ) > 0 ) {
+			if ( $search_subquery ) {
+				// The set of matching products is only known to the database, so count it there too.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $search_subquery is built from prepared fragments.
+				$total_results = (int) $wpdb->get_var( "SELECT COUNT(*) FROM ( {$search_subquery} ) AS search_results" );
+				$ids_table     = $search_subquery;
+			} else {
+				$filtered_products = array_diff( $included_products, array( '-1' ) );
+				$total_results     = count( $filtered_products );
+				$ids_table         = $this->get_ids_table( $included_products, 'product_id' );
+			}
+
+			$total_pages = (int) ceil( $total_results / $params['per_page'] );
 
 			if ( 'date' === $query_args['orderby'] ) {
 				$selections .= ", {$table_name}.date_created";
@@ -385,7 +483,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$fields          = $this->get_fields( $query_args );
 			$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
-			$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
@@ -399,6 +496,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ON default_results.product_id = {$table_name}.product_id"
 			);
 			$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
+
+			// The database is free to resolve a tie differently for each page, so a product comes
+			// back on two of them while another is never reached. A product without sales ties on
+			// every column the report can order by, and a filtered report is mostly those.
+			// `get_ids_table()` types its column as text, so cast it or 100 would sort before 99.
+			$order_by = $this->get_sql_clause( 'order_by' );
+			$this->clear_sql_clause( 'order_by' );
+			$this->add_sql_clause( 'order_by', "{$order_by}, CAST( default_results.product_id AS SIGNED )" );
 
 			$products_query = $this->get_query_statement();
 		} else {

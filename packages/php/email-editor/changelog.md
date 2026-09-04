@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.0](https://github.com/woocommerce/email-editor/releases/tag/2.17.0) - 2026-09-03 
+
+-   Patch - Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails. [#67790]
+-   Patch - Guard against non-array return values from the woocommerce_email_editor_preload_rest_api_routes filter. [#68021]
+-   Patch - Preload the recent emails used by the template selection modal, and add the woocommerce_email_editor_preload_rest_api_routes filter. [#67911]
+-   Patch - Render spacing between Social Links icons in emails and match pill-shape icon padding with the editor. [#67642]
+-   Patch - Render the email editor HTML only once per request — a plugin calling WP_Screen::get() from admin_enqueue_scripts (e.g. Yoast SEO Premium) re-fires the replace_editor filter mid-render and echoed a second editor container that broke the editor [#68150]
+-   Minor - Add a value-interception extension point to the Personalizer. [#66874]
+
 ## [2.16.1](https://github.com/woocommerce/email-editor/releases/tag/2.16.1) - 2026-08-14 
 
 -   Patch - Render a block's background color once instead of twice, which made a translucent palette color appear darker than intended. [#67673]

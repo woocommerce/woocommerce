@@ -78,6 +78,13 @@ class Integration {
 	private \WC_Email $wc_email_instance;
 
 	/**
+	 * Whether the email editor page has been rendered.
+	 *
+	 * @var bool
+	 */
+	private bool $editor_rendered = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -266,6 +273,14 @@ class Integration {
 	public function replace_editor( $replace, $post ) {
 		$current_screen = get_current_screen();
 		if ( self::EMAIL_POST_TYPE === $post->post_type && $current_screen ) {
+			// This callback re-enters while the editor renders: WP_Screen::get() re-applies
+			// the `replace_editor` filter, and plugins call it from admin_enqueue_scripts,
+			// which admin-header.php fires mid-render. Rendering again would echo a second
+			// editor container inside <head> and break the page.
+			if ( $this->editor_rendered ) {
+				return true;
+			}
+			$this->editor_rendered = true;
 			$this->maybe_refresh_scratchpad( $post );
 			$this->editor_page_renderer->render();
 			return true;

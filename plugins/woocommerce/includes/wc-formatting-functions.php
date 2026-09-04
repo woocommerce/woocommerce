@@ -379,7 +379,7 @@ function wc_format_coupon_code( $value ) {
  *
  * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
  *
- * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
+ * Due to the unfiltered_html capability that some (admin) users have, we need to account for slashes.
  *
  * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
  * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
