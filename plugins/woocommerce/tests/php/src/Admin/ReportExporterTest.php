@@ -117,6 +117,20 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An export that never finished writing reports itself as missing.
+	 */
+	public function test_incomplete_export_is_reported_as_missing(): void {
+		$filename = $this->create_export( 'wc-orders-report-export-incomplete' );
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( $filename );
+
+		// A body with no `.headers` companion is an export that stopped before reaching 100%.
+		wp_delete_file( ReportCSVExporter::get_reports_directory() . $filename . '.headers' );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An unfinished export should be reported as unavailable.' );
+	}
+
+	/**
 	 * @testdox Daily cleanup deletes only exports past the retention period.
 	 */
 	public function test_cleanup_deletes_only_expired_exports(): void {

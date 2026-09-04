@@ -117,13 +117,16 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Check whether the generated export is still on disk.
+	 * Check whether a complete generated export is still on disk.
+	 *
+	 * The `.headers` companion is only written once the export reaches 100%, so a body without one
+	 * is an export that never finished and must not be served.
 	 *
 	 * @since 11.2.0
 	 * @return bool
 	 */
 	public function export_file_exists() {
-		return file_exists( $this->get_file_path() );
+		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
 	}
 
 	/**
