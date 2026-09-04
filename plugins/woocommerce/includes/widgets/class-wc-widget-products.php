@@ -104,8 +104,8 @@ class WC_Widget_Products extends WC_Widget {
 			'post_type'      => 'product',
 			'no_found_rows'  => 1,
 			'order'          => $order,
-			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The empty query container does not add a database join.
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- The empty query container does not add a database join.
+			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Optional container; populated only when the hide-free-products option is on.
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Catalog visibility and out-of-stock exclusion are stored only in the product_visibility taxonomy; term_taxonomy_id lookups use the term_relationships index.
 				'relation' => 'AND',
 			),
 		);
@@ -137,7 +137,7 @@ class WC_Widget_Products extends WC_Widget {
 					'terms'    => $product_visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ],
 					'operator' => 'NOT IN',
 				),
-			); // WPCS: slow query ok.
+			);
 		}
 
 		switch ( $show ) {
@@ -160,21 +160,94 @@ class WC_Widget_Products extends WC_Widget {
 				$query_args['orderby'] = 'menu_order';
 				break;
 			case 'price':
-				$query_args['meta_key'] = '_price'; // WPCS: slow query ok.
+				// Kept on post meta: the join also drops products that have no price at all, and
+				// wc_product_meta_lookup stores 0 for those so it cannot reproduce that filter.
+				$query_args['meta_key'] = '_price'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Ordering by the _price meta is what keeps priceless products out of the list; adding the lookup table join on top of it measured slower than the meta join alone.
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'rand':
 				$query_args['orderby'] = 'rand';
 				break;
 			case 'sales':
-				$query_args['meta_key'] = 'total_sales'; // WPCS: slow query ok.
+				// Left in the args so that the query args filter below keeps seeing the documented
+				// payload; the query itself is switched to wc_product_meta_lookup afterwards.
+				$query_args['meta_key'] = 'total_sales'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Part of the filter payload only; query_products() orders through wc_product_meta_lookup instead of joining post meta.
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			default:
 				$query_args['orderby'] = 'date';
 		}
 
-		return new WP_Query( apply_filters( 'woocommerce_products_widget_query_args', $query_args ) );
+		/**
+		 * Filters the query arguments the Products widget uses to fetch its products.
+		 *
+		 * @since 2.4.0
+		 * @param array $query_args Arguments passed to WP_Query.
+		 */
+		$query_args = apply_filters( 'woocommerce_products_widget_query_args', $query_args );
+
+		return $this->query_products( $query_args );
+	}
+
+	/**
+	 * Run the widget query, ordering through the product lookup table where that is equivalent to, and
+	 * cheaper than, ordering through post meta.
+	 *
+	 * Only the sales ordering is redirected. `total_sales` post meta is written for every product, so the
+	 * meta join it replaces filters nothing out, while `wc_product_meta_lookup` holds one narrow row per
+	 * product instead of one row per product in a table that grows with every extension's meta. Price
+	 * ordering deliberately stays on post meta; see the `price` case in get_products().
+	 *
+	 * The swap happens after `woocommerce_products_widget_query_args` has run, and only when nothing on
+	 * that filter changed the ordering arguments, so the filter payload keeps its documented shape and a
+	 * consumer that overrides the ordering still wins.
+	 *
+	 * @param array $query_args Query arguments, as returned by the widget query args filter.
+	 *
+	 * @return WP_Query
+	 */
+	private function query_products( $query_args ) {
+		// WP_Query skips posts_clauses when a filter asks for suppressed filters, which would leave the
+		// query with no ordering at all, so stay on the post meta ordering in that case.
+		$orders_by_total_sales = isset( $query_args['meta_key'], $query_args['orderby'] )
+			&& empty( $query_args['suppress_filters'] )
+			&& 'total_sales' === $query_args['meta_key']
+			&& 'meta_value_num' === $query_args['orderby'];
+
+		if ( ! $orders_by_total_sales ) {
+			return new WP_Query( $query_args );
+		}
+
+		$order = isset( $query_args['order'] ) && 'asc' === strtolower( $query_args['order'] ) ? 'ASC' : 'DESC';
+
+		unset( $query_args['meta_key'] );
+		$query_args['orderby'] = 'none';
+
+		$products = new WP_Query();
+
+		$order_by_total_sales = static function ( $clauses, $query ) use ( $products, $order ) {
+			global $wpdb;
+
+			if ( $query !== $products ) {
+				return $clauses;
+			}
+
+			if ( ! strstr( $clauses['join'], 'wc_product_meta_lookup' ) ) {
+				$clauses['join'] .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
+			}
+
+			// The IS NULL term sorts ascending in both directions, so products that have no lookup row
+			// (a partly regenerated table, say) always land last instead of leading an ascending list.
+			$clauses['orderby'] = " wc_product_meta_lookup.total_sales IS NULL, wc_product_meta_lookup.total_sales {$order}, wc_product_meta_lookup.product_id {$order} ";
+
+			return $clauses;
+		};
+
+		add_filter( 'posts_clauses', $order_by_total_sales, 10, 2 );
+		$products->query( $query_args );
+		remove_filter( 'posts_clauses', $order_by_total_sales, 10 );
+
+		return $products;
 	}
 
 	/**
