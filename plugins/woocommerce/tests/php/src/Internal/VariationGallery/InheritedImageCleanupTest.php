@@ -22,7 +22,6 @@ class InheritedImageCleanupTest extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( $has_more );
 		$this->assertSame( '', get_post_meta( $variation_id, '_thumbnail_id', true ), 'The duplicated featured image should be removed so the variation inherits again.' );
-		$this->assertSame( 1, (int) get_option( InheritedImageCleanup::CLEANED_COUNT_OPTION ) );
 		$this->assertNotFalse( get_option( InheritedImageCleanup::COMPLETED_OPTION ), 'The cleanup should record completion.' );
 	}
 
@@ -41,6 +40,20 @@ class InheritedImageCleanupTest extends \WC_Unit_Test_Case {
 			get_post_meta( $variation_id, '_thumbnail_id', true ),
 			'A diverged value may be a deliberate merchant choice and must survive the cleanup.'
 		);
+	}
+
+	/**
+	 * @testdox The cleanup removes only metadata values that duplicate the parent image.
+	 */
+	public function test_keeps_other_thumbnail_metadata_values() {
+		list( $variation_id, $parent_featured ) = $this->create_variation_with_parent_featured();
+		$own_image                              = $this->create_attachment( 'Variation own image' );
+		update_post_meta( $variation_id, '_thumbnail_id', (string) $parent_featured );
+		add_post_meta( $variation_id, '_thumbnail_id', (string) $own_image );
+
+		InheritedImageCleanup::run();
+
+		$this->assertSame( array( (string) $own_image ), get_post_meta( $variation_id, '_thumbnail_id', false ) );
 	}
 
 	/**

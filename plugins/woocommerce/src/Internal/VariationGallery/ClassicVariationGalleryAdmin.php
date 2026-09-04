@@ -236,7 +236,7 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 	 */
 	private function get_display_image_ids( WC_Product_Variation $variation ): array {
 		$image_ids = array_values( array_map( 'intval', $variation->get_gallery_image_ids() ) );
-		// 'edit' context: the parent-image fallback must not enter the field, or saving would persist it on the variation.
+		// Read the stored value so an inherited parent image is not saved as the variation's own image.
 		$featured_id = (int) $variation->get_image_id( 'edit' );
 
 		if ( $featured_id > 0 && ! in_array( $featured_id, $image_ids, true ) ) {

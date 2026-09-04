@@ -287,22 +287,8 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_available_variation' prefers the variation's own gallery over the inherited parent featured image.
 	 */
-	public function test_get_available_variation_prefers_own_gallery_over_inherited_parent_image() {
-		$product              = WC_Helper_Product::create_variation_product();
-		$variation            = wc_get_product( $product->get_children()[0] );
-		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
-		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
-
-		$product->set_image_id( $parent_featured_id );
-		$product->save();
-
-		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
-		$variation->save();
-
-		// Drop cached product instances so the reload rebuilds parent_data, as a new request would.
-		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
-		$product   = wc_get_product( $product->get_id() );
-		$variation = wc_get_product( $variation->get_id() );
+	public function test_get_available_variation_prefers_own_gallery_over_inherited_parent_image(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
 
 		$available_variation = $product->get_available_variation( $variation );
 
@@ -311,6 +297,21 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 			$available_variation['image_id'],
 			'A variation that owns a gallery but no featured image should open on gallery[0], not on the inherited parent image.'
 		);
+	}
+
+	/**
+	 * @testdox 'get_available_variation' preserves a filtered variation image when no featured image is stored.
+	 */
+	public function test_get_available_variation_preserves_filtered_image(): void {
+		list( $product, $variation ) = $this->create_variation_gallery_fixture();
+		$filtered_image_id           = $this->create_image_attachment( 'Filtered Variation Image', 'filtered-variation.jpg' );
+
+		$filter              = static fn() => $filtered_image_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $filtered_image_id, $available_variation['image_id'] );
 	}
 
 	/**
@@ -413,6 +414,26 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 			'string' => array( 'bad_return' ),
 			'object' => array( new stdClass() ),
 		);
+	}
+
+	/**
+	 * Create a product with a parent image and an image-less variation with a gallery.
+	 *
+	 * @return array{0: WC_Product_Variable, 1: WC_Product_Variation, 2: int}
+	 */
+	private function create_variation_gallery_fixture(): array {
+		$product              = WC_Helper_Product::create_variation_product();
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		return array( $product, $variation, $variation_gallery_id );
 	}
 
 	/**

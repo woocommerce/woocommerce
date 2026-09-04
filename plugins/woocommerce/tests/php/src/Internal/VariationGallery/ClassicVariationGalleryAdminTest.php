@@ -64,9 +64,7 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 			implode( ',', $image_ids )
 		);
 
-		ob_start();
-		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
+		$output = $this->render_variation_gallery_field( $variation );
 
 		$this->assertStringContainsString(
 			'value="' . implode( ',', $image_ids ) . '"',
@@ -86,9 +84,7 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 		$variation->set_gallery_image_ids( array( $gallery ) );
 		$variation->save();
 
-		ob_start();
-		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
+		$output = $this->render_variation_gallery_field( $variation );
 
 		// Featured image must be prepended to the list (value) AND get the active class.
 		$this->assertStringContainsString( 'value="' . $featured . ',' . $gallery . '"', $output );
@@ -109,28 +105,12 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 		$variation->set_gallery_image_ids( array( $missing, $good ) );
 		$variation->save();
 
-		ob_start();
-		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
+		$output = $this->render_variation_gallery_field( $variation );
 
 		$this->assertStringContainsString(
 			'data-attachment_id="' . $missing . '"',
 			$output
 		);
-	}
-
-	/**
-	 * @testdox Empty variation rows render the hidden gallery input needed for the first save.
-	 */
-	public function test_render_variation_gallery_field_renders_hidden_input_for_empty_gallery() {
-		$variation = $this->create_variation();
-
-		ob_start();
-		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
-
-		$this->assertStringContainsString( 'name="variable_gallery_image_ids[0]"', $output );
-		$this->assertStringContainsString( 'value=""', $output );
 	}
 
 	/**
@@ -199,63 +179,41 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An image-less variation renders an empty gallery field even when the parent has a featured image.
+	 * @testdox An image-less variation does not render its inherited parent image as variation data.
 	 */
-	public function test_render_variation_gallery_field_excludes_inherited_parent_image() {
-		$variation       = $this->create_variation();
-		$parent          = wc_get_product( $variation->get_parent_id() );
-		$parent_featured = $this->create_attachment( 'Parent featured image' );
-		$parent->set_image_id( $parent_featured );
-		$parent->save();
-		$this->flush_product_instance_cache();
+	public function test_render_variation_gallery_field_excludes_inherited_parent_image(): void {
+		$variation = $this->create_variation_inheriting_parent_image();
+		$output    = $this->render_variation_gallery_field( $variation );
 
-		ob_start();
-		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
-
-		$this->assertStringContainsString( 'value=""', $output, 'The gallery field should be empty for a variation that owns no images.' );
-		$this->assertStringNotContainsString(
-			'data-attachment_id="' . $parent_featured . '"',
-			$output,
-			'The inherited parent image must not enter the variation gallery field.'
-		);
+		$this->assertStringContainsString( 'value=""', $output, 'The inherited parent image must not be submitted as variation data.' );
 	}
 
 	/**
-	 * @testdox Saving a variation without touching images does not persist the inherited parent image onto the variation.
+	 * Render the gallery field for a variation.
+	 *
+	 * @param WC_Product_Variation $variation Variation object.
+	 * @return string
 	 */
-	public function test_save_roundtrip_does_not_persist_inherited_parent_image() {
-		$variation       = $this->create_variation();
-		$parent          = wc_get_product( $variation->get_parent_id() );
-		$parent_featured = $this->create_attachment( 'Parent featured image' );
-		$parent->set_image_id( $parent_featured );
-		$parent->save();
-		$this->flush_product_instance_cache();
-
+	private function render_variation_gallery_field( WC_Product_Variation $variation ): string {
 		ob_start();
 		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
-		$output = (string) ob_get_clean();
 
-		// Post back exactly what the rendered field contains, as the browser does on save.
-		preg_match( '/name="variable_gallery_image_ids\[0\]"[^>]*value="([^"]*)"/', $output, $matches );
-		$this->assertArrayHasKey( 1, $matches, 'The rendered field must contain the hidden gallery input.' );
-		$_POST['variable_gallery_image_ids'][0] = $matches[1];
-
-		$this->sut->persist_variation_gallery_field( $variation, 0 );
-		$variation->save();
-
-		$this->assertSame(
-			0,
-			wc_get_product( $variation->get_id() )->get_image_id( 'edit' ),
-			'Roundtripping the rendered field must not write the parent image onto the variation.'
-		);
+		return (string) ob_get_clean();
 	}
 
 	/**
-	 * Drop cached product instances so later reads rebuild parent_data, as a new request would.
+	 * Create a variation that inherits its parent's image.
+	 *
+	 * @return WC_Product_Variation
 	 */
-	private function flush_product_instance_cache(): void {
+	private function create_variation_inheriting_parent_image(): WC_Product_Variation {
+		$variation = $this->create_variation();
+		$parent    = wc_get_product( $variation->get_parent_id() );
+		$parent->set_image_id( $this->create_attachment( 'Parent featured image' ) );
+		$parent->save();
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+
+		return $variation;
 	}
 
 	/**

@@ -436,13 +436,11 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
-		$variation_featured_id = (int) $variation->get_image_id();
-		// Ownership must be checked in 'edit' context: in 'view' the ID above inherits the
-		// parent's image, which would let the parent fallback outrank the variation's own gallery.
-		$variation_owns_featured  = (int) $variation->get_image_id( 'edit' ) > 0;
-		$variation_featured_valid = $variation_owns_featured && $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
-		$parent_featured_id       = (int) $this->get_image_id();
-		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$variation_featured_id           = (int) $variation->get_image_id();
+		$variation_featured_is_inherited = ! $variation->get_image_id( 'edit' ) && (int) ( $variation->get_parent_data()['image_id'] ?? 0 ) === $variation_featured_id;
+		$variation_featured_valid        = ! $variation_featured_is_inherited && $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id              = (int) $this->get_image_id();
+		$parent_featured_valid           = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
 		$variation_gallery_image_ids = array_values(
 			array_filter(
@@ -452,7 +450,6 @@ class WC_Product_Variable extends WC_Product {
 		);
 		$variation_gallery_html      = '';
 
-		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_featured_valid ) {
 			$selected_image_id = $variation_featured_id;
 		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
