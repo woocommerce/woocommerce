@@ -179,6 +179,20 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order metadata table size check can read real table statistics.
+	 */
+	public function test_order_meta_table_size_check_can_read_table_statistics(): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( '', $wpdb->last_error, 'The table statistics query should be valid for the test database.' );
+		$this->assertSame( 'good', $result['status'], 'The test database should not have an unusually large order metadata table.' );
+	}
+
+	/**
 	 * @testdox Upload directory protection check is inconclusive when the HTTP request fails.
 	 */
 	public function test_uploads_directory_protection_is_inconclusive_for_http_request_error(): void {
