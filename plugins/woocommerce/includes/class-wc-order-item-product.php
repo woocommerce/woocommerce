@@ -250,10 +250,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * meta this item recorded writing, and that `$data` no longer contains, is removed.
 	 *
 	 * The stored row carries no owner, so removal is deliberately conservative. A key the record
-	 * does not name is never touched, and a key it does name is only removed when exactly one row
-	 * still holds the value this item recorded writing under it. Two rows holding that value, or a
-	 * row since edited so none holds it, leaves every row under the key in place: a stale attribute
-	 * on the order screen can be corrected, a deleted merchant row cannot.
+	 * does not name is never touched, and a key it does name is only removed when the oldest row
+	 * under it still holds the value this item recorded writing and no other row holds that value.
+	 * Anything else leaves every row under the key in place: a stale attribute on the order screen
+	 * can be corrected, a deleted merchant row cannot.
 	 *
 	 * Items created before WooCommerce 11.2.0 carry no such record, so their attribute meta is
 	 * kept rather than guessed at.
@@ -321,28 +321,49 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Remove one attribute meta row this item recorded writing.
 	 *
-	 * Removes nothing unless exactly one row under `$key` still holds `$value`. Anything else means
-	 * ownership cannot be established — a merchant row holding the same value, or the item's own row
-	 * edited since — and every row under the key is kept.
+	 * Two things have to hold before a row is removed, because nothing on the row itself says who
+	 * wrote it. The oldest row under `$key` has to still hold `$value`: attributes are written with
+	 * `add_meta_data( ..., true )`, which leaves the item's own row as the only one under the key,
+	 * so anything a merchant or a plugin adds afterwards sits behind it. And exactly one row under
+	 * the key can hold that value, or there is no telling which of them is the item's.
+	 *
+	 * Anything else — the oldest row edited since, a second row holding the same value — keeps every
+	 * row under the key: a stale attribute on the order screen can be corrected, a deleted merchant
+	 * row cannot.
 	 *
 	 * @param string $key   Meta key.
 	 * @param string $value Value this item recorded writing under that key.
 	 * @return void
 	 */
 	private function delete_recorded_attribute_meta( $key, $value ) {
+		$oldest  = null;
 		$matches = array();
 
 		foreach ( $this->get_meta_data() as $meta ) {
-			if ( $meta->key === $key && is_scalar( $meta->value ) && (string) $meta->value === $value ) {
+			if ( $meta->key !== $key ) {
+				continue;
+			}
+
+			if ( null === $oldest ) {
+				$oldest = $meta;
+			}
+
+			if ( is_scalar( $meta->value ) && (string) $meta->value === $value ) {
 				$matches[] = $meta->value;
 			}
 		}
 
-		if ( 1 === count( $matches ) ) {
-			// Passing the stored value rather than the recorded one keeps the data store's strict
-			// comparison matching the row counted above.
-			$this->delete_meta_data_value( $key, $matches[0] );
+		if ( 1 !== count( $matches ) || null === $oldest ) {
+			return;
 		}
+
+		if ( ! is_scalar( $oldest->value ) || (string) $oldest->value !== $value ) {
+			return;
+		}
+
+		// Passing the stored value rather than the recorded one keeps the data store's strict
+		// comparison matching the row counted above.
+		$this->delete_meta_data_value( $key, $matches[0] );
 	}
 
 	/**

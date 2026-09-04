@@ -990,6 +990,26 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep both rows when its own row was edited and a later row took over the recorded value.
+	 */
+	public function test_set_product_keeps_rows_when_an_edited_row_is_followed_by_the_recorded_value(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+
+		// A merchant corrects the item's own row, then adds one of their own holding the old value.
+		$item->update_meta_data( 'color', 'Azure' );
+		$item->add_meta_data( 'color', 'blue', false );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame(
+			array( 'Azure', 'blue' ),
+			array_values( wp_list_pluck( array_filter( $item->get_meta_data(), static fn( $meta ) => 'color' === $meta->key ), 'value' ) ),
+			'Exactly one row holds the recorded value, but it is not the row the item wrote, so neither row can be claimed and both stay.'
+		);
+	}
+
+	/**
 	 * @testdox Should remove its own row after the record has been through the database.
 	 */
 	public function test_set_product_removes_recorded_attribute_meta_after_a_round_trip(): void {
