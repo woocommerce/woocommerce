@@ -266,11 +266,15 @@ trait CheckoutTrait {
 		}
 
 		/*
-		 * Mirror the redirect into the payment details the way Legacy::process_legacy_payment does
-		 * when a gateway returns normally. Client-side gateway handlers read the redirect back out
-		 * of payment_details rather than redirect_url, so a success result without it is incomplete:
-		 * WooPayments reads paymentDetails.redirect and calls String.match() on it, which throws on
-		 * undefined and leaves the shopper on the checkout with a JavaScript error.
+		 * Keep the two redirect fields in sync, the way Legacy::process_legacy_payment does when a
+		 * gateway returns normally: it copies the gateway's redirect into redirect_url and merges
+		 * the same array into the payment details. Recovery setting only one of them leaves a
+		 * success result core would never otherwise emit.
+		 *
+		 * It matters in practice because client-side gateway handlers read the redirect out of the
+		 * payment details rather than redirect_url. An empty payment_details is a legal state that
+		 * such a handler should guard for, but not every gateway does, so emitting one here would
+		 * strand shoppers on the checkout of an order that was in fact paid and recovered.
 		 */
 		$payment_details = $payment_result->get_payment_details();
 
