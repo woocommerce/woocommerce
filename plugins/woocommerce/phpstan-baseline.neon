@@ -67567,12 +67567,6 @@ parameters:
 			path: src/StoreApi/Legacy.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Legacy.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -67629,18 +67623,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_status\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept array\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/StoreApi/Payments/PaymentResult.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$payment_details \(string\) does not accept default value of type array\.$#'
-			identifier: property.defaultValue
 			count: 1
 			path: src/StoreApi/Payments/PaymentResult.php
 
@@ -69192,11 +69174,6 @@ parameters:
 			count: 1
 			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
 
-		-
-			message: '#^Parameter \#1 \$payment_details of method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:prepare_payment_details_for_response\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Schemas/V1/CheckoutSchema.php
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\:\:\$billing_address_schema \(Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\BillingAddressSchema\) does not accept Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractSchema\.$#'
