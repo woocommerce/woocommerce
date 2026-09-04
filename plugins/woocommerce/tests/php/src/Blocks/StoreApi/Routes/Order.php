@@ -384,6 +384,73 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * An extension's own object need not offer `JsonSerializable`, and casting one publishes its
+	 * non-public fields under mangled names.
+	 *
+	 * @testdox Order item_data publishes only the public fields of an appended plain object.
+	 */
+	public function test_item_data_publishes_only_public_fields_of_an_appended_object(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = new class() {
+					/**
+					 * Metadata key.
+					 *
+					 * @var string
+					 */
+					public $key = 'Appended';
+
+					/**
+					 * Metadata value.
+					 *
+					 * @var string
+					 */
+					public $value = 'value';
+
+					/**
+					 * Metadata key, formatted for display.
+					 *
+					 * @var string
+					 */
+					public $display_key = 'Appended';
+
+					/**
+					 * Metadata value, formatted for display.
+					 *
+					 * @var string
+					 */
+					public $display_value = 'value';
+
+					/**
+					 * A field the extension keeps to itself.
+					 *
+					 * @var string
+					 */
+					protected $internal = 'internal';
+				};
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertSame( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $item_data[1] ), 'Only public fields belong in the response.' );
+	}
+
+	/**
 	 * Appending gets PHP's next integer key. Publishing that as `id` would point consumers at
 	 * another item's row.
 	 *
