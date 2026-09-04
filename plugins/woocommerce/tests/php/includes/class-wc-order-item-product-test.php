@@ -914,6 +914,30 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write the provenance record behind the attribute meta so it never takes their place in meta_data.
+	 */
+	public function test_variation_attribute_keys_record_is_written_after_the_attribute_meta(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+
+		// A second call, the way a caller adds an attribute to an item that already has some.
+		$item->set_variation(
+			array(
+				'attribute_color' => 'blue',
+				'attribute_size'  => 'small',
+			)
+		);
+
+		$keys = wp_list_pluck( $item->get_meta_data(), 'key' );
+
+		$this->assertSame(
+			array( 'color', 'size', WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
+			$keys,
+			'The record belongs behind the attributes it tracks; ahead of them it surfaces first in meta_data, including in the REST response.'
+		);
+	}
+
+	/**
 	 * Create a variation whose parent declares the given attributes for variations.
 	 *
 	 * A variation only reports attributes its parent marks with `is_variation`, so a parent built

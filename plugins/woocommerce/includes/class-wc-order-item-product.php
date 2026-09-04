@@ -278,10 +278,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->delete_meta_data( $stale_key );
 		}
 
+		// Written last, and rewritten rather than updated in place, so the record always sits
+		// behind the attribute rows this call just wrote. Those rows are themselves re-added on
+		// every call, so a record updated in place would drift ahead of them and surface first in
+		// `meta_data` — including in the REST response, where callers index the array positionally.
+		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+
 		if ( $current_keys ) {
-			$this->update_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, array_values( array_unique( $current_keys ) ) );
-		} else {
-			$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+			$this->add_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, array_values( array_unique( $current_keys ) ), true );
 		}
 	}
 
