@@ -838,7 +838,13 @@ class HposLegacyOrderReportQueryBuilder {
 	}
 
 	/**
-	 * Translate legacy `posts.<col>` (and bare `ID` / `post_date`) references in an arbitrary SQL fragment.
+	 * Translate legacy `posts.<col>` and bare `<col>` references in an arbitrary SQL fragment.
+	 *
+	 * Both passes cover the full set of columns in {@see self::legacy_to_hpos_column_map()}:
+	 * legacy callers write these unqualified as often as they qualify them — e.g. WooCommerce
+	 * Subscriptions' "Subscription events by date" report passes a bare
+	 * `post_status NOT IN ( 'trash', 'auto-draft' )` where-predicate — and an untranslated bare
+	 * token references a column that does not exist on `wc_orders`.
 	 *
 	 * Matches are bounded by `\b` so tokens embedded in longer identifiers
 	 * (e.g. `product_ID`, `posts.post_date_gmt`) are left untouched.
@@ -848,25 +854,18 @@ class HposLegacyOrderReportQueryBuilder {
 	 * @return string Translated fragment safe to drop into an HPOS query.
 	 */
 	private function translate_legacy_sql_fragment( string $fragment ): string {
-		$map = $this->legacy_to_hpos_column_map();
+		$map         = $this->legacy_to_hpos_column_map();
+		$alternation = implode( '|', array_keys( $map ) );
 
 		// Qualified `posts.<col>` references first, then the bare tokens legacy
 		// callers use unqualified. Callbacks avoid `$`/`\` replacement-string pitfalls.
-		$fragment = (string) preg_replace_callback(
-			'/\bposts\.(ID|post_date|post_parent|post_status|post_type)\b/',
-			static function ( $matches ) use ( $map ) {
-				return $map[ $matches[1] ];
-			},
-			$fragment
-		);
+		$replace = static function ( $matches ) use ( $map ) {
+			return $map[ $matches[1] ];
+		};
 
-		return (string) preg_replace_callback(
-			'/\b(ID|post_date)\b/',
-			static function ( $matches ) use ( $map ) {
-				return $map[ $matches[1] ];
-			},
-			$fragment
-		);
+		$fragment = (string) preg_replace_callback( '/\bposts\.(' . $alternation . ')\b/', $replace, $fragment );
+
+		return (string) preg_replace_callback( '/\b(' . $alternation . ')\b/', $replace, $fragment );
 	}
 
 	/**

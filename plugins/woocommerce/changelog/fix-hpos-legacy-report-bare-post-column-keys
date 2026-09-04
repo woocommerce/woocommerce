@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix legacy admin reports that filter, group or sort on an unqualified `post_status`, `post_parent` or `post_type` column returning no data under HPOS, by translating those bare tokens to their `wc_orders` equivalents.
