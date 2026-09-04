@@ -45,22 +45,13 @@ export const CountryInput = ( {
 				'countries',
 				{}
 			);
-			const unavailableLabel = decodeEntities(
-				allCountries[ selectedCountry ] || selectedCountry
-			);
-			const insertAt = countryOptions.findIndex(
-				( option ) => option.label.localeCompare( unavailableLabel ) > 0
-			);
-			const unavailableOption = {
+			countryOptions.push( {
 				value: selectedCountry,
-				label: unavailableLabel,
+				label: decodeEntities(
+					allCountries[ selectedCountry ] || selectedCountry
+				),
 				disabled: true,
-			};
-			if ( insertAt === -1 ) {
-				countryOptions.push( unavailableOption );
-			} else {
-				countryOptions.splice( insertAt, 0, unavailableOption );
-			}
+			} );
 		}
 		return countryOptions;
 	}, [ countries, value ] );

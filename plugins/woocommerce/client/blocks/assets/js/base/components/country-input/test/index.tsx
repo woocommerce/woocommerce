@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useState } from '@wordpress/element';
 import { allSettings } from '@woocommerce/settings';
 
 /**
@@ -65,7 +67,7 @@ describe( 'CountryInput', () => {
 		expect( screen.getAllByRole( 'option' ) ).toHaveLength( 3 );
 	} );
 
-	it( 'inserts the unavailable country in alphabetical position', () => {
+	it( 'appends the unavailable country after the allowed countries', () => {
 		render( <CountryInput { ...defaultProps } value="GB" /> );
 
 		const optionLabels = screen
@@ -75,8 +77,8 @@ describe( 'CountryInput', () => {
 		expect( optionLabels ).toEqual( [
 			'Select a country/region',
 			'Austria',
-			'United Kingdom (UK)',
 			'United States (US)',
+			'United Kingdom (UK)',
 		] );
 	} );
 
@@ -103,5 +105,36 @@ describe( 'CountryInput', () => {
 			screen.queryByRole( 'option', { name: 'United Kingdom (UK)' } )
 		).not.toBeInTheDocument();
 		expect( screen.getByLabelText( 'Country/Region' ) ).toHaveValue( 'US' );
+	} );
+
+	it( 'lets the user pick the only allowed country when the saved one is unavailable', async () => {
+		const onChange = jest.fn();
+		const ControlledCountryInput = () => {
+			const [ country, setCountry ] = useState( 'GB' );
+			return (
+				<CountryInput
+					{ ...defaultProps }
+					countries={ { US: 'United States (US)' } }
+					value={ country }
+					onChange={ ( newCountry: string ) => {
+						onChange( newCountry );
+						setCountry( newCountry );
+					} }
+				/>
+			);
+		};
+		render( <ControlledCountryInput /> );
+
+		const select = screen.getByLabelText( 'Country/Region' );
+		expect( select ).toHaveValue( 'GB' );
+
+		await userEvent.selectOptions( select, 'US' );
+
+		expect( onChange ).toHaveBeenCalledTimes( 1 );
+		expect( onChange ).toHaveBeenCalledWith( 'US' );
+		expect( select ).toHaveValue( 'US' );
+		expect(
+			screen.queryByRole( 'option', { name: 'United Kingdom (UK)' } )
+		).not.toBeInTheDocument();
 	} );
 } );
