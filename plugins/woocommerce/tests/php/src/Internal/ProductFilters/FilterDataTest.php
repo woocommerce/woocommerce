@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -183,6 +185,174 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$expected_attribute_counts = $this->get_expected_attribute_counts( 'pa_color' );
 
 		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	/**
+	 * @testdox Attribute counts reflect a changed hide-out-of-stock setting for the same query.
+	 */
+	public function test_get_attribute_counts_reflect_changed_hide_out_of_stock_setting_for_same_query(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+
+		$green_variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$green_variation->save();
+		wc_get_container()->get( LookupDataStore::class )->run_update_callback( $green_variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+
+		$wp_query                       = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars                     = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-key'] = __METHOD__;
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$counts_with_out_of_stock = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$counts_without_out_of_stock = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertSame( 2, $counts_with_out_of_stock[ $green_term->term_id ] ?? 0 );
+		$this->assertSame( 1, $counts_without_out_of_stock[ $green_term->term_id ] ?? 0 );
+	}
+
+	/**
+	 * @testdox Filter data reflects a changed hide-out-of-stock setting when an attribute filter is active.
+	 */
+	public function test_filter_data_cache_keys_include_hide_out_of_stock_setting(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+
+		$green_variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$green_variation->save();
+		wc_get_container()->get( LookupDataStore::class )->run_update_callback( $green_variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+
+		$query_vars = array(
+			'post_type'                 => 'product',
+			'filter_color'              => 'green-slug',
+			'query_type_color'          => 'or',
+			'hide-oos-cache-separation' => __METHOD__,
+		);
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$prices_with_out_of_stock = $this->sut->get_filtered_price( $query_vars );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$prices_without_out_of_stock = $this->sut->get_filtered_price( $query_vars );
+
+		$this->assertSame(
+			array(
+				'min_price' => '50.0000',
+				'max_price' => '60.0000',
+			),
+			$prices_with_out_of_stock
+		);
+		$this->assertSame(
+			array(
+				'min_price' => '60.0000',
+				'max_price' => '60.0000',
+			),
+			$prices_without_out_of_stock
+		);
+	}
+
+	/**
+	 * @testdox A private variation does not contribute to its attribute term count.
+	 */
+	public function test_get_attribute_counts_exclude_private_variations(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+		$red_term        = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		$green_variation->set_status( 'private' );
+		$green_variation->save();
+		$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
+
+		$wp_query                          = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = __METHOD__;
+
+		$actual_attribute_counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertSame(
+			1,
+			$actual_attribute_counts[ $red_term->term_id ] ?? 0,
+			'Product 5\'s published red variation should still contribute to the red count.'
+		);
+		$this->assertSame(
+			1,
+			$actual_attribute_counts[ $green_term->term_id ] ?? 0,
+			'Only Product 6 should contribute to the green count while Product 5\'s green variation is private.'
+		);
+	}
+
+	/**
+	 * @testdox A variation visibility change invalidates cached attribute counts.
+	 */
+	public function test_get_attribute_counts_recompute_after_variation_visibility_change(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+
+		$wp_query                                    = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars                                  = array_filter( $wp_query->query_vars );
+		$query_vars['visibility-cache-invalidation'] = __METHOD__;
+		$published_counts                            = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		wp_update_post(
+			array(
+				'ID'          => $green_variation->get_id(),
+				'post_status' => 'private',
+			)
+		);
+		$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
+
+		$private_counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertSame( 2, $published_counts[ $green_term->term_id ] ?? 0 );
+		$this->assertSame( 1, $private_counts[ $green_term->term_id ] ?? 0 );
+	}
+
+	/**
+	 * @testdox A variation attribute term configured on the parent is absent when no matching variation exists.
+	 */
+	public function test_get_attribute_counts_exclude_parent_only_variation_terms(): void {
+		$yellow_term = wp_insert_term(
+			'Yellow',
+			'pa_color',
+			array( 'slug' => 'yellow-slug' )
+		);
+
+		$this->assertNotWPError( $yellow_term );
+
+		$product         = $this->products[4];
+		$attributes      = $product->get_attributes();
+		$color_attribute = clone $attributes['pa_color'];
+		$color_attribute->set_options(
+			array_merge( $color_attribute->get_options(), array( $yellow_term['term_id'] ) )
+		);
+		$attributes['pa_color'] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$this->assertTrue(
+			has_term( $yellow_term['term_id'], 'pa_color', $product->get_id() ),
+			'Yellow should be configured as a variation term on Product 5.'
+		);
+
+		$wp_query                          = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = __METHOD__;
+
+		$actual_attribute_counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertNotEmpty( $actual_attribute_counts );
+		$this->assertArrayNotHasKey(
+			$yellow_term['term_id'],
+			$actual_attribute_counts,
+			'Parent-only variation terms should not be offered as attribute filters.'
+		);
 	}
 
 	/**

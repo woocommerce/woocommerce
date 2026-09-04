@@ -30,14 +30,23 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	private $params;
 
 	/**
+	 * Hold the attribute lookup data store.
+	 *
+	 * @var LookupDataStore
+	 */
+	private $lookup_data_store;
+
+	/**
 	 * Initialize the query clauses.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @param Params $params The filter params.
+	 * @param Params          $params The filter params.
+	 * @param LookupDataStore $lookup_data_store The attribute lookup data store.
 	 * @return void
 	 */
-	final public function init( Params $params ): void {
-		$this->params = $params;
+	final public function init( Params $params, LookupDataStore $lookup_data_store ): void {
+		$this->params            = $params;
+		$this->lookup_data_store = $lookup_data_store;
 	}
 
 	/**
@@ -214,6 +223,8 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
+
+		$filterable_attribute_where_clause = $this->lookup_data_store->get_filterable_attribute_where_clause( 'lt' );
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
@@ -268,6 +279,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 							SELECT product_or_parent_id
 							FROM {$this->get_lookup_table_name()} lt
 							WHERE term_id in {$term_ids_to_filter_by_list}
+							AND {$filterable_attribute_where_clause}
 							{$in_stock_clause}
 						)";
 				}
@@ -277,6 +289,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
 			$count                      = count( $attribute_ids_for_and_filtering );
 			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
+			$published_variation_exists = $this->lookup_data_store->get_published_variation_exists_clause( 'lt' );
 			$clauses[]                  = "
 				{$clause_root}
 				SELECT product_or_parent_id
@@ -290,6 +303,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				SELECT product_or_parent_id
 				FROM {$this->get_lookup_table_name()} lt
 				WHERE is_variation_attribute=1
+				AND {$published_variation_exists}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 			)";
@@ -593,6 +607,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function get_lookup_table_name(): string {
-		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+		return $this->lookup_data_store->get_lookup_table_name();
 	}
 }

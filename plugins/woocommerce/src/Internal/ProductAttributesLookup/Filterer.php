@@ -91,6 +91,7 @@ class Filterer {
 		} else {
 			$in_stock_clause = '';
 		}
+		$filterable_attribute_where_clause = $this->data_store->get_filterable_attribute_where_clause( 'lt' );
 
 		$attribute_ids_for_and_filtering = array();
 		$clauses                         = array();
@@ -113,6 +114,7 @@ class Filterer {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE term_id in {$term_ids_to_filter_by_list}
+							AND {$filterable_attribute_where_clause}
 							{$in_stock_clause}
 						)";
 				}
@@ -122,6 +124,7 @@ class Filterer {
 		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
 			$count                      = count( $attribute_ids_for_and_filtering );
 			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
+			$published_variation_exists = $this->data_store->get_published_variation_exists_clause( 'lt' );
 			$clauses[]                  = "
 				{$clause_root}
 				SELECT product_or_parent_id
@@ -135,6 +138,7 @@ class Filterer {
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=1
+				AND {$published_variation_exists}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_or_parent_id

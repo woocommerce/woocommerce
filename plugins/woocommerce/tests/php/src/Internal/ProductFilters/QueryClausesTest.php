@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
@@ -147,15 +148,8 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 				'query_type' => $query_type,
 			),
 		);
-		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
-			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
-		};
 
-		add_filter( 'posts_clauses', $filter_callback );
-		$received_products_name = $this->get_data_from_products_array(
-			wc_get_products( array() )
-		);
-		remove_filter( 'posts_clauses', $filter_callback );
+		$received_products_name = $this->get_product_names_filtered_by_attribute( $taxonomy, $terms, $query_type );
 
 		$expected_products_name = $this->get_data_from_products_array(
 			array_filter(
@@ -188,6 +182,88 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox A private variation is excluded from attribute filtering.
+	 */
+	public function test_attribute_clauses_exclude_private_variations(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+
+		$green_variation->set_status( 'private' );
+		$green_variation->save();
+		$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
+
+		$this->assertEqualsCanonicalizing(
+			array( 'Product 6' ),
+			$this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' )
+		);
+	}
+
+	/**
+	 * @testdox A private Any variation is excluded from multi-term attribute filtering.
+	 */
+	public function test_multi_term_attribute_clauses_exclude_private_any_variation(): void {
+		$attribute = $this->fixture_data->get_product_attribute( 'color', array( 'red', 'green' ) );
+		$product   = $this->fixture_data->get_variable_product(
+			array( 'name' => 'Private Any variation parent' ),
+			array( $attribute )
+		);
+		$variation = $this->fixture_data->get_variation_product(
+			$product->get_id(),
+			array( 'pa_color' => '' ),
+			array( 'stock_status' => 'instock' )
+		);
+		$red_term  = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		wc_get_container()->get( LookupDataStore::class )->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+		$variation->set_status( 'private' );
+		$variation->save();
+		$this->assert_private_variation_lookup_row_is_retained( $variation, $product, 'pa_color', $red_term->term_id );
+
+		$this->assertSame(
+			array(),
+			$this->get_product_names_filtered_by_attribute(
+				'pa_color',
+				array( 'red-slug', 'green-slug' ),
+				'and',
+				array( 'include' => array( $product->get_id() ) )
+			)
+		);
+	}
+
+	/**
+	 * Get product names filtered by an attribute.
+	 *
+	 * @param string   $taxonomy   Attribute taxonomy name.
+	 * @param string[] $terms      Attribute term slugs.
+	 * @param string   $query_type Query type.
+	 * @param array    $query_args Optional product query arguments.
+	 * @return string[]
+	 */
+	private function get_product_names_filtered_by_attribute( string $taxonomy, array $terms, string $query_type, array $query_args = array() ): array {
+		$chosen_attributes = array(
+			$taxonomy => array(
+				'terms'      => $terms,
+				'query_type' => $query_type,
+			),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
+			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+
+		try {
+			return $this->get_data_from_products_array( wc_get_products( $query_args ) );
+		} finally {
+			remove_filter( 'posts_clauses', $filter_callback );
+		}
 	}
 
 	/**

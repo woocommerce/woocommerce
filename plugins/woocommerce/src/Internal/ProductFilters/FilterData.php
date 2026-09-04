@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -31,14 +32,34 @@ class FilterData {
 	private $taxonomy_hierarchy_data;
 
 	/**
+	 * Instance of LookupDataStore.
+	 *
+	 * @var LookupDataStore
+	 */
+	private $lookup_data_store;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
+	 * @param LookupDataStore       $lookup_data_store Instance of LookupDataStore.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data, LookupDataStore $lookup_data_store ) {
 		$this->query_clauses           = $query_clauses;
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+		$this->lookup_data_store       = $lookup_data_store;
+	}
+
+	/**
+	 * Whether out of stock products are hidden from the catalog.
+	 *
+	 * The filter data caches are keyed on this, so a change to the setting can't serve stale counts.
+	 *
+	 * @return bool
+	 */
+	private function hide_out_of_stock_items(): bool {
+		return 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
@@ -270,25 +291,27 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			// Optimization note: We evaluated using wc_product_attributes_lookup but decided against it, as removing
-			// the posts table join in the query below produced better benchmarking results and required minimal changes.
-			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
-				FROM {$wpdb->term_relationships} AS term_relationships
-				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-				WHERE term_relationships.object_id IN ( {$product_ids} )
-				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
-				GROUP BY terms.term_id
-			";
+			$lookup_table_name                      = $this->lookup_data_store->get_lookup_table_name();
+			$taxonomy_sql                           = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			$filterable_attribute_where_clause      = $this->lookup_data_store->get_filterable_attribute_where_clause( 'attribute_lookup' );
+			$attribute_lookup_in_stock_where_clause = $this->hide_out_of_stock_items() ? 'AND attribute_lookup.in_stock = 1' : '';
 
-			/**
-			 * We can't use $wpdb->prepare() here because using %s with
-			 * $wpdb->prepare() for a subquery won't work as it will escape the
-			 * SQL query.
-			 * We're using the query as is, same as Core does.
-			 */
+			// Aggregate the indexed lookup rows directly; the cached parent IDs already represent the filtered product set.
+			// $taxonomy_sql is already quoted by $wpdb->prepare(), so it is used without surrounding quotes here.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The lookup table name comes from the internal data store.
+			$attribute_count_sql = "
+				SELECT COUNT( DISTINCT attribute_lookup.product_or_parent_id ) as term_count, attribute_lookup.term_id as term_count_id
+				FROM {$lookup_table_name} AS attribute_lookup
+				WHERE attribute_lookup.product_or_parent_id IN ( {$product_ids} )
+				AND attribute_lookup.taxonomy = {$taxonomy_sql}
+				AND {$filterable_attribute_where_clause}
+				{$attribute_lookup_in_stock_where_clause}
+				GROUP BY attribute_lookup.term_id
+			";
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			// $product_ids is a comma-separated list of IDs the database already returned, so the statement as a
+			// whole can't go through $wpdb->prepare() -- it would escape the list into a single string.
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = $wpdb->get_results( $attribute_count_sql );
 			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
@@ -485,9 +508,10 @@ class FilterData {
 			md5(
 				wp_json_encode(
 					array(
-						'query_vars'  => $this->normalize_query_vars( $query_vars ),
-						'extra'       => $extra,
-						'filter_type' => $filter_type,
+						'query_vars'              => $this->normalize_query_vars( $query_vars ),
+						'extra'                   => $extra,
+						'filter_type'             => $filter_type,
+						'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
 					)
 				)
 			)
@@ -637,7 +661,14 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $this->normalize_query_vars( $query_vars ) ) );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
+			wp_json_encode(
+				array(
+					'query_vars'              => $this->normalize_query_vars( $query_vars ),
+					'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
+				)
+			)
+		);
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {

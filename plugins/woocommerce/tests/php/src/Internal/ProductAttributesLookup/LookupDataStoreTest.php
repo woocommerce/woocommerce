@@ -102,6 +102,57 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Filterable attribute SQL preserves valid identifier casing.
+	 */
+	public function test_filterable_attribute_where_clause_preserves_identifier_casing(): void {
+		$where_clause = $this->sut->get_filterable_attribute_where_clause( 'WP_wc_Lookup' );
+
+		$this->assertStringContainsString( 'WP_wc_Lookup.is_variation_attribute', $where_clause );
+		$this->assertStringContainsString( 'WP_wc_Lookup.product_id', $where_clause );
+	}
+
+	/**
+	 * @testdox Filterable attribute SQL rejects the invalid table reference $reference.
+	 * @dataProvider invalid_table_reference_provider
+	 *
+	 * @param string $reference Table name or alias to validate.
+	 */
+	public function test_filterable_attribute_where_clause_rejects_invalid_identifier( string $reference ): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->get_filterable_attribute_where_clause( $reference );
+	}
+
+	/**
+	 * @testdox Published variation SQL rejects the invalid table reference $reference.
+	 * @dataProvider invalid_table_reference_provider
+	 *
+	 * @param string $reference Table name or alias to validate.
+	 */
+	public function test_published_variation_exists_clause_rejects_invalid_identifier( string $reference ): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->get_published_variation_exists_clause( $reference );
+	}
+
+	/**
+	 * Table references that are not valid SQL identifiers.
+	 *
+	 * An empty reference would otherwise interpolate into a column name with no table qualifier, and a trailing
+	 * newline pins the end-of-string anchor, which a laxer one would let through along with whatever follows it.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function invalid_table_reference_provider(): array {
+		return array(
+			'empty string'     => array( '' ),
+			'statement break'  => array( 'lookup; DROP TABLE posts' ),
+			'whitespace'       => array( 'lookup table' ),
+			'trailing newline' => array( "lt\n" ),
+		);
+	}
+
+	/**
 	 * @testdox `create_data_for_product` creates the appropriate entries for simple products, skipping custom product attributes.
 	 *
 	 * @testWith [true, true]

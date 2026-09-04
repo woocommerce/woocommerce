@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent attribute filters from showing terms backed only by disabled variations.

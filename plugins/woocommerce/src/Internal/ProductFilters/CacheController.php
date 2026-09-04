@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -46,6 +47,9 @@ class CacheController implements RegisterHooksInterface {
 	 * Hook into actions and filters.
 	 */
 	public function register() {
+		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
+		add_action( 'before_delete_post', array( $this, 'handle_before_delete_post' ), 10, 2 );
+
 		if ( ! $this->need_cleanup() ) {
 			return;
 		}
@@ -75,6 +79,58 @@ class CacheController implements RegisterHooksInterface {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 		delete_transient( self::CACHE_ENTRY_COUNT_TRANSIENT );
+	}
+
+	/**
+	 * Handle the transition_post_status hook.
+	 *
+	 * @internal
+	 *
+	 * @param string $new_status New post status.
+	 * @param string $old_status Old post status.
+	 * @param mixed  $post       Post object.
+	 *
+	 * @since 11.2.0
+	 */
+	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		$was_published = ProductStatus::PUBLISH === $old_status;
+		$is_published  = ProductStatus::PUBLISH === $new_status;
+
+		if ( $was_published !== $is_published ) {
+			$this->maybe_invalidate_filter_data_cache_for_post( $post );
+		}
+	}
+
+	/**
+	 * Handle the before_delete_post hook.
+	 *
+	 * @internal
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param mixed $post    Post object.
+	 *
+	 * @since 11.2.0
+	 */
+	public function handle_before_delete_post( $post_id, $post ): void {
+		$this->maybe_invalidate_filter_data_cache_for_post( $post );
+	}
+
+	/**
+	 * Invalidate the filter data cache for a product or variation post, when there is anything cached.
+	 *
+	 * These two hooks are registered before the need_cleanup() early return in register(), because the cache
+	 * can be populated later in the same request.
+	 *
+	 * @param mixed $post Post object.
+	 */
+	private function maybe_invalidate_filter_data_cache_for_post( $post ): void {
+		if ( ! $post instanceof \WP_Post
+			|| ! in_array( $post->post_type, array( 'product', 'product_variation' ), true )
+			|| ! $this->need_cleanup() ) {
+			return;
+		}
+
+		$this->invalidate_filter_data_cache();
 	}
 
 	/**

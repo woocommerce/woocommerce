@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -36,8 +37,9 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 
 		$query_clauses           = $this->createMock( QueryClausesGenerator::class );
 		$taxonomy_hierarchy_data = $this->createMock( TaxonomyHierarchyData::class );
+		$lookup_data_store       = $this->createMock( LookupDataStore::class );
 
-		$this->sut = new FilterData( $query_clauses, $taxonomy_hierarchy_data );
+		$this->sut = new FilterData( $query_clauses, $taxonomy_hierarchy_data, $lookup_data_store );
 
 		$reflection      = new \ReflectionClass( FilterData::class );
 		$this->normalize = $reflection->getMethod( 'normalize_query_vars' );
