@@ -116,6 +116,48 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		return self::get_reports_directory() . $this->get_filename();
 	}
 
+	/**
+	 * Check whether a complete generated export is still on disk.
+	 *
+	 * The `.headers` companion is only written once the export reaches 100%, so a body without one
+	 * is an export that never finished and must not be served.
+	 *
+	 * @since 11.2.0
+	 * @return bool
+	 */
+	public function export_file_exists() {
+		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
+	}
+
+	/**
+	 * Write the export to the output, leaving the file in place. Send the download headers first.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function stream_export_file() {
+		$this->send_content( $this->get_headers_row_file() );
+
+		// Stream the body instead of reading it into memory. Exports are emailed precisely when the
+		// report is too large to return in one request, so it can be far larger than the memory limit.
+		readfile( $this->get_file_path() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile, WordPress.Security.EscapeOutput.OutputNotEscaped -- Streaming a generated CSV download.
+	}
+
+	/**
+	 * Serve the export file.
+	 *
+	 * Unlike the parent, this keeps the file so that the download link WooCommerce emails to the
+	 * merchant works more than once. ReportExporter::delete_expired_exports() removes it later.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function export() {
+		$this->send_headers();
+		$this->stream_export_file();
+		die();
+	}
+
 
 	/**
 	 * Setter for report type.

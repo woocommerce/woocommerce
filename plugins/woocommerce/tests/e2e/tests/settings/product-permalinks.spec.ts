@@ -31,9 +31,9 @@ test.describe( 'Product permalink settings', () => {
 		// (the onboarding wizard installs the default set), and booting them under WP-CLI can
 		// exhaust the CLI container's memory limit before the command runs.
 		const optionCliFlags = '--skip-plugins --skip-themes';
-		// Snapshot the whole option rather than the visible form state: the journey's Shop base
-		// saves also flip the derived `use_verbose_page_rules` flag, which no form field exposes,
-		// so a UI-driven restore could never put it back.
+		// Snapshot the whole option rather than the visible form state: the saved product base is
+		// normalized on the way in, so replaying the form values would not always restore the
+		// bytes the option started with.
 		const readPermalinks = async () =>
 			(
 				await wpCLI(
