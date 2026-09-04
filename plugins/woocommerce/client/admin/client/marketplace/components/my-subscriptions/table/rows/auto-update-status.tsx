@@ -42,7 +42,7 @@ export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
 
 	if ( subscription.product_key === '' ) {
 		blockers.push(
-			__( 'This extension has no subscription.', 'woocommerce' )
+			__( 'There is no subscription for it.', 'woocommerce' )
 		);
 
 		return blockers;
@@ -81,8 +81,7 @@ export default function AutoUpdateStatus( props: {
 
 	const local = subscription.local;
 
-	// Themes have their own auto-update option, which this screen doesn't manage.
-	if ( ! local?.installed || local.type !== 'plugin' ) {
+	if ( ! local?.installed ) {
 		return null;
 	}
 
@@ -124,7 +123,7 @@ export default function AutoUpdateStatus( props: {
 		const explanation = local.auto_update_manageable ? (
 			<>
 				{ __(
-					'This extension will not install new versions on its own, including security releases.',
+					'New versions will not install on their own, including security releases.',
 					'woocommerce'
 				) }{ ' ' }
 				<Button
@@ -138,7 +137,7 @@ export default function AutoUpdateStatus( props: {
 			</>
 		) : (
 			__(
-				'This extension will not install new versions on its own, including security releases. Auto-updates for it are controlled outside this screen.',
+				'New versions will not install on their own, including security releases. Auto-updates are controlled outside this screen.',
 				'woocommerce'
 			)
 		);
@@ -167,7 +166,7 @@ export default function AutoUpdateStatus( props: {
 				<>
 					<p>
 						{ __(
-							'Auto-updates are on, but this extension will not update because:',
+							'Auto-updates are on, but it will not update because:',
 							'woocommerce'
 						) }
 					</p>

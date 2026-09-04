@@ -31,10 +31,13 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_auto_update_state(): void {
 		delete_site_option( 'auto_update_plugins' );
+		delete_site_option( 'auto_update_themes' );
 		wp_cache_delete( 'plugins', 'plugins' );
 		wp_set_current_user( 0 );
 		remove_all_filters( 'auto_update_plugin' );
 		remove_all_filters( 'plugins_auto_update_enabled' );
+		remove_all_filters( 'themes_auto_update_enabled' );
+		remove_all_filters( 'auto_update_theme' );
 	}
 
 	/**
@@ -49,6 +52,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		// The test suite runs with background updates switched off; these tests are about what the
 		// screen reports on a site where the feature is available.
 		add_filter( 'plugins_auto_update_enabled', '__return_true' );
+		add_filter( 'themes_auto_update_enabled', '__return_true' );
 
 		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$admin    = new WP_User( $admin_id );
@@ -702,11 +706,11 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Enabling auto-updates writes the plugin into the auto_update_plugins option.
 	 */
-	public function test_set_subscription_plugin_auto_update_enables(): void {
+	public function test_set_subscription_auto_update_enables(): void {
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 
-		WC_Helper::set_subscription_plugin_auto_update( 'test-key', true );
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
 
 		$this->assertSame(
 			array( 'test-woo-extension/test-woo-extension.php' ),
@@ -717,12 +721,12 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Disabling auto-updates removes the plugin from the auto_update_plugins option.
 	 */
-	public function test_set_subscription_plugin_auto_update_disables(): void {
+	public function test_set_subscription_auto_update_disables(): void {
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 		update_site_option( 'auto_update_plugins', array( 'test-woo-extension/test-woo-extension.php', 'other/other.php' ) );
 
-		WC_Helper::set_subscription_plugin_auto_update( 'test-key', false );
+		WC_Helper::set_subscription_auto_update( 'test-key', false );
 
 		$this->assertSame( array(), (array) get_site_option( 'auto_update_plugins' ), 'Plugins no longer installed are dropped too.' );
 	}
@@ -730,25 +734,25 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Setting auto-updates is refused when the state cannot be changed from here.
 	 */
-	public function test_set_subscription_plugin_auto_update_refuses_a_forced_state(): void {
+	public function test_set_subscription_auto_update_refuses_a_forced_state(): void {
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 		add_filter( 'auto_update_plugin', '__return_false' );
 
 		$this->expectException( Exception::class );
 
-		WC_Helper::set_subscription_plugin_auto_update( 'test-key', true );
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
 	}
 
 	/**
 	 * @testdox Auto-updates can be set for a product distributed through WordPress.org.
 	 */
-	public function test_set_subscription_plugin_auto_update_handles_a_wporg_product(): void {
+	public function test_set_subscription_auto_update_handles_a_wporg_product(): void {
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 
 		// The fixture plugin carries no Woo header, which is what a WordPress.org build looks like.
-		WC_Helper::set_subscription_plugin_auto_update( 'test-key', true );
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
 
 		$this->assertContains(
 			'test-woo-extension/test-woo-extension.php',
@@ -758,15 +762,101 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Auto-update data for a theme reads the auto_update_themes option.
+	 */
+	public function test_theme_auto_update_data_reads_the_theme_option(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+
+		$off = WC_Helper::get_theme_auto_update_data( $stylesheet );
+		update_site_option( 'auto_update_themes', array( $stylesheet ) );
+		$on = WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertFalse( $off['auto_update'], 'A theme not listed in the option does not auto-update.' );
+		$this->assertTrue( $on['auto_update'] );
+		$this->assertTrue( $on['auto_update_manageable'], 'An administrator on single site can change it.' );
+	}
+
+	/**
+	 * @testdox Theme auto-updates are not manageable without the update_themes capability.
+	 */
+	public function test_theme_auto_update_data_requires_the_update_themes_capability(): void {
+		$this->prepare_auto_update_env();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$data = WC_Helper::get_theme_auto_update_data( get_stylesheet() );
+
+		$this->assertFalse( $data['auto_update_manageable'] );
+	}
+
+	/**
+	 * @testdox Enabling auto-updates for a theme writes the stylesheet into auto_update_themes.
+	 */
+	public function test_set_subscription_auto_update_enables_a_theme(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$this->set_subscription_for_local_theme( $stylesheet );
+
+		WC_Helper::set_subscription_auto_update( 'test-theme-key', true );
+
+		$this->assertContains(
+			$stylesheet,
+			(array) get_site_option( 'auto_update_themes' ),
+			'Themes are keyed by stylesheet, not by a file path.'
+		);
+	}
+
+	/**
+	 * @testdox Disabling auto-updates for a theme removes the stylesheet from auto_update_themes.
+	 */
+	public function test_set_subscription_auto_update_disables_a_theme(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$this->set_subscription_for_local_theme( $stylesheet );
+		update_site_option( 'auto_update_themes', array( $stylesheet ) );
+
+		WC_Helper::set_subscription_auto_update( 'test-theme-key', false );
+
+		$this->assertNotContains( $stylesheet, (array) get_site_option( 'auto_update_themes' ) );
+	}
+
+	/**
+	 * Stand in a subscription whose product is the active theme.
+	 *
+	 * @param string $stylesheet Directory name of the theme.
+	 * @return void
+	 */
+	private function set_subscription_for_local_theme( string $stylesheet ): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_key'  => 'test-theme-key',
+					'product_id'   => 456,
+					'product_name' => 'Test Theme',
+					'zip_slug'     => $stylesheet,
+					'connections'  => array(),
+					'expired'      => false,
+					'expiring'     => false,
+					'lifetime'     => false,
+					'autorenew'    => true,
+					'expires'      => time() + DAY_IN_SECONDS,
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
 	 * @testdox Setting auto-updates is refused for an unknown subscription.
 	 */
-	public function test_set_subscription_plugin_auto_update_refuses_an_unknown_subscription(): void {
+	public function test_set_subscription_auto_update_refuses_an_unknown_subscription(): void {
 		$this->prepare_auto_update_env();
 		$this->set_subscription_for_local_plugin();
 
 		$this->expectException( Exception::class );
 
-		WC_Helper::set_subscription_plugin_auto_update( 'no-such-key', true );
+		WC_Helper::set_subscription_auto_update( 'no-such-key', true );
 	}
 
 	/**

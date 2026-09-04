@@ -111,12 +111,29 @@ describe( 'AutoUpdateStatus', () => {
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	it( 'renders nothing for a theme', () => {
-		const { container } = renderStatus(
-			subscriptionWith( { type: 'theme' } )
+	it( 'warns for a theme with auto-updates off, like a plugin', () => {
+		renderStatus( subscriptionWith( { type: 'theme' } ) );
+
+		expect(
+			screen.getByText( 'Auto-updates are off' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'blocks a theme for the same reasons as a plugin', async () => {
+		renderStatus(
+			subscriptionWith(
+				{ type: 'theme', auto_update: true },
+				{ active: false }
+			)
 		);
 
-		expect( container ).toBeEmptyDOMElement();
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
+
+		expect(
+			await screen.findByText(
+				'The subscription is not connected to this store.'
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'ignores automatic updates being switched off site-wide', () => {
@@ -151,7 +168,7 @@ describe( 'AutoUpdateStatus', () => {
 		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 
 		expect(
-			await screen.findByText( 'This extension has no subscription.' )
+			await screen.findByText( 'There is no subscription for it.' )
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(
