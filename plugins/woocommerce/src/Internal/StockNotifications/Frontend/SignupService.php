@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * A class for handling the business logic of the signup process.
@@ -87,6 +88,8 @@ class SignupService {
 	 * @return SignupResult|\WP_Error The signup result.
 	 */
 	public function signup( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		// Sanity checks.
 		if ( ! Config::allows_signups() ) {
@@ -200,6 +203,8 @@ class SignupService {
 	 * @return Notification|null The notification, or null if it doesn't exist.
 	 */
 	public function is_already_signed_up( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		if ( empty( $product_id ) ) {
 			return null;
@@ -344,12 +349,8 @@ class SignupService {
 		}
 
 		if ( ! $is_logged_in ) {
-			$email = isset( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : false;
-			if ( ! $email ) {
-				return new \WP_Error( self::ERROR_INVALID_EMAIL );
-			}
-
-			if ( ! is_email( $email ) ) {
+			$email = isset( $source['wc_bis_email'] ) ? EmailNormalizer::sanitize( (string) wp_unslash( $source['wc_bis_email'] ) ) : '';
+			if ( '' === $email ) {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}
 
@@ -368,7 +369,7 @@ class SignupService {
 			}
 
 			$data['user_id']    = $user->ID;
-			$data['user_email'] = $user->user_email;
+			$data['user_email'] = EmailNormalizer::normalize( $user->user_email );
 		}
 
 		return $data;

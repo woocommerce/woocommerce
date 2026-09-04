@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * Notification create page for Customer Stock Notifications.
@@ -58,12 +59,12 @@ class NotificationCreatePage {
 			}
 
 			$user                      = get_user_by( 'id', $posted_data['user_id'] );
-			$posted_data['user_email'] = is_a( $user, 'WP_User' ) ? $user->user_email : '';
+			$posted_data['user_email'] = is_a( $user, 'WP_User' ) ? EmailNormalizer::normalize( $user->user_email ) : '';
 
 		} elseif ( isset( $_POST['user_email'] ) && ! empty( $_POST['user_email'] ) ) {
 
-			$posted_data['user_email'] = sanitize_text_field( wp_unslash( $_POST['user_email'] ) );
-			if ( ! filter_var( $posted_data['user_email'], FILTER_VALIDATE_EMAIL ) ) {
+			$posted_data['user_email'] = EmailNormalizer::sanitize( sanitize_email( wp_unslash( $_POST['user_email'] ) ) );
+			if ( '' === $posted_data['user_email'] ) {
 				NotificationsPage::add_notice( __( 'Please enter a valid email address.', 'woocommerce' ), 'error' );
 				return;
 			}
