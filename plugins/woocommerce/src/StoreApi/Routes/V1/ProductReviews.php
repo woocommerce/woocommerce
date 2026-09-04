@@ -185,6 +185,11 @@ class ProductReviews extends AbstractRoute {
 	 * @return int[]
 	 */
 	private function get_unlocked_password_protected_product_ids( $candidate_product_ids = array() ) {
+		// Return early if the visitor has not submitted the password form and there is no filter in `post_password_required`.
+		if ( ( ! defined( 'COOKIEHASH' ) || ! isset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] ) ) && ! has_filter( 'post_password_required' ) ) {
+			return array();
+		}
+
 		$query_args = array(
 			'post_type'              => 'product',
 			'post_status'            => ProductStatus::PUBLISH,
