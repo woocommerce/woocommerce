@@ -167,6 +167,9 @@ class PaymentsController {
 	 *
 	 * The enabled state of the gateways is not taken into account.
 	 *
+	 * Matching is by integration name: a gateway counts as compatible when a registered
+	 * Checkout block payment method integration has the same name as the gateway ID.
+	 *
 	 * @return string[] The list of gateway IDs.
 	 */
 	private function get_gateway_ids_incompatible_with_checkout_block(): array {
