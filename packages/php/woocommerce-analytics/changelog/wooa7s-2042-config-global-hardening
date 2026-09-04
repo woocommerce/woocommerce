@@ -1,0 +1,4 @@
+Significance: patch
+Type: security
+
+Always initialize the front-end `window.wcAnalytics` object from scratch and only accept a string as the webpack public path.

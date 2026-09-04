@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
+import { createElement, Fragment } from '@wordpress/element';
 import { optionsStore } from '@woocommerce/data';
 
 /**
