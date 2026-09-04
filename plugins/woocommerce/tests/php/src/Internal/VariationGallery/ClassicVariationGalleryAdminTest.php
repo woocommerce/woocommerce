@@ -199,6 +199,66 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An image-less variation renders an empty gallery field even when the parent has a featured image.
+	 */
+	public function test_render_variation_gallery_field_excludes_inherited_parent_image() {
+		$variation       = $this->create_variation();
+		$parent          = wc_get_product( $variation->get_parent_id() );
+		$parent_featured = $this->create_attachment( 'Parent featured image' );
+		$parent->set_image_id( $parent_featured );
+		$parent->save();
+		$this->flush_product_instance_cache();
+
+		ob_start();
+		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'value=""', $output, 'The gallery field should be empty for a variation that owns no images.' );
+		$this->assertStringNotContainsString(
+			'data-attachment_id="' . $parent_featured . '"',
+			$output,
+			'The inherited parent image must not enter the variation gallery field.'
+		);
+	}
+
+	/**
+	 * @testdox Saving a variation without touching images does not persist the inherited parent image onto the variation.
+	 */
+	public function test_save_roundtrip_does_not_persist_inherited_parent_image() {
+		$variation       = $this->create_variation();
+		$parent          = wc_get_product( $variation->get_parent_id() );
+		$parent_featured = $this->create_attachment( 'Parent featured image' );
+		$parent->set_image_id( $parent_featured );
+		$parent->save();
+		$this->flush_product_instance_cache();
+
+		ob_start();
+		$this->sut->render_variation_gallery_field( 0, array(), get_post( $variation->get_id() ) );
+		$output = (string) ob_get_clean();
+
+		// Post back exactly what the rendered field contains, as the browser does on save.
+		preg_match( '/name="variable_gallery_image_ids\[0\]"[^>]*value="([^"]*)"/', $output, $matches );
+		$this->assertArrayHasKey( 1, $matches, 'The rendered field must contain the hidden gallery input.' );
+		$_POST['variable_gallery_image_ids'][0] = $matches[1];
+
+		$this->sut->persist_variation_gallery_field( $variation, 0 );
+		$variation->save();
+
+		$this->assertSame(
+			0,
+			wc_get_product( $variation->get_id() )->get_image_id( 'edit' ),
+			'Roundtripping the rendered field must not write the parent image onto the variation.'
+		);
+	}
+
+	/**
+	 * Drop cached product instances so later reads rebuild parent_data, as a new request would.
+	 */
+	private function flush_product_instance_cache(): void {
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+	}
+
+	/**
 	 * Create a variation for testing.
 	 *
 	 * @return WC_Product_Variation

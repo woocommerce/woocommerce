@@ -285,6 +285,35 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_available_variation' prefers the variation's own gallery over the inherited parent featured image.
+	 */
+	public function test_get_available_variation_prefers_own_gallery_over_inherited_parent_image() {
+		$product              = WC_Helper_Product::create_variation_product();
+		$variation            = wc_get_product( $product->get_children()[0] );
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		// Drop cached product instances so the reload rebuilds parent_data, as a new request would.
+		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+		$product   = wc_get_product( $product->get_id() );
+		$variation = wc_get_product( $variation->get_id() );
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame(
+			$variation_gallery_id,
+			$available_variation['image_id'],
+			'A variation that owns a gallery but no featured image should open on gallery[0], not on the inherited parent image.'
+		);
+	}
+
+	/**
 	 * @testdox get_variation_prices sorts on first call, skips re-sorting on repeat calls, and treats float and string prices as equal via loose comparison.
 	 */
 	public function test_get_variation_prices_skips_sort_on_repeated_call_and_with_equivalent_types(): void {
