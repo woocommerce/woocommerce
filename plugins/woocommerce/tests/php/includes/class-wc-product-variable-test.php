@@ -569,9 +569,9 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox has_purchasable_variations finds a purchasable variation beyond the chunk threshold without evaluating the ones before it.
+	 * @testdox has_purchasable_variations finds a purchasable variation beyond the first batch without evaluating the ones before it.
 	 */
-	public function test_has_purchasable_variations_handles_products_above_chunk_threshold(): void {
+	public function test_has_purchasable_variations_handles_products_above_the_batch_size(): void {
 		$specs   = array_fill( 0, 60, array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ) );
 		$specs[] = array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' );
 		$product = $this->create_variable_product_with_variations( $specs );
