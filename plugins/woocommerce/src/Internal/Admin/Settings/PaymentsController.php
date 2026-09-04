@@ -170,7 +170,8 @@ class PaymentsController {
 	 * @return string[] The list of gateway IDs.
 	 */
 	private function get_gateway_ids_incompatible_with_checkout_block(): array {
-		$registered_payment_method_names = array_keys(
+		$registered_payment_method_names = array_map(
+			static fn( $payment_method ) => $payment_method->get_name(),
 			BlocksPackage::container()->get( PaymentMethodRegistry::class )->get_all_registered()
 		);
 
