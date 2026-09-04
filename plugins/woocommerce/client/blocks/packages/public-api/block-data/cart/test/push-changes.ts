@@ -10,6 +10,7 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
 import { pushChanges } from '../push-changes';
 
 let updateCustomerDataMock = jest.fn();
+const getValidationErrorMock = jest.fn().mockReturnValue( undefined );
 let getCustomerDataMock = jest.fn().mockReturnValue( {
 	billingAddress: {
 		first_name: 'John',
@@ -109,14 +110,15 @@ describe( 'pushChanges', () => {
 						getCustomerData: getCustomerDataMock,
 					};
 				}
-				if ( storeNameOrDescriptor === validationStore ) {
+				if (
+					storeNameOrDescriptor === validationStore ||
+					storeNameOrDescriptor === validationStore.name
+				) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
 							.select( storeNameOrDescriptor ),
-						getValidationError: jest
-							.fn()
-							.mockReturnValue( undefined ),
+						getValidationError: getValidationErrorMock,
 					};
 				}
 				return jest
@@ -140,8 +142,10 @@ describe( 'pushChanges', () => {
 			}
 		);
 	} );
-	beforeEach( () => {
-		resetToInitialAddressMock();
+	beforeEach( async () => {
+		getValidationErrorMock.mockReset();
+		getValidationErrorMock.mockReturnValue( undefined );
+		await resetToInitialAddressMock();
 	} );
 
 	it( 'Keeps props dirty if data did not persist due to an error', async () => {
@@ -477,5 +481,190 @@ describe( 'pushChanges', () => {
 			true,
 			false // because no shipping rate impacting fields are changed
 		);
+	} );
+
+	it( 'Pushes the address when the country changes, even though the reset state and postcode are invalid', async () => {
+		getValidationErrorMock.mockImplementation( ( key: string ) =>
+			[ 'shipping_state', 'shipping_postcode' ].includes( key )
+				? { message: 'Please enter a valid postcode', hidden: true }
+				: undefined
+		);
+
+		// Changing the country resets the state and postcode, like the address form does.
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: '',
+				postcode: '',
+				country: 'GB',
+				phone: '555-555-5555',
+			},
+		} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{
+				shipping_address: {
+					first_name: 'John',
+					last_name: 'Doe',
+					address_1: '123 Main St',
+					address_2: '',
+					city: 'New York',
+					state: '',
+					postcode: '',
+					country: 'GB',
+					phone: '555-555-5555',
+				},
+			},
+			true,
+			true // because the shipping rate impacting field was changed
+		);
+	} );
+
+	it( 'Does not push the address if the postcode entered after a country change is invalid', async () => {
+		updateCustomerDataMock.mockClear();
+		getValidationErrorMock.mockImplementation( ( key: string ) =>
+			key === 'shipping_postcode'
+				? { message: 'Please enter a valid postcode', hidden: true }
+				: undefined
+		);
+
+		const billingAddress = {
+			first_name: 'John',
+			last_name: 'Doe',
+			address_1: '123 Main St',
+			address_2: '',
+			city: 'New York',
+			state: 'NY',
+			postcode: '10001',
+			country: 'US',
+			email: 'john.doe@mail.com',
+			phone: '555-555-5555',
+		};
+		const shippingAddress = {
+			first_name: 'John',
+			last_name: 'Doe',
+			address_1: '123 Main St',
+			address_2: '',
+			city: 'New York',
+			state: '',
+			country: 'GB',
+			phone: '555-555-5555',
+		};
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress,
+			shippingAddress: { ...shippingAddress, postcode: 'INVALID' },
+		} );
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+
+		// Correcting the postcode unblocks the push, proving nothing else was holding it back.
+		getValidationErrorMock.mockReturnValue( undefined );
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress,
+			shippingAddress: { ...shippingAddress, postcode: 'SW1A 2AA' },
+		} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{ shipping_address: { ...shippingAddress, postcode: 'SW1A 2AA' } },
+			true,
+			true // because the shipping rate impacting field was changed
+		);
+	} );
+
+	it( 'Pushes a country change straight away instead of waiting out the debounce', () => {
+		updateCustomerDataMock.mockClear();
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: '',
+				postcode: '',
+				country: 'GB',
+				phone: '555-555-5555',
+			},
+		} );
+
+		// Debounced, but the shipping rates on screen are stale as soon as the country changes.
+		pushChanges();
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Waits for the debounce when a field other than the country changes', () => {
+		jest.useFakeTimers();
+		updateCustomerDataMock.mockClear();
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'Houston',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				phone: '555-555-5555',
+			},
+		} );
+
+		pushChanges();
+
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+
+		jest.advanceTimersByTime( 1500 );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		jest.useRealTimers();
 	} );
 } );
