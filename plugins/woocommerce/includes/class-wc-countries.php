@@ -45,9 +45,9 @@ class WC_Countries {
 	 * @return string
 	 */
 	private function get_cache_locale() {
-		$locale = (string) get_locale();
+		$locale = get_locale();
 
-		return $locale ? $locale : 'en_US';
+		return is_string( $locale ) && $locale ? $locale : 'en_US';
 	}
 
 	/**

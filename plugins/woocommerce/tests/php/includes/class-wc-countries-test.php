@@ -8,7 +8,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Locale exposed through the WordPress locale filter.
 	 *
-	 * @var string
+	 * @var mixed
 	 */
 	private $active_locale = 'en_US';
 
@@ -70,7 +70,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	 * @internal
 	 *
 	 * @param string $locale Current locale.
-	 * @return string
+	 * @return mixed
 	 */
 	public function filter_active_locale( $locale ) {
 		return $this->active_locale;
@@ -286,6 +286,27 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Country loading falls back for an invalid filtered locale.
+	 *
+	 * @dataProvider provide_invalid_locale_values
+	 *
+	 * @param mixed $invalid_locale Invalid filtered locale.
+	 */
+	public function test_country_loading_normalizes_invalid_filtered_locale( $invalid_locale ): void {
+		$this->active_locale = $invalid_locale;
+		add_filter( 'locale', array( $this, 'filter_active_locale' ) );
+		add_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
+		$sut = new WC_Countries();
+
+		$sut->get_countries();
+
+		$this->active_locale = 'en_US';
+		$sut->get_countries();
+
+		$this->assertSame( 1, $this->country_filter_calls, 'An invalid locale should share the fallback locale cache.' );
+	}
+
+	/**
 	 * @testdox Empty filtered geographical data preserves existing cache semantics.
 	 */
 	public function test_empty_filtered_geographical_data_preserves_existing_cache_semantics(): void {
@@ -381,6 +402,18 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 				'country code'    => 'USA',
 				'expected result' => 'US',
 			),
+		);
+	}
+
+	/**
+	 * Invalid values returned by the WordPress locale filter.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_invalid_locale_values() {
+		return array(
+			'array'                 => array( array() ),
+			'non-stringable object' => array( new stdClass() ),
 		);
 	}
 
