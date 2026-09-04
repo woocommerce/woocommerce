@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `--format=json` support to the `wp wc hpos status` CLI command.
