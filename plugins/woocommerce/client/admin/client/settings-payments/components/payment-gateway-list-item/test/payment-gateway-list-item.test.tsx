@@ -714,7 +714,7 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 
 			expect(
-				getByRole( 'link', { name: 'Learn more' } )
+				getByRole( 'link', { name: /Learn more/ } )
 			).toHaveAttribute(
 				'href',
 				'https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions'
