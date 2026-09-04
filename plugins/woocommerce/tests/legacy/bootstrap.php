@@ -42,7 +42,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		$this->register_autoloader_for_testing_tools();
 
-		$this->initialize_code_hacker();
+		$this->maybe_initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
@@ -149,7 +149,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize the code hacker.
+	 * Initialize the code hacker unless the WC_TEST_DISABLE_CODE_HACKER environment variable is set.
+	 *
+	 * The code hacker owns PHP's file stream wrapper, so tools that need that wrapper
+	 * themselves (for example mutation testers, which swap mutated files in at include
+	 * time) cannot run alongside it.
+	 */
+	private function maybe_initialize_code_hacker() {
+		if ( empty( getenv( 'WC_TEST_DISABLE_CODE_HACKER' ) ) ) {
+			$this->initialize_code_hacker();
+			return;
+		}
+
+		echo 'Not enabling the code hacker (WC_TEST_DISABLE_CODE_HACKER is set). Tests that mock functions or static methods, or that subclass final classes, will fail.' . PHP_EOL;
+	}
+
+	/**
+	 * Initialize the code hacker and register the hacks.
 	 *
 	 * @throws Exception Error when initializing one of the hacks.
 	 */

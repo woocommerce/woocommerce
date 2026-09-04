@@ -9,6 +9,8 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
@@ -468,6 +470,32 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'customer_stock_notifications', $changes );
 		$this->assertTrue( $changes['customer_stock_notifications'] );
+	}
+
+	/**
+	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
+	 */
+	public function test_wc_update_11201_migrate_tax_lookup_order_items(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+
+		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
+		// it still runs the rebuild.
+		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11201_migrate_tax_lookup_order_items', $db_updates['11.2.0-1'] );
+
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+
+		wc_update_11201_migrate_tax_lookup_order_items();
+
+		$this->assertTrue(
+			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
+			'The migration should hand the rebuild to the batch processing controller.'
+		);
+
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
 	}
 
 	/**

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
@@ -29,6 +30,7 @@ defined( 'ABSPATH' ) || exit;
 class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+	use ProductRequestPreparationTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -146,7 +148,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product    = $this->prepare_object_for_database( $request );
+		$updated_product = $this->prepare_product_for_duplication( $request );
+
+		if ( is_wp_error( $updated_product ) ) {
+			return $updated_product;
+		}
+
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
@@ -740,31 +747,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
+		$product = $this->get_product_for_rest_request( $request );
 
-		// Type is the most important part here because we need to be using the correct class and methods.
-		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			$product = new $classname( $id );
-		} elseif ( isset( $request['id'] ) ) {
-			$product = wc_get_product( $id );
-		} else {
-			$product = new WC_Product_Simple();
-		}
-
-		if ( ProductType::VARIATION === $product->get_type() ) {
-			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id",
-				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
-				array(
-					'status' => 404,
-				)
-			);
+		if ( is_wp_error( $product ) ) {
+			return $product;
 		}
 
 		// Post title.
@@ -1991,7 +1977,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params = parent::get_collection_params();
 
 		$params['categories'] = array(
-			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific product category ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',

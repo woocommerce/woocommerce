@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 
 require_once __DIR__ . '/../features/onboarding-tasks/test-task.php';
 
-// Wrokaround to suppress exif_read_data errors from
+// Workaround to suppress exif_read_data errors from
 // https://github.com/WordPress/WordPress/blob/master/wp-admin/includes/image.php#L835
 define( 'WP_RUN_CORE_TESTS', false );
 
@@ -337,6 +337,144 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$task_after_request = TaskLists::get_task( 'test-task' );
 
 		$this->assertEquals( $task_after_request->is_dismissed(), false );
+	}
+
+	/**
+	 * Test that a task is dismissed and restored in the correct task list when
+	 * the same task ID exists in more than one list.
+	 *
+	 * Regression: the "Things to do next" (extended) list registers an
+	 * AdditionalPayments task whose ID ("payments") collides with the core,
+	 * non-dismissable Payments task in the setup list. Without a task list ID,
+	 * the endpoint resolved the non-dismissable task first and returned a 404.
+	 *
+	 * @group tasklist
+	 */
+	public function test_colliding_task_id_is_resolved_by_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		// Registered first: a non-dismissable task that shares the ID.
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'shared-task',
+					'title'          => 'Shared Task (not dismissable)',
+					'is_dismissable' => false,
+				)
+			)
+		);
+
+		// Registered second: the dismissable task with the same ID.
+		TaskLists::add_list( array( 'id' => 'list-b' ) );
+		TaskLists::add_task(
+			'list-b',
+			new TestTask(
+				TaskLists::get_list( 'list-b' ),
+				array(
+					'id'             => 'shared-task',
+					'title'          => 'Shared Task (dismissable)',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		// Without a task list ID, the non-dismissable task resolves first -> 404.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		// Scoping to the list that owns the dismissable task succeeds.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'list-b' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( true, $data['isDismissed'] );
+		$this->assertEquals( true, TaskLists::get_task( 'shared-task', 'list-b' )->is_dismissed() );
+
+		// Undo is likewise scoped to the correct list.
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/shared-task/undo_dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'list-b' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( false, $data['isDismissed'] );
+	}
+
+	/**
+	 * Test that the dismiss endpoint rejects an unknown task list ID instead of
+	 * falling back to a successful dismissal outside the requested scope.
+	 *
+	 * @group tasklist
+	 */
+	public function test_dismiss_rejects_unknown_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_param( 'task_list_id', 'does-not-exist' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_task_list', $data['code'] );
+		$this->assertEquals( false, TaskLists::get_task( 'test-task', 'list-a' )->is_dismissed() );
+	}
+
+	/**
+	 * Test that a falsy-but-supplied task list ID such as "0" is validated
+	 * rather than treated as unscoped (PHP casts "0" to false).
+	 *
+	 * @group tasklist
+	 */
+	public function test_dismiss_and_undo_reject_falsy_task_list_id() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list( array( 'id' => 'list-a' ) );
+		TaskLists::add_task(
+			'list-a',
+			new TestTask(
+				TaskLists::get_list( 'list-a' ),
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
+			)
+		);
+
+		foreach ( array( 'dismiss', 'undo_dismiss' ) as $action ) {
+			$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/' . $action );
+			$request->set_headers( array( 'content-type' => 'application/json' ) );
+			$request->set_param( 'task_list_id', '0' );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertEquals( 404, $response->get_status(), $action );
+			$this->assertEquals( 'woocommerce_rest_invalid_task_list', $data['code'], $action );
+		}
+
+		$this->assertEquals( false, TaskLists::get_task( 'test-task', 'list-a' )->is_dismissed() );
 	}
 
 	/**

@@ -351,8 +351,12 @@ class WC_Install {
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
 		'11.2.0'   => array(
+			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_invalidate_analytics_reports_cache',
+		),
+		'11.2.0-1' => array(
+			'wc_update_11201_migrate_tax_lookup_order_items',
 		),
 	);
 
@@ -1712,6 +1716,42 @@ class WC_Install {
 		}
 
 		/**
+		 * Re-key wc_order_tax_lookup by tax order item. The new column has to join the primary key,
+		 * which dbDelta cannot do, so both changes run here as one table rebuild. Rows already in
+		 * the table land on the column's zero default and keep reporting on their tax rate id alone
+		 * until OrderTaxLookupMigrator has been through them.
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_tax_lookup';" ) ) {
+			$tax_lookup_alterations = array();
+
+			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}wc_order_tax_lookup` LIKE 'order_item_id';" ) ) {
+				$tax_lookup_alterations[] = 'ADD COLUMN order_item_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER tax_rate_id';
+			}
+
+			if ( 3 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_tax_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$tax_lookup_alterations[] = 'DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id, order_item_id)';
+			}
+
+			if ( $tax_lookup_alterations ) {
+				$tax_lookup_altered = $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+
+				// A re-key that failed is otherwise invisible: the sync keeps writing rows in the
+				// released shape and the reports keep reading them, so the store quietly misses the
+				// fix. Leave a trace, and name the tool that retries the change.
+				if ( false === $tax_lookup_altered ) {
+					wc_get_logger()->error(
+						sprintf(
+							'Could not re-key %1$s by tax order item: %2$s. Analytics tax reports keep reading the way they did, and running "Verify base database tables" under WooCommerce > Status > Tools retries the change.',
+							$wpdb->prefix . 'wc_order_tax_lookup',
+							'' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error'
+						),
+						array( 'source' => 'wc-order-tax-lookup-migration' )
+					);
+				}
+			}
+		}
+
+		/**
 		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
 		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
 		 * there were reports of issues with this table (see https://github.com/woocommerce/woocommerce/issues/20912).
@@ -1794,9 +1834,7 @@ class WC_Install {
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
 
-		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
-		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
-		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
+		$order_stats_table_schema = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -2066,11 +2104,12 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_id bigint(20) unsigned NOT NULL,
 	tax_rate_id bigint(20) unsigned NOT NULL,
+	order_item_id bigint(20) unsigned NOT NULL DEFAULT 0,
 	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
-	PRIMARY KEY (order_id, tax_rate_id),
+	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
 ) $collate;
@@ -2142,7 +2181,6 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
-$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2182,6 +2220,12 @@ $email_unsubscribes_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+
+			/*
+			 * No longer created: the abandoned cart recovery feature that owned this table was
+			 * removed in 11.2.0. It stays listed here so that a site which uninstalls before the
+			 * removal migration has run is not left with an orphaned table.
+			 */
 			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
@@ -3185,17 +3229,13 @@ EOT;
 <!-- /wp:woocommerce/filled-cart-block -->
 
 <!-- wp:woocommerce/empty-cart-block -->
-<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
-<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
 <!-- wp:separator {"className":"is-style-dots"} -->
 <hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
 <!-- /wp:separator -->
 
-<!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
 <!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>

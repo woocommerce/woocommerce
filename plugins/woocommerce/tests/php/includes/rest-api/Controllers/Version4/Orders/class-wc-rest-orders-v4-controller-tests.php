@@ -1870,4 +1870,110 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$order->delete( true );
 		}
 	}
+
+	/**
+	 * Test that a serialized value under a reserved line meta key is rejected for every line type.
+	 *
+	 * The create and update routes both build their args from the same OrderSchema property, so one
+	 * route covers the registration. Reading an item adds `_taxes` to its internal meta keys, so the
+	 * underscore-prefixed key diverts to the item's set_taxes() as well.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string   $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param callable $create_item    Builds the order item that $line_type maps to, taxes included.
+	 * @param array    $expected_taxes Taxes the item should still carry after the update is rejected.
+	 */
+	public function test_orders_update_rejects_serialized_taxes_line_meta_key( string $line_type, callable $create_item, array $expected_taxes ): void {
+		$order = new WC_Order();
+		$item  = $create_item();
+		$order->add_item( $item );
+		$order->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					$line_type => array(
+						array(
+							'id'        => $item->get_id(),
+							'meta_data' => array(
+								array(
+									'key'   => '_taxes',
+									'value' => 'O:8:"stdClass":0:{}',
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status(), 'The underscore-prefixed reserved key should be rejected.' );
+		$this->assertEquals(
+			'woocommerce_rest_invalid_order_item_meta_key',
+			$data['data']['details'][ $line_type ]['code'],
+			'The rejection should report the reserved meta key.'
+		);
+
+		$item_class = get_class( $item );
+		$reread     = new $item_class( $item->get_id() );
+		$this->assertEquals( $expected_taxes, $reread->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * Every request key that maps to an order item type accepting meta data.
+	 *
+	 * @return array
+	 */
+	public function provide_reserved_meta_key_line_types(): array {
+		$line_item_taxes = array(
+			'total'    => array( 1 => '2.00' ),
+			'subtotal' => array( 1 => '2.00' ),
+		);
+		$fee_taxes       = array( 'total' => array( 1 => '1.00' ) );
+		$shipping_taxes  = array( 'total' => array( 1 => '2.00' ) );
+
+		return array(
+			'line items'     => array(
+				'line_items',
+				function () use ( $line_item_taxes ) {
+					$item = new WC_Order_Item_Product();
+					$item->set_product( WC_Helper_Product::create_simple_product() );
+					$item->set_quantity( 1 );
+					$item->set_total( '10.00' );
+					$item->set_taxes( $line_item_taxes );
+					return $item;
+				},
+				$line_item_taxes,
+			),
+			'fee lines'      => array(
+				'fee_lines',
+				function () use ( $fee_taxes ) {
+					$item = new WC_Order_Item_Fee();
+					$item->set_name( 'Test fee' );
+					$item->set_total( '5.00' );
+					$item->set_taxes( $fee_taxes );
+					return $item;
+				},
+				$fee_taxes,
+			),
+			'shipping lines' => array(
+				'shipping_lines',
+				function () use ( $shipping_taxes ) {
+					$item = new WC_Order_Item_Shipping();
+					$item->set_method_id( 'flat_rate' );
+					$item->set_method_title( 'Flat rate' );
+					$item->set_total( '10.00' );
+					$item->set_taxes( $shipping_taxes );
+					return $item;
+				},
+				$shipping_taxes,
+			),
+		);
+	}
 }

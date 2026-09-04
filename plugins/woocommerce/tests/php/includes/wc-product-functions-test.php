@@ -277,6 +277,293 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A completed scheduled sale is not returned by get_starting_sales().
+	 */
+	public function test_get_starting_sales_excludes_completed_sales(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertNotContains(
+			(string) $product->get_id(),
+			$data_store->get_starting_sales(),
+			'A sale that already ended must never be started by the daily safety net.'
+		);
+		$this->assertNotContains(
+			(string) $product->get_id(),
+			$data_store->get_ending_sales(),
+			'A completed sale already at the regular price has nothing left to end.'
+		);
+	}
+
+	/**
+	 * @testdox get_starting_sales() still returns sales that have started and not yet ended.
+	 */
+	public function test_get_starting_sales_includes_open_and_future_ending_sales(): void {
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$open_ended = WC_Helper_Product::create_simple_product();
+		$open_ended->set_regular_price( 100 );
+		$open_ended->set_sale_price( 50 );
+		$open_ended->save();
+		update_post_meta( $open_ended->get_id(), '_price', 100 );
+		update_post_meta( $open_ended->get_id(), '_sale_price_dates_from', time() - 100 );
+		delete_post_meta( $open_ended->get_id(), '_sale_price_dates_to' );
+
+		$still_running = WC_Helper_Product::create_simple_product();
+		$still_running->set_regular_price( 100 );
+		$still_running->set_sale_price( 50 );
+		$still_running->save();
+		update_post_meta( $still_running->get_id(), '_price', 100 );
+		update_post_meta( $still_running->get_id(), '_sale_price_dates_from', time() - 100 );
+		update_post_meta( $still_running->get_id(), '_sale_price_dates_to', time() + 3600 );
+
+		// A direct writer leaves the row present but empty, which the `> 0` term tolerates.
+		$empty_end_date = WC_Helper_Product::create_simple_product();
+		$empty_end_date->set_regular_price( 100 );
+		$empty_end_date->set_sale_price( 50 );
+		$empty_end_date->save();
+		update_post_meta( $empty_end_date->get_id(), '_price', 100 );
+		update_post_meta( $empty_end_date->get_id(), '_sale_price_dates_from', time() - 100 );
+		update_post_meta( $empty_end_date->get_id(), '_sale_price_dates_to', '' );
+
+		$starting = $data_store->get_starting_sales();
+
+		$this->assertContains( (string) $open_ended->get_id(), $starting, 'An open-ended sale must still start.' );
+		$this->assertContains( (string) $still_running->get_id(), $starting, 'A sale whose end is in the future must still start.' );
+		$this->assertContains( (string) $empty_end_date->get_id(), $starting, 'An empty end-date row means no end date, so the sale must still start.' );
+	}
+
+	/**
+	 * @testdox The new exclusion reads date meta the same way get_ending_sales() does.
+	 */
+	public function test_get_starting_sales_matches_ending_sales_on_non_numeric_dates(): void {
+		// A date string from an importer. Year 9999 sorts above any timestamp this code sees,
+		// so both queries must read it as not-yet-ended.
+		$far_future = '9999-12-31';
+
+		// At the regular price, so only the date can exclude it from starting.
+		$not_started = WC_Helper_Product::create_simple_product();
+		$not_started->set_regular_price( 100 );
+		$not_started->set_sale_price( 50 );
+		$not_started->save();
+		update_post_meta( $not_started->get_id(), '_price', 100 );
+		update_post_meta( $not_started->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $not_started->get_id(), '_sale_price_dates_to', $far_future );
+
+		// At the sale price, so it clears the ending query's price predicate and only the date
+		// can exclude it. Without that the assertion would pass either way.
+		$not_ended = WC_Helper_Product::create_simple_product();
+		$not_ended->set_regular_price( 100 );
+		$not_ended->set_sale_price( 50 );
+		$not_ended->save();
+		update_post_meta( $not_ended->get_id(), '_price', 50 );
+		update_post_meta( $not_ended->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $not_ended->get_id(), '_sale_price_dates_to', $far_future );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertContains(
+			(string) $not_started->get_id(),
+			$data_store->get_starting_sales(),
+			'A non-numeric end date must not read as ended in the starting query.'
+		);
+		$this->assertNotContains(
+			(string) $not_ended->get_id(),
+			$data_store->get_ending_sales(),
+			'The ending query must read the same value the same way, or the two disagree.'
+		);
+	}
+
+	/**
+	 * End-date values the query still returns, in shapes a PHP-side check reads as ended.
+	 *
+	 * The query returns both, so the consumer has to write the price to settle them. Anything
+	 * deciding "ended" for itself skips that write and re-queues the product forever.
+	 * '0000-00-00' is the one value where the query's numeric `> 0` disagrees with a PHP
+	 * `$v > 0`; '999999999' is a plain past timestamp that still sorts above the current one.
+	 *
+	 * Calendar forms such as '2020-01-01' were dropped: they age out in 2034 once `time()`
+	 * renders as '20...', and no clock-derived replacement survives, since a fixture must read
+	 * as past for the checks it catches yet sort above a decimal timestamp for the query.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_end_dates_the_query_still_returns(): array {
+		return array(
+			'short numeric' => array( '999999999' ),
+			'zero date'     => array( '0000-00-00' ),
+		);
+	}
+
+	/**
+	 * @testdox A sale the query still returns is started once and stops being re-queued.
+	 *
+	 * @dataProvider provider_end_dates_the_query_still_returns
+	 *
+	 * @param string $date_to Stored `_sale_price_dates_to` value.
+	 */
+	public function test_wc_scheduled_sales_settles_a_sale_the_query_still_returns( string $date_to ): void {
+		// A full cycle, not just the query: the consumer's price write is what drains the queue.
+		// This shows it drains, not that the price is right. It is not, the product ends at the
+		// sale price with a past end date, which predates this fix.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', $date_to );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Precondition, not a result: the rest only means anything while the query returns it.
+		$this->assertContains(
+			(string) $product->get_id(),
+			$data_store->get_starting_sales(),
+			"get_starting_sales() no longer returns the fixture '{$date_to}'. Either the query "
+				. 'changed, or this value aged out and needs replacing (see the provider docblock).'
+		);
+
+		$started = array();
+		add_action(
+			'wc_before_products_starting_sales',
+			function ( $ids ) use ( &$started ) {
+				$started = array_merge( $started, $ids );
+			}
+		);
+
+		wc_scheduled_sales();
+		$this->assertContains( (string) $product->get_id(), $started, "The first run should start the sale: {$date_to}." );
+
+		$started = array();
+		wc_scheduled_sales();
+		$this->assertNotContains( (string) $product->get_id(), $started, "The product must settle instead of being queued again: {$date_to}." );
+
+		$this->assertNotContains( (string) $product->get_id(), $data_store->get_starting_sales() );
+	}
+
+	/**
+	 * @testdox An end date of exactly now still leaves the product in one of the two queues.
+	 */
+	public function test_an_end_date_of_exactly_now_lands_in_one_queue(): void {
+		// Asserting that some queue claims it, rather than which one, keeps this deterministic
+		// without freezing the clock. Neither queue is the failure, and a `<=` on one side alone
+		// is what produces it, which nothing else here catches.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// A third price, so neither query's price predicate can be what excludes it.
+		update_post_meta( $product->get_id(), '_price', 75 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() );
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$id         = (string) $product->get_id();
+
+		$starting = in_array( $id, $data_store->get_starting_sales(), true );
+		$ending   = in_array( $id, $data_store->get_ending_sales(), true );
+
+		$this->assertTrue(
+			$starting || $ending,
+			'An end date of exactly now left the product in neither queue, so nothing will ever '
+				. 'settle its price. The two queries have stopped reading the date the same way.'
+		);
+	}
+
+	/**
+	 * @testdox Duplicate end-date rows exclude on the ended one and never duplicate the product.
+	 */
+	public function test_duplicate_end_date_rows_are_handled(): void {
+		// add_post_meta(): direct writers can leave several rows for one key.
+		$expired_and_open = WC_Helper_Product::create_simple_product();
+		$expired_and_open->set_regular_price( 100 );
+		$expired_and_open->set_sale_price( 50 );
+		$expired_and_open->save();
+		update_post_meta( $expired_and_open->get_id(), '_price', 100 );
+		update_post_meta( $expired_and_open->get_id(), '_sale_price_dates_from', time() - 300 );
+		delete_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to' );
+		add_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to', time() - 100 );
+		add_post_meta( $expired_and_open->get_id(), '_sale_price_dates_to', time() + 3600 );
+
+		$both_open = WC_Helper_Product::create_simple_product();
+		$both_open->set_regular_price( 100 );
+		$both_open->set_sale_price( 50 );
+		$both_open->save();
+		update_post_meta( $both_open->get_id(), '_price', 100 );
+		update_post_meta( $both_open->get_id(), '_sale_price_dates_from', time() - 300 );
+		delete_post_meta( $both_open->get_id(), '_sale_price_dates_to' );
+		add_post_meta( $both_open->get_id(), '_sale_price_dates_to', time() + 3600 );
+		add_post_meta( $both_open->get_id(), '_sale_price_dates_to', time() + 7200 );
+
+		$starting = WC_Data_Store::load( 'product' )->get_starting_sales();
+
+		$this->assertNotContains(
+			(string) $expired_and_open->get_id(),
+			$starting,
+			'One ended row is enough to exclude, however many other rows sit beside it.'
+		);
+		$this->assertSame(
+			1,
+			count( array_keys( $starting, (string) $both_open->get_id(), true ) ),
+			'Two open rows must not multiply the product into the result set.'
+		);
+	}
+
+	/**
+	 * @testdox A product left at an expired sale price is repaired once and then goes inert.
+	 */
+	public function test_wc_scheduled_sales_repairs_expired_price_once(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// A missed end: _price still holds the sale price after the window closed.
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$started = array();
+		$ended   = array();
+		add_action(
+			'wc_before_products_starting_sales',
+			function ( $ids ) use ( &$started ) {
+				$started = array_merge( $started, $ids );
+			}
+		);
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $ids ) use ( &$ended ) {
+				$ended = array_merge( $ended, $ids );
+			}
+		);
+
+		wc_scheduled_sales();
+
+		$this->assertNotContains( (string) $product->get_id(), $started, 'An expired sale must not be reported as starting.' );
+		$this->assertContains( (string) $product->get_id(), $ended, 'The safety net should end it once.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
+
+		$started = array();
+		$ended   = array();
+		wc_scheduled_sales();
+
+		$this->assertNotContains( (string) $product->get_id(), $started, 'The churn must not resume on the next run.' );
+		$this->assertNotContains( (string) $product->get_id(), $ended, 'The churn must not resume on the next run.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ) );
+	}
+
+	/**
 	 * @testdox An ended scheduled sale displays the regular price before the AS event runs.
 	 */
 	public function test_scheduled_sale_active_price_heals_ended_sale_to_regular(): void {

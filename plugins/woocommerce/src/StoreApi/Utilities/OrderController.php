@@ -766,9 +766,9 @@ class OrderController {
 						/**
 						 * Filters whether or not the product is in stock for this pay for order.
 						 *
-						 * @param boolean True if in stock.
+						 * @param boolean $is_in_stock True if in stock.
 						 * @param \WC_Product $product Product.
-						 * @param \WC_Order $order Order.
+						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
 						 * @since 9.8.0-dev
 						 */
@@ -792,9 +792,9 @@ class OrderController {
 						/**
 						 * Filters whether or not the product has enough stock.
 						 *
-						 * @param boolean True if has enough stock.
+						 * @param boolean $has_enough_stock True if has enough stock.
 						 * @param \WC_Product $product Product.
-						 * @param \WC_Order $order Order.
+						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
 						 * @since 9.8.0-dev
 						 */

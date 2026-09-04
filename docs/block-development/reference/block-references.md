@@ -262,7 +262,7 @@ Display an input field customers can use to select the number of products to add
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
-- **Supports:** interactivity
+- **Supports:** color (background, text), interactivity
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
 
@@ -1239,7 +1239,7 @@ Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
-- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), spacing (blockGap), typography (fontSize)
+- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap), typography (fontSize)
 - **Attributes:** isPreview, overlayMode, overlayPosition
 
 ## Active Filters - woocommerce/product-filter-active
