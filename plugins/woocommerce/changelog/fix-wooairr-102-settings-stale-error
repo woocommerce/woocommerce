@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Analytics settings so a failed save can be retried and no longer reports an error after it succeeds.

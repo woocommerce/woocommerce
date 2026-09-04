@@ -3099,6 +3099,37 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
+	 */
+	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		$order_id_during_payment = 0;
+		$payment_handler         = function ( $context, $payment_result ) use ( &$order_id_during_payment ) {
+			unset( $context );
+			$order_id_during_payment = (int) WC()->session->get( 'order_awaiting_payment' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = (int) $response->get_data()['order_id'];
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should create an order.' );
+		$this->assertSame( $order_id, $order_id_during_payment, 'The order should be linked to the session before payment processing starts.' );
+		$persisted_session_data = WC()->session->get_session_data();
+		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
+		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
@@ -3207,5 +3238,28 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
 		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
+
+	/**
+	 * @testdox Should return an error response when restoring the cart session throws.
+	 */
+	public function test_cart_session_failure_returns_error_response() {
+		wc()->session->set( 'cart', wc()->cart->get_cart_for_session() );
+
+		// The route restores the cart only when this action has not run yet, so reset
+		// the counter to put the process back into the state a REST request starts in.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		add_filter(
+			'woocommerce_get_cart_item_from_session',
+			static function () {
+				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' ) );
+
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 	}
 }

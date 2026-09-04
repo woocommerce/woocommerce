@@ -19,9 +19,9 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 /**
  * Internal dependencies
  */
-import { SettingsUIPage } from '../settings-ui-page';
+import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import type { SettingsUIField, SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -39,6 +39,23 @@ const renderElement = ( element: JSX.Element ) => {
 
 	return { container, root };
 };
+
+const createSingleFieldSchema = (
+	field: SettingsUIField,
+	overrides: Partial< SettingsUISchema > = {}
+): SettingsUISchema => ( {
+	id: 'test-page',
+	title: 'Test page',
+	section: 'default',
+	save: { adapter: 'none' },
+	...overrides,
+	groups: {
+		general: {
+			id: 'general',
+			fields: [ field ],
+		},
+	},
+} );
 
 const renderElementInMainForm = ( element: JSX.Element ) => {
 	const form = document.createElement( 'form' );
@@ -72,6 +89,15 @@ const changeTextInput = ( input: HTMLInputElement, value: string ) => {
 	);
 };
 
+const changeSelect = ( select: HTMLSelectElement, values: string[] ) => {
+	Array.from( select.options ).forEach( ( option ) => {
+		option.selected = values.includes( option.value );
+	} );
+	select.dispatchEvent(
+		new Event( 'change', { bubbles: true, cancelable: true } )
+	);
+};
+
 const getUnsavedChangesActionButton = ( label: string ): HTMLButtonElement => {
 	const button = Array.from(
 		document.body.querySelectorAll< HTMLButtonElement >(
@@ -99,8 +125,12 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
+	const originalUrl = window.location.href;
+
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
+		window.history.replaceState( {}, '', originalUrl );
 	} );
 
 	it( 'renders settings as centered sections and cards', () => {
@@ -130,21 +160,12 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
+		expect( container.querySelector( '.wc-settings-ui' ) ).not.toBeNull();
 		expect(
-			container.querySelector( '.wc-settings-ui__section' )
+			container.querySelector( '.dataforms-layouts__wrapper' )
 		).not.toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__section-card' )
-		).not.toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__section-fields' )
-		).not.toBeNull();
-		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__group-panel' )
-		).toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__group-header' )
 		).toBeNull();
 		expect( container.textContent ).toContain( 'General settings' );
 		expect( container.textContent ).toContain( 'Test field' );
@@ -191,15 +212,158 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect( container.textContent ).toContain( 'Default section field' );
-		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
-			''
+		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].field.id ).toBe(
+			'test_field'
 		);
 
 		act( () => root.unmount() );
 		container.remove();
 	} );
 
-	it( 'sanitizes native field descriptions before rendering', () => {
+	it( 'fails closed when an explicit component is not registered', () => {
+		window.history.replaceState(
+			{},
+			'',
+			'/wp-admin/admin.php?page=wc-settings&tab=products&section=advanced&preserved=yes#wc-settings'
+		);
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+		const schema = createSingleFieldSchema(
+			{
+				id: 'test_field',
+				label: 'Test field',
+				type: 'text',
+				component: 'test/missing-component',
+			},
+			{
+				id: 'products',
+				title: 'Products',
+				section: 'advanced',
+				save: { adapter: 'form_post' },
+			}
+		);
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+		const classicAction = Array.from(
+			container.querySelectorAll( 'a' )
+		).find(
+			( link ) => link.textContent?.trim() === 'Use classic settings'
+		);
+		expect( classicAction ).toBeDefined();
+		expect(
+			classicAction?.closest( '.components-notice__actions' )
+		).not.toBeNull();
+		expect(
+			container.querySelector( '.components-notice__content' )?.firstChild
+				?.textContent
+		).toBe( 'Something went wrong while rendering this settings page.' );
+		const classicUrl = new URL( classicAction?.href || '' );
+		expect( classicUrl.searchParams.getAll( 'wc_settings_ui' ) ).toEqual( [
+			'classic',
+		] );
+		expect( classicUrl.searchParams.get( 'page' ) ).toBe( 'wc-settings' );
+		expect( classicUrl.searchParams.get( 'tab' ) ).toBe( 'products' );
+		expect( classicUrl.searchParams.get( 'section' ) ).toBe( 'advanced' );
+		expect( classicUrl.searchParams.get( 'preserved' ) ).toBe( 'yes' );
+		expect( classicUrl.hash ).toBe( '#wc-settings' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'uses a field override when an explicit component is not registered', () => {
+		const FieldOverride = () => <div>Extension field override</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: { test_field: FieldOverride },
+		} );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'text',
+			component: 'test/missing-component',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension field override' );
+		expect( container.textContent ).not.toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'renders extension-defined types through registered type renderers', () => {
+		const TypeRenderer = () => <div>Extension type renderer</div>;
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			typeRenderers: { extension_defined: TypeRenderer },
+		} );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain( 'Extension type renderer' );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed and focuses the error region for an unrenderable type', () => {
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+		const schema = createSingleFieldSchema( {
+			id: 'test_field',
+			label: 'Test field',
+			type: 'extension_defined',
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		const errorRegion = container.querySelector( '.wc-settings-ui__error' );
+		expect( errorRegion ).toHaveAttribute( 'role', 'region' );
+		expect( errorRegion ).toHaveAttribute( 'tabindex', '-1' );
+		expect( errorRegion?.ownerDocument.activeElement ).toBe( errorRegion );
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'sanitizes field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -230,7 +394,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'hides fields with unmet native visibility rules', () => {
+	it( 'hides fields with unmet schema visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -305,7 +469,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -383,7 +547,9 @@ describe( 'settings HTML rendering', () => {
 		form.insertBefore( sectionLinks, container );
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = sectionLinks.querySelector( 'a' );
 
 			expect( input ).toBeInstanceOf( HTMLInputElement );
@@ -451,7 +617,9 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
 			);
@@ -549,7 +717,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -653,7 +821,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -712,6 +880,246 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'routes registered control edits into the page values', () => {
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/custom-field': ( { data, field, onChange } ) => (
+					<button
+						onClick={ () =>
+							onChange( { [ field.id ]: 'clicked' } )
+						}
+					>
+						{ `Custom control: ${ String(
+							data[ field.id ] ?? ''
+						) }` }
+					</button>
+				),
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'initial',
+							component: 'test/custom-field',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		try {
+			expect( container.textContent ).toContain(
+				'Custom control: initial'
+			);
+
+			act( () => {
+				container.querySelector( 'button' )?.click();
+			} );
+
+			expect( container.textContent ).toContain(
+				'Custom control: clicked'
+			);
+			expect(
+				form.querySelector( 'input[name="test_field"]' )
+			).toHaveAttribute( 'value', 'clicked' );
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
+	it( 'serializes edits from built-in controls into the form-post hidden inputs', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'flag',
+							label: 'Flag',
+							type: 'checkbox',
+							value: false,
+						},
+						{
+							id: 'unit',
+							label: 'Unit',
+							type: 'select',
+							value: 'kg',
+							options: [
+								{ label: 'kg', value: 'kg' },
+								{ label: 'lbs', value: 'lbs' },
+							],
+						},
+						{
+							id: 'amount',
+							label: 'Amount',
+							type: 'number',
+							value: '1',
+						},
+						{
+							id: 'countries',
+							label: 'Countries',
+							type: 'array',
+							value: [ 'FR' ],
+							options: [
+								{ label: 'France', value: 'FR' },
+								{ label: 'Spain', value: 'ES' },
+							],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+		const hiddenValues = ( name: string ) =>
+			Array.from(
+				form.querySelectorAll< HTMLInputElement >(
+					`input[type="hidden"][name="${ name }"]`
+				)
+			).map( ( input ) => input.value );
+
+		try {
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'no' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'kg' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '1' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR' ] );
+
+			const checkbox = container.querySelector< HTMLInputElement >(
+				'input[type="checkbox"]'
+			);
+			const selects =
+				container.querySelectorAll< HTMLSelectElement >( 'select' );
+			const number = container.querySelector< HTMLInputElement >(
+				'input[type="number"]'
+			);
+			if ( ! checkbox || selects.length !== 2 || ! number ) {
+				throw new Error( 'Expected one control per built-in type.' );
+			}
+
+			act( () => checkbox.click() );
+			act( () => changeSelect( selects[ 0 ], [ 'lbs' ] ) );
+			act( () => changeTextInput( number, '5' ) );
+			act( () => changeSelect( selects[ 1 ], [ 'FR', 'ES' ] ) );
+
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'yes' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'lbs' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '5' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR', 'ES' ] );
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
+	it( 'fails closed when a declared component is not registered', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'test/missing-component',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed when no renderer resolves for a field type', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'extension_defined',
+							options: [ { label: 'One', value: 'one' } ],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		// A type nothing can draw has to be as loud as a missing component,
+		// rather than dropping the field beside a live Save button.
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'select' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -739,8 +1147,24 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		expect( container.textContent ).toContain( 'Info field' );
-		expectUnsafeMarkupRemoved( container );
+		// DataForm paints the label for a read-only field, so the info
+		// renderer must not repeat it.
+		expect(
+			( container.textContent ?? '' ).split( 'Info field' )
+		).toHaveLength( 2 );
+
+		// The info description keeps sanitized markup while the group
+		// description and the DataForm field label render as plain text.
+		const strongTexts = Array.from(
+			container.querySelectorAll( 'strong' )
+		).map( ( el ) => el.textContent );
+		expect( strongTexts ).toEqual( [ 'Safe' ] );
+		expect( container.querySelector( 'script' ) ).toBeNull();
+		expect( container.querySelector( 'img' ) ).toBeNull();
+		expect( container.querySelector( 'iframe' ) ).toBeNull();
+		expect( container.innerHTML ).not.toContain( 'onerror' );
+		expect( container.innerHTML ).not.toContain( 'onclick' );
+		expect( container.innerHTML ).not.toContain( 'javascript:' );
 
 		act( () => root.unmount() );
 		container.remove();

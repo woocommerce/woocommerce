@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: WooCommerce E2E Test Helper
- * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, and a REST API for feature flags, options, environment info and theme switching.
+ * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options, environment info and theme switching, and fixed overrides that remove production timing delays.
  * Version: 1.0.0
  * Requires PHP: 7.4
  * Author: WooCommerce
  *
  * This bundles three previously separate helpers (filter-setter, process-waiting-actions and
- * test-helper-apis). They share the same lifecycle — mounted and auto-activated for every E2E run
- * via the .wp-env.e2e.json "plugins" array — so they live together here. Each concern is kept in its
- * own section below and none of them touch the others.
+ * test-helper-apis), plus the fixed overrides that remove production timing delays. They share the
+ * same lifecycle — mounted and auto-activated for every E2E run via the .wp-env.e2e.json "plugins"
+ * array — so they live together here. Each concern is kept in its own section below and none of them
+ * touch the others.
  *
  * It hopefully goes without saying, none of this should ever run in a production environment.
  *
@@ -231,18 +232,6 @@ function enable_experimental_features( $features ) {
 add_filter( 'woocommerce_admin_get_feature_config', 'enable_experimental_features' );
 
 /**
- * Disable WordPress comment flood protection during E2E runs.
- *
- * Parallel specs post comments and reviews as the shared customer account.
- * WordPress' 15-second flood throttle ("You are posting comments too quickly")
- * then rejects whichever request lands second, causing cross-spec flakes that
- * have nothing to do with the behaviour under test. Override core's
- * `wp_throttle_comment_flood` (priority 10) with a later filter that always
- * allows the comment.
- */
-add_filter( 'comment_flood_filter', '__return_false', 99 );
-
-/**
  * Update a WordPress option.
  *
  * @param WP_REST_Request $request The REST request, carrying `option_name` and `option_value`.
@@ -333,3 +322,40 @@ function activate_theme( WP_REST_Request $request ) {
 		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
 	}
 }
+
+/*
+ * -----------------------------------------------------------------------------
+ * Timing overrides
+ * -----------------------------------------------------------------------------
+ *
+ * Fixed filters that strip out delays and throttles which exist for production traffic but only
+ * make E2E runs slow or flaky. Unconditional by design: unlike the cookie-driven filter setter
+ * above, these must apply to requests a spec does not drive through the browser, such as REST calls
+ * made by the API client.
+ */
+
+/**
+ * Disable WordPress comment flood protection during E2E runs.
+ *
+ * Parallel specs post comments and reviews as the shared customer account.
+ * WordPress' 15-second flood throttle ("You are posting comments too quickly")
+ * then rejects whichever request lands second, causing cross-spec flakes that
+ * have nothing to do with the behaviour under test. Override core's
+ * `wp_throttle_comment_flood` (priority 10) with a later filter that always
+ * allows the comment.
+ */
+add_filter( 'comment_flood_filter', '__return_false', 99 );
+
+/**
+ * Dispatch Back in Stock Notifications batches immediately after a restock.
+ *
+ * Core waits a minute between a product coming back in stock and the first
+ * notifications batch. The BIS specs restock over REST and then drain the queue
+ * with `?process-waiting-actions`, so without this the batch is not due yet and
+ * the back-in-stock email never arrives.
+ */
+add_filter(
+	'woocommerce_customer_stock_notifications_first_batch_delay',
+	'__return_zero',
+	PHP_INT_MAX
+);

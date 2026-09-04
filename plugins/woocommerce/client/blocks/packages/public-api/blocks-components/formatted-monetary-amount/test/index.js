@@ -90,6 +90,43 @@ describe( 'FormattedMonetaryAmount', () => {
 			expect( console ).toHaveWarned();
 			expect( container.textContent ).toBe( '1563,45 €' );
 		} );
+
+		test( 'should fall back to a period for an empty decimal separator', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						code: 'EUR',
+						symbol: '€',
+						thousandSeparator: '.',
+						decimalSeparator: '',
+						minorUnit: 2,
+						prefix: '',
+						suffix: ' €',
+					} }
+				/>
+			);
+			expect( console ).toHaveWarned();
+			expect( container.textContent ).toBe( '1563.45 €' );
+		} );
+
+		test( 'should render when both separators are empty', () => {
+			const { container } = render(
+				<FormattedMonetaryAmount
+					value="156345"
+					currency={ {
+						code: 'EUR',
+						symbol: '€',
+						thousandSeparator: '',
+						decimalSeparator: '',
+						minorUnit: 2,
+						prefix: '',
+						suffix: ' €',
+					} }
+				/>
+			);
+			expect( container.textContent ).toBe( '1563.45 €' );
+		} );
 	} );
 	describe( 'suffix/prefix', () => {
 		test( 'should add the currency suffix', () => {

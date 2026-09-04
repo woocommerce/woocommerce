@@ -343,10 +343,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * - cross-request cache (transient wc_var_prices_<product_id>; sensitive to product transient invalidation through multiple workflows)
 		 * - cache priming (bulk-fetching data from DB) for the product and its variations
 		 * - object instance caching (request-level optimization for wc_get_product; applies across Woo core and extensions)
+		 * - capping the transient size so it doesn't grow unbounded over the 30-day retention period
 		 *
-		 * That leaves two optimization routes:
+		 * That leaves single optimization route:
 		 * - rewrite this method, if breaking the contracts is an option (it's not as per WooCommerce v11.1)
-		 * - verify transient wc_var_prices_<product_id> invalidation frequency and triggers if it gets critical in later releases
 		 */
 		$price_hash = $this->get_price_hash( $product, $for_display );
 		if ( empty( $this->prices_array[ $price_hash ] ) ) {
@@ -404,7 +404,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *     }
 						 *
 						 *     public function apply_user_discount( $price, $variation, $product ) {
-						 *         return $price * $this->get_discount_for_user( get_current_user_id() );
+						 *         return wc_format_decimal( $price * $this->get_discount_for_user( get_current_user_id() ), wc_get_price_decimals() );
 						 *     }
 						 *
 						 *     public function add_user_to_hash( $price_hash, $product, $for_display ) {
@@ -415,7 +415,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $price    The variation's active price.
+						 * @param string        $price    The variation's active price.
 						 * @param WC_Product    $variation The variation product object.
 						 * @param WC_Product    $product   The parent variable product object.
 						 */
@@ -433,7 +433,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $regular_price The variation's regular price.
+						 * @param string        $regular_price The variation's regular price.
 						 * @param WC_Product    $variation     The variation product object.
 						 * @param WC_Product    $product       The parent variable product object.
 						 */
@@ -446,7 +446,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 *
 						 * @since 3.0.0
 						 *
-						 * @param string|float  $sale_price The variation's sale price.
+						 * @param string        $sale_price The variation's sale price.
 						 * @param WC_Product    $variation  The variation product object.
 						 * @param WC_Product    $product    The parent variable product object.
 						 */
@@ -539,17 +539,31 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					}
 				}
 
-				// Add all pricing data to the transient array.
-				foreach ( $prices_array as $key => $values ) {
-					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
-					if ( null !== $opposite_price_hash ) {
-						$transient_cached_prices_array[ $opposite_price_hash ][ $key ] = $values;
+				// Add all pricing data to the transient array: ensure the hashes always pushed to the end.
+				foreach ( array_filter( array( $price_hash, $opposite_price_hash ) ) as $hash ) {
+					unset( $transient_cached_prices_array[ $hash ] );
+					foreach ( $prices_array as $key => $values ) {
+						$transient_cached_prices_array[ $hash ][ $key ] = $values;
 					}
 				}
 
 				// Validate the prices data before storing it in the transient.
 				if ( $this->validate_prices_data( $transient_cached_prices_array, $transient_version ) ) {
-					set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
+					$json = wp_json_encode( $transient_cached_prices_array );
+
+					// Cap the transient size — hash churn (e.g. real-time or role-based pricing) can bloat it over the 30-day TTL.
+					// Size-based cap rather than count-based, as the number of variations per hash varies widely.
+					// Read-optimized: 8KB keeps the wp_options row inline in InnoDB; 64KB stays within a single Memcached slab.
+					$transient_size_cap  = wp_using_ext_object_cache() ? 65536 : 8192;
+					$transient_size      = strlen( (string) $json );
+					$cached_hashes_count = count( $transient_cached_prices_array );
+					if ( $transient_size > $transient_size_cap && $cached_hashes_count > 4 ) {
+						$cached_hashes_to_keep         = max( 4, (int) floor( $transient_size_cap / ( $transient_size / $cached_hashes_count ) ) );
+						$transient_cached_prices_array = array_slice( $transient_cached_prices_array, -$cached_hashes_to_keep, null, true );
+						$json                          = wp_json_encode( $transient_cached_prices_array );
+					}
+
+					set_transient( $transient_name, $json, DAY_IN_SECONDS * 30 );
 				}
 			}
 

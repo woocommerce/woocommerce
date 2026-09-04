@@ -2493,10 +2493,8 @@ class WooPaymentsService {
 	private function get_nox_profile(): array {
 		$nox_profile = $this->proxy->call_function( 'get_option', self::NOX_PROFILE_OPTION_KEY, array() );
 
-		if ( empty( $nox_profile ) ) {
-			$nox_profile = array();
-		} else {
-			$nox_profile = maybe_unserialize( $nox_profile );
+		if ( ! is_array( $nox_profile ) ) {
+			return array();
 		}
 
 		return $nox_profile;
