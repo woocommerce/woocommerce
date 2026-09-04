@@ -129,7 +129,6 @@ class Marketplace {
 			array(
 				'page' => 'wc-admin',
 				'path' => '/extensions',
-				'tab'  => 'extensions',
 				'ref'  => 'plugins',
 			),
 			admin_url( 'admin.php' )
