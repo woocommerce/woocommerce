@@ -31,17 +31,17 @@ if ( ! comments_open() ) {
 			$count = $product->get_review_count();
 			if ( $count && wc_review_ratings_enabled() ) {
 				/* translators: 1: reviews count 2: product name */
-				$reviews_title = sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $count, 'woocommerce' ) ), esc_html( $count ), '<span>' . esc_html( get_the_title() ) . '</span>' );
+				$reviews_title = sprintf( esc_html( _n( '%1$s review for %2$s', '%1$s reviews for %2$s', $count, 'woocommerce' ) ), esc_html( $count ), '<span>' . wp_kses_post( get_the_title() ) . '</span>' );
 				/**
 				 * Filters the heading shown above the product review list.
 				 *
 				 * @since 3.6.0
 				 *
-				 * @param string     $reviews_title Review count heading. The count and the product title are escaped and the product title is wrapped in a span.
+				 * @param string     $reviews_title Review count heading. The count is escaped, the product title is run through wp_kses_post() and wrapped in a span.
 				 * @param int        $count         Number of reviews for the product.
 				 * @param WC_Product $product       Product the reviews belong to.
 				 */
-				echo apply_filters( 'woocommerce_reviews_title', $reviews_title, $count, $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The base heading is escaped above and the filter returns extension-controlled markup by design.
+				echo apply_filters( 'woocommerce_reviews_title', $reviews_title, $count, $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The base heading is sanitised above and the filter returns extension-controlled markup by design.
 			} else {
 				esc_html_e( 'Reviews', 'woocommerce' );
 			}
