@@ -13,6 +13,10 @@ jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
 } ) );
 
+jest.mock( '../../../../../../utils/admin-settings', () => ( {
+	getAdminSetting: jest.fn(),
+} ) );
+
 jest.mock( '../../../../../utils/functions', () => ( {
 	setProductAutoUpdate: jest.fn( () => Promise.resolve() ),
 	addNotice: jest.fn(),
@@ -27,6 +31,7 @@ import {
 	setProductAutoUpdate,
 	addNotice,
 } from '../../../../../utils/functions';
+import { getAdminSetting } from '../../../../../../utils/admin-settings';
 import AutoUpdateStatus from '../auto-update-status';
 import { SubscriptionsContext } from '../../../../../contexts/subscriptions-context';
 import { SubscriptionsContextType } from '../../../../../contexts/types';
@@ -34,12 +39,19 @@ import { Subscription, SubscriptionLocal } from '../../../types';
 
 const loadSubscriptions = jest.fn( () => Promise.resolve() );
 
-function subscriptionWith( local: Partial< SubscriptionLocal > ): Subscription {
+function subscriptionWith(
+	local: Partial< SubscriptionLocal >,
+	subscription: Partial< Subscription > = {}
+): Subscription {
 	return {
 		product_key: 'test-key',
 		product_id: 123,
 		product_name: 'Test Extension',
 		zip_slug: 'test-extension',
+		expired: false,
+		lifetime: false,
+		active: true,
+		...subscription,
 		local: {
 			installed: true,
 			installable: true,
@@ -67,12 +79,24 @@ function renderStatus( subscription: Subscription ) {
 	);
 }
 
+/**
+ * Stand in the site-level settings, healthy unless a test says otherwise.
+ */
+function setSiteSettings( settings: Record< string, boolean > = {} ) {
+	( getAdminSetting as jest.Mock ).mockReturnValue( {
+		pluginAutoUpdatesEnabled: true,
+		wooUpdateManagerActive: true,
+		...settings,
+	} );
+}
+
 describe( 'AutoUpdateStatus', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		setSiteSettings();
 	} );
 
-	it( 'renders nothing when auto-updates are on', () => {
+	it( 'renders nothing when auto-updates are on and nothing blocks them', () => {
 		const { container } = renderStatus(
 			subscriptionWith( { auto_update: true } )
 		);
@@ -94,6 +118,96 @@ describe( 'AutoUpdateStatus', () => {
 		);
 
 		expect( container ).toBeEmptyDOMElement();
+	} );
+
+	it( 'warns when auto-updates are on but the site has them switched off', async () => {
+		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
+		renderStatus( subscriptionWith( { auto_update: true } ) );
+
+		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+
+		expect(
+			await screen.findByText(
+				'Automatic updates are turned off for this site.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'warns when the Update Manager is not active', async () => {
+		setSiteSettings( { wooUpdateManagerActive: false } );
+		renderStatus( subscriptionWith( { auto_update: true } ) );
+
+		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+
+		expect(
+			await screen.findByText( /Update Manager is not active/ )
+		).toBeInTheDocument();
+	} );
+
+	it( 'reports a missing subscription and stops there', async () => {
+		renderStatus(
+			subscriptionWith(
+				{ auto_update: true },
+				{ product_key: '', active: false }
+			)
+		);
+
+		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+
+		expect(
+			await screen.findByText( 'This extension has no subscription.' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'The subscription is not connected to this store.'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'lists an expired subscription and a disconnected one together', async () => {
+		renderStatus(
+			subscriptionWith(
+				{ auto_update: true },
+				{ expired: true, active: false }
+			)
+		);
+
+		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+
+		expect(
+			await screen.findByText( 'The subscription has expired.' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'The subscription is not connected to this store.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'does not treat a lifetime subscription as expired', () => {
+		const { container } = renderStatus(
+			subscriptionWith(
+				{ auto_update: true },
+				{ expired: true, lifetime: true }
+			)
+		);
+
+		expect( container ).toBeEmptyDOMElement();
+	} );
+
+	it( 'offers no action link in the blocked explanation', async () => {
+		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
+		renderStatus( subscriptionWith( { auto_update: true } ) );
+
+		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		await screen.findByText(
+			'Automatic updates are turned off for this site.'
+		);
+
+		expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Enable auto-updates' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'warns when auto-updates are off', () => {

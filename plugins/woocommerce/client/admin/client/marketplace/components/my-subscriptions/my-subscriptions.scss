@@ -217,6 +217,24 @@
 		a {
 			text-decoration: none;
 		}
+
+		p {
+			margin: 0 0 $grid-unit-10;
+		}
+	}
+}
+
+.woocommerce-marketplace__my-subscriptions__auto-update-blockers {
+	list-style: disc;
+	margin: 0;
+	padding-inline-start: $grid-unit-20;
+
+	li {
+		margin-bottom: $grid-unit-05;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 }
 

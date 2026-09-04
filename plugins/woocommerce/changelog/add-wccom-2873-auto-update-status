@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Surface plugin auto-update status on the My Subscriptions screen, with an inline action to turn it on
+Surface plugin auto-update status on the My Subscriptions screen, including when auto-updates are on but something else stops the extension updating

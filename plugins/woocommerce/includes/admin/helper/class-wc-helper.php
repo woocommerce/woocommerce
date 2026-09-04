@@ -2393,15 +2393,6 @@ class WC_Helper {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		require_once ABSPATH . 'wp-admin/includes/update.php';
 
-		// AUTOMATIC_UPDATER_DISABLED, or a plugins_auto_update_enabled filter, turns the whole
-		// feature off; nothing is auto-updating and nothing here can turn it back on.
-		if ( ! wp_is_auto_update_enabled_for_type( 'plugin' ) ) {
-			return array(
-				'auto_update'            => false,
-				'auto_update_manageable' => false,
-			);
-		}
-
 		$forced = wp_is_auto_update_forced_for_item( 'plugin', null, self::get_auto_update_filter_payload( $plugin_file ) );
 		if ( ! is_null( $forced ) ) {
 			return array(
@@ -2413,10 +2404,15 @@ class WC_Helper {
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
 
 		return array(
+			// The plugin's own setting. AUTOMATIC_UPDATER_DISABLED and the plugins_auto_update_enabled
+			// filter switch the feature off for the whole site without changing it, and are reported
+			// separately so the screen can say the setting is on but nothing will act on it.
 			'auto_update'            => in_array( $plugin_file, $auto_updates, true ),
 			// auto_update_plugins is a network option, and core only offers the toggle from network
 			// admin on multisite. My Subscriptions is a site-level screen, so it reads only there.
-			'auto_update_manageable' => ! is_multisite() && current_user_can( 'update_plugins' ),
+			'auto_update_manageable' => wp_is_auto_update_enabled_for_type( 'plugin' )
+				&& ! is_multisite()
+				&& current_user_can( 'update_plugins' ),
 		);
 	}
 

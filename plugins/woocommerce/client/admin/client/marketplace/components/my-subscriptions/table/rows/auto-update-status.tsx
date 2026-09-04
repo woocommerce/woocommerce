@@ -19,10 +19,64 @@ import {
 } from '../../../../utils/functions';
 import { StatusLevel, Subscription } from '../../types';
 import StatusPopover from './status-popover';
+import { getAdminSetting } from '../../../../../utils/admin-settings';
 
 /**
- * Warns that a subscription's installed plugin won't update itself, and offers to turn
- * auto-updates on where that is possible.
+ * Reasons a product won't auto-update even though the plugin's own auto-update setting is on.
+ *
+ * Site-level reasons come first, since they hold back every row in the table.
+ */
+export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const blockers: string[] = [];
+
+	if ( ! wccomSettings?.pluginAutoUpdatesEnabled ) {
+		blockers.push(
+			__(
+				'Automatic updates are turned off for this site.',
+				'woocommerce'
+			)
+		);
+	}
+
+	if ( ! wccomSettings?.wooUpdateManagerActive ) {
+		blockers.push(
+			__(
+				'WooCommerce.com Update Manager is not active, and it delivers these updates.',
+				'woocommerce'
+			)
+		);
+	}
+
+	if ( subscription.product_key === '' ) {
+		blockers.push(
+			__( 'This extension has no subscription.', 'woocommerce' )
+		);
+
+		return blockers;
+	}
+
+	if ( subscription.expired && ! subscription.lifetime ) {
+		blockers.push( __( 'The subscription has expired.', 'woocommerce' ) );
+	}
+
+	if ( ! subscription.active ) {
+		blockers.push(
+			__(
+				'The subscription is not connected to this store.',
+				'woocommerce'
+			)
+		);
+	}
+
+	return blockers;
+}
+
+/**
+ * Warns when a subscription's installed plugin won't update itself.
+ *
+ * Two different problems share this slot: the plugin's auto-update setting being off, which can be
+ * fixed here, and the setting being on while something else holds the update back, which can't.
  *
  * Renders nothing for a healthy row, so the table stays uncluttered.
  */
@@ -36,7 +90,7 @@ export default function AutoUpdateStatus( props: {
 	const local = subscription.local;
 
 	// Themes have their own auto-update option, which this screen doesn't manage.
-	if ( ! local?.installed || local.type !== 'plugin' || local.auto_update ) {
+	if ( ! local?.installed || local.type !== 'plugin' ) {
 		return null;
 	}
 
@@ -74,33 +128,64 @@ export default function AutoUpdateStatus( props: {
 			.finally( () => setIsEnabling( false ) );
 	}
 
-	const explanation = local.auto_update_manageable ? (
-		<>
-			{ __(
-				'This extension will not install new versions on its own, including security releases.',
+	if ( ! local.auto_update ) {
+		const explanation = local.auto_update_manageable ? (
+			<>
+				{ __(
+					'This extension will not install new versions on its own, including security releases.',
+					'woocommerce'
+				) }{ ' ' }
+				<Button
+					variant="link"
+					onClick={ enableAutoUpdate }
+					isBusy={ isEnabling }
+					disabled={ isEnabling }
+				>
+					{ __( 'Enable auto-updates', 'woocommerce' ) }
+				</Button>
+			</>
+		) : (
+			__(
+				'This extension will not install new versions on its own, including security releases. Auto-updates for it are controlled outside this screen.',
 				'woocommerce'
-			) }{ ' ' }
-			<Button
-				variant="link"
-				onClick={ enableAutoUpdate }
-				isBusy={ isEnabling }
-				disabled={ isEnabling }
-			>
-				{ __( 'Enable auto-updates', 'woocommerce' ) }
-			</Button>
-		</>
-	) : (
-		__(
-			'This extension will not install new versions on its own, including security releases. Auto-updates for it are controlled outside this screen.',
-			'woocommerce'
-		)
-	);
+			)
+		);
+
+		return (
+			<StatusPopover
+				text={ __( 'Auto-updates are off', 'woocommerce' ) }
+				level={ StatusLevel.Warning }
+				explanation={ explanation }
+				explanationOnHover
+			/>
+		);
+	}
+
+	const blockers = getAutoUpdateBlockers( subscription );
+
+	if ( blockers.length === 0 ) {
+		return null;
+	}
 
 	return (
 		<StatusPopover
-			text={ __( 'Auto-updates are off', 'woocommerce' ) }
+			text={ __( "Won't auto-update", 'woocommerce' ) }
 			level={ StatusLevel.Warning }
-			explanation={ explanation }
+			explanation={
+				<>
+					<p>
+						{ __(
+							'Auto-updates are on for this extension, but it will not update because:',
+							'woocommerce'
+						) }
+					</p>
+					<ul className="woocommerce-marketplace__my-subscriptions__auto-update-blockers">
+						{ blockers.map( ( blocker ) => (
+							<li key={ blocker }>{ blocker }</li>
+						) ) }
+					</ul>
+				</>
+			}
 			explanationOnHover
 		/>
 	);

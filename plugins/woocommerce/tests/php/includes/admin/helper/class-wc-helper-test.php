@@ -671,7 +671,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Auto-updates disabled site-wide are reported as off and not manageable.
+	 * @testdox The site-wide switch leaves the plugin's own setting alone but blocks changing it.
 	 */
 	public function test_plugin_auto_update_data_follows_the_site_wide_switch(): void {
 		$this->prepare_auto_update_env();
@@ -680,8 +680,8 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
 
-		$this->assertFalse( $data['auto_update'], 'Nothing auto-updates while the feature is off site-wide.' );
-		$this->assertFalse( $data['auto_update_manageable'] );
+		$this->assertTrue( $data['auto_update'], "The plugin's own setting is untouched; the screen reports the site-wide block separately." );
+		$this->assertFalse( $data['auto_update_manageable'], 'There is nothing to toggle while the feature is off site-wide.' );
 	}
 
 	/**
