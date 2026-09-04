@@ -41,6 +41,11 @@ export const MultipleSelector = ( {
 			getFilteredItems={ ( allItems ) => allItems }
 			selected={ selectedOptions }
 			inputProps={ {
+				// Typing is not supported here, and on touch devices the
+				// virtual keyboard covers the menu with no way to dismiss it,
+				// so keep it from opening. #52093 hid the caret for the same
+				// reason, but only in CSS, so the keyboard still opened.
+				readOnly: true,
 				'aria-readonly': true,
 				'aria-label': __(
 					'Use up and down arrow keys to navigate',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the virtual keyboard from opening on the core profiler platform selector on touch devices.

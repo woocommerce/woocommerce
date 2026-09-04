@@ -11,6 +11,13 @@ import { UserProfile } from '../UserProfile';
 import { CoreProfilerStateMachineContext } from '../..';
 
 describe( 'UserProfile', () => {
+	// jsdom does not implement scrollIntoView, which the select control menu
+	// calls when it opens.
+	Object.defineProperty( window.HTMLElement.prototype, 'scrollIntoView', {
+		value: jest.fn(),
+		writable: true,
+	} );
+
 	let props: {
 		sendEvent: jest.Mock;
 		navigationProgress: number;
@@ -83,6 +90,69 @@ describe( 'UserProfile', () => {
 		);
 		const platformSelector = screen.getByLabelText( /Select an option/i );
 		expect( platformSelector ).toBeInTheDocument();
+	} );
+
+	// The readonly attribute is what keeps the touch keyboard closed. jsdom
+	// cannot render an operating-system keyboard, so the suppression itself
+	// is only verifiable on a physical device.
+	it( 'should render the platform selector input as readonly', () => {
+		render(
+			// @ts-ignore
+			<UserProfile
+				{ ...{
+					...props,
+					context: {
+						userProfile: {
+							businessChoice: 'im_already_selling',
+							sellingOnlineAnswer: 'yes_im_selling_online',
+							sellingPlatforms: null,
+						},
+					},
+				} }
+			/>
+		);
+		expect(
+			screen.getByLabelText( /Use up and down arrow keys to navigate/i )
+		).toHaveAttribute( 'readonly' );
+	} );
+
+	it( 'should still allow selecting a platform from the read-only selector', () => {
+		render(
+			// @ts-ignore
+			<UserProfile
+				{ ...{
+					...props,
+					context: {
+						userProfile: {
+							businessChoice: 'im_already_selling',
+							sellingOnlineAnswer: 'yes_im_selling_online',
+							sellingPlatforms: null,
+						},
+					},
+				} }
+			/>
+		);
+
+		fireEvent.focus(
+			screen.getByLabelText( /Use up and down arrow keys to navigate/i )
+		);
+		fireEvent.click( screen.getByText( 'Amazon' ) );
+		screen
+			.getByRole( 'button', {
+				name: /Continue/i,
+			} )
+			.click();
+
+		expect( props.sendEvent ).toHaveBeenCalledWith( {
+			type: 'USER_PROFILE_COMPLETED',
+			payload: {
+				userProfile: {
+					businessChoice: 'im_already_selling',
+					sellingOnlineAnswer: 'yes_im_selling_online',
+					sellingPlatforms: [ 'amazon' ],
+				},
+			},
+		} );
 	} );
 
 	it( 'should call sendEvent with USER_PROFILE_COMPLETED event when button is clicked', () => {
