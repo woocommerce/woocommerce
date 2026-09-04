@@ -50,6 +50,7 @@ export type {
 	FilterLabels,
 	FilterOption,
 	FilterRule,
+	Query,
 } from './types';
 
 type AdvancedFiltersDefaultProps = {
