@@ -730,7 +730,7 @@ class WC_Form_Handler {
 			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( is_string( $_GET['remove_coupon'] ) ? wp_unslash( $_GET['remove_coupon'] ) : '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['remove_item'] ) );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat an array-valued remove_coupon request parameter as empty instead of raising a PHP error on the cart page.
