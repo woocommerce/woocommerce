@@ -126,16 +126,24 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that update is skipped when version option is false (first install).
+	 * An absent version means the module was never installed, so the removal branch
+	 * must not run: it would revoke an authorization this site never granted.
 	 */
 	public function test_maybe_update_proxy_speed_module_skips_when_version_is_false(): void {
 		// Ensure version option doesn't exist (simulates first install).
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
 
+		// The only thing removal touches that is observable from here.
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, 'yes' );
+
 		// Call the method.
 		Woocommerce_Analytics::maybe_update_proxy_speed_module();
 
-		// Version should still not exist (maybe_add_proxy_speed_module was not called).
+		$this->assertSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
+			'Removal ran against a site that never installed the module.'
+		);
 		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ) );
 
 		// Transient should be set (check was performed).
@@ -356,6 +364,11 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * Test that maybe_add_proxy_speed_module skips when version already matches.
 	 */
 	public function test_maybe_add_proxy_speed_module_skips_when_version_matches(): void {
+		// Both flags, or the method returns at its eligibility guard and the file
+		// assertion below holds whatever the version check does.
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+
 		// Set version to match current.
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
 
@@ -366,6 +379,12 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Call the method.
 		Woocommerce_Analytics::maybe_add_proxy_speed_module();
+
+		$this->assertSame(
+			'yes',
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
+			'The eligibility guard returned first, so the version check was never reached.'
+		);
 
 		// No file should be created since version matches.
 		$mu_plugin_file = $this->temp_mu_plugin_dir . '/woocommerce-analytics-proxy-speed-module.php';
@@ -443,8 +462,13 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * carries the endpoint for good with no supported way back.
 	 */
 	public function test_reset_proxy_tracking_state_clears_both_options(): void {
+		// Both flags, or the sync leaves the authorization option absent and the
+		// second assertion below is true without anything having been cleared.
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
 		Woocommerce_Analytics::reset_proxy_tracking_state();
 
