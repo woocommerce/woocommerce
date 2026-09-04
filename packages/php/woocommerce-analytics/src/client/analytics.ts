@@ -265,7 +265,7 @@ export class Analytics {
 			// Set a first-party cookie (same domain only, 1 year)
 			const randomToken = generateRandomToken( 18 ); // 18 * 4/3 = 24 (base64 encoded chars)
 			const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
-			document.cookie = `tk_ai=${ randomToken }; path=/; secure; samesite=strict; expires=${ expires }`;
+			document.cookie = `tk_ai=${ randomToken }; path=/; secure; samesite=lax; expires=${ expires }`;
 		}
 	}
 }
