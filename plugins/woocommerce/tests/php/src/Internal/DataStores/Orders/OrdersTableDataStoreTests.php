@@ -570,7 +570,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox Test the trash-untrash cycle with sync enabled.
+	 * @testdox Test the trash-untrash cycle with sync enabled, including order note visibility.
 	 */
 	public function test_cot_datastore_untrash() {
 		global $wpdb;
@@ -583,6 +583,17 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order->save();
 		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+
+		// A non-order-note comment type, so restore can't be relying on the notes-only fallback.
+		$third_party_comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $order_id,
+				'comment_content'  => 'Third-party comment',
+				'comment_type'     => 'wc-messaging',
+				'comment_approved' => 1,
+			)
+		);
 
 		$this->sut->trash_order( $order );
 
@@ -591,6 +602,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
 		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
+		$this->assertSame( 'post-trashed', get_comment( $note_id )->comment_approved, 'Order note should be hidden while the order is in the trash' );
+		$this->assertSame( 'post-trashed', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be hidden while the order is in the trash' );
 
 		$this->sut->read( $order );
 		$this->sut->untrash_order( $order );
@@ -600,6 +613,70 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should be restored when the order is untrashed' );
+		$this->assertSame( '1', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be restored when the order is untrashed' );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox Notes are still restored on untrash even without a comment-status record.
+	 */
+	public function test_cot_datastore_untrash_restores_notes_with_no_trash_meta_record() {
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+
+		$this->sut->trash_order( $order );
+		$this->assertSame( 'post-trashed', get_comment( $note_id )->comment_approved );
+
+		// No comment-status record, as if this order predates the fix.
+		delete_post_meta( $order_id, '_wp_trash_meta_comments_status' );
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should still be restored even with no trash-meta record' );
+	}
+
+	/**
+	 * @testdox A leaked wc_orders_meta row for the trash comment-status is removed on untrash.
+	 */
+	public function test_cot_datastore_untrash_removes_leaked_trash_comments_meta() {
+		global $wpdb;
+
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->sut->trash_order( $order );
+
+		// Simulate a copy that leaked into wc_orders_meta from a prior CPT-to-HPOS sync.
+		$wpdb->insert(
+			$this->sut->get_meta_table_name(),
+			array(
+				'order_id'   => $order_id,
+				'meta_key'   => '_wp_trash_meta_comments_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'leaked', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		$this->sut->read( $order );
+		$this->sut->untrash_order( $order );
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+		$this->assertEmpty(
+			$wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key = %s", $order_id, '_wp_trash_meta_comments_status' ) ),
+			'A leaked _wp_trash_meta_comments_status row should not survive untrash'
+		);
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
 	}
 
