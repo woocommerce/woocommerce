@@ -152,7 +152,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Import cleanup should preserve a placeholder completed after candidate selection.
+	 * @testdox Import cleanup should preserve a placeholder another process completed after candidate selection.
 	 */
 	public function test_cleanup_after_import_rechecks_placeholder_status_before_deletion(): void {
 		$post_ids                  = array(
@@ -173,19 +173,34 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		);
 		$completed_id              = 0;
 		$complete_next_placeholder = static function ( $deleted_post_id ) use ( $post_ids, &$completed_id ): void {
-			if ( in_array( $deleted_post_id, $post_ids, true ) && ! $completed_id ) {
-				$completed_id = current( array_diff( $post_ids, array( $deleted_post_id ) ) );
+			if ( ! in_array( $deleted_post_id, $post_ids, true ) || $completed_id ) {
+				return;
+			}
+
+			$completed_id = current( array_diff( $post_ids, array( $deleted_post_id ) ) );
+
+			// Suspending invalidation leaves this process holding the stale placeholder, the way a
+			// concurrent request completing the placeholder would.
+			wp_suspend_cache_invalidation( true );
+
+			try {
 				wp_update_post(
 					array(
 						'ID'          => $completed_id,
 						'post_status' => 'publish',
 					)
 				);
+			} finally {
+				wp_suspend_cache_invalidation( false );
 			}
 		};
 		add_action( 'delete_post', $complete_next_placeholder, 1 );
 
-		$this->invoke_cleanup_after_import();
+		try {
+			$this->invoke_cleanup_after_import();
+		} finally {
+			remove_action( 'delete_post', $complete_next_placeholder, 1 );
+		}
 
 		$this->assertNotSame( 0, $completed_id );
 		$this->assertNotNull( get_post( $completed_id ) );
@@ -284,6 +299,35 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		foreach ( $post_ids as $post_id ) {
 			$this->assertNull( get_post( $post_id ) );
 		}
+	}
+
+	/**
+	 * @testdox A new import run should release a claim an earlier cleanup did not live to finish.
+	 */
+	public function test_release_stranded_cleanup_claims_restores_the_placeholder_status(): void {
+		$stranded_id  = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing-cleanup',
+				'post_title'  => 'Import cleanup stranded placeholder',
+			)
+		);
+		$unrelated_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+				'post_title'  => 'Unrelated published product',
+			)
+		);
+
+		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
+		$method = $class->getMethod( 'release_stranded_cleanup_claims' );
+		$method->setAccessible( true );
+		$method->invoke( null );
+
+		// The importer only treats the placeholder status as absent, so the row has to read that way again.
+		$this->assertSame( 'importing', get_post_status( $stranded_id ) );
+		$this->assertSame( 'publish', get_post_status( $unrelated_id ) );
 	}
 
 	/**
