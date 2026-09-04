@@ -127,6 +127,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
 			'global_unique_id'      => $object->get_global_unique_id(),
+			'mpn'                   => $object->get_mpn(),
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),
@@ -222,6 +223,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Unique ID.
 		if ( isset( $request['global_unique_id'] ) ) {
 			$variation->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
+		}
+
+		// MPN.
+		if ( isset( $request['mpn'] ) ) {
+			$variation->set_mpn( wc_clean( $request['mpn'] ) );
 		}
 
 		// Thumbnail.
@@ -606,6 +612,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				'global_unique_id'      => array(
 					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'mpn'                   => array(
+					'description' => __( 'Manufacturer Part Number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1056,6 +1067,19 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			);
 		}
 
+		// Filter by mpn.
+		if ( ! empty( $request['mpn'] ) ) {
+			$mpns               = array_map( 'trim', explode( ',', $request['mpn'] ) );
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				$args,
+				array(
+					'key'     => '_mpn',
+					'value'   => $mpns,
+					'compare' => 'IN',
+				)
+			);
+		}
+
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
@@ -1283,6 +1307,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				'enum' => array_merge( array( 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			),
 			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['mpn'] = array(
+			'description'       => __( 'Limit result set to product variations with specified MPN(s).', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

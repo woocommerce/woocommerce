@@ -3270,6 +3270,56 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
 }
 
 /**
+ * Add MPN column to the product meta lookup table.
+ *
+ * @return void
+ */
+function wc_update_1090_add_mpn_to_product_lookup_table() {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_product_meta_lookup';
+
+	// Check if the column already exists.
+	$column_exists = $wpdb->get_var(
+		$wpdb->prepare(
+			"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+			'mpn'
+		)
+	);
+
+	// Check if the index already exists.
+	$index_exists = $wpdb->get_var(
+		$wpdb->prepare(
+			"SHOW INDEX FROM `{$table_name}` WHERE Key_name = %s",
+			'mpn'
+		)
+	);
+
+	if ( ! $column_exists ) {
+		// Add the MPN column.
+		$wpdb->query(
+			"ALTER TABLE {$table_name} ADD COLUMN `mpn` varchar(100) NOT NULL DEFAULT '' AFTER `global_unique_id`"
+		);
+	}
+
+	if ( ! $index_exists ) {
+		// Add an index for fast filtering.
+		$wpdb->query(
+			"ALTER TABLE {$table_name} ADD INDEX `mpn` (mpn(50))"
+		);
+	}
+
+	// Populate the MPN column with existing data.
+	$wpdb->query(
+		"
+		UPDATE {$table_name} lookup
+		LEFT JOIN {$wpdb->postmeta} pm ON lookup.product_id = pm.post_id AND pm.meta_key = '_mpn'
+		SET lookup.mpn = COALESCE(pm.meta_value, '')
+		"
+	);
+}
+
+/**
  * Add an index to (comment_date_gmt, comment_type, comment_approved, comment_post_ID)
  * on the comments table to improve the admin query that gets the latest 25 comments
  * while excluding reviews and internal notes.

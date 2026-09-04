@@ -69,7 +69,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $db_version = '920';
+	public $db_version = '1090';
 
 	/**
 	 * The single instance of the class.
