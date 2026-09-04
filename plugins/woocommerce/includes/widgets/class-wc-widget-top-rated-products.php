@@ -100,7 +100,7 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$content = ob_get_clean();
 
-		echo $content; // WPCS: XSS ok.
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered widget markup; each dynamic value is escaped or annotated where it is rendered.
 
 		$this->cache_widget( $args, $content );
 	}

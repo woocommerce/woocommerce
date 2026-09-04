@@ -34,6 +34,16 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Discard the REST server installed for the test.
+	 */
+	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Tests that Rate limiting headers are sent and set correctly when Rate Limiting
 	 * main functionality is enabled.
 	 *

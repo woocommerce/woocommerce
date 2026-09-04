@@ -7,6 +7,7 @@
 		margin: 0 0 6px;
 
 		[placeholder]:focus::-webkit-input-placeholder {
+			-webkit-transition: opacity 0.5s 0.5s ease;
 			transition: opacity 0.5s 0.5s ease;
 			opacity: 0;
 		}

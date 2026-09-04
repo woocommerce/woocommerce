@@ -42,6 +42,7 @@ jobs:
         name: Check Asset Sizes
         if: github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         permissions:
             contents: read
             pull-requests: write
@@ -61,7 +62,7 @@ jobs:
               run: 'npm install -g corepack@latest && corepack enable pnpm'
               # `npm install -g corepack@latest` addresses https://github.com/nodejs/corepack/issues/612.
 
-            - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
+            - uses: preactjs/compressed-size-action@f322c295dde06a1cb7ccaef105732dd8a726d1d9 # v2.10.0
               env:
                   BROWSERSLIST_IGNORE_OLD_DATA: true
               with:

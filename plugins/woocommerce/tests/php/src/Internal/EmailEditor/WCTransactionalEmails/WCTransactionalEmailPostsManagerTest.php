@@ -423,6 +423,44 @@ class WCTransactionalEmailPostsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the _wc_email_type post meta when no option mapping exists.
+	 */
+	public function testGetEmailTypeFromPostIdFallsBackToEmailTypeMeta(): void {
+		$post_id = $this->factory->post->create();
+		update_post_meta( $post_id, WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY, 'meta_fallback_email' );
+
+		$result = $this->template_manager->get_email_type_from_post_id( $post_id );
+
+		$this->assertEquals( 'meta_fallback_email', $result, 'Unpublished posts without an option mapping must resolve via the email type meta' );
+	}
+
+	/**
+	 * @testdox Should not feed the meta fallback result into the mapping caches.
+	 */
+	public function testGetEmailTypeFromPostIdDoesNotCacheMetaFallbackResult(): void {
+		$post_id = $this->factory->post->create();
+		update_post_meta( $post_id, WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY, 'meta_uncached_email' );
+
+		$this->assertEquals( 'meta_uncached_email', $this->template_manager->get_email_type_from_post_id( $post_id ) );
+
+		// The fallback result must NOT poison the forward lookup:
+		// `get_email_template_post_id()` reverse-searches the in-memory cache
+		// and must only ever see mapped posts.
+		$this->assertEmpty(
+			$this->template_manager->get_email_template_post_id( 'meta_uncached_email' ),
+			'A meta-resolved scratchpad must not appear as the mapped post for its email type'
+		);
+
+		// Deleting the meta immediately changes the result — nothing was cached.
+		delete_post_meta( $post_id, WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY );
+
+		$this->assertNull(
+			$this->template_manager->get_email_type_from_post_id( $post_id, true ),
+			'The meta fallback result must not be served from a cache after the meta was deleted'
+		);
+	}
+
+	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {

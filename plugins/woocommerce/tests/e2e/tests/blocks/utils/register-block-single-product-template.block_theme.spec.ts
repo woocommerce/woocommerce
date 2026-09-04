@@ -46,9 +46,8 @@ test.describe( 'registerProductBlockType registers', () => {
 		} );
 
 		await test.step( 'Available in post within Single Product block', async () => {
-			const singleProductClientId = await insertSingleProductBlock(
-				editor
-			);
+			const singleProductClientId =
+				await insertSingleProductBlock( editor );
 			// One from the global inserter, one from the single product block
 			await editor.insertBlock(
 				{ name: blockName },

@@ -11,7 +11,7 @@ use WC_Log_Handler;
  */
 class LogHandlerFileV2 extends WC_Log_Handler {
 	/**
-	 * Maximum number of expired log files to delete in one loop iteration.
+	 * Maximum number of log files to delete in one loop iteration.
 	 *
 	 * @var int
 	 */
@@ -175,22 +175,59 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	public function clear( string $source, bool $quiet = false ): int {
 		$source = File::sanitize_source( $source );
 
-		$files = $this->file_controller->get_files(
-			array(
-				'source' => $source,
-			)
-		);
-
-		if ( is_wp_error( $files ) || ! is_array( $files ) || count( $files ) < 1 ) {
+		// Bail on an empty source: an empty value would match every file and,
+		// combined with the batched deletion below, wipe out all log files.
+		if ( '' === $source ) {
 			return 0;
 		}
 
-		$file_ids = array_map(
-			fn( $file ) => $file->get_file_id(),
-			$files
-		);
+		$deleted = 0;
+		$skipped = 0;
 
-		$deleted = $this->file_controller->delete_files( $file_ids );
+		/*
+		 * Fetch and delete in batches so that sources with more than the default
+		 * per-page of log files don't leave files behind.
+		 *
+		 * Order by 'created' rather than the default 'modified'. Because paging
+		 * advances $skipped past undeletable files, the offset is only reliable if
+		 * get_files() returns a stable, strict total order across iterations. For a
+		 * single source, created timestamps (plus rotation) are unique per file,
+		 * whereas modified times can tie -- and on PHP < 8.0 usort() is not stable,
+		 * so tied files could re-order between iterations and strand a deletable file.
+		 */
+		do {
+			$files = $this->file_controller->get_files(
+				array(
+					'source'       => $source,
+					'exact_source' => true,
+					'orderby'      => 'created',
+					'per_page'     => self::DELETE_BATCH_SIZE,
+					'offset'       => $skipped,
+				)
+			);
+
+			if ( is_wp_error( $files ) || ! is_array( $files ) ) {
+				break;
+			}
+
+			$fetched_count = count( $files );
+			if ( $fetched_count < 1 ) {
+				break;
+			}
+
+			$file_ids = array_map(
+				fn( $file ) => $file->get_file_id(),
+				$files
+			);
+
+			$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+			$deleted         += $deleted_in_batch;
+
+			// Deleted files disappear from the directory, so only files that could
+			// not be deleted need to be skipped. This avoids retrying a permanently
+			// undeletable batch forever.
+			$skipped += $fetched_count - $deleted_in_batch;
+		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 && ! $quiet ) {
 			$this->handle(
@@ -237,14 +274,23 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$deleted = 0;
 		$skipped = 0;
 
-		// Fetch and delete in batches so that sites with more than the default
-		// per-page of log files don't leave expired files behind.
+		/*
+		 * Fetch and delete in batches so that sites with more than the default
+		 * per-page of log files don't leave expired files behind.
+		 *
+		 * Order by 'created' so that paging past vetoed files stays reliable: the
+		 * offset only lands correctly if get_files() returns a strict, stable total
+		 * order across iterations, and (created, source, rotation) is unique per file
+		 * whereas the default 'modified' order can tie -- which PHP < 8.0's unstable
+		 * usort() could re-order between iterations, stranding an expired file.
+		 */
 		do {
 			$files = $this->file_controller->get_files(
 				array(
 					'date_filter' => 'created',
 					'date_start'  => 1,
 					'date_end'    => $timestamp,
+					'orderby'     => 'created',
 					'per_page'    => self::DELETE_BATCH_SIZE,
 					'offset'      => $skipped,
 				)

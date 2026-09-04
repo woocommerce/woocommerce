@@ -45,7 +45,7 @@ test.describe(
 			page,
 		} ) => {
 			test.skip(
-				process.env.IS_MULTISITE,
+				!! process.env.IS_MULTISITE,
 				'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
 			);
 			await page.goto(
@@ -206,7 +206,7 @@ test.describe(
 			page,
 		} ) => {
 			test.skip(
-				process.env.IS_MULTISITE,
+				!! process.env.IS_MULTISITE,
 				'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
 			);
 			await page.goto(
@@ -291,7 +291,7 @@ test.describe(
 					} )
 				).not.toBeAttached();
 
-				// select and install the rest of the extentions
+				// select and install the rest of the extensions
 				try {
 					await page
 						.getByText(

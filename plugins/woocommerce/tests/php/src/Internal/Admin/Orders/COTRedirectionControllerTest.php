@@ -33,7 +33,7 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 		$this->sut->setup();
 		$this->redirected_to = '';
 
-		add_filter( 'wp_redirect', array( $this, 'watch_and_anull_redirects' ) );
+		add_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
 	}
 
 	/**
@@ -43,7 +43,7 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'wp_redirect', array( $this, 'watch_and_anull_redirects' ) );
+		remove_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
 	}
 
 	/**
@@ -53,7 +53,7 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return null
 	 */
-	public function watch_and_anull_redirects( string $url ) {
+	public function watch_and_annul_redirects( string $url ) {
 		$this->redirected_to = $url;
 		return null;
 	}

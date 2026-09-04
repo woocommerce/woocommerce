@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Variation bulk action "Set scheduled sale dates": block submission when the sale end date is earlier than the sale start date, and clear sale dates submitted as blank instead of storing 1970-01-01.

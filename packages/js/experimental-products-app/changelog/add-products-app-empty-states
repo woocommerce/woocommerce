@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add per-tab empty states to the experimental products app product list (All, Published, Draft, Pending review, Trash) using the design-system EmptyState component.
