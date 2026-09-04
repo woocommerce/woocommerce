@@ -31,6 +31,7 @@ parameters:
 	scanFiles:
 		- php-stubs/wc-admin-feature-config.php
 		- php-stubs/wc-constants.php
+		- php-stubs/wp-6.9-functions.php
 	treatPhpDocTypesAsCertain: false
 	dynamicConstantNames:
 		# WC_TAX_ROUNDING_MODE can be 1, 2 (ints) or 'auto' (string in tests).
