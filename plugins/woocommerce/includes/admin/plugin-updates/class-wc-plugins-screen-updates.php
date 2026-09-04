@@ -68,7 +68,14 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 			add_action( 'admin_print_footer_scripts', array( $this, 'plugin_screen_modal_js' ) );
 		}
 
-		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		/**
+		 * Filters the inline update message shown for WooCommerce on the Plugins screen.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param string $message Upgrade notice markup, already run through wp_kses_post(), or an empty string.
+		 */
+		echo apply_filters( 'woocommerce_in_plugin_update_message', $this->upgrade_notice ? '</p>' . wp_kses_post( $this->upgrade_notice ) . '<p class="dummy">' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The base value is run through wp_kses_post() and the filter returns extension-controlled markup by design.
 	}
 
 	/**
