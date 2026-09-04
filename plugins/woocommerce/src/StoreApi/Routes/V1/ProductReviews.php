@@ -116,6 +116,10 @@ class ProductReviews extends AbstractRoute {
 		$response_objects = array();
 
 		foreach ( $query_result as $review ) {
+			if ( post_password_required( (int) $review->comment_post_ID ) ) {
+				continue;
+			}
+
 			$data               = $this->prepare_item_for_response( $review, $request );
 			$response_objects[] = $this->prepare_response_for_collection( $data );
 		}
