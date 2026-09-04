@@ -3,6 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
@@ -147,7 +150,38 @@ class PaymentsController {
 		}
 		$settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ]['business_country_code'] = $this->payments->get_country();
 
+		global $current_tab;
+
+		// Add the gateways that are not available in the Checkout block, but only when the store uses it.
+		if ( 'checkout' === $current_tab && CartCheckoutUtils::is_checkout_block_default() ) {
+			$settings['woocommerce_payments_checkout_block_compatibility'] = array(
+				'incompatible_gateway_ids' => $this->get_gateway_ids_incompatible_with_checkout_block(),
+			);
+		}
+
 		return $settings;
+	}
+
+	/**
+	 * Get the IDs of the payment gateways that have no Checkout block payment method integration.
+	 *
+	 * The enabled state of the gateways is not taken into account.
+	 *
+	 * Matching is by integration name: a gateway counts as compatible when a registered
+	 * Checkout block payment method integration has the same name as the gateway ID.
+	 *
+	 * @return string[] The list of gateway IDs.
+	 */
+	private function get_gateway_ids_incompatible_with_checkout_block(): array {
+		$registered_payment_method_names = array_map(
+			static fn( $payment_method ) => $payment_method->get_name(),
+			BlocksPackage::container()->get( PaymentMethodRegistry::class )->get_all_registered()
+		);
+
+		// `payment_gateways()` is keyed by gateway ID; pluck the IDs as a plain list for the diff below.
+		$gateway_ids = wp_list_pluck( WC()->payment_gateways()->payment_gateways(), 'id' );
+
+		return array_values( array_diff( $gateway_ids, $registered_payment_method_names ) );
 	}
 
 	/**
