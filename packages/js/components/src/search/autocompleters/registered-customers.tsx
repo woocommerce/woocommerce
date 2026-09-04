@@ -89,11 +89,15 @@ const completer: AutoCompleter = {
 		return customer.id;
 	},
 	getOptionKeywords( customer ) {
-		const fields = [ customer.name, customer.username, customer.email ];
+		const fields = [
+			customer.name,
+			customer.username,
+			customer.email,
+		].filter( Boolean );
 		// The API matches the search term against these fields joined together,
 		// so the joined string has to be a keyword too. Without it a term that
 		// spans two fields is matched by the API and then filtered back out.
-		return [ ...fields, fields.filter( Boolean ).join( ' ' ) ];
+		return [ ...fields, fields.join( ' ' ) ];
 	},
 	getOptionLabel( customer, query ) {
 		const suggestion = getSuggestion( customer, query );

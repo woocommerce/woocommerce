@@ -60,10 +60,12 @@ describe( 'registered customers autocompleter', () => {
 		] );
 	} );
 
-	it( 'keeps the joined keyword usable when the customer has no name', () => {
-		expect( registeredCustomers.getOptionKeywords( unnamed ) ).toContain(
-			'zoemarketing hello@zoeshop.test'
-		);
+	it( 'leaves out the name of a customer registered without one', () => {
+		expect( registeredCustomers.getOptionKeywords( unnamed ) ).toEqual( [
+			'zoemarketing',
+			'hello@zoeshop.test',
+			'zoemarketing hello@zoeshop.test',
+		] );
 	} );
 
 	it( 'shows the name on its own when it matches the search term', () => {
