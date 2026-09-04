@@ -165,7 +165,7 @@ class ProductReviews extends AbstractRoute {
 
 		$inaccessible_ids = array();
 		foreach ( $protected_products as $product_post ) {
-			if ( post_password_required( $product_post ) ) {
+			if ( $product_post->comment_count > 0 && post_password_required( $product_post ) ) {
 				$inaccessible_ids[] = (int) $product_post->ID;
 			}
 		}
