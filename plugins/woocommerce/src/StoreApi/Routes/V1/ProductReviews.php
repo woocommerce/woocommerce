@@ -160,12 +160,16 @@ class ProductReviews extends AbstractRoute {
 	 * WP_Comment_Query already joins posts because of post_status. Filter on that
 	 * join instead of building a post__not_in list of every protected product.
 	 *
-	 * @param array $clauses              Comment query clauses.
-	 * @param int[] $unlocked_product_ids Password-protected product IDs the visitor has unlocked.
-	 * @return array
+	 * @param array|mixed $clauses              Comment query clauses from comments_clauses.
+	 * @param int[]       $unlocked_product_ids Password-protected product IDs the visitor has unlocked.
+	 * @return array|mixed
 	 */
 	private function exclude_password_protected_product_reviews( $clauses, $unlocked_product_ids ) {
 		global $wpdb;
+
+		if ( ! is_array( $clauses ) ) {
+			return $clauses;
+		}
 
 		$where = " {$wpdb->posts}.post_password = '' ";
 		if ( ! empty( $unlocked_product_ids ) ) {
@@ -173,6 +177,7 @@ class ProductReviews extends AbstractRoute {
 			$where = " ( {$wpdb->posts}.post_password = '' OR {$wpdb->posts}.ID IN ({$ids}) ) ";
 		}
 
+		$clauses['where']  = is_string( $clauses['where'] ?? null ) ? $clauses['where'] : '';
 		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . $where;
 
 		return $clauses;
