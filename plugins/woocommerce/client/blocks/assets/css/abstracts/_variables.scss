@@ -10,6 +10,11 @@ $gap-small: 1.5 * $grid-unit; // 12px
 $gap-smaller: 1 * $grid-unit; // 8px
 $gap-smallest: 0.5 * $grid-unit; // 4px
 
+// Width of the cart and checkout sidebar (the order summary column). Fixed
+// rather than proportional so it neither cramps on narrow desktops nor
+// stretches on very wide ones.
+$cart-checkout-sidebar-width: 360px;
+
 // Standard border radius for forms.
 $universal-border-radius: 4px;
 $universal-translucent-border-color: color-mix(in srgb, currentColor 30%, transparent);

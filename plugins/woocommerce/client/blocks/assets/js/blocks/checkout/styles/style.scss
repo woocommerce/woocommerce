@@ -46,6 +46,7 @@
 .wp-block-woocommerce-checkout.is-loading {
 	display: flex;
 	flex-wrap: wrap;
+	column-gap: $gap-largest;
 	margin: 0 auto $gap;
 	position: relative;
 
@@ -53,14 +54,14 @@
 		flex-direction: row-reverse;
 	}
 
+	// Mirrors the loaded layout in sidebar-layout/style.scss.
 	.wp-block-woocommerce-checkout-totals-block {
-		width: 35%;
-		padding-left: math.percentage(math.div($gap-large, 1060px));
+		flex: 0 0 $cart-checkout-sidebar-width;
+		width: $cart-checkout-sidebar-width;
 	}
 	.wp-block-woocommerce-checkout-fields-block {
-		width: 65%;
-		// ~1060px is the default width of the content area in Storefront.
-		padding-right: math.percentage(math.div($gap-largest, 1060px));
+		flex: 1 1 0%;
+		min-width: 0;
 	}
 
 	.wp-block-woocommerce-checkout-fields-block {
@@ -151,17 +152,21 @@
 	}
 }
 
-// Skeleton is shown before mobile classes are appended.
-@media only screen and (max-width: 700px) {
+// Skeleton is shown before mobile classes are appended, so it has to infer the
+// container width from the viewport: ~1000px of viewport is the ~920px of
+// container the two-column layout needs.
+@media only screen and (max-width: 999px) {
 	.wp-block-woocommerce-checkout.is-loading {
 		flex-direction: column;
 		margin: 0 auto $gap;
 
 		.wp-block-woocommerce-checkout-fields-block {
+			flex: none;
 			padding: 0;
 			width: 100%;
 		}
 		.wp-block-woocommerce-checkout-totals-block {
+			flex: none;
 			padding: 0;
 			width: 100%;
 			.wc-block-components-totals-item,
