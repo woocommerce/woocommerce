@@ -696,23 +696,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		// An update that resolves back to the item's own parent or variation is not a product change,
-		// and set_product() would rewrite the item from present-day catalog state either way: handed
-		// the parent it clears the variation attribute meta, handed the variation it replaces that
-		// meta with whatever the variation reports today. Keep the item's product and variation as
-		// they are instead, and refresh only the name and tax class set_product() resynchronises.
-		// The variation is still validated through the item's own setter. A request that resolved to
-		// the parent and finds the variation gone demotes to that parent below; one that resolved to
-		// the variation itself has nothing left to demote to and fails the way it did before, when
-		// set_product() was handed the same deleted variation.
-		$same_variation_update = 'update' === $action
-			&& $current_variation_id
-			&& $product instanceof WC_Product_Variation
-			&& $product->get_id() === $current_variation_id;
-		$preserve_variation    = $restore_variation_id || $same_variation_update;
-
 		if ( $product && $product !== $item->get_product() ) {
-			if ( $preserve_variation ) {
+			// A parent-only update is not a product change, and set_product() would clear the
+			// variation attribute meta before the variation is put back. Refresh only the name and tax
+			// class instead, still validating the stored variation through the item's own setter.
+			if ( $restore_variation_id ) {
 				try {
 					$item->set_variation_id( $current_variation_id );
 					$item->set_name( $product->get_name() );
@@ -721,11 +709,10 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation, so hand the item to
-					// set_product() after all and let it demote to what the request resolved to.
-					// Unlike v2, no get_post_type() recheck is needed: $item is always a base
-					// WC_Order_Item_Product (never a woocommerce_get_order_item_classname subclass),
-					// whose setter throws this code only when the post is not a product_variation.
+					// The stored variation ID no longer identifies a variation: demote via set_product().
+					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
+					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
+					// when the post is not a product_variation.
 					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(

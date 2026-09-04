@@ -25,7 +25,6 @@ use WC_Order;
 use WP_REST_Request;
 use WP_Http;
 use WC_Order_Item_Product;
-use WC_Product_Variation;
 use WC_Order_Item_Shipping;
 use WC_Order_Item_Fee;
 use WC_Order_Item_Coupon;
@@ -358,30 +357,11 @@ class UpdateUtils {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
-		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
-		$product              = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
-		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
-		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
-		// An update that resolves back to the item's own variation is not a product change, and
-		// set_product() would replace the item's variation attribute meta with whatever the variation
-		// reports today, rewriting an order record from present-day catalog state. Refresh only the
-		// name and tax class set_product() resynchronises, still validating the variation through the
-		// item's own setter, which extensions override. A parent-only update is a genuine demotion and
-		// is left to set_product().
-		$preserve_variation = 'update' === $action
-			&& $product_item
-			&& $current_variation_id
-			&& $product instanceof WC_Product_Variation
-			&& $product->get_id() === $current_variation_id;
+		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
+		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
 
 		if ( $product && $product !== $item->get_product() ) {
-			if ( $preserve_variation && $product_item ) {
-				$product_item->set_variation_id( $current_variation_id );
-				$product_item->set_name( $product->get_name() );
-				$product_item->set_tax_class( $product->get_tax_class() );
-			} else {
-				$item->set_product( $product );
-			}
+			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $request_data['quantity'] ) ? $request_data['quantity'] : 1;

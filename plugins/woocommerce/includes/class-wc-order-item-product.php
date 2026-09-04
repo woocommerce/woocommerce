@@ -402,6 +402,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Aggregate and set properties based on passed in product object.
 	 *
+	 * Handed the variation the item already refers to, the attribute meta is left alone: the item
+	 * records what was bought, not what the variation declares today.
+	 *
 	 * @param WC_Product $product Product instance.
 	 * @return void
 	 */
@@ -410,9 +413,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$same_variation = $product->get_id() === (int) $this->get_variation_id( 'edit' );
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
-			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+			if ( ! $same_variation ) {
+				$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+			}
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );

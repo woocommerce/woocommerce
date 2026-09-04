@@ -966,24 +966,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		// An update that resolves back to the item's own parent or variation is not a product change,
-		// and set_product() would rewrite the item from present-day catalog state either way: handed
-		// the parent it clears the variation attribute meta, handed the variation it replaces that
-		// meta with whatever the variation reports today. Keep the item's product and variation as
-		// they are instead, and refresh only the name and tax class set_product() resynchronises.
-		// The variation is still validated through the item's own setter, which extensions override.
-		// A request that resolved to the parent and finds the variation gone demotes to that parent
-		// below; one that resolved to the variation itself has nothing left to demote to and fails
-		// the way it did before, when set_product() was handed the same deleted variation.
-		$same_variation_update = 'update' === $action
-			&& $product_item
-			&& $current_variation_id
-			&& $product instanceof WC_Product_Variation
-			&& $product->get_id() === $current_variation_id;
-		$preserve_variation    = $product_item && ( $restore_variation_id || $same_variation_update );
-
 		if ( $product && $product !== $item->get_product() ) {
-			if ( $preserve_variation && $product_item ) {
+			// A parent-only update is not a product change, and set_product() would clear the
+			// variation attribute meta before the variation is put back. Refresh only the name and tax
+			// class instead, still validating the stored variation through the item's own setter.
+			if ( $restore_variation_id && $product_item ) {
 				try {
 					$product_item->set_variation_id( $current_variation_id );
 					$product_item->set_name( $product->get_name() );
@@ -995,12 +982,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation, so hand the item to
-					// set_product() after all and let it demote to what the request resolved to.
-					// A subclass veto reusing this error code for an already-deleted variation is
-					// indistinguishable from the core throw and is deliberately swallowed too:
-					// rethrowing for subclasses (e.g. via a get_class() check) would revive the 400
-					// on every store substituting order item classes.
+					// The stored variation ID no longer identifies a variation: demote via set_product().
+					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
+					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
+					// get_class() check) would revive the 400 on every store substituting order item classes.
 					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(

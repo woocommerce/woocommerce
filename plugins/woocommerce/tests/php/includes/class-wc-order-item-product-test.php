@@ -843,6 +843,25 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the recorded attribute meta when set_product() is handed the variation the item already refers to.
+	 */
+	public function test_set_product_keeps_attribute_meta_when_handed_the_items_own_variation(): void {
+		$variation = $this->create_variation( array( 'color' => 'blue' ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$variation->set_attributes( array( 'color' => 'green' ) );
+		$variation->save();
+		$variation = wc_get_product( $variation->get_id() );
+
+		$item->set_product( $variation );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'The item records what was bought, not what the variation declares today.' );
+		$this->assertSame( $variation->get_name(), $item->get_name(), 'The name is still refreshed from the product.' );
+	}
+
+	/**
 	 * @testdox Should remove attribute meta on an item reloaded from the database, which is how REST reassigns a line item.
 	 */
 	public function test_set_product_removes_attribute_meta_on_a_persisted_item(): void {
