@@ -35,6 +35,20 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	private const ROUTE = '/woocommerce-email-editor/v1/send_preview_email';
 
 	/**
+	 * Post type registered for the email editor in these tests.
+	 *
+	 * @var string
+	 */
+	private const EMAIL_POST_TYPE = 'custom_email_type';
+
+	/**
+	 * Callback to register the test email post type.
+	 *
+	 * @var callable
+	 */
+	private $post_register_callback;
+
+	/**
 	 * Creates a user and returns an integer ID.
 	 *
 	 * @param array $args Arguments for user creation.
@@ -47,13 +61,13 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	}
 
 	/**
-	 * Creates a post and returns an integer ID.
+	 * Creates an email post and returns an integer ID.
 	 *
 	 * @param array $args Arguments for post creation.
 	 * @return int
 	 */
 	private function create_post( array $args = array() ): int {
-		$result = self::factory()->post->create( $args );
+		$result = self::factory()->post->create( array_merge( array( 'post_type' => self::EMAIL_POST_TYPE ), $args ) );
 		$this->assertIsInt( $result );
 		return $result;
 	}
@@ -63,7 +77,17 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->email_editor = $this->di_container->get( Email_Editor::class );
+		$this->email_editor           = $this->di_container->get( Email_Editor::class );
+		$this->post_register_callback = function ( $post_types ) {
+			$post_types[] = array(
+				'name' => self::EMAIL_POST_TYPE,
+				'args' => array(),
+				'meta' => array(),
+			);
+			return $post_types;
+		};
+		add_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
+		$this->email_editor->initialize();
 
 		global $wp_rest_server;
 		$wp_rest_server = new \WP_REST_Server();
@@ -78,8 +102,85 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		remove_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
 		global $wp_rest_server;
 		$wp_rest_server = null;
+	}
+
+	/**
+	 * Test that an author can send a preview email for their own email post.
+	 */
+	public function testAuthorCanSendPreviewForOwnEmailPost(): void {
+		$author_id = $this->create_user( array( 'role' => 'author' ) );
+		$post_id   = $this->create_post( array( 'post_author' => $author_id ) );
+
+		wp_set_current_user( $author_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'email'  => 'test@example.com',
+				'postId' => $post_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertNotEquals( 403, $response->get_status(), 'Author should be allowed to send preview for own email post' );
+	}
+
+	/**
+	 * Test that an author cannot send a preview email for their own post of a non-email post type.
+	 */
+	public function testAuthorCannotSendPreviewForOwnNonEmailPost(): void {
+		$author_id = $this->create_user( array( 'role' => 'author' ) );
+		$post_id   = $this->create_post(
+			array(
+				'post_author' => $author_id,
+				'post_type'   => 'post',
+			)
+		);
+
+		wp_set_current_user( $author_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'email'  => 'test@example.com',
+				'postId' => $post_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'Author should not be allowed to send preview for a non-email post' );
+	}
+
+	/**
+	 * Test that an admin cannot send a preview email for a post of a non-email post type.
+	 */
+	public function testAdminCannotSendPreviewForNonEmailPost(): void {
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
+		$post_id  = $this->create_post(
+			array(
+				'post_author' => $admin_id,
+				'post_type'   => 'post',
+			)
+		);
+
+		wp_set_current_user( $admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'email'  => 'test@example.com',
+				'postId' => $post_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'Admin should not be allowed to send preview for a non-email post' );
 	}
 
 	/**
