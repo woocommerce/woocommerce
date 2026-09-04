@@ -331,7 +331,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_orders_create_status_matrix( $requested_status, string $expected_status ): void {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
-		$request->set_body_params( array( 'status' => $requested_status ) );
+		$request->set_body_params( null === $requested_status ? array() : array( 'status' => $requested_status ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
