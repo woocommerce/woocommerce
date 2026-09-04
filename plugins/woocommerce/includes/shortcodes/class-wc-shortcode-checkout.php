@@ -87,7 +87,7 @@ class WC_Shortcode_Checkout {
 		// Pay for existing order.
 		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			try {
-				$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
+				$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 				$order     = wc_get_order( $order_id );
 
 				// Order or payment link is invalid.
@@ -233,7 +233,7 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step.
-			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
+			$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			$order     = wc_get_order( $order_id );
 
 			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
@@ -265,8 +265,20 @@ class WC_Shortcode_Checkout {
 		$order = false;
 
 		// Get the order.
-		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // WPCS: input var ok, CSRF ok.
+		/**
+		 * Filters the ID of the order shown on the thanks page.
+		 *
+		 * @since 2.0.0
+		 * @param int $order_id The order ID resolved from the request.
+		 */
+		$order_id = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
+		/**
+		 * Filters the order key used to validate the order shown on the thanks page.
+		 *
+		 * @since 2.0.0
+		 * @param string $order_key The order key read from the request, or an empty string.
+		 */
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', ( empty( $_GET['key'] ) || ! is_string( $_GET['key'] ) ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Bearer-style order-key lookup; the value is compared with hash_equals() below and a nonce cannot apply to links emailed to the customer.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );

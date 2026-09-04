@@ -832,6 +832,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Delete selected order items by ID.
 	 *
+	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
+	 *
 	 * @since 11.1.0
 	 *
 	 * @param WC_Order $order Order object.

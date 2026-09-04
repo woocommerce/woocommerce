@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Escape product titles in the dashboard top-seller report and correct output annotations.

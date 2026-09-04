@@ -33,7 +33,6 @@ return array(
 			'square',
 			'visa_as',
 			'gocardless',
-			'helcim',
 		),
 		'other_bnpl'      => array(
 			'affirm',
@@ -53,7 +52,6 @@ return array(
 			'square',
 			'visa_as',
 			'airwallex',
-			'helcim',
 		),
 		'other_express_checkout' => array(
 			'amazon_pay',
