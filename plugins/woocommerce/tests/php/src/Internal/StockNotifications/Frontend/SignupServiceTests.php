@@ -106,6 +106,77 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect an existing guest signup when the same email later signs up as a logged-in user.
+	 */
+	public function test_guest_signup_detected_for_logged_in_user_with_same_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+
+		$found = $this->sut->is_already_signed_up( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertInstanceOf( Notification::class, $found );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $found->get_id() );
+	}
+
+	/**
+	 * @testdox Should detect an existing logged-in signup when the same email later signs up as a guest.
+	 */
+	public function test_logged_in_signup_detected_for_guest_with_same_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $user_result->get_code() );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $guest_result->get_code() );
+		$this->assertSame( $user_result->get_notification()->get_id(), $guest_result->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should detect an existing guest signup when the same email later signs up as a logged-in user with different attributes.
+	 */
+	public function test_guest_signup_detected_for_logged_in_user_with_different_attributes() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com', array( 'attribute_pa_color' => 'blue' ) );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $guest_result->get_code() );
+		$this->assertSame( 0, $guest_result->get_notification()->get_user_id() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com', array( 'attribute_pa_color' => 'red' ) );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox Should not treat a different email as a duplicate when the user ID has no signup.
+	 */
+	public function test_no_false_duplicate_for_different_email() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+
+		$this->assertNull( $this->sut->is_already_signed_up( $product->get_id(), $user_id, 'customer@example.com' ) );
+	}
+
+	/**
 	 * Create an out-of-stock simple product for signup.
 	 *
 	 * @return \WC_Product_Simple
