@@ -118,7 +118,10 @@ class SettingsUISchema {
 	 * @param array  $settings Legacy settings definitions.
 	 * @param string $default_save_adapter Default save adapter.
 	 * @return array
-	 * @throws \InvalidArgumentException When legacy settings contain duplicate group ids.
+	 * @throws \InvalidArgumentException When legacy settings contain duplicate group ids, or when a
+	 *                                   legacy value fails canonicalization: an ambiguous checkbox
+	 *                                   value, an out-of-range or non-finite number, a malformed
+	 *                                   datetime, or an unsupported form-post field name.
 	 */
 	public static function from_legacy_settings( string $page_id, string $section, string $title, array $settings, string $default_save_adapter = 'form_post' ): array {
 		$groups                = array();
