@@ -303,7 +303,7 @@ class ProductMetaMigrator implements MigratorInterface {
 		}
 
 		$written = $writer->write_product_meta(
-			$product_id,
+			$product,
 			Config::get_product_signups_meta_key(),
 			self::TARGET_DISABLED_VALUE
 		);

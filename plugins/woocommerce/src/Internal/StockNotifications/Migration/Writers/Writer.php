@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -302,24 +303,14 @@ class Writer {
 	 * search indexers, third-party cache invalidation. That fan-out is accepted: only
 	 * products that carried the legacy disable-signups flag are ever written here.
 	 *
-	 * @param int    $product_id Product id.
-	 * @param string $meta_key   Meta key.
-	 * @param mixed  $meta_value Meta value.
+	 * @param WC_Product $product    Loaded product to write to.
+	 * @param string     $meta_key   Meta key.
+	 * @param mixed      $meta_value Meta value.
 	 * @return bool
 	 */
-	public function write_product_meta( int $product_id, string $meta_key, $meta_value ): bool {
+	public function write_product_meta( WC_Product $product, string $meta_key, $meta_value ): bool {
 		if ( $this->dry_run ) {
 			return true;
-		}
-
-		$product = wc_get_product( $product_id );
-
-		// A post that is typed as a product but will not resolve to one still needs its
-		// value written, or it stays a candidate forever and stalls the section. Writing it
-		// raw leaves no stale read behind: `wc_get_product()` just failed, so there is no
-		// product object anywhere holding the old value.
-		if ( ! $product ) {
-			return false !== update_post_meta( $product_id, $meta_key, $meta_value );
 		}
 
 		$product->update_meta_data( $meta_key, $meta_value );
