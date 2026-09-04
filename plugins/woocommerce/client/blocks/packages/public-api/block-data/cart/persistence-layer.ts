@@ -33,7 +33,7 @@ export const isAddingToCart = () => {
 };
 
 export const persistenceLayer = {
-	get: () => {
+	get: (): Cart | null => {
 		if ( ! hasCartSession() || ! hasValidHash() ) {
 			return null;
 		}
@@ -58,7 +58,7 @@ export const persistenceLayer = {
 			return null;
 		}
 
-		return parsed;
+		return parsed as Cart;
 	},
 	set: ( cartData: Cart ) => {
 		// Wrap in try/catch for two reasons:
