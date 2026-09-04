@@ -87,7 +87,7 @@ class ExportSchemaTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_it_only_uses_exporters_specified_by_steps_argment() {
+	public function test_it_only_uses_exporters_specified_by_steps_argument() {
 		$mock = Mock(
 			ExportSchema::class,
 			array(

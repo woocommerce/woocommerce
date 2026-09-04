@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
@@ -1178,6 +1179,63 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		$failed = OrdersScheduler::get_failed_order_imports();
 		$this->assertNotContains( $order->get_id(), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox import keeps the failed record of an order whose tax lookup rows could not be written.
+	 */
+	public function test_import_keeps_failed_order_when_the_tax_sync_does_not_land(): void {
+		global $wpdb;
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_name( 'US-CA-STATE-TAX-1' );
+		$tax_item->set_rate_id( 1 );
+		$tax_item->set_rate_percent( 0 );
+		$tax_item->set_tax_total( 6.0 );
+		$tax_item->set_shipping_tax_total( 0 );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->add_item( $tax_item );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		$suppress = $wpdb->suppress_errors( true );
+		$restore  = $this->break_next_lookup_write();
+		OrdersScheduler::import( $order->get_id() );
+		$restore();
+		$wpdb->suppress_errors( $suppress );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'], 'A retry whose tax sync failed again should stay on the failed imports list.' );
+	}
+
+	/**
+	 * Make the next write to the tax lookup table fail, the way a database error would.
+	 *
+	 * @return callable Restores normal writes.
+	 */
+	private function break_next_lookup_write(): callable {
+		$table_name = TaxesDataStore::get_db_table_name();
+		$broken     = false;
+
+		$filter = function ( $query ) use ( &$broken, $table_name ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
+				return $query;
+			}
+
+			$broken = true;
+
+			// A table that does not exist, so the write fails the way a database error would.
+			return "REPLACE INTO `{$table_name}_missing` (order_id) VALUES (1)";
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
 	}
 
 	/**
