@@ -49,6 +49,61 @@ final class Shell {
 	}
 
 	/**
+	 * Open a URL in the person's browser, if that is possible and wanted.
+	 *
+	 * Best effort by design. Opening a window is a side effect, so it is skipped
+	 * when the output is not a terminal — a scripted or CI run should never have a
+	 * browser thrown at it — and when NO_BROWSER is set. Failure is silent: the URL
+	 * has already been printed, so the run continues either way.
+	 *
+	 * @param string $url URL to open.
+	 *
+	 * @return bool Whether a browser was launched.
+	 */
+	public static function open_url( string $url ): bool {
+		if ( false !== getenv( 'NO_BROWSER' ) || ! stream_isatty( STDOUT ) ) {
+			return false;
+		}
+
+		foreach ( array( 'open', 'xdg-open' ) as $opener ) {
+			if ( self::has_program( $opener ) ) {
+				return self::succeeds( sprintf( '%s %s', $opener, escapeshellarg( $url ) ) );
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Put text on the clipboard, if this machine has one.
+	 *
+	 * @param string $text Text to copy.
+	 *
+	 * @return bool Whether it was copied.
+	 */
+	public static function copy_to_clipboard( string $text ): bool {
+		foreach ( array( 'pbcopy', 'wl-copy', 'xclip -selection clipboard' ) as $copier ) {
+			$program = strtok( $copier, ' ' );
+
+			if ( ! self::has_program( (string) $program ) ) {
+				continue;
+			}
+
+			$handle = popen( $copier, 'w' );
+
+			if ( ! is_resource( $handle ) ) {
+				continue;
+			}
+
+			fwrite( $handle, $text );
+
+			return 0 === pclose( $handle );
+		}
+
+		return false;
+	}
+
+	/**
 	 * How many processors this machine reports, or zero when it will not say.
 	 */
 	public static function processor_count(): int {

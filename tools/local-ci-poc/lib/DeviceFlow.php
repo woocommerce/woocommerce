@@ -91,9 +91,23 @@ final class DeviceFlow {
 			return null;
 		}
 
+		// GitHub does not return a pre-filled URL, but its device page accepts the
+		// code as a query parameter, so the field arrives filled in.
+		$url = $start['verification_uri'] . '?user_code=' . rawurlencode( $start['user_code'] );
+
 		Output::warn( 'This machine is not authorised yet.', 1 );
-		Output::detail( sprintf( 'Open %s', $start['verification_uri'] ), 1 );
-		Output::detail( sprintf( 'Enter code %s', Output::paint( $start['user_code'], 'bold' ) ), 1 );
+		Output::detail( sprintf( 'Code: %s', Output::paint( $start['user_code'], 'bold' ) ), 1 );
+
+		$copied = Shell::copy_to_clipboard( $start['user_code'] );
+
+		if ( Shell::open_url( $url ) ) {
+			Output::detail( 'Opened your browser' . ( $copied ? ' (code copied too)' : '' ) . '.', 1 );
+		} else {
+			// No browser, or deliberately suppressed. The URL is the instruction.
+			Output::detail( sprintf( 'Open %s', $url ), 1 );
+		}
+
+		Output::detail( 'Waiting for you to approve...', 1 );
 
 		$interval = max( 5, (int) ( $start['interval'] ?? 5 ) );
 		$deadline = time() + (int) ( $start['expires_in'] ?? 900 );
