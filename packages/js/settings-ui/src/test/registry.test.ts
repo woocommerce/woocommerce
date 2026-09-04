@@ -91,6 +91,39 @@ describe( 'settings extension registry', () => {
 		).toBe( fieldOverride );
 	} );
 
+	it( 'falls back to number type renderers for promoted integer fields', () => {
+		const numberRenderer: SettingsEditControl = () => null;
+		const integerRenderer: SettingsEditControl = () => null;
+		const field = {
+			id: 'legacy_number',
+			label: 'Legacy number',
+			type: 'integer',
+		};
+		const context = { page: 'registry-integer-fallback' };
+
+		registerSettingsExtension( {
+			scope: context,
+			typeRenderers: {
+				number: numberRenderer,
+			},
+		} );
+
+		expect( resolveFieldComponent( field, context ) ).toBe(
+			numberRenderer
+		);
+
+		registerSettingsExtension( {
+			scope: context,
+			typeRenderers: {
+				integer: integerRenderer,
+			},
+		} );
+
+		expect( resolveFieldComponent( field, context ) ).toBe(
+			integerRenderer
+		);
+	} );
+
 	it( 'ignores malformed registration payloads', () => {
 		const warnSpy = jest
 			.spyOn( console, 'warn' )
