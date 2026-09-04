@@ -1207,7 +1207,82 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// String with non-breaking space (U+00A0), should be preserved.
 		$this->assertEquals( "Hello\xC2\xA0World", wc_remove_non_displayable_chars( "Hello\xC2\xA0World" ) );
 
-		// String with word joiner (U+2060), should be preserved.
-		$this->assertEquals( "Join\xE2\x81\xA0Me", wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
+		// String with narrow non-breaking space (U+202F), should be preserved.
+		$this->assertEquals( "Hello\xE2\x80\xAFWorld", wc_remove_non_displayable_chars( "Hello\xE2\x80\xAFWorld" ) );
+
+		// String with word joiner (U+2060), should be removed.
+		$this->assertEquals( 'JoinMe', wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
+	}
+
+	/**
+	 * Invisible characters that a copy-paste can carry into a form field.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_invisible_chars() {
+		return array(
+			'combining grapheme joiner (U+034F)' => array( "\u{034F}" ),
+			'arabic letter mark (U+061C)'        => array( "\u{061C}" ),
+			'hangul choseong filler (U+115F)'    => array( "\u{115F}" ),
+			'khmer vowel inherent aq (U+17B4)'   => array( "\u{17B4}" ),
+			'mongolian free variation (U+180B)'  => array( "\u{180B}" ),
+			'left-to-right isolate (U+2066)'     => array( "\u{2066}" ),
+			'pop directional isolate (U+2069)'   => array( "\u{2069}" ),
+			'hangul filler (U+3164)'             => array( "\u{3164}" ),
+			'variation selector-1 (U+FE00)'      => array( "\u{FE00}" ),
+			'variation selector-14 (U+FE0D)'     => array( "\u{FE0D}" ),
+			'variation selector-16 (U+FE0F)'     => array( "\u{FE0F}" ),
+			'halfwidth hangul filler (U+FFA0)'   => array( "\u{FFA0}" ),
+			'reserved format char (U+FFF0)'      => array( "\u{FFF0}" ),
+			'variation selector-17 (U+E0100)'    => array( "\u{E0100}" ),
+			'variation selector-256 (U+E01EF)'   => array( "\u{E01EF}" ),
+			'shorthand format control (U+1BCA0)' => array( "\u{1BCA0}" ),
+			'musical format control (U+1D173)'   => array( "\u{1D173}" ),
+			'tag latin small letter a (U+E0061)' => array( "\u{E0061}" ),
+		);
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() strips characters the reader cannot see.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @dataProvider data_provider_invisible_chars
+	 *
+	 * @param string $char The invisible character to strip.
+	 */
+	public function test_wc_remove_non_displayable_chars_strips_invisible_chars( $char ) {
+		$this->assertEquals( '+15551234567', wc_remove_non_displayable_chars( '+1' . $char . '5551234567' ) );
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() clears the phone number reported in issue #58000.
+	 *
+	 * The variation selector between "1" and "-" is invisible, so the customer had no way to
+	 * see why the number they pasted was rejected.
+	 *
+	 * @since 11.2.0
+	 */
+	public function test_wc_remove_non_displayable_chars_allows_pasted_phone_number_to_validate() {
+		$pasted = "+1\u{FE0D}-555-123-4567";
+
+		$this->assertFalse( WC_Validation::is_phone( $pasted ) );
+		$this->assertEquals( '+1-555-123-4567', wc_remove_non_displayable_chars( $pasted ) );
+		$this->assertTrue( WC_Validation::is_phone( wc_remove_non_displayable_chars( $pasted ) ) );
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() still strips on malformed UTF-8.
+	 *
+	 * A /u pattern returns null rather than a string on invalid UTF-8, which would be fatal
+	 * against this function's return type. The fallback has to clean the input no less than
+	 * the byte-wise replacement this function used before.
+	 *
+	 * @since 11.2.0
+	 */
+	public function test_wc_remove_non_displayable_chars_handles_malformed_utf8() {
+		$malformed = "12\xC3\x2834\xC2\xAD56";
+
+		$this->assertEquals( "12\xC3\x28" . '3456', wc_remove_non_displayable_chars( $malformed ) );
 	}
 }

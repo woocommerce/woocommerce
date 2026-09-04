@@ -238,7 +238,11 @@ class WC_Form_Handler {
 							case 'phone':
 								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
 								$country = is_string( $country ) ? $country : '';
-								if ( '' !== $value && ! WC_Validation::is_phone( $value, $country ) ) {
+								// Strip before validating, so a customer is not rejected over
+								// characters they cannot see. A value that is nothing but those
+								// characters is not a phone number.
+								$value = wc_remove_non_displayable_chars( (string) $value );
+								if ( '' === $value || ! WC_Validation::is_phone( $value, $country ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
