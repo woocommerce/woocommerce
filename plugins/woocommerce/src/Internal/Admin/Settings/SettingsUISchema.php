@@ -717,6 +717,12 @@ class SettingsUISchema {
 	/**
 	 * Whether a legacy number follows the HTML integer step contract.
 	 *
+	 * Promotion happens only when the step is 1 and every quantity the integer
+	 * path will later canonicalize — the stored value and the min/max bounds — is
+	 * itself integral. A step=1 control holding a decimal value or bound (which
+	 * the classic sanitizer never rejected) stays a 'number' field, so integer
+	 * canonicalization does not throw and collapse the section into the fallback.
+	 *
 	 * @param array $field Field definition.
 	 * @return bool
 	 */
@@ -726,12 +732,26 @@ class SettingsUISchema {
 			return false;
 		}
 
-		$base = $attributes['min'] ?? ( $field['value'] ?? '' );
-		if ( is_string( $base ) && '' === trim( $base ) ) {
-			$base = 0;
+		$validation = isset( $field['validation'] ) && is_array( $field['validation'] ) ? $field['validation'] : array();
+		$candidates = array(
+			$field['value'] ?? null,
+			$attributes['min'] ?? null,
+			$attributes['max'] ?? null,
+			$validation['min'] ?? null,
+			$validation['max'] ?? null,
+		);
+
+		foreach ( $candidates as $candidate ) {
+			if ( null === $candidate || ( is_string( $candidate ) && '' === trim( $candidate ) ) ) {
+				// An absent or empty quantity imposes no integer constraint.
+				continue;
+			}
+			if ( null === self::get_integral_decimal( $candidate ) ) {
+				return false;
+			}
 		}
 
-		return null !== self::get_integral_decimal( $base );
+		return true;
 	}
 
 	/**

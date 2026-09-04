@@ -1409,7 +1409,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It promotes step-one numbers only when the selected step base is integral.
+	 * @testdox It promotes step-one numbers only when the stored value and bounds are all integral.
 	 *
 	 * @dataProvider integer_inference_values
 	 *
@@ -1429,13 +1429,38 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It keeps a step-one field holding a decimal value as a number instead of collapsing the schema.
+	 */
+	public function test_canonicalize_schema_values_keeps_decimal_step_one_value_as_number(): void {
+		$field = array(
+			'id'                => 'acme_number',
+			'title'             => 'Number',
+			'type'              => 'number',
+			'value'             => '2.5',
+			'custom_attributes' => array(
+				'step' => '1',
+				'min'  => '0',
+			),
+		);
+
+		// A decimal stored under a step=1/min=0 control must not be promoted to
+		// integer: integer canonicalization would throw and fail the section
+		// closed. It stays a number and its value is preserved.
+		$schema = SettingsUISchema::from_legacy_settings( 'acme', '', 'Acme', array( $field ), 'custom' );
+		$result = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( 'number', $result['type'] );
+		$this->assertSame( 2.5, $result['value'] );
+	}
+
+	/**
 	 * Integer inference fixtures.
 	 *
 	 * @return array<string, array{array, string}>
 	 */
 	public static function integer_inference_values(): array {
 		return array(
-			'min takes precedence'       => array(
+			'min takes precedence'                         => array(
 				array(
 					'value'             => '2',
 					'custom_attributes' => array(
@@ -1445,31 +1470,61 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 				),
 				'number',
 			),
-			'integral current value'     => array(
+			'integral current value'                       => array(
 				array(
 					'value'             => '2',
 					'custom_attributes' => array( 'step' => 1 ),
 				),
 				'integer',
 			),
-			'empty uses zero step base'  => array(
+			'empty uses zero step base'                    => array(
 				array(
 					'value'             => '',
 					'custom_attributes' => array( 'step' => 1 ),
 				),
 				'integer',
 			),
-			'non-unit step stays number' => array(
+			'non-unit step stays number'                   => array(
 				array(
 					'value'             => '2',
 					'custom_attributes' => array( 'step' => '0.5' ),
 				),
 				'number',
 			),
-			'near-one step stays number' => array(
+			'near-one step stays number'                   => array(
 				array(
 					'value'             => '2',
 					'custom_attributes' => array( 'step' => '1.0000000000000000001' ),
+				),
+				'number',
+			),
+			'decimal value with integral min stays number' => array(
+				array(
+					'value'             => '2.5',
+					'custom_attributes' => array(
+						'step' => '1',
+						'min'  => '0',
+					),
+				),
+				'number',
+			),
+			'integral value with integral min promotes'    => array(
+				array(
+					'value'             => '2',
+					'custom_attributes' => array(
+						'step' => '1',
+						'min'  => '0',
+					),
+				),
+				'integer',
+			),
+			'decimal max stays number'                     => array(
+				array(
+					'value'             => '2',
+					'custom_attributes' => array(
+						'step' => '1',
+						'max'  => '10.5',
+					),
 				),
 				'number',
 			),
