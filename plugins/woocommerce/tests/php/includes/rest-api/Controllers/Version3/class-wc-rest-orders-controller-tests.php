@@ -1355,6 +1355,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wc_delete_product_transients( $variation->get_id() );
 		// The parent's save invalidates the parent's cached instance, not its children's.
 		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+		);
 
 		$response = $this->dispatch_line_item_update(
 			$order->get_id(),
