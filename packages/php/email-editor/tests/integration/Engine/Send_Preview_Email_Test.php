@@ -241,7 +241,7 @@ class Send_Preview_Email_Test extends \Email_Editor_Integration_Test_Case {
 	 * Clean up after each test
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		remove_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
+		parent::tearDown();
 	}
 }
