@@ -186,7 +186,32 @@ final class QuantityLimits {
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; must be a multiple of %2$s', 'woocommerce' ), $product->get_name(), $limits['multiple_of'] ) );
 		}
 
-		return $this->filter_quantity_validation( $quantity, $cart_item );
+		/**
+		 * Filters the validation result for a cart item quantity being updated via the Store API.
+		 *
+		 * Return a \WP_Error to reject the new quantity; the Store API sends its code and message in a 400
+		 * response. Throwing a RouteException works too. Any other return value, including false, is
+		 * ignored and the quantity is accepted. Notices added with wc_add_notice() are not read here.
+		 * Core validation failures (min, max, multiple_of, read-only), and cart items whose data key is
+		 * not a WC_Product, return early and never reach this filter.
+		 *
+		 * This does not run when a product is first added to the cart; use the
+		 * woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is
+		 * topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing
+		 * quantity.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param true        $valid     Always true; core validation failures bypass this filter.
+		 * @param int|float   $quantity  The new quantity, already normalized through wc_stock_amount().
+		 * @param \WC_Product $product   The product object.
+		 * @param array       $cart_item Cart item.
+		 * @return \WP_Error|true
+		 */
+		$valid = apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true, $quantity, $product, $cart_item );
+
+		// Like the other filters in this class, unexpected return values fall back to the original value.
+		return is_wp_error( $valid ) ? $valid : true;
 	}
 
 	/**
@@ -284,63 +309,5 @@ final class QuantityLimits {
 		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
 
 		return is_bool( $filtered_value ) ? $filtered_value : (bool) $value;
-	}
-
-	/**
-	 * Get a quantity validation result while running it through a filter hook.
-	 *
-	 * @param int|float $quantity  Quantity to validate, already normalized through wc_stock_amount().
-	 * @param array     $cart_item Cart item. The data key must contain a \WC_Product.
-	 * @return \WP_Error|true
-	 */
-	protected function filter_quantity_validation( $quantity, array $cart_item ) {
-		$product = $cart_item['data'];
-
-		/**
-		 * Filters the validation result for a cart item quantity being updated via the Store API.
-		 *
-		 * Return a \WP_Error with an informative message, or false, to reject the new quantity; return true
-		 * to accept it. Any other return value is ignored and the quantity is accepted. Core validation
-		 * failures (min, max, multiple_of, read-only), and cart items whose data key is not a WC_Product,
-		 * return early and never reach this filter, so $valid is always true here.
-		 *
-		 * This does not run when a product is first added to the cart; use the
-		 * woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is
-		 * topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing
-		 * quantity.
-		 *
-		 * @since 11.2.0
-		 *
-		 * @param true        $valid     Always true; core validation failures bypass this filter.
-		 * @param int|float   $quantity  The new quantity, already normalized through wc_stock_amount().
-		 * @param \WC_Product $product   The product object.
-		 * @param array       $cart_item Cart item.
-		 * @return \WP_Error|bool
-		 */
-		$valid = apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true, $quantity, $product, $cart_item );
-
-		if ( true === $valid ) {
-			return true;
-		}
-
-		if ( is_wp_error( $valid ) ) {
-			$code    = $valid->get_error_code();
-			$message = $valid->get_error_message();
-
-			// WP_Error codes can be strings or integers. Empty codes are what WP_Error itself treats as "no error".
-			$has_code = ( is_string( $code ) || is_int( $code ) ) && ! empty( $code );
-
-			if ( $has_code && is_string( $message ) && '' !== $message ) {
-				return $valid;
-			}
-		}
-
-		if ( false === $valid || is_wp_error( $valid ) ) {
-			/* translators: 1: product name */
-			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; is not valid', 'woocommerce' ), $product->get_name() ) );
-		}
-
-		// Like the other filters in this class, unexpected return values fall back to the original value.
-		return true;
 	}
 }

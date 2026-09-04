@@ -719,27 +719,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve a WP_Error from the filter that carries an integer error code.
-	 */
-	public function test_validate_cart_item_quantity_filter_returns_wp_error_with_integer_code(): void {
-		$cart_item = $this->get_validation_cart_item();
-		$sut       = new QuantityLimits();
-
-		add_filter(
-			'woocommerce_store_api_cart_item_quantity_validation',
-			function () {
-				return new \WP_Error( 123, 'Rejected by extension' );
-			}
-		);
-
-		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
-
-		$this->assertInstanceOf( 'WP_Error', $result, 'A WP_Error with an integer code should be passed through' );
-		$this->assertSame( 123, $result->get_error_code(), 'The integer error code should be preserved' );
-		$this->assertSame( 'Rejected by extension', $result->get_error_message(), 'The filter callback error message should be preserved' );
-	}
-
-	/**
 	 * @testdox Should return true when a woocommerce_store_api_cart_item_quantity_validation callback returns true.
 	 */
 	public function test_validate_cart_item_quantity_filter_returns_true(): void {
@@ -764,28 +743,13 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject the quantity with a generic WP_Error when the filter returns false.
-	 */
-	public function test_validate_cart_item_quantity_filter_returns_false_rejects(): void {
-		$cart_item = $this->get_validation_cart_item();
-		$sut       = new QuantityLimits();
-
-		add_filter( 'woocommerce_store_api_cart_item_quantity_validation', '__return_false' );
-
-		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
-
-		$this->assertInstanceOf( 'WP_Error', $result, 'A false filter return should be treated as a rejection' );
-		$this->assertSame( 'invalid_quantity', $result->get_error_code(), 'The generic rejection should use the invalid_quantity code' );
-		$this->assertStringContainsString( 'Test Product', $result->get_error_message(), 'The generic rejection message should name the product' );
-	}
-
-	/**
 	 * Data provider of unexpected filter return values.
 	 *
 	 * @return array
 	 */
 	public function unexpected_filter_return_values() {
 		return array(
+			'false'       => array( false ),
 			'null'        => array( null ),
 			'string'      => array( 'nope' ),
 			'truthy int'  => array( 1 ),
@@ -811,45 +775,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $sut->validate_cart_item_quantity( 3, $cart_item ), 'Unexpected filter return values should fall back to the original valid result' );
-	}
-
-	/**
-	 * Data provider of malformed WP_Error instances.
-	 *
-	 * @return array
-	 */
-	public function malformed_wp_error_values() {
-		return array(
-			'empty WP_Error'     => array( new \WP_Error() ),
-			'non-string message' => array( new \WP_Error( 'custom_code', array( 'not a string' ) ) ),
-			'empty message'      => array( new \WP_Error( 'custom_code', '' ) ),
-			'zero integer code'  => array( new \WP_Error( 0, 'Rejected by extension' ) ),
-		);
-	}
-
-	/**
-	 * @testdox Should replace a malformed WP_Error from the filter with a well-formed generic one.
-	 * @dataProvider malformed_wp_error_values
-	 *
-	 * @param \WP_Error $malformed_error Malformed error returned by the filter callback.
-	 */
-	public function test_validate_cart_item_quantity_filter_malformed_wp_error_is_replaced( $malformed_error ): void {
-		$cart_item = $this->get_validation_cart_item();
-		$sut       = new QuantityLimits();
-
-		add_filter(
-			'woocommerce_store_api_cart_item_quantity_validation',
-			function () use ( $malformed_error ) {
-				return $malformed_error;
-			}
-		);
-
-		$result = $sut->validate_cart_item_quantity( 3, $cart_item );
-
-		$this->assertInstanceOf( 'WP_Error', $result, 'Malformed WP_Error returns should still reject the quantity' );
-		$this->assertSame( 'invalid_quantity', $result->get_error_code(), 'The replacement error should use the invalid_quantity code' );
-		$this->assertIsString( $result->get_error_message(), 'The replacement error message should be a string' );
-		$this->assertNotSame( '', $result->get_error_message(), 'The replacement error message should not be empty' );
 	}
 
 	/**
