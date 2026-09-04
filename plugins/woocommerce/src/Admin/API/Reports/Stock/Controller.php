@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -72,6 +73,8 @@ class Controller extends GenericController implements ExportableInterface {
 		}
 
 		$args['post_type'] = array( 'product', 'product_variation' );
+
+		$args['post_status'] = array( ProductStatus::PUBLISH, ProductStatus::PRIVATE );
 
 		if ( ProductStockStatus::LOW_STOCK === $request['type'] ) {
 			$args['low_in_stock'] = true;
