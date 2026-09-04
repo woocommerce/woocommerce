@@ -405,6 +405,35 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Import cleanup should keep a placeholder a filter only claims to have deleted.
+	 */
+	public function test_cleanup_after_import_keeps_a_placeholder_a_filter_claims_to_have_deleted(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+				'post_title'  => 'Import cleanup falsely deleted placeholder',
+			)
+		);
+
+		// wp_delete_post() returns whatever this filter returns, so a post here reads as a deletion.
+		$report_deleted = static function ( $check, $post ) {
+			return $post;
+		};
+
+		add_filter( 'pre_delete_post', $report_deleted, 10, 2 );
+
+		try {
+			$this->assertNull( $this->invoke_cleanup_after_import() );
+		} finally {
+			remove_filter( 'pre_delete_post', $report_deleted, 10 );
+		}
+
+		$this->assertNotNull( get_post( $post_id ) );
+		$this->assertSame( 'importing', get_post_status( $post_id ) );
+	}
+
+	/**
 	 * @testdox Import cleanup should delete placeholders queued behind one it cannot delete.
 	 */
 	public function test_cleanup_after_import_continues_past_a_placeholder_it_cannot_delete(): void {
