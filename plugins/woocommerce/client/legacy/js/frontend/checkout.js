@@ -12,7 +12,7 @@ jQuery( function ( $ ) {
 	 * @return {string} Serialized checkout fields.
 	 */
 	function serializeCheckoutForm( $form ) {
-		return $form.serialize().replace( /'/g, '%27' );
+		return $form.serialize().split( "'" ).join( '%27' );
 	}
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
