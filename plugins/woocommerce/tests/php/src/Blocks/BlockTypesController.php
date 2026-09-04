@@ -22,6 +22,27 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	private $block_types_controller;
 
 	/**
+	 * WooCommerce block types registered before the test ran, keyed by name.
+	 *
+	 * @var \WP_Block_Type[]
+	 */
+	private $registered_woo_blocks = array();
+
+	/**
+	 * Style handles queued before the test ran.
+	 *
+	 * @var string[]
+	 */
+	private $styles_queue = array();
+
+	/**
+	 * Script handles queued before the test ran.
+	 *
+	 * @var string[]
+	 */
+	private $scripts_queue = array();
+
+	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -33,6 +54,98 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
+		);
+
+		$registry                    = \WP_Block_Type_Registry::get_instance();
+		$this->registered_woo_blocks = array_filter(
+			$registry->get_all_registered(),
+			fn( $name ) => str_starts_with( $name, 'woocommerce/' ),
+			ARRAY_FILTER_USE_KEY
+		);
+		$this->styles_queue          = wp_styles()->queue;
+		$this->scripts_queue         = wp_scripts()->queue;
+	}
+
+	/**
+	 * Restores the block registry and asset queues a test may have rebuilt.
+	 */
+	public function tearDown(): void {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
+			if ( str_starts_with( $name, 'woocommerce/' ) ) {
+				$registry->unregister( $name );
+			}
+		}
+		foreach ( $this->registered_woo_blocks as $block_type ) {
+			$registry->register( $block_type );
+		}
+		wp_styles()->queue  = $this->styles_queue;
+		wp_scripts()->queue = $this->scripts_queue;
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should queue the Product Filters style only when the block renders in a classic theme.
+	 */
+	public function test_classic_theme_queues_product_filters_style_only_when_rendered(): void {
+		$block_name = 'woocommerce/product-filters';
+		$registry   = \WP_Block_Type_Registry::get_instance();
+
+		// The fallback under test only runs for classic themes, and the suite's active theme depends on
+		// the WordPress version, so pin a classic theme rather than relying on the ambient one.
+		switch_theme( 'storefront' );
+
+		$this->assertFalse( is_admin(), 'The test must run in a frontend context.' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		$block_type = $registry->get_registered( $block_name );
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+		$metadata_style_handles = $block_type->style_handles;
+		$this->assertNotEmpty( $metadata_style_handles, 'Product Filters must have metadata-derived style handles before re-registration.' );
+
+		// Put WordPress on the classic-asset path WooCommerce's fallback exists for, then rebuild the registry under it.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'The test must disable separate Core block assets.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must disable block-asset loading on demand.' );
+
+		// Earlier tests may have rendered blocks and left their styles queued; start from an empty queue so the
+		// assertions below only see what this registration and render produce. tearDown restores the original queue.
+		wp_styles()->queue = array();
+
+		foreach ( array_keys( $this->registered_woo_blocks ) as $name ) {
+			$registry->unregister( $name );
+		}
+		$this->block_types_controller->register_blocks();
+
+		$block_type = $registry->get_registered( $block_name );
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+		$this->assertSame( array(), $block_type->style_handles, 'Classic-theme registration must clear Product Filters style handles.' );
+
+		foreach ( $metadata_style_handles as $style_handle ) {
+			$this->assertTrue( wp_style_is( $style_handle, 'registered' ), 'Product Filters metadata styles must remain registered.' );
+		}
+
+		// This is the Core path that would otherwise queue every registered block style on a classic page.
+		wp_enqueue_registered_block_scripts_and_styles();
+		$this->assertSame(
+			array(),
+			array_values( array_intersect( $metadata_style_handles, wp_styles()->queue ) ),
+			'Product Filters metadata styles must not be queued before the block renders.'
+		);
+		$this->assertSame(
+			array(),
+			preg_grep( '#^woocommerce-.+-style$#', wp_styles()->queue ),
+			'Classic pages without WooCommerce blocks must not queue any block style.'
+		);
+
+		$rendered_block = do_blocks( '<!-- wp:woocommerce/product-filters /-->' );
+		$this->assertStringContainsString( 'wc-block-product-filters', $rendered_block );
+		$this->assertSame(
+			$metadata_style_handles,
+			array_values( array_intersect( $metadata_style_handles, wp_styles()->queue ) ),
+			'Rendering Product Filters must queue every metadata-derived style handle.'
 		);
 	}
 
