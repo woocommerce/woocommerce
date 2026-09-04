@@ -9,11 +9,10 @@ jQuery( function ( $ ) {
 
 	// A paste can carry characters that render as nothing. The server strips them
 	// before validating, so flagging the field here would blame the customer for
-	// something invisible. Spelled out the same way as
-	// wc_remove_non_displayable_chars() because the two sides have to agree: strip
-	// more than the server does and the browser waves through a number the server
-	// then rejects. No "u" flag, and surrogate pairs for the ranges above U+FFFF,
-	// so the pattern builds on any browser.
+	// something invisible. Mirrors the strip in wc_remove_non_displayable_chars(),
+	// not the server's phone check — that one is stricter, so a number can pass
+	// here and still be refused on submit. No "u" flag, and surrogate pairs for the
+	// ranges above U+FFFF, so the pattern builds on any browser.
 	var invisible_chars = new RegExp(
 		'[\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F' +
 			'\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\u3164' +

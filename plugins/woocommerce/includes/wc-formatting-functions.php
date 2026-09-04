@@ -1664,6 +1664,8 @@ function wc_sanitize_endpoint_slug( $raw_value ) {
  *
  * @return string The sanitized string without problematic characters.
  * @since 9.9.0
+ * @since 11.2.0 Removes every Unicode default-ignorable code point, including the word joiner
+ *               (`U+2060`) and the variation selectors earlier versions kept.
  */
 function wc_remove_non_displayable_chars( string $raw_value ): string {
 	// Ranges rather than \p{Default_Ignorable_Code_Point}: that property needs PCRE2 10.43,
