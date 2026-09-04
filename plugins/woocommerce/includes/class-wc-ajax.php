@@ -2838,6 +2838,27 @@ class WC_AJAX {
 			$order      = wc_get_order( $order_id );
 			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
+			// Proactive auto-cap for tax rounding discrepancies
+			$discrepancy = (float) $refund_amount - (float) $max_refund;
+			if ( $discrepancy > 0 && $discrepancy <= 0.05 ) {
+				$refund_amount = $max_refund;
+
+				// Shave the discrepancy off the refunded line items' totals 
+				// so wc_create_refund() balances the ledger exactly.
+				$remaining_discrepancy = $discrepancy;
+				foreach ( $line_item_totals as $item_id => $total ) {
+					$float_total = (float) $total;
+					if ( $float_total > 0 && $remaining_discrepancy > 0 ) {
+						$shave_amount                 = min( $float_total, $remaining_discrepancy );
+						$line_item_totals[ $item_id ] = wc_format_decimal( $float_total - $shave_amount );
+						$remaining_discrepancy       -= $shave_amount;
+					}
+					if ( $remaining_discrepancy <= 0 ) {
+						break;
+					}
+				}
+			}
+
 			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new Exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
