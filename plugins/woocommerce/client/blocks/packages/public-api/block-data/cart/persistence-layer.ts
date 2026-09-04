@@ -44,7 +44,15 @@ export const persistenceLayer = {
 			return null;
 		}
 
-		const parsed = JSON.parse( cached );
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse( cached );
+		} catch {
+			// Corrupt cache (manual edit, disk error, other writer):
+			// drop it and let the store re-fetch, same best-effort
+			// philosophy as `set` below.
+			return null;
+		}
 
 		if ( ! parsed || typeof parsed !== 'object' ) {
 			return null;
