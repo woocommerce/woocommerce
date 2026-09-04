@@ -16,7 +16,11 @@ echo wp_kses_post( sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce'
 
 echo "\n\n";
 
-/** @var string $retention Length of time the download link stays valid, passed by ReportCSVEmail. */
+/**
+ * Length of time the download link stays valid, passed in by ReportCSVEmail.
+ *
+ * @var string $retention
+ */
 /* translators: %s: length of time the download link stays valid, e.g. "1 week" */
 echo esc_html( sprintf( __( 'This link is available for %s.', 'woocommerce' ), $retention ) );
 
