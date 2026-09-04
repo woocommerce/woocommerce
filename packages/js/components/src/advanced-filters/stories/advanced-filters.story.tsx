@@ -1,9 +1,15 @@
 /**
  * External dependencies
  */
-import { AdvancedFilters } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
-const ORDER_STATUSES = {
+/**
+ * Internal dependencies
+ */
+import AdvancedFilters from '../';
+import type { AdvancedFilterConfig } from '../types';
+
+const ORDER_STATUSES: Record< string, string > = {
 	cancelled: 'Cancelled',
 	completed: 'Completed',
 	failed: 'Failed',
@@ -20,15 +26,15 @@ const currency = {
 	precision: 2,
 	priceFormat: '%1$s%2$s',
 	symbol: '$',
-	symbolPosition: 'left',
+	symbolPosition: 'left' as const,
 	thousandSeparator: ',',
 };
-const path = new URL( document.location ).searchParams.get( 'path' );
+const path = new URL( document.location.href ).searchParams.get( 'path' ) ?? '';
 const query = {
 	component: 'advanced-filters',
 };
 
-const advancedFilters = {
+const advancedFilters: AdvancedFilterConfig = {
 	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
@@ -184,7 +190,6 @@ export const Basic = () => (
 		siteLocale={ siteLocale }
 		path={ path }
 		query={ query }
-		filterTitle="Orders"
 		config={ advancedFilters }
 		currency={ currency }
 	/>
