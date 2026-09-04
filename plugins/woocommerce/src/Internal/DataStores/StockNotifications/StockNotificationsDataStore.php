@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -458,7 +459,7 @@ CREATE TABLE $meta_table_name (
 
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
-			$where_values[] = esc_sql( $args['user_email'] );
+			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {
@@ -558,6 +559,7 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function notification_exists_by_email( int $product_id, string $email ): bool {
 
+		$email = EmailNormalizer::normalize( $email );
 		if ( ! is_email( $email ) ) {
 			return false;
 		}

@@ -617,4 +617,53 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( Notification::class, $notifications[0] );
 		$this->assertEquals( 'test@test.com', $notifications[0]->get_user_email() );
 	}
+
+	/**
+	 * @testdox notification_exists_by_email() should match a stored lowercase row from mixed-case input.
+	 */
+	public function test_notification_exists_by_email_is_case_insensitive(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'foo@bar.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, 'FOO@bar.com' ) );
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, ' Foo@Bar.COM ' ) );
+		$this->assertFalse( $this->data_store->notification_exists_by_email( 1, 'other@bar.com' ) );
+	}
+
+	/**
+	 * @testdox notification_exists_by_email() should find a legacy mixed-case row from lowercase input.
+	 */
+	public function test_notification_exists_by_email_finds_legacy_mixed_case_row(): void {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_stock_notifications',
+			array(
+				'product_id'       => 1,
+				'user_id'          => 0,
+				'user_email'       => 'Legacy@Example.com',
+				'status'           => NotificationStatus::ACTIVE,
+				'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+			)
+		);
+
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, 'legacy@example.com' ) );
+	}
+
+	/**
+	 * @testdox query() should match an email containing a single quote.
+	 */
+	public function test_query_notifications_with_quoted_user_email(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( "o'brien@example.com" );
+		$notification->save();
+
+		$notifications = $this->data_store->query( array( 'user_email' => "O'Brien@Example.com" ) );
+
+		$this->assertSame( array( $notification->get_id() ), array_map( 'intval', $notifications ) );
+	}
 }

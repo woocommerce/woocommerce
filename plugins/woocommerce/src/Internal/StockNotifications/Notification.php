@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -236,10 +237,12 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the user email.
 	 *
+	 * The value is stored in canonical form (trimmed, lowercased).
+	 *
 	 * @param string $user_email User email.
 	 */
 	public function set_user_email( string $user_email ) {
-		$this->set_prop( 'user_email', $user_email );
+		$this->set_prop( 'user_email', EmailNormalizer::normalize( $user_email ) );
 	}
 
 	/**
