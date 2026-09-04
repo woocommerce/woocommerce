@@ -48,7 +48,7 @@ class Woocommerce_Analytics {
 	 *
 	 * @var string
 	 */
-	const PROXY_TRACKING_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_enabled';
+	const PROXY_SPEED_MODULE_AUTHORIZED_OPTION = 'woocommerce_analytics_proxy_speed_module_authorized';
 
 	/**
 	 * Whether proxy tracking has ever been enabled on this site.
@@ -229,7 +229,7 @@ class Woocommerce_Analytics {
 
 		// Track module eligibility so a removed module cannot be reauthorized.
 		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
-		$current    = get_option( self::PROXY_TRACKING_ENABLED_OPTION );
+		$current    = get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 
 		if ( $current === $authorized ) {
 			return;
@@ -241,7 +241,7 @@ class Woocommerce_Analytics {
 			return;
 		}
 
-		update_option( self::PROXY_TRACKING_ENABLED_OPTION, $authorized );
+		update_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $authorized );
 	}
 
 	/**
@@ -255,7 +255,7 @@ class Woocommerce_Analytics {
 	 */
 	public static function reset_proxy_tracking_state() {
 		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
-		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
@@ -399,7 +399,7 @@ class Woocommerce_Analytics {
 		// Revoked before anything can fail: WP_Filesystem() returns false outright on
 		// hosts that ask for credentials, and that is exactly the case where the file
 		// survives and keeps loading.
-		delete_option( self::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 
 		if ( ! self::init_filesystem() ) {
 			return;

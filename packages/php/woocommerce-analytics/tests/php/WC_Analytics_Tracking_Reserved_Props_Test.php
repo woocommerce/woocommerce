@@ -940,7 +940,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		// asserted literally: inverting it serves exactly the requests it is there to
 		// refuse, and every other test stays green.
 		$this->assertStringContainsString(
-			"return 'yes' === get_option( \\Automattic\\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );",
+			"return 'yes' === get_option( \\Automattic\\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );",
 			$template,
 			'Only an explicit yes may authorize the module; an absent option must not serve.'
 		);

@@ -42,7 +42,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		parent::set_up();
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
-		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$this->server_snapshot     = $_SERVER;
 		$this->reset_pixel_batch_queue();
@@ -57,7 +57,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
-		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$_SERVER                   = $this->server_snapshot;
 		unset( $_COOKIE['tk_ai'] );

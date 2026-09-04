@@ -41,7 +41,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Clean up any existing options/transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
-		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 
@@ -61,7 +61,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Clean up options and transients.
 		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION );
-		delete_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
 		delete_transient( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT );
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
@@ -202,7 +202,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			'No module may be installed while proxy tracking is disabled.'
 		);
 		$this->assertFalse(
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'An uninstalled module must not be authorized to serve.'
 		);
 
@@ -225,7 +225,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame(
 			'yes',
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'A module written before this option exists refuses every request until the next init.'
 		);
 		$this->assertFalse(
@@ -245,7 +245,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
 		$this->assertFalse(
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'An absent option already means unauthorized; the row buys nothing.'
 		);
 	}
@@ -264,7 +264,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame(
 			'no',
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'A module already on disk must be told to stop, not merely left unmentioned.'
 		);
 	}
@@ -382,7 +382,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
 		// Both filters stay on, so a later sync cannot be what clears the option: the
 		// removal itself has to, or a module file that outlives a deactivation keeps
@@ -391,7 +391,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertNotSame(
 			'yes',
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'Removal must revoke immediately, before any later init can run.'
 		);
 		$this->assertSame(
@@ -412,7 +412,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
 
-		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
 		add_filter( 'filesystem_method', array( $this, 'force_unusable_filesystem' ) );
 		Woocommerce_Analytics::maybe_remove_proxy_speed_module();
@@ -420,7 +420,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertNotSame(
 			'yes',
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'An undeletable module must not be left holding its authorization.'
 		);
 		$this->assertNotFalse(
@@ -449,7 +449,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		Woocommerce_Analytics::reset_proxy_tracking_state();
 
 		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION ) );
-		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+		$this->assertFalse( get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 	}
 
 	/**
@@ -479,7 +479,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ) );
+		$this->assertSame( 'yes', get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ) );
 
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 
@@ -487,7 +487,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		$this->assertSame(
 			'no',
-			get_option( Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION ),
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION ),
 			'Turning the feature off must be mirrored too, or the module never stops answering.'
 		);
 	}
@@ -504,11 +504,11 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 			++$writes;
 			return $value;
 		};
-		add_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
+		add_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $spy );
 
 		Woocommerce_Analytics::sync_proxy_tracking_state();
 
-		remove_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION, $spy );
+		remove_filter( 'pre_update_option_' . Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $spy );
 
 		$this->assertSame( 0, $writes );
 	}

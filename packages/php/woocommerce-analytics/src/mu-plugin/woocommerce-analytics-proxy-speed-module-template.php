@@ -143,8 +143,8 @@ class WooCommerceAnalyticsProxySpeed {
 
 		// Same skew, other class: process_proxy_request() reads this to decide whether
 		// to serve, and an older package lacking it throws where nothing can fall back.
-		if ( ! defined( '\Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION' ) ) {
-			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded Woocommerce_Analytics predates the proxy tracking state option.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		if ( ! defined( '\Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION' ) ) {
+			error_log( 'WooCommerce Analytics Proxy Speed Module: the loaded Woocommerce_Analytics predates the speed module authorization option.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
 		}
 
@@ -162,7 +162,7 @@ class WooCommerceAnalyticsProxySpeed {
 	 * @return bool
 	 */
 	private function is_authorized() {
-		return 'yes' === get_option( \Automattic\Woocommerce_Analytics::PROXY_TRACKING_ENABLED_OPTION );
+		return 'yes' === get_option( \Automattic\Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 	}
 
 	/**
