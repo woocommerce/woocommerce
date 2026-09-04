@@ -1242,7 +1242,7 @@ class WC_Cart extends WC_Legacy_Cart {
 							// Don't use wc_clean as it destroys sanitized characters.
 							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						} else {
-							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							$value = html_entity_decode( wc_sanitize_term_text_based( $variation[ $attribute_key ] ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						}
 
 						// Don't include if it's empty.

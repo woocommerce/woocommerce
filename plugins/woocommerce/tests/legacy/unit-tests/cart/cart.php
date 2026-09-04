@@ -2208,6 +2208,44 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a percent-encoded custom variation attribute value.
+	 */
+	public function test_add_to_cart_preserves_percent_encoded_custom_variation_attribute(): void {
+		$product = new WC_Product_Variable();
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'Black%20White' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE ENCODED COLOR',
+			10,
+			array( 'color' => 'Black%20White' )
+		);
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation->get_id(),
+			array( 'attribute_color' => 'Black%20White' )
+		);
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+		$this->assertSame(
+			'Black%20White',
+			WC()->cart->get_cart_item( $cart_item_key )['variation']['attribute_color'],
+			'The cart item should preserve the percent-encoded attribute value.'
+		);
+	}
+
+	/**
 	 * Test that adding a variation via URL parameter fails when specifying a value for the attribute
 	 * that differs from a value belonging to that variant.
 	 */
