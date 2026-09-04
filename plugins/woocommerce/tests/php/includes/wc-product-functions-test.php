@@ -2750,4 +2750,587 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
 	}
+
+	/**
+	 * @testdox Every product is processed when the backlog spans more than one batch.
+	 */
+	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
+		// One more than the chunk size, so the backlog spans two batches and a product
+		// dropped at the boundary would show up as an unprocessed price.
+		$ids = array();
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+
+			// A missed end: the window closed but _price still holds the sale price.
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+			$ids[] = $product->get_id();
+		}
+
+		$payloads = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $hook_ids ) use ( &$payloads ) {
+				$payloads[] = $hook_ids;
+			}
+		);
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id} was not processed, so a batch boundary dropped it."
+			);
+		}
+
+		// Batching must not fragment the hook payload: extensions receive the whole set
+		// once, exactly as they did before the loop was chunked.
+		$this->assertCount( 1, $payloads, 'The ending hook must fire once, not once per batch.' );
+		$this->assertCount( 51, $payloads[0], 'The hook payload must carry the whole backlog.' );
+	}
+
+	/**
+	 * @testdox Priming happens per batch, not once for the whole backlog.
+	 */
+	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
+		// The point of the change: a backlog larger than one batch must never be primed in
+		// full, or the run dies before its first save on the stores this exists for. Checked
+		// from inside the run, because by the end every batch has been primed and released.
+		$ids = array();
+
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+			$ids[] = $product->get_id();
+		}
+
+		$queued = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			static function ( $product_ids ) use ( &$queued ) {
+				$queued = $product_ids;
+			}
+		);
+
+		// Sampled on the first save, while the run is still inside its first batch.
+		$last_primed_during_first_save = null;
+		add_action(
+			'woocommerce_update_product',
+			static function () use ( &$queued, &$last_primed_during_first_save ) {
+				if ( null !== $last_primed_during_first_save || ! $queued ) {
+					return;
+				}
+
+				$last_primed_during_first_save = false !== wp_cache_get( (int) end( $queued ), 'posts' );
+			}
+		);
+
+		// Creating the fixtures warmed every one of them, which a real cron request would
+		// not have. Without this the probe reads leftover fixture state, not the priming.
+		wp_cache_flush();
+
+		wc_scheduled_sales();
+
+		$this->assertCount( 51, $queued, 'Fixture precondition: the backlog must exceed one batch.' );
+		$this->assertFalse(
+			$last_primed_during_first_save,
+			'The last product in the queue must not be primed while the first batch is still processing.'
+		);
+	}
+
+	/**
+	 * @testdox An external object cache keeps the persistent-capable groups out of the release.
+	 */
+	public function test_wc_scheduled_sales_leaves_shared_groups_alone_on_an_external_cache(): void {
+		// products and term-queries are persistent-capable, so the loop releases them only
+		// when the cache lives in this request. Under an external cache they must survive,
+		// or the run evicts entries other requests are using.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wp_cache_set( 'sentinel', 'keep me', 'products' );
+		wp_cache_set( 'sentinel', 'keep me', 'term-queries' );
+
+		// Cast: with no drop-in loaded nothing ever assigns the global, so the previous
+		// value is null, and wp_using_ext_object_cache( null ) is a read rather than a
+		// write. Restoring that verbatim would leave every later test on this process
+		// believing an external cache is in use.
+		$was_external = (bool) wp_using_ext_object_cache( true );
+
+		try {
+			wc_scheduled_sales();
+		} finally {
+			wp_using_ext_object_cache( $was_external );
+		}
+
+		$this->assertSame(
+			'keep me',
+			wp_cache_get( 'sentinel', 'products' ),
+			'The products group must survive when an external object cache is in use.'
+		);
+		$this->assertSame(
+			'keep me',
+			wp_cache_get( 'sentinel', 'term-queries' ),
+			'The term-queries group must survive when an external object cache is in use.'
+		);
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'The product must still settle with the shared groups left alone.'
+		);
+	}
+
+	/**
+	 * @testdox A request-local cache has the flushed groups released after the run.
+	 */
+	public function test_wc_scheduled_sales_releases_the_flushed_groups_on_a_request_local_cache(): void {
+		// The mirror of the external-cache test: on the default object cache the loop must
+		// flush products and term-queries, or the relief the batching exists for never
+		// happens. Nothing else pins those two calls. product_objects is released per id
+		// rather than as a group flush (see
+		// test_wc_scheduled_sales_releases_the_product_objects_cache_by_id), so it isn't
+		// covered here.
+		if ( ! wp_cache_supports( 'flush_group' ) || wp_using_ext_object_cache() ) {
+			$this->markTestSkipped( 'Requires a request-local object cache with flush_group support.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wp_cache_set( 'sentinel', 'release me', 'products' );
+		wp_cache_set( 'sentinel', 'release me', 'term-queries' );
+
+		wc_scheduled_sales();
+
+		$this->assertFalse(
+			wp_cache_get( 'sentinel', 'products' ),
+			'The products group must be flushed when the cache is request-local.'
+		);
+		$this->assertFalse(
+			wp_cache_get( 'sentinel', 'term-queries' ),
+			'The term-queries group must be flushed when the cache is request-local.'
+		);
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+	}
+
+	/**
+	 * @testdox product_objects entries are released by id, independent of flush_group support.
+	 */
+	public function test_wc_scheduled_sales_releases_the_product_objects_cache_by_id(): void {
+		// product_objects can't be flushed as a whole group without support this loop can't
+		// rely on: ProductCache::flush() only bumps a namespace prefix and frees nothing, so
+		// the release goes through ProductCache::remove() per id instead. That path only
+		// runs anything when the feature that populates the cache is on.
+		$features_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+		$was_enabled         = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME );
+		$features_controller->change_feature_enable( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME, true );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+			$product_cache = new \Automattic\WooCommerce\Internal\Caches\ProductCache();
+			$product_cache->set( $product );
+			$this->assertTrue(
+				$product_cache->is_cached( $product->get_id() ),
+				'Fixture precondition: the product must be cached before the run.'
+			);
+
+			wc_scheduled_sales();
+
+			$this->assertFalse(
+				$product_cache->is_cached( $product->get_id() ),
+				'The product must be released from product_objects by id after the batch that processed it.'
+			);
+		} finally {
+			$features_controller->change_feature_enable( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME, $was_enabled );
+		}
+	}
+
+	/**
+	 * @testdox A batch holding both a product and a variation leaves no term relationship cached.
+	 */
+	public function test_wc_scheduled_sales_releases_term_caches_for_a_mixed_batch(): void {
+		// _prime_post_caches() resolves the batch's post types, then caches every ID against
+		// the union of their taxonomies, writing an empty entry where an ID has no terms in
+		// one. A variation therefore gets the product-only groups too, and releasing each ID
+		// under only its own type would strand exactly those.
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Mixed batch parent' );
+		$parent->set_regular_price( 100 );
+		$parent->set_sale_price( 50 );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( 100 );
+		$variation->set_sale_price( 50 );
+		$variation->save();
+
+		foreach ( array( $parent->get_id(), $variation->get_id() ) as $id ) {
+			update_post_meta( $id, '_price', 50 );
+			update_post_meta( $id, '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $id, '_sale_price_dates_to', time() - 100 );
+		}
+
+		$taxonomies = array_unique(
+			array_merge( get_object_taxonomies( 'product' ), get_object_taxonomies( 'product_variation' ) )
+		);
+
+		// Precondition: without this the assertions below pass just as well against a run
+		// that never primed anything.
+		wp_cache_flush();
+		_prime_post_caches( array( $parent->get_id(), $variation->get_id() ) );
+		$this->assertNotFalse(
+			wp_cache_get( $variation->get_id(), 'product_cat_relationships' ),
+			'Fixture precondition: priming must cache the product-only groups for the variation.'
+		);
+
+		// Pins a bug this branch already hit once: an earlier version released relationship
+		// caches by calling clean_object_term_cache() once per post type with the whole
+		// batch's id list, firing the action with the wrong $object_type for ids that didn't
+		// match. The release code no longer calls that helper, but nothing asserted the
+		// action itself, so a reintroduction wouldn't be caught.
+		$fired_with_wrong_type = false;
+		add_action(
+			'clean_object_term_cache',
+			function ( $object_ids, $object_type ) use ( $parent, $variation, &$fired_with_wrong_type ) {
+				$object_ids = (array) $object_ids;
+
+				if ( in_array( $parent->get_id(), $object_ids, true ) && 'product' !== $object_type ) {
+					$fired_with_wrong_type = true;
+				}
+
+				if ( in_array( $variation->get_id(), $object_ids, true ) && 'product_variation' !== $object_type ) {
+					$fired_with_wrong_type = true;
+				}
+			},
+			10,
+			2
+		);
+
+		wc_scheduled_sales();
+
+		$this->assertFalse(
+			$fired_with_wrong_type,
+			'clean_object_term_cache must not fire with a post type that does not match the ids it was given.'
+		);
+
+		foreach ( array( $parent->get_id(), $variation->get_id() ) as $id ) {
+			foreach ( $taxonomies as $taxonomy ) {
+				$this->assertFalse(
+					wp_cache_get( $id, "{$taxonomy}_relationships" ),
+					"Post {$id} should hold no {$taxonomy} relationship cache after the run."
+				);
+			}
+		}
+	}
+
+	/**
+	 * @testdox Releasing a batch does not evict cache entries belonging to other posts.
+	 */
+	public function test_wc_scheduled_sales_leaves_unrelated_post_caches_intact(): void {
+		// The loop shares `posts` and `post_meta` with every other post type and every
+		// other job in the same WP-Cron request, so it releases its own IDs rather than
+		// flushing those groups whole. A page primed before the run must survive it.
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_post_meta( $page_id, '_unrelated', 'keep me' );
+		get_post( $page_id );
+		get_post_meta( $page_id );
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'posts' ),
+			'Fixture precondition: the page should be primed before the cron runs.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'post_meta' ),
+			'Fixture precondition: the page meta should be primed before the cron runs.'
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		wc_scheduled_sales();
+
+		// Assert the release before anything below re-primes the product: get_post_meta()
+		// in the processing check would repopulate post_meta and mask a missing release.
+		$this->assertFalse(
+			wp_cache_get( $product->get_id(), 'posts' ),
+			'The batch did not release its own post cache entry.'
+		);
+		$this->assertFalse(
+			wp_cache_get( $product->get_id(), 'post_meta' ),
+			'The batch did not release its own post meta cache entry.'
+		);
+
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'posts' ),
+			'The cron released an unrelated post from the shared posts cache.'
+		);
+		$this->assertNotFalse(
+			wp_cache_get( $page_id, 'post_meta' ),
+			'The cron released unrelated meta from the shared post_meta cache.'
+		);
+	}
+
+	/**
+	 * @testdox Ids a replaced data store returns in any form wc_get_product() accepts still settle.
+	 */
+	public function test_wc_scheduled_sales_settles_ids_in_every_form_wc_get_product_accepts(): void {
+		// The loop resolves each row rather than screening it, because wc_get_product()
+		// accepts more than a canonical decimal string and these all named a real product
+		// before the batching went in. A row dropped here settles nothing, says nothing, and
+		// is picked up and dropped again on every later run.
+		$ids = array();
+
+		for ( $i = 0; $i < 6; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->set_sale_price( 50 );
+			$product->save();
+			update_post_meta( $product->get_id(), '_price', 50 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+			update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+			$ids[] = $product->get_id();
+		}
+
+		// Zero padded, leading space, signed, decimal string, float, and a WP_Post, which
+		// get_product_id() reads through ->ID.
+		$rows = array(
+			'0' . $ids[0],
+			' ' . $ids[1],
+			'+' . $ids[2],
+			$ids[3] . '.0',
+			(float) $ids[4],
+			get_post( $ids[5] ),
+		);
+
+		$store = new class( $rows ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Rows to report from the ending-sales query.
+			 *
+			 * @var array
+			 */
+			private $rows;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $rows Rows to report.
+			 */
+			public function __construct( $rows ) {
+				$this->rows = $rows;
+			}
+
+			/**
+			 * Report the rows in the forms a replaced store might return them.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				return $this->rows;
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $index => $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id}, supplied as " . wp_json_encode( $rows[ $index ] ) . ', should have settled.'
+			);
+		}
+	}
+
+	/**
+	 * @testdox A data store returning malformed IDs does not fatal the run or evict unrelated posts.
+	 */
+	public function test_wc_scheduled_sales_survives_malformed_ids_from_a_replaced_data_store(): void {
+		// woocommerce_product_data_store accepts an object, and nothing enforces the int[]
+		// the query methods document. A malformed row must not end a run that has already
+		// saved work, and must not take an unrelated post's cache down with it.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		// A cast would turn "<id>abc" into this page's own id, so priming it here makes a
+		// looser release predicate show up as a real eviction rather than a harmless no-op.
+		$decoy_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$malformed = $decoy_id . 'abc';
+		get_post( $decoy_id );
+		$this->assertNotFalse(
+			wp_cache_get( $decoy_id, 'posts' ),
+			'Fixture precondition: the decoy page should be primed before the cron runs.'
+		);
+
+		$store = new class( $product->get_id(), $malformed ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Real product id to report alongside the malformed rows.
+			 *
+			 * @var int
+			 */
+			private $real_id;
+
+			/**
+			 * Malformed row that casts onto an unrelated post id.
+			 *
+			 * @var string
+			 */
+			private $malformed;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int    $real_id   Real product id.
+			 * @param string $malformed Malformed row.
+			 */
+			public function __construct( $real_id, $malformed ) {
+				$this->real_id   = $real_id;
+				$this->malformed = $malformed;
+			}
+
+			/**
+			 * Return a mix of one real id and rows that violate the int[] contract.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				// Objects are resolved rather than rejected now, on the same terms
+				// wc_get_product() accepts, so one here would name a real product instead of
+				// exercising the malformed path this fixture is for.
+				return array( $this->real_id, array( 9 ), true, $this->malformed, null );
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+		WC_Data_Store::load( 'product' );
+
+		// No setExpectedIncorrectUsage here on purpose: the malformed rows are screened out
+		// before priming, so core never sees them and never reports the usage. Adding the
+		// expectation back would fail, which is the point.
+
+		wc_scheduled_sales();
+
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'A malformed id stopped the run before the real product settled.'
+		);
+
+		$this->assertNotFalse(
+			wp_cache_get( $decoy_id, 'posts' ),
+			"The release cast '{$malformed}' onto post {$decoy_id} and evicted an unrelated page."
+		);
+	}
+
+	/**
+	 * @testdox An id the data store returns twice in one batch is processed once.
+	 */
+	public function test_wc_scheduled_sales_processes_a_duplicated_id_once(): void {
+		// The sales queries join postmeta without a row-identity constraint, so a product
+		// carrying two rows for one of the joined keys comes back twice. Before batching
+		// that meant two saves; the batch now de-duplicates its IDs, and this pins it.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		$store = new class( $product->get_id() ) extends WC_Product_Data_Store_CPT {
+			/**
+			 * Product id to report twice.
+			 *
+			 * @var int
+			 */
+			private $id;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int $id Product id to report twice.
+			 */
+			public function __construct( $id ) {
+				$this->id = $id;
+			}
+
+			/**
+			 * Report the same product as both an int and the string $wpdb->get_col() returns.
+			 *
+			 * @return array
+			 */
+			public function get_ending_sales() {
+				return array( $this->id, (string) $this->id );
+			}
+		};
+
+		add_filter( 'woocommerce_product_data_store', fn() => $store );
+
+		$saves = 0;
+		add_action(
+			'woocommerce_update_product',
+			static function ( $updated_id ) use ( $product, &$saves ) {
+				if ( (int) $updated_id === $product->get_id() ) {
+					++$saves;
+				}
+			}
+		);
+
+		wc_scheduled_sales();
+
+		$this->assertSame( 1, $saves, 'A duplicated id must settle with a single save, not one per row.' );
+		$this->assertEquals(
+			100,
+			get_post_meta( $product->get_id(), '_price', true ),
+			'Fixture precondition: the product should have been processed.'
+		);
+	}
 }

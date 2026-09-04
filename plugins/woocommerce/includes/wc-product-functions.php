@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -846,6 +847,11 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
+ * The products are processed in batches, and each batch primes and then releases its
+ * own caches. The before hooks therefore fire before any product is primed, and the
+ * after hooks fire once the last batch has released, so a callback that reads its
+ * payload with wc_get_product() takes a cold read per ID.
+ *
  * @since 3.0.0
  */
 function wc_scheduled_sales() {
@@ -854,25 +860,137 @@ function wc_scheduled_sales() {
 	$product_util           = wc_get_container()->get( ProductUtil::class );
 	$must_refresh_transient = false;
 
+	// Computed once: neither depends on the batch or the mode. product_objects releases by
+	// id via ProductCache::remove(), which reaches a real wp_cache_delete() on every backend
+	// — unlike ProductCache::flush(), which only bumps a namespace prefix and frees nothing
+	// — so this doesn't need flush_group support the way the group flushes below do.
+	$product_cache = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' )
+		? wc_get_container()->get( ProductCache::class )
+		: null;
+
+	$supports_flush_group = wp_cache_supports( 'flush_group' );
+	$flush_shared_groups  = $supports_flush_group && ! wp_using_ext_object_cache();
+
+	/**
+	 * Apply a sale state to a list of products, priming caches in batches.
+	 *
+	 * Priming the whole result set up front is what exhausts memory before the first save.
+	 * Relief is partial: each product read leaves a cache-prefix entry nothing releases, and
+	 * saving a variation queues its parent for the unbatched shutdown sync.
+	 *
+	 * @param (int|string|float|WC_Product|object)[] $product_ids Products to process, in query order.
+	 *                                                            $wpdb->get_col() returns strings; a
+	 *                                                            replaced store may return anything
+	 *                                                            wc_get_product() resolves, including
+	 *                                                            objects that expose an ID.
+	 * @param string                                 $mode        'start' or 'end'.
+	 */
+	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $product_cache, $flush_shared_groups ): void {
+		// Sliced per iteration: array_chunk() would build every batch before the first runs.
+		$batch_size = 50;
+		$total      = count( $product_ids );
+
+		for ( $offset = 0; $offset < $total; $offset += $batch_size ) {
+			$chunk = array_slice( $product_ids, $offset, $batch_size );
+
+			// A replaced data store can return anything, and priming reaches three caches that
+			// disagree about what an ID is: only the posts prime validates, while the meta and
+			// term primes intval() whatever they are handed. Resolving to one int list up
+			// front and using it throughout is what makes the release cover exactly what the
+			// prime wrote. Resolved on the same terms wc_get_product() accepts, so nothing it
+			// would have processed before this loop was batched gets dropped here.
+			$batch_ids = array();
+
+			foreach ( $chunk as $chunk_entry ) {
+				if ( $chunk_entry instanceof WC_Product ) {
+					$batch_id = $chunk_entry->get_id();
+				} elseif ( is_object( $chunk_entry ) ) {
+					$batch_id = empty( $chunk_entry->ID ) ? 0 : (int) $chunk_entry->ID;
+				} else {
+					$batch_id = is_numeric( $chunk_entry ) ? (int) $chunk_entry : 0;
+				}
+
+				if ( $batch_id > 0 ) {
+					$batch_ids[] = $batch_id;
+				}
+			}
+
+			$batch_ids = array_values( array_unique( $batch_ids ) );
+
+			if ( ! $batch_ids ) {
+				continue;
+			}
+
+			_prime_post_caches( $batch_ids );
+
+			// Priming caches every ID against the union of these types' taxonomies, so only
+			// the same union clears it. Must be read here: the save loop evicts what it reads.
+			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $batch_ids ) ) ) );
+
+			foreach ( $batch_ids as $product_id ) {
+				$product = wc_get_product( $product_id );
+
+				if ( $product ) {
+					// Schedules no end event: only the price prop changes, so
+					// get_props_to_update() never writes a sale date key to trigger one.
+					wc_apply_sale_state_for_product( $product, $mode );
+				}
+
+				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
+			}
+
+			// posts and post_meta are shared with every other action in this Action Scheduler
+			// queue-runner request, so delete this batch's own IDs rather than flushing the
+			// groups whole. Deleted directly rather than through clean_post_cache() on
+			// purpose: save() already ran it for every product that changed, and running it
+			// here for the rest would re-read each post and bump the site-wide posts and
+			// terms salts for rows nothing wrote. The trade-off is that entries this batch
+			// only read are evicted too, including from a persistent backend.
+			wp_cache_delete_multiple( $batch_ids, 'posts' );
+			wp_cache_delete_multiple( $batch_ids, 'post_meta' );
+			// Deleted directly rather than through clean_object_term_cache(), which pairs one
+			// type with whatever IDs it is handed and fires that pairing on a public action.
+			// Any call here mislabels part of the batch, and save() already fired it per
+			// product with that product's own type. This also skips the site-wide terms salt
+			// bump the helper performs, which is wider than anything this loop primed.
+			$release_taxonomies = array();
+
+			foreach ( $release_types as $release_type ) {
+				$release_taxonomies = array_merge( $release_taxonomies, get_object_taxonomies( $release_type ) );
+			}
+
+			foreach ( array_unique( $release_taxonomies ) as $release_taxonomy ) {
+				wp_cache_delete_multiple( $batch_ids, "{$release_taxonomy}_relationships" );
+			}
+
+			// Saving already releases a product's own entry via ProductCache::remove(); this
+			// catches the ones only read. Released per id rather than as a group flush, so it
+			// works regardless of flush_group support.
+			if ( $product_cache ) {
+				foreach ( $batch_ids as $product_id ) {
+					$product_cache->remove( $product_id );
+				}
+			}
+
+			// Persistent-capable, so released only when the cache is request-local. Whole
+			// groups because products keys carry a random prefix, and term-queries is keyed
+			// by a salt this loop cannot recompute. terms is left alone on purpose: it keys
+			// by term ID, so it is bounded by the taxonomy, not the backlog.
+			if ( $flush_shared_groups ) {
+				wp_cache_flush_group( 'products' );
+				wp_cache_flush_group( 'term-queries' );
+			}
+		}
+	};
+
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$process_products( $product_ids, 'start' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
-				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
-				// which schedules the end AS event.
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -880,19 +998,11 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		$process_products( $product_ids, 'end' );
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'end' );
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}

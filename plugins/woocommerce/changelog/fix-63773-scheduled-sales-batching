@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Process scheduled-sale products in batches so stores with a large backlog make progress instead of exhausting memory before the first product is saved. Callbacks on wc_before_products_starting_sales, wc_after_products_starting_sales, wc_before_products_ending_sales and wc_after_products_ending_sales now run against an unprimed post cache, and the after hooks run once the batch has released the product object cache wc_get_product() reads.
