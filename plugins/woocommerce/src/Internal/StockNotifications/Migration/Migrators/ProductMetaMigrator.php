@@ -243,10 +243,15 @@ class ProductMetaMigrator implements MigratorInterface {
 	 */
 	public function migrate_batch( array $ids, Writer $writer ): array {
 		$outcomes = array();
+		$post_ids = array_map( 'intval', $ids );
 
-		foreach ( $ids as $product_id ) {
-			$product_id = (int) $product_id;
+		// Prime the post and meta caches for the whole batch up front, so the per-row
+		// wc_get_product() call below hits one query instead of one per product.
+		if ( ! empty( $post_ids ) ) {
+			_prime_post_caches( $post_ids );
+		}
 
+		foreach ( $post_ids as $product_id ) {
 			try {
 				$outcome = $this->migrate_one( $product_id, $writer );
 			} catch ( \Throwable $e ) {
