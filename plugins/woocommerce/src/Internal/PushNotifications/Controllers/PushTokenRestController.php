@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\Jetpack\Connection\Rest_Authentication;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
@@ -310,10 +309,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			return false;
 		}
 
-		if (
-			class_exists( Rest_Authentication::class )
-			&& Rest_Authentication::is_signed_with_blog_token()
-		) {
+		if ( $this->is_signed_with_blog_token() ) {
 			return true;
 		}
 

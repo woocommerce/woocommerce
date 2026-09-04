@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+
 /**
  * Order Route Tests.
  *
@@ -133,6 +135,359 @@ class Order extends ControllerTestCase {
 
 		return $order;
 	}
+
+	/**
+	 * The Order route has no other schema validation coverage.
+	 *
+	 * The item needs metadata, or the nested item_data schema is never exercised.
+	 *
+	 * @testdox Order response matches the published schema.
+	 */
+	public function test_response_matches_schema(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'order', 'v1' );
+		$validate   = new ValidateSchema( $controller->get_item_schema() );
+
+		$data = $response->get_data();
+		$diff = $validate->get_diff_from_object( $data );
+
+		// Other mismatches on this response are out of scope (items' `type` and `extensions`,
+		// `quantity_limits`, `fees`). Filter to item_data so this does not snapshot them.
+		$item_data_diff = array_values(
+			array_filter(
+				array_merge( $diff['missing'] ?? array(), $diff['invalid_type'] ?? array(), $diff['no_schema'] ?? array() ),
+				function ( $entry ) {
+					return false !== strpos( $entry, 'item_data' );
+				}
+			)
+		);
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		$this->assertEmpty( $item_data_diff, print_r( $item_data_diff, true ) );
+
+		$item_data = $data['items'][0]['item_data'];
+		$this->assertNotEmpty( $item_data );
+
+		// ValidateSchema only recurses into the first entry, so pin the exact public shape here.
+		$entry = $item_data[0];
+		$this->assertEqualSets( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $entry ) );
+		$this->assertSame( 'Gift message', $entry['key'] );
+		$this->assertSame( 'Happy birthday', $entry['value'] );
+	}
+
+	/**
+	 * Consumers read this as a list, the way the cart endpoint sends it.
+	 *
+	 * @testdox Order item_data serializes as a JSON list carrying the meta row ID.
+	 */
+	public function test_item_data_serializes_as_a_json_list_carrying_the_meta_id(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+		$meta_id   = current( $item->get_meta_data() )->id;
+
+		$this->assertSame( array( 0 ), array_keys( $item_data ), 'item_data must be a list, not keyed by meta ID.' );
+		$this->assertStringStartsWith( '[', wp_json_encode( $item_data ), 'item_data must serialize as a JSON list, not an object.' );
+		$this->assertSame( $meta_id, $item_data[0]['id'], 'The meta row ID must survive as `id`.' );
+	}
+
+	/**
+	 * Callbacks can add their own fields; reshaping the container must not drop them.
+	 *
+	 * @testdox Order item_data keeps fields added by extensions.
+	 */
+	public function test_item_data_keeps_fields_added_by_extensions(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				foreach ( $formatted_meta as $meta ) {
+					$meta->custom_field = 'from-extension';
+				}
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$entry = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'][0];
+
+		$this->assertSame( 'from-extension', $entry['custom_field'] ?? null, 'Extension-added fields must survive.' );
+		$this->assertSame( current( $item->get_meta_data() )->id, $entry['id'], 'The row ID must win over anything a callback sets.' );
+	}
+
+	/**
+	 * A misbehaving callback should cost the endpoint its metadata, not its response.
+	 *
+	 * @testdox Order endpoint survives a callback that returns a non-array.
+	 */
+	public function test_item_data_survives_a_hostile_filter(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function () {
+				return 'not-an-array';
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'A bad callback must not fail the request.' );
+		$this->assertSame( [], $response->get_data()['items'][0]['item_data'] );
+	}
+
+	/**
+	 * @testdox Order item_data skips metadata entries that are not objects or arrays.
+	 */
+	public function test_item_data_skips_non_object_entries(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[999] = 'scalar-entry';
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 1, $item_data, 'The scalar entry must be skipped, the real one kept.' );
+		$this->assertSame( 'Gift message', $item_data[0]['key'] );
+	}
+
+	/**
+	 * Still metadata the store wants shown, so it is published with a null `id` rather than dropped.
+	 *
+	 * @testdox Order item_data reports a null id for an entry not keyed by a meta row ID.
+	 */
+	public function test_item_data_reports_null_id_for_entries_not_keyed_by_a_meta_row_id(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta['not-a-row-id'] = (object) array(
+					'key'           => 'Injected',
+					'value'         => 'value',
+					'display_key'   => 'Injected',
+					'display_value' => 'value',
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 2, $item_data, 'The entry must be kept, not dropped.' );
+		$this->assertSame( current( $item->get_meta_data() )->id, $item_data[0]['id'] );
+		$this->assertSame( 'Injected', $item_data[1]['key'] );
+		$this->assertNull( $item_data[1]['id'], 'An entry with no stored row has no ID to report.' );
+	}
+
+	/**
+	 * `WC_Meta_Data` keeps its fields protected, so casting one publishes mangled property names.
+	 * Trunk serialized it through `JsonSerializable`, and so must this.
+	 *
+	 * @testdox Order item_data serializes an appended WC_Meta_Data through JsonSerializable.
+	 */
+	public function test_item_data_serializes_an_appended_wc_meta_data(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = new \WC_Meta_Data(
+					array(
+						'id'    => 0,
+						'key'   => 'Appended',
+						'value' => 'value',
+					)
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertSame( 'value', $item_data[1]['value'] );
+		$this->assertNull( $item_data[1]['id'], 'The wrapped id is 0, not a row on this item.' );
+		$this->assertStringNotContainsString( "\0", wp_json_encode( $item_data ), 'Protected property names must not reach the response.' );
+	}
+
+	/**
+	 * An extension's own object need not offer `JsonSerializable`, and casting one publishes its
+	 * non-public fields under mangled names.
+	 *
+	 * @testdox Order item_data publishes only the public fields of an appended plain object.
+	 */
+	public function test_item_data_publishes_only_public_fields_of_an_appended_object(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = new class() {
+					/**
+					 * Metadata key.
+					 *
+					 * @var string
+					 */
+					public $key = 'Appended';
+
+					/**
+					 * Metadata value.
+					 *
+					 * @var string
+					 */
+					public $value = 'value';
+
+					/**
+					 * Metadata key, formatted for display.
+					 *
+					 * @var string
+					 */
+					public $display_key = 'Appended';
+
+					/**
+					 * Metadata value, formatted for display.
+					 *
+					 * @var string
+					 */
+					public $display_value = 'value';
+
+					/**
+					 * A field the extension keeps to itself.
+					 *
+					 * @var string
+					 */
+					protected $internal = 'internal';
+				};
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertSame( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $item_data[1] ), 'Only public fields belong in the response.' );
+	}
+
+	/**
+	 * Appending gets PHP's next integer key. Publishing that as `id` would point consumers at
+	 * another item's row.
+	 *
+	 * @testdox Order item_data reports a null id for an appended entry.
+	 */
+	public function test_item_data_reports_null_id_for_an_appended_entry(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = (object) array(
+					'key'           => 'Appended',
+					'value'         => 'value',
+					'display_key'   => 'Appended',
+					'display_value' => 'value',
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 2, $item_data, 'The appended entry must be kept, not dropped.' );
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertNull( $item_data[1]['id'], 'An appended entry has no stored row, so no ID.' );
+	}
+
 
 	/**
 	 * Test that a guest can access a guest order with valid order key and billing email.

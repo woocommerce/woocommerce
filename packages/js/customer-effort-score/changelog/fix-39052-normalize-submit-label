@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize customer effort score submit labels while preserving legacy action and queue aliases.

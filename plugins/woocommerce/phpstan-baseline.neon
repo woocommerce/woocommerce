@@ -4231,12 +4231,6 @@ parameters:
 			path: includes/admin/importers/class-wc-tax-rate-importer.php
 
 		-
-			message: '#^Array has 2 duplicate keys with value ''Variant SKU'' \(''Variant SKU'', ''Variant SKU''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: includes/admin/importers/mappings/shopify.php
-
-		-
 			message: '#^Variable \$errors might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -8255,12 +8249,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/woocommerce-legacy-reports.php
-
-		-
-			message: '#^@param array \$terms does not accept actual type of parameter\: array\<int, int\|string\|WP_Term\>\|numeric\-string\|WP_Error\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/class-wc-ajax.php
 
 		-
 			message: '#^@param string \$search_text does not accept actual type of parameter\: array\|string\.$#'
@@ -24230,12 +24218,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function wp_trash_comment expects int\|WP_Comment, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
-
-		-
-			message: '#^Parameter \#1 \$commentarr of function wp_update_comment expects array, array\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
@@ -40288,18 +40270,6 @@ parameters:
 			path: src/Admin/API/Reports/Categories/DataStore.php
 
 		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:\$order is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -40591,18 +40561,6 @@ parameters:
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_DateTime\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
 			path: src/Admin/API/Reports/Coupons/DataStore.php
 
 		-
@@ -41218,12 +41176,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_included_products_array\(\) should return array but returns array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: return.type
 			count: 1
@@ -41425,12 +41377,6 @@ parameters:
 			message: '#^Part \$field \(array\|string\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Part \$id_field \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
@@ -43072,18 +43018,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -43711,12 +43645,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_tax_total\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-
@@ -44430,18 +44358,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
 			count: 1
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
