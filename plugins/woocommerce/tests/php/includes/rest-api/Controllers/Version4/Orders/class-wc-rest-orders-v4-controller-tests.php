@@ -799,7 +799,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that re-posting a line item own variation keeps the attribute meta the order was placed with.
+	 * @testdox PUT /orders naming the line item's own variation keeps the attribute meta the order was placed with.
 	 */
 	public function test_orders_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
@@ -831,7 +831,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status(), 'Re-posting the line item own variation should succeed.' );
+		$this->assertSame( 200, $response->get_status(), 'Re-posting the line item\'s own variation should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
@@ -839,7 +839,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that naming only the variable parent still demotes the line item, attribute meta included.
+	 * @testdox PUT /orders naming only the variable parent still demotes the line item, attribute meta included.
 	 */
 	public function test_orders_update_line_item_with_parent_only_demotes_the_variation(): void {
 		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
@@ -857,7 +857,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status(), 'The update should succeed.' );
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'v4 does not restore the variation for a parent-only update, so the item is genuinely demoted.' );
