@@ -260,6 +260,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
+		if ( ! $data && ! $this->can_have_meta_data() ) {
+			return;
+		}
+
 		$previous_keys = $this->get_variation_attribute_meta_keys();
 		$current_keys  = array();
 
@@ -279,6 +283,21 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
 		}
+	}
+
+	/**
+	 * Whether the item can be carrying meta that `set_variation()` needs to look at.
+	 *
+	 * Reading meta on an item that has neither been saved nor had any meta touched would fill
+	 * {@see WC_Data::$meta_data} with an empty set, and the item would then never load its meta
+	 * from the database once it is saved — `WC_Data::maybe_read_meta_data()` only reads while
+	 * that property is still null. Checkout hands every line item, simple products included, an
+	 * empty variation array, so a clearing call has to leave untouched items alone.
+	 *
+	 * @return bool
+	 */
+	private function can_have_meta_data() {
+		return null !== $this->meta_data || (bool) $this->get_id();
 	}
 
 	/**

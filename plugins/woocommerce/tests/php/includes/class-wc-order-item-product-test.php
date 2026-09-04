@@ -893,6 +893,27 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave an untouched item's meta unread, so the item still loads it from the database once saved.
+	 */
+	public function test_set_product_on_a_simple_product_leaves_item_meta_readable_after_save(): void {
+		// Checkout hands every line item an empty variation array, simple products included, which
+		// reaches set_variation() through set_props().
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_quantity( 1 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		// Stock reduction writes to the saved item through a copy of its own, the way
+		// wc_reduce_stock_levels() does after an order transitions to processing.
+		$stock_holder = new WC_Order_Item_Product( $item->get_id() );
+		$stock_holder->add_meta_data( '_reduced_stock', 2, true );
+		$stock_holder->save();
+
+		$this->assertSame( '2', (string) $item->get_meta( '_reduced_stock' ), 'An item that never had meta of its own must still read it from the database once it has an ID.' );
+	}
+
+	/**
 	 * Create a variation whose parent declares the given attributes for variations.
 	 *
 	 * A variation only reports attributes its parent marks with `is_variation`, so a parent built
