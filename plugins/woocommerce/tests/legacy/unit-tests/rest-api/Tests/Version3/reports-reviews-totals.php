@@ -163,30 +163,6 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * The totals the endpoint produced before this report was rewritten, kept as the regression
-	 * reference so the new aggregate is compared against real previous behaviour rather than
-	 * against numbers written down by hand.
-	 *
-	 * @return array
-	 */
-	private function get_totals_from_previous_implementation() {
-		$totals = array();
-
-		for ( $i = 1; $i <= 5; $i++ ) {
-			$totals[ 'rated_' . $i . '_out_of_5' ] = (int) get_comments(
-				array(
-					'count'      => true,
-					'post_type'  => 'product',
-					'meta_key'   => 'rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The previous implementation is reproduced verbatim so the endpoint can be compared against it.
-					'meta_value' => $i, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- The previous implementation is reproduced verbatim so the endpoint can be compared against it.
-				)
-			);
-		}
-
-		return $totals;
-	}
-
-	/**
 	 * Test getting all product reviews.
 	 *
 	 * @since 3.5.0
@@ -240,19 +216,24 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 		$this->create_rated_comment( $product->get_id(), null );
 		$this->create_rated_comment( $page, '3' );
 
-		$totals = $this->get_totals_by_slug();
-
-		// The endpoint agrees with the implementation it replaced, bucket for bucket.
-		$this->assertSame( $this->get_totals_from_previous_implementation(), $totals );
-
-		// Guard against both sides agreeing on nothing at all.
-		$this->assertGreaterThan( 0, $totals['rated_5_out_of_5'] );
-		$this->assertGreaterThan( 0, $totals['rated_4_out_of_5'] );
-
-		// Buckets with nothing to count are still reported, which the oracle cannot prove on its own.
-		$this->assertSame( 0, $totals['rated_3_out_of_5'] );
-		$this->assertSame( 0, $totals['rated_2_out_of_5'] );
-		$this->assertSame( 0, $totals['rated_1_out_of_5'] );
+		/*
+		 * Five: the approved storefront review and the one still awaiting moderation; the spam and
+		 * trashed ones drop out. Four: the REST review and the plain comment; the order note drops
+		 * out. Three, two and one: nothing survives, because the note, action log and webhook types
+		 * are hidden, the rating '0' and '05' values do not match, one comment carries no rating at
+		 * all, and the last review sits on a page rather than a product. Empty buckets are still
+		 * reported.
+		 */
+		$this->assertSame(
+			array(
+				'rated_1_out_of_5' => 0,
+				'rated_2_out_of_5' => 0,
+				'rated_3_out_of_5' => 0,
+				'rated_4_out_of_5' => 2,
+				'rated_5_out_of_5' => 2,
+			),
+			$this->get_totals_by_slug()
+		);
 	}
 
 	/**
