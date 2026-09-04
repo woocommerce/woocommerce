@@ -3715,7 +3715,7 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
  *
  * @return void
  */
-function wc_update_1120_invalidate_analytics_reports_cache() {
+function wc_update_11201_invalidate_analytics_reports_cache() {
 	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
 		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
 	}
