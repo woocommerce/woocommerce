@@ -37,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 
 /**
@@ -144,9 +145,13 @@ class Bootstrap {
 			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
 		}
 
+		// Register block types on demand (priority 8, before do_blocks at 9) so blocks in a description are not empty.
+		add_filter( 'woocommerce_short_description', array( $this, 'maybe_register_blocks_from_content' ), 8 );
+
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
-			// Skip block/pattern registration on non-rendering requests. See BlockRegistrationContext.
+			// Skip eager block/pattern/asset registration on non-rendering requests; the block types needed for
+			// a description block are still registered on demand (see the hook above). See BlockRegistrationContext.
 			if ( ( new BlockRegistrationContext() )->should_register() ) {
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( BlockTypesController::class );
@@ -165,14 +170,55 @@ class Bootstrap {
 	}
 
 	/**
+	 * Register WooCommerce block types on demand when a description containing one is rendered.
+	 *
+	 * Eager block registration is skipped on non-rendering requests (Store API, REST, AJAX, webhooks), but
+	 * product and variation descriptions still run through do_blocks there, so a WooCommerce block in a
+	 * description would render empty. Hooked to woocommerce_short_description just before do_blocks.
+	 *
+	 * The detection also fires on a synced pattern reference (core/block, `wp:block`): the referenced pattern's
+	 * content is not available here without fetching it, so registration happens defensively in case it
+	 * contains a WooCommerce block; registering covers nested blocks at any depth.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $content The description content passed through the filter.
+	 * @return string The unchanged content.
+	 */
+	public function maybe_register_blocks_from_content( $content ) {
+		if ( is_string( $content ) && preg_match( '/<!--\s+wp:(woocommerce\/|block\s)/', $content ) ) {
+			$block_types_controller = $this->container->get( BlockTypesController::class );
+			if ( ! $block_types_controller->register_blocks_has_run() ) {
+				$block_types_controller->register_blocks();
+			}
+		}
+
+		return $content;
+	}
+
+	/**
 	 * See if files have been built or not.
 	 *
 	 * @return bool
 	 */
 	protected function is_built() {
+		$editor_asset = $this->is_block_editor_unified_assets_enabled_during_bootstrap() ? 'wc-block-library.js' : 'featured-product.js';
+
 		return file_exists(
-			$this->package->get_path( 'assets/client/blocks/featured-product.js' )
+			$this->package->get_path( 'assets/client/blocks/' . $editor_asset )
 		);
+	}
+
+	/**
+	 * Check whether unified block editor assets are enabled during plugin bootstrap.
+	 *
+	 * Feature definitions contain translated presentation strings and are not safe to use before init.
+	 *
+	 * @return bool
+	 */
+	private function is_block_editor_unified_assets_enabled_during_bootstrap(): bool {
+		// Keep this fallback aligned with `enabled_by_default` for unified block editor assets in FeaturesController.
+		return 'yes' === get_option( BlockEditorUnifiedAssets::OPTION_NAME, 'no' );
 	}
 
 	/**

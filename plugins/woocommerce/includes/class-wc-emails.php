@@ -309,9 +309,6 @@ class WC_Emails {
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
 		}
-		if ( FeaturesUtil::feature_is_enabled( 'abandoned_cart_recovery' ) ) {
-			$emails['WC_Email_Customer_Abandoned_Cart_Recovery'] = __DIR__ . '/emails/class-wc-email-customer-abandoned-cart-recovery.php';
-		}
 
 		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
@@ -670,14 +667,14 @@ class WC_Emails {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n"; // WPCS: XSS ok.
+						echo wp_kses_post( $field['label'] . ': ' . $field['value'] ) . "\n";
 					}
 				}
 			} else {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'], $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>'; // WPCS: XSS ok.
+						echo '<p><strong>' . wp_kses_post( $field['label'] ) . ':</strong> ' . wp_kses_post( $field['value'] ) . '</p>';
 					}
 				}
 			}

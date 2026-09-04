@@ -34,17 +34,26 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	private OrderWithdrawalFormView $form_view;
 
 	/**
+	 * Feature highlight notification.
+	 *
+	 * @var OrderWithdrawalFeatureHighlightNotification
+	 */
+	private OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification;
+
+	/**
 	 * Initialize dependencies.
 	 *
-	 * @param OrderWithdrawalFormProcessor $form_processor Form processor.
-	 * @param OrderWithdrawalFormView      $form_view Form view.
+	 * @param OrderWithdrawalFormProcessor                $form_processor                 Form processor.
+	 * @param OrderWithdrawalFormView                     $form_view                      Form view.
+	 * @param OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification Feature highlight notification.
 	 * @internal
 	 *
 	 * @since 11.1.0
 	 */
-	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
-		$this->form_processor = $form_processor;
-		$this->form_view      = $form_view;
+	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view, OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
+		$this->form_processor                 = $form_processor;
+		$this->form_view                      = $form_view;
+		$this->feature_highlight_notification = $feature_highlight_notification;
 	}
 
 	/**
@@ -58,6 +67,10 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
+		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'init', array( $this, 'maybe_register_feature_highlight_notification' ), 10, 0 );
 	}
 
 	/**
@@ -92,6 +105,17 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	public function maybe_flush_rewrite_rules( string $feature_id ): void {
 		if ( self::FEATURE_ID === $feature_id ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+	}
+
+	/**
+	 * Register the order withdrawal feature highlight notification if the feature is not enabled.
+	 *
+	 * @since 11.1.0
+	 */
+	public function maybe_register_feature_highlight_notification(): void {
+		if ( ! $this->is_enabled() ) {
+			$this->feature_highlight_notification->register();
 		}
 	}
 

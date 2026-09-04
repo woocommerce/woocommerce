@@ -6,11 +6,13 @@ sidebar_position: 7
 
 # Settings UI
 
-The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The settings UI is an experimental, opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
 It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
 ## Status
+
+> **The settings UI is experimental.** Until it is marked as stable, the PHP API under `Automattic\WooCommerce\Admin\Settings`, the schema format, and the `@woocommerce/settings-ui` package can change in backwards-incompatible ways in any release. Expect to update integrations between WooCommerce versions.
 
 -   The settings UI is behind the `settings-ui` feature flag.
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
@@ -47,7 +49,7 @@ add_filter(
 
 A `WC_Settings_Page` subclass opts in by returning a settings UI adapter from `get_settings_ui_page()`.
 
-For pages that only need native fields, use `LegacySettingsPageAdapter`:
+For pages that only need built-in fields, use `LegacySettingsPageAdapter`:
 
 ```php
 <?php
@@ -137,9 +139,9 @@ WooCommerce creates the settings UI adapter for registered sections internally. 
 
 Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
 
-### Provide a native Settings UI page for a registered section
+### Provide a custom Settings UI page for a registered section
 
-Sections with custom navigation, save handlers, or native Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
+Sections with custom navigation, save handlers, or custom Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
 
 ```php
 <?php
@@ -157,7 +159,7 @@ final class My_Plugin_Settings_Section extends SettingsSection {
 
 When `get_settings_ui_page()` returns a `SettingsUIPageInterface`, WooCommerce uses it directly for the registered section. Returning `null` keeps the default behavior: WooCommerce converts the section's legacy `get_settings()` array into a Settings UI schema.
 
-### Section navigation on native pages
+### Section navigation on custom pages
 
 The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. How it applies depends on where the page is registered:
 
@@ -176,7 +178,7 @@ $schema['shell']['sectionNavigation'] = array(
 );
 ```
 
-## Native field migration
+## DataForm field migration
 
 The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
 
@@ -197,6 +199,8 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 -   `info`
 
 Fields before the first `title` marker are placed into a default group automatically.
+
+For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select, radio, and multiselect fields can omit `options` or use an empty array. The Settings UI then renders the same empty choice set that the classic settings API accepts. When a field supplies options, WooCommerce validates their structure before rendering.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
@@ -254,6 +258,14 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 
 The settings embed script depends on the settings UI package and these handles only for the opted-in page. Other settings pages do not load it.
 
+WooCommerce validates the schema structure and declared script handles on the server. Structural checks cover identifiers, references, list and map shapes, values that cross the PHP-to-JavaScript boundary, and renderer metadata. PHP does not keep a list of supported field types or decide whether an HTML attribute such as `min`, `max`, or `step` applies to a field. The registered component and the browser own those rendering rules. The existing `WC_Admin_Settings` flow remains responsible for validating, sanitizing, and saving submitted values.
+
+Each declared script handle must be a non-empty string, and the script must be registered and enqueued before the Settings UI renders. WooCommerce trims surrounding whitespace and removes duplicate handles before loading them; whitespace-only handles are invalid. If the schema or a declared handle is invalid, WooCommerce renders the complete classic settings page in that response. PHP cannot inspect the JavaScript component registry. Extension-defined field types remain valid when their values use the Settings UI value contract and a matching `typeRenderers` entry renders them in the browser.
+
+The component registry exists only in the browser, after PHP has selected the Settings UI mount. The browser resolves a named component, a field override, and then a type renderer. A field without an explicit `component` can then use a built-in DataForm control. When a field declares `component`, that custom control is required: if no registry entry resolves it, the page fails closed instead of silently replacing it with a built-in control. A field without an explicit component also fails closed when it has no registered or built-in control. Component render errors use the same fail-closed state.
+
+The fail-closed state has no editable fallback and no Save action. Its error notice provides a **Use classic settings** link that preserves the current page and section and adds `wc_settings_ui=classic`. This is a user-initiated, request-only reload: it does not change the feature flag or automatically reload the page.
+
 ## Save adapters
 
 The settings UI supports two save adapters:
@@ -276,32 +288,22 @@ array(
 )
 ```
 
-## Rich group descriptions and actions
+## Group descriptions
 
-Group title rows can include sanitized description markup and structured header actions. Use this for contextual links such as documentation or secondary actions that belong to the whole group, rather than creating a display-only custom field.
+Group title rows can include a plain-text description. Use it for short context
+that applies to the whole group.
 
 ```php
 array(
-	'id'      => 'my_plugin_checkout',
-	'type'    => 'title',
-	'title'   => __( 'Checkout experience', 'my-plugin' ),
-	'desc'    => sprintf(
-		/* translators: %s: documentation link */
-		__( 'Choose where customers can use express payment methods. %s', 'my-plugin' ),
-		'<a href="' . esc_url( 'https://example.com/docs' ) . '">' . esc_html__( 'Learn more', 'my-plugin' ) . '</a>'
-	),
-	'actions' => array(
-		array(
-			'id'      => 'manage',
-			'label'   => __( 'Manage locations', 'my-plugin' ),
-			'href'    => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
-			'variant' => 'secondary',
-		),
-	),
+	'id'    => 'my_plugin_checkout',
+	'type'  => 'title',
+	'title' => __( 'Checkout experience', 'my-plugin' ),
+	'desc'  => __( 'Choose where customers can use express payment methods.', 'my-plugin' ),
 )
 ```
 
-Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
+Group descriptions render as plain text. Put links and other sanitized HTML in
+a field description instead.
 
 ## Page header
 
@@ -330,13 +332,13 @@ $schema['shell']['badges']   = array(
 
 The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.
 
-Use this page to verify the native migration path before testing a plugin-specific page such as WooPayments.
+Use this page to verify the DataForm migration path before testing a plugin-specific page such as WooPayments.
 
 ## Testing an extension integration
 
 1. Enable the `settings-ui` feature flag.
 2. Return a settings UI adapter from your `WC_Settings_Page` subclass.
-3. Start with native fields and confirm the page renders and saves.
+3. Start with built-in fields and confirm the page renders and saves.
 4. Add `component` metadata only for fields that need custom UI.
 5. Register scoped JavaScript components with `registerSettingsExtension()`.
 6. Return custom script handles from `get_script_handles()` so they load before mount.
@@ -348,6 +350,6 @@ In development, the settings UI logs warnings for common integration issues:
 
 -   The settings payload is missing.
 -   The `wc-settings-ui` script is missing for a settings UI mount.
--   A field declares a component that is not registered.
--   A field type is unsupported.
 -   A field declares an unknown save adapter.
+
+A field that declares an unregistered component, or whose type has no registered or built-in control, does not log a warning. The page fails closed instead, as described under [Load extension scripts before mount](#load-extension-scripts-before-mount).

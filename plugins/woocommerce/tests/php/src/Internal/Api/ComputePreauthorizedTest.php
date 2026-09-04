@@ -88,7 +88,7 @@ class ComputePreauthorizedTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox the autogen-emitted helper ANDs multiple inherited capabilities.
 	 */
-	public function test_autogen_helper_ands_merged_caps(): void {
+	public function test_autogen_helper_and_merged_caps(): void {
 		// The MergedCapsQuery requires manage_options AND edit_posts.
 		// `editor` has edit_posts but not manage_options.
 		$admin      = $this->principal_with_role( 'administrator' );

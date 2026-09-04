@@ -65,17 +65,14 @@ class OpcacheFileExpiry {
 	 * Action Scheduler callback: delete expired files and reschedule.
 	 *
 	 * Immediate reschedule when files were deleted (drain the backlog), 24h
-	 * otherwise. Skipped when no dual-API endpoint is active (core's feature
-	 * flag off and no plugin endpoints registered), since then nothing writes
-	 * to the cache; {@see self::ensure_scheduled()} restarts the cycle when
-	 * an endpoint becomes active again.
+	 * otherwise. Skipped when the feature is disabled.
 	 *
 	 * @internal
 	 */
 	public static function handle_cleanup_action(): void {
 		$interval = self::delete_expired_files() > 0 ? 1 : DAY_IN_SECONDS;
 
-		if ( ! Main::is_enabled() && ! Main::has_registered_plugin_endpoints() ) {
+		if ( ! Main::is_enabled() ) {
 			return;
 		}
 

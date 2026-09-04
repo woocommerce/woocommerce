@@ -22,6 +22,8 @@ import { isProductResponseItem } from '@woocommerce/entities';
 import type {
 	AttributeTerm,
 	ProductResponseAttributeItem,
+	SelectableItem,
+	SelectableItemsContext,
 } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import {
@@ -41,10 +43,6 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
-import type {
-	SelectableItem,
-	SelectableItemsContext,
-} from '../../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
@@ -345,22 +343,21 @@ export default function AttributeItemTemplateEdit(
 			</InspectorControls>
 
 			<div { ...blockProps }>
-				{ productAttributes.map( ( attribute ) => (
+				{ productAttributes.map( ( attribute, index ) => (
+					// Identify rows by position, not by `attribute.id`: the
+					// Store API reports 0 for every non-taxonomy attribute, so
+					// custom attributes would all share the same identity.
 					<CustomDataProvider
-						key={ attribute.id }
+						key={ index }
 						id="attribute"
 						data={ attribute }
 					>
 						<AttributeItem
 							blocks={ blocks }
 							isSelected={
-								( selectedAttributeItem ||
-									productAttributes[ 0 ]?.id ) ===
-								attribute.id
+								( selectedAttributeItem ?? 0 ) === index
 							}
-							onSelect={ () =>
-								setSelectedAttributeItem( attribute.id )
-							}
+							onSelect={ () => setSelectedAttributeItem( index ) }
 						/>
 					</CustomDataProvider>
 				) ) }

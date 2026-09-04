@@ -6,8 +6,9 @@
 		"moduleResolution": "node",
 		"baseUrl": ".",
 		"paths": {
-			"@woocommerce/e2e-utils": [
-				"./utils/blocks"
+			"@woocommerce/e2e-utils": [ "./utils/blocks" ],
+			"@woocommerce/stores/woocommerce/cart": [
+				"../../client/blocks/assets/js/base/stores/woocommerce/cart"
 			]
 		},
 		"esModuleInterop": true,
@@ -20,24 +21,9 @@
 		"noEmit": true,
 		"allowJs": true,
 		"checkJs": false,
-		"lib": [
-			"dom",
-			"esnext"
-		],
-		"types": [
-			"node"
-		]
+		"lib": [ "dom", "esnext" ],
+		"types": [ "node" ]
 	},
-	"include": [
-		"**/*"
-	],
-	"exclude": [
-		"node_modules",
-		"test-results",
-		"playwright-report",
-		"tests/blocks/**/*",
-		"utils/blocks/**/*",
-		"fixtures/blocks-setup.ts",
-		"test-data/blocks/**/*"
-	]
+	"include": [ "**/*" ],
+	"exclude": [ "node_modules", "test-results", "playwright-report" ]
 }

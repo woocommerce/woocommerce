@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Direction-isolate the currency symbol in wc_price() so RTL-script symbols (e.g. Lebanese Pound) respect the configured currency position and no longer bleed into surrounding text.

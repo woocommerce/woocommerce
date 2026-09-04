@@ -78,6 +78,10 @@ plugins/woocommerce/
 
 - Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
 
+**CSS:**
+
+- Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.
+
 ## Development Workflow
 
 1. Make code changes
@@ -140,6 +144,15 @@ When creating PRs, **always use the template** from `.github/PULL_REQUEST_TEMPLA
 
 For bug fixes, always reference the PR that introduced the bug using: `Bug introduced in PR #XXXXX.`
 
+### Review Requirements
+
+PRs against `trunk` require an approving review from a human by default. `docs/contribution/contributing/deciding-pr-high-impact.md` defines when that requirement may be bypassed (clearly low-impact changes: docs, typos, tests, tooling outside the release package) and when an independent human review is always required (anything on the High-Impact list, plus security, privacy, data integrity, backward compatibility, and performance-sensitive paths).
+
+Two rules matter for agents:
+
+- Never present an AI review, whether your own or another agent's, as satisfying the human review requirement. The author and their agents are a single workflow, not independent reviewers.
+- When a PR qualifies as High-Impact, say so and recommend requesting an independent human review; never suggest merging it without one.
+
 ## Testing Environment
 
 - PHP tests run in Docker via `wp-env`
@@ -173,6 +186,12 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Hooks and filters are public contracts.** Every `do_action` and `apply_filters` call is an interface that third-party callbacks depend on. Removing a hook, renaming it, or removing/reordering its arguments breaks every attached callback. Changing *when* or *whether* a hook fires can break consumers that depend on its timing. Additive is the safe path: append new arguments at the end, never remove or reorder existing ones. To retire a hook, fire it through `do_action_deprecated()` / `apply_filters_deprecated()` for a deprecation window instead of deleting it.
 
+**Never trust data that flows through hooks.** Keep hook callback parameters untyped and validate or coerce the value before passing it to strictly typed code, since any callback can receive a value another one produced. And when firing a filter, validate the final return value before using it, since any callback in the chain can return the wrong thing.
+
+**Overridable classes are contracts too, including which internal methods get called.** Extensions subclass WooCommerce data stores and handler classes and override individual methods. Adding a fast path or skip that avoids calling an overridable method silently disables those overrides even though no signature changed: the extension's code simply stops running. When optimizing such a class, ensure overridable methods are still invoked on every code path, or treat the change as breaking and test against extensions known to override it.
+
+**Registered script and style handles are public contracts.** Third-party code enqueues WooCommerce handles and lists them as dependencies, including handles that were only ever registered incidentally. Renaming a handle breaks those consumers. To rename with a compatibility window, register the legacy handle as an alias that depends on the new handle (the same pattern WordPress core uses for `jquery` → `jquery-core`); do not register the same file under both handles, or pages with mixed consumers will load it twice.
+
 **Do not assume global state.** Code can run in admin, REST, CLI, cron, webhook, and front-end contexts, and not all of them set the globals a front-end request does (`$post`, `$wp_query`, an initialized session or cart). A newly introduced read of a global, or of `WC()->…` state, in a path reachable outside a standard request is a fatal or a silent misbehavior in the contexts that do not set it. Guard the exact dependency explicitly: use `function_exists`/`class_exists` for symbols, `isset` for variables, `did_action` for lifecycle state, and verify that `WC()` and the required component are initialized before dereferencing `WC()->…`.
 
 **Do not assume single-site.** Multisite changes where data lives: site-scoped vs network-scoped options (`get_option` vs `get_site_option`), per-site tables, user roles and capabilities, and upload paths all differ. A change that reads or writes site state must state in its PR whether it behaves correctly under multisite — and if it was not tested there, say so explicitly.
@@ -186,6 +205,44 @@ WordPress exposes more contracts than class and function signatures. The followi
 3. Prefer the additive path (new optional method, appended hook argument, new symbol + deprecation) over changing what exists.
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
 5. If you cannot establish the impact, stop and flag it to the user as needing review.
+
+## Country and State (Region) Data
+
+Country and state/province lists live in `plugins/woocommerce/i18n/countries.php` and `plugins/woocommerce/i18n/states.php` (see `plugins/woocommerce/i18n/README.md`).
+
+**Follow the CLDR standard.** Codes and names should match the [Unicode CLDR](https://cldr.unicode.org/) project. CLDR is the actively maintained, widely used source for this kind of data, so following it keeps WooCommerce consistent with the wider ecosystem and avoids the drift and upkeep of a homegrown list. If CLDR doesn't yet have the code or name a region needs, propose the change to CLDR first rather than diverging from it.
+
+**Adding new codes is safe. Renaming or removing existing ones is not.** Do that only when CLDR itself has changed, and expect it to need a migration. State/country codes are stored in orders, shipping zones, tax rates, and store settings. Editing `states.php`/`countries.php` only changes what new data looks like. Every already-stored old code is left behind, no longer matching the dropdown or validation that now expects the new one.
+
+To rename subdivision codes, use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing a map of old codes to new ones. See `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. The helper only covers subdivision codes, so country or other changes might need a custom migration routine. Purely additive changes (new codes, no renames) don't need a migration.
+
+## Database Migrations
+
+Database migrations live in `WC_Install::$db_updates`; read that class for the current mechanics before adding one. Two invariants have broken real releases when violated:
+
+- Migration keys are one-shot: sites that updated past a key never re-run it. A migration added after a prerelease of the same version has shipped needs a new suffixed key (see existing examples in `$db_updates`), and a key must never be ahead of the version it ships in.
+- Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites; ship a migration or remove the flag.
+
+## Comments and Docblocks
+
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+
+When writing a comment or docblock description:
+
+- **Keep it short.** 3-4 lines is the target for a docblock description (`@param`/`@return`/`@since` lines are separate and don't count against this). If it's running longer, the comment is likely explaining something the code itself should make obvious. Simplify the code first.
+- **Use plain language.** Say what the code does or why in ordinary words. Avoid dense or clever phrasing, and avoid vague jargon for guard conditions (e.g. "gates", "gating"). Say "guard", "check", "only when" instead.
+- **Don't force-wrap at a fixed column.** This repo has no enforced 80- or 120-column limit on comment prose (`.markdownlint.json` disables `MD013`, and there's no PHPCS `LineLength` override), and plenty of existing docblocks already run past both. Match the wrap width already used in the surrounding file instead of imposing your own.
+- **Decorative comments are worse than none.** A comment that restates the next line, marks an obvious section (`// Loop over items`), or pads a docblock out to look thorough adds noise a future reader has to read past to find the comments that actually matter.
+
+## Enum-Style Constants (`src/Enums/`)
+
+WooCommerce names its enumerated string vocabularies — order statuses, product types, stock statuses, settings option values, and more — as `final` classes of `public const` strings under `Automattic\WooCommerce\Enums` (`plugins/woocommerce/src/Enums/`, see its `README.md` for the full list). Native PHP enums are not an option: the minimum supported PHP version is 7.4, and the raw string values are the contract persisted in databases and consumed by extensions.
+
+- **Use the existing constants.** When writing code that compares or assigns one of these values, reference the constant (e.g. `OrderStatus::COMPLETED`, `ProductType::SIMPLE`), not the raw string literal. During review, flag new raw literals for which a constant already exists.
+- **New vocabularies get a class by default.** When introducing a new fixed set of string values (including new settings option values), add a class in `src/Enums/`: one `final` class per concept, explicit `public` visibility on every constant, a docblock on every value, no behavior. List it in `src/Enums/README.md`. For large adoptions, introduce the class and adopt it in separate PRs to keep diffs reviewable.
+- **Constants name values; they never change them.** The string is the contract and the constant is a permanent alias for it. Never change a constant's value, and never rename or remove one — deprecate instead (see Backward Compatibility). These constants are public API that extensions may rely on.
+- **Respect the plugin lifecycle.** Some code paths (REST controllers, report queries) can run during install or upgrade, before the autoloader resolves classes under `src/`; referencing an enum class there is a fatal (`Class ... not found`). Code that can execute mid-install or mid-upgrade keeps its string literals.
+- **Near-duplicate vocabularies are distinct classes on purpose.** `OrderStatus` holds the unprefixed values (`completed`) most WooCommerce APIs expect; `OrderInternalStatus` holds the `wc-`-prefixed variants (`wc-completed`) WordPress stores. Reach for the class that matches what the consuming API expects.
 
 ## Block Development
 
@@ -251,6 +308,8 @@ This is part of the WooCommerce monorepo:
 ## Automated Code Reviews
 
 For code review standards and critical violations to flag, use the **`woocommerce-code-review` skill**.
+
+Automated reviews complement the [Review Requirements](#review-requirements); they never satisfy the human review requirement.
 
 ## Notes for AI Agents
 

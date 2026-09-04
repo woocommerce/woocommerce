@@ -83,7 +83,7 @@ const WCAddonsTour = () => {
 	) => {
 		setShowTour( false );
 		// mark tour as completed
-		updateOptions( {
+		void updateOptions( {
 			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
 		} );
 		// remove `tutorial` from search query, so it's not shown on page refresh

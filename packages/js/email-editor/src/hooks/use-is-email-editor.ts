@@ -2,13 +2,19 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
 import { storeName } from '../store';
 import { EmailTemplate } from '../store/types';
+
+/**
+ * Store name of the WordPress editor store.
+ * Using a hardcoded string allows us to avoid the import.
+ * See: https://github.com/woocommerce/woocommerce/issues/47831
+ */
+const CORE_EDITOR_STORE = 'core/editor';
 
 /**
  * Hook to detect if we are currently in the email editor context.
@@ -28,13 +34,18 @@ export function useIsEmailEditor(): boolean {
 			return false;
 		}
 
+		// Get the current post information from the WordPress editor when available.
+		const editorSelectors = select( CORE_EDITOR_STORE );
+		if ( ! editorSelectors ) {
+			return false;
+		}
+
+		const currentPostId = editorSelectors.getCurrentPostId();
+		const currentPostType = editorSelectors.getCurrentPostType();
+
 		// Get the email editor store's post information
 		const emailPostId = emailEditorStore.getEmailPostId();
 		const emailPostType = emailEditorStore.getEmailPostType();
-
-		// Get the current post information from the WordPress editor
-		const currentPostId = select( editorStore ).getCurrentPostId();
-		const currentPostType = select( editorStore ).getCurrentPostType();
 
 		// Check if the current post matches the email editor post
 		const currentPostMatch =

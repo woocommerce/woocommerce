@@ -1,0 +1,4 @@
+Significance: minor
+Type: security
+
+Bound what the unauthenticated tracking proxy endpoint accepts: events per request, properties per event, array members, value and name lengths, an encoded payload budget per event, and a ceiling on the pixel URL that is fired.

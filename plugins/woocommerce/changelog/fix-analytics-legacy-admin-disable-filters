@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect legacy WooCommerce Admin filters when disabling analytics.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep email galleries in normal document flow so the block after a gallery (e.g. a heading) keeps its vertical spacing. The gallery wrapper table's align="left" rendered as a float in email clients, pulling the gallery out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS.

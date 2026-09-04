@@ -29,8 +29,8 @@ class Payments {
 	const FROM_ADDITIONAL_PAYMENTS_TASK = 'WCADMIN_ADDITIONAL_PAYMENT_TASK';
 	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
 
-	private const PROVIDERS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
-	private const PROVIDERS_REQUEST_CACHE_KEY   = 'provider_lists';
+	private const PROVIDERS_REQUEST_CACHE_GROUP = PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP;
+	private const PROVIDERS_REQUEST_CACHE_KEY   = PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY;
 
 	/**
 	 * The payment providers service.

@@ -20,6 +20,7 @@ import {
 	activatePersonalizationTagsReplacing,
 } from './core/rich-text';
 import { enhanceButtonsBlock } from './core/buttons';
+import { enhanceEmbedBlock } from './core/embed';
 import {
 	alterSupportConfiguration,
 	removeBlockStylesFromAllBlocks,
@@ -47,6 +48,7 @@ export function initBlocks() {
 	disableColumnsLayoutAndEnhanceColumnsBlock();
 	disableGroupVariations();
 	enhanceButtonsBlock();
+	enhanceEmbedBlock();
 	enhancePostContentBlock();
 	enhanceQuoteBlock();
 	extendRichTextFormats();

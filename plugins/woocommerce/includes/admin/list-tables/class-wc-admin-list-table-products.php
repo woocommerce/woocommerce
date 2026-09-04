@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
@@ -58,6 +59,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
+		// On posts_clauses, which core applies after every posts_orderby priority, so no posts_orderby
+		// callback sees the relevance clause. The late priority gives earlier posts_clauses callbacks
+		// that same unmodified view.
+		add_filter( 'posts_clauses', array( $this, 'order_search_results' ), 9999, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
 		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
@@ -235,7 +240,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render column: thumb.
 	 */
 	protected function render_thumb_column() {
-		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // WPCS: XSS ok.
+		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_image() returns HTML, including output from the public product image filter.
 	}
 
 	/**
@@ -263,6 +268,19 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
 
+		/**
+		 * Product represented by the current list-table row.
+		 * Narrow the inherited object type without adding a PHPStan baseline entry.
+		 * In future we should correct the type of $this->object.
+		 *
+		 * @var WC_Product $product
+		 */
+		$product        = $this->object;
+		$sale_date_from = $product->get_date_on_sale_from( 'edit' );
+		$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
+		$sale_date_from = $sale_date_from ? date_i18n( 'Y-m-d', $sale_date_from->getOffsetTimestamp() ) : '';
+		$sale_date_to   = $sale_date_to ? date_i18n( 'Y-m-d', $sale_date_to->getOffsetTimestamp() ) : '';
+
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
 		/* Custom inline data for woocommerce. */
 		echo '
@@ -272,6 +290,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="global_unique_id">' . esc_html( $this->object->get_global_unique_id() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
+				<div class="sale_price_dates_from">' . esc_html( $sale_date_from ) . '</div>
+				<div class="sale_price_dates_to">' . esc_html( $sale_date_to ) . '</div>
 				<div class="weight">' . esc_html( $this->object->get_weight() ) . '</div>
 				<div class="length">' . esc_html( $this->object->get_length() ) . '</div>
 				<div class="width">' . esc_html( $this->object->get_width() ) . '</div>
@@ -443,7 +463,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				)
 			);
 		} else {
-			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
+			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 			$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
 			?>
 			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
@@ -461,7 +481,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @since 3.5.0
 	 */
 	protected function render_products_type_filter() {
-		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
+		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . esc_html__( 'Filter by product type', 'woocommerce' ) . '</option>';
 
 		foreach ( wc_get_product_types() as $value => $label ) {
@@ -482,7 +502,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
-		echo $output; // WPCS: XSS ok.
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
 	}
 
 	/**
@@ -491,7 +511,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @since 3.5.0
 	 */
 	public function render_products_stock_status_filter() {
-		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // WPCS: input var ok, sanitization ok.
+		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 		$stock_statuses       = wc_get_product_stock_status_options();
 		$output               = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
@@ -500,7 +520,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
-		echo $output; // WPCS: XSS ok.
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
 	}
 
 	/**
@@ -548,11 +568,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function search_label( $query ) {
 		global $pagenow, $typenow;
 
-		if ( 'edit.php' !== $pagenow || 'product' !== $typenow || ! get_query_var( 'product_search' ) || ! isset( $_GET['s'] ) ) { // WPCS: input var ok.
+		if ( 'edit.php' !== $pagenow || 'product' !== $typenow || ! get_query_var( 'product_search' ) || ! isset( $_GET['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 			return $query;
 		}
 
-		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
+		return wc_clean( wp_unslash( $_GET['s'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 	}
 
 	/**
@@ -617,10 +637,16 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		// Search using CRUD.
 		if ( ! empty( $query_vars['s'] ) ) {
+			$search_term                  = wc_clean( wp_unslash( $query_vars['s'] ) );
 			$data_store                   = WC_Data_Store::load( 'product' );
-			$ids                          = $data_store->search_products( wc_clean( wp_unslash( $query_vars['s'] ) ), '', true, true );
+			$ids                          = $data_store->search_products( $search_term, '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );
 			$query_vars['product_search'] = true;
+			$default_search_order         = $this->get_default_search_order( $query_vars );
+			if ( null !== $default_search_order ) {
+				$query_vars['product_search_term']          = $search_term;
+				$query_vars['product_search_default_order'] = $default_search_order;
+			}
 			unset( $query_vars['s'] );
 		}
 
@@ -637,6 +663,239 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function posts_clauses( $args, $query ) {
 
 		return $args;
+	}
+
+	/**
+	 * Prioritize title matches in unsorted product searches.
+	 *
+	 * Runs on posts_clauses rather than posts_orderby so that every posts_orderby callback, at any
+	 * priority, still observes the ORDER BY clause core generated. Reading it that late means it may
+	 * already carry third-party ordering, so orderby_leads_with() decides whether ranking still leads.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array    $clauses Array of SELECT statement pieces (from, where, orderby, etc).
+	 * @param WP_Query $query   WP_Query instance.
+	 * @return array
+	 */
+	public function order_search_results( $clauses, $query ) {
+		// Another callback produced this array, so confirm the piece being read is still a clause.
+		if ( ! is_array( $clauses ) || ! isset( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
+			return $clauses;
+		}
+
+		$orderby              = $clauses['orderby'];
+		$search_term          = $query->get( 'product_search_term' );
+		$default_search_order = $query->get( 'product_search_default_order' );
+		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
+			return $clauses;
+		}
+
+		global $wpdb;
+		if ( 'date' === $default_search_order ) {
+			if ( $query->get( 'orderby' ) || ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_date DESC" ) ) {
+				return $clauses;
+			}
+		} elseif ( 'modified' === $default_search_order ) {
+			$post_status = $query->get( 'post_status' );
+			$order       = $query->get( 'order' );
+			if (
+				'modified' !== $query->get( 'orderby' )
+				|| ! is_string( $post_status )
+				|| ! is_string( $order )
+				|| ( ! ( 'draft' === $post_status && 'DESC' === $order ) && ! ( 'pending' === $post_status && 'ASC' === $order ) )
+				|| ! $this->orderby_leads_with( $orderby, "{$wpdb->posts}.post_modified {$order}" )
+			) {
+				return $clauses;
+			}
+		} else {
+			return $clauses;
+		}
+
+		$case_clause = $this->build_title_match_case_clause( $search_term );
+		if ( '' === $case_clause ) {
+			return $clauses;
+		}
+
+		$clauses['orderby'] = $case_clause . ', ' . $orderby;
+
+		return $clauses;
+	}
+
+	/**
+	 * Determine whether a clause still leads with the ordering core generated for this view.
+	 *
+	 * A third party that appends a tiebreak leaves core's ordering in charge of the primary sort, so
+	 * ranking can still lead. One that prepends or replaces has taken the primary sort over, and
+	 * ranking defers to it. Only a comma may follow the core clause, so a longer token that merely
+	 * starts the same way is not mistaken for it.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $orderby      Clause observed on the query.
+	 * @param string $core_orderby Clause core generated for this view.
+	 * @return bool
+	 */
+	private function orderby_leads_with( $orderby, $core_orderby ) {
+		return $orderby === $core_orderby || 0 === strpos( $orderby, $core_orderby . ',' );
+	}
+
+	/**
+	 * Build the relevance expression that ranks title matches ahead of the remaining search results.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $search_term Search term the product matcher already ran against.
+	 * @return string CASE expression, or an empty string when the term yields no title predicates.
+	 */
+	private function build_title_match_case_clause( $search_term ) {
+		global $wpdb;
+
+		// Group exactly as search_products() does, so ranking and matching agree on what an OR group is.
+		// \s+or\s+ alone would not: \s also matches \x0B and \x0C, which wc_clean() leaves in place.
+		$search_groups = stristr( $search_term, ' or ' ) ? preg_split( '/\s+or\s+/i', $search_term ) : array( $search_term );
+		if ( ! $search_groups ) {
+			return '';
+		}
+
+		$title_match_groups = array();
+		foreach ( $search_groups as $search_group ) {
+			$title_match_queries = array();
+			foreach ( $this->parse_search_terms( $search_group ) as $title_search_term ) {
+				$title_match_queries[] = $wpdb->prepare(
+					"{$wpdb->posts}.post_title LIKE %s",
+					'%' . $wpdb->esc_like( $title_search_term ) . '%'
+				);
+			}
+
+			if ( $title_match_queries ) {
+				$title_match_groups[] = '(' . implode( ' AND ', $title_match_queries ) . ')';
+			}
+		}
+
+		if ( ! $title_match_groups ) {
+			return '';
+		}
+
+		return 'CASE WHEN (' . implode( ' OR ', $title_match_groups ) . ') THEN 0 ELSE 1 END';
+	}
+
+	/**
+	 * Get the default ordering mode for a product search.
+	 *
+	 * @param array $query_vars Query variables.
+	 * @return string|null
+	 */
+	private function get_default_search_order( $query_vars ) {
+		$orderby = $query_vars['orderby'] ?? '';
+		if ( ! is_string( $orderby ) ) {
+			return null;
+		}
+
+		if ( '' === $orderby ) {
+			return 'date';
+		}
+
+		// Draft and Pending views receive modified ordering from wp_edit_posts_query() only when no orderby was requested.
+		if ( isset( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence check distinguishes explicit sorting from the core default.
+			return null;
+		}
+
+		$post_status = $query_vars['post_status'] ?? '';
+		$order       = $query_vars['order'] ?? '';
+		if ( 'modified' !== strtolower( $orderby ) || ! is_string( $post_status ) || ! is_string( $order ) ) {
+			return null;
+		}
+
+		$order = $order ? strtoupper( $order ) : 'DESC';
+		if ( ( 'draft' === $post_status && 'DESC' === $order ) || ( 'pending' === $post_status && 'ASC' === $order ) ) {
+			return 'modified';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse a product search group using WooCommerce search-term rules.
+	 *
+	 * @param string $search_group Search group without OR separators.
+	 * @return string[]
+	 */
+	private function parse_search_terms( $search_group ) {
+		// Mirrors WP_Query::parse_search_terms(): each match is either a double-quoted phrase (closed by
+		// a quote or the end of the string) or a run of characters delimited by tab, space, double quote,
+		// comma, or plus. The `u` modifier is intentionally omitted for parity with WordPress core.
+		if ( ! preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $search_group, $matches ) ) {
+			return array( $search_group );
+		}
+
+		$search_terms = $this->get_valid_search_terms( $matches[0] );
+		$count        = count( $search_terms );
+
+		return 9 < $count || 0 === $count ? array( $search_group ) : $search_terms;
+	}
+
+	/**
+	 * Remove unsuitable product search terms.
+	 *
+	 * Mirrors WP_Query::get_search_terms(), including its stopword and single-character rules.
+	 *
+	 * @param string[] $terms Search terms.
+	 * @return string[]
+	 */
+	private function get_valid_search_terms( $terms ) {
+		$valid_terms = array();
+		$stopwords   = $this->get_search_stopwords();
+
+		foreach ( $terms as $term ) {
+			// Keep before/after spaces when term is for exact match, otherwise trim quotes and spaces.
+			if ( preg_match( '/^".+"$/', $term ) ) {
+				$term = trim( $term, "\"'" );
+			} else {
+				$term = trim( $term, "\"' " );
+			}
+
+			if ( empty( $term ) || ( 1 === strlen( $term ) && preg_match( '/^[a-z\-]$/i', $term ) ) ) {
+				continue;
+			}
+
+			if ( in_array( wc_strtolower( $term ), $stopwords, true ) ) {
+				continue;
+			}
+
+			$valid_terms[] = $term;
+		}
+
+		return $valid_terms;
+	}
+
+	/**
+	 * Retrieve stopwords used when parsing product search terms.
+	 *
+	 * @return string[]
+	 */
+	private function get_search_stopwords() {
+		// Translators: This is a comma-separated list of very common words that should be excluded from a search, like a, an, and the. These are usually called "stopwords". You should not simply translate these individual words into your language. Instead, look for and provide commonly accepted stopwords in your language.
+		$stopwords = array_map(
+			'wc_strtolower',
+			array_map(
+				'trim',
+				explode(
+					',',
+					_x(
+						'about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,www',
+						'Comma-separated list of search stopwords in your language',
+						'woocommerce'
+					)
+				)
+			)
+		);
+
+		/** This filter is documented in wp-includes/class-wp-query.php. */
+		$filtered_stopwords = apply_filters( 'wp_search_stopwords', $stopwords ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- The hook is documented by WordPress.
+
+		// A callback can return anything; keep only strings so the strict in_array() below stays safe.
+		return is_array( $filtered_stopwords ) ? array_filter( $filtered_stopwords, 'is_string' ) : $stopwords;
 	}
 
 	/**
@@ -669,7 +928,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -681,7 +940,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -693,7 +952,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_sku_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.sku ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -705,7 +964,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_sku_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.sku DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -717,7 +976,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_cogs_value_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -729,7 +988,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_cogs_value_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.cogs_total_value DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -741,7 +1000,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_global_unique_id_asc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
@@ -753,7 +1012,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function order_by_global_unique_id_desc_post_clauses( $args ) {
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['orderby'] = ' wc_product_meta_lookup.global_unique_id DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
@@ -765,7 +1024,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_downloadable_post_clauses( $args ) {
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['where'] .= ' AND wc_product_meta_lookup.downloadable=1 ';
 		return $args;
 	}
@@ -777,7 +1036,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_virtual_post_clauses( $args ) {
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] ?? '' );
 		$args['where'] .= ' AND wc_product_meta_lookup.virtual=1 ';
 		return $args;
 	}
@@ -791,8 +1050,58 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Join before looking at the value at all. This filter is registered on a non-empty raw
+			// stock_status, and has joined the lookup table for every such request since the feature
+			// shipped; callbacks running after it rely on the alias existing. Values that normalise to
+			// nothing ( ' ', '<b>', 'stock_status[]=' ) still reach here, so deciding the join after
+			// normalising would drop it for exactly the requests that used to keep it.
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] ?? '' );
+
+			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			// The request can shape this as an array, but the filter only ever describes a single
+			// status, so the first value wins. That is deliberate: multi-value requests previously
+			// matched the whole catalogue, because wpdb::prepare() rejects the surplus argument and
+			// returns no clause at all. Anything that is still not a string normalises to '', which
+			// matches no product -- the behaviour those requests have always had.
+			if ( is_array( $stock_status ) ) {
+				$stock_status = reset( $stock_status );
+			}
+			if ( ! is_string( $stock_status ) ) {
+				$stock_status = '';
+			}
+
+			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+				// Only published variations qualify their parent for this discoverability filter.
+				// Other statuses retain normal aggregate-parent behavior.
+				$args['where'] .= $wpdb->prepare(
+					" AND {$wpdb->posts}.ID IN (
+						SELECT stock_status_products.product_id
+						FROM (
+							SELECT DISTINCT CAST(
+								CASE
+									WHEN stock_status_posts.post_type = 'product_variation' THEN stock_status_posts.post_parent
+									ELSE stock_status_lookup.product_id
+								END AS UNSIGNED
+							) AS product_id
+							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
+							INNER JOIN {$wpdb->posts} stock_status_posts
+								ON stock_status_posts.ID = stock_status_lookup.product_id
+							WHERE stock_status_lookup.stock_status = %s
+								AND (
+									stock_status_posts.post_type = 'product'
+									OR (
+										stock_status_posts.post_type = 'product_variation'
+										AND stock_status_posts.post_status = 'publish'
+									)
+								)
+						) stock_status_products
+					) ",
+					$stock_status
+				);
+			} else {
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
+			}
 		}
 		return $args;
 	}
@@ -805,6 +1114,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	private function append_product_sorting_table_join( $sql ) {
 		global $wpdb;
+
+		// Another posts_clauses callback produced this clause, so it is not guaranteed to be a string.
+		// Keep anything that can become one: discarding a join while the WHERE that depends on it
+		// survives would leave a broken query rather than a merely unfiltered one.
+		if ( ! is_string( $sql ) ) {
+			$stringable = is_scalar( $sql ) || ( is_object( $sql ) && method_exists( $sql, '__toString' ) );
+			$sql        = $stringable ? (string) $sql : '';
+		}
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
 			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
@@ -821,7 +1138,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function add_variation_parents_for_shipping_class( $pieces, $wp_query ) {
 		global $wpdb;
-		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) { // WPCS: input var ok.
+		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filters; inputs are unslashed and sanitized.
 			$replaced_where   = str_replace( ".post_type = 'product'", ".post_type = 'product_variation'", $pieces['where'] );
 			$pieces['where'] .= " OR {$wpdb->posts}.ID in (
 				SELECT {$wpdb->posts}.post_parent FROM

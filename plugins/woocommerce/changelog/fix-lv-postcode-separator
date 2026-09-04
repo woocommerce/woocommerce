@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept Latvian postcodes that carry the LV prefix without a hyphen, restoring values that validated before postcode rules were added for Latvia.

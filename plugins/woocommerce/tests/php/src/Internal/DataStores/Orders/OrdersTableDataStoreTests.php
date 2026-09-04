@@ -119,7 +119,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		remove_all_filters( 'woocommerce_load_order_cogs_value' );
 		remove_all_filters( 'woocommerce_save_order_cogs_value' );
-		wc()->cart->empty_cart();
 		parent::tearDown();
 	}
 
@@ -3059,7 +3058,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * Helper function to simulate adding meta within a adding meta callback.
 	 * @param int    $meta_id Meta ID.
 	 * @param int    $post_id Post ID.
 	 * @param string $meta_key Meta key.
@@ -4264,5 +4263,39 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$order->delete();
 		$product->delete();
+	}
+
+	/**
+	 * @testDox Order notes (and their commentmeta) are deleted immediately when an order is deleted, regardless of whether sync was enabled when the order was created or when it's deleted.
+	 *
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *
+	 * @param bool $sync_enabled_at_creation Whether sync was enabled when the order (and its backup post) was created.
+	 * @param bool $sync_enabled_at_deletion Whether sync is enabled when the order is deleted.
+	 */
+	public function test_order_notes_deleted_regardless_of_sync_state( bool $sync_enabled_at_creation, bool $sync_enabled_at_deletion ) {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$sync_enabled_at_creation ? $this->enable_cot_sync() : $this->disable_cot_sync();
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+		$note_id  = $order->add_order_note( 'Test note' );
+		add_comment_meta( $note_id, 'test_key', 'test_value' );
+
+		$this->assertSame( 'test_value', get_comment_meta( $note_id, 'test_key', true ), 'Commentmeta should exist before the order is deleted' );
+
+		$expected_post_type = $sync_enabled_at_creation ? 'shop_order' : DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE;
+		$this->assertEquals( $expected_post_type, get_post_type( $order_id ) );
+
+		$sync_enabled_at_deletion ? $this->enable_cot_sync() : $this->disable_cot_sync();
+		$order->delete( true );
+
+		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
+		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
 	}
 }

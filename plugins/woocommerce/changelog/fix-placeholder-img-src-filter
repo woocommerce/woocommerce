@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure the woocommerce_placeholder_img_src filter applies to attachment-based product placeholders.

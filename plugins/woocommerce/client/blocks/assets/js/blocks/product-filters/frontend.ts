@@ -2,12 +2,12 @@
  * External dependencies
  */
 import * as iAPI from '@wordpress/interactivity';
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
-import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 import type {
 	ActiveFilterItem,
 	FilterItemFields,
@@ -179,6 +179,11 @@ const productFiltersStore = {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
 		},
+		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
+			if ( event.target === event.currentTarget ) {
+				actions.closeOverlay();
+			}
+		},
 		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( context.isOverlayOpened && event.key === 'Escape' ) {
@@ -208,7 +213,7 @@ const productFiltersStore = {
 			} else {
 				selectFilter( item );
 			}
-			actions.navigate();
+			void actions.navigate();
 		},
 		*navigate() {
 			const context = getServerContext
@@ -316,7 +321,6 @@ const productFiltersStore = {
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;

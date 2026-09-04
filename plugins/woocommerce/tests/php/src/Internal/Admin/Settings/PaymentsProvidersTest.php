@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGate
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\CorePayPalGatewayTrait;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -22,6 +23,7 @@ use WC_Gateway_Paypal;
  * @class PaymentsProviders
  */
 class PaymentsProvidersTest extends WC_Unit_Test_Case {
+	use CorePayPalGatewayTrait;
 
 	/**
 	 * @var PaymentsProviders
@@ -41,13 +43,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
-	 * The previous store currency value to restore in tearDown.
-	 *
-	 * @var string|null
-	 */
-	private $prev_currency;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -55,9 +50,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
-
-		// Save the current currency to restore in tearDown.
-		$this->prev_currency = get_option( 'woocommerce_currency', null );
 
 		$this->mock_extension_suggestions = $this->getMockBuilder( ExtensionSuggestions::class )
 			->disableOriginalConstructor()
@@ -76,15 +68,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Reset gateways, hooks, and cached provider data between tests.
 		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
+		self::reload_payment_gateways();
 		if ( isset( $this->sut ) ) {
 			$this->sut->clear_cache();
-		}
-
-		// Restore the previous currency to prevent test leakage.
-		if ( null !== $this->prev_currency ) {
-			update_option( 'woocommerce_currency', $this->prev_currency );
 		}
 
 		parent::tearDown();
@@ -446,6 +432,25 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			PaymentsProviders\Stripe::class,
 			$provider,
 			'Should return Stripe provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns the KOMOJU provider for a per-method wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_komoju_provider_for_wildcard() {
+		// Arrange - komoju_* pattern matches komoju_konbini, and should return the Komoju provider,
+		// same as the exact 'komoju' gateway ID.
+		$gateway_id = 'komoju_konbini';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Komoju::class,
+			$provider,
+			'Should return Komoju provider for wildcard match'
 		);
 	}
 
@@ -865,7 +870,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.
@@ -1115,6 +1126,24 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 2, $first_de['_order'] );
 		$this->assertSame( 3, $second_us['_order'] );
 		$this->assertSame( 4, $third_us['_order'] );
+	}
+
+	/**
+	 * @testdox clear_cache removes provider lists cached by the Payments service.
+	 */
+	public function test_clear_cache_removes_cached_provider_lists(): void {
+		wp_cache_set(
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY,
+			array( 'US_display' => array( array( 'id' => 'stale-provider' ) ) ),
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP
+		);
+
+		$this->sut->clear_cache();
+
+		$this->assertFalse(
+			wp_cache_get( PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY, PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP ),
+			'Provider lists derived from gateway data must not survive a providers cache clear.'
+		);
 	}
 
 	/**
@@ -6120,59 +6149,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Load the WC core PayPal gateway but not enable it.
+	 * The payment providers service the core PayPal gateway helpers must invalidate.
 	 *
-	 * @return void
+	 * @return PaymentsProviders
 	 */
-	private function load_core_paypal_pg() {
-		// Make sure the WC core PayPal gateway is loaded.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'no',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->sut->clear_cache();
-	}
-
-	/**
-	 * Enable the WC core PayPal gateway.
-	 *
-	 * @return void
-	 */
-	private function enable_core_paypal_pg() {
-		// Enable the WC core PayPal gateway.
-		update_option(
-			'woocommerce_paypal_settings',
-			array(
-				'_should_load' => 'yes',
-				'enabled'      => 'yes',
-			)
-		);
-		// Make sure the store currency is supported by the gateway.
-		update_option( 'woocommerce_currency', 'USD' );
-		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways()->init();
-
-		// Clear cached provider data to pick up the new gateway details.
-		$this->sut->clear_cache();
-	}
-
-	/**
-	 * Cleanup the core PayPal gateway.
-	 */
-	private function unload_core_paypal_pg() {
-		delete_option( 'woocommerce_paypal_settings' );
-		delete_option( 'woocommerce_currency' );
-
-		$this->sut->clear_cache();
+	protected function get_payments_providers_service(): PaymentsProviders {
+		return $this->sut;
 	}
 
 	/**

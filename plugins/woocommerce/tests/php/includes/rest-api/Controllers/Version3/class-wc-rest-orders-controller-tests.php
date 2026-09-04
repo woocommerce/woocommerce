@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -10,6 +11,8 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+
+require_once __DIR__ . '/Fixtures/class-wc-rest-orders-controller-rejecting-order-item-product.php';
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -1007,7 +1010,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
 	 * @param WC_Order $order The target order.
 	 * @param float    $cogs_value The COGS value of the product.
@@ -1133,5 +1136,845 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $expected_union, $line_item_meta['display_value']['type'] );
 		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
 		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
+	}
+
+	/**
+	 * Builds a variable product with a single variation carrying a real "color" attribute.
+	 *
+	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
+	 */
+	private function create_variable_product_with_color_variation(): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'REST Switch Parent' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'blue', 'green' ) );
+		$attribute->set_variation( true );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'REST-VAR-' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		return array( $parent, $variation );
+	}
+
+	/**
+	 * Creates an order carrying the given variation as its single line item.
+	 *
+	 * @param WC_Product_Variation $variation Variation to add as a line item.
+	 * @return array Two-element array: the saved WC_Order and the line item ID.
+	 */
+	private function create_order_with_variation_line_item( $variation ): array {
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Dispatches a v3 line-item update.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update( int $order_id, array $line_item ): WP_REST_Response {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Dispatches a v3 line-item update after deleting its variation during product resolution.
+	 *
+	 * @param int                       $order_id Order ID.
+	 * @param int                       $item_id Line item ID.
+	 * @param WC_Product_Variation      $variation Variation to delete.
+	 * @param array<string, int|string> $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update_after_deleting_variation( int $order_id, int $item_id, WC_Product_Variation $variation, array $line_item ): WP_REST_Response {
+		$delete_variation = static function ( $product, $order_item ) use ( $item_id, $variation ) {
+			static $deleted = false;
+
+			if ( ! $deleted && $item_id === $order_item->get_id() ) {
+				$deleted = true;
+				wp_delete_post( $variation->get_id(), true );
+			}
+
+			return $product;
+		};
+		add_filter( 'woocommerce_get_product_from_item', $delete_variation, 10, 2 );
+
+		try {
+			return $this->dispatch_line_item_update( $order_id, array_merge( array( 'id' => $item_id ), $line_item ) );
+		} finally {
+			remove_filter( 'woocommerce_get_product_from_item', $delete_variation, 10 );
+		}
+	}
+
+	/**
+	 * @testdox PUT /orders that switches a variation line item to a simple product clears variation_id over the REST round trip.
+	 */
+	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
+		$fixture                 = $this->create_variable_product_with_color_variation();
+		$variation               = $fixture[1];
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$simple                  = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'Precondition: the line item stored the variation ID.' );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $simple->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an unchanged parent preserves the variation while ignoring view-context variation ID filters.
+	 */
+	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent->set_name( 'Updated parent name' );
+		$parent->set_tax_class( 'reduced-rate' );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$item                    = new WC_Order_Item_Product( $item_id );
+		$item->set_name( 'Historical line item name' );
+		$item->set_tax_class( '' );
+		$item->save();
+		$variation_id_filter    = static function ( $variation_id, $order_item ) use ( $item_id ) {
+			return $item_id === $order_item->get_id() ? 0 : $variation_id;
+		};
+		$variation_id_hook_name = 'woocommerce_order_item_get_variation_id';
+		add_filter( $variation_id_hook_name, $variation_id_filter, 10, 2 );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( $variation_id_hook_name, $variation_id_filter, 10 );
+		}
+		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
+
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should remain unchanged.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
+		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
+		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an unchanged parent demotes the line item if its variation is deleted after loading.
+	 */
+	public function test_update_line_item_demotes_when_variation_is_deleted_after_loading(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update_after_deleting_variation(
+			$order->get_id(),
+			$item_id,
+			$variation,
+			array( 'product_id' => $parent->get_id() )
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'A variation deleted after item loading should not reject the order update.' );
+
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted variation ID should be cleared.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( 0, $response_item['variation_id'], 'The response should expose the demoted line item.' );
+	}
+
+	/**
+	 * @testdox PUT /orders rethrows extension validation errors while the existing variation is still valid.
+	 */
+	public function test_update_line_item_rethrows_extension_validation_error_for_existing_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$extension_validation_armed = false;
+
+		$filter_item_class  = static function ( $classname, $item_type, $filtered_item_id ) use ( $item_id ) {
+			return 'line_item' === $item_type && $item_id === (int) $filtered_item_id
+				? WC_REST_Orders_Controller_Rejecting_Order_Item_Product::class
+				: $classname;
+		};
+		$reject_restoration = static function ( $product, $order_item ) use ( $item_id, &$extension_validation_armed ) {
+			if ( $item_id === $order_item->get_id() && $order_item instanceof WC_REST_Orders_Controller_Rejecting_Order_Item_Product ) {
+				WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = true;
+				$extension_validation_armed = true;
+			}
+
+			return $product;
+		};
+
+		add_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10, 3 );
+		add_filter( 'woocommerce_get_product_from_item', $reject_restoration, 10, 2 );
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10 );
+			remove_filter( 'woocommerce_get_product_from_item', $reject_restoration, 10 );
+			WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = false;
+		}
+
+		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'Precondition: the stored variation still exists.' );
+		$this->assertTrue( $extension_validation_armed, 'Precondition: the filtered order item subclass handled the update.' );
+		$this->assertSame( 400, $response->get_status(), 'Extension validation should reject the update.' );
+		$this->assertSame( 'order_item_product_invalid_variation_id', $response->get_data()['code'], 'The extension validation error should be preserved.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The failed update should not demote the line item.' );
+	}
+
+	/**
+	 * @testdox PUT /orders swallows an extension veto that coincides with a deleted variation and demotes the item.
+	 */
+	public function test_update_line_item_swallows_extension_veto_when_variation_is_also_deleted(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$filter_item_class = static function ( $classname, $item_type, $filtered_item_id ) use ( $item_id ) {
+			return 'line_item' === $item_type && $item_id === (int) $filtered_item_id
+				? WC_REST_Orders_Controller_Rejecting_Order_Item_Product::class
+				: $classname;
+		};
+		$arm_and_delete    = static function ( $product, $order_item ) use ( $item_id, $variation ) {
+			static $done = false;
+
+			if ( ! $done && $item_id === $order_item->get_id() && $order_item instanceof WC_REST_Orders_Controller_Rejecting_Order_Item_Product ) {
+				$done = true;
+				WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = true;
+				wp_delete_post( $variation->get_id(), true );
+			}
+
+			return $product;
+		};
+
+		add_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10, 3 );
+		add_filter( 'woocommerce_get_product_from_item', $arm_and_delete, 10, 2 );
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_order_item_classname', $filter_item_class, 10 );
+			remove_filter( 'woocommerce_get_product_from_item', $arm_and_delete, 10 );
+			WC_REST_Orders_Controller_Rejecting_Order_Item_Product::$reject_variation_restoration = false;
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'An extension veto for an already-deleted variation should be swallowed like the core throw.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an echoed variation ID demotes the line item if the variation is deleted after loading.
+	 */
+	public function test_update_line_item_with_echoed_variation_id_demotes_when_variation_is_deleted_after_loading(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+
+		$parent_sku = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update_after_deleting_variation(
+			$order->get_id(),
+			$item_id,
+			$variation,
+			array(
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $variation->get_id(),
+				'sku'          => $parent_sku,
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'Echoing the stored variation ID back should not reject the order update.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation ID demotes a variation even when SKU resolves to it.
+	 */
+	public function test_update_line_item_with_zero_variation_id_and_current_sku_switches_to_parent(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+
+		$parent->set_name( 'REST V3 parent product' );
+		$parent->set_tax_class( '' );
+		$parent->save();
+		$variation_sku = 'REST-V3-VARIATION-' . wp_generate_uuid4();
+		$variation->set_sku( $variation_sku );
+		$variation->set_tax_class( 'reduced-rate' );
+		$variation->save();
+
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => 0,
+				'sku'          => $variation_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation ID should clear the existing variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the submitted parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should be synchronized with the parent product.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should be synchronized with the parent product.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with the parent product as variation_id does not restore the existing variation.
+	 */
+	public function test_update_line_item_with_parent_as_variation_id_does_not_restore_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $parent->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A parent product ID should not be restored as a variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+	}
+
+	/**
+	 * @testdox Round-tripping a variation with its inherited parent SKU preserves the variation ID.
+	 */
+	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'Fetching the order should succeed.' );
+
+		$round_trip_item = $get_response->get_data()['line_items'][0];
+		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
+
+		$put_response = $this->dispatch_line_item_update( $order->get_id(), $round_trip_item );
+		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders does not preserve the variation when product_id conflicts with a SKU resolving to the current parent.
+	 */
+	public function test_update_line_item_with_different_product_id_and_current_parent_sku_does_not_preserve_variation(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$different_product       = WC_Helper_Product::create_simple_product();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $different_product->get_id(),
+				'sku'        => $parent_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'The SKU-selected product update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A conflicting product ID should prevent restoring the variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the product selected by SKU.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still switches products when SKU conflicts with the unchanged parent product_id.
+	 */
+	public function test_update_line_item_with_different_product_sku_switches_products(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$simple                     = WC_Helper_Product::create_simple_product();
+		$simple_sku                 = 'REST-V3-SIMPLE-' . wp_generate_uuid4();
+		$simple->set_sku( $simple_sku );
+		$simple->save();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $parent->get_id(),
+				'sku'        => $simple_sku,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
+	}
+
+	/**
+	 * Create a pending order with one $100 product, optionally with its line total manually edited.
+	 *
+	 * @param string $billing_email Billing email (the order stays a guest order).
+	 * @param float  $edited_total  Manually edited line total, 0 to keep the original price.
+	 * @return WC_Order
+	 */
+	private function create_guest_order_with_product( string $billing_email, float $edited_total = 0 ): WC_Order {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_email( $billing_email );
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+
+		if ( $edited_total > 0 ) {
+			foreach ( $order->get_items() as $item ) {
+				$item->set_total( $edited_total );
+				$item->save();
+			}
+			$order->calculate_totals();
+		}
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Dispatch a PUT request replacing the order's coupons with the given codes.
+	 *
+	 * @param int      $order_id Order ID.
+	 * @param string[] $codes    Coupon codes for the request's coupon_lines.
+	 * @return WP_REST_Response
+	 */
+	private function put_coupon_lines( int $order_id, array $codes ): WP_REST_Response {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array_map(
+					function ( $code ) {
+						return array( 'code' => $code );
+					},
+					$codes
+				),
+			)
+		);
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Get the coupon codes currently applied to an order, freshly loaded from the database.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string[]
+	 */
+	private function get_reloaded_coupon_codes( int $order_id ): array {
+		return array_values(
+			array_map(
+				function ( $coupon ) {
+					return $coupon->get_code();
+				},
+				wc_get_order( $order_id )->get_items( 'coupon' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox A coupon applied via REST calculates the discount from the stored subtotal, not a manually edited total.
+	 */
+	public function test_valid_coupon_applies_to_manually_edited_order(): void {
+		WC_Helper_Coupon::create_coupon(
+			'edited-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order = $this->create_guest_order_with_product( 'edited-ok-customer@example.com', 50 );
+
+		$response = $this->put_coupon_lines( $order->get_id(), array( 'edited-percent' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'edited-percent' ), $this->get_reloaded_coupon_codes( $order->get_id() ) );
+		$this->assertEquals( 90, wc_get_order( $order->get_id() )->get_total(), 'The discount should be taken off the stored subtotal, not the edited total' );
+	}
+
+	/**
+	 * @testdox Creating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_create_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		WC_Helper_Coupon::create_coupon(
+			'created-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'billing'      => array( 'email' => 'create-coupon-customer@example.com' ),
+				'line_items'   => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'subtotal'   => '100',
+						'total'      => '95',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'created-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
+
+	/**
+	 * @testdox Updating an order with explicitly posted line totals and a coupon keeps the posted subtotal as the pre-discount price.
+	 */
+	public function test_update_with_posted_line_totals_and_coupon_does_not_double_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'updated-percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+
+		$order   = $this->create_guest_order_with_product( 'update-coupon-customer@example.com' );
+		$item_id = key( $order->get_items() );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items'   => array(
+					array(
+						'id'       => $item_id,
+						'subtotal' => '100',
+						'total'    => '95',
+					),
+				),
+				'coupon_lines' => array( array( 'code' => 'updated-percent' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEquals( 100, $data['line_items'][0]['subtotal'], 'The posted subtotal should stay the pre-discount price' );
+		$this->assertEquals( 90, $data['line_items'][0]['total'], 'The total should be recalculated from the posted subtotal, not from or on top of the posted total' );
+		$this->assertEquals( 10, $data['discount_total'] );
+	}
+
+	/**
+	 * Create an order with a single shipping line that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the shipping item ID.
+	 */
+	private function create_order_with_shipping_line(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Shipping();
+		$item->set_method_id( 'flat_rate' );
+		$item->set_method_title( 'Flat rate' );
+		$item->set_total( '10.00' );
+		$item->set_taxes( array( 'total' => array( 1 => '2.00' ) ) );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Every request key whose order item carries a `taxes` data prop, against each meta key that
+	 * update_meta_data() diverts to that item's set_taxes().
+	 *
+	 * Reading an item adds `_taxes` to its internal meta keys, so the setter resolves from the
+	 * underscore-prefixed key as well as the bare one.
+	 *
+	 * @return array
+	 */
+	public function provide_reserved_meta_key_line_types(): array {
+		$line_types = array(
+			'line items'     => array(
+				'line_items',
+				'create_order_with_line_item',
+				array(
+					'total'    => array( 1 => '2.00' ),
+					'subtotal' => array( 1 => '2.00' ),
+				),
+			),
+			'fee lines'      => array( 'fee_lines', 'create_order_with_fee_line', array( 'total' => array( 1 => '1.00' ) ) ),
+			'shipping lines' => array( 'shipping_lines', 'create_order_with_shipping_line', array( 'total' => array( 1 => '2.00' ) ) ),
+		);
+
+		$cases = array();
+		foreach ( $line_types as $label => $line_type ) {
+			foreach ( array( 'taxes', '_taxes' ) as $meta_key ) {
+				$cases[ "$label, $meta_key" ] = array_merge( $line_type, array( $meta_key ) );
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox PUT /orders/<id> rejects a serialized value under a reserved line meta key and leaves the taxes untouched.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param string $create_order   Factory method building an order with one line of that type.
+	 * @param array  $expected_taxes Taxes the item should still carry after the update is rejected.
+	 * @param string $meta_key       Reserved meta key to post the serialized value under.
+	 */
+	public function test_update_order_rejects_serialized_taxes_line_meta_key( string $line_type, string $create_order, array $expected_taxes, string $meta_key ): void {
+		list( $order, $item_id ) = $this->$create_order();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( $line_type => array( $this->get_order_line_with_serialized_taxes( $item_id, $meta_key ) ) ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Request argument validation wraps the failure in `rest_invalid_param`, under `details`.
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $data['code'] );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $data['data']['details'][ $line_type ]['code'] );
+
+		$item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( $expected_taxes, $item->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * The batch endpoint skips request argument validation, so the prepare-time check has to catch this.
+	 *
+	 * @testdox POST /orders/batch rejects a serialized value under a reserved line meta key and leaves the taxes untouched.
+	 *
+	 * @dataProvider provide_reserved_meta_key_line_types
+	 *
+	 * @param string $line_type      Request key: `line_items`, `fee_lines` or `shipping_lines`.
+	 * @param string $create_order   Factory method building an order with one line of that type.
+	 * @param array  $expected_taxes Taxes the item should still carry after the update is rejected.
+	 * @param string $meta_key       Reserved meta key to post the serialized value under.
+	 */
+	public function test_batch_update_rejects_serialized_taxes_line_meta_key( string $line_type, string $create_order, array $expected_taxes, string $meta_key ): void {
+		list( $order, $item_id ) = $this->$create_order();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/batch' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'update' => array(
+						array(
+							'id'       => $order->get_id(),
+							$line_type => array( $this->get_order_line_with_serialized_taxes( $item_id, $meta_key ) ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $data['update'][0]['error']['code'] );
+
+		$item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( $expected_taxes, $item->get_taxes(), 'The line taxes should be unchanged.' );
+	}
+
+	/**
+	 * The reserved key still diverts to set_taxes(), hence the expected _doing_it_wrong notice.
+	 *
+	 * @testdox POST /orders only rejects serialized values, and only under the reserved meta key.
+	 */
+	public function test_create_order_accepts_unguarded_shipping_line_meta(): void {
+		$this->setExpectedIncorrectUsage( 'is_internal_meta_key' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'shipping_lines' => array(
+						array(
+							'method_id' => 'flat_rate',
+							'total'     => '10.00',
+							'meta_data' => array(
+								array(
+									'key'   => 'taxes',
+									'value' => 'not-serialized',
+								),
+								array(
+									'key'   => 'delivery_window',
+									'value' => 'morning',
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'Only serialized values should be rejected.' );
+
+		$shipping_lines = wc_get_order( $response->get_data()['id'] )->get_items( 'shipping' );
+		$shipping_line  = reset( $shipping_lines );
+		$this->assertSame( 'morning', $shipping_line->get_meta( 'delivery_window' ), 'A meta key that is not reserved should be stored.' );
+	}
+
+	/**
+	 * Create an order with a single line item that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the line item ID.
+	 */
+	private function create_order_with_line_item(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( ProductHelper::create_simple_product() );
+		$item->set_quantity( 1 );
+		$item->set_total( '10.00' );
+		$item->set_taxes(
+			array(
+				'total'    => array( 1 => '2.00' ),
+				'subtotal' => array( 1 => '2.00' ),
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Create an order with a single fee line that carries known taxes.
+	 *
+	 * @return array{0: WC_Order, 1: int} The order and the fee item ID.
+	 */
+	private function create_order_with_fee_line(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Fee();
+		$item->set_name( 'Test fee' );
+		$item->set_total( '5.00' );
+		$item->set_taxes( array( 'total' => array( 1 => '1.00' ) ) );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * Get an order line payload carrying a serialized object under a reserved meta key.
+	 *
+	 * The non-serialized decoy shares the key: `meta_data` is a list, so a key can repeat and every
+	 * entry reaches the setter.
+	 *
+	 * @param int    $item_id  Order item ID to target.
+	 * @param string $meta_key Meta key to post the serialized value under.
+	 * @return array
+	 */
+	private function get_order_line_with_serialized_taxes( int $item_id, string $meta_key = '_taxes' ): array {
+		return array(
+			'id'        => $item_id,
+			'meta_data' => array(
+				array(
+					'key'   => $meta_key,
+					'value' => 'not-serialized',
+				),
+				array(
+					'key'   => $meta_key,
+					'value' => 'O:8:"stdClass":0:{}',
+				),
+			),
+		);
 	}
 }
