@@ -20,7 +20,7 @@ Returns the full order object response (see [Order Response](#order-response)).
 
 Order endpoints return responses in the same format as `/cart`; an order object which includes order items, applied coupons, shipping addresses and rates, and non-sensitive customer data.
 
-`item_data` is the exception. Order items carry stored order item metadata; cart items carry display data from the `woocommerce_get_item_data` filter. Both are lists, but the entries hold different properties. See [Item data](#item-data).
+One difference worth calling out is `item_data`. Order items carry stored order item metadata; cart items carry display data from the `woocommerce_get_item_data` filter. Both are lists, but the entries hold different properties. See [Item data](#item-data).
 
 ### Order Response
 
