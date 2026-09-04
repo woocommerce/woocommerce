@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Search: add a `registeredCustomers` type that matches registered customers on name, username or email.
+Search: add a `registeredCustomers` type that matches registered customers on name, username or email, and a `customerNames` type that replaces `customers`. `customers` is now a deprecated alias of `customerNames` and behaves identically.
