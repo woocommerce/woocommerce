@@ -666,7 +666,8 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', $default_content );
 
-		$this->assertSame( $existing_page_id, $page_id, 'The existing customized Cart page must be adopted instead of creating a duplicate.' );
+		// wc_create_page() returns the adopted id as a string from $wpdb->get_var(), so compare loosely.
+		$this->assertEquals( $existing_page_id, $page_id, 'The existing customized Cart page must be adopted instead of creating a duplicate.' );
 		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ), 'The page option must point at the adopted page.' );
 
 		wp_delete_post( $existing_page_id, true );
@@ -691,7 +692,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
 
-		$this->assertSame( $existing_page_id, $page_id, 'A page holding the shortcode must still be adopted.' );
+		$this->assertEquals( $existing_page_id, $page_id, 'A page holding the shortcode must still be adopted.' );
 
 		wp_delete_post( $existing_page_id, true );
 		delete_option( 'woocommerce_cart_page_id' );
