@@ -44,6 +44,7 @@ class WC_Form_Handler {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'wp_headers', array( __CLASS__, 'set_reset_password_bridge_headers' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
@@ -66,10 +67,44 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Prevent storage and referrer disclosure of password-reset bridge handles.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param array<string, string> $headers Response headers.
+	 * @return array<string, string> Filtered response headers.
+	 */
+	public static function set_reset_password_bridge_headers( $headers ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['reset-token'] ) || empty( $_GET['show-reset-form'] ) ) {
+			return $headers;
+		}
+
+		$bridge_handle = wc_clean( wp_unslash( $_GET['reset-token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! WC_Shortcode_My_Account::is_password_reset_bridge_handle( $bridge_handle ) || ! is_account_page() ) {
+			return $headers;
+		}
+
+		WC_Cache_Helper::set_nocache_constants();
+		$headers = array_merge( $headers, wp_get_nocache_headers() );
+
+		/*
+		 * WC_Cache_Helper::prevent_caching() drops no-store for logged-out visitors to preserve
+		 * bfcache, and wp_get_nocache_headers() is filterable. Spell the directives out so a page
+		 * carrying a reset credential is never stored, whatever those two decided.
+		 */
+		$headers['Cache-Control']   = 'no-cache, no-store, must-revalidate, max-age=0, private';
+		$headers['Referrer-Policy'] = 'no-referrer';
+
+		return $headers;
+	}
+
+	/**
 	 * Remove key and user ID (or user login, as a fallback) from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
-		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( is_account_page() && isset( $_GET['key'] ) && is_string( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			// If available, get $user_id from query string parameter for fallback purposes.
 			if ( isset( $_GET['login'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -77,6 +112,7 @@ class WC_Form_Handler {
 				$user_id = $user ? $user->ID : 0;
 			} else {
 				$user_id = absint( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$user    = get_userdata( $user_id );
 			}
 
 			// If the reset token is not for the current user, ignore the reset request (don't redirect).
@@ -86,18 +122,23 @@ class WC_Form_Handler {
 				return;
 			}
 
-			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
-			$value   = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
-			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
-			wp_safe_redirect(
-				add_query_arg(
-					array(
-						'show-reset-form' => 'true',
-						'action'          => $action,
-					),
-					wc_lostpassword_url()
-				)
+			$action        = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$reset_key     = wp_unslash( $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$value         = sprintf( '%d:%s', $user_id, $reset_key );
+			$redirect_args = array(
+				'show-reset-form' => 'true',
+				'action'          => $action,
 			);
+
+			$validated_user = $user ? check_password_reset_key( $reset_key, $user->user_login ) : null;
+			$bridge_token   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $validated_user );
+
+			if ( $bridge_token ) {
+				$redirect_args['reset-token'] = $bridge_token;
+			}
+
+			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+			wp_safe_redirect( add_query_arg( $redirect_args, wc_lostpassword_url() ) );
 			exit;
 		}
 	}
