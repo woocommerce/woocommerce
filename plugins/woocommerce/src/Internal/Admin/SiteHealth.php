@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -26,6 +27,16 @@ defined( 'ABSPATH' ) || exit;
  * SiteHealth class.
  */
 class SiteHealth {
+	/**
+	 * Minimum order metadata rows before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROW_COUNT_THRESHOLD = 1000000;
+
+	/**
+	 * Minimum metadata rows per order before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROWS_PER_ORDER_THRESHOLD = 1000;
+
 	/**
 	 * Class instance.
 	 *
@@ -68,7 +79,7 @@ class SiteHealth {
 				'test'      => function () use ( $test_id ) {
 					return $this->run_test( $test_id );
 				},
-				'skip_cron' => true,
+				'skip_cron' => $test['skip_cron'] ?? true,
 			);
 		}
 
@@ -139,6 +150,7 @@ class SiteHealth {
 	 *   - label: visible test name in Site Health.
 	 *   - badge: 'security' or 'performance'.
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
+	 *   - skip_cron: whether to exclude the test from scheduled checks (defaults to true).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
 	 *     Label, status, and description may be callables that receive the check context.
@@ -146,7 +158,7 @@ class SiteHealth {
 	 * @return array<string, array>
 	 */
 	protected function get_woocommerce_site_health_tests(): array {
-		return array(
+		$tests = array(
 			'woocommerce_secure_connection'            => array(
 				'label' => __( 'WooCommerce secure connection', 'woocommerce' ),
 				'badge' => 'security',
@@ -438,6 +450,96 @@ class SiteHealth {
 				),
 			),
 		);
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$tests['woocommerce_order_meta_table_size'] = array(
+				'label'     => __( 'WooCommerce order metadata table size', 'woocommerce' ),
+				'badge'     => 'performance',
+				'skip_cron' => false,
+				'check'     => fn() => $this->get_order_meta_table_size_issue(),
+				'good'      => array(
+					'label'       => __( 'WooCommerce order metadata table does not require attention', 'woocommerce' ),
+					'description' => __( 'WooCommerce did not detect an unusually large order metadata table.', 'woocommerce' ),
+				),
+				'fail'      => array(
+					'label'       => __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
+					'description' => static fn( array $context ) => sprintf(
+						/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
+						__( 'The order metadata table has an estimated %1$s rows, while the orders table has %2$s. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+						number_format_i18n( $context['meta_rows'] ),
+						number_format_i18n( $context['order_rows'] )
+					),
+				),
+			);
+		}
+
+		return $tests;
+	}
+
+	/**
+	 * Get estimated row counts for the HPOS orders and metadata tables.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|null
+	 */
+	private function get_hpos_table_statistics(): ?array {
+		if ( ! defined( 'DB_NAME' ) ) {
+			return null;
+		}
+
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This bounded query reads database-maintained table statistics during Site Health checks.
+		$statistics = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT
+					(
+						SELECT TABLE_ROWS
+						FROM information_schema.TABLES
+						WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+					) AS order_rows,
+					(
+						SELECT TABLE_ROWS
+						FROM information_schema.TABLES
+						WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+					) AS meta_rows',
+				DB_NAME,
+				OrdersTableDataStore::get_orders_table_name(),
+				DB_NAME,
+				OrdersTableDataStore::get_meta_table_name()
+			)
+		);
+
+		if ( ! is_object( $statistics ) || ! isset( $statistics->order_rows, $statistics->meta_rows ) || ! is_numeric( $statistics->order_rows ) || ! is_numeric( $statistics->meta_rows ) ) {
+			return null;
+		}
+
+		return array(
+			'order_rows' => (int) $statistics->order_rows,
+			'meta_rows'  => (int) $statistics->meta_rows,
+		);
+	}
+
+	/**
+	 * Get context when the order metadata table is unusually large.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|array{}
+	 */
+	private function get_order_meta_table_size_issue(): array {
+		$table_statistics = $this->get_hpos_table_statistics();
+
+		if ( null === $table_statistics ) {
+			return array();
+		}
+
+		if ( $table_statistics['meta_rows'] < self::ORDER_META_ROW_COUNT_THRESHOLD ) {
+			return array();
+		}
+
+		if ( 0 !== $table_statistics['order_rows'] && intdiv( $table_statistics['meta_rows'], $table_statistics['order_rows'] ) < self::ORDER_META_ROWS_PER_ORDER_THRESHOLD ) {
+			return array();
+		}
+
+		return $table_statistics;
 	}
 
 	/**
