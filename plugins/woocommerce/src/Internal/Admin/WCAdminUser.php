@@ -41,14 +41,22 @@ class WCAdminUser {
 			'user',
 			'is_super_admin',
 			array(
-				'get_callback' => function( $user ) {
-					if ( ! isset( $user['id'] ) || 0 === $user['id'] ) {
+				'get_callback' => function ( $user, $attr, $request ) {
+					if ( 'edit' !== ( $request['context'] ?? null ) ) {
+						return false;
+					}
+
+					if ( ! $this->current_user_can_read_user_data( $user['id'] ?? 0 ) ) {
 						return false;
 					}
 
 					return is_super_admin( $user['id'] );
 				},
-				'schema'       => null,
+				'schema'       => array(
+					'type'     => 'boolean',
+					'context'  => array( 'edit' ),
+					'readonly' => true,
+				),
 			)
 		);
 		register_rest_field(
@@ -57,7 +65,10 @@ class WCAdminUser {
 			array(
 				'get_callback'    => array( $this, 'get_user_data_values' ),
 				'update_callback' => array( $this, 'update_user_data_values' ),
-				'schema'          => null,
+				'schema'          => array(
+					'type'    => 'object',
+					'context' => array( 'edit' ),
+				),
 			)
 		);
 	}
@@ -66,14 +77,45 @@ class WCAdminUser {
 	 * For all the registered user data fields (  Loader::get_user_data_fields ), fetch the data
 	 * for returning via the REST API.
 	 *
-	 * @param WP_User $user Current user.
+	 * Returns an empty array unless the request has the 'edit' context and the current user
+	 * is either the requested user or has the 'list_users' capability.
+	 *
+	 * @param array                  $user The prepared user data from the users endpoint response.
+	 * @param mixed                  $attr The name of the requested field.
+	 * @param \WP_REST_Request|array $request The current request.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>>|array $request
 	 */
-	public function get_user_data_values( $user ) {
+	public function get_user_data_values( $user, $attr = null, $request = array() ) {
+		if ( 'edit' !== ( $request['context'] ?? null ) ) {
+			return array();
+		}
+
+		if ( ! $this->current_user_can_read_user_data( $user['id'] ?? 0 ) ) {
+			return array();
+		}
+
 		$values = array();
 		foreach ( $this->get_user_data_fields() as $field ) {
 			$values[ $field ] = self::get_user_data_field( $user['id'], $field );
 		}
 		return $values;
+	}
+
+	/**
+	 * Checks whether the current user is allowed to read the extra data registered by
+	 * WooCommerce for a given user.
+	 *
+	 * @param int $user_id The id of the user whose data is being read.
+	 * @return bool True if the current user can read the extra data for the given user.
+	 */
+	private function current_user_can_read_user_data( $user_id ) {
+		$user_id = (int) $user_id;
+		if ( 0 === $user_id ) {
+			return false;
+		}
+
+		return get_current_user_id() === $user_id || current_user_can( 'list_users' );
 	}
 
 	/**

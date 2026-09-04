@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return is_super_admin and woocommerce_meta fields in users REST endpoint only for requests in 'edit' context, and only when requesting own user or with 'list_users' capability.
