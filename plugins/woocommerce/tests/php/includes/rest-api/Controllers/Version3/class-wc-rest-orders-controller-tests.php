@@ -425,7 +425,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @param bool        $matches_target Whether the target order should be returned.
 	 */
 	public function test_orders_search_matrix( ?string $field, string $search_term, bool $matches_target ): void {
-		add_filter( 'pre_option_woocommerce_hpos_fts_index_enabled', '__return_false' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => 'no' );
 
 		$target = new WC_Order();
 		$target->set_billing_first_name( 'OrderSearchTargetControl' );
