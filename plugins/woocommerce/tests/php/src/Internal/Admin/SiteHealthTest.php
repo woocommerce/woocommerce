@@ -136,7 +136,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'WooCommerce order metadata table is unusually large', $result['label'], 'The result should describe the table size without claiming duplicate metadata.' );
 		$this->assertSame( 'Performance', $result['badge']['label'], 'The result should use the performance badge.' );
-		$this->assertSame( '<p>The order metadata table has an estimated 49,800,000 rows, while the orders table has 44. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.</p>', $result['description'], 'The result should explain the risk and recommend investigation rather than deletion.' );
+		$this->assertSame( '<p>The estimated row counts are 49,800,000 for the order metadata table and 44 for the orders table. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.</p>', $result['description'], 'The result should explain the risk and recommend investigation rather than deletion.' );
 		$this->assertSame( '', $result['actions'], 'The result should not link to an unsafe generic cleanup action.' );
 	}
 
