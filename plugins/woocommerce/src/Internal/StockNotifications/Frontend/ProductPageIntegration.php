@@ -16,6 +16,11 @@ use WC_Product;
 class ProductPageIntegration {
 
 	/**
+	 * Name of the Add to Cart + Options block.
+	 */
+	private const ADD_TO_CART_WITH_OPTIONS_BLOCK = 'woocommerce/add-to-cart-with-options';
+
+	/**
 	 * Runtime cache for preventing double rendering.
 	 *
 	 * @var array<int, bool>
@@ -68,6 +73,13 @@ class ProductPageIntegration {
 			return;
 		}
 
+		// Add to Cart + Options buffers this hook inside its <form> and falls back to a
+		// legacy HTML form when the buffer contains form elements. Block themes are
+		// handled separately with an Interactivity API native form.
+		if ( $this->is_rendering_inside_add_to_cart_with_options() ) {
+			return;
+		}
+
 		global $product;
 		if ( ! is_product() || ! is_a( $product, 'WC_Product' ) ) {
 			return;
@@ -99,6 +111,19 @@ class ProductPageIntegration {
 		wp_enqueue_script( 'wc-back-in-stock-form' );
 
 		$this->render_form( $product );
+	}
+
+	/**
+	 * Whether the hook is firing from inside the Add to Cart + Options render callback.
+	 *
+	 * WP_Block::render() sets WP_Block_Supports::$block_to_render around the callback,
+	 * and the block fires its buffered template hooks before rendering inner blocks.
+	 *
+	 * @return bool
+	 */
+	private function is_rendering_inside_add_to_cart_with_options(): bool {
+		return isset( \WP_Block_Supports::$block_to_render['blockName'] )
+			&& self::ADD_TO_CART_WITH_OPTIONS_BLOCK === \WP_Block_Supports::$block_to_render['blockName'];
 	}
 
 	/**

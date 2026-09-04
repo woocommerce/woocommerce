@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Back in Stock form from rendering inside the Add to Cart + Options block, which forced the block into a legacy HTML form.
