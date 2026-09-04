@@ -2095,4 +2095,16 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( $in_stock ), $result );
 	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates reads a serialized array price as absent, as get_post_meta() does.
+	 */
+	public function test_get_purchasable_variation_candidates_treats_non_scalar_meta_as_absent(): void {
+		$sut          = new WC_Product_Variable_Data_Store_CPT();
+		$variation_id = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '' );
+		update_post_meta( $variation_id, '_regular_price', array( '10' ) );
+
+		$this->assertIsArray( get_post_meta( $variation_id, '_regular_price', true ), 'The cache path sees an array and defers the variation.' );
+		$this->assertSame( array(), $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) ), 'The query path must defer it too.' );
+	}
 }

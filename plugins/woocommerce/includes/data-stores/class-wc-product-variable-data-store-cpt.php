@@ -912,8 +912,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			if ( ! isset( $state[ $id ] ) || isset( $seen[ $id ][ $key ] ) ) {
 				continue;
 			}
-			$seen[ $id ][ $key ]  = true;
-			$state[ $id ][ $key ] = is_scalar( $row['meta_value'] ) ? (string) $row['meta_value'] : '';
+			$seen[ $id ][ $key ] = true;
+			// maybe_unserialize() so a serialized value reads the same here as it does through get_post_meta().
+			$value                = maybe_unserialize( $row['meta_value'] );
+			$state[ $id ][ $key ] = is_scalar( $value ) ? (string) $value : '';
 		}
 
 		return array_values(
