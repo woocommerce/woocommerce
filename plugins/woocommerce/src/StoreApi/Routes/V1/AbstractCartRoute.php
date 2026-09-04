@@ -204,20 +204,32 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Load the cart session before handling responses.
 	 *
+	 * @throws \Throwable When the cart session cannot be loaded.
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
+		try {
+			if ( $this->has_cart_token( $request ) ) {
+				// Overrides the core session class.
+				add_filter(
+					'woocommerce_session_handler',
+					function () {
+						return SessionHandler::class;
+					}
+				);
+			}
+			$this->cart_controller->load_cart();
+			$this->cart_controller->normalize_cart();
+		} catch ( \Throwable $error ) {
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			// Do not let later Store API batch requests use and persist a partially loaded cart.
+			// @phpstan-ignore-next-line assign.propertyType (The cart is deliberately invalidated after a failed load.).
+			WC()->cart = null;
+			throw $error;
 		}
-		$this->cart_controller->load_cart();
-		$this->cart_controller->normalize_cart();
 	}
 
 	/**

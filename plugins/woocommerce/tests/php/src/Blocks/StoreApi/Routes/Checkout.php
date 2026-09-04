@@ -3248,16 +3248,28 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		// The route restores the cart only when this action has not run yet, so reset
 		// the counter to put the process back into the state a REST request starts in.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
-		add_filter(
-			'woocommerce_get_cart_item_from_session',
-			static function () {
-				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
-			}
-		);
+		$cart_backup = WC()->cart;
+		$callback    = static function () {
+			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' ) );
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' ) );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
+		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
