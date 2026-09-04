@@ -271,8 +271,9 @@ class Cli {
 	 *
 	 * [--force]
 	 * : CLI only, requires --yes. Resets every cursor and unparks every section, so a run
-	 * revisits rows it has already been past. Does not skip Requirements::check() and does
-	 * not change any status mapping.
+	 * revisits rows it has already been past. Also re-imports settings, overwriting any
+	 * merchant edit made since the last migration — --retry-failed does not do this. Does
+	 * not skip Requirements::check() and does not change any status mapping.
 	 *
 	 * [--retry-failed]
 	 * : Clear the permanent-failure marker on failed rows so they are retried. Ignored under
@@ -371,13 +372,19 @@ class Cli {
 				$run_state->unpark_all();
 			}
 
+			if ( $force ) {
+				// Settings re-import is a --force-only behaviour: --retry-failed must not
+				// re-overwrite a merchant's post-migration edit to a setting.
+				$run_state->reset_settled_options();
+			}
+
 			$reporter  = $run->get_reporter();
 			$migrators = array_intersect_key( $run->build_migrators( $dry_run ), array_flip( $sections ) );
 			$writer    = $run->build_writer( $dry_run );
 
 			// Settings are not a section: the processor writes them on every batch, whatever
 			// `--section` asked for, since there is nothing about them to scan or restrict.
-			$options = $run->get_options_migrator();
+			$options = $run->get_options_migrator( $dry_run );
 
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI

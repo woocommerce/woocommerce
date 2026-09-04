@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Migrators;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\OptionsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
@@ -12,8 +13,8 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for the settings migrator: the legacy-to-Core option pairing, the per-sub-key merge
- * that leaves hand-edited siblings alone, and the read-back-and-compare that decides whether a
- * value is settled or has to be written again on the next batch.
+ * that leaves hand-edited siblings alone, and the settled marker in run state that decides
+ * whether a value is left alone or has to be written again on a later run.
  */
 class OptionsMigratorTests extends WC_Unit_Test_Case {
 
@@ -177,9 +178,160 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox migrating one sub-key should leave a hand-edited sibling alone.
+	 * @testdox a merchant edit after migration should be kept, for a general option and an email sub-key alike.
 	 */
-	public function test_sub_key_write_does_not_clobber_a_sibling(): void {
+	public function test_a_merchant_edit_after_migration_is_kept(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'subject' => 'Legacy subject' )
+		);
+
+		$state  = new MigrationState();
+		$writer = wc_get_container()->get( Writer::class );
+
+		$this->build_migrator( $state )->migrate( $writer );
+
+		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
+		update_option(
+			'woocommerce_customer_stock_notification_settings',
+			array_merge(
+				(array) get_option( 'woocommerce_customer_stock_notification_settings', array() ),
+				array( 'subject' => 'Merchant subject' )
+			)
+		);
+
+		// A fresh instance, sharing the same run state - what a later batch or CLI run looks
+		// like from here.
+		$counts = $this->build_migrator( $state )->migrate( $writer );
+
+		$this->assertSame( array(), $counts, 'A settled value must not be reported as migrated again.' );
+		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'A merchant edit to a general option must be kept.' );
+		$this->assertSame(
+			'Merchant subject',
+			( (array) get_option( 'woocommerce_customer_stock_notification_settings' ) )['subject'],
+			'A merchant edit to an email sub-key must be kept.'
+		);
+	}
+
+	/**
+	 * @testdox a value that already matched should be settled, and a later merchant edit kept.
+	 */
+	public function test_a_value_that_already_matched_is_settled(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+		update_option( self::CORE_ALLOW_SIGNUPS, 'no' );
+
+		$state = new MigrationState();
+
+		$this->build_migrator( $state )->migrate( wc_get_container()->get( Writer::class ) );
+
+		$this->assertContains(
+			self::CORE_ALLOW_SIGNUPS,
+			$state->get_settled_options(),
+			'A value that already matched on arrival must be settled too, not just a value this migrator wrote.'
+		);
+
+		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
+
+		$this->build_migrator( $state )->migrate( wc_get_container()->get( Writer::class ) );
+
+		$this->assertSame( 'yes', get_option( self::CORE_ALLOW_SIGNUPS ), 'A merchant edit after settling on a match must be kept.' );
+	}
+
+	/**
+	 * @testdox a write that does not land should not be settled.
+	 */
+	public function test_a_write_that_did_not_land_is_not_settled(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+
+		// A writer that reports success without writing, the way a filtered-away
+		// update_option() looks from here.
+		$silent = new class() extends Writer {
+			/**
+			 * Discard the write and report success.
+			 *
+			 * @param string $option Option name.
+			 * @param mixed  $value  Option value.
+			 * @return bool
+			 */
+			public function write_option( string $option, $value ): bool {
+				return true;
+			}
+		};
+
+		$state = new MigrationState();
+
+		$this->build_migrator( $state )->migrate( $silent );
+
+		$this->assertNotContains(
+			self::CORE_ALLOW_SIGNUPS,
+			$state->get_settled_options(),
+			'A write that did not land must not be settled, so the next run retries it.'
+		);
+	}
+
+	/**
+	 * @testdox is_done should read settled markers, even after a merchant edit.
+	 */
+	public function test_is_done_reads_settled_markers(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+
+		$state = new MigrationState();
+
+		$this->build_migrator( $state )->migrate( wc_get_container()->get( Writer::class ) );
+
+		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
+
+		$this->assertTrue(
+			$this->build_migrator( $state )->is_done(),
+			'A fresh instance reading a settled marker must report done, whatever the Core row currently holds.'
+		);
+	}
+
+	/**
+	 * @testdox reset_settled_options should let the legacy value be re-imported.
+	 */
+	public function test_reset_settled_options_re_imports(): void {
+		update_option( self::LEGACY_ALLOW_SIGNUPS, 'no' );
+
+		$state  = new MigrationState();
+		$writer = wc_get_container()->get( Writer::class );
+
+		$this->build_migrator( $state )->migrate( $writer );
+
+		update_option( self::CORE_ALLOW_SIGNUPS, 'yes' );
+
+		$state->reset_settled_options();
+
+		$this->build_migrator( $state )->migrate( $writer );
+
+		$this->assertSame(
+			'no',
+			get_option( self::CORE_ALLOW_SIGNUPS ),
+			'Once the settled markers are cleared, the legacy value must be written again, overwriting the merchant edit.'
+		);
+	}
+
+	/**
+	 * @testdox migrating a newly-outstanding sub-key should leave an already-settled sibling alone.
+	 */
+	public function test_sub_key_write_does_not_clobber_a_settled_sibling(): void {
+		update_option(
+			'woocommerce_bis_notification_received_settings',
+			array( 'subject' => 'Legacy subject' )
+		);
+
+		$state  = new MigrationState();
+		$writer = wc_get_container()->get( Writer::class );
+
+		// The first run only has 'subject' to settle; 'heading' has nothing to migrate yet.
+		$this->build_migrator( $state )->migrate( $writer );
+
+		$core            = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
+		$core['subject'] = 'Merchant subject';
+		update_option( 'woocommerce_customer_stock_notification_settings', $core );
+
+		// The legacy row is edited between runs, so 'heading' is outstanding on the second one.
 		update_option(
 			'woocommerce_bis_notification_received_settings',
 			array(
@@ -188,18 +340,12 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->migrate();
-
-		$core            = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
-		$core['heading'] = 'Merchant heading';
-		update_option( 'woocommerce_customer_stock_notification_settings', $core );
-
-		$this->migrate();
+		$this->build_migrator( $state )->migrate( $writer );
 
 		$core = (array) get_option( 'woocommerce_customer_stock_notification_settings' );
 
-		$this->assertSame( 'Legacy subject', $core['subject'], 'A migrated sub-key must keep the value it was given.' );
-		$this->assertSame( 'Legacy heading', $core['heading'], 'The legacy value is written again on a later run.' );
+		$this->assertSame( 'Merchant subject', $core['subject'], 'A settled sibling must not be clobbered by a write to a different sub-key.' );
+		$this->assertSame( 'Legacy heading', $core['heading'], 'A sub-key that only became outstanding on this run must still migrate.' );
 	}
 
 	/**
@@ -315,7 +461,10 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 			array( 'subject' => 'Legacy subject' )
 		);
 
-		$migrator = $this->build_migrator();
+		// A non-persisting state, matching the dry-run writer: neither may leave anything
+		// behind in the database.
+		$state    = new MigrationState( false );
+		$migrator = $this->build_migrator( $state );
 		$writer   = new Writer( true );
 
 		$this->assertNotEmpty( $migrator->migrate( $writer ), 'A dry run reports what a live run would have written.' );
@@ -324,6 +473,7 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ) );
 		$this->assertFalse( get_option( 'woocommerce_customer_stock_notification_settings' ) );
+		$this->assertFalse( get_option( 'wc_bis_migration_state' ), 'A dry run must not persist settled markers either.' );
 	}
 
 	/**
@@ -456,12 +606,15 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a migrator with a reporter of its own.
+	 * Build a migrator with a reporter of its own, and a persisting run state so a marker
+	 * settled by one instance is seen by another built the same way.
 	 *
+	 * @param MigrationState|null $state Run state to share, or null to build a fresh
+	 *                                   persisting one.
 	 * @return OptionsMigrator
 	 */
-	private function build_migrator(): OptionsMigrator {
-		return new OptionsMigrator( new Reporter() );
+	private function build_migrator( ?MigrationState $state = null ): OptionsMigrator {
+		return new OptionsMigrator( new Reporter(), $state ?? new MigrationState() );
 	}
 
 	/**

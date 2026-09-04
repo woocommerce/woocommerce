@@ -263,6 +263,49 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox --retry-failed should keep a settled setting's merchant edit; only --force overwrites it.
+	 */
+	public function test_retry_failed_keeps_settings_only_force_overwrites(): void {
+		update_option( 'wc_bis_allow_signups', 'no' );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertSame( 'no', get_option( 'woocommerce_customer_stock_notifications_allow_signups' ), 'The first run must have migrated the setting.' );
+
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'retry-failed' => true,
+				'yes'          => true,
+			)
+		);
+
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_customer_stock_notifications_allow_signups' ),
+			'--retry-failed must not re-import settings, so a merchant edit survives it.'
+		);
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'force' => true,
+				'yes'   => true,
+			)
+		);
+
+		$this->assertSame(
+			'no',
+			get_option( 'woocommerce_customer_stock_notifications_allow_signups' ),
+			'--force must re-import settings, overwriting the merchant edit.'
+		);
+	}
+
+	/**
 	 * @testdox a second run should write nothing and report nothing outstanding.
 	 */
 	public function test_a_second_run_writes_nothing(): void {

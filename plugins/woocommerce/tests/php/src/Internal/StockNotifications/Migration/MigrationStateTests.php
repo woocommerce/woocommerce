@@ -214,6 +214,56 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a settled option should stay settled until it is reset.
+	 */
+	public function test_a_settled_option_stays_settled_until_reset(): void {
+		$this->sut->settle_option( 'woocommerce_customer_stock_notifications_allow_signups' );
+
+		$this->assertTrue( $this->sut->is_option_settled( 'woocommerce_customer_stock_notifications_allow_signups' ) );
+		$this->assertFalse( $this->sut->is_option_settled( 'woocommerce_customer_stock_notifications_require_account' ) );
+		$this->assertSame( array( 'woocommerce_customer_stock_notifications_allow_signups' ), $this->sut->get_settled_options() );
+
+		$this->sut->reset_settled_options();
+
+		$this->assertFalse( $this->sut->is_option_settled( 'woocommerce_customer_stock_notifications_allow_signups' ) );
+		$this->assertSame( array(), $this->sut->get_settled_options() );
+	}
+
+	/**
+	 * @testdox settle_options should settle several markers in a single save.
+	 */
+	public function test_settle_options_settles_several_markers_at_once(): void {
+		$this->sut->settle_options( array( 'marker_one', 'marker_two' ) );
+
+		$this->assertTrue( $this->sut->is_option_settled( 'marker_one' ) );
+		$this->assertTrue( $this->sut->is_option_settled( 'marker_two' ) );
+	}
+
+	/**
+	 * @testdox reset_all_cursors should leave settled options alone.
+	 *
+	 * `--retry-failed` calls reset_all_cursors() too, and it must not re-overwrite a
+	 * merchant's post-migration edit to a setting - only `--force` does that.
+	 */
+	public function test_reset_all_cursors_leaves_settled_options_alone(): void {
+		$this->sut->settle_option( 'woocommerce_customer_stock_notifications_allow_signups' );
+
+		$this->sut->reset_all_cursors();
+
+		$this->assertTrue( $this->sut->is_option_settled( 'woocommerce_customer_stock_notifications_allow_signups' ) );
+	}
+
+	/**
+	 * @testdox a non-array options key should read back as no settled markers.
+	 */
+	public function test_a_scalar_options_field_reads_back_as_empty(): void {
+		update_option( Constants::STATE_OPTION, array( 'options' => 'yes' ), false );
+
+		$this->assertSame( array(), $this->sut->get_settled_options() );
+		$this->assertFalse( $this->sut->is_option_settled( 'woocommerce_customer_stock_notifications_allow_signups' ) );
+	}
+
+	/**
 	 * @testdox the batch lock should refuse a second holder until it is released.
 	 */
 	public function test_the_batch_lock_admits_one_holder_at_a_time(): void {

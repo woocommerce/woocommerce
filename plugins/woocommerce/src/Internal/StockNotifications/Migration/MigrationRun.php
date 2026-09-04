@@ -73,10 +73,12 @@ class MigrationRun {
 	/**
 	 * The settings migrator this run uses.
 	 *
+	 * @param bool $dry_run Whether the run should keep its settled markers to itself. Only
+	 *                      read on the first call, same as `get_state()`.
 	 * @return OptionsMigrator
 	 */
-	public function get_options_migrator(): OptionsMigrator {
-		return $this->options ??= new OptionsMigrator( $this->reporter );
+	public function get_options_migrator( bool $dry_run = false ): OptionsMigrator {
+		return $this->options ??= new OptionsMigrator( $this->reporter, $this->get_state( $dry_run ) );
 	}
 
 	/**

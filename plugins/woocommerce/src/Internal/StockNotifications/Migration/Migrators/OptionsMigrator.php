@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\MigrationState;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 
@@ -21,13 +22,15 @@ defined( 'ABSPATH' ) || exit;
  * `migrate()` at the top of every batch instead, which keeps options inside the retry and
  * requirement checks a run already has.
  *
- * Idempotency is read-back-and-compare rather than a stored marker: a value whose Core home
- * already holds it is left alone, and a value that is written is confirmed by reading it back
- * before it counts as migrated. A key this instance has already visited is not looked at again
- * for the rest of the run, whether or not the write landed. That is what bounds the run: a
- * value that cannot be written would otherwise keep the run from ever draining, and it also
- * means a merchant editing a setting mid-run cannot have it overwritten by a later batch. A
- * write that did not land is retried by the next run, which starts a new instance.
+ * Idempotency is a per-value settled marker in the run state (`MigrationState`), not read-back-
+ * and-compare against the legacy value. A value is settled once it is confirmed in its Core
+ * home - either it already matched the legacy value, or a write to it was read back and matched
+ * - and the marker is written after that confirmation. Once settled, a value is never looked at
+ * again on a later run: a merchant editing it afterwards is kept, not overwritten. `--force`
+ * clears the markers, so a run after it re-imports everything from legacy. The in-memory
+ * `$visited` still bounds a single run: a value that keeps failing to write is retried only
+ * inside that run, so it cannot keep the run from ever draining. A write that did not land is
+ * not settled, and is retried by the next run.
  *
  * Two mappings that are easy to get backwards:
  *
@@ -147,6 +150,13 @@ class OptionsMigrator {
 	private Reporter $reporter;
 
 	/**
+	 * Run state, holding the settled markers a prior run confirmed.
+	 *
+	 * @var MigrationState
+	 */
+	private MigrationState $state;
+
+	/**
 	 * Values this instance has already attempted, so a run that calls `migrate()` once per
 	 * batch only looks at each of them once, and so a value that cannot be written cannot
 	 * keep the run from draining.
@@ -158,10 +168,12 @@ class OptionsMigrator {
 	/**
 	 * Constructor.
 	 *
-	 * @param Reporter $reporter Outcome reporter.
+	 * @param Reporter       $reporter Outcome reporter.
+	 * @param MigrationState $state    Run state, for reading and writing settled markers.
 	 */
-	public function __construct( Reporter $reporter ) {
+	public function __construct( Reporter $reporter, MigrationState $state ) {
 		$this->reporter = $reporter;
+		$this->state    = $state;
 	}
 
 	/**
@@ -202,14 +214,23 @@ class OptionsMigrator {
 	/**
 	 * The markers of every value that is not in its Core home.
 	 *
-	 * @param bool $skip_visited Whether to ignore values this instance has already attempted.
+	 * A settled marker is always skipped, whatever the Core row currently holds: once this
+	 * migrator has confirmed a value, a merchant's later edit to it is not "outstanding".
+	 *
+	 * @param bool $skip_visited Whether to also ignore values this instance has already
+	 *                           attempted this run.
 	 * @return string[] Markers, as `migrate()` records them.
 	 */
 	private function outstanding( bool $skip_visited ): array {
 		$markers = array();
+		$settled = array_flip( $this->state->get_settled_options() );
 
 		foreach ( self::GENERAL_MAP as $legacy_key => $mapping ) {
 			$marker = $mapping['core'];
+
+			if ( isset( $settled[ $marker ] ) ) {
+				continue;
+			}
 
 			if ( $skip_visited && isset( $this->visited[ $marker ] ) ) {
 				continue;
@@ -226,6 +247,10 @@ class OptionsMigrator {
 
 			foreach ( self::SUB_KEYS as $sub_key ) {
 				$marker = $core_key . self::MARKER_DELIMITER . $sub_key;
+
+				if ( isset( $settled[ $marker ] ) ) {
+					continue;
+				}
 
 				if ( $skip_visited && isset( $this->visited[ $marker ] ) ) {
 					continue;
@@ -247,19 +272,25 @@ class OptionsMigrator {
 	/**
 	 * Migrate every legacy setting that is not already in its Core home.
 	 *
+	 * Settling is batched: a marker confirmed in its Core home during this call is collected
+	 * rather than saved one at a time, and the whole batch is persisted in a single state
+	 * write at the end.
+	 *
 	 * @param Writer $writer Writer to route all persistence through.
 	 * @return array Outcome counts keyed by outcome code.
 	 */
 	public function migrate( Writer $writer ): array {
-		$counts = array();
-		$row_id = 0;
+		$counts         = array();
+		$row_id         = 0;
+		$settled        = array();
+		$settled_before = array_flip( $this->state->get_settled_options() );
 
 		foreach ( self::GENERAL_MAP as $legacy_key => $mapping ) {
 			++$row_id;
 
 			$core_key = $mapping['core'];
 
-			if ( isset( $this->visited[ $core_key ] ) ) {
+			if ( isset( $this->visited[ $core_key ] ) || isset( $settled_before[ $core_key ] ) ) {
 				continue;
 			}
 
@@ -269,6 +300,7 @@ class OptionsMigrator {
 			$before = get_option( $core_key );
 
 			if ( $this->values_match( $before, $value ) ) {
+				$settled[] = $core_key;
 				continue;
 			}
 
@@ -278,14 +310,21 @@ class OptionsMigrator {
 			// not land must stay outstanding so the next batch tries it again.
 			// `write_option()`'s own return is no use here — `update_option()` returns false
 			// for a value that was already what it is being set to.
-			$after = $writer->is_dry_run() ? $value : get_option( $core_key );
+			$after  = $writer->is_dry_run() ? $value : get_option( $core_key );
+			$landed = $this->values_match( $after, $value );
 
-			$this->record( $counts, $this->values_match( $after, $value ) ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $row_id );
+			if ( $landed ) {
+				$settled[] = $core_key;
+			}
+
+			$this->record( $counts, $landed ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $row_id );
 		}
 
 		foreach ( self::EMAIL_MAP as $legacy_key => $core_key ) {
-			$row_id = $this->migrate_email_settings( $legacy_key, $core_key, $row_id, $writer, $counts );
+			$row_id = $this->migrate_email_settings( $legacy_key, $core_key, $row_id, $writer, $counts, $settled, $settled_before );
 		}
+
+		$this->state->settle_options( $settled );
 
 		return $counts;
 	}
@@ -293,14 +332,16 @@ class OptionsMigrator {
 	/**
 	 * Migrate one email settings option, sub-key by sub-key, in a single write.
 	 *
-	 * @param string $legacy_key Legacy settings option name.
-	 * @param string $core_key   Core settings option name.
-	 * @param int    $row_id     Identifier of the last value reported, to number these from.
-	 * @param Writer $writer     Writer to route all persistence through.
-	 * @param array  $counts     Outcome counts, added to in place.
+	 * @param string   $legacy_key Legacy settings option name.
+	 * @param string   $core_key   Core settings option name.
+	 * @param int      $row_id     Identifier of the last value reported, to number these from.
+	 * @param Writer   $writer     Writer to route all persistence through.
+	 * @param array    $counts     Outcome counts, added to in place.
+	 * @param string[] $settled    Markers confirmed in their Core home this call, added to in place.
+	 * @param array    $settled_before Markers a prior run settled, keyed by marker.
 	 * @return int The identifier of the last value reported.
 	 */
-	private function migrate_email_settings( string $legacy_key, string $core_key, int $row_id, Writer $writer, array &$counts ): int {
+	private function migrate_email_settings( string $legacy_key, string $core_key, int $row_id, Writer $writer, array &$counts, array &$settled, array $settled_before ): int {
 		$legacy_settings = (array) get_option( $legacy_key, array() );
 		$core_settings   = (array) get_option( $core_key, array() );
 		$pending         = array();
@@ -310,7 +351,7 @@ class OptionsMigrator {
 
 			$marker = $core_key . self::MARKER_DELIMITER . $sub_key;
 
-			if ( isset( $this->visited[ $marker ] ) ) {
+			if ( isset( $this->visited[ $marker ] ) || isset( $settled_before[ $marker ] ) ) {
 				continue;
 			}
 
@@ -326,6 +367,7 @@ class OptionsMigrator {
 			$value = $legacy_settings[ $sub_key ];
 
 			if ( $this->values_match( $core_settings[ $sub_key ] ?? null, $value ) ) {
+				$settled[] = $marker;
 				continue;
 			}
 
@@ -347,6 +389,10 @@ class OptionsMigrator {
 
 		foreach ( $pending as $sub_key => $sub_row_id ) {
 			$landed = $this->values_match( $stored[ $sub_key ] ?? null, $core_settings[ $sub_key ] );
+
+			if ( $landed ) {
+				$settled[] = $core_key . self::MARKER_DELIMITER . $sub_key;
+			}
 
 			$this->record( $counts, $landed ? Reporter::OUTCOME_MIGRATED : Reporter::OUTCOME_FAILED, $sub_row_id );
 		}

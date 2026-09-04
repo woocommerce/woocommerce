@@ -145,7 +145,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$run = new MigrationRun();
 
 		$this->reporter  = $run->get_reporter();
-		$this->options   = $run->get_options_migrator();
+		$this->options   = $run->get_options_migrator( false );
 		$this->migrators = $run->build_migrators();
 	}
 
