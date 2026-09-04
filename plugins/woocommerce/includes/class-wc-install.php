@@ -356,6 +356,7 @@ class WC_Install {
 		),
 		'11.2.0-1' => array(
 			'wc_update_11201_migrate_tax_lookup_order_items',
+			'wc_update_11201_invalidate_analytics_reports_cache',
 		),
 	);
 
