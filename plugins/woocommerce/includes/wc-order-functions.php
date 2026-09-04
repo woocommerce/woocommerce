@@ -671,33 +671,6 @@ function wc_create_refund( $args = array() ) {
 		 */
 		do_action( 'woocommerce_create_refund', $refund, $args );
 
-		// Determine which refunded products still have unrefunded quantity left on the order,
-		// so download permissions are only revoked once no purchased quantity remains (#67008).
-		// The quantities are read from the refund object because a 'woocommerce_create_refund'
-		// callback may have adjusted them; the refund is not saved yet, so
-		// get_qty_refunded_for_item() still covers previous refunds only.
-		$products_with_remaining_qty = array();
-		if ( ! empty( $refunded_order_and_products ) ) {
-			$refund_quantities = array();
-			foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
-				$refunded_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				if ( $refunded_item_id ) {
-					$current_qty                            = isset( $refund_quantities[ $refunded_item_id ] ) ? $refund_quantities[ $refunded_item_id ] : 0;
-					$refund_quantities[ $refunded_item_id ] = $current_qty + abs( (float) $refunded_item->get_quantity() );
-				}
-			}
-
-			foreach ( $order->get_items() as $order_item_id => $order_item ) {
-				$remaining_qty = $order_item->get_quantity()
-					- abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) )
-					- ( isset( $refund_quantities[ $order_item_id ] ) ? $refund_quantities[ $order_item_id ] : 0 );
-
-				if ( $remaining_qty > 0 ) {
-					$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
-				}
-			}
-		}
-
 		if ( $refund->save() ) {
 			if ( $args['refund_payment'] ) {
 				$result = wc_refund_payment( $order, $refund->get_amount(), $refund->get_reason() );
@@ -716,11 +689,56 @@ function wc_create_refund( $args = array() ) {
 			}
 
 			// delete downloads that were refunded using order and product id, if present.
-			if ( ! empty( $refunded_order_and_products ) ) {
+			if ( ! empty( $refunded_order_and_products ) && $order instanceof WC_Order ) {
 				$download_data_store = WC_Data_Store::load( 'customer-download' );
-				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
-					// A partially refunded product keeps its download permissions while unrefunded quantity remains (#67008).
-					if ( isset( $products_with_remaining_qty[ $refunded_order_and_product['product_id'] ] ) ) {
+
+				// Quantities refunded by the refund that was just saved, per original order item.
+				// Read from the refund object so 'woocommerce_create_refund' adjustments are included.
+				$current_refund_quantities = array();
+				foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
+					$original_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+					if ( $original_item_id ) {
+						$already_counted                                = isset( $current_refund_quantities[ $original_item_id ] ) ? $current_refund_quantities[ $original_item_id ] : 0;
+						$current_refund_quantities[ $original_item_id ] = $already_counted + abs( (float) $refunded_item->get_quantity() );
+					}
+				}
+
+				// Products that still have unrefunded quantity across all line items of the order.
+				// The refund is already saved at this point, so get_qty_refunded_for_item() covers
+				// all refunds, including the current one, exactly once.
+				$products_with_remaining_qty = array();
+				foreach ( $order->get_items() as $order_item_id => $order_item ) {
+					if ( ! $order_item instanceof WC_Order_Item_Product ) {
+						continue;
+					}
+
+					$remaining_qty = $order_item->get_quantity() - abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) );
+					if ( $remaining_qty > 0 ) {
+						$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
+					}
+				}
+
+				foreach ( $refunded_order_and_products as $refunded_item_id => $refunded_order_and_product ) {
+					$product_id = $refunded_order_and_product['product_id'];
+
+					// Refunding an explicit quantity keeps the download permissions while unrefunded
+					// quantity of the product remains on the order. Amount-only refunds keep the
+					// historical all-or-nothing behavior and always revoke (#67008).
+					$is_quantity_refund = ! empty( $current_refund_quantities[ $refunded_item_id ] );
+					$should_revoke      = ! ( $is_quantity_refund && isset( $products_with_remaining_qty[ $product_id ] ) );
+
+					/**
+					 * Filters whether creating a refund should revoke the download permissions of a
+					 * refunded product on the order.
+					 *
+					 * @since 11.2.0
+					 *
+					 * @param bool            $should_revoke Whether the download permissions will be revoked.
+					 * @param int             $product_id    The id of the refunded product.
+					 * @param WC_Order        $order         The order the refund belongs to.
+					 * @param WC_Order_Refund $refund        The newly created refund.
+					 */
+					if ( ! apply_filters( 'woocommerce_refund_should_revoke_download_permissions', $should_revoke, $product_id, $order, $refund ) ) {
 						continue;
 					}
 

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep a customer's download permissions when a downloadable line item is only partially refunded; permissions are now revoked only once no unrefunded quantity of the product remains on the order.
+Keep a customer's download permissions when an explicit quantity of a downloadable line item is only partially refunded; amount-only refunds keep the previous all-or-nothing behavior, and the new woocommerce_refund_should_revoke_download_permissions filter allows overriding the decision.
