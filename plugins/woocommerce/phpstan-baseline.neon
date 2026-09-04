@@ -66931,12 +66931,6 @@ parameters:
 			path: src/Internal/StockNotifications/Notification.php
 
 		-
-			message: '#^Method WC_Product\:\:get_permalink\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Internal/StockNotifications/Notification.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\:\:\$product \(WC_Product\) does not accept null\.$#'
 			identifier: assign.propertyType
 			count: 1
