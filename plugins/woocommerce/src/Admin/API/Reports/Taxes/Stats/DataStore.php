@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
@@ -110,7 +111,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// (date_paid by default) rather than the lookup's date_created, so the Taxes report
 		// reconciles with the Orders and Revenue reports.
 		$this->add_time_period_sql_params( $query_args, $order_stats_table );
-		$taxes_where_clause  = '';
+
+		// This report sums the lookup rows as they stand, so a row a per-line row has replaced
+		// would be added on top of it and report its rate twice.
+		$taxes_where_clause = " AND ( {$order_tax_lookup_table}.order_item_id > 0 OR " . TaxesDataStore::get_legacy_row_condition() . ' )';
+
 		$order_status_filter = $this->get_status_subquery( $query_args );
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
