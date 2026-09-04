@@ -1251,7 +1251,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
 		$this->assertSame( '', $reloaded->get_meta( 'color' ), 'A genuine product switch should still take the old variation attribute meta with it.' );
-		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should go with the attributes it tracked.' );
+		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should go with the attributes it tracked.' );
 	}
 
 	/**
@@ -1298,7 +1298,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
 		$this->assertSame(
 			array( 'color' => 'blue' ),
-			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
 			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
 		);
 	}

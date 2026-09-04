@@ -42,7 +42,7 @@ final class OrderItemMetaUtil {
 				'cost',
 				'_reduced_stock',
 				'_restock_refunded_items',
-				WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY,
+				WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY,
 			)
 		);
 	}

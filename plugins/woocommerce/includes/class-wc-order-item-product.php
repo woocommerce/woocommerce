@@ -30,7 +30,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @since 11.2.0
 	 * @var string
 	 */
-	public const VARIATION_ATTRIBUTE_KEYS_META_KEY = '_variation_attribute_keys';
+	public const VARIATION_ATTRIBUTE_META_RECORD_KEY = '_variation_attribute_meta_record';
 
 	/**
 	 * Legacy values.
@@ -296,10 +296,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		// behind the attribute rows this call just wrote. Those rows are themselves re-added on
 		// every call, so a record updated in place would drift ahead of them and surface first in
 		// `meta_data` — including in the REST response, where callers index the array positionally.
-		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		if ( $current ) {
-			$this->add_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, $current, true );
+			$this->add_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, $current, true );
 		}
 	}
 
@@ -359,7 +359,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return array<string, string> Meta key => the value written under it.
 	 */
 	private function get_variation_attribute_meta_record() {
-		$record = $this->get_meta( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, true, 'edit' );
+		$record = $this->get_meta( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, true, 'edit' );
 
 		if ( ! is_array( $record ) ) {
 			return array();

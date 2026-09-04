@@ -743,7 +743,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
 		$this->assertSame( '', $item->get_meta( 'color' ), 'The previous variation\'s attribute meta should not survive the switch to a simple product.' );
-		$this->assertSame( '', $item->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should be removed along with the attributes it tracked.' );
+		$this->assertSame( '', $item->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should be removed along with the attributes it tracked.' );
 	}
 
 	/**
@@ -854,7 +854,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$after_switch = new WC_Order_Item_Product( $item->get_id() );
 
 		$this->assertSame( '', $after_switch->get_meta( 'color' ), 'The provenance record must survive the database round trip so a reloaded item can still clean up after itself.' );
-		$this->assertSame( '', $after_switch->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should be gone from the database too.' );
+		$this->assertSame( '', $after_switch->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should be gone from the database too.' );
 	}
 
 	/**
@@ -865,7 +865,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
 		// Reproduce a line item stored by an older WooCommerce: the attribute meta is there, the record is not.
-		$item->delete_meta_data( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+		$item->delete_meta_data( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		$item->set_product( $this->product );
 
@@ -875,7 +875,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should keep the provenance record out of the meta shown for an item.
 	 */
-	public function test_variation_attribute_keys_record_is_not_displayed(): void {
+	public function test_variation_attribute_meta_record_is_not_displayed(): void {
 		$item = new WC_Order_Item_Product();
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 		$item->set_quantity( 1 );
@@ -884,9 +884,9 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		$displayed_keys = wp_list_pluck( $item->get_all_formatted_meta_data( '' ), 'key' );
 
-		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY, $displayed_keys, 'The record is bookkeeping, not something to render on an order.' );
+		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, $displayed_keys, 'The record is bookkeeping, not something to render on an order.' );
 		$this->assertContains(
-			WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY,
+			WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY,
 			\Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil::get_hidden_keys(),
 			'The record must be registered as hidden so the admin order screen neither lists nor lets anyone edit it.'
 		);
@@ -916,7 +916,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should write the provenance record behind the attribute meta so it never takes their place in meta_data.
 	 */
-	public function test_variation_attribute_keys_record_is_written_after_the_attribute_meta(): void {
+	public function test_variation_attribute_meta_record_is_written_after_the_attribute_meta(): void {
 		$item = new WC_Order_Item_Product();
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
@@ -931,7 +931,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$keys = wp_list_pluck( $item->get_meta_data(), 'key' );
 
 		$this->assertSame(
-			array( 'color', 'size', WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
+			array( 'color', 'size', WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
 			$keys,
 			'The record belongs behind the attributes it tracks; ahead of them it surfaces first in meta_data, including in the REST response.'
 		);
@@ -1002,7 +1002,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame(
 			array( 'color' => 'blue' ),
-			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
 			'Precondition: the record survives the round trip with the value it wrote.'
 		);
 
@@ -1012,7 +1012,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$after_switch = new WC_Order_Item_Product( $item->get_id() );
 
 		$this->assertSame( '', $after_switch->get_meta( 'color' ), 'A record read back from the database must still identify the row it wrote.' );
-		$this->assertSame( '', $after_switch->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The record should be gone from the database too.' );
+		$this->assertSame( '', $after_switch->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The record should be gone from the database too.' );
 	}
 
 	/**
@@ -1029,7 +1029,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$item = new WC_Order_Item_Product();
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
-		$item->update_meta_data( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY, $record );
+		$item->update_meta_data( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, $record );
 
 		$item->set_product( $this->product );
 
@@ -1043,7 +1043,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$item = new WC_Order_Item_Product();
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
-		$hook   = 'woocommerce_order_item_get_' . WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY;
+		$hook   = 'woocommerce_order_item_get_' . WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY;
 		$filter = static function () {
 			return array( 'color' => array( 'not', 'a', 'value' ) );
 		};
