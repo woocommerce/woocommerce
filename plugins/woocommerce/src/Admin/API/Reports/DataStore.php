@@ -1021,10 +1021,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Generates a virtual table given a list of IDs.
 	 *
-	 * @param array $ids          Array of IDs.
-	 * @param array $id_field     Name of the ID field.
-	 * @param array $other_values Other values that must be contained in the virtual table.
-	 * @return array
+	 * @param array  $ids          Array of IDs.
+	 * @param string $id_field     Name of the ID field.
+	 * @param array  $other_values Other values that must be contained in the virtual table.
+	 * @return string
 	 */
 	protected function get_ids_table( $ids, $id_field, $other_values = array() ) {
 		global $wpdb;
@@ -1229,6 +1229,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				if ( 'AND' === $operator ) {
 					// AND results in an intersection between products from selected categories and manually included products.
 					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
+
+					// Force an empty set the same way an empty category does. Callers cannot tell an
+					// empty list apart from an absent product filter, and would drop both filters.
+					if ( empty( $included_products ) ) {
+						$included_products = array( '-1' );
+					}
 				} elseif ( 'OR' === $operator ) {
 					// OR results in a union of products from selected categories and manually included products.
 					$included_products = array_merge( $included_products, $query_args['product_includes'] );

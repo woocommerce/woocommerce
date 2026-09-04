@@ -3703,3 +3703,20 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 
 	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
 }
+
+/**
+ * Invalidate the Analytics report cache.
+ *
+ * Report responses are cached for a week and keyed on the query arguments alone, so a report
+ * run before the update keeps serving its pre-update answer. That hides the corrected result
+ * for category and product filters that have no product in common.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_invalidate_analytics_reports_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
+		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+	}
+}
