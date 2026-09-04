@@ -30,6 +30,19 @@ $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 $cogs_is_enabled     = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 
+// Restocking is decided per line, so mirror the conditions wc_restock_refunded_items()
+// applies. Computed once here and read by both the item rows and the refund panel, so
+// there is a single definition of what can be returned to stock.
+$restockable_items = array();
+
+foreach ( $line_items as $restock_item_id => $restock_item ) {
+	$restock_product = $restock_item->get_product();
+
+	if ( $restock_product && $restock_product->managing_stock() && (float) $restock_item->get_meta( '_reduced_stock', true ) > 0 ) {
+		$restockable_items[ $restock_item_id ] = true;
+	}
+}
+
 if ( wc_tax_enabled() ) {
 	$order_taxes      = $order->get_taxes();
 	$tax_classes      = WC_Tax::get_tax_classes();
@@ -349,10 +362,23 @@ if ( wc_tax_enabled() ) {
 <?php if ( $render_refunds ) : ?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">
-		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-			<tr>
-				<td class="label"><label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" <?php checked( apply_filters( 'woocommerce_restock_refunded_items', true ) ); ?> /></td>
+		<?php
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) :
+			?>
+			<tr class="restock-refunded-items" data-can-restock="<?php echo esc_attr( wc_bool_to_string( ! empty( $restockable_items ) ) ); ?>">
+				<td class="label">
+					<label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label>
+					<p class="description restock-refunded-items__description">
+						<?php
+						if ( ! empty( $restockable_items ) ) {
+							esc_html_e( 'Enter a refund quantity to return items to stock.', 'woocommerce' );
+						} else {
+							esc_html_e( 'Nothing can be returned to stock.', 'woocommerce' );
+						}
+						?>
+					</p>
+				</td>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" disabled /></td>
 			</tr>
 		<?php endif; ?>
 		<tr>

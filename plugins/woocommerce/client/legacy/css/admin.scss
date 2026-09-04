@@ -2327,6 +2327,31 @@ body.woocommerce_page_wc-orders {
 			vertical-align: top;
 		}
 
+		.restock-refunded-items {
+
+			.total {
+				vertical-align: top;
+			}
+
+			// Core fades disabled inputs almost out of sight. The option is kept
+			// visible on purpose here, so merchants can see it exists and learn
+			// when it applies.
+			input[type="checkbox"]:disabled {
+				opacity: 1;
+				background: $gray-200;
+				border-color: darken($gray-400, 15%);
+			}
+
+			.description {
+				margin: 0;
+				font-size: 12px;
+				line-height: 1.4;
+				font-style: normal;
+				font-weight: 400;
+				color: $gray-700;
+			}
+		}
+
 		.total {
 			font-size: 1em !important;
 			width: 10em;
