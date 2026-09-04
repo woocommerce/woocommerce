@@ -461,11 +461,13 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		$data_store = $this->data_store;
-		if ( ! $data_store instanceof WC_Data_Store || ! $data_store->has_callable( 'get_purchasable_variation_candidates' ) ) {
+		// method_exists() on the concrete class rather than has_callable(), which is is_callable() and so
+		// answers true for every method name on a data store that declares __call().
+		if ( ! $data_store instanceof WC_Data_Store || ! method_exists( $data_store->get_current_class_name(), 'get_purchasable_variation_candidates' ) ) {
 			return $variation_ids;
 		}
 
-		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
+		// @phpstan-ignore-next-line method.notFound (Guarded by method_exists() and called via __call() on the underlying product data store instance.)
 		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
 		// Only this product's children may be scanned, whatever the data store returned.
 		$candidate_ids = array_values( array_unique( array_intersect( $candidate_ids, $variation_ids ) ) );
