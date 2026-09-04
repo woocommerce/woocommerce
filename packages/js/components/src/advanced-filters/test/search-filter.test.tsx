@@ -12,8 +12,9 @@ import { createElement, createRef } from '@wordpress/element';
  * Internal dependencies
  */
 import SearchFilter from '../search-filter';
+import type { FilterConfig, FilterInput, SearchLabel } from '../types';
 
-const getConfig = ( getLabels ) => ( {
+const getConfig = ( getLabels: FilterInput[ 'getLabels' ] ): FilterConfig => ( {
 	labels: {
 		add: 'IP Address',
 		filter: 'Select IP addresses',
@@ -23,6 +24,7 @@ const getConfig = ( getLabels ) => ( {
 	},
 	rules: [ { value: 'includes', label: 'Includes' } ],
 	input: {
+		component: 'Search',
 		type: 'downloadIps',
 		getLabels,
 	},
@@ -34,7 +36,7 @@ describe( 'SearchFilter', () => {
 			.fn()
 			.mockResolvedValue( [ { id: '::1', label: '::1' } ] );
 		const onFilterChange = jest.fn();
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'ip_address', rule: 'includes', value: '' },
@@ -46,7 +48,7 @@ describe( 'SearchFilter', () => {
 		);
 
 		act( () => {
-			ref.current.onSearchChange( [
+			ref.current?.onSearchChange( [
 				{ key: '127.0.0.1', label: '127.0.0.1' },
 			] );
 		} );
@@ -63,7 +65,7 @@ describe( 'SearchFilter', () => {
 		await waitFor( () =>
 			expect( getLabels ).toHaveBeenCalledWith( '::1', {} )
 		);
-		expect( ref.current.state.selected ).toEqual( [
+		expect( ref.current?.state.selected ).toEqual( [
 			{ id: '::1', key: '::1', label: '::1' },
 		] );
 
@@ -85,7 +87,7 @@ describe( 'SearchFilter', () => {
 			.fn()
 			.mockResolvedValue( [ { id: '::1', label: '::1' } ] );
 		const onFilterChange = jest.fn();
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'ip_address', rule: 'includes', value: '' },
@@ -97,7 +99,7 @@ describe( 'SearchFilter', () => {
 		);
 
 		act( () => {
-			ref.current.onSearchChange( [ { key: '::1', label: '::1' } ] );
+			ref.current?.onSearchChange( [ { key: '::1', label: '::1' } ] );
 		} );
 		onFilterChange.mockClear();
 		rerender(
@@ -109,7 +111,7 @@ describe( 'SearchFilter', () => {
 		);
 
 		expect( getLabels ).not.toHaveBeenCalled();
-		expect( ref.current.state.selected ).toEqual( [
+		expect( ref.current?.state.selected ).toEqual( [
 			{ key: '::1', label: '::1' },
 		] );
 
@@ -126,7 +128,7 @@ describe( 'SearchFilter', () => {
 		const getLabels = jest
 			.fn()
 			.mockResolvedValue( [ { id: 60, label: '#60' } ] );
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
@@ -138,7 +140,7 @@ describe( 'SearchFilter', () => {
 		);
 
 		act( () => {
-			ref.current.onSearchChange( [ { key: 60, label: '#60' } ] );
+			ref.current?.onSearchChange( [ { key: 60, label: '#60' } ] );
 		} );
 		rerender(
 			<SearchFilter
@@ -149,14 +151,14 @@ describe( 'SearchFilter', () => {
 		);
 
 		expect( getLabels ).not.toHaveBeenCalled();
-		expect( ref.current.state.selected ).toEqual( [
+		expect( ref.current?.state.selected ).toEqual( [
 			{ key: 60, label: '#60' },
 		] );
 	} );
 
 	test( 'does not reload labels when an array filter value matches the selection', () => {
 		const getLabels = jest.fn();
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
@@ -168,7 +170,7 @@ describe( 'SearchFilter', () => {
 		);
 
 		act( () => {
-			ref.current.onSearchChange( [ { key: 60, label: '#60' } ] );
+			ref.current?.onSearchChange( [ { key: 60, label: '#60' } ] );
 		} );
 		rerender(
 			<SearchFilter
@@ -206,7 +208,7 @@ describe( 'SearchFilter', () => {
 		const getLabels = jest
 			.fn()
 			.mockResolvedValue( [ { id: 60, label: '#60' } ] );
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
@@ -231,19 +233,19 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'ignores stale label responses', async () => {
-		let resolveFirstRequest;
-		let resolveSecondRequest;
-		const firstRequest = new Promise( ( resolve ) => {
+		let resolveFirstRequest: ( labels: SearchLabel[] ) => void = () => {};
+		let resolveSecondRequest: ( labels: SearchLabel[] ) => void = () => {};
+		const firstRequest = new Promise< SearchLabel[] >( ( resolve ) => {
 			resolveFirstRequest = resolve;
 		} );
-		const secondRequest = new Promise( ( resolve ) => {
+		const secondRequest = new Promise< SearchLabel[] >( ( resolve ) => {
 			resolveSecondRequest = resolve;
 		} );
 		const getLabels = jest
 			.fn()
 			.mockReturnValueOnce( firstRequest )
 			.mockReturnValueOnce( secondRequest );
-		const ref = createRef();
+		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'ip_address', rule: 'includes', value: '' },
@@ -278,7 +280,7 @@ describe( 'SearchFilter', () => {
 			await firstRequest;
 		} );
 
-		expect( ref.current.state.selected ).toEqual( [
+		expect( ref.current?.state.selected ).toEqual( [
 			{ id: '127.0.0.1', key: '127.0.0.1', label: '127.0.0.1' },
 		] );
 	} );
