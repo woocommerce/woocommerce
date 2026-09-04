@@ -92,6 +92,7 @@ class NotificationRetryHandler {
 				),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
+			$notification->reset_processing_meta();
 			return;
 		}
 
@@ -108,6 +109,7 @@ class NotificationRetryHandler {
 				),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
+			$notification->reset_processing_meta();
 			return;
 		}
 
