@@ -406,10 +406,10 @@ class WC_Product_Variable extends WC_Product {
 	 *
 	 * The children most likely to be purchasable on stored data (published, not out of stock, priced) are
 	 * primed and checked first, so a product that has a purchasable variation usually hydrates one instead
-	 * of all of them. Only that first batch is primed up front; everything else is primed in one further
-	 * call, so a product with none costs one extra prime rather than one per batch. Every variation is
-	 * still evaluated with is_purchasable() and is_in_stock() before returning false, so filters and
-	 * overrides that widen purchasability keep working.
+	 * of all of them. Each batch is primed just before it is scanned, so nothing the scan does not reach is
+	 * primed; without a bulk read, all children are primed up front and partitioned from the caches. Every
+	 * variation is still evaluated with is_purchasable() and is_in_stock() before returning false, so filters
+	 * and overrides that widen purchasability keep working.
 	 *
 	 * @internal
 	 *
