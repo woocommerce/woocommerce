@@ -20,7 +20,8 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
-	 * Item meta key recording which meta keys `set_variation()` wrote for the item's variation.
+	 * Item meta key recording which meta keys, and which values, `set_variation()` wrote for the
+	 * item's variation.
 	 *
 	 * Variation attributes are stored under bare names (`color`), so nothing in the stored row
 	 * says who wrote it. This record is that provenance: it is the only thing that lets the item
@@ -246,11 +247,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * Set variation data (stored as meta data - write only).
 	 *
 	 * `$data` replaces the item's variation attributes rather than merging into them: attribute
-	 * meta this item recorded earlier and `$data` no longer contains is removed. Only keys listed
-	 * in {@see self::VARIATION_ATTRIBUTE_KEYS_META_KEY} are ever removed, so meta under any other
-	 * key is left alone. A row sharing a recorded key cannot be told apart from the attribute and
-	 * goes with it, the same way `add_meta_data( ..., true )` already replaces a same-named row
-	 * when the attribute is written.
+	 * meta this item recorded writing, and that `$data` no longer contains, is removed.
+	 *
+	 * The stored row carries no owner, so removal is deliberately conservative. A key the record
+	 * does not name is never touched, and a key it does name is only removed when exactly one row
+	 * still holds the value this item recorded writing under it. Two rows holding that value, or a
+	 * row since edited so none holds it, leaves every row under the key in place: a stale attribute
+	 * on the order screen can be corrected, a deleted merchant row cannot.
 	 *
 	 * Items created before WooCommerce 11.2.0 carry no such record, so their attribute meta is
 	 * kept rather than guessed at.
@@ -266,18 +269,27 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
-		$previous_keys = $this->get_variation_attribute_meta_keys();
-		$current_keys  = array();
+		$previous = $this->get_variation_attribute_meta_record();
+		$current  = array();
 
 		foreach ( $data as $key => $value ) {
 			$meta_key = str_replace( 'attribute_', '', $key );
 
 			$this->add_meta_data( $meta_key, $value, true );
-			$current_keys[] = $meta_key;
+
+			// A non-scalar value cannot be compared against the stored row later, so it is written
+			// but not recorded: an unrecorded key is never removed.
+			if ( is_scalar( $value ) ) {
+				$current[ $meta_key ] = (string) $value;
+			}
 		}
 
-		foreach ( array_diff( $previous_keys, $current_keys ) as $stale_key ) {
-			$this->delete_meta_data( $stale_key );
+		foreach ( $previous as $stale_key => $stale_value ) {
+			if ( array_key_exists( $stale_key, $current ) ) {
+				continue;
+			}
+
+			$this->delete_recorded_attribute_meta( $stale_key, $stale_value );
 		}
 
 		// Written last, and rewritten rather than updated in place, so the record always sits
@@ -286,8 +298,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		// `meta_data` — including in the REST response, where callers index the array positionally.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
 
-		if ( $current_keys ) {
-			$this->add_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, array_values( array_unique( $current_keys ) ), true );
+		if ( $current ) {
+			$this->add_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, $current, true );
 		}
 	}
 
@@ -307,25 +319,63 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get the meta keys a previous `set_variation()` call recorded for this item.
+	 * Remove one attribute meta row this item recorded writing.
 	 *
-	 * @return string[]
+	 * Removes nothing unless exactly one row under `$key` still holds `$value`. Anything else means
+	 * ownership cannot be established — a merchant row holding the same value, or the item's own row
+	 * edited since — and every row under the key is kept.
+	 *
+	 * @param string $key   Meta key.
+	 * @param string $value Value this item recorded writing under that key.
+	 * @return void
 	 */
-	private function get_variation_attribute_meta_keys() {
-		$keys = $this->get_meta( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, true );
+	private function delete_recorded_attribute_meta( $key, $value ) {
+		$matches = array();
 
-		if ( ! is_array( $keys ) ) {
+		foreach ( $this->get_meta_data() as $meta ) {
+			if ( $meta->key === $key && is_scalar( $meta->value ) && (string) $meta->value === $value ) {
+				$matches[] = $meta->value;
+			}
+		}
+
+		if ( 1 === count( $matches ) ) {
+			// Passing the stored value rather than the recorded one keeps the data store's strict
+			// comparison matching the row counted above.
+			$this->delete_meta_data_value( $key, $matches[0] );
+		}
+	}
+
+	/**
+	 * Get the attribute meta a previous `set_variation()` call recorded writing for this item.
+	 *
+	 * Read in the `edit` context so a display filter on the meta key cannot reshape the item's own
+	 * bookkeeping, and validated element by element: the row is persisted meta, so a plugin, an
+	 * older version, or a manual edit could have left anything in it.
+	 *
+	 * Entries that are not a meta key mapped to a scalar value are dropped, which includes the bare
+	 * list of keys written by earlier 11.2.0 development builds. An entry that is dropped is simply
+	 * never removed.
+	 *
+	 * @return array<string, string> Meta key => the value written under it.
+	 */
+	private function get_variation_attribute_meta_record() {
+		$record = $this->get_meta( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, true, 'edit' );
+
+		if ( ! is_array( $record ) ) {
 			return array();
 		}
 
-		return array_values(
-			array_filter(
-				array_map( 'strval', $keys ),
-				static function ( $key ) {
-					return '' !== $key;
-				}
-			)
-		);
+		$recorded = array();
+
+		foreach ( $record as $key => $value ) {
+			if ( ! is_string( $key ) || '' === $key || ! is_scalar( $value ) ) {
+				continue;
+			}
+
+			$recorded[ $key ] = (string) $value;
+		}
+
+		return $recorded;
 	}
 
 	/**
