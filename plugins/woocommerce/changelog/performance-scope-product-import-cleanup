@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid site-wide orphan cleanup after product CSV imports.
