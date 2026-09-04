@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Site Health recommendation for unusually large HPOS order metadata tables.
