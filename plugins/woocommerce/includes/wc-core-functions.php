@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 
@@ -2159,16 +2160,25 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * @return array
  */
 function wc_get_permalink_structure() {
-	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
-	$permalinks       = wp_parse_args(
+	$saved_permalinks   = (array) get_option( 'woocommerce_permalinks', array() );
+	$default_permalinks = array(
+		'product_base'           => 'product',
+		'category_base'          => 'product-category',
+		'tag_base'               => 'product-tag',
+		'attribute_base'         => '',
+		'use_verbose_page_rules' => false,
+	);
+
+	if ( empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] ) ) {
+		// These defaults are persisted site-wide, so translate them in the site locale rather than the request locale.
+		foreach ( array( 'product_base', 'category_base', 'tag_base' ) as $permalink_key ) {
+			$default_permalinks[ $permalink_key ] = SiteLocale::translate_slug( $default_permalinks[ $permalink_key ] );
+		}
+	}
+
+	$permalinks = wp_parse_args(
 		array_filter( $saved_permalinks ),
-		array(
-			'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
-			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
-			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
-			'attribute_base'         => '',
-			'use_verbose_page_rules' => false,
-		)
+		$default_permalinks
 	);
 
 	if ( $saved_permalinks !== $permalinks ) {
