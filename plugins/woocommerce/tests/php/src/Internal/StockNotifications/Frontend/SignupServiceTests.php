@@ -117,4 +117,57 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		return $product;
 	}
+
+	/**
+	 * @testdox A second signup with a different-case email should be reported as already joined.
+	 */
+	public function test_signup_dedupes_case_variants(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+
+		$product = $this->create_out_of_stock_product();
+
+		$first = $this->sut->signup( $product->get_id(), 0, 'guest@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $first->get_code() );
+		$this->assertSame( 'guest@example.com', $first->get_notification()->get_user_email() );
+
+		$second = $this->sut->signup( $product->get_id(), 0, ' Guest@Example.COM ' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED, $second->get_code() );
+		$this->assertSame( $first->get_notification()->get_id(), $second->get_notification()->get_id() );
+	}
+
+	/**
+	 * @testdox parse() should return a lowercase email for mixed-case guest input.
+	 */
+	public function test_parse_normalizes_guest_email(): void {
+		$product = $this->create_out_of_stock_product();
+
+		$data = $this->sut->parse(
+			array(
+				'wc_bis_product_id' => $product->get_id(),
+				'wc_bis_email'      => ' Guest@Example.COM ',
+				'wc_bis_opt_in'     => 'on',
+			)
+		);
+
+		$this->assertIsArray( $data );
+		$this->assertSame( 'guest@example.com', $data['user_email'] );
+	}
+
+	/**
+	 * @testdox parse() should reject an invalid guest email.
+	 */
+	public function test_parse_rejects_invalid_guest_email(): void {
+		$product = $this->create_out_of_stock_product();
+
+		$data = $this->sut->parse(
+			array(
+				'wc_bis_product_id' => $product->get_id(),
+				'wc_bis_email'      => 'not an email',
+				'wc_bis_opt_in'     => 'on',
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $data );
+		$this->assertSame( SignupService::ERROR_INVALID_EMAIL, $data->get_error_code() );
+	}
 }

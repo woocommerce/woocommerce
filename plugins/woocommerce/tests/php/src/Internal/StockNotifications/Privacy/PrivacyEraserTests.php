@@ -29,4 +29,19 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( $anonymous_notification->get_user_email(), wp_privacy_anonymize_data( 'email', '' ) );
 		$this->assertEquals( NotificationStatus::CANCELLED, $anonymous_notification->get_status() );
 	}
+
+	/**
+	 * @testdox Should erase a lowercase row when given a mixed-case email.
+	 */
+	public function test_privacy_eraser_matches_case_variants(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 1 );
+		$notification_id = $notification->save();
+
+		$response = PrivacyEraser::erase_notification_data( 'Jon@Doe.COM' );
+
+		$this->assertTrue( $response['items_removed'] );
+		$this->assertEquals( NotificationStatus::CANCELLED, ( new Notification( $notification_id ) )->get_status() );
+	}
 }

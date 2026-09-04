@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize customer emails in Back in Stock Notifications so signups and lookups match regardless of letter case, and fix lookups for emails containing a single quote.
