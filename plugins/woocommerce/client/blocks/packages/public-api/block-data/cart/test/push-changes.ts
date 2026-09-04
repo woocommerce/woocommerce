@@ -667,4 +667,120 @@ describe( 'pushChanges', () => {
 
 		jest.useRealTimers();
 	} );
+
+	it( 'Pushes the address when the billing country changes, even though the reset state and postcode are invalid', async () => {
+		updateCustomerDataMock.mockClear();
+		getValidationErrorMock.mockImplementation( ( key: string ) =>
+			[ 'billing_state', 'billing_postcode' ].includes( key )
+				? { message: 'Please enter a valid postcode', hidden: true }
+				: undefined
+		);
+
+		// Changing the country resets the state and postcode, like the address form does.
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: '',
+				postcode: '',
+				country: 'GB',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				phone: '555-555-5555',
+			},
+		} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{
+				billing_address: {
+					first_name: 'John',
+					last_name: 'Doe',
+					address_1: '123 Main St',
+					address_2: '',
+					city: 'New York',
+					state: '',
+					postcode: '',
+					country: 'GB',
+					email: 'john.doe@mail.com',
+					phone: '555-555-5555',
+				},
+			},
+			true,
+			false // because no shipping rate impacting fields are changed
+		);
+	} );
+
+	it( 'Still waits for a valid postcode when it was emptied without the country changing', async () => {
+		updateCustomerDataMock.mockClear();
+		getValidationErrorMock.mockImplementation( ( key: string ) =>
+			key === 'shipping_postcode'
+				? { message: 'Please enter a valid postcode', hidden: true }
+				: undefined
+		);
+
+		const billingAddress = {
+			first_name: 'John',
+			last_name: 'Doe',
+			address_1: '123 Main St',
+			address_2: '',
+			city: 'New York',
+			state: 'NY',
+			postcode: '10001',
+			country: 'US',
+			email: 'john.doe@mail.com',
+			phone: '555-555-5555',
+		};
+		// Same country throughout: the customer cleared the postcode themselves.
+		const shippingAddress = {
+			first_name: 'John',
+			last_name: 'Doe',
+			address_1: '123 Main St',
+			address_2: '',
+			city: 'Boston',
+			state: 'NY',
+			country: 'US',
+			phone: '555-555-5555',
+		};
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress,
+			shippingAddress: { ...shippingAddress, postcode: '' },
+		} );
+
+		pushChanges( false );
+
+		// The country did not change, so an empty postcode is the customer's own doing and is
+		// still validated. Only a country change earns the exemption.
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+
+		// Filling it in unblocks the push, proving nothing else was holding it back.
+		getValidationErrorMock.mockReturnValue( undefined );
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress,
+			shippingAddress: { ...shippingAddress, postcode: '02101' },
+		} );
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{ shipping_address: { ...shippingAddress, postcode: '02101' } },
+			true,
+			true // because the shipping rate impacting field was changed
+		);
+	} );
 } );
