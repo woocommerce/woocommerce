@@ -104,6 +104,35 @@ const updateDirtyProps = () => {
 };
 
 /**
+ * Fields a country change resets, since their values only make sense for the previous country.
+ */
+const countryDependentFields = [ 'state', 'postcode' ] as const;
+
+/**
+ * Returns the dirty props that need to pass validation before the address can be pushed.
+ *
+ * When the country changes, the state and postcode are reset and are therefore invalid until
+ * the customer fills them in again. Waiting for them would leave the server calculating
+ * shipping for the previous country, so they are skipped while they are still empty.
+ */
+const getDirtyPropsToValidate = (
+	dirtyProps: BaseAddressKey[],
+	address: CartBillingAddress | CartShippingAddress
+): BaseAddressKey[] => {
+	if ( ! dirtyProps.includes( 'country' ) ) {
+		return dirtyProps;
+	}
+
+	const emptiedByCountryChange = countryDependentFields.filter(
+		( field ) => ! address[ field ]
+	) as BaseAddressKey[];
+
+	return dirtyProps.filter(
+		( key ) => ! emptiedByCountryChange.includes( key )
+	);
+};
+
+/**
  * Function to dispatch an update to the server.
  */
 const updateCustomerData = (): void => {
@@ -131,7 +160,18 @@ const updateCustomerData = (): void => {
 	}
 
 	// Check props are valid, or abort.
-	if ( ! validateDirtyProps( localState.dirtyProps ) ) {
+	if (
+		! validateDirtyProps( {
+			billingAddress: getDirtyPropsToValidate(
+				localState.dirtyProps.billingAddress,
+				localState.customerData.billingAddress
+			),
+			shippingAddress: getDirtyPropsToValidate(
+				localState.dirtyProps.shippingAddress,
+				localState.customerData.shippingAddress
+			),
+		} )
+	) {
 		localState.doingPush = false;
 		return;
 	}
@@ -193,19 +233,30 @@ export const pushChanges = ( debounced = true ): void => {
 		return;
 	}
 
-	if (
-		isShallowEqual(
-			localState.customerData,
-			select( cartStore ).getCustomerData()
-		)
-	) {
+	const customerData = select( cartStore ).getCustomerData();
+
+	if ( isShallowEqual( localState.customerData, customerData ) ) {
 		return;
 	}
 
-	if ( debounced ) {
-		debouncedUpdateCustomerData();
-	} else {
+	if ( ! debounced ) {
 		updateCustomerData();
+		return;
+	}
+
+	debouncedUpdateCustomerData();
+
+	// Picking a country is a deliberate choice rather than typing, and it invalidates the
+	// shipping rates already on screen. Push it straight away so the rates reload instead of
+	// showing the previous country's options for the length of the debounce.
+	const countryChanged =
+		customerData.billingAddress.country !==
+			localState.customerData.billingAddress.country ||
+		customerData.shippingAddress.country !==
+			localState.customerData.shippingAddress.country;
+
+	if ( countryChanged ) {
+		debouncedUpdateCustomerData.flush();
 	}
 };
 
