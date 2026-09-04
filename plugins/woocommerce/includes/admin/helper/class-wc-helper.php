@@ -2345,12 +2345,15 @@ class WC_Helper {
 			throw new Exception( esc_html__( 'Subscription not found.', 'woocommerce' ) );
 		}
 
-		$local = self::_get_local_from_product_id( $subscription['product_id'] ?? 0 );
-		if ( ! is_array( $local ) || 'plugin' !== ( $local['_type'] ?? '' ) ) {
+		// Resolved the same way the row itself is, by zip_slug against every installed plugin.
+		// _get_local_from_product_id() only sees plugins carrying a Woo header, which misses the
+		// WooCommerce.com products distributed through WordPress.org.
+		$local = self::get_subscription_local_data( $subscription );
+		if ( empty( $local['installed'] ) || 'plugin' !== $local['type'] || empty( $local['path'] ) ) {
 			throw new Exception( esc_html__( 'This subscription has no installed plugin to update.', 'woocommerce' ) );
 		}
 
-		$plugin_file = (string) $local['_filename'];
+		$plugin_file = (string) $local['path'];
 		$auto_update = self::get_plugin_auto_update_data( $plugin_file );
 		if ( ! $auto_update['auto_update_manageable'] ) {
 			throw new Exception( esc_html__( "Auto-updates for this plugin can't be changed from here.", 'woocommerce' ) );

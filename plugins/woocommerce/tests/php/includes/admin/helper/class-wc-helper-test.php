@@ -62,7 +62,10 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 					'test-woo-extension/test-woo-extension.php' => array(
 						'Name'    => 'Test Woo Extension',
 						'Version' => '1.0.0',
-						'Woo'     => '123:abcdef',
+						// Empty, as it is for a WooCommerce.com product distributed through
+						// WordPress.org. The key itself has to be present or get_local_woo_plugins()
+						// discards this stand-in and re-reads the real plugin list.
+						'Woo'     => '',
 					),
 				),
 			),
@@ -735,6 +738,23 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->expectException( Exception::class );
 
 		WC_Helper::set_subscription_plugin_auto_update( 'test-key', true );
+	}
+
+	/**
+	 * @testdox Auto-updates can be set for a product distributed through WordPress.org.
+	 */
+	public function test_set_subscription_plugin_auto_update_handles_a_wporg_product(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+
+		// The fixture plugin carries no Woo header, which is what a WordPress.org build looks like.
+		WC_Helper::set_subscription_plugin_auto_update( 'test-key', true );
+
+		$this->assertContains(
+			'test-woo-extension/test-woo-extension.php',
+			(array) get_site_option( 'auto_update_plugins' ),
+			'Resolution has to go through the same local data the row is built from.'
+		);
 	}
 
 	/**
