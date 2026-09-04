@@ -207,7 +207,10 @@ class WC_Widget_Products extends WC_Widget {
 	 * @return WP_Query
 	 */
 	private function query_products( $query_args ) {
+		// WP_Query skips posts_clauses when a filter asks for suppressed filters, which would leave the
+		// query with no ordering at all, so stay on the post meta ordering in that case.
 		$orders_by_total_sales = isset( $query_args['meta_key'], $query_args['orderby'] )
+			&& empty( $query_args['suppress_filters'] )
 			&& 'total_sales' === $query_args['meta_key']
 			&& 'meta_value_num' === $query_args['orderby'];
 

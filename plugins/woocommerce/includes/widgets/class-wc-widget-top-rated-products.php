@@ -125,7 +125,10 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 	 * @return WP_Query
 	 */
 	private function query_top_rated_products( $query_args ) {
+		// WP_Query skips posts_clauses when a filter asks for suppressed filters, which would leave the
+		// query with no ordering at all, so stay on the post meta ordering in that case.
 		$orders_by_average_rating = isset( $query_args['meta_key'], $query_args['orderby'], $query_args['order'] )
+			&& empty( $query_args['suppress_filters'] )
 			&& '_wc_average_rating' === $query_args['meta_key']
 			&& 'meta_value_num' === $query_args['orderby']
 			&& 'DESC' === strtoupper( $query_args['order'] );
