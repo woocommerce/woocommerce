@@ -66,9 +66,7 @@ const AddressLineFields = ( {
 				<Address1Component
 					{ ...address1FieldProps }
 					type={ address1.field.type }
-					{ ...( useAutocomplete && isAddressForm
-						? { addressType }
-						: {} ) }
+					{ ...( useAutocomplete ? { addressType } : {} ) }
 					className={ `wc-block-components-address-form__address_1` }
 					value={ address1.value }
 					onChange={ ( newValue: string ) =>
