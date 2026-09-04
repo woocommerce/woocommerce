@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Batch initial multi-package shipping rate selections when switching from pickup to shipping.

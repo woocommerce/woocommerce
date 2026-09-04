@@ -21,6 +21,8 @@ interface PackageRates {
 	disabled?: boolean;
 	// Should the selected rate be highlighted.
 	highlightChecked?: boolean;
+	// Whether to synchronize the initial rate selection on mount.
+	selectRateOnMount?: boolean;
 }
 
 const PackageRates = ( {
@@ -32,6 +34,7 @@ const PackageRates = ( {
 	selectedRate,
 	disabled = false,
 	highlightChecked = false,
+	selectRateOnMount = true,
 }: PackageRates ): JSX.Element => {
 	const selectedRateId = selectedRate?.rate_id;
 
@@ -46,7 +49,7 @@ const PackageRates = ( {
 	//   from other components (e.g. local pickup), selectShippingRate thunk in
 	//   the cart store properly handles aborting the previous request if needed
 	useEffect( () => {
-		if ( selectedOption ) {
+		if ( selectRateOnMount && selectedOption ) {
 			onSelectRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
