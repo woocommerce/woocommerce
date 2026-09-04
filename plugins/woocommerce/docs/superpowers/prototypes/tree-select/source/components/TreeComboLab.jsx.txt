@@ -1,0 +1,900 @@
+import { useMemo, useState } from 'react';
+import { Button } from '@wordpress/components';
+import TreeCombo from './TreeCombo.jsx';
+import ProductCategoryTreeCombo from './ProductCategoryTreeCombo.jsx';
+import {
+  computeProductCategoryTags,
+  formatProductCategoryPath,
+} from '../data/productCategoryTree.js';
+import {
+  COUNTRY_TREE,
+  computeTags,
+  findNodeById,
+  getAllLeaves,
+  tagsToZones,
+} from '../data/countryTree.js';
+
+function makeInitialShippingValue() {
+  const usLeaves = getAllLeaves(findNodeById(COUNTRY_TREE, 'us')).map((leaf) => leaf.id);
+  const canadaLeaves = getAllLeaves(findNodeById(COUNTRY_TREE, 'ca')).map((leaf) => leaf.id);
+
+  return {
+    selected: new Set([...usLeaves, ...canadaLeaves]),
+    anywhereElseSelected: true,
+    splitOut: new Set(['us-ak', 'us-hi']),
+  };
+}
+
+const initialCategories = new Set([
+  'petite-linen-long-sleeve',
+  'speckled-glaze-ceramic-mugs',
+  'thunderbolt-4-1m-braided',
+  'canon-refills',
+]);
+
+const initialRepeatedCategories = new Set();
+const initialPathCategories = new Set([
+  'women-tees',
+  'men-tees',
+]);
+const longPathProductEditorCategories = new Set([
+  'thunderbolt-4-1m-braided',
+  'petite-linen-long-sleeve',
+  'summer-sale-t-shirts',
+]);
+
+const labTabs = [
+  { id: 'shipping', label: 'Shipping source case' },
+  { id: 'categories', label: 'Category stress test' },
+  { id: 'product-details', label: 'Product details' },
+  { id: 'product-editor', label: 'Current editor fit' },
+  { id: 'mobile', label: 'Mobile + accessibility' },
+];
+
+const categoryVariants = [
+  { id: 'deep', label: 'Deep hierarchy' },
+  { id: 'repeated', label: 'Repeated labels' },
+];
+
+const categoryStressPaths = [
+  'Clothing > Women > Tops > Shirts > Linen shirts > Long sleeve > Petite',
+  'Electronics > Computers > Accessories > Cables & adapters > USB-C cables > Thunderbolt 4 > 1m braided',
+  'Home & Kitchen > Kitchen > Drinkware > Mugs > Ceramic mugs > Handmade > Speckled glaze',
+];
+
+const accessibilityChecks = [
+  'Keyboardable row, breadcrumb, drill, and remove actions',
+  'Search results include full path context',
+  'Partial selection is visible and still needs announcement text',
+  'Mobile rows keep large hit targets at 375px',
+];
+
+const shippingDestinationSuggestions = [
+  {
+    id: 'north-america',
+    label: 'North America',
+    count: 3,
+  },
+  {
+    id: 'european-union',
+    label: 'European Union',
+    count: 27,
+  },
+  {
+    id: 'asia-pacific',
+    label: 'Asia Pacific',
+    count: 7,
+  },
+  {
+    id: 'latin-america',
+    label: 'Latin America',
+    count: 4,
+  },
+  {
+    id: 'de',
+    label: 'Germany',
+  },
+];
+
+const productClassifierSuggestions = [
+  {
+    id: 'women-tees',
+    label: 'T-shirts',
+    path: 'Clothing > Women > Tops > T-shirts',
+    reason: 'Suggested from the product title and description',
+  },
+  {
+    id: 'men-tees',
+    label: 'T-shirts',
+    path: 'Clothing > Men > Tops > T-shirts',
+    reason: 'Suggested from product copy mentioning women’s and men’s tops',
+  },
+  {
+    id: 'summer-sale-t-shirts',
+    label: 'T-shirts',
+    path: 'Sale > Summer > T-shirts',
+    reason: 'Add if this shirt belongs in the summer campaign',
+  },
+  {
+    id: 'petite-linen-long-sleeve',
+    label: 'Petite',
+    path: 'Clothing > Women > Tops > Shirts > Linen shirts > Long sleeve > Petite',
+    reason: 'Long-path example for category hierarchy testing',
+  },
+];
+
+const productSignals = [
+  ['Title', 'Nice black shirt'],
+  ['Description', 'Soft black shirt for everyday wear.'],
+  ['Tags', 'unisex, summer'],
+];
+
+function makeCategoryPathOption(id) {
+  const path = formatProductCategoryPath(id);
+  const parts = path.split(' > ');
+
+  return {
+    id,
+    label: parts[parts.length - 1],
+    parentPath: parts.slice(0, -1).join(' > '),
+    path,
+  };
+}
+
+function PrimaryCategoryPicker({
+  id,
+  options,
+  value,
+  onChange,
+  disabled = false,
+  helpText,
+  className = '',
+  defaultOpen = false,
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const selectedOption = options.find((option) => option.id === value);
+  const labelId = `${id}-label`;
+  const listboxId = `${id}-listbox`;
+
+  return (
+    <div className={`primary-category-field${className ? ` ${className}` : ''}`}>
+      <span id={labelId}>Primary category</span>
+      <div className={`primary-category-picker${isOpen ? ' is-open' : ''}`}>
+        <button
+          id={id}
+          type="button"
+          className="primary-category-trigger"
+          aria-labelledby={`${labelId} ${id}`}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          disabled={disabled}
+          title={selectedOption?.path || undefined}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          <span>{selectedOption?.path || 'Choose a category'}</span>
+          <span className="primary-category-caret" aria-hidden="true" />
+        </button>
+
+        {isOpen && !disabled && (
+          <div className="primary-category-menu" id={listboxId} role="listbox" aria-labelledby={labelId}>
+            {options.length > 0 ? (
+              options.map((option) => (
+                <button
+                  type="button"
+                  className={`primary-category-option${option.id === selectedOption?.id ? ' is-selected' : ''}`}
+                  key={option.id}
+                  role="option"
+                  aria-selected={option.id === selectedOption?.id}
+                  title={option.path}
+                  onClick={() => {
+                    onChange(option.id);
+                    setIsOpen(false);
+                  }}
+                >
+                  <strong>{option.label}</strong>
+                  <small>{option.path}</small>
+                </button>
+              ))
+            ) : (
+              <div className="primary-category-empty">Assign a category first.</div>
+            )}
+          </div>
+        )}
+      </div>
+      {helpText && <small>{helpText}</small>}
+    </div>
+  );
+}
+
+export default function TreeComboLab({ onBack }) {
+  const query = new URLSearchParams(window.location.search);
+  const initialView = query.get('view');
+  const initialCase = query.get('case');
+  const hideBack = query.get('hideBack') === '1';
+  const openProductTree = query.get('openTree') === '1';
+  const openPrimaryPicker = query.get('openPrimary') === '1';
+  const productName =
+    initialCase === 'long-paths' ? 'Braided USB-C cable' : 'Nice black shirt';
+  const productDescription =
+    initialCase === 'long-paths'
+      ? 'Braided cable for laptops, monitors, and charging docks. This stress case uses a deliberately deep product-category path.'
+      : 'Soft black shirt for everyday wear. Works across multiple storefront categories, including women’s tops and men’s tops.';
+  const initialLabTab =
+    initialView === 'categories' || initialView === 'mobile' || initialView === 'product-details' || initialView === 'product-editor'
+      ? initialView
+      : initialView === 'path' || initialView === 'product-path'
+        ? 'product-details'
+        : 'shipping';
+  const [shippingValue, setShippingValue] = useState(makeInitialShippingValue);
+  const [categories, setCategories] = useState(initialCategories);
+  const [repeatedCategories, setRepeatedCategories] = useState(initialRepeatedCategories);
+  const [productDetailCategories, setProductDetailCategories] = useState(
+    () =>
+      initialLabTab === 'product-editor' || initialLabTab === 'product-details'
+        ? new Set(initialCase === 'long-paths' ? longPathProductEditorCategories : [])
+        : initialPathCategories
+  );
+  const [mobileCategories, setMobileCategories] = useState(initialCategories);
+  const [primaryPathId, setPrimaryPathId] = useState(
+    initialCase === 'long-paths' ? 'thunderbolt-4-1m-braided' : 'women-tees'
+  );
+  const [activeTab, setActiveTab] = useState(initialLabTab);
+  const [categoryVariant, setCategoryVariant] = useState(
+    initialCase === 'repeated' ? 'repeated' : 'deep'
+  );
+
+  const generatedZones = useMemo(() => {
+    const tags = computeTags(
+      shippingValue.selected,
+      shippingValue.anywhereElseSelected,
+      shippingValue.splitOut
+    );
+    return tagsToZones(tags);
+  }, [shippingValue]);
+
+  const repeatedTags = useMemo(
+    () => computeProductCategoryTags(repeatedCategories),
+    [repeatedCategories]
+  );
+  const primaryBreadcrumbPath = repeatedTags[0]?.path || repeatedTags[0]?.label;
+  const storefrontPathOptions = useMemo(
+    () => [...productDetailCategories].map(makeCategoryPathOption),
+    [productDetailCategories]
+  );
+  const availableProductSuggestions = useMemo(
+    () => productClassifierSuggestions.filter((suggestion) => !productDetailCategories.has(suggestion.id)),
+    [productDetailCategories]
+  );
+  const selectedStorefrontPath =
+    storefrontPathOptions.find((option) => option.id === primaryPathId) || storefrontPathOptions[0];
+
+  function updateProductDetailCategories(nextValue) {
+    const next = nextValue instanceof Set ? nextValue : new Set(nextValue || []);
+    setProductDetailCategories(next);
+
+    if (next.size === 0) {
+      setPrimaryPathId('');
+      return;
+    }
+
+    if (!next.has(primaryPathId)) {
+      setPrimaryPathId(next.values().next().value);
+    }
+  }
+
+  function toggleProductSuggestion(id) {
+    const next = new Set(productDetailCategories);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    updateProductDetailCategories(next);
+  }
+
+  function removeProductCategory(id) {
+    const next = new Set(productDetailCategories);
+    next.delete(id);
+    updateProductDetailCategories(next);
+  }
+
+  function setMainProductPath(id) {
+    if (!productDetailCategories.has(id)) {
+      const next = new Set(productDetailCategories);
+      next.add(id);
+      updateProductDetailCategories(next);
+    }
+
+    setPrimaryPathId(id);
+  }
+
+  return (
+    <div className="tree-lab-shell">
+      <header className="tree-lab-header">
+        <div>
+          <div className="tree-lab-kicker">Prototype lab</div>
+          <h1>TreeCombo breakout</h1>
+          <p>
+            One TreeCombo pattern tested through the shipping source case, a deeper
+            product-category taxonomy, a storefront path decision, and a narrow
+            mobile/a11y check.
+          </p>
+        </div>
+        {!hideBack && (
+          <Button variant="secondary" onClick={onBack} __next40pxDefaultSize>
+            Back to shipping prototype
+          </Button>
+        )}
+      </header>
+
+      <nav className="tree-lab-tabs" aria-label="TreeCombo lab examples">
+        {labTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`tree-lab-tab${activeTab === tab.id ? ' is-active' : ''}`}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="tree-lab-main">
+        {activeTab === 'categories' && (
+          <section className="tree-lab-showcase" aria-labelledby="tree-lab-categories-title">
+            <div className="tree-lab-panel tree-lab-demo-panel tree-lab-product-demo">
+              <div className="tree-lab-panel-header">
+                <div>
+                  <h2 id="tree-lab-categories-title">Product categories</h2>
+                  <p>
+                    {categoryVariant === 'deep'
+                      ? 'Realistic product taxonomy with a few deliberate 7-layer branches.'
+                      : 'One product can be assigned to more than one category path.'}
+                  </p>
+                </div>
+                <span className="tree-lab-pill">Stress case</span>
+              </div>
+
+              <div className="tree-lab-subtabs" aria-label="Product category stress variants">
+                {categoryVariants.map((variant) => (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    className={`tree-lab-subtab${categoryVariant === variant.id ? ' is-active' : ''}`}
+                    aria-pressed={categoryVariant === variant.id}
+                    onClick={() => setCategoryVariant(variant.id)}
+                  >
+                    {variant.label}
+                  </button>
+                ))}
+              </div>
+
+              {categoryVariant === 'deep' ? (
+                <ProductCategoryTreeCombo
+                  label="Assign categories"
+                  value={categories}
+                  onChange={setCategories}
+                  defaultOpen
+                />
+              ) : (
+                <>
+                  <div className="tree-lab-product-context">
+                    <span>Product being edited</span>
+                    <strong>Everyday tee</strong>
+                  </div>
+                  <ProductCategoryTreeCombo
+                    label="Categories"
+                    value={repeatedCategories}
+                    onChange={setRepeatedCategories}
+                    defaultOpen
+                    defaultSearchQuery="T-shirts"
+                    showCounts={false}
+                    pathFirstSearchResults
+                  />
+                </>
+              )}
+            </div>
+
+            <aside className="tree-lab-side-panel" aria-label="Product category stress notes">
+              {categoryVariant === 'deep' ? (
+                <>
+                  <h3>What this tests</h3>
+                  <ul>
+                    <li>Deep category paths without losing the user in the tree.</li>
+                    <li>Search results that show where each match lives.</li>
+                    <li>Mixed leaf and group selections at realistic store scale.</li>
+                  </ul>
+                  <h3>7-layer examples</h3>
+                  <div className="tree-lab-path-list">
+                    {categoryStressPaths.map((path) => (
+                      <div className="tree-lab-path" key={path}>{path}</div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3>What this tests</h3>
+                  <ul>
+                    <li>The product is already selected; this only assigns categories.</li>
+                    <li>Repeated category names like T-shirts need full path context.</li>
+                    <li>Product-category counts can be hidden when they add noise.</li>
+                    <li>Breadcrumb choice is related, but separate from generic selection.</li>
+                  </ul>
+                  <h3>Selected paths</h3>
+                  {repeatedTags.length > 0 ? (
+                    <div className="tree-lab-path-list">
+                      {repeatedTags.map((tag) => (
+                        <div className="tree-lab-path" key={tag.id}>
+                          {tag.path || tag.label}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="tree-lab-path">No categories selected yet.</div>
+                  )}
+                  <h3>Storefront breadcrumb preview</h3>
+                  {primaryBreadcrumbPath ? (
+                    <div className="tree-lab-breadcrumb-preview">
+                      Home &gt; {primaryBreadcrumbPath} &gt; Everyday tee
+                    </div>
+                  ) : (
+                    <div className="tree-lab-breadcrumb-preview">
+                      Select a category path to preview.
+                    </div>
+                  )}
+                  <p className="tree-lab-note">
+                    The primary breadcrumb path is a product/catalogue decision, not
+                    generic TreeCombo behavior.
+                  </p>
+                </>
+              )}
+            </aside>
+          </section>
+        )}
+
+        {activeTab === 'shipping' && (
+          <section className="tree-lab-showcase" aria-labelledby="tree-lab-shipping-title">
+            <div className="tree-lab-panel tree-lab-demo-panel tree-lab-panel-shipping">
+              <div className="tree-lab-panel-header">
+                <div>
+                  <h2 id="tree-lab-shipping-title">Shipping destinations</h2>
+                </div>
+                <span className="tree-lab-pill">Source case</span>
+              </div>
+
+              <TreeCombo
+                label="Countries and regions"
+                value={shippingValue}
+                onChange={setShippingValue}
+                defaultOpen={initialView === 'shipping-open'}
+                suggestions={shippingDestinationSuggestions}
+              />
+            </div>
+
+            <aside className="tree-lab-side-panel" aria-label="Generated shipping zones">
+              <h3>Generated zones</h3>
+              <div className="tree-lab-zone-preview">
+                {generatedZones.map((zone) => (
+                  <div className="tree-lab-zone-row" key={zone.id}>
+                    <span>{zone.name}</span>
+                    <span>{zone.regions}</span>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </section>
+        )}
+
+        {activeTab === 'product-details' && (
+          <section className="tree-lab-product-details" aria-labelledby="tree-lab-product-details-title">
+            <div className="tree-lab-panel tree-lab-product-details-panel">
+              <div className="tree-lab-panel-header product-detail-heading">
+                <div>
+                  <h2 id="tree-lab-product-details-title">Product details</h2>
+                  <p>
+                    Category suggestions, TreeCombo review, and storefront path choice in one merchant workflow.
+                  </p>
+                </div>
+                <span className="tree-lab-pill">Follow-up</span>
+              </div>
+
+              <div className="product-detail-layout">
+                <div className="product-detail-main">
+                  <section className="product-detail-section product-detail-summary" aria-label="Product summary">
+                    <div>
+                      <span className="product-detail-section-label">Product being edited</span>
+                      <h3>{productName}</h3>
+                    </div>
+                    <div className="product-detail-signal-list">
+                      {productSignals.map(([label, value]) => (
+                        <div className="product-detail-signal" key={label}>
+                          <span>{label}</span>
+                          <strong>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="product-detail-section product-detail-category-section" aria-labelledby="product-detail-categories-title">
+                    <div className="product-detail-section-heading">
+                      <div>
+                        <h3 id="product-detail-categories-title">Product categories</h3>
+                        <p>Start from suggestions or TreeSelect search, then choose one assigned path for the storefront.</p>
+                      </div>
+                      <span>{productDetailCategories.size} assigned</span>
+                    </div>
+
+                    <div className="product-category-flow">
+                      <div className="product-category-flow-step product-detail-add-card">
+                        <div className="product-category-flow-heading">
+                          <span>1</span>
+                          <div>
+                            <h4>Add categories</h4>
+                            <p>Use product suggestions, or search and browse the category tree.</p>
+                          </div>
+                        </div>
+
+                        <ProductCategoryTreeCombo
+                          label="Search or browse categories"
+                          value={productDetailCategories}
+                          onChange={updateProductDetailCategories}
+                          defaultOpen={openProductTree}
+                          showCounts={false}
+                          pathFirstSearchResults
+                          defaultActivePathTagId="women-tees"
+                        />
+
+                        <div className="classifier-suggestions" aria-label="Suggested categories">
+                          <div className="classifier-suggestions-heading">
+                            <span>Suggestions</span>
+                            <span>Optional</span>
+                          </div>
+                          <div className="classifier-suggestion-list">
+                            {availableProductSuggestions.length > 0 ? availableProductSuggestions.map((suggestion) => (
+                              <button
+                                type="button"
+                                className="classifier-suggestion"
+                                key={suggestion.id}
+                                onClick={() => toggleProductSuggestion(suggestion.id)}
+                              >
+                                <div className="classifier-suggestion-body">
+                                  <span className="classifier-suggestion-title">{suggestion.label}</span>
+                                  <span className="classifier-suggestion-path">{suggestion.path}</span>
+                                  <span className="classifier-suggestion-reason">{suggestion.reason}</span>
+                                </div>
+                                <span className="classifier-suggestion-action">Add</span>
+                              </button>
+                            )) : (
+                              <div className="classifier-suggestion-empty">
+                                All suggested categories are already assigned.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="product-category-flow-step">
+                        <div className="product-category-flow-heading">
+                          <span>2</span>
+                          <div>
+                            <h4>Review assigned categories</h4>
+                            <p>Assigned categories are saved to the product. Choose one primary category for the storefront path.</p>
+                          </div>
+                        </div>
+
+                        <div className="assigned-category-card">
+                          <div className="assigned-category-card-heading">
+                            <span>Assigned categories</span>
+                            <span>{productDetailCategories.size} assigned</span>
+                          </div>
+                          <div className="assigned-category-list">
+                            {storefrontPathOptions.length > 0 ? (
+                              storefrontPathOptions.map((option) => (
+                                <div
+                                  className={`assigned-category-row${selectedStorefrontPath?.id === option.id ? ' is-main-path' : ''}`}
+                                  key={option.id}
+                                >
+                                  <div className="assigned-category-body">
+                                    <span className="assigned-category-title">{option.label}</span>
+                                    <span className="assigned-category-path">{option.path}</span>
+                                  </div>
+                                  <div className="assigned-category-actions">
+                                    <button
+                                      type="button"
+                                      className="assigned-category-remove"
+                                      aria-label={`Remove ${option.path}`}
+                                      onClick={() => removeProductCategory(option.id)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="storefront-path-empty">
+                                No categories assigned yet.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <PrimaryCategoryPicker
+                          id="product-detail-primary-category"
+                          options={storefrontPathOptions}
+                          value={selectedStorefrontPath?.id || ''}
+                          disabled={storefrontPathOptions.length === 0}
+                          onChange={setMainProductPath}
+                          helpText="Used for the storefront path preview."
+                          defaultOpen={openPrimaryPicker}
+                        />
+
+                        <div className="storefront-path-card product-detail-storefront-path">
+                          <div className="storefront-path-card-heading">Storefront path</div>
+                          <div className="storefront-path-summary">
+                            <span>Shoppers will see</span>
+                            <strong>
+                              {selectedStorefrontPath
+                                ? `Home > ${selectedStorefrontPath.path} > ${productName}`
+                                : 'Choose a category to preview the storefront path'}
+                            </strong>
+                            <p>
+                              Change this by choosing a different primary category above.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <aside className="product-detail-side" aria-label="Product details preview">
+                  <section className="product-detail-preview">
+                    <h3>Storefront preview</h3>
+                    <div className="tree-lab-breadcrumb-preview storefront-path-preview">
+                      {selectedStorefrontPath
+                        ? <>Home &gt; {selectedStorefrontPath.path} &gt; {productName}</>
+                        : 'Select a storefront path to preview.'}
+                    </div>
+                    <div className="product-detail-preview-box">
+                      <span>{productName}</span>
+                      <strong>$28.00</strong>
+                      <small>{selectedStorefrontPath?.label || 'No primary path selected'}</small>
+                    </div>
+                  </section>
+
+                  <section className="product-detail-preview product-detail-notes">
+                    <h3>What this tests</h3>
+                    <ul>
+                      <li>Suggestions feed the same TreeSelect selected state.</li>
+                      <li>Assigned categories are the source of truth.</li>
+                      <li>Storefront path is chosen from assigned category paths.</li>
+                    </ul>
+                  </section>
+                </aside>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'product-editor' && (
+          <section className="current-editor-fit" aria-labelledby="current-editor-fit-title">
+            <div className="current-editor-frame">
+              <div className="current-editor-topbar">
+                <div>
+                  <span className="current-editor-kicker">WooCommerce product</span>
+                  <h2 id="current-editor-fit-title">Edit product</h2>
+                </div>
+              </div>
+
+              <div className="current-editor-grid">
+                <div className="current-editor-content">
+                  <label className="current-editor-title-field">
+                    <span>Product name</span>
+                    <input type="text" value={productName} readOnly />
+                  </label>
+                  <div className="current-editor-block">
+                    <span>Description</span>
+                    <p>
+                      {productDescription}
+                    </p>
+                  </div>
+                  <div className="current-editor-product-data">
+                    <div className="current-editor-product-data-tabs">
+                      <span className="is-active">General</span>
+                      <span>Inventory</span>
+                      <span>Shipping</span>
+                      <span>Attributes</span>
+                    </div>
+                    <div className="current-editor-product-data-panel">
+                      <label>
+                        <span>Regular price</span>
+                        <input type="text" value="$28.00" readOnly />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="current-editor-sidebar" aria-label="Product settings sidebar">
+                  <section className="current-editor-postbox current-editor-publish">
+                    <div className="current-editor-postbox-heading">Publish</div>
+                    <div className="current-editor-publish-body">
+                      <div className="current-editor-publish-actions">
+                        <button type="button">Save Draft</button>
+                        <button type="button">Preview</button>
+                      </div>
+                      <div className="current-editor-publish-row">
+                        <span>Status: <strong>Draft</strong></span>
+                        <button type="button">Edit</button>
+                      </div>
+                      <div className="current-editor-publish-row">
+                        <span>Visibility: <strong>Public</strong></span>
+                        <button type="button">Edit</button>
+                      </div>
+                      <div className="current-editor-publish-row">
+                        <span>Catalog visibility: <strong>Shop and search results</strong></span>
+                        <button type="button">Edit</button>
+                      </div>
+                    </div>
+                    <div className="current-editor-publish-footer">
+                      <button type="button" className="is-link">Move to Trash</button>
+                      <button type="button" className="is-primary">Publish</button>
+                    </div>
+                  </section>
+
+                  <section className="current-editor-postbox">
+                    <div className="current-editor-postbox-heading">Product image</div>
+                    <div className="current-editor-image-placeholder">{productName}</div>
+                    <div className="current-editor-image-caption">Click the image to edit or update</div>
+                  </section>
+
+                  <section className="current-editor-postbox">
+                    <div className="current-editor-postbox-heading">Product gallery</div>
+                    <div className="current-editor-simple-link">Add product gallery images</div>
+                  </section>
+
+                  <section className="current-editor-postbox">
+                    <div className="current-editor-postbox-heading">Product categories</div>
+                    <div className="current-product-categories-box">
+                      <div className="current-editor-tabs" aria-label="Product category tabs">
+                        <button type="button" className="is-active">All categories</button>
+                        <button type="button">Most used</button>
+                      </div>
+
+                      <div className="current-category-current">
+                        <div className="current-category-heading">
+                          <span>Assigned categories</span>
+                          <span>{productDetailCategories.size} assigned</span>
+                        </div>
+                        <div className="current-category-assigned-list">
+                          {storefrontPathOptions.length > 0 ? (
+                            storefrontPathOptions.map((option) => (
+                              <div
+                                className={`current-category-assigned-row${selectedStorefrontPath?.id === option.id ? ' is-main-path' : ''}`}
+                                key={option.id}
+                              >
+                                <span className="current-category-assigned-body">
+                                  <strong>{option.label}</strong>
+                                  <small>{option.path}</small>
+                                </span>
+                                <div className="current-category-assigned-actions">
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${option.path}`}
+                                    onClick={() => removeProductCategory(option.id)}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="current-category-empty">No categories assigned yet.</div>
+                          )}
+                        </div>
+                      </div>
+
+                        <PrimaryCategoryPicker
+                          id="current-editor-primary-category"
+                          options={storefrontPathOptions}
+                          value={selectedStorefrontPath?.id || ''}
+                        disabled={storefrontPathOptions.length === 0}
+                        onChange={setMainProductPath}
+                        className="current-primary-category-field"
+                        defaultOpen={openPrimaryPicker}
+                      />
+
+                      <div className="current-category-storefront-preview">
+                        <span>Storefront path</span>
+                        <strong>
+                          {selectedStorefrontPath
+                            ? `Home > ${selectedStorefrontPath.path} > ${productName}`
+                            : 'Choose a main category path'}
+                        </strong>
+                      </div>
+
+                      <ProductCategoryTreeCombo
+                        label="Add categories"
+                        value={productDetailCategories}
+                        onChange={updateProductDetailCategories}
+                        defaultOpen={openProductTree}
+                        showCounts={false}
+                        pathFirstSearchResults
+                        defaultActivePathTagId="women-tees"
+                      />
+
+                      {availableProductSuggestions.length > 0 && (
+                        <div className="current-category-inline-suggestions" aria-label="Suggested categories">
+                          <div className="current-category-inline-heading">Suggestions</div>
+                          <div className="current-category-inline-list">
+                            {availableProductSuggestions.map((suggestion) => (
+                              <button
+                                type="button"
+                                className="current-category-inline-suggestion"
+                                key={suggestion.id}
+                                onClick={() => toggleProductSuggestion(suggestion.id)}
+                              >
+                                <span>
+                                  <strong>{suggestion.label}</strong>
+                                  <small>{suggestion.path}</small>
+                                </span>
+                                <span>Add</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  <section className="current-editor-postbox">
+                    <div className="current-editor-postbox-heading">Product tags</div>
+                    <div className="current-editor-tag-box">
+                      <input type="text" aria-label="Product tags" readOnly />
+                      <button type="button">Add</button>
+                    </div>
+                    <div className="current-editor-simple-link">Choose from the most used tags</div>
+                  </section>
+                </aside>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'mobile' && (
+          <section className="tree-lab-showcase tree-lab-mobile-showcase" aria-labelledby="tree-lab-mobile-title">
+            <div className="tree-lab-mobile-wrap">
+              <div className="tree-lab-mobile-device">
+                <div className="tree-lab-mobile-header">
+                  <h2 id="tree-lab-mobile-title">Mobile web</h2>
+                  <span>375px</span>
+                </div>
+                <ProductCategoryTreeCombo
+                  label="Assign categories"
+                  value={mobileCategories}
+                  onChange={setMobileCategories}
+                  defaultOpen
+                  defaultActivePathTagId="petite-linen-long-sleeve"
+                />
+              </div>
+            </div>
+
+            <aside className="tree-lab-side-panel" aria-labelledby="tree-lab-a11y-title">
+              <h3 id="tree-lab-a11y-title">Accessibility checklist</h3>
+              <ul className="tree-lab-a11y-list">
+                {accessibilityChecks.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <p className="tree-lab-note">
+                This is still a prototype. The next real component pass needs the full
+                combobox/tree keyboard model and screen reader announcement contract.
+              </p>
+            </aside>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
