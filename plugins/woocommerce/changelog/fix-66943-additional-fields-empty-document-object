@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an issue in which conditional fields depending on a hidden field caused false positives.

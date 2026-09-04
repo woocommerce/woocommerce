@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use WC_Customer;
 
 /**
@@ -327,19 +327,12 @@ trait CheckoutTrait {
 	 * @param callable         $persist Callback invoked as `$persist( string $key, mixed $value )` for each field.
 	 */
 	private function resolve_and_persist_additional_fields( \WP_REST_Request $request, callable $persist ): void {
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$document_object = $this->get_document_object_from_rest_request( $request );
-			$document_object->set_context( 'order' );
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
-			);
-		} else {
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_fields_for_location( 'order' ),
-				$this->additional_fields_controller->get_fields_for_location( 'contact' )
-			);
-		}
+		$document_object = $this->get_document_object_from_rest_request( $request );
+		$document_object->set_context( 'order' );
+		$additional_fields = array_merge(
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
+		);
 
 		$field_values = isset( $request['additional_fields'] ) ? (array) $request['additional_fields'] : array();
 
@@ -361,27 +354,27 @@ trait CheckoutTrait {
 	 * Returns a document object from a REST request.
 	 *
 	 * @param \WP_REST_Request $request The REST request.
-	 * @return DocumentObject The document object or null if experimental blocks are not enabled.
+	 * @return DocumentObject The document object.
 	 */
 	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
+		// Ensure DocumentObject has all fields (posted, saved), not just posted.
+		$saved_fields      = $this->schema instanceof CheckoutSchema
+			? (array) $this->schema->get_additional_fields_response( $this->order instanceof \WC_Order ? $this->order : wc()->customer )
+			: [];
+		$additional_fields = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+
 		return new DocumentObject(
 			[
 				'customer' => [
 					'billing_address'   => $request['billing_address'],
 					'shipping_address'  => $request['shipping_address'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_contact_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'contact' ),
 				],
 				'checkout' => [
 					'payment_method'    => $request['payment_method'],
 					'create_account'    => $request['create_account'],
 					'customer_note'     => $request['customer_note'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_order_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'order' ),
 				],
 			]
 		);
