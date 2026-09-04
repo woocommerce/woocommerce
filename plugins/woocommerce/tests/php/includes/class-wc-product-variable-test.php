@@ -588,6 +588,34 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_purchasable_variations reaches a candidate beyond the first batch.
+	 */
+	public function test_has_purchasable_variations_scans_the_second_candidate_batch(): void {
+		$product = $this->create_variable_product_with_variations( array_fill( 0, 60, array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ) ) );
+		$target  = (int) $product->get_children()[55];
+
+		// Every child is a stored-state candidate; only the 56th survives the filter, so the hit sits in the second batch.
+		add_filter(
+			'woocommerce_variation_is_purchasable',
+			function ( $purchasable, $variation ) use ( $target ) {
+				return $purchasable && $variation->get_id() === $target;
+			},
+			10,
+			2
+		);
+
+		$result  = null;
+		$checked = $this->count_variations_checked(
+			function () use ( $product, &$result ) {
+				$result = $product->has_purchasable_variations();
+			}
+		);
+
+		$this->assertTrue( $result, 'A candidate beyond the first batch must still be reached.' );
+		$this->assertSame( 56, $checked, 'The scan stops at the hit in the second batch.' );
+	}
+
+	/**
 	 * @testdox has_purchasable_variations ignores candidate IDs from the data store that are not children of the product.
 	 */
 	public function test_has_purchasable_variations_ignores_foreign_candidate_ids_from_data_store(): void {
