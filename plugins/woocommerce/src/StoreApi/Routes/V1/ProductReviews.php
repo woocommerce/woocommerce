@@ -111,7 +111,7 @@ class ProductReviews extends AbstractRoute {
 			$prepared_args['offset'] = $prepared_args['number'] * ( absint( $request['page'] ) - 1 );
 		}
 
-		$inaccessible_product_ids = $this->get_inaccessible_password_protected_product_ids();
+		$inaccessible_product_ids = $this->get_inaccessible_password_protected_product_ids( $request );
 		if ( ! empty( $inaccessible_product_ids ) ) {
 			$prepared_args['post__not_in'] = $inaccessible_product_ids;
 		}
@@ -148,24 +148,34 @@ class ProductReviews extends AbstractRoute {
 	/**
 	 * Product IDs whose reviews should stay hidden from this request.
 	 *
+	 * @param \WP_REST_Request $request Request object.
 	 * @return int[]
 	 */
-	private function get_inaccessible_password_protected_product_ids() {
-		$protected_products = get_posts(
-			array(
-				'post_type'              => 'product',
-				'post_status'            => ProductStatus::PUBLISH,
-				'has_password'           => true,
-				'posts_per_page'         => -1,
-				'no_found_rows'          => true,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			)
+	private function get_inaccessible_password_protected_product_ids( $request ) {
+		$protected_products_query = array(
+			'post_type'              => 'product',
+			'post_status'            => ProductStatus::PUBLISH,
+			'has_password'           => true,
+			'comment_count'          => array(
+				'value'   => 0,
+				'compare' => '!=',
+			),
+			'posts_per_page'         => -1,
+			'orderby'                => 'none',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
 		);
+
+		if ( ! empty( $request['product_id'] ) ) {
+			$protected_products_query['post__in'] = $request['product_id'];
+		}
+
+		$protected_products = get_posts( $protected_products_query );
 
 		$inaccessible_ids = array();
 		foreach ( $protected_products as $product_post ) {
-			if ( $product_post->comment_count > 0 && post_password_required( $product_post ) ) {
+			if ( post_password_required( $product_post ) ) {
 				$inaccessible_ids[] = (int) $product_post->ID;
 			}
 		}
