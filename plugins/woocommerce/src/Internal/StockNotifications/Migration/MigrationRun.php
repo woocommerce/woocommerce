@@ -39,8 +39,6 @@ class MigrationRun {
 	private Reporter $reporter;
 
 	/**
-
-	/**
 	 * The settings migrator, built on first use.
 	 *
 	 * @var OptionsMigrator|null
@@ -70,9 +68,6 @@ class MigrationRun {
 	 */
 	public function get_reporter(): Reporter {
 		return $this->reporter;
-	}
-
-	/**
 	}
 
 	/**
