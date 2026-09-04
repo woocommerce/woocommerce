@@ -175,7 +175,7 @@ class PaymentsController {
 			BlocksPackage::container()->get( PaymentMethodRegistry::class )->get_all_registered()
 		);
 
-		// The payment gateways list is keyed by ordering, not by gateway ID.
+		// `payment_gateways()` is keyed by gateway ID; pluck the IDs as a plain list for the diff below.
 		$gateway_ids = wp_list_pluck( WC()->payment_gateways()->payment_gateways(), 'id' );
 
 		return array_values( array_diff( $gateway_ids, $registered_payment_method_names ) );
