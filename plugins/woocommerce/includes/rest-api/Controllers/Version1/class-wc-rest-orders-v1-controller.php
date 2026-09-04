@@ -701,8 +701,10 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		// the parent it clears the variation attribute meta, handed the variation it replaces that
 		// meta with whatever the variation reports today. Keep the item's product and variation as
 		// they are instead, and refresh only the name and tax class set_product() resynchronises.
-		// The variation is still validated through the item's own setter, and one that no longer
-		// exists is demoted below, which is what should happen to it.
+		// The variation is still validated through the item's own setter. A request that resolved to
+		// the parent and finds the variation gone demotes to that parent below; one that resolved to
+		// the variation itself has nothing left to demote to and fails the way it did before, when
+		// set_product() was handed the same deleted variation.
 		$same_variation_update = 'update' === $action
 			&& $current_variation_id
 			&& $product instanceof WC_Product_Variation
