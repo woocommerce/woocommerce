@@ -228,9 +228,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 * directly, so that write fires no transition. Core already transitioned the post to the
 		 * status it saved just before `save_post`, but the CRUD can write a different one here (a
 		 * `save_post` callback setting the coupon to draft, say), and this covers the difference.
+		 *
+		 * The edit context is the code that was written to `post_title` above, and the one the
+		 * hooks invalidate from. The view context would run it through the
+		 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
 		 */
 		if ( 'publish' !== $coupon->get_status() ) {
-			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( $coupon->get_code() );
+			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
 		}
 
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
