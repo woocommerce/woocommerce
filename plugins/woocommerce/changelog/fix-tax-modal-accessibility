@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve keyboard support in the Add tax modal on the admin order screen, including page navigation and keeping the selected tax visible when moving through results.
