@@ -967,10 +967,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( $product && $product !== $item->get_product() ) {
-			$item->set_product( $product );
+			// A parent-only update is not a product change, and set_product() would clear the
+			// variation attribute meta before the variation is put back. Refresh only the name and tax
+			// class instead, still validating the stored variation through the item's own setter.
 			if ( $restore_variation_id && $product_item ) {
 				try {
 					$product_item->set_variation_id( $current_variation_id );
+					$product_item->set_name( $product->get_name() );
+					$product_item->set_tax_class( $product->get_tax_class() );
 				} catch ( WC_Data_Exception $e ) {
 					if (
 						'order_item_product_invalid_variation_id' !== $e->getErrorCode()
@@ -978,10 +982,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// The stored variation ID no longer identifies a variation: demote via set_product().
 					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
 					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
 					// get_class() check) would revive the 400 on every store substituting order item classes.
+					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
 							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
@@ -992,6 +997,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						array( 'source' => 'rest-api' )
 					);
 				}
+			} else {
+				$item->set_product( $product );
 			}
 
 			if ( 'create' === $action ) {

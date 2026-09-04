@@ -697,18 +697,23 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		if ( $product && $product !== $item->get_product() ) {
-			$item->set_product( $product );
+			// A parent-only update is not a product change, and set_product() would clear the
+			// variation attribute meta before the variation is put back. Refresh only the name and tax
+			// class instead, still validating the stored variation through the item's own setter.
 			if ( $restore_variation_id ) {
 				try {
 					$item->set_variation_id( $current_variation_id );
+					$item->set_name( $product->get_name() );
+					$item->set_tax_class( $product->get_tax_class() );
 				} catch ( WC_Data_Exception $e ) {
 					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// The stored variation ID no longer identifies a variation: demote via set_product().
 					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
 					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
 					// when the post is not a product_variation.
+					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
 							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
@@ -719,6 +724,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						array( 'source' => 'rest-api' )
 					);
 				}
+			} else {
+				$item->set_product( $product );
 			}
 
 			if ( 'create' === $action ) {

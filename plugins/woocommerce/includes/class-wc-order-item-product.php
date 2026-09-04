@@ -20,6 +20,17 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
+	 * Meta key of the record `set_variation()` keeps of the attribute meta it wrote: meta key => value.
+	 *
+	 * Attribute meta is stored under bare keys (`color`), so without this record a variation's
+	 * row cannot be told apart from a merchant's or a plugin's.
+	 *
+	 * @since 11.2.0
+	 * @var string
+	 */
+	public const VARIATION_ATTRIBUTE_META_RECORD_KEY = '_variation_attribute_meta_record';
+
+	/**
 	 * Legacy values.
 	 *
 	 * @deprecated 4.4.0 For legacy actions.
@@ -233,18 +244,119 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 *
+	 * Replaces rather than merges: recorded attribute meta that `$data` no longer contains is
+	 * removed. Items saved before 11.2.0 carry no record, so their attribute meta is left alone.
+	 *
 	 * @param array $data Key/Value pairs.
 	 */
 	public function set_variation( $data = array() ) {
-		if ( is_array( $data ) ) {
-			foreach ( $data as $key => $value ) {
-				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
+		if ( ! is_array( $data ) ) {
+			return;
+		}
+
+		// Reading meta on an unsaved item with no meta loaded caches an empty set that is never
+		// re-read after save. Checkout passes every line item an empty array, so bail out early.
+		if ( ! $data && null === $this->meta_data && ! $this->get_id() ) {
+			return;
+		}
+
+		$previous = $this->get_variation_attribute_meta_record();
+		$current  = array();
+
+		foreach ( $data as $key => $value ) {
+			$meta_key = str_replace( 'attribute_', '', $key );
+
+			$this->add_meta_data( $meta_key, $value, true );
+
+			// Only a scalar can be matched against the stored row later; unrecorded keys are never removed.
+			if ( is_scalar( $value ) ) {
+				$current[ $meta_key ] = (string) $value;
 			}
+		}
+
+		foreach ( $previous as $stale_key => $stale_value ) {
+			if ( ! array_key_exists( $stale_key, $current ) ) {
+				$this->delete_recorded_attribute_meta( $stale_key, $stale_value );
+			}
+		}
+
+		// Rewritten rather than updated in place so the record stays behind the attribute rows in
+		// `meta_data`; REST consumers index that array positionally.
+		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
+
+		if ( $current ) {
+			$this->add_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, $current, true );
 		}
 	}
 
 	/**
+	 * Remove one attribute meta row this item recorded writing.
+	 *
+	 * Nothing on the row says who wrote it, so the row is only removed when the oldest row under
+	 * the key still holds the recorded value and no other row does. A stale attribute can be
+	 * corrected later; a deleted merchant row cannot.
+	 *
+	 * @param string $key   Meta key.
+	 * @param string $value Value this item recorded writing under that key.
+	 * @return void
+	 */
+	private function delete_recorded_attribute_meta( $key, $value ) {
+		$oldest  = null;
+		$matches = array();
+
+		foreach ( $this->get_meta_data() as $meta ) {
+			if ( $meta->key !== $key ) {
+				continue;
+			}
+
+			if ( null === $oldest ) {
+				$oldest = $meta;
+			}
+
+			if ( is_scalar( $meta->value ) && (string) $meta->value === $value ) {
+				$matches[] = $meta->value;
+			}
+		}
+
+		if ( 1 !== count( $matches ) || $oldest->value !== $matches[0] ) {
+			return;
+		}
+
+		// The stored value, not the recorded string: the data store compares strictly.
+		$this->delete_meta_data_value( $key, $matches[0] );
+	}
+
+	/**
+	 * Get the attribute meta a previous `set_variation()` call recorded writing for this item.
+	 *
+	 * The record is persisted meta, so anything could be in it. Entries that are not a meta key
+	 * mapped to a scalar are dropped, and a dropped entry is simply never removed.
+	 *
+	 * @return array<string, string> Meta key => the value written under it.
+	 */
+	private function get_variation_attribute_meta_record() {
+		$record = $this->get_meta( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, true, 'edit' );
+
+		if ( ! is_array( $record ) ) {
+			return array();
+		}
+
+		$recorded = array();
+
+		foreach ( $record as $key => $value ) {
+			if ( is_string( $key ) && '' !== $key && is_scalar( $value ) ) {
+				$recorded[ $key ] = (string) $value;
+			}
+		}
+
+		return $recorded;
+	}
+
+	/**
 	 * Aggregate and set properties based on passed in product object.
+	 *
+	 * Handed the variation the item already refers to, the attribute meta is left alone: the item
+	 * records what was bought, not what the variation declares today.
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @return void
@@ -254,21 +366,20 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$same_variation = $product->get_id() === (int) $this->get_variation_id( 'edit' );
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
-			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+			if ( ! $same_variation ) {
+				$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+			}
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
-			// Any variation attribute meta written by a previous set_variation() call is left in
-			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
-			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
-			// risks deleting real data. Removing that stale display meta is tracked in #66733.
+			$this->set_variation( array() );
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
 	}
-
 	/**
 	 * Set meta data for backordered products.
 	 */

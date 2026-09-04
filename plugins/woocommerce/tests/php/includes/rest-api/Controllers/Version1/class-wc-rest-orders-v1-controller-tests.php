@@ -216,6 +216,52 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( 'small', $reloaded->get_meta( 'pa_size' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
+		$this->assertSame(
+			'small',
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY )['pa_size'] ?? '',
+			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
+		);
+	}
+
+	/**
+	 * @testdox Updating with the line item's own variation keeps the attribute meta the order was placed with.
+	 */
+	public function test_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+
+		// The merchant reconfigures the catalog after the order was placed: the parent stops using
+		// the attribute for variations, so the variation no longer reports what was bought.
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+		// The parent's save invalidates the parent's cached instance, not its children's.
+		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => $variation->get_id(),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Re-posting the line item\'s own variation should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
+		$this->assertSame( 'small', $reloaded->get_meta( 'pa_size' ), 'An order records what was bought, so touching the line item must not rewrite its attributes from the catalog as it stands today.' );
 	}
 
 	/**
@@ -239,6 +285,8 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( '', $reloaded->get_meta( 'pa_size' ), 'A demoted item is no longer a variation, so its attribute meta should go too.' );
+		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should go with the attributes it tracked.' );
 	}
 
 	/**
