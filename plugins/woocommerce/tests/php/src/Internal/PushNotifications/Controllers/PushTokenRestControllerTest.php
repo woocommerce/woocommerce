@@ -1234,6 +1234,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_send_at_gmt',
 			),
 			array_keys( $schema['properties'] )
 		);
@@ -1508,6 +1509,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_send_at_gmt',
 			),
 			array_keys( $fields )
 		);
@@ -1701,6 +1703,51 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'last_confirmed_at_gmt', $token_data );
 		$this->assertNull( $token_data['created_at_gmt'] );
 		$this->assertNull( $token_data['last_confirmed_at_gmt'] );
+	}
+
+	/**
+	 * @testdox Should return the last send time for a sent token and null for an unsent one.
+	 */
+	public function test_index_returns_token_last_send_time(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$sent = $data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-sent-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'last-send-sent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-unsent-token',
+				'platform'      => PushToken::PLATFORM_ANDROID,
+				'device_uuid'   => 'last-send-unsent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_ANDROID,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->record_last_send( array( $sent ) );
+		$data_store->flush_last_send();
+
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$by_token = array_column( ( new PushTokenRestController() )->index( $request )->get_data()['tokens'], null, 'token' );
+
+		$this->assertArrayHasKey( 'last_send_at_gmt', $by_token['last-send-unsent-token'] );
+		$this->assertNull( $by_token['last-send-unsent-token']['last_send_at_gmt'] );
+		$this->assertNotNull( $by_token['last-send-sent-token']['last_send_at_gmt'] );
 	}
 
 	/**

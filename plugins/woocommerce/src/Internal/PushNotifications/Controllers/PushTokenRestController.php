@@ -363,6 +363,12 @@ class PushTokenRestController extends RestApiControllerBase {
 						'context'     => array( 'view' ),
 						'readonly'    => true,
 					),
+					'last_send_at_gmt'      => array(
+						'description' => __( 'The date a notification for this token was last sent to WordPress.com, as GMT. This records that WordPress.com accepted the payload, not that the device received it. Null when nothing has been sent.', 'woocommerce' ),
+						'type'        => array( 'date-time', 'null' ),
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
 				),
 			)
 		);

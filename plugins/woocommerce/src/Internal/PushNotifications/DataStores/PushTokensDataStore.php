@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvali
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
+use Throwable;
 use WC_Data_Exception;
 use WP_Http;
 use WP_Query;
@@ -33,6 +34,36 @@ class PushTokensDataStore {
 	 */
 	private array $tokens_by_roles_cache = array();
 
+	/**
+	 * Buffered last-send stamps awaiting a write, as token post ID => GMT
+	 * datetime. Holds the most recent time recorded for each token this
+	 * request. Flushed by {@see self::flush_last_send()} on shutdown.
+	 *
+	 * @var array<int, string>
+	 */
+	private array $pending_last_send = array();
+
+	/**
+	 * Whether the shutdown flush for `$pending_last_send` has been registered.
+	 *
+	 * @var bool
+	 */
+	private bool $last_send_flush_registered = false;
+
+	/**
+	 * How many tokens to write per statement when flushing last-send stamps.
+	 */
+	const LAST_SEND_CHUNK_SIZE = 100;
+
+	/**
+	 * Meta key holding the GMT datetime of the last successful send to WPCOM.
+	 *
+	 * Deliberately absent from `build_meta_array_from_token()`: it is written
+	 * only by `record_last_send()`, so an unrelated token update (e.g. the app
+	 * re-registering with a new locale) cannot clobber it.
+	 */
+	const LAST_SEND_AT_META_KEY = 'last_send_at_gmt';
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -40,6 +71,7 @@ class PushTokensDataStore {
 		'platform',
 		'device_locale',
 		'metadata',
+		self::LAST_SEND_AT_META_KEY,
 	);
 
 	/**
@@ -130,6 +162,7 @@ class PushTokensDataStore {
 		 */
 		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
 		$push_token->set_metadata( $meta['metadata'] ?? array() );
+		$push_token->set_last_send_at_gmt( $meta[ self::LAST_SEND_AT_META_KEY ] ?? null );
 
 		/**
 		 * Both timestamps come from the post record rather than meta, because
@@ -300,19 +333,20 @@ class PushTokensDataStore {
 			) {
 				return new PushToken(
 					array(
-						'id'            => $post_id,
-						'user_id'       => $user_id,
-						'token'         => $meta['token'],
-						'device_uuid'   => $meta['device_uuid'] ?? null,
-						'platform'      => $meta['platform'],
-						'origin'        => $meta['origin'],
+						'id'               => $post_id,
+						'user_id'          => $user_id,
+						'token'            => $meta['token'],
+						'device_uuid'      => $meta['device_uuid'] ?? null,
+						'platform'         => $meta['platform'],
+						'origin'           => $meta['origin'],
 						/**
 						 * These meta items were added after the ability to store
 						 * tokens, so may not be available for older tokens. Use
 						 * sensible defaults.
 						 */
-						'device_locale' => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
-						'metadata'      => $meta['metadata'] ?? array(),
+						'device_locale'    => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
+						'metadata'         => $meta['metadata'] ?? array(),
+						'last_send_at_gmt' => $meta[ self::LAST_SEND_AT_META_KEY ] ?? null,
 					)
 				);
 			}
@@ -442,6 +476,261 @@ class PushTokensDataStore {
 
 		$this->tokens_by_roles_cache[ $cache_key ] = $result;
 		return $result;
+	}
+
+	/**
+	 * Records that the given tokens were successfully sent to WPCOM.
+	 *
+	 * Buffers the stamps and writes them once on shutdown rather than per call.
+	 * A single request often processes several notifications — the loopback
+	 * receives every notification a store event produced, and a bulk order
+	 * update can produce dozens — and each one would otherwise repeat the same
+	 * write against the same handful of tokens. Buffering makes the cost a
+	 * function of the request rather than of the notification count, while each
+	 * token still keeps the exact time of its own most recent send.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param PushToken[] $push_tokens The tokens WPCOM accepted.
+	 * @return void
+	 */
+	public function record_last_send( array $push_tokens ): void {
+		$timestamp = gmdate( 'Y-m-d H:i:s' );
+
+		foreach ( $push_tokens as $push_token ) {
+			$id = $push_token->get_id();
+
+			if ( $id ) {
+				$this->pending_last_send[ $id ] = $timestamp;
+			}
+		}
+
+		if ( empty( $this->pending_last_send ) || $this->last_send_flush_registered ) {
+			return;
+		}
+
+		add_action( 'shutdown', array( $this, 'flush_last_send' ) );
+
+		// The safety net and retry jobs run under an Action Scheduler queue
+		// runner, which is routinely killed on a time limit. Shutdown functions
+		// do not run on a kill, so flush after each action as well.
+		add_action( 'action_scheduler_after_execute', array( $this, 'flush_last_send' ) );
+
+		$this->last_send_flush_registered = true;
+	}
+
+	/**
+	 * Writes the buffered last-send stamps.
+	 *
+	 * Runs on shutdown and after each Action Scheduler action, and is safe to
+	 * call directly to force the write early.
+	 *
+	 * Failure is swallowed: not knowing when a token was last used is a
+	 * diagnostic gap, and must never turn a delivered notification into a
+	 * failed one.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public function flush_last_send(): void {
+		// Lets a later `record_last_send()` re-assert both hooks. They stay
+		// registered either way, and `add_action()` is idempotent here.
+		$this->last_send_flush_registered = false;
+
+		if ( empty( $this->pending_last_send ) ) {
+			return;
+		}
+
+		$pending                 = $this->pending_last_send;
+		$this->pending_last_send = array();
+
+		// Chunked so neither the `IN` list nor the number of placeholders handed
+		// to `$wpdb->prepare()` grows with the number of registered devices. A
+		// large `IN` list can also push the optimizer off the `post_id` index.
+		foreach ( array_chunk( $pending, self::LAST_SEND_CHUNK_SIZE, true ) as $chunk ) {
+			try {
+				$this->write_last_send_chunk( $chunk );
+			} catch ( Throwable $e ) {
+				// Throwable, not Exception. `action_scheduler_after_execute`
+				// fires between the action running and `mark_complete()`, inside
+				// the runner's own Throwable catch, so an Error escaping here
+				// would record a delivered notification's action as failed.
+				wc_get_logger()->warning(
+					'Failed to record last send time for push tokens.',
+					array(
+						'token_ids' => array_keys( $chunk ),
+						'error'     => $e->getMessage(),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Writes one chunk of buffered last-send stamps.
+	 *
+	 * Existing rows are updated in place rather than deleted and reinserted.
+	 * This is the busiest write path in the feature, and a delete/insert cycle
+	 * on the same rows consumes `meta_id` values permanently and fragments the
+	 * primary key, for no benefit — `wp_postmeta` has no unique key on
+	 * `(post_id, meta_key)`, so the rows to update have to be identified first
+	 * either way.
+	 *
+	 * @param array<int, string> $chunk Map of token post ID to GMT datetime.
+	 * @return void
+	 */
+	private function write_last_send_chunk( array $chunk ): void {
+		global $wpdb;
+
+		$post_ids = array_keys( $chunk );
+
+		/**
+		 * The statements below interpolate a placeholder list whose length
+		 * depends on the number of tokens. The interpolated strings are built
+		 * from literals only — never from token data — and every value still
+		 * travels through `$wpdb->prepare()`, which is why the sniffs are
+		 * suppressed rather than the queries being restructured.
+		 */
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$select = $wpdb->prepare(
+			sprintf(
+				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %%s AND post_id IN ( %s )",
+				implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) )
+			),
+			array_merge( array( self::LAST_SEND_AT_META_KEY ), $post_ids )
+		);
+
+		// `prepare()` returns null on a placeholder mismatch, and `get_col()`
+		// would then skip the query and read `last_result` from whatever ran
+		// before, so the check cannot wait until after the read.
+		if ( ! is_string( $select ) || '' === $select ) {
+			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to read existing stamps, skipping chunk.' );
+
+			return;
+		}
+
+		// Run the statement rather than using `get_col()`, whose empty array
+		// means both "nothing matched" and "the read failed". Taking a failed
+		// read as "no rows exist" would insert duplicates that `wp_postmeta`
+		// has no unique key to prevent. `last_error` alone cannot be trusted
+		// either: `wpdb::query()` returns false before it clears the previous
+		// error when the `query` filter empties the statement.
+		$rows = $wpdb->query( $select );
+
+		if ( false === $rows ) {
+			$this->warn_last_send_not_recorded(
+				$post_ids,
+				sprintf(
+					'Could not read existing stamps, skipping chunk. %s',
+					'' !== $wpdb->last_error ? $wpdb->last_error : 'The query did not run.'
+				)
+			);
+
+			return;
+		}
+
+		$existing = array_map( 'intval', wp_list_pluck( (array) $wpdb->last_result, 'post_id' ) );
+
+		// Tokens sent at the same moment share an UPDATE, so this is usually
+		// one query, without giving a token another's send time when a request
+		// spans a second boundary.
+		$by_timestamp = array();
+
+		foreach ( $chunk as $post_id => $timestamp ) {
+			$by_timestamp[ $timestamp ][] = $post_id;
+		}
+
+		foreach ( $by_timestamp as $timestamp => $ids ) {
+			$update_ids = array_values( array_intersect( $ids, $existing ) );
+			$insert_ids = array_values( array_diff( $ids, $existing ) );
+
+			if ( ! empty( $update_ids ) ) {
+				$this->query_or_warn(
+					$wpdb->prepare(
+						sprintf(
+							"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND post_id IN ( %s )",
+							implode( ', ', array_fill( 0, count( $update_ids ), '%d' ) )
+						),
+						array_merge( array( $timestamp, self::LAST_SEND_AT_META_KEY ), $update_ids )
+					),
+					$update_ids
+				);
+			}
+
+			if ( ! empty( $insert_ids ) ) {
+				$insert_args = array();
+
+				foreach ( $insert_ids as $post_id ) {
+					$insert_args[] = $post_id;
+					$insert_args[] = self::LAST_SEND_AT_META_KEY;
+					$insert_args[] = $timestamp;
+				}
+
+				$this->query_or_warn(
+					$wpdb->prepare(
+						sprintf(
+							"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES %s",
+							implode( ', ', array_fill( 0, count( $insert_ids ), '( %d, %s, %s )' ) )
+						),
+						$insert_args
+					),
+					$insert_ids
+				);
+			}
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		// The rows were written behind the meta API's back, so the cached meta
+		// for these posts is now stale and must be dropped.
+		wp_cache_delete_multiple( $post_ids, 'post_meta' );
+	}
+
+	/**
+	 * Logs that last-send stamps could not be recorded.
+	 *
+	 * @param int[]  $post_ids The token post IDs affected.
+	 * @param string $error    What went wrong, and what was skipped as a result.
+	 * @return void
+	 */
+	private function warn_last_send_not_recorded( array $post_ids, string $error ): void {
+		wc_get_logger()->warning(
+			'Could not record last send time for push tokens.',
+			array(
+				'token_ids' => $post_ids,
+				'error'     => $error,
+			)
+		);
+	}
+
+	/**
+	 * Runs a prepared statement, logging rather than throwing when it fails.
+	 *
+	 * @param string|null $query    The prepared SQL, or null if `prepare()` failed.
+	 * @param int[]       $post_ids The token post IDs the statement covers, for the log context.
+	 * @return void
+	 */
+	private function query_or_warn( ?string $query, array $post_ids ): void {
+		global $wpdb;
+
+		if ( ! is_string( $query ) || '' === $query ) {
+			$this->warn_last_send_not_recorded( $post_ids, 'Could not build the query to write stamps.' );
+
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( false !== $wpdb->query( $query ) ) {
+			return;
+		}
+
+		wc_get_logger()->warning(
+			'Failed to record last send time for push tokens.',
+			array(
+				'token_ids' => $post_ids,
+				'error'     => $wpdb->last_error,
+			)
+		);
 	}
 
 	/**

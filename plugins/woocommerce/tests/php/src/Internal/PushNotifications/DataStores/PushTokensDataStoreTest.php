@@ -1004,6 +1004,331 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests a token has no last send time until it has actually been sent.
+	 */
+	public function test_last_send_at_is_null_for_a_token_that_has_never_been_sent() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send stamps every supplied token with the same time.
+	 */
+	public function test_record_last_send_stamps_all_supplied_tokens() {
+		$data_store = new PushTokensDataStore();
+		$first      = $this->create_test_push_token();
+		$second     = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $first, $second ) );
+		$data_store->flush_last_send();
+
+		$first_send_at  = $data_store->read( $first->get_id() )->get_last_send_at_gmt();
+		$second_send_at = $data_store->read( $second->get_id() )->get_last_send_at_gmt();
+
+		$this->assertNotNull( $first_send_at );
+		$this->assertSame( $first_send_at, $second_send_at );
+	}
+
+	/**
+	 * @testdox Tests recording a send twice replaces the stamp rather than accumulating rows.
+	 *
+	 * The batched write bypasses the meta API, so it has to leave exactly one
+	 * row per token behind — a duplicate would make `get_post_meta( …, true )`
+	 * return an arbitrary one of them.
+	 */
+	public function test_record_last_send_replaces_the_previous_stamp() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests recording a send leaves the rest of the token record untouched.
+	 */
+	public function test_record_last_send_does_not_disturb_other_token_data() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+		$read = $data_store->read( $push_token->get_id() );
+
+		$this->assertSame( $push_token->get_token(), $read->get_token() );
+		$this->assertSame( $push_token->get_device_uuid(), $read->get_device_uuid() );
+		$this->assertSame( $push_token->get_device_locale(), $read->get_device_locale() );
+		$this->assertSame( $push_token->get_metadata(), $read->get_metadata() );
+	}
+
+	/**
+	 * @testdox Tests updating a token preserves its last send time.
+	 *
+	 * The app re-registers a device whenever its locale or metadata changes,
+	 * which must not wipe the send history that update path knows nothing about.
+	 */
+	public function test_updating_a_token_preserves_its_last_send_time() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_send_at_gmt();
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$data_store->update( $push_token );
+
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send defers the write until the buffer is flushed.
+	 *
+	 * A request can process many notifications against the same few tokens, so
+	 * the write is buffered and happens once rather than once per notification.
+	 */
+	public function test_record_last_send_defers_the_write_until_flushed() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+
+		$data_store->flush_last_send();
+
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests repeated recording before a flush results in a single write.
+	 */
+	public function test_repeated_recording_before_a_flush_writes_once() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		for ( $i = 0; $i < 5; $i++ ) {
+			$data_store->record_last_send( array( $push_token ) );
+		}
+
+		$data_store->flush_last_send();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests flushing an already flushed buffer is a no-op.
+	 */
+	public function test_flushing_twice_does_not_write_again() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$recorded = $data_store->read( $push_token->get_id() )->get_last_send_at_gmt();
+
+		$data_store->flush_last_send();
+
+		$this->assertSame( $recorded, $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a second send updates the existing row rather than replacing it.
+	 *
+	 * The row is updated in place so that repeatedly sending to the same device
+	 * does not consume `meta_id` values or churn the primary key on what is the
+	 * busiest write path in the feature.
+	 */
+	public function test_a_second_send_updates_the_row_in_place() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$meta_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$this->assertSame(
+			$meta_id,
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+					$push_token->get_id(),
+					PushTokensDataStore::LAST_SEND_AT_META_KEY
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests every token is stamped when the buffer spans more than one chunk.
+	 */
+	public function test_flush_stamps_every_token_across_chunks() {
+		$data_store = new PushTokensDataStore();
+		$tokens     = array();
+
+		for ( $i = 0; $i < PushTokensDataStore::LAST_SEND_CHUNK_SIZE + 5; $i++ ) {
+			$tokens[] = $this->create_test_push_token();
+		}
+
+		$data_store->record_last_send( $tokens );
+		$data_store->flush_last_send();
+
+		foreach ( $tokens as $token ) {
+			$this->assertNotNull( $data_store->read( $token->get_id() )->get_last_send_at_gmt() );
+		}
+	}
+
+	/**
+	 * @testdox Tests the Action Scheduler hook flushes buffered stamps.
+	 *
+	 * The safety net and retry paths run under a queue runner that can be killed
+	 * before shutdown, so the buffer is also flushed after each action. This
+	 * exists only for a path a hook creates, so nothing else would catch its
+	 * removal.
+	 */
+	public function test_the_action_scheduler_hook_flushes_buffered_stamps() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing Action Scheduler's hook, not declaring one.
+		do_action( 'action_scheduler_after_execute', 1, null, '' );
+
+		$this->assertNotNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests a failed read of existing stamps does not insert duplicates.
+	 *
+	 * `wpdb::query()` returns false without setting `last_error` when the `query`
+	 * filter empties the statement, so a failed read must not be taken as "no
+	 * rows exist". `wp_postmeta` has no unique key to catch the duplicates that
+	 * would follow.
+	 */
+	public function test_a_failed_read_of_existing_stamps_does_not_insert_duplicates() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+
+		$empty_the_select = function ( $query ) {
+			return false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, 'last_send_at_gmt' )
+				? ''
+				: $query;
+		};
+
+		add_filter( 'query', $empty_the_select );
+		$data_store->record_last_send( array( $push_token ) );
+		$data_store->flush_last_send();
+		remove_filter( 'query', $empty_the_select );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests an error raised while writing stamps does not escape the flush.
+	 *
+	 * The flush runs on `action_scheduler_after_execute`, which fires between an
+	 * action completing and being marked complete, so anything escaping here
+	 * records a delivered notification's action as failed. Errors do not extend
+	 * Exception, which is why the catch is on Throwable.
+	 */
+	public function test_an_error_while_writing_stamps_does_not_escape_the_flush() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$raise_an_error = function ( $query ) {
+			if ( false !== strpos( $query, 'last_send_at_gmt' ) ) {
+				throw new \Error( 'Raised for testing.' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $raise_an_error );
+
+		try {
+			$data_store->record_last_send( array( $push_token ) );
+			$data_store->flush_last_send();
+		} finally {
+			remove_filter( 'query', $raise_an_error );
+		}
+
+		$this->assertNull( $data_store->read( $push_token->get_id() )->get_last_send_at_gmt() );
+	}
+
+	/**
+	 * @testdox Tests recording a send with no tokens is a no-op.
+	 */
+	public function test_record_last_send_ignores_an_empty_token_list() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$data_store->record_last_send( array() );
+		$data_store->flush_last_send();
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = %s",
+				PushTokensDataStore::LAST_SEND_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 0, $row_count );
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.
