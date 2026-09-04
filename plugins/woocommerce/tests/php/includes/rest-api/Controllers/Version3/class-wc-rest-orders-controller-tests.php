@@ -636,14 +636,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
 
-		foreach ( array( 1, 3, wc_get_price_decimals() ) as $precision ) {
+		foreach ( array( 0, 1, 3, wc_get_price_decimals() ) as $precision ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id );
 			if ( wc_get_price_decimals() !== $precision ) {
 				$request->set_param( 'dp', $precision );
 			}
 			$response = $this->server->dispatch( $request );
 			$data     = $response->get_data();
-			$pattern  = '/^-?\d+\.\d{' . $precision . '}$/';
+			$pattern  = 0 === $precision ? '/^-?\d+$/' : '/^-?\d+\.\d{' . $precision . '}$/';
 
 			$this->assertSame( 200, $response->get_status(), 'Reading the precision fixture should return HTTP 200.' );
 			$monetary_values = array(
