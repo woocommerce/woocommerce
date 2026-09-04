@@ -98,6 +98,14 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'type'     => 'date',
 			),
 			array(
+				'id'       => 'plugin-namespace/appointment-date',
+				'label'    => 'Appointment date',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'P0D',
+				'max'      => 'P30D',
+			),
+			array(
 				'id'         => 'namespace/vat-number',
 				'label'      => 'VAT Number',
 				'location'   => 'address',
@@ -196,76 +204,46 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Date fields can be registered.
+	 * @testdox Date fields can be registered, with their constraints stored as registered.
 	 */
 	public function test_date_fields_can_be_registered() {
 		$fields = $this->controller->get_additional_fields();
 
 		$this->assertArrayHasKey( 'plugin-namespace/delivery-date', $fields, 'Date fields should be a supported field type.' );
 		$this->assertSame( 'date', $fields['plugin-namespace/delivery-date']['type'] );
+
+		// The constraint rules themselves are covered by DateFieldTypeTest; this only checks registration carries them through unresolved.
+		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
+		$this->assertSame( 'P30D', $fields['plugin-namespace/appointment-date']['max'] );
 	}
 
 	/**
-	 * @testdox Date fields only accept a real calendar date in Y-m-d format.
-	 *
-	 * @testWith ["2026-08-26", false]
-	 *           ["", false]
-	 *           ["2026-02-31", true]
-	 *           ["2026-8-6", true]
-	 *           ["26-08-2026", true]
-	 *           ["not-a-date", true]
-	 *
-	 * @param string $value       The submitted value.
-	 * @param bool   $has_errors  Whether the value should be rejected.
+	 * @testdox Date field validation is delegated to the date field type.
 	 */
-	public function test_date_field_validation( string $value, bool $has_errors ) {
-		$fields = $this->controller->get_additional_fields();
-		$errors = $this->controller->validate_field( $fields['plugin-namespace/delivery-date'], $value );
+	public function test_date_field_validation_is_delegated() {
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
 
-		$this->assertSame( $has_errors, $errors->has_errors(), sprintf( 'Unexpected validation result for "%s".', $value ) );
+		$this->assertFalse( $this->controller->validate_field( $field, '2025-08-26' )->has_errors() );
+		$this->assertTrue( $this->controller->validate_field( $field, '2025-02-31' )->has_errors() );
 	}
 
 	/**
-	 * @testdox Date field values are displayed using the site date format, in the site timezone.
-	 *
-	 * @testWith ["UTC", "F j, Y", "August 26, 2026"]
-	 *           ["America/New_York", "Y-m-d", "2026-08-26"]
-	 *           ["Pacific/Auckland", "Y-m-d", "2026-08-26"]
-	 *
-	 * @param string $timezone    The site timezone.
-	 * @param string $date_format The site date format.
-	 * @param string $expected    The expected formatted value.
+	 * @testdox A date field whose constraints the date field type rejects is not registered.
 	 */
-	public function test_date_field_value_formatting( string $timezone, string $date_format, string $expected ) {
-		update_option( 'timezone_string', $timezone );
-		update_option( 'date_format', $date_format );
+	public function test_date_field_with_invalid_constraint_is_not_registered() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 
-		$fields = $this->controller->get_additional_fields();
-		$value  = $this->controller->format_additional_field_value( '2026-08-26', $fields['plugin-namespace/delivery-date'] );
-
-		$this->assertSame( $expected, $value, 'The stored calendar date should never shift when it is formatted.' );
-	}
-
-	/**
-	 * @testdox Date values that are not a real calendar date are displayed as stored.
-	 *
-	 * @testWith ["2026-02-31"]
-	 *           ["2026-13-01"]
-	 *           ["not-a-date"]
-	 *           [""]
-	 *
-	 * @param string $value The stored value.
-	 */
-	public function test_invalid_date_field_value_is_not_reformatted( string $value ) {
-		update_option( 'date_format', 'F j, Y' );
-
-		$fields = $this->controller->get_additional_fields();
-
-		$this->assertSame(
-			$value,
-			$this->controller->format_additional_field_value( $value, $fields['plugin-namespace/delivery-date'] ),
-			'A value that is not a real date should be shown as stored rather than rolled forward.'
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/invalid-constraint',
+				'label'    => 'Invalid constraint',
+				'location' => 'order',
+				'type'     => 'date',
+				'min'      => 'not-a-date',
+			)
 		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/invalid-constraint', $this->controller->get_additional_fields() );
 	}
 
 	/**

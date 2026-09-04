@@ -252,7 +252,46 @@ Text fields don't have any additional options beyond the general options listed 
 
 #### Options for `date` fields
 
-Date fields don't have any additional options beyond the general options listed above.
+As well as the options above, date fields support `min` and `max` options to limit the range of dates a shopper can pick.
+
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
+| `min` | The earliest date the shopper can select. | No | `2026-01-01`, `P0D`, `P1D` | No minimum. |
+| `max` | The latest date the shopper can select. | No | `2026-12-31`, `P30D`, `-P18Y` | No maximum. |
+
+Each one takes either:
+
+- An **absolute** date in `YYYY-MM-DD` format, such as `2026-01-01`. This is the same format the HTML `min` and `max` attributes use.
+- A **duration relative to today**, written in the [ISO 8601-2 duration format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/Duration#iso_8601_duration_format), optionally signed: `P1D` (tomorrow), `-P5D` (five days ago), `P2W`, `P3M`, `-P18Y`. `P0D` means today.
+
+```php
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'my-plugin/delivery-date',
+		'label'    => 'Preferred delivery date',
+		'location' => 'order',
+		'type'     => 'date',
+		'required' => true,
+		'min'      => 'P1D',   // From tomorrow,
+		'max'      => 'P30D',  // up to 30 days out.
+	)
+);
+```
+
+##### Dates only, not times
+
+A date field holds a calendar date with no time component, so only the `Y`, `M`, `W` and `D` parts of a duration are meaningful. A duration carrying a time component, such as `PT1H` or `P1DT12H`, is rejected at registration.
+
+##### Pass the duration, don't resolve it yourself
+
+```php
+// Don't do this.
+'min' => date( 'Y-m-d', strtotime( '+1 day' ) ),
+```
+
+This ends up resolving to a date that may not always be up to date between registration, field rendering, and value submission. Instead, pass P1D, which will be evaluated at input time and submission time.
+
+Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed, or if `min` resolves to a date later than `max`. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would fail in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
 
 The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 

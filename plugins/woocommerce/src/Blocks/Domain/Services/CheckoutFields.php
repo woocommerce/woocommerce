@@ -986,7 +986,8 @@ class CheckoutFields {
 	/**
 	 * Applies type-specific arguments to a field before it is rendered with woocommerce_form_field().
 	 *
-	 * Used by the server-rendered My Account forms: maps select options and sets checkbox submit values.
+	 * Used by the server-rendered My Account forms: maps select options, sets checkbox submit values, and
+	 * resolves date min/max constraints into input attributes.
 	 *
 	 * @param array $form_field The woocommerce_form_field() arguments built from the field.
 	 * @return array The updated arguments.

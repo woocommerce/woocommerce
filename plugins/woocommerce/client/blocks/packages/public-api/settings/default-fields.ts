@@ -50,6 +50,10 @@ export interface Field {
 	options?: SelectOption[];
 	// The placeholder for the field, only applicable for select fields.
 	placeholder?: string;
+	// The earliest date a date field accepts, as YYYY-MM-DD or an ISO 8601-2 duration such as `P1D`.
+	min?: string;
+	// The latest date a date field accepts, as YYYY-MM-DD or an ISO 8601-2 duration such as `-P18Y`.
+	max?: string;
 	// Additional attributes added when registering a field. String in key is required for data attributes.
 	attributes?: Record< keyof CustomFieldAttributes, string >;
 }

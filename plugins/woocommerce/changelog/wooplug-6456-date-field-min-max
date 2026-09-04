@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `min` and `max` options to `date` additional checkout fields, accepting an absolute date or an ISO 8601-2 duration relative to today such as `P1D` or `-P18Y`.
