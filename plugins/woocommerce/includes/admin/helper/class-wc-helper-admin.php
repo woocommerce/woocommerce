@@ -73,10 +73,6 @@ class WC_Helper_Admin {
 
 		$blog_name = get_bloginfo( 'name' );
 
-		// wp_is_auto_update_enabled_for_type() is an admin-only function, and this can run before
-		// wp-admin/includes/update.php is loaded.
-		require_once ABSPATH . 'wp-admin/includes/update.php';
-
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
 			'connectURL'                 => self::get_connection_url(),
@@ -94,7 +90,6 @@ class WC_Helper_Admin {
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
 			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
-			'pluginAutoUpdatesEnabled'   => wp_is_auto_update_enabled_for_type( 'plugin' ),
 		);
 
 		// This data is only used in the `Extensions` screen, so only populate it there.

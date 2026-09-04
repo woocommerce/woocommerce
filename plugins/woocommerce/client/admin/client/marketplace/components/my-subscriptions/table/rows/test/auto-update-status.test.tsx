@@ -84,7 +84,6 @@ function renderStatus( subscription: Subscription ) {
  */
 function setSiteSettings( settings: Record< string, boolean > = {} ) {
 	( getAdminSetting as jest.Mock ).mockReturnValue( {
-		pluginAutoUpdatesEnabled: true,
 		wooUpdateManagerActive: true,
 		...settings,
 	} );
@@ -120,17 +119,14 @@ describe( 'AutoUpdateStatus', () => {
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	it( 'warns when auto-updates are on but the site has them switched off', async () => {
+	it( 'ignores automatic updates being switched off site-wide', () => {
 		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
-		renderStatus( subscriptionWith( { auto_update: true } ) );
 
-		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
+		const { container } = renderStatus(
+			subscriptionWith( { auto_update: true } )
+		);
 
-		expect(
-			await screen.findByText(
-				'Automatic updates are turned off for this site.'
-			)
-		).toBeInTheDocument();
+		expect( container ).toBeEmptyDOMElement();
 	} );
 
 	it( 'warns when the Update Manager is not active', async () => {
@@ -196,13 +192,11 @@ describe( 'AutoUpdateStatus', () => {
 	} );
 
 	it( 'offers no action link in the blocked explanation', async () => {
-		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
+		setSiteSettings( { wooUpdateManagerActive: false } );
 		renderStatus( subscriptionWith( { auto_update: true } ) );
 
 		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
-		await screen.findByText(
-			'Automatic updates are turned off for this site.'
-		);
+		await screen.findByText( /Update Manager is not active/ );
 
 		expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
 		expect(
