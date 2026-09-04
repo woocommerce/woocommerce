@@ -421,7 +421,9 @@ class WC_Shortcode_My_Account {
 		}
 
 		self::set_reset_password_cookie();
-		wc_set_customer_auth_cookie( $user->ID );
+		if ( get_current_user_id() === $user->ID ) {
+			wc_set_customer_auth_cookie( $user->ID );
+		}
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
