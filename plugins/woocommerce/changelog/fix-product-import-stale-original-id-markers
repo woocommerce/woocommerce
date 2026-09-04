@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear leftover product CSV import mapping markers when an import starts, so an import abandoned at 100% cannot make a later import resolve its id: references to the wrong products.

@@ -469,6 +469,117 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The first request of an import run should clear mapping markers an abandoned run left behind.
+	 */
+	public function test_first_request_of_a_run_clears_markers_left_by_an_abandoned_run(): void {
+		$product_id = WC_Helper_Product::create_simple_product()->get_id();
+		add_post_meta( $product_id, '_original_id', '4242' );
+
+		$this->dispatch_import_request( '0' );
+
+		$this->assertSame( array(), get_post_meta( $product_id, '_original_id', false ) );
+	}
+
+	/**
+	 * @testdox A resumed request should leave the markers of the run in progress alone.
+	 */
+	public function test_resumed_request_keeps_the_markers_of_the_run_in_progress(): void {
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0' );
+
+			// A batch size of one leaves the second row for a resumed request.
+			$this->assertIsNumeric( $response['data']['position'] );
+
+			$product_id = WC_Helper_Product::create_simple_product()->get_id();
+			add_post_meta( $product_id, '_original_id', '4242' );
+
+			$this->dispatch_import_request( (string) $response['data']['position'] );
+
+			$this->assertSame( array( '4242' ), get_post_meta( $product_id, '_original_id', false ) );
+		} finally {
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+	}
+
+	/**
+	 * Filter callback that shrinks the import batch to a single row.
+	 *
+	 * @return int
+	 */
+	public function return_one(): int {
+		return 1;
+	}
+
+	/**
+	 * Run one import request against the test CSV and return the decoded response.
+	 *
+	 * The importer answers with wp_send_json_success(), so the request is put in AJAX mode and its
+	 * wp_die() is turned into a throwable rather than the exit a test cannot come back from. It has
+	 * to be an Error: dispatch_ajax() catches Exception, and would answer a second time.
+	 *
+	 * @param string $position Import position to request.
+	 * @return array
+	 */
+	private function dispatch_import_request( string $position ): array {
+		$nonce = wp_create_nonce( 'wc-product-import' );
+
+		$_REQUEST['security'] = $nonce;
+		$_POST['security']    = $nonce;
+		$_POST['file']        = $this->write_import_csv();
+		$_POST['position']    = $position;
+		$_POST['mapping']     = array( 'name' );
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
+
+		ob_start();
+
+		try {
+			WC_Product_CSV_Importer_Controller::dispatch_ajax();
+		} catch ( Error $e ) {
+			$this->assertSame( 'wp_die', $e->getMessage() );
+		} finally {
+			$response = (string) ob_get_clean();
+
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
+
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
+		}
+
+		return (array) json_decode( $response, true );
+	}
+
+	/**
+	 * Filter callback returning a wp_die() handler that throws instead of exiting.
+	 *
+	 * @return callable
+	 */
+	public function get_throwing_die_handler(): callable {
+		return function () {
+			throw new Error( 'wp_die' );
+		};
+	}
+
+	/**
+	 * Write the test CSV to the uploads directory, the only place the importer accepts a file from.
+	 *
+	 * @return string
+	 */
+	private function write_import_csv(): string {
+		$uploads = wp_upload_dir();
+		$path    = trailingslashit( $uploads['basedir'] ) . 'wc-product-import-marker-test.csv';
+
+		if ( ! file_exists( $path ) ) {
+			file_put_contents( $path, "Name\nMarker product one\nMarker product two\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Writing a fixture for this test.
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Invoke the import cleanup routine.
 	 *
 	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
