@@ -344,6 +344,57 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * `get_formatted_meta_data()` skips hidden rows, so an appended entry's next-int key can be a
+	 * hidden row's ID: a hidden row saved right after the item's visible ones sits on that number.
+	 *
+	 * @testdox Order item_data does not report a hidden meta row's ID for an appended entry.
+	 */
+	public function test_item_data_ignores_hidden_meta_rows_when_matching_ids(): void {
+		$order = $this->create_guest_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
+		$item->save();
+
+		// What `wc_reduce_stock_levels()` does once the order is paid.
+		$item->add_meta_data( '_reduced_stock', 1, true );
+		$item->save();
+
+		$row_ids = array_values( wp_list_pluck( $item->get_meta_data(), 'id' ) );
+
+		$this->assertSame(
+			$row_ids[0] + 1,
+			$row_ids[1],
+			'The hidden row must follow the visible one for this to exercise the collision.'
+		);
+
+		add_filter(
+			'woocommerce_order_item_get_formatted_meta_data',
+			function ( $formatted_meta ) {
+				$formatted_meta[] = (object) array(
+					'key'           => 'Appended',
+					'value'         => 'value',
+					'display_key'   => 'Appended',
+					'display_value' => 'value',
+				);
+				return $formatted_meta;
+			}
+		);
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
+
+		$this->assertCount( 2, $item_data, 'The hidden row must not become an entry of its own.' );
+		$this->assertSame( $row_ids[0], $item_data[0]['id'] );
+		$this->assertSame( 'Appended', $item_data[1]['key'] );
+		$this->assertNull( $item_data[1]['id'], 'An entry with no stored row has no ID to report.' );
+	}
+
+	/**
 	 * `WC_Meta_Data` keeps its fields protected, so casting one publishes mangled property names.
 	 * Trunk serialized it through `JsonSerializable`, and so must this.
 	 *

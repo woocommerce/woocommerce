@@ -52,7 +52,7 @@ class OrderItemSchema extends ItemSchema {
 				'type'       => 'object',
 				'properties' => [
 					'id'            => [
-						'description' => __( 'Order item metadata ID. Null for entries an extension added that have no stored metadata row.', 'woocommerce' ),
+						'description' => __( 'Order item metadata ID. Null for an entry that no displayed metadata row backs, such as one an extension added.', 'woocommerce' ),
 						'type'        => [ 'integer', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
@@ -97,18 +97,36 @@ class OrderItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	private function get_item_data( $order_item ) {
+		$item_data = [];
+
+		// A callback appending with `$formatted_meta[] =` gets PHP's next integer key, not a row ID.
+		// Mirror what `get_formatted_meta_data()` skips at its default `_` prefix: a row it leaves out
+		// never keys an entry, so counting its ID lets that key land on a hidden row saved right
+		// after the visible ones. Read the rows first, because formatting rewrites keys and values.
+		$meta_row_ids = [];
+
+		/**
+		 * `get_meta_data()` is documented as returning bare objects.
+		 *
+		 * @var \WC_Meta_Data[] $meta_rows
+		 */
+		$meta_rows = $order_item->get_meta_data();
+
+		foreach ( $meta_rows as $meta ) {
+			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || 0 === strpos( (string) $meta->key, '_' ) ) {
+				continue;
+			}
+
+			$meta_row_ids[ $meta->id ] = true;
+		}
+
 		$formatted_meta_data = $order_item->get_all_formatted_meta_data();
-		$item_data           = [];
 
 		// A `woocommerce_order_item_get_formatted_meta_data` callback can return anything, and a bad
 		// one must not take the endpoint down.
 		if ( ! is_array( $formatted_meta_data ) ) {
 			return $item_data;
 		}
-
-		// A callback appending with `$formatted_meta[] =` gets PHP's next integer key, not a row ID.
-		// Same source the formatted metadata is built from, so matching costs no query.
-		$meta_row_ids = array_flip( array_filter( wp_list_pluck( $order_item->get_meta_data(), 'id' ) ) );
 
 		foreach ( $formatted_meta_data as $meta_id => $meta ) {
 			// Only public fields are meant to ship. Casting an object reaches past them and
