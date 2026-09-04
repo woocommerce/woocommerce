@@ -349,7 +349,13 @@ class WC_Post_Types {
 		$theme_unavailable = self::wp_cli_skips_active_theme() || wp_installing();
 
 		if ( self::should_register_product_archive( $theme_support, $theme_unavailable ) ) {
-			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+			$shop_page = $shop_page_id ? get_post( $shop_page_id ) : null;
+
+			if ( $shop_page && ! is_post_publicly_viewable( $shop_page ) && 'trash' !== $shop_page->post_status ) {
+				$has_archive = false;
+			} else {
+				$has_archive = $shop_page ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+			}
 		} else {
 			$has_archive = false;
 		}

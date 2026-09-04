@@ -196,6 +196,37 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product archive registration respects the assigned shop page status.
+	 * @testWith ["publish", "shop"]
+	 *           ["draft", false]
+	 *           ["private", false]
+	 *           ["trash", "shop"]
+	 *
+	 * @param string      $post_status Shop page status.
+	 * @param string|bool $expected    Expected product archive slug.
+	 */
+	public function test_product_archive_respects_shop_page_status( string $post_status, $expected ): void {
+		$shop_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => $post_status,
+				'post_name'   => 'shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		add_theme_support( 'woocommerce' );
+
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
+
+		$this->assertSame(
+			$expected,
+			get_post_type_object( 'product' )->has_archive,
+			'The product archive should only use a publicly viewable or trashed shop page.'
+		);
+	}
+
+	/**
 	 * @testdox Installing mode preserves stored theme support while continuing post type registration and hooks.
 	 */
 	public function test_installing_mode_preserves_theme_support_state_during_registration(): void {
