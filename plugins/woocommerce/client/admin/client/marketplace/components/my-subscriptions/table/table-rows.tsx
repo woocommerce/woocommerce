@@ -19,7 +19,7 @@ export function subscriptionRow(
 	table: MySubscriptionsTable
 ): TableRow[] {
 	return [
-		nameAndStatus( item ),
+		nameAndStatus( item, table ),
 		expiry( item ),
 		subscriptionStatus( item, table ),
 		version( item, table ),
