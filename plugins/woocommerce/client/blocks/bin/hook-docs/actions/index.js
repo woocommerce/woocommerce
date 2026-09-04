@@ -39,13 +39,13 @@ const generate = ( hooks ) => {
 		...generateToc( hooks ),
 		{ hr: '' },
 		...hooks.map( ( hook ) => {
-			const hookDocs = hook.doc || [];
+			const hookDocs = hook.doc || {};
 
 			return [
 				...generateHookName( hook ),
 				...generateIntroduction( hook ),
 				...contentWithHeading(
-					hook.doc.long_description,
+					hookDocs.long_description,
 					'Description'
 				),
 				...sectionWithHeading( params( hookDocs ), 'Parameters' ),

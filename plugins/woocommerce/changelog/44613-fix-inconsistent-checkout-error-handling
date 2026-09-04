@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render Cart and Checkout notices with the same list markup whether there is one notice or several, and expose each notice's id as `data-id` on its list item.

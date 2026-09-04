@@ -8196,6 +8196,46 @@ table.bar_chart {
 				}
 			}
 		}
+
+		table.widefat.wc-tax-rate-results {
+			thead th,
+			tbody td,
+			tbody th {
+				&:first-child {
+					padding-left: 1em;
+				}
+
+				&:last-child {
+					padding-right: 1em;
+				}
+			}
+
+			thead th:last-child {
+				white-space: nowrap;
+			}
+
+			tbody td.wc-tax-rate-status,
+			tbody td.wc-tax-rate-empty {
+				text-align: center;
+			}
+
+			tbody td.wc-tax-rate-empty {
+				padding-bottom: 48px;
+				padding-top: 48px;
+			}
+
+			.wc-tax-rate-empty-title {
+				margin: 0;
+			}
+
+			.wc-tax-rate-empty-description {
+				margin: 4px 0 0;
+			}
+
+			.wc-tax-rate-empty-action {
+				margin: 24px 0 0;
+			}
+		}
 	}
 
 	footer {
@@ -8220,6 +8260,38 @@ table.bar_chart {
 			.button {
 				margin-bottom: 0;
 			}
+		}
+	}
+}
+
+.wc-modal-add-tax {
+	.wc-backbone-modal-main {
+		padding-bottom: calc( 2.5em + 40px );
+
+		.search-box {
+			float: none;
+			justify-content: flex-start;
+			width: 100%;
+		}
+
+		[data-wc-tax-rate-search-box][hidden],
+		[data-wc-tax-rate-pagination-container][hidden] {
+			display: none;
+		}
+
+		.wc-tax-rate-search-summary:not([hidden]) {
+			display: block;
+			flex-basis: 100%;
+			margin: 8px 0 0;
+			text-align: start;
+		}
+
+		.wc-tax-rate-search-summary .button-link {
+			margin-inline-start: 8px;
+		}
+
+		footer {
+			padding: 1.25em 2em;
 		}
 	}
 }

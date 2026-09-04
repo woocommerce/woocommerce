@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Revert the @woocommerce/classic-assets node build script and restore the Grunt pipeline. Built assets are unchanged either way.

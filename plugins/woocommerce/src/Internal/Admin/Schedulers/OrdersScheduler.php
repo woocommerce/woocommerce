@@ -364,7 +364,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Imports a single order or refund to update lookup tables for.
-	 * If an error is encountered in one of the updates, a retry action is scheduled.
+	 * An order whose tax lookup rows could not be written stays on the failed imports list.
 	 *
 	 * @internal
 	 * @param int $order_id Order or refund ID.
@@ -407,13 +407,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		$results = array(
-			OrdersStatsDataStore::sync_order( $order_id ),
-			ProductsDataStore::sync_order_products( $order_id ),
-			CouponsDataStore::sync_order_coupons( $order_id ),
-			TaxesDataStore::sync_order_taxes( $order_id ),
-			CustomersDataStore::sync_order_customer( $order_id ),
-		);
+		OrdersStatsDataStore::sync_order( $order_id );
+		ProductsDataStore::sync_order_products( $order_id );
+		CouponsDataStore::sync_order_coupons( $order_id );
+		$taxes_synced = TaxesDataStore::sync_order_taxes( $order_id );
+		CustomersDataStore::sync_order_customer( $order_id );
 
 		if ( 'shop_order' === $type ) {
 			$order_refunds = $order->get_refunds();
@@ -425,8 +423,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
-		// A successful import means the order is no longer missing from analytics.
-		self::clear_failed_order_import( $order_id );
+		// A tax sync that did not land leaves the order holding the lookup rows it came in with,
+		// so the import did not finish and the order stays on the list Analytics settings retries
+		// over. Only this sync is read: the other stores return false for writes that changed no
+		// rows as well, so their return value does not tell a failure from an order that was
+		// already up to date.
+		if ( false === $taxes_synced ) {
+			self::record_failed_order_import( $order_id );
+		} else {
+			self::clear_failed_order_import( $order_id );
+		}
 
 		/**
 		 * Fires after an order or refund has been imported into Analytics lookup tables
