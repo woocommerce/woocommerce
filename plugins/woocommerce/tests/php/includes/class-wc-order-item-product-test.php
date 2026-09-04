@@ -829,6 +829,13 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$parent->set_attributes( array() );
 		$parent->save();
 		wc_delete_product_transients( $variation->get_id() );
+		// The parent's save invalidates the parent's cached instance, not its children's.
+		clean_post_cache( $variation->get_id() );
+		$this->assertSame(
+			array(),
+			wc_get_product( $variation->get_id() )->get_variation_attributes(),
+			'Precondition: a freshly loaded variation no longer reports the attribute, so cleanup derived from the variation would find nothing to remove.'
+		);
 
 		$item->set_product( $this->product );
 
