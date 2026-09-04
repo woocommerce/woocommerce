@@ -448,6 +448,12 @@ test.describe(
 
 				await page.getByRole( 'link', { name: 'log in' } ).click();
 
+				// The prompt's link points at a non-existent endpoint, so
+				// WordPress guesses the 404 back to the account page. Assert
+				// the landing, or a lost guess would only show up as a
+				// timeout on the login form below.
+				await expect( page ).toHaveURL( /\/my-account\/?$/ );
+
 				await page.locator( '#username' ).fill( customer.username );
 				await page.locator( '#password' ).fill( customer.password );
 				await page
