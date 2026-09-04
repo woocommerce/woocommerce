@@ -1297,7 +1297,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
 		$this->assertSame(
-			array( 'color' ),
+			array( 'color' => 'blue' ),
 			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
 			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
 		);
