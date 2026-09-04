@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fix review by products blocks to use responsive product thumbnails by adding srcset and sizes.
