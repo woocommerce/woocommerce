@@ -247,8 +247,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * `$data` replaces the item's variation attributes rather than merging into them: attribute
 	 * meta this item recorded earlier and `$data` no longer contains is removed. Only keys listed
-	 * in {@see self::VARIATION_ATTRIBUTE_KEYS_META_KEY} are ever removed, so meta written by a
-	 * merchant or a plugin is left alone even when it shares a key with an attribute.
+	 * in {@see self::VARIATION_ATTRIBUTE_KEYS_META_KEY} are ever removed, so meta under any other
+	 * key is left alone. A row sharing a recorded key cannot be told apart from the attribute and
+	 * goes with it, the same way `add_meta_data( ..., true )` already replaces a same-named row
+	 * when the attribute is written.
 	 *
 	 * Items created before WooCommerce 11.2.0 carry no such record, so their attribute meta is
 	 * kept rather than guessed at.
