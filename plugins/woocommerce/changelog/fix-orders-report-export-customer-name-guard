@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Orders Analytics CSV export warning, and writing a lone space, for an order that carries no customer name.
