@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: the order endpoint no longer reports a hidden metadata row's ID on an item_data entry an extension appended. That entry now correctly reports a null `id`.
