@@ -79,6 +79,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'last_name', $schema );
 		$this->assertArrayHasKey( 'email', $schema );
 		$this->assertArrayHasKey( 'username', $schema );
+		$this->assertArrayHasKey( 'role', $schema );
 		$this->assertArrayHasKey( 'country', $schema );
 		$this->assertArrayHasKey( 'city', $schema );
 		$this->assertArrayHasKey( 'state', $schema );
@@ -107,7 +108,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 20, $properties );
+		$this->assertCount( 21, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 
@@ -201,6 +202,104 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 2, $reports );
 		$this->assertEquals( $customer->get_id(), $reports[0]['user_id'] );
 		$this->assertEquals( $admin_id, $reports[1]['user_id'] );
+	}
+
+	/**
+	 * @testdox Should include localized user roles in the response and an empty role for guests.
+	 */
+	public function test_customer_role_in_response() {
+		wp_set_current_user( $this->user );
+
+		$customer = WC_Helper_Customer::create_customer( 'rolecustomer', 'password', 'role-customer@example.com' );
+
+		$editor_id = wp_insert_user(
+			array(
+				'user_login' => 'roleeditor',
+				'user_pass'  => 'password',
+				'user_email' => 'role-editor@example.com',
+				'role'       => 'editor',
+			)
+		);
+		$editor    = new WP_User( $editor_id );
+		$editor->add_role( 'shop_manager' );
+
+		// Editors are not synced as registered customers, so they enter the report via an order.
+		$editor_order = WC_Helper_Order::create_order( $editor_id );
+
+		// Order with guest customer (no account).
+		$guest_order = WC_Helper_Order::create_order( 0 );
+		$guest_order->set_billing_email( 'role-guest@example.com' );
+		$guest_order->save();
+
+		// Sync the lookup table directly to keep the test independent of the queue.
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $customer->get_id() ) );
+		$this->assertGreaterThan( 0, CustomersDataStore::get_or_create_customer_from_order( $editor_order ) );
+		$this->assertGreaterThan( 0, CustomersDataStore::get_or_create_customer_from_order( $guest_order ) );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 10 ) );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $reports );
+
+		$roles_by_user_id = array();
+		foreach ( $reports as $report ) {
+			$roles_by_user_id[ (int) $report['user_id'] ] = $report['role'];
+		}
+
+		$this->assertEquals( 'Customer', $roles_by_user_id[ $customer->get_id() ], 'Registered customers should report their role' );
+		$this->assertEquals( 'Editor, Shop manager', $roles_by_user_id[ $editor_id ], 'Users with multiple roles should report all of them' );
+		$this->assertSame( '', $roles_by_user_id[0], 'Guest customers should report an empty role' );
+
+		$controller     = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+		$export_columns = $controller->get_export_columns();
+		$this->assertArrayHasKey( 'role', $export_columns, 'CSV export should include a role column' );
+		$this->assertEquals( 'Role', $export_columns['role'] );
+
+		$export_roles_by_user_id = array();
+		foreach ( $reports as $report ) {
+			$export_item = $controller->prepare_item_for_export( $report );
+			$export_roles_by_user_id[ (int) $report['user_id'] ] = $export_item['role'];
+			$this->assertSame( 'role', array_key_last( $export_item ), 'Role must stay the last column in prepared export rows, matching the header order' );
+		}
+
+		$this->assertEquals( 'Editor, Shop manager', $export_roles_by_user_id[ $editor_id ], 'CSV export should carry the role value' );
+		$this->assertSame( '', $export_roles_by_user_id[0], 'CSV export should leave the role empty for guests' );
+	}
+
+	/**
+	 * The same Download button exports single-page reports in the browser from the
+	 * table column order and larger ones from here, so the two must not drift.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'name',
+			'username',
+			'last_active',
+			'registered',
+			'email',
+			'orders_count',
+			'total_spend',
+			'avg_order_value',
+			'country',
+			'city',
+			'region',
+			'postcode',
+			'billing_phone',
+			'shipping_phone',
+			'role',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'New CSV columns must be appended, and table.js must be updated to match' );
 	}
 
 	/**

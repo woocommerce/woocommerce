@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\Utils as BlocksUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -294,7 +295,6 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string The current URL.
 	 */
 	public function add_to_cart_form_action() {
-		global $wp;
-		return home_url( add_query_arg( $_GET, $wp->request ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return BlocksUtils::get_current_page_url();
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix printed order receipts: show the discount line for orders discounted without a coupon so the amounts add up to the total paid, and stop rendering an empty payment method section.

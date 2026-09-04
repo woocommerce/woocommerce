@@ -153,7 +153,11 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
+		try {
+			$this->load_cart_session( $request );
+		} catch ( \Throwable $error ) {
+			return $this->add_response_headers( $this->get_cart_session_error_response( $error ) );
+		}
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -683,7 +687,7 @@ class Checkout extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
+		 * @example docs/examples/checkout-order-processed.md
 
 		 * @param \WC_Order $order Order object.
 		 */

@@ -526,6 +526,47 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the Quantity Selector block outputs configured border radius styles.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::render
+	 */
+	public function test_quantity_selector_renders_border_radius_styles() {
+		global $product;
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$linked_markup = do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"style":{"border":{"radius":"12px"}}} /--><!-- /wp:woocommerce/single-product -->'
+		);
+
+		$this->assertStringContainsString(
+			'border-radius:12px',
+			$linked_markup,
+			'The quantity selector wrapper includes the configured border radius.'
+		);
+
+		$unlinked_markup = do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"style":{"border":{"radius":{"topLeft":"4px","topRight":"8px","bottomRight":"16px","bottomLeft":"2px"}}}} /--><!-- /wp:woocommerce/single-product -->'
+		);
+
+		foreach (
+			array(
+				'border-top-left-radius:4px',
+				'border-top-right-radius:8px',
+				'border-bottom-right-radius:16px',
+				'border-bottom-left-radius:2px',
+			) as $border_radius
+		) {
+			$this->assertStringContainsString(
+				$border_radius,
+				$unlinked_markup,
+				"The quantity selector wrapper includes the configured {$border_radius}."
+			);
+		}
+	}
+
+	/**
 	 * Tests that add_quantity_stepper_classes adds wrapper and input classes to inputs.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes

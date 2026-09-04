@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Blueprint: match the restricted site options list regardless of the casing, padding or accents used in an imported key, so a variant spelling can no longer overwrite a restricted option such as wp_user_roles.

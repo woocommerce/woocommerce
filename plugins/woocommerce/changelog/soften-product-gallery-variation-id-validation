@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow Product Gallery variation events to use numeric string IDs.

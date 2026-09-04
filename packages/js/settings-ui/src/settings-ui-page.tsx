@@ -6,7 +6,6 @@ import { Button, Modal, Notice } from '@wordpress/components';
 import {
 	Component,
 	createElement,
-	RawHTML,
 	useCallback,
 	useEffect,
 	useMemo,
@@ -19,20 +18,13 @@ import type { ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { createDataFormAdapter } from './dataform-adapter';
+import { DataForm } from './dataform-runtime';
 import { HiddenInputs } from './hidden-inputs';
-import { error, warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
-import {
-	resolveFieldComponent,
-	resolveFieldVisibilityPredicate,
-	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
-	resolveSaveHandler,
-} from './registry';
+import { error } from './diagnostics';
+import { resolveRegionComponent, resolveSaveHandler } from './registry';
 import type {
 	SettingsUIField,
-	SettingsUIGroup,
 	SettingsUIShellBadgeIntent,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
@@ -40,6 +32,7 @@ import type {
 	SettingsValue,
 	SettingsValues,
 } from './types';
+import { areValuesEqual } from './values';
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -68,19 +61,6 @@ const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	return values;
 };
 
-const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
-	if ( Array.isArray( a ) || Array.isArray( b ) ) {
-		return (
-			Array.isArray( a ) &&
-			Array.isArray( b ) &&
-			a.length === b.length &&
-			a.every( ( value, index ) => value === b[ index ] )
-		);
-	}
-
-	return a === b;
-};
-
 const getChangedValues = (
 	values: SettingsValues,
 	initialValues: SettingsValues
@@ -95,14 +75,6 @@ const getChangedValues = (
 
 	return changedValues;
 };
-
-const getFieldTypeClassName = ( type: string ) =>
-	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
-
-const getActionVariant = ( variant?: string ) =>
-	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
-		? variant
-		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
 const BADGE_INTENTS = {
 	default: true,
@@ -233,104 +205,14 @@ const UnsavedChangesModal = ( {
 	);
 };
 
-const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
-	const hasHeaderContent =
-		group.title || group.description || ( group.actions || [] ).length > 0;
-
-	if ( ! hasHeaderContent ) {
-		return null;
-	}
-
-	return (
-		<header className="wc-settings-ui__section-header">
-			<div className="wc-settings-ui__section-heading">
-				{ group.title ? <h2>{ group.title }</h2> : null }
-				{ group.description ? (
-					<div className="wc-settings-ui__section-description">
-						<RawHTML>
-							{ sanitizeSettingsHtml( group.description ) }
-						</RawHTML>
-					</div>
-				) : null }
-			</div>
-			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__section-actions">
-					{ group.actions.map( ( action ) => (
-						<Button
-							key={ action.id }
-							variant={ getActionVariant( action.variant ) }
-							href={ action.href }
-							target={ action.target }
-							rel={ action.rel }
-						>
-							{ action.label }
-						</Button>
-					) ) }
-				</div>
-			) : null }
-		</header>
-	);
-};
-
-const valueMatchesVisibilityRule = (
-	value: SettingsValue,
-	expected: SettingsValue | SettingsValue[] | undefined
-) => {
-	const expectedValues = Array.isArray( expected )
-		? expected
-		: [ expected ?? true ];
-
-	return expectedValues.some( ( expectedValue ) =>
-		areValuesEqual( value, expectedValue )
-	);
-};
-
-const getVisible = ( {
-	id,
-	kind,
-	field,
-	values,
-	initialValues,
-	context,
-	schema,
-}: {
-	id: string;
-	kind: 'field' | 'group';
-	field?: SettingsUIField;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-} ) => {
-	const predicate =
-		kind === 'field'
-			? resolveFieldVisibilityPredicate( id, context )
-			: resolveGroupVisibilityPredicate( id, context );
-
-	if ( predicate ) {
-		try {
-			return predicate( { values, initialValues, context, schema } );
-		} catch ( predicateError ) {
-			warn(
-				`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
-				{ error: predicateError, context }
-			);
-			return true;
-		}
-	}
-
-	if ( field?.visibility ) {
-		return valueMatchesVisibilityRule(
-			values[ field.visibility.controller ],
-			field.visibility.value
-		);
-	}
-
-	return true;
-};
-
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
+
+const getClassicSettingsUrl = () => {
+	const url = new URL( window.location.href );
+	url.searchParams.set( 'wc_settings_ui', 'classic' );
+	return url.toString();
+};
 
 type ErrorBoundaryProps = {
 	children: ReactNode;
@@ -345,6 +227,7 @@ export class SettingsUIErrorBoundary extends Component<
 	ErrorBoundaryState
 > {
 	state: ErrorBoundaryState = { hasError: false };
+	private errorRegion: HTMLDivElement | null = null;
 
 	static getDerivedStateFromError(): ErrorBoundaryState {
 		return { hasError: true };
@@ -355,17 +238,43 @@ export class SettingsUIErrorBoundary extends Component<
 			error: caughtError,
 			errorInfo,
 		} );
+		this.errorRegion?.focus();
 	}
 
 	render() {
 		if ( this.state.hasError ) {
+			const message = __(
+				'Something went wrong while rendering this settings page.',
+				'woocommerce'
+			);
+
 			return (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
-						'woocommerce'
-					) }
-				</Notice>
+				<div
+					className="wc-settings-ui__error"
+					role="region"
+					aria-label={ message }
+					tabIndex={ -1 }
+					ref={ ( region ) => {
+						this.errorRegion = region;
+					} }
+				>
+					<Notice
+						status="error"
+						isDismissible={ false }
+						actions={ [
+							{
+								label: __(
+									'Use classic settings',
+									'woocommerce'
+								),
+								url: getClassicSettingsUrl(),
+								variant: 'link',
+							},
+						] }
+					>
+						{ message }
+					</Notice>
+				</div>
 			);
 		}
 
@@ -568,16 +477,6 @@ export const SettingsUIPage = ( {
 		setSaveNotice( null );
 		setPendingNavigation( null );
 	}, [ schema ] );
-
-	const setValue = useCallback(
-		( fieldId: string, nextValue: SettingsValue ) => {
-			setValuesState( ( currentValues ) => ( {
-				...currentValues,
-				[ fieldId ]: nextValue,
-			} ) );
-		},
-		[]
-	);
 
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
@@ -785,35 +684,27 @@ export const SettingsUIPage = ( {
 		submitSettingsForm,
 	] );
 
-	const visibleGroups = useMemo(
-		() =>
-			Object.values( schema.groups )
-				.filter( ( group ) =>
-					getVisible( {
-						id: group.id,
-						kind: 'group',
-						values,
-						initialValues,
-						context,
-						schema,
-					} )
-				)
-				.map( ( group ) => ( {
-					...group,
-					fields: group.fields.filter( ( field ) =>
-						getVisible( {
-							id: field.id,
-							kind: 'field',
-							field,
-							values,
-							initialValues,
-							context,
-							schema,
-						} )
-					),
-				} ) )
-				.filter( ( group ) => group.fields.length > 0 ),
-		[ context, initialValues, schema, values ]
+	const dataFormAdapter = useMemo(
+		() => createDataFormAdapter( { schema, context, initialValues } ),
+		[ schema, context, initialValues ]
+	);
+	const dataForm = useMemo(
+		() => dataFormAdapter.getForm( values ),
+		[ dataFormAdapter, values ]
+	);
+	const handleDataFormChange = useCallback(
+		( nextValues: Record< string, SettingsValue | undefined > ) => {
+			const merged: Partial< SettingsValues > = {};
+
+			// Package controls emit undefined for a cleared value; the settings
+			// vocabulary represents that as an empty string.
+			Object.entries( nextValues ).forEach( ( [ fieldId, value ] ) => {
+				merged[ fieldId ] = typeof value === 'undefined' ? '' : value;
+			} );
+
+			setValues( merged );
+		},
+		[ setValues ]
 	);
 
 	const formPostFields =
@@ -870,54 +761,12 @@ export const SettingsUIPage = ( {
 				</Notice>
 			) : null }
 			<div className="wc-settings-ui">
-				{ visibleGroups.map( ( group ) => (
-					<section
-						className="wc-settings-ui__section"
-						key={ group.id }
-					>
-						<div className="wc-settings-ui__section-card">
-							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__section-fields">
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
-
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
-							</div>
-						</div>
-					</section>
-				) ) }
+				<DataForm
+					data={ values }
+					fields={ dataFormAdapter.fields }
+					form={ dataForm }
+					onChange={ handleDataFormChange }
+				/>
 				{ ! showHeader && saveButton ? (
 					<div className="wc-settings-ui__footer-actions">
 						{ saveButton }

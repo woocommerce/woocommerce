@@ -110,22 +110,24 @@
 			]
 		},
 		{
-			"label": "Babel dependencies, must be aligned with versions in @wordpress/babel-preset-default package",
+			"label": "Direct Babel build tooling shared across workspace packages",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@babel/core",
 				"@babel/cli",
 				"@babel/plugin-syntax-jsx",
-				"@babel/plugin-transform-react-jsx",
-				"@babel/plugin-transform-runtime",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime"
 			],
-			"pinVersion": "7.25.7",
 			"packages": [
 				"**"
-			]
+			],
+			"policy": "catalog"
 		},
 		{
 			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
@@ -210,13 +212,17 @@
 			"pinVersion": "^10.0.0"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"webpack"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "5.97.x"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -480,20 +486,6 @@
 			"isIgnored": true
 		},
 		{
-			"label": "experimental-products-app uses custom WordPress package versions",
-			"dependencies": [
-				"@wordpress/base-styles",
-				"@wordpress/dataviews",
-				"@wordpress/icons",
-				"@wordpress/router",
-				"@wordpress/theme"
-			],
-			"packages": [
-				"@woocommerce/experimental-products-app"
-			],
-			"isIgnored": true
-		},
-		{
 			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
 			"dependencies": [
 				"@wordpress/dataviews"
@@ -560,13 +552,17 @@
 			"pinVersion": "4.3.x"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"postcss"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "8.4.x"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

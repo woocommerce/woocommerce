@@ -199,6 +199,120 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A lump-sum refund of a never-paid order stores no paid or completed date, so date-filtered reports exclude it with its parent.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/37065: a failed
+	 * (never-paid) order manually set to "refunded" produced a refund stats row with
+	 * date_paid and date_completed backfilled from its own creation date. The parent row
+	 * (both dates NULL) was excluded from date-filtered Revenue reports while the refund row
+	 * was included, so the pair no longer cancelled out: Returns, Net sales and Taxes all
+	 * showed amounts for money that was never collected.
+	 */
+	public function test_refund_of_never_paid_order_has_null_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'failed' );
+		$order->save();
+		$this->assertNull( $order->get_date_paid(), 'Fixture order must never have been paid.' );
+
+		// Setting the status to "refunded" fires wc_order_fully_refunded(), creating the lump-sum refund.
+		$order->update_status( 'refunded' );
+		$refunds = $order->get_refunds();
+		$this->assertCount( 1, $refunds, 'Marking the order refunded should create one lump-sum refund.' );
+		$refund = reset( $refunds );
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, date_paid, date_completed FROM {$wpdb->prefix}wc_order_stats WHERE order_id IN (%d, %d)",
+				$order->get_id(),
+				$refund->get_id()
+			),
+			OBJECT_K
+		);
+
+		$this->assertCount( 2, $rows, 'Both the order and its refund should have stats rows.' );
+		$this->assertNull( $rows[ $order->get_id() ]->date_paid, 'A never-paid order should carry no paid date.' );
+		$this->assertNull( $rows[ $refund->get_id() ]->date_paid, 'A refund of a never-paid order should carry no paid date.' );
+		$this->assertNull( $rows[ $refund->get_id() ]->date_completed, 'A refund of a never-completed order should carry no completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox A refund of a paid order keeps its own creation date as the stats row paid and completed dates.
+	 */
+	public function test_refund_of_paid_order_keeps_own_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$this->assertNotNull( $order->get_date_paid(), 'Fixture order must have been paid.' );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() ),
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT date_paid, date_completed, date_created FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$refund->get_id()
+			)
+		);
+
+		$this->assertNotNull( $row, 'The refund should have a stats row.' );
+		$this->assertSame( $row->date_created, $row->date_paid, 'A refund of a paid order should keep its creation date as the paid date.' );
+		$this->assertSame( $row->date_created, $row->date_completed, 'A refund of a completed order should keep its creation date as the completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox A refund of a paid-but-never-completed order backfills only the paid date and keeps the completed date empty.
+	 */
+	public function test_refund_of_paid_uncompleted_order_backfills_only_date_paid(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_paid( time() );
+		$order->set_status( 'processing' );
+		$order->save();
+		$this->assertNotNull( $order->get_date_paid(), 'Fixture order must have been paid.' );
+		$this->assertNull( $order->get_date_completed(), 'Fixture order must never have been completed.' );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() ),
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT date_paid, date_completed, date_created FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$refund->get_id()
+			)
+		);
+
+		$this->assertNotNull( $row, 'The refund should have a stats row.' );
+		$this->assertSame( $row->date_created, $row->date_paid, 'A refund of a paid order should keep its creation date as the paid date.' );
+		$this->assertNull( $row->date_completed, 'A refund of a never-completed order should carry no completed date.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
 	 * @testdox Deleting a refund removes its analytics rows while keeping the parent order's rows.
 	 *
 	 * Regression test for HPOS refund deletion leaving orphaned analytics rows:

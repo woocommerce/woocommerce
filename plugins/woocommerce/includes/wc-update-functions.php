@@ -18,6 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -37,9 +38,11 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3349,7 +3352,6 @@ function wc_update_1050_enable_autoload_options() {
 	$feature_options = array(
 		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
 		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
-		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
 		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
 	);
 
@@ -3585,6 +3587,21 @@ function wc_update_1100_enable_point_of_sale_feature() {
 }
 
 /**
+ * Remove the deprecated variation gallery feature option from the database.
+ *
+ * The variation gallery feature flag is deprecated as of 11.1.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('variation_gallery')
+ * returns the deprecated_value directly without reading from the database.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+	delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
+}
+
+/**
  * Delete the cached dashboard out-of-stock product count.
  *
  * @since 11.1.0
@@ -3619,4 +3636,70 @@ function wc_update_1110_flush_product_count_cache() {
 	if ( class_exists( \Automattic\WooCommerce\Caches\ProductCountCache::class ) ) {
 		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
 	}
+}
+
+/**
+ * Clean up the state left behind by the removed abandoned cart recovery feature.
+ *
+ * The feature shipped in 11.0.x behind the experimental, default-off
+ * `abandoned_cart_recovery` flag and has now been removed in full: the email, its
+ * settings, the manual-send order action, the settings-page recommendations, and the
+ * email-unsubscribe endpoint and table. Sites that opted in can be left holding
+ * queued Action Scheduler sends, options and unsubscribe rows that no remaining code
+ * reads, so clear them here rather than orphaning them.
+ *
+ *
+ * Names are hardcoded rather than referenced through the classes that used to own
+ * them, because those classes no longer exist.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_remove_abandoned_cart_recovery() {
+	global $wpdb;
+
+	// Cancel queued automated sends. Nothing listens to the hook any more, so a
+	// due action would run as an inert no-op, but leaving it queued keeps dead
+	// rows in the Action Scheduler store until then.
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
+	}
+
+	delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
+	delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
+	delete_option( 'woocommerce_abandoned_cart_recovery_recommendations_hidden' );
+	delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
+
+	// The unsubscribes table only ever held opt-outs for this email, and the GDPR
+	// eraser that covered it is gone too, so drop it rather than leave hashed
+	// recipient addresses behind with no erasure path.
+	$unsubscribes_table = $wpdb->prefix . 'wc_email_unsubscribes';
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from the wpdb prefix.
+	$wpdb->query( "DROP TABLE IF EXISTS {$unsubscribes_table}" );
+}
+
+/**
+ * Migrate the Back in Stock Notifications alpha opt-in from the
+ * WOOCOMMERCE_BIS_ALPHA_ENABLED constant to the feature toggle.
+ *
+ * The option is written with update_option() rather than add_option() because
+ * WC_Install::create_options() runs first and has already seeded every Features
+ * screen checkbox with its default. No store can have chosen 'no' deliberately:
+ * the toggle does not exist before this release.
+ *
+ * Writing the option fires 'updated_option', which FeaturesController turns into
+ * FEATURE_ENABLED_CHANGED_ACTION, so the feature's own activation side effects
+ * (the data retention task and the rewrite rules flush) run from there.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_migrate_stock_notifications_alpha_constant() {
+	if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+		return;
+	}
+
+	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
 }
