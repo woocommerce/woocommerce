@@ -169,13 +169,13 @@ export default function AutoUpdateStatus( props: {
 
 	return (
 		<StatusPopover
-			text={ __( "Won't auto-update", 'woocommerce' ) }
-			level={ StatusLevel.Warning }
+			text={ __( 'Auto-updates blocked', 'woocommerce' ) }
+			level={ StatusLevel.Error }
 			explanation={
 				<>
 					<p>
 						{ __(
-							'Auto-updates are on for this extension, but it will not update because:',
+							'Auto-updates are on, but this extension will not update because:',
 							'woocommerce'
 						) }
 					</p>

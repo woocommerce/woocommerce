@@ -124,7 +124,7 @@ describe( 'AutoUpdateStatus', () => {
 		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
 		renderStatus( subscriptionWith( { auto_update: true } ) );
 
-		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 
 		expect(
 			await screen.findByText(
@@ -137,7 +137,7 @@ describe( 'AutoUpdateStatus', () => {
 		setSiteSettings( { wooUpdateManagerActive: false } );
 		renderStatus( subscriptionWith( { auto_update: true } ) );
 
-		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 
 		expect(
 			await screen.findByText( /Update Manager is not active/ )
@@ -152,7 +152,7 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 
 		expect(
 			await screen.findByText( 'This extension has no subscription.' )
@@ -172,7 +172,7 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 
 		expect(
 			await screen.findByText( 'The subscription has expired.' )
@@ -199,7 +199,7 @@ describe( 'AutoUpdateStatus', () => {
 		setSiteSettings( { pluginAutoUpdatesEnabled: false } );
 		renderStatus( subscriptionWith( { auto_update: true } ) );
 
-		fireEvent.click( screen.getByText( "Won't auto-update" ) );
+		fireEvent.click( screen.getByText( 'Auto-updates blocked' ) );
 		await screen.findByText(
 			'Automatic updates are turned off for this site.'
 		);
