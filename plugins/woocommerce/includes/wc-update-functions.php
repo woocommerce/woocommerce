@@ -3728,7 +3728,7 @@ function wc_update_1120_delete_surface_cart_checkout_note(): void {
  *
  * @return void
  */
-function wc_update_11201_invalidate_analytics_reports_cache() {
+function wc_update_1120_invalidate_analytics_reports_cache() {
 	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
 		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
 	}
@@ -3743,16 +3743,18 @@ function wc_update_11201_invalidate_analytics_reports_cache() {
  * and restores the Orders report fallback to the refunded order's value.
  *
  * Batches walk the table by order ID. A database error stops the migration and is logged instead
- * of retried, because the report queries stay correct without the reset.
+ * of retried: customer aggregates read the order type rather than the marker, so they stay correct
+ * either way. Rows the migration does not reach keep their stale marker, and the Orders report
+ * keeps reporting customer_type from it, exactly as it did before the update.
  *
  * @since 11.2.0
  *
  * @return bool True to run again for the next batch, false when completed.
  */
-function wc_update_11202_reset_refund_returning_customer_markers() {
+function wc_update_1120_reset_refund_returning_customer_markers() {
 	global $wpdb;
 
-	$last_id_option    = 'woocommerce_update_11202_last_refund_order_id';
+	$last_id_option    = 'woocommerce_update_1120_last_refund_order_id';
 	$order_stats_table = $wpdb->prefix . 'wc_order_stats';
 	$orders_table      = OrderUtil::get_table_for_orders();
 	$hpos_enabled      = OrderUtil::custom_orders_table_usage_is_enabled();
@@ -3789,14 +3791,14 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 	if ( '' !== $wpdb->last_error ) {
 		wc_get_logger()->error(
 			sprintf( 'Stopped resetting refund returning-customer markers: %s', $wpdb->last_error ),
-			array( 'source' => 'wc_update_11202_reset_refund_returning_customer_markers' )
+			array( 'source' => 'wc_update_1120_reset_refund_returning_customer_markers' )
 		);
 	}
 
 	delete_option( $last_id_option );
 
 	// Reports cached against half-migrated data would otherwise keep being served.
-	wc_update_11201_invalidate_analytics_reports_cache();
+	wc_update_1120_invalidate_analytics_reports_cache();
 
 	return false;
 }

@@ -479,20 +479,20 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
 	 */
-	public function test_wc_update_11201_migrate_tax_lookup_order_items(): void {
+	public function test_wc_update_1120_migrate_tax_lookup_order_items(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$db_updates = WC_Install::get_db_update_callbacks();
 
 		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
 		// it still runs the rebuild.
-		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_migrate_tax_lookup_order_items', $db_updates['11.2.0-1'] );
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_migrate_tax_lookup_order_items', $db_updates['11.2.0'] );
 
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
 
-		wc_update_11201_migrate_tax_lookup_order_items();
+		wc_update_1120_migrate_tax_lookup_order_items();
 
 		$this->assertTrue(
 			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
@@ -533,7 +533,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration invalidates the Analytics report cache, so a response cached before the update stops being served.
 	 */
-	public function test_wc_update_11201_invalidate_analytics_reports_cache(): void {
+	public function test_wc_update_1120_invalidate_analytics_reports_cache(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$db_updates = WC_Install::get_db_update_callbacks();
@@ -541,7 +541,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
 		// it still drops its stale responses.
 		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_invalidate_analytics_reports_cache', $db_updates['11.2.0-1'] );
+		$this->assertContains( 'wc_update_1120_invalidate_analytics_reports_cache', $db_updates['11.2.0-1'] );
 
 		// The cache version is a timestamp, so pin an old one rather than race the clock.
 		set_transient( ReportsCache::VERSION_OPTION . '-transient-version', '1000000000' );
@@ -550,7 +550,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		ReportsCache::set( $key, 'pre-update response' );
 		$this->assertSame( 'pre-update response', ReportsCache::get( $key ), 'The response should be served from cache before the update runs' );
 
-		wc_update_11201_invalidate_analytics_reports_cache();
+		wc_update_1120_invalidate_analytics_reports_cache();
 
 		$this->assertFalse( ReportsCache::get( $key ), 'A response cached before the update should no longer be served' );
 	}
@@ -558,7 +558,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration resets stale refund markers in batches and invalidates cached Analytics reports.
 	 */
-	public function test_wc_update_11202_reset_refund_returning_customer_markers(): void {
+	public function test_wc_update_1120_reset_refund_returning_customer_markers(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
@@ -566,7 +566,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$db_updates = WC_Install::get_db_update_callbacks();
 		// Under its own key, so that a store already past the 11.2.0 batches still resets its markers.
 		$this->assertArrayHasKey( '11.2.0-2', $db_updates );
-		$this->assertContains( 'wc_update_11202_reset_refund_returning_customer_markers', $db_updates['11.2.0-2'] );
+		$this->assertContains( 'wc_update_1120_reset_refund_returning_customer_markers', $db_updates['11.2.0-2'] );
 
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
@@ -591,7 +591,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $wpdb->update( $order_stats_table, array( 'returning_customer' => 1 ), array( 'order_id' => $refund->get_id() ), array( '%d' ), array( '%d' ) ) );
 		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row should start with a non-stale marker.' );
 
-		$cache_key        = 'wc_update_11202_analytics_report';
+		$cache_key        = 'wc_update_1120_analytics_report';
 		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
 		$original_version = get_transient( $version_key );
 		set_transient( $version_key, 'stale-version' );
@@ -600,12 +600,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			ReportsCache::set( $cache_key, 'stale-value' );
 			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
 
-			$this->assertTrue( wc_update_11202_reset_refund_returning_customer_markers(), 'A batch with stale refund rows should request another run.' );
-			$this->assertSame( $refund->get_id(), (int) get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be stored between batches.' );
+			$this->assertTrue( wc_update_1120_reset_refund_returning_customer_markers(), 'A batch with stale refund rows should request another run.' );
+			$this->assertSame( $refund->get_id(), (int) get_option( 'woocommerce_update_1120_last_refund_order_id' ), 'The last processed order ID should be stored between batches.' );
 			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ), 'The cache should stay valid until the last batch completes.' );
 
-			$this->assertFalse( wc_update_11202_reset_refund_returning_customer_markers(), 'A run with no stale refund rows should complete.' );
-			$this->assertFalse( get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be cleared on completion.' );
+			$this->assertFalse( wc_update_1120_reset_refund_returning_customer_markers(), 'A run with no stale refund rows should complete.' );
+			$this->assertFalse( get_option( 'woocommerce_update_1120_last_refund_order_id' ), 'The last processed order ID should be cleared on completion.' );
 			$this->assertFalse( ReportsCache::get( $cache_key ), 'The cache should be invalidated once the migration completes.' );
 		} finally {
 			delete_transient( $cache_key );
