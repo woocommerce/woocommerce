@@ -92,7 +92,10 @@ describe( 'UserProfile', () => {
 		expect( platformSelector ).toBeInTheDocument();
 	} );
 
-	it( 'should render the platform selector as read-only so touch devices do not open the keyboard', () => {
+	// The readonly attribute is what keeps the touch keyboard closed. jsdom
+	// cannot render an operating-system keyboard, so the suppression itself
+	// is only verifiable on a physical device.
+	it( 'should render the platform selector input as readonly', () => {
 		render(
 			// @ts-ignore
 			<UserProfile
