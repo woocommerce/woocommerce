@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep Shop subpage rewrite rules in sync with the product permalink base.
