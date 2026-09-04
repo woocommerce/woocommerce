@@ -368,11 +368,12 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A malformed Global Unique ID that matches nothing is skipped when updating existing products.
+	 * @testdox A Global Unique ID that strips to nothing creates a product, like a blank cell, when updating existing products.
 	 */
-	public function test_import_skips_invalid_global_unique_id_when_updating_existing_products() {
+	public function test_import_creates_products_whose_global_unique_id_strips_to_nothing() {
+		// "ABC" is saved as a blank Global Unique ID, so the row supplies no match key at all.
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-invalid-global-unique-id.csv';
-		file_put_contents( $csv_file, "GTIN,Name\nABC,Product that should not be created\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		file_put_contents( $csv_file, "GTIN,Name\nABC,Product without a usable identifier\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_file,
@@ -390,11 +391,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wp_delete_file( $csv_file );
 
 		$this->assertEmpty( $data['updated'] );
-		$this->assertEmpty( $data['imported'] );
-		$this->assertEmpty( $data['imported_variations'] );
+		$this->assertCount( 1, $data['imported'] );
 		$this->assertEmpty( $data['failed'] );
-		$this->assertCount( 1, $data['skipped'] );
-		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Product without a usable identifier', wc_get_product( $data['imported'][0] )->get_name() );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_global_unique_id() );
+
+		WC_Helper_Product::delete_product( $data['imported'][0] );
 	}
 
 	/**
@@ -840,9 +843,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that a variation row is skipped when its Global Unique ID is stripped to nothing and it has no SKU.
+	 * @testdox Test that a variation row with a blank SKU is skipped when its Global Unique ID strips to nothing.
 	 */
-	public function test_import_skips_new_variations_whose_global_unique_id_is_stripped_to_nothing() {
+	public function test_import_skips_new_variations_whose_global_unique_id_strips_to_nothing() {
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'Size' );
 		$attribute->set_options( array( 'S', 'M' ) );
@@ -854,9 +857,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		// "n/a" is saved as a blank Global Unique ID, so it is no more matchable than a missing one.
+		// "n/a" is saved as a blank Global Unique ID, so it is no more of a re-import key than the blank SKU is.
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-variation-unusable-global-unique-id.csv';
-		file_put_contents( $csv_file, "Type,GTIN,Name,Parent,Attribute 1 name,Attribute 1 value(s)\nvariation,n/a,Import GTIN Tee - S,IMPORT-GTIN-PARENT,Size,S\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		file_put_contents( $csv_file, "Type,SKU,GTIN,Name,Parent,Attribute 1 name,Attribute 1 value(s)\nvariation,,n/a,Import GTIN Tee - S,IMPORT-GTIN-PARENT,Size,S\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_file,
@@ -865,6 +868,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				'update_existing' => true,
 				'mapping'         => array(
 					'Type'                 => 'type',
+					'SKU'                  => 'sku',
 					'GTIN'                 => 'global_unique_id',
 					'Name'                 => 'name',
 					'Parent'               => 'parent_id',

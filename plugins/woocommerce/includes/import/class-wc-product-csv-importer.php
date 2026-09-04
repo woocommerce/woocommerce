@@ -1395,9 +1395,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
-			$id               = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-			$sku              = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
-			$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? $parsed_data['global_unique_id'] : '';
+			$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+			$sku = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
+
+			// Compare the stored form throughout: a cell that strips to nothing is saved as a blank
+			// Global Unique ID, so it is no more of a match key than an empty cell is.
+			$global_unique_id = $this->normalize_global_unique_id( $parsed_data['global_unique_id'] ?? '' );
 			$id_exists        = false;
 			$sku_exists       = false;
 
