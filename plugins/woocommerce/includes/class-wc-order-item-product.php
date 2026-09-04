@@ -20,12 +20,10 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
-	 * Item meta key recording which meta keys, and which values, `set_variation()` wrote for the
-	 * item's variation.
+	 * Meta key of the record `set_variation()` keeps of the attribute meta it wrote: meta key => value.
 	 *
-	 * Variation attributes are stored under bare names (`color`), so nothing in the stored row
-	 * says who wrote it. This record is that provenance: it is the only thing that lets the item
-	 * remove its own attribute meta without guessing at a merchant's or a plugin's meta.
+	 * Attribute meta is stored under bare keys (`color`), so without this record a variation's
+	 * row cannot be told apart from a merchant's or a plugin's.
 	 *
 	 * @since 11.2.0
 	 * @var string
@@ -246,17 +244,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 *
-	 * `$data` replaces the item's variation attributes rather than merging into them: attribute
-	 * meta this item recorded writing, and that `$data` no longer contains, is removed.
-	 *
-	 * The stored row carries no owner, so removal is deliberately conservative. A key the record
-	 * does not name is never touched, and a key it does name is only removed when the oldest row
-	 * under it still holds the value this item recorded writing and no other row holds that value.
-	 * Anything else leaves every row under the key in place: a stale attribute on the order screen
-	 * can be corrected, a deleted merchant row cannot.
-	 *
-	 * Items created before WooCommerce 11.2.0 carry no such record, so their attribute meta is
-	 * kept rather than guessed at.
+	 * Replaces rather than merges: recorded attribute meta that `$data` no longer contains is
+	 * removed. Items saved before 11.2.0 carry no record, so their attribute meta is left alone.
 	 *
 	 * @param array $data Key/Value pairs.
 	 */
@@ -279,8 +268,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 			$this->add_meta_data( $meta_key, $value, true );
 
-			// A non-scalar value cannot be compared against the stored row later, so it is written
-			// but not recorded: an unrecorded key is never removed.
+			// Only a scalar can be matched against the stored row later; unrecorded keys are never removed.
 			if ( is_scalar( $value ) ) {
 				$current[ $meta_key ] = (string) $value;
 			}
@@ -292,10 +280,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
-		// Written last, and rewritten rather than updated in place, so the record always sits
-		// behind the attribute rows this call just wrote. Those rows are themselves re-added on
-		// every call, so a record updated in place would drift ahead of them and surface first in
-		// `meta_data` — including in the REST response, where callers index the array positionally.
+		// Rewritten rather than updated in place so the record stays behind the attribute rows in
+		// `meta_data`; REST consumers index that array positionally.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		if ( $current ) {
@@ -306,15 +292,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Remove one attribute meta row this item recorded writing.
 	 *
-	 * Two things have to hold before a row is removed, because nothing on the row itself says who
-	 * wrote it. The oldest row under `$key` has to still hold `$value`: attributes are written with
-	 * `add_meta_data( ..., true )`, which leaves the item's own row as the only one under the key,
-	 * so anything a merchant or a plugin adds afterwards sits behind it. And exactly one row under
-	 * the key can hold that value, or there is no telling which of them is the item's.
-	 *
-	 * Anything else — the oldest row edited since, a second row holding the same value — keeps every
-	 * row under the key: a stale attribute on the order screen can be corrected, a deleted merchant
-	 * row cannot.
+	 * Nothing on the row says who wrote it, so the row is only removed when the oldest row under
+	 * the key still holds the recorded value and no other row does. A stale attribute can be
+	 * corrected later; a deleted merchant row cannot.
 	 *
 	 * @param string $key   Meta key.
 	 * @param string $value Value this item recorded writing under that key.
@@ -342,21 +322,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
-		// Passing the stored value rather than the recorded one keeps the data store's strict
-		// comparison matching the row counted above.
+		// The stored value, not the recorded string: the data store compares strictly.
 		$this->delete_meta_data_value( $key, $matches[0] );
 	}
 
 	/**
 	 * Get the attribute meta a previous `set_variation()` call recorded writing for this item.
 	 *
-	 * Read in the `edit` context so a display filter on the meta key cannot reshape the item's own
-	 * bookkeeping, and validated element by element: the row is persisted meta, so a plugin, an
-	 * older version, or a manual edit could have left anything in it.
-	 *
-	 * Entries that are not a meta key mapped to a scalar value are dropped, which includes the bare
-	 * list of keys written by earlier 11.2.0 development builds. An entry that is dropped is simply
-	 * never removed.
+	 * The record is persisted meta, so anything could be in it. Entries that are not a meta key
+	 * mapped to a scalar are dropped, and a dropped entry is simply never removed.
 	 *
 	 * @return array<string, string> Meta key => the value written under it.
 	 */
@@ -406,7 +380,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
 	}
-
 	/**
 	 * Set meta data for backordered products.
 	 */
