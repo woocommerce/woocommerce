@@ -465,7 +465,7 @@ class SiteHealth {
 					'label'       => __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
 					'description' => static fn( array $context ) => sprintf(
 						/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
-						__( 'The order metadata table has an estimated %1$s rows, while the orders table has %2$s. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+						__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
 						number_format_i18n( $context['meta_rows'] ),
 						number_format_i18n( $context['order_rows'] )
 					),
