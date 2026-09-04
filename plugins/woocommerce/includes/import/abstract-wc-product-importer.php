@@ -232,6 +232,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Reduce a Global Unique ID to the form it is stored in.
+	 *
+	 * Keep this in step with the stripping in WC_Product::set_global_unique_id(), so a row is
+	 * matched and judged usable on the same value the product would be saved with.
+	 *
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
+	 * @return string Stored form of the Global Unique ID, or an empty string when nothing is left of it.
+	 *
+	 * @since 11.2.0
+	 */
+	protected function normalize_global_unique_id( $global_unique_id ) {
+		return (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+	}
+
+	/**
 	 * Find the product a row refers to by its Global Unique ID.
 	 *
 	 * A match whose product type disagrees with the row type is refused, because
@@ -244,8 +259,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @since 11.2.0
 	 */
 	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
-		// Match the stored form; keep this in step with the stripping in WC_Product::set_global_unique_id().
-		$global_unique_id = (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+		$global_unique_id = $this->normalize_global_unique_id( $global_unique_id );
 
 		if ( '' === $global_unique_id ) {
 			return 0;

@@ -1249,12 +1249,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			);
 		}
 
-		// A CSV ID cannot be assigned to a new variation, so without a SKU the created variation
-		// could never be matched again and every re-import would duplicate it.
-		if ( empty( $parsed_data['sku'] ) ) {
+		// A CSV ID cannot be assigned to a new variation, so the row needs a key a later import can
+		// match it on; without one the created variation would be duplicated on every re-import.
+		// The Global Unique ID is compared in its stored form, since a cell that strips to nothing
+		// is saved as blank and would leave the variation unmatchable.
+		if ( empty( $parsed_data['sku'] ) && '' === $this->normalize_global_unique_id( $parsed_data['global_unique_id'] ?? '' ) ) {
 			return new WP_Error(
 				'woocommerce_product_importer_variation_missing_sku',
-				esc_html__( 'A new variation cannot be created without a SKU.', 'woocommerce' )
+				esc_html__( 'A new variation cannot be created without a SKU or a GTIN, UPC, EAN, or ISBN.', 'woocommerce' )
 			);
 		}
 
