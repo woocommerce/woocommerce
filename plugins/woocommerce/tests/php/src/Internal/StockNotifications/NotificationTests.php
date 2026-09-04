@@ -115,7 +115,14 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification = new Notification();
 		$notification->set_product_id( $variation_id );
 		$notification->set_user_email( 'test@example.com' );
-		$notification->update_meta_data( 'posted_attributes', array( 'attribute_pa_colour' => 'red' ) );
+		// "attribute_pa_stale" is not a variation attribute and must not end up in the URL.
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_stale'  => 'gone',
+			)
+		);
 		$notification->save();
 
 		$expected = add_query_arg(
@@ -126,7 +133,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 			get_permalink( $variable_product->get_id() )
 		);
 
-		$this->assertSame( $expected, $notification->get_product_permalink(), 'Permalink should carry both the variation attribute and the posted "Any" attribute' );
+		$this->assertSame( $expected, $notification->get_product_permalink(), 'Permalink should carry the variation attribute and the posted "Any" attribute, and nothing else' );
 	}
 
 	/**
