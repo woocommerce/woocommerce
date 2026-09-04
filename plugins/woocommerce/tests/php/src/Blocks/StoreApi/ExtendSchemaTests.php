@@ -173,6 +173,31 @@ class ExtendSchemaTests extends TestCase {
 	}
 
 	/**
+	 * @testdox The first namespace gets empty properties when its schema callback throws.
+	 */
+	public function test_get_endpoint_schema_when_the_first_namespace_throws() {
+		$this->register_endpoint_data(
+			'first-plugin',
+			null,
+			function () {
+				throw new \Exception( 'Callback failed.' );
+			}
+		);
+		$this->register_endpoint_data(
+			'second-plugin',
+			null,
+			function () {
+				return array( 'token' => array( 'type' => 'string' ) );
+			}
+		);
+
+		$schema = $this->mock_extend->get_endpoint_schema( 'cart' );
+
+		$this->assertSame( array(), $schema->{'first-plugin'}['properties'] );
+		$this->assertSame( array( 'token' => array( 'type' => 'string' ) ), $schema->{'second-plugin'}['properties'] );
+	}
+
+	/**
 	 * Registers cart endpoint data for a namespace.
 	 *
 	 * @param string        $plugin_namespace Plugin namespace.
