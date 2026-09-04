@@ -53,6 +53,20 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_address_fields' hides the postcode and makes the state optional for Qatar, matching the UAE.
+	 *
+	 * @return void
+	 */
+	public function test_get_address_fields_relaxes_postcode_and_state_for_qatar() {
+		$fields = ( new WC_Countries() )->get_address_fields( 'QA', 'billing_' );
+
+		$this->assertTrue( $fields['billing_postcode']['hidden'] ?? false, 'Qatar addresses have no postcode, so the field should be hidden.' );
+		$this->assertFalse( $fields['billing_postcode']['required'], 'Qatar addresses have no postcode, so the field should not be required.' );
+		$this->assertFalse( $fields['billing_state']['required'], 'WooCommerce lists no subdivisions for Qatar, so the state should not be required.' );
+		$this->assertFalse( $fields['billing_state']['hidden'] ?? false, 'Qatar follows the UAE, which keeps the state visible rather than hiding it like Bahrain and Kuwait.' );
+	}
+
+	/**
 	 * Provider for `test_get_country_from_alpha_3_code`.
 	 *
 	 * @return array
