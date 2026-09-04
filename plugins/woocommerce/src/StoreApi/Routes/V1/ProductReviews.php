@@ -198,7 +198,6 @@ class ProductReviews extends AbstractRoute {
 			'no_found_rows'          => true,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
-			'fields'                 => 'ids',
 		);
 
 		if ( ! empty( $candidate_product_ids ) ) {
@@ -206,10 +205,9 @@ class ProductReviews extends AbstractRoute {
 		}
 
 		$unlocked_ids = array();
-		foreach ( get_posts( $query_args ) as $product_id ) {
-			$product_id = absint( $product_id );
-			if ( $product_id && ! post_password_required( $product_id ) ) {
-				$unlocked_ids[] = $product_id;
+		foreach ( get_posts( $query_args ) as $product ) {
+			if ( $product instanceof \WP_Post && ! post_password_required( $product ) ) {
+				$unlocked_ids[] = (int) $product->ID;
 			}
 		}
 
