@@ -29,9 +29,10 @@ const SECTIONED_ADDRESS_TYPES = [ 'billing', 'shipping' ];
 /**
  * Build the `autocomplete` attribute value for a checkout field.
  *
- * Only `shipping` and `billing` are valid in the address type slot, and
- * `on`/`off` cannot be combined with any other token. Browsers drop a value
- * they cannot parse and guess instead, so anything else is passed through bare.
+ * Only `shipping` and `billing` are valid in the address type slot, `on`/`off`
+ * cannot be combined with any other token, and a value that already carries
+ * tokens would overflow the limit. Browsers drop a value they cannot parse and
+ * guess instead, so anything else is passed through as it came.
  *
  * @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
  *
@@ -58,6 +59,12 @@ export const getAutoCompleteValue = (
 	const lowerCaseValue = value.toLowerCase();
 
 	if ( lowerCaseValue === 'on' || lowerCaseValue === 'off' ) {
+		return value;
+	}
+
+	// A field that already supplies its own tokens would overflow the token
+	// limit once prefixed, and the browser drops the whole value.
+	if ( value.includes( ' ' ) ) {
 		return value;
 	}
 

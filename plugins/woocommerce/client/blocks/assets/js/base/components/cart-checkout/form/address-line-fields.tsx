@@ -51,8 +51,14 @@ const AddressLineFields = ( {
 		}
 	);
 
-	const Address1Component =
-		serverProviders.length > 0 ? AddressAutocomplete : ValidatedTextInput;
+	// Address autocomplete keys its providers by billing/shipping, so it only
+	// applies to an address form.
+	const isAddressForm =
+		addressType === 'billing' || addressType === 'shipping';
+	const useAutocomplete = serverProviders.length > 0 && isAddressForm;
+	const Address1Component = useAutocomplete
+		? AddressAutocomplete
+		: ValidatedTextInput;
 
 	return (
 		<>
@@ -60,7 +66,9 @@ const AddressLineFields = ( {
 				<Address1Component
 					{ ...address1FieldProps }
 					type={ address1.field.type }
-					{ ...( serverProviders.length > 0 ? { addressType } : {} ) }
+					{ ...( useAutocomplete && isAddressForm
+						? { addressType }
+						: {} ) }
 					className={ `wc-block-components-address-form__address_1` }
 					value={ address1.value }
 					onChange={ ( newValue: string ) =>

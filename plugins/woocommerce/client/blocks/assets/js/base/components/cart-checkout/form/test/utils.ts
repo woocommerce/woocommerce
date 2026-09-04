@@ -37,6 +37,17 @@ describe( 'getAutoCompleteValue', () => {
 		);
 	} );
 
+	it( 'leaves a value that already carries its own tokens alone', () => {
+		// Prefixing would push it past the token limit and the browser would
+		// drop the whole hint.
+		expect(
+			getAutoCompleteValue( 'shipping address-line1', 'billing' )
+		).toBe( 'shipping address-line1' );
+		expect(
+			getAutoCompleteValue( 'section-work address-line2', 'billing' )
+		).toBe( 'section-work address-line2' );
+	} );
+
 	it( 'normalises the address type it puts in the attribute', () => {
 		expect( getAutoCompleteValue( 'address-line1', ' Billing ' ) ).toBe(
 			'section-billing billing address-line1'

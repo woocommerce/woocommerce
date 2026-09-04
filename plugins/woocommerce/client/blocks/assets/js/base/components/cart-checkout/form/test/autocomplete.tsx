@@ -3,8 +3,15 @@
  */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CheckoutProvider } from '@woocommerce/base-context';
-import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
-import type { AddressFormType, Field } from '@woocommerce/settings';
+import {
+	ADDRESS_FORM_KEYS,
+	CONTACT_FORM_KEYS,
+} from '@woocommerce/block-settings';
+import type {
+	AddressFormType,
+	AddressFormValues,
+	Field,
+} from '@woocommerce/settings';
 import type { ReactElement } from 'react';
 
 /**
@@ -93,7 +100,7 @@ describe( 'Checkout field autocomplete attribute', () => {
 		);
 	} );
 
-	it( 'renders the same value on the hidden address_2 catcher and its visible sibling', () => {
+	it( 'gives the hidden address_2 catcher the value it computed for the visible sibling', () => {
 		renderAddressLines( { addressType: 'billing' } );
 
 		const hiddenInput = screen.getByLabelText( 'Apartment, suite, etc.' );
@@ -113,12 +120,26 @@ describe( 'Checkout field autocomplete attribute', () => {
 		);
 	} );
 
+	it( 'keeps the prefix on the country select, which renders through Select', () => {
+		renderInCheckoutProvider(
+			<Form
+				addressType="billing"
+				fields={ ADDRESS_FORM_KEYS }
+				values={ { country: 'GB' } as AddressFormValues }
+				onChange={ jest.fn() }
+			/>
+		);
+
+		expect( screen.getByLabelText( /Country\/Region/ ) ).toHaveAttribute(
+			'autocomplete',
+			'section-billing billing country'
+		);
+	} );
+
 	it( 'does not prefix contact fields, whose address type is not valid autofill grammar', () => {
 		renderInCheckoutProvider(
 			<Form
-				// The prop is typed AddressFormType, but the contact and
-				// additional information blocks pass 'contact' and 'order'.
-				addressType={ 'contact' as AddressFormType }
+				addressType="contact"
 				fields={ CONTACT_FORM_KEYS }
 				values={ { email: '' } }
 				onChange={ jest.fn() }
