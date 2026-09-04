@@ -309,26 +309,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          RECEIPT_CONTEXT: 'local-ci/v1/${{ matrix.name }}'
+          RECEIPT_NAME: 'local-ci/v1: ${{ matrix.name }}'
+          # Matched by numeric id, not slug: the slug follows the app's display
+          # name and a trust check must not hinge on something renameable.
+          RECEIPT_APP_ID: '4830646'
         run: |
           substituted=false
 
-          # The list endpoint, not the combined one: only this shape carries
-          # `creator`. Newest first, so take the most recent entry for the
-          # context and then require success — a later failure must not be
-          # masked by an earlier success.
-          # jq --arg, not string interpolation: the context contains spaces and
-          # brackets ("JavaScript - @woocommerce/number [unit]"), which break an
-          # inlined filter.
-          latest=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/statuses" 2>/dev/null \
-            | jq -c --arg ctx "$RECEIPT_CONTEXT" '[.[] | select(.context == $ctx)][0] // empty' 2>/dev/null || true)
+          # A check run, not a commit status: only a GitHub App can create one,
+          # so a receipt cannot be hand-rolled with a personal access token.
+          # jq --arg because the name contains spaces and brackets.
+          run_json=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/check-runs?per_page=100" 2>/dev/null \
+            | jq -c --arg name "$RECEIPT_NAME" --argjson app "$RECEIPT_APP_ID" \
+              '[.check_runs[] | select(.name == $name and .app.id == $app)][0] // empty' 2>/dev/null || true)
 
-          if [ -n "$latest" ] && [ "$(jq -r '.state // empty' <<<"$latest" 2>/dev/null)" = 'success' ]; then
+          if [ -n "$run_json" ] && [ "$(jq -r '.conclusion // empty' <<<"$run_json" 2>/dev/null)" = 'success' ]; then
             substituted=true
-            echo "Receipt found for '$RECEIPT_CONTEXT', posted by $(jq -r '.creator.login // "unknown"' <<<"$latest")."
-            echo "Trust is NOT implemented in this POC: the creator is not checked against a team."
+            echo "Receipt found for '$RECEIPT_NAME' ($(jq -r '.external_id // "unattributed"' <<<"$run_json"))."
+            echo "Trust is PARTLY implemented: the app is verified, the named author is not."
           else
-            echo "No receipt for '$RECEIPT_CONTEXT'. Running the job normally."
+            echo "No receipt for '$RECEIPT_NAME'. Running the job normally."
           fi
 
           echo "substituted=$substituted" >> "$GITHUB_OUTPUT"

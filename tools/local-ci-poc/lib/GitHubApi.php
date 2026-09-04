@@ -10,13 +10,9 @@ namespace LocalCi;
 /**
  * The GitHub REST calls this tool makes, and the one way it gets a token.
  *
- * The GitHub CLI is the single supported credential source. Reading tokens out
- * of the environment or the git credential store as well would mean this tool
- * could authenticate as one identity while `gh` reports another, and a receipt's
- * creator is the whole basis for trusting it. One source keeps that unambiguous.
- *
- * `gh auth token` honours GH_TOKEN and GITHUB_TOKEN itself, so exporting either
- * still works — it goes through the CLI rather than around it.
+ * Authentication is a user-to-server token from the tool's GitHub App, obtained
+ * by device flow. That is not a preference: only a GitHub App may create a check
+ * run, so no other credential can publish a receipt at all.
  */
 final class GitHubApi {
 
@@ -44,28 +40,14 @@ final class GitHubApi {
 	}
 
 	/**
-	 * Build a client from the GitHub CLI's token.
+	 * The login of whoever this token belongs to.
 	 *
-	 * @param string $repository Repository in owner/name form.
-	 *
-	 * @return self|null Null when the CLI is missing or logged out; the caller
-	 *                   decides what to say about it.
+	 * @return string Empty when the token cannot identify anyone.
 	 */
-	public static function from_github_cli( string $repository ): ?self {
-		if ( ! Shell::has_program( 'gh' ) ) {
-			return null;
-		}
+	public function viewer_login(): string {
+		$response = $this->request( 'GET', '/user' );
 
-		$token = Shell::output( 'gh auth token 2>/dev/null' );
-
-		return '' === $token ? null : new self( $token, $repository );
-	}
-
-	/**
-	 * Whether the GitHub CLI is installed, to tell "missing" from "logged out".
-	 */
-	public static function github_cli_is_installed(): bool {
-		return Shell::has_program( 'gh' );
+		return (string) ( $response['body']['login'] ?? '' );
 	}
 
 	/**
@@ -95,51 +77,44 @@ final class GitHubApi {
 	}
 
 	/**
-	 * Attach a commit status.
+	 * Create a completed, successful check run.
 	 *
-	 * @param string $sha         Commit to attach to.
-	 * @param string $context     Status context.
-	 * @param string $description Short human-readable description.
-	 * @param string $target_url  Optional link; this is what the status links to.
+	 * @param string               $sha         Commit to attach to.
+	 * @param string               $name        Check run name; this is what CI looks up.
+	 * @param string               $external_id Caller's own identifier, carried verbatim.
+	 * @param array<string,string> $output      title, summary and text.
 	 *
 	 * @return array{status: int, body: mixed}
 	 */
-	public function post_status( string $sha, string $context, string $description, string $target_url = '' ): array {
-		$body = array(
-			'state'       => 'success',
-			'context'     => $context,
-			'description' => $description,
-		);
-
-		if ( '' !== $target_url ) {
-			$body['target_url'] = $target_url;
-		}
-
+	public function create_check_run( string $sha, string $name, string $external_id, array $output ): array {
 		return $this->request(
 			'POST',
-			sprintf( '/repos/%s/statuses/%s', $this->repository, $sha ),
-			$body
+			sprintf( '/repos/%s/check-runs', $this->repository ),
+			array(
+				'name'        => $name,
+				'head_sha'    => $sha,
+				'status'      => 'completed',
+				'conclusion'  => 'success',
+				'external_id' => $external_id,
+				'output'      => $output,
+			)
 		);
 	}
 
 	/**
-	 * Every commit status on a SHA, newest first.
-	 *
-	 * Deliberately the list endpoint and not the combined one at
-	 * /commits/:sha/status. Only this shape includes `creator`, and creator is
-	 * the identity a trust check would validate — the combined endpoint omits it.
+	 * Every check run on a SHA.
 	 *
 	 * @param string $sha Commit to read.
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
-	public function list_statuses( string $sha ): array {
+	public function list_check_runs( string $sha ): array {
 		$response = $this->request(
 			'GET',
-			sprintf( '/repos/%s/commits/%s/statuses', $this->repository, $sha )
+			sprintf( '/repos/%s/commits/%s/check-runs?per_page=100', $this->repository, $sha )
 		);
 
-		return (array) ( $response['body'] ?? array() );
+		return (array) ( $response['body']['check_runs'] ?? array() );
 	}
 
 	/**

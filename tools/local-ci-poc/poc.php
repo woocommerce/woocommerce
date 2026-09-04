@@ -29,7 +29,7 @@ require_once __DIR__ . '/lib/Output.php';
 require_once __DIR__ . '/lib/Git.php';
 require_once __DIR__ . '/lib/GitHubApi.php';
 require_once __DIR__ . '/lib/Receipts.php';
-require_once __DIR__ . '/lib/LogStore.php';
+require_once __DIR__ . '/lib/DeviceFlow.php';
 require_once __DIR__ . '/lib/CheckRunner.php';
 require_once __DIR__ . '/lib/JobPlanner.php';
 require_once __DIR__ . '/lib/TemporaryRef.php';
@@ -37,6 +37,14 @@ require_once __DIR__ . '/lib/Options.php';
 
 const REPOSITORY   = 'woocommerce/woocommerce';
 const TRUNK_BRANCH = 'trunk';
+
+/**
+ * The GitHub App's client ID.
+ *
+ * Public by design: device flow needs it and nothing else, so no private key and
+ * no client secret is distributed to anyone's machine.
+ */
+const CLIENT_ID = 'Iv23lix7ORqAqQLsB13K';
 
 // Armed before anything is started, so an interrupt during the checks — by far
 // the longest part of a run — stops them rather than orphaning them.
@@ -55,26 +63,28 @@ if ( $options->wants_help || null !== $options->unknown_argument ) {
 // 1. The GitHub CLI, which is the only supported way in.
 // ---------------------------------------------------------------------------
 
-Output::heading( '1 · Require the GitHub CLI' );
+Output::heading( '1 · Authorise this machine' );
 
-$github = GitHubApi::from_github_cli( REPOSITORY );
+$token = ( new DeviceFlow( CLIENT_ID ) )->token();
 
-if ( null === $github ) {
-	if ( GitHubApi::github_cli_is_installed() ) {
-		Output::fail( 'the GitHub CLI is installed but not authenticated' );
-		Output::warn( 'Run `gh auth login`, then try this again.' );
-	} else {
-		Output::fail( 'the GitHub CLI (gh) is not installed' );
-		Output::warn( 'This tool requires it. Install from https://cli.github.com,' );
-		Output::warn( 'then run `gh auth login`.' );
-	}
-
+if ( null === $token ) {
+	Output::fail( 'not authorised — publishing nothing' );
+	Output::warn( 'Only the GitHub App may create a check run, so without this' );
+	Output::warn( 'there is no way to publish a receipt at all.' );
 	exit( 1 );
 }
 
-$receipts = new Receipts( $github );
+$github = new GitHubApi( $token, REPOSITORY );
+$author = $github->viewer_login();
 
-Output::pass( 'gh is installed and authenticated' );
+if ( '' === $author ) {
+	Output::fail( 'the token does not identify anyone — publishing nothing' );
+	exit( 1 );
+}
+
+$receipts = new Receipts( $github, $author );
+
+Output::pass( sprintf( 'authorised as %s, through the Local CI app', $author ) );
 
 // ---------------------------------------------------------------------------
 // 2. Refuse to publish anything a receipt could not honestly describe.
@@ -313,20 +323,10 @@ if ( 0 !== $drifted ) {
 	exit( 1 );
 }
 
-$log_urls = ( new LogStore( sprintf( 'local-ci run for %s', substr( $sha, 0, 11 ) ) ) )->upload(
-	array_intersect_key( $logs, array_flip( array_column( $passed_jobs, 'name' ) ) )
-);
-
-if ( array() === $log_urls ) {
-	// Not fatal. A receipt without a link still substitutes the job; it just
-	// gives a reviewer nothing to inspect.
-	Output::warn( 'could not upload the run output — receipts will have no link' );
-} else {
-	Output::detail( sprintf( 'output uploaded: %s', strtok( (string) reset( $log_urls ), '#' ) ), 2 );
-}
-
 foreach ( $passed_jobs as $job ) {
-	$posted = $receipts->publish( $sha, $job, $log_urls[ $job['name'] ] ?? '' );
+	// The log travels inside the check run, so there is nothing to host and
+	// nothing living under an individual's account.
+	$posted = $receipts->publish( $sha, $job, $logs[ $job['name'] ] ?? '' );
 
 	if ( 201 !== $posted['status'] ) {
 		// Carrying on would make a failed publish look like a successful one, and
@@ -340,7 +340,8 @@ foreach ( $passed_jobs as $job ) {
 		}
 
 		if ( 403 === $posted['status'] ) {
-			Output::warn( 'A 403 here usually means the token lacks the repo:status scope.' );
+			Output::warn( 'A 403 here usually means the app is not installed on this' );
+			Output::warn( 'repository, or lacks the Checks write permission.' );
 		}
 
 		exit( 1 );
@@ -358,20 +359,19 @@ Output::heading( '8 · Read them back, as CI would' );
 $published = $receipts->read( $sha );
 
 foreach ( array_slice( $published, 0, 3 ) as $receipt ) {
-	Output::detail(
-		sprintf( '%s  %s  creator=%s', $receipt['context'], $receipt['state'], $receipt['creator'] ),
-		2
-	);
+	Output::detail( sprintf( '%s  %s  by %s', $receipt['name'], $receipt['conclusion'], $receipt['author'] ), 2 );
+	Output::detail( $receipt['url'], 3 );
 }
 
 if ( count( $published ) > 3 ) {
 	Output::detail( sprintf( '... and %d more', count( $published ) - 3 ), 2 );
 }
 
-Output::detail( 'ci.yml reads exactly this, per matrix job, and skips both the install and', 2 );
-Output::detail( 'the test run when it finds a success for that job.', 2 );
-Output::warn( 'Trust is NOT implemented: the workflow does not yet check that creator' );
-Output::warn( 'belongs to a trusted team. That is the next piece.' );
+Output::detail( 'ci.yml rebuilds the same name per matrix job, checks the run came from', 2 );
+Output::detail( 'this app, and skips that job\'s install and test run when it finds one.', 2 );
+Output::warn( 'Trust is PARTLY implemented: only this app can create these, so they' );
+Output::warn( 'cannot be forged with a personal token. The workflow does not yet check' );
+Output::warn( 'that the named author belongs to a trusted team.' );
 
 // ---------------------------------------------------------------------------
 // 9. Optionally push, while the receipts still describe HEAD.
