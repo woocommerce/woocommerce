@@ -20,6 +20,18 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
+	 * Item meta key recording which meta keys `set_variation()` wrote for the item's variation.
+	 *
+	 * Variation attributes are stored under bare names (`color`), so nothing in the stored row
+	 * says who wrote it. This record is that provenance: it is the only thing that lets the item
+	 * remove its own attribute meta without guessing at a merchant's or a plugin's meta.
+	 *
+	 * @since 11.2.0
+	 * @var string
+	 */
+	public const VARIATION_ATTRIBUTE_KEYS_META_KEY = '_variation_attribute_keys';
+
+	/**
 	 * Legacy values.
 	 *
 	 * @deprecated 4.4.0 For legacy actions.
@@ -233,14 +245,62 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 *
+	 * `$data` replaces the item's variation attributes rather than merging into them: attribute
+	 * meta this item recorded earlier and `$data` no longer contains is removed. Only keys listed
+	 * in {@see self::VARIATION_ATTRIBUTE_KEYS_META_KEY} are ever removed, so meta written by a
+	 * merchant or a plugin is left alone even when it shares a key with an attribute.
+	 *
+	 * Items created before WooCommerce 11.2.0 carry no such record, so their attribute meta is
+	 * kept rather than guessed at.
+	 *
 	 * @param array $data Key/Value pairs.
 	 */
 	public function set_variation( $data = array() ) {
-		if ( is_array( $data ) ) {
-			foreach ( $data as $key => $value ) {
-				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
-			}
+		if ( ! is_array( $data ) ) {
+			return;
 		}
+
+		$previous_keys = $this->get_variation_attribute_meta_keys();
+		$current_keys  = array();
+
+		foreach ( $data as $key => $value ) {
+			$meta_key = str_replace( 'attribute_', '', $key );
+
+			$this->add_meta_data( $meta_key, $value, true );
+			$current_keys[] = $meta_key;
+		}
+
+		foreach ( array_diff( $previous_keys, $current_keys ) as $stale_key ) {
+			$this->delete_meta_data( $stale_key );
+		}
+
+		if ( $current_keys ) {
+			$this->update_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, array_values( array_unique( $current_keys ) ) );
+		} else {
+			$this->delete_meta_data( self::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+		}
+	}
+
+	/**
+	 * Get the meta keys a previous `set_variation()` call recorded for this item.
+	 *
+	 * @return string[]
+	 */
+	private function get_variation_attribute_meta_keys() {
+		$keys = $this->get_meta( self::VARIATION_ATTRIBUTE_KEYS_META_KEY, true );
+
+		if ( ! is_array( $keys ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				array_map( 'strval', $keys ),
+				static function ( $key ) {
+					return '' !== $key;
+				}
+			)
+		);
 	}
 
 	/**
@@ -260,10 +320,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
-			// Any variation attribute meta written by a previous set_variation() call is left in
-			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
-			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
-			// risks deleting real data. Removing that stale display meta is tracked in #66733.
+			$this->set_variation( array() );
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );

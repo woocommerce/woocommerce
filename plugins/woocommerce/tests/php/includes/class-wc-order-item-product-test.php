@@ -731,28 +731,199 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 * @testdox Should remove the previous variation's attribute meta when set_product() switches to a simple product.
 	 */
-	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
-		$parent = new WC_Product_Variable();
-		$parent->set_name( 'Dummy Variable Product' );
-		$parent->save();
-
-		$variation = WC_Helper_Product::create_product_variation_object(
-			$parent->get_id(),
-			'VARIATION SKU ' . wp_generate_uuid4(),
-			10,
-			array( 'color' => 'blue' )
-		);
-
+	public function test_set_product_removes_variation_attribute_meta_when_switching_to_simple_product(): void {
 		$item = new WC_Order_Item_Product();
-		$item->set_product( $variation );
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
 		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Precondition: set_variation() writes the variation attribute as display meta with the attribute_ prefix stripped.' );
 
 		$item->set_product( $this->product );
 
 		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
-		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The previous variation\'s attribute meta should not survive the switch to a simple product.' );
+		$this->assertSame( '', $item->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should be removed along with the attributes it tracked.' );
+	}
+
+	/**
+	 * @testdox Should drop attribute meta the incoming variation does not define when set_product() switches between variations.
+	 */
+	public function test_set_product_removes_orphaned_attribute_meta_when_switching_between_variations(): void {
+		$variation_a = $this->create_variation(
+			array(
+				'color' => 'blue',
+				'size'  => 'small',
+			)
+		);
+		$variation_b = $this->create_variation( array( 'color' => 'red' ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation_a );
+
+		$this->assertSame( 'small', $item->get_meta( 'size' ), 'Precondition: the first variation contributes a "size" attribute.' );
+
+		$item->set_product( $variation_b );
+
+		$this->assertSame( 'red', $item->get_meta( 'color' ), 'A shared attribute key should carry the incoming variation\'s value.' );
+		$this->assertSame( '', $item->get_meta( 'size' ), 'An attribute the incoming variation does not define should not linger on the item.' );
+	}
+
+	/**
+	 * @testdox Should keep meta the item never recorded as a variation attribute when set_product() switches product.
+	 */
+	public function test_set_product_keeps_meta_it_did_not_write(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+		$item->add_meta_data( 'engraving', 'Happy Birthday', true );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The recorded variation attribute meta should be removed.' );
+		$this->assertSame( 'Happy Birthday', $item->get_meta( 'engraving' ), 'Meta the item never recorded as a variation attribute belongs to the merchant or a plugin and must survive the switch.' );
+	}
+
+	/**
+	 * @testdox Should keep a merchant's meta that shares a key with an attribute when the item never carried that attribute.
+	 */
+	public function test_set_product_keeps_merchant_meta_sharing_an_attribute_key_on_a_simple_item(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->add_meta_data( 'color', 'Merchant picked this', true );
+
+		$item->set_product( $this->create_variation( array( 'size' => 'small' ) ) );
+
+		$this->assertSame( 'Merchant picked this', $item->get_meta( 'color' ), 'A "color" row this item never wrote as a variation attribute must survive, even though "color" is an attribute name elsewhere in the store.' );
+		$this->assertSame( 'small', $item->get_meta( 'size' ), 'The incoming variation\'s own attribute should still be written.' );
+	}
+
+	/**
+	 * @testdox Should remove attribute meta even when the previous variation has been deleted.
+	 */
+	public function test_set_product_removes_attribute_meta_when_previous_variation_was_deleted(): void {
+		$variation = $this->create_variation( array( 'color' => 'blue' ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		wp_delete_post( $variation->get_id(), true );
+		wc_delete_product_transients( $variation->get_id() );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should be reset even when the variation is gone.' );
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The item records the keys it wrote, so cleanup does not depend on the variation still existing.' );
+	}
+
+	/**
+	 * @testdox Should remove attribute meta even when the parent no longer declares the attribute for variations.
+	 */
+	public function test_set_product_removes_attribute_meta_when_parent_no_longer_declares_the_attribute(): void {
+		$variation = $this->create_variation( array( 'color' => 'blue' ) );
+		$parent    = wc_get_product( $variation->get_parent_id() );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		// A variation only reports the attributes its parent still marks as "used for variations".
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The item records the keys it wrote, so cleanup does not depend on the parent still declaring the attribute.' );
+	}
+
+	/**
+	 * @testdox Should remove attribute meta on an item reloaded from the database, which is how REST reassigns a line item.
+	 */
+	public function test_set_product_removes_attribute_meta_on_a_persisted_item(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+		$item->set_quantity( 1 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Precondition: the attribute meta survives a save/read round trip.' );
+
+		$reloaded->set_product( $this->product );
+		$reloaded->save();
+
+		$after_switch = new WC_Order_Item_Product( $item->get_id() );
+
+		$this->assertSame( '', $after_switch->get_meta( 'color' ), 'The provenance record must survive the database round trip so a reloaded item can still clean up after itself.' );
+		$this->assertSame( '', $after_switch->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should be gone from the database too.' );
+	}
+
+	/**
+	 * @testdox Should keep attribute meta on items written before the provenance record existed.
+	 */
+	public function test_set_product_keeps_attribute_meta_on_items_predating_the_provenance_record(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+
+		// Reproduce a line item stored by an older WooCommerce: the attribute meta is there, the record is not.
+		$item->delete_meta_data( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Without a record of what it wrote, the item cannot tell its own attribute meta from a merchant\'s, so it keeps it.' );
+	}
+
+	/**
+	 * @testdox Should keep the provenance record out of the meta shown for an item.
+	 */
+	public function test_variation_attribute_keys_record_is_not_displayed(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+		$item->set_quantity( 1 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$displayed_keys = wp_list_pluck( $item->get_all_formatted_meta_data( '' ), 'key' );
+
+		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY, $displayed_keys, 'The record is bookkeeping, not something to render on an order.' );
+		$this->assertContains(
+			WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY,
+			\Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil::get_hidden_keys(),
+			'The record must be registered as hidden so the admin order screen neither lists nor lets anyone edit it.'
+		);
+	}
+
+	/**
+	 * Create a variation whose parent declares the given attributes for variations.
+	 *
+	 * A variation only reports attributes its parent marks with `is_variation`, so a parent built
+	 * without them makes variation attribute meta invisible to anything reading it back.
+	 *
+	 * @param array $attributes Map of attribute name to the value this variation takes.
+	 * @return WC_Product_Variation
+	 */
+	private function create_variation( array $attributes ): WC_Product_Variation {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+
+		$parent_attributes = array();
+		foreach ( $attributes as $name => $value ) {
+			$attribute = new WC_Product_Attribute();
+			$attribute->set_name( $name );
+			$attribute->set_options( array( $value ) );
+			$attribute->set_visible( true );
+			$attribute->set_variation( true );
+
+			$parent_attributes[] = $attribute;
+		}
+
+		$parent->set_attributes( $parent_attributes );
+		$parent->save();
+
+		return WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			$attributes
+		);
 	}
 }
