@@ -97,6 +97,34 @@ async function resetToInitialAddressMock() {
 	pushChanges( false );
 }
 
+// The address every test starts from, matching what resetToInitialAddressMock restores.
+// Always spread these rather than passing them straight through: updateDirtyProps mutates the
+// address it is given, so a shared reference would leak changes into later tests.
+const initialBillingAddress = {
+	first_name: 'John',
+	last_name: 'Doe',
+	address_1: '123 Main St',
+	address_2: '',
+	city: 'New York',
+	state: 'NY',
+	postcode: '10001',
+	country: 'US',
+	email: 'john.doe@mail.com',
+	phone: '555-555-5555',
+};
+
+const initialShippingAddress = {
+	first_name: 'John',
+	last_name: 'Doe',
+	address_1: '123 Main St',
+	address_2: '',
+	city: 'New York',
+	state: 'NY',
+	postcode: '10001',
+	country: 'US',
+	phone: '555-555-5555',
+};
+
 describe( 'pushChanges', () => {
 	beforeAll( () => {
 		wpDataFunctions.select.mockImplementation(
@@ -677,49 +705,22 @@ describe( 'pushChanges', () => {
 		);
 
 		// Changing the country resets the state and postcode, like the address form does.
+		const billingAddress = {
+			...initialBillingAddress,
+			state: '',
+			postcode: '',
+			country: 'GB',
+		};
+
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress: {
-				first_name: 'John',
-				last_name: 'Doe',
-				address_1: '123 Main St',
-				address_2: '',
-				city: 'New York',
-				state: '',
-				postcode: '',
-				country: 'GB',
-				email: 'john.doe@mail.com',
-				phone: '555-555-5555',
-			},
-			shippingAddress: {
-				first_name: 'John',
-				last_name: 'Doe',
-				address_1: '123 Main St',
-				address_2: '',
-				city: 'New York',
-				state: 'NY',
-				postcode: '10001',
-				country: 'US',
-				phone: '555-555-5555',
-			},
+			billingAddress,
+			shippingAddress: { ...initialShippingAddress },
 		} );
 
 		pushChanges( false );
 
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{
-				billing_address: {
-					first_name: 'John',
-					last_name: 'Doe',
-					address_1: '123 Main St',
-					address_2: '',
-					city: 'New York',
-					state: '',
-					postcode: '',
-					country: 'GB',
-					email: 'john.doe@mail.com',
-					phone: '555-555-5555',
-				},
-			},
+			{ billing_address: billingAddress },
 			true,
 			false // because no shipping rate impacting fields are changed
 		);
@@ -733,32 +734,11 @@ describe( 'pushChanges', () => {
 				: undefined
 		);
 
-		const billingAddress = {
-			first_name: 'John',
-			last_name: 'Doe',
-			address_1: '123 Main St',
-			address_2: '',
-			city: 'New York',
-			state: 'NY',
-			postcode: '10001',
-			country: 'US',
-			email: 'john.doe@mail.com',
-			phone: '555-555-5555',
-		};
 		// Same country throughout: the customer cleared the postcode themselves.
-		const shippingAddress = {
-			first_name: 'John',
-			last_name: 'Doe',
-			address_1: '123 Main St',
-			address_2: '',
-			city: 'Boston',
-			state: 'NY',
-			country: 'US',
-			phone: '555-555-5555',
-		};
+		const shippingAddress = { ...initialShippingAddress, city: 'Boston' };
 
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress,
+			billingAddress: { ...initialBillingAddress },
 			shippingAddress: { ...shippingAddress, postcode: '' },
 		} );
 
@@ -771,7 +751,7 @@ describe( 'pushChanges', () => {
 		// Filling it in unblocks the push, proving nothing else was holding it back.
 		getValidationErrorMock.mockReturnValue( undefined );
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress,
+			billingAddress: { ...initialBillingAddress },
 			shippingAddress: { ...shippingAddress, postcode: '02101' },
 		} );
 
