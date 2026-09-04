@@ -512,7 +512,7 @@ class WC_Form_Handler {
 			ob_start();
 
 			// Pay for existing order.
-			$order_key = wp_unslash( $_GET['key'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order_key = is_string( $_GET['key'] ) ? wp_unslash( $_GET['key'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
@@ -881,7 +881,7 @@ class WC_Form_Handler {
 		) {
 			wc_nocache_headers();
 
-			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order_key = is_string( $_GET['order'] ) ? wp_unslash( $_GET['order'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $_GET['order_id'] );
 
 			if ( doing_action( 'wp_loaded' ) ) {

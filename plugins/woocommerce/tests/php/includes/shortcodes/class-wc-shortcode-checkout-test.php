@@ -19,7 +19,9 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		global $wp;
 
 		unset( $_GET['key'] );
+		unset( $_GET['pay_for_order'] );
 		unset( $wp->query_vars['order-received'] );
+		unset( $wp->query_vars['order-pay'] );
 
 		parent::tearDown();
 	}
@@ -41,5 +43,24 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'woocommerce-thankyou-order-details', $output );
 		$this->assertStringNotContainsString( (string) $order->get_order_number(), $output );
+	}
+
+	/**
+	 * An array `key` on the pay-for-order page must be rejected rather than reaching hash_equals().
+	 */
+	public function test_order_pay_treats_array_order_key_as_invalid() {
+		global $wp;
+
+		$order = WC_Helper_Order::create_order( 0 );
+
+		$wp->query_vars['order-pay'] = $order->get_id();
+		$_GET['pay_for_order']       = 'true';
+		$_GET['key']                 = array( $order->get_order_key() );
+
+		ob_start();
+		WC_Shortcode_Checkout::output( array() );
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'Sorry, this order is invalid and cannot be paid for.', $output );
 	}
 }

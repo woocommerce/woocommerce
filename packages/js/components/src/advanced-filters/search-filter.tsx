@@ -4,28 +4,53 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { find, isEqual } from 'lodash';
-import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
 import Search from '../search';
+import type { SearchProps, SearchType } from '../search';
 import {
 	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
 	textContent,
 } from './utils';
+import type {
+	ActiveFilter,
+	ActiveFilterValue,
+	FilterComponentProps,
+	FilterConfig,
+	FilterRule,
+	Query,
+	SearchLabel,
+} from './types';
 
-const normalizeFilterValue = ( value ) => {
+export type SearchFilterProps = FilterComponentProps;
+
+/**
+ * A selected search value. Keys come from API ids, so they may be numeric at runtime.
+ */
+export type SearchSelection = {
+	key: string | number;
+	label: string;
+	id?: string | number;
+};
+
+type SearchFilterState = {
+	selected: SearchSelection[];
+};
+
+const normalizeFilterValue = ( value: ActiveFilterValue | undefined ) => {
 	if ( Array.isArray( value ) ) {
 		return value.join( ',' );
 	}
 	return typeof value === 'string' ? value : '';
 };
 
-class SearchFilter extends Component {
-	constructor( { filter, query } ) {
-		super( ...arguments );
+class SearchFilter extends Component< SearchFilterProps, SearchFilterState > {
+	constructor( props: SearchFilterProps ) {
+		super( props );
+		const { filter, query } = props;
 		this.onSearchChange = this.onSearchChange.bind( this );
 		this.state = {
 			selected: [],
@@ -39,7 +64,7 @@ class SearchFilter extends Component {
 		}
 	}
 
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate( prevProps: SearchFilterProps ) {
 		const { filter, query } = this.props;
 		const { filter: prevFilter } = prevProps;
 		const filterValue = normalizeFilterValue( filter.value );
@@ -61,9 +86,9 @@ class SearchFilter extends Component {
 		}
 	}
 
-	loadLabels( filterValue, query ) {
-		this.props.config.input
-			.getLabels( filterValue, query )
+	loadLabels( filterValue: string, query?: Query ) {
+		void this.props.config.input
+			.getLabels?.( filterValue, query )
 			.then( ( selected ) => {
 				if (
 					filterValue ===
@@ -74,11 +99,15 @@ class SearchFilter extends Component {
 			} );
 	}
 
-	updateLabels( selected ) {
-		const normalizedSelected = selected.map( ( item ) => ( {
-			...item,
-			key: item.key ?? item.id,
-		} ) );
+	updateLabels( selected: SearchLabel[] ) {
+		const normalizedSelected = selected
+			.map( ( item ) => ( {
+				...item,
+				key: item.key ?? item.id,
+			} ) )
+			.filter(
+				( item ): item is SearchSelection => item.key !== undefined
+			);
 		const prevIds = this.state.selected.map( ( item ) => item.key );
 		const ids = normalizedSelected.map( ( item ) => item.key );
 
@@ -87,7 +116,7 @@ class SearchFilter extends Component {
 		}
 	}
 
-	onSearchChange( values ) {
+	onSearchChange( values: SearchSelection[] ) {
 		this.setState( {
 			selected: values,
 		} );
@@ -96,14 +125,15 @@ class SearchFilter extends Component {
 		onFilterChange( { property: 'value', value: idList } );
 	}
 
-	getScreenReaderText( filter, config ) {
+	getScreenReaderText( filter: ActiveFilter, config: FilterConfig ) {
 		const { selected } = this.state;
 
 		if ( selected.length === 0 ) {
 			return '';
 		}
 
-		const rule = find( config.rules, { value: filter.rule } ) || {};
+		const rule: Partial< FilterRule > =
+			find( config.rules, { value: filter.rule } ) || {};
 		const filterStr = selected.map( ( item ) => item.label ).join( ', ' );
 
 		return textContent(
@@ -145,10 +175,11 @@ class SearchFilter extends Component {
 						'woocommerce-filters-advanced__input'
 					) }
 					onChange={ this.onSearchChange }
-					type={ input.type }
+					type={ input.type as SearchType }
 					autocompleter={ input.autocompleter }
 					placeholder={ labels.placeholder }
-					selected={ selected }
+					// Search types keys as strings, but ids resolved from the API are numeric.
+					selected={ selected as SearchProps[ 'selected' ] }
 					inlineTags
 					aria-label={ labels.filter }
 				/>
@@ -160,7 +191,7 @@ class SearchFilter extends Component {
 		return (
 			<fieldset
 				className="woocommerce-filters-advanced__line-item"
-				tabIndex="0"
+				tabIndex={ 0 }
 			>
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
@@ -184,36 +215,5 @@ class SearchFilter extends Component {
 		);
 	}
 }
-
-SearchFilter.propTypes = {
-	/**
-	 * The configuration object for the single filter to be rendered.
-	 */
-	config: PropTypes.shape( {
-		labels: PropTypes.shape( {
-			placeholder: PropTypes.string,
-			rule: PropTypes.string,
-			title: PropTypes.string,
-		} ),
-		rules: PropTypes.arrayOf( PropTypes.object ),
-		input: PropTypes.object,
-	} ).isRequired,
-	/**
-	 * The activeFilter handed down by AdvancedFilters.
-	 */
-	filter: PropTypes.shape( {
-		key: PropTypes.string,
-		rule: PropTypes.string,
-		value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
-	} ).isRequired,
-	/**
-	 * Function to be called on update.
-	 */
-	onFilterChange: PropTypes.func.isRequired,
-	/**
-	 * The query string represented in object form.
-	 */
-	query: PropTypes.object,
-};
 
 export default SearchFilter;
