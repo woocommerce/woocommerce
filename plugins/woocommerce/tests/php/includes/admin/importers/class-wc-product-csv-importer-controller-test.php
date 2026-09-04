@@ -359,6 +359,52 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Import cleanup should return a resume cursor once its time budget is spent.
+	 */
+	public function test_cleanup_after_import_returns_a_resume_cursor_when_time_is_exceeded(): void {
+		$post_ids = array();
+
+		for ( $index = 0; $index < 3; $index++ ) {
+			$post_ids[] = wp_insert_post(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'importing',
+					'post_title'  => 'Import cleanup resumable placeholder ' . $index,
+				)
+			);
+		}
+
+		$spend_budget = static function () {
+			return 0;
+		};
+
+		add_filter( 'woocommerce_product_importer_default_time_limit', $spend_budget );
+
+		try {
+			// A spent budget stops after the first placeholder and reports where to resume.
+			$cursor = $this->invoke_cleanup_after_import();
+
+			$this->assertSame( $post_ids[0], $cursor );
+			$this->assertNull( get_post( $post_ids[0] ) );
+			$this->assertNotNull( get_post( $post_ids[1] ) );
+
+			$cursor = $this->invoke_cleanup_after_import( $cursor );
+
+			$this->assertSame( $post_ids[1], $cursor );
+			$this->assertNull( get_post( $post_ids[1] ) );
+
+			$this->assertSame( $post_ids[2], $this->invoke_cleanup_after_import( $cursor ) );
+			$this->assertNull( $this->invoke_cleanup_after_import( $post_ids[2] ) );
+		} finally {
+			remove_filter( 'woocommerce_product_importer_default_time_limit', $spend_budget );
+		}
+
+		foreach ( $post_ids as $post_id ) {
+			$this->assertNull( get_post( $post_id ) );
+		}
+	}
+
+	/**
 	 * @testdox Import cleanup should delete placeholders queued behind one it cannot delete.
 	 */
 	public function test_cleanup_after_import_continues_past_a_placeholder_it_cannot_delete(): void {
@@ -395,12 +441,16 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Invoke the import cleanup routine.
+	 *
+	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
+	 * @return int|null ID to resume from, or null once no placeholders are left.
 	 */
-	private function invoke_cleanup_after_import(): void {
+	private function invoke_cleanup_after_import( int $cursor = 0 ): ?int {
 		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
 		$method = $class->getMethod( 'cleanup_after_import' );
 		$method->setAccessible( true );
-		$method->invoke( null );
+
+		return $method->invoke( null, $cursor );
 	}
 
 	/**

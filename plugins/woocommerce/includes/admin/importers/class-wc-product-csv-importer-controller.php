@@ -42,6 +42,11 @@ class WC_Product_CSV_Importer_Controller {
 	private const CLEANUP_CLAIMED_STATUS = 'importing-cleanup';
 
 	/**
+	 * Prefix of the AJAX position that runs, and resumes, the cleanup phase.
+	 */
+	private const CLEANUP_POSITION_PREFIX = 'cleanup:';
+
+	/**
 	 * The path to the current file.
 	 *
 	 * @var string
@@ -333,14 +338,21 @@ class WC_Product_CSV_Importer_Controller {
 
 	/**
 	 * Remove temporary products and mapping data left by the importer.
+	 *
+	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
+	 * @return int|null ID to resume from, or null once no placeholders are left.
 	 */
-	private static function cleanup_after_import(): void {
+	private static function cleanup_after_import( int $cursor = 0 ): ?int {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
-		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+		if ( 0 === $cursor ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
+			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+		}
 
-		$cursor = 0;
+		/** This filter is documented in includes/import/abstract-wc-product-importer.php */
+		$time_limit = (int) apply_filters( 'woocommerce_product_importer_default_time_limit', 20 ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$deadline   = time() + $time_limit;
 
 		// Page by ID so a placeholder that cannot be deleted is passed over instead of being read again.
 		while ( true ) {
@@ -357,7 +369,7 @@ class WC_Product_CSV_Importer_Controller {
 			);
 
 			if ( ! $post_ids ) {
-				break;
+				return null;
 			}
 
 			$post_ids = array_map( 'absint', $post_ids );
@@ -366,8 +378,41 @@ class WC_Product_CSV_Importer_Controller {
 			// Ascending IDs delete a placeholder parent before its variations, so WooCommerce removes them through the normal lifecycle.
 			foreach ( $post_ids as $post_id ) {
 				self::delete_claimed_placeholder( $post_id );
+
+				// One delete lifecycle can take seconds, so check the budget per placeholder rather than per batch.
+				if ( time() >= $deadline ) {
+					return $post_id;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Run one bounded pass of the post-import cleanup and tell the client where to resume.
+	 *
+	 * The cursor only ever skips placeholders forward, and the queries it feeds match nothing
+	 * but the importer's own temporary products, so it needs no server-side state of its own.
+	 *
+	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
+	 */
+	private static function dispatch_ajax_cleanup( int $cursor ): void {
+		$next_cursor = self::cleanup_after_import( $cursor );
+
+		$response = array(
+			'position'            => null === $next_cursor ? 'done' : self::CLEANUP_POSITION_PREFIX . $next_cursor,
+			'percentage'          => 100,
+			'imported'            => 0,
+			'imported_variations' => 0,
+			'failed'              => 0,
+			'updated'             => 0,
+			'skipped'             => 0,
+		);
+
+		if ( null === $next_cursor ) {
+			$response['url'] = add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) );
+		}
+
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -467,12 +512,21 @@ class WC_Product_CSV_Importer_Controller {
 		check_ajax_referer( 'wc-product-import', 'security' );
 
 		try {
+			$position = wc_clean( wp_unslash( $_POST['position'] ?? '' ) );
+
+			// Cleanup runs in requests of its own so it cannot time out behind the last import batch.
+			if ( is_string( $position ) && preg_match( '/^' . preg_quote( self::CLEANUP_POSITION_PREFIX, '/' ) . '(\\d+)$/', $position, $matches ) ) {
+				self::dispatch_ajax_cleanup( (int) $matches[1] );
+
+				return;
+			}
+
 			$file = wc_clean( wp_unslash( $_POST['file'] ?? '' ) ); // PHPCS: input var ok.
 			self::validate_file_path( $file );
 
 			$params = array(
 				'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
-				'start_pos'          => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
+				'start_pos'          => absint( $position ),
 				'mapping'            => isset( $_POST['mapping'] ) ? (array) wc_clean( wp_unslash( $_POST['mapping'] ) ) : array(), // PHPCS: input var ok.
 				'update_existing'    => isset( $_POST['update_existing'] ) ? (bool) $_POST['update_existing'] : false, // PHPCS: input var ok.
 				'character_encoding' => isset( $_POST['character_encoding'] ) ? wc_clean( wp_unslash( $_POST['character_encoding'] ) ) : '',
@@ -508,35 +562,20 @@ class WC_Product_CSV_Importer_Controller {
 
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
-			if ( 100 === $percent_complete ) {
-				self::cleanup_after_import();
+			// The last row hands over to the cleanup phase rather than running it in this request.
+			$next_position = 100 === $percent_complete ? self::CLEANUP_POSITION_PREFIX . '0' : $importer->get_file_position();
 
-				// Send success.
-				wp_send_json_success(
-					array(
-						'position'            => 'done',
-						'percentage'          => 100,
-						'url'                 => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-						'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-						'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-						'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-						'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-						'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-					)
-				);
-			} else {
-				wp_send_json_success(
-					array(
-						'position'            => $importer->get_file_position(),
-						'percentage'          => $percent_complete,
-						'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-						'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-						'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-						'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-						'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
-					)
-				);
-			}
+			wp_send_json_success(
+				array(
+					'position'            => $next_position,
+					'percentage'          => $percent_complete,
+					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
+					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
+					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
+					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
+					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
+				)
+			);
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
