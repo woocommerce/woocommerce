@@ -36,6 +36,13 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	private $styles_queue = array();
 
 	/**
+	 * Script handles queued before the test ran.
+	 *
+	 * @var string[]
+	 */
+	private $scripts_queue = array();
+
+	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -56,10 +63,11 @@ class BlockTypesController extends WC_Unit_Test_Case {
 			ARRAY_FILTER_USE_KEY
 		);
 		$this->styles_queue          = wp_styles()->queue;
+		$this->scripts_queue         = wp_scripts()->queue;
 	}
 
 	/**
-	 * Restores the block registry and style queue a test may have rebuilt.
+	 * Restores the block registry and asset queues a test may have rebuilt.
 	 */
 	public function tearDown(): void {
 		$registry = \WP_Block_Type_Registry::get_instance();
@@ -71,7 +79,8 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		foreach ( $this->registered_woo_blocks as $block_type ) {
 			$registry->register( $block_type );
 		}
-		wp_styles()->queue = $this->styles_queue;
+		wp_styles()->queue  = $this->styles_queue;
+		wp_scripts()->queue = $this->scripts_queue;
 
 		parent::tearDown();
 	}
