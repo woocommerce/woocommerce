@@ -9,6 +9,7 @@ export type SearchType =
 	| 'categories'
 	| 'countries'
 	| 'coupons'
+	| 'customerNames'
 	| 'customers'
 	| 'downloadIps'
 	| 'emails'
