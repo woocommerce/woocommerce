@@ -100,9 +100,9 @@ class OrderItemSchema extends ItemSchema {
 		$item_data = [];
 
 		// A callback appending with `$formatted_meta[] =` gets PHP's next integer key, not a row ID.
-		// Mirror what `get_formatted_meta_data()` skips at its default `_` prefix: a row it leaves out
-		// never keys an entry, so counting its ID lets that key land on a hidden row saved right
-		// after the visible ones. Read the rows first, because formatting rewrites keys and values.
+		// Mirror what `get_formatted_meta_data()` skips for this call's `_` prefix and `$include_all`:
+		// a row it leaves out never keys an entry, so counting its ID lets that key land on a hidden
+		// row saved right after the visible ones. Read rows first; formatting rewrites keys and values.
 		$meta_row_ids = [];
 
 		/**
