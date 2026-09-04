@@ -141,6 +141,8 @@ class ProductReviews extends ControllerTestCase {
 		$product_ids = wp_list_pluck( $response->get_data(), 'product_id' );
 
 		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 2, $product_ids );
+		$this->assertSame( 2, (int) $response->get_headers()['X-WP-Total'] );
 		$this->assertContains( $this->products[0]->get_id(), $product_ids );
 		$this->assertContains( $this->products[1]->get_id(), $product_ids );
 		$this->assertNotContains( $protected_product->get_id(), $product_ids );
@@ -151,6 +153,7 @@ class ProductReviews extends ControllerTestCase {
 
 		$this->assertSame( 200, $targeted->get_status() );
 		$this->assertCount( 0, $targeted->get_data() );
+		$this->assertSame( 0, (int) $targeted->get_headers()['X-WP-Total'] );
 	}
 
 	/**
@@ -174,21 +177,26 @@ class ProductReviews extends ControllerTestCase {
 		$hasher                                 = new \PasswordHash( 8, true );
 		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( $password );
 
-		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' ) );
-		$product_ids = wp_list_pluck( $response->get_data(), 'product_id' );
+		try {
+			$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' ) );
+			$product_ids = wp_list_pluck( $response->get_data(), 'product_id' );
 
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
-		$request->set_param( 'product_id', (string) $protected_product->get_id() );
-		$targeted = rest_get_server()->dispatch( $request );
-		$data     = $targeted->get_data();
-
-		unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
+			$request->set_param( 'product_id', (string) $protected_product->get_id() );
+			$targeted = rest_get_server()->dispatch( $request );
+			$data     = $targeted->get_data();
+		} finally {
+			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+		}
 
 		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 3, $product_ids );
+		$this->assertSame( 3, (int) $response->get_headers()['X-WP-Total'] );
 		$this->assertContains( $protected_product->get_id(), $product_ids );
 
 		$this->assertSame( 200, $targeted->get_status() );
 		$this->assertCount( 1, $data );
+		$this->assertSame( 1, (int) $targeted->get_headers()['X-WP-Total'] );
 		$this->assertSame( $protected_product->get_id(), $data[0]['product_id'] );
 		$this->assertSame( 3, $data[0]['rating'] );
 	}

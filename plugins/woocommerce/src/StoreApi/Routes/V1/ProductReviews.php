@@ -111,15 +111,16 @@ class ProductReviews extends AbstractRoute {
 			$prepared_args['offset'] = $prepared_args['number'] * ( absint( $request['page'] ) - 1 );
 		}
 
+		$inaccessible_product_ids = $this->get_inaccessible_password_protected_product_ids();
+		if ( ! empty( $inaccessible_product_ids ) ) {
+			$prepared_args['post__not_in'] = $inaccessible_product_ids;
+		}
+
 		$query            = new WP_Comment_Query();
 		$query_result     = $query->query( $prepared_args );
 		$response_objects = array();
 
 		foreach ( $query_result as $review ) {
-			if ( post_password_required( (int) $review->comment_post_ID ) ) {
-				continue;
-			}
-
 			$data               = $this->prepare_item_for_response( $review, $request );
 			$response_objects[] = $this->prepare_response_for_collection( $data );
 		}
@@ -142,6 +143,34 @@ class ProductReviews extends AbstractRoute {
 		$response = ( new Pagination() )->add_headers( $response, $request, $total_reviews, $max_pages );
 
 		return $response;
+	}
+
+	/**
+	 * Product IDs whose reviews should stay hidden from this request.
+	 *
+	 * @return int[]
+	 */
+	private function get_inaccessible_password_protected_product_ids() {
+		$protected_products = get_posts(
+			array(
+				'post_type'              => 'product',
+				'post_status'            => ProductStatus::PUBLISH,
+				'has_password'           => true,
+				'posts_per_page'         => -1,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+
+		$inaccessible_ids = array();
+		foreach ( $protected_products as $product_post ) {
+			if ( post_password_required( $product_post ) ) {
+				$inaccessible_ids[] = (int) $product_post->ID;
+			}
+		}
+
+		return $inaccessible_ids;
 	}
 
 	/**
