@@ -261,4 +261,84 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 
 		$customer->delete();
 	}
+
+	/**
+	 * Tests compatibility with customer datastores that do not support timeframe totals.
+	 *
+	 * @testdox Timeframe totals remain correct when a third-party datastore only implements the established interface.
+	 */
+	public function test_customer_total_spent_timeframe_falls_back_for_legacy_datastore(): void {
+		foreach ( array( false, true ) as $hpos_enabled ) {
+			$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+			$storage_suffix = $hpos_enabled ? 'hpos' : 'cpt';
+			$customer       = WC_Helper_Customer::create_customer( "timeframe-$storage_suffix", 'password', "timeframe-$storage_suffix@example.com" );
+			$order          = WC_Helper_Order::create_order( $customer->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_date_paid( '2024-02-10 12:00:00' );
+			$order->set_total( 20 );
+			$order->save();
+
+			$core_store = new WC_Customer_Data_Store();
+			$timeframe  = array(
+				'after'  => '2024-01-01 00:00:00',
+				'before' => '2024-03-01 00:00:00',
+			);
+			$this->assertSame( '20.00', $core_store->get_total_spent_for_timeframe( $customer, $timeframe ), "Core $storage_suffix timeframe query should include the paid order." );
+			$legacy_store = Mockery::mock( WC_Customer_Data_Store_Interface::class . ', ' . WC_Object_Data_Store_Interface::class );
+			$legacy_store->shouldReceive( 'read' )->andReturnNull();
+			$legacy_store->shouldReceive( 'get_total_spent' )->andReturn( '999.00' );
+			$this->assertNotInstanceOf( WC_Customer_Data_Store_Timeframe_Interface::class, $legacy_store );
+			$this->assertTrue( is_callable( array( $legacy_store, 'get_total_spent_for_timeframe' ) ) );
+			$filter = static function () use ( $legacy_store ) {
+				return $legacy_store;
+			};
+			add_filter( 'woocommerce_customer_data_store', $filter );
+
+			try {
+				$legacy_customer = new WC_Customer( $customer->get_id() );
+				$this->assertSame( $customer->get_id(), $legacy_customer->get_id(), "Legacy $storage_suffix datastore should preserve the customer ID." );
+				$this->assertSame( '20.00', $core_store->get_total_spent_for_timeframe( $legacy_customer, $timeframe ), "Core $storage_suffix fallback should support a customer hydrated by the legacy datastore." );
+				$this->assertSame( '999.00', wc_get_customer_total_spent( $customer->get_id() ) );
+				$this->assertSame(
+					'20.00',
+					wc_get_customer_total_spent(
+						$customer->get_id(),
+						$timeframe
+					),
+					"Legacy $storage_suffix datastore should use the core timeframe fallback."
+				);
+			} finally {
+				remove_filter( 'woocommerce_customer_data_store', $filter );
+			}
+
+			$legacy_value_filter_calls = 0;
+			$legacy_query_filter_calls = 0;
+			$legacy_value_filter       = static function ( $spent ) use ( &$legacy_value_filter_calls ) {
+				++$legacy_value_filter_calls;
+				return $spent;
+			};
+			$legacy_query_filter       = static function ( $query ) use ( &$legacy_query_filter_calls ) {
+				++$legacy_query_filter_calls;
+				return $query;
+			};
+			add_filter( 'woocommerce_customer_get_total_spent', $legacy_value_filter );
+			add_filter( 'woocommerce_customer_get_total_spent_query', $legacy_query_filter );
+
+			try {
+				$this->assertSame(
+					'20.00',
+					wc_get_customer_total_spent(
+						$customer->get_id(),
+						$timeframe
+					)
+				);
+			} finally {
+				remove_filter( 'woocommerce_customer_get_total_spent_query', $legacy_query_filter );
+				remove_filter( 'woocommerce_customer_get_total_spent', $legacy_value_filter );
+			}
+
+			$this->assertSame( 0, $legacy_value_filter_calls );
+			$this->assertSame( 0, $legacy_query_filter_calls );
+		}
+	}
 }
