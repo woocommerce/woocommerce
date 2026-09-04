@@ -1,0 +1,214 @@
+<?php
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Caches;
+
+/**
+ * Invalidation handler for the coupon code to coupon id lookup cache.
+ *
+ * The wc_get_coupon_id_by_code() function caches the ids of the published coupons matching a
+ * given code. The entries live in the 'coupons' object cache group, under the key format this
+ * class owns, so WC_Cache_Helper::invalidate_cache_group( 'coupons' ) still reaches them.
+ *
+ * Invalidation is per coupon and happens in two layers:
+ *
+ * - On write, the hooks delete the lookup entry of the coupon's stored code whenever the coupon
+ *   crosses the `publish` boundary or is deleted. Every other coupon's entry stays warm.
+ * - On read, wc_get_coupon_id_by_code() only trusts a cached entry while every coupon id in it
+ *   still belongs to a published coupon (see is_lookup_entry_stale()). The check reads the core
+ *   post cache, which WordPress cleans on every post write, so it also catches what deleting one
+ *   key cannot reach: the same code cached under another key (raw vs. sanitized form, surrounding
+ *   whitespace, or a spelling the accent-insensitive database collation treats as equal), and a
+ *   lookup that started before the delete and wrote the old id back after it.
+ *
+ * Known limitations:
+ *
+ * - The read layer describes what WC_Coupon_Data_Store_CPT resolves, so wc_get_coupon_id_by_code()
+ *   only runs it while that data store is in use. A custom coupon data store registered through
+ *   the `woocommerce_data_stores` filter may resolve further statuses, or coupons that are not
+ *   posts at all, and keeps the write layer as its only coverage (what it had before this class
+ *   existed). Rejecting its entries instead would disable the lookup cache for those sites, since
+ *   every read would write an entry the next read throws away.
+ * - Renaming the code of a coupon that stays published crosses no boundary, so the old code
+ *   keeps resolving to the coupon until the cache entry expires or the coupon is unpublished.
+ *   This is pre-existing behaviour, not something this class introduced. The read layer does not
+ *   close it either: is_lookup_entry_stale() checks that the ids still belong to published
+ *   coupons, not that they still carry the code the entry was cached under. Comparing the two in
+ *   PHP would reject the aliases the database collation resolves (see the third limitation), and
+ *   turn every read of such an entry into a re-resolve.
+ * - wc_get_coupon_id_by_code() hashes the caller's raw input while `post_title` holds the
+ *   sanitized code, so for codes with kses-escapable characters the two are different keys.
+ *   Publishing a newer coupon under a code that is already cached under such a raw alias does not
+ *   reach the alias, so the older coupon keeps winning that lookup until its entry is invalidated.
+ * - The read-side check is only as fresh as the core post cache. A post cache entry primed by a
+ *   read that raced the unpublishing write vouches for the coupon until the next post write, the
+ *   same way it would for any other post type.
+ *
+ * @since 11.2.0
+ */
+class CouponCodeLookupInvalidator {
+
+	/**
+	 * The object cache group the lookup entries are stored in.
+	 *
+	 * @var string
+	 */
+	private const CACHE_GROUP = 'coupons';
+
+	/**
+	 * Register the WordPress hooks that cover coupon changes made outside the WC_Coupon CRUD.
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 */
+	final public function init(): void {
+		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
+		add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
+	}
+
+	/**
+	 * Get the object cache group the lookup entries are stored in.
+	 *
+	 * @return string The cache group.
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_cache_group(): string {
+		return self::CACHE_GROUP;
+	}
+
+	/**
+	 * Get the object cache key holding the ids of the published coupons with the given code.
+	 *
+	 * The key must be used with the cache group returned by get_cache_group().
+	 *
+	 * @param string $code Coupon code.
+	 * @return string The cache key.
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_cache_key( string $code ): string {
+		// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached), hence the hashing.
+		$hashed_code = md5( wc_strtolower( $code ) );
+
+		return \WC_Cache_Helper::get_cache_prefix( self::CACHE_GROUP ) . 'coupon_id_from_code_' . $hashed_code;
+	}
+
+	/**
+	 * Delete the cached coupon ids for the given code.
+	 *
+	 * @param string $code Coupon code.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function invalidate( string $code ): void {
+		if ( '' === $code ) {
+			return;
+		}
+
+		wp_cache_delete( $this->get_cache_key( $code ), self::CACHE_GROUP );
+	}
+
+	/**
+	 * Invalidate every code to coupon id lookup entry at once.
+	 *
+	 * Rotates the 'coupons' group prefix, which strands all previously cached lookup keys
+	 * regardless of the code representation they were primed under, and the meta cache of every
+	 * WC_Coupon along with them. Meant for bulk changes such as migrations that rewrite many
+	 * codes; single coupon changes use invalidate().
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function invalidate_all(): void {
+		\WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
+	}
+
+	/**
+	 * Check whether a cached lookup entry can no longer be trusted.
+	 *
+	 * An entry is stale as soon as one of its ids no longer belongs to a published coupon, i.e.
+	 * the coupon was unpublished, trashed or deleted after the entry was written. The post is read
+	 * through get_post(), which serves it from the core post cache. Every post write cleans that
+	 * cache, so the check costs no query on a warm cache and does not depend on which key the
+	 * entry was cached under.
+	 *
+	 * "Published coupon" is what WC_Coupon_Data_Store_CPT::get_ids_by_code() resolves, so callers
+	 * must only apply this to entries that data store wrote. See the known limitations above.
+	 *
+	 * @param array $ids The coupon ids stored in the lookup entry.
+	 * @return bool True if the entry must not be used.
+	 *
+	 * @since 11.2.0
+	 */
+	public function is_lookup_entry_stale( array $ids ): bool {
+		$ids = array_filter( array_map( 'absint', $ids ) );
+
+		if ( empty( $ids ) ) {
+			return true;
+		}
+
+		foreach ( $ids as $id ) {
+			$post = get_post( $id );
+
+			if ( ! $post instanceof \WP_Post || 'shop_coupon' !== $post->post_type || 'publish' !== $post->post_status ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Delete the lookup entry of a coupon that crosses the publish boundary.
+	 *
+	 * Only transitions into or out of `publish` can change which ids a code resolves to, so
+	 * other status changes (e.g. draft to pending) are ignored. wp_insert_post() reports `new`
+	 * as the old status, so a brand-new published coupon takes this path too, which is what lets
+	 * a newer coupon published under an already cached code win the lookup.
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 */
+	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		if ( ! $post instanceof \WP_Post || 'shop_coupon' !== $post->post_type || $new_status === $old_status ) {
+			return;
+		}
+
+		if ( 'publish' === $old_status || 'publish' === $new_status ) {
+			$this->invalidate( $post->post_title );
+		}
+	}
+
+	/**
+	 * Delete the lookup entry of a published coupon post that is deleted.
+	 *
+	 * Deleting a coupon in any other status cannot strand a lookup entry, since only published
+	 * coupons are ever cached.
+	 *
+	 * @param int      $post_id Post id.
+	 * @param \WP_Post $post    Post object.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 */
+	public function handle_deleted_post( $post_id, $post ): void {
+		if ( $post instanceof \WP_Post && 'shop_coupon' === $post->post_type && 'publish' === $post->post_status ) {
+			$this->invalidate( $post->post_title );
+		}
+	}
+}

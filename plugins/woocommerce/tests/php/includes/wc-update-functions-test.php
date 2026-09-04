@@ -496,4 +496,72 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
 	}
+
+	/**
+	 * @testdox Migration sanitizes dirty coupon codes and invalidates every coupon code lookup entry once per batch.
+	 */
+	public function test_wc_update_450_sanitize_coupons_code_invalidates_the_lookup_cache(): void {
+		global $wpdb;
+
+		$coupon_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'dirty-code',
+				'post_status' => 'publish',
+			)
+		);
+
+		// The migration exists for titles WordPress would not store today, so write the raw one directly.
+		$wpdb->update( $wpdb->posts, array( 'post_title' => ' dirty-code ' ), array( 'ID' => $coupon_id ) );
+		clean_post_cache( $coupon_id );
+
+		// Start the batch at this coupon, so the assertions do not depend on what else is in the database.
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
+
+		wc_update_450_sanitize_coupons_code();
+
+		$this->assertSame( 'dirty-code', get_post( $coupon_id )->post_title, 'The migration should have sanitized the code.' );
+		$this->assertNotSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'Rewriting a code should strand the lookup entries it was cached under.'
+		);
+
+		delete_option( 'woocommerce_update_450_last_coupon_id' );
+		wp_delete_post( $coupon_id, true );
+	}
+
+	/**
+	 * @testdox Migration keeps the coupon code lookup cache when there is nothing to sanitize.
+	 */
+	public function test_wc_update_450_sanitize_coupons_code_keeps_the_lookup_cache_when_no_code_changes(): void {
+		$coupon_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'clean-code',
+				'post_status' => 'publish',
+			)
+		);
+
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
+
+		wc_update_450_sanitize_coupons_code();
+
+		$this->assertSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'A batch that rewrites no code should leave the warm lookup entries alone.'
+		);
+
+		delete_option( 'woocommerce_update_450_last_coupon_id' );
+		wp_delete_post( $coupon_id, true );
+	}
 }

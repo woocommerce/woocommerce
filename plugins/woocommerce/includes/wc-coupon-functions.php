@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 
@@ -112,17 +113,29 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 		return 0;
 	}
 
-	$data_store = WC_Data_Store::load( 'coupon' );
-	// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached).
-	$hashed_code = md5( wc_strtolower( $code ) );
-	$cache_key   = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+	$data_store  = WC_Data_Store::load( 'coupon' );
+	$invalidator = wc_get_container()->get( CouponCodeLookupInvalidator::class );
+	$cache_key   = $invalidator->get_cache_key( $code );
+	$cache_group = $invalidator->get_cache_group();
 
-	$ids = wp_cache_get( $cache_key, 'coupons' );
+	$ids = wp_cache_get( $cache_key, $cache_group );
 
-	if ( false === $ids ) {
+	/*
+	 * A cached entry is only trusted while all of its coupons are still published, whichever key it
+	 * was cached under. The check describes what the core data store resolves, so a custom coupon
+	 * data store skips it and keeps the write-side invalidation as its only layer. Running it there
+	 * would reject every entry the custom store wrote, disabling the lookup cache for that site.
+	 */
+	$is_stale = false !== $ids
+		&& 'WC_Coupon_Data_Store_CPT' === $data_store->get_current_class_name()
+		&& $invalidator->is_lookup_entry_stale( (array) $ids );
+
+	if ( false === $ids || $is_stale ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
-			wp_cache_set( $cache_key, $ids, 'coupons' );
+			wp_cache_set( $cache_key, $ids, $cache_group );
+		} elseif ( $is_stale ) {
+			wp_cache_delete( $cache_key, $cache_group );
 		}
 	}
 

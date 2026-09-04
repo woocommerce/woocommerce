@@ -55,22 +55,60 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 * Test coupon accurately cleans up object cache upon deletion.
 	 */
 	public function test_coupon_cache_deletion() {
-		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+		$coupon      = WC_Helper_Coupon::create_coupon( 'test' );
+		$code        = $coupon->get_code();
+		$invalidator = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator::class );
 
 		// Prime the cache.
-		$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
-		$cache_name  = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
-		wc_get_coupon_id_by_code( $coupon->get_code() );
+		wc_get_coupon_id_by_code( $code );
 
-		$ids = wp_cache_get( $cache_name, 'coupons' );
+		$cache_name = $invalidator->get_cache_key( $code );
+		$ids        = wp_cache_get( $cache_name, 'coupons' );
 
 		$this->assertNotEquals( false, $ids, sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
 
 		$coupon->delete( true );
 
-		$ids = wp_cache_get( $cache_name, 'coupons' );
+		// Deleting a published coupon removes its lookup entry, so the code no longer resolves from the object cache.
+		$ids = wp_cache_get( $invalidator->get_cache_key( $code ), 'coupons' );
 
-		$this->assertEquals( false, $ids, sprintf( 'Object cache for %s was not removed upon deletion of coupon.', $cache_name ) );
+		$this->assertEquals( false, $ids, 'Object cache should not resolve the coupon code after deletion.' );
+	}
+
+	/**
+	 * Test the data store cleans up the code lookup cache when it unpublishes a coupon during `save_post`.
+	 *
+	 * On that path the status is written with $wpdb directly, so no `transition_post_status` fires
+	 * for CouponCodeLookupInvalidator to listen to and the data store is what invalidates.
+	 */
+	public function test_coupon_cache_deletion_when_unpublished_during_save_post() {
+		$coupon      = WC_Helper_Coupon::create_coupon( 'save-post-draft' );
+		$code        = $coupon->get_code();
+		$invalidator = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator::class );
+
+		// Prime the cache.
+		wc_get_coupon_id_by_code( $code );
+		$cache_name = $invalidator->get_cache_key( $code );
+		$this->assertNotEquals( false, wp_cache_get( $cache_name, 'coupons' ), sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
+
+		// Unpublish through the CRUD while `save_post` is running, the way a third party callback would.
+		$unpublish = function () use ( $coupon ) {
+			$coupon->set_status( 'draft' );
+			$coupon->save();
+		};
+		add_action( 'save_post', $unpublish );
+		wp_update_post(
+			array(
+				'ID'           => $coupon->get_id(),
+				'post_excerpt' => 'Updated description',
+			)
+		);
+		remove_action( 'save_post', $unpublish );
+
+		$this->assertEquals( 'draft', get_post_status( $coupon->get_id() ), 'The coupon should have been unpublished during save_post.' );
+		$this->assertEquals( false, wp_cache_get( $cache_name, 'coupons' ), 'Object cache should not resolve the coupon code after it is unpublished during save_post.' );
+
+		$coupon->delete( true );
 	}
 
 	/**
