@@ -68839,18 +68839,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
-			message: '#^Variable \$schema might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractAddressSchema\:\:sanitize_callback\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
