@@ -381,6 +381,53 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep single-page-select attributes inside their rendered contexts.
+	 */
+	public function test_output_fields_escapes_single_select_page_attributes(): void {
+		$css   = "width: 12px;' onfocus='alert(1)";
+		$class = "safe-class' data-pwned='1";
+		$this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$options = array(
+			array(
+				'id'    => 'test_page_setting',
+				'title' => 'Page setting',
+				'type'  => 'single_select_page',
+				'value' => 0,
+				'css'   => $css,
+				'class' => $class,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The setting output should remain valid enough for DOM parsing.' );
+
+		$select = ( new DOMXPath( $document ) )->query( '//select[@id="test_page_setting"]' )->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $select );
+		$this->assertSame( $css, $select->getAttribute( 'style' ) );
+		$this->assertSame( $class, $select->getAttribute( 'class' ) );
+		$this->assertFalse( $select->hasAttribute( 'onfocus' ) );
+		$this->assertFalse( $select->hasAttribute( 'data-pwned' ) );
+	}
+
+	/**
 	 * @testdox Should not emit a shared "-title" ID for radio settings that have no ID.
 	 */
 	public function test_output_fields_does_not_cross_label_id_less_radio_settings(): void {

@@ -89,7 +89,7 @@ if ( process.env.CI ) {
 	] );
 }
 
-export const setupProjects = [
+export const coreSetupProjects = [
 	{
 		name: 'install wc',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
@@ -107,12 +107,13 @@ export const setupProjects = [
 		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
-	{
-		name: 'blocks setup',
-		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'blocks-setup.ts',
-	},
 ];
+
+const blocksSetupProject = {
+	name: 'blocks setup',
+	testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+	testMatch: 'blocks-setup.ts',
+};
 
 /**
  * Spec folders that must run serially in `core-serial` (they mutate global
@@ -178,8 +179,8 @@ const serialRunSpecs = [
 	// Mutate global WooCommerce settings (store address/currency/country, tax)
 	// that other workers' cart/checkout/storefront specs depend on.
 	'**/tests/settings/settings-general.spec.ts',
-	// Mutates the global woocommerce_permalinks option (product base and the
-	// derived use_verbose_page_rules flag) and restores it in teardown.
+	// Mutates the global woocommerce_permalinks option (the product base) and
+	// restores it in teardown.
 	'**/tests/settings/product-permalinks.spec.ts',
 	'**/tests/settings/settings-tax.spec.ts',
 	// Toggles the global `settings-ui` feature flag and resets all e2e feature flags
@@ -234,7 +235,8 @@ export default defineConfig( {
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 
 	projects: [
-		...setupProjects,
+		...coreSetupProjects,
+		blocksSetupProject,
 		{
 			name: 'core-serial',
 			testMatch: serialRunSpecs,

@@ -72,6 +72,55 @@ add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 ```
 
+This registers the unauthenticated `POST /wp-json/woocommerce-analytics/v1/track`
+endpoint. Sites that have never enabled proxy tracking do not get it. After it
+has been enabled, the route returns `403 proxy_tracking_disabled` while the
+filter is `false`, so cached pages fail visibly instead of receiving a `404`.
+
+Events arriving through it are untrusted. Server-derived properties replace
+client values; the reserved set is
+`WC_Analytics_Tracking::get_reserved_property_names()`. `_lg`, `_dl`, and
+`_dr` are client values because they describe the page, not the `/track` request.
+
+Input is limited. Long values are truncated with `…`, and the payload budget
+keeps the cheapest properties first. The same value limit applies to
+request-derived values and the session cookie.
+
+| Limit                     | Value |
+| ------------------------- | ----- |
+| Events per request        | 50    |
+| Properties per event      | 50    |
+| Members per array value   | 50    |
+| Characters per value      | 1000  |
+| Characters per name       | 100   |
+| Encoded payload per event | 4096  |
+| Pixel URL bytes           | 8192  |
+
+Invalid event names and oversized pixel URLs return an error. Events beyond the
+batch limit are ignored.
+
+Two options carry this state, because the optional MU-plugin speed module loads
+before plugins register filters and cannot read them:
+
+-   `woocommerce_analytics_proxy_tracking_ever_enabled` is sticky and decides
+    whether the route is registered at all. Nothing in the package clears it:
+    `Woocommerce_Analytics::reset_proxy_tracking_state()` is the only way, and it
+    has no caller, so a host that wants the endpoint gone has to call it from its
+    own deactivation or uninstall routine once the cached pages have expired.
+-   `woocommerce_analytics_proxy_speed_module_authorized` records whether the speed
+    module may serve. It holds `should_install_proxy_speed_module()`, which is proxy
+    tracking **and** the module's own opt-in, so a revoked module is not
+    reauthorized by the next request. An unauthorized module falls through to the
+    REST route rather than answering itself, so the `403` always comes from one
+    place.
+
+**The filter must resolve to the same value for every request on a site, and must
+be registered before `init` priority 20.** A value that varies by cohort,
+percentage or geo makes cached pages disagree with what `/track` decides, and makes
+the speed module install and uninstall itself on alternate runs. A callback added
+after `init` priority 20 is never seen: the route is registered from the option,
+not from the filter, and the option is written there.
+
 ## Privacy & Consent Management
 
 ### WP Consent API Integration

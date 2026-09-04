@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace legacy WPCS suppression comments on extension-facing SQL and order note queries with scoped phpcs:ignore annotations.

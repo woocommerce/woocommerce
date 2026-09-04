@@ -234,6 +234,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'from_clause'       => $this->interval_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $this->interval_query->get_sql_clause( 'where_time' ),
 			'where_clause'      => $this->interval_query->get_sql_clause( 'where' ),
+			// The segmenter reads this key on every store. This one never calls
+			// get_limit_sql_params(), unlike the sibling stats stores, so the clause is empty and
+			// the segment queries go unlimited, as they always have.
+			'limit'             => $this->get_sql_clause( 'limit' ),
 		);
 		$segmenter             = new Segmenter( $query_args, $this->report_columns );
 		$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
