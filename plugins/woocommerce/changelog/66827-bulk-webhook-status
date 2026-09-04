@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Allow merchants to activate, pause, or deactivate selected webhooks from the bulk actions menu.
