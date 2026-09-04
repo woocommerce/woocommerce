@@ -111,32 +111,41 @@ class ProductReviews extends AbstractRoute {
 			$prepared_args['offset'] = $prepared_args['number'] * ( absint( $request['page'] ) - 1 );
 		}
 
-		$inaccessible_product_ids = $this->get_inaccessible_password_protected_product_ids( $request );
-		if ( ! empty( $inaccessible_product_ids ) ) {
-			$prepared_args['post__not_in'] = $inaccessible_product_ids;
+		$unlocked_product_ids               = $this->get_unlocked_password_protected_product_ids( $prepared_args['post__in'] ?? array() );
+		$exclude_password_protected_reviews = function ( $clauses ) use ( $unlocked_product_ids ) {
+			return $this->exclude_password_protected_product_reviews( $clauses, $unlocked_product_ids );
+		};
+
+		$query_result  = array();
+		$total_reviews = 0;
+		$max_pages     = 0;
+
+		add_filter( 'comments_clauses', $exclude_password_protected_reviews );
+		try {
+			$query        = new WP_Comment_Query();
+			$query_result = $query->query( $prepared_args );
+
+			$total_reviews = (int) $query->found_comments;
+			$max_pages     = (int) $query->max_num_pages;
+
+			if ( $total_reviews < 1 ) {
+				// Out-of-bounds, run the query again without LIMIT for total count.
+				unset( $prepared_args['number'], $prepared_args['offset'] );
+
+				$query                  = new WP_Comment_Query();
+				$prepared_args['count'] = true;
+
+				$total_reviews = $query->query( $prepared_args );
+				$max_pages     = $request['per_page'] ? ceil( $total_reviews / $request['per_page'] ) : 1;
+			}
+		} finally {
+			remove_filter( 'comments_clauses', $exclude_password_protected_reviews );
 		}
 
-		$query            = new WP_Comment_Query();
-		$query_result     = $query->query( $prepared_args );
 		$response_objects = array();
-
 		foreach ( $query_result as $review ) {
 			$data               = $this->prepare_item_for_response( $review, $request );
 			$response_objects[] = $this->prepare_response_for_collection( $data );
-		}
-
-		$total_reviews = (int) $query->found_comments;
-		$max_pages     = (int) $query->max_num_pages;
-
-		if ( $total_reviews < 1 ) {
-			// Out-of-bounds, run the query again without LIMIT for total count.
-			unset( $prepared_args['number'], $prepared_args['offset'] );
-
-			$query                  = new WP_Comment_Query();
-			$prepared_args['count'] = true;
-
-			$total_reviews = $query->query( $prepared_args );
-			$max_pages     = $request['per_page'] ? ceil( $total_reviews / $request['per_page'] ) : 1;
 		}
 
 		$response = rest_ensure_response( $response_objects );
@@ -146,13 +155,37 @@ class ProductReviews extends AbstractRoute {
 	}
 
 	/**
-	 * Product IDs whose reviews should stay hidden from this request.
+	 * Restrict the comment query to products the visitor can access.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * WP_Comment_Query already joins posts because of post_status. Filter on that
+	 * join instead of building a post__not_in list of every protected product.
+	 *
+	 * @param array $clauses              Comment query clauses.
+	 * @param int[] $unlocked_product_ids Password-protected product IDs the visitor has unlocked.
+	 * @return array
+	 */
+	private function exclude_password_protected_product_reviews( $clauses, $unlocked_product_ids ) {
+		global $wpdb;
+
+		$where = " {$wpdb->posts}.post_password = '' ";
+		if ( ! empty( $unlocked_product_ids ) ) {
+			$ids   = implode( ',', array_map( 'absint', $unlocked_product_ids ) );
+			$where = " ( {$wpdb->posts}.post_password = '' OR {$wpdb->posts}.ID IN ({$ids}) ) ";
+		}
+
+		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . $where;
+
+		return $clauses;
+	}
+
+	/**
+	 * Password-protected product IDs the visitor has unlocked.
+	 *
+	 * @param int[] $candidate_product_ids Product IDs already limiting the review query, if any.
 	 * @return int[]
 	 */
-	private function get_inaccessible_password_protected_product_ids( $request ) {
-		$protected_products_query = array(
+	private function get_unlocked_password_protected_product_ids( $candidate_product_ids = array() ) {
+		$query_args = array(
 			'post_type'              => 'product',
 			'post_status'            => ProductStatus::PUBLISH,
 			'has_password'           => true,
@@ -165,22 +198,22 @@ class ProductReviews extends AbstractRoute {
 			'no_found_rows'          => true,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
+			'fields'                 => 'ids',
 		);
 
-		if ( ! empty( $request['product_id'] ) ) {
-			$protected_products_query['post__in'] = $request['product_id'];
+		if ( ! empty( $candidate_product_ids ) ) {
+			$query_args['post__in'] = $candidate_product_ids;
 		}
 
-		$protected_products = get_posts( $protected_products_query );
-
-		$inaccessible_ids = array();
-		foreach ( $protected_products as $product_post ) {
-			if ( post_password_required( $product_post ) ) {
-				$inaccessible_ids[] = (int) $product_post->ID;
+		$unlocked_ids = array();
+		foreach ( get_posts( $query_args ) as $product_id ) {
+			$product_id = absint( $product_id );
+			if ( $product_id && ! post_password_required( $product_id ) ) {
+				$unlocked_ids[] = $product_id;
 			}
 		}
 
-		return $inaccessible_ids;
+		return $unlocked_ids;
 	}
 
 	/**
