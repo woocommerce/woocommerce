@@ -44,6 +44,7 @@ use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -3702,6 +3703,17 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 	}
 
 	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
+}
+
+/**
+ * Delete the retired Surface Cart and Checkout inbox note.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_delete_surface_cart_checkout_note(): void {
+	InboxNotifications::delete_surface_cart_checkout_blocks_notification();
 }
 
 /**

@@ -13,6 +13,79 @@ class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 	use MetaDataAssertionTrait;
 
 	/**
+	 * @testdox A nested V3 refund can be created, read, listed, and permanently deleted.
+	 */
+	public function test_nested_refund_lifecycle(): void {
+		wp_set_current_user( 1 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$order_item = current( $order->get_items( 'line_item' ) );
+
+		$collection = '/wc/v3/orders/' . $order->get_id() . '/refunds';
+		$request    = new WP_REST_Request( 'POST', $collection );
+		$request->set_body_params(
+			array(
+				'amount'      => '5.00',
+				'reason'      => 'Damaged item refund',
+				'api_refund'  => false,
+				'api_restock' => false,
+				'line_items'  => array(
+					array(
+						'id'           => $order_item->get_id(),
+						'quantity'     => 1,
+						'refund_total' => 5,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$created  = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$refund_id = $created['id'];
+		$this->assertIsInt( $refund_id );
+		$this->assertSame( '5.00', $created['amount'] );
+		$this->assertSame( 'Damaged item refund', $created['reason'] );
+		$this->assertCount( 1, $created['line_items'] );
+		$this->assertSame( $product->get_id(), $created['line_items'][0]['product_id'] );
+		$this->assertSame( '-5.00', $created['line_items'][0]['total'] );
+		$this->assertSame( $refund_id, current( wc_get_order( $order->get_id() )->get_refunds() )->get_id() );
+
+		$item_path = $collection . '/' . $refund_id;
+		$response  = $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $refund_id, $response->get_data()['id'] );
+		$this->assertSame( '5.00', $response->get_data()['amount'] );
+		$this->assertSame( 'Damaged item refund', $response->get_data()['reason'] );
+		$this->assertSame( $product->get_id(), $response->get_data()['line_items'][0]['product_id'] );
+
+		$links = $response->get_links();
+		$this->assertSame( rest_url( $item_path ), $links['self'][0]['href'] );
+		$this->assertSame( rest_url( $collection ), $links['collection'][0]['href'] );
+		$this->assertSame( rest_url( '/wc/v3/orders/' . $order->get_id() ), $links['up'][0]['href'] );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $collection ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( $refund_id ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		$request = new WP_REST_Request( 'DELETE', $item_path );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $refund_id, $response->get_data()['id'] );
+		$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) )->get_status() );
+		$this->assertFalse( wc_get_order( $refund_id ) );
+		$this->assertSame( array(), wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * Test if line, fees and shipping items are all included in refund response.
 	 */
 	public function test_items_response_fields() {
