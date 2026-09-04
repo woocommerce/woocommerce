@@ -668,4 +668,42 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->fail( 'Expected save_account_details() to redirect after a successful save.' );
 	}
+
+	/**
+	 * @testdox update_cart_action() ignores array-valued remove_coupon instead of fataling.
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 */
+	public function test_update_cart_action_ignores_array_remove_coupon(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'tenoff', array( 'coupon_amount' => 10 ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_discount( $coupon->get_code() );
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ) );
+
+		$_GET['remove_coupon']     = array( 'tenoff' );
+		$_REQUEST['remove_coupon'] = array( 'tenoff' );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'Array remove_coupon must not remove the coupon.' );
+	}
+
+	/**
+	 * @testdox update_cart_action() still removes the coupon for a string remove_coupon.
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 */
+	public function test_update_cart_action_removes_coupon_for_string_remove_coupon(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'tenoff', array( 'coupon_amount' => 10 ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_discount( $coupon->get_code() );
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ) );
+
+		$_GET['remove_coupon']     = $coupon->get_code();
+		$_REQUEST['remove_coupon'] = $coupon->get_code();
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertFalse( WC()->cart->has_discount( $coupon->get_code() ), 'String remove_coupon must remove the coupon.' );
+	}
 }
