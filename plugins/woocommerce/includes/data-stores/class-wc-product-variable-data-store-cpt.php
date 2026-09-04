@@ -873,7 +873,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param WC_Product $product       Parent variable product (unused, keeps the data store call convention).
+	 * @param WC_Product $product       Parent variable product, used for log context on a failed read.
 	 * @param int[]      $variation_ids Variation IDs to narrow, typically `WC_Product_Variable::get_children()`.
 	 * @return int[] Subset of `$variation_ids` that may be purchasable.
 	 */
@@ -893,8 +893,22 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$statuses = $wpdb->get_results( $wpdb->prepare( $status_query, ...$variation_ids ), ARRAY_A );
+		// last_error is reset per query, so capture it here or a clean second query would hide a failed first one.
+		$error = $wpdb->last_error;
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$meta = $wpdb->get_results( $wpdb->prepare( $meta_query, ...$variation_ids ), ARRAY_A );
+		$meta  = $wpdb->get_results( $wpdb->prepare( $meta_query, ...$variation_ids ), ARRAY_A );
+		$error = '' !== $error ? $error : $wpdb->last_error;
+
+		if ( '' !== $error ) {
+			wc_get_logger()->error(
+				'Failed to read stored state for purchasable variation candidates.',
+				array(
+					'source'     => 'product-variable-data-store',
+					'product_id' => $product->get_id(),
+					'error'      => $error,
+				)
+			);
+		}
 
 		$state = array();
 		foreach ( (array) $statuses as $row ) {

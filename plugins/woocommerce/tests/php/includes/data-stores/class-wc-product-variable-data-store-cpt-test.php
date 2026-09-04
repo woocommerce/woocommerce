@@ -2107,4 +2107,53 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertIsArray( get_post_meta( $variation_id, '_regular_price', true ), 'The cache path sees an array and defers the variation.' );
 		$this->assertSame( array(), $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) ), 'The query path must defer it too.' );
 	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates logs a failure from either read and still answers.
+	 *
+	 * @testWith [ "wp_posts" ]
+	 *           [ "wp_postmeta" ]
+	 *
+	 * @param string $table Table whose read is broken.
+	 */
+	public function test_get_purchasable_variation_candidates_logs_a_failed_read( string $table ): void {
+		$sut          = new WC_Product_Variable_Data_Store_CPT();
+		$variation_id = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+
+		$logger = new class() extends WC_Logger {
+			/**
+			 * Captured error messages.
+			 *
+			 * @var array
+			 */
+			public $errors = array();
+
+			/**
+			 * Records an error.
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function error( $message, $context = array() ) {
+				$this->errors[] = array( $message, $context );
+			}
+		};
+		add_filter( 'woocommerce_logging_class', fn() => $logger );
+
+		// Break only the read under test, so a clean sibling query cannot mask it.
+		add_filter(
+			'query',
+			function ( $query ) use ( $table ) {
+				return str_contains( $query, "FROM {$table} WHERE" ) ? str_replace( $table, $table . '_missing', $query ) : $query;
+			}
+		);
+
+		$suppress = $GLOBALS['wpdb']->suppress_errors( true );
+		$result   = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) );
+		$GLOBALS['wpdb']->suppress_errors( $suppress );
+
+		$this->assertCount( 1, $logger->errors, "A failed read of {$table} must be logged once." );
+		$this->assertSame( self::$product_id, $logger->errors[0][1]['product_id'] );
+		$this->assertSame( array(), $result, 'A failed read defers every variation rather than promoting it.' );
+	}
 }
