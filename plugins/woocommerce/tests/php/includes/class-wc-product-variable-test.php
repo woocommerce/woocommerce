@@ -676,4 +676,69 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( $product->has_purchasable_variations(), 'Only the filtered child list may be considered.' );
 	}
+
+	/**
+	 * @testdox has_purchasable_variations asks the data store for candidates only above the batch size, and once per request.
+	 */
+	public function test_has_purchasable_variations_uses_the_candidate_query_only_when_it_pays(): void {
+		$data_store = new class() extends WC_Product_Variable_Data_Store_CPT {
+			/**
+			 * How many times the candidate query was asked for.
+			 *
+			 * @var int
+			 */
+			public $calls = 0;
+
+			/**
+			 * Counts the call and defers to the real query.
+			 *
+			 * @param WC_Product_Variable $product       Parent product.
+			 * @param int[]               $variation_ids Children being scanned.
+			 * @return int[]
+			 */
+			public function get_purchasable_variation_candidates( $product, array $variation_ids ): array {
+				++$this->calls;
+				return parent::get_purchasable_variation_candidates( $product, $variation_ids );
+			}
+		};
+
+		// Registered before the fixtures exist: the product factory caches instances, so a product
+		// loaded earlier would keep the stock data store.
+		add_filter(
+			'woocommerce_data_stores',
+			static function ( $stores ) use ( $data_store ) {
+				$stores['product-variable'] = $data_store;
+				return $stores;
+			}
+		);
+
+		$spec        = array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' );
+		$at_batch    = $this->create_variable_product_with_variations( array_fill( 0, 50, $spec ) );
+		$above_batch = $this->create_variable_product_with_variations( array_fill( 0, 51, $spec ) );
+
+		$at_batch->has_purchasable_variations();
+		$this->assertSame( 0, $data_store->calls, 'A product within one batch is scanned from the primed caches alone.' );
+
+		$above_batch->has_purchasable_variations();
+		$this->assertSame( 1, $data_store->calls, 'A product above the batch size asks the data store for candidates.' );
+
+		$above_batch->has_purchasable_variations();
+		$this->assertSame( 1, $data_store->calls, 'Repeat calls in the same request reuse the memoised candidate list.' );
+
+		// Drop the memo so the next two calls really re-enter the branch.
+		wp_cache_flush();
+		$previous = wp_using_ext_object_cache( true );
+		try {
+			$above_batch->has_purchasable_variations();
+		} finally {
+			// Always restore. Cast to bool because wp_using_ext_object_cache( null ) is a
+			// no-op, which would otherwise leak the simulated true state into later tests.
+			wp_using_ext_object_cache( (bool) $previous );
+		}
+		$this->assertSame( 1, $data_store->calls, 'A persistent object cache makes priming cheap, so the candidate query is skipped.' );
+
+		wp_cache_flush();
+		$above_batch->has_purchasable_variations();
+		$this->assertSame( 2, $data_store->calls, 'Without the memo or a persistent object cache, the candidate query runs again.' );
+	}
 }
