@@ -203,9 +203,10 @@ const ValidatedTextInput = forwardRef<
 				inputRef.current?.ownerDocument?.activeElement !==
 					inputRef.current
 			) {
-				const formattedValue = customFormatter(
-					inputRef.current.value
-				);
+				const currentValue = rest.mask
+					? String( value )
+					: inputRef.current.value;
+				const formattedValue = customFormatter( currentValue );
 
 				if ( formattedValue !== value ) {
 					onChange( formattedValue );
@@ -213,7 +214,14 @@ const ValidatedTextInput = forwardRef<
 					validateInput( true );
 				}
 			}
-		}, [ validateInput, customFormatter, value, previousValue, onChange ] );
+		}, [
+			validateInput,
+			customFormatter,
+			value,
+			previousValue,
+			onChange,
+			rest.mask,
+		] );
 
 		/**
 		 * Validation on mount.

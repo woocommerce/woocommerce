@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Initial release: a small input mask engine that formats as the user types and reports the unmasked value.

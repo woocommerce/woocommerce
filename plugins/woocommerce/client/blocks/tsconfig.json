@@ -30,6 +30,9 @@
 			"path": "../../../../packages/js/email-editor"
 		},
 		{
+			"path": "../../../../packages/js/input-mask"
+		},
+		{
 			"path": "../../../../packages/js/sanitize"
 		},
 		{

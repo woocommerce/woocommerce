@@ -52,6 +52,8 @@ export interface Field {
 	placeholder?: string;
 	// Additional attributes added when registering a field. String in key is required for data attributes.
 	attributes?: Record< keyof CustomFieldAttributes, string >;
+	// Input mask, text fields only. Values are stored unmasked.
+	mask?: string;
 }
 
 /**

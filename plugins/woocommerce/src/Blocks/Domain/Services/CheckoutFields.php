@@ -212,6 +212,7 @@ class CheckoutFields {
 				'hidden'                     => false,
 				'required'                   => false,
 				'attributes'                 => [],
+				'mask'                       => '',
 				'show_in_order_confirmation' => true,
 				'sanitize_callback'          => array( $this, 'default_sanitize_callback' ),
 				'validate_callback'          => array( $this, 'default_validate_callback' ),
@@ -440,6 +441,12 @@ class CheckoutFields {
 				_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '8.6.0' );
 				return false;
 			}
+		}
+
+		if ( ! empty( $options['mask'] ) && ( ! is_string( $options['mask'] ) || 'text' !== ( $options['type'] ?? 'text' ) ) ) {
+			$message = sprintf( 'The mask for field "%s" must be a string on a text field. It will be ignored.', $id );
+			_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '11.2.0' );
+			unset( $options['mask'] );
 		}
 
 		if ( ! empty( $options['sanitize_callback'] ) && ! is_callable( $options['sanitize_callback'] ) ) {
@@ -1477,7 +1484,92 @@ class CheckoutFields {
 			$value   = isset( $options[ $value ] ) ? $options[ $value ] : $value;
 		}
 
+		if ( 'text' === $field['type'] && ! empty( $field['mask'] ) && is_scalar( $value ) ) {
+			$value = $this->apply_mask_to_value( (string) $value, $field['mask'] );
+		}
+
 		return $value;
+	}
+
+	/**
+	 * Formats a value against a mask, the same way the @woocommerce/input-mask JS package does.
+	 *
+	 * Returns the value formatted with the mask's literal characters when it fits the mask.
+	 * Returns the value unchanged when it does not fit.
+	 *
+	 * @param string $value Raw value to format.
+	 * @param string $mask  Mask pattern. Refer to docs.
+	 * @return string
+	 */
+	private function apply_mask_to_value( string $value, string $mask ): string {
+		$slot_patterns = array(
+			'0' => '/^[0-9]$/u',
+			'a' => '/^\p{L}$/u',
+			'*' => '/^.$/su',
+		);
+
+		$mask_chars = preg_split( '//u', $mask, -1, PREG_SPLIT_NO_EMPTY );
+		$mask_chars = false === $mask_chars ? array() : $mask_chars;
+		$tokens     = array();
+
+		for ( $i = 0, $count = count( $mask_chars ); $i < $count; $i++ ) {
+			if ( '\\' === $mask_chars[ $i ] && $i + 1 < $count ) {
+				$tokens[] = array(
+					'type'  => 'literal',
+					'value' => $mask_chars[ ++$i ],
+				);
+			} elseif ( isset( $slot_patterns[ $mask_chars[ $i ] ] ) ) {
+				$tokens[] = array(
+					'type'  => 'test',
+					'value' => $slot_patterns[ $mask_chars[ $i ] ],
+				);
+			} else {
+				$tokens[] = array(
+					'type'  => 'literal',
+					'value' => $mask_chars[ $i ],
+				);
+			}
+		}
+
+		$typed = preg_split( '//u', $value, -1, PREG_SPLIT_NO_EMPTY );
+		$typed = false === $typed ? array() : $typed;
+
+		$typed_length = count( $typed );
+		$display      = '';
+		$pending      = '';
+		$t            = 0;
+
+		foreach ( $tokens as $token ) {
+			if ( 'literal' === $token['type'] ) {
+				if ( isset( $typed[ $t ] ) && $typed[ $t ] === $token['value'] ) {
+					$display .= $pending . $token['value'];
+					$pending  = '';
+					++$t;
+				} else {
+					$pending .= $token['value'];
+				}
+				continue;
+			}
+
+			if ( $t >= $typed_length ) {
+				$pending = '';
+				break;
+			}
+
+			if ( ! preg_match( $token['value'], $typed[ $t ] ) ) {
+				return $value;
+			}
+
+			$display .= $pending . $typed[ $t ];
+			$pending  = '';
+			++$t;
+		}
+
+		if ( $t < $typed_length ) {
+			return $value;
+		}
+
+		return $display . $pending;
 	}
 
 	/**

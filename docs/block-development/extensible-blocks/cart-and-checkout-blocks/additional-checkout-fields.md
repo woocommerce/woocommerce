@@ -247,7 +247,23 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-Text fields don't have any additional options beyond the general options listed above.
+Text fields support an input `mask` that formats the value as the shopper types, and also format complaint values at render time (in emails, orders, and admin).
+
+The sytanx for a mask follow  a subset of `imask` syntax.
+
+| Option name | Description | Required? | Example | Default value |
+| --- | --- | --- | --- | --- |
+| `mask` | An input mask: `0` accepts a digit, `a` a letter, `*` any character, `\` escapes the next character. Any other character is a literal that the checkout shows but never stores. | No | `000.000.000-00` | No mask |
+
+Mask are only for formating and not for validation. As the shopper types, their input is matched against the mask partially (or fully). If the inputted value differs from the mask, the mask will be removed.
+
+To validate, use `validation` schema rules.
+
+##### Masks and other validation
+
+If your field uses `pattern` or `maxLength` attributes, then those must account for the mask literals.
+
+However, `validation` JSON schema, `validate_callback`, and `sanitize_callback` run against the raw value.
 
 #### Options for `select` fields
 

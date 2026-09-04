@@ -214,4 +214,123 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			__internal_woocommerce_blocks_deregister_checkout_field( 'test-namespace/early-field' );
 		}
 	}
+
+	/**
+	 * A mask on a text field is kept.
+	 */
+	public function test_mask_is_kept_on_text_field() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked',
+				'label'    => 'Masked',
+				'location' => 'order',
+				'mask'     => '000-000',
+			)
+		);
+
+		$this->assertSame( '000-000', $this->controller->get_additional_fields()['test-namespace/masked']['mask'] );
+	}
+
+	/**
+	 * A mask on a non-text field warns the developer and is dropped.
+	 */
+	public function test_mask_on_non_text_field_is_dropped() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked-checkbox',
+				'label'    => 'Masked checkbox',
+				'location' => 'order',
+				'type'     => 'checkbox',
+				'mask'     => '000-000',
+			)
+		);
+
+		$this->assertSame( '', $this->controller->get_additional_fields()['test-namespace/masked-checkbox']['mask'] );
+	}
+
+	/**
+	 * A mask that is not a string warns the developer and is dropped.
+	 */
+	public function test_non_string_mask_is_dropped() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'test-namespace/masked-array',
+				'label'    => 'Masked array',
+				'location' => 'order',
+				'mask'     => array( '000-000' ),
+			)
+		);
+
+		$this->assertSame( '', $this->controller->get_additional_fields()['test-namespace/masked-array']['mask'] );
+	}
+
+	/**
+	 * A value that fits the mask is displayed with the mask's literal characters filled in.
+	 *
+	 * @dataProvider provider_mask_values_that_fit
+	 *
+	 * @param string $mask     The mask to format the value with.
+	 * @param string $value    The raw value to format.
+	 * @param string $expected The expected formatted value.
+	 */
+	public function test_mask_formats_value_that_fits( string $mask, string $value, string $expected ) {
+		$field = array(
+			'type' => 'text',
+			'mask' => $mask,
+		);
+
+		$this->assertSame( $expected, $this->controller->format_additional_field_value( $value, $field ) );
+	}
+
+	/**
+	 * Data provider for test_mask_formats_value_that_fits.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_mask_values_that_fit(): array {
+		$phone = '+00 [000] (000) {000}';
+
+		return array(
+			'raw digits are formatted with the mask literals' => array( $phone, '34697745564', '+34 [697] (745) {564}' ),
+			'an already formatted value is left as is'     => array( $phone, '+34 [697] (745) {564}', '+34 [697] (745) {564}' ),
+			'a CPF number'                                 => array( '000.000.000-00', '12345678901', '123.456.789-01' ),
+			'a leading literal is filled in automatically' => array( '100', '2', '12' ),
+			'an escaped literal is filled in automatically' => array( '\\000', '12', '012' ),
+		);
+	}
+
+	/**
+	 * A value that does not fit the mask, or a field without a mask, is displayed unchanged.
+	 */
+	public function test_mask_leaves_value_unchanged_when_it_does_not_fit_or_is_absent() {
+		$field_with_mask = array(
+			'type' => 'text',
+			'mask' => '000-000',
+		);
+
+		$this->assertSame( 'not-digits', $this->controller->format_additional_field_value( 'not-digits', $field_with_mask ) );
+
+		$field_without_mask = array(
+			'type' => 'text',
+			'mask' => '',
+		);
+
+		$this->assertSame( '123456', $this->controller->format_additional_field_value( '123456', $field_without_mask ) );
+	}
+
+	/**
+	 * A non-string value, for example an integer returned by a sanitize callback, is formatted like a string.
+	 */
+	public function test_mask_formats_non_string_value() {
+		$field = array(
+			'type' => 'text',
+			'mask' => '000-000',
+		);
+
+		$this->assertSame( '123-456', $this->controller->format_additional_field_value( 123456, $field ) );
+	}
 }
