@@ -216,6 +216,12 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( 'small', $reloaded->get_meta( 'pa_size' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
+		$this->assertSame(
+			'small',
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY )['pa_size'] ?? '',
+			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
+		);
 	}
 
 	/**
@@ -279,6 +285,8 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'The deleted variation should not be restored.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
+		$this->assertSame( '', $reloaded->get_meta( 'pa_size' ), 'A demoted item is no longer a variation, so its attribute meta should go too.' );
+		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ), 'The provenance record should go with the attributes it tracked.' );
 	}
 
 	/**
