@@ -8,7 +8,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\Edit as OrderEdit;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -47,7 +46,6 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'add_meta_boxes', array( $this, 'rename_meta_boxes' ), 20 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 30 );
 		add_action( 'add_meta_boxes', array( $this, 'add_product_boxes_sort_order' ), 40 );
-		add_action( 'wp_insert_post', array( $this, 'handle_wp_insert_post' ), 10, 3 );
 		add_action( 'save_post', array( $this, 'save_meta_boxes' ), 1, 2 );
 
 		OrderEdit::add_save_meta_boxes();
@@ -205,30 +203,6 @@ class WC_Admin_Meta_Boxes {
 			remove_meta_box( 'commentsdiv', 'product', 'normal' );
 			add_meta_box( 'commentsdiv', __( 'Reviews', 'woocommerce' ), 'post_comment_meta_box', 'product', 'normal' );
 		}
-	}
-
-	/**
-	 * Save the store tax mode when WordPress creates an order auto-draft.
-	 *
-	 * @internal
-	 *
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post object.
-	 * @param bool    $update  Whether this is an existing post being updated.
-	 */
-	public function handle_wp_insert_post( $post_id, $post, $update ): void {
-		if (
-			$update ||
-			! $post instanceof WP_Post ||
-			OrderStatus::AUTO_DRAFT !== $post->post_status ||
-			! in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ), true ) ||
-			'post-new.php' !== ( $GLOBALS['pagenow'] ?? '' ) ||
-			OrderUtil::custom_orders_table_usage_is_enabled()
-		) {
-			return;
-		}
-
-		update_post_meta( $post_id, '_prices_include_tax', wc_bool_to_string( 'yes' === get_option( 'woocommerce_prices_include_tax' ) ) );
 	}
 
 	/**

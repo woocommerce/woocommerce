@@ -58108,12 +58108,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot access property \$action on WP_Screen\|null\.$#'
 			identifier: property.nonObject
 			count: 1

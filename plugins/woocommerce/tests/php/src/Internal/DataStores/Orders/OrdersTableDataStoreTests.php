@@ -2449,47 +2449,59 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testDox Generic order persistence keeps the historical false tax-mode default.
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default() {
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
 
-		$order = new WC_Order();
-		$this->switch_data_store( $order, $this->sut );
-		$order->save();
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
 
-		wp_cache_flush();
+			wp_cache_flush();
 
-		$r_order = new WC_Order();
-		$r_order->set_id( $order->get_id() );
-		$this->switch_data_store( $r_order, $this->sut );
-		$this->sut->read( $r_order );
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
 
-		$this->assertFalse(
-			$r_order->get_prices_include_tax(),
-			'Generic persistence should not derive the order value from the store setting.'
-		);
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'Generic persistence should not derive its value from the store setting.'
+			);
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**
 	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
 	 */
 	public function test_create_keeps_explicit_prices_include_tax_value() {
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
 
-		$order = new WC_Order();
-		$this->switch_data_store( $order, $this->sut );
-		$order->set_prices_include_tax( false );
-		$order->save();
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_prices_include_tax( false );
+			$order->save();
 
-		wp_cache_flush();
+			wp_cache_flush();
 
-		$r_order = new WC_Order();
-		$r_order->set_id( $order->get_id() );
-		$this->switch_data_store( $r_order, $this->sut );
-		$this->sut->read( $r_order );
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
 
-		$this->assertFalse(
-			$r_order->get_prices_include_tax(),
-			'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
-		);
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+			);
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**
@@ -2498,30 +2510,36 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_null_prices_include_tax_uses_false_default(): void {
 		global $wpdb;
 
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
 
-		$order = new WC_Order();
-		$this->switch_data_store( $order, $this->sut );
-		$order->save();
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
 
-		$operational_data_table = $this->sut::get_operational_data_table_name();
-		$wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$order->get_id()
-			)
-		);
-		wp_cache_flush();
+			$operational_data_table = $this->sut::get_operational_data_table_name();
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$order->get_id()
+				)
+			);
+			wp_cache_flush();
 
-		$read_order = new WC_Order();
-		$read_order->set_id( $order->get_id() );
-		$this->switch_data_store( $read_order, $this->sut );
-		$this->sut->read( $read_order );
+			$read_order = new WC_Order();
+			$read_order->set_id( $order->get_id() );
+			$this->switch_data_store( $read_order, $this->sut );
+			$this->sut->read( $read_order );
 
-		$this->assertFalse(
-			$read_order->get_prices_include_tax(),
-			'A null historical value should not derive its value from the current store setting.'
-		);
+			$this->assertFalse(
+				$read_order->get_prices_include_tax(),
+				'A null historical value should not derive its value from the current store setting.'
+			);
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**

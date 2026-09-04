@@ -812,18 +812,28 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An order with missing tax-mode metadata keeps the historical false default.
 	 */
 	public function test_reading_order_without_prices_include_tax_metadata_uses_false_default(): void {
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
 
-		$order = WC_Helper_Order::create_order();
-		delete_post_meta( $order->get_id(), '_prices_include_tax' );
-		wp_cache_flush();
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		$read_order = wc_get_order( $order->get_id() );
+			$order = WC_Helper_Order::create_order();
+			delete_post_meta( $order->get_id(), '_prices_include_tax' );
+			wp_cache_flush();
 
-		$this->assertFalse(
-			$read_order->get_prices_include_tax(),
-			'Missing historical metadata should not derive its value from the current store setting.'
-		);
+			$read_order = wc_get_order( $order->get_id() );
+
+			$this->assertFalse(
+				$read_order->get_prices_include_tax(),
+				'Missing historical metadata should not derive its value from the current store setting.'
+			);
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**

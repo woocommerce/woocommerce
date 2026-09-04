@@ -378,23 +378,13 @@ class PageController {
 
 		$this->verify_create_permission();
 
-		$order_class_name = wc_get_order_type( $this->order_type )['class_name'];
-		if ( ! $order_class_name || ! class_exists( $order_class_name ) || ! is_a( $order_class_name, \WC_Order::class, true ) ) {
+		$order = wc_get_container()->get( AdminOrderCreator::class )->create_order( $this->order_type );
+		if ( ! $order ) {
 			wp_die();
 		}
+		$this->order = $order;
 
-		$this->order = new $order_class_name();
-		$this->order->set_object_read( false );
-		$this->order->set_status( 'auto-draft' );
-		$this->order->set_created_via( 'admin' );
-		$this->order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$this->order->save();
 		$this->handle_edit_lock();
-
-		// Schedule auto-draft cleanup. We re-use the WP event here on purpose.
-		if ( ! wp_next_scheduled( 'wp_scheduled_auto_draft_delete' ) ) {
-			wp_schedule_event( time(), 'daily', 'wp_scheduled_auto_draft_delete' );
-		}
 
 		$theorder = $this->order;
 
