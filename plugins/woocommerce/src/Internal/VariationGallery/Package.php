@@ -89,17 +89,28 @@ class Package {
 	}
 
 	/**
-	 * Schedule the legacy variation gallery migration if it hasn't already
-	 * completed and isn't already pending or running.
+	 * Schedule the variation gallery update callbacks that haven't already
+	 * completed and aren't already pending or running.
 	 *
 	 * @internal
 	 */
 	public static function maybe_schedule_migration(): void {
-		if ( get_option( Migration::COMPLETED_OPTION ) ) {
+		self::maybe_schedule_update_callback( Migration::COMPLETED_OPTION, array( Migration::class, 'run' ) );
+		self::maybe_schedule_update_callback( InheritedImageCleanup::COMPLETED_OPTION, array( InheritedImageCleanup::class, 'run' ) );
+	}
+
+	/**
+	 * Schedule a batched update callback unless it has completed or is already queued.
+	 *
+	 * @param string             $completed_option Option name marking the callback as done.
+	 * @param array<int, string> $callback         Static callback passed to the update runner.
+	 */
+	private static function maybe_schedule_update_callback( string $completed_option, array $callback ): void {
+		if ( get_option( $completed_option ) ) {
 			return;
 		}
 
-		$args = array( 'update_callback' => array( Migration::class, 'run' ) );
+		$args = array( 'update_callback' => $callback );
 
 		if ( self::has_pending_or_running_migration( $args ) ) {
 			return;

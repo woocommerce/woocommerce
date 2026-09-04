@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\VariationGallery\InheritedImageCleanup as VariationGalleryInheritedImageCleanup;
 use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -333,11 +334,18 @@ class WC_Unit_Tests_Bootstrap {
 	 * bootstrap action pending leaks into unrelated tests of the shared DB update queue.
 	 */
 	public function cancel_variation_gallery_migration_action(): void {
-		WC()->queue()->cancel_all(
-			'woocommerce_run_update_callback',
-			array( 'update_callback' => array( VariationGalleryMigration::class, 'run' ) ),
-			'woocommerce-db-updates'
+		$callbacks = array(
+			array( VariationGalleryMigration::class, 'run' ),
+			array( VariationGalleryInheritedImageCleanup::class, 'run' ),
 		);
+
+		foreach ( $callbacks as $callback ) {
+			WC()->queue()->cancel_all(
+				'woocommerce_run_update_callback',
+				array( 'update_callback' => $callback ),
+				'woocommerce-db-updates'
+			);
+		}
 	}
 
 	/**
