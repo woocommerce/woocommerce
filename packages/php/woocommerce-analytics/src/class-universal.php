@@ -547,7 +547,7 @@ class Universal {
 		if ( is_search() ) {
 			global $wp_query;
 			$this->enqueue_event(
-				'search',
+				'search_performed',
 				array(
 					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,

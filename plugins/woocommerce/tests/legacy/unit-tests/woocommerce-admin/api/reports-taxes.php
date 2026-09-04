@@ -106,19 +106,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 1,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
@@ -314,41 +301,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 109.75 ); // Product + all taxes.
 		$order->save();
-
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 1,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 1,
-				'order_tax'    => 5,
-				'total_tax'    => 6,
-			)
-		);
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 2,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 0.5,
-				'order_tax'    => 2.5,
-				'total_tax'    => 3,
-			)
-		);
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 3,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 0.25,
-				'order_tax'    => 1,
-				'total_tax'    => 1.25,
-			)
-		);
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -573,54 +525,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_es_2->set_total( 100 ); // $25 x 4.
 		$order_es_2->save();
 		$order_es_2->calculate_totals( true );
-
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order->get_id(),
-				'tax_rate_id'  => 1,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_ca->get_id(),
-				'tax_rate_id'  => 2,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_es->get_id(),
-				'tax_rate_id'  => 3,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => $order_es_2->get_id(),
-				'tax_rate_id'  => 3,
-				'date_created' => gmdate( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 	}

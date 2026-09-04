@@ -244,6 +244,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->add_from_sql_params( $query_args, $order_status_filter );
 
 		$this->subquery->add_sql_clause( 'where', "AND itemmeta_rate_id.meta_value = {$order_tax_lookup_table}.tax_rate_id" );
+
+		/*
+		 * Narrow the rate match to the single tax line the row was written for. The rate id on its
+		 * own fans one lookup row out across every line of the order that shares it, which is how
+		 * an order carrying several lines on one rate id came to report the wrong tax.
+		 *
+		 * Rows recorded before the lookup held one row per tax order item sit at the column's zero
+		 * default and have no line to narrow to, so they go on matching the rate id alone, which is
+		 * how the report read them all along. OrderTaxLookupMigrator rebuilds them in the
+		 * background.
+		 */
+		$this->subquery->add_sql_clause( 'where', "AND ( {$order_tax_lookup_table}.order_item_id = 0 OR {$order_tax_lookup_table}.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id )" );
+
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
 			$this->subquery->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
@@ -371,7 +384,48 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Cache of lookup_is_keyed_by_order_item(). Only `true` sticks: the re-key can land while a
+	 * request runs (the "Verify base database tables" tool re-keys right before the tools list
+	 * re-renders), and a cached `false` would outlive it.
+	 *
+	 * @var bool|null
+	 */
+	private static $lookup_keyed_by_order_item = null;
+
+	/**
+	 * Whether the lookup's primary key includes the tax order item.
+	 *
+	 * The re-key in `WC_Install::create_tables()` can fail on a large store, and dbDelta adds the
+	 * `order_item_id` column either way. Writing a real tax order item id into a table still keyed
+	 * on (order_id, tax_rate_id) collapses the lines sharing a rate into one row that the report
+	 * then matches to a single line, which reads worse than it did before the column existed.
+	 *
+	 * `OrderTaxLookupMigrator` reads this too: a rebuild over such a table would write every row
+	 * back at zero while stepping the cursor past it, so it waits instead.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public static function lookup_is_keyed_by_order_item(): bool {
+		global $wpdb;
+
+		if ( true !== self::$lookup_keyed_by_order_item ) {
+			$table_name = self::get_db_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+			self::$lookup_keyed_by_order_item = (bool) $wpdb->get_var( "SHOW KEYS FROM `{$table_name}` WHERE Key_name = 'PRIMARY' AND Column_name = 'order_item_id'" );
+		}
+
+		return self::$lookup_keyed_by_order_item;
+	}
+
+	/**
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
+	 *
+	 * Writes one row per tax order item, in a single statement so that a write that does not land
+	 * rebuilds none of the order's tax lines rather than some of them, then drops the rows the
+	 * order held before and no longer carries.
 	 *
 	 * @param int $order_id Order ID.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
@@ -380,17 +434,60 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+
+		// An order with no creation date has nothing to date its lookup rows by, and
+		// `WC_Data::set_date_prop()` leaves the date null for a zero datetime, not only for a
+		// missing one. `OrdersScheduler::import()` leaves such an order out of the reports for the
+		// same reason.
+		if ( ! $order || ! $order->get_date_created( 'edit' ) ) {
 			return -1;
 		}
 
+		$table_name   = self::get_db_table_name();
+		$date_created = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
 		/**
 		 * Tax line items of the order.
 		 *
 		 * @var \WC_Order_Item_Tax[] $tax_items
 		 */
-		$tax_items   = $order->get_items( OrderItemType::TAX );
-		$num_updated = 0;
+		$tax_items     = $order->get_items( OrderItemType::TAX );
+		$keyed_by_item = self::lookup_is_keyed_by_order_item();
+
+		// Read the rows the order already holds, so that the prune below names the rows this sync
+		// found, the way the Products and Coupons stores do. Deleting everything outside the
+		// snapshot instead would let two syncs that read different tax lines delete each other's
+		// rows and leave the order with none.
+		$existing_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+				"SELECT tax_rate_id, order_item_id FROM {$table_name} WHERE order_id = %d",
+				$order->get_id()
+			),
+			ARRAY_A
+		);
+
+		// Nothing has been written yet, so the order keeps the rows it came in with. Carrying on
+		// would prune against an empty snapshot, which leaves every row the order no longer
+		// carries in place for the reports to go on counting.
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				"Could not read the analytics tax lookup rows of order {$order->get_id()}. The order keeps the rows it had and reports the way it did before.",
+				array( 'source' => 'wc-order-tax-lookup' )
+			);
+
+			return false;
+		}
+
+		$stale  = array();
+		$rows   = array();
+		$values = array();
+
+		foreach ( $existing_rows as $existing_row ) {
+			$stale[ $existing_row['tax_rate_id'] . '-' . $existing_row['order_item_id'] ] = array(
+				(int) $existing_row['tax_rate_id'],
+				(int) $existing_row['order_item_id'],
+			);
+		}
 
 		// Guard against the column not existing yet: wpdb::replace() with an unknown column
 		// fails whole, which would silently drop the order from the Taxes report.
@@ -429,36 +526,116 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		foreach ( $tax_items as $tax_item ) {
-			$data   = array(
-				'order_id'     => $order->get_id(),
-				'date_created' => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-				'tax_rate_id'  => $tax_item->get_rate_id(),
-				'shipping_tax' => $tax_item->get_shipping_tax_total(),
-				'order_tax'    => $tax_item->get_tax_total(),
-				'total_tax'    => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+			// Leaving the column at zero on a table the re-key never reached keeps the row in the
+			// shape the released report reads, rather than collapsing the order's tax lines into
+			// one row the report matches to a single line.
+			$order_item_id = $keyed_by_item ? $tax_item->get_id() : 0;
+			$tax_rate_id   = (int) $tax_item->get_rate_id();
+
+			// A row this sync is about to write is not stale. The key is the rate and the item
+			// together, so a line whose rate id has changed leaves behind the row it held before.
+			unset( $stale[ $tax_rate_id . '-' . $order_item_id ] );
+
+			array_push(
+				$values,
+				$order->get_id(),
+				$date_created,
+				$tax_rate_id,
+				$order_item_id,
+				$tax_item->get_shipping_tax_total(),
+				$tax_item->get_tax_total(),
+				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
 			);
-			$format = array( '%d', '%s', '%d', '%f', '%f', '%f' );
 
 			if ( $has_taxable_amount_column ) {
-				$data['taxable_amount'] = $taxable_amounts[ $tax_item->get_rate_id() ] ?? 0;
-				$format[]               = '%f';
+				// The bases are computed per rate and the report sums the column per rate, so
+				// when tax lines share a rate only the first row carries the rate's base. On an
+				// unkeyed table the lines collapse into one row and the last write wins, so
+				// there every write carries the base.
+				$values[] = $taxable_amounts[ $tax_rate_id ] ?? 0;
+				if ( $keyed_by_item ) {
+					unset( $taxable_amounts[ $tax_rate_id ] );
+				}
+				$rows[] = '(%d, %s, %d, %d, %f, %f, %f, %f)';
+			} else {
+				$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
+			}
+		}
+
+		// One statement for the whole order. Rebuilding only some of its lines would leave a row
+		// still on the order item column's zero default beside the rows written next to it, and
+		// that row stands in for every line of the order sharing its rate, so the reports would
+		// count those lines twice.
+		if ( $rows ) {
+			$columns = 'order_id, date_created, tax_rate_id, order_item_id, shipping_tax, order_tax, total_tax';
+			if ( $has_taxable_amount_column ) {
+				$columns .= ', taxable_amount';
 			}
 
-			$result = $wpdb->replace( self::get_db_table_name(), $data, $format );
+			$written = $wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the value placeholders are built above, one set per tax line.
+					"REPLACE INTO {$table_name} ({$columns}) VALUES " . implode( ', ', $rows ),
+					$values
+				)
+			);
 
+			if ( false === $written ) {
+				wc_get_logger()->error(
+					"Could not write the analytics tax lookup rows of order {$order->get_id()}. The order keeps the rows it had and reports the way it did before.",
+					array( 'source' => 'wc-order-tax-lookup' )
+				);
+
+				return false;
+			}
+		}
+
+		// Drop the rows the order came in with that it no longer carries, which includes the rows
+		// written before the order item column existed, since those sit at zero. Prune only once
+		// the writes have landed, so a write that did not land leaves the order with the rows it
+		// came in with.
+		if ( $stale ) {
+			$keys       = array();
+			$key_values = array( $order->get_id() );
+
+			foreach ( $stale as $stale_key ) {
+				$keys[] = '(%d, %d)';
+				array_push( $key_values, $stale_key[0], $stale_key[1] );
+			}
+
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the key placeholders are built above, one pair per stale row.
+					"DELETE FROM {$table_name} WHERE order_id = %d AND (tax_rate_id, order_item_id) IN (" . implode( ', ', $keys ) . ')',
+					$key_values
+				)
+			);
+
+			// A row the order no longer carries goes on being counted by the reports, so a prune
+			// that failed is not a sync that succeeded.
+			if ( false === $deleted ) {
+				wc_get_logger()->error(
+					"Could not drop the analytics tax lookup rows order {$order->get_id()} no longer carries. Its old rows stand beside the rows just written, so the reports count those tax lines twice until the order is synced again.",
+					array( 'source' => 'wc-order-tax-lookup' )
+				);
+
+				return false;
+			}
+		}
+
+		foreach ( $tax_items as $tax_item ) {
 			/**
 			 * Fires when tax's reports are updated.
 			 *
 			 * @param int $tax_rate_id Tax Rate ID.
 			 * @param int $order_id    Order ID.
+			 *
+			 * @since 4.0.0
 			 */
 			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
-
-			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
-			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
 		}
 
-		return ( count( $tax_items ) === $num_updated );
+		return true;
 	}
 
 	/**

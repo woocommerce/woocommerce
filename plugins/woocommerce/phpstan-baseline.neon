@@ -4231,12 +4231,6 @@ parameters:
 			path: includes/admin/importers/class-wc-tax-rate-importer.php
 
 		-
-			message: '#^Array has 2 duplicate keys with value ''Variant SKU'' \(''Variant SKU'', ''Variant SKU''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: includes/admin/importers/mappings/shopify.php
-
-		-
 			message: '#^Variable \$errors might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -24229,12 +24223,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
 
 		-
-			message: '#^Parameter \#1 \$commentarr of function wp_update_comment expects array, array\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
-
-		-
 			message: '#^Parameter \#1 \$data_object of method WP_REST_Controller\:\:update_additional_fields_for_object\(\) expects object, WP_Comment\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -43690,9 +43678,21 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/Controller.php
 
 		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_rate_id\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Admin/API/Reports/Taxes/DataStore.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_shipping_tax_total\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Admin/API/Reports/Taxes/DataStore.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_tax_total\(\)\.$#'
+			identifier: method.notFound
+			count: 2
 			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-

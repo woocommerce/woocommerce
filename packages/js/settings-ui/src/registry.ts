@@ -4,8 +4,8 @@
 import { warn } from './diagnostics';
 import type {
 	SettingsUIField,
+	SettingsEditControl,
 	SettingsExtensionRegistration,
-	SettingsFieldComponent,
 	SettingsFieldContext,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
@@ -181,7 +181,7 @@ export const __resetRegistry = () => {
 export const resolveFieldComponent = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
-): SettingsFieldComponent | undefined => {
+): SettingsEditControl | undefined => {
 	const componentName = field.component;
 	const component = componentName
 		? findInMatchingRegistrations(
@@ -210,25 +210,6 @@ export const resolveFieldComponent = (
 			field,
 			context,
 		} );
-	}
-
-	return undefined;
-};
-
-export const resolveFieldComponentForRendering = (
-	field: SettingsUIField,
-	context: SettingsFieldContext
-): SettingsFieldComponent | undefined => {
-	const component = resolveFieldComponent( field, context );
-
-	if ( component ) {
-		return component;
-	}
-
-	if ( field.component ) {
-		throw new Error(
-			`Component "${ field.component }" is not registered.`
-		);
 	}
 
 	return undefined;
@@ -287,10 +268,3 @@ export const resolveRegionComponent = (
 	} );
 	return undefined;
 };
-
-if ( typeof window !== 'undefined' ) {
-	window.wcSettingsUI = {
-		...( window.wcSettingsUI || {} ),
-		registerSettingsExtension,
-	};
-}
