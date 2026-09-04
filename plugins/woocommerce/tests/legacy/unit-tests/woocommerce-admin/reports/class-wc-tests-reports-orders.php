@@ -765,6 +765,8 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 	 * @testdox Should keep reporting a customer's only order as new after its date is moved past its refund.
 	 */
 	public function test_refund_is_not_treated_as_the_customers_first_order() {
+		global $wpdb;
+
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$simple_product = new WC_Product_Simple();
@@ -774,14 +776,23 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 		$order = $this->create_guest_order( $simple_product, 'guest-refund-first-order@example.org' );
 
-		wc_create_refund(
+		$refund = wc_create_refund(
 			array(
 				'amount'   => 25,
 				'order_id' => $order->get_id(),
 			)
 		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'returning_customer' => 1 ),
+			array( 'order_id' => $refund->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+		$this->assertSame( 1, $updated, 'The fixture should simulate a legacy non-null refund marker.' );
 
 		// Moving the order past its refund makes the refund the oldest row of the customer,
 		// which triggers the first order recalculation.

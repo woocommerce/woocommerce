@@ -1,5 +1,5 @@
 /*global wc_tokenization_form_params */
-( function( $ ) {
+jQuery( function( $ ) {
 
 	/**
 	 * WCTokenizationForm class.
@@ -105,12 +105,6 @@
 
 	/**
 	 * Initialize.
-	 *
-	 * Register the listener synchronously (outside jQuery(fn)) so it is bound before
-	 * any DOM-ready callback runs. With this script loaded in the footer with a
-	 * defer strategy, wc-credit-card-form-init is fired from another script's
-	 * DOM-ready callback and would otherwise be missed if we deferred registration
-	 * until our own DOM-ready callback ran later in the queue.
 	 */
 	$( document.body ).on( 'updated_checkout wc-credit-card-form-init', function() {
 		// Loop over gateways with saved payment methods
@@ -120,4 +114,4 @@
 			$( this ).wc_tokenization_form();
 		} );
 	} );
-} )( jQuery );
+} );
