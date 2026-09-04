@@ -164,6 +164,73 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests key monetary fields respect the dp request parameter when getting a single order.
+	 */
+	public function test_get_item_monetary_fields_respect_dp() {
+		wp_set_current_user( $this->user );
+
+		$order  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dp-coupon' );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( 5 );
+		$order->add_item( $shipping );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling fee' );
+		$fee->set_tax_status( ProductTaxStatus::NONE );
+		$fee->set_total( 3 );
+		$order->add_item( $fee );
+
+		$order->apply_coupon( $coupon );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() );
+		$request->set_param( 'dp', 5 );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$top_level_decimal_fields = array(
+			'discount_total',
+			'discount_tax',
+			'shipping_total',
+			'shipping_tax',
+			'cart_tax',
+			'total',
+			'total_tax',
+		);
+
+		foreach ( $top_level_decimal_fields as $field ) {
+			$this->assertMatchesRegularExpression( '/^-?\\d+\.\\d{5}$/', $data[ $field ], "Expected $field to use 5 decimal places" );
+		}
+
+		$line_item_decimal_fields = array(
+			'line_items'     => array( 'subtotal', 'subtotal_tax', 'total', 'total_tax' ),
+			'shipping_lines' => array( 'total', 'total_tax' ),
+			'fee_lines'      => array( 'total', 'total_tax' ),
+			'coupon_lines'   => array( 'discount', 'discount_tax' ),
+		);
+
+		foreach ( $line_item_decimal_fields as $line_type => $fields ) {
+			$this->assertNotEmpty( $data[ $line_type ], "Expected $line_type to contain at least one item" );
+
+			foreach ( $data[ $line_type ] as $item ) {
+				foreach ( $fields as $field ) {
+					$this->assertMatchesRegularExpression( '/^-?\\d+\.\\d{5}$/', $item[ $field ], "Expected $line_type.$field to use 5 decimal places" );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Tests getting a single order without the correct permissions.
 	 * @since 3.0.0
 	 */

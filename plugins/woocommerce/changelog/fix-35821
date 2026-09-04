@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix coupon line items not respecting the dp parameter in orders API and add tests.
