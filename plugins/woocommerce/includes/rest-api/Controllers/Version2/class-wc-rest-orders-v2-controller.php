@@ -966,9 +966,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
+		// Restoring the variation ID after set_product() is not enough. Handed the parent, set_product()
+		// takes its non-variation branch, which clears the item's variation attribute meta, and
+		// set_variation_id() puts back only the ID: the item ends up pointing at a variation whose
+		// attributes are gone. Leave the item alone instead and resynchronise just the props
+		// set_product() would have refreshed. A variation that no longer exists falls through to the
+		// demotion below, which is what should happen to it.
+		$preserve_variation = $restore_variation_id
+			&& $product_item
+			&& $product instanceof WC_Product
+			&& ! $product instanceof WC_Product_Variation
+			&& wc_get_product( $current_variation_id ) instanceof WC_Product_Variation;
+
 		if ( $product && $product !== $item->get_product() ) {
-			$item->set_product( $product );
-			if ( $restore_variation_id && $product_item ) {
+			if ( $preserve_variation ) {
+				$product_item->set_name( $product->get_name() );
+				$product_item->set_tax_class( $product->get_tax_class() );
+			} else {
+				$item->set_product( $product );
+			}
+			if ( $restore_variation_id && ! $preserve_variation && $product_item ) {
 				try {
 					$product_item->set_variation_id( $current_variation_id );
 				} catch ( WC_Data_Exception $e ) {

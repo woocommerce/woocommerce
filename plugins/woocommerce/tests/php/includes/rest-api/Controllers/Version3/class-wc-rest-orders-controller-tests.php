@@ -1250,6 +1250,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
 		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+		$this->assertSame( '', $reloaded->get_meta( 'color' ), 'A genuine product switch should still take the old variation attribute meta with it.' );
+		$this->assertSame( '', $reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ), 'The provenance record should go with the attributes it tracked.' );
 	}
 
 	/**
@@ -1293,6 +1295,12 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
+		$this->assertSame(
+			array( 'color' ),
+			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_KEYS_META_KEY ),
+			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
+		);
 	}
 
 	/**
@@ -1318,6 +1326,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the parent product ID.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 		$this->assertSame( 0, $response_item['variation_id'], 'The response should expose the demoted line item.' );
+		$this->assertSame( '', $reloaded->get_meta( 'color' ), 'A demoted item is no longer a variation, so its attribute meta should go too.' );
 	}
 
 	/**
@@ -1480,6 +1489,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should be synchronized with the parent product.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should be synchronized with the parent product.' );
+		$this->assertSame( '', $reloaded->get_meta( 'color' ), 'An explicit demotion should still take the variation attribute meta with it.' );
 	}
 
 	/**
