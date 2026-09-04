@@ -319,4 +319,24 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'payment_method_section_title', $rendered );
 	}
+
+	/**
+	 * @testdox 'generate_receipt' falls back to the line item name when the variation parent product was deleted.
+	 */
+	public function test_generate_receipt_falls_back_to_item_name_when_variation_parent_is_deleted() {
+		// Arrange - an order holding a variation item whose parent product no longer exists.
+		$parent    = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( current( $parent->get_children() ) );
+
+		$order = OrderHelper::create_order( 1, $variation );
+
+		$parent->delete( true );
+
+		// Act - rendering must not fatal on the dangling parent lookup.
+		$rendered = $this->render_receipt( $order );
+
+		// Assert - the line item name is used as the title fallback.
+		$item = current( $order->get_items() );
+		$this->assertStringContainsString( $item->get_name(), $rendered );
+	}
 }
