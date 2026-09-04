@@ -98,7 +98,7 @@
 		"@babel/preset-react": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.62.1",
 		"@storybook/addon-a11y": "10.5.10",
 		"@storybook/addon-docs": "10.5.10",
 		"@storybook/addon-links": "10.5.10",

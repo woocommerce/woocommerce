@@ -9,6 +9,7 @@ This is the documentation for the e2e testing setup based on Playwright and `wp-
 - [About the Environment](#test-environment)
 - [Guide for writing e2e tests](#writing-e2e-tests)
 - [Guide for using test reports](#test-reports)
+- [Blocks shard duration balancing](#blocks-shard-duration-balancing)
 - [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
@@ -279,6 +280,39 @@ the example above, you should be able to view the Allure report on localhost:389
 
 To know more about the `allure-playwright` integration, see
 their [GitHub documentation](https://github.com/allure-framework/allure-js/tree/master/packages/allure-playwright).
+
+## Blocks shard duration balancing
+
+Playwright's `--shard=N/10` splits by test **count**, in discovery order. The Blocks suite has a handful of slow editor specs that land together at the tail, so the last shard runs far longer than the rest while the others finish and idle. The job group cannot complete until the slowest shard does, so that shard is the critical path.
+
+`tests/e2e/reporters/blocks-duration-shard.ts` replaces that split for the Blocks project. It receives the discovered suite before sharding, packs whole spec files into the requested number of shards by recorded duration, excludes the files belonging to other shards, and calls `testRun.skipSharding()`. CI keeps passing a plain `--shard=N/10`; there is no custom flag and no second source of test discovery.
+
+The reporter only engages when `--shard` is set **and** the run's only non-dependency project is `blocks-chromium`. Every other project keeps Playwright's own sharding. Whole files stay together because the Blocks project runs with `fullyParallel: false` and a single worker.
+
+### The duration manifest
+
+Weights live in `tests/e2e/bin/blocks/block-test-durations.json`, generated from CTRF reports of past CI runs. A spec file the manifest has never seen is scheduled at a fallback weight rather than skipped, and a plan that would drop or duplicate a file fails the job instead of running a partial suite. If the manifest cannot be read at all, the reporter logs a warning and leaves Playwright's count-based sharding in place — that still runs every test, just less evenly.
+
+Recorded durations drift as tests change. Drift costs balance quality, not coverage: a manifest left untouched for six weeks still cut the critical path by about 42%, while a freshly generated one cut it by about 47%. The mechanism decays toward native sharding rather than toward failure.
+
+### Checking and refreshing
+
+```sh
+# Report how far the committed manifest has drifted from recent trunk runs.
+# Exits non-zero when the worst shard is off by more than the threshold.
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks:refresh-sharding-manifest --check
+
+# Regenerate the manifest from the three most recent successful trunk runs.
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks:refresh-sharding-manifest
+```
+
+Both modes download the `blocks-e2e-report-attempt-1` artifact with the `gh` CLI, so it must be installed and authenticated. CI artifacts are kept for seven days, so runs older than that no longer carry one.
+
+Useful flags: `--runs <n>` (default 3), `--threshold <percent>` (default 20, `--check` only), `--shards <n>` (default 10), `--repository <owner/name>`.
+
+To build a manifest from reports you already have on disk, use `test:e2e:blocks:generate-sharding-manifest` with `--run <id>=<directory>` instead.
+
+Nothing runs `--check` automatically. Where a drift signal should go — a scheduled job, a Slack message, an automated refresh PR, or nothing at all — is a CI-ownership decision, deliberately left open.
 
 ## Debugging tests
 

@@ -67,6 +67,9 @@ const reporter = [
 		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.ts`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
+	// Balances the Blocks shards by recorded duration. No-op for every other
+	// project and for runs without --shard.
+	[ `${ TESTS_ROOT_PATH }/reporters/blocks-duration-shard.ts` ],
 ];
 
 if ( process.env.CI ) {
