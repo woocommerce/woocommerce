@@ -132,6 +132,10 @@ jQuery( function ( $ ) {
 		init: function () {
 			$( document.body ).on( 'update_checkout', this.update_checkout );
 			$( document.body ).on( 'init_checkout', this.init_checkout );
+			$( document.body ).on(
+				'country_to_state_changing',
+				this.revalidate_postcode
+			);
 
 			// Payment methods
 			this.$checkout_form.on(
@@ -517,6 +521,64 @@ jQuery( function ( $ ) {
 				return false;
 			}
 		},
+		get_field_country: function ( $field ) {
+			var id = ( $field.attr( 'id' ) || '' ).replace( /postcode$/, '' );
+
+			return $( '#' + id + 'country' ).val() || '';
+		},
+		is_valid_postcode: function ( postcode, country ) {
+			var rules = wc_checkout_params.postcode_rules;
+
+			// A country with no rule is valid, matching the server.
+			if (
+				! rules ||
+				! Object.prototype.hasOwnProperty.call( rules, country )
+			) {
+				return true;
+			}
+
+			// Mirror WC_Validation::is_postcode(): only ASCII whitespace,
+			// letters, digits, and hyphens reach the country rule.
+			if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {
+				return false;
+			}
+
+			// Rules match a postcode with no spaces or hyphens, as on the server.
+			try {
+				return new RegExp( '^(?:' + rules[ country ] + ')$', 'i' ).test(
+					postcode.replace( /[\s-]/g, '' )
+				);
+			} catch ( err ) {
+				// The server ignores a rule it cannot compile.
+				return true;
+			}
+		},
+		show_field_error: function ( $field, $parent, message ) {
+			var descriptionId = ( $field.attr( 'id' ) || '' ) + '_description';
+
+			$parent.find( '.checkout-inline-error-message' ).remove();
+			$parent.append(
+				$( '<p></p>' )
+					.attr( 'id', descriptionId )
+					.addClass( 'checkout-inline-error-message' )
+					.text( message )
+			);
+			$field
+				.attr( 'aria-invalid', 'true' )
+				.attr( 'aria-describedby', descriptionId );
+		},
+		revalidate_postcode: function ( event, country, $wrapper ) {
+			if ( ! $wrapper ) {
+				return;
+			}
+
+			$wrapper
+				.find( '.validate-postcode input.input-text' )
+				.filter( function () {
+					return '' !== $( this ).val();
+				} )
+				.trigger( 'validate' );
+		},
 		validate_field: function ( e ) {
 			var $this = $( this ),
 				$parent = $this.closest( '.form-row' ),
@@ -524,6 +586,7 @@ jQuery( function ( $ ) {
 				validate_required = $parent.is( '.validate-required' ),
 				validate_email = $parent.is( '.validate-email' ),
 				validate_phone = $parent.is( '.validate-phone' ),
+				validate_postcode = $parent.is( '.validate-postcode' ),
 				pattern = '',
 				event_type = e.type;
 
@@ -534,7 +597,7 @@ jQuery( function ( $ ) {
 				$parent.find( '.checkout-inline-error-message' ).remove();
 				$parent.removeClass(
 					// eslint-disable-next-line max-len
-					'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone woocommerce-validated'
+					'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone woocommerce-invalid-postcode woocommerce-validated'
 				);
 			}
 
@@ -593,6 +656,27 @@ jQuery( function ( $ ) {
 					}
 				}
 
+				if ( validate_postcode && $this.val() ) {
+					if (
+						! wc_checkout_form.is_valid_postcode(
+							$this.val(),
+							wc_checkout_form.get_field_country( $this )
+						)
+					) {
+						$parent
+							.removeClass( 'woocommerce-validated' )
+							.addClass(
+								'woocommerce-invalid woocommerce-invalid-postcode'
+							);
+						wc_checkout_form.show_field_error(
+							$this,
+							$parent,
+							wc_checkout_params.i18n_postcode_error
+						);
+						validated = false;
+					}
+				}
+
 				if ( validated ) {
 					$this
 						.removeAttr( 'aria-invalid' )
@@ -600,9 +684,11 @@ jQuery( function ( $ ) {
 					$parent.find( '.checkout-inline-error-message' ).remove();
 					$parent
 						.removeClass(
-							'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone'
+							'woocommerce-invalid woocommerce-invalid-required-field ' +
+								'woocommerce-invalid-email woocommerce-invalid-phone ' +
+								'woocommerce-invalid-postcode'
 						)
-						.addClass( 'woocommerce-validated' ); // eslint-disable-line max-len
+						.addClass( 'woocommerce-validated' );
 				}
 			}
 		},
@@ -1108,25 +1194,14 @@ jQuery( function ( $ ) {
 		show_inline_errors: function ( $messages ) {
 			$messages.find( 'li[data-id]' ).each( function () {
 				const $this = $( this );
-				const dataId = $this.attr( 'data-id' );
-				const $field = $( '#' + dataId );
+				const $field = $( '#' + $this.attr( 'data-id' ) );
 
 				if ( $field.length === 1 ) {
-					const descriptionId = dataId + '_description';
-					const msg = $this.text().trim();
-					const $formRow = $field.closest( '.form-row' );
-
-					const errorMessage = document.createElement( 'p' );
-					errorMessage.id = descriptionId;
-					errorMessage.className = 'checkout-inline-error-message';
-					errorMessage.textContent = msg;
-
-					if ( $formRow && errorMessage.textContent.length > 0 ) {
-						$formRow.append( errorMessage );
-					}
-
-					$field.attr( 'aria-describedby', descriptionId );
-					$field.attr( 'aria-invalid', 'true' );
+					wc_checkout_form.show_field_error(
+						$field,
+						$field.closest( '.form-row' ),
+						$this.text().trim()
+					);
 				}
 			} );
 		},
