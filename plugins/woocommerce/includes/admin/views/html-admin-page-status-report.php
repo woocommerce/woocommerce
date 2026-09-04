@@ -74,6 +74,17 @@ if ( file_exists( $plugin_path ) ) {
 		</p>
 	</div>
 </div>
+<div class="notice notice-info inline" style="margin: 16px 0;">
+	<p>
+		<?php
+		printf(
+			/* translators: %s: link to Tools > Site Health */
+			esc_html__( 'WooCommerce now contributes health checks to WordPress Site Health. View them at %s.', 'woocommerce' ),
+			'<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html__( 'Tools › Site Health', 'woocommerce' ) . '</a>'
+		);
+		?>
+	</p>
+</div>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
