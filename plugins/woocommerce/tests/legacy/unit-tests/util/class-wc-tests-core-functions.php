@@ -793,6 +793,118 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_fix_rewrite_rules uses the filtered Shop page and any supplied Shop pages.
+	 */
+	public function test_wc_fix_rewrite_rules_uses_filtered_and_supplied_shop_pages(): void {
+		$shop_page_id         = wp_insert_post(
+			array(
+				'post_title'  => 'Shop',
+				'post_type'   => 'page',
+				'post_name'   => 'shop',
+				'post_status' => 'publish',
+			)
+		);
+		$child_page_id        = wp_insert_post(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_title'  => 'Collection',
+				'post_type'   => 'page',
+				'post_name'   => 'collection',
+				'post_status' => 'publish',
+			)
+		);
+		$translated_shop_id   = wp_insert_post(
+			array(
+				'post_title'  => 'Boutique',
+				'post_type'   => 'page',
+				'post_name'   => 'boutique',
+				'post_status' => 'publish',
+			)
+		);
+		$translated_child_id  = wp_insert_post(
+			array(
+				'post_parent' => $translated_shop_id,
+				'post_title'  => 'Collection FR',
+				'post_type'   => 'page',
+				'post_name'   => 'collection-fr',
+				'post_status' => 'publish',
+			)
+		);
+		$additional_shop_id   = wp_insert_post(
+			array(
+				'post_title'  => 'Tienda',
+				'post_type'   => 'page',
+				'post_name'   => 'tienda',
+				'post_status' => 'publish',
+			)
+		);
+		$additional_child_id  = wp_insert_post(
+			array(
+				'post_parent' => $additional_shop_id,
+				'post_title'  => 'Collection ES',
+				'post_type'   => 'page',
+				'post_name'   => 'collection-es',
+				'post_status' => 'publish',
+			)
+		);
+		$unrelated_child_id   = wp_insert_post(
+			array(
+				'post_parent' => 1,
+				'post_title'  => 'Unrelated child',
+				'post_type'   => 'page',
+				'post_name'   => 'unrelated-child',
+				'post_status' => 'publish',
+			)
+		);
+		$unrelated_child_rule = get_page_uri( $unrelated_child_id ) . '/?$';
+
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => 'shop/%product_cat%',
+				'use_verbose_page_rules' => true,
+			)
+		);
+
+		$translate_shop_page   = static fn() => $translated_shop_id;
+		$add_shop_page         = static function ( $shop_page_ids ) use ( $additional_shop_id ) {
+			$shop_page_ids[] = $additional_shop_id;
+
+			return $shop_page_ids;
+		};
+		$add_invalid_shop_page = static function ( $shop_page_ids ) {
+			$shop_page_ids[] = 'invalid';
+			$shop_page_ids[] = true;
+
+			return $shop_page_ids;
+		};
+		// Model a multilingual plugin hiding pages outside the current language from page queries.
+		$filter_by_current_language = static function ( $query ) {
+			if ( 'page' === $query->get( 'post_type' ) ) {
+				$query->set( 'post__in', array( 0 ) );
+			}
+		};
+		add_action( 'parse_query', $filter_by_current_language );
+		add_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+
+		$rules = wc_fix_rewrite_rules( array() );
+
+		// Without any Shop page, only IDs supplied through the filter remain, and invalid ones must be dropped.
+		delete_option( 'woocommerce_shop_page_id' );
+		remove_filter( 'woocommerce_get_shop_page_id', $translate_shop_page );
+		remove_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_shop_page );
+		add_filter( 'woocommerce_rewrite_rules_shop_page_ids', $add_invalid_shop_page );
+		$missing_shop_rules = wc_fix_rewrite_rules( array() );
+
+		$this->assertArrayNotHasKey( 'shop/collection/?$', $rules, 'A Shop page repointed through woocommerce_get_shop_page_id should not keep rules for the stored page.' );
+		$this->assertArrayHasKey( 'boutique/collection-fr/?$', $rules, 'Persisted rules should honor the filtered Shop page regardless of page query filters.' );
+		$this->assertArrayHasKey( 'tienda/collection-es/?$', $rules, 'Persisted rules should include descendants of additional translated Shop pages supplied by integrations.' );
+		$this->assertArrayNotHasKey( $unrelated_child_rule, $missing_shop_rules, 'Missing and invalid Shop page IDs should not be converted into page ID 1.' );
+	}
+
+	/**
 	 * Test hash_equals function.
 	 *
 	 * @return void

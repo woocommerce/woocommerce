@@ -1059,13 +1059,53 @@ function wc_fix_rewrite_rules( $rules ) {
 		return $rules;
 	}
 
-	$shop_page_id = wc_get_page_id( 'shop' );
-	if ( $shop_page_id ) {
-		$page_rewrite_rules = array();
-		$subpages           = wc_get_page_children( $shop_page_id );
+	/**
+	 * Filters the Shop page IDs used to generate subpage rewrite rules.
+	 *
+	 * The default is the Shop page resolved by wc_get_page_id(), which multilingual plugins translate for the
+	 * current request language. Multilingual integrations should add the IDs of every translated Shop page here
+	 * so persisted rewrite rules cover every language.
+	 *
+	 * @since 11.2.0
+	 * @param int[] $shop_page_ids Shop page IDs.
+	 */
+	$filtered_shop_page_ids = apply_filters( 'woocommerce_rewrite_rules_shop_page_ids', array( wc_get_page_id( 'shop' ) ) );
+	/**
+	 * Filter callbacks can return anything, so validate each value before use.
+	 *
+	 * @var mixed[] $shop_page_ids
+	 */
+	$shop_page_ids = (array) $filtered_shop_page_ids;
+	$shop_page_ids = array_filter(
+		$shop_page_ids,
+		static function ( $shop_page_id ) {
+			// Booleans pass FILTER_VALIDATE_INT, so they are rejected first.
+			if ( ! is_int( $shop_page_id ) && ! is_string( $shop_page_id ) ) {
+				return false;
+			}
 
+			return false !== filter_var(
+				$shop_page_id,
+				FILTER_VALIDATE_INT,
+				array( 'options' => array( 'min_range' => 1 ) )
+			);
+		}
+	);
+	$shop_page_ids = array_unique( array_map( 'absint', $shop_page_ids ) );
+
+	$page_rewrite_rules = array();
+
+	if ( $shop_page_ids ) {
+		global $wpdb;
+
+		// Read pages directly, like WP_Rewrite::page_uri_index(), so multilingual query filters cannot hide the
+		// descendants of a Shop page in another language from the persisted rules.
+		$pages = $wpdb->get_results( "SELECT ID, post_name, post_parent FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status NOT IN ( 'auto-draft', 'trash' )" );
+	}
+
+	foreach ( $shop_page_ids as $shop_page_id ) {
 		// Subpage rules.
-		foreach ( $subpages as $subpage ) {
+		foreach ( wp_list_pluck( get_page_children( $shop_page_id, $pages ), 'ID' ) as $subpage ) {
 			$uri                                = get_page_uri( $subpage );
 			$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
 			$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );
@@ -1074,10 +1114,10 @@ function wc_fix_rewrite_rules( $rules ) {
 			}
 			$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
 		}
-
-		// Merge with rules.
-		$rules = array_merge( $page_rewrite_rules, $rules );
 	}
+
+	// Merge with rules.
+	$rules = array_merge( $page_rewrite_rules, $rules );
 
 	return $rules;
 }
