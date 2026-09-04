@@ -34,6 +34,13 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	private $country_filter_calls = 0;
 
 	/**
+	 * Number of empty geographical filter calls keyed by filter name.
+	 *
+	 * @var array<string, int>
+	 */
+	private $empty_geographical_filter_calls = array();
+
+	/**
 	 * Whether the states global existed before the test.
 	 *
 	 * @var bool
@@ -93,6 +100,27 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	public function record_country_filter_call( $countries ) {
 		++$this->country_filter_calls;
 		return $countries;
+	}
+
+	/**
+	 * Return empty geographical data and record the filter call.
+	 *
+	 * @internal
+	 *
+	 * @param array $data Geographical data.
+	 * @return array
+	 */
+	public function filter_empty_geographical_data( $data ) {
+		unset( $data );
+
+		$filter = current_filter();
+
+		if ( ! isset( $this->empty_geographical_filter_calls[ $filter ] ) ) {
+			$this->empty_geographical_filter_calls[ $filter ] = 0;
+		}
+
+		++$this->empty_geographical_filter_calls[ $filter ];
+		return array();
 	}
 
 	/**
@@ -165,15 +193,19 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'locale', array( $this, 'filter_stateful_locale' ) );
 		remove_filter( 'woocommerce_countries', array( $this, 'filter_country_names' ) );
 		remove_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
+		remove_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
 		remove_filter( 'woocommerce_states', array( $this, 'filter_state_names' ) );
+		remove_filter( 'woocommerce_states', array( $this, 'filter_empty_geographical_data' ) );
 		remove_filter( 'woocommerce_continents', array( $this, 'filter_continent_names' ) );
+		remove_filter( 'woocommerce_continents', array( $this, 'filter_empty_geographical_data' ) );
 		remove_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
 		remove_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
 
-		$this->active_locale             = 'en_US';
-		$this->geographical_filter_calls = array();
-		$this->locale_filter_calls       = 0;
-		$this->country_filter_calls      = 0;
+		$this->active_locale                   = 'en_US';
+		$this->geographical_filter_calls       = array();
+		$this->locale_filter_calls             = 0;
+		$this->country_filter_calls            = 0;
+		$this->empty_geographical_filter_calls = array();
 
 		parent::tearDown();
 	}
@@ -251,6 +283,32 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 2, $this->locale_filter_calls, 'Each country cache lookup should read the active locale once.' );
 		$this->assertSame( 1, $this->country_filter_calls, 'The normalized fallback locale should reuse its country cache.' );
+	}
+
+	/**
+	 * @testdox Empty filtered geographical data preserves existing cache semantics.
+	 */
+	public function test_empty_filtered_geographical_data_preserves_existing_cache_semantics(): void {
+		add_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
+		add_filter( 'woocommerce_states', array( $this, 'filter_empty_geographical_data' ) );
+		add_filter( 'woocommerce_continents', array( $this, 'filter_empty_geographical_data' ) );
+		$sut = new WC_Countries();
+
+		$this->assertSame( array(), $sut->get_countries(), 'Countries should allow an empty filtered result.' );
+		$this->assertSame( array(), $sut->get_countries(), 'Countries should allow a repeated empty filtered result.' );
+		$this->assertSame( array(), $sut->get_states(), 'States should allow an empty filtered result.' );
+		$this->assertSame( array(), $sut->get_states(), 'States should reuse an empty filtered result.' );
+		$this->assertSame( array(), $sut->get_continents(), 'Continents should allow an empty filtered result.' );
+		$this->assertSame( array(), $sut->get_continents(), 'Continents should allow a repeated empty filtered result.' );
+		$this->assertSame(
+			array(
+				'woocommerce_countries'  => 2,
+				'woocommerce_states'     => 1,
+				'woocommerce_continents' => 2,
+			),
+			$this->empty_geographical_filter_calls,
+			'Countries and continents should reload empty results while states cache them.'
+		);
 	}
 
 	/**
@@ -361,6 +419,9 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $locale, $sut->get_allowed_countries()['US'], 'Allowed countries should use the active locale.' );
 		$this->assertSame( $locale, $sut->get_shipping_countries()['US'], 'Shipping countries should use the active locale.' );
 		$this->assertSame( $locale, $sut->get_states( 'US' )['CA'], 'States should use the active locale.' );
+		$this->assertSame( $locale, $sut->get_allowed_country_states()['US']['CA'], 'Allowed states should use the active locale.' );
+		$this->assertSame( $locale, $sut->get_shipping_country_states()['US']['CA'], 'Shipping states should use the active locale.' );
 		$this->assertSame( $locale, $sut->get_continents()['NA']['name'], 'Continents should use the active locale.' );
+		$this->assertSame( $locale, $sut->get_shipping_continents()['NA']['name'], 'Shipping continents should use the active locale.' );
 	}
 }
