@@ -3,17 +3,25 @@
  */
 
 describe( 'createCheckoutPlaceOrderApi', () => {
+	let $allNotices;
+	let $checkoutFields;
 	let $form;
 	let $termsCheckbox;
 	let $termsRow;
+	let $updateOrderReviewNotices;
 	let capturedApi;
+	let capturedAjaxOptions;
+	let jQueryMock;
+	let mockBody;
 	// Set the number of invalid `.form-row` elements that are hidden (e.g. the
 	// collapsed "Ship to a different address?" shipping fields). These must never
 	// block submission, so `validate()` should only count visible invalid fields.
 	let setHiddenInvalidCount;
 
 	beforeEach( () => {
+		jest.useFakeTimers();
 		capturedApi = null;
+		capturedAjaxOptions = null;
 		let hiddenInvalidCount = 0;
 		setHiddenInvalidCount = ( count ) => {
 			hiddenInvalidCount = count;
@@ -60,6 +68,16 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			termsChecked = checked;
 		};
 
+		$checkoutFields = {
+			trigger: jest.fn( () => $checkoutFields ),
+		};
+		$allNotices = {
+			remove: jest.fn(),
+		};
+		$updateOrderReviewNotices = {
+			remove: jest.fn(),
+		};
+
 		$form = {
 			length: 1,
 			find: jest.fn( ( selector ) => {
@@ -67,7 +85,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 					return $termsCheckbox;
 				}
 				if ( selector === '.input-text, select, input:checkbox' ) {
-					return { trigger: jest.fn() };
+					return $checkoutFields;
 				}
 				if ( selector === '.woocommerce-invalid:visible' ) {
 					// Visible invalid fields only (e.g. the terms row). Hidden
@@ -101,6 +119,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				}
 				return { length: 0, trigger: jest.fn() };
 			} ),
+			prepend: jest.fn(),
+			serialize: jest.fn( () => '' ),
 			trigger: jest.fn(),
 		};
 
@@ -164,7 +184,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		// Simple event system for document.body to enable event-based API capture
 		const bodyEventHandlers = {};
-		const mockBody = {
+		mockBody = {
 			on: jest.fn( ( event, handler ) => {
 				if ( ! bodyEventHandlers[ event ] ) {
 					bodyEventHandlers[ event ] = [];
@@ -181,7 +201,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		};
 
 		// Mock jQuery - needs to handle document ready pattern: jQuery(function($) { ... })
-		const jQueryMock = jest.fn( ( selectorOrCallback ) => {
+		jQueryMock = jest.fn( ( selectorOrCallback ) => {
 			// Handle document ready: jQuery(function($) { ... })
 			if ( typeof selectorOrCallback === 'function' ) {
 				// Execute immediately with jQuery mock as argument
@@ -190,6 +210,21 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			}
 			if ( selectorOrCallback === 'form.checkout' ) {
 				return $form;
+			}
+			if ( selectorOrCallback === $form ) {
+				return $form;
+			}
+			if (
+				selectorOrCallback ===
+				'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
+			) {
+				return $allNotices;
+			}
+			if (
+				selectorOrCallback ===
+				'.woocommerce-NoticeGroup-updateOrderReview'
+			) {
+				return $updateOrderReviewNotices;
 			}
 			if ( selectorOrCallback === '#order_review' ) {
 				return { length: 0, on: jest.fn(), attr: jest.fn(), find: jest.fn( () => ( { length: 0, val: jest.fn() } ) ) };
@@ -204,6 +239,14 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			return createDefaultMock();
 		} );
 		jQueryMock.blockUI = { defaults: { overlayCSS: {} } };
+		jQueryMock.ajax = jest.fn( ( options ) => {
+			capturedAjaxOptions = options;
+			return { abort: jest.fn() };
+		} );
+		jQueryMock.isEmptyObject = jest.fn( ( value ) => {
+			return Object.keys( value ).length === 0;
+		} );
+		jQueryMock.scroll_to_notices = jest.fn();
 
 		global.window.jQuery = jQueryMock;
 		global.window.$ = jQueryMock;
@@ -212,6 +255,10 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		global.window.wc_checkout_params = {
 			gateways_with_custom_place_order_button: [ 'test-gateway' ],
+			is_checkout: '0',
+			option_guest_checkout: 'no',
+			update_order_review_nonce: 'nonce',
+			wc_ajax_url: '/?wc-ajax=%%endpoint%%',
 		};
 
 		global.window.wc = {
@@ -235,6 +282,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	} );
 
 	afterEach( () => {
+		jest.clearAllTimers();
+		jest.useRealTimers();
 		jest.clearAllMocks();
 	} );
 
@@ -319,6 +368,70 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'.woocommerce-invalid:visible'
 			);
 			expect( $form.find ).not.toHaveBeenCalledWith( '.woocommerce-invalid' );
+		} );
+	} );
+
+	describe( 'Checkout update notices', () => {
+		const sendCheckoutUpdateResponse = ( response ) => {
+			mockBody.trigger( 'update_checkout', [
+				{ update_shipping_method: false },
+			] );
+			jest.runOnlyPendingTimers();
+			expect( capturedAjaxOptions ).not.toBeNull();
+
+			capturedAjaxOptions.success( response );
+		};
+
+		test( 'should render successful notices without validating checkout fields', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				messages:
+					'<div class="woocommerce-message">Coupon applied.</div>',
+			} );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'woocommerce-NoticeGroup-updateOrderReview'
+				)
+			);
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Coupon applied.' )
+			);
+			expect( $updateOrderReviewNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should preserve failure notice replacement and field validation', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				messages:
+					'<ul class="woocommerce-error"><li>Invalid address.</li></ul>',
+			} );
+
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Invalid address.' )
+			);
+			expect( $allNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				1,
+				'validate'
+			);
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				2,
+				'blur'
+			);
+		} );
+
+		test( 'should leave notices and fields unchanged for message-free success', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				messages: '',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
 		} );
 	} );
 } );
