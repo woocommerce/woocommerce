@@ -455,7 +455,7 @@ describe( 'FormattedMonetaryAmount', () => {
 			// to the symbol via the `woocommerce_currency_symbol` filter. The
 			// mark is not whitespace, so it survives the spacing split as part
 			// of the symbol and lands inside the isolate, where it is inert.
-			const lrm = '\\u200e';
+			const lrm = '\u200e';
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
