@@ -17,7 +17,6 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	let setHiddenInvalidCount;
 
 	beforeEach( () => {
-		jest.useFakeTimers();
 		capturedApi = null;
 		capturedAjaxRequests = [];
 		serializedCheckoutData =
@@ -309,8 +308,6 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	} );
 
 	afterEach( () => {
-		jest.clearAllTimers();
-		jest.useRealTimers();
 		jest.clearAllMocks();
 	} );
 
@@ -399,6 +396,15 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	} );
 
 	describe( 'Checkout form serialization', () => {
+		beforeEach( () => {
+			jest.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			jest.clearAllTimers();
+			jest.useRealTimers();
+		} );
+
 		const expectedSerializedData =
 			'billing_email=shopper%27o%40example.test' +
 			'&company=Rock+%26+Roll' +
