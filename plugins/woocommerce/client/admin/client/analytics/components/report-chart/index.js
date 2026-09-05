@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
@@ -33,6 +32,7 @@ import {
 	createDateFormatter,
 	buildChartData,
 } from './utils';
+import { getEmptyMessage, hasEmptySearchResults } from '../utils';
 
 /**
  * Component that renders the chart in reports.
@@ -125,11 +125,12 @@ export class ReportChart extends Component {
 
 	renderChart( mode, isRequesting, chartData, legendTotals ) {
 		const {
-			emptySearchResults,
+			endpoint,
 			filterParam,
 			interactiveLegend,
 			itemsLabel,
 			legendPosition,
+			limitProperties,
 			path,
 			query,
 			selectedChart,
@@ -147,9 +148,10 @@ export class ReportChart extends Component {
 			primaryData.data.intervals.length,
 			{ type: 'php' }
 		);
-		const emptyMessage = emptySearchResults
-			? __( 'No data for the current search', 'woocommerce' )
-			: __( 'No data for the selected date range', 'woocommerce' );
+		const emptyMessage = getEmptyMessage(
+			query,
+			limitProperties || [ endpoint ]
+		);
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return (
 			<Chart
@@ -358,15 +360,9 @@ export default compose(
 			return newProps;
 		}
 
-		const hasLimitByParam = limitBy.some(
-			( item ) => query[ item ] && query[ item ].length
-		);
-
-		if ( query.search && ! hasLimitByParam ) {
-			return {
-				...newProps,
-				emptySearchResults: true,
-			};
+		// Nothing matched, so skip the request and let the chart render its empty state.
+		if ( hasEmptySearchResults( query, limitBy ) ) {
+			return newProps;
 		}
 
 		const reportStoreSelector = select( reportsStore );

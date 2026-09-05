@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
@@ -564,6 +565,8 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			$variation = is_array( $values['variation'] ?? null ) ? $values['variation'] : array();
+
 			/**
 			 * Filter hook to get initial item object.
 			 *
@@ -576,7 +579,7 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
+					'variation'    => $variation,
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
@@ -590,7 +593,7 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'name'         => $product->get_name(),
+						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,

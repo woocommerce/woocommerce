@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add REST taxes controller tests covering tax class and tax rate CRUD and batch lifecycles against persisted state.
