@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Send the tk_ai visitor cookie on inbound cross-site navigations by relaxing it from SameSite=Strict to Lax, so the server can see a returning visitor on the first request after an ad or link click.
