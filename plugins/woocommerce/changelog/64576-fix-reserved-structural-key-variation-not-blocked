@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block custom attribute names using the key "variation" when saving a product, grandfathering products that already use it.

@@ -899,6 +899,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$attributes[] = $attribute_object;
 				}
 			}
+			$reserved_names_error = $this->check_for_reserved_attribute_names( $attributes, $product );
+			if ( is_wp_error( $reserved_names_error ) ) {
+				return $reserved_names_error;
+			}
 			$product->set_attributes( $attributes );
 		}
 
