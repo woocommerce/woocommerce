@@ -1042,4 +1042,87 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 0.25, 0.25, 6.0, 6.0 ), $amounts, 'No line should be counted twice or lost.' );
 		$this->assertSame( 12.5, array_sum( $amounts ), 'The report should add up to the tax both orders carry.' );
 	}
+
+	/**
+	 * Write a lookup row the way code outside WooCommerce did while the table was keyed on
+	 * (order_id, tax_rate_id). Such a write now lands on the tax order item column's zero default
+	 * instead of replacing the rows WooCommerce holds for the order.
+	 *
+	 * @param int   $order_id  Order id.
+	 * @param int   $rate_id   Tax rate id.
+	 * @param float $total_tax Tax the row carries.
+	 */
+	private function write_lookup_row_on_the_released_key( int $order_id, int $rate_id, float $total_tax ): void {
+		global $wpdb;
+
+		$wpdb->replace(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order_id,
+				'tax_rate_id'  => $rate_id,
+				'date_created' => '2023-02-10 10:00:00',
+				'shipping_tax' => 0,
+				'order_tax'    => $total_tax,
+				'total_tax'    => $total_tax,
+			),
+			array( '%d', '%d', '%s', '%f', '%f', '%f' )
+		);
+
+		ReportsCache::invalidate();
+	}
+
+	/**
+	 * @testdox Taxes report leaves out a lookup row written on the released (order_id, tax_rate_id) key beside the rows the order already holds.
+	 */
+	public function test_taxes_report_leaves_out_a_lookup_row_written_on_the_released_key(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$this->write_lookup_row_on_the_released_key( $order->get_id(), 101, 6.0 );
+
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
+
+		$amounts = array_column( $data->data, 'total_tax' );
+		sort( $amounts );
+		$this->assertSame( array( 0.25, 6.0 ), $amounts, 'The order should report the tax it carries, not that tax plus the row left standing beside it.' );
+	}
+
+	/**
+	 * @testdox Taxes stats leave out a lookup row written on the released (order_id, tax_rate_id) key beside the rows the order already holds.
+	 */
+	public function test_taxes_stats_leave_out_a_lookup_row_written_on_the_released_key(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$this->write_lookup_row_on_the_released_key( $order->get_id(), 101, 6.0 );
+
+		$sut  = new StatsDataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' ) );
+
+		$this->assertSame( 6.25, $data->totals->total_tax, 'The stats total should match the tax the order carries.' );
+	}
+
+	/**
+	 * @testdox Taxes stats still count rows written before the lookup was keyed by tax order item.
+	 */
+	public function test_taxes_stats_read_rows_written_before_the_grain_change(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// Nothing has replaced these rows, so leaving them out would drop the order's tax from the
+		// report until the rebuild has been through it.
+		$this->unmigrate_lookup_rows( $order->get_id() );
+
+		$sut  = new StatsDataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' ) );
+
+		$this->assertSame( 6.25, $data->totals->total_tax, 'Rows waiting on the rebuild should still be counted.' );
+	}
 }
