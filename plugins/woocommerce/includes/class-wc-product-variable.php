@@ -388,7 +388,29 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
+	 * Number of likely-purchasable variations primed and scanned before the rest of the children.
+	 *
+	 * @var int
+	 */
+	private const PURCHASABLE_SCAN_BATCH_SIZE = 50;
+
+	/**
+	 * Request-scoped cache group holding the scan order for a product's children.
+	 *
+	 * @var string
+	 */
+	private const PURCHASABLE_SCAN_CACHE_GROUP = 'wc_purchasable_scan_order';
+
+	/**
 	 * Check if there are variations that can be purchased for the current product.
+	 *
+	 * The children most likely to be purchasable on stored data (published, not out of stock, priced) are
+	 * primed and checked first, so a product that has a purchasable variation usually hydrates one instead
+	 * of all of them. With a bulk read, each batch is primed just before it is scanned, so nothing the scan
+	 * does not reach is primed. Without one, all children are primed up front and then classified and tested
+	 * in the same pass, so a product whose first child is purchasable reads one child's stored state rather
+	 * than every child's. Every variation is still evaluated with is_purchasable() and is_in_stock() before
+	 * returning false, so filters and overrides that widen purchasability keep working.
 	 *
 	 * @internal
 	 *
@@ -403,22 +425,162 @@ class WC_Product_Variable extends WC_Product {
 		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
 		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
 		 */
-		$has_purchasable_variations = false;
-		$variation_ids              = $this->get_children();
-		if ( ! empty( $variation_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $variation_ids );
+		$variation_ids = array_values( array_unique( array_map( 'intval', (array) $this->get_children() ) ) );
+		if ( empty( $variation_ids ) ) {
+			return false;
+		}
 
-			foreach ( $variation_ids as $variation_id ) {
-				$variation = wc_get_product( $variation_id );
-				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
-					$has_purchasable_variations = true;
-					break;
-				}
+		$candidate_ids = $this->get_stored_state_candidates( $variation_ids );
+
+		return null === $candidate_ids
+			? $this->scan_from_primed_caches( $variation_ids )
+			: $this->scan_candidate_batches( $variation_ids, $candidate_ids );
+	}
+
+	/**
+	 * Scan children with no bulk read available, reading stored state from the primed caches.
+	 *
+	 * Everything is primed up front here, so batching would buy nothing and each child is classified and
+	 * tested in one pass instead. That keeps an early hit at one stored-state read: materialising the whole
+	 * partition first would read every child's state to answer a question the first child already answers.
+	 *
+	 * @param int[] $variation_ids All children, cast to int, in children order.
+	 * @return bool
+	 */
+	private function scan_from_primed_caches( array $variation_ids ): bool {
+		// Prime caches to reduce future queries.
+		_prime_post_caches( $variation_ids );
+
+		$deferred_ids = array();
+		foreach ( $variation_ids as $variation_id ) {
+			if ( ! $this->variation_may_be_purchasable( $variation_id ) ) {
+				$deferred_ids[] = $variation_id;
+				continue;
+			}
+
+			if ( $this->variation_is_purchasable( $variation_id ) ) {
+				return true;
 			}
 		}
 
-		return $has_purchasable_variations;
+		return $this->any_variation_is_purchasable( $deferred_ids );
+	}
+
+	/**
+	 * Scan the candidates a bulk read identified, in batches, then everything it left out.
+	 *
+	 * @param int[] $variation_ids All children, cast to int, in children order.
+	 * @param int[] $candidate_ids Children whose stored state leaves room for a purchase, in children order.
+	 * @return bool
+	 */
+	private function scan_candidate_batches( array $variation_ids, array $candidate_ids ): bool {
+		$deferred_ids = array_keys( array_diff_key( array_flip( $variation_ids ), array_flip( $candidate_ids ) ) );
+
+		foreach (
+			array(
+				array_slice( $candidate_ids, 0, self::PURCHASABLE_SCAN_BATCH_SIZE ),
+				array_slice( $candidate_ids, self::PURCHASABLE_SCAN_BATCH_SIZE ),
+				$deferred_ids,
+			) as $batch
+		) {
+			if ( empty( $batch ) ) {
+				continue;
+			}
+
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $batch );
+
+			if ( $this->any_variation_is_purchasable( $batch ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Ask the data store which children could be purchasable, judged on stored data alone.
+	 *
+	 * @param int[] $variation_ids All children, cast to int, in children order.
+	 * @return int[]|null Candidate IDs, or null when no bulk read is available or worthwhile.
+	 */
+	private function get_stored_state_candidates( array $variation_ids ): ?array {
+		if ( count( $variation_ids ) <= self::PURCHASABLE_SCAN_BATCH_SIZE || wp_using_ext_object_cache() ) {
+			return null;
+		}
+
+		// method_exists() rather than has_callable(): is_callable() is true for any store that declares __call(), which then throws for this method.
+		$data_store = $this->data_store;
+		if ( ! $data_store instanceof WC_Data_Store || ! method_exists( $data_store->get_current_class_name(), 'get_purchasable_variation_candidates' ) ) {
+			return null;
+		}
+
+		$cache_key = $this->get_id() . ':' . md5( implode( ',', $variation_ids ) );
+		$cached    = wp_cache_get( $cache_key, self::PURCHASABLE_SCAN_CACHE_GROUP );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
+		// @phpstan-ignore-next-line method.notFound (Guarded by method_exists() above and called via __call() on the underlying data store instance.)
+		$candidate_ids = array_map( 'intval', (array) $data_store->get_purchasable_variation_candidates( $this, $variation_ids ) );
+		$candidate_ids = array_values( array_unique( array_intersect( $candidate_ids, $variation_ids ) ) );
+
+		wp_cache_set( $cache_key, $candidate_ids, self::PURCHASABLE_SCAN_CACHE_GROUP );
+
+		return $candidate_ids;
+	}
+
+	/**
+	 * Stored-state pre-check for one variation, read from primed post and meta caches.
+	 *
+	 * @param int $variation_id Variation ID.
+	 * @return bool
+	 */
+	private function variation_may_be_purchasable( int $variation_id ): bool {
+		return WC_Product_Variable_Data_Store_CPT::stored_state_allows_purchase(
+			$this->stored_variation_value( get_post_status( $variation_id ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_stock_status', true ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_regular_price', true ) ),
+			$this->stored_variation_value( get_post_meta( $variation_id, '_sale_price', true ) )
+		);
+	}
+
+	/**
+	 * Cast one stored post or meta value to the string the pre-check expects.
+	 *
+	 * @param mixed $value Stored value.
+	 * @return string
+	 */
+	private function stored_variation_value( $value ): string {
+		return is_scalar( $value ) ? (string) $value : '';
+	}
+
+	/**
+	 * Run the full purchasability checks on hydrated variations, stopping at the first hit.
+	 *
+	 * @param int[] $variation_ids Variation IDs whose caches are primed.
+	 * @return bool
+	 */
+	private function any_variation_is_purchasable( array $variation_ids ): bool {
+		foreach ( $variation_ids as $variation_id ) {
+			if ( $this->variation_is_purchasable( $variation_id ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Full purchasability check for one variation, on a hydrated product object.
+	 *
+	 * @param int $variation_id Variation ID.
+	 * @return bool
+	 */
+	private function variation_is_purchasable( int $variation_id ): bool {
+		$variation = wc_get_product( $variation_id );
+
+		return $variation && $variation->is_purchasable() && $variation->is_in_stock();
 	}
 
 	/**
