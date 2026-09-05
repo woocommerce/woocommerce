@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add a "Cart behavior on logout" setting under Accounts & Privacy, letting merchants keep a shopper's cart when they log out instead of emptying it.
