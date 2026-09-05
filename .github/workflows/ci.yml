@@ -292,9 +292,53 @@ jobs:
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
+      # ----------------------------------------------------------------------
+      # POC (not for merge): local-first CI receipts.
+      #
+      # If the contributor already ran this exact job locally and published a
+      # receipt for this commit, skip it here. Fails open in every direction —
+      # a missing receipt, an API error, or malformed JSON all leave
+      # `substituted` false, so the tests run. Uncertainty must never skip.
+      #
+      # The context is matrix.name because that string already identifies the
+      # job uniquely: it carries the project and the test type.
+      # ----------------------------------------------------------------------
+      - name: 'POC: look for a local CI receipt'
+        id: 'local-ci-receipt'
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RECEIPT_NAME: 'local-ci/v1: ${{ matrix.name }}'
+          # Matched by numeric id, not slug: the slug follows the app's display
+          # name and a trust check must not hinge on something renameable.
+          RECEIPT_APP_ID: '4830646'
+        run: |
+          substituted=false
+
+          # A check run, not a commit status: only a GitHub App can create one,
+          # so a receipt cannot be hand-rolled with a personal access token.
+          # jq --arg because the name contains spaces and brackets.
+          run_json=$(gh api "repos/${{ github.repository }}/commits/$HEAD_SHA/check-runs?per_page=100" 2>/dev/null \
+            | jq -c --arg name "$RECEIPT_NAME" --argjson app "$RECEIPT_APP_ID" \
+              '[.check_runs[] | select(.name == $name and .app.id == $app)][0] // empty' 2>/dev/null || true)
+
+          if [ -n "$run_json" ] && [ "$(jq -r '.conclusion // empty' <<<"$run_json" 2>/dev/null)" = 'success' ]; then
+            substituted=true
+            echo "Receipt found for '$RECEIPT_NAME' ($(jq -r '.external_id // "unattributed"' <<<"$run_json"))."
+            echo "Trust is PARTLY implemented: the app is verified, the named author is not."
+          else
+            echo "No receipt for '$RECEIPT_NAME'. Running the job normally."
+          fi
+
+          echo "substituted=$substituted" >> "$GITHUB_OUTPUT"
+
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
         id: 'install-monorepo'
+        # POC: a receipt makes the install unnecessary too, which is where most
+        # of this job's time goes. Only JS unit jobs ever carry one.
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
@@ -405,6 +449,8 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        # POC: skipped when a local receipt vouches for this exact job.
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
