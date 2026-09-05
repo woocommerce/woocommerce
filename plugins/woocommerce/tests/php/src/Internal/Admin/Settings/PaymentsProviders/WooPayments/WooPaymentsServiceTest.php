@@ -6919,6 +6919,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$send->willReturn( array( 'payments_enabled' => false ) );
 		}
 
+		// Poll between and at the 10-second refresh boundaries; only the checks at 10 and 20 seconds should send a request.
 		foreach ( array( 0, 3, 6, 9, 10, 12, 15, 19, 20 ) as $elapsed ) {
 			$this->current_time = self::TEST_EPOCH + $elapsed;
 			$result             = $this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, 'US' );
