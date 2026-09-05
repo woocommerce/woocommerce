@@ -40,6 +40,9 @@ $WP_CLI_PREFIX bash -c 'printf "apache_modules:\n  - mod_rewrite\n" > /var/www/h
 echo -e 'Update URL structure \n'
 $WP_CLI_PREFIX wp rewrite structure '/%postname%/' --hard
 
+echo -e 'Remove Blocks database request lock configuration \n'
+$WP_CLI_PREFIX php wp-content/plugins/woocommerce/blocks-bin/playwright/htaccess-lock-block.php remove || exit $?
+
 echo -e 'Add Customer user \n'
 if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 	$WP_CLI_PREFIX wp user create customer customer@woocommercecoree2etestsuite.com \

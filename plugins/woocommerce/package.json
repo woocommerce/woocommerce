@@ -78,6 +78,7 @@
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/*.test.mjs && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
+		"test:e2e:blocks:environment": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/environment/*.test.mjs",
 		"test:e2e:blocks:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:e2e:blocks",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
@@ -881,6 +882,32 @@
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Blocks e2e environment tests",
+					"testType": "e2e",
+					"usesSharedPluginBuild": true,
+					"command": "test:e2e:blocks:environment",
+					"changes": [
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "7.4"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks",
+						"blocks-e2e"
+					]
 				},
 				{
 					"name": "Blocks e2e tests - unified editor assets",

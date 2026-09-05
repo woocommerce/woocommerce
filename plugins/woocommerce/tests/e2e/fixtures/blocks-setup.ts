@@ -7,6 +7,8 @@ import { test as setup, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
+	exportBlocksDatabase,
+	importBlocksDatabase,
 	wpCLI,
 	customerFile,
 	BLOCK_THEME_SLUG,
@@ -65,50 +67,62 @@ setup( 'blocks setup', async () => {
 	console.log( 'Running global setup:' );
 	console.time( '└ Total time' );
 
-	let databaseImported = false;
+	const requestContext = await request.newContext( { baseURL: BASE_URL } );
 
 	try {
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
-		console.log( '├ Database snapshot imported, running basic setup…' );
-		databaseImported = true;
-	} catch ( error ) {
-		if (
-			error instanceof Error &&
-			! error.message.includes( 'Import file missing' )
-		) {
-			// Throw if the error is not related to the import file missing.
-			throw error;
+		// The generic E2E setup removes the request-lock prepend. Refuse to run without it rather than
+		// silently falling back to restores that race in-flight requests.
+		const probe = await requestContext.get(
+			'/wp-content/plugins/woocommerce/blocks-bin/playwright/request-lock-probe.php'
+		);
+		if ( ! probe.ok() ) {
+			const probeBody = ( await probe.text() ).trim();
+			throw new Error(
+				`The Blocks E2E database request lock is not installed (probe returned ${ probe.status() }: ${ probeBody }). Run \`pnpm env:start:blocks\`.`
+			);
 		}
 
-		console.log( '├ Database snapshot not found, running full setup…' );
+		let databaseImported = false;
+
+		try {
+			await importBlocksDatabase( DB_EXPORT_FILE );
+			console.log( '├ Database snapshot imported, running basic setup…' );
+			databaseImported = true;
+		} catch ( error ) {
+			if (
+				error instanceof Error &&
+				! error.message.includes( 'Import file missing' )
+			) {
+				// Throw if the error is not related to the import file missing.
+				throw error;
+			}
+
+			console.log( '├ Database snapshot not found, running full setup…' );
+		}
+
+		console.log( '├ Pre-authenticating users…' );
+		await new RequestUtils( requestContext, {
+			user: customer,
+			storageStatePath: customerFile,
+		} ).setupRest();
+		const requestUtils = new RequestUtils( requestContext, {
+			user: admin,
+			storageStatePath: adminFile,
+		} );
+		await requestUtils.setupRest();
+
+		if ( ! databaseImported ) {
+			console.log( '├ Activating default theme…' );
+			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+
+			console.log( '├ Preparing product attributes…' );
+			await prepareAttributes();
+		}
+
+		console.log( '├ Exporting database snapshot…' );
+		await exportBlocksDatabase( DB_EXPORT_FILE );
+	} finally {
+		await requestContext.dispose();
 	}
-
-	const requestContext = await request.newContext( {
-		baseURL: BASE_URL,
-	} );
-
-	console.log( '├ Pre-authenticating users…' );
-	await new RequestUtils( requestContext, {
-		user: customer,
-		storageStatePath: customerFile,
-	} ).setupRest();
-	const requestUtils = new RequestUtils( requestContext, {
-		user: admin,
-		storageStatePath: adminFile,
-	} );
-	await requestUtils.setupRest();
-
-	if ( ! databaseImported ) {
-		console.log( '├ Activating default theme…' );
-		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
-
-		console.log( '├ Preparing product attributes…' );
-		await prepareAttributes();
-	}
-
-	console.log( '├ Exporting database snapshot…' );
-	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
-
-	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );
 } );

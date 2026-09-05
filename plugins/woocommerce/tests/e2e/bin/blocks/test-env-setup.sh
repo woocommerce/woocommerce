@@ -15,6 +15,14 @@ wp_cli="wp-env --config .wp-env.e2e.json run cli"
 $wp_cli -- rm -f blocks_e2e.sql
 # Run the main script in the container for better performance.
 $wp_cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/scripts/index.sh
+
+# One container round-trip: each `wp-env run` costs a Node start plus a
+# `docker compose exec`. The `&&` chain keeps the required order -- the lock
+# file must exist before the prepend is installed, and the prepend must be
+# installed before the probe can pass.
+echo "Configuring database request lock"
+$wp_cli -- bash -c 'touch /var/www/html/.woocommerce-blocks-e2e-db.lock && chmod 0666 /var/www/html/.woocommerce-blocks-e2e-db.lock && test -f /var/www/html/.woocommerce-blocks-e2e-db.lock && test -r /var/www/html/.woocommerce-blocks-e2e-db.lock && test -w /var/www/html/.woocommerce-blocks-e2e-db.lock && php wp-content/plugins/woocommerce/blocks-bin/playwright/htaccess-lock-block.php install && curl --fail --silent --show-error http://wordpress/wp-content/plugins/woocommerce/blocks-bin/playwright/request-lock-probe.php'
+
 # Disable the LYS Coming Soon banner.
 $wp_cli -- wp option update woocommerce_coming_soon 'no'
 # Dismiss the site editor welcome guide for the admin user so it does not
