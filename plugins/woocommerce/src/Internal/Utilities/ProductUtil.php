@@ -145,6 +145,31 @@ class ProductUtil {
 	}
 
 	/**
+	 * Append the product meta lookup join unless the clause mentions wc_product_meta_lookup as a standalone token.
+	 * References, SQL literals and comments also count as mentions; this is not an SQL parser.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $join SQL JOIN clause supplied by query filters.
+	 * @return string
+	 */
+	public function append_product_sorting_table_join( $join ): string {
+		global $wpdb;
+
+		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
+		if ( ! is_string( $join ) ) {
+			$stringable = is_scalar( $join ) || ( is_object( $join ) && method_exists( $join, '__toString' ) );
+			$join       = $stringable ? (string) $join : '';
+		}
+
+		// A non-empty wpdb prefix prevents a table-name match. Empty prefixes retain the old guard's limitation.
+		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
+	}
+
+	/**
 	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0

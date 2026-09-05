@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use WP_REST_Request;
 use WP_REST_Response;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * REST API Reports stock controller class.
@@ -220,12 +221,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return string
 	 */
 	protected static function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
