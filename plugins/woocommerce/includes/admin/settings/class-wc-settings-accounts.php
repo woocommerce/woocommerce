@@ -13,6 +13,7 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 
 /**
  * WC_Settings_Accounts.
@@ -141,6 +142,19 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'custom_attributes' => array(
 					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
 				),
+			),
+			array(
+				'title'    => __( 'Cart behavior on logout', 'woocommerce' ),
+				'desc_tip' => __( 'Whether shoppers keep the items in their cart after logging out. Clearing the cart suits stores where devices are shared or the items themselves are sensitive. Either way, the cart is restored when the shopper logs back in.', 'woocommerce' ),
+				'id'       => 'woocommerce_cart_behavior_on_logout',
+				'default'  => CartBehaviorOnLogout::PRESERVE,
+				'type'     => 'select',
+				'class'    => 'wc-enhanced-select',
+				'options'  => array(
+					CartBehaviorOnLogout::PRESERVE => __( 'Preserve cart on logout', 'woocommerce' ),
+					CartBehaviorOnLogout::CLEAR    => __( 'Clear cart on logout', 'woocommerce' ),
+				),
+				'autoload' => false,
 			),
 			array(
 				'title'         => __( 'Account erasure requests', 'woocommerce' ),
