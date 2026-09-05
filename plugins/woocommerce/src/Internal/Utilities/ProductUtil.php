@@ -145,20 +145,24 @@ class ProductUtil {
 	}
 
 	/**
-	 * Append a join to the product meta lookup table, aliased as wc_product_meta_lookup, unless the
-	 * clause already defines that alias. Callers reference the alias, so the check looks for the alias
-	 * rather than the table name, and it stays a no-op when the alias exists because defining it twice
-	 * is a SQL error.
+	 * Append the product meta lookup join unless the clause mentions wc_product_meta_lookup as a standalone token.
+	 * References, SQL literals and comments also count as mentions; this is not an SQL parser.
 	 *
 	 * @since 11.2.0
 	 *
-	 * @param string $join SQL JOIN clause.
+	 * @param mixed $join SQL JOIN clause supplied by query filters.
 	 * @return string
 	 */
-	public function append_product_sorting_table_join( string $join ): string {
+	public function append_product_sorting_table_join( $join ): string {
 		global $wpdb;
 
-		// The word boundary cannot match inside the prefixed table name because wpdb prefixes contain only word characters.
+		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
+		if ( ! is_string( $join ) ) {
+			$stringable = is_scalar( $join ) || ( is_object( $join ) && method_exists( $join, '__toString' ) );
+			$join       = $stringable ? (string) $join : '';
+		}
+
+		// A non-empty wpdb prefix prevents a table-name match. Empty prefixes retain the old guard's limitation.
 		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
 			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
 		}
