@@ -643,4 +643,75 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 			'Existing shipping lines named Shipping should not be replaced with the generic method title'
 		);
 	}
+	/**
+	 * A block-based default page must be matched by its WooCommerce block, not by the full
+	 * markup blob, so a customized existing page is adopted instead of duplicated.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68099
+	 */
+	public function test_wc_create_page_adopts_customized_block_page(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'my-custom-cart',
+				'post_title'   => 'My custom cart',
+				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$default_content = '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart alignwide is-loading"><!-- wp:woocommerce/filled-cart-block --><div class="wp-block-woocommerce-filled-cart-block">default markup</div><!-- /wp:woocommerce/filled-cart-block --></div><!-- /wp:woocommerce/cart -->';
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', $default_content );
+
+		// wc_create_page() returns the adopted id as a string from $wpdb->get_var(), so compare loosely.
+		$this->assertEquals( $existing_page_id, $page_id, 'The existing customized Cart page must be adopted instead of creating a duplicate.' );
+		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ), 'The page option must point at the adopted page.' );
+
+		wp_delete_post( $existing_page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * The classic shortcode matching of wc_create_page() must keep working unchanged.
+	 */
+	public function test_wc_create_page_still_matches_shortcode_content(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'old-cart',
+				'post_title'   => 'Old cart',
+				'post_content' => 'Before [woocommerce_cart] after',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id, 'A page holding the shortcode must still be adopted.' );
+
+		wp_delete_post( $existing_page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * Without any existing match, wc_create_page() must still create the page.
+	 */
+	public function test_wc_create_page_creates_page_when_no_match_exists(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$default_content = '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->';
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', $default_content );
+
+		$this->assertGreaterThan( 0, $page_id, 'A new Cart page must be created when nothing matches.' );
+		$this->assertSame( $default_content, get_post( $page_id )->post_content, 'The created page must carry the default content.' );
+
+		wp_delete_post( $page_id, true );
+		delete_option( 'woocommerce_cart_page_id' );
+	}
 }
