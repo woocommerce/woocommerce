@@ -405,7 +405,10 @@ describe( 'Checkout Order Summary', () => {
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 
 		expect(
-			queryByText( container, 'Tax $10.00' )
+			queryByText(
+				container,
+				textContentMatcherAcrossSiblings( 'Taxes $10.00' )
+			)
 		).not.toBeInTheDocument();
 	} );
 

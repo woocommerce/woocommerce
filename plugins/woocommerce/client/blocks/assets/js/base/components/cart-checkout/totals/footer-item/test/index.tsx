@@ -13,6 +13,11 @@ import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
  */
 import TotalsFooterItem from '../index';
 
+// The currency symbol sits in its own element, so the whole value is read at once.
+const getTotalValue = ( container: HTMLElement ) =>
+	container.querySelector( '.wc-block-components-totals-item__value' )
+		?.textContent;
+
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
@@ -171,10 +176,12 @@ describe( 'TotalsFooterItem', () => {
 	};
 
 	it( 'Does not show the "including %s of tax" line if tax is 0', async () => {
-		render( <TotalsFooterItem currency={ currency } values={ values } /> );
+		const { container } = render(
+			<TotalsFooterItem currency={ currency } values={ values } />
+		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect( getTotalValue( container ) ).toBe( '£85.00' );
 
 		// Check that no tax information is displayed
 		expect(
@@ -190,12 +197,12 @@ describe( 'TotalsFooterItem', () => {
 			total_tax: '100',
 			total_items_tax: '100',
 		};
-		render(
+		const { container } = render(
 			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect( getTotalValue( container ) ).toBe( '£85.00' );
 
 		// Check that no tax information is displayed when taxes are disabled
 		expect(
@@ -209,12 +216,12 @@ describe( 'TotalsFooterItem', () => {
 			total_tax: '100',
 			total_items_tax: '100',
 		};
-		render(
+		const { container } = render(
 			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect( getTotalValue( container ) ).toBe( '£85.00' );
 
 		// Check that tax information is displayed
 		const taxInfo = screen.getByText( /including.*tax/i );
@@ -231,12 +238,12 @@ describe( 'TotalsFooterItem', () => {
 			total_items_tax: '100',
 			tax_lines: [ { name: '10% VAT', price: '100', rate: '10.000' } ],
 		};
-		render(
+		const { container } = render(
 			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect( getTotalValue( container ) ).toBe( '£85.00' );
 
 		// Check that tax information with label is displayed
 		const taxInfo = screen.getByText( /including.*10% VAT/i );
@@ -256,12 +263,12 @@ describe( 'TotalsFooterItem', () => {
 				{ name: '5% VAT', price: '50', rate: '5.000' },
 			],
 		};
-		render(
+		const { container } = render(
 			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect( getTotalValue( container ) ).toBe( '£85.00' );
 
 		// Check that tax information with multiple labels is displayed
 		const taxInfo = screen.getByText( /including.*10% VAT.*5% VAT/i );
@@ -269,5 +276,42 @@ describe( 'TotalsFooterItem', () => {
 		expect( taxInfo ).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
+	} );
+
+	it( 'Isolates the currency symbol of each itemised tax amount', async () => {
+		const valuesWithTax = {
+			...values,
+			total_tax: '100',
+			total_items_tax: '100',
+			tax_lines: [
+				{ name: '10% VAT', price: '50', rate: '10.000' },
+				{ name: '5% VAT', price: '50', rate: '5.000' },
+			],
+		};
+		const { container } = render(
+			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
+		);
+
+		const taxInfo = container.querySelector(
+			'.wc-block-components-totals-footer-item-tax'
+		);
+
+		// The line reads the same as it did when it was one flat string.
+		expect( taxInfo?.textContent ).toBe(
+			'Including £0.50 10% VAT, £0.50 5% VAT'
+		);
+
+		// Each amount is a price element with the symbol in its own isolate,
+		// so the bidi algorithm cannot move it to the other side of the digits.
+		const amounts = taxInfo?.querySelectorAll( 'bdi' );
+		expect( amounts ).toHaveLength( 2 );
+		amounts?.forEach( ( amount ) => {
+			expect( amount.textContent ).toBe( '£0.50' );
+			expect(
+				amount.querySelector(
+					'.wc-block-components-formatted-money-amount__currency-symbol'
+				)?.textContent
+			).toBe( '£' );
+		} );
 	} );
 } );
