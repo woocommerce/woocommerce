@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refresh country, state, and continent names when the active locale changes.
