@@ -54046,12 +54046,6 @@ parameters:
 			path: src/Blocks/Utils/StyleAttributesUtils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\StyleAttributesUtils\:\:join_styles\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Utils/StyleAttributesUtils.php
-
-		-
 			message: '#^Parameter \#1 \$version1 of function version_compare expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
