@@ -736,7 +736,7 @@ function wc_update_attribute( $id, $args ) {
  * @return bool
  */
 function wc_delete_attribute( $id ) {
-	global $wpdb;
+	global $wpdb, $wc_product_attributes, $wp_taxonomies;
 
 	$name = $wpdb->get_var(
 		$wpdb->prepare(
@@ -749,7 +749,11 @@ function wc_delete_attribute( $id ) {
 		)
 	);
 
-	$taxonomy = wc_attribute_taxonomy_name( $name );
+	$taxonomy                    = wc_attribute_taxonomy_name( $name );
+	$wp_taxonomy_was_registered  = isset( $wp_taxonomies[ $taxonomy ] );
+	$original_wp_taxonomy        = $wp_taxonomy_was_registered ? $wp_taxonomies[ $taxonomy ] : null;
+	$wc_attribute_was_registered = isset( $wc_product_attributes[ $taxonomy ] );
+	$original_wc_attribute       = $wc_attribute_was_registered ? $wc_product_attributes[ $taxonomy ] : null;
 
 	/**
 	 * Before deleting an attribute.
@@ -776,6 +780,15 @@ function wc_delete_attribute( $id ) {
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+
+		if ( $wp_taxonomy_was_registered && ( $wp_taxonomies[ $taxonomy ] ?? null ) === $original_wp_taxonomy ) {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		if ( $wc_attribute_was_registered && ( $wc_product_attributes[ $taxonomy ] ?? null ) === $original_wc_attribute ) {
+			unset( $wc_product_attributes[ $taxonomy ] );
+		}
+
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
