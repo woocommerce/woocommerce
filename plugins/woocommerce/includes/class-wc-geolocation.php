@@ -280,10 +280,17 @@ class WC_Geolocation {
 	 * If APIs are defined, one will be chosen at random to fulfil the request. After completing, the result
 	 * will be cached in a transient.
 	 *
+	 * Private, reserved, and otherwise non-public IP addresses (e.g. 127.0.0.1, 0.0.0.0, 192.168.0.1) are
+	 * skipped, since they can never be geolocated and querying an external API for them is pointless.
+	 *
 	 * @param  string $ip_address IP address.
 	 * @return string
 	 */
 	private static function geolocate_via_api( $ip_address ) {
+		if ( ! filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+			return '';
+		}
+
 		$country_code = get_transient( 'geoip_' . $ip_address );
 
 		if ( false === $country_code ) {
