@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Download_Handler: use the actual request protocol instead of a hardcoded HTTP/1.1 for range-download status headers, and default download errors to 403 Forbidden instead of 404 Not Found.
