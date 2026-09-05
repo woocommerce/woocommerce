@@ -3,6 +3,8 @@
  */
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { getSetting } from '@woocommerce/settings';
+import { objectHasProp } from '@woocommerce/types';
 import clsx from 'clsx';
 
 /**
@@ -24,13 +26,35 @@ export const CountryInput = ( {
 	required = false,
 }: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo< SelectOption[] >( () => {
-		return Object.entries( countries ).map(
+		const countryOptions: SelectOption[] = Object.entries( countries ).map(
 			( [ countryCode, countryName ] ) => ( {
 				value: countryCode,
 				label: decodeEntities( countryName ),
 			} )
 		);
-	}, [ countries ] );
+		// Keep an unavailable saved country in the list as a disabled option.
+		// With no matching option the select drifts off the stored value, and
+		// re-picking the displayed country fires no change event, so the error
+		// could never be cleared.
+		const selectedCountry = typeof value === 'string' ? value : '';
+		if (
+			selectedCountry &&
+			! objectHasProp( countries, selectedCountry )
+		) {
+			const allCountries = getSetting< Record< string, string > >(
+				'countries',
+				{}
+			);
+			countryOptions.push( {
+				value: selectedCountry,
+				label: decodeEntities(
+					allCountries[ selectedCountry ] || selectedCountry
+				),
+				disabled: true,
+			} );
+		}
+		return countryOptions;
+	}, [ countries, value ] );
 
 	return (
 		<Select

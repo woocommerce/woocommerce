@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a returning customer's saved country as a disabled option in the checkout country dropdown when the store no longer sells or ships to that country
