@@ -11,3 +11,35 @@
 		}
 	}
 }
+
+// Keeps a cell's first item on the same line as its "+N more" badge. The badge
+// is a button, so once it wraps onto its own line it adds that full height and
+// rows carrying one end up taller than rows without. Flex alone (no wrap) is
+// enough for that; the name itself is still allowed to wrap onto multiple
+// lines within the bounds below, so a long name doesn't force one endless row.
+.woocommerce-analytics__inline-list {
+	display: inline-flex;
+	align-items: center;
+	max-width: 80ch;
+
+	// A name with no spaces has a min-content width of the whole name, which
+	// would otherwise set the column's floor and widen the table. Allowing a
+	// break anywhere lets it wrap inside the bounds here instead.
+	> a {
+		overflow-wrap: anywhere;
+	}
+
+	// Enough room that the name beside a badge doesn't shred into short lines.
+	// On the link rather than the wrapper, so the badge's fixed width isn't
+	// taken out of the name's share. Scoped so the Coupons cell — same class,
+	// usually empty — is left alone.
+	&:has(.woocommerce-view-more-list) > a {
+		min-width: 20ch;
+	}
+
+	// The badge carries overflow: hidden and text-overflow: ellipsis, so it
+	// renders as "+…" if flex is allowed to shrink it.
+	> .woocommerce-view-more-list {
+		flex-shrink: 0;
+	}
+}
