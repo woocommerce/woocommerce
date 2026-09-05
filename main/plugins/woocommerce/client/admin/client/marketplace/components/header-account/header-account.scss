@@ -1,0 +1,153 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	// Connected-user avatar in the floating-header toggle — locked to 18px
+	// so the User button matches every other tab in the bar regardless of
+	// sign-in state.
+	&__header-account-avatar {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		display: block;
+		object-fit: cover;
+	}
+
+	&__menu-item span {
+		white-space: normal;
+	}
+
+	&__menu-icon {
+		flex-shrink: 0;
+		margin-right: $grid-unit-10;
+	}
+
+	&__menu-text {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__sub-text {
+		color: $gray-700;
+		font-size: 12px;
+	}
+
+	&__header-account-modal {
+
+		.components-modal__header {
+			padding-top: 32px;
+		}
+
+		&__header-account-modal-text {
+			margin-bottom: $grid-unit-10;
+		}
+	}
+
+	// HeaderAccount renders in two places — the WC Home floating-header
+	// activity-panel tab strip, and the Marketplace page's own header
+	// next to a search input. The default toggle structure doesn't
+	// stretch / centre vertically on its own, so we explicitly handle
+	// both contexts:
+	// - Floating header (inside `.woocommerce-layout__activity-panel-tabs`):
+	//   wrapper stretches to the 60px bar height so the User tab aligns
+	//   with its neighbours (bell / store / display / help).
+	// - Marketplace page (inside `.woocommerce-marketplace__header`):
+	//   wrapper sits at 40px to match the WP 7.0-height search input
+	//   beside it.
+	// Both rules scope to their parent container rather than styling
+	// `__user-menu` unconditionally, otherwise the Home rule would leak
+	// onto Marketplace (and vice versa).
+	.woocommerce-layout__activity-panel-tabs &__user-menu {
+		display: flex;
+		align-items: stretch;
+		height: $header-height;
+	}
+
+	&__header &__user-menu {
+		// Inner toggle button is 40px to match the WP 7.0-height search
+		// input next to it. The 7px top offset compensates for the
+		// difference between the search input's `margin-top: 15px` (in
+		// search.scss) and the `padding-top: 8px` already on the parent
+		// `__header-meta` — without it, the User toggle visually sits
+		// ~7px higher than the search input. Previously masked by the
+		// removed `.activity-panel-tab` class overflowing the 60px grid
+		// cell.
+		margin-top: 7px;
+
+		> button.components-dropdown-menu__toggle {
+			height: 40px;
+		}
+	}
+
+	&__header-account-trigger {
+		display: contents;
+
+		&__email,
+		&__expand-icon {
+			display: none;
+		}
+
+		@media screen and (min-width: $breakpoint-medium) {
+			display: flex;
+			align-items: center;
+			gap: $grid-unit-10;
+			border: 1px solid $gutenberg-gray-300;
+			margin: -6px; // accommodate for being placed in a button
+			height: 40px;
+			padding-left: $grid-unit-10;
+			padding-right: $grid-unit-10;
+			max-width: 280px;
+
+			&__email {
+				display: block;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
+			}
+
+			&__expand-icon,
+			svg,
+			img {
+				display: block;
+				width: $grid-unit-30;
+				height: $grid-unit-30;
+				flex-shrink: 0;
+			}
+		}
+
+		button:focus & {
+			border-color: transparent;
+		}
+	}
+
+	&__header-account-modal-overlay {
+		// This is to ensure the modal is above the user menu popover.
+		z-index: 1000000;
+	}
+
+	&__header-account-modal-button-group {
+		display: inline-flex;
+		gap: $grid-unit-10;
+		justify-content: flex-end;
+		margin-top: $grid-unit-30;
+		width: 100%;
+
+		.woocommerce-marketplace__header-account-modal-button,
+		.woocommerce-marketplace__header-account-modal-button.is-primary {
+			border-radius: 2px;
+			box-shadow: none;
+		}
+	}
+}
+
+@media screen and (min-width: $break-small) {
+	.woocommerce-marketplace {
+		&__header-account-modal {
+			max-width: $header-account-modal-width;
+
+			&.has-size-medium {
+				max-width: $modal-width-medium;
+				width: 100%;
+			}
+		}
+	}
+}

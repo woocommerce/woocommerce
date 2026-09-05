@@ -1,0 +1,10 @@
+.woocommerce-marketing-registered-channel-card-body {
+	.woocommerce-marketing-registered-channel-description {
+		display: flex;
+		gap: $gap-smaller;
+
+		&__separator::before {
+			content: "•";
+		}
+	}
+}

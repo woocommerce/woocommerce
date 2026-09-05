@@ -1,0 +1,219 @@
+.woocommerce-layout__activity-panel {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: $header-height;
+}
+
+.woocommerce-layout__activity-panel-tabs {
+	width: 100%;
+	display: flex;
+	height: $header-height;
+	justify-content: flex-end;
+
+	.dashicon,
+	.gridicon {
+		width: 100%;
+	}
+
+	svg {
+		width: 18px;
+		height: 18px;
+
+		&.woocommerce-layout__activity-panel-tab-icon {
+			fill: none;
+
+			rect,
+			path {
+				stroke: currentColor;
+			}
+		}
+	}
+
+	.woocommerce-layout__homescreen-display-options {
+		svg.woocommerce-layout__activity-panel-tab-icon {
+			height: 14px;
+		}
+	}
+
+	.woocommerce-layout__homescreen-extension-tasklist-toggle {
+		min-width: 205px;
+	}
+
+	.components-icon-button {
+		display: initial;
+		text-indent: 0;
+		border-radius: 0;
+
+		&.has-text {
+			svg {
+				margin: 0;
+			}
+		}
+	}
+
+	.woocommerce-layout__activity-panel-tab {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		// Match wp-admin admin-bar item padding so all five icons in the bar
+		// (bell / list / megaphone / gear / ?) sit at the same tight spacing.
+		// $grid-unit-10 (8px from @wordpress/base-styles) instead of a
+		// literal so the value tracks the WP spacing scale automatically.
+		width: auto;
+		min-width: 0;
+		padding: 0 $grid-unit-10;
+		height: $header-height;
+		// $gray-900 across all states (default, hover, active) — the blue
+		// underline alone signals active, matching Gutenberg's icon tab group.
+		color: $gray-900;
+		white-space: nowrap;
+
+		&::before {
+			background-color: var(--wp-admin-theme-color);
+			bottom: 0;
+			content: "";
+			height: 0;
+			opacity: 0;
+			transition-property: height, opacity;
+			transition-duration: 300ms;
+			transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+			left: 0;
+			position: absolute;
+			right: 0;
+		}
+
+		&.is-active,
+		&.is-opened {
+			box-shadow: none;
+
+			&::before {
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
+				opacity: 1;
+			}
+		}
+
+		&:hover,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
+			box-shadow: none;
+			// Override Button's default theme-blue hover — Gutenberg's own
+			// icon tab groups keep the same dark-grey across all states.
+			color: $gray-900;
+		}
+
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows via
+		// :focus-visible.
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
+			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700;
+		}
+
+		// Hide display options if we're in single column.
+		@include breakpoint( "<782px" ) {
+			&.display-options {
+				display: none;
+			}
+		}
+	}
+
+	.woocommerce-layout__activity-panel-popover {
+		margin-top: 0;
+		z-index: 1001; // One higher than the other activity panels.
+
+		.components-menu-group {
+			padding: 12px;
+		}
+	}
+}
+
+@keyframes tabSwitch {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(100px);
+	}
+}
+
+@mixin activity-panel-slide {
+	transition-property: transform box-shadow;
+	transition-duration: 300ms;
+	transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+	@media screen and ( prefers-reduced-motion: reduce ) {
+		transition-duration: 1ms;
+	}
+}
+
+.woocommerce-layout__activity-panel-wrapper {
+	// Suppress the browser's default focus outline on click focus (the blue
+	// ring with slight rounded corners). Keyboard nav still gets it via
+	// :focus-visible so a11y is preserved.
+	&:focus {
+		outline: none;
+	}
+
+	height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height-mobile});
+	background: $gray-100;
+	width: 430px;
+	@include breakpoint( "<782px" ) {
+		width: 100%;
+	}
+	transform: translateX(100%);
+	@include activity-panel-slide();
+	position: fixed;
+	right: 0;
+	top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height-mobile + $header-border-width});
+	z-index: 1000;
+	overflow-x: hidden;
+	overflow-y: auto;
+
+	@include breakpoint( ">782px" ) {
+		height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height});
+		top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height + $header-border-width});
+	}
+	.is-wp-toolbar-disabled & {
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: calc(var(--woocommerce-admin-header-height) + #{$header-border-width});
+	}
+	.has-woocommerce-navigation & {
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: var(--woocommerce-admin-header-height);
+	}
+
+	&.is-open {
+		transform: initial;
+		box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
+	}
+
+	&.is-switching {
+		animation: tabSwitch;
+		animation-duration: 300ms;
+
+		@media screen and ( prefers-reduced-motion: reduce ) {
+			animation: none;
+		}
+	}
+
+	.woocommerce-empty-content {
+		padding-left: $gap-large;
+		padding-right: $gap-large;
+	}
+}
+
+.woocommerce-layout__notice-list-hide {
+	display: none;
+}

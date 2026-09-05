@@ -1,0 +1,73 @@
+.blueprint-upload-dropzone-notice,
+.blueprint-upload-dropzone-error {
+	margin-top: 16px;
+}
+
+.blueprint-upload-form {
+	height: 133px;
+	position: relative; // make this element a positioned ancestor for the dropzone so that the dropzone takes reference from this element
+
+	border: 1px solid #e0e0e0;
+	background-color: #fff;
+	border-radius: 2px;
+
+	.components-form-file-upload {
+		height: 100%;
+	}
+
+	.blueprint-upload-field {
+		width: 100%;
+		height: 100%;
+		padding: 0;
+	}
+
+	.blueprint-upload-dropzone {
+		width: 100%;
+		height: 100%;
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+
+		.blueprint-upload-dropzone-text {
+			color: $gray-700;
+			margin: 0;
+			span {
+				color: var(--wp-admin-theme-color);
+			}
+		}
+
+		.blueprint-upload-max-size {
+			color: $gray-700;
+			margin: 0;
+			font-size: 11px;
+		}
+
+	}
+
+	.blueprint-upload-dropzone-uploading {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+.blueprint-upload-dropzone-success {
+	background: #fff;
+	padding: 16px;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+	margin: 16px 0 0 0;
+
+	.blueprint-upload-dropzone-text {
+		margin: 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+}
