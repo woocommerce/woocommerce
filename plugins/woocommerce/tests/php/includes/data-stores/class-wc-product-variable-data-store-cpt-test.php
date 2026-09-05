@@ -2138,19 +2138,31 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				$this->errors[] = array( $message, $context );
 			}
 		};
-		add_filter( 'woocommerce_logging_class', fn() => $logger );
+
+		$logger_filter = static function () use ( $logger ) {
+			return $logger;
+		};
 
 		// Break only the read under test, so a clean sibling query cannot mask it.
-		add_filter(
-			'query',
-			function ( $query ) use ( $table ) {
-				return str_contains( $query, "FROM {$table} WHERE" ) ? str_replace( $table, $table . '_missing', $query ) : $query;
-			}
-		);
+		$query_filter = static function ( $query ) use ( $table ) {
+			return str_contains( $query, "FROM {$table} WHERE" ) ? str_replace( $table, $table . '_missing', $query ) : $query;
+		};
 
-		$suppress = $GLOBALS['wpdb']->suppress_errors( true );
-		$result   = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) );
-		$GLOBALS['wpdb']->suppress_errors( $suppress );
+		global $wpdb;
+
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+		add_filter( 'query', $query_filter );
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+
+		try {
+			$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) );
+		} finally {
+			// suppress_errors() is not part of what the test case restores, so a throw here would silence
+			// database errors for the rest of the run.
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			remove_filter( 'query', $query_filter );
+			$wpdb->suppress_errors( $previous_suppress_errors );
+		}
 
 		$this->assertCount( 1, $logger->errors, "A failed read of {$table} must be logged once." );
 		$this->assertSame( self::$product_id, $logger->errors[0][1]['product_id'] );
