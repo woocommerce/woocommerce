@@ -980,10 +980,18 @@ final class WooCommerce {
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
 	 *
+	 * Notice functions are loaded here too: templates loaded through the
+	 * template functions (for example `checkout/form-login.php`, which calls
+	 * `wc_print_notice()`) assume they exist, but they were previously only
+	 * included for frontend/REST requests. Requests such as wp-cron or plain
+	 * wp-admin loads could therefore fatal when a plugin rendered a template
+	 * in a context where the notice functions had not been loaded.
+	 *
 	 * @return void
 	 */
 	public function include_template_functions() {
 		include_once WC_ABSPATH . 'includes/wc-template-functions.php';
+		include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
 	}
 
 	/**
