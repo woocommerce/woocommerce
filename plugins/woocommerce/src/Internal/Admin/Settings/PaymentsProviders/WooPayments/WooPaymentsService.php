@@ -1207,10 +1207,41 @@ class WooPaymentsService {
 	public function onboarding_step_check( string $step_id, string $location ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
+		if ( self::ONBOARDING_STEP_TEST_ACCOUNT === $step_id && $this->has_test_account() && ! $this->has_working_account() ) {
+			$this->maybe_refresh_test_account();
+		}
+
 		return array(
 			'status' => $this->get_onboarding_step_status( $step_id, $location ),
 			'error'  => $this->get_onboarding_step_error( $step_id, $location ),
 		);
+	}
+
+	/**
+	 * Refresh a pending test account while allowing time for webhook updates between requests.
+	 */
+	private function maybe_refresh_test_account(): void {
+		$transient    = 'woocommerce_woopayments_test_account_refresh';
+		$now          = $this->proxy->call_function( 'time' );
+		$next_refresh = $this->proxy->call_function( 'get_transient', $transient );
+
+		if ( false !== $next_refresh && $now < (int) $next_refresh ) {
+			return;
+		}
+
+		$this->proxy->call_function( 'set_transient', $transient, $now + 10, MINUTE_IN_SECONDS );
+
+		// The first poll may have just populated the account cache. Give that data time to change.
+		if ( false === $next_refresh ) {
+			return;
+		}
+
+		$account_service = $this->proxy->call_static( '\\WC_Payments', 'get_account_service' );
+		if ( is_object( $account_service ) && method_exists( $account_service, 'refresh_test_account_data' ) ) {
+			$account_service->refresh_test_account_data();
+		} else {
+			$account_service->refresh_account_data();
+		}
 	}
 
 	/**
