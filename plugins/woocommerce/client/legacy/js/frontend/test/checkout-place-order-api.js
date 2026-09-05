@@ -7,6 +7,10 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	let $termsCheckbox;
 	let $termsRow;
 	let capturedApi;
+	let capturedAjaxRequests;
+	let jQueryMock;
+	let mockBody;
+	let serializedCheckoutData;
 	// Set the number of invalid `.form-row` elements that are hidden (e.g. the
 	// collapsed "Ship to a different address?" shipping fields). These must never
 	// block submission, so `validate()` should only count visible invalid fields.
@@ -14,6 +18,13 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 	beforeEach( () => {
 		capturedApi = null;
+		capturedAjaxRequests = [];
+		serializedCheckoutData =
+			"billing_email=shopper'o%40example.test" +
+			'&company=Rock+%26+Roll' +
+			'&items%5B%5D=one' +
+			"&delivery'note=Recipient's+door" +
+			'&reference=already%27encoded';
 		let hiddenInvalidCount = 0;
 		setHiddenInvalidCount = ( count ) => {
 			hiddenInvalidCount = count;
@@ -61,6 +72,10 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		};
 
 		$form = {
+			addClass: jest.fn( () => $form ),
+			block: jest.fn( () => $form ),
+			data: jest.fn(),
+			is: jest.fn( () => false ),
 			length: 1,
 			find: jest.fn( ( selector ) => {
 				if ( selector === 'input[name="terms"]:visible' ) {
@@ -101,7 +116,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				}
 				return { length: 0, trigger: jest.fn() };
 			} ),
+			serialize: jest.fn( () => serializedCheckoutData ),
 			trigger: jest.fn(),
+			triggerHandler: jest.fn( () => true ),
 		};
 
 		// Add methods to $form for checkout.js initialization
@@ -164,7 +181,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		// Simple event system for document.body to enable event-based API capture
 		const bodyEventHandlers = {};
-		const mockBody = {
+		mockBody = {
 			on: jest.fn( ( event, handler ) => {
 				if ( ! bodyEventHandlers[ event ] ) {
 					bodyEventHandlers[ event ] = [];
@@ -180,8 +197,19 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			hasClass: jest.fn( () => false ),
 		};
 
+		// update_order_review sends these as siblings of post_data, so they have
+		// to carry apostrophes for the test to prove the whole body is encoded.
+		const addressFieldValues = {
+			'#billing_country': 'US',
+			'#billing_state': "O'State",
+			':input#billing_postcode': '12345',
+			'#billing_city': "O'Fallon",
+			':input#billing_address_1': "123 O'Brien Ave",
+			':input#billing_address_2': "Apt O'2",
+		};
+
 		// Mock jQuery - needs to handle document ready pattern: jQuery(function($) { ... })
-		const jQueryMock = jest.fn( ( selectorOrCallback ) => {
+		jQueryMock = jest.fn( ( selectorOrCallback ) => {
 			// Handle document ready: jQuery(function($) { ... })
 			if ( typeof selectorOrCallback === 'function' ) {
 				// Execute immediately with jQuery mock as argument
@@ -189,6 +217,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				return jQueryMock;
 			}
 			if ( selectorOrCallback === 'form.checkout' ) {
+				return $form;
+			}
+			if ( selectorOrCallback === $form ) {
 				return $form;
 			}
 			if ( selectorOrCallback === '#order_review' ) {
@@ -200,10 +231,47 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			if ( selectorOrCallback === document.body ) {
 				return mockBody;
 			}
+			if ( addressFieldValues[ selectorOrCallback ] !== undefined ) {
+				const addressMock = createDefaultMock();
+				addressMock.val = jest.fn(
+					() => addressFieldValues[ selectorOrCallback ]
+				);
+				return addressMock;
+			}
 			// Return a default mock for any other selector
 			return createDefaultMock();
 		} );
 		jQueryMock.blockUI = { defaults: { overlayCSS: {} } };
+		jQueryMock.ajax = jest.fn( ( options ) => {
+			capturedAjaxRequests.push( options );
+			return { abort: jest.fn() };
+		} );
+		jQueryMock.param = jest.fn( ( object ) => {
+			const parts = [];
+			const add = ( key, value ) => {
+				parts.push(
+					encodeURIComponent( key ) +
+						'=' +
+						encodeURIComponent(
+							value === null || value === undefined ? '' : value
+						)
+				);
+			};
+			const buildParams = ( prefix, value ) => {
+				if ( value !== null && typeof value === 'object' ) {
+					Object.keys( value ).forEach( ( key ) =>
+						buildParams( prefix + '[' + key + ']', value[ key ] )
+					);
+					return;
+				}
+				add( prefix, value );
+			};
+			Object.keys( object ).forEach( ( key ) =>
+				buildParams( key, object[ key ] )
+			);
+			return parts.join( '&' ).split( '%20' ).join( '+' );
+		} );
+		jQueryMock.ajaxSetup = jest.fn();
 
 		global.window.jQuery = jQueryMock;
 		global.window.$ = jQueryMock;
@@ -211,7 +279,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		global.$ = jQueryMock;
 
 		global.window.wc_checkout_params = {
+			checkout_url: '/?wc-ajax=checkout',
 			gateways_with_custom_place_order_button: [ 'test-gateway' ],
+			is_checkout: '0',
+			option_guest_checkout: 'no',
+			update_order_review_nonce: 'nonce',
+			wc_ajax_url: '/?wc-ajax=%%endpoint%%',
 		};
 
 		global.window.wc = {
@@ -319,6 +392,65 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'.woocommerce-invalid:visible'
 			);
 			expect( $form.find ).not.toHaveBeenCalledWith( '.woocommerce-invalid' );
+		} );
+	} );
+
+	describe( 'Checkout form serialization', () => {
+		beforeEach( () => {
+			jest.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			jest.clearAllTimers();
+			jest.useRealTimers();
+		} );
+
+		const expectedSerializedData =
+			'billing_email=shopper%27o%40example.test' +
+			'&company=Rock+%26+Roll' +
+			'&items%5B%5D=one' +
+			'&delivery%27note=Recipient%27s+door' +
+			'&reference=already%27encoded';
+
+		test( 'should encode apostrophes in update order review data', () => {
+			mockBody.trigger( 'update_checkout', [
+				{ update_shipping_method: false },
+			] );
+			jest.runOnlyPendingTimers();
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'update_order_review' )
+			);
+
+			expect( request ).toBeDefined();
+			expect( request.data ).not.toContain( "'" );
+
+			// Address fields travel outside post_data and must be encoded too.
+			expect( request.data ).toContain( 'city=O%27Fallon' );
+			expect( request.data ).toContain( 'address=123+O%27Brien+Ave' );
+			expect( request.data ).toContain( 'state=O%27State' );
+
+			// The whole body is encoded, so post_data survives the outer layer
+			// byte-for-byte and raw-string consumers see what serialize() produced.
+			const postData = new URLSearchParams( request.data ).get(
+				'post_data'
+			);
+			expect( postData ).toBe( serializedCheckoutData );
+		} );
+
+		test( 'should encode apostrophes in final checkout data', () => {
+			const submitRegistration = $form.on.mock.calls.find(
+				( call ) => call[ 0 ] === 'submit'
+			);
+			expect( submitRegistration ).toBeDefined();
+
+			submitRegistration[ 1 ].call( $form );
+			const request = capturedAjaxRequests.find(
+				( options ) => options.url === '/?wc-ajax=checkout'
+			);
+
+			expect( request ).toBeDefined();
+			expect( request.data ).toBe( expectedSerializedData );
 		} );
 	} );
 } );

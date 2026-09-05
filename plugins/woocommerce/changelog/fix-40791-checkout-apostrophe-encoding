@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Encode apostrophes in classic checkout request data.
