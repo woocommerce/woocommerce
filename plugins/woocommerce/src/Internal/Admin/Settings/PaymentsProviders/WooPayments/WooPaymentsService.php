@@ -1236,10 +1236,16 @@ class WooPaymentsService {
 			return;
 		}
 
-		$account_service = $this->proxy->call_static( '\\WC_Payments', 'get_account_service' );
-		if ( is_object( $account_service ) && method_exists( $account_service, 'refresh_test_account_data' ) ) {
-			$account_service->refresh_test_account_data();
-		} else {
+		try {
+			$request = $this->proxy->call_static( '\WCPay\Core\Server\Request', 'get', 'accounts/readiness' );
+			$request->assign_hook( 'wcpay_get_account_readiness_request' );
+			$account = $request->send();
+		} catch ( \Exception $e ) {
+			return;
+		}
+
+		if ( is_array( $account ) && ! empty( $account['payments_enabled'] ) ) {
+			$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
 			$account_service->refresh_account_data();
 		}
 	}

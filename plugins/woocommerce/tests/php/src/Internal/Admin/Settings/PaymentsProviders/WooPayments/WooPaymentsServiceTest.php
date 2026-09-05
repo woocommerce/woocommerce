@@ -54,6 +54,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	protected $mock_account_service;
 
+	/** @var \PHPUnit\Framework\MockObject\MockObject */
+	private $mock_readiness_request;
+
 	/**
 	 * The ID of the store admin user.
 	 *
@@ -144,9 +147,22 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
+		$this->mock_readiness_request = $this->getMockBuilder( \stdClass::class )->addMethods( array( 'send', 'assign_hook' ) )->getMock();
+
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data', 'refresh_account_data' ) )
 			->getMock();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WCPay\Core\Server\Request' => array(
+					'get' => function ( $route ) {
+						$this->assertSame( 'accounts/readiness', $route );
+						return $this->mock_readiness_request;
+					},
+				),
+			)
+		);
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
@@ -6845,20 +6861,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should observe a ready test account when its webhook update was delayed.
-	 * @testWith [false]
-	 *           [true]
-	 * @param bool $supports_readiness Whether WooPayments supports lightweight readiness checks.
+	 * @testdox Should fetch full account data only after readiness succeeds.
 	 */
-	public function test_onboarding_step_check_refreshes_stale_test_account( bool $supports_readiness ): void {
-		$refresh_method = 'refresh_account_data';
-		if ( $supports_readiness ) {
-			$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
-				->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data', 'refresh_account_data', 'refresh_test_account_data' ) )
-				->getMock();
-			$this->mock_account_service->expects( $this->never() )->method( 'refresh_account_data' );
-			$refresh_method = 'refresh_test_account_data';
-		}
+	public function test_onboarding_step_check_refreshes_stale_test_account(): void {
+		$this->mock_readiness_request->expects( $this->once() )->method( 'assign_hook' )->with( 'wcpay_get_account_readiness_request' );
+		$this->mock_readiness_request->expects( $this->once() )->method( 'send' )->willReturn( array( 'payments_enabled' => true ) );
 		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
 		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( true );
 		$this->mock_provider->method( 'is_account_connected' )->willReturn( true );
@@ -6872,7 +6879,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
-		$this->mock_account_service->expects( $this->once() )->method( $refresh_method )->willReturnCallback(
+		$this->mock_account_service->expects( $this->once() )->method( 'refresh_account_data' )->willReturnCallback(
 			static function () use ( &$ready ) {
 				$ready = true;
 			}
@@ -6888,9 +6895,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should wait between refresh attempts even when the platform is unavailable.
+	 * @testdox Should throttle pending checks and failed requests without refreshing the full account.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $fails Whether the readiness request fails.
 	 */
-	public function test_onboarding_step_check_throttles_failed_refreshes(): void {
+	public function test_onboarding_step_check_throttles_failed_refreshes( bool $fails ): void {
 		$this->mock_account_service->method( 'is_stripe_account_valid' )->willReturn( true );
 		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
 		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( true );
@@ -6901,7 +6911,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'paymentsEnabled' => false,
 			)
 		);
-		$this->mock_account_service->expects( $this->exactly( 2 ) )->method( 'refresh_account_data' )->willReturn( false );
+		$this->mock_account_service->expects( $this->never() )->method( 'refresh_account_data' );
+		$send = $this->mock_readiness_request->expects( $this->exactly( 2 ) )->method( 'send' );
+		if ( $fails ) {
+			$send->willThrowException( new \Exception( 'Unavailable' ) );
+		} else {
+			$send->willReturn( array( 'payments_enabled' => false ) );
+		}
 
 		foreach ( array( 0, 3, 6, 9, 10, 12, 15, 19, 20 ) as $elapsed ) {
 			$this->current_time = self::TEST_EPOCH + $elapsed;
