@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use WP_Query;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -569,7 +570,7 @@ class ProductQuery extends AbstractBlock {
 	 */
 	private function get_product_visibility_query( $stock_query ) {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
-		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+		$product_visibility_not_in = array( is_search() ? $product_visibility_terms[ ProductVisibility::EXCLUDE_FROM_SEARCH ] : $product_visibility_terms[ ProductVisibility::EXCLUDE_FROM_CATALOG ] );
 
 		// Hide out of stock products.
 		if ( empty( $stock_query ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {

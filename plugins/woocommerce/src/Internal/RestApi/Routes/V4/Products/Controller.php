@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
@@ -466,7 +467,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
-				'terms'    => 'featured',
+				'terms'    => ProductVisibility::FEATURED,
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
 			);
 		}

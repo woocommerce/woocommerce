@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
@@ -191,7 +192,7 @@ class ProductQuery implements QueryClausesGenerator {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
-				'terms'    => 'featured',
+				'terms'    => ProductVisibility::FEATURED,
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
 			);
 		}
@@ -212,8 +213,8 @@ class ProductQuery implements QueryClausesGenerator {
 		$visibility_options = wc_get_product_visibility_options();
 
 		if ( in_array( $catalog_visibility, array_keys( $visibility_options ), true ) ) {
-			$exclude_from_catalog = CatalogVisibility::SEARCH === $catalog_visibility ? '' : 'exclude-from-catalog';
-			$exclude_from_search  = CatalogVisibility::CATALOG === $catalog_visibility ? '' : 'exclude-from-search';
+			$exclude_from_catalog = CatalogVisibility::SEARCH === $catalog_visibility ? '' : ProductVisibility::EXCLUDE_FROM_CATALOG;
+			$exclude_from_search  = CatalogVisibility::CATALOG === $catalog_visibility ? '' : ProductVisibility::EXCLUDE_FROM_SEARCH;
 
 			$args['tax_query'][] = array(
 				'taxonomy'      => 'product_visibility',

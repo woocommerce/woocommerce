@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductVisibility;
 
 /**
  * AbstractProductGrid class.
@@ -290,7 +291,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 */
 	protected function set_visibility_query_args( &$query_args ) {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
-		$product_visibility_not_in = array( $product_visibility_terms['exclude-from-catalog'] );
+		$product_visibility_not_in = array( $product_visibility_terms[ ProductVisibility::EXCLUDE_FROM_CATALOG ] );
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$product_visibility_not_in[] = $product_visibility_terms[ ProductStockStatus::OUT_OF_STOCK ];

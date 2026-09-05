@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a ProductVisibility enum class for the product_visibility taxonomy terms and use it in place of raw string literals in src.
