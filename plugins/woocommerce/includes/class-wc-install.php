@@ -2114,6 +2114,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
+	taxable_amount double DEFAULT 0 NOT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)

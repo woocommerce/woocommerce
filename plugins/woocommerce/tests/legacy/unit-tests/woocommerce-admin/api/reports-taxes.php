@@ -370,6 +370,30 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the CSV export column order stays in sync with the report table.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/taxes/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'tax_code',
+			'rate',
+			'total_tax',
+			'order_tax',
+			'shipping_tax',
+			'taxable_amount',
+			'orders_count',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'New CSV columns must be appended, and table.js must be updated to match' );
+	}
+
+	/**
 	 * Test reports schema.
 	 *
 	 * @since 3.5.0
@@ -382,7 +406,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
 		$this->assertArrayHasKey( 'tax_rate_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'tax_rate', $properties );
@@ -392,6 +416,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'total_tax', $properties );
 		$this->assertArrayHasKey( 'order_tax', $properties );
 		$this->assertArrayHasKey( 'shipping_tax', $properties );
+		$this->assertArrayHasKey( 'taxable_amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 	}
 

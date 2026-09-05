@@ -45,16 +45,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'tax_rate_id'  => 'intval',
-		'name'         => 'strval',
-		'tax_rate'     => 'floatval',
-		'country'      => 'strval',
-		'state'        => 'strval',
-		'priority'     => 'intval',
-		'total_tax'    => 'floatval',
-		'order_tax'    => 'floatval',
-		'shipping_tax' => 'floatval',
-		'orders_count' => 'intval',
+		'tax_rate_id'    => 'intval',
+		'name'           => 'strval',
+		'tax_rate'       => 'floatval',
+		'country'        => 'strval',
+		'state'          => 'strval',
+		'priority'       => 'intval',
+		'total_tax'      => 'floatval',
+		'order_tax'      => 'floatval',
+		'shipping_tax'   => 'floatval',
+		'taxable_amount' => 'floatval',
+		'orders_count'   => 'intval',
 	);
 
 	/**
@@ -65,6 +66,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var string
 	 */
 	protected $context = 'taxes';
+
+	/**
+	 * Option caching a positive check for the taxable_amount column on the lookup table.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @var string
+	 */
+	const OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN = 'woocommerce_tax_lookup_has_taxable_amount_column';
 
 	/**
 	 * Constructor.
@@ -98,20 +108,92 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// but given this query is paginated and cached, then it is not a big deal. There is always room for
 		// improvements here.
 		$this->report_columns = array(
-			'tax_rate_id'  => "{$table_name}.tax_rate_id",
-			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
-			'tax_rate'     => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
-			'country'      => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
-			'state'        => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
-			'priority'     => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
-			'total_tax'    => 'SUM(total_tax) as total_tax',
-			'order_tax'    => 'SUM(order_tax) as order_tax',
-			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
+			'tax_rate_id'    => "{$table_name}.tax_rate_id",
+			'name'           => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
+			'tax_rate'       => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
+			'country'        => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
+			'state'          => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
+			'priority'       => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
+			'total_tax'      => 'SUM(total_tax) as total_tax',
+			'order_tax'      => 'SUM(order_tax) as order_tax',
+			'shipping_tax'   => 'SUM(shipping_tax) as shipping_tax',
+			'taxable_amount' => 'SUM(taxable_amount) as taxable_amount',
 			// parent_id stays unqualified: wc_order_stats is the only joined table carrying it, and
 			// this string is carried by the public woocommerce_admin_report_columns filter, so it must
 			// match the released form for extension callbacks that inspect or rewrite it.
-			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
+			'orders_count'   => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
+
+		// Guard against the column not existing yet: the report otherwise breaks entirely on a
+		// site where the upgrade routine has not run (or could not run) the schema update.
+		if ( ! static::has_taxable_amount_column() ) {
+			unset( $this->report_columns['taxable_amount'] );
+		}
+	}
+
+	/**
+	 * Check if the wc_order_tax_lookup table has the taxable_amount column.
+	 *
+	 * Only a positive result is cached: while the column is missing the check re-runs,
+	 * so the feature turns on by itself once the schema update lands.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public static function has_taxable_amount_column() {
+		// Memoize the negative result per request only: a site whose schema update never
+		// lands would otherwise pay two SHOW queries per call, once per order on imports.
+		// Keyed by blog id since the schema is per site, though get_db_table_name() itself
+		// memoizes the first blog's table name across switch_to_blog() (pre-existing
+		// limitation shared by the whole Taxes report).
+		static $missing_this_request = array();
+
+		if ( ! empty( $missing_this_request[ get_current_blog_id() ] ) ) {
+			return false;
+		}
+
+		if ( 'yes' === get_option( self::OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN ) ) {
+			return true;
+		}
+
+		global $wpdb;
+		$table_name = self::get_db_table_name();
+
+		// If the table itself does not exist yet, checking its columns would be a DB error.
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$table_name
+			)
+		);
+
+		if ( ! $table_exists ) {
+			$missing_this_request[ get_current_blog_id() ] = true;
+			return false;
+		}
+
+		$column_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+				'taxable_amount'
+			)
+		);
+
+		if ( empty( $column_exists ) ) {
+			$missing_this_request[ get_current_blog_id() ] = true;
+			return false;
+		}
+
+		// The column changes the report's SELECT, so reports cached before it existed would
+		// keep serving rows without it for up to a week. Invalidate only when the option
+		// write persisted, or a blocked write would re-invalidate on every request.
+		if ( update_option( self::OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN, 'yes', false ) ) {
+			ReportsCache::invalidate();
+		}
+
+		return true;
 	}
 
 	/**
@@ -223,6 +305,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page_no' => 0,
 		);
 
+		// While the taxable_amount column is missing its report column is unset, so ordering
+		// by it would be a SQL error. Fall back to the default order.
+		if ( 'taxable_amount' === ( $query_args['orderby'] ?? '' ) && ! isset( $this->report_columns['taxable_amount'] ) ) {
+			$query_args['orderby'] = 'tax_rate_id';
+		}
+
 		$this->add_sql_query_params( $query_args );
 		$params = $this->get_limit_params( $query_args );
 
@@ -245,7 +333,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-		if ( in_array( $query_args['orderby'], array( 'total_tax', 'order_tax', 'shipping_tax', 'orders_count' ), true ) ) {
+		if ( in_array( $query_args['orderby'], array( 'total_tax', 'order_tax', 'shipping_tax', 'taxable_amount', 'orders_count' ), true ) ) {
 			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', tax_rate_id' );
 		} else {
 			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
@@ -355,8 +443,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$table_name    = self::get_db_table_name();
-		$date_created  = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
+		$table_name   = self::get_db_table_name();
+		$date_created = $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format );
+		/**
+		 * Tax line items of the order.
+		 *
+		 * @var \WC_Order_Item_Tax[] $tax_items
+		 */
 		$tax_items     = $order->get_items( OrderItemType::TAX );
 		$keyed_by_item = self::lookup_is_keyed_by_order_item();
 
@@ -396,6 +489,42 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 		}
 
+		// Guard against the column not existing yet: wpdb::replace() with an unknown column
+		// fails whole, which would silently drop the order from the Taxes report.
+		$has_taxable_amount_column = static::has_taxable_amount_column();
+		$taxable_amounts           = array();
+
+		// Also skip orders without tax lines: computing bases would hydrate every
+		// line item, fee and shipping row for a write that never happens.
+		if ( $has_taxable_amount_column && ! empty( $tax_items ) ) {
+			// A refund's tax items re-derive the compound flag from the live rate, which can
+			// be gone by refund time; the parent's tax items carry the flags as charged, and
+			// the refund base must mirror them or a refunded order stops netting to zero.
+			$flag_items = $tax_items;
+			if ( $order instanceof \WC_Order_Refund ) {
+				$parent = wc_get_order( $order->get_parent_id() );
+				if ( $parent ) {
+					/**
+					 * Tax line items of the parent order.
+					 *
+					 * @var \WC_Order_Item_Tax[] $parent_tax_items
+					 */
+					$parent_tax_items = $parent->get_items( OrderItemType::TAX );
+					if ( ! empty( $parent_tax_items ) ) {
+						$flag_items = $parent_tax_items;
+					}
+				}
+			}
+
+			$compound_rate_ids = array();
+			foreach ( $flag_items as $tax_item ) {
+				if ( $tax_item->get_compound() ) {
+					$compound_rate_ids[] = $tax_item->get_rate_id();
+				}
+			}
+			$taxable_amounts = static::get_taxable_amounts_by_rate( $order, $compound_rate_ids );
+		}
+
 		foreach ( $tax_items as $tax_item ) {
 			// Leaving the column at zero on a table the re-key never reached keeps the row in the
 			// shape the released report reads, rather than collapsing the order's tax lines into
@@ -407,8 +536,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			// together, so a line whose rate id has changed leaves behind the row it held before.
 			unset( $stale[ $tax_rate_id . '-' . $order_item_id ] );
 
-			$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
-
 			array_push(
 				$values,
 				$order->get_id(),
@@ -419,6 +546,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_item->get_tax_total(),
 				(float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total()
 			);
+
+			if ( $has_taxable_amount_column ) {
+				// The bases are computed per rate and the report sums the column per rate, so
+				// when tax lines share a rate only the first row carries the rate's base. On an
+				// unkeyed table the lines collapse into one row and the last write wins, so
+				// there every write carries the base.
+				$values[] = $taxable_amounts[ $tax_rate_id ] ?? 0;
+				if ( $keyed_by_item ) {
+					unset( $taxable_amounts[ $tax_rate_id ] );
+				}
+				$rows[] = '(%d, %s, %d, %d, %f, %f, %f, %f)';
+			} else {
+				$rows[] = '(%d, %s, %d, %d, %f, %f, %f)';
+			}
 		}
 
 		// One statement for the whole order. Rebuilding only some of its lines would leave a row
@@ -426,10 +567,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// that row stands in for every line of the order sharing its rate, so the reports would
 		// count those lines twice.
 		if ( $rows ) {
+			$columns = 'order_id, date_created, tax_rate_id, order_item_id, shipping_tax, order_tax, total_tax';
+			if ( $has_taxable_amount_column ) {
+				$columns .= ', taxable_amount';
+			}
+
 			$written = $wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is not user input, and the value placeholders are built above, one set per tax line.
-					"REPLACE INTO {$table_name} (order_id, date_created, tax_rate_id, order_item_id, shipping_tax, order_tax, total_tax) VALUES " . implode( ', ', $rows ),
+					"REPLACE INTO {$table_name} ({$columns}) VALUES " . implode( ', ', $rows ),
 					$values
 				)
 			);
@@ -490,6 +636,60 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Sum the net totals of the order parts (line items, fees, shipping) each tax rate applied to.
+	 *
+	 * Computed from the items rather than derived from the tax amounts, so zero-rated
+	 * sales still record the base amount they were taxed on. A compound rate is applied
+	 * on top of the other taxes of the same item, so its base includes them.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param \WC_Order|\WC_Order_Refund $order             Order object.
+	 * @param int[]                      $compound_rate_ids Ids of the order's compound tax rates.
+	 * @return array Map of tax rate id => taxable amount.
+	 */
+	protected static function get_taxable_amounts_by_rate( $order, $compound_rate_ids = array() ) {
+		$amounts = array();
+		/**
+		 * Taxable line items of the order.
+		 *
+		 * @var \WC_Order_Item_Product[]|\WC_Order_Item_Fee[]|\WC_Order_Item_Shipping[] $items
+		 */
+		$items = $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE, OrderItemType::SHIPPING ) );
+
+		foreach ( $items as $item ) {
+			$taxes = $item->get_taxes();
+			if ( empty( $taxes['total'] ) || ! is_array( $taxes['total'] ) ) {
+				continue;
+			}
+
+			$non_compound_tax = 0.0;
+			foreach ( $taxes['total'] as $rate_id => $tax ) {
+				if ( ! in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
+					$non_compound_tax += (float) $tax;
+				}
+			}
+
+			// Mirror WC_Tax::calc_exclusive_tax(): a compound rate is applied over the item
+			// total plus all non-compound taxes plus the compound taxes applied before it.
+			// Assumes the item tax data keeps core's rate order (compound rates after the
+			// rates they compound over); a third-party engine writing another order would
+			// only mis-split the base between multiple compound rates, not the total.
+			$compound_running_tax = 0.0;
+			foreach ( $taxes['total'] as $rate_id => $tax ) {
+				$base = (float) $item->get_total();
+				if ( in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
+					$base                 += $non_compound_tax + $compound_running_tax;
+					$compound_running_tax += (float) $tax;
+				}
+				$amounts[ $rate_id ] = ( $amounts[ $rate_id ] ?? 0 ) + $base;
+			}
+		}
+
+		return $amounts;
 	}
 
 	/**
