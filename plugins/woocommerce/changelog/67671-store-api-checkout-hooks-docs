@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Document that template hooks such as woocommerce_thankyou do not fire for headless Store API checkouts and point developers to order lifecycle hooks instead (#67671)
