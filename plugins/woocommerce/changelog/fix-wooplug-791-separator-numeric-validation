@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent numbers from being saved as the thousand or decimal separator in currency settings.
