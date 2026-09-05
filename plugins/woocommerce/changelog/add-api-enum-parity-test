@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a test that keeps the enums in src/Api/Enums and their src/Enums counterparts from drifting apart.

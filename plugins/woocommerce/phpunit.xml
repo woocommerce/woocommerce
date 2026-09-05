@@ -24,6 +24,7 @@
 			     ./tests/php/src/Api/<X>/ subdir is never silently picked up by
 			     this suite. A new GraphQL test subdir must be added to the
 			     wc-phpunit-graphql testsuite AND excluded here. -->
+			<exclude>./tests/php/src/Api/Enums</exclude>
 			<exclude>./tests/php/src/Api/Infrastructure</exclude>
 			<exclude>./tests/php/src/Api/Queries</exclude>
 			<exclude>./tests/php/src/Api/Mutations</exclude>
@@ -35,6 +36,7 @@
 		     the public command classes under src/Api/Queries/ and
 		     src/Api/Mutations/ (products, coupons, …). -->
 		<testsuite name="wc-phpunit-graphql">
+			<directory suffix=".php">./tests/php/src/Api/Enums</directory>
 			<directory suffix=".php">./tests/php/src/Api/Infrastructure</directory>
 			<directory suffix=".php">./tests/php/src/Internal/Api</directory>
 			<directory suffix=".php">./tests/php/src/Api/Queries</directory>
