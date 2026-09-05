@@ -6,7 +6,7 @@ declare( strict_types=1 );
  */
 class WC_Countries_Test extends \WC_Unit_Test_Case {
 	/**
-	 * Locale exposed through the WordPress locale filter.
+	 * Locale exposed through the WordPress request-locale filter.
 	 *
 	 * @var mixed
 	 */
@@ -32,6 +32,13 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	 * @var int
 	 */
 	private $country_filter_calls = 0;
+
+	/**
+	 * Number of times the country locale filter was called.
+	 *
+	 * @var int
+	 */
+	private $country_locale_filter_calls = 0;
 
 	/**
 	 * Number of empty geographical filter calls keyed by filter name.
@@ -65,7 +72,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Filter the active locale.
+	 * Filter the active request locale.
 	 *
 	 * @internal
 	 *
@@ -87,6 +94,19 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	public function filter_stateful_locale( $locale ) {
 		++$this->locale_filter_calls;
 		return 1 === $this->locale_filter_calls ? '' : 'en_US';
+	}
+
+	/**
+	 * Record and return the active request locale.
+	 *
+	 * @internal
+	 *
+	 * @param string $locale Current locale.
+	 * @return mixed
+	 */
+	public function filter_counted_active_locale( $locale ) {
+		++$this->locale_filter_calls;
+		return $this->active_locale;
 	}
 
 	/**
@@ -166,6 +186,20 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Stamp country locale settings for the active request locale.
+	 *
+	 * @internal
+	 *
+	 * @param array $locale Country locale settings.
+	 * @return array
+	 */
+	public function filter_country_locale( $locale ) {
+		++$this->country_locale_filter_calls;
+		$locale['US']['postcode']['label'] = $this->active_locale;
+		return $locale;
+	}
+
+	/**
 	 * Return the option value that enables all countries.
 	 *
 	 * @internal
@@ -189,8 +223,9 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		$this->states_global_existed = false;
 		$this->states_global_value   = null;
 
-		remove_filter( 'locale', array( $this, 'filter_active_locale' ) );
-		remove_filter( 'locale', array( $this, 'filter_stateful_locale' ) );
+		remove_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
+		remove_filter( 'determine_locale', array( $this, 'filter_counted_active_locale' ) );
+		remove_filter( 'determine_locale', array( $this, 'filter_stateful_locale' ) );
 		remove_filter( 'woocommerce_countries', array( $this, 'filter_country_names' ) );
 		remove_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
 		remove_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
@@ -198,6 +233,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_states', array( $this, 'filter_empty_geographical_data' ) );
 		remove_filter( 'woocommerce_continents', array( $this, 'filter_continent_names' ) );
 		remove_filter( 'woocommerce_continents', array( $this, 'filter_empty_geographical_data' ) );
+		remove_filter( 'woocommerce_get_country_locale', array( $this, 'filter_country_locale' ) );
 		remove_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
 		remove_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
 
@@ -205,15 +241,16 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		$this->geographical_filter_calls       = array();
 		$this->locale_filter_calls             = 0;
 		$this->country_filter_calls            = 0;
+		$this->country_locale_filter_calls     = 0;
 		$this->empty_geographical_filter_calls = array();
 
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox Geographical data uses the active locale and reuses each locale cache.
+	 * @testdox Geographical data uses the active request locale and reuses each locale cache.
 	 */
-	public function test_geographical_data_uses_the_active_locale_and_reuses_each_locale_cache() {
+	public function test_geographical_data_uses_the_active_request_locale_and_reuses_each_locale_cache() {
 		$this->register_geographical_filters();
 		$sut = new WC_Countries();
 
@@ -243,20 +280,20 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Loading country states populates only the active locale.
+	 * @testdox Loading country states populates only the active request locale.
 	 */
-	public function test_load_country_states_populates_only_the_active_locale() {
+	public function test_load_country_states_populates_only_the_active_request_locale() {
 		$this->register_geographical_filters();
 		$sut = new WC_Countries();
 
 		$sut->load_country_states();
-		$this->assertSame( 'en_US', $sut->get_states( 'US' )['CA'], 'Loaded states should use the active locale.' );
+		$this->assertSame( 'en_US', $sut->get_states( 'US' )['CA'], 'Loaded states should use the active request locale.' );
 
 		$this->active_locale = 'fr_FR';
-		$this->assertSame( 'fr_FR', $sut->get_states( 'US' )['CA'], 'States should use the changed active locale.' );
+		$this->assertSame( 'fr_FR', $sut->get_states( 'US' )['CA'], 'States should use the changed active request locale.' );
 
 		$this->active_locale = 'en_US';
-		$this->assertSame( 'en_US', $sut->get_states( 'US' )['CA'], 'States should reuse the restored locale cache.' );
+		$this->assertSame( 'en_US', $sut->get_states( 'US' )['CA'], 'States should reuse the restored request-locale cache.' );
 		$this->assertSame(
 			array(
 				'en_US' => 1,
@@ -268,10 +305,92 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Country locale settings rebuild for the active request locale.
+	 */
+	public function test_country_locale_settings_rebuild_for_the_active_request_locale(): void {
+		add_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
+		add_filter( 'woocommerce_get_country_locale', array( $this, 'filter_country_locale' ) );
+		$sut = new WC_Countries();
+
+		$this->assertSame( 'en_US', $sut->get_country_locale()['US']['postcode']['label'], 'Country locale settings should use the initial request locale.' );
+		$this->assertSame( 'en_US', $sut->get_country_locale()['US']['postcode']['label'], 'Country locale settings should reuse the initial request-locale cache.' );
+		$this->assertSame( 1, $this->country_locale_filter_calls, 'Country locale settings should be built once for the initial request locale.' );
+
+		$this->active_locale = 'fr_FR';
+
+		$this->assertSame( 'fr_FR', $sut->get_country_locale()['US']['postcode']['label'], 'Country locale settings should rebuild for the changed request locale.' );
+		$this->assertSame( 'fr_FR', $sut->get_country_locale()['US']['postcode']['label'], 'Country locale settings should reuse the changed request-locale cache.' );
+		$this->assertSame( 2, $this->country_locale_filter_calls, 'Country locale settings should be built once per request locale.' );
+	}
+
+	/**
+	 * @testdox Country locale settings preserve a prepopulated public locale property.
+	 */
+	public function test_country_locale_settings_preserve_a_prepopulated_public_locale_property(): void {
+		$custom_locale = array(
+			'CUSTOM' => array(
+				'city' => array(
+					'label' => 'Extension-provided city',
+				),
+			),
+		);
+		$sut           = new WC_Countries();
+		$sut->locale   = $custom_locale;
+		add_filter( 'determine_locale', array( $this, 'filter_counted_active_locale' ) );
+
+		$this->assertSame( $custom_locale, $sut->get_country_locale(), 'A prepopulated public locale property should remain authoritative.' );
+		$this->assertSame( 0, $this->locale_filter_calls, 'A prepopulated public locale property should bypass request-locale evaluation.' );
+	}
+
+	/**
+	 * @testdox Filtering states for specific countries reads the magic states property once.
+	 *
+	 * @dataProvider provide_specific_country_state_methods
+	 *
+	 * @param string $method                   Method under test.
+	 * @param string $mode_option              Country restriction mode option.
+	 * @param string $specific_countries_option Specific countries option.
+	 */
+	public function test_filtering_states_for_specific_countries_reads_the_magic_states_property_once( $method, $mode_option, $specific_countries_option ): void {
+		update_option( $mode_option, 'specific' );
+		update_option( $specific_countries_option, array( 'US', 'CA' ) );
+		add_filter( 'determine_locale', array( $this, 'filter_counted_active_locale' ) );
+		$sut = new class() extends WC_Countries {
+			/**
+			 * Number of reads through the magic states property.
+			 *
+			 * @var int
+			 */
+			public $state_property_reads = 0;
+
+			/**
+			 * Track magic states property reads.
+			 *
+			 * @param mixed $key Property key.
+			 * @return mixed
+			 */
+			public function __get( $key ) {
+				if ( 'states' === $key ) {
+					++$this->state_property_reads;
+				}
+
+				return parent::__get( $key );
+			}
+		};
+
+		$states = $sut->$method();
+
+		$this->assertArrayHasKey( 'US', $states, 'The United States should be included in the filtered states.' );
+		$this->assertArrayHasKey( 'CA', $states, 'Canada should be included in the filtered states.' );
+		$this->assertSame( 1, $sut->state_property_reads, 'Filtering states should preserve one magic property read.' );
+		$this->assertSame( 1, $this->locale_filter_calls, 'Filtering states should evaluate the request locale once.' );
+	}
+
+	/**
 	 * @testdox Country loading normalizes a falsey locale with one locale read.
 	 */
 	public function test_country_loading_normalizes_a_falsey_locale_with_one_locale_read() {
-		add_filter( 'locale', array( $this, 'filter_stateful_locale' ) );
+		add_filter( 'determine_locale', array( $this, 'filter_stateful_locale' ) );
 		add_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
 		$sut = new WC_Countries();
 
@@ -294,7 +413,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_country_loading_normalizes_invalid_filtered_locale( $invalid_locale ): void {
 		$this->active_locale = $invalid_locale;
-		add_filter( 'locale', array( $this, 'filter_active_locale' ) );
+		add_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
 		add_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
 		$sut = new WC_Countries();
 
@@ -307,7 +426,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty filtered geographical data preserves existing cache semantics.
+	 * @testdox Empty filtered geographical data preserves existing cache semantics (characterization, not locale coverage).
 	 */
 	public function test_empty_filtered_geographical_data_preserves_existing_cache_semantics(): void {
 		add_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
@@ -418,10 +537,22 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Specific-country state methods and their options.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_specific_country_state_methods() {
+		return array(
+			'allowed states'  => array( 'get_allowed_country_states', 'woocommerce_allowed_countries', 'woocommerce_specific_allowed_countries' ),
+			'shipping states' => array( 'get_shipping_country_states', 'woocommerce_ship_to_countries', 'woocommerce_specific_ship_to_countries' ),
+		);
+	}
+
+	/**
 	 * Register the geographical data filters used by locale tests.
 	 */
 	private function register_geographical_filters() {
-		add_filter( 'locale', array( $this, 'filter_active_locale' ) );
+		add_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
 		add_filter( 'woocommerce_countries', array( $this, 'filter_country_names' ) );
 		add_filter( 'woocommerce_states', array( $this, 'filter_state_names' ) );
 		add_filter( 'woocommerce_continents', array( $this, 'filter_continent_names' ) );

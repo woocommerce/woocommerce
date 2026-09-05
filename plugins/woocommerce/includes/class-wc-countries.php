@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * The WooCommerce countries class stores country/state data.
+ *
+ * @property-read array $states Country states.
  */
 class WC_Countries {
 
@@ -40,12 +42,21 @@ class WC_Countries {
 	private $geo_cache = array();
 
 	/**
-	 * Get the active locale for geographical cache entries.
+	 * Locale used to build the cached country locale settings.
+	 *
+	 * Null until get_country_locale() builds the public locale property.
+	 *
+	 * @var string|null
+	 */
+	private $country_locale_built_for = null;
+
+	/**
+	 * Get the active request locale for geographical cache entries.
 	 *
 	 * @return string
 	 */
 	private function get_cache_locale() {
-		$locale = get_locale();
+		$locale = determine_locale();
 
 		return is_string( $locale ) && $locale ? $locale : 'en_US';
 	}
@@ -418,9 +429,11 @@ class WC_Countries {
 		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
 		if ( $raw_countries ) {
+			$all_states = $this->states;
+
 			foreach ( $raw_countries as $country ) {
-				if ( isset( $this->states[ $country ] ) ) {
-					$states[ $country ] = $this->states[ $country ];
+				if ( isset( $all_states[ $country ] ) ) {
+					$states[ $country ] = $all_states[ $country ];
 				}
 			}
 		}
@@ -447,9 +460,11 @@ class WC_Countries {
 		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
 
 		if ( $raw_countries ) {
+			$all_states = $this->states;
+
 			foreach ( $raw_countries as $country ) {
-				if ( ! empty( $this->states[ $country ] ) ) {
-					$states[ $country ] = $this->states[ $country ];
+				if ( ! empty( $all_states[ $country ] ) ) {
+					$states[ $country ] = $all_states[ $country ];
 				}
 			}
 		}
@@ -912,7 +927,13 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_country_locale() {
-		if ( empty( $this->locale ) ) {
+		if ( ! empty( $this->locale ) && null === $this->country_locale_built_for ) {
+			return $this->locale;
+		}
+
+		$cache_locale = $this->get_cache_locale();
+
+		if ( empty( $this->locale ) || ( null !== $this->country_locale_built_for && $cache_locale !== $this->country_locale_built_for ) ) {
 			$this->locale = apply_filters(
 				'woocommerce_get_country_locale',
 				array(
@@ -1749,6 +1770,8 @@ class WC_Countries {
 				}
 			}
 			unset( $locale_entry );
+
+			$this->country_locale_built_for = $cache_locale;
 		}
 
 		return $this->locale;
