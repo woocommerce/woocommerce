@@ -383,6 +383,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
 	}
 
 	/**
