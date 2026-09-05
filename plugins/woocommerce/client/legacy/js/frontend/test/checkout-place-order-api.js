@@ -269,7 +269,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			Object.keys( object ).forEach( ( key ) =>
 				buildParams( key, object[ key ] )
 			);
-			return parts.join( '&' ).replace( /%20/g, '+' );
+			return parts.join( '&' ).split( '%20' ).join( '+' );
 		} );
 		jQueryMock.ajaxSetup = jest.fn();
 
