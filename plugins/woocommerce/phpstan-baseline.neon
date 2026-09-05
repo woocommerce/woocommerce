@@ -30082,12 +30082,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-report-reviews-totals-controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function get_comments expects array\{author_email\?\: string, author_url\?\: string, author__in\?\: array\<int\>, author__not_in\?\: array\<int\>, comment__in\?\: array\<int\>, comment__not_in\?\: array\<int\>, count\?\: bool, date_query\?\: array, \.\.\.\}, array\{count\: true, post_type\: ''product'', meta_key\: ''rating'', meta_value\: int\<1, 5\>\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-report-reviews-totals-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Report_Sales_V2_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 128 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1

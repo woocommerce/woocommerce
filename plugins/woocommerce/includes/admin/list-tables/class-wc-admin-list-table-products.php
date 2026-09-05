@@ -356,7 +356,18 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
+			/**
+			 * Filters the term list rendered in the products list table taxonomy column.
+			 *
+			 * @since 3.3.0
+			 *
+			 * @param string             $term_list  Comma separated list of escaped term links.
+			 * @param string             $taxonomy   Taxonomy the terms belong to.
+			 * @param int                $product_id ID of the product the terms are rendered for.
+			 * @param string[]           $termlist   Individual escaped term links.
+			 * @param WP_Term[]|WP_Error $terms      Term objects assigned to the product, or the WP_Error returned by get_the_terms().
+			 */
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Term names and links are escaped above; the filter returns extension-controlled markup by design.
 		}
 	}
 
@@ -373,7 +384,18 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
+			/**
+			 * Filters the term list rendered in the products list table taxonomy column.
+			 *
+			 * @since 3.3.0
+			 *
+			 * @param string             $term_list  Comma separated list of escaped term links.
+			 * @param string             $taxonomy   Taxonomy the terms belong to.
+			 * @param int                $product_id ID of the product the terms are rendered for.
+			 * @param string[]           $termlist   Individual escaped term links.
+			 * @param WP_Term[]|WP_Error $terms      Term objects assigned to the product, or the WP_Error returned by get_the_terms().
+			 */
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Term names and links are escaped above; the filter returns extension-controlled markup by design.
 		}
 	}
 
@@ -440,7 +462,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 		$output = ob_get_clean();
 
-		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
+		/**
+		 * Filters the rendered markup for the products list table filter controls.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string|false $output Buffered markup produced by the registered filter renderers, or false when no output buffer was active.
+		 */
+		echo apply_filters( 'woocommerce_product_filters', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output is buffered admin markup and the filter returns extension-controlled markup by design.
 	}
 
 	/**
