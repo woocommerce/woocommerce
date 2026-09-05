@@ -588,6 +588,37 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_purchasable_variations stops reading stored state once a child answers, with no bulk read.
+	 */
+	public function test_has_purchasable_variations_does_not_pre_check_every_child_for_an_early_hit(): void {
+		// At or below the batch size there is no bulk read, so this is the path every small product takes.
+		$product = $this->create_variable_product_with_variations( array_fill( 0, 40, array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' ) ) );
+
+		$read = array();
+		add_filter(
+			'get_post_metadata',
+			function ( $value, $object_id, $meta_key ) use ( &$read ) {
+				if ( '_stock_status' === $meta_key ) {
+					$read[ $object_id ] = true;
+				}
+				return $value;
+			},
+			10,
+			3
+		);
+
+		wp_cache_flush();
+		$product = wc_get_product( $product->get_id() );
+
+		$this->assertTrue( $product->has_purchasable_variations() );
+		$this->assertCount(
+			1,
+			$read,
+			'The first child answers the question, so no other child should have its stored state read.'
+		);
+	}
+
+	/**
 	 * @testdox has_purchasable_variations reaches a candidate beyond the first batch.
 	 */
 	public function test_has_purchasable_variations_scans_the_second_candidate_batch(): void {
