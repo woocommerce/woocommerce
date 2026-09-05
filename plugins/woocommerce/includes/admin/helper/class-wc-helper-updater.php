@@ -104,6 +104,10 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $plugin['_product_id'] );
 
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
 			}
@@ -172,6 +176,14 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $theme['_product_id'] );
 
+			if ( isset( $data['requires_php'] ) ) {
+				$item['requires_php'] = $data['requires_php'];
+			}
+
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( version_compare( $theme['Version'], $data['version'], '<' ) ) {
 				$transient->response[ $slug ] = $item;
 			} else {
@@ -181,6 +193,38 @@ class WC_Helper_Updater {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Checks whether WooCommerce.com flagged this update to be installed automatically.
+	 *
+	 * Uses core's own `autoupdate` flag, the same one api.wordpress.org sets on WordPress.org
+	 * plugins, so these updates follow the same path through WP_Automatic_Updater::should_update().
+	 * The flag overrides the per-item setting and the site-wide plugins_auto_update_enabled and
+	 * themes_auto_update_enabled switches. AUTOMATIC_UPDATER_DISABLED, disable_autoupdate and the
+	 * auto_update_plugin and auto_update_theme filters still apply.
+	 *
+	 * The package checks are required: forcing an update that cannot be installed, either
+	 * because no package was supplied or because the subscription expired, only produces a
+	 * failed update email to every admin on the site.
+	 *
+	 * @since 11.2.0
+	 * @param array $data Product data returned by the Helper API update check.
+	 * @param array $item Update item built for the update transient.
+	 * @return bool
+	 */
+	private static function is_autoupdate_forced( $data, $item ) {
+		// The flag arrives from a remote response, so only a value that reads as boolean true
+		// counts. A truthy string such as "false", or an array, must not trigger an install.
+		if ( true !== filter_var( $data['autoupdate'] ?? null, FILTER_VALIDATE_BOOLEAN ) ) {
+			return false;
+		}
+
+		if ( empty( $item['package'] ) || ! is_string( $item['package'] ) ) {
+			return false;
+		}
+
+		return 0 !== strpos( $item['package'], 'woocommerce-com-expired-' );
 	}
 
 	/**
@@ -425,6 +469,7 @@ class WC_Helper_Updater {
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,
 				'file_id'    => '',
+				'version'    => '',
 			);
 		}
 
@@ -437,6 +482,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		return self::_update_check( $payload );
@@ -463,6 +509,7 @@ class WC_Helper_Updater {
 			$payload[ $product_id ] = array(
 				'product_id' => $product_id,
 				'file_id'    => '',
+				'version'    => '',
 			);
 		}
 
@@ -475,6 +522,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		// Scan local themes.
@@ -486,6 +534,7 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
 		return self::_update_check( $payload );
@@ -659,8 +708,9 @@ class WC_Helper_Updater {
 	/**
 	 * Run an update check API call.
 	 *
-	 * The call is cached based on the payload (product ids, file ids). If
-	 * the payload changes, the cache is going to miss.
+	 * The call is cached based on the payload (product ids, file ids). If the payload
+	 * changes, the cache is going to miss. The installed version is sent to the API but
+	 * kept out of the cache key, so updating an extension doesn't force a fresh call.
 	 *
 	 * @param array $payload Information about the plugin to update.
 	 * @return array Update data for each requested product.
@@ -670,7 +720,19 @@ class WC_Helper_Updater {
 			return array();
 		}
 		ksort( $payload );
-		$hash = md5( wp_json_encode( $payload ) );
+
+		// Callers compare against the installed version themselves, so a response cached
+		// under an older one is still correct, and hashing the version would move the
+		// cache key on every extension update.
+		$hash_payload = array_map(
+			static function ( $product ) {
+				unset( $product['version'] );
+				return $product;
+			},
+			$payload
+		);
+
+		$hash = md5( wp_json_encode( $hash_payload ) );
 
 		$cache_key = '_woocommerce_helper_updates';
 		$data      = get_transient( $cache_key );

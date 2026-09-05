@@ -34,6 +34,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private $mocked_request_products;
 
 	/**
+	 * Fixture theme root, when a Woo theme has been mocked.
+	 *
+	 * @var string|null
+	 */
+	private $theme_root;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -46,9 +53,42 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * Tear down after each test.
 	 */
 	public function tearDown(): void {
-		$this->cleanup_transients();
+		try {
+			// The fixture theme lives on disk and in a global, neither of which the parent teardown resets.
+			$this->cleanup_theme_fixture();
+		} finally {
+			parent::tearDown();
+		}
+	}
 
-		parent::tearDown();
+	/**
+	 * Unregister and delete the fixture theme, when one was created.
+	 */
+	private function cleanup_theme_fixture() {
+		if ( null === $this->theme_root ) {
+			return;
+		}
+
+		// register_theme_directory() has no counterpart, so the fixture root is removed by hand.
+		global $wp_theme_directories;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Unregistering the fixture theme root.
+		$wp_theme_directories = array_values( array_diff( (array) $wp_theme_directories, array( $this->theme_root ) ) );
+		wp_clean_themes_cache();
+
+		$theme_dir = $this->theme_root . '/woo-test-theme';
+		foreach ( array( $theme_dir . '/style.css', $theme_dir . '/index.php' ) as $file ) {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+		}
+		foreach ( array( $theme_dir, $this->theme_root ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test fixture in the temp directory.
+				rmdir( $dir );
+			}
+		}
+
+		$this->theme_root = null;
 	}
 
 	/**
@@ -484,8 +524,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_should_use_cached_update_data_rejects_non_string_hash() {
 		$data = array(
-			'hash'     => 123, // Not a string.
-			'products' => array(),
+			'hash'                     => 123,
+			// Not a string.
+							'products' => array(),
 		);
 
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject numeric hash' );
@@ -505,7 +546,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$data = array(
 			'hash'     => $hash,
-			'products' => 'string', // Not an array.
+			'products' => 'string',
+		// Not an array.
 		);
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject string products' );
 
@@ -566,12 +608,341 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'products'    => array(),
 			'updated'     => time(),
 			'errors'      => array(),
-			'extra_field' => 'extra_value', // Extra key should not cause rejection.
+			'extra_field' => 'extra_value',
+		// Extra key should not cause rejection.
 		);
 
 		$this->assertTrue(
 			$this->call_should_use_cached_update_data( $data, $hash ),
 			'Should accept valid data with extra keys'
+		);
+	}
+
+	/**
+	 * @testdox A forced auto-update flag reaches the plugin update item only when the package can be installed.
+	 * @testWith [true, "https://woocommerce.com/package.zip", true]
+	 *           [true, "", false]
+	 *           [true, "woocommerce-com-expired-123", false]
+	 *           [false, "https://woocommerce.com/package.zip", false]
+	 *
+	 * @param bool   $forced   Whether the update-check response flags the product for a forced auto-update.
+	 * @param string $package  Package the update_woo_com_subscription_details filter supplies, as Woo Update Manager does.
+	 * @param bool   $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_plugins_forced_autoupdate( bool $forced, string $package, bool $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+		$this->mock_update_check_products( 123, $forced );
+		$this->mock_update_package( $package );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		$transient = WC_Helper_Updater::transient_update_plugins(
+			(object) array(
+				'response'  => array(),
+				'no_update' => array(),
+			)
+		);
+		remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+
+		$item = (array) $transient->response[ $filename ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'The plugin update item carries the wrong forced auto-update state' );
+	}
+
+	/**
+	 * @testdox Only an autoupdate value that reads as boolean true forces an update.
+	 *
+	 * @dataProvider autoupdate_flag_values
+	 *
+	 * @param mixed $flag     Raw value the update-check response reports for autoupdate.
+	 * @param bool  $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_plugins_validates_autoupdate_flag( $flag, bool $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+		$this->mock_update_check_autoupdate_flag( 123, $flag );
+		$this->mock_update_package( 'https://woocommerce.com/package.zip' );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_plugins(
+				(object) array(
+					'response'  => array(),
+					'no_update' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$item = (array) $transient->response[ $filename ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'A non-boolean autoupdate value was read as the wrong forced auto-update state' );
+	}
+
+	/**
+	 * Values the update-check response could report for autoupdate, and whether each forces an update.
+	 *
+	 * Shapes are what survives a JSON round trip, since the response is decoded as an array.
+	 *
+	 * @return array
+	 */
+	public function autoupdate_flag_values(): array {
+		return array(
+			'boolean true'   => array( true, true ),
+			'string "true"'  => array( 'true', true ),
+			'string "1"'     => array( '1', true ),
+			'integer 1'      => array( 1, true ),
+			'boolean false'  => array( false, false ),
+			'string "false"' => array( 'false', false ),
+			'string "0"'     => array( '0', false ),
+			'integer 0'      => array( 0, false ),
+			'empty string'   => array( '', false ),
+			'null'           => array( null, false ),
+			'empty array'    => array( array(), false ),
+			'list'           => array( array( 'yes' ), false ),
+			'object'         => array( array( 'forced' => true ), false ),
+		);
+	}
+
+	/**
+	 * @testdox The update-check request reports the installed version of each local Woo extension.
+	 */
+	public function test_update_check_request_includes_installed_version(): void {
+		$this->mock_local_woo_plugin();
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		WC_Helper_Updater::get_update_data();
+		remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+
+		$this->assertSame(
+			array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+				'version'    => '1.0.0',
+			),
+			$this->mocked_request_products[123],
+			'The requested product should report the version installed on the site'
+		);
+	}
+
+	/**
+	 * @testdox The installed version is left out of the update-check cache key.
+	 */
+	public function test_update_check_cache_key_ignores_installed_version(): void {
+		$cached_data = array(
+			'hash'     => md5(
+				wp_json_encode(
+					array(
+						123 => array(
+							'product_id' => 123,
+							'file_id'    => 'abc123',
+						),
+					)
+				)
+			),
+			'updated'  => time(),
+			'products' => array(
+				123 => array( 'version' => '2.0.0' ),
+			),
+			'errors'   => array(),
+		);
+
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+						'version'    => '1.5.0',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame( $cached_data['products'], $result, 'A payload differing only by installed version should still hit the cache' );
+		$this->assertNull( $this->mocked_request_products, 'Updating an extension should not force a remote update-check' );
+	}
+
+	/**
+	 * @testdox A forced auto-update flag reaches the theme update item only when the package can be installed.
+	 * @testWith [true, "https://woocommerce.com/package.zip", true]
+	 *           [true, "", false]
+	 *           [true, "woocommerce-com-expired-456", false]
+	 *           [false, "https://woocommerce.com/package.zip", false]
+	 *
+	 * @param bool   $forced   Whether the update-check response flags the product for a forced auto-update.
+	 * @param string $package  Package the update_woo_com_subscription_details filter supplies, as Woo Update Manager does.
+	 * @param bool   $expected Whether the update item should carry the autoupdate flag.
+	 */
+	public function test_transient_update_themes_forced_autoupdate( bool $forced, string $package, bool $expected ): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, $forced );
+		$this->mock_update_package( $package );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_themes(
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$item = $transient->response[ $stylesheet ];
+
+		$this->assertSame( $expected, ! empty( $item['autoupdate'] ), 'The theme update item carries the wrong forced auto-update state' );
+	}
+
+	/**
+	 * @testdox A theme update item reports the PHP requirement the update-check response carries.
+	 * @testWith ["8.2"]
+	 *           [null]
+	 *
+	 * @param string|null $requires_php PHP requirement reported for the product, or null when it reports none.
+	 */
+	public function test_transient_update_themes_passes_requires_php( ?string $requires_php ): void {
+		$stylesheet = $this->mock_local_woo_theme();
+
+		$product = array(
+			'version'        => '2.0.0',
+			'url'            => 'https://woocommerce.com/products/test-theme',
+			'package'        => '',
+			'slug'           => 'woo-test-theme',
+			'upgrade_notice' => '',
+		);
+
+		if ( null !== $requires_php ) {
+			$product['requires_php'] = $requires_php;
+		}
+
+		$this->mocked_updates = array( 456 => $product );
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_themes(
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertArrayHasKey( $stylesheet, $transient->response, 'The theme should have been offered an update' );
+
+		$this->assertSame(
+			$requires_php,
+			$transient->response[ $stylesheet ]['requires_php'] ?? null,
+			'The theme update item should report the PHP requirement, so WP_Automatic_Updater::should_update() can enforce it'
+		);
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
+	 *
+	 * @return string The plugin file name.
+	 */
+	private function mock_local_woo_plugin(): string {
+		$filename = 'woo-test-plugin/woo-test-plugin.php';
+
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$filename => array(
+						'Name'    => 'Woo Test Plugin',
+						'Version' => '1.0.0',
+						'Woo'     => '123:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+
+		return $filename;
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_themes() report a single Woo theme, from a fixture theme root.
+	 *
+	 * @return string The theme stylesheet.
+	 */
+	private function mock_local_woo_theme(): string {
+		$stylesheet       = 'woo-test-theme';
+		$this->theme_root = untrailingslashit( get_temp_dir() ) . '/wc-helper-updater-themes';
+
+		wp_mkdir_p( $this->theme_root . '/' . $stylesheet );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+		file_put_contents(
+			$this->theme_root . '/' . $stylesheet . '/style.css',
+			"/*\nTheme Name: Woo Test Theme\nVersion: 1.0.0\nWoo: 456:def456\n*/\n"
+		);
+
+		// WP_Theme reports a theme without an index.php as broken, and wp_get_themes() then skips it.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+		file_put_contents( $this->theme_root . '/' . $stylesheet . '/index.php', "<?php\n" );
+
+		register_theme_directory( $this->theme_root );
+		wp_clean_themes_cache();
+
+		return $stylesheet;
+	}
+
+	/**
+	 * Sets the products the mocked update-check response returns.
+	 *
+	 * @param int  $product_id The Woo product id to return an update for.
+	 * @param bool $forced     Whether the product is flagged for a forced auto-update.
+	 */
+	private function mock_update_check_products( int $product_id, bool $forced ): void {
+		$product = array(
+			'version'        => '2.0.0',
+			'url'            => 'https://woocommerce.com/products/test',
+			'package'        => '',
+			'slug'           => 'test-plugin',
+			'upgrade_notice' => '',
+		);
+
+		if ( $forced ) {
+			$product['autoupdate'] = true;
+		}
+
+		$this->mocked_updates = array( $product_id => $product );
+	}
+
+	/**
+	 * Sets the raw value the mocked update-check response reports for autoupdate.
+	 *
+	 * @param int   $product_id The Woo product id to return an update for.
+	 * @param mixed $flag       Raw value reported for autoupdate.
+	 */
+	private function mock_update_check_autoupdate_flag( int $product_id, $flag ): void {
+		$this->mock_update_check_products( $product_id, false );
+		$this->mocked_updates[ $product_id ]['autoupdate'] = $flag;
+	}
+
+	/**
+	 * Sets the package on the update item, the way the Woo Update Manager plugin does.
+	 *
+	 * @param string $package The package to set.
+	 */
+	private function mock_update_package( string $package ): void {
+		add_filter(
+			'update_woo_com_subscription_details',
+			function ( $item ) use ( $package ) {
+				$item['package'] = $package;
+
+				return $item;
+			}
 		);
 	}
 
