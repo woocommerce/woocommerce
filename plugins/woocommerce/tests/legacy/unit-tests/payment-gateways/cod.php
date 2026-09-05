@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Tests_Payment_Gateway_COD
@@ -126,5 +127,85 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 				$GLOBALS['wp']->query_vars['order-pay'] = $order_pay_query_var;
 			}
 		}
+	}
+
+	/**
+	 * Render the COD email instructions for an order with the given status.
+	 *
+	 * @param string $order_status  Status to set on the order.
+	 * @param bool   $sent_to_admin Whether the email is sent to the admin.
+	 * @return string The rendered output.
+	 */
+	private function get_email_instructions_output( $order_status, $sent_to_admin = false ) {
+		$gateway               = new WC_Gateway_COD();
+		$gateway->instructions = 'Please have exact change ready.';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( WC_Gateway_COD::ID );
+		$order->set_status( $order_status );
+		$order->save();
+
+		ob_start();
+		$gateway->email_instructions( $order, $sent_to_admin );
+		return ob_get_clean();
+	}
+
+	/**
+	 * @testdox Instructions are shown for orders where COD payment is still outstanding.
+	 *
+	 * @dataProvider provider_unpaid_order_statuses
+	 * @param string $order_status Status to set on the order.
+	 */
+	public function test_email_instructions_are_included_for_unpaid_orders( $order_status ) {
+		$output = $this->get_email_instructions_output( $order_status );
+
+		$this->assertStringContainsString(
+			'Please have exact change ready.',
+			$output,
+			"COD instructions should be shown for orders with the '{$order_status}' status"
+		);
+	}
+
+	/**
+	 * Order statuses for which COD payment has not been collected yet.
+	 *
+	 * @return array
+	 */
+	public function provider_unpaid_order_statuses() {
+		return array(
+			'pending'    => array( OrderStatus::PENDING ),
+			'on-hold'    => array( OrderStatus::ON_HOLD ),
+			'processing' => array( OrderStatus::PROCESSING ),
+		);
+	}
+
+	/**
+	 * @testdox Instructions are hidden once the order is settled and no longer awaiting payment.
+	 *
+	 * @dataProvider provider_settled_order_statuses
+	 * @param string $order_status Status to set on the order.
+	 */
+	public function test_email_instructions_are_omitted_for_settled_orders( $order_status ) {
+		$output = $this->get_email_instructions_output( $order_status );
+
+		$this->assertSame(
+			'',
+			$output,
+			"COD instructions should be hidden for orders with the '{$order_status}' status"
+		);
+	}
+
+	/**
+	 * Order statuses for which COD instructions are no longer relevant.
+	 *
+	 * @return array
+	 */
+	public function provider_settled_order_statuses() {
+		return array(
+			'completed' => array( OrderStatus::COMPLETED ),
+			'cancelled' => array( OrderStatus::CANCELLED ),
+			'refunded'  => array( OrderStatus::REFUNDED ),
+			'failed'    => array( OrderStatus::FAILED ),
+		);
 	}
 }

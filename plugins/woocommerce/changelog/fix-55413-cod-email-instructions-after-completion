@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop showing Cash on Delivery instructions in order emails once the order is completed, cancelled, refunded, or failed.
