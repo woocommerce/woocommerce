@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
 use Generator;
 use ReflectionClass;
@@ -1889,6 +1890,67 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$this->assertSame( 20, $method->invoke( $list_table ) );
+	}
+
+	/**
+	 * @testdox `get_per_page` uses the dedicated Product Reviews option instead of the Comments option.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_per_page_uses_dedicated_user_option(): void {
+		$previous_user_id = get_current_user_id();
+		$user_id          = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+
+		wp_set_current_user( $user_id );
+		update_user_option( $user_id, Reviews::PER_PAGE_USER_OPTION_KEY, 55 );
+		update_user_option( $user_id, 'edit_comments_per_page', 35 );
+
+		try {
+			$list_table = $this->get_reviews_list_table();
+			$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+			$method->setAccessible( true );
+
+			$this->assertSame( 55, $method->invoke( $list_table ) );
+		} finally {
+			delete_user_option( $user_id, Reviews::PER_PAGE_USER_OPTION_KEY );
+			delete_user_option( $user_id, 'edit_comments_per_page' );
+			wp_set_current_user( $previous_user_id );
+		}
+	}
+
+	/**
+	 * @testdox `get_per_page` and the Screen Options input use the legacy `edit_comments_per_page` value.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_per_page_bridges_legacy_comments_filter(): void {
+		wc_get_container()->get( Reviews::class );
+
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method->setAccessible( true );
+
+		$legacy = static function () {
+			return 45;
+		};
+		add_filter( 'edit_comments_per_page', $legacy );
+
+		try {
+			$this->assertSame( 45, $method->invoke( $list_table ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
+			$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
+			$this->assertSame( 45, $input_per_page );
+		} finally {
+			remove_filter( 'edit_comments_per_page', $legacy );
+		}
 	}
 
 	/**

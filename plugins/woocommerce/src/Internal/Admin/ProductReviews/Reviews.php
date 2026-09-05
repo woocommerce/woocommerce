@@ -20,6 +20,17 @@ class Reviews {
 	const MENU_SLUG = 'product-reviews';
 
 	/**
+	 * User option key that stores the number of reviews to display per page on the Product Reviews screen.
+	 *
+	 * Kept here to avoid autoloading the admin-only {@see ReviewsListTable} outside admin requests.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	const PER_PAGE_USER_OPTION_KEY = 'edit_product_reviews_per_page';
+
+	/**
 	 * Reviews page hook name.
 	 *
 	 * @var string|null
@@ -47,6 +58,9 @@ class Reviews {
 
 		add_filter( 'parent_file', array( $this, 'edit_review_parent_file' ) );
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
+
+		add_filter( 'set_screen_option_' . self::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
+		add_filter( self::PER_PAGE_USER_OPTION_KEY, array( $this, 'apply_legacy_reviews_per_page_filter' ) );
 	}
 
 	/**
@@ -556,8 +570,70 @@ class Reviews {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function load_reviews_screen(): void {
+		$this->add_screen_options();
 		$this->reviews_list_table = $this->make_reviews_list_table();
 		$this->reviews_list_table->process_bulk_action();
+	}
+
+	/**
+	 * Registers the screen options for the Reviews page.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_screen_options(): void {
+		add_screen_option(
+			'per_page',
+			array(
+				'label'   => __( 'Number of reviews per page:', 'woocommerce' ),
+				'default' => 20,
+				'option'  => self::PER_PAGE_USER_OPTION_KEY,
+			)
+		);
+	}
+
+	/**
+	 * Saves the reviews per-page screen option within WordPress's standard `1`–`999` bounds.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed  $screen_option The value to save instead of the option value. Default false (to skip saving the current option).
+	 * @param string $option        The option name.
+	 * @param int    $value         The number of reviews to show per page.
+	 * @return mixed
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function set_reviews_per_page_option( $screen_option, $option, $value ) {
+		if ( self::PER_PAGE_USER_OPTION_KEY !== $option ) {
+			return $screen_option;
+		}
+
+		$value = (int) $value;
+
+		if ( $value < 1 || $value > 999 ) {
+			return false;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Applies the legacy `edit_comments_per_page` filter to the dedicated reviews per-page value.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $per_page Number of reviews to show per page.
+	 * @return int
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function apply_legacy_reviews_per_page_filter( $per_page ): int {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core hook retained for compatibility.
+		return (int) apply_filters( 'edit_comments_per_page', $per_page );
 	}
 
 	/**
