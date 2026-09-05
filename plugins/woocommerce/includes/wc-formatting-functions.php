@@ -1211,7 +1211,7 @@ function wc_format_product_short_description( $content ) {
  * @return mixed
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $value, $option, $raw_value );
+	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $value, $raw_value );
 }
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );

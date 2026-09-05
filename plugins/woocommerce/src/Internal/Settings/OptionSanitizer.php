@@ -68,50 +68,31 @@ class OptionSanitizer {
 
 	/**
 	 * Rejects thousand and decimal separators that contain a number.
-	 * Adds a settings error and falls back to the stored value, or to the default if that is invalid too.
+	 * On rejection it adds a settings error and returns null, so the stored value is left untouched.
 	 *
 	 * @since 11.2.0
 	 * @param mixed $value     Option value.
-	 * @param array $option    Option data.
 	 * @param mixed $raw_value Raw request value, null when the field was not submitted.
 	 * @return mixed
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function sanitize_price_separator_setting( $value, $option, $raw_value ) {
+	public function sanitize_price_separator_setting( $value, $raw_value ) {
 		if ( null === $raw_value ) {
 			return $value;
 		}
 
-		$separator = is_string( $raw_value ) ? preg_replace( '/\s+/', ' ', wp_kses( $raw_value, array() ) ) : null;
+		if ( is_string( $raw_value ) ) {
+			$separator = wp_kses( $raw_value, array() );
+			$decoded   = html_entity_decode( $separator, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
-		if ( is_string( $separator ) && $this->is_valid_price_separator( $separator ) ) {
-			return $separator;
+			if ( 0 === preg_match( '/\p{N}/u', $decoded ) ) {
+				return $separator;
+			}
 		}
 
-		\WC_Admin_Settings::add_error(
-			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
-		);
+		\WC_Admin_Settings::add_error( __( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' ) );
 
-		$default = $option['default'] ?? '';
-		$stored  = get_option( $option['id'], $default );
-
-		return $this->is_valid_price_separator( $stored ) ? $stored : $default;
-	}
-
-	/**
-	 * Checks that a separator contains no digit, including localized ones and HTML entities that decode to a digit.
-	 *
-	 * @param mixed $value Value to check.
-	 * @return bool
-	 */
-	private function is_valid_price_separator( $value ): bool {
-		if ( ! is_string( $value ) ) {
-			return false;
-		}
-
-		$decoded = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-
-		return 0 === preg_match( '/\p{N}/u', $decoded );
+		return null;
 	}
 }
