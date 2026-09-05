@@ -51316,18 +51316,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterChips.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, string\|true\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1

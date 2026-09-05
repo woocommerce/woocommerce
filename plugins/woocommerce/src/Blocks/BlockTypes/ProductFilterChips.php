@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
@@ -52,14 +53,22 @@ final class ProductFilterChips extends AbstractBlock {
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$display_limit   = 'woocommerce/product-filters' === $store_namespace ? 15 : 30;
-		$classes         = '';
-		$style           = '';
 
-		$tags = new \WP_HTML_Tag_Processor( $content );
+		$classes = '';
+		$style   = '';
+		$tags    = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-chips' ) ) ) {
-			$classes = $tags->get_attribute( 'class' );
-			$style   = $tags->get_attribute( 'style' );
+			$saved_classes = $tags->get_attribute( 'class' );
+			$saved_style   = $tags->get_attribute( 'style' );
+			$classes       = is_string( $saved_classes ) ? $saved_classes : '';
+			$style         = is_string( $saved_style ) ? $saved_style : '';
 		}
+
+		$has_visual_swatches  = self::has_visual_swatches( $items );
+		$chip_item_attributes = self::get_chip_item_attributes(
+			is_array( $attributes ) ? $attributes : array(),
+			$has_visual_swatches
+		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
@@ -94,12 +103,11 @@ final class ProductFilterChips extends AbstractBlock {
 		$visible_items           = array_merge( $first_items, $overflow_selected_items );
 		$hidden_count            = count( $items ) - count( $visible_items );
 
-		$first_item          = reset( $items );
-		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_visual_swatches = self::has_visual_swatches( $items );
-		$button_role         = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
+		$first_item  = reset( $items );
+		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$button_role = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
-		if ( $has_visual_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
+		if ( $has_visual_swatches && ! str_contains( $classes, 'is-style-swatch' ) ) {
 			$classes                    .= ' is-style-swatch';
 			$wrapper_attributes['class'] = esc_attr( $classes );
 		}
@@ -116,7 +124,10 @@ final class ProductFilterChips extends AbstractBlock {
 					foreach ( $visible_items as $item ) :
 						?>
 						<button
-							class="wc-block-product-filter-chips__item"
+							class="<?php echo esc_attr( $chip_item_attributes['class'] ); ?>"
+							<?php if ( '' !== $chip_item_attributes['style'] ) : ?>
+								style="<?php echo esc_attr( $chip_item_attributes['style'] ); ?>"
+							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
 							id="<?php echo esc_attr( $item['id'] ); ?>"
@@ -166,7 +177,10 @@ final class ProductFilterChips extends AbstractBlock {
 						data-wp-each-key="context.item.id"
 					>
 						<button
-							class="wc-block-product-filter-chips__item"
+							class="<?php echo esc_attr( $chip_item_attributes['class'] ); ?>"
+							<?php if ( '' !== $chip_item_attributes['style'] ) : ?>
+								style="<?php echo esc_attr( $chip_item_attributes['style'] ); ?>"
+							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
 							data-wp-bind--id="context.item.id"
@@ -219,6 +233,34 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get class and style attributes for individual chip items.
+	 *
+	 * Visual swatches stay circular, so padding and border radius are not applied to them.
+	 *
+	 * @param array $attributes          Block attributes.
+	 * @param bool  $has_visual_swatches Whether items use the swatch style.
+	 * @return array{class: string, style: string}
+	 */
+	private static function get_chip_item_attributes( array $attributes, bool $has_visual_swatches ): array {
+		if ( $has_visual_swatches ) {
+			return array(
+				'class' => 'wc-block-product-filter-chips__item',
+				'style' => '',
+			);
+		}
+
+		$item_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
+			$attributes,
+			array( 'border_radius', 'padding' )
+		);
+
+		return array(
+			'class' => trim( 'wc-block-product-filter-chips__item ' . $item_classes_and_styles['classes'] ),
+			'style' => $item_classes_and_styles['styles'],
+		);
 	}
 
 	/**
