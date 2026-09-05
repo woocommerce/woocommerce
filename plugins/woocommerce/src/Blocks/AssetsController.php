@@ -113,7 +113,7 @@ final class AssetsController {
 			"
 			var wcBlocksMiddlewareConfig = {
 				storeApiNonce: '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "',
-				wcStoreApiNonceTimestamp: '" . esc_js( time() ) . "'
+				storeApiNonceTimestamp: '" . esc_js( time() ) . "'
 			};
 			",
 			'before'
