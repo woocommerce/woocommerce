@@ -15,6 +15,37 @@ class NotificationQuery {
 	 * @return array The notifications.
 	 */
 	public static function get_notifications( array $args ): array {
+		$result = self::run_query( $args );
+
+		return is_array( $result ) ? $result : array();
+	}
+
+	/**
+	 * Count notifications matching the given filters.
+	 *
+	 * @param array $args Same filter args as {@see self::get_notifications()}, minus
+	 *                    the `return` / `limit` / `offset` keys (those are forced to
+	 *                    `count` / no-limit).
+	 * @return int Number of matching notifications.
+	 */
+	public static function count_notifications( array $args ): int {
+		$args['return'] = 'count';
+		unset( $args['limit'], $args['offset'] );
+
+		return (int) self::run_query( $args );
+	}
+
+	/**
+	 * Single dispatch site to the underlying data store's `query()` method.
+	 *
+	 * Centralised so the `WC_Data_Store::query()` PHPStan suppression in
+	 * `phpstan-baseline.neon` only needs to cover one call site.
+	 *
+	 * @param array $args Query args.
+	 * @return mixed Whatever the data store returns for the requested `return` mode
+	 *               (array of objects/ids, int for `count`).
+	 */
+	private static function run_query( array $args ) {
 		return \WC_Data_Store::load( 'stock_notification' )->query( $args );
 	}
 
