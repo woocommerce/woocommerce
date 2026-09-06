@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import type {
 	Field,
 	FieldTypeName,
@@ -265,16 +266,31 @@ export const buildDataFormField = (
 		options.context
 	);
 
+	const disabled = isFieldDisabled( settingsField );
+	const help = createSettingsHelpElement( settingsField.description );
+	const disabledTooltip =
+		settingsField.customAttributes?.[ 'disabled-tooltip' ];
+	const description =
+		disabled && typeof disabledTooltip === 'string' && disabledTooltip
+			? createElement(
+					'span',
+					null,
+					help,
+					help ? ' ' : null,
+					disabledTooltip
+			  )
+			: help;
+
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
-		description: createSettingsHelpElement( settingsField.description ),
+		description,
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
 		isValid: buildValidationRules( settingsField, descriptor ),
 		isVisible: createIsVisible( settingsField, options ),
-		isDisabled: isFieldDisabled( settingsField ),
+		isDisabled: disabled,
 	};
 
 	if ( registeredComponent ) {
