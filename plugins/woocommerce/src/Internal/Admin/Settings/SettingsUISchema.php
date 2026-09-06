@@ -817,12 +817,14 @@ class SettingsUISchema {
 		}
 
 		$adapter = $save['adapter'] ?? null;
-		if ( ! is_string( $adapter ) || ! in_array( $adapter, array( 'form_post', 'none' ), true ) ) {
-			throw self::invalid_schema( 'Schema save adapter must be "form_post" or "none".' );
+		if ( ! is_string( $adapter ) || ! in_array( $adapter, array( 'custom', 'form_post', 'none' ), true ) ) {
+			throw self::invalid_schema( 'Schema save adapter must be "custom", "form_post", or "none".' );
 		}
 
-		if ( array_key_exists( 'handler', $save ) ) {
-			throw self::invalid_schema( 'Schema save handlers are not supported.' );
+		if ( 'custom' === $adapter ) {
+			self::assert_non_empty_string( $save['handler'] ?? null, 'Schema custom save strategy must define a non-empty handler.' );
+		} elseif ( array_key_exists( 'handler', $save ) ) {
+			throw self::invalid_schema( 'Schema save handler is only valid for the "custom" adapter.' );
 		}
 	}
 
@@ -846,7 +848,7 @@ class SettingsUISchema {
 		}
 
 		if ( array_key_exists( 'navigationComponent', $shell ) ) {
-			throw self::invalid_schema( 'Shell navigationComponent is not supported. Use navigation or sectionNavigation.' );
+			self::assert_non_empty_string( $shell['navigationComponent'], 'Shell navigationComponent must be a non-empty string.' );
 		}
 
 		foreach ( array( 'navigation', 'sectionNavigation' ) as $property ) {

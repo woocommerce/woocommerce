@@ -13,11 +13,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type {
-	ErrorInfo,
-	MouseEvent as ReactMouseEvent,
-	ReactNode,
-} from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -26,6 +22,7 @@ import { createDataFormAdapter } from './dataform-adapter';
 import { DataForm } from './dataform-runtime';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
+import { resolveRegionComponent, resolveSaveHandler } from './registry';
 import type {
 	SettingsUIField,
 	SettingsUIShellBadgeIntent,
@@ -36,6 +33,11 @@ import type {
 	SettingsValues,
 } from './types';
 import { areValuesEqual } from './values';
+
+type SaveNotice = {
+	status: 'success' | 'error';
+	message: string;
+};
 
 type PendingNavigation = {
 	href: string;
@@ -57,6 +59,21 @@ const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	} );
 
 	return values;
+};
+
+const getChangedValues = (
+	values: SettingsValues,
+	initialValues: SettingsValues
+) => {
+	const changedValues: Partial< SettingsValues > = {};
+
+	Object.keys( values ).forEach( ( key ) => {
+		if ( ! areValuesEqual( values[ key ], initialValues[ key ] ) ) {
+			changedValues[ key ] = values[ key ];
+		}
+	} );
+
+	return changedValues;
 };
 
 const BADGE_INTENTS = {
@@ -136,10 +153,12 @@ const getNavigationHref = ( event: MouseEvent ) => {
 };
 
 const UnsavedChangesModal = ( {
+	isSaving,
 	onClose,
 	onDiscard,
 	onSave,
 }: {
+	isSaving: boolean;
 	onClose: () => void;
 	onDiscard: () => void;
 	onSave: () => void;
@@ -148,7 +167,10 @@ const UnsavedChangesModal = ( {
 		<Modal
 			className="wc-settings-ui__unsaved-changes-modal"
 			title={ __( 'You have unsaved changes', 'woocommerce' ) }
-			onRequestClose={ onClose }
+			isDismissible={ ! isSaving }
+			shouldCloseOnClickOutside={ ! isSaving }
+			shouldCloseOnEsc={ ! isSaving }
+			onRequestClose={ isSaving ? () => undefined : onClose }
 		>
 			<p>
 				{ __(
@@ -157,12 +179,18 @@ const UnsavedChangesModal = ( {
 				) }
 			</p>
 			<div className="wc-settings-ui__unsaved-changes-actions">
-				<Button variant="tertiary" onClick={ onDiscard }>
+				<Button
+					variant="tertiary"
+					disabled={ isSaving }
+					onClick={ onDiscard }
+				>
 					{ __( 'Discard', 'woocommerce' ) }
 				</Button>
 				<Button
 					variant="primary"
 					type="button"
+					isBusy={ isSaving }
+					disabled={ isSaving }
 					accessibleWhenDisabled
 					onClick={ onSave }
 				>
@@ -252,19 +280,29 @@ export class SettingsUIErrorBoundary extends Component<
 
 const ShellHeader = ( {
 	schema,
+	context,
+	values,
+	initialValues,
 	actions,
 	children,
 }: {
 	schema: SettingsUISchema;
+	context: SettingsFieldContext;
+	values: SettingsValues;
+	initialValues: SettingsValues;
 	actions?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
 	const showHeader = shell.header === 'visible';
 	const title = shell.title || schema.title;
+	const NavigationComponent = shell.navigationComponent
+		? resolveRegionComponent( shell.navigationComponent, context )
+		: undefined;
 	const hasNavigation = Boolean(
 		( shell.navigation && shell.navigation.length > 0 ) ||
-			( shell.sectionNavigation && shell.sectionNavigation.length > 0 )
+			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
+			NavigationComponent
 	);
 
 	const breadcrumbs =
@@ -379,6 +417,14 @@ const ShellHeader = ( {
 							) ) }
 						</nav>
 					) : null }
+					{ NavigationComponent ? (
+						<NavigationComponent
+							values={ values }
+							initialValues={ initialValues }
+							context={ context }
+							schema={ schema }
+						/>
+					) : null }
 				</div>
 			) : null }
 			{ children }
@@ -401,6 +447,8 @@ export const SettingsUIPage = ( {
 	const [ values, setValuesState ] = useState< SettingsValues >( () =>
 		getInitialValues( schema )
 	);
+	const [ isSaving, setIsSaving ] = useState( false );
+	const [ saveNotice, setSaveNotice ] = useState< SaveNotice | null >( null );
 	const [ pendingNavigation, setPendingNavigation ] =
 		useState< PendingNavigation | null >( null );
 	const allowNavigationRef = useRef( false );
@@ -414,28 +462,21 @@ export const SettingsUIPage = ( {
 		[ page, schema.id, schema.section, section ]
 	);
 	const saveStrategy = getSaveStrategy( schema );
-	if (
-		saveStrategy.adapter !== 'form_post' &&
-		saveStrategy.adapter !== 'none'
-	) {
-		throw new Error(
-			'Settings UI only supports form_post and none save strategies.'
-		);
-	}
-	if ( schema.shell && 'navigationComponent' in schema.shell ) {
-		throw new Error(
-			'Settings UI navigation components are not supported.'
-		);
-	}
-
-	const isDirty = Object.keys( values ).some(
-		( key ) => ! areValuesEqual( values[ key ], initialValues[ key ] )
+	const changedValues = useMemo(
+		() => getChangedValues( values, initialValues ),
+		[ initialValues, values ]
 	);
+	const dirtyFields = useMemo(
+		() => Object.keys( changedValues ),
+		[ changedValues ]
+	);
+	const isDirty = dirtyFields.length > 0;
 
 	useEffect( () => {
 		const nextValues = getInitialValues( schema );
 		setInitialValues( nextValues );
 		setValuesState( nextValues );
+		setSaveNotice( null );
 		setPendingNavigation( null );
 	}, [ schema ] );
 
@@ -468,6 +509,66 @@ export const SettingsUIPage = ( {
 		},
 		[ allowNavigation ]
 	);
+
+	const handleCustomSave = useCallback( async () => {
+		if ( saveStrategy.adapter !== 'custom' ) {
+			return false;
+		}
+
+		const handlerName =
+			'handler' in saveStrategy ? saveStrategy.handler : undefined;
+		const handler = handlerName
+			? resolveSaveHandler( handlerName, context )
+			: undefined;
+		if ( ! handler ) {
+			setSaveNotice( {
+				status: 'error',
+				message: __( 'Unable to save settings.', 'woocommerce' ),
+			} );
+			return false;
+		}
+
+		setIsSaving( true );
+		setSaveNotice( null );
+
+		try {
+			const result = await handler( {
+				values,
+				initialValues,
+				changedValues,
+				dirtyFields,
+				context,
+				schema,
+			} );
+			const savedValues = result?.values || values;
+			setValuesState( savedValues );
+			setInitialValues( savedValues );
+			setSaveNotice( {
+				status: 'success',
+				message:
+					result?.notice ||
+					__( 'Settings saved successfully.', 'woocommerce' ),
+			} );
+			return true;
+		} catch ( saveError ) {
+			const message =
+				saveError instanceof Error && saveError.message
+					? saveError.message
+					: __( 'Unable to save settings.', 'woocommerce' );
+			setSaveNotice( { status: 'error', message } );
+			return false;
+		} finally {
+			setIsSaving( false );
+		}
+	}, [
+		changedValues,
+		context,
+		dirtyFields,
+		initialValues,
+		saveStrategy,
+		schema,
+		values,
+	] );
 
 	useEffect( () => {
 		if ( ! isDirty ) {
@@ -531,19 +632,39 @@ export const SettingsUIPage = ( {
 	}, [ isDirty ] );
 
 	const handleDiscardNavigation = useCallback( () => {
-		if ( ! pendingNavigation ) {
+		if ( isSaving || ! pendingNavigation ) {
 			return;
 		}
 
 		allowNavigation();
 		window.location.assign( pendingNavigation.href );
-	}, [ allowNavigation, pendingNavigation ] );
+	}, [ allowNavigation, isSaving, pendingNavigation ] );
 
-	const handleSavePendingNavigation = useCallback( () => {
-		if ( pendingNavigation && saveStrategy.adapter === 'form_post' ) {
-			submitSettingsForm( pendingNavigation.href );
+	const handleSavePendingNavigation = useCallback( async () => {
+		if ( ! pendingNavigation ) {
+			return;
 		}
-	}, [ pendingNavigation, saveStrategy.adapter, submitSettingsForm ] );
+
+		if ( saveStrategy.adapter === 'form_post' ) {
+			submitSettingsForm( pendingNavigation.href );
+			return;
+		}
+
+		if ( saveStrategy.adapter === 'custom' ) {
+			const saved = await handleCustomSave();
+
+			if ( saved ) {
+				allowNavigation();
+				window.location.assign( pendingNavigation.href );
+			}
+		}
+	}, [
+		allowNavigation,
+		handleCustomSave,
+		pendingNavigation,
+		saveStrategy.adapter,
+		submitSettingsForm,
+	] );
 
 	const dataFormAdapter = useMemo(
 		() => createDataFormAdapter( { schema, context, initialValues } ),
@@ -576,33 +697,53 @@ export const SettingsUIPage = ( {
 	const showHeader = schema.shell?.header === 'visible';
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 	const saveButton =
-		saveStrategy.adapter === 'form_post' ? (
+		saveStrategy.adapter !== 'none' ? (
 			<Button
 				className="woocommerce-save-button"
 				variant="primary"
-				type="submit"
+				type={
+					saveStrategy.adapter === 'form_post' ? 'submit' : 'button'
+				}
 				name="save"
 				value={ saveButtonLabel }
-				disabled={ ! isDirty }
-				onClick={ ( event: ReactMouseEvent< HTMLButtonElement > ) => {
-					event.preventDefault();
-					submitSettingsForm();
-				} }
+				disabled={ ! isDirty || isSaving }
+				isBusy={ isSaving }
+				onClick={ () =>
+					saveStrategy.adapter === 'form_post'
+						? submitSettingsForm()
+						: handleCustomSave()
+				}
 			>
 				{ saveButtonLabel }
 			</Button>
 		) : undefined;
 
 	return (
-		<ShellHeader schema={ schema } actions={ saveButton }>
+		<ShellHeader
+			schema={ schema }
+			context={ context }
+			values={ values }
+			initialValues={ initialValues }
+			actions={ saveButton }
+		>
 			{ pendingNavigation ? (
 				<UnsavedChangesModal
+					isSaving={ isSaving }
 					onClose={ () => setPendingNavigation( null ) }
 					onDiscard={ handleDiscardNavigation }
 					onSave={ handleSavePendingNavigation }
 				/>
 			) : null }
-
+			{ saveNotice ? (
+				<Notice
+					className="wc-settings-ui-shell__notice"
+					status={ saveNotice.status }
+					isDismissible
+					onRemove={ () => setSaveNotice( null ) }
+				>
+					{ saveNotice.message }
+				</Notice>
+			) : null }
 			<div className="wc-settings-ui">
 				<DataForm
 					data={ values }

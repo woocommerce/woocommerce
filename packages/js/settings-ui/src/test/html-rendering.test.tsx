@@ -133,29 +133,6 @@ describe( 'settings HTML rendering', () => {
 		window.history.replaceState( {}, '', originalUrl );
 	} );
 
-	it.each( [
-		{ save: { adapter: 'custom', handler: 'acme/save' } },
-		{ shell: { navigationComponent: 'acme/navigation' } },
-	] )( 'offers classic settings for removed contracts: %j', ( overrides ) => {
-		jest.spyOn( console, 'error' ).mockImplementation( () => {} );
-		const schema = createSingleFieldSchema(
-			{ id: 'name', label: 'Name', type: 'text' },
-			overrides as Partial< SettingsUISchema >
-		);
-		const { container, root } = renderElement(
-			<SettingsUIErrorBoundary>
-				<SettingsUIPage schema={ schema } />
-			</SettingsUIErrorBoundary>
-		);
-		try {
-			expect( container.textContent ).toContain( 'Use classic settings' );
-			expect( container.querySelector( 'input' ) ).toBeNull();
-		} finally {
-			act( () => root.unmount() );
-			container.remove();
-		}
-	} );
-
 	it( 'renders settings as centered sections and cards', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -705,6 +682,214 @@ describe( 'settings HTML rendering', () => {
 			form.remove();
 			requestSubmit.mockRestore();
 		}
+	} );
+
+	it( 'keeps unload protection when custom save before navigation fails', async () => {
+		const saveHandler = jest
+			.fn()
+			.mockRejectedValue( new Error( 'Save failed.' ) );
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			saveHandlers: {
+				fail: saveHandler,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'custom', handler: 'fail' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input:not([type="hidden"])' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		act( () => {
+			if ( input instanceof HTMLInputElement ) {
+				const valueSetter = Object.getOwnPropertyDescriptor(
+					HTMLInputElement.prototype,
+					'value'
+				)?.set;
+
+				valueSetter?.call( input, 'Changed value' );
+				input.dispatchEvent(
+					new Event( 'input', { bubbles: true, cancelable: true } )
+				);
+			}
+		} );
+
+		act( () => {
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const saveButton = getUnsavedChangesActionButton( 'Save' );
+
+		await act( async () => {
+			saveButton.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		const beforeUnloadEvent = new Event( 'beforeunload', {
+			cancelable: true,
+		} );
+
+		window.dispatchEvent( beforeUnloadEvent );
+
+		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+		expect( beforeUnloadEvent.defaultPrevented ).toBe( true );
+		expect( document.body.textContent ).toContain( 'Save failed.' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'prevents dismissing the navigation modal while a custom save is pending', async () => {
+		let rejectSave: ( error: Error ) => void = () => undefined;
+		const saveHandler = jest.fn(
+			() =>
+				new Promise< never >( ( _resolve, reject ) => {
+					rejectSave = reject;
+				} )
+		);
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			saveHandlers: {
+				pending: saveHandler,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'custom', handler: 'pending' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		const input = container.querySelector( 'input:not([type="hidden"])' );
+		const link = container.querySelector(
+			'a[href="https://example.com/next"]'
+		);
+
+		act( () => {
+			changeTextInput( input as HTMLInputElement, 'Changed value' );
+			link?.dispatchEvent(
+				new MouseEvent( 'click', {
+					bubbles: true,
+					cancelable: true,
+					button: 0,
+				} )
+			);
+		} );
+
+		await act( async () => {
+			getUnsavedChangesActionButton( 'Save' ).click();
+			await Promise.resolve();
+		} );
+
+		const discardButton = getUnsavedChangesActionButton( 'Discard' );
+		const saveButton = getUnsavedChangesActionButton( 'Save' );
+		const modal = document.body.querySelector(
+			'.wc-settings-ui__unsaved-changes-modal'
+		);
+
+		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+		expect( discardButton ).toBeDisabled();
+		expect( saveButton ).toHaveAttribute( 'aria-disabled', 'true' );
+		expect( saveButton ).not.toBeDisabled();
+		expect(
+			document.body.querySelector( 'button[aria-label="Close"]' )
+		).toBeNull();
+
+		act( () => {
+			discardButton.click();
+			modal?.dispatchEvent(
+				new KeyboardEvent( 'keydown', {
+					bubbles: true,
+					cancelable: true,
+					key: 'Escape',
+				} )
+			);
+		} );
+
+		expect( document.body.textContent ).toContain(
+			'You have unsaved changes'
+		);
+
+		await act( async () => {
+			rejectSave( new Error( 'Expected save failure.' ) );
+			await Promise.resolve();
+		} );
+
+		act( () => root.unmount() );
+		container.remove();
 	} );
 
 	it( 'routes registered control edits into the page values', () => {
