@@ -94,10 +94,6 @@ const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
-const clearLegacyFormPrompt = () => {
-	window.onbeforeunload = null;
-};
-
 const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	let redirectInput = form.querySelector< HTMLInputElement >(
 		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
@@ -480,7 +476,6 @@ export const SettingsUIPage = ( {
 
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
-		clearLegacyFormPrompt();
 	}, [] );
 
 	const submitSettingsForm = useCallback(
