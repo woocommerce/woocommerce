@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove experimental custom save handlers and navigation regions, preserve unrelated extension registrations, and simplify DataForm updates while retaining disabled-field explanations.
