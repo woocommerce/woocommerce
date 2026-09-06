@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Restore a visible keyboard focus indicator on the Settings UI shell tabs.
+Restore WordPress focus and modal styling, identify current navigation links, and preserve other plugins' navigation warnings in the experimental Settings UI.
