@@ -160,7 +160,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
-		padding: 0 48px;
+		// Keep WordPress focus rings inside the scrolling tab bar.
+		padding: var(--wpds-dimension-padding-xs) 48px;
 		width: 100%;
 	}
 
@@ -180,16 +181,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&:focus,
 		&:hover,
 		&:active {
-			box-shadow: none;
 			color: var(--wpds-color-foreground-interactive-brand);
-			outline: none;
-		}
-
-		// WPDS focus ring, inset so the tab bar's overflow clipping keeps it visible.
-		&:focus-visible {
-			border-radius: var(--wpds-border-radius-sm);
-			outline: var(--wpds-border-width-focus, 2px) solid var(--wpds-color-stroke-focus);
-			outline-offset: calc(var(--wpds-border-width-focus, 2px) * -1);
 		}
 
 		&.is-active {
