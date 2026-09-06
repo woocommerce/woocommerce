@@ -379,6 +379,9 @@ const ShellHeader = ( {
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
 									}
+									aria-current={
+										item.active ? 'page' : undefined
+									}
 									href={ item.href }
 									key={ item.id }
 								>
@@ -402,6 +405,9 @@ const ShellHeader = ( {
 										item.active
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
+									}
+									aria-current={
+										item.active ? 'page' : undefined
 									}
 									href={ item.href }
 									key={ item.id }
