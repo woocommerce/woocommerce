@@ -7,8 +7,6 @@ import type {
 	SettingsEditControl,
 	SettingsExtensionRegistration,
 	SettingsFieldContext,
-	SettingsRegionComponent,
-	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from './types';
 
@@ -20,8 +18,6 @@ const registrationMapKeys = [
 	'typeRenderers',
 	'fieldVisibility',
 	'groupVisibility',
-	'saveHandlers',
-	'regions',
 ] as const;
 
 type RegistrationMapKey = ( typeof registrationMapKeys )[ number ];
@@ -232,39 +228,3 @@ export const resolveGroupVisibilityPredicate = (
 		context,
 		( registration ) => registration.groupVisibility?.[ groupId ]
 	);
-
-export const resolveSaveHandler = (
-	handler: string,
-	context: SettingsFieldContext
-): SettingsSaveHandler | undefined => {
-	const saveHandler = findInMatchingRegistrations(
-		context,
-		( registration ) => registration.saveHandlers?.[ handler ]
-	);
-
-	if ( saveHandler ) {
-		return saveHandler;
-	}
-
-	warn( `Save handler "${ handler }" is not registered.`, { context } );
-	return undefined;
-};
-
-export const resolveRegionComponent = (
-	component: string,
-	context: SettingsFieldContext
-): SettingsRegionComponent | undefined => {
-	const region = findInMatchingRegistrations(
-		context,
-		( registration ) => registration.regions?.[ component ]
-	);
-
-	if ( region ) {
-		return region;
-	}
-
-	warn( `Region component "${ component }" is not registered.`, {
-		context,
-	} );
-	return undefined;
-};

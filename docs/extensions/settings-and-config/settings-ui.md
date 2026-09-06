@@ -141,7 +141,7 @@ Use a section id that does not conflict with an existing section on the same set
 
 ### Provide a custom Settings UI page for a registered section
 
-Sections with custom navigation, save handlers, or custom Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
+Sections with declarative navigation or custom Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
 
 ```php
 <?php
@@ -203,6 +203,20 @@ Fields before the first `title` marker are placed into a default group automatic
 For legacy country and page selectors, the adapter creates the same option list that the classic renderer creates at render time. Other select, radio, and multiselect fields can omit `options` or use an empty array. The Settings UI then renders the same empty choice set that the classic settings API accepts. When a field supplies options, WooCommerce validates their structure before rendering.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
+
+## Migrating custom saving and navigation
+
+The experimental Settings UI no longer supports `save: { adapter: 'custom', handler }`, `saveHandlers`, `regions`, or `shell.navigationComponent`. Schemas selecting either removed path fall back to classic settings when resolved by WooCommerce.
+
+| Previous contract | Supported path |
+| --- | --- |
+| Custom save handler and `SettingsSaveHandler*` / `SettingsSaveResult` types | Use `save: { adapter: 'form_post' }` and persist through the existing PHP settings save hooks. Map field names through `field.save.name` where needed. |
+| `regions` and `SettingsRegionComponent*` types | Define links in `shell.navigation` or `shell.sectionNavigation`; each entry supplies `id`, `label`, `href`, and optionally `active`. |
+| `shell.navigationComponent` | Remove the component name and provide the declarative navigation links above. |
+
+Pages that require a separate persistence workflow should keep their existing settings page until they can use the supported save path. The `none` adapter is for fields or pages whose persistence is handled separately; it does not provide a replacement page-level Save handler.
+
+Repeated extension registrations now replace only matching entries. Registering a replacement control preserves unrelated controls and visibility predicates in the same scope.
 
 ## Custom component migration
 

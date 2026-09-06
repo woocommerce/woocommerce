@@ -1182,36 +1182,39 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			),
 		);
 		$invalid_page_save                                   = $valid;
-		$invalid_page_save['save']                           = array( 'adapter' => 'custom' );
+		$invalid_page_save['save']                           = array(
+			'adapter' => 'custom',
+			'handler' => 'acme/save',
+		);
 		$invalid_navigation_component                        = $valid;
-		$invalid_navigation_component['shell']['navigationComponent'] = '';
+		$invalid_navigation_component['shell']['navigationComponent'] = 'acme/navigation';
 		$invalid_group_map                    = $valid;
 		$invalid_group_map['groups']['other'] = $invalid_group_map['groups']['main'];
 		unset( $invalid_group_map['groups']['main'] );
 
 		return array(
-			'empty field type'            => array( $empty_type, 'Field "acme_field" type must be a non-empty string.' ),
-			'duplicate field id'          => array( $duplicate_id, 'Field id "acme_field" is duplicated.' ),
-			'group and field collision'   => array( $group_field_collision, 'Field id "main" collides with a group id.' ),
-			'empty schema id'             => array( $empty_schema_id, 'Schema id must be a non-empty string.' ),
-			'malformed group fields'      => array( $malformed_group, 'Group "main" fields must be a list.' ),
-			'non-list choice options'     => array( $invalid_options, 'Field "acme_field" options must be a list.' ),
-			'null choice options'         => array( $null_options, 'Field "acme_field" options must be a list.' ),
-			'non-string option value'     => array( $invalid_option, 'Field "acme_field" option 0 value must be a string.' ),
-			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
-			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
-			'missing visibility control'  => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
-			'invalid field value'         => array( $invalid_field_value, 'Field "acme_field" value is not a valid Settings UI value.' ),
-			'invalid custom attributes'   => array( $invalid_custom_attributes, 'Field "acme_field" customAttributes must be a map.' ),
-			'invalid custom value'        => array( $invalid_custom_attribute_value, 'Field "acme_field" custom attribute "data-values" has an invalid value.' ),
-			'non-finite custom value'     => array( $invalid_custom_attribute_float, 'Field "acme_field" custom attribute "data-value" has an invalid value.' ),
-			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
-			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
-			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),
-			'invalid badge intent'        => array( $invalid_badge, 'Shell badge 0 intent must be a string.' ),
-			'custom save without handler' => array( $invalid_page_save, 'Schema custom save strategy must define a non-empty handler.' ),
-			'empty navigation component'  => array( $invalid_navigation_component, 'Shell navigationComponent must be a non-empty string.' ),
-			'group map id mismatch'       => array( $invalid_group_map, 'Group map key "other" must match group id "main".' ),
+			'empty field type'             => array( $empty_type, 'Field "acme_field" type must be a non-empty string.' ),
+			'duplicate field id'           => array( $duplicate_id, 'Field id "acme_field" is duplicated.' ),
+			'group and field collision'    => array( $group_field_collision, 'Field id "main" collides with a group id.' ),
+			'empty schema id'              => array( $empty_schema_id, 'Schema id must be a non-empty string.' ),
+			'malformed group fields'       => array( $malformed_group, 'Group "main" fields must be a list.' ),
+			'non-list choice options'      => array( $invalid_options, 'Field "acme_field" options must be a list.' ),
+			'null choice options'          => array( $null_options, 'Field "acme_field" options must be a list.' ),
+			'non-string option value'      => array( $invalid_option, 'Field "acme_field" option 0 value must be a string.' ),
+			'empty component name'         => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
+			'unsupported field save'       => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
+			'missing visibility control'   => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
+			'invalid field value'          => array( $invalid_field_value, 'Field "acme_field" value is not a valid Settings UI value.' ),
+			'invalid custom attributes'    => array( $invalid_custom_attributes, 'Field "acme_field" customAttributes must be a map.' ),
+			'invalid custom value'         => array( $invalid_custom_attribute_value, 'Field "acme_field" custom attribute "data-values" has an invalid value.' ),
+			'non-finite custom value'      => array( $invalid_custom_attribute_float, 'Field "acme_field" custom attribute "data-value" has an invalid value.' ),
+			'saving info field'            => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
+			'malformed shell navigation'   => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
+			'malformed breadcrumb'         => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),
+			'invalid badge intent'         => array( $invalid_badge, 'Shell badge 0 intent must be a string.' ),
+			'removed custom save adapter'  => array( $invalid_page_save, 'Schema save adapter must be "form_post" or "none".' ),
+			'removed navigation component' => array( $invalid_navigation_component, 'Shell navigationComponent is not supported. Use navigation or sectionNavigation.' ),
+			'group map id mismatch'        => array( $invalid_group_map, 'Group map key "other" must match group id "main".' ),
 		);
 	}
 
@@ -1221,26 +1224,25 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	public function test_assert_valid_schema_accepts_optional_metadata(): void {
 		$schema          = self::get_valid_schema_for_validation();
 		$schema['save']  = array(
-			'adapter' => 'custom',
-			'handler' => 'acme/save',
+			'adapter' => 'form_post',
 		);
 		$schema['shell'] = array(
-			'header'              => 'visible',
-			'title'               => 'Acme settings',
-			'subtitle'            => 'Configure Acme.',
-			'breadcrumbs'         => array(
+			'header'            => 'visible',
+			'title'             => 'Acme settings',
+			'subtitle'          => 'Configure Acme.',
+			'breadcrumbs'       => array(
 				array(
 					'label' => 'Settings',
 					'href'  => 'https://example.com/settings',
 				),
 			),
-			'badges'              => array(
+			'badges'            => array(
 				array(
 					'label'  => 'Beta',
 					'intent' => 'extension-defined-intent',
 				),
 			),
-			'navigation'          => array(
+			'navigation'        => array(
 				array(
 					'id'     => 'general',
 					'label'  => 'General',
@@ -1248,8 +1250,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 					'active' => true,
 				),
 			),
-			'sectionNavigation'   => array(),
-			'navigationComponent' => 'acme/navigation',
+			'sectionNavigation' => array(),
 		);
 		$schema['groups']['main']['fields'][0]['component']  = 'acme/text';
 		$schema['groups']['main']['fields'][0]['visibility'] = array(

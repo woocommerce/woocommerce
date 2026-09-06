@@ -7,14 +7,10 @@ import {
 	resolveFieldComponent,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
-	resolveSaveHandler,
 } from '../registry';
 import type { SettingsEditControl } from '../index';
 import type {
 	SettingsExtensionRegistration,
-	SettingsRegionComponent,
-	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from '../types';
 
@@ -277,31 +273,5 @@ describe( 'settings extension registry', () => {
 				section: 'other',
 			} )
 		).toBeUndefined();
-	} );
-
-	it( 'resolves save handlers and region components by scope', () => {
-		const saveHandler: SettingsSaveHandler = () => undefined;
-		const region: SettingsRegionComponent = () => null;
-
-		registerSettingsExtension( {
-			scope: { page: 'registry-save-region' },
-			saveHandlers: {
-				'save/handler': saveHandler,
-			},
-			regions: {
-				'region/component': region,
-			},
-		} );
-
-		expect(
-			resolveSaveHandler( 'save/handler', {
-				page: 'registry-save-region',
-			} )
-		).toBe( saveHandler );
-		expect(
-			resolveRegionComponent( 'region/component', {
-				page: 'registry-save-region',
-			} )
-		).toBe( region );
 	} );
 } );

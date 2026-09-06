@@ -17,11 +17,7 @@ export type SettingsUISaveSchema = {
 	name?: string;
 };
 
-export type SettingsUISaveStrategy =
-	| { adapter: 'form_post' }
-	| { adapter: 'custom'; handler: string }
-	| { adapter: 'none' }
-	| { adapter: string & NonNullable< unknown >; handler?: string };
+export type SettingsUISaveStrategy = { adapter: 'form_post' | 'none' };
 
 export type SettingsUIVisibilityRule = {
 	controller: string;
@@ -92,7 +88,6 @@ export type SettingsUIShell = {
 	badges?: SettingsUIShellBadge[];
 	navigation?: SettingsUIShellNavigationItem[];
 	sectionNavigation?: SettingsUIShellNavigationItem[];
-	navigationComponent?: string;
 };
 
 export type SettingsUISchema = {
@@ -147,35 +142,6 @@ export type SettingsVisibilityPredicate = (
 	args: SettingsVisibilityPredicateArgs
 ) => boolean;
 
-export type SettingsSaveHandlerArgs = {
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	changedValues: Partial< SettingsValues >;
-	dirtyFields: string[];
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-};
-
-export type SettingsSaveResult = void | {
-	values?: SettingsValues;
-	notice?: string;
-};
-
-export type SettingsSaveHandler = (
-	args: SettingsSaveHandlerArgs
-) => Promise< SettingsSaveResult > | SettingsSaveResult;
-
-export type SettingsRegionComponentProps = {
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-};
-
-export type SettingsRegionComponent = (
-	props: SettingsRegionComponentProps
-) => JSX.Element | null;
-
 export type SettingsExtensionScope = {
 	page: string;
 	section?: string;
@@ -188,6 +154,4 @@ export type SettingsExtensionRegistration = {
 	typeRenderers?: Record< string, SettingsEditControl >;
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
-	saveHandlers?: Record< string, SettingsSaveHandler >;
-	regions?: Record< string, SettingsRegionComponent >;
 };
