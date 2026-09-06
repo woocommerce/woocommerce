@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Reject removed experimental Settings UI custom-save and navigation-component schemas and document migration to classic form saving and declarative navigation.
+Comment: Document Settings UI registration replacement and existing save adapter choices.
