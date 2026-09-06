@@ -87,6 +87,38 @@ describe( 'settings extension registry', () => {
 		).toBe( fieldOverride );
 	} );
 
+	it( 'replaces overlapping entries without dropping unrelated registrations', () => {
+		const original = () => null;
+		const replacement = () => null;
+		const unrelated = () => null;
+		const visibility = () => false;
+		const scope = { page: 'products', section: 'inventory' };
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension( {
+			scope,
+			components: { shared: original, unrelated },
+		} );
+		registerSettingsExtension( {
+			scope,
+			fieldVisibility: { stock: visibility },
+		} );
+		registerSettingsExtension( {
+			scope,
+			components: { shared: replacement },
+		} );
+
+		const field = { id: 'field', label: 'Field', type: 'text' };
+		expect(
+			resolveFieldComponent( { ...field, component: 'shared' }, scope )
+		).toBe( replacement );
+		expect(
+			resolveFieldComponent( { ...field, component: 'unrelated' }, scope )
+		).toBe( unrelated );
+		expect( resolveFieldVisibilityPredicate( 'stock', scope ) ).toBe(
+			visibility
+		);
+	} );
+
 	it( 'ignores malformed registration payloads', () => {
 		const warnSpy = jest
 			.spyOn( console, 'warn' )

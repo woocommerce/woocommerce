@@ -154,17 +154,9 @@ export const registerSettingsExtension = (
 		warn(
 			`Registration already exists for scope "${ getScopeKey(
 				registration.scope
-			) }". Replacing the existing registration.`,
+			) }". Replacing the conflicting entries.`,
 			{ registration }
 		);
-		for ( let i = registrations.length - 1; i >= 0; i-- ) {
-			if (
-				getScopeKey( registrations[ i ].scope ) ===
-				getScopeKey( registration.scope )
-			) {
-				registrations.splice( i, 1 );
-			}
-		}
 	}
 
 	registrations.push( registration );
