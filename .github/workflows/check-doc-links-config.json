@@ -1,0 +1,18 @@
+{
+	"ignorePatterns": [
+		{
+			"pattern": "^(?![hH][tT][tT][pP][sS]?://).*"
+		},
+		{
+			"pattern": "^[hH][tT][tT][pP][sS]?://(?:[lL][oO][cC][aA][lL][hH][oO][sS][tT]|127\\.0\\.0\\.1|\\[::1\\])(?::[0-9]+)?(?:[/?#]|$)"
+		},
+		{
+			"pattern": "^[hH][tT][tT][pP][sS]?://(?:[wW][wW][wW]\\.)?[nN][pP][mM][jJ][sS]\\.[cC][oO][mM]/package/"
+		}
+	],
+	"retryOn429": true,
+	"retryCount": 1,
+	"fallbackRetryDelay": "5s",
+	"timeout": "5s",
+	"aliveStatusCodes": [ 200, 204, 206 ]
+}

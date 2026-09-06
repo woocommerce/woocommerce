@@ -92,6 +92,10 @@ jobs:
             needs-markdown-validation:
               - '*.md'
               - '!(.github/**)/**/*.md'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/check-doc-links-config.json'
+              - '.github/workflows/scripts/check-doc-links.js'
+              - '.github/workflows/scripts/check-doc-links.test.sh'
             needs-syncpack-validation:
               - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
 
@@ -747,7 +751,7 @@ jobs:
     name: 'Validate markdown'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}
     needs: [ 'identify-jobs-to-run' ]
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
@@ -766,6 +770,19 @@ jobs:
             needs-docs-build-validation:
               - 'docs/**/*.md'
 
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        id: doc-link-changes
+        with:
+          list-files: json
+          filters: |
+            needs-doc-link-validation:
+              - added|modified: 'docs/**/*.md'
+            needs-doc-link-contract-validation:
+              - added|modified|deleted: '.github/workflows/check-doc-links-config.json'
+              - added|modified|deleted: '.github/workflows/scripts/check-doc-links.js'
+              - added|modified|deleted: '.github/workflows/scripts/check-doc-links.test.sh'
+              - added|modified|deleted: '.github/workflows/ci.yml'
+
       - name: 'Setup - node'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -778,6 +795,20 @@ jobs:
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
         run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
+
+      - name: 'Validate - doc-link contract'
+        id: doc-link-contract
+        if: ${{ always() && steps.doc-link-changes.outputs.needs-doc-link-contract-validation == 'true' }}
+        shell: bash
+        run: bash .github/workflows/scripts/check-doc-links.test.sh
+
+      - name: 'Validate - external doc links'
+        if: ${{ always() && steps.doc-link-changes.outputs.needs-doc-link-validation == 'true' && ( steps.doc-link-contract.outcome == 'success' || steps.doc-link-contract.outcome == 'skipped' ) }}
+        timeout-minutes: 2
+        env:
+          DOC_LINK_FILES_JSON: ${{ steps.doc-link-changes.outputs.needs-doc-link-validation_files }}
+        shell: bash
+        run: node .github/workflows/scripts/check-doc-links.js
 
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
