@@ -351,6 +351,9 @@ export const createDataFormAdapter = (
 	options: DataFormAdapterOptions
 ): DataFormAdapter => {
 	const groups = Object.values( options.schema.groups );
+	const groupForms = new Map(
+		groups.map( ( group ) => [ group.id, buildGroupFormField( group ) ] )
+	);
 	const fields = groups.flatMap( ( group ) =>
 		group.fields.map( ( field ) => buildDataFormField( field, options ) )
 	);
@@ -391,7 +394,7 @@ export const createDataFormAdapter = (
 	const getForm = ( values: SettingsValues ): Form => ( {
 		fields: groups
 			.filter( ( group ) => isGroupVisible( group, values ) )
-			.map( buildGroupFormField ),
+			.map( ( group ) => groupForms.get( group.id )! ),
 	} );
 
 	return { fields, getForm };
