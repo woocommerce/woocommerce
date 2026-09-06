@@ -350,11 +350,11 @@ const buildGroupFormField = ( group: SettingsUIGroup ): FormField => ( {
 export const createDataFormAdapter = (
 	options: DataFormAdapterOptions
 ): DataFormAdapter => {
-	const groups = Object.values( options.schema.groups );
-	const groupForms = new Map(
-		groups.map( ( group ) => [ group.id, buildGroupFormField( group ) ] )
-	);
-	const fields = groups.flatMap( ( group ) =>
+	const groups = Object.values( options.schema.groups ).map( ( group ) => ( {
+		group,
+		form: buildGroupFormField( group ),
+	} ) );
+	const fields = groups.flatMap( ( { group } ) =>
 		group.fields.map( ( field ) => buildDataFormField( field, options ) )
 	);
 	const fieldsById = new Map(
@@ -393,8 +393,8 @@ export const createDataFormAdapter = (
 
 	const getForm = ( values: SettingsValues ): Form => ( {
 		fields: groups
-			.filter( ( group ) => isGroupVisible( group, values ) )
-			.map( ( group ) => groupForms.get( group.id )! ),
+			.filter( ( { group } ) => isGroupVisible( group, values ) )
+			.map( ( { form } ) => form ),
 	} );
 
 	return { fields, getForm };
