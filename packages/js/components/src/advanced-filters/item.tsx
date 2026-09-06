@@ -14,8 +14,40 @@ import SearchFilter from './search-filter';
 import NumberFilter from './number-filter';
 import DateFilter from './date-filter';
 import AttributeFilter from './attribute-filter';
+import type {
+	ActiveFilter,
+	AdvancedFilterConfig,
+	Currency,
+	FilterConfig,
+	OnFilterChange,
+	Query,
+} from './types';
 
-const AdvancedFilterItem = ( props ) => {
+export type AdvancedFilterItemProps = {
+	config: AdvancedFilterConfig;
+	currency: Currency;
+	filter: ActiveFilter;
+	isEnglish: boolean;
+	onFilterChange: OnFilterChange;
+	query: Query;
+	removeFilter: () => void;
+};
+
+const componentMap = {
+	Currency: NumberFilter,
+	Date: DateFilter,
+	Number: NumberFilter,
+	ProductAttribute: AttributeFilter,
+	Search: SearchFilter,
+	SelectControl: SelectFilter,
+};
+
+const isKnownComponent = (
+	component: string
+): component is keyof typeof componentMap =>
+	componentMap.hasOwnProperty( component );
+
+const AdvancedFilterItem = ( props: AdvancedFilterItemProps ) => {
 	const {
 		config,
 		currency,
@@ -26,20 +58,11 @@ const AdvancedFilterItem = ( props ) => {
 		removeFilter,
 	} = props;
 	const { key } = filterValue;
-	let filterConfig = config.filters[ key ];
+	let filterConfig: FilterConfig = config.filters[ key ];
 	const { input, labels } = filterConfig;
 
-	const componentMap = {
-		Currency: NumberFilter,
-		Date: DateFilter,
-		Number: NumberFilter,
-		ProductAttribute: AttributeFilter,
-		Search: SearchFilter,
-		SelectControl: SelectFilter,
-	};
-
-	if ( ! componentMap.hasOwnProperty( input.component ) ) {
-		return;
+	if ( ! isKnownComponent( input.component ) ) {
+		return null;
 	}
 
 	if ( input.component === 'Currency' ) {

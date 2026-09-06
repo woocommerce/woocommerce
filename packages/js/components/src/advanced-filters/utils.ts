@@ -3,7 +3,8 @@
  */
 import { isArray, isNumber, isString } from 'lodash';
 import deprecated from '@wordpress/deprecated';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, isValidElement } from '@wordpress/element';
+import type { ReactElement, ReactNode } from 'react';
 
 /**
  * DOM Node.textContent for React components
@@ -13,15 +14,18 @@ import { createInterpolateElement } from '@wordpress/element';
  *
  * @return {string} concatenated text content of all nodes
  */
-export function textContent( components ) {
+export function textContent( components: ReactNode ) {
 	let text = '';
 
-	const toText = ( component ) => {
+	const toText = ( component: ReactNode ) => {
 		if ( isString( component ) || isNumber( component ) ) {
 			text += component;
 		} else if ( isArray( component ) ) {
 			component.forEach( toText );
-		} else if ( component && component.props ) {
+		} else if (
+			isValidElement< { children?: ReactNode } >( component ) &&
+			component.props
+		) {
 			const { children } = component.props;
 
 			if ( isArray( children ) ) {
@@ -47,12 +51,12 @@ export function textContent( components ) {
  *
  * @return {string}  Fixed interpolation string.
  */
-export function getInterpolatedString( interpolatedString ) {
+export function getInterpolatedString( interpolatedString: string ) {
 	const regex = /(\{\{)(\/?\s*\w+\s*\/?)(\}\})/g;
 
 	const replacedString = interpolatedString.replaceAll(
 		regex,
-		( match, p1, p2 ) => {
+		( match: string, p1: string, p2: string ) => {
 			const inner = p2.trim();
 			let replacement;
 			if ( inner.startsWith( '/' ) ) {
@@ -94,8 +98,8 @@ export function getInterpolatedString( interpolatedString ) {
  * @return {Element} A React element that is the result of applying the transformation.
  */
 export function backwardsCompatibleCreateInterpolateElement(
-	interpolatedString,
-	conversionMap
+	interpolatedString: string,
+	conversionMap: Record< string, ReactElement >
 ) {
 	return createInterpolateElement(
 		getInterpolatedString( interpolatedString ),

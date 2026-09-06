@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { SelectControl as Select, Spinner } from '@wordpress/components';
 import clsx from 'clsx';
 import {
@@ -22,6 +21,24 @@ import {
 	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
 	textContent,
 } from './utils';
+import type {
+	ActiveFilter,
+	FilterComponentProps,
+	FilterConfig,
+	FilterRule,
+} from './types';
+
+export type AttributeFilterProps = FilterComponentProps;
+
+type AttributeOption = {
+	key: string;
+	label: string;
+};
+
+type AttributeResponse = {
+	id: number;
+	name: string;
+};
 
 const getScreenReaderText = ( {
 	attributeTerms,
@@ -29,6 +46,12 @@ const getScreenReaderText = ( {
 	filter,
 	selectedAttribute,
 	selectedAttributeTerm,
+}: {
+	attributeTerms: AttributeOption[] | false;
+	config: FilterConfig;
+	filter: ActiveFilter;
+	selectedAttribute: AttributeOption[];
+	selectedAttributeTerm: string;
 } ) => {
 	if (
 		! attributeTerms ||
@@ -40,7 +63,7 @@ const getScreenReaderText = ( {
 		return '';
 	}
 
-	const rule = Array.isArray( config.rules )
+	const rule: Partial< FilterRule > = Array.isArray( config.rules )
 		? config.rules.find(
 				( configRule ) => configRule.value === filter.rule
 		  ) || {}
@@ -57,7 +80,6 @@ const getScreenReaderText = ( {
 	}
 
 	const filterStr = createInterpolateElement(
-		/* eslint-disable-next-line max-len */
 		/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
 		__( '<attribute/> <equals/> <value/>', 'woocommerce' ),
 		{
@@ -76,12 +98,14 @@ const getScreenReaderText = ( {
 	);
 };
 
-const AttributeFilter = ( props ) => {
+const AttributeFilter = ( props: AttributeFilterProps ) => {
 	const { className, config, filter, isEnglish, onFilterChange } = props;
 	const { rule, value } = filter;
 	const { labels, rules } = config;
 
-	const [ selectedAttribute, setSelectedAttribute ] = useState( [] );
+	const [ selectedAttribute, setSelectedAttribute ] = useState<
+		AttributeOption[]
+	>( [] );
 
 	// Set selected attribute from filter value (in query string).
 	useEffect( () => {
@@ -90,7 +114,7 @@ const AttributeFilter = ( props ) => {
 			Array.isArray( value ) &&
 			value[ 0 ]
 		) {
-			apiFetch( {
+			void apiFetch< AttributeResponse >( {
 				path: `/wc-analytics/products/attributes/${ value[ 0 ] }`,
 			} )
 				.then( ( { id, name } ) => [
@@ -103,7 +127,9 @@ const AttributeFilter = ( props ) => {
 		}
 	}, [ value, selectedAttribute ] );
 
-	const [ attributeTerms, setAttributeTerms ] = useState( [] );
+	const [ attributeTerms, setAttributeTerms ] = useState<
+		AttributeOption[] | false
+	>( [] );
 
 	// Fetch all product attributes on mount.
 	useEffect( () => {
@@ -111,7 +137,7 @@ const AttributeFilter = ( props ) => {
 			return;
 		}
 		setAttributeTerms( false );
-		apiFetch( {
+		void apiFetch< AttributeResponse[] >( {
 			path: `/wc-analytics/products/attributes/${ selectedAttribute[ 0 ].key }/terms?per_page=100`,
 		} )
 			.then( ( terms ) =>
@@ -124,7 +150,7 @@ const AttributeFilter = ( props ) => {
 	}, [ selectedAttribute ] );
 
 	const [ selectedAttributeTerm, setSelectedAttributeTerm ] = useState(
-		Array.isArray( value ) ? value[ 1 ] || '' : ''
+		Array.isArray( value ) ? String( value[ 1 ] || '' ) : ''
 	);
 
 	const screenReaderText = getScreenReaderText( {
@@ -135,11 +161,10 @@ const AttributeFilter = ( props ) => {
 		selectedAttributeTerm,
 	} );
 
-	/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 	return (
 		<fieldset
 			className="woocommerce-filters-advanced__line-item"
-			tabIndex="0"
+			tabIndex={ 0 }
 		>
 			<legend className="screen-reader-text">{ labels.add || '' }</legend>
 			<div
@@ -179,7 +204,9 @@ const AttributeFilter = ( props ) => {
 							selectedAttribute.length ? (
 								<Search
 									className="woocommerce-filters-advanced__input woocommerce-search"
-									onChange={ ( [ attr ] ) => {
+									onChange={ ( [
+										attr,
+									]: AttributeOption[] ) => {
 										setSelectedAttribute(
 											attr ? [ attr ] : []
 										);
@@ -208,13 +235,12 @@ const AttributeFilter = ( props ) => {
 								<Spinner />
 							) }
 							{ selectedAttribute.length > 0 &&
-								( attributeTerms.length ? (
+								( attributeTerms && attributeTerms.length ? (
 									<Fragment>
 										<span className="woocommerce-filters-advanced__attribute-field-separator">
 											=
 										</span>
 										<SelectControl
-											__next40pxDefaultSize
 											className="woocommerce-filters-advanced__input woocommerce-search"
 											placeholder={ __(
 												'Attribute value',
@@ -259,36 +285,6 @@ const AttributeFilter = ( props ) => {
 			) }
 		</fieldset>
 	);
-	/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
-};
-
-AttributeFilter.propTypes = {
-	/**
-	 * The configuration object for the single filter to be rendered.
-	 */
-	config: PropTypes.shape( {
-		labels: PropTypes.shape( {
-			rule: PropTypes.string,
-			title: PropTypes.string,
-			filter: PropTypes.string,
-		} ),
-		rules: PropTypes.arrayOf( PropTypes.object ),
-		input: PropTypes.object,
-	} ).isRequired,
-	/**
-	 * The activeFilter handed down by AdvancedFilters.
-	 */
-	filter: PropTypes.shape( {
-		key: PropTypes.string,
-		rule: PropTypes.string,
-		value: PropTypes.arrayOf(
-			PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] )
-		),
-	} ).isRequired,
-	/**
-	 * Function to be called on update.
-	 */
-	onFilterChange: PropTypes.func.isRequired,
 };
 
 export default AttributeFilter;

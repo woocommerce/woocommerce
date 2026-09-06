@@ -12,8 +12,10 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import AdvancedFilters from '../';
+import type { AdvancedFiltersProps } from '../';
+import type { AdvancedFilterConfig } from '../types';
 
-const ORDER_STATUSES = {
+const ORDER_STATUSES: Record< string, string > = {
 	cancelled: 'Cancelled',
 	completed: 'Completed',
 	failed: 'Failed',
@@ -29,11 +31,11 @@ const CURRENCY = {
 	precision: 2,
 	priceFormat: '%1$s%2$s',
 	symbol: '$',
-	symbolPosition: 'left',
+	symbolPosition: 'left' as const,
 	thousandSeparator: ',',
 };
 
-const advancedFiltersConfig = {
+const advancedFiltersConfig: AdvancedFilterConfig = {
 	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
@@ -201,12 +203,13 @@ const advancedFiltersConfig = {
 	},
 };
 
-const AdvancedFiltersComponent = ( props = null ) => (
+const AdvancedFiltersComponent = (
+	props: Partial< AdvancedFiltersProps > = {}
+) => (
 	<AdvancedFilters
 		siteLocale="en_US"
 		path=""
 		query={ { component: 'advanced-filters' } }
-		filterTitle="Orders"
 		config={ advancedFiltersConfig }
 		currency={ CURRENCY }
 		{ ...props }
