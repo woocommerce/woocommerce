@@ -139,53 +139,40 @@ class EmailActionController {
 	 * @return void
 	 */
 	private function process_verification_action( Notification $notification, string $action_key ): void {
-		if ( $notification->check_verification_key( $action_key ) ) {
-			// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
-			// link-scanner bots). Without this, each hit would re-dispatch the verified email.
-			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
-				return;
-			}
+		if ( ! $notification->check_verification_key( $action_key ) ) {
+			return;
+		}
 
-			$notification->set_status( NotificationStatus::ACTIVE );
-			$notification->set_date_confirmed( time() );
-			$notification->save();
+		// A re-hit of a still-valid verification URL (double-click, email prefetch,
+		// link-scanner bot) leaves the row alone and falls through without redirecting.
+		if ( ! $this->verify( $notification ) ) {
+			return;
+		}
 
-			/**
-			 * Action: woocommerce_customer_stock_notifications_verified
-			 *
-			 * Fires after a stock-notification signup has been verified via the
-			 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
-			 *
-			 * @since 10.9.0
-			 *
-			 * @param Notification $notification The notification.
-			 */
-			do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
+		// We need a cookie-based session for notices to work on frontend pages.
+		if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
+			WC()->session->set_customer_session_cookie( true );
+		}
 
-			$this->email_manager->send_verified_email( $notification );
+		$product = wc_get_product( $notification->get_product_id() );
 
-			// We need a cookie-based session for notices to work on frontend pages.
-			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
-				WC()->session->set_customer_session_cookie( true );
-			}
-
-			$product = wc_get_product( $notification->get_product_id() );
-
+		if ( $product instanceof \WC_Product ) {
 			/* translators: %s is product name */
 			$notice_text = sprintf( esc_html__( 'Successfully verified stock notifications for "%s".', 'woocommerce' ), $product->get_name() );
 			wc_add_notice( $notice_text );
-			/**
-			 * `woocommerce_customer_stock_notification_verified_redirect_url` filter.
-			 *
-			 * @since 10.2.0
-			 *
-			 * @param  string  $url
-			 * @return string
-			 */
-			$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
-			wp_safe_redirect( $url );
-			exit;
 		}
+
+		/**
+		 * `woocommerce_customer_stock_notification_verified_redirect_url` filter.
+		 *
+		 * @since 10.2.0
+		 *
+		 * @param  string  $url
+		 * @return string
+		 */
+		$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
+		wp_safe_redirect( $url );
+		exit;
 	}
 
 	/**
@@ -197,10 +184,7 @@ class EmailActionController {
 	 */
 	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_unsubscribe_key( $action_key ) ) {
-			$notification->set_status( NotificationStatus::CANCELLED );
-			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( time() );
-			$notification->save();
+			$this->unsubscribe( $notification );
 
 			// We need a cookie-based session for notices to work on frontend pages.
 			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
@@ -209,9 +193,11 @@ class EmailActionController {
 
 			$product = wc_get_product( $notification->get_product_id() );
 
-			/* translators: %2$s product name, %1$s user email */
-			$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
-			wc_add_notice( $notice_text );
+			if ( $product instanceof \WC_Product ) {
+				/* translators: %2$s product name, %1$s user email */
+				$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
+				wc_add_notice( $notice_text );
+			}
 			/**
 			 * `woocommerce_customer_stock_notification_unsubscribe_redirect_url` filter.
 			 *
@@ -224,6 +210,83 @@ class EmailActionController {
 			wp_safe_redirect( $url );
 			exit;
 		}
+	}
+
+	/**
+	 * Activate a notification, if it is still awaiting verification.
+	 *
+	 * Acts only on a `pending` notification, so a verification link followed after the row
+	 * was cancelled, sent or already verified is a no-op. Without that guard a link issued
+	 * before a cancellation would resurrect the row and send a "verified" email for a
+	 * notification the shopper or the store had since called off.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param Notification $notification The notification to activate.
+	 * @return bool True if the notification was activated, false if it was left unchanged.
+	 */
+	public function verify( Notification $notification ): bool {
+		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
+			return false;
+		}
+
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_date_confirmed( time() );
+		$notification->save();
+
+		/**
+		 * Action: woocommerce_customer_stock_notifications_verified
+		 *
+		 * Fires after a stock-notification signup has been verified via the
+		 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param Notification $notification The notification.
+		 */
+		do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
+
+		$this->email_manager->send_verified_email( $notification );
+
+		return true;
+	}
+
+	/**
+	 * Cancel a notification, if it is still eligible to be cancelled.
+	 *
+	 * Acts only on a `pending` or `active` notification, so calling this again on an
+	 * already-cancelled or already-sent row is a no-op.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param Notification $notification The notification to cancel.
+	 * @return bool True if the notification was cancelled, false if it was left unchanged.
+	 */
+	public function unsubscribe( Notification $notification ): bool {
+		if ( ! in_array( $notification->get_status(), array( NotificationStatus::PENDING, NotificationStatus::ACTIVE ), true ) ) {
+			return false;
+		}
+
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$notification->set_cancellation_source( NotificationCancellationSource::USER );
+		$notification->set_date_cancelled( time() );
+		$notification->save();
+
+		/**
+		 * Action: woocommerce_customer_stock_notifications_cancelled
+		 *
+		 * Fires after a shopper cancels a stock notification from an email link. Mirrors
+		 * `woocommerce_customer_stock_notifications_signup`. Does not fire for a row that
+		 * was already cancelled, or for a cancellation the store made on the shopper's
+		 * behalf.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param Notification $notification The notification.
+		 */
+		do_action( 'woocommerce_customer_stock_notifications_cancelled', $notification );
+
+		return true;
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an opt-in migration that carries subscribers, settings and product signup flags from the Back In Stock Notifications extension into the customer stock notifications feature, run from WooCommerce > Status > Tools or wp wc bis-migrate, so unsubscribe and verification links in already-delivered emails keep working after the move and no longer reactivate a sign-up that was cancelled after the link was sent.

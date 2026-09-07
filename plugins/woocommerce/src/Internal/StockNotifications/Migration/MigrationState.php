@@ -234,6 +234,44 @@ class MigrationState {
 	}
 
 	/**
+	 * Release the lock only when the named owner still holds it.
+	 *
+	 * The background run cannot always hand its own lock back: `BatchProcessingController`
+	 * drops a consistently failing processor without telling it, so the lock outlives the
+	 * run that took it. A caller that can prove the owner is gone — the Tools screen, which
+	 * knows the processor is no longer enqueued — reclaims it here rather than making the
+	 * merchant wait out STALE_LOCK_SECONDS.
+	 *
+	 * @param string $owner Owner string the lock must carry to be released.
+	 * @return bool True when a lock owned by $owner was released.
+	 */
+	public function release_lock_owned_by( string $owner ): bool {
+		global $wpdb;
+
+		$stored = $this->read_stored_lock();
+
+		if ( null === $stored || $stored['owner'] !== $owner ) {
+			return false;
+		}
+
+		// Delete the exact value that was read, so a lock a third process has taken over in
+		// the meantime is left where it is.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->delete(
+			$wpdb->options,
+			array(
+				'option_name'  => self::LOCK_OPTION_NAME,
+				'option_value' => $stored['value'],
+			),
+			array( '%s', '%s' )
+		);
+
+		$this->flush_lock_cache( self::LOCK_OPTION_NAME );
+
+		return (bool) $deleted;
+	}
+
+	/**
 	 * Push out the acquisition time of the lock currently held.
 	 *
 	 * A run longer than STALE_LOCK_SECONDS would otherwise have its lock treated as
