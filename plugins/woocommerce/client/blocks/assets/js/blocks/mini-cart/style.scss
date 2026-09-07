@@ -143,9 +143,8 @@ h2.wc-block-mini-cart__title {
 	background: inherit;
 	padding-bottom: $gap * 2;
 	z-index: 1;
-	margin: $gap-smallest $gap $gap * -2;
+	margin: (-$gap-smallest / 2) $gap $gap * -2;
 	font-size: 1.5rem;
-	line-height: 1rem;
 
 	span:first-child {
 		margin-right: $gap-smaller;
