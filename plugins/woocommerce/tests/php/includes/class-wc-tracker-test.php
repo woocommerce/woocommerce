@@ -349,6 +349,54 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stop rebuilding a snapshot that cannot be built after the same number of attempts a failed delivery gets.
+	 *
+	 * A Throwable escaping get_tracking_data() never reaches record_send_result(), so nothing
+	 * downstream records the outcome. Throwing from a woocommerce_tracker_data callback
+	 * reproduces that exact path: a real fatal is uncatchable, but both leave send_tracking_data()
+	 * before any result is recorded.
+	 */
+	public function test_unbuildable_snapshot_is_abandoned_after_max_attempts(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$last_send = strtotime( '-2 weeks' );
+		update_option( 'woocommerce_tracker_last_send', $last_send );
+
+		$builds   = 0;
+		$requests = 0;
+		add_filter(
+			'woocommerce_tracker_data',
+			function () use ( &$builds ) {
+				++$builds;
+				throw new RuntimeException( 'Snapshot build failed' );
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function () use ( &$requests ) {
+				++$requests;
+				return array( 'response' => array( 'code' => 200 ) );
+			}
+		);
+		$logger = $this->expect_tracker_warning();
+
+		// Four consecutive scheduled runs, on a store where building the snapshot always fails.
+		for ( $run = 0; $run < 4; $run++ ) {
+			try {
+				WC_Tracker::send_tracking_data();
+			} catch ( RuntimeException $e ) {
+				continue;
+			}
+		}
+
+		$this->assertSame( 0, $requests, 'A snapshot that cannot be built is never posted.' );
+		$this->assertSame( 3, $builds, 'The build should be attempted the same number of times a failed delivery is retried, then abandoned.' );
+		$this->assertEqualsWithDelta( time(), (int) get_option( 'woocommerce_tracker_last_send' ), 5, 'Abandoning the snapshot should record the send time so the next attempt waits for the weekly interval.' );
+		$this->assertFalse( get_option( 'woocommerce_tracker_send_failures' ), 'Giving up should clear the failure counter.' );
+		$this->assertCount( 1, $logger->warnings, 'Abandoning the snapshot should be logged once, on the run that gives up.' );
+		$this->assertSame( 3, $logger->warnings[0]['failures'], 'The warning should report the attempts made, not the run that found the limit exceeded.' );
+	}
+
+	/**
 	 * Fake the tracker HTTP response.
 	 *
 	 * @param int|string $status       HTTP status code, or "wp_error" for a transport failure.
