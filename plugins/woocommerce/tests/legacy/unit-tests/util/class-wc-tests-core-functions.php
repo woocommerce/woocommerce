@@ -74,6 +74,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'CAD' => 'Canadian dollar',
 			'CDF' => 'Congolese franc',
 			'CHF' => 'Swiss franc',
+			'CHW' => 'WIR franc',
 			'CLP' => 'Chilean peso',
 			'CNY' => 'Chinese yuan',
 			'COP' => 'Colombian peso',
