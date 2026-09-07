@@ -302,6 +302,14 @@ jobs:
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
 
+      - name: 'Patch wp-env for archived Debian Bullseye repositories'
+        if: ${{ matrix.testEnv.shouldCreate && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+        working-directory: plugins/woocommerce
+        run: |
+          # Backport https://github.com/WordPress/gutenberg/pull/82478 to wp-env 11.9.0; remove when the pinned release includes it.
+          wp_env_dir="$(dirname "$(node -p "require.resolve('@wordpress/env/package.json')")")"
+          patch --batch --forward --directory="$wp_env_dir" --strip=1 < "$GITHUB_WORKSPACE/.github/patches/wp-env-bullseye-eol.patch"
+
       - name: 'Download WooCommerce plugin artifact'
         if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
