@@ -26,3 +26,7 @@ This file exists only to exercise the pull-request docs link check on a hosted r
 - [loopback](http://127.0.0.1:8080/)
 - [link-local metadata](http://169.254.169.254/latest/meta-data/)
 - [placeholder store](http://store.local/wp-admin/)
+
+## Dead link (red control)
+
+- [repository that does not exist](https://github.com/woocommerce/this-repo-does-not-exist-43281)
