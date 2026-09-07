@@ -221,48 +221,31 @@ CREATE TABLE $meta_table_name (
 				'SELECT * FROM %i WHERE id = %d',
 				$this->get_table_name(),
 				$notification->get_id()
-			),
-			ARRAY_A
+			)
 		);
 
 		if ( ! $data ) {
 			throw new \Exception( 'Stock notification not found' );
 		}
 
-		$this->hydrate( $notification, $data );
-		$notification->read_meta_data();
-	}
-
-	/**
-	 * Populate a notification from a row already selected from the notifications table.
-	 *
-	 * Lets `query()` build objects from the rows it already selected, without the
-	 * data store reading each one back. Meta is left for
-	 * {@see \WC_Data::maybe_read_meta_data()} to fetch on first access.
-	 *
-	 * @param Notification         $notification The data object to populate.
-	 * @param array<string, mixed> $row          A full row from the notifications table.
-	 *
-	 * @return void
-	 */
-	private function hydrate( Notification $notification, array $row ) {
-		$notification->set_object_read( false );
 		$notification->set_props(
 			array(
-				'id'                  => $row['id'],
-				'product_id'          => $row['product_id'],
-				'user_id'             => $row['user_id'],
-				'user_email'          => $row['user_email'],
-				'status'              => $row['status'],
-				'date_created'        => wc_string_to_timestamp( $row['date_created_gmt'] ),
-				'date_modified'       => wc_string_to_timestamp( $row['date_modified_gmt'] ),
-				'date_confirmed'      => wc_string_to_timestamp( $row['date_confirmed_gmt'] ),
-				'date_last_attempt'   => wc_string_to_timestamp( $row['date_last_attempt_gmt'] ),
-				'date_notified'       => wc_string_to_timestamp( $row['date_notified_gmt'] ),
-				'date_cancelled'      => wc_string_to_timestamp( $row['date_cancelled_gmt'] ),
-				'cancellation_source' => $row['cancellation_source'],
+				'id'                  => $data->id,
+				'product_id'          => $data->product_id,
+				'user_id'             => $data->user_id,
+				'user_email'          => $data->user_email,
+				'status'              => $data->status,
+				'date_created'        => wc_string_to_timestamp( $data->date_created_gmt ),
+				'date_modified'       => wc_string_to_timestamp( $data->date_modified_gmt ),
+				'date_confirmed'      => wc_string_to_timestamp( $data->date_confirmed_gmt ),
+				'date_last_attempt'   => wc_string_to_timestamp( $data->date_last_attempt_gmt ),
+				'date_notified'       => wc_string_to_timestamp( $data->date_notified_gmt ),
+				'date_cancelled'      => wc_string_to_timestamp( $data->date_cancelled_gmt ),
+				'cancellation_source' => $data->cancellation_source,
 			)
 		);
+
+		$notification->read_meta_data();
 		$notification->set_object_read( true );
 	}
 
@@ -531,9 +514,7 @@ CREATE TABLE $meta_table_name (
 
 			return array_map(
 				function ( $result ) {
-					$notification = new Notification();
-					$this->hydrate( $notification, $result );
-					return $notification;
+					return new Notification( $result );
 				},
 				$results
 			);
