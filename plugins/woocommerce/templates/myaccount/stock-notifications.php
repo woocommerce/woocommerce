@@ -105,8 +105,8 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend verification', 'woocommerce' ); ?></a>
-					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--resend<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $resend_label ); ?>"><?php esc_html_e( 'Resend verification', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 				</td>
 			</tr>
 		<?php endforeach; ?>
@@ -185,7 +185,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 				</td>
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-actions actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
 					<?php if ( MyAccountEndpoint::is_cancellable( $notification ) ) : ?>
-						<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id() ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+						<a href="<?php echo esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, (int) $notification->get_id(), $current_page ) ); ?>" class="woocommerce-button button woocommerce-customer-stock-notifications-action-link woocommerce-customer-stock-notifications-action-link--cancel<?php echo esc_attr( $wp_button_class ); ?>" aria-label="<?php echo esc_attr( $cancel_label ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 					<?php else : ?>
 						&mdash;
 					<?php endif; ?>

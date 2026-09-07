@@ -183,12 +183,17 @@ function FormComponent< Values extends Record< string, any > = any >(
 		( name: keyof Values, value: any ) => {
 			// lodash writes an existing literal key such as 'a.b' in place rather
 			// than as a path, so only split a name the form does not already hold.
-			const segments = Object.prototype.hasOwnProperty.call(
+			const path = Object.prototype.hasOwnProperty.call(
 				pendingValuesRef.current,
 				name
 			)
 				? [ String( name ) ]
 				: _toPath( name );
+
+			// toPath() yields no segments for a name such as '' or null. Write
+			// those under the literal key instead, and hand setWith() the same
+			// segments so the entry read below is the one the write landed on.
+			const segments = path.length ? path : [ String( name ) ];
 
 			// lodash drops a write whose path steps through one of these keys.
 			// Drop it here too: otherwise the entry picked below reads an
@@ -203,7 +208,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 			const newValues = _setWith(
 				{ ...pendingValuesRef.current },
-				name,
+				segments,
 				value,
 				_clone
 			);

@@ -82,7 +82,8 @@ class Universal {
 		?>
 		<script type="text/javascript">
 			(function() {
-				window.wcAnalytics = window.wcAnalytics || {};
+				// Always start from a fresh object: a `||` fallback would keep a same-named DOM element alive.
+				window.wcAnalytics = {};
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set the assets URL for webpack to find the split assets.

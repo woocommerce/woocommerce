@@ -43,20 +43,10 @@ export type SettingsUIField = {
 	save?: SettingsUISaveSchema;
 };
 
-export type SettingsUIGroupAction = {
-	id: string;
-	label: string;
-	href: string;
-	variant?: 'primary' | 'secondary' | 'tertiary' | 'link' | string;
-	target?: string;
-	rel?: string;
-};
-
 export type SettingsUIGroup = {
 	id: string;
 	title?: string;
 	description?: string;
-	actions?: SettingsUIGroupAction[];
 	fields: SettingsUIField[];
 };
 
@@ -118,21 +108,6 @@ export type SettingsFieldContext = {
 	page: string;
 	section?: string;
 };
-
-export type SettingsFieldComponentProps = {
-	field: SettingsUIField;
-	value: SettingsValue;
-	onChange: ( value: SettingsValue ) => void;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	setValue: ( fieldId: string, value: SettingsValue ) => void;
-	setValues: ( values: Partial< SettingsValues > ) => void;
-	context: SettingsFieldContext;
-};
-
-export type SettingsFieldComponent = (
-	props: SettingsFieldComponentProps
-) => JSX.Element | null;
 
 /**
  * The field surface a registered edit control receives. A frozen subset of
@@ -216,15 +191,3 @@ export type SettingsExtensionRegistration = {
 	saveHandlers?: Record< string, SettingsSaveHandler >;
 	regions?: Record< string, SettingsRegionComponent >;
 };
-
-export type SettingsUIRegistry = {
-	registerSettingsExtension: (
-		registration: SettingsExtensionRegistration
-	) => void;
-};
-
-declare global {
-	interface Window {
-		wcSettingsUI?: SettingsUIRegistry;
-	}
-}

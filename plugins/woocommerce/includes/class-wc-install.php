@@ -353,6 +353,14 @@ class WC_Install {
 		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
+			'wc_update_1120_delete_surface_cart_checkout_note',
+		),
+		'11.2.0-1' => array(
+			'wc_update_11201_migrate_tax_lookup_order_items',
+			'wc_update_11201_invalidate_analytics_reports_cache',
+		),
+		'11.2.0-2' => array(
+			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
 	);
 
@@ -1712,6 +1720,42 @@ class WC_Install {
 		}
 
 		/**
+		 * Re-key wc_order_tax_lookup by tax order item. The new column has to join the primary key,
+		 * which dbDelta cannot do, so both changes run here as one table rebuild. Rows already in
+		 * the table land on the column's zero default and keep reporting on their tax rate id alone
+		 * until OrderTaxLookupMigrator has been through them.
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_tax_lookup';" ) ) {
+			$tax_lookup_alterations = array();
+
+			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}wc_order_tax_lookup` LIKE 'order_item_id';" ) ) {
+				$tax_lookup_alterations[] = 'ADD COLUMN order_item_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER tax_rate_id';
+			}
+
+			if ( 3 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_tax_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$tax_lookup_alterations[] = 'DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id, order_item_id)';
+			}
+
+			if ( $tax_lookup_alterations ) {
+				$tax_lookup_altered = $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+
+				// A re-key that failed is otherwise invisible: the sync keeps writing rows in the
+				// released shape and the reports keep reading them, so the store quietly misses the
+				// fix. Leave a trace, and name the tool that retries the change.
+				if ( false === $tax_lookup_altered ) {
+					wc_get_logger()->error(
+						sprintf(
+							'Could not re-key %1$s by tax order item: %2$s. Analytics tax reports keep reading the way they did, and running "Verify base database tables" under WooCommerce > Status > Tools retries the change.',
+							$wpdb->prefix . 'wc_order_tax_lookup',
+							'' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error'
+						),
+						array( 'source' => 'wc-order-tax-lookup-migration' )
+					);
+				}
+			}
+		}
+
+		/**
 		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
 		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
 		 * there were reports of issues with this table (see https://github.com/woocommerce/woocommerce/issues/20912).
@@ -2005,7 +2049,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY global_unique_id (global_unique_id(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2064,11 +2109,12 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_id bigint(20) unsigned NOT NULL,
 	tax_rate_id bigint(20) unsigned NOT NULL,
+	order_item_id bigint(20) unsigned NOT NULL DEFAULT 0,
 	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
-	PRIMARY KEY (order_id, tax_rate_id),
+	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
 ) $collate;

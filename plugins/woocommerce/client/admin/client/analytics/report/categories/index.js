@@ -101,6 +101,7 @@ class CategoriesReport extends Component {
 					<ProductsReportTable
 						isRequesting={ isRequesting }
 						query={ chartQuery }
+						limitProperties={ [ 'products', 'categories' ] }
 						baseSearchQuery={ { filter: 'single_category' } }
 						hideCompare={ isSingleCategoryView }
 						filters={ filters }

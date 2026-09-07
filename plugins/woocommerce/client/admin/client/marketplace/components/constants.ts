@@ -15,7 +15,7 @@ export const MARKETPLACE_IAM_SETTINGS_API_PATH =
 export const MARKETPLACE_ITEMS_PER_PAGE = 60; // This should match the number of results returned by the API
 export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;
 export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
-export const MARKETPLACE_RENEW_SUBSCRIPTON_PATH =
+export const MARKETPLACE_RENEW_SUBSCRIPTION_PATH =
 	MARKETPLACE_HOST + '/my-account/my-subscriptions/';
 export const MARKETPLACE_SUPPORT_PATH =
 	MARKETPLACE_HOST + '/my-account/contact-support/';

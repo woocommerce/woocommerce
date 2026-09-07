@@ -114,9 +114,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * `capture_redirect()` throws in place of the `exit` that follows the redirect
 	 * in production, so the call has to be wrapped.
 	 *
-	 * @param NotificationManagementService|null $service Service to inject; defaults to the container's.
+	 * @param NotificationManagementService|null $service       Service to inject; defaults to the container's.
+	 * @param int                                $expected_page 1-indexed page the redirect should land on.
 	 */
-	private function run_action_expecting_redirect( ?NotificationManagementService $service = null ): void {
+	private function run_action_expecting_redirect( ?NotificationManagementService $service = null, int $expected_page = 1 ): void {
 		try {
 			$this->make_endpoint( $service )->maybe_handle_action();
 			$this->fail( 'Expected the action handler to redirect.' );
@@ -125,7 +126,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame(
-			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, $expected_page > 1 ? (string) $expected_page : '', \wc_get_page_permalink( 'myaccount' ) ),
 			$this->redirect_location
 		);
 	}
@@ -856,14 +857,62 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the customer to the page they acted from.
+	 */
+	public function test_action_returns_to_the_page_it_was_triggered_from(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), true, 3 );
+
+		$this->run_action_expecting_redirect( null, 3 );
+
+		$updated = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::CANCELLED, $updated->get_status() );
+	}
+
+	/**
+	 * @testdox Should keep the customer on their page when the action fails.
+	 */
+	public function test_failed_action_returns_to_the_page_it_was_triggered_from(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id(), false, 2 );
+
+		$this->run_action_expecting_redirect( null, 2 );
+
+		$this->assertNotEmpty( \wc_get_notices( 'error' ), 'An invalid nonce should queue an error notice.' );
+	}
+
+	/**
+	 * @testdox Should carry the page on action links so the redirect can return to it.
+	 */
+	public function test_get_action_url_carries_the_page(): void {
+		$this->assertStringNotContainsString(
+			'notifications_page',
+			MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, 42 ),
+			'Page 1 is the default, so it should not be spelled out in the link.'
+		);
+
+		$this->assertStringContainsString(
+			'notifications_page=3',
+			html_entity_decode( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, 42, 3 ) )
+		);
+	}
+
+	/**
 	 * Helper: fake the global state needed for `maybe_handle_action()` to proceed past guards,
 	 * as if the customer followed a row action link.
 	 *
 	 * @param string $action          One of the `MyAccountEndpoint::ACTION_*` values.
 	 * @param int    $notification_id Notification id.
 	 * @param bool   $valid_nonce     Whether to mint a nonce that validates for this action and id.
+	 * @param int    $page            1-indexed page the link was rendered on.
 	 */
-	private function simulate_action_request( string $action, int $notification_id, bool $valid_nonce ): void {
+	private function simulate_action_request( string $action, int $notification_id, bool $valid_nonce, int $page = 1 ): void {
 		$this->set_endpoint_query_var();
 
 		$nonce = $valid_nonce
@@ -876,6 +925,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 			'notification_id'               => (string) $notification_id,
 			'_wpnonce'                      => $nonce,
 		);
+
+		if ( $page > 1 ) {
+			$_GET['notifications_page'] = (string) $page; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 

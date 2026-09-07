@@ -43,7 +43,9 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -3702,4 +3704,99 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
 	}
 
 	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
+}
+
+/**
+ * Delete the retired Surface Cart and Checkout inbox note.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_delete_surface_cart_checkout_note(): void {
+	InboxNotifications::delete_surface_cart_checkout_blocks_notification();
+}
+
+/**
+ * Invalidate the Analytics report cache.
+ *
+ * Report responses are cached for a week and keyed on the query arguments alone, so a report
+ * run before the update keeps serving its pre-update answer. That hides the corrected result
+ * for category and product filters that have no product in common.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_invalidate_analytics_reports_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
+		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+	}
+}
+
+/**
+ * Reset stale returning-customer markers on refund rows.
+ *
+ * Refund rows in the order stats table are written with a NULL returning_customer, but earlier
+ * first-order recalculations could overwrite that marker and never restore it. Customer aggregates
+ * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
+ * and restores the Orders report fallback to the refunded order's value.
+ *
+ * Batches walk the table by order ID. A database error stops the migration and is logged instead
+ * of retried, because the report queries stay correct without the reset.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_11202_reset_refund_returning_customer_markers() {
+	global $wpdb;
+
+	$last_id_option    = 'woocommerce_update_11202_last_refund_order_id';
+	$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+	$orders_table      = OrderUtil::get_table_for_orders();
+	$hpos_enabled      = OrderUtil::custom_orders_table_usage_is_enabled();
+	$order_id_column   = $hpos_enabled ? 'id' : 'ID';
+	$order_type_column = $hpos_enabled ? 'type' : 'post_type';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+	$refund_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT stats.order_id FROM {$order_stats_table} AS stats
+			INNER JOIN {$orders_table} AS orders ON orders.{$order_id_column} = stats.order_id
+			WHERE stats.order_id > %d AND stats.returning_customer IS NOT NULL AND orders.{$order_type_column} = 'shop_order_refund'
+			ORDER BY stats.order_id ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' === $wpdb->last_error && ! empty( $refund_ids ) ) {
+		$refund_ids      = array_map( 'intval', $refund_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $refund_ids ), '%d' ) );
+		$updated         = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name cannot be prepared; placeholders are generated per ID.
+			$wpdb->prepare( "UPDATE {$order_stats_table} SET returning_customer = NULL WHERE order_id IN ( {$id_placeholders} )", $refund_ids )
+		);
+
+		if ( false !== $updated ) {
+			update_option( $last_id_option, end( $refund_ids ), false );
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped resetting refund returning-customer markers: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_11202_reset_refund_returning_customer_markers' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// Reports cached against half-migrated data would otherwise keep being served.
+	wc_update_11201_invalidate_analytics_reports_cache();
+
+	return false;
 }

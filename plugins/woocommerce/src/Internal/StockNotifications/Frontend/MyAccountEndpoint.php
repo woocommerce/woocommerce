@@ -65,16 +65,21 @@ class MyAccountEndpoint {
 	 *
 	 * @param string $action          One of the `ACTION_*` values.
 	 * @param int    $notification_id The notification id.
+	 * @param int    $page            1-indexed page the link is rendered on.
 	 * @return string The action URL.
 	 */
-	public static function get_action_url( string $action, int $notification_id ): string {
-		$url = add_query_arg(
-			array(
-				self::ACTION_FIELD => $action,
-				'notification_id'  => $notification_id,
-			),
-			self::get_endpoint_url()
+	public static function get_action_url( string $action, int $notification_id, int $page = 1 ): string {
+		$args = array(
+			self::ACTION_FIELD => $action,
+			'notification_id'  => $notification_id,
 		);
+
+		// Carried so the redirect afterwards returns the customer to the page they acted from.
+		if ( $page > 1 ) {
+			$args['notifications_page'] = $page;
+		}
+
+		$url = add_query_arg( $args, self::get_endpoint_url() );
 
 		return wp_nonce_url( $url, self::get_nonce_action( $action, $notification_id ) );
 	}
@@ -425,15 +430,18 @@ class MyAccountEndpoint {
 		}
 
 		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		// The page the link was clicked on, so the redirect lands there instead of page 1.
+		$page = isset( $_GET['notifications_page'] ) ? max( 1, absint( wp_unslash( $_GET['notifications_page'] ) ) ) : 1;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! wp_verify_nonce( $nonce, self::get_nonce_action( $action, $notification_id ) ) ) {
-			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ), $page );
 		}
 
 		$notification = Factory::get_notification( $notification_id );
 		if ( ! $notification instanceof Notification || (int) $notification->get_user_id() !== get_current_user_id() ) {
-			$this->redirect_with_error( __( 'We were unable to process your request. Notification not found.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'We were unable to process your request. Notification not found.', 'woocommerce' ), $page );
 		}
 
 		$result = self::ACTION_RESEND === $action
@@ -441,11 +449,11 @@ class MyAccountEndpoint {
 			: $this->cancel( $notification );
 
 		if ( is_wp_error( $result ) ) {
-			$this->redirect_with_error( $result->get_error_message() );
+			$this->redirect_with_error( $result->get_error_message(), $page );
 		}
 
 		\wc_add_notice( esc_html( $result ) );
-		wp_safe_redirect( self::get_endpoint_url() );
+		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
 
@@ -502,20 +510,23 @@ class MyAccountEndpoint {
 	 * Queue an error notice and redirect back to the stock notifications endpoint.
 	 *
 	 * @param string $message The error to show the customer.
+	 * @param int    $page    1-indexed page to return the customer to.
 	 * @return never
 	 */
-	private function redirect_with_error( string $message ) {
+	private function redirect_with_error( string $message, int $page = 1 ) {
 		\wc_add_notice( esc_html( $message ), 'error' );
-		wp_safe_redirect( self::get_endpoint_url() );
+		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
 
 	/**
 	 * Get the URL of the My Account > stock notifications endpoint.
 	 *
+	 * @param int $page 1-indexed page to link to. Page 1 has no page segment.
 	 * @return string
 	 */
-	public static function get_endpoint_url(): string {
-		return \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) );
+	public static function get_endpoint_url( int $page = 1 ): string {
+		$value = $page > 1 ? (string) $page : '';
+		return \wc_get_endpoint_url( self::ENDPOINT, $value, \wc_get_page_permalink( 'myaccount' ) );
 	}
 }

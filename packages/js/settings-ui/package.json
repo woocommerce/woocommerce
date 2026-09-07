@@ -37,7 +37,6 @@
 	"dependencies": {
 		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
-		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/dataviews": "17.1.0",
 		"@wordpress/element": "catalog:wp-min",

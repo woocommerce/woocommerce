@@ -363,7 +363,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'sanitizes native field descriptions before rendering', () => {
+	it( 'sanitizes field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -394,7 +394,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'hides fields with unmet native visibility rules', () => {
+	it( 'hides fields with unmet schema visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -578,7 +578,7 @@ describe( 'settings HTML rendering', () => {
 		}
 	} );
 
-	it( 'submits form-post saves with the pending destination', () => {
+	it( 'submits form-post saves without clearing another unload handler', () => {
 		const requestSubmit = jest
 			.spyOn( HTMLFormElement.prototype, 'requestSubmit' )
 			.mockImplementation( () => undefined );
@@ -615,6 +615,10 @@ describe( 'settings HTML rendering', () => {
 		const { container, form, root } = renderElementInMainForm(
 			<SettingsUIPage schema={ schema } />
 		);
+
+		const previousBeforeUnload = window.onbeforeunload;
+		const otherBeforeUnload = jest.fn();
+		window.onbeforeunload = otherBeforeUnload;
 
 		try {
 			const input = container.querySelector(
@@ -665,7 +669,15 @@ describe( 'settings HTML rendering', () => {
 			expect( requestSubmit ).toHaveBeenCalledWith(
 				container.querySelector( '.woocommerce-save-button' )
 			);
+			expect( window.onbeforeunload ).toBe( otherBeforeUnload );
+			const beforeUnloadEvent = new Event( 'beforeunload', {
+				cancelable: true,
+			} );
+			window.dispatchEvent( beforeUnloadEvent );
+			expect( otherBeforeUnload ).toHaveBeenCalledTimes( 1 );
+			expect( beforeUnloadEvent.defaultPrevented ).toBe( false );
 		} finally {
+			window.onbeforeunload = previousBeforeUnload;
 			act( () => root.unmount() );
 			form.remove();
 			requestSubmit.mockRestore();
@@ -1154,8 +1166,7 @@ describe( 'settings HTML rendering', () => {
 		).toHaveLength( 2 );
 
 		// The info description keeps sanitized markup while the group
-		// description renders as plain text, so the only strong tag left is
-		// the one from the info description.
+		// description and the DataForm field label render as plain text.
 		const strongTexts = Array.from(
 			container.querySelectorAll( 'strong' )
 		).map( ( el ) => el.textContent );

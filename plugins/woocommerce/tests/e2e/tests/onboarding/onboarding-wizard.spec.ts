@@ -291,7 +291,7 @@ test.describe(
 					} )
 				).not.toBeAttached();
 
-				// select and install the rest of the extentions
+				// select and install the rest of the extensions
 				try {
 					await page
 						.getByText(
