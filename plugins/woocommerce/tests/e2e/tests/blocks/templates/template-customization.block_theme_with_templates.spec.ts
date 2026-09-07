@@ -27,6 +27,7 @@ test.describe( 'Template customization', () => {
 			testData.templateType === 'wp_template'
 				? 'template'
 				: 'template part';
+		const templateId = `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`;
 
 		test.describe( `${ testData.templateName } template`, () => {
 			test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -38,7 +39,7 @@ test.describe( 'Template customization', () => {
 			} ) => {
 				// Edit the theme template.
 				await admin.visitSiteEditor( {
-					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+					postId: templateId,
 					postType: testData.templateType,
 					canvas: 'edit',
 				} );
@@ -76,12 +77,10 @@ test.describe( 'Template customization', () => {
 				).toBeVisible();
 
 				// Revert edition and verify the template from the theme is used.
-				await admin.visitSiteEditor( {
-					postType: testData.templateType,
-				} );
-				await editor.revertTemplate( {
-					templateName: testData.templateName,
-				} );
+				await requestUtils.revertTemplate(
+					testData.templateType,
+					templateId
+				);
 
 				await testData.visitPage( {
 					admin,
@@ -102,34 +101,22 @@ test.describe( 'Template customization', () => {
 			} );
 
 			if ( testData.fallbackTemplate ) {
-				test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
+				const fallbackTemplate = testData.fallbackTemplate;
+
+				test( `theme template has priority over user-modified ${ fallbackTemplate.templateName } template`, async ( {
 					admin,
 					frontendUtils,
 					requestUtils,
 					editor,
 					page,
 				} ) => {
-					// Edit default template and verify changes are not visible,
-					// as the theme template has priority.
-					await admin.visitSiteEditor( {
-						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.fallbackTemplate?.templatePath }`,
-						postType: testData.templateType,
-						canvas: 'edit',
-					} );
-
-					await editor.canvas
-						.locator( 'body' )
-						.waitFor( { timeout: 20000 } );
-
-					await editor.insertBlock( {
-						name: 'core/paragraph',
-						attributes: {
-							content: fallbackTemplateUserText,
-						},
-					} );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
-					} );
+					// Customize the fallback template and verify changes are not
+					// visible, as the theme template has priority.
+					await requestUtils.updateTemplateContent(
+						testData.templateType,
+						`${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ fallbackTemplate.templatePath }`,
+						`<!-- wp:paragraph --><p>${ fallbackTemplateUserText }</p><!-- /wp:paragraph -->`
+					);
 					await testData.visitPage( {
 						admin,
 						editor,

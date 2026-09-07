@@ -6,8 +6,15 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
@@ -467,5 +474,149 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'customer_stock_notifications', $changes );
 		$this->assertTrue( $changes['customer_stock_notifications'] );
+	}
+
+	/**
+	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
+	 */
+	public function test_wc_update_11201_migrate_tax_lookup_order_items(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+
+		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
+		// it still runs the rebuild.
+		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11201_migrate_tax_lookup_order_items', $db_updates['11.2.0-1'] );
+
+		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+
+		wc_update_11201_migrate_tax_lookup_order_items();
+
+		$this->assertTrue(
+			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
+			'The migration should hand the rebuild to the batch processing controller.'
+		);
+
+		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
+	}
+
+	/**
+	 * @testdox Migration registers for WooCommerce 11.2.0 and deletes the retired Surface Cart and Checkout note.
+	 */
+	public function test_wc_update_1120_delete_surface_cart_checkout_note(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_1120_delete_surface_cart_checkout_note', $db_updates['11.2.0'] );
+
+		$note = new Note();
+		$note->set_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME );
+		$note->set_title( 'Surface Cart and Checkout' );
+		$note->set_content( 'Test content' );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_source( 'PHPUNIT_TEST' );
+		$note->add_action( 'learn-more', 'Learn more', 'https://woocommerce.com/' );
+		$note->save();
+		$this->assertNotFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The retired note fixture should exist before the update.' );
+
+		wc_update_1120_delete_surface_cart_checkout_note();
+
+		$this->assertFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The retired note should be deleted during the update.' );
+
+		wc_update_1120_delete_surface_cart_checkout_note();
+		$this->assertFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The update should remain safe when the note is already absent.' );
+	}
+
+	/**
+	 * @testdox Migration invalidates the Analytics report cache, so a response cached before the update stops being served.
+	 */
+	public function test_wc_update_11201_invalidate_analytics_reports_cache(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+
+		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
+		// it still drops its stale responses.
+		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
+		$this->assertContains( 'wc_update_11201_invalidate_analytics_reports_cache', $db_updates['11.2.0-1'] );
+
+		// The cache version is a timestamp, so pin an old one rather than race the clock.
+		set_transient( ReportsCache::VERSION_OPTION . '-transient-version', '1000000000' );
+
+		$key = 'wc_report_products_pre_update';
+		ReportsCache::set( $key, 'pre-update response' );
+		$this->assertSame( 'pre-update response', ReportsCache::get( $key ), 'The response should be served from cache before the update runs' );
+
+		wc_update_11201_invalidate_analytics_reports_cache();
+
+		$this->assertFalse( ReportsCache::get( $key ), 'A response cached before the update should no longer be served' );
+	}
+
+	/**
+	 * @testdox Migration resets stale refund markers in batches and invalidates cached Analytics reports.
+	 */
+	public function test_wc_update_11202_reset_refund_returning_customer_markers(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		// Under its own key, so that a store already past the 11.2.0 batches still resets its markers.
+		$this->assertArrayHasKey( '11.2.0-2', $db_updates );
+		$this->assertContains( 'wc_update_11202_reset_refund_returning_customer_markers', $db_updates['11.2.0-2'] );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5,
+				'line_items' => array(),
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		$get_marker        = static function ( int $order_id ) use ( $wpdb, $order_stats_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			return $wpdb->get_var( $wpdb->prepare( "SELECT returning_customer FROM {$order_stats_table} WHERE order_id = %d", $order_id ) );
+		};
+
+		// Older first-order recalculations could overwrite the refund's NULL marker.
+		$this->assertSame( 1, $wpdb->update( $order_stats_table, array( 'returning_customer' => 1 ), array( 'order_id' => $refund->get_id() ), array( '%d' ), array( '%d' ) ) );
+		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row should start with a non-stale marker.' );
+
+		$cache_key        = 'wc_update_11202_analytics_report';
+		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
+		$original_version = get_transient( $version_key );
+		set_transient( $version_key, 'stale-version' );
+
+		try {
+			ReportsCache::set( $cache_key, 'stale-value' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
+
+			$this->assertTrue( wc_update_11202_reset_refund_returning_customer_markers(), 'A batch with stale refund rows should request another run.' );
+			$this->assertSame( $refund->get_id(), (int) get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be stored between batches.' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ), 'The cache should stay valid until the last batch completes.' );
+
+			$this->assertFalse( wc_update_11202_reset_refund_returning_customer_markers(), 'A run with no stale refund rows should complete.' );
+			$this->assertFalse( get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be cleared on completion.' );
+			$this->assertFalse( ReportsCache::get( $cache_key ), 'The cache should be invalidated once the migration completes.' );
+		} finally {
+			delete_transient( $cache_key );
+			if ( false === $original_version ) {
+				delete_transient( $version_key );
+			} else {
+				set_transient( $version_key, $original_version );
+			}
+		}
+
+		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
+		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
 	}
 }
