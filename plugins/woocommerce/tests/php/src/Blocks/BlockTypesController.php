@@ -66,9 +66,13 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	 */
 	public function test_classic_theme_defers_block_style_until_render(): void {
 		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// WordPress 6.9+ opts classic themes into on-demand block assets at priority 0 (see
+		// wp_load_classic_theme_block_styles_on_demand()), so the fallback is only live on sites that opt out.
 		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
 		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
-		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must simulate a site that opted out of on-demand block assets.' );
 
 		$block_type = $this->register_probe_block();
 
@@ -80,16 +84,20 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave block registration args alone and unhook itself on a block theme.
+	 * @testdox Should stand down when WordPress already loads block assets on demand.
+	 * @testWith ["storefront"]
+	 *           ["twentytwentytwo"]
+	 *
+	 * @param string $theme Theme to activate before the decision is made.
 	 */
-	public function test_block_theme_leaves_args_alone_and_unhooks(): void {
-		switch_theme( 'twentytwentytwo' );
-		$this->assertTrue( wp_is_block_theme(), 'The test must run with a block theme.' );
+	public function test_stands_down_when_core_loads_block_assets_on_demand( string $theme ): void {
+		switch_theme( $theme );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'WordPress must already be loading block assets on demand.' );
 		$args = array( 'style_handles' => array( self::PROBE_STYLE ) );
 
 		$result = $this->block_types_controller->enqueue_block_style_for_classic_themes( $args, self::PROBE_BLOCK );
 
-		$this->assertSame( $args, $result, 'Block themes load block styles on demand already, so the args must pass through untouched.' );
+		$this->assertSame( $args, $result, 'Core queues the style on render already, so the args must pass through untouched.' );
 		$this->assertFalse(
 			has_filter( 'register_block_type_args', array( $this->block_types_controller, 'enqueue_block_style_for_classic_themes' ) ),
 			'The fallback must unhook itself once it decides it is not needed.'
