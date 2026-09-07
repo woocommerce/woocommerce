@@ -190,7 +190,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			&::after {
 				background: var(--wpds-color-stroke-interactive-brand);
 				border-radius: 999px;
-				bottom: 0;
+				inset-block-end: calc(-1 * var(--wpds-dimension-padding-xs));
 				content: "";
 				height: var(--wpds-border-width-sm);
 				left: 0;
