@@ -46,13 +46,12 @@
 		margin-top: $gap;
 	}
 
-	h2.wc-block-mini-cart__title {
-		@include font-size(larger);
+	h2.wc-block-mini-cart__title .block-editor-block-list__layout {
+		display: flex;
+		align-items: baseline;
 
-		.block-editor-block-list__layout {
-			display: flex;
-			align-items: baseline;
-		}
+		// Simulate the space taken by notifications in the frontend.
+		margin-top: $gap;
 	}
 
 	table.wc-block-cart-items {

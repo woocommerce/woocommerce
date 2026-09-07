@@ -142,10 +142,10 @@ h2.wc-block-mini-cart__title {
 	align-items: baseline;
 	background: inherit;
 	padding-bottom: $gap * 2;
-	mask-image: linear-gradient(#000 calc(100% - #{$gap * 1.5}), transparent);
 	z-index: 1;
-	margin: $gap $gap $gap * -2;
-	@include font-size(larger);
+	margin: $gap-smallest $gap $gap * -2;
+	font-size: 1.5rem;
+	line-height: 1rem;
 
 	span:first-child {
 		margin-right: $gap-smaller;
