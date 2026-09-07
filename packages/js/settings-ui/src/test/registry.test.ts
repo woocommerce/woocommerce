@@ -98,7 +98,9 @@ describe( 'settings extension registry', () => {
 		const visibility = () => false;
 		const saveHandler = () => undefined;
 		const scope = { page: 'products', section: 'inventory' };
-		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		const warnSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( () => undefined );
 		registerSettingsExtension( {
 			scope,
 			components: { shared: original, unrelated },
@@ -108,10 +110,16 @@ describe( 'settings extension registry', () => {
 			scope,
 			fieldVisibility: { stock: visibility },
 		} );
+		expect( warnSpy ).not.toHaveBeenCalled();
 		registerSettingsExtension( {
 			scope,
 			components: { shared: replacement },
 		} );
+		expect( warnSpy ).toHaveBeenCalledTimes( 1 );
+		expect( warnSpy ).toHaveBeenCalledWith(
+			expect.stringContaining( 'Replacing the conflicting entries.' ),
+			expect.any( Object )
+		);
 
 		const field = { id: 'field', label: 'Field', type: 'text' };
 		expect(
@@ -124,6 +132,72 @@ describe( 'settings extension registry', () => {
 		expect( resolveFieldVisibilityPredicate( 'stock', scope ) ).toBe(
 			visibility
 		);
+	} );
+
+	it( 'preserves unrelated entry precedence when replacing a page-wide control', () => {
+		const original = () => null;
+		const sectionControl = () => null;
+		const replacement = () => null;
+		const components = Object.freeze( {
+			shared: original,
+			other: original,
+		} );
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension(
+			Object.freeze( {
+				scope: { page: 'products' },
+				components,
+			} )
+		);
+		registerSettingsExtension( {
+			scope: { page: 'products', section: 'inventory' },
+			components: { shared: sectionControl, other: sectionControl },
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'products' },
+			components: { shared: replacement },
+		} );
+
+		const field = { id: 'field', label: 'Field', type: 'text' };
+		const context = { page: 'products', section: 'inventory' };
+		expect(
+			resolveFieldComponent( { ...field, component: 'shared' }, context )
+		).toBe( replacement );
+		expect(
+			resolveFieldComponent( { ...field, component: 'other' }, context )
+		).toBe( sectionControl );
+		expect(
+			resolveFieldComponent(
+				{ ...field, component: 'other' },
+				{ page: 'products', section: 'shipping' }
+			)
+		).toBe( original );
+		expect( components.shared ).toBe( original );
+	} );
+
+	it( 'stops scanning fully superseded registrations', () => {
+		const scope = {
+			get page() {
+				return 'products';
+			},
+		};
+		const pageSpy = jest.spyOn( scope, 'page', 'get' );
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension( {
+			scope,
+			fieldVisibility: { stock: () => false },
+		} );
+		for ( let i = 0; i < 10; i++ ) {
+			registerSettingsExtension( {
+				scope: { page: 'products' },
+				fieldVisibility: { stock: () => true },
+			} );
+		}
+		pageSpy.mockClear();
+		expect(
+			resolveFieldVisibilityPredicate( 'missing', { page: 'products' } )
+		).toBeUndefined();
+		expect( pageSpy ).not.toHaveBeenCalled();
 	} );
 
 	it( 'ignores malformed registration payloads', () => {
