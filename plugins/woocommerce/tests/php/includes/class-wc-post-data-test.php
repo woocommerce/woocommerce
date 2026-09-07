@@ -34,6 +34,245 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reparenting a product category subtree recounts the affected hierarchy branches.
+	 */
+	public function test_reparenting_product_category_subtree_recounts_affected_hierarchy_branches(): void {
+		$old_grandparent = wp_insert_term( 'Old grandparent', 'product_cat' );
+		$new_grandparent = wp_insert_term( 'New grandparent', 'product_cat' );
+		$old_parent      = wp_insert_term(
+			'Old parent',
+			'product_cat',
+			array(
+				'parent' => $old_grandparent['term_id'],
+			)
+		);
+		$new_parent      = wp_insert_term(
+			'New parent',
+			'product_cat',
+			array(
+				'parent' => $new_grandparent['term_id'],
+			)
+		);
+		$moved_category  = wp_insert_term(
+			'Moved category',
+			'product_cat',
+			array(
+				'parent' => $old_parent['term_id'],
+			)
+		);
+		$leaf_category   = wp_insert_term(
+			'Leaf category',
+			'product_cat',
+			array(
+				'parent' => $moved_category['term_id'],
+			)
+		);
+		$product         = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'category_ids' => array( $leaf_category['term_id'] ),
+			)
+		);
+		wc_recount_all_terms( false );
+
+		$this->assertSame( 1, (int) get_term_meta( $old_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $moved_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $leaf_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $new_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $new_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$clear_term_cache = static function ( $term_id, $_tt_id, $taxonomy ) use ( $moved_category ) {
+			if ( (int) $moved_category['term_id'] === (int) $term_id && 'product_cat' === $taxonomy ) {
+				clean_term_cache( $term_id, $taxonomy );
+			}
+		};
+		add_action( 'edit_term', $clear_term_cache, 9, 3 );
+
+		wp_update_term(
+			$moved_category['term_id'],
+			'product_cat',
+			array(
+				'parent' => $new_parent['term_id'],
+			)
+		);
+		remove_action( 'edit_term', $clear_term_cache, 9 );
+
+		$this->assertSame( 0, (int) get_term_meta( $old_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $moved_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $leaf_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $new_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $new_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$product->delete( true );
+		wp_delete_term( $leaf_category['term_id'], 'product_cat' );
+		wp_delete_term( $moved_category['term_id'], 'product_cat' );
+		wp_delete_term( $old_parent['term_id'], 'product_cat' );
+		wp_delete_term( $new_parent['term_id'], 'product_cat' );
+		wp_delete_term( $old_grandparent['term_id'], 'product_cat' );
+		wp_delete_term( $new_grandparent['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Editing a product category without changing its parent does not recount products.
+	 */
+	public function test_editing_product_category_without_reparenting_does_not_recount_products(): void {
+		$category         = wp_insert_term( 'Category', 'product_cat' );
+		$recount_attempts = 0;
+		$track_recounts   = function ( $should_recount ) use ( &$recount_attempts ) {
+			++$recount_attempts;
+			return $should_recount;
+		};
+		add_filter( 'woocommerce_product_recount_terms', $track_recounts );
+
+		wp_update_term(
+			$category['term_id'],
+			'product_cat',
+			array(
+				'name' => 'Renamed category',
+			)
+		);
+
+		remove_filter( 'woocommerce_product_recount_terms', $track_recounts );
+
+		$this->assertSame( 0, $recount_attempts );
+		wp_delete_term( $category['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Updating a product category count does not capture parent recount state.
+	 */
+	public function test_updating_product_category_count_does_not_capture_parent_recount_state(): void {
+		$parent   = wp_insert_term( 'Parent category', 'product_cat' );
+		$category = wp_insert_term(
+			'Category',
+			'product_cat',
+			array(
+				'parent' => $parent['term_id'],
+			)
+		);
+
+		wp_update_term_count_now( array( $category['term_taxonomy_id'] ), 'product_cat' );
+
+		$recount_state = new ReflectionProperty( WC_Post_Data::class, 'product_cat_parent_recount_ids' );
+		$recount_state->setAccessible( true );
+
+		$this->assertSame( array(), $recount_state->getValue() );
+
+		wp_delete_term( $category['term_id'], 'product_cat' );
+		wp_delete_term( $parent['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Nested edits of the same product category recount every parent visited.
+	 */
+	public function test_nested_product_category_edits_recount_every_parent_visited(): void {
+		$old_parent          = wp_insert_term( 'Old parent', 'product_cat' );
+		$intermediate_parent = wp_insert_term( 'Intermediate parent', 'product_cat' );
+		$final_parent        = wp_insert_term( 'Final parent', 'product_cat' );
+		$moved_category      = wp_insert_term(
+			'Moved category',
+			'product_cat',
+			array(
+				'parent' => $old_parent['term_id'],
+			)
+		);
+		$product             = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'category_ids' => array( $moved_category['term_id'] ),
+			)
+		);
+		$run_nested_edit     = true;
+		$nested_edit         = static function ( $tt_id, $taxonomy ) use ( &$run_nested_edit, $moved_category, $intermediate_parent ) {
+			if ( ! $run_nested_edit || (int) $moved_category['term_taxonomy_id'] !== (int) $tt_id || 'product_cat' !== $taxonomy ) {
+				return;
+			}
+
+			$run_nested_edit = false;
+			wp_update_term(
+				$moved_category['term_id'],
+				'product_cat',
+				array(
+					'parent' => $intermediate_parent['term_id'],
+				)
+			);
+		};
+		wc_recount_all_terms( false );
+		add_action( 'edit_term_taxonomy', $nested_edit, 20, 2 );
+
+		wp_update_term(
+			$moved_category['term_id'],
+			'product_cat',
+			array(
+				'parent' => $final_parent['term_id'],
+			)
+		);
+		remove_action( 'edit_term_taxonomy', $nested_edit, 20 );
+
+		$this->assertSame( (int) $final_parent['term_id'], (int) get_term( $moved_category['term_id'], 'product_cat' )->parent );
+		$this->assertSame( 0, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $intermediate_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $final_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$product->delete( true );
+		wp_delete_term( $moved_category['term_id'], 'product_cat' );
+		wp_delete_term( $old_parent['term_id'], 'product_cat' );
+		wp_delete_term( $intermediate_parent['term_id'], 'product_cat' );
+		wp_delete_term( $final_parent['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Filtering a product category term ID does not prevent its parents from being recounted.
+	 */
+	public function test_filtering_product_category_term_id_does_not_prevent_parent_recount(): void {
+		$old_parent     = wp_insert_term( 'Old parent', 'product_cat' );
+		$new_parent     = wp_insert_term( 'New parent', 'product_cat' );
+		$filtered_term  = wp_insert_term( 'Filtered term', 'product_cat' );
+		$moved_category = wp_insert_term(
+			'Moved category',
+			'product_cat',
+			array(
+				'parent' => $old_parent['term_id'],
+			)
+		);
+		$product        = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'category_ids' => array( $moved_category['term_id'] ),
+			)
+		);
+		$filter_term_id = static function ( $term_id, $tt_id ) use ( $moved_category, $filtered_term ) {
+			if ( (int) $moved_category['term_taxonomy_id'] === (int) $tt_id ) {
+				return $filtered_term['term_id'];
+			}
+
+			return $term_id;
+		};
+		wc_recount_all_terms( false );
+		add_filter( 'term_id_filter', $filter_term_id, 10, 2 );
+
+		wp_update_term(
+			$moved_category['term_id'],
+			'product_cat',
+			array(
+				'parent' => $new_parent['term_id'],
+			)
+		);
+		remove_filter( 'term_id_filter', $filter_term_id, 10 );
+
+		$this->assertSame( 0, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $new_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$product->delete( true );
+		wp_delete_term( $moved_category['term_id'], 'product_cat' );
+		wp_delete_term( $old_parent['term_id'], 'product_cat' );
+		wp_delete_term( $new_parent['term_id'], 'product_cat' );
+		wp_delete_term( $filtered_term['term_id'], 'product_cat' );
+	}
+
+	/**
 	 * @testdox coupon code should be always sanitized.
 	 */
 	public function test_coupon_code_sanitization() {
