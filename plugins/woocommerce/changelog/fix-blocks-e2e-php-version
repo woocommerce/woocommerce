@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Let Blocks E2E CI jobs inherit the shared PHP version instead of forcing PHP 7.4.
-
-
