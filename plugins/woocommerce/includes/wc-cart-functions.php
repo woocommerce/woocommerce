@@ -183,7 +183,7 @@ function wc_clear_cart_after_payment() {
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
-		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Raw referer is sanitized and validated by its consumers.
+		$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Order key is cleaned and compared with hash_equals() against the order's key below.
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );

@@ -268,10 +268,3 @@ export const resolveRegionComponent = (
 	} );
 	return undefined;
 };
-
-if ( typeof window !== 'undefined' ) {
-	window.wcSettingsUI = {
-		...( window.wcSettingsUI || {} ),
-		registerSettingsExtension,
-	};
-}
