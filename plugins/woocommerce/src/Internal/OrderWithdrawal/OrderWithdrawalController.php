@@ -135,7 +135,11 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 			return array();
 		}
 
-		$query_vars[ self::ENDPOINT_KEY ] = (string) get_option( self::ENDPOINT_OPTION, self::ENDPOINT_SLUG );
+		$endpoint = (string) get_option( self::ENDPOINT_OPTION, self::ENDPOINT_SLUG );
+
+		if ( ! empty( $endpoint ) ) {
+			$query_vars[ self::ENDPOINT_KEY ] = $endpoint;
+		}
 
 		return $query_vars;
 	}
