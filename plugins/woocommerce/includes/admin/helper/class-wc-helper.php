@@ -2304,7 +2304,7 @@ class WC_Helper {
 			'auto_update_manageable' => false,
 			// The updater only handles products carrying a Woo header. Without one, this copy
 			// updates from WordPress.org, and nothing WooCommerce.com-related can hold it back.
-			'updates_from_wccom'     => self::has_woo_header( $installed_product['_filename'] ),
+			'updates_from_wccom'     => self::has_woo_header( $installed_product['_type'], $installed_product['_filename'] ),
 		);
 
 		if ( 'plugin' === $installed_product['_type'] ) {
@@ -2333,12 +2333,15 @@ class WC_Helper {
 	 *
 	 * @since 11.2.0
 	 *
+	 * @param string $type     'plugin' or 'theme'.
 	 * @param string $filename Plugin file, or a theme's stylesheet followed by /style.css.
 	 *
 	 * @return bool
 	 */
-	private static function has_woo_header( string $filename ): bool {
-		return isset( self::get_local_woo_plugins()[ $filename ] ) || isset( self::get_local_woo_themes()[ $filename ] );
+	private static function has_woo_header( string $type, string $filename ): bool {
+		$woo_products = 'theme' === $type ? self::get_local_woo_themes() : self::get_local_woo_plugins();
+
+		return isset( $woo_products[ $filename ] );
 	}
 
 	/**
