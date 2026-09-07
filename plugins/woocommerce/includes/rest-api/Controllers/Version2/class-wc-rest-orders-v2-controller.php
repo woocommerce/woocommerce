@@ -960,10 +960,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
 		$current_product_id   = $product_item ? (int) $product_item->get_product_id( 'edit' ) : 0;
 		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
-		// set_product() clears a variation when given its parent. REST partial updates restore it only
-		// when the posted parent and SKU-resolved product still identify the current item.
-		// An explicit variation_id of 0 sent alongside the parent product_id still demotes the item;
-		// on its own it resolves to no product at all and this whole block is skipped.
+		// Restore variations only for same-product partial updates. A zero variation ID demotes only
+		// when posted with the parent product ID; by itself it resolves no product.
 		$same_product_update  = 'update' === $action
 			&& array_key_exists( 'product_id', $posted )
 			&& $product instanceof WC_Product
@@ -982,9 +980,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( $product && $product !== $item->get_product() ) {
-			// A parent-only update is not a product change, and set_product() would clear the
-			// variation attribute meta before the variation is put back. Refresh only the name and tax
-			// class instead, still validating the stored variation through the item's own setter.
+			// A parent-only update must refresh product fields and validate the stored variation without
+			// calling set_product(), which would clear its historical attributes.
 			if ( $restore_variation_id && $product_item ) {
 				try {
 					$product_item->set_variation_id( $current_variation_id );
@@ -997,10 +994,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					) {
 						throw $e;
 					}
-					// The stored variation ID no longer identifies a variation: demote via set_product().
-					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
-					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
-					// get_class() check) would revive the 400 on every store substituting order item classes.
+					// A deleted variation and a subclass veto reusing this error code are indistinguishable.
+					// Swallow both to avoid reviving 400 responses for substituted order item classes.
 					$product_item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(

@@ -765,7 +765,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates a variable product with one "color" variation, plus an order carrying it as a line item.
+	 * Create an order containing one color variation.
 	 *
 	 * @return array{WC_Product_Variable, WC_Product_Variation, WC_Order, WC_Order_Item_Product}
 	 */
@@ -804,17 +804,16 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_orders_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
 
-		// The merchant reconfigures the catalog after the order was placed: the parent stops using
-		// "color" for variations, so the variation no longer reports the attribute it was bought with.
+		// Remove the purchased attribute from the current catalog definition.
 		$parent->set_attributes( array() );
 		$parent->save();
 		wc_delete_product_transients( $variation->get_id() );
-		// The parent's save invalidates the parent's cached instance, not its children's.
+		// The parent save does not invalidate cached variations.
 		clean_post_cache( $variation->get_id() );
 		$this->assertSame(
 			array(),
 			wc_get_product( $variation->get_id() )->get_variation_attributes(),
-			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+			'Precondition: the variation no longer reports the purchased attribute.'
 		);
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
@@ -835,7 +834,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
-		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'An order records what was bought, so touching the line item must not rewrite its attributes from the catalog as it stands today.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The purchased attribute must not be rewritten.' );
 	}
 
 	/**
@@ -860,7 +859,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
-		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Echoing the parent is not a product change, so the variation should survive it here as it does on v1, v2 and v3.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Echoing the parent must preserve the variation.' );
 		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The item still refers to its variation, so its attribute meta stays.' );
 	}
 

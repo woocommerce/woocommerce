@@ -20,10 +20,8 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
-	 * Meta key of the record `set_variation()` keeps of the attribute meta it wrote: meta key => value.
-	 *
-	 * Attribute meta is stored under bare keys (`color`), so without this record a variation's
-	 * row cannot be told apart from a merchant's or a plugin's.
+	 * Meta key for variation attribute rows written by `set_variation()`, keyed by bare attribute name.
+	 * The record distinguishes those rows from merchant or plugin meta using the same keys.
 	 *
 	 * @since 11.2.0
 	 * @var string
@@ -242,11 +240,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set variation data (stored as meta data - write only).
-	 *
-	 * Adds to the item's attribute meta and never removes any, as it always has. What it writes is
-	 * also added to the item's record of its own attribute meta, so `set_product()` can later tell
-	 * those rows apart from a merchant's and clean them up.
+	 * Add variation data as item meta (write only).
+	 * Scalar values are recorded so `set_product()` can later remove only rows this item wrote.
 	 *
 	 * @param array $data Key/Value pairs.
 	 */
@@ -255,8 +250,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
-		// Reading meta on an unsaved item with no meta loaded caches an empty set that is never
-		// re-read after save. Checkout passes every line item an empty array, so bail out early.
+		// Avoid priming unsaved items with an empty meta cache that will not reload after save.
 		if ( ! $data && null === $this->meta_data && ! $this->get_id() ) {
 			return;
 		}
@@ -268,16 +262,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 			$this->add_meta_data( $meta_key, $value, true );
 
-			// Only a scalar can be matched against the stored row later; unrecorded keys are never removed.
+			// Only scalar values can be matched safely during cleanup.
 			if ( is_scalar( $value ) ) {
 				$record[ $meta_key ] = (string) $value;
 			}
 		}
 
-		// Rewritten rather than updated in place so the record stays behind the attribute rows in
-		// `meta_data`. Updated in place it keeps its meta ID, so after a reload it sits between them
-		// instead, and the v2/v3 response, which drops the record, stops matching get_meta_data()
-		// index for index. Nothing in production is known to rely on that; a REST test does.
+		// Re-add the record after the attributes so filtering it from v2/v3 responses does not shift
+		// the remaining `meta_data` indexes after a reload.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		if ( $record ) {
@@ -286,18 +278,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Write the attribute meta for the product this item now refers to, removing the recorded rows
-	 * `$data` no longer contains.
-	 *
-	 * The removal half of `set_product()`. It is kept out of `set_variation()` so that method stays
-	 * additive: it is public, reachable through `set_props( array( 'variation' => ... ) )`, and how
-	 * checkout and `WC_Abstract_Order::add_product()` write their attribute meta.
+	 * Replace recorded variation attribute meta while keeping public `set_variation()` additive.
 	 *
 	 * @param array $data Key/Value pairs.
 	 * @return void
 	 */
 	private function replace_variation_attribute_meta( $data ) {
-		// See set_variation(): the same early bail, for the same reason.
+		// Match set_variation() without priming an unsaved item's meta cache.
 		if ( ! $data && null === $this->meta_data && ! $this->get_id() ) {
 			return;
 		}
@@ -317,19 +304,16 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
-		// Cleared first so set_variation() records only what this call writes. get_meta() reads
-		// through get_meta_data(), which skips deleted rows, so it sees no record at all.
+		// Clear first so set_variation() records only what this call writes.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		$this->set_variation( $data );
 	}
 
 	/**
-	 * Remove one attribute meta row this item recorded writing.
-	 *
-	 * Nothing on the row says who wrote it, so the row is only removed when the oldest row under
-	 * the key still holds the recorded value and no other row does. A stale attribute can be
-	 * corrected later; a deleted merchant row cannot.
+	 * Remove a uniquely identifiable attribute meta row written by this item.
+	 * The oldest row must hold the recorded value and no other row may match; otherwise ownership
+	 * is ambiguous and the row is kept.
 	 *
 	 * @param string $key   Meta key.
 	 * @param string $value Value this item recorded writing under that key.
@@ -360,9 +344,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		// The stored value, not the recorded string: the data store compares strictly.
 		$this->delete_meta_data_value( $key, $matches[0] );
 
-		// The only trace of the removal decision. Kept at debug so a normal variation switch is not
-		// noise, and so a store investigating a missing row can turn it on and see this one. It fires
-		// on the in-memory removal, so an item whose save never happens still logs.
+		// Log the in-memory decision at debug level because a later save is not guaranteed.
 		wc_get_logger()->debug(
 			sprintf( 'Marked the attribute meta "%s" recorded for order item #%d for removal: the item no longer refers to the variation that wrote it.', $key, $this->get_id() ),
 			array(
@@ -374,10 +356,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Get the attribute meta a previous `set_variation()` call recorded writing for this item.
-	 *
-	 * The record is persisted meta, so anything could be in it. Entries that are not a meta key
-	 * mapped to a scalar are dropped, and a dropped entry is simply never removed.
+	 * Get valid scalar entries from the persisted variation attribute meta record.
 	 *
 	 * @return array<string, string> Meta key => the value written under it.
 	 */
@@ -400,10 +379,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Aggregate and set properties based on passed in product object.
-	 *
-	 * Handed the variation the item already recorded attribute meta for, that meta is left alone:
-	 * the item records what was bought, not what the variation declares today.
+	 * Set properties from a product while preserving recorded attributes for the same variation.
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @return void
@@ -413,11 +389,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
-			// A matching variation ID alone is not enough: a caller can set it before calling this, and
-			// an item that has recorded no attribute meta has nothing to keep. Checking the ID first
-			// keeps the record unread on the usual path, where the item refers to no variation yet.
-			// Note that skipping here also skips set_variation(), so a subclass overriding it for its
-			// own side effects does not run on this path.
+			// Require a record because callers may set the variation ID before set_product(). Check the
+			// ID first to avoid loading meta on the usual path. This fast path skips set_variation() overrides.
 			$keep_recorded_attributes = $product->get_id() === (int) $this->get_variation_id( 'edit' )
 				&& (bool) $this->get_variation_attribute_meta_record();
 			$this->set_product_id( $product->get_parent_id() );

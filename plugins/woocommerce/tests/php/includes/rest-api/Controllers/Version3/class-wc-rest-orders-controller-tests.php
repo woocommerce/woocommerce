@@ -1728,11 +1728,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
-		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Preserving the variation must keep its attribute meta, or the item points at a variation whose attributes are gone.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'Preserving the variation must keep its attribute meta.' );
 		$this->assertSame(
 			array( 'color' => 'blue' ),
 			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
-			'The provenance record must survive with the attributes it tracks, or the item can no longer clean up after itself.'
+			'The provenance record must survive with its attributes.'
 		);
 	}
 
@@ -1754,8 +1754,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$meta_keys = wp_list_pluck( $response->get_data()['line_items'][0]['meta_data'], 'key' );
 
-		// Unlike v1 and v4, this response is built from the item's raw meta, so nothing else drops the
-		// record. Left in, it would be the only line item meta whose value is an object, not a string.
+		// V2/v3 responses use raw item meta, so the provenance record must be filtered explicitly.
 		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, $meta_keys, 'The record is bookkeeping and must not reach REST clients.' );
 		$this->assertContains( 'color', $meta_keys, 'The attribute meta itself still belongs in the response.' );
 	}
@@ -1767,17 +1766,16 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
 
-		// The merchant reconfigures the catalog after the order was placed: the parent stops using
-		// "color" for variations, so the variation no longer reports the attribute it was bought with.
+		// Remove the purchased attribute from the current catalog definition.
 		$parent->set_attributes( array() );
 		$parent->save();
 		wc_delete_product_transients( $variation->get_id() );
-		// The parent's save invalidates the parent's cached instance, not its children's.
+		// The parent save does not invalidate cached variations.
 		clean_post_cache( $variation->get_id() );
 		$this->assertSame(
 			array(),
 			wc_get_product( $variation->get_id() )->get_variation_attributes(),
-			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+			'Precondition: the variation no longer reports the purchased attribute.'
 		);
 
 		$response = $this->dispatch_line_item_update(
@@ -1792,7 +1790,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The line item should still point at its own variation.' );
-		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'An order records what was bought, so touching the line item must not rewrite its attributes from the catalog as it stands today.' );
+		$this->assertSame( 'blue', $reloaded->get_meta( 'color' ), 'The purchased attribute must not be rewritten.' );
 		$this->assertSame(
 			array( 'color' => 'blue' ),
 			$reloaded->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
@@ -1810,12 +1808,12 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$parent->set_attributes( array() );
 		$parent->save();
 		wc_delete_product_transients( $variation->get_id() );
-		// The parent's save invalidates the parent's cached instance, not its children's.
+		// The parent save does not invalidate cached variations.
 		clean_post_cache( $variation->get_id() );
 		$this->assertSame(
 			array(),
 			wc_get_product( $variation->get_id() )->get_variation_attributes(),
-			'Precondition: a freshly loaded variation no longer reports the attribute the order recorded.'
+			'Precondition: the variation no longer reports the purchased attribute.'
 		);
 
 		$response = $this->dispatch_line_item_update(
