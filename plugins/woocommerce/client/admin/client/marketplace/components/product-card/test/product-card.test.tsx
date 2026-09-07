@@ -136,3 +136,84 @@ describe( 'ProductCard quality badge placement', () => {
 		expect( getBadge( container ) ).toBeNull();
 	} );
 } );
+
+describe( 'ProductCard sponsored label', () => {
+	const sponsoredProduct: Product = {
+		...product,
+		vendorName: 'Test vendor',
+		vendorUrl: 'https://example.com',
+		label: 'promoted',
+		primary_color: '#720eec',
+	};
+
+	function renderSponsoredCard(
+		cardType: ProductCardType,
+		overrides: Partial< Product > = {}
+	) {
+		return render(
+			<MarketplaceContext.Provider value={ context }>
+				<ProductCard
+					type={ ProductType.extension }
+					product={ { ...sponsoredProduct, ...overrides } }
+					cardType={ cardType }
+					tracksData={ {} }
+				/>
+			</MarketplaceContext.Provider>
+		);
+	}
+
+	function getSponsoredLabel( container: HTMLElement ) {
+		return container.querySelector(
+			'.woocommerce-marketplace__product-card__sponsored-label'
+		);
+	}
+
+	it( 'renders the label on compact cards, without the vendor', () => {
+		const { container } = renderSponsoredCard( ProductCardType.compact );
+
+		expect( getSponsoredLabel( container ) ).toHaveTextContent(
+			'Sponsored'
+		);
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor'
+			)
+		).toBeNull();
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details__separator'
+			)
+		).toBeNull();
+	} );
+
+	it( 'renders the vendor, separator and label on regular cards', () => {
+		const { container } = renderSponsoredCard( ProductCardType.regular );
+
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor'
+			)
+		).toHaveTextContent( /By\s*Test vendor/ );
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details__separator'
+			)
+		).not.toBeNull();
+		expect( getSponsoredLabel( container ) ).toHaveTextContent(
+			'Sponsored'
+		);
+	} );
+
+	it( 'renders no label or vendor line on compact cards that are not sponsored', () => {
+		const { container } = renderSponsoredCard( ProductCardType.compact, {
+			label: undefined,
+		} );
+
+		expect( getSponsoredLabel( container ) ).toBeNull();
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__vendor-details'
+			)
+		).toBeNull();
+	} );
+} );
