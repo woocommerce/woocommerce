@@ -477,6 +477,40 @@ class OptionsMigratorTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a store with no legacy sign-ups row should get the legacy screen's default.
+	 */
+	public function test_an_absent_legacy_row_migrates_the_legacy_default(): void {
+		$this->assertFalse( get_option( self::LEGACY_ALLOW_SIGNUPS ), 'The legacy row must be absent for this test to mean anything.' );
+		$this->assertFalse( get_option( self::CORE_ALLOW_SIGNUPS ), 'The Core row must be absent for this test to mean anything.' );
+
+		$this->migrate();
+
+		$this->assertSame(
+			'yes',
+			get_option( self::CORE_ALLOW_SIGNUPS ),
+			'Sign-ups were on by default on the legacy screen, so a store that never saved it keeps them on.'
+		);
+	}
+
+	/**
+	 * @testdox a Core value the merchant chose should survive a legacy row that was never written.
+	 */
+	public function test_an_absent_legacy_row_leaves_a_stored_core_value_alone(): void {
+		update_option( self::CORE_ALLOW_SIGNUPS, 'no' );
+
+		$this->assertFalse( get_option( self::LEGACY_ALLOW_SIGNUPS ), 'The legacy row must be absent for this test to mean anything.' );
+
+		$this->migrate();
+
+		$this->assertSame(
+			'no',
+			get_option( self::CORE_ALLOW_SIGNUPS ),
+			'A default no store ever stored must not turn sign-ups back on.'
+		);
+		$this->assertTrue( $this->build_migrator()->is_done(), 'A Core value that stands leaves nothing outstanding.' );
+	}
+
+	/**
 	 * @testdox a store with no legacy email settings row should keep its Core email enabled.
 	 */
 	public function test_an_absent_legacy_email_row_leaves_the_core_email_enabled(): void {

@@ -57,7 +57,8 @@ class OptionsMigrator {
 	 * Legacy general option name to `array{ core: string, default: mixed }`.
 	 *
 	 * Defaults mirror the legacy admin settings screen so a store that never wrote the
-	 * option row still migrates the value the merchant actually saw.
+	 * option row still migrates the value the merchant actually saw. A default stands in
+	 * only for a Core option that has no row of its own — see `general_value()`.
 	 *
 	 * @var array<string, array{core: string, default: mixed}>
 	 */
@@ -236,7 +237,9 @@ class OptionsMigrator {
 				continue;
 			}
 
-			if ( ! $this->values_match( get_option( $marker ), get_option( $legacy_key, $mapping['default'] ) ) ) {
+			$value = $this->general_value( $legacy_key, $mapping );
+
+			if ( null !== $value && ! $this->values_match( get_option( $marker ), $value ) ) {
 				$markers[] = $marker;
 			}
 		}
@@ -270,6 +273,31 @@ class OptionsMigrator {
 	}
 
 	/**
+	 * The value one general setting should carry into Core, or null when there is nothing to write.
+	 *
+	 * A stored legacy row always migrates. When legacy has no row the merchant saw the legacy
+	 * screen's default, so that default migrates instead — but only into a Core option that has
+	 * no row of its own. A Core row exists only once the merchant has saved the stock
+	 * notification settings section, and a value they chose there is not overwritten by one no
+	 * store ever stored. This is why the general path does not use the `array_key_exists()`
+	 * guard the email path does: an absent legacy email sub-key stands for nothing, an absent
+	 * legacy option stands for the default on the screen.
+	 *
+	 * @param string $legacy_key Legacy option name.
+	 * @param array  $mapping    Its entry in GENERAL_MAP.
+	 * @return mixed The value to write, or null to leave the Core option alone.
+	 */
+	private function general_value( string $legacy_key, array $mapping ) {
+		$legacy = get_option( $legacy_key, null );
+
+		if ( null !== $legacy ) {
+			return $legacy;
+		}
+
+		return null === get_option( $mapping['core'], null ) ? $mapping['default'] : null;
+	}
+
+	/**
 	 * Migrate every legacy setting that is not already in its Core home.
 	 *
 	 * Settling is batched: a marker confirmed in its Core home during this call is collected
@@ -296,10 +324,10 @@ class OptionsMigrator {
 
 			$this->visited[ $core_key ] = true;
 
-			$value  = get_option( $legacy_key, $mapping['default'] );
+			$value  = $this->general_value( $legacy_key, $mapping );
 			$before = get_option( $core_key );
 
-			if ( $this->values_match( $before, $value ) ) {
+			if ( null === $value || $this->values_match( $before, $value ) ) {
 				$settled[] = $core_key;
 				continue;
 			}

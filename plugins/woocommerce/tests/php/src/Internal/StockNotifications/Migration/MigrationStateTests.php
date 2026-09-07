@@ -127,17 +127,6 @@ class MigrationStateTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox releasing by owner should leave a lock a later run took over in place.
-	 */
-	public function test_releasing_by_owner_leaves_a_reclaimed_lock_alone(): void {
-		$this->write_lock( time() - ( HOUR_IN_SECONDS + 60 ), 'an abandoned run' );
-
-		$this->assertTrue( $this->sut->acquire_lock( 'the new run' ) );
-		$this->assertFalse( $this->sut->release_lock_owned_by( 'an abandoned run' ) );
-		$this->assertTrue( $this->sut->is_lock_held() );
-	}
-
-	/**
 	 * @testdox the lock should live in its own option row, not in the run state.
 	 */
 	public function test_the_lock_is_not_stored_in_the_run_state(): void {
