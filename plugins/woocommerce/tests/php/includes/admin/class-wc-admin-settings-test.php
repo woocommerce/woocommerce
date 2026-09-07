@@ -16,6 +16,183 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	private array $option_names_to_clean = array();
 
 	/**
+	 * @testdox Should resolve field values from the saved option name while preserving existing value precedence.
+	 *
+	 * @dataProvider output_fields_value_data
+	 *
+	 * @param string $option_name  Option name to store.
+	 * @param mixed  $option_value Stored option value.
+	 * @param array  $field        Field definition.
+	 * @param string $expected     Expected rendered field value.
+	 */
+	public function test_output_fields_resolves_field_values( string $option_name, $option_value, array $field, string $expected ): void {
+		$this->option_names_to_clean[] = $option_name;
+		update_option( $option_name, $option_value );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( array( $field ) );
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="' . esc_attr( $expected ) . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_resolves_field_values().
+	 *
+	 * @return array<string, array{string, mixed, array<string, mixed>, string}>
+	 */
+	public static function output_fields_value_data(): array {
+		return array(
+			'nested field name' => array(
+				'test_output_fields_nested',
+				array( 'enabled' => 'saved nested value' ),
+				array(
+					'id'         => 'test_output_fields_nested_enabled',
+					'field_name' => 'test_output_fields_nested[enabled]',
+					'type'       => 'text',
+					'default'    => 'default value',
+				),
+				'saved nested value',
+			),
+			'id fallback'       => array(
+				'test_output_fields_id',
+				'saved scalar value',
+				array(
+					'id'      => 'test_output_fields_id',
+					'type'    => 'text',
+					'default' => 'default value',
+				),
+				'saved scalar value',
+			),
+			'explicit value'    => array(
+				'test_output_fields_explicit',
+				'saved option value',
+				array(
+					'id'    => 'test_output_fields_explicit',
+					'type'  => 'text',
+					'value' => 'explicit field value',
+				),
+				'explicit field value',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should read through the field name only for a single nested key, and through the ID otherwise.
+	 *
+	 * The fix reads a field's value through 'field_name'. Definitions come from third-party code,
+	 * so only the `option_name[key]` shape issue #48254 describes is resolved that way; every other
+	 * spelling keeps reading through the ID, which is what this method did before the fix.
+	 *
+	 * @dataProvider field_name_shape_data
+	 *
+	 * @param mixed  $field_name Field name supplied by the definition.
+	 * @param string $expected   Value the rendered input should carry.
+	 */
+	public function test_output_fields_reads_through_field_name_only_for_a_single_key( $field_name, string $expected ): void {
+		$this->option_names_to_clean[] = 'test_shape_parent';
+		$this->option_names_to_clean[] = 'test_shape_id';
+		update_option(
+			'test_shape_parent',
+			array(
+				'key'  => 'nested value',
+				'deep' => array( 'leaf' => 'two levels' ),
+				'list' => array( 'x', 'y' ),
+			)
+		);
+		update_option( 'test_shape_id', 'value under the id' );
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields(
+				array(
+					array(
+						'id'         => 'test_shape_id',
+						'field_name' => $field_name,
+						'type'       => 'text',
+						'default'    => 'default value',
+					),
+				)
+			);
+		} finally {
+			$output = ob_get_clean();
+		}
+
+		$this->assertStringContainsString( 'value="' . esc_attr( $expected ) . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_reads_through_field_name_only_for_a_single_key().
+	 *
+	 * Everything other than the first row must fall back to the ID, so each of these renders the
+	 * value stored under 'test_shape_id' rather than anything reached through the field name.
+	 *
+	 * A non-scalar field name is not covered here. The read falls back to the ID as it should,
+	 * but the name is still printed into the input's name attribute unnormalised, which warns
+	 * exactly as it did before this branch, so asserting on the rendered output would assert on
+	 * that pre-existing warning rather than on the read.
+	 *
+	 * @return array<string, array{mixed, string}>
+	 */
+	public static function field_name_shape_data(): array {
+		return array(
+			'single nested key'  => array( 'test_shape_parent[key]', 'nested value' ),
+			'two levels'         => array( 'test_shape_parent[deep][leaf]', 'value under the id' ),
+			'trailing brackets'  => array( 'test_shape_parent[list][]', 'value under the id' ),
+			'explicit index'     => array( 'test_shape_parent[list][0]', 'value under the id' ),
+			'index with junk'    => array( 'test_shape_parent[list][0]x[]', 'value under the id' ),
+			'bare brackets'      => array( 'test_shape_parent[]', 'value under the id' ),
+			'unbalanced bracket' => array( 'test_shape_parent[', 'value under the id' ),
+			'no base name'       => array( '[key]', 'value under the id' ),
+			'empty string'       => array( '', 'value under the id' ),
+		);
+	}
+
+	/**
+	 * @testdox Should return the default rather than fataling when a nested read hits an object.
+	 *
+	 * Reading through 'field_name' is what first routes a bracketed name into get_option() from the
+	 * render path, so the two shapes that raise there are covered.
+	 *
+	 * @dataProvider object_valued_option_data
+	 *
+	 * @param string $option_name Option to seed.
+	 * @param mixed  $value       Value to store under it.
+	 * @param string $lookup      Bracketed name to resolve.
+	 */
+	public function test_get_option_returns_the_default_for_object_values( string $option_name, $value, string $lookup ): void {
+		$this->option_names_to_clean[] = $option_name;
+		update_option( $option_name, $value );
+
+		$this->assertSame( 'DEFAULT', WC_Admin_Settings::get_option( $lookup, 'DEFAULT' ) );
+	}
+
+	/**
+	 * Data provider for test_get_option_returns_the_default_for_object_values().
+	 *
+	 * @return array<string, array{string, mixed, string}>
+	 */
+	public static function object_valued_option_data(): array {
+		return array(
+			'object option' => array( 'test_object_option', new stdClass(), 'test_object_option[key]' ),
+			'object member' => array( 'test_object_member', array( 'key' => new stdClass() ), 'test_object_member[key]' ),
+		);
+	}
+
+	/**
+	 * @testdox Should keep resolving a nested name that an ArrayAccess option carries.
+	 */
+	public function test_get_option_resolves_through_array_access(): void {
+		$this->option_names_to_clean[] = 'test_array_access';
+		update_option( 'test_array_access', new ArrayObject( array( 'key' => 'from array access' ) ) );
+
+		$this->assertSame( 'from array access', WC_Admin_Settings::get_option( 'test_array_access[key]', 'DEFAULT' ) );
+	}
+
+	/**
 	 * Clean up options after each test to ensure test isolation even on assertion failure.
 	 */
 	public function tearDown(): void {

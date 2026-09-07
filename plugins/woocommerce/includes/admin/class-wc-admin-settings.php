@@ -217,14 +217,36 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				// Option name is first key.
 				$option_name = current( array_keys( $option_array ) );
 
+				/*
+				 * A name parse_str() cannot resolve into a key path leaves a string, or nothing at
+				 * all, where the path should be. key() raises on both, and it runs before the value
+				 * guards below, so this has to come first.
+				 */
+				if ( ! is_array( $option_array[ $option_name ] ?? null ) ) {
+					return $default;
+				}
+
 				// Get value.
 				$option_values = get_option( $option_name, '' );
 
 				$key = key( $option_array[ $option_name ] );
 
-				if ( isset( $option_values[ $key ] ) ) {
+				/*
+				 * Only index into a container. A string would be read by character offset, and an
+				 * object that does not implement ArrayAccess raises an Error in isset().
+				 */
+				if ( ( is_array( $option_values ) || $option_values instanceof ArrayAccess ) && isset( $option_values[ $key ] ) ) {
 					$option_value = $option_values[ $key ];
 				} else {
+					$option_value = null;
+				}
+
+				/*
+				 * An object stored here reaches stripslashes() below and fatals; an array reaches
+				 * esc_attr() in the caller and renders as 'Array'. Neither is a value a field can
+				 * show, so both fall back to the default.
+				 */
+				if ( is_object( $option_value ) || is_array( $option_value ) ) {
 					$option_value = null;
 				}
 			} else {
@@ -239,6 +261,23 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			}
 
 			return ( null === $option_value ) ? $default : $option_value;
+		}
+
+		/**
+		 * Resolve which name a field's value is read through.
+		 *
+		 * Shared with SettingsUISchema so the classic screen and the new settings UI cannot
+		 * disagree about where a field's value lives.
+		 *
+		 * @since 11.2.0
+		 * @param mixed  $field_name The field definition's 'field_name', which may be anything.
+		 * @param string $id         The field definition's ID, used when the name is not supported.
+		 * @return string
+		 */
+		public static function get_read_name( $field_name, $id ) {
+			return ( is_string( $field_name ) && preg_match( '/^[^\[\]]+\[[^\[\]]+\]$/', $field_name ) )
+				? $field_name
+				: (string) $id;
 		}
 
 		/**
@@ -294,7 +333,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_option( $value['id'], $value['default'] );
+					/*
+					 * Read through 'field_name' only when it is the `option_name[key]` shape this
+					 * fix is about: a base name followed by one bracket group with a non-empty key.
+					 * Field definitions come from third-party code, and a deeper path, a bare '[]'
+					 * or an unbalanced bracket is either not stored where the name says or resolves
+					 * to something a field cannot render. Those keep reading through the ID, which
+					 * is what this method did before the fix. An explicit index such as 'opt[0]'
+					 * does match, and resolves like any other single key.
+					 */
+					$read_name = self::get_read_name( $value['field_name'], $value['id'] );
+
+					$value['value'] = self::get_option( $read_name, $value['default'] );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {

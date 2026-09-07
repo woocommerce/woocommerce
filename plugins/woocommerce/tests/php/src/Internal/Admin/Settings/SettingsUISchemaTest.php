@@ -255,6 +255,94 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It reads the field value from the legacy field name when it differs from the id.
+	 */
+	public function test_from_legacy_settings_reads_value_from_field_name(): void {
+		update_option( 'woocommerce_test', array( 'nested' => 'saved nested value' ) );
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'test',
+				'',
+				'Test settings',
+				array(
+					array(
+						'id'         => 'woocommerce_test_nested',
+						'type'       => 'text',
+						'title'      => 'Nested field',
+						'field_name' => 'woocommerce_test[nested]',
+						'default'    => 'default value',
+					),
+				)
+			);
+
+			$this->assertSame( 'saved nested value', $schema['groups']['default']['fields'][0]['value'] );
+		} finally {
+			delete_option( 'woocommerce_test' );
+		}
+	}
+
+	/**
+	 * @testdox It resolves a field's value through the same name the classic screen would use.
+	 *
+	 * Both surfaces read through WC_Admin_Settings::get_read_name(), so a shape supported by one
+	 * cannot silently resolve differently on the other. That divergence would be invisible: the
+	 * schema's save adapter is form_post, so a wrongly displayed value is written back on save.
+	 *
+	 * @dataProvider shared_read_name_data
+	 *
+	 * @param mixed  $field_name Field name a definition could carry.
+	 * @param string $expected   Value both surfaces must resolve to.
+	 */
+	public function test_from_legacy_settings_resolves_like_the_classic_screen( $field_name, string $expected ): void {
+		update_option( 'woocommerce_shared', array( 'key' => 'nested value' ) );
+		update_option( 'woocommerce_shared_id', 'value under the id' );
+
+		try {
+			$setting = array(
+				'id'         => 'woocommerce_shared_id',
+				'type'       => 'text',
+				'title'      => 'Shared',
+				'field_name' => $field_name,
+				'default'    => 'default value',
+			);
+
+			$schema = SettingsUISchema::from_legacy_settings( 'test', '', 'Test settings', array( $setting ) );
+
+			$this->assertSame( $expected, $schema['groups']['default']['fields'][0]['value'] );
+
+			// The classic screen resolves the same name, so it must reach the same value.
+			$this->assertSame(
+				$expected,
+				\WC_Admin_Settings::get_option(
+					\WC_Admin_Settings::get_read_name( $field_name, 'woocommerce_shared_id' ),
+					'default value'
+				)
+			);
+		} finally {
+			delete_option( 'woocommerce_shared' );
+			delete_option( 'woocommerce_shared_id' );
+		}
+	}
+
+	/**
+	 * Data provider for test_from_legacy_settings_resolves_like_the_classic_screen().
+	 *
+	 * @return array<string, array{mixed, string}>
+	 */
+	public static function shared_read_name_data(): array {
+		return array(
+			'single nested key'  => array( 'woocommerce_shared[key]', 'nested value' ),
+			'two levels'         => array( 'woocommerce_shared[key][deeper]', 'value under the id' ),
+			'trailing brackets'  => array( 'woocommerce_shared[key][]', 'value under the id' ),
+			'unbalanced bracket' => array( 'woocommerce_shared[', 'value under the id' ),
+			'no base name'       => array( '[key]', 'value under the id' ),
+			'bare brackets'      => array( 'woocommerce_shared[]', 'value under the id' ),
+			'empty string'       => array( '', 'value under the id' ),
+		);
+	}
+
+	/**
 	 * @testdox It sanitizes info field text and marks info fields as non-saving.
 	 */
 	public function test_from_legacy_settings_sanitizes_info_field_text_and_marks_info_fields_as_non_saving(): void {
