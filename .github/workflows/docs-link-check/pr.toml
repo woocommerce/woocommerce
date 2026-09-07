@@ -9,13 +9,19 @@
 # Adding a host is a policy change: it lets a docs-only pull request make the CI runner
 # contact that host. Keep the list to hosts operated by WooCommerce, WordPress.org, or GitHub.
 #
+# raw.githubusercontent.com is approved because lychee rewrites approved github.com links
+# of the form `/<owner>/<repo>/blob/<ref>/<file>.md#<fragment>` to that host after the
+# filter has run (lychee-lib `quirks`, "fetch raw GitHub Markdown files"). The rewrite is
+# not a redirect, so `max_redirects = 0` does not stop it, and `--dump` prints the original
+# URL, so the offline policy test cannot observe it either. Both hosts are GitHub-operated.
+#
 # `.github/workflows/scripts/docs-link-check-policy-test.sh` proves this file offline.
 
 no_progress = true
 scheme = ["http", "https"]
 exclude_all_private = true
 include = [
-	'^https?://(github\.com|developer\.woocommerce\.com|woocommerce\.com|developer\.wordpress\.org|woocommerce\.github\.io|wordpress\.org|qit\.woo\.com|user-images\.githubusercontent\.com|codex\.wordpress\.org|make\.wordpress\.org)/',
+	'^https?://(github\.com|developer\.woocommerce\.com|woocommerce\.com|developer\.wordpress\.org|woocommerce\.github\.io|wordpress\.org|qit\.woo\.com|user-images\.githubusercontent\.com|raw\.githubusercontent\.com|codex\.wordpress\.org|make\.wordpress\.org)/',
 ]
 
 # Redirects are not followed at pull-request time, so an approved host can never lead the

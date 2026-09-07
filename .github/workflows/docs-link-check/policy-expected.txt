@@ -3,4 +3,6 @@ https://developer.woocommerce.com/docs/
 https://github.com/Woo/Repo#frag
 https://github.com/auto/link
 https://github.com/woocommerce/woocommerce
+https://github.com/woocommerce/woocommerce/blob/trunk/README.md#readme
 https://github.com/x?y=1
+https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/README.md

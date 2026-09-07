@@ -10,6 +10,8 @@ This file is input for `.github/workflows/scripts/docs-link-check-policy-test.sh
 - [approved docs host](https://developer.woocommerce.com/docs/)
 - [query string kept](https://github.com/x?y=1)
 - autolink: <https://github.com/auto/link>
+- [raw file host](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/README.md)
+- [blob link with a fragment](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#readme) is requested from raw.githubusercontent.com at check time (see `pr.toml`); `--dump` shows the original URL
 
 ## Lookalikes and out-of-policy hosts (must not be requested)
 
