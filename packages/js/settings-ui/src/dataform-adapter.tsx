@@ -66,6 +66,7 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	text: { type: 'text' },
 	password: { type: 'password' },
 	number: { type: 'number' },
+	integer: { type: 'integer' },
 	checkbox: { type: 'boolean' },
 	email: { type: 'email' },
 	url: { type: 'url' },
@@ -176,7 +177,7 @@ const toRangeConstraint = (
 		return undefined;
 	}
 
-	if ( type === 'number' ) {
+	if ( type === 'number' || type === 'integer' ) {
 		const numeric = Number( value );
 		return Number.isFinite( numeric ) ? numeric : undefined;
 	}
@@ -209,18 +210,25 @@ const buildValidationRules = (
 	descriptor: SettingsTypeDescriptor | undefined
 ): Rules< SettingsValues > => {
 	const attributes = settingsField.customAttributes ?? {};
+	const validation = settingsField.validation ?? {};
 	const rules: Rules< SettingsValues > = {};
 
 	if ( isAttributeSet( attributes.required ) ) {
 		rules.required = true;
 	}
 
-	const min = toRangeConstraint( attributes.min, descriptor?.type );
+	const min = toRangeConstraint(
+		validation.min ?? attributes.min,
+		descriptor?.type
+	);
 	if ( typeof min !== 'undefined' ) {
 		rules.min = min;
 	}
 
-	const max = toRangeConstraint( attributes.max, descriptor?.type );
+	const max = toRangeConstraint(
+		validation.max ?? attributes.max,
+		descriptor?.type
+	);
 	if ( typeof max !== 'undefined' ) {
 		rules.max = max;
 	}
