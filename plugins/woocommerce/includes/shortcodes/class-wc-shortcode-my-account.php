@@ -521,7 +521,11 @@ class WC_Shortcode_My_Account {
 
 		$transient_name = self::get_password_reset_bridge_transient_name( $handle );
 		$payload        = get_transient( $transient_name );
-		delete_transient( $transient_name );
+
+		// Only the request whose delete actually removed the row may exchange the handle.
+		if ( ! delete_transient( $transient_name ) ) {
+			return false;
+		}
 
 		if (
 			! is_array( $payload ) ||
