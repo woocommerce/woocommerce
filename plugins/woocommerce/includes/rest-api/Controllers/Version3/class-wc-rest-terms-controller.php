@@ -806,6 +806,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		 * Shares its name with the WordPress core hook, so a callback added for a taxonomy served by
 		 * both /wp/v2 and /wc/v3 runs for both.
 		 *
+		 * This filter only registers parameters; use `woocommerce_rest_{$taxonomy}_query`
+		 * to map them to `WP_Term_Query` arguments.
+		 *
 		 * @since 11.2.0
 		 *
 		 * @param array       $params   JSON Schema-formatted collection parameters.
