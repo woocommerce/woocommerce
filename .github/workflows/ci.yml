@@ -78,7 +78,7 @@ jobs:
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
       needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
     steps:
-      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: target-changes
         with:
           # `needs-code-validation` is the negation of `NON_CODE_PATHS`: a PR needs code
@@ -755,7 +755,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
 
-      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: target-changes
         with:
           list-files: shell
@@ -775,12 +775,12 @@ jobs:
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: 'Validate - lint md-files'
-        if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
+        if: ${{ steps.target-changes.outputs.needs-markdown-linting == 'true' }}
         shell: bash
         run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
 
       - name: 'Validate - lint docs-files'
-        if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
+        if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation == 'true' }}
         shell: bash
         working-directory: docs/_docu-tools
         run: |
