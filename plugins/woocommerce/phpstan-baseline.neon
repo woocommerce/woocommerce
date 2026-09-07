@@ -10687,12 +10687,6 @@ parameters:
 			path: includes/class-wc-countries.php
 
 		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$states\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/class-wc-countries.php
-
-		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -54042,12 +54036,6 @@ parameters:
 		-
 			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
-			path: src/Blocks/Utils/StyleAttributesUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\StyleAttributesUtils\:\:join_styles\(\) should return array but returns string\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/Utils/StyleAttributesUtils.php
 
