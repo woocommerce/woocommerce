@@ -139,6 +139,13 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	private OptionsMigrator $options;
 
 	/**
+	 * Whether the last `process_batch()` call gave up because another batch held the batch lock.
+	 *
+	 * @var bool
+	 */
+	private bool $batch_declined = false;
+
+	/**
 	 * Init the service.
 	 *
 	 * Only `Requirements` and the writer are injected; `MigrationRun` assembles the rest, the
@@ -157,7 +164,7 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		$run = new MigrationRun();
 
 		$this->reporter  = $run->get_reporter();
-		$this->options   = $run->get_options_migrator();
+		$this->options   = $run->get_options_migrator( false );
 		$this->migrators = $run->build_migrators();
 	}
 
@@ -330,6 +337,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 	 *                    rather than leaving the reporting to the controller.
 	 */
 	public function process_batch( array $batch ): void {
+		$this->batch_declined = false;
+
 		if ( empty( $batch ) ) {
 			return;
 		}
@@ -339,6 +348,8 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		}
 
 		if ( ! $this->state->acquire_batch_lock() ) {
+			$this->batch_declined = true;
+
 			return;
 		}
 
@@ -380,6 +391,19 @@ class MigrationBatchProcessor implements BatchProcessorInterface {
 		} finally {
 			$this->state->release_batch_lock();
 		}
+	}
+
+	/**
+	 * Whether the last batch was handed back untouched because another batch held the lock.
+	 *
+	 * A run driven one batch at a time - the CLI does this - has no other way to tell a batch
+	 * that did nothing from one that did, and would otherwise serve the same rows in a loop
+	 * until the other claim went stale.
+	 *
+	 * @return bool True when the last `process_batch()` call lost the batch lock claim.
+	 */
+	public function last_batch_declined(): bool {
+		return $this->batch_declined;
 	}
 
 	/**

@@ -292,9 +292,12 @@ class Cli {
 	 * : Compute and report everything without writing anything.
 	 *
 	 * [--force]
-	 * : CLI only, requires --yes. Overrides the is_queued='on' pre-flight refusal, so a run
-	 * can start while the legacy extension still has rows queued for its own sender. Does not
-	 * skip Requirements::check() and does not change any status mapping.
+	 * : CLI only, requires --yes. Resets every cursor and unparks every section, so a run
+	 * revisits rows it has already been past. Also re-imports settings, overwriting any
+	 * merchant edit made since the last migration — --retry-failed does not do this.
+	 * Overrides the is_queued='on' pre-flight refusal, so a run can start while the legacy
+	 * extension still has rows queued for its own sender. Does not skip
+	 * Requirements::check() and does not change any status mapping.
 	 *
 	 * [--retry-failed]
 	 * : Clear the permanent-failure marker on legacy rows so they are retried. Ignored under
@@ -327,8 +330,17 @@ class Cli {
 		$check = $this->requirements()->check();
 
 		if ( is_wp_error( $check ) ) {
+			// A store with no legacy tables has genuinely nothing to migrate, and a script that
+			// runs this on every site should read that as success. Every other reason is a
+			// misconfiguration the caller has to see in the exit code, not only in the output.
+			if ( 'legacy_tables_missing' === $check->get_error_code() ) {
+				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+				WP_CLI::success( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
+				return;
+			}
+
 			// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			WP_CLI::success( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
+			WP_CLI::error( sprintf( 'Nothing to migrate: %s', $check->get_error_message() ) );
 			return;
 		}
 
@@ -413,6 +425,12 @@ class Cli {
 				$run_state->unpark_all();
 			}
 
+			if ( $force ) {
+				// Settings re-import is a --force-only behaviour: --retry-failed must not
+				// re-overwrite a merchant's post-migration edit to a setting.
+				$run_state->reset_settled_options();
+			}
+
 			$reporter               = $run->get_reporter();
 			$notifications_migrator = $run->get_notifications_migrator();
 			$migrators              = array_intersect_key( $run->build_migrators( $dry_run ), array_flip( $sections ) );
@@ -420,7 +438,7 @@ class Cli {
 
 			// Settings are not a section: the processor writes them on every batch, whatever
 			// `--section` asked for, since there is nothing about them to scan or restrict.
-			$options = $run->get_options_migrator();
+			$options = $run->get_options_migrator( $dry_run );
 
 			// The loop itself - section order, cursors, the per-batch
 			// requirement check and lock refresh - belongs to MigrationBatchProcessor. The CLI
@@ -446,8 +464,9 @@ class Cli {
 			}
 
 			// @phpstan-ignore-next-line function.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
-			$progress    = WP_CLI\Utils\make_progress_bar( 'BIS migration', max( 1, $total_estimate ) );
-			$batches_run = 0;
+			$progress            = WP_CLI\Utils\make_progress_bar( 'BIS migration', max( 1, $total_estimate ) );
+			$batches_run         = 0;
+			$batch_lock_declined = false;
 
 			while ( null === $max_batches || $batches_run < $max_batches ) {
 				$batch = $processor->get_next_batch_to_process( $batch_size );
@@ -457,6 +476,14 @@ class Cli {
 				}
 
 				$processor->process_batch( $batch );
+
+				// A declined batch lock does no work and hands the rows back unchanged, so the
+				// same batch would be served again for as long as the other claim stands.
+				if ( $processor->last_batch_declined() ) {
+					$batch_lock_declined = true;
+					break;
+				}
+
 				$progress->tick( count( $batch ) );
 				++$batches_run;
 			}
@@ -483,7 +510,16 @@ class Cli {
 			$this->print_report( $reporter );
 			$this->print_known_losses( $reporter );
 
-			if ( $reporter->has_errors() ) {
+			if ( $batch_lock_declined ) {
+				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
+				WP_CLI::warning(
+					'Stopped: another batch of this migration is still running and holds the batch lock. ' .
+					'Run the command again once it has finished.'
+				);
+
+				// Same reason as the has_errors() branch below: halt after the lock is back.
+				$halt_code = 1;
+			} elseif ( $reporter->has_errors() ) {
 				// @phpstan-ignore-next-line class.notFound -- WP_CLI is not resolvable to PHPStan outside a wp-cli runtime; see other CLI command classes in this codebase.
 				WP_CLI::warning( 'Run finished with error-severity outcomes. See the table above.' );
 

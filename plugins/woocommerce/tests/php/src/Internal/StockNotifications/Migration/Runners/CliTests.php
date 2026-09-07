@@ -97,7 +97,7 @@ class CliTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox the feature toggle being off should stop the run without writing or erroring.
+	 * @testdox the feature toggle being off should stop the run as an error, not a success.
 	 */
 	public function test_feature_off_stops_the_run(): void {
 		$this->seed_notifications( 1 );
@@ -105,8 +105,37 @@ class CliTests extends WC_Unit_Test_Case {
 
 		$this->cli()->run( array(), array( 'yes' => true ) );
 
-		$this->assertStringContainsString( 'Features', MockWPCLI::$last_success_message );
+		$this->assertStringContainsString( 'Features', MockWPCLI::$last_error_message );
+		$this->assertSame( '', MockWPCLI::$last_success_message, 'A misconfigured store must not report success.' );
 		$this->assertSame( array(), LegacyStore::get_core_rows() );
+	}
+
+	/**
+	 * @testdox a store with no legacy tables should report success, having nothing to migrate.
+	 */
+	public function test_no_legacy_tables_reports_success(): void {
+		LegacyStore::drop_tables();
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertStringContainsString( 'Nothing to migrate', MockWPCLI::$last_success_message );
+		$this->assertSame( '', MockWPCLI::$last_error_message );
+	}
+
+	/**
+	 * @testdox a batch lock another batch holds should stop the run instead of looping on it.
+	 */
+	public function test_a_held_batch_lock_stops_the_run(): void {
+		$this->seed_notifications( 1 );
+
+		$other_batch = new MigrationState();
+		$this->assertTrue( $other_batch->acquire_batch_lock(), 'The other claim has to land for this test to mean anything.' );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertStringContainsString( 'holds the batch lock', MockWPCLI::$last_warning_message );
+		$this->assertSame( 1, MockWPCLI::$last_halt_code );
+		$this->assertSame( array(), LegacyStore::get_core_rows(), 'A batch that lost the claim must leave its rows alone.' );
 	}
 
 	/**
@@ -440,6 +469,49 @@ class CliTests extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			( new MigrationState() )->is_lock_held(),
 			'A run that halted on an error-severity outcome must still hand its lock back.'
+		);
+	}
+
+	/**
+	 * @testdox --retry-failed should keep a settled setting's merchant edit; only --force overwrites it.
+	 */
+	public function test_retry_failed_keeps_settings_only_force_overwrites(): void {
+		update_option( 'wc_bis_allow_signups', 'no' );
+
+		$this->cli()->run( array(), array( 'yes' => true ) );
+
+		$this->assertSame( 'no', get_option( 'woocommerce_customer_stock_notifications_allow_signups' ), 'The first run must have migrated the setting.' );
+
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'retry-failed' => true,
+				'yes'          => true,
+			)
+		);
+
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_customer_stock_notifications_allow_signups' ),
+			'--retry-failed must not re-import settings, so a merchant edit survives it.'
+		);
+
+		MockWPCLI::reset();
+		$this->cli()->run(
+			array(),
+			array(
+				'force' => true,
+				'yes'   => true,
+			)
+		);
+
+		$this->assertSame(
+			'no',
+			get_option( 'woocommerce_customer_stock_notifications_allow_signups' ),
+			'--force must re-import settings, overwriting the merchant edit.'
 		);
 	}
 
