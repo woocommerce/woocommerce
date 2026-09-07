@@ -557,4 +557,51 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->delete();
 		$customer->delete();
 	}
+
+	/**
+	 * Test that wc_create_refund() records the logged-in user who issued the refund.
+	 */
+	public function test_wc_create_refund_records_the_current_user() {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertSame( $user_id, $refund->get_refunded_by() );
+		$this->assertSame(
+			$user_id,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'The refunding user should survive a round trip through the data store.'
+		);
+	}
+
+	/**
+	 * Test that wc_create_refund() attributes a refund to nobody when no user is logged in, rather than to user 1.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_wc_create_refund_records_no_user_when_nobody_is_logged_in() {
+		wp_set_current_user( 0 );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertSame( 0, $refund->get_refunded_by() );
+		$this->assertSame(
+			0,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'An unattributed refund should stay unattributed after a round trip through the data store.'
+		);
+	}
 }
