@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve server file paths entered in the product CSV importer against the site root and uploads directory (and accept absolute paths), fixing imports on hosts where wp-content lives outside of ABSPATH.
