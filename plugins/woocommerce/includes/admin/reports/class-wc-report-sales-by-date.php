@@ -747,7 +747,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							<?php echo $this->get_currency_tooltip();  // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Returns a fixed JavaScript property with a JSON-encoded currency symbol. ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ); ?>",
@@ -757,7 +757,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>"
+							prepend_tooltip: <?php echo wp_json_encode( get_woocommerce_currency_symbol(), JSON_UNESCAPED_UNICODE ); ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Gross sales amount', 'woocommerce' ) ); ?>",
@@ -767,7 +767,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Returns a fixed JavaScript property with a JSON-encoded currency symbol. ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Net sales amount', 'woocommerce' ) ); ?>",
@@ -777,7 +777,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 6, lineWidth: 4, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 5, fill: false },
 							shadowSize: 0,
-							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Returns a fixed JavaScript property with a JSON-encoded currency symbol. ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Refund amount', 'woocommerce' ) ); ?>",
@@ -787,7 +787,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>"
+							prepend_tooltip: <?php echo wp_json_encode( get_woocommerce_currency_symbol(), JSON_UNESCAPED_UNICODE ); ?>
 						},
 					];
 

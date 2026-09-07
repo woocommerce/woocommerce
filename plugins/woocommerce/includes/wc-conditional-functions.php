@@ -26,6 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool
  */
 function is_woocommerce() {
+	/**
+	 * Filters whether the current request is being handled by a WooCommerce template.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param bool $is_woocommerce True on the shop archive, a product taxonomy archive or a single product.
+	 */
 	return apply_filters( 'is_woocommerce', is_shop() || is_product_taxonomy() || is_product() );
 }
 
@@ -245,6 +252,12 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 
 		$page_id = wc_get_page_id( 'checkout' );
 
+		/**
+		 * Filters whether the order received (thanks) page is being viewed.
+		 *
+		 * @since 3.0.0
+		 * @param bool $is_order_received_page Whether the order received page is being viewed.
+		 */
 		return apply_filters( 'woocommerce_is_order_received_page', ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['order-received'] ) ) );
 	}
 }
@@ -343,7 +356,13 @@ if ( ! function_exists( 'is_filtered' ) ) {
 	 * @return bool
 	 */
 	function is_filtered() {
-		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['rating_filter'] ) ) ); // WPCS: CSRF ok.
+		/**
+		 * Filters whether products are currently being filtered by layered nav, price or rating.
+		 *
+		 * @since 2.1.0
+		 * @param bool $is_filtered Whether a product filter is active.
+		 */
+		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['rating_filter'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence checks on public catalog filter parameters; nothing is written.
 	}
 }
 
@@ -399,6 +418,12 @@ if ( ! function_exists( 'wc_tax_enabled' ) ) {
 	 * @return bool
 	 */
 	function wc_tax_enabled() {
+		/**
+		 * Filters whether store-wide taxes are enabled.
+		 *
+		 * @since 2.4.0
+		 * @param bool $tax_enabled Whether taxes are enabled.
+		 */
 		return apply_filters( 'wc_tax_enabled', get_option( 'woocommerce_calc_taxes' ) === 'yes' );
 	}
 }
@@ -411,6 +436,12 @@ if ( ! function_exists( 'wc_shipping_enabled' ) ) {
 	 * @return bool
 	 */
 	function wc_shipping_enabled() {
+		/**
+		 * Filters whether shipping is enabled.
+		 *
+		 * @since 2.6.0
+		 * @param bool $shipping_enabled Whether shipping is enabled.
+		 */
 		return apply_filters( 'wc_shipping_enabled', get_option( 'woocommerce_ship_to_countries' ) !== 'disabled' );
 	}
 }

@@ -164,6 +164,10 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			'plain permalink non-woocommerce route'       => array( '/?rest_route=/wp/v2/users&x=wp-json/wc/', false ),
 			'non-woocommerce route with query'            => array( '/wp-json/wp/v2/users?context=edit&x=wp-json/wc/', false ),
 			'non-woocommerce path with substring'         => array( '/not-wp-json/wc/v3/products', false ),
+			'woocommerce route, repeated leading slash'   => array( '//wp-json/wc/v3/products', true ),
+			'third-party route, repeated leading slash'   => array( '//wp-json/wc-custom/v1/resource', true ),
+			'many leading slashes'                        => array( '////wp-json/wc/v3/products', true ),
+			'non-woocommerce route, repeated leading slash' => array( '//wp-json/wp/v2/users', false ),
 			// A character esc_url_raw() strips must not be collapsed into a WooCommerce route prefix.
 			'path with stripped character in prefix'      => array( '/wp-json/w^c/v3/products', false ),
 			'plain route with stripped character in prefix' => array( '/?rest_route=/w^c/v3/products', false ),
@@ -171,6 +175,38 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			// WordPress routes this request to /wp/v2/users. Sanitizing the URI first would drop the '^'
 			// and change which parameter wins, so the route has to be read from the raw URI.
 			'decoy parameter that sanitizing would merge' => array( '/?rest_route=/wp/v2/users&rest_rou^te=/wc/v3/products', false ),
+		);
+	}
+
+	/**
+	 * @testdox Should identify a WooCommerce REST request by the route WordPress resolved.
+	 *
+	 * @dataProvider provider_resolved_routes_for_rest_api_detection
+	 *
+	 * @param string $request_uri    Request URI.
+	 * @param string $resolved_route Route WordPress resolved for the request.
+	 * @param bool   $expected       Expected result.
+	 */
+	public function test_is_request_to_rest_api_checks_resolved_route( string $request_uri, string $resolved_route, bool $expected ): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = $request_uri;
+		$wp->query_vars['rest_route'] = $resolved_route;
+
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
+	}
+
+	/**
+	 * Data provider for resolved REST routes.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_resolved_routes_for_rest_api_detection(): array {
+		return array(
+			'language-prefixed woocommerce route' => array( '/en/wp-json/wc/v3/products', '/wc/v3/products', true ),
+			'route differs from resolved route'   => array( '/en/wp-json/wc/v3/products', '/wp/v2/users', false ),
+			'custom rewrite without REST prefix'  => array( '/shop-api/products', '/wc/v3/products', true ),
+			'resolved route overrides URI route'  => array( '/wp-json/wp/v2/users', '/wc/v3/products', true ),
 		);
 	}
 
@@ -208,6 +244,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			// WP::parse_request() strips the home path case-insensitively, so this still reaches WooCommerce.
 			'woocommerce route, home path cased' => array( '/Shop/wp-json/wc/v3/products', true ),
 			'index.php permalink'                => array( '/shop/index.php/wp-json/wc/v3/products', true ),
+			'repeated slash after home path'     => array( '/shop//wp-json/wc/v3/products', true ),
 			'non-woocommerce route'              => array( '/shop/wp-json/wp/v2/users', false ),
 		);
 	}
@@ -276,6 +313,53 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let an authenticated key through to a third-party route the URI named in percent-encoded form.
+	 *
+	 * @dataProvider provider_encoded_third_party_routes
+	 *
+	 * @param string $request_uri    Request URI.
+	 * @param string $resolved_route Route WordPress resolves from that URI.
+	 */
+	public function test_reject_out_of_scope_route_allows_encoded_third_party_route( string $request_uri, string $resolved_route ): void {
+		global $wp;
+
+		$_SERVER['REQUEST_URI']       = $request_uri;
+		$wp->query_vars['rest_route'] = $resolved_route;
+
+		$this->authenticate_as( 1 );
+
+		$this->assertNull(
+			$this->sut->reject_out_of_scope_route( null ),
+			'A third-party route the URI named must stay in scope however the URI encoded it.'
+		);
+	}
+
+	/**
+	 * Data provider pairing an encoded request URI with the route WordPress resolves from it.
+	 *
+	 * @return array[]
+	 */
+	public static function provider_encoded_third_party_routes(): array {
+		return array(
+			'encoded space'          => array( '/wp-json/myplugin/v1/items/a%20b', '/myplugin/v1/items/a b' ),
+			'encoded hyphen'         => array( '/wp-json/myplugin/v1/items/a%2Db', '/myplugin/v1/items/a-b' ),
+			'encoded slash'          => array( '/wp-json/myplugin/v1/items/a%2Fb', '/myplugin/v1/items/a/b' ),
+			'encoded ampersand'      => array( '/wp-json/myplugin/v1/items/a%26b', '/myplugin/v1/items/a&b' ),
+			'encoded multibyte'      => array( '/wp-json/myplugin/v1/items/caf%C3%A9', '/myplugin/v1/items/café' ),
+			// rest_route is stored with its leading slash and trimmed before comparison, so the decoded
+			// URI route has to be trimmed too, or a trailing '%2F' leaves a slash behind.
+			'encoded trailing slash' => array( '/wp-json/myplugin/v1/items/a%2F', '/myplugin/v1/items/a' ),
+			// A '+' survives when the server fills PATH_INFO, and parse_str() reads it as a space when
+			// WordPress falls back to the raw URI. Both readings name this route.
+			'plus kept as plus'      => array( '/wp-json/myplugin/v1/items/a+b', '/myplugin/v1/items/a+b' ),
+			'plus read as space'     => array( '/wp-json/myplugin/v1/items/a+b', '/myplugin/v1/items/a b' ),
+			// WP::parse_request() re-escapes '%' in PATH_INFO, so an encoded percent reaches the route
+			// undecoded and only the raw comparison names it.
+			'encoded percent'        => array( '/wp-json/myplugin/v1/items/a%2520b', '/myplugin/v1/items/a%2520b' ),
+		);
+	}
+
+	/**
 	 * @testdox Should treat a namespace opted in through the woocommerce_rest_is_request_to_rest_api filter as a WooCommerce request.
 	 */
 	public function test_is_request_to_rest_api_honours_scope_filter(): void {
@@ -313,6 +397,25 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$result = $this->sut->reject_out_of_scope_route( null );
 
 		$this->assertWPError( $result, 'A resolved route the URI never named must be rejected even when the URI names an opted-in namespace.' );
+		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject a resolved route in the same namespace as the one the URI names.
+	 */
+	public function test_reject_out_of_scope_route_rejects_sibling_route_in_same_namespace(): void {
+		global $wp;
+
+		// Same namespace, different resource, and the URI is encoded. Decoding must not collapse the
+		// two into a match: scope is judged per route, not per namespace.
+		$_SERVER['REQUEST_URI']       = '/wp-json/myplugin/v1/items/a%20b';
+		$wp->query_vars['rest_route'] = '/myplugin/v1/items/other';
+
+		$this->authenticate_as( 1 );
+
+		$result = $this->sut->reject_out_of_scope_route( null );
+
+		$this->assertWPError( $result, 'A sibling route the URI never named must be rejected.' );
 		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
 	}
 
@@ -394,9 +497,15 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let the authentication fallback through for a WooCommerce route.
+	 * @testdox Should let the authentication fallback through for an in-scope WooCommerce route.
+	 *
+	 * @testWith ["/wp-json/wc/v3/products"]
+	 *           ["/ja/wp-json/wc/v3/products"]
+	 *           ["/shop-api/products"]
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback(): void {
+	public function test_rest_authentication_errors_allows_in_scope_route_from_fallback( string $request_uri ): void {
 		global $wp, $wpdb;
 
 		$consumer_key    = 'ck_' . wp_generate_password( 32, false );
@@ -417,7 +526,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$_SERVER['HTTPS']             = 'on';
 		$_SERVER['PHP_AUTH_USER']     = $consumer_key;
 		$_SERVER['PHP_AUTH_PW']       = $consumer_secret;
-		$_SERVER['REQUEST_URI']       = '/wp-json/wc/v3/products';
+		$_SERVER['REQUEST_URI']       = $request_uri;
 		$wp->query_vars['rest_route'] = '/wc/v3/products';
 
 		wp_set_current_user( 0 );

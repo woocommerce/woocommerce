@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\TermCount;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Internal\Caches\ProductTermCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
@@ -385,6 +386,7 @@ final class WooCommerce {
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
 		$container->get( ProductCacheController::class );
+		$container->get( ProductTermCacheInvalidator::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
@@ -433,6 +435,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -445,9 +448,6 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
-
-		// Code+GraphQL API.
-		Automattic\WooCommerce\Api\Infrastructure\Main::register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();

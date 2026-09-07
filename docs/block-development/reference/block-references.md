@@ -1239,7 +1239,7 @@ Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
-- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), spacing (blockGap), typography (fontSize)
+- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap), typography (fontSize)
 - **Attributes:** isPreview, overlayMode, overlayPosition
 
 ## Active Filters - woocommerce/product-filter-active
