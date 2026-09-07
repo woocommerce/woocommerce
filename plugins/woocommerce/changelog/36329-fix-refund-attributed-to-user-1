@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Stop attributing a refund to user #1 when no one is logged in; such refunds now show as issued by System.
+Stop attributing refunds to user #1 when no user is logged in. refunded_by is now 0 in REST v1-v3 and null in v4, and the admin labels these refunds as System.
