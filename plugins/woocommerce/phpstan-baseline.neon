@@ -10687,12 +10687,6 @@ parameters:
 			path: includes/class-wc-countries.php
 
 		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$states\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/class-wc-countries.php
-
-		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -54046,12 +54040,6 @@ parameters:
 			path: src/Blocks/Utils/StyleAttributesUtils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\StyleAttributesUtils\:\:join_styles\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Utils/StyleAttributesUtils.php
-
-		-
 			message: '#^Parameter \#1 \$version1 of function version_compare expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -59056,12 +59044,6 @@ parameters:
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
-			message: '#^Access to offset ''id'' on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
 			message: '#^Access to property \$ID on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
 			identifier: class.notFound
 			count: 1
@@ -59088,12 +59070,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:update_user_data_values\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
-			message: '#^Parameter \$user of method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:get_user_data_values\(\) has invalid type Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/WCAdminUser.php
 
