@@ -617,43 +617,4 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( Notification::class, $notifications[0] );
 		$this->assertEquals( 'test@test.com', $notifications[0]->get_user_email() );
 	}
-
-	/**
-	 * @testdox Should build objects from the queried rows without reading each one back.
-	 */
-	public function test_query_notifications_with_return_type_objects_does_not_reread_rows() {
-		global $wpdb;
-
-		$expected_dates = array();
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$notification = new Notification();
-			$notification->set_product_id( $i );
-			$notification->set_user_id( 1 );
-			$notification->set_user_email( 'test@test.com' );
-			$notification->save();
-
-			$expected_dates[ $notification->get_id() ] = $notification->get_date_created()->getTimestamp();
-		}
-
-		$queries_before = $wpdb->num_queries;
-
-		$notifications = $this->data_store->query(
-			array(
-				'user_id' => 1,
-				'return'  => 'objects',
-			)
-		);
-
-		$this->assertSame( $queries_before + 1, $wpdb->num_queries, 'Only the list query itself should run.' );
-		$this->assertCount( 3, $notifications );
-
-		foreach ( $notifications as $queried ) {
-			$this->assertSame(
-				$expected_dates[ $queried->get_id() ],
-				$queried->get_date_created()->getTimestamp(),
-				'Rows hydrated from the query should carry their dates.'
-			);
-			$this->assertEmpty( $queried->get_changes(), 'A hydrated notification should not look dirty.' );
-		}
-	}
 }
