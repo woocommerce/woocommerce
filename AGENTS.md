@@ -225,7 +225,7 @@ Database migrations live in `WC_Install::$db_updates`; read that class for the c
 
 ## Comments and Docblocks
 
-Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
 
 When writing a comment or docblock description:
 
