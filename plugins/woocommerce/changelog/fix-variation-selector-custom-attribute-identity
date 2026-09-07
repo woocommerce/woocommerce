@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Variation Selector attribute rows being unselectable, and colliding with each other, for custom (non-taxonomy) product attributes in the editor.

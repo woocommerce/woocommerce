@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add usesServerSideSearch() and pass the search term straight to report endpoints that resolve it themselves, instead of limiting them to a hydrated list of matching IDs.

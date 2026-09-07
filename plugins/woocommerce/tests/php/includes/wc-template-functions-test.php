@@ -224,4 +224,58 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'rel="nofollow"', $markup );
 	}
+
+	/**
+	 * @testdox Pagination defaults link page one to the canonical archive URL.
+	 */
+	public function test_pagination_defaults_link_page_one_to_canonical_archive_url(): void {
+		global $wp_rewrite;
+
+		$original_permalink_structure = $wp_rewrite->permalink_structure;
+		$buffer_level                 = ob_get_level();
+		$previous_loop                = $GLOBALS['woocommerce_loop'] ?? null;
+		$pagination_args              = null;
+		$get_pagenum_link_filter      = static function ( $link, $pagenum ) {
+			return 'https://example.test/shop/page/' . $pagenum . '/';
+		};
+		$pagination_args_filter       = static function ( $args ) use ( &$pagination_args ) {
+			$pagination_args = $args;
+			return $args;
+		};
+
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		wc_setup_loop(
+			array(
+				'is_shortcode' => false,
+				'is_paginated' => true,
+				'total'        => 2,
+				'total_pages'  => 2,
+				'current_page' => 2,
+			)
+		);
+		add_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10, 2 );
+		add_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+
+		ob_start();
+		try {
+			woocommerce_pagination();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'get_pagenum_link', $get_pagenum_link_filter, 10 );
+			remove_filter( 'woocommerce_pagination_args', $pagination_args_filter );
+			$wp_rewrite->set_permalink_structure( $original_permalink_structure );
+			if ( null === $previous_loop ) {
+				wc_reset_loop();
+			} else {
+				$GLOBALS['woocommerce_loop'] = $previous_loop;
+			}
+		}
+
+		$this->assertSame( 'https://example.test/shop/%_%', $pagination_args['base'] );
+		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
+		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
+	}
 }

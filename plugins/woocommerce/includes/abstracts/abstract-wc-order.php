@@ -106,6 +106,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $temp_item_id_counter = 0;
 
 	/**
+	 * Whether the data store supports deferred item deletion.
+	 *
+	 * @var bool|null Null until first checked.
+	 */
+	private $data_store_supports_deferred_item_deletion = null;
+
+	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
 	 * Populated by remove_order_items() with a specific item type and processed by
@@ -356,6 +363,54 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the data store supports deferred item deletion.
+	 *
+	 * @return bool
+	 */
+	private function data_store_supports_deferred_item_deletion(): bool {
+		if ( null !== $this->data_store_supports_deferred_item_deletion ) {
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( ! $data_store->has_callable( 'delete_items' ) ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		$data_store_class = $data_store->get_current_class_name();
+		$is_cpt_store     = is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true );
+
+		if ( ! $is_cpt_store ) {
+			// Standalone data stores opt in to deferred deletion by providing this optional method.
+			$this->data_store_supports_deferred_item_deletion = $data_store->has_callable( 'delete_items_by_ids' );
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		$delete_items_method = new ReflectionMethod( $data_store_class, 'delete_items' );
+		if ( Abstract_WC_Order_Data_Store_CPT::class === $delete_items_method->getDeclaringClass()->getName() ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		if ( ! $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			$this->data_store_supports_deferred_item_deletion = false;
+			return false;
+		}
+
+		$delete_items_by_ids_method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
+
+		$this->data_store_supports_deferred_item_deletion = Abstract_WC_Order_Data_Store_CPT::class !== $delete_items_by_ids_method->getDeclaringClass()->getName();
+		return $this->data_store_supports_deferred_item_deletion;
 	}
 
 	/**
@@ -1055,18 +1110,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * The items are cleared from the in-memory order immediately, but the database
-	 * deletion is deferred until the next call to save(). This keeps the checkout
-	 * "resume order" flow atomic: if anything between here and save() throws, the
-	 * previously persisted items remain intact in the database. As a consequence,
-	 * the `woocommerce_removed_order_items` action now fires from save_items()
-	 * (after the actual DB delete completes) rather than synchronously from this
-	 * method — listeners that observe the persisted state continue to see it as
-	 * before, but listeners pairing pre/post on the same call stack will see
-	 * the post-hook fire at save() time.
+	 * The items are cleared from the in-memory order immediately, but core data stores defer
+	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
+	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
 	 * @param string|null $type Order item type. Default null (remove every type).
-	 * @throws Exception If persisted item IDs cannot be read.
+	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
@@ -1095,10 +1144,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
-		$has_persisted_items = $this->get_id() > 0;
+		$has_persisted_items  = $this->get_id() > 0;
+		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
+
+		if ( $delete_synchronously && $has_persisted_items ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$this->data_store->delete_items( $this, $type );
+		}
 
 		if ( ! empty( $type ) ) {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids( $type );
 
 				if ( $this->bulk_delete_all_items_pending ) {
@@ -1129,7 +1184,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		} else {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids();
 
 				foreach ( $this->item_ids_to_bulk_delete_by_type as $typed_item_ids ) {
@@ -1156,6 +1211,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $groups as $group ) {
 				$this->items[ $group ] = array();
 			}
+		}
+
+		if ( $delete_synchronously ) {
+			/**
+			 * This action is documented in save_items().
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, $type );
 		}
 	}
 
@@ -1809,6 +1873,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				$this->recalculate_coupons();
+
+				/**
+				 * Action hook fired when a coupon is removed from an order.
+				 *
+				 * @param  WC_Coupon $coupon_object The removed coupon object.
+				 * @param  WC_Order  $order         The current order object.
+				 *
+				 * @since 10.8.0
+				 */
+				do_action( 'woocommerce_order_removed_coupon', $coupon_object, $this );
 
 				return true;
 			}
@@ -3099,7 +3173,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @param string   $total_html The formatted total COGS HTML.
 		 * @param float    $total      The total COGS value.
-		 * @param WC_Order $order      The order object.
+		 * @param WC_Abstract_Order $order The order object.
 		 */
 		return apply_filters(
 			'woocommerce_order_cogs_total_value_html',

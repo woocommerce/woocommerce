@@ -134,7 +134,7 @@ class Autoloader {
 	 *
 	 * Degrades to null (nothing registered) if the Composer files are unavailable or a
 	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
-	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
+	 * unresolved — rather than fataling — if a resolved file is torn/unparsable mid-upgrade,
 	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
 	 * The failed attempt stays retryable: the handler records only the files it has executed
 	 * cleanly, so once the upgrade finishes writing a file that previously failed to parse,
