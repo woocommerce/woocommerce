@@ -15,11 +15,14 @@
 	background-color: $gray-0;
 	padding: $grid-unit-20 $grid-unit-30;
 	margin-bottom: $grid-unit-50;
+	position: relative;
 
 	&-header {
 		font-size: 16px;
 		line-height: 1.5;
 		padding-left: $grid-unit-40;
+		// Keep the heading clear of the dismiss button in the corner.
+		padding-inline-end: $grid-unit-50;
 		position: relative;
 		word-break: break-word;
 		font-weight: 500;
@@ -42,6 +45,12 @@
 		.components-button.is-secondary {
 			background-color: $white;
 		}
+	}
+
+	&-dismiss.components-button {
+		position: absolute;
+		inset-inline-end: $grid-unit-10;
+		top: $grid-unit-10;
 	}
 }
 
@@ -258,6 +267,16 @@
 		text-decoration: none;
 		padding: 6px 12px;
 	}
+}
+
+// The "disconnect your account" control in the connected account banner is a
+// link-styled button inside a sentence; drop the button box above so it flows
+// with the text.
+.woocommerce-marketplace__my-subscriptions .woocommerce-marketplace__my-subscriptions__account-content .components-button.is-link {
+	display: inline;
+	height: auto;
+	line-height: inherit;
+	padding: 0;
 }
 
 .woocommerce-marketplace__my-subscriptions
