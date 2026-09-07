@@ -59056,12 +59056,6 @@ parameters:
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
-			message: '#^Access to offset ''id'' on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
 			message: '#^Access to property \$ID on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
 			identifier: class.notFound
 			count: 1
@@ -59088,12 +59082,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:update_user_data_values\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
-			message: '#^Parameter \$user of method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:get_user_data_values\(\) has invalid type Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/WCAdminUser.php
 
