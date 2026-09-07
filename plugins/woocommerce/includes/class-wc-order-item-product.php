@@ -389,8 +389,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Aggregate and set properties based on passed in product object.
 	 *
-	 * Handed the variation the item already refers to, the attribute meta is left alone: the item
-	 * records what was bought, not what the variation declares today.
+	 * Handed the variation the item already recorded attribute meta for, that meta is left alone:
+	 * the item records what was bought, not what the variation declares today.
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @return void
@@ -400,10 +400,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
-			$same_variation = $product->get_id() === (int) $this->get_variation_id( 'edit' );
+			// A matching variation ID alone is not enough: a caller can set it before calling this, and
+			// an item that has recorded no attribute meta has nothing to keep. Checking the ID first
+			// keeps the record unread on the usual path, where the item refers to no variation yet.
+			$keep_recorded_attributes = $product->get_id() === (int) $this->get_variation_id( 'edit' )
+				&& (bool) $this->get_variation_attribute_meta_record();
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
-			if ( ! $same_variation ) {
+			if ( ! $keep_recorded_attributes ) {
 				$this->replace_variation_attribute_meta( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 			}
 		} else {

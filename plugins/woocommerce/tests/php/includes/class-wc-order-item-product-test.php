@@ -975,6 +975,21 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should still write the attribute meta when the variation ID was set before set_product() was called.
+	 */
+	public function test_set_product_writes_attribute_meta_when_the_variation_id_was_set_first(): void {
+		$variation = $this->create_variation( array( 'color' => 'blue' ) );
+
+		// The order a caller reconstructing a line item might use: identify the variation, then hand
+		// over the product. A matching ID alone must not be read as "this item already has its meta".
+		$item = new WC_Order_Item_Product();
+		$item->set_variation_id( $variation->get_id() );
+		$item->set_product( $variation );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'An item that recorded nothing has no history to keep, so the attribute meta is written.' );
+	}
+
+	/**
 	 * @testdox Should record everything set_variation() wrote, so a later product switch cleans up both calls.
 	 */
 	public function test_set_variation_records_the_attribute_meta_added_by_every_call(): void {
