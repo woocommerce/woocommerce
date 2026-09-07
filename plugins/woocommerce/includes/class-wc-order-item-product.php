@@ -275,8 +275,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 
 		// Rewritten rather than updated in place so the record stays behind the attribute rows in
-		// `meta_data`. Updated in place it would sit between them, and the v2/v3 order response, which
-		// drops the record but keeps the rest in order, would no longer line up with get_meta_data().
+		// `meta_data`. Updated in place it keeps its meta ID, so after a reload it sits between them
+		// instead, and the v2/v3 response, which drops the record, stops matching get_meta_data()
+		// index for index. Nothing in production is known to rely on that; a REST test does.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
 		if ( $record ) {
@@ -414,6 +415,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			// A matching variation ID alone is not enough: a caller can set it before calling this, and
 			// an item that has recorded no attribute meta has nothing to keep. Checking the ID first
 			// keeps the record unread on the usual path, where the item refers to no variation yet.
+			// Note that skipping here also skips set_variation(), so a subclass overriding it for its
+			// own side effects does not run on this path.
 			$keep_recorded_attributes = $product->get_id() === (int) $this->get_variation_id( 'edit' )
 				&& (bool) $this->get_variation_attribute_meta_record();
 			$this->set_product_id( $product->get_parent_id() );

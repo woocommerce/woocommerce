@@ -972,7 +972,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array( 'color', 'size', WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
 			$keys,
-			'The v2/v3 order response drops the record but keeps the attribute rows in order, so anything indexing both by position needs the record last.'
+			'The v2/v3 order response drops the record but keeps the attribute rows in order, so the record has to stay last for the two to match index for index.'
 		);
 	}
 
