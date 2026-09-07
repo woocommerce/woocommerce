@@ -63,7 +63,7 @@ export default function CustomerNotificationBox( {
 	return (
 		<FulfillmentCard
 			size="small"
-			isCollapsable={ false }
+			isCollapsible={ false }
 			initialState="expanded"
 			header={
 				<>

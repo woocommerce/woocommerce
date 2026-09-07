@@ -498,11 +498,10 @@ class WC_Admin_Taxonomies {
 					'use strict';
 					const product_cat = document.getElementById('tag-%d');
 					if (product_cat) {
-						const th = product_cat.querySelector('th');
-						const thumbSpan = product_cat.querySelector('td.thumb span');
-						if (th && thumbSpan) {
-							th.innerHTML = '';
-							th.appendChild(thumbSpan);
+						const checkColumn = product_cat.querySelector('.check-column');
+						const tooltip = product_cat.querySelector('.column-thumb > .woocommerce-help-tip');
+						if (checkColumn && tooltip) {
+							checkColumn.insertBefore(tooltip, checkColumn.firstChild);
 						}
 					}
 				})();",
