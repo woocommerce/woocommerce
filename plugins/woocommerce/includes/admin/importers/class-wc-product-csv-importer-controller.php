@@ -346,8 +346,7 @@ class WC_Product_CSV_Importer_Controller {
 		global $wpdb;
 
 		if ( 0 === $cursor ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
-			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+			self::delete_original_id_markers();
 		}
 
 		/** This filter is documented in includes/import/abstract-wc-product-importer.php */
@@ -447,6 +446,22 @@ class WC_Product_CSV_Importer_Controller {
 		);
 
 		wp_cache_delete_multiple( array_map( 'absint', $post_ids ), 'posts' );
+	}
+
+	/**
+	 * Remove the markers that map a CSV `id:` reference to the product the importer created for it.
+	 *
+	 * The markers are only meaningful within the run that wrote them: get_product_id_by_original_id()
+	 * matches them site-wide, so a marker an abandoned run left behind would resolve a later run's
+	 * `id:` reference to the wrong product. Both ends of a run clear them for that reason, which also
+	 * means two imports cannot run at once - the same already holds for the placeholders themselves,
+	 * since cleanup deletes every one it finds rather than only its own.
+	 */
+	private static function delete_original_id_markers(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
 	}
 
 	/**
@@ -551,6 +566,11 @@ class WC_Product_CSV_Importer_Controller {
 
 			if ( 0 === $params['start_pos'] ) {
 				self::release_stranded_cleanup_claims();
+
+				// Cleanup runs in requests the client drives, so a tab closed at 100% can leave the
+				// previous run's markers behind. Start from a clean slate rather than resolve this
+				// run's `id:` references against them.
+				self::delete_original_id_markers();
 			}
 
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
