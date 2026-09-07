@@ -321,15 +321,18 @@ class MyAccountEndpoint {
 		}
 
 		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+		// The page the customer cancelled from, so they land back on it instead of page 1.
+		$page = isset( $_POST['notifications_page'] ) ? max( 1, absint( wp_unslash( $_POST['notifications_page'] ) ) ) : 1;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! wp_verify_nonce( $nonce, self::get_cancel_nonce_action( $notification_id ) ) ) {
-			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'This link has expired. Please reload the page and try again.', 'woocommerce' ), $page );
 		}
 
 		$notification = Factory::get_notification( $notification_id );
 		if ( ! $notification instanceof Notification ) {
-			$this->redirect_with_error( __( 'That back in stock notification no longer exists.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'That back in stock notification no longer exists.', 'woocommerce' ), $page );
 		}
 
 		if ( (int) $notification->get_user_id() !== get_current_user_id() ) {
@@ -337,7 +340,7 @@ class MyAccountEndpoint {
 		}
 
 		if ( ! self::is_cancellable( $notification ) ) {
-			$this->redirect_with_error( __( 'That back in stock notification has already been cancelled.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'That back in stock notification has already been cancelled.', 'woocommerce' ), $page );
 		}
 
 		$notification->set_status( NotificationStatus::CANCELLED );
@@ -350,7 +353,7 @@ class MyAccountEndpoint {
 		// reaches us as a successful save. Read the row back to confirm it really changed.
 		$saved = Factory::get_notification( $notification->get_id() );
 		if ( ! $saved instanceof Notification || NotificationStatus::CANCELLED !== $saved->get_status() ) {
-			$this->redirect_with_error( __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ) );
+			$this->redirect_with_error( __( 'We could not cancel that back in stock notification. Please try again.', 'woocommerce' ), $page );
 		}
 
 		$product_name = $notification->get_product_name();
@@ -366,7 +369,7 @@ class MyAccountEndpoint {
 			\wc_add_notice( esc_html__( 'Back in stock notification cancelled.', 'woocommerce' ) );
 		}
 
-		wp_safe_redirect( self::get_endpoint_url() );
+		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
 
@@ -374,20 +377,23 @@ class MyAccountEndpoint {
 	 * Queue an error notice and redirect back to the stock notifications endpoint.
 	 *
 	 * @param string $message The error to show the customer.
+	 * @param int    $page    1-indexed page to return the customer to.
 	 * @return never
 	 */
-	private function redirect_with_error( string $message ) {
+	private function redirect_with_error( string $message, int $page = 1 ) {
 		\wc_add_notice( esc_html( $message ), 'error' );
-		wp_safe_redirect( self::get_endpoint_url() );
+		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
 
 	/**
 	 * Get the URL of the My Account > stock notifications endpoint.
 	 *
+	 * @param int $page 1-indexed page to link to. Page 1 has no page segment.
 	 * @return string
 	 */
-	private static function get_endpoint_url(): string {
-		return \wc_get_endpoint_url( self::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) );
+	private static function get_endpoint_url( int $page = 1 ): string {
+		$value = $page > 1 ? (string) $page : '';
+		return \wc_get_endpoint_url( self::ENDPOINT, $value, \wc_get_page_permalink( 'myaccount' ) );
 	}
 }
