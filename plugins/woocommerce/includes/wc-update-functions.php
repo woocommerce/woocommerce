@@ -3805,17 +3805,11 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 /**
  * Remove variation featured images that duplicate the parent product's featured image.
  *
- * Saving a variation through the classic editor used to persist the parent's inherited
- * featured image onto the variation, silently freezing what was dynamic inheritance.
- * While the stored ID still equals the parent's current featured image, deleting it is
- * display-neutral and restores inheritance. Diverged values are kept: they are
- * indistinguishable from a deliberate merchant choice.
- *
- * Stores upgrading from before 10.9.0 were never exposed to the bug (the variation
- * gallery shipped as an opt-in feature in 10.9.0), so the cleanup is skipped for them.
- *
- * Batches walk variations by ID. A database error stops the cleanup and is logged
- * instead of retried, because the storefront stays correct without it.
+ * The classic editor used to persist the inherited parent image onto variations on save,
+ * freezing dynamic inheritance. Removing values that still equal the parent's canonical
+ * thumbnail is display-neutral; diverged values may be deliberate and are kept. Skipped
+ * for stores upgrading from before 10.9.0, which predates the variation gallery.
+ * A database error stops the cleanup and is logged.
  *
  * @since 11.2.0
  *
@@ -3839,6 +3833,7 @@ function wc_update_11203_cleanup_inherited_variation_images() {
 	$matching_variations = (array) $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT variation.ID AS variation_id,
+				variation.post_parent AS parent_id,
 				GROUP_CONCAT(DISTINCT variation_thumb.meta_value) AS inherited_image_ids
 			FROM {$wpdb->posts} AS variation
 			INNER JOIN {$wpdb->postmeta} AS variation_thumb
@@ -3874,13 +3869,23 @@ function wc_update_11203_cleanup_inherited_variation_images() {
 	$has_more            = count( $matching_variations ) > $batch_size;
 	$matching_variations = array_slice( $matching_variations, 0, $batch_size );
 
+	$cleaned_count = (int) ( $state['cleaned_count'] ?? 0 );
+
 	foreach ( $matching_variations as $matching_variation ) {
+		// The join matches any parent thumbnail row; only the canonical value is safe to delete.
+		$canonical_parent_thumbnail = (int) get_post_meta( (int) $matching_variation['parent_id'], '_thumbnail_id', true );
+		$deleted_any                = false;
+
 		foreach ( wp_parse_id_list( $matching_variation['inherited_image_ids'] ) as $inherited_image_id ) {
-			delete_post_meta( (int) $matching_variation['variation_id'], '_thumbnail_id', $inherited_image_id );
+			if ( $inherited_image_id === $canonical_parent_thumbnail && delete_post_meta( (int) $matching_variation['variation_id'], '_thumbnail_id', $inherited_image_id ) ) {
+				$deleted_any = true;
+			}
+		}
+
+		if ( $deleted_any ) {
+			++$cleaned_count;
 		}
 	}
-
-	$cleaned_count = (int) ( $state['cleaned_count'] ?? 0 ) + count( $matching_variations );
 
 	if ( $has_more ) {
 		$last_processed = end( $matching_variations );

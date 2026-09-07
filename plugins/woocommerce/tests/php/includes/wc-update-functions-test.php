@@ -659,6 +659,21 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images matches only the parent's canonical thumbnail, not stale duplicate rows.
+	 */
+	public function test_wc_update_11203_ignores_stale_duplicate_parent_thumbnail_rows() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '88', '77' );
+		$parent_id    = wp_get_post_parent_id( $variation_id );
+		add_post_meta( $parent_id, '_thumbnail_id', '77' );
+
+		wc_update_11203_cleanup_inherited_variation_images();
+
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching only a stale duplicate parent row may be deliberate and must survive.' );
+	}
+
+	/**
 	 * @testdox wc_update_11203_cleanup_inherited_variation_images skips stores upgrading from before the variation gallery existed.
 	 */
 	public function test_wc_update_11203_skips_stores_upgrading_from_before_10_9() {
