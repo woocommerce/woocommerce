@@ -762,6 +762,31 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Local data reports whether the installed copy carries a Woo header.
+	 */
+	public function test_local_data_reports_where_updates_come_from(): void {
+		$this->prepare_auto_update_env();
+
+		$plugins = wp_cache_get( 'plugins', 'plugins' );
+
+		$plugins['']['wccom-extension/wccom-extension.php'] = array(
+			'Name'    => 'WooCommerce.com Extension',
+			'Version' => '1.0.0',
+			'Woo'     => '456:abcdef',
+		);
+		wp_cache_set( 'plugins', $plugins, 'plugins' );
+
+		// The fixture plugin has an empty Woo header, as a WordPress.org build does.
+		$wporg = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'test-woo-extension' ) );
+		$wccom = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'wccom-extension' ) );
+		$none  = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'not-installed' ) );
+
+		$this->assertFalse( $wporg['updates_from_wccom'], 'Without a Woo header, core updates the plugin from WordPress.org.' );
+		$this->assertTrue( $wccom['updates_from_wccom'] );
+		$this->assertFalse( $none['updates_from_wccom'] );
+	}
+
+	/**
 	 * @testdox Auto-update data for a theme reads the auto_update_themes option.
 	 */
 	public function test_theme_auto_update_data_reads_the_theme_option(): void {

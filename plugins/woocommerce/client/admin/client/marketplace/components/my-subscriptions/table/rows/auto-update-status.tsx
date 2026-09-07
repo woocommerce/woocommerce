@@ -24,12 +24,20 @@ import { getAdminSetting } from '../../../../../utils/admin-settings';
 /**
  * Reasons a product won't auto-update even though the plugin's own auto-update setting is on.
  *
+ * Every reason is about WooCommerce.com delivering the update, so none of them applies to a copy
+ * installed from WordPress.org: core updates that one on its own.
+ *
  * Whether WordPress runs automatic updates at all is deliberately not one of them: that is a
  * site-wide decision, and repeating it on every row says nothing about the product.
  */
 export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const blockers: string[] = [];
+
+	if ( ! subscription.local?.updates_from_wccom ) {
+		return blockers;
+	}
+
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	if ( ! wccomSettings?.wooUpdateManagerActive ) {
 		blockers.push(

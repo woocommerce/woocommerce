@@ -62,6 +62,7 @@ function subscriptionWith(
 			path: 'test-extension/test-extension.php',
 			auto_update: false,
 			auto_update_manageable: true,
+			updates_from_wccom: true,
 			...local,
 		},
 	} as Subscription;
@@ -141,6 +142,18 @@ describe( 'AutoUpdateStatus', () => {
 
 		const { container } = renderStatus(
 			subscriptionWith( { auto_update: true } )
+		);
+
+		expect( container ).toBeEmptyDOMElement();
+	} );
+
+	it( 'never blocks a copy installed from WordPress.org', () => {
+		setSiteSettings( { wooUpdateManagerActive: false } );
+		const { container } = renderStatus(
+			subscriptionWith(
+				{ auto_update: true, updates_from_wccom: false },
+				{ product_key: '', expired: true, active: false }
+			)
 		);
 
 		expect( container ).toBeEmptyDOMElement();
