@@ -244,8 +244,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set variation data (stored as meta data - write only).
 	 *
-	 * Replaces rather than merges: recorded attribute meta that `$data` no longer contains is
-	 * removed. Items saved before 11.2.0 carry no record, so their attribute meta is left alone.
+	 * Adds to the item's attribute meta and never removes any, as it always has. What it writes is
+	 * also added to the item's record of its own attribute meta, so `set_product()` can later tell
+	 * those rows apart from a merchant's and clean them up.
 	 *
 	 * @param array $data Key/Value pairs.
 	 */
@@ -260,8 +261,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
-		$previous = $this->get_variation_attribute_meta_record();
-		$current  = array();
+		$record = $this->get_variation_attribute_meta_record();
 
 		foreach ( $data as $key => $value ) {
 			$meta_key = str_replace( 'attribute_', '', $key );
@@ -270,7 +270,43 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 			// Only a scalar can be matched against the stored row later; unrecorded keys are never removed.
 			if ( is_scalar( $value ) ) {
-				$current[ $meta_key ] = (string) $value;
+				$record[ $meta_key ] = (string) $value;
+			}
+		}
+
+		// Rewritten rather than updated in place so the record stays behind the attribute rows in
+		// `meta_data`. Updated in place it would sit between them, and the v2/v3 order response, which
+		// drops the record but keeps the rest in order, would no longer line up with get_meta_data().
+		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
+
+		if ( $record ) {
+			$this->add_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, $record, true );
+		}
+	}
+
+	/**
+	 * Write the attribute meta for the product this item now refers to, removing the recorded rows
+	 * `$data` no longer contains.
+	 *
+	 * The removal half of `set_product()`. It is kept out of `set_variation()` so that method stays
+	 * additive: it is public, reachable through `set_props( array( 'variation' => ... ) )`, and how
+	 * checkout and `WC_Abstract_Order::add_product()` write their attribute meta.
+	 *
+	 * @param array $data Key/Value pairs.
+	 * @return void
+	 */
+	private function replace_variation_attribute_meta( $data ) {
+		// See set_variation(): the same early bail, for the same reason.
+		if ( ! $data && null === $this->meta_data && ! $this->get_id() ) {
+			return;
+		}
+
+		$previous = $this->get_variation_attribute_meta_record();
+		$current  = array();
+
+		foreach ( $data as $key => $value ) {
+			if ( is_scalar( $value ) ) {
+				$current[ str_replace( 'attribute_', '', $key ) ] = (string) $value;
 			}
 		}
 
@@ -280,13 +316,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
-		// Rewritten rather than updated in place so the record stays behind the attribute rows in
-		// `meta_data`; REST consumers index that array positionally.
+		// Cleared first so set_variation() records only what this call writes. get_meta() reads
+		// through get_meta_data(), which skips deleted rows, so it sees no record at all.
 		$this->delete_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY );
 
-		if ( $current ) {
-			$this->add_meta_data( self::VARIATION_ATTRIBUTE_META_RECORD_KEY, $current, true );
-		}
+		$this->set_variation( $data );
 	}
 
 	/**
@@ -370,12 +404,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
 			if ( ! $same_variation ) {
-				$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+				$this->replace_variation_attribute_meta( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 			}
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
-			$this->set_variation( array() );
+			$this->replace_variation_attribute_meta( array() );
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );

@@ -940,27 +940,63 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write the provenance record behind the attribute meta so it never takes their place in meta_data.
+	 * @testdox Should add to an item's attribute meta rather than replace it, the way set_variation() always has.
 	 */
-	public function test_variation_attribute_meta_record_is_written_after_the_attribute_meta(): void {
+	public function test_set_variation_adds_to_the_attribute_meta_it_already_wrote(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+
+		// The two-step pattern for adding a site-level attribute alongside the variation's own.
+		$item->set_props( array( 'variation' => array( 'attribute_size' => 'small' ) ) );
+
+		$values = wp_list_pluck( $item->get_meta_data(), 'value', 'key' );
+
+		$this->assertSame( 'blue', $values['color'] ?? '', 'set_variation() is public and additive; a second call must not drop what an earlier one wrote.' );
+		$this->assertSame( 'small', $values['size'] ?? '', 'The attribute the second call added should be there too.' );
+	}
+
+	/**
+	 * @testdox Should keep the provenance record behind the attribute meta so it never takes their place in meta_data.
+	 */
+	public function test_variation_attribute_meta_record_stays_behind_the_attribute_meta(): void {
 		$item = new WC_Order_Item_Product();
 		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
 
 		// A second call, the way a caller adds an attribute to an item that already has some.
-		$item->set_variation(
-			array(
-				'attribute_color' => 'blue',
-				'attribute_size'  => 'small',
-			)
-		);
+		$item->set_variation( array( 'attribute_size' => 'small' ) );
 
 		$keys = wp_list_pluck( $item->get_meta_data(), 'key' );
 
 		$this->assertSame(
 			array( 'color', 'size', WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
 			$keys,
-			'The record belongs behind the attributes it tracks; ahead of them it surfaces first in meta_data, including in the REST response.'
+			'The v2/v3 order response drops the record but keeps the attribute rows in order, so anything indexing both by position needs the record last.'
 		);
+	}
+
+	/**
+	 * @testdox Should record everything set_variation() wrote, so a later product switch cleans up both calls.
+	 */
+	public function test_set_variation_records_the_attribute_meta_added_by_every_call(): void {
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->create_variation( array( 'color' => 'blue' ) ) );
+		$item->set_props( array( 'variation' => array( 'attribute_size' => 'small' ) ) );
+
+		$this->assertSame(
+			array(
+				'color' => 'blue',
+				'size'  => 'small',
+			),
+			$item->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, true, 'edit' ),
+			'Both calls wrote attribute meta, so both belong in the record.'
+		);
+
+		$item->set_product( $this->product );
+
+		$values = wp_list_pluck( $item->get_meta_data(), 'value', 'key' );
+
+		$this->assertArrayNotHasKey( 'color', $values, 'A recorded row goes when the item stops being a variation.' );
+		$this->assertArrayNotHasKey( 'size', $values, 'The row the second call recorded goes with it.' );
 	}
 
 	/**
