@@ -218,6 +218,20 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$data           = $item->get_data();
 		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
+		// Unlike v1 and v4, this response carries the item's raw meta rather than its formatted meta,
+		// so the bookkeeping record has to be dropped here or it would reach clients as an object
+		// where every other line item meta value is a string.
+		if ( isset( $data['meta_data'] ) && is_array( $data['meta_data'] ) ) {
+			$data['meta_data'] = array_values(
+				array_filter(
+					$data['meta_data'],
+					static function ( $meta ) {
+						return WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY !== $meta->key;
+					}
+				)
+			);
+		}
+
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
 			if ( isset( $data[ $key ] ) ) {

@@ -1737,6 +1737,30 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GET /orders keeps the provenance record out of line_items[].meta_data.
+	 */
+	public function test_get_order_line_item_meta_data_omits_the_provenance_record(): void {
+		list( , $variation )     = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$this->assertSame(
+			array( 'color' => 'blue' ),
+			( new WC_Order_Item_Product( $item_id ) )->get_meta( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY ),
+			'Precondition: the item carries the record this response must not expose.'
+		);
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+		$this->assertSame( 200, $response->get_status(), 'Reading the order should succeed.' );
+
+		$meta_keys = wp_list_pluck( $response->get_data()['line_items'][0]['meta_data'], 'key' );
+
+		// Unlike v1 and v4, this response is built from the item's raw meta, so nothing else drops the
+		// record. Left in, it would be the only line item meta whose value is an object, not a string.
+		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, $meta_keys, 'The record is bookkeeping and must not reach REST clients.' );
+		$this->assertContains( 'color', $meta_keys, 'The attribute meta itself still belongs in the response.' );
+	}
+
+	/**
 	 * @testdox PUT /orders naming the line item's own variation keeps the attribute meta the order was placed with.
 	 */
 	public function test_update_line_item_with_the_same_variation_keeps_historical_attribute_meta(): void {
