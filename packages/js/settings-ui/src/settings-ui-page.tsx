@@ -94,10 +94,6 @@ const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
-const clearLegacyFormPrompt = () => {
-	window.onbeforeunload = null;
-};
-
 const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	let redirectInput = form.querySelector< HTMLInputElement >(
 		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
@@ -383,6 +379,9 @@ const ShellHeader = ( {
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
 									}
+									aria-current={
+										item.active ? 'page' : undefined
+									}
 									href={ item.href }
 									key={ item.id }
 								>
@@ -406,6 +405,9 @@ const ShellHeader = ( {
 										item.active
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
+									}
+									aria-current={
+										item.active ? 'page' : undefined
 									}
 									href={ item.href }
 									key={ item.id }
@@ -480,7 +482,6 @@ export const SettingsUIPage = ( {
 
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
-		clearLegacyFormPrompt();
 	}, [] );
 
 	const submitSettingsForm = useCallback(

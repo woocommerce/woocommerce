@@ -5,6 +5,19 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	/**
+	 * Percent-encode literal apostrophes in an already URL-encoded request body.
+	 *
+	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
+	 * server with literal apostrophes that some WAF rules reject.
+	 *
+	 * @param {string} data URL-encoded request body.
+	 * @return {string} Body with apostrophes encoded as %27.
+	 */
+	function encodeApostrophes( data ) {
+		return data.split( "'" ).join( '%27' );
+	}
+
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
 	/**
@@ -717,7 +730,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -961,7 +974,7 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: $form.serialize(),
+					data: encodeApostrophes( $form.serialize() ),
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1267,7 +1280,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1341,7 +1354,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
