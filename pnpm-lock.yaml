@@ -218,6 +218,9 @@ patchedDependencies:
   '@wordpress/edit-site@5.15.0':
     hash: 63381743e38412fb89154386a5d169639ca10f8315407527829db669201fce9b
     path: bin/patches/@wordpress__edit-site@5.15.0.patch
+  '@wordpress/env@11.9.0':
+    hash: 4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7
+    path: bin/patches/@wordpress__env@11.9.0.patch
 
 importers:
 
@@ -2402,13 +2405,13 @@ importers:
     devDependencies:
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
 
   packages/php/email-editor:
     devDependencies:
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2475,7 +2478,7 @@ importers:
     devDependencies:
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
 
   plugins/woocommerce:
     dependencies:
@@ -2530,7 +2533,7 @@ importers:
         version: 1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.61.1)
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.41.0(postcss@8.5.26)(stylelint@14.16.1)
@@ -2678,13 +2681,13 @@ importers:
         version: link:../../packages/js/eslint-plugin
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       '@wordpress/prettier-config':
         specifier: 4.49.0
         version: 4.49.0(wp-prettier@3.0.3)
       '@wordpress/scripts':
         specifier: ^32.6.0
-        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)
+        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -3526,7 +3529,7 @@ importers:
         version: 6.33.1
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       '@wordpress/format-library':
         specifier: catalog:wp-min
         version: 5.33.9(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
@@ -3571,7 +3574,7 @@ importers:
         version: 7.33.2(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/scripts':
         specifier: 32.6.0
-        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(eslint-import-resolver-webpack@0.13.11)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
+        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(eslint-import-resolver-webpack@0.13.11)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
       '@wordpress/stylelint-config':
         specifier: ^23.14.0
         version: 23.36.0(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
@@ -3765,7 +3768,7 @@ importers:
         version: 24.12.2
       '@wordpress/scripts':
         specifier: 32.6.0
-        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
+        version: 32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.41.0(postcss@8.5.26)(stylelint@14.16.1)
@@ -3886,7 +3889,7 @@ importers:
         version: 24.12.2
       '@wordpress/env':
         specifier: 11.9.0
-        version: 11.9.0(@types/node@24.12.2)
+        version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -29140,7 +29143,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@wordpress/env@11.9.0(@types/node@24.12.2)':
+  '@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@24.12.2)
       '@wp-playground/cli': 3.1.50
@@ -30780,7 +30783,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(eslint-import-resolver-webpack@0.13.11)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)':
+  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(eslint-import-resolver-webpack@0.13.11)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.61.1
@@ -30845,7 +30848,7 @@ snapshots:
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
       webpack-dev-server: 4.15.2(webpack-cli@5.1.4)(webpack@5.97.1)
     optionalDependencies:
-      '@wordpress/env': 11.9.0(@types/node@24.12.2)
+      '@wordpress/env': 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@swc/core'
@@ -30883,7 +30886,7 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)':
+  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@14.16.1))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.61.1
@@ -30948,7 +30951,7 @@ snapshots:
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
       webpack-dev-server: 4.15.2(webpack-cli@5.1.4)(webpack@5.97.1)
     optionalDependencies:
-      '@wordpress/env': 11.9.0(@types/node@24.12.2)
+      '@wordpress/env': 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@swc/core'
@@ -30986,7 +30989,7 @@ snapshots:
       - webpack-hot-middleware
       - webpack-plugin-serve
 
-  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)':
+  '@wordpress/scripts@32.6.0(@playwright/test@1.61.1)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)':
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.61.1
@@ -31051,7 +31054,7 @@ snapshots:
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
       webpack-dev-server: 4.15.2(webpack-cli@5.1.4)(webpack@5.97.1)
     optionalDependencies:
-      '@wordpress/env': 11.9.0(@types/node@24.12.2)
+      '@wordpress/env': 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@swc/core'
