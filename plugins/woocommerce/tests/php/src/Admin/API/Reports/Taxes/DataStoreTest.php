@@ -970,6 +970,22 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Point the Taxes data store at a table of the given name and forget what
+	 * `DataStore::lookup_is_keyed_by_order_item()` read, so that the new table's key is seen.
+	 *
+	 * @param string $table_name Table name, without the database prefix.
+	 */
+	private function point_data_store_at( string $table_name ): void {
+		$table = new \ReflectionProperty( DataStore::class, 'table_name' );
+		$table->setAccessible( true );
+		$table->setValue( null, $table_name );
+
+		$cache = new \ReflectionProperty( DataStore::class, 'lookup_keyed_by_order_item' );
+		$cache->setAccessible( true );
+		$cache->setValue( null, null );
+	}
+
+	/**
 	 * Two tax lines on distinct rate ids, the shape almost every store's history is in.
 	 *
 	 * @param string $prefix Tax code prefix, so lines from different orders group separately.
@@ -1124,5 +1140,49 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' ) );
 
 		$this->assertSame( 6.25, $data->totals->total_tax, 'Rows waiting on the rebuild should still be counted.' );
+	}
+
+	/**
+	 * @testdox Taxes reports drop the replaced-row check while the lookup is not keyed by tax order item.
+	 */
+	public function test_taxes_reports_drop_the_replaced_row_check_while_the_lookup_is_not_re_keyed(): void {
+		global $wpdb;
+
+		$unkeyed_table = $wpdb->prefix . 'wc_order_tax_lookup_unkeyed';
+
+		// The shape a failed re-key leaves behind: dbDelta added the column, the key change never
+		// landed. Nothing writes a per-line row there, so no row can have been replaced.
+		//
+		// The store reads the shape of its table rather than its rows, so a temporary table in
+		// that shape stands in for the lookup. Re-keying the real one would need `ALTER TABLE`,
+		// which commits the transaction the test framework rolls back after each test, leaving
+		// both the key change and whatever else this class had written standing for the rest of
+		// the run. Temporary table DDL commits nothing.
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is not user input. */
+		$wpdb->query(
+			"CREATE TEMPORARY TABLE `{$unkeyed_table}` (
+				order_id bigint(20) unsigned NOT NULL,
+				tax_rate_id bigint(20) unsigned NOT NULL,
+				order_item_id bigint(20) unsigned NOT NULL DEFAULT 0,
+				PRIMARY KEY (order_id, tax_rate_id)
+			)"
+		);
+		/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching */
+
+		try {
+			$this->point_data_store_at( 'wc_order_tax_lookup_unkeyed' );
+
+			$condition = DataStore::get_legacy_row_condition();
+
+			$this->assertStringNotContainsString( 'NOT EXISTS', $condition, 'The reports should not look for a per-line row that cannot be there.' );
+			$this->assertSame( "{$unkeyed_table}.order_item_id = 0", $condition, 'The reports should read a row at zero the way the released report did.' );
+		} finally {
+			$this->point_data_store_at( 'wc_order_tax_lookup' );
+
+			/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is not user input. */
+			$wpdb->query( "DROP TEMPORARY TABLE `{$unkeyed_table}`" );
+		}
+
+		$this->assertStringContainsString( 'NOT EXISTS', DataStore::get_legacy_row_condition(), 'The check should be back once the re-key has landed.' );
 	}
 }
