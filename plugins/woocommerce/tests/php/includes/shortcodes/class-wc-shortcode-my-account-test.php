@@ -25,18 +25,6 @@ class WC_Shortcode_My_Account_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_action( 'set_auth_cookie', array( $this, 'record_auth_cookie_user_id' ), 10 );
-		remove_filter( 'send_auth_cookies', '__return_false' );
-		remove_filter( 'woocommerce_disable_password_change_notification', '__return_true' );
-		wp_set_current_user( 0 );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Record the user ID when WordPress generates an authentication cookie.
 	 *
 	 * @param string $auth_cookie Authentication cookie value.
