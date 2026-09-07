@@ -619,4 +619,71 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
 		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
 	}
+
+	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
+	 */
+	public function test_wc_update_11203_removes_variation_thumbnail_duplicating_parent() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_11203_cleanup_inherited_variation_images(), 'A batch smaller than the limit should complete in one run.' );
+		$this->assertSame( '', get_post_meta( $variation_id, '_thumbnail_id', true ), 'The duplicated thumbnail should be removed so the variation inherits again.' );
+	}
+
+	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images keeps a variation thumbnail that diverged from the parent's featured image.
+	 */
+	public function test_wc_update_11203_keeps_diverged_variation_thumbnail() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '88' );
+
+		$this->assertFalse( wc_update_11203_cleanup_inherited_variation_images() );
+		$this->assertSame( '88', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A diverged value may be a deliberate merchant choice and must survive the cleanup.' );
+	}
+
+	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images removes only metadata values that duplicate the parent image.
+	 */
+	public function test_wc_update_11203_keeps_other_thumbnail_metadata_values() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+		add_post_meta( $variation_id, '_thumbnail_id', '88' );
+
+		wc_update_11203_cleanup_inherited_variation_images();
+
+		$this->assertSame( array( '88' ), get_post_meta( $variation_id, '_thumbnail_id', false ), 'Only the value duplicating the parent image should be removed.' );
+	}
+
+	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images skips stores upgrading from before the variation gallery existed.
+	 */
+	public function test_wc_update_11203_skips_stores_upgrading_from_before_10_9() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '10.8.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_11203_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'Stores never exposed to the bug must not be touched.' );
+	}
+
+	/**
+	 * Create a variable product and return its first variation's ID, with the given thumbnail meta on parent and variation.
+	 *
+	 * @param string $parent_thumbnail_id    Meta value for the parent's _thumbnail_id.
+	 * @param string $variation_thumbnail_id Meta value for the variation's _thumbnail_id.
+	 * @return int
+	 */
+	private function create_variation_with_thumbnails( string $parent_thumbnail_id, string $variation_thumbnail_id ): int {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		update_post_meta( $product->get_id(), '_thumbnail_id', $parent_thumbnail_id );
+		update_post_meta( $variation_id, '_thumbnail_id', $variation_thumbnail_id );
+
+		return $variation_id;
+	}
 }
