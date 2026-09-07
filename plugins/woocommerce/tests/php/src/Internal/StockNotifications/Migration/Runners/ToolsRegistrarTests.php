@@ -294,7 +294,7 @@ class ToolsRegistrarTests extends WC_Unit_Test_Case {
 
 		// Store settings are not a section with a cached count: the line reads them straight
 		// off the options, so they have to actually be there.
-		( new OptionsMigrator( new Reporter() ) )->migrate( wc_get_container()->get( Writer::class ) );
+		( new OptionsMigrator( new Reporter(), $this->state ) )->migrate( wc_get_container()->get( Writer::class ) );
 
 		$desc = $this->registrar->handle_woocommerce_debug_tools( array() )['start_bis_migration']['desc'];
 
