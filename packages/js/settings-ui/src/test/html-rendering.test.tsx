@@ -578,7 +578,7 @@ describe( 'settings HTML rendering', () => {
 		}
 	} );
 
-	it( 'submits form-post saves with the pending destination', () => {
+	it( 'submits form-post saves without clearing another unload handler', () => {
 		const requestSubmit = jest
 			.spyOn( HTMLFormElement.prototype, 'requestSubmit' )
 			.mockImplementation( () => undefined );
@@ -615,6 +615,10 @@ describe( 'settings HTML rendering', () => {
 		const { container, form, root } = renderElementInMainForm(
 			<SettingsUIPage schema={ schema } />
 		);
+
+		const previousBeforeUnload = window.onbeforeunload;
+		const otherBeforeUnload = jest.fn();
+		window.onbeforeunload = otherBeforeUnload;
 
 		try {
 			const input = container.querySelector(
@@ -665,7 +669,15 @@ describe( 'settings HTML rendering', () => {
 			expect( requestSubmit ).toHaveBeenCalledWith(
 				container.querySelector( '.woocommerce-save-button' )
 			);
+			expect( window.onbeforeunload ).toBe( otherBeforeUnload );
+			const beforeUnloadEvent = new Event( 'beforeunload', {
+				cancelable: true,
+			} );
+			window.dispatchEvent( beforeUnloadEvent );
+			expect( otherBeforeUnload ).toHaveBeenCalledTimes( 1 );
+			expect( beforeUnloadEvent.defaultPrevented ).toBe( false );
 		} finally {
+			window.onbeforeunload = previousBeforeUnload;
 			act( () => root.unmount() );
 			form.remove();
 			requestSubmit.mockRestore();
