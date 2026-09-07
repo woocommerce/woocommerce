@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Persist the store's tax entry mode when manual orders are created in WP Admin, and keep historical order values stable when the store setting changes.
+Initialize manual orders with the store's tax entry mode, and preserve saved order values when the store setting changes.
