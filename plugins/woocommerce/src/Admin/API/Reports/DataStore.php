@@ -794,7 +794,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * Casts strings returned from the database to appropriate data types for output.
 	 *
 	 * @param array $array Associative array of values extracted from the database.
-	 * @return array|WP_Error
+	 * @return array
 	 */
 	protected function cast_numbers( $array ) {
 		$retyped_array = array();

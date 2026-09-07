@@ -60,6 +60,10 @@ class ProductsReport extends Component {
 			return <AnalyticsError />;
 		}
 
+		// Every metric an unsold product reports is zero, so the summary and
+		// chart would only show flat lines.
+		const isUnsoldView = query.filter === 'unsold';
+
 		const chartQuery = {
 			...query,
 		};
@@ -78,30 +82,37 @@ class ProductsReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="products"
 				/>
-				<ReportSummary
-					mode={ mode }
-					charts={ charts }
-					endpoint="products"
-					query={ chartQuery }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
-				/>
-				<ReportChart
-					charts={ charts }
-					mode={ mode }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
-					endpoint="products"
-					isRequesting={ isRequesting }
-					itemsLabel={ itemsLabel }
-					path={ path }
-					query={ chartQuery }
-					selectedChart={ getSelectedChart(
-						chartQuery.chart,
-						charts
-					) }
-				/>
+				{ ! isUnsoldView && (
+					<ReportSummary
+						mode={ mode }
+						charts={ charts }
+						endpoint="products"
+						query={ chartQuery }
+						selectedChart={ getSelectedChart(
+							query.chart,
+							charts
+						) }
+						filters={ filters }
+						advancedFilters={ advancedFilters }
+					/>
+				) }
+				{ ! isUnsoldView && (
+					<ReportChart
+						charts={ charts }
+						mode={ mode }
+						filters={ filters }
+						advancedFilters={ advancedFilters }
+						endpoint="products"
+						isRequesting={ isRequesting }
+						itemsLabel={ itemsLabel }
+						path={ path }
+						query={ chartQuery }
+						selectedChart={ getSelectedChart(
+							chartQuery.chart,
+							charts
+						) }
+					/>
+				) }
 				{ isSingleProductVariable ? (
 					<VariationsReportTable
 						baseSearchQuery={ { filter: 'single_product' } }
