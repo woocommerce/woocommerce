@@ -3,7 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Report;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
 use Automattic\WooCommerce\Internal\StockNotifications\Migration\Report\Reporter;
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Writers\Writer;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\Migration\Helpers\LegacyStore;
 use WC_Unit_Test_Case;
 
@@ -68,6 +70,63 @@ class ReporterTests extends WC_Unit_Test_Case {
 		}
 
 		return $message;
+	}
+
+	/**
+	 * @testdox no log line should ever carry row content, at any severity.
+	 */
+	public function test_no_log_line_carries_row_content(): void {
+		$product = new \WC_Product_Simple();
+		$product->save();
+
+		$migrated = LegacyStore::add_notification(
+			array(
+				'product_id' => $product->get_id(),
+				'user_email' => 'migrated@example.com',
+			)
+		);
+
+		$failing = LegacyStore::add_notification(
+			array(
+				'product_id' => $product->get_id(),
+				'user_email' => 'failing@example.com',
+			)
+		);
+
+		// The failing row adopts a pre-existing Core row, so its write happens inside the
+		// per-row try/catch rather than in the batch's bulk insert.
+		LegacyStore::add_core_notification(
+			array(
+				'product_id' => $product->get_id(),
+				'user_email' => 'failing@example.com',
+			)
+		);
+
+		$migrator = new NotificationsMigrator( new Reporter() );
+		$batch    = $migrator->get_batch( 0, 10 );
+
+		$thrower = static function ( $query ) {
+			if ( false !== strpos( $query, '_wc_bis_legacy_adopted' ) ) {
+				throw new \RuntimeException( 'forced row failure' );
+			}
+
+			return $query;
+		};
+
+		add_filter( 'query', $thrower );
+		$migrator->migrate_batch( $batch, wc_get_container()->get( Writer::class ) );
+		remove_filter( 'query', $thrower );
+
+		$this->assertNotEmpty( $this->logged, 'The run should have logged something.' );
+
+		foreach ( $this->logged as $level => $messages ) {
+			foreach ( $messages as $message ) {
+				$this->assertStringNotContainsString( '@example.com', $message, "An address leaked into a {$level} line." );
+			}
+		}
+
+		$this->assertContains( "section=notifications id={$failing} outcome=failed", $this->logged['error'] ?? array() );
+		$this->assertNotContains( "section=notifications id={$migrated} outcome=failed", $this->logged['error'] ?? array() );
 	}
 
 	/**

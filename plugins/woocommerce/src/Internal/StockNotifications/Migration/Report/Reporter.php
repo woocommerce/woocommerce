@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Migration\Report;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Migration\Migrators\NotificationsMigrator;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -336,6 +338,29 @@ class Reporter {
 		}
 
 		return $lines;
+	}
+
+	/**
+	 * The known losses this run has accumulated so far.
+	 *
+	 * Every count comes from the run itself: the three skip populations are per-row outcomes
+	 * the notifications section recorded as it walked its rows, the other two are totals the
+	 * migrator adds up while producing OUTCOME_MIGRATED rows. Nothing here queries, so this
+	 * is safe to call on a page load - but it only describes what has been visited so far,
+	 * and is complete only once a run has walked the whole legacy table.
+	 *
+	 * @param NotificationsMigrator $migrator The notifications migrator that produced these counts.
+	 * @return array<string, int> Known-losses counts, keyed by name.
+	 */
+	public function with_run_losses( NotificationsMigrator $migrator ): array {
+		$section = $this->counts[ $migrator->get_slug() ] ?? array();
+
+		return array(
+			self::LOSS_EMAIL_TOO_LONG    => (int) ( $section[ self::OUTCOME_EMAIL_TOO_LONG ] ?? 0 ),
+			self::LOSS_INVALID_EMAIL     => (int) ( $section[ self::OUTCOME_INVALID_EMAIL ] ?? 0 ),
+			self::LOSS_PRODUCT_MISSING   => (int) ( $section[ self::OUTCOME_PRODUCT_MISSING ] ?? 0 ),
+			self::LOSS_ROWS_WITHOUT_HASH => $migrator->get_rows_without_hash_count(),
+		);
 	}
 
 	/**

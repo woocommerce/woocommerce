@@ -34,7 +34,7 @@ final class Constants {
 	 *
 	 * @var string[]
 	 */
-	public const SECTION_ORDER = array( 'product-meta' );
+	public const SECTION_ORDER = array( 'notifications', 'product-meta' );
 
 	/**
 	 * Legacy notifications meta table, unprefixed.
