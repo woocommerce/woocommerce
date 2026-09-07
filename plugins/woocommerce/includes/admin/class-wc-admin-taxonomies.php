@@ -499,9 +499,9 @@ class WC_Admin_Taxonomies {
 					const product_cat = document.getElementById('tag-%d');
 					if (product_cat) {
 						const checkColumn = product_cat.querySelector('.check-column');
-						const tooltip = product_cat.querySelector('.woocommerce-help-tip');
+						const tooltip = product_cat.querySelector('.column-thumb > .woocommerce-help-tip');
 						if (checkColumn && tooltip) {
-							checkColumn.appendChild(tooltip);
+							checkColumn.insertBefore(tooltip, checkColumn.firstChild);
 						}
 					}
 				})();",
