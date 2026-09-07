@@ -41,6 +41,8 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$this->server_snapshot     = $_SERVER;
 		$this->reset_pixel_batch_queue();
@@ -54,6 +56,8 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
+		delete_option( Woocommerce_Analytics::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
 		$GLOBALS['wp_rest_server'] = null;
 		$_SERVER                   = $this->server_snapshot;
 		unset( $_COOKIE['tk_ai'] );
@@ -133,6 +137,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	 */
 	public function test_route_is_registered_when_proxy_tracking_is_enabled(): void {
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
 
 		Woocommerce_Analytics::register_rest_routes();
 
@@ -169,6 +174,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
 
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
 		Woocommerce_Analytics::register_rest_routes();
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -206,13 +212,41 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
 
-		// No filter: proxy tracking is off: proxy tracking has never been on here.
+		// No filter and no sync: proxy tracking has never been on here.
 		Woocommerce_Analytics::register_rest_routes();
 
 		$response = rest_do_request( $this->build_track_request() );
 
 		$this->assertSame( 404, $response->get_status(), 'A site that never used proxy tracking must not expose the endpoint.' );
 		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel may be queued when the route is gated off.' );
+	}
+
+	/**
+	 * Turning the feature off cannot unregister the route, because pages cached
+	 * while it was on still tell their visitors to POST here. A 404 loses every
+	 * one of those events with no signal anywhere; a 403 with a reason is
+	 * something the client and the server log can both act on.
+	 */
+	public function test_post_is_refused_with_a_reason_once_the_feature_is_turned_off(): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
+
+		// On, then off — the sticky option records that cached pages may exist.
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
+
+		Woocommerce_Analytics::register_rest_routes();
+
+		$this->assertArrayHasKey( self::ROUTE, rest_get_server()->get_routes(), 'The route must survive the feature being turned off.' );
+
+		$response = rest_do_request( $this->build_track_request() );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'proxy_tracking_disabled', $response->get_data()['code'] ?? null );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'Refusing must not record.' );
 	}
 
 	/**
@@ -248,6 +282,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		update_option( 'woocommerce_store_id', 'real-store-id' );
 
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
 		Woocommerce_Analytics::register_rest_routes();
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -290,6 +325,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
 
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::sync_proxy_tracking_state();
 		Woocommerce_Analytics::register_rest_routes();
 
 		$events = array();

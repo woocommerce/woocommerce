@@ -14,12 +14,14 @@ import {
 	attributes,
 	countries,
 	coupons,
+	customerNames,
 	customers,
 	downloadIps,
 	emails,
 	orders,
 	product,
 	productCategory,
+	registeredCustomers,
 	taxes,
 	usernames,
 	variableProduct,
@@ -65,6 +67,8 @@ export class Search extends Component< SearchProps, SearchState > {
 				return countries;
 			case 'coupons':
 				return coupons;
+			case 'customerNames':
+				return customerNames;
 			case 'customers':
 				return customers;
 			case 'downloadIps':
@@ -75,6 +79,8 @@ export class Search extends Component< SearchProps, SearchState > {
 				return orders;
 			case 'products':
 				return product;
+			case 'registeredCustomers':
+				return registeredCustomers;
 			case 'taxes':
 				return taxes;
 			case 'usernames':
