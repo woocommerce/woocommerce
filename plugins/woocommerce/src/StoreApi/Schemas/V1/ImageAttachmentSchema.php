@@ -107,5 +107,4 @@ class ImageAttachmentSchema extends AbstractSchema {
 			'alt'              => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 		];
 	}
-
 }
