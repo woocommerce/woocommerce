@@ -83,6 +83,10 @@ class MigrationState {
 	/**
 	 * The empty state shape, used when the option does not exist yet.
 	 *
+	 * `options` is an `array<string, true>` of settled settings markers, as `OptionsMigrator`
+	 * builds them. It is a fixed-size set - one entry per legacy setting or email sub-key, 32
+	 * at most - not a per-row structure like `cursor` or `counts`.
+	 *
 	 * @var array
 	 */
 	private const DEFAULT_STATE = array(
@@ -92,6 +96,7 @@ class MigrationState {
 		'totals'  => array(),
 		'failure' => null,
 		'parked'  => array(),
+		'options' => array(),
 	);
 
 	/**
@@ -164,7 +169,7 @@ class MigrationState {
 			}
 		}
 
-		foreach ( array( 'cursor', 'counts', 'totals', 'parked' ) as $key ) {
+		foreach ( array( 'cursor', 'counts', 'totals', 'parked', 'options' ) as $key ) {
 			if ( ! is_array( $state[ $key ] ) ) {
 				$state[ $key ] = array();
 			}
@@ -226,44 +231,6 @@ class MigrationState {
 	 */
 	public function release_lock(): void {
 		$this->delete_lock_row( self::LOCK_OPTION_NAME );
-	}
-
-	/**
-	 * Release the lock only when the named owner still holds it.
-	 *
-	 * The background run cannot always hand its own lock back: `BatchProcessingController`
-	 * drops a consistently failing processor without telling it, so the lock outlives the
-	 * run that took it. A caller that can prove the owner is gone — the Tools screen, which
-	 * knows the processor is no longer enqueued — reclaims it here rather than making the
-	 * merchant wait out STALE_LOCK_SECONDS.
-	 *
-	 * @param string $owner Owner string the lock must carry to be released.
-	 * @return bool True when a lock owned by $owner was released.
-	 */
-	public function release_lock_owned_by( string $owner ): bool {
-		global $wpdb;
-
-		$stored = $this->read_stored_lock();
-
-		if ( null === $stored || $stored['owner'] !== $owner ) {
-			return false;
-		}
-
-		// Delete the exact value that was read, so a lock a third process has taken over in
-		// the meantime is left where it is.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $wpdb->delete(
-			$wpdb->options,
-			array(
-				'option_name'  => self::LOCK_OPTION_NAME,
-				'option_value' => $stored['value'],
-			),
-			array( '%s', '%s' )
-		);
-
-		$this->flush_lock_cache( self::LOCK_OPTION_NAME );
-
-		return (bool) $deleted;
 	}
 
 	/**
@@ -841,6 +808,70 @@ class MigrationState {
 		}
 
 		$state['failure'] = null;
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Whether a settings value is settled: already confirmed in its Core home, so
+	 * `OptionsMigrator` leaves it alone even after a merchant edit.
+	 *
+	 * @param string $marker Marker as `OptionsMigrator` builds it.
+	 * @return bool
+	 */
+	public function is_option_settled( string $marker ): bool {
+		return isset( $this->get_state()['options'][ $marker ] );
+	}
+
+	/**
+	 * Mark a settings value as settled.
+	 *
+	 * @param string $marker Marker as `OptionsMigrator` builds it.
+	 * @return void
+	 */
+	public function settle_option( string $marker ): void {
+		$this->settle_options( array( $marker ) );
+	}
+
+	/**
+	 * Mark several settings values as settled in a single save.
+	 *
+	 * @param string[] $markers Markers as `OptionsMigrator` builds them.
+	 * @return void
+	 */
+	public function settle_options( array $markers ): void {
+		if ( empty( $markers ) ) {
+			return;
+		}
+
+		$state = $this->get_state();
+
+		foreach ( $markers as $marker ) {
+			$state['options'][ $marker ] = true;
+		}
+
+		$this->save_state( $state );
+	}
+
+	/**
+	 * Every settled settings marker, for tests and status reporting.
+	 *
+	 * @return string[]
+	 */
+	public function get_settled_options(): array {
+		return array_map( 'strval', array_keys( $this->get_state()['options'] ) );
+	}
+
+	/**
+	 * Clear every settled settings marker, so the next run re-imports settings from legacy.
+	 *
+	 * Not called by `reset_all_cursors()`: that runs on `--retry-failed` too, which must not
+	 * re-overwrite a merchant's post-migration edit. Only `--force` clears these.
+	 *
+	 * @return void
+	 */
+	public function reset_settled_options(): void {
+		$state            = $this->get_state();
+		$state['options'] = array();
 		$this->save_state( $state );
 	}
 }
