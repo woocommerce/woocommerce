@@ -283,6 +283,48 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Feature definition initialization is safe when a translation callback checks a feature.
+	 */
+	public function test_feature_definition_initialization_is_reentrant_safe() {
+		$reflection_class = new \ReflectionClass( $this->sut );
+
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $this->sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $this->sut, array() );
+
+		$reentrant_feature_enabled = null;
+		$translation_count         = 0;
+
+		$gettext_filter = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
+			unset( $text, $domain ); // Avoid parameter not used PHPCS errors.
+
+			++$translation_count;
+
+			if ( null === $reentrant_feature_enabled ) {
+				$reentrant_feature_enabled = $this->sut->feature_is_enabled( 'order_withdrawal' );
+			}
+
+			return $translation;
+		};
+
+		add_filter( 'gettext', $gettext_filter, 10, 3 );
+
+		try {
+			$this->sut->get_features( true, false );
+		} finally {
+			remove_filter( 'gettext', $gettext_filter, 10 );
+		}
+
+		$this->assertFalse( $reentrant_feature_enabled );
+		$this->assertGreaterThan( 0, $translation_count );
+		$this->assertNotNull( $this->sut->get_feature_definition( 'order_withdrawal' ) );
+	}
+
+	/**
 	 * @testdox 'change_feature_enable' does nothing and returns false for an invalid feature id.
 	 */
 	public function test_change_feature_enable_for_non_existing_feature() {
