@@ -299,7 +299,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it renders post wrapped withing a template associated with the post via _wp_page_template post meta.
+	 * Test it renders post wrapped within a template associated with the post via _wp_page_template post meta.
 	 */
 	public function testItRendersPostWithinAssociatedTemplate(): void {
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
@@ -323,7 +323,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it renders post wrapped withing a template passed as parameter.
+	 * Test it renders post wrapped within a template passed as parameter.
 	 */
 	public function testItRendersPostWithinTemplatePassedAsParameter(): void {
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.

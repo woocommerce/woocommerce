@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: label a customer filter tag with the username or email when the customer is registered without a name. Affects the Downloads and Customers reports.

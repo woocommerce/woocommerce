@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update product rating aggregates when REST API reviews are created, re-rated, or moved between products in wc/v1, wc/v2, and wc/v3.

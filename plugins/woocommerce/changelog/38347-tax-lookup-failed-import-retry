@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep an order on the Analytics failed imports list when its tax lookup rows could not be written, so a retry that fails again stays visible instead of reporting success.
