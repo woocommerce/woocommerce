@@ -181,7 +181,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		$new_settings = array();
 		$added        = false;
 
-		foreach ( $settings as $setting ) {
+		foreach ( $settings as $key => $setting ) {
 			if ( is_array( $setting ) && self::ENDPOINT_OPTION === ( $setting['id'] ?? '' ) ) {
 				return $settings;
 			}
@@ -192,15 +192,15 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 				'sectionend' === ( $setting['type'] ?? '' ) &&
 				'account_endpoint_options' === ( $setting['id'] ?? '' )
 			) {
-				$new_settings[] = $endpoint_setting;
-				$added          = true;
+				$new_settings[ self::ENDPOINT_OPTION ] = $endpoint_setting;
+				$added                                 = true;
 			}
 
-			$new_settings[] = $setting;
+			$new_settings[ $key ] = $setting;
 		}
 
 		if ( ! $added ) {
-			$new_settings[] = $endpoint_setting;
+			$new_settings[ self::ENDPOINT_OPTION ] = $endpoint_setting;
 		}
 
 		return $new_settings;
