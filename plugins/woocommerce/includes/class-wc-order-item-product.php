@@ -352,7 +352,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 		}
 
-		if ( 1 !== count( $matches ) || $oldest->value !== $matches[0] ) {
+		if ( null === $oldest || 1 !== count( $matches ) || $oldest->value !== $matches[0] ) {
 			return;
 		}
 
@@ -429,6 +429,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
 	}
+
 	/**
 	 * Set meta data for backordered products.
 	 */

@@ -1000,7 +1000,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
 					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
 					// get_class() check) would revive the 400 on every store substituting order item classes.
-					$item->set_product( $product );
+					$product_item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
 							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
