@@ -2153,8 +2153,8 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox get_purchasable_variation_candidates logs a failure from either read and still answers.
 	 *
-	 * @testWith [ "wp_posts" ]
-	 *           [ "wp_postmeta" ]
+	 * @testWith [ "posts" ]
+	 *           [ "postmeta" ]
 	 *
 	 * @param string $table Table whose read is broken.
 	 */
@@ -2187,7 +2187,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Break only the read under test, so a clean sibling query cannot mask it.
 		$query_filter = static function ( $query ) use ( $table ) {
-			return str_contains( $query, "FROM {$table} WHERE" ) ? str_replace( $table, $table . '_missing', $query ) : $query;
+			global $wpdb;
+			$name = $wpdb->{$table};
+			return str_contains( $query, "FROM {$name} WHERE" ) ? str_replace( $name, $name . '_missing', $query ) : $query;
 		};
 
 		global $wpdb;
