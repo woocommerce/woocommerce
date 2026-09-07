@@ -134,7 +134,10 @@ const getNavigationHref = ( event: MouseEvent ) => {
 		return undefined;
 	}
 
-	if ( link.target && link.target !== '_self' ) {
+	if (
+		link.hasAttribute( 'download' ) ||
+		( link.target && link.target !== '_self' )
+	) {
 		return undefined;
 	}
 

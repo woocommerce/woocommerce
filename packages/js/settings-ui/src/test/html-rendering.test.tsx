@@ -435,6 +435,65 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it.each( [ '', 'settings.csv' ] )(
+		'allows a download with attribute "%s" while settings are dirty',
+		( download ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'export', label: 'Export', href: '#export' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
+			if ( ! ( input instanceof window.HTMLInputElement ) ) {
+				throw new Error( 'Expected an editable input.' );
+			}
+			const link = container.querySelector( 'a' )!;
+			link.setAttribute( 'download', download );
+			act( () => changeTextInput( input, 'Changed' ) );
+
+			const click = new window.MouseEvent( 'click', {
+				bubbles: true,
+				cancelable: true,
+				button: 0,
+			} );
+			let intercepted: boolean | undefined;
+			link.addEventListener(
+				'click',
+				( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				},
+				{ once: true }
+			);
+			act( () => {
+				link.dispatchEvent( click );
+			} );
+			expect( intercepted ).toBe( false );
+			expect(
+				document.querySelector(
+					'.wc-settings-ui__unsaved-changes-modal'
+				)
+			).toBeNull();
+			const unload = new Event( 'beforeunload', { cancelable: true } );
+			window.dispatchEvent( unload );
+			expect( unload.defaultPrevented ).toBe( true );
+
+			act( () => root.unmount() );
+			container.remove();
+		}
+	);
+
 	it( 'prompts before navigating away with unsaved changes', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
