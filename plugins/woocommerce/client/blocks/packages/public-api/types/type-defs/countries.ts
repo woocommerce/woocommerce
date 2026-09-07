@@ -8,5 +8,6 @@ export type CountryData = {
 	allowShipping: boolean;
 	states: Record< string, string >;
 	locale: Record< keyof FormFields, FieldLocaleOverrides >;
+	postcode?: string;
 	format?: string;
 };
