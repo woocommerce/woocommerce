@@ -25,6 +25,9 @@
 		},
 		"html": false,
 		"__experimentalBorder": {
+			"color": true,
+			"width": true,
+			"style": true,
 			"radius": true,
 			"__experimentalSkipSerialization": true
 		},
