@@ -2446,14 +2446,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testDox Generic order persistence keeps the historical false tax-mode default.
+	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
 	 */
-	public function test_create_without_explicit_prices_include_tax_keeps_default() {
+	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = new WC_Order();
+		$order             = null;
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
 
@@ -2464,12 +2466,15 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->switch_data_store( $r_order, $this->sut );
 			$this->sut->read( $r_order );
 
-			$this->assertFalse(
+			$this->assertTrue(
 				$r_order->get_prices_include_tax(),
-				'Generic persistence should not derive its value from the store setting.'
+				'Persistence should use the default captured at construction, not the current store setting.'
 			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $r_order->get_changes() );
 		} finally {
-			$order->delete( true );
+			if ( $order ) {
+				$order->delete( true );
+			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
@@ -2477,12 +2482,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	/**
 	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
 	 */
-	public function test_create_keeps_explicit_prices_include_tax_value() {
+	public function test_create_keeps_explicit_prices_include_tax_value(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = new WC_Order();
+		$order             = null;
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
 			$this->switch_data_store( $order, $this->sut );
 			$order->set_prices_include_tax( false );
 			$order->save();
@@ -2499,15 +2505,17 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
 			);
 		} finally {
-			$order->delete( true );
+			if ( $order ) {
+				$order->delete( true );
+			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
 	/**
-	 * @testDox An HPOS order with a null tax-mode column keeps the historical false default.
+	 * @testdox An HPOS order with a null tax-mode column uses the store default without a pending edit.
 	 */
-	public function test_read_with_null_prices_include_tax_uses_false_default(): void {
+	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
@@ -2532,10 +2540,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->switch_data_store( $read_order, $this->sut );
 			$this->sut->read( $read_order );
 
-			$this->assertFalse(
+			$this->assertTrue(
 				$read_order->get_prices_include_tax(),
-				'A null historical value should not derive its value from the current store setting.'
+				'A missing stored value should use the constructor default.'
 			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
