@@ -62,5 +62,3 @@
 
 <!-- wp:woocommerce/order-confirmation-additional-information /--></main>
 <!-- /wp:group -->
-
-<!-- wp:template-part {"slug":"footer","theme":"purple"} /-->
