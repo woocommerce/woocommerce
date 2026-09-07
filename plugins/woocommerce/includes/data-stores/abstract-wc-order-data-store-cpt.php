@@ -151,6 +151,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @throws Exception If passed order is invalid.
 	 */
 	public function read( &$order ) {
+		$this->validated_order_meta = array();
 		$order->set_defaults();
 		$post_object = get_post( $order->get_id() );
 		if ( ! $order->get_id() || ! $post_object || ! in_array( $post_object->post_type, wc_get_order_types(), true ) ) {
@@ -446,7 +447,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * re-reads it from the database so the real values are used instead of
 	 * falling back to defaults.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @param int $id The post ID.
 	 * @return array The validated postmeta array.
 	 */
@@ -467,7 +468,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$this->log_malformed_order_meta( $id, $meta_data );
 		}
 
-		$meta_data = is_array( $meta_data ) ? $meta_data : array();
+		$meta_data                         = is_array( $meta_data ) ? $meta_data : array();
 		$this->validated_order_meta[ $id ] = $meta_data;
 
 		return $meta_data;
@@ -536,7 +537,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * value. Returns the provided default when the key is missing or the entry
 	 * is malformed.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @param mixed  $meta_data     The postmeta array for a post.
 	 * @param string $key           The meta key to read.
 	 * @param mixed  $default_value The value to return when the key is missing or malformed.

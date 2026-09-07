@@ -1583,13 +1583,11 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->save();
 		$order_id = $order->get_id();
 
-		$fake_logger = $this->create_fake_logger();
-		add_filter(
-			'woocommerce_logging_class',
-			function () use ( $fake_logger ) {
-				return $fake_logger;
-			}
-		);
+		$fake_logger   = $this->create_fake_logger();
+		$logger_filter = function () use ( $fake_logger ) {
+			return $fake_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 
 		// Force every "read all postmeta" lookup to return a malformed entry, so the
 		// self-heal re-read also fails and the default fallback + warning path is taken.
@@ -1601,22 +1599,64 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'get_post_metadata', $malformed_meta_filter, 10, 3 );
 
-		$read_order = wc_get_order( $order_id );
+		try {
+			$read_order = wc_get_order( $order_id );
 
-		$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on persistently malformed postmeta' );
-		$this->assertEquals( get_woocommerce_currency(), $read_order->get_currency(), 'Persistently malformed currency meta should fall back to the store currency' );
+			$this->assertInstanceOf( WC_Order::class, $read_order, 'Order should hydrate without fataling on persistently malformed postmeta' );
+			$this->assertEquals( get_woocommerce_currency(), $read_order->get_currency(), 'Persistently malformed currency meta should fall back to the store currency' );
 
-		$warnings = array_filter(
-			$fake_logger->warning_calls,
-			function ( $call ) {
-				return 'woocommerce-order-data-store' === ( $call['context']['source'] ?? '' );
-			}
-		);
-		$this->assertCount( 1, $warnings, 'A single warning should be logged per hydration for malformed postmeta' );
-		$this->assertStringContainsString( '_order_currency', $warnings[ array_key_first( $warnings ) ]['message'] ?? '' );
+			$warnings = array_filter(
+				$fake_logger->warning_calls,
+				function ( $call ) {
+					return 'woocommerce-order-data-store' === ( $call['context']['source'] ?? '' );
+				}
+			);
+			$this->assertCount( 1, $warnings, 'A single warning should be logged per hydration for malformed postmeta' );
+			$this->assertStringContainsString( '_order_currency', $warnings[ array_key_first( $warnings ) ]['message'] ?? '' );
+		} finally {
+			remove_filter( 'get_post_metadata', $malformed_meta_filter, 10 );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+		}
+	}
 
-		remove_filter( 'get_post_metadata', $malformed_meta_filter, 10 );
-		remove_all_filters( 'woocommerce_logging_class' );
+	/**
+	 * @testdox Reusing an order data store reads updated metadata on each hydration.
+	 */
+	public function test_reading_order_refreshes_metadata_when_data_store_is_reused(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->set_billing_first_name( 'Alice' );
+		$order->save();
+
+		$sut = new WC_Order_Data_Store_CPT();
+		$sut->read( $order );
+		$this->assertSame( 'EUR', $order->get_currency(), 'The first read should load the stored currency' );
+		$this->assertSame( 'Alice', $order->get_billing_first_name(), 'The first read should load the stored billing name' );
+
+		update_post_meta( $order->get_id(), '_order_currency', 'GBP' );
+		update_post_meta( $order->get_id(), '_billing_first_name', 'Bob' );
+		$sut->read( $order );
+
+		$this->assertSame( 'GBP', $order->get_currency(), 'The second read should reload the shared order metadata' );
+		$this->assertSame( 'Bob', $order->get_billing_first_name(), 'The second read should reload the order-specific metadata' );
+	}
+
+	/**
+	 * @testdox Reusing a refund data store reads updated metadata on each hydration.
+	 */
+	public function test_reading_refund_refreshes_metadata_when_data_store_is_reused(): void {
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 10 );
+		$refund->save();
+
+		$sut = new WC_Order_Refund_Data_Store_CPT();
+		$sut->read( $refund );
+		$this->assertEquals( 10, $refund->get_amount(), 'The first read should load the stored refund amount' );
+
+		update_post_meta( $refund->get_id(), '_refund_amount', '20' );
+		$sut->read( $refund );
+
+		$this->assertEquals( 20, $refund->get_amount(), 'The second read should reload the refund metadata' );
 	}
 
 	/**
