@@ -3792,6 +3792,10 @@ ul.order_notes {
 }
 
 table.wp-list-table {
+	.woocommerce-Price-amount {
+		white-space: nowrap;
+	}
+
 	.column-thumb {
 		width: 52px;
 		text-align: center;
