@@ -707,8 +707,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
 						throw $e;
 					}
-					// V1 always uses the base item, whose setter throws this code only when the stored ID
-					// no longer identifies a variation. Demote it through set_product().
+					// V1 always uses the base item, never a substituted subclass. Its setter uses this code only
+					// when the stored ID is not a variation, so unlike v2/v4 no get_post_type() recheck is
+					// needed. Demote through set_product().
 					$item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
