@@ -2097,15 +2097,57 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_purchasable_variation_candidates reads a serialized array price as absent, as get_post_meta() does.
+	 * @testdox SQL and primed-cache paths classify the same stored rows identically, using the first duplicate row.
+	 *
+	 * @testWith [ "publish", ["instock"], ["10"], [""], true ]
+	 *           [ "private", ["instock"], ["10"], [""], false ]
+	 *           [ "publish", ["outofstock"], ["10"], [""], false ]
+	 *           [ "publish", ["onbackorder"], ["10"], [""], true ]
+	 *           [ "publish", ["instock"], [""], [""], false ]
+	 *           [ "publish", ["instock"], ["0"], [""], true ]
+	 *           [ "publish", ["instock"], [""], ["5"], true ]
+	 *           [ "publish", [], ["10"], [""], true ]
+	 *           [ "publish", ["instock"], [["10"]], [""], false ]
+	 *           [ "publish", ["instock"], [""], [["5"]], false ]
+	 *           [ "publish", ["instock"], ["", "10"], [""], false ]
+	 *           [ "publish", ["instock"], ["10", ""], [""], true ]
+	 *           [ "publish", ["instock"], [""], ["", "5"], false ]
+	 *           [ "publish", ["instock"], [""], ["5", ""], true ]
+	 *           [ "publish", ["", "outofstock"], ["10"], [""], true ]
+	 *           [ "publish", ["outofstock", ""], ["10"], [""], false ]
+	 *
+	 * @param string $status        Post status.
+	 * @param array  $stock_rows    Stock metadata rows in insertion order.
+	 * @param array  $regular_rows  Regular-price metadata rows in insertion order.
+	 * @param array  $sale_rows     Sale-price metadata rows in insertion order.
+	 * @param bool   $expected      Whether the variation is a stored-state candidate.
 	 */
-	public function test_get_purchasable_variation_candidates_treats_non_scalar_meta_as_absent(): void {
+	public function test_get_purchasable_variation_candidates_matches_primed_cache( string $status, array $stock_rows, array $regular_rows, array $sale_rows, bool $expected ): void {
 		$sut          = new WC_Product_Variable_Data_Store_CPT();
-		$variation_id = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '' );
-		update_post_meta( $variation_id, '_regular_price', array( '10' ) );
+		$variation_id = $this->create_stored_variation( $status, ProductStockStatus::IN_STOCK, '', '' );
+		$product      = new WC_Product_Variable( self::$product_id );
 
-		$this->assertIsArray( get_post_meta( $variation_id, '_regular_price', true ), 'The cache path sees an array and defers the variation.' );
-		$this->assertSame( array(), $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) ), 'The query path must defer it too.' );
+		// Bypass CRUD upserts to preserve duplicate rows and malformed or missing metadata.
+		foreach (
+			array(
+				'_stock_status'  => $stock_rows,
+				'_regular_price' => $regular_rows,
+				'_sale_price'    => $sale_rows,
+			) as $key => $rows
+		) {
+			delete_post_meta( $variation_id, $key );
+			foreach ( $rows as $value ) {
+				add_post_meta( $variation_id, $key, $value );
+			}
+		}
+
+		$sql_candidates = $sut->get_purchasable_variation_candidates( $product, array( $variation_id ) );
+		clean_post_cache( $variation_id );
+		_prime_post_caches( array( $variation_id ) );
+		$cache_candidate = $this->invokeMethod( $product, 'variation_may_be_purchasable', array( $variation_id ) );
+
+		$this->assertSame( $expected ? array( $variation_id ) : array(), $sql_candidates, 'SQL must classify the stored rows using their first value.' );
+		$this->assertSame( $expected, $cache_candidate, 'The primed-cache path must agree with the expected SQL classification.' );
 	}
 
 	/**

@@ -647,6 +647,58 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_purchasable_variations supports a proxy store that rejects the optional candidate method.
+	 */
+	public function test_has_purchasable_variations_supports_magic_store_without_candidate_method(): void {
+		$data_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Delegate for variable-only methods.
+			 *
+			 * @var WC_Product_Variable_Data_Store_CPT
+			 */
+			private $variable_store;
+
+			/**
+			 * Sets up the variable-store delegate.
+			 */
+			public function __construct() {
+				$this->variable_store = new WC_Product_Variable_Data_Store_CPT();
+			}
+
+			/**
+			 * Proxies variable-only methods and rejects the optional candidate method.
+			 *
+			 * @param string  $method Method name.
+			 * @param mixed[] $args   Arguments.
+			 * @return mixed
+			 * @throws BadMethodCallException When the candidate method is requested.
+			 */
+			public function __call( $method, $args ) {
+				if ( 'get_purchasable_variation_candidates' === $method ) {
+					throw new BadMethodCallException( 'Candidate lookup is not supported.' );
+				}
+
+				return $this->variable_store->$method( ...$args );
+			}
+		};
+
+		add_filter(
+			'woocommerce_data_stores',
+			static function ( $stores ) use ( $data_store ) {
+				$stores['product-variable'] = $data_store;
+				return $stores;
+			}
+		);
+
+		$specs   = array_fill( 0, 50, array( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10' ) );
+		$specs[] = array( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10' );
+		$product = $this->create_variable_product_with_variations( $specs );
+
+		$this->assertSame( get_class( $data_store ), $product->get_data_store()->get_current_class_name() );
+		$this->assertTrue( $product->has_purchasable_variations(), 'The fallback scan must reach the purchasable child without calling the unsupported method.' );
+	}
+
+	/**
 	 * @testdox has_purchasable_variations ignores candidate IDs from the data store that are not children of the product.
 	 */
 	public function test_has_purchasable_variations_ignores_foreign_candidate_ids_from_data_store(): void {
