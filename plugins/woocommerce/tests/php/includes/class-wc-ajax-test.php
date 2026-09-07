@@ -1235,6 +1235,19 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertIsArray( $response, 'The search should return a result set.' );
 		$this->assertArrayHasKey( $product_two->get_id(), $response, 'The non-excluded product must be part of the results.' );
 		$this->assertArrayNotHasKey( $product_one->get_id(), $response, 'An excluded (already granted) product must not reappear in the results.' );
+
+		// The include allowlist must be honored as well.
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['term']     = 'Exclusit Download';
+		$_GET['include']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		unset( $_GET['security'], $_GET['term'], $_GET['include'] );
+
+		$this->assertIsArray( $response, 'The include search should return a result set.' );
+		$this->assertArrayHasKey( $product_one->get_id(), $response, 'The included product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_two->get_id(), $response, 'A product outside the include allowlist must not be part of the results.' );
 	}
 
 	/**
