@@ -269,7 +269,9 @@ export class Analytics {
 		// 18 * 4/3 = 24 (base64 encoded chars)
 		const anonId = getCookie( 'tk_ai' ) || generateRandomToken( 18 );
 		// Set a first-party cookie (same domain only, 1 year)
-		const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
+		const expires = new Date(
+			Date.now() + 1 * 365 * 24 * 60 * 60 * 1000
+		).toUTCString();
 		document.cookie = `tk_ai=${ anonId }; path=/; secure; samesite=lax; expires=${ expires }`;
 	}
 }
