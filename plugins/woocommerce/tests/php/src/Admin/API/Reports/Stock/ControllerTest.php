@@ -39,59 +39,41 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Product statuses and whether the stock report should list them.
-	 *
-	 * @return array[]
-	 */
-	public function product_status_provider(): array {
-		return array(
-			'published' => array( ProductStatus::PUBLISH, true ),
-			'private'   => array( ProductStatus::PRIVATE, true ),
-			'draft'     => array( ProductStatus::DRAFT, false ),
-			'pending'   => array( ProductStatus::PENDING, false ),
-			'future'    => array( ProductStatus::FUTURE, false ),
-		);
-	}
-
-	/**
-	 * @testdox Should list only published and private products.
-	 *
-	 * @dataProvider product_status_provider
-	 *
-	 * @param string $status   Product status.
-	 * @param bool   $expected Whether the product should be listed.
-	 */
-	public function test_report_lists_only_published_and_private_products( string $status, bool $expected ): void {
-		$product = $this->create_product( $status );
-
-		$report = $this->get_report( array( $product->get_id() ) );
-
-		$this->assertSame(
-			$expected ? array( $product->get_id() ) : array(),
-			$report['ids'],
-			sprintf( 'A %s product is listed in the stock report when it should not be, or vice versa.', $status )
-		);
-	}
-
-	/**
 	 * The CSV export counts the rows once when it queues its batches (a REST request) and again
 	 * while each batch runs (an admin-ajax request). A report that returns more products in an
 	 * admin context leaves the export short of 100%, so its download email is never sent.
 	 *
-	 * @testdox Should return the same products in an admin context as outside one.
+	 * @testdox Should list only published and private products, in an admin context and outside one.
 	 */
-	public function test_report_is_not_affected_by_admin_context(): void {
-		$ids = array(
-			$this->create_product( ProductStatus::PUBLISH )->get_id(),
-			$this->create_product( ProductStatus::DRAFT )->get_id(),
+	public function test_report_lists_only_published_and_private_products_in_any_context(): void {
+		$statuses = array(
+			ProductStatus::PUBLISH,
+			ProductStatus::PRIVATE,
+			ProductStatus::DRAFT,
+			ProductStatus::PENDING,
+			ProductStatus::FUTURE,
 		);
 
-		$outside_admin = $this->get_report( $ids );
+		$ids = array();
+		foreach ( $statuses as $status ) {
+			$ids[ $status ] = $this->create_product( $status )->get_id();
+		}
+
+		$listed = array( $ids[ ProductStatus::PUBLISH ], $ids[ ProductStatus::PRIVATE ] );
+		sort( $listed );
+
+		$expected = array(
+			'ids'   => $listed,
+			'total' => count( $listed ),
+		);
+
+		$this->assertFalse( is_admin(), 'The first report must be requested outside an admin context.' );
+		$this->assertSame( $expected, $this->get_report( $ids ), 'The stock report lists the wrong products outside an admin context.' );
 
 		set_current_screen( 'edit-post' );
-		$this->assertTrue( is_admin(), 'The second report must be requested in an admin context.' );
 
-		$this->assertSame( $outside_admin, $this->get_report( $ids ), 'The stock report differs between an admin and a non-admin context.' );
+		$this->assertTrue( is_admin(), 'The second report must be requested in an admin context.' );
+		$this->assertSame( $expected, $this->get_report( $ids ), 'The stock report lists the wrong products in an admin context.' );
 	}
 
 	/**

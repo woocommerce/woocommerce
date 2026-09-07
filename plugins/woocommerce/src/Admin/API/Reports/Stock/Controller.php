@@ -74,6 +74,9 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$args['post_type'] = array( 'product', 'product_variation' );
 
+		// Set the statuses explicitly. WP_Query's default set also matches draft, pending and future
+		// posts in an admin context, and the CSV export counts its rows once in a REST request and
+		// again in an admin-ajax one, so a context-dependent set leaves the two counts disagreeing.
 		$args['post_status'] = array( ProductStatus::PUBLISH, ProductStatus::PRIVATE );
 
 		if ( ProductStockStatus::LOW_STOCK === $request['type'] ) {
