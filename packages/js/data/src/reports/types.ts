@@ -386,7 +386,7 @@ type Interval = {
 };
 
 export type Segment = {
-	/** Segment identificator. */
+	/** Segment identifier. */
 	segment_id: number;
 	/** Human readable segment label, either product or variation name. */
 	segment_label: 'day' | 'week' | 'month' | 'year';
