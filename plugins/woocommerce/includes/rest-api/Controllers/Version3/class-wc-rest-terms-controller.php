@@ -792,7 +792,26 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		return $params;
+		$taxonomy_obj = get_taxonomy( $this->taxonomy );
+
+		// Empty for the attribute terms route, which serves every pa_* taxonomy from one registration.
+		if ( ! $taxonomy_obj ) {
+			return $params;
+		}
+
+		/**
+		 * Filter collection parameters for the terms controller.
+		 *
+		 * The dynamic portion of the hook name, `$this->taxonomy`, refers to the taxonomy slug.
+		 * Shares its name with the WordPress core hook, so a callback added for a taxonomy served by
+		 * both /wp/v2 and /wc/v3 runs for both.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array       $params   JSON Schema-formatted collection parameters.
+		 * @param WP_Taxonomy $taxonomy Taxonomy object.
+		 */
+		return apply_filters( "rest_{$this->taxonomy}_collection_params", $params, $taxonomy_obj );
 	}
 
 	/**
