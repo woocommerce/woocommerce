@@ -910,11 +910,13 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		$displayed_keys = wp_list_pluck( $item->get_all_formatted_meta_data( '' ), 'key' );
 
+		// This one holds because the record's value is an array and formatted meta drops non-scalars,
+		// not because of the hidden-key registration. The registration is what the assertion below covers.
 		$this->assertNotContains( WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY, $displayed_keys, 'The record is bookkeeping, not something to render on an order.' );
 		$this->assertContains(
 			WC_Order_Item_Product::VARIATION_ATTRIBUTE_META_RECORD_KEY,
-			\Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil::get_hidden_keys(),
-			'The record must be registered as hidden so the admin order screen neither lists nor lets anyone edit it.'
+			\Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil::get_reserved_keys( $item ),
+			'The record must be reserved so the admin order screen neither lists it nor lets anyone save custom meta under its key.'
 		);
 	}
 
