@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop attributing a refund to user #1 when no one is logged in; such refunds now show as issued by System.
