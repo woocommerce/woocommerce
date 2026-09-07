@@ -542,8 +542,14 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
+		// Old-style keys carry no timestamp and keep the bridge's short window; everything else lasts as long as the WordPress key.
+		$form_expiration = self::get_password_reset_state_expiration( $user );
+		if ( PHP_INT_MAX === $form_expiration ) {
+			$form_expiration = $expiration;
+		}
+
 		return array(
-			'key'   => self::create_password_reset_form_token( $user, $expiration ),
+			'key'   => self::create_password_reset_form_token( $user, $form_expiration ),
 			'login' => $user->user_login,
 		);
 	}

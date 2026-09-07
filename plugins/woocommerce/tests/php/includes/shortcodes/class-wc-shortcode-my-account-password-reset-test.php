@@ -302,13 +302,14 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, $transient_expirations[0] );
 		$this->assertLessThanOrEqual( 10 * MINUTE_IN_SECONDS, $transient_expirations[0] );
 		$this->assertLessThanOrEqual( 30, $transient_expirations[1] );
-		$this->assertLessThanOrEqual( time() + 10 * MINUTE_IN_SECONDS, (int) $default_claims[2] );
+		$this->assertGreaterThan( time() + 10 * MINUTE_IN_SECONDS, (int) $default_claims[2] );
+		$this->assertLessThanOrEqual( time() + DAY_IN_SECONDS, (int) $default_claims[2] );
 		$this->assertLessThanOrEqual( time() + 30, (int) $short_claims[2] );
 		$this->assertLessThan( (int) $default_claims[2], (int) $short_claims[2] );
 	}
 
 	/**
-	 * @testdox A core-approved old-style reset key can create and exchange a bridge.
+	 * @testdox A core-approved old-style reset key exchanges a bridge that keeps the short window.
 	 */
 	public function test_old_style_reset_key_compatibility(): void {
 		$old_style_key = 'oldstyleresetkey';
@@ -336,6 +337,10 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$template = $this->render_bridge_handle( $handle );
 		$this->assertSame( 'myaccount/form-reset-password.php', $template['name'] );
 		$this->assertSame( $this->user->ID, WC_Shortcode_My_Account::check_password_reset_key( $template['args']['key'], $this->user->user_login )->ID );
+
+		// An old-style key carries no request timestamp, so its form token cannot borrow the WordPress key's lifetime.
+		$claims = explode( '.', $template['args']['key'] );
+		$this->assertLessThanOrEqual( time() + 10 * MINUTE_IN_SECONDS, (int) $claims[2] );
 	}
 
 	/**
