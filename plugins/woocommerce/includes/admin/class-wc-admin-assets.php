@@ -685,6 +685,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'tax_based_on'                                    => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
 					'round_at_subtotal'                               => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
 					'no_customer_selected'                            => __( 'No customer selected', 'woocommerce' ),
+					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),
 					'plugin_url'                                      => WC()->plugin_url(),
 					'ajax_url'                                        => admin_url( 'admin-ajax.php' ),
 					'order_item_nonce'                                => wp_create_nonce( 'order-item' ),
