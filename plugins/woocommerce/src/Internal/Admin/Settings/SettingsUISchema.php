@@ -914,18 +914,20 @@ class SettingsUISchema {
 		$negative = '-' === $matches['sign'];
 		$scale    = strlen( $fraction );
 
-		if ( strlen( ltrim( $exponent, '+-0' ) ) > 6 ) {
-			if ( '0' === $digits ) {
-				return '0';
-			}
+		if ( '0' === $digits ) {
+			// Zero stays zero at every exponent, so return before expanding it and
+			// tripping the overflow sentinel below on values such as "0e17".
+			return '0';
+		}
 
+		if ( strlen( ltrim( $exponent, '+-0' ) ) > 6 ) {
 			return '-' === substr( $exponent, 0, 1 ) ? null : ( $negative ? '-' : '' ) . str_repeat( '9', 17 );
 		}
 
 		$decimal_places = $scale - (int) $exponent;
 		if ( 0 < $decimal_places ) {
 			if ( $decimal_places >= strlen( $digits ) ) {
-				return '0' === $digits ? '0' : null;
+				return null;
 			}
 
 			$trailing = substr( $digits, -$decimal_places );
