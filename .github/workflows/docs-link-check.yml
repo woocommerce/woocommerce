@@ -1,0 +1,73 @@
+name: 'Docs external link check'
+
+# Weekly crawl of every external link in docs/**/*.md on trunk. It runs only against
+# reviewed content, so no pull request can choose what this job requests. Broken links
+# fail the run, land in the job summary, and are announced on Slack.
+#
+# The pull-request gate for changed docs lives in ci.yml (`Validate markdown`) and is
+# restricted to approved hosts; see .github/workflows/docs-link-check/pr.toml.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays at 06:00 UTC.
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: 'docs-link-check'
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: 'Check external links in docs'
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
+        with:
+          ref: trunk
+          persist-credentials: false
+          sparse-checkout: |
+            docs
+            .github/workflows
+            tools/monorepo-utils
+
+      - name: 'Install lychee'
+        run: bash .github/workflows/scripts/install-lychee.sh
+
+      - name: 'Check links'
+        run: |
+          lychee --config .github/workflows/docs-link-check/scheduled.toml \
+            --root-dir "$PWD" \
+            --format markdown --output "$RUNNER_TEMP/docs-link-report.md" \
+            'docs/**/*.md'
+
+      - name: 'Publish report'
+        if: ${{ always() }}
+        run: |
+          if [[ -f "$RUNNER_TEMP/docs-link-report.md" ]]; then
+            cat "$RUNNER_TEMP/docs-link-report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 'Setup Node'
+        if: ${{ failure() }}
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: 'Setup PNPM'
+        if: ${{ failure() }}
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 'Notify Slack on failure'
+        if: ${{ failure() }}
+        env:
+          SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+          SLACK_CHANNELS: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+        run: |
+          pnpm utils slack ":link: Docs external link check found broken links or failed.\n<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|View the report>"
