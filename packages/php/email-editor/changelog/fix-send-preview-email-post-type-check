@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restrict the send preview email endpoint to posts of registered email post types.

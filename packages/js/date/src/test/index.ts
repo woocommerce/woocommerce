@@ -839,6 +839,53 @@ describe( 'getRangeLabel', () => {
 		expect( label ).toBe( '2024年10月' );
 	} );
 
+	it( 'should keep the range when the format uses a localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'October 1 - 31, 2024' );
+	} );
+
+	it( 'should keep the range when the format uses an abbreviated localized format token', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'll' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should leave a bracketed localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[LL] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2024-10-01' ),
+			moment( '2024-10-31' )
+		);
+
+		expect( label ).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should leave a backslash escaped localized format token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\LL MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\L\\L MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'LL Oct 1 - 31, 2024' );
+	} );
+
 	it( 'should keep the zero padding a "DD" format asks for', () => {
 		// Mirrors the Serbian translation of the format.
 		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
@@ -871,6 +918,17 @@ describe( 'getRangeLabel', () => {
 		);
 
 		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
+	} );
+
+	it( 'should leave a bracketed month literal alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '[MMMM] MMM D, YYYY' );
+
+		const label = getRangeLabel(
+			moment( '2018-04-01' ),
+			moment( '2018-04-15' )
+		);
+
+		expect( label ).toBe( 'MMMM Apr 1 - 15, 2018' );
 	} );
 
 	it( 'should leave a backslash escaped day literal alone', () => {
@@ -1010,6 +1068,268 @@ describe( 'getRangeLabel', () => {
 				moment( '2024-10-01' )
 			);
 			expect( label ).toBe( 'أكتوبر ١, ٢٠٢٤' );
+		} );
+	} );
+	it( 'should leave a whole backslash escaped token alone', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( '\\MMMM MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'MMMM Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DD MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DD Oct 1 - 31, 2024' );
+
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDo MMM D, YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDo Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should escape no more of a backslashed day run than moment does', () => {
+		// Moment reads "\DDDDD" as an escaped "DDDD" and a live day of month
+		// token, so the fifth "D" still carries the range.
+		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDDD MMM YYYY' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'DDDD1 - 31 Oct 2024' );
+	} );
+
+	it( 'should render a weekday from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
+
+		// Oct 1 2024 is a Tuesday, Oct 31 a Thursday.
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Tue, Oct 1 - 31, 2024' );
+	} );
+
+	it( 'should render a week number from the start of the range', () => {
+		( __ as jest.Mock ).mockReturnValueOnce( 'MMM D, YYYY [w]w' );
+
+		expect(
+			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+		).toBe( 'Oct 1 - 31, 2024 w40' );
+	} );
+
+	describe( 'with a locale that inflects the month name', () => {
+		// Moment picks the genitive month name over the nominative one by
+		// testing the format string for a day token next to the month one, and
+		// locales disagree on how: some rely on moment's own regex, some ship a
+		// stricter one, and some replace the month names with a function that
+		// tests the format itself. Each is covered here because a format string
+		// that stops matching renders the wrong grammatical form.
+		const genitive = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-genitive`
+		);
+		const nominative = Array.from(
+			{ length: 12 },
+			( _, index ) => `month${ index + 1 }-nominative`
+		);
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( "should keep the genitive month name of moment's own format test", () => {
+			moment.defineLocale( 'inflected-months', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that allows only whitespace before the month', () => {
+			// Mirrors the Catalan locale's stricter `isFormat`.
+			moment.defineLocale( 'inflected-months-strict', {
+				months: {
+					format: genitive,
+					standalone: nominative,
+					isFormat: /D[oD]?(\s)+MMMM/,
+				},
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name of a locale that tests the format itself', () => {
+			// Mirrors the Polish locale, which resolves month names in code.
+			moment.defineLocale( 'inflected-months-fn', {
+				months: ( monthMoment, format ) =>
+					( /D MMMM/.test( format || '' ) ? genitive : nominative )[
+						monthMoment.month()
+					],
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive short month name of a "MMM" format', () => {
+			const shortGenitive = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-genitive`
+			);
+			const shortNominative = Array.from(
+				{ length: 12 },
+				( _, index ) => `short${ index + 1 }-nominative`
+			);
+			moment.defineLocale( 'inflected-months-abbreviated', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: {
+					format: shortGenitive,
+					standalone: shortNominative,
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 short10-genitive 2024' );
+		} );
+
+		it( 'should keep the genitive month name behind a localized format token', () => {
+			// The WOOAIRR-105 shape itself: the translation resolves to a
+			// localized token, and only its expansion reveals the day sitting
+			// next to the month.
+			moment.defineLocale( 'inflected-months-localized', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'DD/MM/YYYY',
+					LL: 'D MMMM YYYY',
+					LLL: 'D MMMM YYYY HH:mm',
+					LLLL: 'dddd, D MMMM YYYY HH:mm',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 month10-genitive 2024' );
+		} );
+
+		it( 'should keep the nominative month name when the format holds no day token', () => {
+			moment.defineLocale( 'inflected-months-standalone', {
+				months: { format: genitive, standalone: nominative },
+				monthsShort: { format: genitive, standalone: nominative },
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'month10-nominative 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that inflects the weekday name', () => {
+		// Mirrors the Ukrainian locale, which renders the genitive weekday
+		// whenever a bracketed literal precedes "dddd" - exactly the shape the
+		// month and day substitutions leave behind.
+		const weekdayGenitive = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-genitive`
+		);
+		const weekdayNominative = Array.from(
+			{ length: 7 },
+			( _, index ) => `weekday${ index }-nominative`
+		);
+		const weekdays = ( dayMoment: moment.Moment, format?: string ) =>
+			( /\] ?dddd/.test( format || '' )
+				? weekdayGenitive
+				: weekdayNominative )[ dayMoment.day() ];
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should keep the nominative weekday after the month name', () => {
+			moment.defineLocale( 'inflected-weekdays', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'MMM dddd D YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'Oct weekday2-nominative 1 - 31 2024' );
+		} );
+
+		it( 'should keep the nominative weekday after the day of month', () => {
+			moment.defineLocale( 'inflected-weekdays-after-day', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( 'D dddd MMM YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( '1 - 31 weekday2-nominative Oct 2024' );
+		} );
+
+		it( 'should keep the genitive weekday of a format that asks for it', () => {
+			moment.defineLocale( 'inflected-weekdays-literal', { weekdays } );
+			( __ as jest.Mock ).mockReturnValueOnce( '[у] dddd, MMM D, YYYY' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'у weekday2-genitive, Oct 1 - 31, 2024' );
+		} );
+	} );
+
+	describe( 'with a locale that nests localized format tokens', () => {
+		// `loadLocaleData` below builds "LLL" from a translation that still
+		// holds "LT", so on a real site an expansion can itself hold a
+		// localized token and a single pass is not enough.
+		let originalLocale: string;
+
+		beforeAll( () => {
+			originalLocale = moment.locale();
+		} );
+
+		afterEach( () => {
+			moment.locale( originalLocale );
+		} );
+
+		it( 'should expand a localized format token that expands to another', () => {
+			moment.defineLocale( 'nested-long-formats', {
+				longDateFormat: {
+					LT: 'HH:mm',
+					LTS: 'HH:mm:ss',
+					L: 'MM/DD/YYYY',
+					LL: 'LLL',
+					LLL: 'MMMM D, YYYY',
+					LLLL: 'dddd, MMMM D, YYYY',
+				},
+			} );
+			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
+
+			expect(
+				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
+			).toBe( 'October 1 - 31, 2024' );
 		} );
 	} );
 } );

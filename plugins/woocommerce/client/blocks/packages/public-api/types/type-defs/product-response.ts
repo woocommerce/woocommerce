@@ -13,7 +13,13 @@ export interface ProductResponseItemPrices extends CurrencyResponse {
 export interface ProductResponseItemBaseData {
 	value: string;
 	display?: string;
-	hidden?: boolean;
+	/**
+	 * Truthy marks the entry hidden. Always a string: the Store API runs every
+	 * `item_data` value through `wp_kses_post()`, which string-coerces, so a
+	 * boolean set by an extension arrives as `"1"` or `""`. Test it for
+	 * truthiness — comparing against `true` or `1` can never match.
+	 */
+	hidden?: string;
 	className?: string;
 }
 

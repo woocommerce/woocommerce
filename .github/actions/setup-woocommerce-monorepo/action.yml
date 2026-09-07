@@ -95,7 +95,7 @@ runs:
           # The installation command is a bit odd as it's a workaround for know bug - https://github.com/pnpm/pnpm/issues/6300.
           run: |
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
-              # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallellized between PHP/JS.
+              # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallelized between PHP/JS.
               # JS deps installation is abit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
               composer install --working-dir=./plugins/woocommerce --quiet &
               pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile

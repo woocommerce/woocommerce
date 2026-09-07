@@ -488,7 +488,7 @@ class CartController {
 		 *
 		 * @since 7.2.0
 		 *
-		 * @example See docs/examples/validate-cart.md
+		 * @example docs/examples/validate-cart.md
 		 *
 		 * @param \WP_Error $errors  WP_Error object.
 		 * @param \WC_Cart  $cart    Cart object.
