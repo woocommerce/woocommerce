@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { format, type FormatResult } from './format';
+import { format, formatValue, type FormatResult } from './format';
 
 export interface BindOptions {
 	mask: string;
@@ -9,7 +9,7 @@ export interface BindOptions {
 }
 
 export interface Bound {
-	/** Replaces the typed text. Accepts raw or formatted text. */
+	/** Replaces the input with raw slot values. */
 	setValue: ( value: string ) => void;
 	destroy: () => void;
 }
@@ -23,6 +23,7 @@ export const bind = (
 	{ mask, onChange }: BindOptions
 ): Bound => {
 	let typed = '';
+	let literalPositions: boolean[] = [];
 	let result = format( '', mask );
 
 	const typedBefore = ( displayIndex: number ) =>
@@ -33,9 +34,18 @@ export const bind = (
 		return index === -1 ? result.display.length : index;
 	};
 
-	const render = ( nextTyped: string, caret: number | null ) => {
+	const render = (
+		nextTyped: string,
+		caret: number | null,
+		nextLiteralPositions: boolean[]
+	) => {
 		typed = nextTyped;
-		result = format( typed, mask );
+		literalPositions = nextLiteralPositions;
+		result = formatValue(
+			typed,
+			mask,
+			( index ) => literalPositions[ index ]
+		);
 		if ( input.value !== result.display ) {
 			input.value = result.display;
 		}
@@ -71,25 +81,44 @@ export const bind = (
 			if (
 				( event as InputEvent ).inputType === 'deleteContentForward'
 			) {
-				to++;
+				const codePoint = typed.codePointAt( to );
+				to +=
+					codePoint === undefined
+						? 0
+						: String.fromCodePoint( codePoint ).length;
 			} else {
-				from = Math.max( 0, from - 1 );
+				from -=
+					Array.from( typed.slice( 0, from ) ).at( -1 )?.length ?? 0;
 			}
 		}
 
 		render(
 			typed.slice( 0, from ) + inserted + typed.slice( to ),
-			from + inserted.length
+			from + inserted.length,
+			[
+				...literalPositions.slice( 0, from ),
+				...Array< boolean >( inserted.length ).fill( true ),
+				...literalPositions.slice( to ),
+			]
 		);
 		onChange?.( result.unmasked, result );
 	};
 
 	input.addEventListener( 'input', onInput );
 	input.addEventListener( 'compositionend', onInput );
-	render( input.value, null );
+	render(
+		input.value,
+		null,
+		Array< boolean >( input.value.length ).fill( false )
+	);
 
 	return {
-		setValue: ( value ) => render( value, null ),
+		setValue: ( value ) =>
+			render(
+				value,
+				null,
+				Array< boolean >( value.length ).fill( false )
+			),
 		destroy: () => {
 			input.removeEventListener( 'input', onInput );
 			input.removeEventListener( 'compositionend', onInput );

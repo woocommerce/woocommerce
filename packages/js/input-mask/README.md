@@ -42,7 +42,7 @@ bound.setValue( '12345678901' ); // Input shows 123.456.789-01.
 bound.destroy();
 ```
 
-`bind` formats the value the input already has. `setValue` accepts raw or formatted text.
+`bind` reads the input’s initial value as raw slot values. `setValue` also accepts raw slot values. Mask literals never consume stored characters: `bound.setValue( '1234' )` with mask `10000` shows `11234`.
 
 ### Format without an input
 
@@ -55,7 +55,9 @@ format( '12345678901', '000.000.000-00' );
 
 `fits` is false when the text does not fit the mask. `display` and `unmasked` are then the text as typed.
 
-`map` gives the typed index of each display character, or `-1` for a literal the mask inserted.
+`format` accepts raw slot values, just like `setValue`. Typed and pasted text can include mask literals; `bind` handles those input events and returns raw slot values through `onChange`.
+
+`map` gives the typed UTF-16 offset of each display code unit, or `-1` for a literal the mask inserted. These offsets match the DOM selection API. Slots match whole Unicode code points, so an emoji takes one `*` slot and two map entries.
 
 ### Remove escapes
 

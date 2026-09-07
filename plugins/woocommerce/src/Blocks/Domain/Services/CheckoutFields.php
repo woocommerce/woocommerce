@@ -1011,7 +1011,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Formats a value against a mask, the same way the @woocommerce/input-mask JS package does.
+	 * Formats a raw value against a mask without consuming stored characters as literals.
 	 *
 	 * Returns the value formatted with the mask's literal characters when it fits the mask.
 	 * Returns the value unchanged when it does not fit.
@@ -1060,13 +1060,7 @@ class CheckoutFields {
 
 		foreach ( $tokens as $token ) {
 			if ( 'literal' === $token['type'] ) {
-				if ( isset( $typed[ $t ] ) && $typed[ $t ] === $token['value'] ) {
-					$display .= $pending . $token['value'];
-					$pending  = '';
-					++$t;
-				} else {
-					$pending .= $token['value'];
-				}
+				$pending .= $token['value'];
 				continue;
 			}
 
