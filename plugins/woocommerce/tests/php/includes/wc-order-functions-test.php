@@ -559,9 +559,9 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wc_create_refund() records the logged-in user who issued the refund.
+	 * @testdox Should record the logged-in user who issued the refund.
 	 */
-	public function test_wc_create_refund_records_the_current_user() {
+	public function test_wc_create_refund_records_the_current_user(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
@@ -573,6 +573,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotWPError( $refund );
 		$this->assertSame( $user_id, $refund->get_refunded_by() );
 		$this->assertSame(
 			$user_id,
@@ -582,11 +583,11 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wc_create_refund() attributes a refund to nobody when no user is logged in, rather than to user 1.
+	 * @testdox Should attribute a refund to nobody when no user is logged in, rather than to user 1.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/36329
 	 */
-	public function test_wc_create_refund_records_no_user_when_nobody_is_logged_in() {
+	public function test_wc_create_refund_records_no_user_when_nobody_is_logged_in(): void {
 		wp_set_current_user( 0 );
 
 		$order  = WC_Helper_Order::create_order();
@@ -597,6 +598,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotWPError( $refund );
 		$this->assertSame( 0, $refund->get_refunded_by() );
 		$this->assertSame(
 			0,
