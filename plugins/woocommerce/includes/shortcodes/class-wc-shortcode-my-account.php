@@ -729,7 +729,11 @@ class WC_Shortcode_My_Account {
 	 * Add the standard invalid password-reset key notice.
 	 */
 	private static function add_password_reset_key_error_notice(): void {
-		wc_add_notice( __( 'This key is invalid or has already been used. Please reset your password again if needed.', 'woocommerce' ), 'error' );
+		$message = __( 'This key is invalid or has already been used. Please reset your password again if needed.', 'woocommerce' );
+
+		if ( ! wc_has_notice( $message, 'error' ) ) {
+			wc_add_notice( $message, 'error' );
+		}
 	}
 
 	/**

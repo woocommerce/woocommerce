@@ -374,6 +374,48 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A rejected submission carrying a spent handle shows the invalid-key notice once.
+	 */
+	public function test_rejected_submission_with_spent_handle_notices_once(): void {
+		$handle   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$template = $this->render_bridge_handle( $handle );
+		$token    = $template['args']['key'];
+		$tampered = substr( $token, 0, -1 ) . ( 'a' === substr( $token, -1 ) ? 'b' : 'a' );
+
+		$_POST = array(
+			'woocommerce-reset-password-nonce' => wp_create_nonce( 'reset_password' ),
+			'wc_reset_password'                => 'true',
+			'password_1'                       => 'a-valid-password',
+			'password_2'                       => 'a-valid-password',
+			'reset_key'                        => $tampered,
+			'reset_login'                      => $this->user->user_login,
+		);
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Build the request superglobal consumed by the form handler.
+		$_REQUEST = $_POST;
+
+		WC_Form_Handler::process_reset_password();
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+
+		// The first render spent the handle, so the page cannot recover the form either.
+		$_GET = array(
+			'show-reset-form' => 'true',
+			'reset-token'     => $handle,
+		);
+
+		// Counted while the page renders, because printing the notices empties the queue.
+		$rendered_error_count = null;
+		$count_errors         = static function () use ( &$rendered_error_count ): void {
+			$rendered_error_count ??= wc_notice_count( 'error' );
+		};
+		add_action( 'woocommerce_before_template_part', $count_errors, 10, 0 );
+
+		$rerendered = $this->render_lost_password_page();
+
+		$this->assertSame( 'myaccount/form-lost-password.php', $rerendered['name'] );
+		$this->assertSame( 1, $rendered_error_count, 'The form handler and the page should not each add the invalid-key notice.' );
+	}
+
+	/**
 	 * @testdox Invalid nonce candidates cannot recover a consumed bridge form.
 	 */
 	public function test_invalid_nonces_do_not_recover_consumed_bridge_form(): void {
