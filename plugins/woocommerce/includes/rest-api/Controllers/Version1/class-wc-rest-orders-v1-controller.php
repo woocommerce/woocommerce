@@ -678,7 +678,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$current_variation_id = (int) $item->get_variation_id( 'edit' );
 		// set_product() clears a variation when given its parent. REST partial updates restore it only
 		// when the posted parent and SKU-resolved product still identify the current item.
-		// An explicit variation_id of 0 still demotes the item.
+		// An explicit variation_id of 0 sent alongside the parent product_id still demotes the item;
+		// on its own it resolves to no product at all and this whole block is skipped.
 		$same_product_update  = 'update' === $action
 			&& array_key_exists( 'product_id', $posted )
 			&& $product instanceof WC_Product
