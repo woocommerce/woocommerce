@@ -49,11 +49,12 @@ class StyleAttributesUtilsTest extends WC_Unit_Test_Case {
 		$padding     = 'padding-top:8px;';
 
 		return array(
-			'empty properties'      => array( array(), array(), $all_classes, $padding ),
-			'requested properties'  => array( array( 'font_size', 'extra_classes' ), array(), 'has-font-size has-large-font-size extra', '' ),
-			'exclude extra_classes' => array( array(), array( 'extra_classes' ), 'has-font-size has-large-font-size has-text-color has-vivid-red-color', $padding ),
-			'exclude font_size'     => array( array(), array( 'font_size' ), 'has-text-color has-vivid-red-color extra', $padding ),
-			'exclude padding'       => array( array(), array( 'padding' ), $all_classes, '' ),
+			'empty properties'                 => array( array(), array(), $all_classes, $padding ),
+			'requested properties'             => array( array( 'font_size', 'extra_classes' ), array(), 'has-font-size has-large-font-size extra', '' ),
+			'exclude extra_classes'            => array( array(), array( 'extra_classes' ), 'has-font-size has-large-font-size has-text-color has-vivid-red-color', $padding ),
+			'exclude font_size'                => array( array(), array( 'font_size' ), 'has-text-color has-vivid-red-color extra', $padding ),
+			'exclude padding'                  => array( array(), array( 'padding' ), $all_classes, '' ),
+			'requested and excluded font_size' => array( array( 'font_size' ), array( 'font_size' ), '', '' ),
 		);
 	}
 }
