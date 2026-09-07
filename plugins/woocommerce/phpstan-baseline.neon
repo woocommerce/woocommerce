@@ -10687,12 +10687,6 @@ parameters:
 			path: includes/class-wc-countries.php
 
 		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$states\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/class-wc-countries.php
-
-		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
