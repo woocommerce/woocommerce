@@ -2,8 +2,15 @@
  * @jest-environment jest-fixed-jsdom
  */
 
+// Apostrophe-bearing coupon fixtures. `billing_email` is the field from the
+// original report, and the coupon endpoints post it from the checkout page.
+const COUPON_CODE = "SAVE'10";
+const BILLING_EMAIL = "o'brien@example.com";
+
 describe( 'createCheckoutPlaceOrderApi', () => {
 	let $form;
+	let $couponForm;
+	let $removeCouponLink;
 	let $termsCheckbox;
 	let $termsRow;
 	let capturedApi;
@@ -15,6 +22,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	// collapsed "Ship to a different address?" shipping fields). These must never
 	// block submission, so `validate()` should only count visible invalid fields.
 	let setHiddenInvalidCount;
+	// Fire a handler that checkout.js delegated off document.body, with `this`
+	// bound to the element that would have matched the selector.
+	let triggerDelegatedBodyEvent;
 
 	beforeEach( () => {
 		capturedApi = null;
@@ -114,6 +124,10 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				if ( selector === 'input[name="payment_method"]:checked' ) {
 					return { val: jest.fn( () => 'test-gateway' ) };
 				}
+				if ( selector === 'input[name="billing_email"]' ) {
+					// apply_coupon reads this off the checkout form.
+					return { val: jest.fn( () => BILLING_EMAIL ) };
+				}
 				return { length: 0, trigger: jest.fn() };
 			} ),
 			serialize: jest.fn( () => serializedCheckoutData ),
@@ -179,22 +193,43 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			return mock;
 		};
 
-		// Simple event system for document.body to enable event-based API capture
+		// Simple event system for document.body to enable event-based API capture.
+		// Registrations come in two shapes: direct `on( event, handler )` and
+		// delegated `on( event, selector, handler )`. Several delegated handlers
+		// share the 'click' event, so the selector has to be stored to tell them
+		// apart, and only direct handlers respond to trigger().
 		const bodyEventHandlers = {};
 		mockBody = {
-			on: jest.fn( ( event, handler ) => {
+			on: jest.fn( ( event, selectorOrHandler, delegatedHandler ) => {
+				const isDelegated = typeof delegatedHandler === 'function';
 				if ( ! bodyEventHandlers[ event ] ) {
 					bodyEventHandlers[ event ] = [];
 				}
-				bodyEventHandlers[ event ].push( handler );
+				bodyEventHandlers[ event ].push( {
+					selector: isDelegated ? selectorOrHandler : null,
+					handler: isDelegated ? delegatedHandler : selectorOrHandler,
+				} );
 				return mockBody;
 			} ),
 			trigger: jest.fn( ( event, args ) => {
-				const handlers = bodyEventHandlers[ event ] || [];
-				handlers.forEach( ( handler ) => handler( {}, ...( args || [] ) ) );
+				( bodyEventHandlers[ event ] || [] )
+					.filter( ( entry ) => entry.selector === null )
+					.forEach( ( entry ) => entry.handler( {}, ...( args || [] ) ) );
 				return mockBody;
 			} ),
 			hasClass: jest.fn( () => false ),
+		};
+
+		triggerDelegatedBodyEvent = ( event, selector, element ) => {
+			const entry = ( bodyEventHandlers[ event ] || [] ).find(
+				( candidate ) => candidate.selector === selector
+			);
+			if ( ! entry ) {
+				throw new Error(
+					'No delegated ' + event + ' handler for ' + selector
+				);
+			}
+			entry.handler.call( element, { preventDefault: jest.fn() } );
 		};
 
 		// update_order_review sends these as siblings of post_data, so they have
@@ -206,6 +241,38 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			'#billing_city': "O'Fallon",
 			':input#billing_address_1': "123 O'Brien Ave",
 			':input#billing_address_2': "Apt O'2",
+		};
+
+		// The coupon form is bound directly at init(), so it needs a stable mock
+		// rather than a fresh default one per lookup — otherwise the submit
+		// registration can't be retrieved afterwards.
+		$couponForm = {
+			length: 1,
+			hide: jest.fn( () => $couponForm ),
+			on: jest.fn( () => $couponForm ),
+			is: jest.fn( () => false ),
+			addClass: jest.fn( () => $couponForm ),
+			removeClass: jest.fn( () => $couponForm ),
+			block: jest.fn( () => $couponForm ),
+			unblock: jest.fn( () => $couponForm ),
+			slideUp: jest.fn( () => $couponForm ),
+			before: jest.fn( () => $couponForm ),
+			find: jest.fn( ( selector ) => {
+				if ( selector === 'input[name="coupon_code"]' ) {
+					return { val: jest.fn( () => COUPON_CODE ) };
+				}
+				return createDefaultMock();
+			} ),
+		};
+
+		// The clicked ".woocommerce-remove-coupon" element. remove_coupon reads
+		// the code off it with data( 'coupon' ).
+		$removeCouponLink = {
+			length: 1,
+			parents: jest.fn( () => createDefaultMock() ),
+			data: jest.fn( ( key ) =>
+				key === 'coupon' ? COUPON_CODE : undefined
+			),
 		};
 
 		// Mock jQuery - needs to handle document ready pattern: jQuery(function($) { ... })
@@ -221,6 +288,15 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			}
 			if ( selectorOrCallback === $form ) {
 				return $form;
+			}
+			if (
+				selectorOrCallback === 'form.checkout_coupon' ||
+				selectorOrCallback === $couponForm
+			) {
+				return $couponForm;
+			}
+			if ( selectorOrCallback === $removeCouponLink ) {
+				return $removeCouponLink;
 			}
 			if ( selectorOrCallback === '#order_review' ) {
 				return { length: 0, on: jest.fn(), attr: jest.fn(), find: jest.fn( () => ( { length: 0, val: jest.fn() } ) ) };
@@ -284,6 +360,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			is_checkout: '0',
 			option_guest_checkout: 'no',
 			update_order_review_nonce: 'nonce',
+			apply_coupon_nonce: 'nonce',
+			remove_coupon_nonce: 'nonce',
 			wc_ajax_url: '/?wc-ajax=%%endpoint%%',
 		};
 
@@ -451,6 +529,49 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 			expect( request ).toBeDefined();
 			expect( request.data ).toBe( expectedSerializedData );
+		} );
+	} );
+
+	// The coupon endpoints are the fourth and third of the four request bodies
+	// routed through encodeApostrophes(). No fake timers here: neither handler
+	// schedules one unless its success callback runs, which these never do.
+	describe( 'Coupon request serialization', () => {
+		test( 'should encode apostrophes in apply coupon data', () => {
+			const submitRegistration = $couponForm.on.mock.calls.find(
+				( call ) => call[ 0 ] === 'submit'
+			);
+			expect( submitRegistration ).toBeDefined();
+
+			submitRegistration[ 1 ]( { currentTarget: $couponForm } );
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'apply_coupon' )
+			);
+
+			expect( request ).toBeDefined();
+			expect( request.data ).not.toContain( "'" );
+
+			const body = new URLSearchParams( request.data );
+			expect( body.get( 'coupon_code' ) ).toBe( COUPON_CODE );
+			expect( body.get( 'billing_email' ) ).toBe( BILLING_EMAIL );
+		} );
+
+		test( 'should encode apostrophes in remove coupon data', () => {
+			triggerDelegatedBodyEvent(
+				'click',
+				'.woocommerce-remove-coupon',
+				$removeCouponLink
+			);
+
+			const request = capturedAjaxRequests.find( ( options ) =>
+				options.url.includes( 'remove_coupon' )
+			);
+
+			expect( request ).toBeDefined();
+			expect( request.data ).not.toContain( "'" );
+			expect( new URLSearchParams( request.data ).get( 'coupon' ) ).toBe(
+				COUPON_CODE
+			);
 		} );
 	} );
 } );
