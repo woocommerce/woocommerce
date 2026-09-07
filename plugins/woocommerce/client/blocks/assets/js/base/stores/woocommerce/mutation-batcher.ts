@@ -79,6 +79,8 @@ type TrackedRequest< TMeta = unknown > = {
 	reject: ( error: Error ) => void;
 };
 
+const KEEPALIVE_PAYLOAD_LIMIT = 64 * 1024;
+
 export function createMutationQueue< TState, TMeta = unknown >(
 	config: MutationQueueConfig< TState, TMeta >
 ) {
@@ -256,14 +258,18 @@ export function createMutationQueue< TState, TMeta = unknown >(
 					};
 				} )
 				.filter( Boolean );
+			const body = JSON.stringify( { requests } );
 
 			const response = await fetchHandler( endpoint, {
 				method: 'POST',
+				keepalive:
+					new TextEncoder().encode( body ).byteLength <
+					KEEPALIVE_PAYLOAD_LIMIT,
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,
 				},
-				body: JSON.stringify( { requests } ),
+				body,
 			} );
 
 			if ( ! response.ok ) {
