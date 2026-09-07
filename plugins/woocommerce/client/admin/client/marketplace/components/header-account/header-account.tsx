@@ -24,7 +24,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import './header-account.scss';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import HeaderAccountModal from './header-account-modal';
-import { MARKETPLACE_HOST } from '../constants';
+import { MARKETPLACE_MY_ACCOUNT_PATH } from '../constants';
 import { connectUrl } from '../../utils/functions';
 
 // Make TS happy: The MenuItem component passes these as an href prop to the underlying button.
@@ -52,7 +52,7 @@ export default function HeaderAccount( {
 	const userEmail = wccomSettings?.userEmail;
 	const avatarURL = wccomSettings?.userAvatar;
 
-	const accountURL = MARKETPLACE_HOST + '/my-dashboard/';
+	const accountURL = MARKETPLACE_MY_ACCOUNT_PATH;
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
 	const isInApp = page === 'wc-addons';
 
@@ -218,7 +218,7 @@ export default function HeaderAccount( {
 										className="woocommerce-marketplace__menu-icon"
 									/>
 									{ __(
-										'WooCommerce.com account',
+										'Your WooCommerce.com account',
 										'woocommerce'
 									) }
 								</MenuItem>
