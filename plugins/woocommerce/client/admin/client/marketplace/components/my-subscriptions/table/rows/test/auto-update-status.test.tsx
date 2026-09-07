@@ -266,9 +266,11 @@ describe( 'AutoUpdateStatus', () => {
 		);
 	} );
 
-	it( 'surfaces a notice when enabling fails', async () => {
+	it( "surfaces the endpoint's reason when enabling fails", async () => {
+		// The shape wp_send_json_error() produces.
 		( setProductAutoUpdate as jest.Mock ).mockRejectedValueOnce( {
-			message: 'Nope.',
+			success: false,
+			data: { message: 'There is no subscription for this product.' },
 		} );
 		renderStatus( subscriptionWith( {} ) );
 
@@ -282,7 +284,29 @@ describe( 'AutoUpdateStatus', () => {
 		await waitFor( () =>
 			expect( addNotice ).toHaveBeenCalledWith(
 				'test-key',
-				'Nope.',
+				'Auto-updates could not be enabled. There is no subscription for this product.',
+				'error'
+			)
+		);
+	} );
+
+	it( 'falls back to a generic notice when the failure carries no reason', async () => {
+		( setProductAutoUpdate as jest.Mock ).mockRejectedValueOnce( {
+			code: 'invalid_json',
+		} );
+		renderStatus( subscriptionWith( {} ) );
+
+		fireEvent.click( screen.getByText( 'Auto-updates are off' ) );
+		fireEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
+		);
+
+		await waitFor( () =>
+			expect( addNotice ).toHaveBeenCalledWith(
+				'test-key',
+				'Auto-updates could not be enabled.',
 				'error'
 			)
 		);

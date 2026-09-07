@@ -105,14 +105,25 @@ export default function AutoUpdateStatus( props: {
 					)
 				);
 			} )
-			.catch( ( error: { message?: string } ) => {
+			.catch( ( error: { data?: { message?: string } } ) => {
+				// The endpoint answers with wp_send_json_error(), which nests the reason under data.
+				const reason = error?.data?.message;
+
 				addNotice(
 					subscription.product_key,
-					error?.message ??
-						__(
-							'Auto-updates could not be enabled.',
-							'woocommerce'
-						),
+					reason
+						? sprintf(
+								/* translators: %s is the reason the endpoint gave, a full sentence. */
+								__(
+									'Auto-updates could not be enabled. %s',
+									'woocommerce'
+								),
+								reason
+						  )
+						: __(
+								'Auto-updates could not be enabled.',
+								'woocommerce'
+						  ),
 					NoticeStatus.Error
 				);
 			} )

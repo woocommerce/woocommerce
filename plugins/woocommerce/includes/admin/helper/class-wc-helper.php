@@ -2342,7 +2342,7 @@ class WC_Helper {
 	public static function set_subscription_auto_update( string $product_key, bool $enabled ): void {
 		$subscription = self::get_subscription( $product_key );
 		if ( ! is_array( $subscription ) ) {
-			throw new Exception( esc_html__( 'Subscription not found.', 'woocommerce' ) );
+			throw new Exception( esc_html__( 'There is no subscription for this product.', 'woocommerce' ) );
 		}
 
 		// Resolved the same way the row itself is, by zip_slug against every installed product.
