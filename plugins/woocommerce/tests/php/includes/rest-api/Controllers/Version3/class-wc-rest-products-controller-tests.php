@@ -156,7 +156,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	/**
 	 * Get all expected fields.
 	 *
-	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
+	 * @param bool $with_cogs_enabled True to get the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
 	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
@@ -246,7 +246,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -290,7 +290,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {

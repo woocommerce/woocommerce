@@ -163,6 +163,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'dismiss_task' ),
@@ -176,6 +182,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'undo_dismiss_task' ),
@@ -769,12 +781,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Dismiss a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -803,12 +827,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo dismissal of a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function undo_dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(

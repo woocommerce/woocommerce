@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
@@ -268,18 +269,27 @@ class WC_Checkout {
 				'shipping_'
 			),
 			'account'  => array(),
-			'order'    => array(
-				'order_comments' => array(
-					'type'        => 'textarea',
-					'class'       => array( 'notes' ),
-					'label'       => __( 'Order notes', 'woocommerce' ),
-					'placeholder' => esc_attr__(
-						'Notes about your order, e.g. special notes for delivery.',
-						'woocommerce'
-					),
-				),
-			),
+			'order'    => array(),
 		);
+
+		/**
+		 * Controls whether the order notes field is added to the checkout.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enabled Whether the order notes field is enabled.
+		 */
+		if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+			$this->fields['order']['order_comments'] = array(
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order notes', 'woocommerce' ),
+				'placeholder' => esc_attr__(
+					'Notes about your order, e.g. special notes for delivery.',
+					'woocommerce'
+				),
+			);
+		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
@@ -555,6 +565,8 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			$variation = is_array( $values['variation'] ?? null ) ? $values['variation'] : array();
+
 			/**
 			 * Filter hook to get initial item object.
 			 *
@@ -567,7 +579,7 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
+					'variation'    => $variation,
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
@@ -581,7 +593,7 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'name'         => $product->get_name(),
+						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
@@ -909,7 +921,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] ) && empty( $field['hidden'] );
+				$required    = ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
