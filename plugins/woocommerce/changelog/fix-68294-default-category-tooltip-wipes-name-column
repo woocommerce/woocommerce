@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix default product category row losing Name column and actions when Image column is hidden.
+Fix default product category row losing Name column and actions on WordPress 7.1.
