@@ -411,7 +411,7 @@
 				"border": {
 					"color": "var(--wp--preset--color--theme-6)"
 				},
-				"css": "& .wp-block-search__input { padding-inline: 12px; }"
+				"css": "& .wp-block-search__input { padding-inline: 12px; } &.purple-mobile-navigation-search .wp-block-search__inside-wrapper { background-color: transparent; }"
 			},
 			"core/separator": {
 				"border": {
