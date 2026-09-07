@@ -151,12 +151,12 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Instructions are shown for orders where COD payment is still outstanding.
+	 * @testdox Instructions are shown while the order has not been completed.
 	 *
-	 * @dataProvider provider_unpaid_order_statuses
+	 * @dataProvider provider_non_completed_order_statuses
 	 * @param string $order_status Status to set on the order.
 	 */
-	public function test_email_instructions_are_included_for_unpaid_orders( $order_status ) {
+	public function test_email_instructions_are_included_for_non_completed_orders( $order_status ) {
 		$output = $this->get_email_instructions_output( $order_status );
 
 		$this->assertStringContainsString(
@@ -167,45 +167,27 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Order statuses for which COD payment has not been collected yet.
+	 * Order statuses that do not mark the order as completed.
 	 *
 	 * @return array
 	 */
-	public function provider_unpaid_order_statuses() {
+	public function provider_non_completed_order_statuses() {
 		return array(
 			'pending'    => array( OrderStatus::PENDING ),
 			'on-hold'    => array( OrderStatus::ON_HOLD ),
 			'processing' => array( OrderStatus::PROCESSING ),
+			'cancelled'  => array( OrderStatus::CANCELLED ),
+			'refunded'   => array( OrderStatus::REFUNDED ),
+			'failed'     => array( OrderStatus::FAILED ),
 		);
 	}
 
 	/**
-	 * @testdox Instructions are hidden once the order is settled and no longer awaiting payment.
-	 *
-	 * @dataProvider provider_settled_order_statuses
-	 * @param string $order_status Status to set on the order.
+	 * @testdox Instructions are hidden once the order is completed.
 	 */
-	public function test_email_instructions_are_omitted_for_settled_orders( $order_status ) {
-		$output = $this->get_email_instructions_output( $order_status );
+	public function test_email_instructions_are_omitted_for_completed_orders() {
+		$output = $this->get_email_instructions_output( OrderStatus::COMPLETED );
 
-		$this->assertSame(
-			'',
-			$output,
-			"COD instructions should be hidden for orders with the '{$order_status}' status"
-		);
-	}
-
-	/**
-	 * Order statuses for which COD instructions are no longer relevant.
-	 *
-	 * @return array
-	 */
-	public function provider_settled_order_statuses() {
-		return array(
-			'completed' => array( OrderStatus::COMPLETED ),
-			'cancelled' => array( OrderStatus::CANCELLED ),
-			'refunded'  => array( OrderStatus::REFUNDED ),
-			'failed'    => array( OrderStatus::FAILED ),
-		);
+		$this->assertSame( '', $output, 'COD instructions should be hidden for completed orders' );
 	}
 }
