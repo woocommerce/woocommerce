@@ -132,6 +132,7 @@ class ReportCSVEmail extends \WC_Email {
 				'sent_to_admin' => true,
 				'plain_text'    => false,
 				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
 			),
 			'',
 			$this->template_base
@@ -153,10 +154,21 @@ class ReportCSVEmail extends \WC_Email {
 				'sent_to_admin' => true,
 				'plain_text'    => true,
 				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
 			),
 			'',
 			$this->template_base
 		);
+	}
+
+	/**
+	 * Get how long the emailed download link stays valid, for display.
+	 *
+	 * @since 11.2.0
+	 * @return string Human readable length of time, e.g. "1 week".
+	 */
+	protected function get_retention_period() {
+		return human_time_diff( 0, ReportExporter::EXPORT_RETENTION_PERIOD );
 	}
 
 	/**
