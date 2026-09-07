@@ -374,6 +374,34 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A handle whose row disappears mid-read cannot be exchanged.
+	 */
+	public function test_bridge_handle_losing_the_consume_race_is_not_exchanged(): void {
+		$transient_name = '';
+		$capture_name   = static function ( string $transient ) use ( &$transient_name ): void {
+			$transient_name = $transient_name ? $transient_name : $transient;
+		};
+
+		add_action( 'set_transient', $capture_name, 10, 1 );
+		$handle = WC_Shortcode_My_Account::create_password_reset_bridge_token( $this->user );
+		$this->assertNotSame( '', $transient_name );
+
+		/*
+		 * Stand in for a second request that read the same payload and got its delete in first:
+		 * the row is gone by the time this request tries to consume the handle.
+		 */
+		$delete_between_read_and_delete = static function ( $value ) use ( $transient_name ) {
+			delete_transient( $transient_name );
+			return $value;
+		};
+		add_filter( "transient_{$transient_name}", $delete_between_read_and_delete );
+
+		$template = $this->render_bridge_handle( $handle );
+
+		$this->assertSame( 'myaccount/form-lost-password.php', $template['name'] );
+	}
+
+	/**
 	 * @testdox A rejected submission carrying a spent handle shows the invalid-key notice once.
 	 */
 	public function test_rejected_submission_with_spent_handle_notices_once(): void {
