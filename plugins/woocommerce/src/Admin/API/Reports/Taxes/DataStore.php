@@ -348,11 +348,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * default instead of replacing the rows WooCommerce holds for the order. A prune that could
 	 * not run in `sync_order_taxes()` leaves the same shape behind.
 	 *
-	 * The lookup only holds rows at zero until the rebuild has been through it, so the check costs
-	 * nothing on a store that is through it: `order_item_id > 0` is true and the subquery is never
-	 * reached. It is paid for while the rebuild runs, where every row at zero takes an index
-	 * lookup to find no per-line row beside it. Measured on a 2M row lookup over a 30 day report,
-	 * that is 177ms against 595ms, and it goes away as the rebuild does.
+	 * Once the lookup is keyed by tax order item it only holds rows at zero until the rebuild has
+	 * been through it, so the check costs nothing on a store that is through it:
+	 * `order_item_id > 0` is true and the subquery is never reached. It is paid for while the
+	 * rebuild runs, where every row at zero takes an index lookup to find no per-line row beside
+	 * it. Measured on a 2M row lookup over a 30 day report, that is 177ms against 595ms, and it
+	 * goes away as the rebuild does.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.2.0
@@ -361,6 +362,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function get_legacy_row_condition(): string {
 		$table_name = self::get_db_table_name();
+
+		// Nothing can have replaced a row while the lookup is still keyed on
+		// (order_id, tax_rate_id): the sync writes every row at zero and `OrderTaxLookupMigrator`
+		// waits for the re-key. Unlike a rebuild that is still queued, that state does not clear
+		// itself, so the subquery would read the report range on every uncached report and come
+		// back empty for good.
+		if ( ! self::lookup_is_keyed_by_order_item() ) {
+			return "{$table_name}.order_item_id = 0";
+		}
 
 		return "( {$table_name}.order_item_id = 0 AND NOT EXISTS ( SELECT 1 FROM {$table_name} per_line WHERE per_line.order_id = {$table_name}.order_id AND per_line.tax_rate_id = {$table_name}.tax_rate_id AND per_line.order_item_id > 0 ) )";
 	}

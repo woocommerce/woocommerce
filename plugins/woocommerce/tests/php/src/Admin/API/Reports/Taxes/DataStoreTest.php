@@ -970,6 +970,16 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Forget what `DataStore::lookup_is_keyed_by_order_item()` read, so that a test changing the
+	 * lookup's primary key is seen.
+	 */
+	private function reset_lookup_key_cache(): void {
+		$property = new \ReflectionProperty( DataStore::class, 'lookup_keyed_by_order_item' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
+	}
+
+	/**
 	 * Two tax lines on distinct rate ids, the shape almost every store's history is in.
 	 *
 	 * @param string $prefix Tax code prefix, so lines from different orders group separately.
@@ -1124,5 +1134,43 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' ) );
 
 		$this->assertSame( 6.25, $data->totals->total_tax, 'Rows waiting on the rebuild should still be counted.' );
+	}
+
+	/**
+	 * @testdox Taxes reports drop the replaced-row check while the lookup is not keyed by tax order item.
+	 */
+	public function test_taxes_reports_drop_the_replaced_row_check_while_the_lookup_is_not_re_keyed(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_on_distinct_rate_ids( 'US-CA', 101 ), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$this->unmigrate_lookup_rows( $order->get_id() );
+
+		$table_name = DataStore::get_db_table_name();
+
+		// The shape a failed re-key leaves behind: dbDelta added the column, the key change never
+		// landed. Nothing writes a per-line row here, so no row can have been replaced.
+		$wpdb->query( "ALTER TABLE `{$table_name}` DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+		$this->reset_lookup_key_cache();
+
+		try {
+			$this->assertStringNotContainsString( 'NOT EXISTS', DataStore::get_legacy_row_condition(), 'The reports should not look for a per-line row that cannot be there.' );
+
+			$list = ( new DataStore() )->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) );
+
+			$this->assertSame( 6.25, array_sum( array_column( $list->data, 'total_tax' ) ), 'The order should report the tax it carries.' );
+
+			$stats = ( new StatsDataStore() )->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' ) );
+
+			$this->assertSame( 6.25, $stats->totals->total_tax, 'The stats total should match the tax the order carries.' );
+		} finally {
+			$wpdb->query( "ALTER TABLE `{$table_name}` DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id, order_item_id)" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is not user input.
+			$this->reset_lookup_key_cache();
+		}
+
+		$this->assertStringContainsString( 'NOT EXISTS', DataStore::get_legacy_row_condition(), 'The check should be back once the re-key has landed.' );
 	}
 }
