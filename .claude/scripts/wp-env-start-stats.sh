@@ -115,6 +115,12 @@ classify() {
   # Composer fetching dists inside the Docker build. Must stay above the buildkit rule:
   # BuildKit reports it as "failed to solve", which hides the upstream that actually failed.
   elif grep -qaE  'api\.github\.com.*file could not be downloaded' "$s"; then echo github-api
+  # Debian dropped a .deb from the pool that the image's cached apt index still names.
+  # wp-env refreshes that index in its own layer (`RUN apt-get -qy update`, separate from
+  # every `RUN apt-get -qy install`), so BuildKit reuses the stale layer and each attempt
+  # asks for the same dead file. Must stay above the buildkit rule, which would otherwise
+  # swallow it as "failed to solve".
+  elif grep -qaE  'E: Failed to fetch http://deb\.debian\.org' "$s"; then echo debian-apt
   elif grep -qaiE 'failed to solve' "$s"; then echo buildkit
   elif grep -qaiE 'Error while running docker compose command' "$s"; then echo docker-compose
   else echo unclassified
@@ -465,7 +471,7 @@ emit_table() {  # emit_table <group> <first-column-header> <limit|0>
   awk -F'\t' -v repo="$REPO" '
     function retryable(c) {
       if (c == "plugin-code" || c == "workspace-eacces") return "no — the branch is broken"
-      if (c == "composer-installer") return "no — BuildKit caches the bad layer"
+      if (c == "composer-installer" || c == "debian-apt") return "no — BuildKit caches the bad layer"
       if (c == "unclassified") return "unknown — add a pattern"
       return "yes"
     }
