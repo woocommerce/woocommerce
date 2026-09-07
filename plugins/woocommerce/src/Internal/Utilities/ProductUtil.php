@@ -158,7 +158,7 @@ class ProductUtil {
 
 		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
 		if ( ! is_string( $join ) ) {
-			$stringable = is_scalar( $join ) || ( is_object( $join ) && method_exists( $join, '__toString' ) );
+			$stringable = is_object( $join ) && method_exists( $join, '__toString' );
 			$join       = $stringable ? (string) $join : '';
 		}
 

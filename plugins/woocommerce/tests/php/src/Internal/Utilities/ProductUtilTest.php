@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller as StockController
 use Automattic\WooCommerce\Caches\ProductCountCache;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
  * Tests for the internal ProductUtil class.
@@ -210,23 +211,24 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Non-string query clauses are normalized before appending the lookup join.
-	 * @testWith [null, ""]
-	 *           [false, ""]
-	 *           [0, "0"]
-	 *           [[], ""]
+	 * @testWith [null]
+	 *           [false]
+	 *           [0]
+	 *           [true]
+	 *           [1.5]
+	 *           [[]]
 	 *
-	 * @param mixed  $join   Filtered join clause.
-	 * @param string $prefix Expected preserved clause.
+	 * @param mixed $join Filtered join clause.
 	 */
-	public function test_append_product_sorting_table_join_normalizes_non_strings( $join, string $prefix ): void {
+	public function test_append_product_sorting_table_join_normalizes_non_strings( $join ): void {
 		global $wpdb;
 
 		$result = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $join );
 
 		$this->assertSame(
-			$prefix . " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ",
+			" LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ",
 			$result,
-			'Non-string input must not cause a fatal or lose a convertible clause.'
+			'Non-string input must not produce an invalid SQL prefix.'
 		);
 	}
 
@@ -251,14 +253,19 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product queries still return products when an earlier filter supplies a null join.
-	 * @testWith ["catalog_sort"]
-	 *           ["stock_join"]
-	 *           ["stock_sort"]
+	 * @testdox Product queries still return products when an earlier filter supplies a non-string join.
+	 * @testWith ["catalog_sort", null]
+	 *           ["stock_join", null]
+	 *           ["stock_sort", null]
+	 *           ["store_api", null]
+	 *           ["store_api", 0]
+	 *           ["store_api", true]
+	 *           ["store_api", 1.5]
 	 *
 	 * @param string $path Query path to exercise.
+	 * @param mixed  $join Filtered join clause.
 	 */
-	public function test_lookup_join_consumers_tolerate_null_from_filters( string $path ): void {
+	public function test_lookup_join_consumers_tolerate_non_strings_from_filters( string $path, $join ): void {
 		global $wpdb;
 
 		$product = \WC_Helper_Product::create_simple_product();
@@ -269,8 +276,8 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 		} else {
 			add_filter(
 				'posts_clauses',
-				static function ( $clauses ) {
-					$clauses['join'] = null;
+				static function ( $clauses ) use ( $join ) {
+					$clauses['join'] = $join;
 					return $clauses;
 				},
 				5
@@ -278,6 +285,9 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 			$callback = 'catalog_sort' === $path
 				? array( WC()->query, 'order_by_price_asc_post_clauses' )
 				: array( StockController::class, 'add_wp_query_orderby' );
+			if ( 'store_api' === $path ) {
+				$callback = array( new ProductQuery(), 'add_query_clauses' );
+			}
 			add_filter( 'posts_clauses', $callback, 10, 2 );
 		}
 
@@ -287,12 +297,17 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 				'post__in'     => array( $product->get_id() ),
 				'fields'       => 'ids',
 				'orderby'      => 'stock_quantity',
-				'stock_status' => ProductStockStatus::IN_STOCK,
+				'stock_status' => 'store_api' === $path ? array( ProductStockStatus::IN_STOCK ) : ProductStockStatus::IN_STOCK,
 			)
 		);
 
 		$this->assertSame( '', $wpdb->last_error, 'The lookup join must produce valid SQL.' );
-		$this->assertSame( array( $product->get_id() ), $query->posts, 'The product must remain visible after a null join from an earlier filter.' );
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$query->request,
+			'The query must include the lookup join after normalizing the filtered clause.'
+		);
+		$this->assertSame( array( $product->get_id() ), $query->posts, 'The product must remain visible after a non-string join from an earlier filter.' );
 	}
 
 	/**
