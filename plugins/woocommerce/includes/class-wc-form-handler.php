@@ -123,6 +123,7 @@ class WC_Form_Handler {
 			}
 
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+			nocache_headers();
 			wp_safe_redirect( add_query_arg( $redirect_args, wc_lostpassword_url() ) );
 			exit;
 		}
