@@ -1,0 +1,30 @@
+# lychee policy for the pull-request docs link check (`Validate markdown` job in ci.yml).
+#
+# Only URLs whose exact host is listed in `include` are requested. lychee matches the
+# regex against the parsed, normalized URL (lowercased punycode host, default port
+# elided, user info kept), so user info, non-default ports, subdomains, and lookalike
+# hosts never match. Loopback, private, and link-local addresses are rejected before
+# `include` is consulted and cannot be re-included.
+#
+# Adding a host is a policy change: it lets a docs-only pull request make the CI runner
+# contact that host. Keep the list to hosts operated by WooCommerce, WordPress.org, or GitHub.
+#
+# `.github/workflows/scripts/docs-link-check-policy-test.sh` proves this file offline.
+
+no_progress = true
+scheme = ["http", "https"]
+exclude_all_private = true
+include = [
+	'^https?://(github\.com|developer\.woocommerce\.com|woocommerce\.com|developer\.wordpress\.org|woocommerce\.github\.io|wordpress\.org|qit\.woo\.com|user-images\.githubusercontent\.com|codex\.wordpress\.org|make\.wordpress\.org)/',
+]
+
+# Redirects are not followed at pull-request time, so an approved host can never lead the
+# runner elsewhere. A 3xx counts as alive here; the scheduled crawl follows redirects.
+max_redirects = 0
+
+# Only 400, 404, and 410 (plus transport failures) fail the check. Auth challenges, bot
+# blocks, rate limits, and server errors do not prove a link is dead.
+accept = "200..=399,401,403,405..=409,411..=599"
+timeout = 10
+max_retries = 2
+max_concurrency = 4
