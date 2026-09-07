@@ -358,6 +358,17 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		// The stored value, not the recorded string: the data store compares strictly.
 		$this->delete_meta_data_value( $key, $matches[0] );
+
+		// The only trace of an irreversible removal. Kept at debug so a normal variation switch is
+		// not noise, and so a store investigating a missing row can turn it on and see this one.
+		wc_get_logger()->debug(
+			sprintf( 'Removed the attribute meta "%s" recorded for order item #%d, which no longer refers to the variation that wrote it.', $key, $this->get_id() ),
+			array(
+				'source'   => 'order-item-product',
+				'order_id' => $this->get_order_id(),
+				'value'    => $value,
+			)
+		);
 	}
 
 	/**
