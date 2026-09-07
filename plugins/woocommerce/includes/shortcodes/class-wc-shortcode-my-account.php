@@ -480,6 +480,8 @@ class WC_Shortcode_My_Account {
 			}
 		}
 
+		wc_get_logger()->warning( 'Password reset bridge could not be stored; falling back to the cookie-only flow.', array( 'source' => 'password-reset' ) );
+
 		return '';
 	}
 
