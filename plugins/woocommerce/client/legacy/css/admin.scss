@@ -1186,10 +1186,6 @@ mark.amount {
 	color: inherit;
 }
 
-.woocommerce-Price-amount {
-	white-space: nowrap;
-}
-
 /**
   * Help Tip
   */
@@ -3796,6 +3792,10 @@ ul.order_notes {
 }
 
 table.wp-list-table {
+	.woocommerce-Price-amount {
+		white-space: nowrap;
+	}
+
 	.column-thumb {
 		width: 52px;
 		text-align: center;
@@ -3898,7 +3898,7 @@ table.wp-list-table {
 	}
 
 	.column-price {
-		width: 12ch;
+		width: 10ch;
 	}
 
 	.column-cogs_value {
