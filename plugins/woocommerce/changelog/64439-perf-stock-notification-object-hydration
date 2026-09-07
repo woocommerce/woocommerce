@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Stock notifications: build notification objects from the rows the query already selected, instead of reading each row and its meta back from the database.

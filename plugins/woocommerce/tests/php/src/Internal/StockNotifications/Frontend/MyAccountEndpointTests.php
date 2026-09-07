@@ -99,8 +99,10 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 *
 	 * `capture_redirect()` throws in place of the `exit` that follows the redirect
 	 * in production, so the call has to be wrapped.
+	 *
+	 * @param int $expected_page 1-indexed page the redirect should land on.
 	 */
-	private function run_cancel_expecting_redirect(): void {
+	private function run_cancel_expecting_redirect( int $expected_page = 1 ): void {
 		try {
 			( new MyAccountEndpoint() )->maybe_handle_cancel();
 			$this->fail( 'Expected the cancel handler to redirect.' );
@@ -109,7 +111,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame(
-			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', \wc_get_page_permalink( 'myaccount' ) ),
+			\wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, $expected_page > 1 ? (string) $expected_page : '', \wc_get_page_permalink( 'myaccount' ) ),
 			$this->redirect_location
 		);
 	}
@@ -573,12 +575,41 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the customer to the page they cancelled from.
+	 */
+	public function test_cancel_returns_to_the_page_it_was_submitted_from(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_cancel_request( $notification->get_id(), true, 3 );
+
+		$this->run_cancel_expecting_redirect( 3 );
+	}
+
+	/**
+	 * @testdox Should keep the customer on their page when the cancel fails.
+	 */
+	public function test_failed_cancel_returns_to_the_page_it_was_submitted_from(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+
+		$this->simulate_cancel_request( $notification->get_id(), false, 2 );
+
+		$this->run_cancel_expecting_redirect( 2 );
+
+		$this->assertNotEmpty( \wc_get_notices( 'error' ), 'An invalid nonce should queue an error notice.' );
+	}
+
+	/**
 	 * Helper: fake the global state needed for `maybe_handle_cancel()` to proceed past guards.
 	 *
 	 * @param int  $notification_id Notification id.
 	 * @param bool $valid_nonce     Whether to mint a nonce that validates for this id.
+	 * @param int  $page            1-indexed page the cancel was submitted from.
 	 */
-	private function simulate_cancel_request( int $notification_id, bool $valid_nonce ): void {
+	private function simulate_cancel_request( int $notification_id, bool $valid_nonce, int $page = 1 ): void {
 		$this->set_endpoint_query_var();
 
 		$nonce = $valid_nonce
@@ -589,6 +620,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$_POST = array(
 			MyAccountEndpoint::CANCEL_ACTION => '1',
 			'notification_id'                => (string) $notification_id,
+			'notifications_page'             => (string) $page,
 			'_wpnonce'                       => $nonce,
 		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited

@@ -386,6 +386,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_attributions = $this->get_order_attributions_by_order_ids( array_keys( $mapped_orders ) );
 		$customers          = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
+		$customer_details   = $this->map_array_by_key(
+			$this->get_order_customer_details_by_order_ids( $order_ids ),
+			'order_id'
+		);
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
@@ -446,6 +450,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_id ] ) ? array_merge( $defaults, $mapped_data[ $order_id ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
+			}
+
+			$name_order_id = $order_id;
+			if (
+				isset( $customer_details[ $order_id ] )
+				&& 'shop_order_refund' === $customer_details[ $order_id ]['order_type']
+				&& $order_data['parent_id']
+			) {
+				$name_order_id = $order_data['parent_id'];
+			}
+
+			if ( isset( $customer_details[ $name_order_id ] ) && 0 === (int) $customer_details[ $name_order_id ]['customer_id'] ) {
+				$orders_data[ $key ]['extended_info']['customer']['first_name'] = (string) $customer_details[ $name_order_id ]['first_name'];
+				$orders_data[ $key ]['extended_info']['customer']['last_name']  = (string) $customer_details[ $name_order_id ]['last_name'];
 			}
 
 			$source_type = $order_attributions[ $order_id ]['_wc_order_attribution_source_type'] ?? '';
@@ -554,6 +572,76 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		/* phpcs:enable */
 
 		return $customers;
+	}
+
+	/**
+	 * Get the customer ID and customer name stored on each order.
+	 *
+	 * The name falls back from billing to shipping per field, matching how
+	 * Automattic\WooCommerce\Admin\Overrides\Order builds the customer lookup row. Without that
+	 * fallback an order that only has a shipping name would lose the name it used to display.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 * @return array
+	 */
+	private function get_order_customer_details_by_order_ids( $order_ids ) {
+		global $wpdb;
+
+		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$included_order_ids = implode( ',', $order_ids );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table    = OrdersTableDataStore::get_orders_table_name();
+			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
+
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			return $wpdb->get_results(
+				"SELECT orders.id AS order_id,
+					orders.type AS order_type,
+					orders.customer_id,
+					COALESCE( NULLIF( billing.first_name, '' ), shipping.first_name, '' ) AS first_name,
+					COALESCE( NULLIF( billing.last_name, '' ), shipping.last_name, '' ) AS last_name
+				FROM {$orders_table} orders
+				LEFT JOIN {$addresses_table} billing
+					ON orders.id = billing.order_id
+					AND billing.address_type = 'billing'
+				LEFT JOIN {$addresses_table} shipping
+					ON orders.id = shipping.order_id
+					AND shipping.address_type = 'shipping'
+				WHERE orders.id IN ({$included_order_ids})",
+				ARRAY_A
+			);
+			/* phpcs:enable */
+		}
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+		return $wpdb->get_results(
+			"SELECT orders.ID AS order_id,
+				orders.post_type AS order_type,
+				MAX( CASE WHEN order_meta.meta_key = '_customer_user' THEN order_meta.meta_value END ) AS customer_id,
+				COALESCE(
+					NULLIF( MAX( CASE WHEN order_meta.meta_key = '_billing_first_name' THEN order_meta.meta_value END ), '' ),
+					MAX( CASE WHEN order_meta.meta_key = '_shipping_first_name' THEN order_meta.meta_value END ),
+					''
+				) AS first_name,
+				COALESCE(
+					NULLIF( MAX( CASE WHEN order_meta.meta_key = '_billing_last_name' THEN order_meta.meta_value END ), '' ),
+					MAX( CASE WHEN order_meta.meta_key = '_shipping_last_name' THEN order_meta.meta_value END ),
+					''
+				) AS last_name
+			FROM {$wpdb->posts} orders
+			LEFT JOIN {$wpdb->postmeta} order_meta
+				ON orders.ID = order_meta.post_id
+				AND order_meta.meta_key IN ( '_customer_user', '_billing_first_name', '_billing_last_name', '_shipping_first_name', '_shipping_last_name' )
+			WHERE orders.ID IN ({$included_order_ids})
+			GROUP BY orders.ID, orders.post_type",
+			ARRAY_A
+		);
+		/* phpcs:enable */
 	}
 
 	/**
