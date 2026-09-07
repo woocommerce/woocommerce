@@ -1,4 +1,4 @@
 Significance: patch
 Type: changed
 
-Send the tk_ai visitor cookie on inbound cross-site navigations by relaxing it from SameSite=Strict to Lax, so the server can see a returning visitor on the first request after an ad or link click.
+Relax the tk_ai visitor cookie from SameSite=Strict to Lax so it is sent on inbound cross-site navigations such as an ad click, and rewrite it on each page load with the same id so cookies set by earlier versions pick up the new attribute. The one-year expiry becomes rolling from the most recent visit.

@@ -256,16 +256,19 @@ export class Analytics {
 	};
 
 	/**
-	 * Set anonymous ID if not already set
+	 * Set or refresh the anonymous ID cookie.
+	 *
+	 * The existing id is reused when present, so visitor continuity is kept; a new one is
+	 * minted only when absent. The cookie is written on every load because a cookie set by
+	 * an earlier version may still carry samesite=strict and JS cannot read attributes back.
+	 * Keep path=/ and no domain so the write replaces the existing cookie instead of adding a
+	 * second one (getCookie returns null when it sees two). Keeping expires on each write makes
+	 * the one-year lifetime rolling from the most recent visit.
 	 */
 	private maybeSetAnonId() {
-		const anonId = getCookie( 'tk_ai' );
-
-		if ( ! anonId ) {
-			// Set a first-party cookie (same domain only, 1 year)
-			const randomToken = generateRandomToken( 18 ); // 18 * 4/3 = 24 (base64 encoded chars)
-			const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
-			document.cookie = `tk_ai=${ randomToken }; path=/; secure; samesite=lax; expires=${ expires }`;
-		}
+		const anonId = getCookie( 'tk_ai' ) || generateRandomToken( 18 ); // 18 * 4/3 = 24 (base64 encoded chars)
+		// Set a first-party cookie (same domain only, 1 year)
+		const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
+		document.cookie = `tk_ai=${ anonId }; path=/; secure; samesite=lax; expires=${ expires }`;
 	}
 }
