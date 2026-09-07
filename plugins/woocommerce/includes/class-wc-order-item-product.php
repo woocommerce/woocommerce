@@ -240,7 +240,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Add variation data as item meta (write only).
+	 * Set variation data (stored as meta data - write only).
+	 *
 	 * Scalar values are recorded so `set_product()` can later remove only rows this item wrote.
 	 *
 	 * @param array $data Key/Value pairs.

@@ -994,8 +994,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					) {
 						throw $e;
 					}
-					// A deleted variation and a subclass veto reusing this error code are indistinguishable.
-					// Swallow both to avoid reviving 400 responses for substituted order item classes.
+					// The stored variation ID no longer identifies a variation: demote via set_product().
+					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
+					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
+					// get_class() check) would revive the 400 on every store substituting order item classes.
 					$product_item->set_product( $product );
 					wc_get_logger()->warning(
 						sprintf(
