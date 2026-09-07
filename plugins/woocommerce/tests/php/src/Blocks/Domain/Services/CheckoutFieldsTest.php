@@ -209,8 +209,10 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	 * @testdox Date fields only accept a real calendar date in Y-m-d format.
 	 *
 	 * @testWith ["2026-08-26", false]
+	 *           ["2024-02-29", false]
 	 *           ["", false]
 	 *           ["2026-02-31", true]
+	 *           ["2026-02-29", true]
 	 *           ["2026-8-6", true]
 	 *           ["26-08-2026", true]
 	 *           ["not-a-date", true]
@@ -223,6 +225,49 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$errors = $this->controller->validate_field( $fields['plugin-namespace/delivery-date'], $value );
 
 		$this->assertSame( $has_errors, $errors->has_errors(), sprintf( 'Unexpected validation result for "%s".', $value ) );
+	}
+
+	/**
+	 * @testdox Invalid dates still reach custom validation and both validation hooks.
+	 */
+	public function test_invalid_date_runs_custom_validation_and_hooks(): void {
+		$calls = array();
+		$field = $this->controller->get_additional_fields()['plugin-namespace/delivery-date'];
+
+		$field['validate_callback'] = static function ( $value ) use ( &$calls ) {
+			$calls['callback'] = $value;
+			return new \WP_Error( 'custom_date_error', 'Custom validation error.' );
+		};
+
+		$hooks = array(
+			'__experimental_woocommerce_blocks_validate_additional_field',
+			'woocommerce_validate_additional_field',
+		);
+		$this->setExpectedDeprecated( $hooks[0] );
+
+		foreach ( $hooks as $hook ) {
+			add_action(
+				$hook,
+				static function ( $errors, $key, $value ) use ( &$calls, $hook ) {
+					$calls[ $hook ] = array( $key, $value, $errors->get_error_codes() );
+				},
+				10,
+				3
+			);
+		}
+
+		$errors = $this->controller->validate_field( $field, '2026-02-31' );
+
+		$this->assertSame( '2026-02-31', $calls['callback'] ?? null );
+		$this->assertContains( 'woocommerce_invalid_checkout_field', $errors->get_error_codes() );
+		$this->assertContains( 'custom_date_error', $errors->get_error_codes() );
+		foreach ( $hooks as $hook ) {
+			$this->assertArrayHasKey( $hook, $calls, 'Both validation hooks must run after a type error.' );
+			$this->assertSame( $field['id'], $calls[ $hook ][0] );
+			$this->assertSame( '2026-02-31', $calls[ $hook ][1] );
+			$this->assertContains( 'woocommerce_invalid_checkout_field', $calls[ $hook ][2] );
+			$this->assertContains( 'custom_date_error', $calls[ $hook ][2] );
+		}
 	}
 
 	/**

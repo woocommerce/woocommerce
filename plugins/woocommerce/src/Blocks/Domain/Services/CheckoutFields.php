@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\{
 	DocumentObject, Validation
 };
@@ -905,10 +906,7 @@ class CheckoutFields {
 			return null;
 		}
 
-		$date = is_string( $field_value ) ? \DateTime::createFromFormat( '!Y-m-d', $field_value, wp_timezone() ) : false;
-
-		// Comparing the round trip rejects impossible dates such as 2026-02-31, which PHP would otherwise roll forward.
-		if ( ! $date || $date->format( 'Y-m-d' ) !== $field_value ) {
+		if ( ! is_string( $field_value ) || ! TimeUtil::is_valid_date( $field_value, 'Y-m-d' ) ) {
 			return new WP_Error(
 				'woocommerce_invalid_checkout_field',
 				sprintf(
@@ -944,7 +942,6 @@ class CheckoutFields {
 
 			if ( is_wp_error( $type_error ) ) {
 				$errors->merge_from( $type_error );
-				return $errors;
 			}
 
 			if ( ! empty( $field['validate_callback'] ) && is_callable( $field['validate_callback'] ) ) {
@@ -1521,13 +1518,11 @@ class CheckoutFields {
 			$value   = isset( $options[ $value ] ) ? $options[ $value ] : $value;
 		}
 
-		if ( 'date' === $field['type'] && is_string( $value ) && '' !== $value ) {
+		if ( 'date' === $field['type'] && is_string( $value ) && TimeUtil::is_valid_date( $value, 'Y-m-d' ) ) {
 			// Parsed in the site timezone so the stored calendar date cannot shift a day when it is formatted.
 			$date = \DateTime::createFromFormat( '!Y-m-d', $value, wp_timezone() );
 
-			// The round trip check keeps a value PHP would roll forward, such as 2026-02-31, displayed as
-			// stored rather than silently turned into a different date.
-			if ( $date && $date->format( 'Y-m-d' ) === $value ) {
+			if ( $date ) {
 				$value = wp_date( wc_date_format(), $date->getTimestamp() );
 			}
 		}
