@@ -114,7 +114,7 @@ class ProductReviews extends AbstractRoute {
 		$unlocked_product_ids = $this->get_unlocked_password_protected_product_ids( $prepared_args['post__in'] ?? array() );
 		sort( $unlocked_product_ids, SORT_NUMERIC );
 		// We need to set a cache domain to prevent the comment query from being cached across different sets of unlocked products.
-		$prepared_args['cache_domain'] = 'wc_store_api_product_reviews_' . md5( implode( ',', $unlocked_product_ids ) );
+		$prepared_args['cache_domain'] = 'wc_store_api_product_reviews_' . implode( ',', $unlocked_product_ids );
 
 		$exclude_password_protected_reviews = function ( $clauses ) use ( $unlocked_product_ids ) {
 			return $this->exclude_password_protected_product_reviews( $clauses, $unlocked_product_ids );
