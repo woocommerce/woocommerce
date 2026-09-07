@@ -248,23 +248,23 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-Text fields support an input `mask` that formats the value as the shopper types, and also format complaint values at render time (in emails, orders, and admin).
+Text fields support an input `mask` that formats the value as the shopper types. Values that fit the mask also appear with formatting in emails, on order pages, and in the admin.
 
-The sytanx for a mask follow  a subset of `imask` syntax.
+The syntax for a mask follows a subset of `imask` syntax.
 
 | Option name | Description | Required? | Example | Default value |
 | --- | --- | --- | --- | --- |
 | `mask` | An input mask: `0` accepts a digit, `a` a letter, `*` any character, `\` escapes the next character. Any other character is a literal that the checkout shows but never stores. | No | `000.000.000-00` | No mask |
 
-Mask are only for formating and not for validation. As the shopper types, their input is matched against the mask partially (or fully). If the inputted value differs from the mask, the mask will be removed.
+Masks are only for formatting, not validation. A value can fit part or all of the mask. For example, `1234` with the mask `000-000` appears as `123-4`. If the value does not fit, the input shows the text as typed. Formatting resumes when the value fits again.
 
-To validate, use `validation` schema rules.
+To validate on the server, use `validation` schema rules or `validate_callback`.
 
 ##### Masks and other validation
 
-If your field uses `pattern` or `maxLength` attributes, then those must account for the mask literals.
+The browser checks `pattern` and `maxLength` against the formatted text, including mask literals. Store API requests can bypass browser validation.
 
-However, `validation` JSON schema, `validate_callback`, and `sanitize_callback` run against the raw value.
+The `validation` JSON schema, `validate_callback`, and `sanitize_callback` run against the raw value. When using `TextInput` or `ValidatedTextInput` with a `mask`, pass raw slot values through `value`; `onChange` returns the raw value. For example, `000.000.000-00` displays `123.456.789-01` and stores `12345678901`.
 
 #### Options for `date` fields
 

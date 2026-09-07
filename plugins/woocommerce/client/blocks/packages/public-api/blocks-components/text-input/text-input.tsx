@@ -44,6 +44,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 			type = 'text',
 			ariaLabel,
 			ariaDescribedBy,
+			'aria-describedby': ariaDescribedByAttribute,
 			label,
 			screenReaderLabel,
 			disabled,
@@ -64,18 +65,14 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		ref
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
-		// A masked input can show literals only, like `+1 `, while `value` is empty.
-		const [ hasMaskedText, setHasMaskedText ] = useState( false );
-		const mergedRef = useMergeRefs( [
-			ref,
-			useInputMask( mask, onChange ),
-		] );
 		const decodedValue = decodeEntities( String( value ) );
+		const inputMask = useInputMask( mask, decodedValue, onChange );
+		const mergedRef = useMergeRefs( [ ref, inputMask.ref ] );
 		const hintId = mask ? id + '__mask-hint' : undefined;
-		const describedBy = [
-			!! help && ! ariaDescribedBy ? id + '__help' : ariaDescribedBy,
-			hintId,
-		]
+		const helpId = help ? id + '__help' : undefined;
+		const description =
+			ariaDescribedByAttribute ?? ( ariaDescribedBy || helpId );
+		const describedBy = [ description, hintId ]
 			.filter( Boolean )
 			.join( ' ' );
 
@@ -98,17 +95,15 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 					autoCapitalize={ autoCapitalize }
 					autoComplete={ autoComplete }
 					onChange={
-						mask
+						inputMask.isBound
 							? undefined
-							: ( event ) => onChange( event.target.value )
+							: ( event ) =>
+									inputMask.onChange( event.target.value )
 					}
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ ( event ) => {
 						onBlur( event.target.value );
 						setIsActive( false );
-						setHasMaskedText(
-							!! mask && event.target.value !== ''
-						);
 					} }
 					aria-label={ ariaLabel || label }
 					disabled={ disabled }
@@ -140,7 +135,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		return (
 			<div
 				className={ clsx( 'wc-block-components-text-input', className, {
-					'is-active': isFieldActive || hasMaskedText,
+					'is-active': isFieldActive || inputMask.hasText,
 				} ) }
 			>
 				{ isValidElement( icon ) ? (
@@ -153,7 +148,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				) }
 				{ !! help && (
 					<p
-						id={ id + '__help' }
+						id={ helpId }
 						className="wc-block-components-text-input__help"
 					>
 						{ help }

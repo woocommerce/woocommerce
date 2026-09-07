@@ -11,35 +11,36 @@ export interface FormatResult {
 	unmasked: string;
 	/** False when the typed text does not fit the mask. Display and unmasked are then the typed text. */
 	fits: boolean;
-	/** Typed index of each display character, -1 for a literal the mask inserted. */
+	/** UTF-16 typed offset for each display code unit, -1 for an inserted literal. */
 	map: number[];
 }
 
 const parseMask = ( mask: string ): Token[] => {
 	const tokens: Token[] = [];
-	for ( let i = 0; i < mask.length; i++ ) {
-		if ( mask[ i ] === '\\' && i + 1 < mask.length ) {
-			tokens.push( { literal: mask[ ++i ] } );
-		} else if ( SLOTS[ mask[ i ] ] ) {
-			tokens.push( { test: SLOTS[ mask[ i ] ] } );
+	const chars = Array.from( mask );
+	for ( let i = 0; i < chars.length; i++ ) {
+		if ( chars[ i ] === '\\' && i + 1 < chars.length ) {
+			tokens.push( { literal: chars[ ++i ] } );
+		} else if ( SLOTS[ chars[ i ] ] ) {
+			tokens.push( { test: SLOTS[ chars[ i ] ] } );
 		} else {
-			tokens.push( { literal: mask[ i ] } );
+			tokens.push( { literal: chars[ i ] } );
 		}
 	}
 	return tokens;
 };
 
 export const unescapeMask = ( mask: string ): string =>
-	mask.replace( /\\(.)/g, '$1' );
+	mask.replace( /\\([\s\S])/gu, '$1' );
 
 /**
- * Formats the typed text against the mask.
- *
- * A slot takes the next typed character when it matches. A literal takes the next typed
- * character when it is the same. Otherwise the mask inserts the literal once a later slot
- * fills or the mask ends.
+ * Formats edits while keeping stored slot values distinct from user-typed literals.
  */
-export const format = ( typed: string, mask: string ): FormatResult => {
+export const formatValue = (
+	typed: string,
+	mask: string,
+	canConsumeLiteral: ( index: number ) => boolean
+): FormatResult => {
 	const map: number[] = [];
 	let display = '';
 	let unmasked = '';
@@ -47,32 +48,39 @@ export const format = ( typed: string, mask: string ): FormatResult => {
 	let t = 0;
 
 	const flush = () => {
-		for ( const char of pending ) {
-			display += char;
+		display += pending;
+		for ( let i = 0; i < pending.length; i++ ) {
 			map.push( -1 );
 		}
 		pending = '';
 	};
 
 	for ( const token of parseMask( mask ) ) {
+		const codePoint = typed.codePointAt( t );
+		const char =
+			codePoint === undefined ? '' : String.fromCodePoint( codePoint );
 		if ( 'literal' in token ) {
-			if ( typed[ t ] === token.literal ) {
+			if ( char === token.literal && canConsumeLiteral( t ) ) {
 				flush();
 				display += token.literal;
-				map.push( t++ );
+				for ( let i = 0; i < char.length; i++ ) {
+					map.push( t++ );
+				}
 			} else {
 				pending += token.literal;
 			}
 		} else if ( t >= typed.length ) {
 			pending = '';
 			break;
-		} else if ( ! token.test.test( typed[ t ] ) ) {
+		} else if ( ! token.test.test( char ) ) {
 			break;
 		} else {
 			flush();
-			display += typed[ t ];
-			unmasked += typed[ t ];
-			map.push( t++ );
+			display += char;
+			unmasked += char;
+			for ( let i = 0; i < char.length; i++ ) {
+				map.push( t++ );
+			}
 		}
 	}
 
@@ -81,9 +89,15 @@ export const format = ( typed: string, mask: string ): FormatResult => {
 			display: typed,
 			unmasked: typed,
 			fits: false,
-			map: Array.from( typed, ( _, i ) => i ),
+			map: Array.from( { length: typed.length }, ( _, i ) => i ),
 		};
 	}
 	flush();
 	return { display, unmasked, fits: true, map };
 };
+
+/**
+ * Formats raw slot values. Mask literals never consume a stored character.
+ */
+export const format = ( value: string, mask: string ): FormatResult =>
+	formatValue( value, mask, () => false );

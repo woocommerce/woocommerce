@@ -641,4 +641,25 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 
 		$this->assertSame( '123-456', $this->controller->format_additional_field_value( 123456, $field ) );
 	}
+
+	/**
+	 * @testdox Formats stored slot values without treating them as literals.
+	 * @testWith ["10000", "1234", "11234"]
+	 *           ["\\0000", "012", "0012"]
+	 *           ["\\aaaa", "abc", "aabc"]
+	 *           ["(***)", "(ab", "((ab)"]
+	 *           ["a-0", "𐐀1", "𐐀-1"]
+	 *           ["*-0", "😀1", "😀-1"]
+	 *
+	 * @param string $mask     Mask pattern.
+	 * @param string $value    Stored slot values.
+	 * @param string $expected Formatted value.
+	 */
+	public function test_mask_formats_raw_slot_values( string $mask, string $value, string $expected ): void {
+		$field = array(
+			'type' => 'text',
+			'mask' => $mask,
+		);
+		$this->assertSame( $expected, $this->controller->format_additional_field_value( $value, $field ) );
+	}
 }

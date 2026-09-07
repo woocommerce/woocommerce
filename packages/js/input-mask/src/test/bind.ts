@@ -22,15 +22,17 @@ const setup = ( mask: string, initial = '' ) => {
 				input.value.slice( 0, caret ) +
 					char +
 					input.value.slice( caret ),
-				caret + 1
+				caret + char.length
 			);
 		}
 	};
 	const backspace = () => {
 		const caret = input.selectionStart ?? input.value.length;
+		const length =
+			Array.from( input.value.slice( 0, caret ) ).at( -1 )?.length ?? 0;
 		edit(
-			input.value.slice( 0, caret - 1 ) + input.value.slice( caret ),
-			caret - 1,
+			input.value.slice( 0, caret - length ) + input.value.slice( caret ),
+			caret - length,
 			'deleteContentBackward'
 		);
 	};
@@ -113,6 +115,22 @@ describe( 'bind', () => {
 		expect( last() ).toBe( '12345678901' );
 	} );
 
+	it.each( [
+		[ '+3', '3' ],
+		[ '34 [6', '346' ],
+		[ '34[6', '346' ],
+		[ '+34 [697] (745) {564}', '34697745564' ],
+	] )( 'consumes literals in pasted text %p', ( value, raw ) => {
+		const { edit, last } = setup( '+00 [000] (000) {000}' );
+		edit( value, value.length, 'insertFromPaste' );
+		expect( last() ).toBe( raw );
+	} );
+
+	it( 'treats the initial value as raw slot values', () => {
+		const { input } = setup( '10000', '1234' );
+		expect( input.value ).toBe( '11234' );
+	} );
+
 	it( 'formats the initial value and values set from outside', () => {
 		const { input, bound, last } = setup( '000-000', '123456' );
 		expect( input.value ).toBe( '123-456' );
@@ -126,5 +144,50 @@ describe( 'bind', () => {
 		bound.destroy();
 		type( '1234' );
 		expect( input.value ).toBe( '1234' );
+	} );
+
+	it( 'keeps raw values distinct from literals through later edits', () => {
+		const { input, bound, type, backspace, last } = setup( '10000' );
+		bound.setValue( '1234' );
+		expect( input.value ).toBe( '11234' );
+		backspace();
+		expect( input.value ).toBe( '1123' );
+		expect( last() ).toBe( '123' );
+		type( '45' );
+		expect( input.value ).toBe( '12345' );
+		expect( last() ).toBe( '12345' );
+	} );
+
+	it( 'keeps the caret after a supplementary-plane letter', () => {
+		const { input, type, backspace, last } = setup( 'a-0' );
+		type( '𐐀1' );
+		expect( input.value ).toBe( '𐐀-1' );
+		expect( input.selectionStart ).toBe( 4 );
+		backspace();
+		backspace();
+		expect( input.value ).toBe( '' );
+		expect( last() ).toBe( '' );
+	} );
+
+	it( 'deletes a whole code point beside inserted literals', () => {
+		const { input, type, backspace, last, edit } = setup( '{*}' );
+		type( '😀' );
+		backspace();
+		expect( input.value ).toBe( '' );
+		expect( last() ).toBe( '' );
+		type( '😀' );
+		edit( '😀}', 0, 'deleteContentForward' );
+		expect( input.value ).toBe( '' );
+		expect( last() ).toBe( '' );
+	} );
+
+	it( 'keeps fallback text in order and replaces Unicode selections', () => {
+		const { input, type, edit, last } = setup( '000-000' );
+		type( '😀123' );
+		expect( input.value ).toBe( '😀123' );
+		edit( '4123', 1, 'insertReplacementText' );
+		expect( input.value ).toBe( '412-3' );
+		expect( last() ).toBe( '4123' );
+		expect( input.selectionStart ).toBe( 1 );
 	} );
 } );
