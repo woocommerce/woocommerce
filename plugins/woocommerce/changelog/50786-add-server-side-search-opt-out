@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the `woocommerce_admin_report_server_side_search_item_types` JavaScript filter, so an integration that overrides an Analytics report route with a handler that does not read `search` can opt out of server-side search and keep receiving resolved item IDs.
