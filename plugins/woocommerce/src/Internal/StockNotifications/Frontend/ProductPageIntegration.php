@@ -153,7 +153,7 @@ class ProductPageIntegration {
 		}
 
 		$text = __( 'Please {login_link} to sign up for stock notifications.', 'woocommerce' );
-		$text = str_replace( '{login_link}', '<a href="' . wc_get_account_endpoint_url( 'my-account' ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{login_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( 'my-account' ) ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 
@@ -189,7 +189,7 @@ class ProductPageIntegration {
 		}
 
 		$text = __( 'You have already joined the waitlist! Click {manage_account_link} to manage your notifications.', 'woocommerce' );
-		$text = str_replace( '{manage_account_link}', '<a href="' . wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{manage_account_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ) ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 
