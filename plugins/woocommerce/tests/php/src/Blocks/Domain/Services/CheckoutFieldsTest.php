@@ -372,7 +372,8 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$fields = $this->controller->get_additional_fields();
 
 		$date = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/delivery-date'] );
-		$this->assertSame( '^(\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))?$', $date['pattern'] );
+		$this->assertSame( 'string', $date['type'] );
+		$this->assertArrayNotHasKey( 'pattern', $date, 'Date validation runs outside the REST API value schema.' );
 
 		$checkbox = $this->controller->prepare_field_value_schema( array( 'type' => 'string' ), $fields['plugin-namespace/leave-on-porch'] );
 		$this->assertSame( 'boolean', $checkbox['type'] );
