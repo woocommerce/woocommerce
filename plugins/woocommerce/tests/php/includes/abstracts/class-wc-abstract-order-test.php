@@ -1029,22 +1029,65 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_taxes removes an obsolete persisted tax item.
+	 * @testdox update_taxes removes an obsolete persisted or unsaved tax item.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $persist_tax Whether to persist the tax before removing it.
 	 */
-	public function test_update_taxes_removes_obsolete_persisted_tax_item(): void {
+	public function test_update_taxes_removes_obsolete_tax_item( bool $persist_tax ): void {
 		$order    = new WC_Order();
 		$tax_item = new WC_Order_Item_Tax();
 		$tax_item->set_rate_id( 1234 );
 		$tax_item->set_label( 'Obsolete tax' );
 		$order->add_item( $tax_item );
-		$order->save();
-
-		$this->assertGreaterThan( 0, $tax_item->get_id(), 'The tax item should be persisted before update_taxes() removes it.' );
+		if ( $persist_tax ) {
+			$order->save();
+			$this->assertGreaterThan( 0, $tax_item->get_id(), 'The tax item should be persisted before update_taxes() removes it.' );
+		} else {
+			$this->assertSame( 0, $tax_item->get_id(), 'The tax item should still be unsaved before update_taxes() removes it.' );
+		}
 
 		$order->update_taxes();
 
 		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax item should be removed from the in-memory order.' );
 		$this->assertEmpty( wc_get_order( $order->get_id() )->get_taxes(), 'The obsolete tax item should be removed from the persisted order.' );
+	}
+
+	/**
+	 * @testdox update_taxes removes an unsaved duplicate while preserving the persisted tax item.
+	 */
+	public function test_update_taxes_removes_unsaved_duplicate_tax_item(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate'      => '10.0000',
+				'tax_rate_name' => 'Test tax',
+			)
+		);
+		$order       = new WC_Order();
+		$fee         = new WC_Order_Item_Fee();
+		$fee->set_name( 'Taxable fee' );
+		$fee->set_amount( '10' );
+		$fee->set_total( '10' );
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => '1.00' ) ) );
+		$order->add_item( $fee );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate_id( $tax_rate_id );
+		$order->add_item( $tax_item );
+		$order->save();
+		$tax_item_id = $tax_item->get_id();
+
+		$duplicate = new WC_Order_Item_Tax();
+		$duplicate->set_rate_id( $tax_rate_id );
+		$order->add_item( $duplicate );
+		$this->assertSame( 0, $duplicate->get_id(), 'The duplicate tax should still use a temporary collection key.' );
+
+		$order->update_taxes();
+
+		$this->assertSame( array( $tax_item_id ), array_keys( $order->get_taxes() ), 'Only the original persisted tax should remain in memory.' );
+		$this->assertSame( 1.0, (float) $order->get_cart_tax(), 'Removing the duplicate should preserve the fee tax total.' );
+		$this->assertSame( array( $tax_item_id ), array_keys( wc_get_order( $order->get_id() )->get_taxes() ), 'The duplicate tax should never be persisted.' );
 	}
 
 	/**
@@ -1341,6 +1384,81 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The removed item should not be persisted when the order is saved.' );
+	}
+
+	/**
+	 * @testdox Should preserve factory lookup behavior for numeric string item IDs.
+	 * @testWith ["%d"]
+	 *           ["0%d"]
+	 *           ["%d.5"]
+	 *           ["%de0"]
+	 *
+	 * @param string $item_id_format Format for a numeric string based on the persisted ID.
+	 */
+	public function test_get_item_preserves_numeric_string_factory_lookup( string $item_id_format ): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$order->add_item( $fee );
+		$order->save();
+
+		$item = $order->get_item( sprintf( $item_id_format, $fee->get_id() ) );
+
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, $item, 'The default lookup should retain the factory numeric-string behavior.' );
+		$this->assertSame( $fee->get_id(), $item->get_id(), 'The factory should resolve the same persisted item.' );
+	}
+
+	/**
+	 * @testdox Should remove a persisted item using an integer or digit-only string ID.
+	 * @testWith [null, false]
+	 *           ["%d", false]
+	 *           ["0%d", false]
+	 *           [null, true]
+	 *           ["%d", true]
+	 *           ["0%d", true]
+	 *
+	 * @param string|null $item_id_format Format for a string ID, or null for an integer ID.
+	 * @param bool        $reload_order Whether to reload the order before removing the item.
+	 */
+	public function test_remove_item_removes_persisted_item( ?string $item_id_format, bool $reload_order ): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$order->add_item( $fee );
+		$order->save();
+
+		$order_id = $order->get_id();
+		$item_id  = null === $item_id_format ? $fee->get_id() : sprintf( $item_id_format, $fee->get_id() );
+		if ( $reload_order ) {
+			$order = new WC_Order( $order_id );
+		}
+
+		$order->remove_item( $item_id );
+
+		$this->assertEmpty( $order->get_fees(), 'The removed fee should immediately leave the in-memory collection.' );
+		$this->assertCount( 1, ( new WC_Order( $order_id ) )->get_fees(), 'Persisted deletion should be deferred until save.' );
+
+		$order->save();
+
+		$this->assertEmpty( ( new WC_Order( $order_id ) )->get_fees(), 'The removed fee should be deleted after save.' );
+	}
+
+	/**
+	 * @testdox Should leave other items attached when a temporary key is missing.
+	 */
+	public function test_remove_item_ignores_missing_temporary_key(): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Retained fee' );
+		$order->add_item( $fee );
+		$item_id = array_key_first( $order->get_fees() );
+
+		$this->assertSame( $fee, $order->get_item( $item_id, false ), 'An existing temporary key should resolve locally.' );
+		$this->assertFalse( $order->get_item( 'new:fee_lines999', false ), 'A missing temporary key should not resolve another item.' );
+		$this->assertFalse( $order->remove_item( 'new:fee_lines999' ), 'A missing temporary key should not remove another item.' );
+		$this->assertSame( array( $item_id => $fee ), $order->get_fees(), 'The existing fee should remain attached.' );
+
+		$order->save();
+
+		$this->assertSame( array( $fee->get_id() ), array_keys( ( new WC_Order( $order->get_id() ) )->get_fees() ), 'The existing fee should still be persisted.' );
 	}
 
 	/**
