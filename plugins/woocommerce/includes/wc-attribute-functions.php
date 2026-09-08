@@ -761,10 +761,13 @@ function wc_delete_attribute( $id ) {
 	do_action( 'woocommerce_before_attribute_delete', $id, $name, $taxonomy );
 
 	if ( $name && $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $id ) ) ) {
+		$deleted_terms = false;
+
 		if ( taxonomy_exists( $taxonomy ) ) {
 			$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
 			foreach ( $terms as $term ) {
 				wp_delete_term( $term->term_id, $taxonomy );
+				$deleted_terms = true;
 			}
 		}
 
@@ -778,10 +781,10 @@ function wc_delete_attribute( $id ) {
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
 
 		if ( taxonomy_exists( $taxonomy ) ) {
-			// Deleting the terms above queues term counts when the caller defers counting.
-			// Those resolve the taxonomy by name, so flush them while it still exists.
-			// WordPress keeps one shared queue, so this flushes every pending taxonomy.
-			if ( wp_defer_term_counting() ) {
+			// Deleting terms queues their counts when the caller defers counting, and those
+			// resolve the taxonomy by name later, once it is gone. Flush while it still exists.
+			// WordPress drains its whole queue at once, so only do this when we queued something.
+			if ( $deleted_terms && wp_defer_term_counting() ) {
 				wp_update_term_count( array(), '', true );
 			}
 

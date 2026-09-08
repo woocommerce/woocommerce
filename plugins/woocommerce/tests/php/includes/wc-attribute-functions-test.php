@@ -358,6 +358,47 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
 		}
 	}
+	/**
+	 * @testdox Should leave an unrelated taxonomy's deferred counts queued when no terms were deleted.
+	 */
+	public function test_wc_delete_attribute_without_terms_leaves_other_deferred_counts_queued(): void {
+		$slug      = $this->get_unique_attribute_slug( 'no-terms' );
+		$attribute = $this->create_registered_attribute( $slug );
+
+		$category = wp_insert_term( 'Deferred category ' . $slug, 'product_cat' );
+		$this->assertIsArray( $category, 'The fixture category should be created.' );
+
+		$product_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_title'  => 'Unrelated taxonomy product',
+				'post_status' => 'publish',
+			)
+		);
+		$this->assertIsInt( $product_id, 'The fixture product should be created.' );
+
+		wp_defer_term_counting( true );
+
+		try {
+			// Queue a count for a taxonomy this deletion has nothing to do with.
+			wp_set_object_terms( $product_id, array( (int) $category['term_id'] ), 'product_cat' );
+			$this->assertSame( 0, $this->get_term_count( (int) $category['term_id'] ), 'The unrelated count should start deferred.' );
+
+			// The attribute has no terms, so nothing of ours is queued and nothing needs flushing.
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should still be unregistered.' );
+			$this->assertSame( 0, $this->get_term_count( (int) $category['term_id'] ), 'The unrelated taxonomy should still be deferred.' );
+
+			wp_defer_term_counting( false );
+			$this->assertSame( 1, $this->get_term_count( (int) $category['term_id'] ), "The caller's own flush should resolve the unrelated count." );
+		} finally {
+			wp_defer_term_counting( false );
+			wp_delete_post( $product_id, true );
+			wp_delete_term( (int) $category['term_id'], 'product_cat' );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
 
 
 	/**
@@ -526,6 +567,18 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'wp_taxonomy'  => $wp_taxonomy,
 			'wc_attribute' => $wc_attribute,
 		);
+	}
+
+	/**
+	 * Reads a term's stored count straight from the database, bypassing caches.
+	 *
+	 * @param int $term_id Term ID.
+	 * @return int
+	 */
+	private function get_term_count( int $term_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT count FROM {$wpdb->term_taxonomy} WHERE term_id = %d", $term_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The test must observe the stored count, not a cached one.
 	}
 
 	/**
