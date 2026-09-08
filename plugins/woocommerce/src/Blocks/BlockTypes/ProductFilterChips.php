@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
@@ -64,10 +63,22 @@ final class ProductFilterChips extends AbstractBlock {
 			$style         = is_string( $saved_style ) ? $saved_style : '';
 		}
 
-		$has_visual_swatches  = self::has_visual_swatches( $items );
-		$chip_item_attributes = self::get_chip_item_attributes(
-			is_array( $attributes ) ? $attributes : array(),
-			$has_visual_swatches
+		$has_visual_swatches     = self::has_visual_swatches( $items );
+		$item_classes_and_styles = wp_parse_args(
+			wp_style_engine_get_styles(
+				array(
+					'border'  => array(
+						'radius' => $attributes['style']['border']['radius'] ?? null,
+					),
+					'spacing' => array(
+						'padding' => $attributes['style']['spacing']['padding'] ?? null,
+					),
+				)
+			),
+			array(
+				'css'        => '',
+				'classnames' => '',
+			)
 		);
 
 		$wrapper_attributes = array(
@@ -124,9 +135,9 @@ final class ProductFilterChips extends AbstractBlock {
 					foreach ( $visible_items as $item ) :
 						?>
 						<button
-							class="<?php echo esc_attr( $chip_item_attributes['class'] ); ?>"
-							<?php if ( '' !== $chip_item_attributes['style'] ) : ?>
-								style="<?php echo esc_attr( $chip_item_attributes['style'] ); ?>"
+							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?>"
+							<?php if ( $item_classes_and_styles['css'] ) : ?>
+								style="<?php echo esc_attr( $item_classes_and_styles['css'] ); ?>"
 							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
@@ -177,9 +188,9 @@ final class ProductFilterChips extends AbstractBlock {
 						data-wp-each-key="context.item.id"
 					>
 						<button
-							class="<?php echo esc_attr( $chip_item_attributes['class'] ); ?>"
-							<?php if ( '' !== $chip_item_attributes['style'] ) : ?>
-								style="<?php echo esc_attr( $chip_item_attributes['style'] ); ?>"
+							class="wc-block-product-filter-chips__item <?php echo esc_attr( $item_classes_and_styles['classnames'] ); ?>"
+							<?php if ( $item_classes_and_styles['css'] ) : ?>
+								style="<?php echo esc_attr( $item_classes_and_styles['css'] ); ?>"
 							<?php endif; ?>
 							type="button"
 							role="<?php echo esc_attr( $button_role ); ?>"
@@ -233,34 +244,6 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Get class and style attributes for individual chip items.
-	 *
-	 * Visual swatches stay circular, so padding and border radius are not applied to them.
-	 *
-	 * @param array $attributes          Block attributes.
-	 * @param bool  $has_visual_swatches Whether items use the swatch style.
-	 * @return array{class: string, style: string}
-	 */
-	private static function get_chip_item_attributes( array $attributes, bool $has_visual_swatches ): array {
-		if ( $has_visual_swatches ) {
-			return array(
-				'class' => 'wc-block-product-filter-chips__item',
-				'style' => '',
-			);
-		}
-
-		$item_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
-			$attributes,
-			array( 'border_radius', 'padding' )
-		);
-
-		return array(
-			'class' => trim( 'wc-block-product-filter-chips__item ' . $item_classes_and_styles['classes'] ),
-			'style' => $item_classes_and_styles['styles'],
-		);
 	}
 
 	/**
