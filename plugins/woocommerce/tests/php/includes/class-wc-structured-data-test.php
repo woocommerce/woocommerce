@@ -21,6 +21,27 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() preserves scalar @type grouping.
+	 */
+	public function test_get_structured_data_preserves_scalar_type_grouping(): void {
+		$markup = array(
+			'@type' => 'Product',
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => 'Product',
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Scalar structured data should retain its existing grouping and output.'
+		);
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void
