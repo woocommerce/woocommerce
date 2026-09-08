@@ -1142,20 +1142,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		// Another posts_clauses callback produced this clause, so it is not guaranteed to be a string.
-		// Keep anything that can become one: discarding a join while the WHERE that depends on it
-		// survives would leave a broken query rather than a merely unfiltered one.
-		if ( ! is_string( $sql ) ) {
-			$stringable = is_scalar( $sql ) || ( is_object( $sql ) && method_exists( $sql, '__toString' ) );
-			$sql        = $stringable ? (string) $sql : '';
-		}
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**

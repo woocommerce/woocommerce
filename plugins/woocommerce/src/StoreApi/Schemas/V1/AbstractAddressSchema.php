@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * AddressSchema class.
@@ -244,13 +245,29 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 		}
 
-		// Get additional field keys here as we need to know if they are present in the address for validation.
-		$additional_keys = array_keys( $this->get_additional_address_fields_schema() );
+		$additional_fields = array_intersect_key(
+			$this->additional_fields_controller->get_additional_fields(),
+			$this->get_additional_address_fields_schema()
+		);
 
 		foreach ( array_keys( $address ) as $key ) {
 			// Skip email here it will be validated in BillingAddressSchema.
 			if ( 'email' === $key ) {
 				continue;
+			}
+
+			$field_value = $address[ $key ];
+			if ( 'date' === ( $additional_fields[ $key ]['type'] ?? '' ) && '' !== $field_value ) {
+				if ( ! is_string( $field_value ) || ! TimeUtil::is_valid_date( $field_value, 'Y-m-d' ) ) {
+					$errors->add(
+						'invalid_' . $key,
+						sprintf(
+							/* translators: %s: is the field label */
+							__( 'Please provide a valid %s in YYYY-MM-DD format.', 'woocommerce' ),
+							$additional_fields[ $key ]['label']
+						)
+					);
+				}
 			}
 
 			// Only run specific validation on properties that are defined in the schema and present in the address.
