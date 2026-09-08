@@ -65,14 +65,14 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$cache_name = $invalidator->get_cache_key( $code );
 		$ids        = wp_cache_get( $cache_name, 'coupons' );
 
-		$this->assertNotEquals( false, $ids, sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
+		$this->assertNotFalse( $ids, sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
 
 		$coupon->delete( true );
 
 		// Deleting a published coupon removes its lookup entry, so the code no longer resolves from the object cache.
 		$ids = wp_cache_get( $invalidator->get_cache_key( $code ), 'coupons' );
 
-		$this->assertEquals( false, $ids, 'Object cache should not resolve the coupon code after deletion.' );
+		$this->assertFalse( $ids, 'Object cache should not resolve the coupon code after deletion.' );
 	}
 
 	/**
@@ -89,7 +89,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		// Prime the cache.
 		wc_get_coupon_id_by_code( $code );
 		$cache_name = $invalidator->get_cache_key( $code );
-		$this->assertNotEquals( false, wp_cache_get( $cache_name, 'coupons' ), sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
+		$this->assertNotFalse( wp_cache_get( $cache_name, 'coupons' ), sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
 
 		// Unpublish through the CRUD while `save_post` is running, the way a third party callback would.
 		$unpublish = function () use ( $coupon ) {
@@ -106,9 +106,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		remove_action( 'save_post', $unpublish );
 
 		$this->assertEquals( 'draft', get_post_status( $coupon->get_id() ), 'The coupon should have been unpublished during save_post.' );
-		$this->assertEquals( false, wp_cache_get( $cache_name, 'coupons' ), 'Object cache should not resolve the coupon code after it is unpublished during save_post.' );
-
-		$coupon->delete( true );
+		$this->assertFalse( wp_cache_get( $cache_name, 'coupons' ), 'Object cache should not resolve the coupon code after it is unpublished during save_post.' );
 	}
 
 	/**

@@ -53,8 +53,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), "The coupon code lookup cache should be invalidated when the coupon transitions to {$new_status}" );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), "A {$new_status} coupon should not be resolvable by code" );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -110,9 +108,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse( wp_cache_get( $kept_key, 'coupons' ), "Unpublishing a coupon should not flush another coupon's lookup entry" );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( 'cache-keep-unpublished' ), 'The unpublished coupon should not be resolvable by code' );
 		$this->assertSame( $kept->get_id(), wc_get_coupon_id_by_code( 'cache-keep-kept' ), 'The other coupon should still resolve by code' );
-
-		$unpublished->delete( true );
-		$kept->delete( true );
 	}
 
 	/**
@@ -137,8 +132,8 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	 * @param string $status The status of the coupon being deleted.
 	 */
 	public function test_deleting_a_non_published_coupon_keeps_the_lookup_cache( string $status ): void {
-		$code   = 'cache-keep-delete-' . $status;
-		$coupon = WC_Helper_Coupon::create_coupon( $code );
+		$code = 'cache-keep-delete-' . $status;
+		WC_Helper_Coupon::create_coupon( $code );
 
 		wc_get_coupon_id_by_code( $code );
 		$cache_key = $this->sut->get_cache_key( $code );
@@ -155,28 +150,23 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), "Deleting a {$status} coupon should not rotate the coupons group prefix" );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Deleting a {$status} coupon should not flush an unrelated lookup entry" );
-
-		$coupon->delete( true );
 	}
 
 	/**
 	 * @testdox Should keep the coupon code lookup cache of other coupons when a new coupon is published.
 	 */
 	public function test_publishing_a_coupon_keeps_the_lookup_cache_of_other_coupons(): void {
-		$code   = 'cache-keep-on-create';
-		$coupon = WC_Helper_Coupon::create_coupon( $code );
+		$code = 'cache-keep-on-create';
+		WC_Helper_Coupon::create_coupon( $code );
 
 		wc_get_coupon_id_by_code( $code );
 		$cache_key = $this->sut->get_cache_key( $code );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
 
-		$other = WC_Helper_Coupon::create_coupon( 'cache-keep-on-create-other' );
+		WC_Helper_Coupon::create_coupon( 'cache-keep-on-create-other' );
 
 		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'Publishing a coupon should not rotate the coupons group prefix' );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), "Publishing a coupon should not flush another coupon's lookup entry" );
-
-		$other->delete( true );
-		$coupon->delete( true );
 	}
 
 	/**
@@ -216,17 +206,14 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $older_id, wc_get_coupon_id_by_code( $code ), 'The older coupon should win the lookup again once the newer one is unpublished' );
-
-		wp_delete_post( $newer_id, true );
-		wp_delete_post( $older_id, true );
 	}
 
 	/**
 	 * @testdox Invalidating the 'coupons' cache group should still reach the lookup entries.
 	 */
 	public function test_invalidating_the_coupons_cache_group_busts_the_lookup_cache(): void {
-		$code   = 'cache-bust-group';
-		$coupon = WC_Helper_Coupon::create_coupon( $code );
+		$code = 'cache-bust-group';
+		WC_Helper_Coupon::create_coupon( $code );
 
 		wc_get_coupon_id_by_code( $code );
 		$cache_key = $this->sut->get_cache_key( $code );
@@ -235,8 +222,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		\WC_Cache_Helper::invalidate_cache_group( 'coupons' );
 
 		$this->assertNotSame( $cache_key, $this->sut->get_cache_key( $code ), "Rotating the 'coupons' group prefix should strand the lookup keys built under it" );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -273,8 +258,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'The coupons group prefix should not rotate when the coupon stays published' );
 		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be kept when the coupon stays published' );
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'A published coupon should remain resolvable by code' );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -293,8 +276,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$queries_before = $wpdb->num_queries;
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The published coupon should resolve by code' );
 		$this->assertSame( $queries_before, $wpdb->num_queries, 'A fresh lookup entry should be served from the object cache without a query' );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -345,8 +326,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertSame( $queries_before, $wpdb->num_queries, "A custom data store's lookup entry should be served from the object cache, not thrown away and re-queried on every read" );
 
 		remove_filter( 'woocommerce_coupon_data_store', $use_custom_store );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -407,11 +386,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), 'A late write must not resurrect a coupon that is no longer published' );
 		$this->assertFalse( wp_cache_get( $lookup_key, 'coupons' ), 'The rejected lookup entry should be removed from the object cache' );
 		$this->assertNotFalse( wp_cache_get( $unrelated_meta_key, 'coupons' ), 'Invalidating a lookup entry must not flush unrelated coupon meta' );
-
-		if ( get_post( $coupon->get_id() ) ) {
-			$coupon->delete( true );
-		}
-		$unrelated_coupon->delete( true );
 	}
 
 	/**
@@ -463,9 +437,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			array_map( 'absint', (array) wp_cache_get( $cache_key, 'coupons' ) ),
 			'A rejected entry whose code still resolves should be overwritten with the remaining ids, not deleted'
 		);
-
-		wp_delete_post( $newer_id, true );
-		wp_delete_post( $older_id, true );
 	}
 
 	/**
@@ -499,7 +470,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertNotSame( $this->sut->get_cache_key( $stored_code ), $alias_key, 'The alias should be cached under a different key than the stored code' );
 
 		if ( $coupon->get_id() !== wc_get_coupon_id_by_code( $alias ) ) {
-			$coupon->delete( true );
 			$this->markTestSkipped( 'The database collation of this test environment does not resolve the alias, so there is nothing to invalidate.' );
 		}
 		$this->assertNotFalse( wp_cache_get( $alias_key, 'coupons' ), 'The alias lookup should be primed while the coupon is published' );
@@ -513,8 +483,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $alias ), 'The alias must not resolve the coupon once it is unpublished' );
 		$this->assertFalse( wp_cache_get( $alias_key, 'coupons' ), 'The stale alias lookup entry should be removed from the object cache' );
-
-		$coupon->delete( true );
 	}
 
 	/**
@@ -547,10 +515,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_lookup_entry_stale( array( $page_id ) ), 'An entry pointing at a post that is not a coupon should be stale' );
 		$this->assertTrue( $this->sut->is_lookup_entry_stale( array() ), 'An empty entry should be stale' );
 		$this->assertTrue( $this->sut->is_lookup_entry_stale( array( 0 ) ), 'An entry with an invalid id should be stale' );
-
-		$published->delete( true );
-		$draft->delete( true );
-		wp_delete_post( $page_id, true );
 	}
 
 	/**
