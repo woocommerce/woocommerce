@@ -62,7 +62,7 @@ ul.woocommerce_stats {
 		font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 		font-size: 4em;
 		line-height: 1.2em;
-		font-weight: normal;
+		font-weight: 400;
 		text-align: center;
 		display: block;
 	}
@@ -127,7 +127,7 @@ ul.woocommerce_stats {
 				strong {
 					font-size: 16px;
 					line-height: 1.2em;
-					font-weight: normal;
+					font-weight: 400;
 					display: block;
 					color: $gray-900;
 				}
@@ -237,7 +237,7 @@ ul.woocommerce_stats {
 		font-size: 13px;
 		line-height: 1.5;
 		margin: 0;
-		font-weight: normal;
+		font-weight: 400;
 		color: $wp-admin-icon-gray;
 	}
 
@@ -267,7 +267,7 @@ ul.woocommerce_stats {
 		line-height: 1.5;
 		margin-left: 0.5em;
 		width: 5.4em;
-		font-family: "WooCommerce" !important;
+		font-family: WooCommerce !important;
 
 		&::before {
 			content: "\e021\e021\e021\e021\e021";
@@ -302,14 +302,18 @@ ul.woocommerce_stats {
 }
 
 #dash-right-now li.product-count a::before {
-	font-family: "WooCommerce";
+	font-family: WooCommerce;
 	content: "\e01d";
 }
 
 #dashboard_activity {
+
 	#activity-widget {
+
 		#the-comment-list {
+
 			.review.comment-item {
+
 				.avatar {
 					margin-right: 12px;
 					position: relative;

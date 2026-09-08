@@ -22,7 +22,9 @@ module.exports = function ( grunt ) {
 			options: {
 				configFile: '.stylelintrc',
 			},
-			all: [ '<%= dirs.css %>/*.scss', '!<%= dirs.css %>/select2.scss' ],
+			// select2.scss is excluded through `ignoreFiles` in .stylelintrc,
+			// so a direct stylelint run skips it too.
+			all: [ '<%= dirs.css %>/*.scss' ],
 		},
 
 		// Minify .js files.
