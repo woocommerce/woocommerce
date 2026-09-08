@@ -857,6 +857,50 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Variations should inherit the parent product's password-protected flag regardless of access.
+	 */
+	public function test_variation_inherits_parent_password_protected_flag(): void {
+		$password     = 'secret';
+		$product      = \WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_description( 'Protected variation description' );
+		$variation->save();
+		$product->set_post_password( $password );
+		$product->save();
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_query_params(
+			array(
+				'include' => array( $variation_id ),
+				'parent'  => array( $product->get_id() ),
+				'type'    => 'variation',
+			)
+		);
+
+		$protected_response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $protected_response->get_status() );
+		$protected_data = $protected_response->get_data()[0];
+		$this->assertTrue( $protected_data['is_password_protected'] );
+		$this->assertSame( '', $protected_data['description'] );
+
+		require_once ABSPATH . WPINC . '/class-phpass.php';
+		$hasher                                 = new \PasswordHash( 8, true );
+		$_COOKIE[ 'wp-postpass_' . COOKIEHASH ] = $hasher->HashPassword( $password );
+
+		try {
+			$accessible_response = rest_get_server()->dispatch( $request );
+		} finally {
+			unset( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
+		}
+
+		$this->assertSame( 200, $accessible_response->get_status() );
+		$accessible_data = $accessible_response->get_data()[0];
+		$this->assertTrue( $accessible_data['is_password_protected'] );
+		$this->assertStringContainsString( 'Protected variation description', $accessible_data['description'] );
+	}
+
+	/**
 	 * @testdox Related query parameter returns empty when no related products exist.
 	 */
 	public function test_related_query_parameter_returns_empty_when_no_related() {
