@@ -363,7 +363,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 									<span className="woocommerce-marketplace__product-card__vendor">
 										<span>
 											{ __( 'By', 'woocommerce' ) }
-										</span>
+										</span>{ ' ' }
 										{ productVendor }
 									</span>
 								) }
