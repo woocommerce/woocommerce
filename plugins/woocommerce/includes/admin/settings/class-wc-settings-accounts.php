@@ -144,17 +144,20 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 			),
 			array(
-				'title'    => __( 'Cart behavior on logout', 'woocommerce' ),
-				'desc_tip' => __( 'Whether shoppers keep the items in their cart after logging out. Clearing the cart suits stores where devices are shared or the items themselves are sensitive. Either way, the cart is restored when the shopper logs back in.', 'woocommerce' ),
-				'id'       => 'woocommerce_cart_behavior_on_logout',
-				'default'  => CartBehaviorOnLogout::PRESERVE,
-				'type'     => 'select',
-				'class'    => 'wc-enhanced-select',
-				'options'  => array(
+				'title'             => __( 'Cart behavior on logout', 'woocommerce' ),
+				'desc_tip'          => __( 'Whether shoppers keep the items in their cart after logging out. Clearing the cart suits stores where devices are shared or the items themselves are sensitive. Either way, the cart is restored when the shopper logs back in.', 'woocommerce' ),
+				'id'                => 'woocommerce_cart_behavior_on_logout',
+				'default'           => CartBehaviorOnLogout::PRESERVE,
+				'type'              => 'select',
+				'class'             => 'wc-enhanced-select',
+				'options'           => array(
 					CartBehaviorOnLogout::PRESERVE => __( 'Preserve cart on logout', 'woocommerce' ),
 					CartBehaviorOnLogout::CLEAR    => __( 'Clear cart on logout', 'woocommerce' ),
 				),
-				'autoload' => false,
+				'autoload'          => false,
+				// The starting value depends on whether the store is new, so WC_Install::create_options()
+				// writes it explicitly rather than seeding this default for every store.
+				'skip_initial_save' => true,
 			),
 			array(
 				'title'         => __( 'Account erasure requests', 'woocommerce' ),

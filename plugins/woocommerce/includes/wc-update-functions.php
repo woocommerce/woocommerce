@@ -22,7 +22,6 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
-use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -3800,25 +3799,4 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 	wc_update_11201_invalidate_analytics_reports_cache();
 
 	return false;
-}
-
-/**
- * Keep existing stores on the current logout behavior, which empties the cart.
- *
- * The 'woocommerce_cart_behavior_on_logout' setting defaults to 'preserve' so that new stores
- * keep the cart through logout. Existing stores have always emptied it, so changing that
- * underneath them on upgrade would be a surprise; they stay on 'clear' until the merchant
- * chooses otherwise.
- *
- * The option is written with update_option() rather than add_option() because
- * WC_Install::create_options() runs first and has already seeded the setting with its 'preserve'
- * default. No store can have chosen 'preserve' deliberately: the setting does not exist before
- * this release.
- *
- * @since 11.2.0
- *
- * @return void
- */
-function wc_update_11203_set_cart_behavior_on_logout_for_existing_stores() {
-	update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::CLEAR, false );
 }
