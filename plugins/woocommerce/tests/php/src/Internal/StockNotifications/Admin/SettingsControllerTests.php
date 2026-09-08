@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Admin;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController as StockNotificationsSettings;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use WC_Settings_Advanced;
 use WC_Settings_Products;
@@ -16,7 +16,7 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	/**
 	 * The controller whose hooks the tests exercise.
 	 *
-	 * @var StockNotificationsSettings
+	 * @var SettingsController
 	 */
 	private $controller;
 
@@ -25,9 +25,8 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		// Only AdminManager resolves the controller, and only in admin context. Built directly
-		// rather than through the container, whose cached instance loses its hooks after the first test.
-		$this->controller = new StockNotificationsSettings();
+		// Built directly rather than through the container, whose cached instance loses its hooks after the first test.
+		$this->controller = new SettingsController();
 	}
 
 	/**
@@ -72,6 +71,57 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox Outside admin, only the settings filters are attached.
+	 */
+	public function test_only_settings_filters_are_attached_outside_admin(): void {
+		$this->assertFalse( is_admin() );
+
+		$sut = new SettingsController();
+
+		$this->assertSame( 100, has_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ) ) );
+		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ) ) );
+		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ) ) );
+		$this->assertFalse( has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
+
+		$this->remove_hooks( $sut );
+	}
+
+	/**
+	 * @testdox In admin, the product edit and notice hooks are attached as well.
+	 */
+	public function test_admin_hooks_are_attached_in_admin(): void {
+		set_current_screen( 'edit-post' );
+		$this->assertTrue( is_admin() );
+
+		$sut = new SettingsController();
+
+		$this->assertSame( 100, has_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ) ) );
+		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ) ) );
+		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ) ) );
+		$this->assertSame( 10, has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
+		$this->assertSame( 20, has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
+
+		$this->remove_hooks( $sut );
+	}
+
+	/**
+	 * Detach every hook a test instance attached, so it does not leak into other tests.
+	 *
+	 * @param SettingsController $sut The instance under test.
+	 */
+	private function remove_hooks( SettingsController $sut ): void {
+		remove_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ), 100 );
+		remove_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ), 100 );
+		remove_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ), 100 );
+		remove_action( 'admin_notices', array( $sut, 'output_admin_notices' ) );
+		remove_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ), 20 );
+		remove_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) );
 	}
 
 	/**
