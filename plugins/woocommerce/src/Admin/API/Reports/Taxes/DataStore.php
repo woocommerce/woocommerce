@@ -137,6 +137,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Only a positive result is cached: while the column is missing the check re-runs,
 	 * so the feature turns on by itself once the schema update lands.
 	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.2.0
 	 *
 	 * @return bool
