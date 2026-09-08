@@ -285,20 +285,14 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$lookup_table_name = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
-			$taxonomy_sql      = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			$in_stock_clause   = $this->hide_out_of_stock_items() ? 'AND in_stock = 1' : '';
+			$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
 
-			// The lookup table only holds rows for published variations, so no join on the posts table is needed.
-			// $taxonomy_sql is already quoted by prepare(); $product_ids is a list the database returned.
-			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT product_or_parent_id ) as term_count, term_id as term_count_id
-				FROM {$lookup_table_name}
-				WHERE product_or_parent_id IN ( {$product_ids} )
-				AND taxonomy = {$taxonomy_sql}
-				{$in_stock_clause}
-				GROUP BY term_id
-			";
+			// A regeneration truncates the lookup table and refills it in batches, so its rows are incomplete
+			// until it finishes. The counts come from the parent terms until then.
+			$attribute_count_sql =
+				$lookup_data_store->regeneration_is_in_progress() || $lookup_data_store->regeneration_was_aborted()
+					? $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count )
+					: $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = $wpdb->get_results( $attribute_count_sql );
@@ -315,6 +309,56 @@ class FilterData {
 		$this->set_cache( $transient_key, $results );
 
 		return $results;
+	}
+
+	/**
+	 * Build the attribute count query that reads the product attributes lookup table.
+	 *
+	 * @param string $product_ids        Comma separated list of product ids.
+	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @return string The SQL query.
+	 */
+	private function get_attribute_counts_sql_from_lookup_table( string $product_ids, string $attribute_to_count ): string {
+		global $wpdb;
+
+		$lookup_table_name = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+		$taxonomy_sql      = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
+		$in_stock_clause   = $this->hide_out_of_stock_items() ? 'AND in_stock = 1' : '';
+
+		// The lookup table only holds rows for published variations, so no join on the posts table is needed.
+		// $taxonomy_sql is already quoted by prepare(); $product_ids is a list the database returned.
+		return "
+			SELECT COUNT( DISTINCT product_or_parent_id ) as term_count, term_id as term_count_id
+			FROM {$lookup_table_name}
+			WHERE product_or_parent_id IN ( {$product_ids} )
+			AND taxonomy = {$taxonomy_sql}
+			{$in_stock_clause}
+			GROUP BY term_id
+		";
+	}
+
+	/**
+	 * Build the attribute count query that reads the terms assigned to the parent products.
+	 *
+	 * @param string $product_ids        Comma separated list of product ids.
+	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @return string The SQL query.
+	 */
+	private function get_attribute_counts_sql_from_term_relationships( string $product_ids, string $attribute_to_count ): string {
+		global $wpdb;
+
+		// $taxonomy_escaped is escaped by esc_sql(); $product_ids is a list the database returned.
+		$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+
+		return "
+			SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
+			FROM {$wpdb->term_relationships} AS term_relationships
+			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+			WHERE term_relationships.object_id IN ( {$product_ids} )
+			AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
+			GROUP BY terms.term_id
+		";
 	}
 
 	/**

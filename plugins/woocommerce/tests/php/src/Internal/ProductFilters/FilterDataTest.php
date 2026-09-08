@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -284,6 +285,40 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5\'s published red variation still counts.' );
 		$this->assertSame( 1, $counts[ $green_term->term_id ] ?? 0, 'Only Product 6 counts for green while Product 5\'s green variation is disabled.' );
+	}
+
+	/**
+	 * @testdox Attribute counts come from the parent terms while the lookup table is being regenerated.
+	 */
+	public function test_get_attribute_counts_fall_back_to_parent_terms_while_the_lookup_table_is_regenerating(): void {
+		global $wpdb;
+
+		$green_term = get_term_by( 'slug', 'green-slug', 'pa_color' );
+		$red_term   = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		// A regeneration truncates the table and refills it in batches, so the rows can be missing for a long while.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		update_option( 'woocommerce_attribute_lookup_regeneration_in_progress', 'yes' );
+
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+		$counts     = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertSame( 2, $counts[ $green_term->term_id ] ?? 0, 'Products 5 and 6 still carry the green term, so the counts stay complete during the rebuild.' );
+		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5 still carries the red term, so the counts stay complete during the rebuild.' );
+
+		delete_option( 'woocommerce_attribute_lookup_regeneration_in_progress' );
+
+		// The regeneration flag is not part of the cache key, so the counts have to be recalculated explicitly.
+		wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
+
+		$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertArrayNotHasKey( $green_term->term_id, $counts, 'Once no regeneration is running the counts come from the empty lookup table.' );
+		$this->assertArrayNotHasKey( $red_term->term_id, $counts, 'Once no regeneration is running the counts come from the empty lookup table.' );
 	}
 
 	/**
