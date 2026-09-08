@@ -55,6 +55,26 @@ jQuery( function ( $ ) {
 		}
 	} );
 
+	// WordPress discards empty auto-drafts before WooCommerce can save the product data.
+	const postForm = document.getElementById( 'post' );
+	if ( postForm ) {
+		postForm.addEventListener( 'formdata', function ( event ) {
+			const title = event.formData.get( 'post_title' );
+
+			if (
+				'auto-draft' ===
+					event.formData.get( 'original_post_status' ) &&
+				typeof title === 'string' &&
+				'' === title.trim()
+			) {
+				event.formData.set(
+					'post_title',
+					woocommerce_admin_meta_boxes.i18n_no_title
+				);
+			}
+		} );
+	}
+
 	// Type box.
 	if ( $( 'body' ).hasClass( 'wc-wp-version-gte-55' ) ) {
 		$( '.type_box' ).appendTo( '#woocommerce-product-data .hndle' );
