@@ -230,6 +230,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// Given specific currency.
 		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol( 'GBP' ) );
 		$this->assertEquals( 'MOP&#36;', get_woocommerce_currency_symbol( 'MOP' ) );
+		$this->assertSame( 'CHW', get_woocommerce_currency_symbol( 'CHW' ) );
 		$this->assertSame( 'K', get_woocommerce_currency_symbol( 'ZMW' ), 'The Zambian kwacha should use its local display symbol.' );
 
 		// Each case.
