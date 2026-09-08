@@ -960,6 +960,83 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should delete every token owned by the user and report how many went.
+	 */
+	public function test_delete_for_user_deletes_all_of_that_users_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, 101 );
+		$this->create_push_token_for_user( $data_store, 101 );
+		$retained = $this->create_push_token_for_user( $data_store, 102 );
+
+		$this->assertSame( 2, $data_store->delete_for_user( 101 ) );
+		$this->assertSame( 0, $this->count_tokens_for_user( 101 ) );
+		$this->assertNotNull( get_post( $retained->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should report zero when the user owns no tokens.
+	 */
+	public function test_delete_for_user_returns_zero_when_the_user_has_no_tokens(): void {
+		$data_store = new PushTokensDataStore();
+
+		$this->assertSame( 0, $data_store->delete_for_user( 103 ) );
+	}
+
+	/**
+	 * A caller that loses the user ID must not match every author-less row.
+	 *
+	 * @testdox Should refuse a non-positive user ID and delete nothing.
+	 */
+	public function test_delete_for_user_refuses_a_non_positive_user_id(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$this->create_push_token_for_user( $data_store, 105 );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = %s",
+				PushToken::POST_TYPE
+			)
+		);
+
+		$this->assertSame( 0, $data_store->delete_for_user( 0 ) );
+		$this->assertSame( 1, $this->count_tokens_for_user( 0 ) );
+	}
+
+	/**
+	 * @testdox Should remove the token's meta along with the record.
+	 */
+	public function test_delete_for_user_removes_token_meta(): void {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_push_token_for_user( $data_store, 104 );
+		$token_id   = $push_token->get_id();
+
+		$data_store->delete_for_user( 104 );
+
+		$this->assertSame( '', get_post_meta( $token_id, 'token', true ) );
+	}
+
+	/**
+	 * Counts the push token records owned by a user.
+	 *
+	 * @param int $user_id The owning user ID.
+	 * @return int The number of records.
+	 */
+	private function count_tokens_for_user( int $user_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d",
+				PushToken::POST_TYPE,
+				$user_id
+			)
+		);
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.
