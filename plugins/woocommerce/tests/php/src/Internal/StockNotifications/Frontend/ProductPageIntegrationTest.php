@@ -162,19 +162,14 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	 * @testdox Should render the form inside the legacy Add to Cart Form block.
 	 */
 	public function test_form_is_rendered_inside_legacy_add_to_cart_form_block(): void {
-		$product_ids = array(
-			'variable' => $this->create_and_visit_variable_product(),
-			'simple'   => $this->create_and_visit_out_of_stock_simple_product(),
-		);
+		$variable_product_id = $this->create_and_visit_variable_product();
+		$markup              = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $variable_product_id . '} --><!-- wp:woocommerce/add-to-cart-form /--><!-- /wp:woocommerce/single-product -->' );
 
-		foreach ( $product_ids as $type => $product_id ) {
-			// Reset the per-product render cache guard state by visiting the product again.
-			$this->go_to( get_permalink( $product_id ) );
-			$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render inside the legacy Add to Cart Form block for a variable product.' );
 
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-form /--><!-- /wp:woocommerce/single-product -->' );
+		$simple_product_id = $this->create_and_visit_out_of_stock_simple_product();
+		$markup            = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-form /--><!-- /wp:woocommerce/single-product -->' );
 
-			$this->assertStringContainsString( 'wc_bis_form', $markup, "The Back in Stock form should render inside the legacy Add to Cart Form block for a {$type} product." );
-		}
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render inside the legacy Add to Cart Form block for an out of stock simple product.' );
 	}
 }
