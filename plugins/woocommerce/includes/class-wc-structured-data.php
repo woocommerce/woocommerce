@@ -50,7 +50,10 @@ class WC_Structured_Data {
 	/**
 	 * Sets data.
 	 *
-	 * @param  array $data  Structured data.
+	 * @since 3.0.0
+	 * @since 11.2.0 Added support for multiple schema types in `@type`.
+	 *
+	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings; any invalid array member rejects the node.
 	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */
@@ -65,6 +68,8 @@ class WC_Structured_Data {
 					return false;
 				}
 			}
+
+			$data['@type'] = array_values( $data['@type'] );
 		} elseif ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
 			return false;
 		}
@@ -108,7 +113,7 @@ class WC_Structured_Data {
 		foreach ( $this->get_data() as $value ) {
 			if ( is_array( $value['@type'] ) ) {
 				$value_types    = array_map( 'strtolower', $value['@type'] );
-				$matching_types = array_intersect( $value_types, $types );
+				$matching_types = array_intersect( $types, $value_types );
 				$type           = $matching_types ? reset( $matching_types ) : reset( $value_types );
 
 				$data[ $type ][] = $value;

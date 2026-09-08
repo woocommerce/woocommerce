@@ -42,7 +42,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox set_data() accepts a valid array @type without changing it.
+	 * @testdox set_data() accepts a valid list of @type values.
 	 */
 	public function test_set_data_accepts_valid_array_type(): void {
 		$markup = array(
@@ -57,7 +57,35 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array( $markup ),
 			$this->structured_data->get_data(),
-			'A valid array @type should be stored verbatim.'
+			'A valid list of @type values should retain its values and order.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() normalizes a non-list @type array before storage.
+	 */
+	public function test_set_data_normalizes_non_list_array_type(): void {
+		$markup = array(
+			'@type' => array(
+				0 => 'Product',
+				2 => 'Book',
+			),
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid non-list @type array should be accepted.'
+		);
+		$this->assertSame(
+			array(
+				array(
+					'@type' => array( 'Product', 'Book' ),
+					'name'  => 'Test product',
+				),
+			),
+			$this->structured_data->get_data(),
+			'A non-list @type array should be reindexed so it encodes as a JSON list.'
 		);
 	}
 
@@ -102,6 +130,60 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			),
 			$this->structured_data->get_structured_data( $requested_types ),
 			'Array @type markup should survive grouping and page-type filtering.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() groups multi-type nodes by requested type priority.
+	 */
+	public function test_get_structured_data_groups_array_type_by_requested_priority(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => 'Product',
+				'name'  => 'Scalar product',
+			)
+		);
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Review', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@graph'   => array(
+					array(
+						'@type' => 'Product',
+						'name'  => 'Scalar product',
+					),
+					array(
+						'@type' => array( 'Review', 'Product' ),
+						'name'  => 'Multi-type product',
+					),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'product', 'review' ) ),
+			'Multi-type nodes should join the group selected by the requested type order.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() excludes multi-type nodes without a requested type.
+	 */
+	public function test_get_structured_data_excludes_array_type_without_requested_match(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Thing', 'CreativeWork' ),
+				'name'  => 'Unrequested node',
+			)
+		);
+
+		$this->assertSame(
+			array(),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Multi-type nodes without a requested type should be excluded.'
 		);
 	}
 
