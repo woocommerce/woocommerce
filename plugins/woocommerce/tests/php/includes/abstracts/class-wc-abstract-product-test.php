@@ -118,6 +118,29 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving a product without an image leaves no stored thumbnail meta, as before, and reloads as integer zero.
+	 */
+	public function test_saving_without_an_image_leaves_no_thumbnail_meta() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = new WC_Product_Simple();
+		$product->set_name( 'Product without an image' );
+		$product_id = $product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_thumbnail_id' ), 'A product created without an image should not store a thumbnail meta row.' );
+
+		$product->set_image_id( $image_id );
+		$product->save();
+
+		$this->assertSame( (string) $image_id, get_post_meta( $product_id, '_thumbnail_id', true ), 'A product with an image should store the attachment ID.' );
+
+		$product->set_image_id();
+		$product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_thumbnail_id' ), 'Clearing the image should remove the thumbnail meta row, not store "0".' );
+		$this->assertSame( 0, ( new WC_Product_Simple( $product_id ) )->get_image_id(), 'The cleared image ID should reload as integer zero.' );
+	}
+
+	/**
 	 * @testdox Ensure that individual Downloadable Products follow the rules regarding Approved Download Directories.
 	 */
 	public function test_fetching_of_approved_downloads() {
