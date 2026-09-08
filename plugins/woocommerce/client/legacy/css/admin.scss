@@ -6987,6 +6987,16 @@ img.help_tip {
 
 		&.woocommerce_variation h3 {
 
+			> select[name^="attribute_"] {
+				max-width: min(100%, 25rem);
+				margin-inline: 0;
+
+				@media only screen and (max-width: 782px) {
+					width: 100%;
+					max-width: 100%;
+				}
+			}
+
 			a.delete,
 			a.edit,
 			.sort {
