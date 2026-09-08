@@ -304,6 +304,31 @@ describe( 'AutoUpdateStatus', () => {
 		);
 	} );
 
+	it( 'reports a failed refresh without calling the saved toggle a failure', async () => {
+		loadSubscriptions.mockRejectedValueOnce( new Error( 'offline' ) );
+		renderStatus( subscriptionWith( {} ) );
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+		);
+
+		await waitFor( () =>
+			expect( addNotice ).toHaveBeenCalledWith(
+				'test-key',
+				'The setting was saved, but the list could not be refreshed. Reload the page to see the change.',
+				'error'
+			)
+		);
+		expect( speak ).toHaveBeenCalledWith(
+			'Auto-updates enabled for Test Extension.'
+		);
+		expect( addNotice ).not.toHaveBeenCalledWith(
+			'test-key',
+			expect.stringContaining( 'could not be enabled' ),
+			'error'
+		);
+	} );
+
 	it( 'shows a progress label while enabling', async () => {
 		let finish: () => void = () => {};
 		( setProductAutoUpdate as jest.Mock ).mockReturnValueOnce(

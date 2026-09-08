@@ -109,7 +109,6 @@ export default function AutoUpdateStatus( props: {
 		removeNotice( subscription.product_key );
 
 		setProductAutoUpdate( subscription, enabled )
-			.then( () => loadSubscriptions( false ) )
 			.then( () => {
 				const announcement = enabled
 					? /* translators: %s is the product name. */
@@ -118,6 +117,19 @@ export default function AutoUpdateStatus( props: {
 					  __( 'Auto-updates disabled for %s.', 'woocommerce' );
 
 				speak( sprintf( announcement, subscription.product_name ) );
+
+				// The setting is saved by now. A failed refresh only leaves the row stale, so it
+				// gets its own notice rather than the toggle failure below.
+				return loadSubscriptions( false ).catch( () =>
+					addNotice(
+						subscription.product_key,
+						__(
+							'The setting was saved, but the list could not be refreshed. Reload the page to see the change.',
+							'woocommerce'
+						),
+						NoticeStatus.Error
+					)
+				);
 			} )
 			.catch( ( error: { data?: { message?: string } } ) => {
 				const failure = enabled
