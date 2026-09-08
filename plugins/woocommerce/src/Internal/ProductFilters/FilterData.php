@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -286,12 +285,14 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
+			$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+
 			// The lookup table usage option is 'no' while a regeneration is running, after an aborted
 			// regeneration is cleaned up, and when an admin disabled the table. Its rows are incomplete
 			// in all of those states, so the counts come from the parent terms then, which is the same
-			// rule the main product query applies.
-			$attribute_count_sql = wc_get_container()->get( Filterer::class )->filtering_via_lookup_table_is_active()
-				? $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count )
+			// condition under which the main product query filters through the table.
+			$attribute_count_sql = $lookup_data_store->usage_is_enabled()
+				? $this->get_attribute_counts_sql_from_lookup_table( $lookup_data_store, $product_ids, $attribute_to_count )
 				: $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -314,14 +315,15 @@ class FilterData {
 	/**
 	 * Build the attribute count query that reads the product attributes lookup table.
 	 *
-	 * @param string $product_ids        Comma separated list of product ids.
-	 * @param string $attribute_to_count Attribute taxonomy name.
+	 * @param LookupDataStore $lookup_data_store  The product attributes lookup data store.
+	 * @param string          $product_ids        Comma separated list of product ids.
+	 * @param string          $attribute_to_count Attribute taxonomy name.
 	 * @return string The SQL query.
 	 */
-	private function get_attribute_counts_sql_from_lookup_table( string $product_ids, string $attribute_to_count ): string {
+	private function get_attribute_counts_sql_from_lookup_table( LookupDataStore $lookup_data_store, string $product_ids, string $attribute_to_count ): string {
 		global $wpdb;
 
-		$lookup_table_name = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+		$lookup_table_name = $lookup_data_store->get_lookup_table_name();
 		$taxonomy_sql      = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
 		$in_stock_clause   = $this->hide_out_of_stock_items() ? 'AND in_stock = 1' : '';
 

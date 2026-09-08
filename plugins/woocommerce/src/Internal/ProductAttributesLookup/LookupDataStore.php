@@ -861,6 +861,19 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Whether reading the lookup table is enabled (the "Enable table usage" tool, option 'woocommerce_attribute_lookup_enabled').
+	 *
+	 * It's off while a regeneration runs, after an aborted regeneration is cleaned up, and when an admin disabled it.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public function usage_is_enabled(): bool {
+		return 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+	}
+
+	/**
 	 * Check if the optimized database access setting is enabled.
 	 *
 	 * @return bool True if the optimized database access setting is enabled.
