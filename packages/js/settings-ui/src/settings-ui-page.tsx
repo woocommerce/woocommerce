@@ -651,25 +651,36 @@ export const SettingsUIPage = ( {
 		() => dataFormAdapter.getForm( values ),
 		[ dataFormAdapter, values ]
 	);
+	const allFields = useMemo( () => getAllFields( schema ), [ schema ] );
+	const fieldsById = useMemo(
+		() => new Map( allFields.map( ( field ) => [ field.id, field ] ) ),
+		[ allFields ]
+	);
 	const handleDataFormChange = useCallback(
 		( nextValues: Record< string, SettingsValue | undefined > ) => {
 			setValuesState( ( currentValues ) => {
 				const mergedValues = { ...currentValues };
 				Object.entries( nextValues ).forEach(
 					( [ fieldId, value ] ) => {
-						// Cleared controls use the settings vocabulary's empty string.
+						const fieldType = fieldsById.get( fieldId )?.type;
+						const emptyValue =
+							fieldType === 'number' ||
+							fieldType === 'integer' ||
+							fieldType === 'datetime-local'
+								? null
+								: '';
 						mergedValues[ fieldId ] =
-							value === undefined ? '' : value;
+							value === undefined ? emptyValue : value;
 					}
 				);
 				return mergedValues;
 			} );
 		},
-		[]
+		[ fieldsById ]
 	);
 
 	const formPostFields =
-		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
+		saveStrategy.adapter === 'form_post' ? allFields : [];
 
 	const showHeader = schema.shell?.header === 'visible';
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
@@ -740,6 +751,9 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							initialCanonicalValue={ initialValues[ field.id ] }
+							serializeDateTimeAsStoreLocal
+							strict
 							key={ field.id }
 						/>
 					) ) }
