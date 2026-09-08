@@ -77,7 +77,7 @@ folder (the `.wp-env.json` file configures the separate dev environment, and `.w
 
 ### PHP coverage in CI
 
-See the [PHP version guidelines](https://github.com/woocommerce/woocommerce/blob/dev/add-php-8.3-unit-test-coverage/docs/contribution/testing/php-version-coverage.md) for how to choose PHP versions and where they are covered by E2E and PHP unit tests.
+See the [PHP version guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/testing/php-version-coverage.md) for how to choose PHP versions and where they are covered by E2E and PHP unit tests.
 
 The policy lives in `config.ci.tests` in `plugins/woocommerce/package.json`, using each job's `events` and `testEnv.config.phpVersion`. PHP 7.4 and 8.5 have separate nightly entries and report names; the existing report names represent PHP 8.3. When updating the policy, keep the routine version aligned with store usage and update the latest nightly version as WooCommerce adopts a newer PHP release.
 
