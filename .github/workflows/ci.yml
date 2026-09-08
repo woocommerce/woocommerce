@@ -524,7 +524,10 @@ jobs:
     # Match the three-attempt limit in retry-nightly-tests.yml before alerting on nightly failures.
     if: >-
       ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' &&
-          ( inputs.trigger != 'nightly-checks' || github.event_name != 'schedule' || github.run_attempt >= 3 ) }}
+          (
+            ( inputs.trigger == 'nightly-checks' && github.event_name == 'schedule' && github.run_attempt >= 3 ) ||
+            ( inputs.trigger != 'nightly-checks' || github.event_name != 'schedule' )
+          ) }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
