@@ -49,6 +49,16 @@ class WC_Analytics_Visitor_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Put a cookie on the request the way PHP would: raw header plus the decoded superglobal.
+	 *
+	 * @param string $raw Raw cookie value as the browser sends it.
+	 */
+	private function send_cookie_value( string $raw ): void {
+		$_SERVER['HTTP_COOKIE'] = 'other=1; tk_ai=' . $raw . '; last=2';
+		$_COOKIE['tk_ai']       = urldecode( $raw );
+	}
+
+	/**
 	 * Dispatch a POST to the endpoint.
 	 *
 	 * @return \WP_REST_Response
@@ -56,17 +66,6 @@ class WC_Analytics_Visitor_Test extends BaseTestCase {
 	private function dispatch(): \WP_REST_Response {
 		Woocommerce_Analytics::register_rest_routes();
 		return rest_get_server()->dispatch( new \WP_REST_Request( 'POST', self::ROUTE ) );
-	}
-
-	/**
-	 * The Set-Cookie header of a response, or null.
-	 *
-	 * @param \WP_REST_Response $response Response.
-	 * @return string|null
-	 */
-	private function set_cookie_header( \WP_REST_Response $response ) {
-		$headers = $response->get_headers();
-		return isset( $headers['Set-Cookie'] ) ? $headers['Set-Cookie'] : null;
 	}
 
 	/**
@@ -81,25 +80,35 @@ class WC_Analytics_Visitor_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A browser without a cookie gets a new 24-character id in the body and in Set-Cookie.
+	 * A browser without a cookie gets a new 24-character id.
 	 */
-	public function test_mints_an_id_and_sets_a_lax_cookie_when_none_is_sent(): void {
+	public function test_mints_an_id_when_none_is_sent(): void {
 		$response = $this->dispatch();
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertIsString( $data['anon_id'] );
 		$this->assertSame( 24, strlen( $data['anon_id'] ) );
+		$this->assertMatchesRegularExpression( '/^[A-Za-z0-9_-]{24}$/', $data['anon_id'], 'URL-safe base64, no + or /.' );
 		$this->assertFalse( $data['reused'] );
+	}
 
-		$cookie = $this->set_cookie_header( $response );
-		$this->assertNotNull( $cookie );
-		$this->assertStringStartsWith( 'tk_ai=' . $data['anon_id'] . '; Path=/; Expires=', $cookie );
-		$this->assertStringContainsString( '; Max-Age=' . ( 365 * DAY_IN_SECONDS ) . ';', $cookie );
-		$this->assertStringEndsWith( '; SameSite=Lax', $cookie );
-		$this->assertStringNotContainsString( 'Domain=', $cookie );
-		$this->assertStringNotContainsString( 'HttpOnly', $cookie );
-		$this->assertStringNotContainsString( 'Secure', $cookie, 'Secure is only set on SSL requests.' );
+	/**
+	 * The cookie attributes: one year, Path=/, no Domain, not HttpOnly, SameSite=Lax, Secure
+	 * only on SSL. Headers cannot be observed under PHPUnit, so the options are asserted.
+	 */
+	public function test_cookie_options(): void {
+		$options = WC_Analytics_Visitor::get_cookie_options();
+
+		$this->assertEqualsWithDelta( time() + 365 * DAY_IN_SECONDS, $options['expires'], 5 );
+		$this->assertSame( '/', $options['path'] );
+		$this->assertArrayNotHasKey( 'domain', $options );
+		$this->assertFalse( $options['httponly'] );
+		$this->assertSame( 'Lax', $options['samesite'] );
+		$this->assertFalse( $options['secure'] );
+
+		$_SERVER['HTTPS'] = 'on';
+		$this->assertTrue( WC_Analytics_Visitor::get_cookie_options()['secure'] );
 	}
 
 	/**
@@ -107,43 +116,57 @@ class WC_Analytics_Visitor_Test extends BaseTestCase {
 	 * script-written cookie becomes an HTTP one.
 	 */
 	public function test_reissues_the_cookie_the_browser_sent(): void {
-		$_COOKIE['tk_ai'] = 'jetpack:abcDEF123456789+/=';
+		$this->send_cookie_value( 'jetpack:abcDEF123456789' );
 
-		$response = $this->dispatch();
-		$data     = $response->get_data();
+		$data = $this->dispatch()->get_data();
 
-		$this->assertSame( 'jetpack:abcDEF123456789+/=', $data['anon_id'] );
+		$this->assertSame( 'jetpack:abcDEF123456789', $data['anon_id'] );
 		$this->assertTrue( $data['reused'] );
-		$this->assertStringStartsWith( 'tk_ai=jetpack:abcDEF123456789+/=; Path=/;', $this->set_cookie_header( $response ) );
+	}
+
+	/**
+	 * An id the client script minted with standard base64 keeps its `+` and `/`: the raw
+	 * header is read, not the url-decoded superglobal where `+` becomes a space.
+	 */
+	public function test_keeps_a_base64_id_with_plus_and_slash(): void {
+		$this->send_cookie_value( 'aB+cD/eF0123456789ghij==' );
+
+		$data = $this->dispatch()->get_data();
+
+		$this->assertSame( 'aB+cD/eF0123456789ghij==', $data['anon_id'] );
+		$this->assertTrue( $data['reused'] );
 	}
 
 	/**
 	 * A malformed value is not echoed back; a fresh id replaces it.
 	 */
 	public function test_replaces_a_malformed_cookie_value(): void {
-		$_COOKIE['tk_ai'] = '<script>alert(1)</script>';
+		$this->send_cookie_value( '<script>alert(1)</script>' );
 
-		$response = $this->dispatch();
-		$data     = $response->get_data();
+		$data = $this->dispatch()->get_data();
 
 		$this->assertFalse( $data['reused'] );
 		$this->assertSame( 24, strlen( $data['anon_id'] ) );
-		$this->assertStringNotContainsString( 'script', $this->set_cookie_header( $response ) );
+		$this->assertStringNotContainsString( 'script', $data['anon_id'] );
 	}
 
 	/**
-	 * Secure follows is_ssl().
+	 * A value with a trailing newline (reachable through the url-decoded superglobal) is
+	 * not echoed either.
 	 */
-	public function test_secure_attribute_on_ssl(): void {
-		$_SERVER['HTTPS'] = 'on';
+	public function test_replaces_a_value_with_a_trailing_newline(): void {
+		unset( $_SERVER['HTTP_COOKIE'] );
+		$_COOKIE['tk_ai'] = "abcdefgh0123\n";
 
-		$cookie = $this->set_cookie_header( $this->dispatch() );
+		$data = $this->dispatch()->get_data();
 
-		$this->assertStringContainsString( '; Secure; SameSite=Lax', $cookie );
+		$this->assertFalse( $data['reused'] );
+		$this->assertSame( 24, strlen( $data['anon_id'] ) );
+		$this->assertStringNotContainsString( 'script', $data['anon_id'] );
 	}
 
 	/**
-	 * Bots get no id and no cookie.
+	 * Bots get no id.
 	 */
 	public function test_bots_get_nothing(): void {
 		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
@@ -152,7 +175,6 @@ class WC_Analytics_Visitor_Test extends BaseTestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertNull( $response->get_data()['anon_id'] );
-		$this->assertNull( $this->set_cookie_header( $response ) );
 	}
 
 	/**

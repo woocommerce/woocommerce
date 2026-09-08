@@ -33,9 +33,10 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	const COOKIE_LIFETIME = 365 * DAY_IN_SECONDS;
 
 	/**
-	 * Accepted cookie values: the ids this package mints and the prefixed forms other writers use.
+	 * Accepted cookie values: the ids this package mints, the base64 ids the client used to
+	 * mint, and the prefixed forms other writers use.
 	 */
-	const VALUE_PATTERN = '/^[A-Za-z0-9+\/=:._-]{8,64}$/';
+	const VALUE_PATTERN = '/^[A-Za-z0-9+\/=:._-]{8,64}$/D';
 
 	/**
 	 * Endpoint namespace.
@@ -97,7 +98,7 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 				'reused'  => $reused,
 			)
 		);
-		$response->header( 'Set-Cookie', $this->build_cookie_header( $anon_id ) );
+		$this->send_cookie( $anon_id );
 
 		return $response;
 	}
@@ -117,52 +118,66 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	}
 
 	/**
-	 * The `tk_ai` value the browser sent, when it is well formed.
+	 * The `tk_ai` value the browser sent, when it is well formed. Read from the raw header:
+	 * PHP url-decodes `$_COOKIE`, which turns the `+` of an older base64 id into a space.
 	 *
 	 * @return string|null
 	 */
 	private function get_valid_cookie_value() {
-		if ( empty( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-			return null;
+		$value = null;
+
+		if ( ! empty( $_SERVER['HTTP_COOKIE'] ) ) {
+			$header = wp_unslash( $_SERVER['HTTP_COOKIE'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated against VALUE_PATTERN below.
+			if ( preg_match( '/(?:^|;\s*)' . self::COOKIE_NAME . '=([^;]*)/', $header, $matches ) ) {
+				$value = $matches[1];
+			}
+		} elseif ( ! empty( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			$value = wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated against VALUE_PATTERN below.
 		}
 
-		$value = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
-
-		return preg_match( self::VALUE_PATTERN, $value ) ? $value : null;
+		return is_string( $value ) && preg_match( self::VALUE_PATTERN, $value ) ? $value : null;
 	}
 
 	/**
-	 * Mint a new id: 18 random bytes, base64 encoded, the 24-character shape the client used.
+	 * Mint a new id: 18 random bytes as URL-safe base64, the 24-character shape the client
+	 * used, without `+` and `/` so the value needs no encoding anywhere.
 	 *
 	 * @return string
 	 */
 	private function generate_anon_id() {
-		return base64_encode( random_bytes( 18 ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		return strtr( base64_encode( random_bytes( 18 ) ), '+/', '-_' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
 	/**
-	 * Build the `Set-Cookie` header. `Path=/` and no `Domain` replace the cookie the client
-	 * used to set; `SameSite=Lax` lets it travel on an ad-click navigation; not `HttpOnly`
-	 * because the client and the stats.wp.com tracker read it.
+	 * Cookie attributes. `Path=/` and no `Domain` replace the cookie the client used to set;
+	 * `SameSite=Lax` lets it travel on an ad-click navigation; not `HttpOnly` because the
+	 * client and the stats.wp.com tracker read it.
 	 *
-	 * @param string $anon_id Cookie value.
-	 * @return string
+	 * @return array Options for setcookie().
 	 */
-	private function build_cookie_header( $anon_id ) {
-		$parts = array(
-			self::COOKIE_NAME . '=' . $anon_id,
-			'Path=/',
-			'Expires=' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + self::COOKIE_LIFETIME ),
-			'Max-Age=' . self::COOKIE_LIFETIME,
+	public static function get_cookie_options() {
+		return array(
+			'expires'  => time() + self::COOKIE_LIFETIME,
+			'path'     => '/',
+			'secure'   => is_ssl(),
+			'httponly' => false,
+			'samesite' => 'Lax',
 		);
+	}
 
-		if ( is_ssl() ) {
-			$parts[] = 'Secure';
+	/**
+	 * Send the cookie. setrawcookie() appends a `Set-Cookie` header (`WP_REST_Response::header()`
+	 * would replace one another plugin already sent) and leaves the value unencoded, so the
+	 * browser, the client script and PHP all see the same string.
+	 *
+	 * @param string $anon_id Cookie value, already validated against VALUE_PATTERN.
+	 */
+	private function send_cookie( $anon_id ) {
+		if ( headers_sent() ) {
+			return;
 		}
 
-		$parts[] = 'SameSite=Lax';
-
-		return implode( '; ', $parts );
+		setrawcookie( self::COOKIE_NAME, $anon_id, self::get_cookie_options() );
 	}
 
 	/**
