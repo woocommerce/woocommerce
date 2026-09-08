@@ -411,7 +411,6 @@
 				"border": {
 					"color": "var(--wp--preset--color--theme-6)"
 				},
-				"css": "& .wp-block-search__input { padding-inline: 12px; }",
 				"elements": {
 					"button": {
 						"spacing": {
@@ -420,6 +419,14 @@
 								"left": "var:preset|spacing|10",
 								"right": "var:preset|spacing|10",
 								"top": "var:preset|spacing|10"
+							}
+						}
+					},
+					"textInput": {
+						"spacing": {
+							"padding": {
+								"left": "12px",
+								"right": "12px"
 							}
 						}
 					}
