@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+wc_product_attributes_lookup now holds is_variation_attribute = 1 rows only for published variations, so private, draft, pending and trashed variations get none and code counting those rows to enumerate a product's variations will see fewer of them; is_variation_attribute = 0 rows are unchanged. A one-shot 11.2.0-3 database update deletes the rows already written for unpublished variations. Anything derived from the table should be invalidated on the new woocommerce_product_attributes_lookup_updated( int $product_id, int $action ) action, which fires after the table is written, rather than on product save, because updates normally run later in a scheduled action.
