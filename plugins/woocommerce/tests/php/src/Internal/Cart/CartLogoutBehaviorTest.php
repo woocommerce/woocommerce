@@ -191,6 +191,52 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write the new guest session to the database during logout, not leave it to shutdown.
+	 */
+	public function test_restored_session_is_persisted_before_the_request_ends(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+
+		$session = $this->use_real_session_handler();
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$product_id = $this->add_product_to_cart();
+		$session->set_customer_session_cookie( true );
+		$session->save_data();
+
+		$this->sut->register();
+
+		$cookies = array();
+		$this->capture_cookies( $cookies );
+
+		do_action( 'wp_logout', $user_id );
+
+		// PHPUnit never fires the shutdown action, so the handler's own save_data() callback at priority
+		// 20 has not run. A row here can only come from the class writing the session itself.
+		$stored = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT session_value FROM {$wpdb->prefix}woocommerce_sessions WHERE session_key = %s",
+				WC()->session->get_customer_id()
+			)
+		);
+
+		$this->assertNotNull(
+			$stored,
+			'The new guest session should already be in the database when the logout request ends'
+		);
+
+		$stored_cart = maybe_unserialize( maybe_unserialize( $stored )['cart'] ?? '' );
+
+		$this->assertSame(
+			array( $product_id ),
+			array_values( array_map( 'intval', array_column( (array) $stored_cart, 'product_id' ) ) ),
+			'The persisted session should hold the preserved cart'
+		);
+	}
+
+	/**
 	 * @testdox Should let the logout finish when restoring the cart throws, rather than replacing the redirect with a fatal.
 	 */
 	public function test_logout_survives_a_failure_while_restoring_the_cart(): void {

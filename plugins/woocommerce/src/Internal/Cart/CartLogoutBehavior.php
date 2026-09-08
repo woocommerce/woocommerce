@@ -116,14 +116,22 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 			}
 
 			$cart = WC()->cart;
-			if ( ! $cart instanceof WC_Cart ) {
-				return;
+			if ( $cart instanceof WC_Cart ) {
+				// Rebuild the in-memory cart, which destroy_session() emptied. Skipping this would leave the
+				// request finishing with an empty cart, and the shutdown handler would clear the cart cookies
+				// that front-end caches rely on.
+				$cart->get_cart_from_session();
 			}
 
-			// Rebuild the in-memory cart, which destroy_session() emptied. Skipping this would leave the
-			// request finishing with an empty cart, and the shutdown handler would clear the cart cookies
-			// that front-end caches rely on.
-			$cart->get_cart_from_session();
+			// Write the session now instead of leaving it to the handler's own shutdown callback, which
+			// runs at priority 20, behind the cart cookies, the customer save, the deferred product sync
+			// and the webhook queue. wp_logout ends in a redirect and an exit, so anything that fatals or
+			// exits among those would drop the cart this class exists to keep. save_data() only writes
+			// when the session is dirty and clears the flag, so the shutdown call becomes a no-op rather
+			// than a second write.
+			if ( method_exists( $session, 'save_data' ) ) {
+				$session->save_data();
+			}
 		} catch ( \Throwable $error ) {
 			$this->log_failure( 'restore the cart into the new session', $error );
 		}
