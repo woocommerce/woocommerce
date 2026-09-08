@@ -390,7 +390,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller();
 
-		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'New CSV columns must be appended, and table.js must be updated to match' );
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'The CSV column order must match the column order in table.js' );
 	}
 
 	/**
