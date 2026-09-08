@@ -705,12 +705,6 @@
 									modal.find( '.wc-shipping-method-add-class-costs').hide();
 								}
 							});
-
-							$('.wc-shipping-modal-price').on('blur', function() {
-								const value = $(this).val();
-								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
-								$(this).val( formattedValue );
-							});
 						}
 					}
 				},
