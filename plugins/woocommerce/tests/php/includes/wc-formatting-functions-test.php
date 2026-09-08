@@ -18,7 +18,9 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	public function data_provider_test_wc_sanitize_coupon_code(): array {
 		return array(
 			array( 'DUMMYCOUPON', 'DUMMYCOUPON' ),
-			array( 'a&amp;a', 'a&a' ),
+			array( 'a&a', 'a&a' ),
+			array( 'a&a', 'a&amp;a' ),
+			array( 'a&a', 'a&amp;amp;a' ),
 			array( "test's", "test's" ),
 		);
 	}
