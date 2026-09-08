@@ -1178,6 +1178,19 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the stock notifications endpoint setting is sanitized on save.
+	 *
+	 * @return void
+	 */
+	public function test_stock_notifications_endpoint_setting_is_sanitized() {
+		$hook = 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_stock_notifications_endpoint';
+
+		$this->assertEquals( 10, has_filter( $hook, 'wc_sanitize_endpoint_slug' ) );
+		$this->assertEquals( 'restock-alerts', apply_filters( $hook, 'Restock Alerts' ) );
+		$this->assertEquals( 'stock-notifications', apply_filters( $hook, 'stock-notifications' ) );
+	}
+
+	/**
 	 * Test wc_remove_non_displayable_chars().
 	 *
 	 * @since 9.9.0
