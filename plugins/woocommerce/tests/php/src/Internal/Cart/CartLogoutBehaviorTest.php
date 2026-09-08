@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Cart;
 
 use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Internal\Cart\CartLogoutBehavior;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -12,6 +13,7 @@ use WC_Unit_Test_Case;
  * Tests for the CartLogoutBehavior class.
  */
 class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * The System Under Test.
@@ -111,6 +113,54 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 		// WC_Session_Handler::destroy_session() empties the cart on wp_logout at priority 10.
 		$this->assertLessThan( 10, $capture_priority, 'The cart must be captured before the session is destroyed' );
 		$this->assertGreaterThan( 10, $restore_priority, 'The cart must be restored after the session is destroyed' );
+	}
+
+
+	/**
+	 * @testdox Should let the logout finish when restoring the cart throws, rather than replacing the redirect with a fatal.
+	 */
+	public function test_logout_survives_a_failure_while_restoring_the_cart(): void {
+		update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+		$this->add_product_to_cart();
+
+		// Stand in for an extension that raises while the cart is rebuilt. wp_logout has no error
+		// boundary, so anything escaping here would surface as a fatal instead of the logout redirect.
+		$explode = function () {
+			throw new \RuntimeException( 'Extension blew up while the cart was rebuilt' );
+		};
+		add_action( 'woocommerce_cart_loaded_from_session', $explode );
+
+		try {
+			$this->sut->handle_wp_logout_capture();
+			$this->destroy_session_like_logout_does();
+			$this->sut->handle_wp_logout_restore();
+		} finally {
+			remove_action( 'woocommerce_cart_loaded_from_session', $explode );
+		}
+
+		$this->assertLogged(
+			'error',
+			'Could not restore the cart into the new session on logout',
+			array( 'source' => 'cart-logout-behavior' )
+		);
+		$this->assertNotEmpty(
+			WC()->session->get( 'cart' ),
+			'The captured cart should still reach the session, so the next request can recover it'
+		);
+	}
+
+	/**
+	 * @testdox Should not log an error when the cart is carried over successfully.
+	 */
+	public function test_successful_preserve_logs_no_error(): void {
+		update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+		$this->add_product_to_cart();
+
+		$this->sut->handle_wp_logout_capture();
+		$this->destroy_session_like_logout_does();
+		$this->sut->handle_wp_logout_restore();
+
+		$this->assertNoErrorLogged();
 	}
 
 	/**

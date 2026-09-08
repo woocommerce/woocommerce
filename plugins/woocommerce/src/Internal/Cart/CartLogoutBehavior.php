@@ -72,7 +72,13 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 			return;
 		}
 
-		$cart_for_session = $cart->get_cart_for_session();
+		try {
+			$cart_for_session = $cart->get_cart_for_session();
+		} catch ( \Throwable $error ) {
+			$this->log_failure( 'read the cart before the session was destroyed', $error );
+			return;
+		}
+
 		if ( empty( $cart_for_session ) ) {
 			return;
 		}
@@ -99,24 +105,59 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 			return;
 		}
 
-		$session->set( 'cart', $captured_cart );
+		try {
+			$session->set( 'cart', $captured_cart );
 
-		// Without a cookie for the newly generated guest customer ID the session is written but never
-		// read back on the next request. The session handler can be swapped via the
-		// 'woocommerce_session_handler' filter, so the method is not guaranteed to exist.
-		if ( method_exists( $session, 'set_customer_session_cookie' ) ) {
-			$session->set_customer_session_cookie( true );
+			// Without a cookie for the newly generated guest customer ID the session is written but never
+			// read back on the next request. The session handler can be swapped via the
+			// 'woocommerce_session_handler' filter, so the method is not guaranteed to exist.
+			if ( method_exists( $session, 'set_customer_session_cookie' ) ) {
+				$session->set_customer_session_cookie( true );
+			}
+
+			$cart = WC()->cart;
+			if ( ! $cart instanceof WC_Cart ) {
+				return;
+			}
+
+			// Rebuild the in-memory cart, which destroy_session() emptied. Skipping this would leave the
+			// request finishing with an empty cart, and the shutdown handler would clear the cart cookies
+			// that front-end caches rely on.
+			$cart->get_cart_from_session();
+		} catch ( \Throwable $error ) {
+			$this->log_failure( 'restore the cart into the new session', $error );
 		}
+	}
 
-		$cart = WC()->cart;
-		if ( ! $cart instanceof WC_Cart ) {
-			return;
-		}
-
-		// Rebuild the in-memory cart, which destroy_session() emptied. Skipping this would leave the
-		// request finishing with an empty cart, and the shutdown handler would clear the cart cookies
-		// that front-end caches rely on.
-		$cart->get_cart_from_session();
+	/**
+	 * Record a failure that must not be allowed to escape into the logout request.
+	 *
+	 * Rebuilding the cart runs third-party code, through the product data store and the actions that
+	 * `WC_Cart_Session::get_cart_from_session()` fires, and `wp_logout` has no error boundary of its
+	 * own: an escaping error would replace the redirect with a fatal error page and leave the shopper
+	 * unable to tell whether they had logged out. Preserving a cart is never worth that, so failures
+	 * are logged and the logout is allowed to finish.
+	 *
+	 * A failure part-way through the restore still leaves the captured cart in the session, so the
+	 * next request reads it back and re-sets the cart cookies.
+	 *
+	 * @param string     $attempted What the class was trying to do, for the log message.
+	 * @param \Throwable $error     The error that was raised.
+	 */
+	private function log_failure( string $attempted, \Throwable $error ): void {
+		wc_get_logger()->error(
+			sprintf(
+				'Could not %1$s on logout: %2$s in %3$s:%4$d',
+				$attempted,
+				$error->getMessage(),
+				$error->getFile(),
+				$error->getLine()
+			),
+			array(
+				'source'    => 'cart-logout-behavior',
+				'exception' => $error,
+			)
+		);
 	}
 
 	/**
