@@ -75,8 +75,8 @@ class ProductPageIntegration {
 		}
 
 		// Add to Cart + Options buffers this hook inside its <form> and falls back to a
-		// legacy HTML form when the buffer contains form elements. Block themes are
-		// handled separately with an Interactivity API native form.
+		// legacy HTML form when the buffer contains form elements. Block-theme support
+		// will ship separately.
 		if ( $this->is_rendering_inside_add_to_cart_with_options() ) {
 			return;
 		}
