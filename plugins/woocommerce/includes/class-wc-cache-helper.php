@@ -35,6 +35,7 @@ class WC_Cache_Helper {
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+		add_action( 'woocommerce_product_attributes_lookup_updated', array( __CLASS__, 'invalidate_attribute_count_after_lookup_update' ) );
 	}
 
 	/**
@@ -158,6 +159,20 @@ class WC_Cache_Helper {
 				self::queue_delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 			}
 		}
+	}
+
+	/**
+	 * Invalidate the layered nav counts once the product attributes lookup table has been updated.
+	 *
+	 * The counts are invalidated on product save too, but the table is usually updated later, in a scheduled
+	 * action, and counts cached in between would otherwise stay stale until they expire.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public static function invalidate_attribute_count_after_lookup_update() {
+		self::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
 	}
 
 	/**

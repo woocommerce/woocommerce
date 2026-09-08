@@ -285,11 +285,11 @@ class DataRegenerator {
 		$this->cancel_regeneration_scheduled_action();
 		$this->delete_all_attributes_lookup_data( false );
 		update_option( 'woocommerce_attribute_lookup_enabled', $enable_usage ? 'yes' : 'no' );
-		$this->invalidate_filter_data_cache();
+		$this->invalidate_caches_derived_from_lookup_table();
 	}
 
 	/**
-	 * Regenerate the lookup data for a single product and invalidate the filter data derived from the table.
+	 * Regenerate the lookup data for a single product and invalidate the counts derived from the table.
 	 *
 	 * @since 11.2.0
 	 *
@@ -298,17 +298,19 @@ class DataRegenerator {
 	 */
 	public function regenerate_for_product( int $product_id, bool $use_optimized_db_access ): void {
 		$this->data_store->create_data_for_product( $product_id, $use_optimized_db_access );
-		$this->invalidate_filter_data_cache();
+		$this->invalidate_caches_derived_from_lookup_table();
 	}
 
 	/**
-	 * Invalidate the filter counts derived from the lookup table.
+	 * Invalidate the filter counts derived from the lookup table: the Product Filters block cache
+	 * and the classic layered nav counts.
 	 *
 	 * Regenerating writes rows directly, without going through LookupDataStore::run_update_callback(),
 	 * so nothing else clears them.
 	 */
-	private function invalidate_filter_data_cache(): void {
+	private function invalidate_caches_derived_from_lookup_table(): void {
 		wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
+		\WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
 	}
 
 	/**

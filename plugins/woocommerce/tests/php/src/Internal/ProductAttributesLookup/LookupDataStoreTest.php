@@ -1394,6 +1394,24 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'run_update_callback' invalidates the classic layered nav counts, which are derived from the table.
+	 */
+	public function test_run_update_callback_invalidates_layered_nav_counts() {
+		$variation = $this->create_variable_product_with_one_variation()[1];
+
+		// Saving the product queued its own invalidation, flush it so that only the lookup update is observed.
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$transient_name = 'wc_layered_nav_counts_' . self::$attributes[1]['name'];
+		set_transient( $transient_name, array( 'x' => 1 ) );
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$this->assertFalse( get_transient( $transient_name ), 'The counts cached for the attribute taxonomy are deleted.' );
+	}
+
+	/**
 	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
 	 * and one published, in-stock variation defined by the first term ('term_2_1').
 	 *
