@@ -1302,6 +1302,72 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `create_data_for_product` creates no entries for variations that are not published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_variable_product_skips_unpublished_variations( bool $use_optimized_db_access ) {
+		list( $product, $published_variation ) = $this->create_variable_product_with_one_variation();
+
+		$disabled_variation = new \WC_Product_Variation();
+		$disabled_variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_2' ) );
+		$disabled_variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$disabled_variation->set_parent_id( $product->get_id() );
+		$disabled_variation->set_status( ProductStatus::PRIVATE );
+		$disabled_variation->save();
+
+		$product->set_children( array( $published_variation->get_id(), $disabled_variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product, $use_optimized_db_access );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $published_variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates no entries for a variation that is not published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_unpublished_variation_creates_nothing( bool $use_optimized_db_access ) {
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		$this->empty_lookup_table();
+		$this->insert_lookup_table_data( $variation->get_id(), $product->get_id(), self::$attributes[1]['name'], self::$attributes[1]['term_ids'][0], true, true );
+
+		$this->sut->create_data_for_product( $variation, $use_optimized_db_access );
+
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Stale rows of an unpublished variation are removed and none are recreated.' );
+	}
+
+	/**
+	 * @testdox Disabling a variation removes its entries and re-enabling it recreates them, when the "direct updates" option is on.
+	 */
+	public function test_disabling_and_enabling_a_variation_updates_its_data() {
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$expected_row                = $this->variation_lookup_row( $product, $variation );
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Saving a published variation creates its row.' );
+
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Disabling the variation removes its row.' );
+
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Re-enabling the variation recreates its row.' );
+	}
+
+	/**
 	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
 	 * and one published, in-stock variation defined by the first term ('term_2_1').
 	 *

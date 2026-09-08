@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -461,12 +462,16 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Create all the necessary lookup data for a given variation.
+	 * Create all the necessary lookup data for a given variation. Unpublished variations get none.
 	 *
 	 * @param \WC_Product_Variation $variation The variation to create entries for.
 	 * @throws \Exception Can't retrieve the details of the parent product.
 	 */
 	private function create_data_for_variation( \WC_Product_Variation $variation ) {
+		if ( ! $this->is_published_variation( $variation ) ) {
+			return;
+		}
+
 		$main_product = WC()->call_function( 'wc_get_product', $variation->get_parent_id() );
 		if ( false === $main_product ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -561,19 +566,33 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Get the variations of a given variable product.
+	 * Get the published variations of a given variable product.
+	 *
+	 * Unpublished (disabled) variations get no lookup data: they can't be bought, so they mustn't make
+	 * their parent match an attribute filter or count towards a term.
 	 *
 	 * @param \WC_Product_Variable $product The product to get the variations for.
-	 * @return array An array of WC_Product_Variation objects.
+	 * @return \WC_Product_Variation[]
 	 */
 	private function get_variations_of( \WC_Product_Variable $product ) {
-		$variation_ids = $product->get_children();
-		return array_map(
+		$variations = array_map(
 			function ( $id ) {
 				return WC()->call_function( 'wc_get_product', $id );
 			},
-			$variation_ids
+			$product->get_children()
 		);
+
+		return array_filter( $variations, array( $this, 'is_published_variation' ) );
+	}
+
+	/**
+	 * Check if a value is a published variation.
+	 *
+	 * @param mixed $product Product object, or false when the product couldn't be loaded.
+	 * @return bool
+	 */
+	private function is_published_variation( $product ): bool {
+		return $product instanceof \WC_Product_Variation && ProductStatus::PUBLISH === $product->get_status( 'edit' );
 	}
 
 	/**
@@ -881,7 +900,7 @@ class LookupDataStore {
 			)
 		);
 
-		// * Obtain list of product variations, together with stock statuses; also get the product type.
+		// * Obtain list of published product variations, together with stock statuses; also get the product type.
 		// For a variation this will return just one entry, with type 'variation'.
 		// Output: $product_ids_with_stock_status = associative array where 'id' is the key and values are the stock status (1 for "in stock", 0 otherwise).
 		// $variation_ids = raw list of variation ids.
@@ -904,7 +923,7 @@ class LookupDataStore {
 			(select p.ID as id, p.post_parent as parent, m.meta_value as stock_status, 'variation' as product_type from {$wpdb->posts} p
 			left join {$wpdb->postmeta} m on p.id=m.post_id and m.meta_key='_stock_status'
 			where p.post_type = 'product_variation'
-			and p.post_status in ('publish', 'draft', 'pending', 'private')
+			and p.post_status = 'publish'
 			and (p.ID=%d or p.post_parent=%d));
 		",
 			$product_id,
@@ -915,8 +934,8 @@ class LookupDataStore {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
 		if ( empty( $product_ids_with_stock_status ) ) {
-			// The product has been deleted. The DELETE above only covers rows keyed by parent id,
-			// delete_data_for also removes the rows of a deleted variation (keyed by product_id).
+			// The product has been deleted, or it's a variation that is no longer published. The DELETE above
+			// only covers rows keyed by parent id, delete_data_for also removes the rows keyed by product_id.
 			$this->delete_data_for( $product_id );
 			return;
 		}
@@ -1014,7 +1033,7 @@ class LookupDataStore {
 		} else {
 			$sql = $wpdb->prepare(
 				"select post_id as variation_id, substr(meta_key,11) as attribute, meta_value as slug from {$wpdb->postmeta}
-				where post_id in (select ID from {$wpdb->posts} where (id=%d or post_parent=%d) and post_type = 'product_variation')
+				where post_id in (select ID from {$wpdb->posts} where (id=%d or post_parent=%d) and post_type = 'product_variation' and post_status = 'publish')
 				and meta_key like %s
 				and meta_value != ''",
 				$product_id,
