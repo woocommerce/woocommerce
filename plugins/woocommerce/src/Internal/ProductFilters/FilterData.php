@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -285,14 +286,13 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
-
-			// A regeneration truncates the lookup table and refills it in batches, so its rows are incomplete
-			// until it finishes. The counts come from the parent terms until then.
-			$attribute_count_sql =
-				$lookup_data_store->regeneration_is_in_progress() || $lookup_data_store->regeneration_was_aborted()
-					? $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count )
-					: $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count );
+			// The lookup table usage option is 'no' while a regeneration is running, after an aborted
+			// regeneration is cleaned up, and when an admin disabled the table. Its rows are incomplete
+			// in all of those states, so the counts come from the parent terms then, which is the same
+			// rule the main product query applies.
+			$attribute_count_sql = wc_get_container()->get( Filterer::class )->filtering_via_lookup_table_is_active()
+				? $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count )
+				: $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = $wpdb->get_results( $attribute_count_sql );
