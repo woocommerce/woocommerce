@@ -671,16 +671,24 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @testdox Should register cleanup hooks for HPOS and legacy order deletion.
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
+		$this->enable_feature();
+
 		$controller = new OrderWithdrawalController();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification() );
+		$controller->init(
+			$this->sut,
+			new OrderWithdrawalFormView(),
+			new OrderWithdrawalFeatureHighlightNotification()
+		);
 
 		try {
 			$controller->register();
+			$controller->register_feature_hooks();
 
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 		} finally {
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
 			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
@@ -700,24 +708,67 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller   = new OrderWithdrawalController();
 		$notification = new OrderWithdrawalFeatureHighlightNotification();
 
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification );
+		$controller->init(
+			$this->sut,
+			new OrderWithdrawalFormView(),
+			$notification
+		);
 
 		try {
 			$controller->register();
 
-			$this->assertNotFalse( has_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ) ), 'The controller should defer feature highlight notification registration until init.' );
+			$this->assertNotFalse( has_action( 'init', array( $controller, 'register_feature_hooks' ) ), 'The controller should defer feature-specific hook registration until init.' );
 
-			$controller->maybe_register_feature_highlight_notification();
+			$controller->register_feature_hooks();
 
 			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
 			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
 		} finally {
-			remove_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ), 10 );
+			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
 			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
 			remove_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ), 10 );
+			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should keep cleanup hooks but skip endpoint hooks after order withdrawal is disabled.
+	 */
+	public function test_controller_keeps_cleanup_hooks_after_feature_is_disabled(): void {
+		$this->enable_feature();
+		$this->disable_feature();
+
+		$controller   = new OrderWithdrawalController();
+		$notification = new OrderWithdrawalFeatureHighlightNotification();
+
+		$controller->init(
+			$this->sut,
+			new OrderWithdrawalFormView(),
+			$notification
+		);
+
+		try {
+			$controller->register();
+			$controller->register_feature_hooks();
+
+			$this->assertFalse( has_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ) ), 'The endpoint query var should not be registered while the feature is disabled.' );
+			$this->assertFalse( has_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ) ), 'The endpoint title should not be registered while the feature is disabled.' );
+			$this->assertFalse( has_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ) ), 'The endpoint setting should not be registered while the feature is disabled.' );
+			$this->assertFalse( has_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ) ), 'The endpoint renderer should not be registered while the feature is disabled.' );
+			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'HPOS order cleanup should stay registered while the feature is disabled.' );
+			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Legacy order cleanup should stay registered while the feature is disabled.' );
+			$this->assertNotFalse( has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ), 'Privacy erasure cleanup should stay registered while the feature is disabled.' );
+			$this->assertNotFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should run while the feature is disabled.' );
+		} finally {
+			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
+			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
 			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );

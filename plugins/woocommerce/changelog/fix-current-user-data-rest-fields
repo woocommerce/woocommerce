@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include WooCommerce user fields in currentUserData when the REST API has not been initialized.
