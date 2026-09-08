@@ -14,18 +14,11 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Issues the `tk_ai` visitor cookie from the server.
  *
- * The cookie used to be written by page JavaScript. WebKit deletes cookies created through
- * `document.cookie` after seven days of Safari use without interaction with the site, and caps
- * them to 24 hours when the landing URL is decorated by a classified domain, which is what an
- * ad click looks like. Cookies that arrive in a `Set-Cookie` header from the site's own origin
- * are outside both rules, so the server has to be the writer.
- *
- * It cannot be written while rendering a page: page caches refuse to store a response that
- * carries `Set-Cookie`, and one that slipped through would hand the same id to every visitor
- * served from that cache. This endpoint is a `POST`, which no page cache stores, and the client
- * calls it only when it sees no cookie or once per browser session to refresh the expiry. Only a
- * browser that ran the client script reaches it, so the cookie-less crawlers that used to be
- * minted throwaway ids on server-fired events never get one here.
+ * WebKit caps cookies written by JavaScript (deleted after seven days without interaction,
+ * 24 hours after a link-decorated landing); cookies set in an HTTP response are not capped.
+ * Setting it while rendering a page would break page caches, so it is set from this POST
+ * endpoint, which caches never store. Only the client script calls it, so cookie-less
+ * crawlers never get an id.
  */
 class WC_Analytics_Visitor extends \WC_REST_Controller {
 
@@ -40,8 +33,7 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	const COOKIE_LIFETIME = 365 * DAY_IN_SECONDS;
 
 	/**
-	 * Values the browser may send back. Covers the 24-character base64 ids this package mints,
-	 * the `jetpack:` and `woo:` prefixed forms other writers use, and nothing else.
+	 * Accepted cookie values: the ids this package mints and the prefixed forms other writers use.
 	 */
 	const VALUE_PATTERN = '/^[A-Za-z0-9+\/=:._-]{8,64}$/';
 
@@ -70,8 +62,7 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'issue_visitor_id' ),
-					// Unauthenticated by design: the visitor is anonymous. The handler only
-					// echoes or mints an opaque id and never reads user data.
+					// Unauthenticated: the handler only echoes or mints an opaque id.
 					'permission_callback' => '__return_true',
 					'schema'              => array( $this, 'get_public_item_schema' ),
 				),
@@ -112,10 +103,8 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	}
 
 	/**
-	 * Whether the request comes from a known bot user agent.
-	 *
-	 * The user agent is passed explicitly: `User_Agent_Info::is_bot()` caches the first
-	 * answer it computes from `$_SERVER` for the rest of the process.
+	 * Whether the request comes from a known bot. The user agent is passed explicitly
+	 * because `User_Agent_Info::is_bot()` caches its first answer for the whole process.
 	 *
 	 * @return bool
 	 */
@@ -143,8 +132,7 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	}
 
 	/**
-	 * Mint a new id: 18 random bytes, base64 encoded, 24 characters. Same shape the client
-	 * script produced, so downstream consumers see no change.
+	 * Mint a new id: 18 random bytes, base64 encoded, the 24-character shape the client used.
 	 *
 	 * @return string
 	 */
@@ -153,12 +141,9 @@ class WC_Analytics_Visitor extends \WC_REST_Controller {
 	}
 
 	/**
-	 * Build the `Set-Cookie` header value.
-	 *
-	 * `Path=/` and no `Domain`, so the write replaces the cookie the client script used to set
-	 * instead of adding a second one. `SameSite=Lax`, so the cookie travels on the top-level
-	 * navigation that follows an ad click. Not `HttpOnly`: the client script and the
-	 * stats.wp.com tracker read the value to stamp `_ui` on events.
+	 * Build the `Set-Cookie` header. `Path=/` and no `Domain` replace the cookie the client
+	 * used to set; `SameSite=Lax` lets it travel on an ad-click navigation; not `HttpOnly`
+	 * because the client and the stats.wp.com tracker read it.
 	 *
 	 * @param string $anon_id Cookie value.
 	 * @return string

@@ -48,10 +48,7 @@ export class Analytics {
 	}
 
 	/**
-	 * Initialize the analytics.
-	 *
-	 * The visitor id is resolved before anything else runs, so the first event of a visit
-	 * already carries it and the stats.wp.com tracker never has to mint one of its own.
+	 * Initialize the analytics. The visitor id is resolved first so every event carries it.
 	 */
 	init = async (): Promise< void > => {
 		if ( this.isInitialized ) {
@@ -181,7 +178,7 @@ export class Analytics {
 		debug( 'Recording event via _wca: "%s" with props %o', event, eventProperties );
 
 		eventProperties._en = `${ EVENT_PREFIX }${ event }`;
-		// Stamp the identity so the tracker uses this id instead of minting one when it cannot see the cookie.
+		// Carry the id so the tracker never mints its own.
 		if ( this.anonId ) {
 			eventProperties._ui = this.anonId;
 			eventProperties._ut = 'anon';
@@ -272,17 +269,11 @@ export class Analytics {
 	};
 
 	/**
-	 * Resolve the anonymous visitor id.
+	 * Resolve the visitor id.
 	 *
-	 * The cookie is issued by the server (`POST /woocommerce-analytics/v1/visitor`), never by
-	 * this script, because WebKit deletes script-written cookies after seven days of Safari use
-	 * without interaction and caps them to 24 hours on an ad-click landing. The request goes out
-	 * when no cookie is visible, and once per browser session otherwise, so the server re-issues
-	 * it and the one-year expiry rolls from the most recent visit. Only the no-cookie case is
-	 * awaited: the refresh does not change the id, so events need not wait for it.
-	 *
-	 * When the server cannot issue one, the id is written from here as before, so a visitor on a
-	 * site where the endpoint is unreachable still keeps one id across pages.
+	 * The server issues the cookie, because WebKit caps script-written cookies. The request is
+	 * awaited when no cookie is visible, and fired once per browser session otherwise so the
+	 * expiry rolls. If the server cannot issue one, the cookie is written here as before.
 	 */
 	private ensureAnonId = async (): Promise< void > => {
 		this.anonId = getCookie( ANON_ID_COOKIE );
@@ -307,7 +298,7 @@ export class Analytics {
 	 * Ask the server to issue or refresh the visitor cookie.
 	 *
 	 * @param endpoint - The visitor endpoint URL.
-	 * @return The issued id, or null when the server did not issue one.
+	 * @return The issued id, or null.
 	 */
 	private requestVisitorId = async (
 		endpoint: string
@@ -366,7 +357,7 @@ export class Analytics {
 		try {
 			window.sessionStorage.setItem( VISITOR_ISSUED_KEY, '1' );
 		} catch ( error ) {
-			// Storage unavailable: the refresh simply repeats on the next page.
+			// Storage unavailable: the refresh repeats on the next page.
 		}
 	};
 }

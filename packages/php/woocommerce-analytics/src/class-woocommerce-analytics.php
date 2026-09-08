@@ -203,9 +203,8 @@ class Woocommerce_Analytics {
 	/**
 	 * Register REST API routes.
 	 *
-	 * The visitor endpoint is always registered: it is how the `tk_ai` cookie is issued.
-	 * The tracking proxy is not. A site that has never used proxy tracking does not get
-	 * that endpoint, and it stays registered after being disabled, so cached pages
+	 * The visitor endpoint is always registered. The tracking proxy only exists on sites
+	 * that enabled it once, and stays registered after being disabled so cached pages
 	 * receive a visible 403.
 	 */
 	public static function register_rest_routes() {
