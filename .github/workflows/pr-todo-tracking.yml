@@ -28,9 +28,13 @@ jobs:
             # The issues arrive unlabelled, which is fine: they sync into Linear and get
             # triaged there like any other report.
             #
-            # The action also renames those issues on the issues edited event. That trigger
-            # is left out on purpose, since it would start a runner on every issue edit in
-            # the repo, and the Linear sync generates plenty of those.
+            # The issues edited trigger is left out on purpose. It only renames the bot's
+            # own issues, and subscribing would start a runner on every issue edit here.
+            #
+            # This action targets an old Node runtime, so every run logs a deprecation
+            # warning and GitHub executes it on Node 24 instead. That is expected and not a
+            # failure. There is nothing newer to move to, since upstream trunk still
+            # declares node12; fixing it means a pull request against woocommerce/automations.
             - uses: woocommerce/automations@dde49354e6307929d4f2daa9afcba97d1f4d09b2 # v1.5.0
               with:
                   github_token: '${{ secrets.GITHUB_TOKEN }}'
