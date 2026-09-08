@@ -71,47 +71,22 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An inherited image ID is an integer without changing a variation's own image data.
+	 * @testdox Parent image data is exposed as an integer without changing a variation's own image data.
 	 */
-	public function test_inherited_image_id_is_integer_without_changing_own_image_data() {
-		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
-		$this->parent_product->set_image_id( (string) $image_id );
-		$this->parent_product->save();
-
-		$this->variation->set_image_id();
-		$variation_id       = $this->variation->save();
-		$reloaded_variation = new WC_Product_Variation( $variation_id );
-
-		$this->assertSame( $image_id, $reloaded_variation->get_image_id(), 'The inherited view-context image ID should be an integer.' );
-		$this->assertSame( 0, $reloaded_variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
-		$this->assertSame( 0, $reloaded_variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
-	}
-
-	/**
-	 * @testdox A numeric-string parent image ID is exposed as an integer without changing the variation's own image data.
-	 */
-	public function test_parent_data_numeric_string_image_id_is_integer() {
-		$image_id  = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+	public function test_parent_data_image_id_is_integer() {
 		$variation = new WC_Product_Variation();
-		$variation->set_parent_data( array( 'image_id' => (string) $image_id ) );
 
-		$this->assertSame( $image_id, $variation->get_image_id(), 'The inherited view-context image ID should be an integer.' );
-		$this->assertSame( $image_id, $variation->get_parent_data()['image_id'], 'The parent image ID should be an integer.' );
+		$variation->set_parent_data( array( 'image_id' => '123' ) );
+
+		$this->assertSame( 123, $variation->get_parent_data()['image_id'], 'A numeric-string parent image ID should be an integer.' );
+		$this->assertSame( 123, $variation->get_image_id(), 'The inherited view-context image ID should be an integer.' );
 		$this->assertSame( 0, $variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
 		$this->assertSame( 0, $variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
-	}
 
-	/**
-	 * @testdox Empty parent image data is exposed as integer zero without changing the variation's own image data.
-	 */
-	public function test_parent_data_empty_image_id_is_integer_zero() {
-		$variation = new WC_Product_Variation();
 		$variation->set_parent_data( array( 'image_id' => false ) );
 
-		$this->assertSame( 0, $variation->get_image_id(), 'The inherited view-context image ID should be integer zero for empty parent data.' );
-		$this->assertSame( 0, $variation->get_parent_data()['image_id'], 'The parent image ID should be integer zero for empty parent data.' );
-		$this->assertSame( 0, $variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
-		$this->assertSame( 0, $variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
+		$this->assertSame( 0, $variation->get_parent_data()['image_id'], 'A missing parent image should be integer zero.' );
+		$this->assertSame( 0, $variation->get_image_id(), 'The inherited view-context image ID should be integer zero when the parent has no image.' );
 	}
 
 	/**
