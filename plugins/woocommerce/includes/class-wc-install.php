@@ -359,6 +359,9 @@ class WC_Install {
 			'wc_update_11201_invalidate_analytics_reports_cache',
 			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
+		'11.2.0-3' => array(
+			'wc_update_11203_normalize_stock_notification_emails',
+		),
 	);
 
 	/**

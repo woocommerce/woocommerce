@@ -39,6 +39,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
@@ -3915,4 +3916,51 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 	wc_update_11201_invalidate_analytics_reports_cache();
 
 	return false;
+}
+
+/**
+ * Rewrite stored Back in Stock customer emails in canonical form (trimmed, lowercased).
+ *
+ * Lookups on `user_email` use plain SQL equality, so rows written before emails were
+ * normalized would not match on a case-sensitive collation.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11203_normalize_stock_notification_emails() {
+	global $wpdb;
+
+	$table      = $wpdb->prefix . 'wc_stock_notifications';
+	$batch_size = 500;
+	$last_id    = 0;
+
+	// Normalize in PHP rather than with SQL LOWER()/TRIM() so stored values match exactly
+	// what EmailNormalizer produces at lookup time.
+	do {
+		$rows      = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, user_email FROM {$table} WHERE id > %d ORDER BY id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$last_id,
+				$batch_size
+			)
+		);
+		$row_count = count( $rows );
+
+		foreach ( $rows as $row ) {
+			$last_id    = (int) $row->id;
+			$normalized = EmailNormalizer::normalize( (string) $row->user_email );
+			if ( $normalized === $row->user_email ) {
+				continue;
+			}
+
+			$updated = $wpdb->update( $table, array( 'user_email' => $normalized ), array( 'id' => $last_id ), array( '%s' ), array( '%d' ) );
+			if ( false === $updated ) {
+				wc_get_logger()->error(
+					sprintf( 'Failed to normalize the customer email of stock notification #%d: %s', $last_id, $wpdb->last_error ),
+					array( 'source' => 'wc-updater' )
+				);
+			}
+		}
+	} while ( $row_count === $batch_size );
 }
