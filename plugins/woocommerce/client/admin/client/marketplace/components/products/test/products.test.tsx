@@ -26,12 +26,12 @@ jest.mock( '../../quality-badge/quality-badge-filter', () => ( {
 
 jest.mock( '../../product-list-content/product-list-content', () => ( {
 	__esModule: true,
-	default: () => <div data-testid="product-list-content" />,
+	default: () => <span>Product list content</span>,
 } ) );
 
 jest.mock( '../../product-list-content/no-results', () => ( {
 	__esModule: true,
-	default: () => <div data-testid="no-results" />,
+	default: () => <span>No results</span>,
 } ) );
 
 jest.mock( '../../product-loader/product-loader', () => ( {
@@ -94,7 +94,7 @@ describe( 'Products search results heading', () => {
 			screen.getByRole( 'heading', { name: 'Results for “shipping”' } )
 		).toBeInTheDocument();
 		expect(
-			screen.getByTestId( 'product-list-content' )
+			screen.getByText( 'Product list content' )
 		).toBeInTheDocument();
 	} );
 
@@ -104,7 +104,7 @@ describe( 'Products search results heading', () => {
 		expect(
 			screen.getByRole( 'heading', { name: 'Results for “zzzz”' } )
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'no-results' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'No results' ) ).toBeInTheDocument();
 	} );
 
 	it( 'shows no heading when browsing without a search term', () => {
