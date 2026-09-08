@@ -84,7 +84,7 @@ export class Analytics {
 			this.recordEvent( 'page_view' );
 		}
 
-		this.maybeSetAnonId();
+		this.setAnonId();
 		this.processEventQueue();
 		this.initListeners();
 
@@ -265,10 +265,9 @@ export class Analytics {
 	 * second one (getCookie returns null when it sees two). Keeping expires on each write makes
 	 * the one-year lifetime rolling from the most recent visit.
 	 */
-	private maybeSetAnonId() {
+	private setAnonId() {
 		// 18 * 4/3 = 24 (base64 encoded chars)
 		const anonId = getCookie( 'tk_ai' ) || generateRandomToken( 18 );
-		// Set a first-party cookie (same domain only, 1 year)
 		const expires = new Date(
 			Date.now() + 1 * 365 * 24 * 60 * 60 * 1000
 		).toUTCString();
