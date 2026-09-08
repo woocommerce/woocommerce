@@ -5,9 +5,9 @@
 
 * {
 	background: transparent !important;
-	color: black !important;
+	color: #000 !important;
 	text-shadow: none !important;
-	filter:none !important;
+	filter: none !important;
 	-ms-filter: none !important;
 	font-size: 9pt !important;
 	opacity: 1;
@@ -69,5 +69,5 @@ h2 .nav-tab {
 .chart-legend li {
 	padding: 0.25em 0.5em !important;
 	box-shadow: none !important;
-	border-bottom: 1px solid gray !important;
+	border-bottom: 1px solid #808080 !important;
 }
