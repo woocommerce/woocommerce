@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve product data when saving a new product without a name in the classic editor by using the default “(no title)” name.
