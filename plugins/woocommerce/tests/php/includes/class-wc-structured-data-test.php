@@ -42,6 +42,70 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_data() accepts a valid array @type without changing it.
+	 */
+	public function test_set_data_accepts_valid_array_type(): void {
+		$markup = array(
+			'@type' => array( 'Car', 'Product' ),
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid array @type should be accepted.'
+		);
+		$this->assertSame(
+			array( $markup ),
+			$this->structured_data->get_data(),
+			'A valid array @type should be stored verbatim.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() rejects an invalid array @type.
+	 *
+	 * @testWith [[]]
+	 *           [["Product", 123]]
+	 *           [["Product", "Invalid-Type"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_rejects_invalid_array_type( array $types ): void {
+		$this->assertFalse(
+			$this->structured_data->set_data( array( '@type' => $types ) ),
+			'Empty arrays, non-string members, and pattern-invalid members should be rejected.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() emits array @type values for matching or unfiltered requests.
+	 *
+	 * @testWith [["Car", "Product"], ["product"]]
+	 *           [["Thing", "CustomType"], ["customtype"]]
+	 *           [["Car", "Product"], []]
+	 *
+	 * @param string[] $schema_types    Schema types stored in the markup.
+	 * @param string[] $requested_types Lower-case output types requested by the caller.
+	 */
+	public function test_get_structured_data_outputs_array_type( array $schema_types, array $requested_types ): void {
+		$markup = array(
+			'@type' => $schema_types,
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => $schema_types,
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'Array @type markup should survive grouping and page-type filtering.'
+		);
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void

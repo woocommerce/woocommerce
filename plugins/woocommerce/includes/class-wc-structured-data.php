@@ -55,7 +55,17 @@ class WC_Structured_Data {
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
-		if ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
+		if ( isset( $data['@type'] ) && is_array( $data['@type'] ) ) {
+			if ( empty( $data['@type'] ) ) {
+				return false;
+			}
+
+			foreach ( $data['@type'] as $type ) {
+				if ( ! is_string( $type ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $type ) ) {
+					return false;
+				}
+			}
+		} elseif ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
 			return false;
 		}
 
@@ -96,7 +106,15 @@ class WC_Structured_Data {
 
 		// Put together the values of same type of structured data.
 		foreach ( $this->get_data() as $value ) {
-			$data[ strtolower( $value['@type'] ) ][] = $value;
+			if ( is_array( $value['@type'] ) ) {
+				$value_types    = array_map( 'strtolower', $value['@type'] );
+				$matching_types = array_intersect( $value_types, $types );
+				$type           = $matching_types ? reset( $matching_types ) : reset( $value_types );
+
+				$data[ $type ][] = $value;
+			} else {
+				$data[ strtolower( $value['@type'] ) ][] = $value;
+			}
 		}
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
