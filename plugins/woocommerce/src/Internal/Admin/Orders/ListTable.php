@@ -504,25 +504,43 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Implements date (month-based) filtering.
+	 * Implements date filtering.
+	 *
+	 * The 'm' query arg is accepted at month (YYYYMM) or day (YYYYMMDD) granularity. The date field being filtered
+	 * defaults to 'date_created' and can be changed via the 'order_date_type' query arg, which is how Analytics
+	 * reports link to orders paid or completed on a given day.
 	 */
 	private function set_date_args() {
-		$year_month = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$date_value = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) );
 
-		if ( empty( $year_month ) || ! preg_match( '/^[0-9]{6}$/', $year_month ) ) {
+		if ( empty( $date_value ) || ! preg_match( '/^([0-9]{4})([0-9]{2})([0-9]{2})?$/', $date_value, $matches ) ) {
 			return;
 		}
 
-		$year  = (int) substr( $year_month, 0, 4 );
-		$month = (int) substr( $year_month, 4, 2 );
+		$year  = (int) $matches[1];
+		$month = (int) $matches[2];
+		$day   = isset( $matches[3] ) ? (int) $matches[3] : null;
 
-		if ( $month < 0 || $month > 12 ) {
+		if ( ! checkdate( $month, $day ?? 1, $year ) ) {
 			return;
 		}
 
-		$last_day_of_month                      = date_create( "$year-$month" )->format( 'Y-m-t' );
-		$this->order_query_args['date_created'] = "$year-$month-01..." . $last_day_of_month;
-		$this->has_filter                       = true;
+		$date_type = sanitize_text_field( wp_unslash( $_GET['order_date_type'] ?? '' ) );
+		if ( ! in_array( $date_type, array( 'date_created', 'date_paid', 'date_completed' ), true ) ) {
+			$date_type = 'date_created';
+		}
+
+		if ( is_null( $day ) ) {
+			$date_start = sprintf( '%04d-%02d-01', $year, $month );
+			$date_end   = date_create( $date_start )->format( 'Y-m-t' );
+		} else {
+			$date_start = sprintf( '%04d-%02d-%02d', $year, $month, $day );
+			$date_end   = $date_start;
+		}
+
+		$this->order_query_args[ $date_type ] = "$date_start...$date_end";
+		$this->has_filter                     = true;
 	}
 
 	/**
@@ -876,21 +894,21 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$table_name     = OrdersTableDataStore::get_orders_table_name();
+		$table_name = OrdersTableDataStore::get_orders_table_name();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
 		$min_max_months = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
 				 FROM (
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
 					UNION ALL
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
 				 ) d",
-				$table_name,
 				$this->order_type,
-				$table_name,
 				$this->order_type
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		/**
 		 * Normalize "this month" to be the first day of the month in the current timezone of the site.
@@ -1631,7 +1649,7 @@ class ListTable extends WP_List_Table {
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) {
 				/* translators: %s: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				break;

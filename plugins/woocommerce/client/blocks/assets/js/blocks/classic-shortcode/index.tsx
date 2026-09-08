@@ -83,7 +83,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						replaceBlock,
 						selectBlock,
 					} );
-					createInfoNotice(
+					void createInfoNotice(
 						__(
 							'Classic shortcode transformed to blocks.',
 							'woocommerce'
@@ -109,7 +109,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 										if ( ! cartCheckoutBlock ) {
 											return;
 										}
-										replaceBlock(
+										void replaceBlock(
 											cartCheckoutBlock.clientId,
 											createBlock(
 												'woocommerce/classic-shortcode',

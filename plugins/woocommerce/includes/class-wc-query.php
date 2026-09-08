@@ -7,6 +7,8 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -314,7 +316,7 @@ class WC_Query {
 	 */
 	private function is_query_var_valid_on_front_page( $query_var ) {
 		return in_array( $query_var, array( 'preview', 'page', 'paged', 'cpage', 'orderby' ), true )
-			|| in_array( $query_var, array( 'min_price', 'max_price', 'rating_filter' ), true )
+			|| in_array( $query_var, wc_get_container()->get( Params::class )->get_param_keys(), true )
 			|| 0 === strpos( $query_var, 'filter_' )
 			|| 0 === strpos( $query_var, 'query_type_' );
 	}
@@ -876,12 +878,7 @@ class WC_Query {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**

@@ -57,5 +57,25 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await expect( miniCartButton ).toBeVisible();
 			await expect( miniCartButton ).toBeDisabled();
 		} );
+
+		test( 'renders filled and empty views in the Mini-Cart template part', async ( {
+			editor,
+			admin,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postType: 'wp_template_part',
+			} );
+			await editor.openTemplate( { templateName: 'Mini-Cart' } );
+
+			const filledMiniCart = await editor.getBlockByName(
+				'woocommerce/filled-mini-cart-contents-block'
+			);
+			const emptyMiniCart = await editor.getBlockByName(
+				'woocommerce/empty-mini-cart-contents-block'
+			);
+
+			await expect( filledMiniCart ).toBeVisible();
+			await expect( emptyMiniCart ).toBeAttached();
+		} );
 	} );
 } );

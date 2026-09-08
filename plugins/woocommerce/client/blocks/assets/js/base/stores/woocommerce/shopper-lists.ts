@@ -250,7 +250,7 @@ const { state, actions } = store< Store >(
 						list.items.push( item );
 					}
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -276,7 +276,7 @@ const { state, actions } = store< Store >(
 						{ method: 'DELETE' }
 					);
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 					return;
 				}
 
@@ -321,7 +321,7 @@ const { state, actions } = store< Store >(
 // has a TODO about.
 //
 // Keeps the discriminator + payload contract in sync with
-// `assets/js/data/cart/thunks.ts::saveForLater`.
+// `packages/public-api/block-data/cart/thunks.ts::saveForLater`.
 window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	const detail = ( event as CustomEvent ).detail as
 		| { type?: string; slug?: string; item?: RawShopperListItem }

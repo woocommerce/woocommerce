@@ -38,8 +38,8 @@ class Tax extends Task {
 	 * Adds a return to task list notice when completing the task.
 	 */
 	public function possibly_add_return_notice_script() {
-		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
-		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Values are used only in strict comparisons and never reach a sink.
+		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Values are used only in strict comparisons and never reach a sink.
 
 		if ( $page !== 'wc-settings' || $tab !== 'tax' ) {
 			return;
@@ -59,6 +59,24 @@ class Tax extends Task {
 	 */
 	public function get_id() {
 		return 'tax';
+	}
+
+	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/tax-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Tax illustration', 'woocommerce' );
 	}
 
 	/**

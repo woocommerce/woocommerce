@@ -314,7 +314,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	public function enqueue_visual_attribute_script(): void {
 		$screen = get_current_screen();
 
-		if ( ! $screen ) {
+		if ( ! $screen || ! is_string( $screen->id ) ) {
 			return;
 		}
 
@@ -387,13 +387,13 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param string $content  Column output so far.
+	 * @param mixed  $content  Column output so far.
 	 * @param string $column   Current column key.
 	 * @param int    $term_id  Term ID.
 	 * @param string $taxonomy Taxonomy slug.
-	 * @return string
+	 * @return mixed
 	 */
-	public function render_term_visual_column( $content, $column, $term_id, $taxonomy ): string {
+	public function render_term_visual_column( $content, $column, $term_id, $taxonomy ) {
 		if ( 'visual' !== $column || ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			return $content;
 		}

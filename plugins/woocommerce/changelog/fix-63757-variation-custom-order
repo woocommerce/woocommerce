@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect the attribute's custom term order when creating all product variations.

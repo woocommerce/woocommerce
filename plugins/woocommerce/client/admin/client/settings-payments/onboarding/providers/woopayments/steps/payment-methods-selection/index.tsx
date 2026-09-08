@@ -255,7 +255,7 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											savePaymentMethodsState(
+											void savePaymentMethodsState(
 												state,
 												method.id
 											);

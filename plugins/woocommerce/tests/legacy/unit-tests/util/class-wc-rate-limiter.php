@@ -37,7 +37,7 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 		$rate_limit_id_1 = $action_identifier . $user_1_id;
 		$rate_limit_id_2 = $action_identifier . $user_2_id;
 
-		WC_Rate_Limiter::set_rate_limit( $rate_limit_id_1, 0 );
+		WC_Rate_Limiter::set_rate_limit( $rate_limit_id_1, HOUR_IN_SECONDS );
 
 		$this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_1 ), 'retried_too_soon allowed action to run too soon before the delay.' );
 		$this->assertEquals( false, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user before the delay.' );
@@ -59,7 +59,7 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 		$rate_limit_id_1 = $action_identifier . $user_1_id;
 		$rate_limit_id_2 = $action_identifier . $user_2_id;
 
-		WC_Rate_Limiter::set_rate_limit( $rate_limit_id_1, 0 );
+		WC_Rate_Limiter::set_rate_limit( $rate_limit_id_1, HOUR_IN_SECONDS );
 		// Clear cached value for user 1.
 		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'rate_limit' . $rate_limit_id_1 ), WC_Rate_Limiter::CACHE_GROUP );
 

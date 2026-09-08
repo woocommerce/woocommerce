@@ -702,7 +702,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Consistently returns an integer.
+	 * @since 11.2.0 Consistently returns an integer.
 	 *
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
@@ -1467,7 +1467,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Converts image IDs to integers.
+	 * @since 11.2.0 Converts image IDs to integers.
 	 *
 	 * @param int|string $image_id Product image id.
 	 * @return void

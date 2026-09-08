@@ -22,7 +22,7 @@ interface ItemProps< T extends object = object > {
 	search: string;
 	useExpandedPanelId: [
 		string | number | null,
-		React.Dispatch< React.SetStateAction< string | number | null > >
+		React.Dispatch< React.SetStateAction< string | number | null > >,
 	];
 }
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow decimal stock quantities below 1 to remain in stock when the `woocommerce_stock_amount` filter is overridden with `floatval`. The integer cast inside `WC_Abstract_Product::validate_props()` truncated values like `0.5` to `0`, incorrectly flipping the product to "Out of stock".

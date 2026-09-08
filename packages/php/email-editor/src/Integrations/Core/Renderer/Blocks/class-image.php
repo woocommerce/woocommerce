@@ -141,14 +141,9 @@ class Image extends Abstract_Block_Renderer {
 				}
 			}
 
-			// Fallback to wp_getimagesize if we still don't have a size.
+			// Fall back to reading the local image file if we still don't have a size.
 			if ( ! isset( $image_size ) ) {
-				$upload_dir = wp_upload_dir();
-				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-				$result     = wp_getimagesize( $image_path );
-				if ( $result ) {
-					$image_size = (int) $result[0];
-				}
+				$image_size = $this->get_local_image_width( $image_url );
 			}
 		}
 
@@ -157,6 +152,43 @@ class Image extends Abstract_Block_Renderer {
 
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
+	}
+
+	/**
+	 * Get the width of an image stored locally in the uploads directory.
+	 *
+	 * Only local files are measured. External URLs return null so the caller
+	 * can fall back to the max width.
+	 *
+	 * @param string $image_url Image URL.
+	 * @return int|null Image width in pixels, or null if it can't be determined locally.
+	 */
+	private function get_local_image_width( string $image_url ): ?int {
+		$upload_dir = wp_upload_dir();
+		$base_url   = trailingslashit( $upload_dir['baseurl'] );
+
+		// Only measure images served from the uploads directory.
+		if ( ! str_starts_with( $image_url, $base_url ) ) {
+			return null;
+		}
+
+		$base_dir   = realpath( $upload_dir['basedir'] );
+		$image_path = realpath( $upload_dir['basedir'] . '/' . substr( $image_url, strlen( $base_url ) ) );
+
+		if ( false === $base_dir || false === $image_path ) {
+			return null;
+		}
+
+		// Make sure the resolved file stays inside the uploads directory.
+		$base_dir   = trailingslashit( wp_normalize_path( $base_dir ) );
+		$image_path = wp_normalize_path( $image_path );
+		if ( ! str_starts_with( $image_path, $base_dir ) ) {
+			return null;
+		}
+
+		$result = wp_getimagesize( $image_path );
+
+		return $result ? (int) $result[0] : null;
 	}
 
 	/**

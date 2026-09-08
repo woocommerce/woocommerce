@@ -5,6 +5,7 @@ import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
 } from '@woocommerce/blocks-components';
+import type { ValidatedTextInputProps } from '@woocommerce/blocks-components/text-input/types';
 import type {
 	AddressAutocompleteResult,
 	ServerAddressAutocompleteProvider,
@@ -18,7 +19,6 @@ import { useCheckoutAddress } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import { ValidatedTextInputProps } from '../../../../../../packages/components/text-input/types';
 import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
@@ -240,7 +240,8 @@ export const AddressAutocomplete = ( {
 			const parentElement = inputElement.parentElement;
 			if ( parentElement ) {
 				// Store current focus state and cursor position
-				const hasFocus = document.activeElement === inputElement;
+				const hasFocus =
+					inputElement.ownerDocument.activeElement === inputElement;
 				const selectionStart = inputElement.selectionStart;
 				const selectionEnd = inputElement.selectionEnd;
 
@@ -377,7 +378,7 @@ export const AddressAutocomplete = ( {
 					suppressSearchTimeoutRef.current = setTimeout( () => {
 						suppressSearchTimeoutRef.current = null;
 					}, 1000 );
-					provider
+					void provider
 						.select( selected.id, country )
 						.then( ( address ) => {
 							if ( addressType === 'shipping' ) {

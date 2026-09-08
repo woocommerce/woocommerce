@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove an unnecessary coding-standard suppression from product review rating counts.

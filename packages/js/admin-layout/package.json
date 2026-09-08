@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/admin-layout",
 	"version": "2.0.0",
-	"description": "WooCommerce admin layout copmonents and utilities.",
+	"description": "WooCommerce admin layout components and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
@@ -77,11 +77,12 @@
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"postcss-loader": "4.3.x",
@@ -91,7 +92,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
 	"peerDependencies": {

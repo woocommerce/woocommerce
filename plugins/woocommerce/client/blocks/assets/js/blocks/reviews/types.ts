@@ -17,6 +17,7 @@ export interface Attributes {
 	categoryIds?: number[];
 	editMode?: boolean;
 	imageType?: string;
+	offset?: number;
 	orderby?: string;
 	productId?: number;
 	reviewsOnLoadMore?: number;

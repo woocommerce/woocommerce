@@ -217,7 +217,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_woocommerce_currency_symbol().
+	 * @testdox Should return the requested WooCommerce currency symbol.
 	 *
 	 * @since 2.2
 	 */
@@ -228,6 +228,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		// Given specific currency.
 		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol( 'GBP' ) );
+		$this->assertEquals( 'MOP&#36;', get_woocommerce_currency_symbol( 'MOP' ) );
+		$this->assertSame( 'K', get_woocommerce_currency_symbol( 'ZMW' ), 'The Zambian kwacha should use its local display symbol.' );
 
 		// Each case.
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
@@ -998,7 +1000,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_credit_card_type_label() {
 		$this->assertEquals( 'Visa', wc_get_credit_card_type_label( 'visa' ) );
 		$this->assertEquals( 'JCB', wc_get_credit_card_type_label( 'jCb' ) );
-		$this->assertEquals( 'MasterCard', wc_get_credit_card_type_label( 'Mastercard' ) );
+		$this->assertEquals( 'Mastercard', wc_get_credit_card_type_label( 'Mastercard' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american_express' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american-express' ) );
 		$this->assertEquals( 'Cartes Bancaires', wc_get_credit_card_type_label( 'cartes_bancaires' ) );

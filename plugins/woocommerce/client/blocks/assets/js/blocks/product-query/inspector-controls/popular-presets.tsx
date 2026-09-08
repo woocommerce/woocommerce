@@ -48,7 +48,7 @@ export function PopularPresets( props: ProductQueryBlock ) {
 						'/'
 					) as [
 						ProductQueryBlockQuery[ 'orderBy' ],
-						ProductQueryBlockQuery[ 'order' ]
+						ProductQueryBlockQuery[ 'order' ],
 					];
 
 					setQueryAttribute( props, { order, orderBy } );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow the "Regenerate the product attributes lookup table" tool (and the related abort and resume tools) to run via the REST API instead of failing with an "Invalid nonce" error.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Blueprint: export SQL steps using a table prefix placeholder instead of the source site's database prefix, so settings can be imported on sites that use a different table prefix.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Rename the e2e test directory from e2e-pw to e2e and repoint all references; test-only, no changes to shipped code.

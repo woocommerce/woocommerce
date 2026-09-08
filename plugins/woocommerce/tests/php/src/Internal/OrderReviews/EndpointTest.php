@@ -221,6 +221,44 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render_shortcode() only renders on the managed page with a matching order key.
+	 */
+	public function test_render_shortcode_requires_managed_page_and_key(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$page_id       = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$other_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Some other page',
+			)
+		);
+
+		global $wp, $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp             = new \stdClass();
+		$wp->query_vars = array( Endpoint::QUERY_VAR => (string) $order->get_id() );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
+		$wp_query          = new WP_Query();
+		$wp_query->is_page = true;
+
+		$wp_query->queried_object = get_post( $page_id );
+		$_GET                     = array( 'key' => 'wc_order_definitelywrong' );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Wrong key on the managed page.' );
+
+		$wp_query->queried_object = get_post( $other_page_id );
+		$_GET                     = array( 'key' => $order->get_order_key() );
+		$this->assertSame( '', $this->endpoint->render_shortcode(), 'Correct key off the managed page.' );
+
+		$wp_query->queried_object = get_post( $page_id );
+		$html                     = $this->endpoint->render_shortcode();
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html, 'Correct key on the managed page.' );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set.
 	 */
 	public function test_eligible_statuses_filter_widens_set(): void {
@@ -689,6 +727,111 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Installing-mode requests defer the rewrite flush until the next normal request registers the endpoint.
+	 * @dataProvider provide_pending_rewrite_option_autoload_cases
+	 *
+	 * @param bool $autoload Whether the pending option is autoloaded.
+	 */
+	public function test_pending_rewrite_flush_is_deferred_during_installing_mode( bool $autoload ): void {
+		global $wp_actions, $wp_rewrite;
+
+		$this->reset_review_order_pages();
+		$page_id = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		update_option( 'woocommerce_review_order_page_id', $page_id );
+
+		$original_installing = wp_installing();
+		$original_pending    = get_option( 'woocommerce_review_order_flush_rewrite_pending', null );
+		$original_queue      = get_option( 'woocommerce_queue_flush_rewrite_rules', null );
+		$original_rules      = get_option( 'rewrite_rules', null );
+		$original_extra      = $wp_rewrite->extra_rules_top;
+		$original_generated  = $wp_rewrite->rules;
+		$original_permalink  = $wp_rewrite->permalink_structure;
+		$original_wp_loaded  = $wp_actions['wp_loaded'] ?? null;
+
+		$original_alloptions = wp_load_alloptions();
+
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+		add_option( 'woocommerce_review_order_flush_rewrite_pending', 'no', '', $autoload );
+		$this->assertSame( 'no', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'Prime the option cache before the install-mode write.' );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		update_option( 'rewrite_rules', array() );
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		$wp_rewrite->extra_rules_top = array();
+		add_filter( 'flush_rewrite_rules_hard', '__return_false' );
+		$wp_actions['wp_loaded'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate wp_loaded so WP_Rewrite::flush_rules() would write rules if the install guard did not return early.
+		wp_installing( true );
+
+		try {
+			// Republishing the draft host page queues the flush through the install-mode write path.
+			$this->endpoint->maybe_create_host_page();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$this->assertSame( array(), (array) get_option( 'rewrite_rules' ), 'Installing mode should not persist rewrite rules.' );
+			$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'A soft endpoint flush should not use the shared hard-flush queue.' );
+
+			wp_installing( false );
+			$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'The next normal request should see the queued flush through the option cache.' );
+			$this->endpoint->add_rewrite_rule();
+			$this->endpoint->maybe_flush_pending_rewrite();
+
+			$review_order_rules = array_filter(
+				(array) get_option( 'rewrite_rules' ),
+				static function ( $query ): bool {
+					return str_contains( $query, Endpoint::QUERY_VAR . '=' );
+				}
+			);
+
+			$this->assertNotEmpty( $review_order_rules, 'The next normal request should persist the endpoint registered on init.' );
+			$this->assertFalse( get_option( 'woocommerce_review_order_flush_rewrite_pending', false ), 'The normal request should consume the endpoint trigger.' );
+		} finally {
+			wp_installing( false );
+			remove_action( 'wp_loaded', array( $wp_rewrite, 'flush_rules' ) );
+			remove_filter( 'flush_rewrite_rules_hard', '__return_false' );
+			delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			delete_option( 'rewrite_rules' );
+			if ( null !== $original_pending ) {
+				add_option( 'woocommerce_review_order_flush_rewrite_pending', $original_pending, '', array_key_exists( 'woocommerce_review_order_flush_rewrite_pending', $original_alloptions ) );
+			}
+			if ( null !== $original_queue ) {
+				add_option( 'woocommerce_queue_flush_rewrite_rules', $original_queue, '', array_key_exists( 'woocommerce_queue_flush_rewrite_rules', $original_alloptions ) );
+			}
+			if ( null !== $original_rules ) {
+				add_option( 'rewrite_rules', $original_rules, '', array_key_exists( 'rewrite_rules', $original_alloptions ) );
+			}
+			$wp_rewrite->set_permalink_structure( $original_permalink );
+			$wp_rewrite->extra_rules_top = $original_extra;
+			$wp_rewrite->rules           = $original_generated;
+			if ( null === $original_wp_loaded ) {
+				unset( $wp_actions['wp_loaded'] );
+			} else {
+				$wp_actions['wp_loaded'] = $original_wp_loaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original action count.
+			}
+			wp_installing( $original_installing );
+		}
+	}
+
+	/**
+	 * Pending rewrite option cache locations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provide_pending_rewrite_option_autoload_cases(): array {
+		return array(
+			'autoloaded in alloptions' => array( true ),
+			'cached by option name'    => array( false ),
+		);
+	}
+
+	/**
 	 * @testdox maybe_create_host_page() republishes a draft host page and queues a rewrite flush.
 	 */
 	public function test_maybe_create_host_page_republishes_draft_host_page(): void {
@@ -714,6 +857,78 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_create_host_page() preserves an intentionally empty Shop page setting.
+	 */
+	public function test_maybe_create_host_page_preserves_empty_shop_page_option(): void {
+		// Snapshot the Shop page option before staging: option values survive the
+		// per-test DB-transaction rollback (see setUp()), so the `finally` block
+		// must restore the pre-test value rather than leave it deleted for later
+		// tests in the same PHPUnit process.
+		$original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+
+		$this->reset_review_order_pages();
+		$this->reset_shop_pages();
+
+		$shop_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+				'post_name'   => 'shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', '' );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+
+		$customize_review_order_page = static function ( $pages ) {
+			if ( isset( $pages[ Endpoint::PAGE_KEY ] ) ) {
+					$pages[ Endpoint::PAGE_KEY ]['title'] = 'Customized review order page';
+
+					$pages[ Endpoint::PAGE_KEY ]['content'] .= '<!-- extension-customization -->';
+			}
+			return $pages;
+		};
+		$restore_shop_page           = static function ( $pages ) {
+			$pages['shop'] = array(
+				'name'    => 'shop',
+				'title'   => 'Shop',
+				'content' => '',
+			);
+			return $pages;
+		};
+
+		add_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+		add_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+		add_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
+		try {
+			$this->endpoint->maybe_create_host_page();
+
+			$this->assertSame( '', get_option( 'woocommerce_shop_page_id' ), 'intentional empty shop page option should stay empty' );
+
+			$review_order_page = get_post( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
+			$this->assertInstanceOf( \WP_Post::class, $review_order_page, 'review order page should still be created' );
+			$this->assertSame( 'Customized review order page', $review_order_page->post_title, 'earlier page-definition customizations should be preserved' );
+			$this->assertStringContainsString( '<!-- extension-customization -->', $review_order_page->post_content, 'earlier content customizations should be preserved' );
+
+			\WC_Install::create_pages();
+			$this->assertSame( $shop_page_id, (int) wc_get_page_id( 'shop' ), 'a later full repair should adopt the staged Shop page' );
+		} finally {
+			remove_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+			remove_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+			remove_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
+			$this->reset_review_order_pages();
+			$this->reset_shop_pages();
+
+			// Restore the pre-test Shop page option. `reset_shop_pages()` deletes
+			// it for a clean slate; put back whatever was there before so the
+			// suite's shared option state is unchanged by this test.
+			if ( false !== $original_shop_page_id ) {
+				update_option( 'woocommerce_shop_page_id', $original_shop_page_id );
+			}
+		}
+	}
+
+	/**
 	 * @testdox The `woocommerce_create_pages` filter injects the Review Order entry so any caller of `WC_Install::create_pages()` (e.g. Status → Tools repair) seeds the page.
 	 */
 	public function test_inject_review_order_page_filter_adds_entry_for_third_party_callers(): void {
@@ -731,14 +946,15 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * Remove every page that could match the Review Order lookup, plus the
 	 * stored option, so a test can stage a clean slate before exercising
-	 * `maybe_create_host_page()`.
+	 * `maybe_create_host_page()`. Trashed pages must go too: `'any'` skips
+	 * `trash`, but `wc_create_page()` untrashes matching pages.
 	 */
 	private function reset_review_order_pages(): void {
 		$candidates = get_posts(
 			array(
 				'name'             => 'review-order',
 				'post_type'        => 'page',
-				'post_status'      => 'any',
+				'post_status'      => array_keys( get_post_stati() ),
 				'numberposts'      => -1,
 				'suppress_filters' => false,
 			)
@@ -747,5 +963,27 @@ class EndpointTest extends WC_Unit_Test_Case {
 			wp_delete_post( (int) $page->ID, true );
 		}
 		delete_option( 'woocommerce_review_order_page_id' );
+	}
+
+	/**
+	 * Remove every page that could match the Shop page lookup, plus the
+	 * stored option, so a test can stage an intentionally empty setting.
+	 * Trashed pages must go too: `'any'` skips `trash`, but
+	 * `wc_create_page()` untrashes matching pages.
+	 */
+	private function reset_shop_pages(): void {
+		$candidates = get_posts(
+			array(
+				'name'             => 'shop',
+				'post_type'        => 'page',
+				'post_status'      => array_keys( get_post_stati() ),
+				'numberposts'      => -1,
+				'suppress_filters' => false,
+			)
+		);
+		foreach ( $candidates as $page ) {
+			wp_delete_post( (int) $page->ID, true );
+		}
+		delete_option( 'woocommerce_shop_page_id' );
 	}
 }

@@ -28,7 +28,7 @@ interface CrudStoreParams<
 	) => ResourceState = (
 		state: ResourceState | undefined,
 		action: AnyAction
-	) => ResourceState
+	) => ResourceState,
 > {
 	storeName: string;
 	resourceName: string;
@@ -48,7 +48,7 @@ export const createCrudDataStore = <
 		string,
 		( ...args: AnyArguments ) => unknown
 	> = Record< string, ( ...args: AnyArguments ) => unknown >,
-	Selectors = unknown
+	Selectors = unknown,
 >( {
 	storeName,
 	resourceName,

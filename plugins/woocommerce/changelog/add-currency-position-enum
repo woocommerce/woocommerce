@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add CurrencyPosition enum class for woocommerce_currency_pos option values and adopt it in the Store API and Marketing Campaigns REST API.

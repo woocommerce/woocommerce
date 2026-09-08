@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Internationalization: use the singular form for the variation report order count.

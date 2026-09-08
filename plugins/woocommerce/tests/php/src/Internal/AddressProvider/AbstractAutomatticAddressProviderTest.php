@@ -7,12 +7,11 @@ use Automattic\WooCommerce\Internal\AddressProvider\AbstractAutomatticAddressPro
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Automattic\Jetpack\Constants;
 use WC_Address_Provider;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Tests for AbstractAutomatticAddressProvider functionality
  */
-class AbstractAutomatticAddressProviderTest extends TestCase {
+class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The mock logger.
@@ -31,7 +30,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 	/**
 	 * Setup test case.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Setup mock logger.
@@ -70,21 +69,13 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 	/**
 	 * Tear down test case.
 	 */
-	protected function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'pre_update_option_woocommerce_address_autocomplete_enabled' );
-		remove_all_filters( 'woocommerce_is_checkout' );
-		remove_all_actions( 'wp_enqueue_scripts' );
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
-
-		// Dequeue and deregister scripts.
+	public function tearDown(): void {
+		// The script registry lives on the $wp_scripts global, which the parent teardown
+		// does not reset, so dequeue and deregister explicitly.
 		wp_dequeue_script( 'a8c-address-autocomplete-service' );
 		wp_deregister_script( 'a8c-address-autocomplete-service' );
 
-		// Clean up options.
-		delete_option( 'test-provider_address_autocomplete_jwt' );
-		delete_option( 'test-provider_jwt_retry_data' );
-		delete_option( 'woocommerce_address_autocomplete_enabled' );
+		parent::tearDown();
 	}
 
 	/**

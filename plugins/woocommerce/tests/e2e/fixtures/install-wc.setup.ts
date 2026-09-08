@@ -135,9 +135,8 @@ setup( 'Install WC using WC Beta Tester', async ( { restApi } ) => {
 	}
 
 	// Check if WooCommerce is activated and its version
-	const finalActivatedWcVersion = await getActivatedWooCommerceVersion(
-		restApi
-	);
+	const finalActivatedWcVersion =
+		await getActivatedWooCommerceVersion( restApi );
 
 	if (
 		wcVersion === 'nightly'

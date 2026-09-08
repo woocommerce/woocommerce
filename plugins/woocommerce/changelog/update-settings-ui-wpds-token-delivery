@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Load the WordPress Design System tokens stylesheet on WooCommerce settings pages so Settings UI styles consume real design tokens.

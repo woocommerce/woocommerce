@@ -318,7 +318,9 @@ abstract class ItemSchema extends ProductSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			self::EXTENDING_KEY    => $this->get_extended_schema( self::IDENTIFIER ),
+			// static:: so each subclass advertises the extensions registered against its own
+			// endpoint. self:: here would resolve to the inherited ProductSchema identifier.
+			self::EXTENDING_KEY    => $this->get_extended_schema( static::IDENTIFIER ),
 		];
 	}
 }

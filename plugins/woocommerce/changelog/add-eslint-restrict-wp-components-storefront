@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Adds an ESLint rule to prevent `@wordpress/components` from being imported in storefront-bound files in the Cart and Checkout blocks, and refactors the Place Order button icon to use an inline SVG instead.
-

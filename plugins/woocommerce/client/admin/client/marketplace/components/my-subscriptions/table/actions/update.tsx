@@ -83,7 +83,7 @@ export default function Update( props: UpdateProps ) {
 
 		updateProduct( props.subscription )
 			.then( () => {
-				loadSubscriptions( false ).then( () => {
+				void loadSubscriptions( false ).then( () => {
 					addNotice(
 						props.subscription.product_key,
 						sprintf(

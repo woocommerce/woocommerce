@@ -378,7 +378,7 @@ function wc_format_coupon_code( $value ) {
  *
  * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
  *
- * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
+ * Due to the unfiltered_html capability that some (admin) users have, we need to account for slashes.
  *
  * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
  * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
@@ -644,7 +644,8 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	if ( $args['in_span'] ) {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		// dir="auto" isolates the symbol so RTL-script symbols (e.g. Lebanese Pound) can't flip the visual order of the price or bleed into surrounding text; it must stay "auto" (not "ltr") so those symbols' glyphs keep rendering in their native right-to-left order.
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
 		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
@@ -1201,7 +1202,7 @@ function wc_format_product_short_description( $content ) {
 }
 
 /**
- * Formats curency symbols when saved in settings.
+ * Formats currency symbols when saved in settings.
  *
  * @codeCoverageIgnore
  * @param  string $value     Option value.
@@ -1695,6 +1696,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_de
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_set_default_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_orders_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_view_order_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_order_withdrawal_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_downloads_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_account_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_address_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

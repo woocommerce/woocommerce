@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Stabilize two e2e specs in the core-parallel pool against concurrent-worker pollution: customer-list (pin the customers report page size on the URL so the list assertions and CSV download stay deterministic regardless of how many customers other workers create) and create-order (wait for the line item to render before saving so the order is never persisted with a 0-quantity line).

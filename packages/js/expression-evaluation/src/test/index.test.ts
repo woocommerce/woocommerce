@@ -98,7 +98,7 @@ describe( 'evaluate', () => {
 
 	it( 'should evaluate a string literal with single quotes and double quotes', () => {
 		// eslint-disable-next-line prettier/prettier
-		const result = evaluate( "'foo \"bar\"'" );
+		const result = evaluate( '\'foo "bar"\'' );
 
 		expect( result ).toEqual( 'foo "bar"' );
 	} );

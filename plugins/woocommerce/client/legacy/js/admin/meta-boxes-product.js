@@ -161,9 +161,21 @@ jQuery( function ( $ ) {
 			} else if ( 'grouped' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
+				$( 'input#_manage_stock' )
+					.prop( 'checked', false )
+					.trigger( 'change' );
+				$( '[name="_stock_status"]' )
+					.val( [ 'instock' ] )
+					.trigger( 'change' );
 			} else if ( 'external' === select_val ) {
 				$( 'input#_downloadable' ).prop( 'checked', false );
 				$( 'input#_virtual' ).prop( 'checked', false );
+				$( 'input#_manage_stock' )
+					.prop( 'checked', false )
+					.trigger( 'change' );
+				$( '[name="_stock_status"]' )
+					.val( [ 'instock' ] )
+					.trigger( 'change' );
 			}
 
 			const cogs_field_tip = $( '._cogs_value_field' ).find(
@@ -1570,8 +1582,7 @@ jQuery( function ( $ ) {
 			keepAlive: true,
 		} );
 
-	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
-	const setProductImageLink = $( '#set-post-thumbnail' );
+	// Add tooltips to the product image and product gallery actions.
 	// Escape the translated label before interpolating into the attribute so a
 	// translation containing quotes or markup cannot break the rendered span.
 	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ _.escape(
@@ -1585,16 +1596,53 @@ jQuery( function ( $ ) {
 		delay: 200,
 		keepAlive: true,
 	};
+	const productImageContainer = $( '#postimagediv .inside' );
+	const productImageTooltipClass = 'woocommerce-product-image-help-tip';
 
-	if ( setProductImageLink ) {
+	const syncProductImageTooltip = () => {
+		const removeProductImageLink = $( '#remove-post-thumbnail' );
+		const productImageLink = removeProductImageLink.length
+			? removeProductImageLink
+			: $( '#set-post-thumbnail' );
+		const existingTooltip = productImageContainer.find(
+			`.${ productImageTooltipClass }`
+		);
+
+		if ( ! productImageLink.length ) {
+			existingTooltip.remove();
+			return;
+		}
+
+		if (
+			existingTooltip.length &&
+			existingTooltip.prev()[ 0 ] === productImageLink[ 0 ]
+		) {
+			return;
+		}
+
+		existingTooltip.remove();
 		$( tooltipMarkup )
-			.insertAfter( setProductImageLink )
+			.addClass( productImageTooltipClass )
+			.insertAfter( productImageLink )
 			.tipTip( tooltipData );
+	};
+
+	if ( productImageContainer.length ) {
+		syncProductImageTooltip();
+
+		// WPSetThumbnailHTML() replaces the direct children of `.inside`, so
+		// `childList` alone observes every image change. Omitting `subtree`
+		// also keeps the observer blind to the tooltip's own insertion, which
+		// happens one level deeper.
+		new MutationObserver( syncProductImageTooltip ).observe(
+			productImageContainer[ 0 ],
+			{ childList: true }
+		);
 	}
 
 	const addProductImagesLink = $( '.add_product_images > a' );
 
-	if ( addProductImagesLink ) {
+	if ( addProductImagesLink.length ) {
 		$( tooltipMarkup )
 			.insertAfter( addProductImagesLink )
 			.tipTip( tooltipData );

@@ -36,9 +36,9 @@ export const useOptionsHydration = ( data: Options ) => {
 	useEffect( () => {
 		Object.entries( shouldHydrate ).forEach( ( [ name, hydrate ] ) => {
 			if ( hydrate ) {
-				startResolution( 'getOption', [ name ] );
-				receiveOptions( { [ name ]: data[ name ] } );
-				finishResolution( 'getOption', [ name ] );
+				void startResolution( 'getOption', [ name ] );
+				void receiveOptions( { [ name ]: data[ name ] } );
+				void finishResolution( 'getOption', [ name ] );
 			}
 		} );
 	}, [ shouldHydrate ] );

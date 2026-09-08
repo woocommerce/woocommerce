@@ -270,9 +270,8 @@ export async function watchComposerPackages(
 	const ignoredPackages = new Set( options.ignoredPackages ?? [] );
 
 	const startWatching = async (): Promise< void > => {
-		const packageInstallPaths = await fetchPackageInstallPaths(
-			projectDir
-		);
+		const packageInstallPaths =
+			await fetchPackageInstallPaths( projectDir );
 		const packages = await resolvePackages(
 			composerJsonPath,
 			ignoredPackages,
@@ -341,9 +340,8 @@ export async function watchComposerPackages(
 				return;
 			}
 			composerInstallRunning = false;
-			const projectInstallPaths = await fetchPackageInstallPaths(
-				projectDir
-			);
+			const projectInstallPaths =
+				await fetchPackageInstallPaths( projectDir );
 			const next = await resolvePackages(
 				composerJsonPath,
 				ignoredPackages,
@@ -366,7 +364,7 @@ export async function watchComposerPackages(
 			// Consuming project's composer.json is its own path; not in any pkg.
 			if ( absPath === composerJsonPath ) {
 				if ( event === 'change' || event === 'add' )
-					onComposerJsonChange();
+					void onComposerJsonChange();
 				return;
 			}
 
@@ -381,7 +379,7 @@ export async function watchComposerPackages(
 				absPath === path.join( pkg.sourceDir, 'composer.json' )
 			) {
 				await mirror( absPath, pkg ).catch( () => undefined );
-				onComposerJsonChange();
+				void onComposerJsonChange();
 				return;
 			}
 

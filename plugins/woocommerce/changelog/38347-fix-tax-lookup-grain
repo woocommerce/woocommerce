@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Store one wc_order_tax_lookup row per tax order item, so Analytics tax reports keep every tax line of an order, including lines that share a tax rate id, and drop rows for tax lines that have been removed.

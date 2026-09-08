@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix SKU duplication corrupting hyphenated SKUs. Duplicating a product with SKU `SKU-123` now correctly produces `SKU-123-1` instead of `SKU-124`.

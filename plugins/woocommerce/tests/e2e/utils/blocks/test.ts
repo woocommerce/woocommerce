@@ -19,6 +19,11 @@ import {
 } from '@woocommerce/e2e-utils';
 
 /**
+ * Internal dependencies
+ */
+import { restoreBlocksDatabase } from './wp-cli';
+
+/**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
  * to the Playwright ConsoleMessage type, its value the corresponding function
@@ -159,9 +164,8 @@ const test = base.extend<
 			);
 		}
 
-		await wpCLI( `db reset --yes` );
 		// Reset the database to the initial state via snapshot import.
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await restoreBlocksDatabase( DB_EXPORT_FILE );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );

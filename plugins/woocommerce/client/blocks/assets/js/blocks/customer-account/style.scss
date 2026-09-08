@@ -61,9 +61,33 @@
 		text-decoration: underline;
 	}
 
+	:where(.wc-block-customer-account__visual) {
+		position: relative;
+	}
+
+	:where(.wc-block-customer-account__visual + .label) {
+		padding-left: em($gap-smallest);
+	}
+
+	:where(.wc-block-customer-account__visual > svg),
 	.wc-block-customer-account__account-icon {
+		display: block;
 		width: em($grid-unit-30);
 		height: em($grid-unit-30);
+	}
+
+	:where(.wc-block-customer-account__avatar) {
+		// SVG icons have some transparent spacing around the actual icon.
+		// So we add some spacing around the avatar to simulate a similar size.
+		$avatar_spacing: 4%;
+
+		border-radius: 50%;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: calc(100% - ($avatar_spacing * 2));
+		height: auto;
 	}
 }
 

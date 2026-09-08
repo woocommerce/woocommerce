@@ -96,6 +96,14 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 				$this->handle_order_deletion_with_sync_disabled( $refund_id );
 			}
 		}
+
+		/**
+		 * Fires when a refund is deleted.
+		 *
+		 * @param int $refund_id The refund ID.
+		 * @since 3.0.0
+		 */
+		do_action( 'woocommerce_delete_order_refund', $refund_id );
 	}
 
 	/**

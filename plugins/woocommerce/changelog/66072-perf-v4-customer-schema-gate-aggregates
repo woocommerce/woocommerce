@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+REST API: in the wc/v4 customers endpoint, only compute the order count, total spent and avatar fields when they are requested via _fields, avoiding wasted per-customer aggregate queries on sparse requests.

@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced the number of SQL queries required to fetch tax rates in the cart and during checkout.

@@ -31,6 +31,8 @@ class Products extends Task {
 		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
+		// Onboarding tasks open a pre-created draft via post.php, which WordPress otherwise highlights as All Products.
+		add_filter( 'submenu_file', array( $this, 'highlight_add_product_menu' ) );
 
 		add_action( 'woocommerce_update_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'woocommerce_new_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
@@ -45,12 +47,50 @@ class Products extends Task {
 	}
 
 	/**
+	 * Highlight Add product while creating a product from the onboarding task.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $submenu_file Current submenu file.
+	 * @return mixed
+	 */
+	public function highlight_add_product_menu( $submenu_file ) {
+		$screen   = get_current_screen();
+		$tutorial = wc_clean( wp_unslash( $_GET['tutorial'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$tutorial = is_string( $tutorial ) ? $tutorial : '';
+
+		if ( ! $this->is_active() || ! wc_string_to_bool( $tutorial ) || ! $screen || 'post' !== $screen->base || 'product' !== $screen->post_type ) {
+			return $submenu_file;
+		}
+
+		return 'post-new.php?post_type=product';
+	}
+
+	/**
 	 * ID.
 	 *
 	 * @return string
 	 */
 	public function get_id() {
 		return 'products';
+	}
+
+	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/sales-section-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Products illustration', 'woocommerce' );
 	}
 
 	/**
@@ -290,7 +330,7 @@ class Products extends Task {
 				return;
 			}
 
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&task=products' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product&task=products' ) );
 			exit;
 		}
 	}

@@ -3,7 +3,11 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useEffect,
+} from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -22,13 +26,45 @@ import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
-import { connectUrl } from '../../utils/functions';
+import { addNotice, connectUrl } from '../../utils/functions';
+import {
+	NoticeStatus,
+	REFRESH_SUBSCRIPTIONS_NOTICE_ID,
+} from '../../contexts/types';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
+
+/**
+ * Whether the failure captured at page load has already been reported.
+ *
+ * Module scope rather than component state because this component is unmounted
+ * whenever the merchant switches marketplace tabs. Held in the component, the
+ * flag would reset on the way back and re-add a notice that had already been
+ * dismissed.
+ */
+let pageLoadErrorReported = false;
 
 export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	// Report the failure captured at page load as the notice a failed refresh
+	// would report, under the same id. The Refresh button reruns the very
+	// request this describes, so sharing the id means the later result replaces
+	// the earlier one and a single problem yields a single dismissible notice.
+	useEffect( () => {
+		if ( pageLoadErrorReported || ! wccomSettings?.api_error_notice ) {
+			return;
+		}
+
+		pageLoadErrorReported = true;
+
+		addNotice(
+			REFRESH_SUBSCRIPTIONS_NOTICE_ID,
+			wccomSettings.api_error_notice,
+			NoticeStatus.Error
+		);
+	}, [ wccomSettings?.api_error_notice ] );
 
 	const installedTableDescription = createInterpolateElement(
 		__(
@@ -66,7 +102,7 @@ export default function MySubscriptions(): React.JSX.Element {
 			notice_id: 'woo-connect-notice',
 			dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 		};
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
@@ -88,7 +124,7 @@ export default function MySubscriptions(): React.JSX.Element {
 				notice_id: 'woo-disconnect-notice',
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			};
-			apiFetch( {
+			void apiFetch( {
 				path: `/wc-admin/notice/dismiss`,
 				method: 'POST',
 				data,

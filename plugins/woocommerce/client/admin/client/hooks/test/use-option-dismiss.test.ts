@@ -46,6 +46,7 @@ describe( 'useOptionDismiss', () => {
 		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
 
 		expect( result.current.isDismissed ).toBe( true );
+		expect( result.current.hasResolved ).toBe( false );
 	} );
 
 	it( 'is dismissed when the resolved option is "yes"', () => {
@@ -54,6 +55,7 @@ describe( 'useOptionDismiss', () => {
 		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
 
 		expect( result.current.isDismissed ).toBe( true );
+		expect( result.current.hasResolved ).toBe( true );
 	} );
 
 	it( 'is not dismissed when the resolved option is not "yes"', () => {
@@ -62,6 +64,7 @@ describe( 'useOptionDismiss', () => {
 		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
 
 		expect( result.current.isDismissed ).toBe( false );
+		expect( result.current.hasResolved ).toBe( true );
 	} );
 
 	it( 'persists the dismissal through updateOptions', () => {

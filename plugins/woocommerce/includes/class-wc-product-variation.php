@@ -367,7 +367,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Consistently returns an integer.
+	 * @since 11.2.0 Consistently returns an integer.
 	 *
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int
@@ -463,7 +463,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Set the parent data array for this variation.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Converts parent image IDs to integers.
+	 * @since 11.2.0 Converts parent image IDs to integers.
 	 *
 	 * @param array $parent_data parent data array for this variation.
 	 */
@@ -515,9 +515,21 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 	/**
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
-	 * specific attributes using name value pairs.
+	 * specific attributes using name-value pairs. Taxonomy attribute values must use term
+	 * slugs, which can be URL-encoded and differ from the term name.
 	 *
-	 * @param array $raw_attributes array of raw attributes.
+	 * For example, if a global "Size" attribute has a term named "7½", whose stored
+	 * slug is "7%c2%bd", configure the variation using that term slug:
+	 *
+	 * $variation->set_attributes(
+	 *     array(
+	 *         'pa_size' => '7%c2%bd',
+	 *     )
+	 * );
+	 *
+	 * @param array $raw_attributes Array of raw attributes.
+	 *
+	 * @since 3.0.0
 	 */
 	public function set_attributes( $raw_attributes ) {
 		$raw_attributes = (array) $raw_attributes;

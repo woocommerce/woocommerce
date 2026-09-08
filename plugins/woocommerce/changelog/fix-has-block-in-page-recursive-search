@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix - Make WC_Blocks_Utils::has_block_in_page() search nested blocks recursively.

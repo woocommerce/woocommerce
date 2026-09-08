@@ -14,6 +14,7 @@ import { useState, useContext, useRef } from '@wordpress/element';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
+import QualityBadge from '../quality-badge/quality-badge';
 import {
 	Product,
 	ProductCardType,
@@ -293,11 +294,19 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		);
 	};
 
+	const qualityBadge =
+		! isLoading && props.product ? (
+			<QualityBadge product={ props.product } />
+		) : null;
+
 	const footer = ! isBusinessService ? (
 		<footer className="woocommerce-marketplace__product-card__footer">
 			{ isLoading && (
 				<div className="woocommerce-marketplace__product-card__price" />
 			) }
+			{ /* Regular cards show the badge on its own row above the price;
+			     compact cards show it between the title and the price. */ }
+			{ ! isCompact && qualityBadge }
 			{ ! isLoading && props.product && (
 				<ProductCardFooter product={ props.product } />
 			) }
@@ -367,6 +376,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 								) }
 							</p>
 						) }
+						{ isCompact && qualityBadge }
 						{ isCompact && footer }
 					</div>
 				</div>

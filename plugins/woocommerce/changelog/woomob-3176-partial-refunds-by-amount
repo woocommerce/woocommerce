@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-POST /wc/v4/refunds/preview: accept refund_total per line item for partial-amount previews (quantity now optional when refund_total is provided). For the quantity and tax-inclusive refund_total forms, preview and create split tax by the line's stored total/tax ratio and round amounts identically, so a previewed amount matches the created refund to the cent.

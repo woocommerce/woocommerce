@@ -19,6 +19,11 @@ const blockData = {
 	slug: 'archive-product',
 };
 
+const getExpectedStyleControls = ( wpCoreVersion: number ) =>
+	wpCoreVersion >= 7.1
+		? [ 'Typography', 'Dimensions', 'Border' ]
+		: [ 'Color', 'Typography', 'Dimensions' ];
+
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
 	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductFiltersPage( {
@@ -42,6 +47,7 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'should display the correct inspector style controls', async ( {
 		editor,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
@@ -53,18 +59,13 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
 
-		await expect(
-			editor.page.getByText( 'ColorAll options are currently hidden' )
-		).toBeVisible();
-		await expect(
-			editor.page.getByText(
-				'TypographyAll options are currently hidden'
-			)
-		).toBeVisible();
-		await expect(
-			editor.page.getByText(
-				'DimensionsAll options are currently hidden'
-			)
-		).toBeVisible();
+		for ( const control of getExpectedStyleControls( wpCoreVersion ) ) {
+			await expect(
+				editor.page.getByRole( 'heading', {
+					name: control,
+					exact: true,
+				} )
+			).toBeVisible();
+		}
 	} );
 } );

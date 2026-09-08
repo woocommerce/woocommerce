@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Tolerate settings section registry failures when resolving the Settings UI request context, preventing update-time fatals.

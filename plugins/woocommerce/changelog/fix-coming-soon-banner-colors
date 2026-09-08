@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use fixed colors for the coming soon footer banner instead of inheriting them from the active theme.
