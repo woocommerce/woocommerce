@@ -325,11 +325,7 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_generate_receipt_falls_back_to_item_name_when_variation_parent_is_deleted() {
 		global $wpdb;
-		// Arrange - an order holding a variation item whose parent product
-		// lookup dangles (failed cleanup, out-of-band delete, stale cache
-		// serving the variation after its parent is gone). The orphan is
-		// built at the row level on purpose: deleting through the API
-		// cascades to the children, so it cannot produce this state.
+		// Arrange - orphan the variation at the row level: deleting through the API cascades to the children, so it cannot produce this state.
 		$parent    = \WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( current( $parent->get_children() ) );
 
@@ -345,7 +341,7 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 		$rendered = $this->render_receipt( $order );
 
 		// Assert - the line item name is used as the title fallback.
-		$item = current( $order->get_items() );
+		$item = current( $items );
 		$this->assertStringContainsString( $item->get_name(), $rendered );
 	}
 }
