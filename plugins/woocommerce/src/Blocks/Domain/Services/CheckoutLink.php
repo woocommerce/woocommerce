@@ -90,15 +90,23 @@ class CheckoutLink {
 	 *
 	 * Products use the format `id-or-sku:quantity:variation-data:cart-item-data`. Quantity and both data groups are optional,
 	 * while an empty variation group separates cart item data. Multiple key-value pairs within a data group use semicolons.
+	 * Prefix numeric SKUs with `sku=`. Delimiters within identifiers, keys, or values must be escaped with a tilde.
 	 *
 	 * @return array[] Array of product data formatted for CartController::add_to_cart().
 	 */
 	protected function get_products_from_checkout_link() {
-		$raw_products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$products     = [];
+		$products_query = wp_unslash( $_GET['products'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( ! is_string( $products_query ) ) {
+			return [];
+		}
+
+		$products_query = sanitize_text_field( $products_query );
+		$raw_products   = array_filter( $this->split_escaped( $products_query, ',' ) );
+		$products       = [];
 
 		foreach ( $raw_products as $raw_product ) {
-			$segments           = explode( ':', $raw_product, 4 );
+			$segments           = $this->split_escaped( $raw_product, ':', 4 );
 			$product_identifier = $segments[0] ?? '';
 			$quantity           = '' !== ( $segments[1] ?? '' ) ? absint( $segments[1] ) : 1;
 			$variation_data     = $this->parse_product_data( $segments[2] ?? '' );
@@ -108,13 +116,16 @@ class CheckoutLink {
 				continue;
 			}
 
-			if ( is_numeric( $product_identifier ) ) {
+			if ( 0 === strpos( $product_identifier, 'sku=' ) ) {
+				$product_id = wc_get_product_id_by_sku( substr( $product_identifier, 4 ) );
+			} elseif ( is_numeric( $product_identifier ) ) {
 				$product_id = absint( $product_identifier );
 			} else {
 				$product_id = wc_get_product_id_by_sku( $product_identifier );
-				if ( ! $product_id ) {
-					continue;
-				}
+			}
+
+			if ( ! $product_id ) {
+				continue;
 			}
 
 			$variation = array_map(
@@ -142,13 +153,15 @@ class CheckoutLink {
 	/**
 	 * Parse a semicolon-separated list of key-value pairs.
 	 *
+	 * @since 11.2.0
+	 *
 	 * @param string $raw_data Raw product data from the checkout link.
 	 * @return array<string, string> Sanitized product data.
 	 */
 	protected function parse_product_data( $raw_data ) {
 		$data = [];
 
-		foreach ( explode( ';', $raw_data ) as $pair ) {
+		foreach ( $this->split_escaped( $raw_data, ';' ) as $pair ) {
 			if ( false === strpos( $pair, '=' ) ) {
 				continue;
 			}
@@ -162,6 +175,36 @@ class CheckoutLink {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Split a string on unescaped delimiters.
+	 *
+	 * @param string $value     Value to split.
+	 * @param string $delimiter Single-character delimiter.
+	 * @param int    $limit     Maximum number of returned segments.
+	 * @return string[] Split values with delimiter escapes removed.
+	 */
+	private function split_escaped( $value, $delimiter, $limit = PHP_INT_MAX ) {
+		$segments = [ '' ];
+		$index    = 0;
+		$length   = strlen( $value );
+
+		for ( $position = 0; $position < $length; ++$position ) {
+			$character = $value[ $position ];
+
+			if ( '~' === $character && $position + 1 < $length && $delimiter === $value[ $position + 1 ] ) {
+				$segments[ $index ] .= $delimiter;
+				++$position;
+			} elseif ( $delimiter === $character && count( $segments ) < $limit ) {
+				$segments[] = '';
+				++$index;
+			} else {
+				$segments[ $index ] .= $character;
+			}
+		}
+
+		return $segments;
 	}
 
 	/**
