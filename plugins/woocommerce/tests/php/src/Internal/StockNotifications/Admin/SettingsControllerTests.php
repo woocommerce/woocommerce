@@ -71,4 +71,15 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 'text', $settings[ $setting_index ]['type'] );
 		$this->assertSame( MyAccountEndpoint::ENDPOINT, $settings[ $setting_index ]['default'] );
 	}
+
+	/**
+	 * @testdox The My Account endpoint setting is sanitized as an endpoint slug on save.
+	 */
+	public function test_my_account_endpoint_setting_is_sanitized_on_save() {
+		$hook = 'woocommerce_admin_settings_sanitize_option_' . MyAccountEndpoint::ENDPOINT_OPTION;
+
+		$this->assertSame( 10, has_filter( $hook, 'wc_sanitize_endpoint_slug' ) );
+		$this->assertSame( 'restock-alerts', apply_filters( $hook, 'Restock Alerts' ) );
+		$this->assertSame( 'stock-notifications', apply_filters( $hook, 'stock-notifications' ) );
+	}
 }
