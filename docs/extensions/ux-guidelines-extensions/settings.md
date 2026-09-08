@@ -1,6 +1,7 @@
 ---
 post_title: Settings
 sidebar_label: Settings
+sidebar_position: 5
 ---
 
 # Settings
