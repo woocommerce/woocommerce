@@ -53,23 +53,27 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	 * @testdox Adds legacy products, quantities, SKUs, variations, additional data, and a coupon from a checkout link.
 	 */
 	public function test_products_and_coupon_are_added_and_token_in_url(): void {
-		$legacy_product    = \WC_Helper_Product::create_simple_product();
-		$quantity_product  = \WC_Helper_Product::create_simple_product();
-		$sku_product       = \WC_Helper_Product::create_simple_product();
-		$variable_product  = \WC_Helper_Product::create_variation_product();
-		$available_options = $variable_product->get_available_variations();
-		$chosen_variation  = array_shift( $available_options );
+		$legacy_product      = \WC_Helper_Product::create_simple_product();
+		$quantity_product    = \WC_Helper_Product::create_simple_product();
+		$sku_product         = \WC_Helper_Product::create_simple_product();
+		$numeric_sku_product = \WC_Helper_Product::create_simple_product();
+		$variable_product    = \WC_Helper_Product::create_variation_product();
+		$available_options   = $variable_product->get_available_variations();
+		$chosen_variation    = array_shift( $available_options );
 
-		$sku_product->set_sku( 'CHECKOUT-LINK-SKU' );
+		$sku_product->set_sku( 'CHECKOUT,LINK:SKU' );
 		$sku_product->save();
+		$numeric_sku_product->set_sku( '999999' );
+		$numeric_sku_product->save();
 
 		$_GET['products'] = implode(
 			',',
 			[
 				(string) $legacy_product->get_id(),
 				$quantity_product->get_id() . ':2',
-				'CHECKOUT-LINK-SKU',
-				$variable_product->get_id() . ':1:' . http_build_query( $chosen_variation['attributes'], '', ';' ) . ':nyp=99',
+				'CHECKOUT~,LINK~:SKU',
+				'sku=999999',
+				$variable_product->get_id() . ':1:' . http_build_query( $chosen_variation['attributes'], '', ';' ) . ':nyp=99;note=alpha~,beta~;gamma:delta',
 			]
 		);
 		$_GET['coupon']   = 'test-coupon';
@@ -92,6 +96,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 			$legacy_product->get_id(),
 			$quantity_product->get_id(),
 			$sku_product->get_id(),
+			$numeric_sku_product->get_id(),
 			$variable_product->get_id(),
 		];
 
@@ -102,7 +107,8 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $expected_product_ids, array_keys( $cart_by_product ), 'All checkout-link product identifier formats should resolve.' );
 		$this->assertSame( 1, $cart_by_product[ $legacy_product->get_id() ]['quantity'], 'A legacy product ID should default to quantity one.' );
 		$this->assertSame( 2, $cart_by_product[ $quantity_product->get_id() ]['quantity'], 'A legacy product ID and quantity should remain supported.' );
-		$this->assertSame( 1, $cart_by_product[ $sku_product->get_id() ]['quantity'], 'A SKU should resolve to its product.' );
+		$this->assertSame( 1, $cart_by_product[ $sku_product->get_id() ]['quantity'], 'An escaped SKU should resolve to its product.' );
+		$this->assertSame( 1, $cart_by_product[ $numeric_sku_product->get_id() ]['quantity'], 'An explicitly prefixed numeric SKU should resolve to its product.' );
 		$this->assertSame(
 			[
 				'attribute_pa_colour' => '',
@@ -113,9 +119,46 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 			'Variation data should select the requested variation.'
 		);
 		$this->assertSame( '99', $cart_by_product[ $variable_product->get_id() ]['nyp'], 'Additional product data should be retained on the cart item.' );
+		$this->assertSame( 'alpha,beta;gamma:delta', $cart_by_product[ $variable_product->get_id() ]['note'], 'Escaped delimiters should be retained in additional product data.' );
 		$this->assertArrayNotHasKey( 'nyp', $cart_by_product[ $variable_product->get_id() ]['variation'], 'Additional product data should not be treated as variation data.' );
 		$this->assertSame( [ 'test-coupon' ], WC()->cart->get_applied_coupons(), 'The checkout-link coupon should be applied.' );
 		$this->assertStringContainsString( 'session=', $url, 'Guest checkout links should include a cart session token.' );
+	}
+
+	/**
+	 * @testdox Preserves escaped delimiters in variation and cart item data.
+	 */
+	public function test_escaped_product_data_delimiters_are_preserved(): void {
+		$_GET['products'] = '123:1:ratio=10~:20~,wide~;special:note=a~,b~;c:d';
+
+		$service = new class() extends CheckoutLink {
+			/**
+			 * Get parsed checkout-link products for testing.
+			 *
+			 * @return array[] Parsed product data.
+			 */
+			public function get_products_test() {
+				return parent::get_products_from_checkout_link();
+			}
+		};
+
+		$this->assertSame(
+			[
+				[
+					'id'             => 123,
+					'quantity'       => 1,
+					'variation'      => [
+						[
+							'attribute' => 'ratio',
+							'value'     => '10:20,wide;special',
+						],
+					],
+					'cart_item_data' => [ 'note' => 'a,b;c:d' ],
+				],
+			],
+			$service->get_products_test(),
+			'Escaped delimiters should be treated as data rather than checkout-link separators.'
+		);
 	}
 
 	/**
