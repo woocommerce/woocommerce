@@ -2655,13 +2655,23 @@ class WC_Helper {
 	 */
 	private static function get_auto_update_filter_payload( string $type, string $item_key ) {
 		if ( 'theme' === $type ) {
+			// Core stores theme entries as arrays; extensions that add their own sometimes use objects.
+			$updates     = get_site_transient( 'update_themes' );
+			$update_item = $updates->response[ $item_key ] ?? $updates->no_update[ $item_key ] ?? null;
+			if ( ! empty( $update_item ) ) {
+				return (object) $update_item;
+			}
+
+			// Same fallback as wp_prepare_themes_for_js() when the theme is not in the transient.
+			$theme = wp_get_theme( $item_key );
+
 			return (object) array(
 				'theme'        => $item_key,
-				'new_version'  => '',
+				'new_version'  => $theme->get( 'Version' ),
 				'url'          => '',
 				'package'      => '',
-				'requires'     => '',
-				'requires_php' => '',
+				'requires'     => $theme->get( 'RequiresWP' ),
+				'requires_php' => $theme->get( 'RequiresPHP' ),
 			);
 		}
 

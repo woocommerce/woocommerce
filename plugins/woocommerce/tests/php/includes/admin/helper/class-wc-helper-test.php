@@ -32,6 +32,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	private function cleanup_auto_update_state(): void {
 		delete_site_option( 'auto_update_plugins' );
 		delete_site_option( 'auto_update_themes' );
+		delete_site_transient( 'update_themes' );
 		wp_cache_delete( 'plugins', 'plugins' );
 		wp_set_current_user( 0 );
 		remove_all_filters( 'auto_update_plugin' );
@@ -1034,6 +1035,68 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $off['auto_update'], 'A theme not listed in the option does not auto-update.' );
 		$this->assertTrue( $on['auto_update'] );
 		$this->assertTrue( $on['auto_update_manageable'], 'An administrator on single site can change it.' );
+	}
+
+	/**
+	 * @testdox The auto_update_theme filter receives the installed version when the theme has no update entry.
+	 */
+	public function test_theme_auto_update_filter_receives_the_installed_version(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$version    = wp_get_theme( $stylesheet )->get( 'Version' );
+		$seen       = null;
+
+		// Blocks only when the payload carries the installed version, as core's fallback does.
+		add_filter(
+			'auto_update_theme',
+			function ( $update, $item ) use ( &$seen, $version ) {
+				$seen = $item;
+				return $item->new_version === $version ? false : $update;
+			},
+			10,
+			2
+		);
+
+		$data = WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertSame( $version, $seen->new_version, 'The fallback carries the same fields core passes.' );
+		$this->assertFalse( $data['auto_update_manageable'], 'The filter could decide on that field, so the state is forced.' );
+	}
+
+	/**
+	 * @testdox The auto_update_theme filter receives the update offer when the theme has one.
+	 */
+	public function test_theme_auto_update_filter_receives_the_update_offer(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$seen       = null;
+
+		set_site_transient(
+			'update_themes',
+			(object) array(
+				'response' => array(
+					$stylesheet => array(
+						'theme'       => $stylesheet,
+						'new_version' => '99.0.0',
+						'package'     => 'https://example.com/theme.zip',
+					),
+				),
+			)
+		);
+		add_filter(
+			'auto_update_theme',
+			function ( $update, $item ) use ( &$seen ) {
+				$seen = $item;
+				return $update;
+			},
+			10,
+			2
+		);
+
+		WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertSame( '99.0.0', $seen->new_version );
+		$this->assertSame( 'https://example.com/theme.zip', $seen->package );
 	}
 
 	/**
