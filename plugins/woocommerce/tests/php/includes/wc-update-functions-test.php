@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -618,5 +619,54 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
 		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
+	}
+
+	/**
+	 * @testdox Migration deletes the lookup rows of unpublished variations and keeps every other row.
+	 */
+	public function test_wc_update_11203_delete_unpublished_variation_lookup_rows(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertContains( 'wc_update_11203_delete_unpublished_variation_lookup_rows', $db_updates['11.2.0-3'] );
+
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$this->assertGreaterThanOrEqual( 2, count( $variation_ids ) );
+
+		$disabled_variation = wc_get_product( $variation_ids[0] );
+		$disabled_variation->set_status( ProductStatus::PRIVATE );
+		$disabled_variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$rows = array(
+			array( $product->get_id(), 0 ),
+			array( $variation_ids[0], 1 ),
+			array( $variation_ids[1], 1 ),
+		);
+		foreach ( $rows as list( $product_id, $is_variation_attribute ) ) {
+			$wpdb->insert(
+				$lookup_table,
+				array(
+					'product_id'             => $product_id,
+					'product_or_parent_id'   => $product->get_id(),
+					'taxonomy'               => 'pa_size',
+					'term_id'                => 1,
+					'is_variation_attribute' => $is_variation_attribute,
+					'in_stock'               => 1,
+				),
+				array( '%d', '%d', '%s', '%d', '%d', '%d' )
+			);
+		}
+
+		wc_update_11203_delete_unpublished_variation_lookup_rows();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
+		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation_ids[1] ), $remaining );
 	}
 }

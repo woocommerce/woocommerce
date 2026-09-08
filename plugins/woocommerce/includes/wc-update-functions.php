@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -38,6 +39,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
@@ -3799,4 +3801,43 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 	wc_update_11201_invalidate_analytics_reports_cache();
 
 	return false;
+}
+
+/**
+ * Delete the product attributes lookup rows of variations that are not published.
+ *
+ * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
+ * counted terms that only a disabled variation carried. Rows are now only written for published variations
+ * and a status change refreshes them, but rows written before that are never revisited.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11203_delete_unpublished_variation_lookup_rows() {
+	global $wpdb;
+
+	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
+		return;
+	}
+
+	$lookup_table = $lookup_data_store->get_lookup_table_name();
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names cannot be prepared; both are trusted identifiers.
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE lookup FROM {$lookup_table} AS lookup
+			INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+			WHERE lookup.is_variation_attribute = 1
+			AND posts.post_type = 'product_variation'
+			AND posts.post_status != %s",
+			ProductStatus::PUBLISH
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	// Counts cached from the old rows: the Product Filters block cache, and the classic widget transients.
+	wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
 }

@@ -362,6 +362,9 @@ class WC_Install {
 		'11.2.0-2' => array(
 			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
+		'11.2.0-3' => array(
+			'wc_update_11203_delete_unpublished_variation_lookup_rows',
+		),
 	);
 
 	/**
