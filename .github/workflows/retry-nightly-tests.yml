@@ -1,0 +1,52 @@
+name: 'Retry nightly tests'
+
+on:
+    workflow_run:
+        workflows: ['Release checks run']
+        types: [completed]
+        branches: [trunk]
+
+permissions:
+    actions: write
+
+concurrency:
+    group: retry-nightly-tests-${{ github.event.workflow_run.id }}
+    cancel-in-progress: false
+
+jobs:
+    retry:
+        if: >-
+            ${{ github.repository == 'woocommerce/woocommerce' &&
+                github.event.workflow_run.event == 'schedule' &&
+                contains( fromJSON('["failure", "timed_out"]'), github.event.workflow_run.conclusion ) }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - name: 'Re-run failed jobs, up to three total attempts'
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  script: |
+                      const maxAttempts = 3;
+                      const completedRun = context.payload.workflow_run;
+                      const params = { ...context.repo, run_id: completedRun.id };
+                      const { data: run } = await github.rest.actions.getWorkflowRun( params );
+
+                      // A manual rerun or a delayed event may have advanced the run already.
+                      if (
+                          run.status !== 'completed' ||
+                          run.run_attempt !== completedRun.run_attempt ||
+                          run.event !== 'schedule' ||
+                          run.path !== '.github/workflows/tests-on-release.yml' ||
+                          ! [ 'failure', 'timed_out' ].includes( run.conclusion )
+                      ) {
+                          core.info( 'The nightly run is no longer eligible for a retry.' );
+                          return;
+                      }
+
+                      if ( run.run_attempt >= maxAttempts ) {
+                          core.info( `Stopping after ${ run.run_attempt } attempts: ${ run.html_url }` );
+                          return;
+                      }
+
+                      await github.rest.actions.reRunWorkflowFailedJobs( params );
+                      core.info( `Requested attempt ${ run.run_attempt + 1 }/${ maxAttempts }: ${ run.html_url }` );
