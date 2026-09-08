@@ -503,7 +503,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration sanitizes dirty coupon codes and invalidates every coupon code lookup entry once per batch.
+	 * @testdox Migration sanitizes dirty coupon codes and invalidates every coupon code lookup entry once, on the last batch.
 	 */
 	public function test_wc_update_450_sanitize_coupons_code_invalidates_the_lookup_cache(): void {
 		global $wpdb;
@@ -527,17 +527,24 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
 
-		wc_update_450_sanitize_coupons_code();
+		$this->assertTrue( (bool) wc_update_450_sanitize_coupons_code(), 'The migration should ask for another batch while coupons remain.' );
 
 		$this->assertSame( 'dirty-code', get_post( $coupon_id )->post_title, 'The migration should have sanitized the code.' );
+		$this->assertSame( 'yes', get_option( 'woocommerce_update_450_codes_changed' ), 'The rewrite should be recorded for the last batch.' );
+		$this->assertSame(
+			$prefix_before,
+			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
+			'A batch that rewrites a code should not rotate the coupons group on its own.'
+		);
+
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
+
 		$this->assertNotSame(
 			$prefix_before,
 			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
-			'Rewriting a code should strand the lookup entries it was cached under.'
+			'The last batch should strand the lookup entries the rewritten codes were cached under.'
 		);
-
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		wp_delete_post( $coupon_id, true );
+		$this->assertFalse( get_option( 'woocommerce_update_450_codes_changed' ), 'The migration should clean up the flag it persisted.' );
 	}
 
 	/**
@@ -558,16 +565,26 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'coupons' );
 
-		wc_update_450_sanitize_coupons_code();
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
 
 		$this->assertSame(
 			$prefix_before,
 			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
-			'A batch that rewrites no code should leave the warm lookup entries alone.'
+			'A run that rewrites no code should leave the warm lookup entries alone.'
 		);
+	}
 
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		wp_delete_post( $coupon_id, true );
+	/**
+	 * Run the 4.5.0 coupon code migration until it reports there is nothing left to process.
+	 *
+	 * @return void
+	 */
+	private function run_wc_update_450_sanitize_coupons_code_to_completion(): void {
+		$batches = 0;
+
+		while ( wc_update_450_sanitize_coupons_code() ) {
+			$this->assertLessThan( 100, ++$batches, 'The coupon code migration should reach its last batch.' );
+		}
 	}
 
 	/**

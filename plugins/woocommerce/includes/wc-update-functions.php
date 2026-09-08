@@ -2261,11 +2261,6 @@ function wc_update_450_sanitize_coupons_code() {
 		ARRAY_A
 	);
 
-	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		return false;
-	}
-
 	$codes_changed = false;
 
 	foreach ( $coupons as $key => $data ) {
@@ -2295,9 +2290,9 @@ function wc_update_450_sanitize_coupons_code() {
 		}
 	}
 
-	// Clean coupon code lookup cache.
+	// Remember the rewrite for the last batch, which is where the lookup cache is cleaned.
 	if ( $codes_changed ) {
-		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
+		update_option( 'woocommerce_update_450_codes_changed', 'yes' );
 	}
 
 	// Start the run again.
@@ -2306,6 +2301,19 @@ function wc_update_450_sanitize_coupons_code() {
 	}
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
+
+	/*
+	 * A rewritten code leaves its lookup entry behind under the old spelling, and those keys
+	 * cannot be deleted one by one: wc_get_coupon_id_by_code() hashes the caller's raw input, so
+	 * an entry can be keyed on a representation this function never sees. Rotating the group is
+	 * what reaches all of them, and it runs here, once per migration, rather than in every batch
+	 * that happened to rewrite something.
+	 */
+	if ( 'yes' === get_option( 'woocommerce_update_450_codes_changed' ) ) {
+		delete_option( 'woocommerce_update_450_codes_changed' );
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
+	}
+
 	return false;
 }
 
