@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return HTTP 429 (Too Many Requests) when Store API rate limiting is applied instead of HTTP 400.
