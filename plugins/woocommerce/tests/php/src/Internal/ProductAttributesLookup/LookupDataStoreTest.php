@@ -10,6 +10,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Tests for the LookupDataStore class.
@@ -1261,6 +1262,97 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		sort( $expected );
 		sort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' regenerates the data for a variation when its status changes and the "direct updates" option is on.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_on_variation_status_changed_regenerates_data( bool $use_optimized_db_access ) {
+		if ( $use_optimized_db_access ) {
+			update_option( 'woocommerce_attribute_lookup_optimized_updates', 'yes' );
+			$this->sut = new LookupDataStore();
+		}
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $variation, array( 'status' => ProductStatus::PUBLISH ) );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' ignores a status change of a product that is not a variation.
+	 */
+	public function test_on_product_status_changed_does_nothing() {
+		$this->set_direct_update_option( true );
+
+		list( $product ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $product, array( 'status' => ProductStatus::DRAFT ) );
+
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
+	 * and one published, in-stock variation defined by the first term ('term_2_1').
+	 *
+	 * @return array The product and the variation: [ \WC_Product_Variable, \WC_Product_Variation ].
+	 */
+	private function create_variable_product_with_one_variation(): array {
+		$variation_attribute = self::$attributes[1];
+
+		$product = new \WC_Product_Variable();
+		$this->set_product_attributes(
+			$product,
+			array(
+				$variation_attribute['name'] => array(
+					'id'        => $variation_attribute['id'],
+					'options'   => $variation_attribute['term_ids'],
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_attributes( array( $variation_attribute['name'] => 'term_2_1' ) );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$product->set_children( array( $variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+
+		return array( $product, $variation );
+	}
+
+	/**
+	 * The lookup table row expected for a published, in-stock variation created by
+	 * create_variable_product_with_one_variation.
+	 *
+	 * @param \WC_Product_Variable  $product The parent product.
+	 * @param \WC_Product_Variation $variation The variation.
+	 * @return array Row in the format returned by get_lookup_table_data.
+	 */
+	private function variation_lookup_row( \WC_Product_Variable $product, \WC_Product_Variation $variation ): array {
+		return array(
+			'product_id'             => $variation->get_id(),
+			'product_or_parent_id'   => $product->get_id(),
+			'taxonomy'               => self::$attributes[1]['name'],
+			'term_id'                => self::$attributes[1]['term_ids'][0],
+			'is_variation_attribute' => 1,
+			'in_stock'               => 1,
+		);
 	}
 
 	/**

@@ -140,7 +140,7 @@ class LookupDataStore {
 			return;
 		}
 
-		$action = $this->get_update_action( $changeset );
+		$action = $this->get_update_action( $changeset, $this->is_variation( $product ) );
 		if ( self::ACTION_NONE !== $action ) {
 			$this->maybe_schedule_update( $product->get_id(), $action );
 		}
@@ -224,9 +224,10 @@ class LookupDataStore {
 	 * Determine the type of action to perform depending on the received changeset.
 	 *
 	 * @param array|null $changeset The changeset received by on_product_changed.
+	 * @param bool       $is_variation True if the changed product is a variation.
 	 * @return int One of the ACTION_ constants.
 	 */
-	private function get_update_action( $changeset ) {
+	private function get_update_action( $changeset, bool $is_variation ) {
 		if ( is_null( $changeset ) ) {
 			// No changeset at all means that the product is new.
 			return self::ACTION_INSERT;
@@ -237,6 +238,7 @@ class LookupDataStore {
 		// Order matters:
 		// - The change with the most precedence is a change in catalog visibility
 		// (which will result in all data being regenerated or deleted).
+		// - Then a status change of a variation (data regenerated: unpublished variations get no rows).
 		// - Then a change in attributes (all data will be regenerated).
 		// - And finally a change in stock status (existing data will be updated).
 		// Thus these conditions must be checked in that same order.
@@ -248,6 +250,12 @@ class LookupDataStore {
 			} else {
 				return self::ACTION_DELETE;
 			}
+		}
+
+		// The "Enabled" checkbox of a variation toggles its status between 'publish' and 'private'.
+		// A product's own status isn't stored in the table, so it doesn't trigger anything.
+		if ( $is_variation && in_array( 'status', $keys, true ) ) {
+			return self::ACTION_INSERT;
 		}
 
 		if ( in_array( 'attributes', $keys, true ) ) {
