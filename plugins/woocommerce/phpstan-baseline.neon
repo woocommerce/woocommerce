@@ -29518,24 +29518,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$post of function get_post expects int\|WP_Post\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_the_title expects int\|WP_Post, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$product of method WC_REST_Product_Variations_Controller\:\:delete_unmatched_product_variations\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
