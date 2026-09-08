@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Taxes;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as StatsDataStore;
@@ -16,8 +17,11 @@ use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Order;
+use WC_Order_Item_Fee;
+use WC_Order_Item_Shipping;
 use WC_Order_Item_Tax;
 use WC_Product_Simple;
+use WC_Tax;
 use WC_Unit_Test_Case;
 
 /**
@@ -43,13 +47,34 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $original_date_type;
 
 	/**
+	 * Original woocommerce_tax_based_on option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_tax_based_on;
+
+	/**
+	 * Original woocommerce_shipping_tax_class option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_shipping_tax_class;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_calc_taxes = get_option( 'woocommerce_calc_taxes' );
-		$this->original_date_type  = get_option( 'woocommerce_date_type' );
+		$this->original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$this->original_date_type          = get_option( 'woocommerce_date_type' );
+		$this->original_tax_based_on       = get_option( 'woocommerce_tax_based_on' );
+		$this->original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		// Pin the tax location basis and the shipping tax class so the DE order fixtures
+		// do not depend on the environment's store base address or on the class-inheritance
+		// resolution, which varies with state left behind by the wider suite.
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
 	}
 
 	/**
@@ -57,6 +82,16 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
+		if ( false === $this->original_tax_based_on ) {
+			delete_option( 'woocommerce_tax_based_on' );
+		} else {
+			update_option( 'woocommerce_tax_based_on', $this->original_tax_based_on );
+		}
+		if ( false === $this->original_shipping_tax_class ) {
+			delete_option( 'woocommerce_shipping_tax_class' );
+		} else {
+			update_option( 'woocommerce_shipping_tax_class', $this->original_shipping_tax_class );
+		}
 		if ( false === $this->original_date_type ) {
 			delete_option( 'woocommerce_date_type' );
 		} else {
@@ -68,23 +103,25 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * Insert a DE VAT tax rate and return its id.
 	 *
+	 * @param string $rate     Tax rate percentage.
+	 * @param int    $priority Tax rate priority.
+	 * @param int    $compound Whether the rate is compound.
 	 * @return int
 	 */
-	private function insert_tax_rate(): int {
-		global $wpdb;
-		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_tax_rates',
+	private function insert_tax_rate( string $rate = '19', int $priority = 1, int $compound = 0 ): int {
+		return (int) WC_Tax::_insert_tax_rate(
 			array(
-				'tax_rate_id'       => 1,
-				'tax_rate'          => '19',
 				'tax_rate_country'  => 'DE',
 				'tax_rate_state'    => '',
+				'tax_rate'          => $rate,
 				'tax_rate_name'     => 'VAT',
-				'tax_rate_priority' => 1,
-				'tax_rate_order'    => 1,
+				'tax_rate_priority' => $priority,
+				'tax_rate_compound' => $compound,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => '',
 			)
 		);
-		return 1;
 	}
 
 	/**
@@ -328,6 +365,42 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a completed DE order with two product units, a fee and shipping, all taxed.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_taxed_de_order(): \WC_Order {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Taxable Product' );
+		$product->set_regular_price( '100' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'DE' );
+		$order->set_shipping_country( 'DE' );
+		$order->add_product( $product, 2 );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling' );
+		$fee->set_total( '10' );
+		$fee->set_tax_status( 'taxable' );
+		$order->add_item( $fee );
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( '5' );
+		$order->add_item( $shipping );
+
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_date_paid( time() );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * Create a completed, paid order whose tax lines carry an arbitrary `rate_id`, including one
 	 * that has no `woocommerce_tax_rates` row and one shared by several lines.
 	 *
@@ -396,6 +469,297 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		ReportsCache::invalidate();
 
 		return $order;
+	}
+
+	/**
+	 * @testdox Syncing an order records the net amount its tax rate applied to, and the reports expose it.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+		ReportsCache::invalidate();
+
+		// 2 x 100 product + 10 fee + 5 shipping, all net of tax.
+		$lookup_amount = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 215.0, (float) $lookup_amount, 'The lookup row should record the net total the rate applied to.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+
+		$taxes_data = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) );
+		$this->assertArrayHasKey( 'taxable_amount', $taxes_data->data[0] );
+		$this->assertSame( 215.0, $taxes_data->data[0]['taxable_amount'], 'The Taxes report row should expose the taxable amount.' );
+	}
+
+	/**
+	 * @testdox Syncing an order records the taxable amount for a zero-rated tax rate.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount_for_zero_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate( '0' );
+		$order   = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT total_tax, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'A zero-rated tax should still produce a lookup row.' );
+		$this->assertSame( 0.0, (float) $lookup_row->total_tax );
+		$this->assertSame( 215.0, (float) $lookup_row->taxable_amount, 'A zero-rated sale should record the base amount it was taxed on.' );
+	}
+
+	/**
+	 * @testdox Syncing an order with a manual tax line no item carries records a zero taxable amount.
+	 */
+	public function test_sync_order_taxes_records_zero_taxable_amount_for_unapplied_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $rate_id );
+		$tax_item->set_tax_total( 19 );
+
+		$order = wc_create_order();
+		$order->add_item( $tax_item );
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'A manual tax line should still produce a lookup row.' );
+		$this->assertSame( 0.0, (float) $lookup_row->taxable_amount, 'A tax line applied to no order item should record a zero taxable amount.' );
+	}
+
+	/**
+	 * @testdox Syncing an order records the base of a compound tax rate including the taxes it compounds over.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount_for_compound_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id       = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id   = $this->insert_tax_rate( '7', 2, 1 );
+		$compound_rate_2_id = $this->insert_tax_rate( '10', 3, 1 );
+		$order              = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d",
+				$order->get_id()
+			),
+			OBJECT_K
+		);
+
+		// 2 x 100 product + 10 fee + 5 shipping = 215 net; the first compound rate is
+		// applied on top of the 5% tax (10.75), so its base is 225.75, and the second
+		// compound rate is additionally applied on top of the first one's tax.
+		$this->assertSame( 215.0, (float) $amounts[ $base_rate_id ]->taxable_amount, 'The non-compound rate base should be the net total.' );
+		$this->assertSame( 225.75, (float) $amounts[ $compound_rate_id ]->taxable_amount, 'The compound rate base should include the taxes it compounds over.' );
+		$this->assertEqualsWithDelta( 241.55, (float) $amounts[ $compound_rate_2_id ]->taxable_amount, 0.02, 'A second compound rate should also compound over the first one.' );
+	}
+
+	/**
+	 * @testdox An order whose tax lines share one tax rate records the taxable amount once per rate.
+	 */
+	public function test_taxable_amount_is_recorded_once_for_tax_lines_sharing_a_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// Automated tax plugins can add several tax lines carrying the same rate id.
+		$duplicate_tax_item = new WC_Order_Item_Tax();
+		$duplicate_tax_item->set_rate( $rate_id );
+		$duplicate_tax_item->set_tax_total( 0 );
+		$order->add_item( $duplicate_tax_item );
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// Pins the storage-layer invariant: however the lookup table is keyed, the base
+		// written for one rate must not multiply across its rows - it is the amount the
+		// rate applied to, counted once. The report query's join can still inflate
+		// duplicated tax lines, but that is pre-existing and shared with total_tax.
+		$summed = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM(taxable_amount) FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 215.0, (float) $summed, 'Tax lines sharing a rate id must not multiply the taxable amount.' );
+	}
+
+	/**
+	 * Refund the given order in full, mirroring its items and their taxes.
+	 *
+	 * @param \WC_Order $order Order to refund.
+	 * @return \WC_Order_Refund
+	 */
+	private function refund_order_in_full( \WC_Order $order ): \WC_Order_Refund {
+		$line_items = array();
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE, OrderItemType::SHIPPING ) ) as $item_id => $item ) {
+			$line_items[ $item_id ] = array(
+				'qty'          => is_callable( array( $item, 'get_quantity' ) ) ? $item->get_quantity() : 0,
+				'refund_total' => $item->get_total(),
+				'refund_tax'   => $item->get_taxes()['total'],
+			);
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => $line_items,
+			)
+		);
+		$this->assertNotWPError( $refund, 'The full refund should be created.' );
+
+		return $refund;
+	}
+
+	/**
+	 * @testdox A fully refunded order nets its taxable amount back to zero.
+	 */
+	public function test_refunded_order_nets_taxable_amount_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+		$refund  = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		$sums = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT SUM(total_tax) AS total_tax, SUM(taxable_amount) AS taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+				$order->get_id(),
+				$refund->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 0.0, (float) $sums->total_tax, 'A full refund should net the tax back to zero.' );
+		$this->assertSame( 0.0, (float) $sums->taxable_amount, 'A full refund should net the taxable amount back to zero.' );
+	}
+
+	/**
+	 * @testdox A refund created after a compound rate was deleted still nets the taxable amount to zero.
+	 */
+	public function test_refund_nets_compound_taxable_amount_after_rate_deletion(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id     = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id = $this->insert_tax_rate( '7', 2, 1 );
+		$order            = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// The refund's own tax items re-derive the compound flag from the live rate,
+		// so deleting the rate first exercises the parent-flags fallback.
+		WC_Tax::_delete_tax_rate( $compound_rate_id );
+
+		// A real refund happens in a later request, where the rate objects cache is cold;
+		// clear it so the refund's tax items re-derive their flags from the database.
+		$rate_store = wc_get_container()->get( \Automattic\WooCommerce\Internal\Tax\TaxRateDataStore::class );
+		$cache_prop = ( new \ReflectionClass( $rate_store ) )->getProperty( 'rate_objects_cache' );
+		$cache_prop->setAccessible( true );
+		$cache_prop->setValue( $rate_store, array() );
+
+		$refund = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		foreach ( array( $base_rate_id, $compound_rate_id ) as $rate_id ) {
+			$summed = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT SUM(taxable_amount) FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+					$order->get_id(),
+					$refund->get_id(),
+					$rate_id
+				)
+			);
+			$this->assertSame( 0.0, (float) $summed, "Rate {$rate_id} should net its taxable amount back to zero after a full refund." );
+		}
+	}
+
+	/**
+	 * @testdox While the taxable_amount column is missing, syncing still writes rows and the report still returns data.
+	 */
+	public function test_guards_apply_while_taxable_amount_column_is_missing(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// Force the column-missing code paths through the static:: seam instead of
+		// dropping the real column, which would break test transaction isolation.
+		$sut       = new class() extends DataStore {
+			/**
+			 * Report the taxable_amount column as missing.
+			 *
+			 * @return bool
+			 */
+			public static function has_taxable_amount_column() {
+				return false;
+			}
+		};
+		$sut_class = get_class( $sut );
+
+		$sut_class::sync_order_taxes( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		ReportsCache::invalidate();
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT total_tax, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'The sync must still write lookup rows while the column is missing.' );
+		$this->assertSame( 40.85, round( (float) $lookup_row->total_tax, 2 ), 'The tax columns must still be recorded.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$query  = $this->taxes_query( $after, $before, $rate_id );
+
+		$data = $sut->get_data( array_merge( $query, array( 'orderby' => 'taxable_amount' ) ) );
+		$this->assertCount( 1, $data->data, 'Ordering by the missing column must fall back instead of erroring into an empty report.' );
+		$this->assertArrayNotHasKey( 'taxable_amount', $data->data[0], 'The report must omit the column it cannot select.' );
 	}
 
 	/**
