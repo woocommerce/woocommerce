@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only show the clear button in the marketplace search field when there is text to clear, and have it reset the search results.
