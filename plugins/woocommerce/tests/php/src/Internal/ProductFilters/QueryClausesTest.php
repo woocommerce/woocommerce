@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
@@ -147,15 +148,8 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 				'query_type' => $query_type,
 			),
 		);
-		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
-			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
-		};
 
-		add_filter( 'posts_clauses', $filter_callback );
-		$received_products_name = $this->get_data_from_products_array(
-			wc_get_products( array() )
-		);
-		remove_filter( 'posts_clauses', $filter_callback );
+		$received_products_name = $this->get_product_names_filtered_by_attribute( $taxonomy, $terms, $query_type );
 
 		$expected_products_name = $this->get_data_from_products_array(
 			array_filter(
@@ -188,6 +182,54 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
+
+	/**
+	 * @testdox A disabled variation is excluded from attribute filtering.
+	 */
+	public function test_attribute_clauses_exclude_disabled_variations(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $green_variation ) {
+				$green_variation->set_status( ProductStatus::PRIVATE );
+				$green_variation->save();
+			}
+		);
+		$this->assert_variation_has_no_lookup_rows( $green_variation );
+
+		$this->assertEqualsCanonicalizing(
+			array( 'Product 6' ),
+			$this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' )
+		);
+	}
+
+	/**
+	 * Get product names filtered by an attribute.
+	 *
+	 * @param string   $taxonomy   Attribute taxonomy name.
+	 * @param string[] $terms      Attribute term slugs.
+	 * @param string   $query_type Query type, 'and' or 'or'.
+	 * @return string[]
+	 */
+	private function get_product_names_filtered_by_attribute( string $taxonomy, array $terms, string $query_type ): array {
+		$chosen_attributes = array(
+			$taxonomy => array(
+				'terms'      => $terms,
+				'query_type' => $query_type,
+			),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
+			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+
+		try {
+			return $this->get_data_from_products_array( wc_get_products( array() ) );
+		} finally {
+			remove_filter( 'posts_clauses', $filter_callback );
+		}
 	}
 
 	/**
