@@ -285,6 +285,29 @@ class DataRegenerator {
 		$this->cancel_regeneration_scheduled_action();
 		$this->delete_all_attributes_lookup_data( false );
 		update_option( 'woocommerce_attribute_lookup_enabled', $enable_usage ? 'yes' : 'no' );
+		$this->invalidate_filter_data_cache();
+	}
+
+	/**
+	 * Regenerate the lookup data for a single product and invalidate the filter data derived from the table.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int  $product_id               Id of the product to regenerate the data for.
+	 * @param bool $use_optimized_db_access  Whether to use the optimized database access path.
+	 */
+	public function regenerate_for_product( int $product_id, bool $use_optimized_db_access ): void {
+		$this->data_store->create_data_for_product( $product_id, $use_optimized_db_access );
+		$this->invalidate_filter_data_cache();
+	}
+
+	/**
+	 * Invalidate the filter counts derived from the lookup table.
+	 *
+	 * Regenerating writes rows directly, without going through LookupDataStore::run_update_callback(),
+	 * so nothing else clears them.
+	 */
+	private function invalidate_filter_data_cache(): void {
 		wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
 	}
 
@@ -382,8 +405,7 @@ class DataRegenerator {
 		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
 			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
 			$this->check_can_do_lookup_table_regeneration( $product_id );
-			$this->data_store->create_data_for_product( $product_id, $this->data_store->optimized_data_access_is_enabled() );
-			wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
+			$this->regenerate_for_product( $product_id, $this->data_store->optimized_data_access_is_enabled() );
 		} else {
 			$this->initiate_regeneration();
 		}

@@ -146,7 +146,7 @@ class CLIRunner {
 		$use_db_optimization = ! array_key_exists( 'disable-db-optimization', $assoc_args );
 		$this->check_can_use_db_optimization( $use_db_optimization );
 		$start_time = microtime( true );
-		$this->lookup_data_store->create_data_for_product( $product_id, $use_db_optimization );
+		$this->data_regenerator->regenerate_for_product( $product_id, $use_db_optimization );
 
 		if ( $this->lookup_data_store->get_last_create_operation_failed() ) {
 			$this->error( "Lookup data regeneration failed.\nSee the WooCommerce logs (source is %9palt-updates%n) for details." );

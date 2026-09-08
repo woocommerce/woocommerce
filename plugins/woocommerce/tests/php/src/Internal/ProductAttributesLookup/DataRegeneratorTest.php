@@ -312,6 +312,21 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Regenerating the data for a single product invalidates the filter data derived from the table.
+	 */
+	public function test_regenerate_for_product_invalidates_filter_data_cache() {
+		// Populating the transient version is what makes need_cleanup() true, i.e. "there is a cache to clean".
+		$version_before = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
+
+		$this->sut->regenerate_for_product( 123, false );
+
+		$this->assertSame( array( 123 ), $this->lookup_data_store->passed_products );
+		$this->assertNotSame( $version_before, WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) );
+		$this->assertFalse( get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT ) );
+	}
+
+	/**
 	 * @testdox After WooCommerce is installed the table usage is enabled only if it hadn't been explicitly disabled by an admin.
 	 *
 	 * @testWith [null, "yes"]
