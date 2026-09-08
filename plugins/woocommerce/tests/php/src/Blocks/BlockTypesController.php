@@ -68,8 +68,8 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		switch_theme( 'storefront' );
 		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
 
-		// WordPress 6.9+ opts classic themes into on-demand block assets at priority 0 (see
-		// wp_load_classic_theme_block_styles_on_demand()), so the fallback is only live on sites that opt out.
+		// Since WordPress 7.0, wp_load_classic_theme_block_styles_on_demand() opts classic themes into
+		// on-demand block assets at wp_default_styles priority 0, so the fallback is only live on sites that opt out.
 		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
 		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
 		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must simulate a site that opted out of on-demand block assets.' );
@@ -84,15 +84,74 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should stand down when WordPress already loads block assets on demand.
+	 * Both themes satisfy more than one clause of the fallback's guard under Core's defaults, so this asserts the
+	 * real-world outcome that makes the fallback dormant. The three tests below isolate the individual clauses.
+	 *
+	 * @testdox Should stand down under Core's default block asset settings.
 	 * @testWith ["storefront"]
 	 *           ["twentytwentytwo"]
 	 *
 	 * @param string $theme Theme to activate before the decision is made.
 	 */
-	public function test_stands_down_when_core_loads_block_assets_on_demand( string $theme ): void {
+	public function test_stands_down_under_core_default_asset_settings( string $theme ): void {
 		switch_theme( $theme );
 		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'WordPress must already be loading block assets on demand.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only on-demand block assets are enabled.
+	 */
+	public function test_stands_down_when_only_on_demand_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the separate-assets clause off so on-demand is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_true', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be on.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down when only separate core block assets are enabled.
+	 */
+	public function test_stands_down_when_only_separate_assets_are_enabled(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
+
+		// Turn the on-demand clause off so separate assets is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_true', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertTrue( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be on.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * @testdox Should stand down under a block theme even when block assets are not loaded on demand.
+	 */
+	public function test_stands_down_under_a_block_theme_without_on_demand_assets(): void {
+		switch_theme( 'twentytwentytwo' );
+		$this->assertTrue( wp_is_block_theme(), 'The test must run with a block theme.' );
+
+		// Turn both asset clauses off so the block theme check is the only clause that can stand the fallback down.
+		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
+		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
+		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
+		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
+
+		$this->assert_fallback_stands_down();
+	}
+
+	/**
+	 * Asserts that the fallback passed the block args through untouched and unhooked itself.
+	 */
+	private function assert_fallback_stands_down(): void {
 		$args = array( 'style_handles' => array( self::PROBE_STYLE ) );
 
 		$result = $this->block_types_controller->enqueue_block_style_for_classic_themes( $args, self::PROBE_BLOCK );
