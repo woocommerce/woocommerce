@@ -248,6 +248,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( $attribute['wc_attribute'], $hook_wc_attribute, 'The deletion hook should observe the original WooCommerce attribute entry.' );
 			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered after the deletion hook.' );
 			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The deleted WooCommerce attribute entry should be removed after the deletion hook.' );
+			$this->assertFalse( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'The deleted taxonomy should no longer be reported as a product attribute.' );
 
 			$replacement_attribute_id = wc_create_attribute(
 				array(
@@ -284,6 +285,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should still be deleted after its taxonomy is unregistered by a callback.' );
 			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The pre-unregistered taxonomy should remain absent.' );
 			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The original WooCommerce attribute entry should still be removed.' );
+			$this->assertFalse( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'The deleted taxonomy should no longer be reported as a product attribute.' );
 		} finally {
 			remove_action( 'woocommerce_before_attribute_delete', $unregister_callback, 10 );
 			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
@@ -317,11 +319,13 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertFalse( wc_delete_attribute( $attribute['id'] ), 'The outer deletion should fail after the callback removes the database row.' );
 			$this->assertTrue( taxonomy_exists( $attribute['taxonomy'] ), 'A failed deletion should leave the taxonomy registered.' );
 			$this->assertArrayHasKey( $attribute['taxonomy'], $wc_product_attributes, 'A failed deletion should leave the WooCommerce attribute entry in place.' );
+			$this->assertTrue( taxonomy_is_product_attribute( $attribute['taxonomy'] ), 'A failed deletion should leave the taxonomy reported as a product attribute.' );
 		} finally {
 			remove_action( 'woocommerce_before_attribute_delete', $before_delete_callback, 10 );
 			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
 		}
 	}
+
 	/**
 	 * @testdox Should flush deferred term counts before unregistering the taxonomy.
 	 */
