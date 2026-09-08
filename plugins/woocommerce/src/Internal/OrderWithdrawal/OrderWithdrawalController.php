@@ -212,6 +212,9 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 * @since 11.1.0
 	 */
 	public function render_view(): void {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
 		wc_get_template( 'myaccount/form-order-withdrawal.php', $this->get_template_args() );
 	}
 
