@@ -546,6 +546,7 @@ class FilterData {
 						'extra'                   => $extra,
 						'filter_type'             => $filter_type,
 						'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
+						'lookup_table_in_use'     => wc_get_container()->get( LookupDataStore::class )->usage_is_enabled(),
 					)
 				)
 			)

@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -312,9 +311,6 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5 still carries the red term, so the counts stay complete while the table is out of use.' );
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
-
-		// The usage option is not part of the cache key, so the counts have to be recalculated explicitly.
-		wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
 
 		$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
