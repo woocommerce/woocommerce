@@ -68,15 +68,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'taxes';
 
 	/**
-	 * Option caching a positive check for the taxable_amount column on the lookup table.
-	 *
-	 * @since 11.2.0
-	 *
-	 * @var string
-	 */
-	const OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN = 'woocommerce_tax_lookup_has_taxable_amount_column';
-
-	/**
 	 * Constructor.
 	 *
 	 * Report on the date type configured in Analytics settings (default `date_paid`),
@@ -134,8 +125,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Check if the wc_order_tax_lookup table has the taxable_amount column.
 	 *
-	 * Only a positive result is cached: while the column is missing the check re-runs,
-	 * so the feature turns on by itself once the schema update lands.
+	 * Asks the schema on every request rather than caching the answer in an option, so a
+	 * column that appears or disappears behind WooCommerce's back (a partial restore, a
+	 * manual drop) changes the report on the next request instead of leaving a stored
+	 * answer to go stale. The upgrade that adds the column also queues the lookup rebuild,
+	 * whose batches invalidate the reports cache as they land.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.2.0
@@ -143,22 +137,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return bool
 	 */
 	public static function has_taxable_amount_column() {
-		// Memoize the negative result per request only: a site whose schema update never
-		// lands would otherwise pay two SHOW queries per call, once per order on imports.
-		// Keyed by blog id since the schema is per site, though get_db_table_name() itself
-		// memoizes the first blog's table name across switch_to_blog() (pre-existing
-		// limitation shared by the whole Taxes report).
-		static $missing_this_request = array();
-
-		if ( ! empty( $missing_this_request[ get_current_blog_id() ] ) ) {
-			return false;
-		}
-
-		if ( 'yes' === get_option( self::OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN ) ) {
-			return true;
-		}
-
 		global $wpdb;
+
+		// One schema check per request: imports call this once per synced order. Keyed by
+		// blog id since the schema is per site, though get_db_table_name() itself memoizes
+		// the first blog's table name across switch_to_blog() (pre-existing limitation
+		// shared by the whole Taxes report).
+		static $has_column = array();
+
+		$blog_id = get_current_blog_id();
+
+		if ( isset( $has_column[ $blog_id ] ) ) {
+			return $has_column[ $blog_id ];
+		}
+
 		$table_name = self::get_db_table_name();
 
 		// If the table itself does not exist yet, checking its columns would be a DB error.
@@ -170,7 +162,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		if ( ! $table_exists ) {
-			$missing_this_request[ get_current_blog_id() ] = true;
+			$has_column[ $blog_id ] = false;
 			return false;
 		}
 
@@ -182,19 +174,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			)
 		);
 
-		if ( empty( $column_exists ) ) {
-			$missing_this_request[ get_current_blog_id() ] = true;
-			return false;
-		}
+		$has_column[ $blog_id ] = ! empty( $column_exists );
 
-		// The column changes the report's SELECT, so reports cached before it existed would
-		// keep serving rows without it for up to a week. Invalidate only when the option
-		// write persisted, or a blocked write would re-invalidate on every request.
-		if ( update_option( self::OPTION_TAX_LOOKUP_TABLE_HAS_TAXABLE_AMOUNT_COLUMN, 'yes', false ) ) {
-			ReportsCache::invalidate();
-		}
-
-		return true;
+		return $has_column[ $blog_id ];
 	}
 
 	/**
