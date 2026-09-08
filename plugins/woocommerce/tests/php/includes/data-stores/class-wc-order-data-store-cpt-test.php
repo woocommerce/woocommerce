@@ -1682,6 +1682,92 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed-closed query stays closed when a filter replaces the query args.
+	 */
+	public function test_fail_closed_query_survives_a_filter_rebuilding_args(): void {
+		OrderHelper::create_order();
+
+		$replace_query_args = static function () {
+			return array(
+				'post_type'      => 'shop_order',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			);
+		};
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
+
+		try {
+			$result = wc_get_orders(
+				array(
+					'customer' => new stdClass(),
+					'return'   => 'ids',
+					'limit'    => -1,
+					'status'   => 'any',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'A malformed query must not be reopened by a filter.' );
+	}
+
+	/**
+	 * @testdox Query failure warnings are deduplicated independently for each site.
+	 */
+	public function test_query_failure_logging_is_deduped_per_site(): void {
+		$warning_count = 0;
+		$logger        = $this->createMock( WC_Logger_Interface::class );
+		$logger->method( 'warning' )->willReturnCallback(
+			static function ( $message, $context ) use ( &$warning_count ) {
+				unset( $message, $context );
+				++$warning_count;
+			}
+		);
+
+		$inject_logger = static function () use ( $logger ) {
+			return $logger;
+		};
+
+		$logged_query_failures = new ReflectionProperty( WC_Order_Data_Store_CPT::class, 'logged_query_failures' );
+		$logged_query_failures->setAccessible( true );
+		$previous_failures = $logged_query_failures->getValue();
+		$previous_blog_id  = $GLOBALS['blog_id'] ?? 1;
+
+		$logged_query_failures->setValue( null, array() );
+		add_filter( 'woocommerce_logging_class', $inject_logger );
+
+		try {
+			$args = array(
+				'status' => new stdClass(),
+				'return' => 'ids',
+				'limit'  => -1,
+			);
+
+			$first_result  = wc_get_orders( $args );
+			$second_result = wc_get_orders( $args );
+
+			$this->assertSame( array(), $first_result, 'The first malformed query must fail closed.' );
+			$this->assertSame( array(), $second_result, 'A deduplicated query must still fail closed.' );
+			$this->assertSame( 1, $warning_count, 'The same failure should be logged once per site.' );
+
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test-only: simulate another site without changing database tables.
+			$GLOBALS['blog_id'] = $previous_blog_id + 1;
+			$third_result       = wc_get_orders( $args );
+
+			$this->assertSame( array(), $third_result, 'The malformed query on another site must fail closed.' );
+			$this->assertSame( 2, $warning_count, 'The same failure should be logged again for another site.' );
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original site context.
+			$GLOBALS['blog_id'] = $previous_blog_id;
+			remove_filter( 'woocommerce_logging_class', $inject_logger );
+			$logged_query_failures->setValue( null, $previous_failures );
+		}
+	}
+
+	/**
 	 * @testdox Malformed date args match no orders rather than returning every order.
 	 *
 	 * @dataProvider provider_malformed_date_keys
@@ -1776,6 +1862,106 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$matched,
 			'A nested customer array must build an AND group, not fail the query closed.'
 		);
+	}
+
+	/**
+	 * @testdox A malformed leaf in a nested customer group fails the query closed.
+	 */
+	public function test_nested_customer_array_with_unusable_leaf_fails_closed(): void {
+		OrderHelper::create_order();
+
+		$result = wc_get_orders(
+			array(
+				'customer' => array( array( 'nested@example.com', new stdClass() ) ),
+				'return'   => 'ids',
+				'limit'    => -1,
+				'status'   => 'any',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'A malformed nested customer leaf must not reopen the query.' );
+	}
+
+	/**
+	 * @testdox A stringable object remains a valid order status query value.
+	 */
+	public function test_stringable_status_value_remains_accepted(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$stringable_status = new class() {
+			/**
+			 * Return a valid order status.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				return OrderStatus::COMPLETED;
+			}
+		};
+		$store             = new WC_Order_Data_Store_CPT();
+
+		$result = $store->query(
+			array(
+				'status'   => $stringable_status,
+				'return'   => 'ids',
+				'limit'    => -1,
+				'paginate' => false,
+				'type'     => 'shop_order',
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $result, 'A stringable status must keep filtering as its string value.' );
+	}
+
+	/**
+	 * @testdox A malformed date still reaches an overridden parser after the query is failed closed.
+	 */
+	public function test_malformed_date_still_invokes_overridden_parser(): void {
+		$store           = new class() extends WC_Order_Data_Store_CPT {
+			/** @var bool */
+			public $parse_date_was_called = false;
+
+			/** @var mixed */
+			public $received_query_var;
+
+			/** @var array */
+			public $received_errors = array();
+
+			/**
+			 * Observe the public parser call.
+			 *
+			 * @param mixed  $query_var     A date query value.
+			 * @param string $key           Meta or database column key.
+			 * @param array  $wp_query_args WP_Query arguments.
+			 * @return array
+			 */
+			public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
+				$this->parse_date_was_called = true;
+				$this->received_query_var    = $query_var;
+				$this->received_errors       = $wp_query_args['errors'] ?? array();
+
+				return parent::parse_date_for_wp_query( $query_var, $key, $wp_query_args );
+			}
+		};
+		$malformed_value = new stdClass();
+
+		$result = $store->query(
+			array(
+				'date_paid' => $malformed_value,
+				'limit'     => -1,
+				'paginate'  => false,
+				'return'    => 'ids',
+				'status'    => 'any',
+				'type'      => 'shop_order',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'The malformed query must fail closed.' );
+		$this->assertTrue( $store->parse_date_was_called, 'The public parser override must still run.' );
+		$this->assertSame( $malformed_value, $store->received_query_var, 'The override must receive the raw value.' );
+		$this->assertNotEmpty( $store->received_errors, 'The query must be failed closed before the override runs.' );
 	}
 
 

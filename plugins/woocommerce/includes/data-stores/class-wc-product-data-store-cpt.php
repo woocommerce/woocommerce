@@ -2498,6 +2498,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+				$date_value = $query_vars[ $query_var_key ];
+
+				// Fail closed before calling the public parser, so an override still receives the raw value.
+				if ( ! is_scalar( $date_value ) && ! ( is_object( $date_value ) && method_exists( $date_value, '__toString' ) ) ) {
+					$wp_query_args['errors'][] = new WP_Error( 'woocommerce_product_query_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+					$wp_query_args['post__in'] = array( 0 );
+					unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+				}
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
@@ -2524,7 +2532,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['orderby'] = 'post__in';
 		}
 
-		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
+		$query_errors = $wp_query_args['errors'] ?? array();
+
+		/**
+		 * Filters the WP_Query arguments used for a legacy product query.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @param array                     $wp_query_args WP_Query arguments.
+		 * @param array                     $query_vars    Original WC_Product_Query arguments.
+		 * @param WC_Product_Data_Store_CPT $data_store   Current product data store.
+		 */
+		$wp_query_args = apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
+
+		if ( ! empty( $query_errors ) ) {
+			if ( empty( $wp_query_args['errors'] ) ) {
+				$wp_query_args['errors'] = $query_errors;
+			}
+			$wp_query_args['post__in'] = array( 0 );
+			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+		}
+
+		return $wp_query_args;
 	}
 
 	/**

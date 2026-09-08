@@ -735,4 +735,36 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox A malformed product date stays closed when a filter replaces the query args.
+	 */
+	public function test_malformed_product_date_stays_closed_after_filter_rebuild(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$replace_query_args = static function () {
+			return array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			);
+		};
+
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+
+		try {
+			$result = wc_get_products(
+				array(
+					'date_on_sale_from' => array( 'foo' ),
+					'return'            => 'ids',
+					'limit'             => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'A malformed date query must not be reopened by a filter.' );
+	}
 }

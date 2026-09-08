@@ -911,7 +911,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Query failures already logged this request, keyed by error code.
+	 * Query failures already logged during this PHP execution, keyed by site and error code.
 	 *
 	 * A malformed query no longer stops the caller, so a loop over bad data would otherwise write
 	 * one log line per iteration.
@@ -1000,12 +1000,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * filter the caller asked for.
 	 *
 	 * Two mechanisms are used together. `errors` is what {@see self::query()} checks to skip
-	 * WP_Query entirely, but it is only reachable if the args survive the
-	 * `woocommerce_order_data_store_cpt_get_orders_query` filter that fires afterwards, and a
-	 * callback that rebuilds the array can drop it. `post__in => array( 0 )` is a normal query arg
-	 * that such a callback carries forward, and no post has ID 0, so the query still matches
-	 * nothing if `errors` is lost. Any caller-supplied `p` is removed alongside it, because
-	 * WP_Query honours `p` in preference to `post__in`.
+	 * WP_Query entirely, while `post__in => array( 0 )` also makes the translated arguments
+	 * unsatisfiable if they are passed to WP_Query elsewhere. Both markers are reasserted after
+	 * the `woocommerce_order_data_store_cpt_get_orders_query` filter in case a callback rebuilds
+	 * the array. Any caller-supplied `p` is removed because WP_Query honours it in preference to
+	 * `post__in`.
 	 *
 	 * @since 11.2.0
 	 * @param array  $wp_query_args WP_Query args, passed by reference.
@@ -1021,14 +1020,15 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// 'p' would return that order despite the query being failed closed.
 		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 
-		// One line per distinct failure per process, since a loop over stored bad data would
-		// otherwise log every iteration. Later occurrences in a long-running process (WP-CLI,
-		// cron) are not logged, though the query still fails closed each time.
-		if ( isset( self::$logged_query_failures[ $code ] ) ) {
+		// One line per distinct failure per site, since a loop over stored bad data would
+		// otherwise log every iteration. The site keeps multisite loops independently visible.
+		$dedupe_key = get_current_blog_id() . '|' . $code;
+
+		if ( isset( self::$logged_query_failures[ $dedupe_key ] ) ) {
 			return;
 		}
 
-		self::$logged_query_failures[ $code ] = true;
+		self::$logged_query_failures[ $dedupe_key ] = true;
 
 		wc_get_logger()->warning(
 			__( 'Malformed order query args. Returning no orders.', 'woocommerce' ),
@@ -1243,7 +1243,28 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
-		return apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
+		$query_errors = $wp_query_args['errors'] ?? array();
+
+		/**
+		 * Filters the WP_Query arguments used for a legacy order query.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array                   $wp_query_args WP_Query arguments.
+		 * @param array                   $query_vars    Original WC_Order_Query arguments.
+		 * @param WC_Order_Data_Store_CPT $data_store   Current order data store.
+		 */
+		$wp_query_args = apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
+
+		if ( ! empty( $query_errors ) ) {
+			if ( empty( $wp_query_args['errors'] ) ) {
+				$wp_query_args['errors'] = $query_errors;
+			}
+			$wp_query_args['post__in'] = array( 0 );
+			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+		}
+
+		return $wp_query_args;
 	}
 
 	/**
