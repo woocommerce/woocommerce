@@ -300,6 +300,23 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_available_variation' treats a filtered image equal to the parent featured image as inheritance, so the variation gallery still wins.
+	 */
+	public function test_get_available_variation_treats_filtered_parent_image_as_inherited(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
+		$parent_featured_id                                 = $product->get_image_id();
+
+		// A filter returning exactly the parent's featured image is indistinguishable from
+		// plain inheritance, so the variation-owned gallery takes priority by design.
+		$filter              = static fn() => $parent_featured_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' preserves a filtered variation image when no featured image is stored.
 	 */
 	public function test_get_available_variation_preserves_filtered_image(): void {
