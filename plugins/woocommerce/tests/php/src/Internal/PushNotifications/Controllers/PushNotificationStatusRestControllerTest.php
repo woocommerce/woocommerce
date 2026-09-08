@@ -157,7 +157,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+		$this->assertSame( WP_Http::UNAUTHORIZED, $response->get_status() );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class PushNotificationStatusRestControllerTest extends WC_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/status' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+		$this->assertSame( WP_Http::FORBIDDEN, $response->get_status() );
 
 		$data = $response->get_data();
 		$this->assertArrayNotHasKey( 'installed_drivers', $data );
