@@ -89,6 +89,26 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create an out of stock simple product and load its single product page.
+	 *
+	 * @return int The product ID.
+	 */
+	private function create_and_visit_out_of_stock_simple_product(): int {
+		$fixtures   = new FixtureData();
+		$product_id = $fixtures->get_simple_product(
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+			)
+		)->get_id();
+
+		$this->go_to( get_permalink( $product_id ) );
+		$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $product_id;
+	}
+
+	/**
 	 * @testdox Should not render the form inside the Add to Cart + Options block so it keeps its Interactivity API form.
 	 */
 	public function test_form_is_not_rendered_inside_add_to_cart_with_options_block(): void {
@@ -111,5 +131,30 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render when the hook fires from a classic template.' );
+	}
+
+	/**
+	 * @testdox Should not render the form for an out of stock simple product inside the Add to Cart + Options block.
+	 */
+	public function test_form_is_not_rendered_for_simple_product_inside_add_to_cart_with_options_block(): void {
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The Add to Cart + Options block should keep its Interactivity API form for an out of stock simple product.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render inside the Add to Cart + Options block for a simple product.' );
+	}
+
+	/**
+	 * @testdox Should render the form when the simple product hook fires outside the Add to Cart + Options block.
+	 */
+	public function test_form_is_rendered_by_simple_product_hook(): void {
+		$this->create_and_visit_out_of_stock_simple_product();
+
+		ob_start();
+		do_action( 'woocommerce_simple_add_to_cart' );
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render when the simple product hook fires from a classic template.' );
 	}
 }
