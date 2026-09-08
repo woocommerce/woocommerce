@@ -47,6 +47,9 @@ class FilterData {
 	 *
 	 * The attribute counts and the cached product ids depend on it, so the cache keys include it.
 	 *
+	 * The `in_stock` rule this drives mirrors QueryClauses::add_attribute_clauses(), and the two
+	 * have to stay in step, or the counts and the filtered results disagree.
+	 *
 	 * @return bool
 	 */
 	private function hide_out_of_stock_items(): bool {

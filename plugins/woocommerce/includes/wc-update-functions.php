@@ -3824,7 +3824,7 @@ function wc_update_11203_delete_unpublished_variation_lookup_rows() {
 
 	$lookup_table = $lookup_data_store->get_lookup_table_name();
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names cannot be prepared; both are trusted identifiers.
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for.
 	$wpdb->query(
 		$wpdb->prepare(
 			"DELETE lookup FROM {$lookup_table} AS lookup

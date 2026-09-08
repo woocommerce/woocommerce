@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -226,6 +226,8 @@ class LookupDataStore {
 		 * Data derived from the lookup table (such as attribute filter counts) should be invalidated on this
 		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
 		 * in a scheduled action.
+		 *
+		 * It fires once per run_update_callback() call, whether or not any row actually changed.
 		 *
 		 * @since 11.2.0
 		 *
