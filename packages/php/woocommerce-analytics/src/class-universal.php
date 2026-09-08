@@ -101,6 +101,9 @@ class Universal {
 				?>
 				wcAnalytics.trackEndpoint = <?php echo wp_json_encode( esc_url_raw( $track_endpoint ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
+				// The endpoint that issues the tk_ai visitor cookie from the server.
+				wcAnalytics.visitorEndpoint = <?php echo wp_json_encode( esc_url_raw( rest_url( 'woocommerce-analytics/v1/visitor' ) ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
+
 				// Set common properties for all events.
 				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 

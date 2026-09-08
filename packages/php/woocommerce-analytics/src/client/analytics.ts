@@ -14,6 +14,11 @@ import type { AnalyticsConfig } from './types/shared';
 
 const debug = debugFactory( 'wc-analytics:analytics' );
 
+const ANON_ID_COOKIE = 'tk_ai';
+// One browser session: the server re-issues the cookie once per session so the expiry rolls.
+const VISITOR_ISSUED_KEY = 'wcAnalyticsVisitorIssued';
+const VISITOR_REQUEST_TIMEOUT_MS = 2000;
+
 /**
  * Analytics class for WooCommerce Analytics.
  */
@@ -25,6 +30,7 @@ export class Analytics {
 	private commonProps: AnalyticsConfig[ 'commonProps' ];
 	private features: AnalyticsConfig[ 'features' ];
 	private pages: AnalyticsConfig[ 'pages' ];
+	private anonId: string | null;
 
 	constructor(
 		sessionManager: SessionManager,
@@ -38,15 +44,21 @@ export class Analytics {
 		this.commonProps = commonProps;
 		this.features = features;
 		this.pages = pages;
+		this.anonId = null;
 	}
 
 	/**
 	 * Initialize the analytics.
+	 *
+	 * The visitor id is resolved before anything else runs, so the first event of a visit
+	 * already carries it and the stats.wp.com tracker never has to mint one of its own.
 	 */
-	init = () => {
+	init = async (): Promise< void > => {
 		if ( this.isInitialized ) {
 			return;
 		}
+
+		await this.ensureAnonId();
 
 		// Initialize API client if proxy tracking is enabled
 		if ( this.features.proxy ) {
@@ -84,7 +96,6 @@ export class Analytics {
 			this.recordEvent( 'page_view' );
 		}
 
-		this.setAnonId();
 		this.processEventQueue();
 		this.initListeners();
 
@@ -170,6 +181,11 @@ export class Analytics {
 		debug( 'Recording event via _wca: "%s" with props %o', event, eventProperties );
 
 		eventProperties._en = `${ EVENT_PREFIX }${ event }`;
+		// Stamp the identity so the tracker uses this id instead of minting one when it cannot see the cookie.
+		if ( this.anonId ) {
+			eventProperties._ui = this.anonId;
+			eventProperties._ut = 'anon';
+		}
 		window._wca.push( eventProperties );
 	};
 
@@ -256,21 +272,101 @@ export class Analytics {
 	};
 
 	/**
-	 * Set or refresh the anonymous ID cookie.
+	 * Resolve the anonymous visitor id.
 	 *
-	 * The existing id is reused when present, so visitor continuity is kept; a new one is
-	 * minted only when absent. The cookie is written on every load because a cookie set by
-	 * an earlier version may still carry samesite=strict and JS cannot read attributes back.
-	 * Keep path=/ and no domain so the write replaces the existing cookie instead of adding a
-	 * second one (getCookie returns null when it sees two). Keeping expires on each write makes
-	 * the one-year lifetime rolling from the most recent visit.
+	 * The cookie is issued by the server (`POST /woocommerce-analytics/v1/visitor`), never by
+	 * this script, because WebKit deletes script-written cookies after seven days of Safari use
+	 * without interaction and caps them to 24 hours on an ad-click landing. The request goes out
+	 * when no cookie is visible, and once per browser session otherwise, so the server re-issues
+	 * it and the one-year expiry rolls from the most recent visit. Only the no-cookie case is
+	 * awaited: the refresh does not change the id, so events need not wait for it.
+	 *
+	 * When the server cannot issue one, the id is written from here as before, so a visitor on a
+	 * site where the endpoint is unreachable still keeps one id across pages.
 	 */
-	private setAnonId() {
-		// 18 * 4/3 = 24 (base64 encoded chars)
-		const anonId = getCookie( 'tk_ai' ) || generateRandomToken( 18 );
-		const expires = new Date(
-			Date.now() + 1 * 365 * 24 * 60 * 60 * 1000
-		).toUTCString();
-		document.cookie = `tk_ai=${ anonId }; path=/; secure; samesite=lax; expires=${ expires }`;
-	}
+	private ensureAnonId = async (): Promise< void > => {
+		this.anonId = getCookie( ANON_ID_COOKIE );
+		const endpoint = window.wcAnalytics?.visitorEndpoint;
+
+		if ( endpoint && ! this.anonId ) {
+			this.anonId = await this.requestVisitorId( endpoint );
+		} else if ( endpoint && ! this.wasVisitorIssuedThisSession() ) {
+			void this.requestVisitorId( endpoint );
+		}
+
+		if ( ! this.anonId ) {
+			this.anonId = generateRandomToken( 18 );
+			const expires = new Date(
+				Date.now() + 1 * 365 * 24 * 60 * 60 * 1000
+			).toUTCString();
+			document.cookie = `${ ANON_ID_COOKIE }=${ this.anonId }; path=/; secure; samesite=lax; expires=${ expires }`;
+		}
+	};
+
+	/**
+	 * Ask the server to issue or refresh the visitor cookie.
+	 *
+	 * @param endpoint - The visitor endpoint URL.
+	 * @return The issued id, or null when the server did not issue one.
+	 */
+	private requestVisitorId = async (
+		endpoint: string
+	): Promise< string | null > => {
+		const controller = typeof AbortController === 'undefined' ? null : new AbortController();
+		const timer = controller
+			? window.setTimeout( () => controller.abort(), VISITOR_REQUEST_TIMEOUT_MS )
+			: 0;
+
+		try {
+			const response = await fetch( endpoint, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json' },
+				body: '{}',
+				signal: controller ? controller.signal : undefined,
+			} );
+
+			if ( ! response.ok ) {
+				debug( 'Visitor endpoint answered %d', response.status );
+				return null;
+			}
+
+			const data = ( await response.json() ) as { anon_id?: unknown };
+			if ( typeof data.anon_id !== 'string' || ! data.anon_id ) {
+				return null;
+			}
+
+			this.markVisitorIssuedThisSession();
+			return data.anon_id;
+		} catch ( error ) {
+			debug( 'Visitor endpoint request failed: %o', error );
+			return null;
+		} finally {
+			if ( timer ) {
+				window.clearTimeout( timer );
+			}
+		}
+	};
+
+	/**
+	 * Whether the server already re-issued the cookie during this browser session.
+	 */
+	private wasVisitorIssuedThisSession = (): boolean => {
+		try {
+			return window.sessionStorage.getItem( VISITOR_ISSUED_KEY ) === '1';
+		} catch ( error ) {
+			return false;
+		}
+	};
+
+	/**
+	 * Remember that the server re-issued the cookie during this browser session.
+	 */
+	private markVisitorIssuedThisSession = (): void => {
+		try {
+			window.sessionStorage.setItem( VISITOR_ISSUED_KEY, '1' );
+		} catch ( error ) {
+			// Storage unavailable: the refresh simply repeats on the next page.
+		}
+	};
 }

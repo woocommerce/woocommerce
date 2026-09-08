@@ -65,6 +65,20 @@ Enable advanced features using WordPress filters:
 add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 ```
 
+#### Visitor cookie
+
+The `tk_ai` visitor cookie is issued by `POST /wp-json/woocommerce-analytics/v1/visitor`,
+which is registered on every site running the package. The client script calls it when
+it sees no cookie, and once per browser session otherwise, so the server re-issues the
+cookie with the same value and the one-year expiry rolls. The response carries
+`Set-Cookie: tk_ai=<id>; Path=/; Max-Age=31536000; Secure; SameSite=Lax` and
+`Cache-Control: no-store`; nothing is written while rendering a page, so page caches
+are unaffected. The cookie is written by the server rather than by script because WebKit
+deletes script-written cookies after seven days of Safari use without interaction and
+caps them to 24 hours on a link-decorated landing. Bots and visitors without statistics
+consent get no cookie. If the endpoint cannot issue one, the client script writes the
+cookie itself as a fallback.
+
 #### Proxy Tracking (Experimental)
 
 ```php
