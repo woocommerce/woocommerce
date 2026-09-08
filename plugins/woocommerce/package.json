@@ -518,7 +518,9 @@
 						}
 					},
 					"events": [
+						"pull_request",
 						"nightly-checks",
+						"release-checks",
 						"core-e2e-php-8.5"
 					],
 					"report": {
@@ -549,7 +551,9 @@
 						}
 					},
 					"events": [
+						"pull_request",
 						"nightly-checks",
+						"release-checks",
 						"core-e2e-php-8.5"
 					],
 					"report": {
