@@ -18,6 +18,23 @@ const ANON_ID_COOKIE = 'tk_ai';
 // One browser session: the server re-issues the cookie once per session so the expiry rolls.
 const VISITOR_ISSUED_KEY = 'wcAnalyticsVisitorIssued';
 const VISITOR_REQUEST_TIMEOUT_MS = 2000;
+// The last acquisition source reported as a session_entry event, and when.
+const LAST_ENTRY_KEY = 'wcAnalyticsLastEntry';
+// A repeat of the same source within this window (a reload, back/forward) is not a new entry.
+const ENTRY_REPEAT_WINDOW_MS = 30 * 60 * 1000;
+// sourcebuster's own aliases, as WooCommerce's Order Attribution writes them.
+const ENTRY_FIELDS: Record< string, string > = {
+	typ: 'source_type',
+	src: 'utm_source',
+	mdm: 'utm_medium',
+	cmp: 'utm_campaign',
+	cnt: 'utm_content',
+	trm: 'utm_term',
+	id: 'utm_id',
+	ep: 'entry_url',
+	rf: 'entry_referrer',
+	fd: 'entry_at',
+};
 
 /**
  * Analytics class for WooCommerce Analytics.
@@ -56,6 +73,7 @@ export class Analytics {
 		}
 
 		await this.ensureAnonId();
+		this.maybeRecordSessionEntry();
 
 		// Initialize API client if proxy tracking is enabled
 		if ( this.features.proxy ) {
@@ -269,6 +287,65 @@ export class Analytics {
 	};
 
 	/**
+	 * Report how the visitor arrived, once per acquisition source.
+	 *
+	 * WooCommerce's Order Attribution already classifies every landing (sourcebuster: utm,
+	 * organic, referral, typein) into the `sbjs_current` and `sbjs_current_add` cookies, but
+	 * only stamps the last one on an order. Reporting each new source as an event keeps the
+	 * whole sequence under the visitor id. The same source seen again within half an hour is
+	 * a reload or a back/forward, not a new entry; the same link followed a day later is.
+	 */
+	private maybeRecordSessionEntry = (): void => {
+		const current = parseSourcebusterCookie( 'sbjs_current' );
+		const extra = parseSourcebusterCookie( 'sbjs_current_add' );
+		if ( ! current || ! extra ) {
+			return;
+		}
+
+		const props: Record< string, unknown > = {};
+		for ( const [ alias, value ] of Object.entries( {
+			...current,
+			...extra,
+		} ) ) {
+			const name = ENTRY_FIELDS[ alias ];
+			if ( name && value && value !== '(none)' ) {
+				props[ name ] = value;
+			}
+		}
+		const key = Object.keys( current )
+			.sort()
+			.map( ( alias ) => `${ alias }=${ current[ alias ] }` )
+			.join( '|' );
+		const now = Date.now();
+
+		try {
+			const last = JSON.parse(
+				window.localStorage.getItem( LAST_ENTRY_KEY ) || 'null'
+			);
+			if (
+				last &&
+				last.key === key &&
+				now - Number( last.at ) < ENTRY_REPEAT_WINDOW_MS
+			) {
+				return;
+			}
+		} catch ( error ) {
+			// Unreadable marker: report, and overwrite it below.
+		}
+
+		this.recordEvent( 'session_entry', props );
+
+		try {
+			window.localStorage.setItem(
+				LAST_ENTRY_KEY,
+				JSON.stringify( { key, at: now } )
+			);
+		} catch ( error ) {
+			// Storage unavailable: the entry repeats on the next page, which the warehouse can dedupe.
+		}
+	};
+
+	/**
 	 * Resolve the visitor id.
 	 *
 	 * The server issues the cookie, because WebKit caps script-written cookies. The request is
@@ -303,9 +380,15 @@ export class Analytics {
 	private requestVisitorId = async (
 		endpoint: string
 	): Promise< string | null > => {
-		const controller = typeof AbortController === 'undefined' ? null : new AbortController();
+		const controller =
+			typeof AbortController === 'undefined'
+				? null
+				: new AbortController();
 		const timer = controller
-			? window.setTimeout( () => controller.abort(), VISITOR_REQUEST_TIMEOUT_MS )
+			? window.setTimeout(
+					() => controller.abort(),
+					VISITOR_REQUEST_TIMEOUT_MS
+			  )
 			: 0;
 
 		try {
@@ -360,4 +443,37 @@ export class Analytics {
 			// Storage unavailable: the refresh repeats on the next page.
 		}
 	};
+}
+
+/**
+ * Parse one sourcebuster cookie (`key=value|||key=value`, URL-encoded, optionally base64).
+ *
+ * @param name - Cookie name.
+ * @return The key/value pairs, or null when the cookie is absent or not in that shape.
+ */
+function parseSourcebusterCookie( name: string ): Record< string, string > | null {
+	const raw = getCookie( name );
+	if ( ! raw ) {
+		return null;
+	}
+	let decoded: string;
+	try {
+		decoded = decodeURIComponent( raw );
+		if ( ! decoded.includes( '|||' ) ) {
+			decoded = window.atob( decoded );
+		}
+	} catch ( error ) {
+		return null;
+	}
+	if ( ! decoded.includes( '=' ) ) {
+		return null;
+	}
+	const out: Record< string, string > = {};
+	for ( const pair of decoded.split( '|||' ) ) {
+		const at = pair.indexOf( '=' );
+		if ( at > 0 ) {
+			out[ pair.slice( 0, at ) ] = pair.slice( at + 1 );
+		}
+	}
+	return out;
 }

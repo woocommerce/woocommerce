@@ -79,6 +79,13 @@ caps them to 24 hours on a link-decorated landing. Bots and visitors without sta
 consent get no cookie. If the endpoint cannot issue one, the client script writes the
 cookie itself as a fallback.
 
+The client also reports how a visitor arrived, as a `session_entry` event, once per
+acquisition source. It reads the classification WooCommerce's Order Attribution
+(sourcebuster) already writes to the `sbjs_current` and `sbjs_current_add` cookies
+(`source_type`, `utm_*`, `entry_url`, `entry_referrer`, `entry_at`) and reports it
+when sourcebuster's fire date changes, so a visit from a search, a link or an ad
+leaves a trace before the first product view. No cookies, no event.
+
 #### Proxy Tracking (Experimental)
 
 ```php

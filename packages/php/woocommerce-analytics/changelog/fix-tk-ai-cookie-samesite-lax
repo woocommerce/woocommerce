@@ -1,4 +1,4 @@
 Significance: minor
 Type: added
 
-Issue the tk_ai visitor cookie from the server through a new POST /woocommerce-analytics/v1/visitor endpoint, with SameSite=Lax and a one-year expiry that rolls once per browser session, so it is sent on the navigation that follows an ad click and is outside WebKit's caps on script-written cookies. The client script no longer writes the cookie unless the endpoint cannot issue one.
+Issue the tk_ai visitor cookie from the server through a new POST /woocommerce-analytics/v1/visitor endpoint, with SameSite=Lax and a one-year expiry that rolls once per browser session, so it is sent on the navigation that follows an ad click and is outside WebKit's caps on script-written cookies. The client script no longer writes the cookie unless the endpoint cannot issue one, and reports each new acquisition source as a session_entry event from the cookies WooCommerce's Order Attribution already writes.
