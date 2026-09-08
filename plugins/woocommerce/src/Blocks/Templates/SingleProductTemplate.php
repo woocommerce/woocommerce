@@ -164,7 +164,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			);
 		}
 
-		if ( empty( $block['innerBlocks'] ) ) {
+		if ( empty( $block['innerBlocks'] ) || ! isset( $block['innerContent'] ) || ! is_array( $block['innerContent'] ) ) {
 			return array(
 				'blocks'              => array( $block ),
 				'is_already_replaced' => $is_already_replaced,
@@ -174,11 +174,8 @@ class SingleProductTemplate extends AbstractTemplate {
 		$new_inner_blocks  = array();
 		$new_inner_content = array();
 		$inner_block_index = 0;
-		$inner_content     = isset( $block['innerContent'] ) && is_array( $block['innerContent'] )
-			? $block['innerContent']
-			: array_fill( 0, count( $block['innerBlocks'] ), null );
 
-		foreach ( $inner_content as $chunk ) {
+		foreach ( $block['innerContent'] as $chunk ) {
 			if ( is_string( $chunk ) ) {
 				$new_inner_content[] = $chunk;
 				continue;
