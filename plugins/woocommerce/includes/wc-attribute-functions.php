@@ -736,7 +736,7 @@ function wc_update_attribute( $id, $args ) {
  * @return bool
  */
 function wc_delete_attribute( $id ) {
-	global $wpdb;
+	global $wpdb, $wc_product_attributes;
 
 	$name = $wpdb->get_var(
 		$wpdb->prepare(
@@ -776,6 +776,20 @@ function wc_delete_attribute( $id ) {
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			// Deleting the terms above queues term counts when the caller defers counting.
+			// Those resolve the taxonomy by name, so flush them while it still exists.
+			// WordPress keeps one shared queue, so this flushes every pending taxonomy.
+			if ( wp_defer_term_counting() ) {
+				wp_update_term_count( array(), '', true );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+
+		unset( $wc_product_attributes[ $taxonomy ] );
+
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
