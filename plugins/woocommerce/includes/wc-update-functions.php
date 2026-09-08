@@ -39,7 +39,6 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
@@ -3837,7 +3836,7 @@ function wc_update_11203_delete_unpublished_variation_lookup_rows() {
 	);
 	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-	// Counts cached from the old rows: the Product Filters block cache, and the classic widget transients.
-	wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
-	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+	// The listeners of the action drop the counts cached from the old rows.
+	/** This action is documented in LookupDataStore::run_update_callback(). */
+	do_action( 'woocommerce_product_attributes_lookup_updated', 0, LookupDataStore::ACTION_DELETE ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 }

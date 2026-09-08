@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
@@ -663,10 +664,26 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			);
 		}
 
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action );
+			},
+			10,
+			2
+		);
+
 		wc_update_11203_delete_unpublished_variation_lookup_rows();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
 		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation_ids[1] ), $remaining );
+
+		$this->assertSame(
+			array( array( 0, LookupDataStore::ACTION_DELETE ) ),
+			$received,
+			'The migration announces the update once, so the data derived from the table is invalidated.'
+		);
 	}
 }

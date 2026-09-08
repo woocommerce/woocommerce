@@ -7,9 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
-use WC_Cache_Helper;
 
 /**
  * Tests for the DataRegenerator class.
@@ -298,61 +296,49 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Finalizing the regeneration invalidates the caches derived from the lookup table, since the regeneration writes rows without going through the update callback.
+	 * @testdox Finalizing the regeneration announces the update, since it writes rows without going through the update callback.
 	 */
-	public function test_finalize_regeneration_invalidates_the_caches_derived_from_the_lookup_table() {
-		// Populating the transient version is what makes need_cleanup() true, i.e. "there is a cache to clean".
-		$version_before     = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
-		$layered_nav_counts = $this->create_layered_nav_counts_transient();
-		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
+	public function test_finalize_regeneration_fires_the_lookup_updated_action() {
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action );
+			},
+			10,
+			2
+		);
 
 		$this->sut->finalize_regeneration( true );
-		WC_Cache_Helper::delete_transients_on_shutdown();
 
-		$this->assertNotSame( $version_before, WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) );
-		$this->assertFalse( get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT ) );
-		$this->assertFalse( get_transient( $layered_nav_counts ), 'The classic layered nav counts are deleted too.' );
+		$this->assertSame(
+			array( array( 0, LookupDataStore::ACTION_INSERT ) ),
+			$received,
+			'The action fires once, with product id 0 because the whole table was regenerated.'
+		);
 	}
 
 	/**
-	 * @testdox Regenerating the data for a single product invalidates the caches derived from the lookup table.
+	 * @testdox Regenerating the data for a single product announces the update once the data has been created.
 	 */
-	public function test_regenerate_for_product_invalidates_the_caches_derived_from_the_lookup_table() {
-		// Populating the transient version is what makes need_cleanup() true, i.e. "there is a cache to clean".
-		$version_before     = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
-		$layered_nav_counts = $this->create_layered_nav_counts_transient();
-		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
+	public function test_regenerate_for_product_fires_the_lookup_updated_action_after_creating_the_data() {
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action, $this->lookup_data_store->passed_products );
+			},
+			10,
+			2
+		);
 
 		$this->sut->regenerate_for_product( 123, false );
-		WC_Cache_Helper::delete_transients_on_shutdown();
 
-		$this->assertSame( array( 123 ), $this->lookup_data_store->passed_products );
-		$this->assertNotSame( $version_before, WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) );
-		$this->assertFalse( get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT ) );
-		$this->assertFalse( get_transient( $layered_nav_counts ), 'The classic layered nav counts are deleted too.' );
-	}
-
-	/**
-	 * Create a global attribute and cache layered nav counts for its taxonomy.
-	 *
-	 * @return string The name of the transient holding the counts.
-	 */
-	private function create_layered_nav_counts_transient(): string {
-		$attribute_id = wc_create_attribute(
-			array(
-				'name' => 'Color',
-				'slug' => 'color',
-			)
+		$this->assertSame(
+			array( array( 123, LookupDataStore::ACTION_INSERT, array( 123 ) ) ),
+			$received,
+			'The action fires once, with the product id, after the data for it has been created.'
 		);
-		$this->assertIsInt( $attribute_id, 'The attribute the counts are cached for is created.' );
-
-		$transient_name = 'wc_layered_nav_counts_' . wc_get_attribute( $attribute_id )->slug;
-
-		// Anything queued earlier would delete the transient on its own, so flush it before caching the counts.
-		WC_Cache_Helper::delete_transients_on_shutdown();
-		set_transient( $transient_name, array( 'x' => 1 ) );
-
-		return $transient_name;
 	}
 
 	/**

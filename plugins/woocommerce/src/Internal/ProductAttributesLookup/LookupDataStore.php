@@ -221,17 +221,18 @@ class LookupDataStore {
 		}
 
 		/**
-		 * Fires after the product attributes lookup table has been updated for a product or variation.
+		 * Fires after the product attributes lookup table has been updated.
 		 *
 		 * Data derived from the lookup table (such as attribute filter counts) should be invalidated on this
 		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
 		 * in a scheduled action.
 		 *
-		 * It fires once per run_update_callback() call, whether or not any row actually changed.
+		 * It fires once per run_update_callback() call, whether or not any row actually changed, and also
+		 * after the whole table is regenerated or cleaned up.
 		 *
 		 * @since 11.2.0
 		 *
-		 * @param int $product_id The product or variation id the lookup data was updated for.
+		 * @param int $product_id The product or variation id the data was updated for, or 0 when the whole table was regenerated or cleaned up.
 		 * @param int $action The update that was performed, one of the LookupDataStore::ACTION_ constants.
 		 */
 		do_action( 'woocommerce_product_attributes_lookup_updated', $product_id, $action );
