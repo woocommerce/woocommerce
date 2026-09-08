@@ -681,7 +681,7 @@ do_action( 'woocommerce_set_additional_field_value', string $key, mixed $value, 
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
