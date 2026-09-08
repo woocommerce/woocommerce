@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -81,7 +82,8 @@ class Notice extends \WC_REST_Data_Controller {
 				$dismissed = true;
 				break;
 			case 'woo-connected-account-notice':
-				update_user_meta( get_current_user_id(), PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, time() );
+				// Store site-scoped so a dismissal on one multisite site doesn't hide the banner on another.
+				Users::update_site_user_meta( get_current_user_id(), PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, time() );
 				$dismissed = true;
 				break;
 		}
