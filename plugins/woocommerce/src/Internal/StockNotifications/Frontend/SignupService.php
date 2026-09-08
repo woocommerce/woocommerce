@@ -349,7 +349,8 @@ class SignupService {
 		}
 
 		if ( ! $is_logged_in ) {
-			$email = isset( $source['wc_bis_email'] ) ? EmailNormalizer::sanitize( (string) wp_unslash( $source['wc_bis_email'] ) ) : '';
+			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? wp_unslash( $source['wc_bis_email'] ) : '';
+			$email        = EmailNormalizer::sanitize( $posted_email );
 			if ( '' === $email ) {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}

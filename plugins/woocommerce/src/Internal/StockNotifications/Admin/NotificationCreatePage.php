@@ -63,7 +63,8 @@ class NotificationCreatePage {
 
 		} elseif ( isset( $_POST['user_email'] ) && ! empty( $_POST['user_email'] ) ) {
 
-			$posted_data['user_email'] = EmailNormalizer::sanitize( sanitize_email( wp_unslash( $_POST['user_email'] ) ) );
+			$posted_email              = wp_unslash( $_POST['user_email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized below, after the type check.
+			$posted_data['user_email'] = is_string( $posted_email ) ? EmailNormalizer::sanitize( $posted_email ) : '';
 			if ( '' === $posted_data['user_email'] ) {
 				NotificationsPage::add_notice( __( 'Please enter a valid email address.', 'woocommerce' ), 'error' );
 				return;

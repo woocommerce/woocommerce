@@ -159,15 +159,21 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse() should reject an invalid guest email.
+	 * @testdox parse() should reject a guest email that is not a valid address.
+	 *
+	 * @testWith ["not an email"]
+	 *           [["guest@example.com"]]
+	 *           [42]
+	 *
+	 * @param mixed $posted_email The submitted email value.
 	 */
-	public function test_parse_rejects_invalid_guest_email(): void {
+	public function test_parse_rejects_invalid_guest_email( $posted_email ): void {
 		$product = $this->create_out_of_stock_product();
 
 		$data = $this->sut->parse(
 			array(
 				'wc_bis_product_id' => $product->get_id(),
-				'wc_bis_email'      => 'not an email',
+				'wc_bis_email'      => $posted_email,
 				'wc_bis_opt_in'     => 'on',
 			)
 		);
