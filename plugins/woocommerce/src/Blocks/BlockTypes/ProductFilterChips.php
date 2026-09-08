@@ -65,7 +65,7 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$has_visual_swatches     = self::has_visual_swatches( $items );
 		$item_classes_and_styles = wp_parse_args(
-			wp_style_engine_get_styles(
+			$has_visual_swatches ? array() : wp_style_engine_get_styles(
 				array(
 					'border'  => array(
 						'radius' => $attributes['style']['border']['radius'] ?? null,
