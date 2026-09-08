@@ -690,7 +690,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$non_compound_tax = 0.0;
 			foreach ( $taxes['total'] as $rate_id => $tax ) {
-				if ( ! in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
+				if ( is_numeric( $tax ) && ! in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
 					$non_compound_tax += (float) $tax;
 				}
 			}
