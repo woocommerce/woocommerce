@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Three small Marketplace UI fixes: the Plugins > Add Plugin "WooCommerce Marketplace" tab lands on Discover, the Extensions page title matches other admin page titles, and compact product cards show the "Sponsored" label (WOOMKT-848, WOOMKT-850, WOOMKT-859).
+Three small Marketplace UI fixes: the Plugins > Add Plugin "WooCommerce Marketplace" tab lands on Discover, the Extensions page title matches other admin page titles, and compact product cards show the "Sponsored" label.
