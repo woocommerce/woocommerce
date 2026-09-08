@@ -127,9 +127,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * Asks the schema on every request rather than caching the answer in an option, so a
 	 * column that appears or disappears behind WooCommerce's back (a partial restore, a
-	 * manual drop) changes the report on the next request instead of leaving a stored
-	 * answer to go stale. The upgrade that adds the column also queues the lookup rebuild,
-	 * whose batches invalidate the reports cache as they land.
+	 * manual drop) corrects the report on the next request.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @since 11.2.0
@@ -140,9 +138,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		// One schema check per request: imports call this once per synced order. Keyed by
-		// blog id since the schema is per site, though get_db_table_name() itself memoizes
-		// the first blog's table name across switch_to_blog() (pre-existing limitation
-		// shared by the whole Taxes report).
+		// blog id since the schema is per site.
 		static $has_column = array();
 
 		$blog_id = get_current_blog_id();
