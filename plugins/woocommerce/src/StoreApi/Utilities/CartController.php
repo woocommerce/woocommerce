@@ -1402,6 +1402,7 @@ class CartController {
 	 * Format and sanitize variation data posted to the API.
 	 *
 	 * Labels are converted to names (e.g. Size to pa_size), and values are cleaned.
+	 * Custom (non-taxonomy) values are stripped of HTML tags but keep percent sequences (e.g. `%20`), which `wc_clean()` would destroy, breaking validation against the stored options.
 	 *
 	 * @throws RouteException Exception if variation cannot be found.
 	 *
@@ -1426,7 +1427,7 @@ class CartController {
 						sanitize_title( $variation_data[ $variation_attribute_name ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $variation_attribute_name ] ),
+							wp_strip_all_tags( $variation_data[ $variation_attribute_name ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
@@ -1447,7 +1448,7 @@ class CartController {
 						sanitize_title( $variation_data[ $attribute_label ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_label ] ),
+							wp_strip_all_tags( $variation_data[ $attribute_label ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
@@ -1462,7 +1463,7 @@ class CartController {
 						sanitize_title( $variation_data[ $attribute['name'] ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute['name'] ] ),
+							wp_strip_all_tags( $variation_data[ $attribute['name'] ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);

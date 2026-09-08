@@ -687,6 +687,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Custom attribute values containing a percent escape can be added to the cart.
+	 */
+	public function test_add_to_cart_accepts_custom_attribute_values_containing_percent_escapes() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_name( 'Percent Escape Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$fixed_variation = new WC_Product_Variation();
+		$fixed_variation->set_parent_id( $product->get_id() );
+		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+
+		$this->assertNotFalse( $cart_item_key, 'A posted value matching the stored option must pass validation.' );
+		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization unaltered.' );
+
+		WC()->cart->empty_cart();
+
+		$any_variation = new WC_Product_Variation();
+		$any_variation->set_parent_id( $product->get_id() );
+		$any_variation->set_attributes( array( 'finish' => '' ) );
+		$any_variation->set_regular_price( '10' );
+		$any_variation->save();
+
+		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+
+		$this->assertNotFalse( $any_cart_item_key, 'A posted value for an Any attribute must validate against the configured options.' );
+		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if using an invalid product_id.
 	 */
 	public function test_add_variation_to_the_cart_invalid_product() {

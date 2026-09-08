@@ -1242,7 +1242,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							// Don't use wc_clean as it destroys sanitized characters.
 							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						} else {
-							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							// Don't use wc_clean as it strips percent sequences (e.g. `%20`) that can legitimately appear in custom attribute values, making them fail validation against the stored options.
+							$value = html_entity_decode( wp_strip_all_tags( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						}
 
 						// Don't include if it's empty.
