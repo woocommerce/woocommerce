@@ -336,6 +336,31 @@ final class WC_Cart_Session {
 	}
 
 	/**
+	 * Checks whether session updates are enabled for a cart.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 *
+	 * @param WC_Cart $cart Cart object.
+	 * @return bool
+	 */
+	public static function are_updates_enabled_for_cart( WC_Cart $cart ): bool {
+		$cart_id = spl_object_id( $cart );
+
+		if ( ! isset( self::$carts_with_disabled_updates[ $cart_id ] ) ) {
+			return true;
+		}
+
+		$disabled_cart = self::$carts_with_disabled_updates[ $cart_id ]->get();
+		if ( null === $disabled_cart ) {
+			unset( self::$carts_with_disabled_updates[ $cart_id ] );
+			return true;
+		}
+
+		return $disabled_cart !== $cart;
+	}
+
+	/**
 	 * Destroy cart session data.
 	 *
 	 * @since 3.2.0
@@ -773,19 +798,7 @@ final class WC_Cart_Session {
 	 * @return bool
 	 */
 	private function should_skip_session_updates() {
-		$cart_id = spl_object_id( $this->cart );
-
-		if ( ! isset( self::$carts_with_disabled_updates[ $cart_id ] ) ) {
-			return false;
-		}
-
-		$disabled_cart = self::$carts_with_disabled_updates[ $cart_id ]->get();
-		if ( null === $disabled_cart ) {
-			unset( self::$carts_with_disabled_updates[ $cart_id ] );
-			return false;
-		}
-
-		return $disabled_cart === $this->cart;
+		return ! self::are_updates_enabled_for_cart( $this->cart );
 	}
 
 	/**

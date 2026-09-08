@@ -195,16 +195,16 @@ class Batch extends ControllerTestCase {
 			$this->assertArrayNotHasKey( 'Cart-Token', $response_data['responses'][0]['headers'], 'A failed cart response should not include a cart token.' );
 			$this->assertArrayNotHasKey( 'Cart-Hash', $response_data['responses'][0]['headers'], 'A failed cart response should not include a cart hash.' );
 
-			// A failed cart remains referenced by its registered callbacks after WC()->cart is cleared.
 			$failed_cart_session = new \WC_Cart_Session( $cart_backup );
 			$failed_cart_session->get_cart_from_session();
 			$this->assertCount( 1, $cart_backup->get_cart_contents(), 'The failed cart should not resume loading from the session.' );
+			$this->assertSame( $cart_backup, WC()->cart, 'The failed cart should remain available to extension callbacks.' );
+
+			WC()->cart->empty_cart();
+			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'Emptying the failed cart should not destroy the session.' );
 
 			do_action( 'woocommerce_removed_coupon', 'synthetic-coupon' );
 			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The failed cart should not update the session.' );
-
-			do_action( 'woocommerce_cart_emptied' );
-			$this->assertSame( $stored_cart, WC()->session->get( 'cart' ), 'The failed cart should not destroy the session.' );
 
 			$user_id                = self::factory()->user->create();
 			$persistent_cart_key    = '_woocommerce_persistent_cart_' . get_current_blog_id();
