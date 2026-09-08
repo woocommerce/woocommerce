@@ -425,8 +425,8 @@
 					"textInput": {
 						"spacing": {
 							"padding": {
-								"left": "12px",
-								"right": "12px"
+								"left": "var:preset|spacing|10",
+								"right": "var:preset|spacing|10"
 							}
 						}
 					}
