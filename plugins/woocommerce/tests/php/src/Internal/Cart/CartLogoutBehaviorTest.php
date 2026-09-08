@@ -102,19 +102,93 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should read the cart before, and write it after, the session handler tears the session down.
+	 * @testdox Should bracket the session handler's own wp_logout priority, whatever that priority is.
 	 */
-	public function test_hooks_run_around_the_session_teardown(): void {
+	public function test_hooks_bracket_the_real_session_teardown(): void {
+		$session = $this->use_real_session_handler();
 		$this->sut->register();
 
-		$capture_priority = has_action( 'wp_logout', array( $this->sut, 'handle_wp_logout_capture' ) );
-		$restore_priority = has_action( 'wp_logout', array( $this->sut, 'handle_wp_logout_restore' ) );
+		// Read the teardown's priority off the live handler rather than hardcoding 10, so this fails if
+		// core ever moves it instead of quietly passing against a stale number.
+		$teardown_priority = has_action( 'wp_logout', array( $session, 'destroy_session' ) );
+		$capture_priority  = has_action( 'wp_logout', array( $this->sut, 'handle_wp_logout_capture' ) );
+		$restore_priority  = has_action( 'wp_logout', array( $this->sut, 'handle_wp_logout_restore' ) );
 
-		// WC_Session_Handler::destroy_session() empties the cart on wp_logout at priority 10.
-		$this->assertLessThan( 10, $capture_priority, 'The cart must be captured before the session is destroyed' );
-		$this->assertGreaterThan( 10, $restore_priority, 'The cart must be restored after the session is destroyed' );
+		$this->assertIsInt( $teardown_priority, 'The session handler should hook its teardown to wp_logout' );
+		$this->assertIsInt( $capture_priority, 'The class should hook its capture to wp_logout' );
+		$this->assertIsInt( $restore_priority, 'The class should hook its restore to wp_logout' );
+
+		$this->assertLessThan(
+			$teardown_priority,
+			$capture_priority,
+			'The cart must be captured before the session handler tears the session down'
+		);
+		$this->assertGreaterThan(
+			$teardown_priority,
+			$restore_priority,
+			'The cart must be restored after the session handler tears the session down'
+		);
 	}
 
+	/**
+	 * @testdox Should carry the cart through a real wp_logout, including the cookie for the new guest session.
+	 */
+	public function test_cart_survives_a_real_logout_through_the_session_handler(): void {
+		update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+
+		$session = $this->use_real_session_handler();
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$product_id = $this->add_product_to_cart();
+		$session->set_customer_session_cookie( true );
+		$session->save_data();
+
+		$customer_id_before = $session->get_customer_id();
+
+		$this->sut->register();
+
+		$cookies = array();
+		$this->capture_cookies( $cookies );
+
+		// The real thing: WC_Session_Handler::destroy_session() runs at priority 10 between the two
+		// callbacks, deleting the session row, emptying the cart and issuing a new customer ID.
+		do_action( 'wp_logout', $user_id );
+
+		$customer_id_after = WC()->session->get_customer_id();
+
+		$this->assertNotSame(
+			$customer_id_before,
+			$customer_id_after,
+			'The session handler should have issued a new guest customer ID'
+		);
+		$this->assertSame(
+			array( $product_id ),
+			$this->get_product_ids_in_cart(),
+			'The cart should still hold the product after a real logout'
+		);
+		$this->assertNotEmpty(
+			WC()->session->get( 'cart' ),
+			'The new guest session should be seeded with the cart'
+		);
+
+		// Without this cookie the seeded session is written but never read back on the next request,
+		// which is the whole point of the restore. The mock handler has no cookie handling, so this
+		// assertion is only reachable against the real one.
+		$cookie_name = ( new \ReflectionProperty( \WC_Session_Handler::class, '_cookie' ) );
+		$cookie_name->setAccessible( true );
+
+		$this->assertArrayHasKey(
+			$cookie_name->getValue( WC()->session ),
+			$cookies,
+			'A session cookie should have been set for the new guest session'
+		);
+		$this->assertStringStartsWith(
+			$customer_id_after . '|',
+			$cookies[ $cookie_name->getValue( WC()->session ) ],
+			'The session cookie should point at the new guest customer ID, not the logged-out one'
+		);
+	}
 
 	/**
 	 * @testdox Should let the logout finish when restoring the cart throws, rather than replacing the redirect with a fatal.
@@ -192,5 +266,42 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	private function destroy_session_like_logout_does(): void {
 		wc_empty_cart();
 		WC()->session->set( 'cart', null );
+
+		// forget_session() drops the whole session payload, not just the cart. Leaving cart_totals behind
+		// would keep get_cart_from_session() out of the calculate_totals() branch that writes the restored
+		// cart back to the session, so the fake has to clear it too. Customer ID rotation is left to
+		// test_cart_survives_a_real_logout_through_the_session_handler(), which uses the real handler.
+		WC()->session->set( 'cart_totals', null );
+	}
+
+	/**
+	 * Swap the bare WC_Mock_Session_Handler the suite installs for the real WC_Session_Handler, so the
+	 * wp_logout teardown, the customer ID rotation and the session cookie all behave as they do in
+	 * production.
+	 *
+	 * @return \WC_Session_Handler The live session handler.
+	 */
+	private function use_real_session_handler(): \WC_Session_Handler {
+		remove_filter( 'woocommerce_session_handler', array( $this, 'set_mock_session_handler' ) );
+		WC()->initialize_session();
+
+		return WC()->session;
+	}
+
+	/**
+	 * Record the cookies WooCommerce tries to set, without emitting real headers from the CLI.
+	 *
+	 * @param array $cookies Filled with the last value set for each cookie name.
+	 */
+	private function capture_cookies( array &$cookies ): void {
+		add_filter(
+			'woocommerce_set_cookie_enabled',
+			function ( $enabled, $name, $value ) use ( &$cookies ) {
+				$cookies[ $name ] = $value;
+				return false;
+			},
+			10,
+			3
+		);
 	}
 }
