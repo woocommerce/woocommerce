@@ -192,6 +192,7 @@ The following field types are supported:
 - `select`
 - `text`
 - `checkbox`
+- `date`
 
 There are plans to expand this list, but for now these are the types available.
 
@@ -219,7 +220,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `label` | The label shown on your field. This will be the placeholder too. | Yes | `How did you hear about us?` | No default - this must be provided. |
 | `optionalLabel` | The label shown on your field if it is optional. This will be the placeholder too. | No | `How did you hear about us? (Optional)` | The default value will be the value of `label` with `(optional)` appended. |
 | `location` | The location to render your field. | Yes | `contact`, `address`, or `order` | No default - this must be provided. |
-| `type` | The type of field you're rendering. It defaults to `text` and must match one of the supported field types. | No | `text`, `select`, or `checkbox` | `text` |
+| `type` | The type of field you're rendering. It defaults to `text` and must match one of the supported field types. | No | `text`, `select`, `checkbox`, or `date` | `text` |
 | `attributes` | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields. | No | `[	'data-custom-data' => 'my-custom-data' ]` | `[]` |
 | `required` | Can be a boolean or a JSON Schema array. If boolean and `true`, the shopper _must_ provide a value for this field during the checkout process. For checkbox fields, the shopper must check the box to place the order. If a JSON Schema array, the field will be required based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `true` or `["type" => "object", "properties" => [...]]` | `false` |
 | `hidden` | Can be a boolean or a JSON Schema array. Must be `false` when used as a boolean. If a JSON Schema array, the field will be hidden based on the schema conditions. See [Conditional visibility and validation via JSON Schema](#conditional-visibility-and-validation-via-json-schema). | No | `false` or `["type" => "object", "properties" => [...]]` | `false` |
@@ -248,6 +249,12 @@ These options apply to all field types (except in a few circumstances which are 
 #### Options for `text` fields
 
 Text fields don't have any additional options beyond the general options listed above.
+
+#### Options for `date` fields
+
+Date fields don't have any additional options beyond the general options listed above.
+
+The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
 #### Options for `select` fields
 
@@ -292,7 +299,7 @@ As well as the options above, checkbox field support showing an error message if
 
 ### Attributes
 
-Adding additional attributes to checkbox and text fields is supported. Adding them to select fields is **not possible for now**.
+Adding additional attributes to checkbox, text, and date fields is supported. Adding them to select fields is **not possible for now**.
 
 These attributes have a 1:1 mapping to the HTML attributes on `input` elements (except `pattern` on checkbox).
 
