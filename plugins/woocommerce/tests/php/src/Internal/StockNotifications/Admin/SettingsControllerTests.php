@@ -87,8 +87,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertFalse( has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
-
-		$this->remove_hooks( $sut );
 	}
 
 	/**
@@ -106,22 +104,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 10, has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
 		$this->assertSame( 20, has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
-
-		$this->remove_hooks( $sut );
-	}
-
-	/**
-	 * Detach every hook a test instance attached, so it does not leak into other tests.
-	 *
-	 * @param SettingsController $sut The instance under test.
-	 */
-	private function remove_hooks( SettingsController $sut ): void {
-		remove_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ), 100 );
-		remove_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ), 100 );
-		remove_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ), 100 );
-		remove_action( 'admin_notices', array( $sut, 'output_admin_notices' ) );
-		remove_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ), 20 );
-		remove_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) );
 	}
 
 	/**
