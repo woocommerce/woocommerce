@@ -522,6 +522,7 @@ jobs:
     timeout-minutes: 5
     needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     # Match the three-attempt limit in retry-nightly-tests.yml before alerting on nightly failures.
+    # Other workflows share this job and should still report failures immediately.
     if: >-
       ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' &&
           (
