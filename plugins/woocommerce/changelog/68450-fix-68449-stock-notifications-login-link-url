@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix stock notifications "log in" link on product page pointing to /my-account/my-account/.
