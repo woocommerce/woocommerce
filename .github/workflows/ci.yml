@@ -475,6 +475,8 @@ jobs:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
           retention-days: 7
+          # A failed report merge can leave the previous attempt's artifact behind.
+          overwrite: true
 
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -519,7 +521,10 @@ jobs:
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     timeout-minutes: 5
     needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
+    # Match the three-attempt limit in retry-nightly-tests.yml before alerting on nightly failures.
+    if: >-
+      ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' &&
+          ( inputs.trigger != 'nightly-checks' || github.event_name != 'schedule' || github.run_attempt >= 3 ) }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
