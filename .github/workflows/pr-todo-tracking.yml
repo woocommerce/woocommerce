@@ -1,0 +1,37 @@
+name: 'Track Todos'
+on:
+    pull_request:
+        types: [opened, synchronize, closed]
+    push:
+        branches: [trunk]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+    cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+    track_todos:
+        name: Track todos
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        steps:
+            # Comments on a pull request with the todos its diff adds, then opens an issue
+            # for each one on merge. The action reads the diff through the API and never
+            # checks out the branch, so no pull request code runs here.
+            #
+            # The issues arrive unlabelled, which is fine: they sync into Linear and get
+            # triaged there like any other report.
+            #
+            # The action also renames those issues on the issues edited event. That trigger
+            # is left out on purpose, since it would start a runner on every issue edit in
+            # the repo, and the Linear sync generates plenty of those.
+            - uses: woocommerce/automations@dde49354e6307929d4f2daa9afcba97d1f4d09b2 # v1.5.0
+              with:
+                  github_token: '${{ secrets.GITHUB_TOKEN }}'
+                  automations: todos
