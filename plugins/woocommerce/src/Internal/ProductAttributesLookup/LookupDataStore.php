@@ -1061,15 +1061,19 @@ class LookupDataStore {
 		if ( ! $is_variation && ( ! $is_variable_product || empty( $variation_ids ) ) ) {
 			$variations_defined = array();
 		} else {
+			// The first query already selected the published variations, so the ids are reused here
+			// instead of deriving the same set again with a subquery on the posts table.
+			$variation_ids_list = implode( ',', array_map( 'intval', $variation_ids ) );
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $variation_ids_list holds the integer ids this method computed.
 			$sql = $wpdb->prepare(
 				"select post_id as variation_id, substr(meta_key,11) as attribute, meta_value as slug from {$wpdb->postmeta}
-				where post_id in (select ID from {$wpdb->posts} where (id=%d or post_parent=%d) and post_type = 'product_variation' and post_status = 'publish')
+				where post_id in ({$variation_ids_list})
 				and meta_key like %s
 				and meta_value != ''",
-				$product_id,
-				$product_id,
 				'attribute_pa_%'
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$variations_defined = $wpdb->get_results( $sql, ARRAY_A );
 			$variations_defined = ArrayUtil::group_by_column( $variations_defined, 'variation_id' );
