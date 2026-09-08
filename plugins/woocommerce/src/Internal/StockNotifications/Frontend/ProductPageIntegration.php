@@ -152,7 +152,7 @@ class ProductPageIntegration {
 		}
 
 		$text = __( 'Please {login_link} to sign up for stock notifications.', 'woocommerce' );
-		$text = str_replace( '{login_link}', '<a href="' . wc_get_page_permalink( 'myaccount' ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{login_link}', '<a href="' . wc_get_account_endpoint_url( 'dashboard' ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 
