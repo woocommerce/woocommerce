@@ -3818,8 +3818,14 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 function wc_update_11203_cleanup_inherited_variation_images() {
 	global $wpdb;
 
-	$state_option = 'woocommerce_update_11203_cleanup_state';
-	$batch_size   = 250;
+	$state_option     = 'woocommerce_update_11203_cleanup_state';
+	$completed_option = 'woocommerce_update_11203_completed_at';
+	$batch_size       = 250;
+
+	// A manual db-version rollback replays all update callbacks; this one deletes data, so it must not run twice.
+	if ( get_option( $completed_option ) ) {
+		return false;
+	}
 
 	// Still the pre-update version here: the option is only bumped by the final update callback.
 	if ( version_compare( (string) get_option( 'woocommerce_db_version' ), '10.9.0', '<' ) ) {
@@ -3902,6 +3908,7 @@ function wc_update_11203_cleanup_inherited_variation_images() {
 	}
 
 	delete_option( $state_option );
+	update_option( $completed_option, time(), false );
 	VariationGalleryTelemetry::record_event(
 		VariationGalleryTelemetry::EVENT_INHERITED_IMAGE_CLEANUP_COMPLETED,
 		array( 'cleaned_count' => $cleaned_count )

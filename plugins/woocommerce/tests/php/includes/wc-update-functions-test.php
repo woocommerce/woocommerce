@@ -659,6 +659,19 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_update_11203_cleanup_inherited_variation_images never runs again once completed, even if update callbacks are replayed.
+	 */
+	public function test_wc_update_11203_does_not_run_again_after_completion() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		update_option( 'woocommerce_update_11203_completed_at', time() );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_11203_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching the parent after the one-time cleanup may be deliberate and must survive a replay.' );
+	}
+
+	/**
 	 * @testdox wc_update_11203_cleanup_inherited_variation_images matches only the parent's canonical thumbnail, not stale duplicate rows.
 	 */
 	public function test_wc_update_11203_ignores_stale_duplicate_parent_thumbnail_rows() {
