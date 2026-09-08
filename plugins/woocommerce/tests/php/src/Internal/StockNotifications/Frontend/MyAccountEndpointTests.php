@@ -44,6 +44,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->redirect_location = null;
 		\wc_clear_notices();
 		\wp_set_current_user( 0 );
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$_POST = array();
 		global $wp;
@@ -543,8 +544,6 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$items    = $endpoint->register_menu_item( array( 'downloads' => 'Downloads' ), array() );
 
 		$this->assertArrayNotHasKey( MyAccountEndpoint::ENDPOINT, $items );
-
-		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 	}
 
 	/**
@@ -557,8 +556,6 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$vars     = $endpoint->register_query_var( array( 'orders' => 'orders' ) );
 
 		$this->assertSame( 'restock-alerts', $vars[ MyAccountEndpoint::ENDPOINT ] );
-
-		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 	}
 
 	/**
@@ -570,8 +567,6 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		update_option( MyAccountEndpoint::ENDPOINT_OPTION, array( 'not-a-string' ) );
 		$this->assertSame( MyAccountEndpoint::ENDPOINT, MyAccountEndpoint::get_endpoint_slug() );
-
-		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 	}
 
 	/**
