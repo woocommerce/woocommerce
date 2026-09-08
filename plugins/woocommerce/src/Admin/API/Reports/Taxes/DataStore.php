@@ -702,6 +702,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			// only mis-split the base between multiple compound rates, not the total.
 			$compound_running_tax = 0.0;
 			foreach ( $taxes['total'] as $rate_id => $tax ) {
+				// Admin saves without recalculating store '' for rates that never applied
+				// to the item. Numeric zero still counts (zero-rated sales).
+				if ( ! is_numeric( $tax ) ) {
+					continue;
+				}
+
 				$base = (float) $item->get_total();
 				if ( in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
 					$base                 += $non_compound_tax + $compound_running_tax;
