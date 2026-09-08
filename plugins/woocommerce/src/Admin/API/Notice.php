@@ -66,19 +66,19 @@ class Notice extends \WC_REST_Data_Controller {
 		$dismissed = false;
 		switch ( $notice_id ) {
 			case 'woo-subscription-expired-notice':
-				update_user_meta( get_current_user_id(), PluginsHelper::DISMISS_EXPIRED_SUBS_NOTICE, time() );
+				Users::update_site_user_meta( get_current_user_id(), PluginsHelper::DISMISS_EXPIRED_SUBS_NOTICE, time() );
 				$dismissed = true;
 				break;
 			case 'woo-subscription-expiring-notice':
-				update_user_meta( get_current_user_id(), PluginsHelper::DISMISS_EXPIRING_SUBS_NOTICE, time() );
+				Users::update_site_user_meta( get_current_user_id(), PluginsHelper::DISMISS_EXPIRING_SUBS_NOTICE, time() );
 				$dismissed = true;
 				break;
 			case 'woo-disconnect-notice':
-				update_user_meta( get_current_user_id(), PluginsHelper::DISMISS_DISCONNECT_NOTICE, time() );
+				Users::update_site_user_meta( get_current_user_id(), PluginsHelper::DISMISS_DISCONNECT_NOTICE, time() );
 				$dismissed = true;
 				break;
 			case 'woo-connect-notice':
-				update_user_meta( get_current_user_id(), PluginsHelper::DISMISS_CONNECT_NOTICE, time() );
+				Users::update_site_user_meta( get_current_user_id(), PluginsHelper::DISMISS_CONNECT_NOTICE, time() );
 				$dismissed = true;
 				break;
 			case 'woo-connected-account-notice':

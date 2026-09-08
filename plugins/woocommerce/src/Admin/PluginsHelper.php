@@ -1387,19 +1387,19 @@ class PluginsHelper {
 	/**
 	 * Determine whether a specific notice should be shown to the current user.
 	 *
+	 * Dismissals are stored site-scoped, so dismissing a notice on one multisite site
+	 * doesn't hide it on the others.
+	 *
 	 * @param string $dismiss_notice_meta User meta that includes the timestamp when a store notice was dismissed.
 	 * @param bool   $show_after_one_month Show the notices dismissed earlier than one month.
-	 * @param bool   $site_scoped Whether the dismissal is stored per site (multisite) rather than network-wide.
 	 * @return bool True if the notice should be shown, false otherwise.
 	 */
-	public static function should_show_notice( $dismiss_notice_meta, $show_after_one_month = true, $site_scoped = false ) {
+	public static function should_show_notice( $dismiss_notice_meta, $show_after_one_month = true ) {
 		// Get the current user ID.
 		$user_id = get_current_user_id();
 
 		// Get the timestamp when the notice was dismissed.
-		$dismissed_timestamp = $site_scoped
-			? Users::get_site_user_meta( $user_id, $dismiss_notice_meta )
-			: get_user_meta( $user_id, $dismiss_notice_meta, true );
+		$dismissed_timestamp = Users::get_site_user_meta( $user_id, $dismiss_notice_meta );
 
 		if ( ! $show_after_one_month ) {
 			return empty( $dismissed_timestamp );
@@ -1412,24 +1412,21 @@ class PluginsHelper {
 
 		// If the notice was dismissed more than a month ago, delete the meta value and show the notice.
 		if ( ! empty( $dismissed_timestamp ) ) {
-			$site_scoped
-				? Users::delete_site_user_meta( $user_id, $dismiss_notice_meta )
-				: delete_user_meta( $user_id, $dismiss_notice_meta );
+			Users::delete_site_user_meta( $user_id, $dismiss_notice_meta );
 		}
 
 		return true;
 	}
 
 	/**
-	 * Delete the connected account notice dismissal for all users on the current site.
+	 * Delete a notice dismissal for all users on the current site.
 	 *
-	 * The dismissal is stored site-scoped (see should_show_notice), so starting a new
-	 * WooCommerce.com connection only resets it for the site being connected.
+	 * Pairs with should_show_notice(), which stores dismissals site-scoped.
+	 *
+	 * @param string $dismiss_notice_meta User meta key of the dismissal.
 	 */
-	public static function delete_connected_account_notice_dismissal(): void {
-		global $wpdb;
-		$key = self::DISMISS_CONNECTED_ACCOUNT_NOTICE . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
-		delete_metadata( 'user', 0, $key, '', true );
+	public static function delete_notice_dismissal( string $dismiss_notice_meta ): void {
+		Users::delete_site_user_meta_for_all_users( $dismiss_notice_meta );
 	}
 
 	/**

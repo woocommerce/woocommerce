@@ -212,4 +212,20 @@ class Users {
 		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
 		return delete_user_meta( $user_id, $site_specific_key, $meta_value );
 	}
+
+	/**
+	 * Site-specific means of deleting user meta for all users on the current site.
+	 *
+	 * Pairs with update_site_user_meta(): deletes the site-prefixed meta key for every user,
+	 * regardless of the stored value.
+	 *
+	 * @param string $meta_key Metadata key.
+	 *
+	 * @return bool True on success, false on failure.
+	 */
+	public static function delete_site_user_meta_for_all_users( string $meta_key ): bool {
+		global $wpdb;
+		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
+		return delete_metadata( 'user', 0, $site_specific_key, '', true );
+	}
 }

@@ -1079,8 +1079,8 @@ class WC_Helper {
 		do_action( 'woocommerce_helper_connect_start' );
 
 		// Ignore all previously dismissed connected notices.
-		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECT_NOTICE, '', true );
-		\Automattic\WooCommerce\Admin\PluginsHelper::delete_connected_account_notice_dismissal();
+		\Automattic\WooCommerce\Admin\PluginsHelper::delete_notice_dismissal( \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECT_NOTICE );
+		\Automattic\WooCommerce\Admin\PluginsHelper::delete_notice_dismissal( \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE );
 
 		$connect_url = add_query_arg(
 			array(
