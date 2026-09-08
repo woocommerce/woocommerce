@@ -66,6 +66,10 @@ class ProductCollectionData extends ControllerTestCase {
 
 		$this->created_product_attributes = array();
 		$this->products                   = array_map( 'wc_get_product', self::$product_ids );
+
+		// The attribute counts only read the lookup table while its usage is enabled, and the test
+		// install leaves it disabled.
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 	}
 
 	/**
@@ -766,10 +770,6 @@ class ProductCollectionData extends ControllerTestCase {
 	 * Create a variable product with one published "large" size variation, with its lookup rows written.
 	 */
 	private function create_filterable_size_product(): void {
-		// The attribute counts only read the lookup table while its usage is enabled, and the test
-		// install leaves it disabled.
-		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
-
 		self::with_direct_product_attribute_lookup_updates(
 			function () {
 				$fixtures = new FixtureData();
