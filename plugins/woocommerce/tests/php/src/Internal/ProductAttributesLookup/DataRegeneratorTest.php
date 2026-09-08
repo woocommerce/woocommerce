@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
+use WC_Cache_Helper;
 
 /**
  * Tests for the DataRegenerator class.
@@ -293,6 +295,20 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
+	}
+
+	/**
+	 * @testdox Finalizing the regeneration invalidates the filter data cache, since the regeneration writes rows without going through the update callback.
+	 */
+	public function test_finalize_regeneration_invalidates_filter_data_cache() {
+		// Populating the transient version is what makes need_cleanup() true, i.e. "there is a cache to clean".
+		$version_before = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, 5 );
+
+		$this->sut->finalize_regeneration( true );
+
+		$this->assertNotSame( $version_before, WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) );
+		$this->assertFalse( get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT ) );
 	}
 
 	/**

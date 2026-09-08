@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -275,12 +276,16 @@ class DataRegenerator {
 	/**
 	 * Cleanup/final option setup after the regeneration has been completed.
 	 *
+	 * Counts derived from the table are invalidated here because the regeneration writes rows
+	 * directly, without going through LookupDataStore::run_update_callback().
+	 *
 	 * @param bool $enable_usage Whether the table usage should be enabled or not.
 	 */
 	public function finalize_regeneration( bool $enable_usage ) {
 		$this->cancel_regeneration_scheduled_action();
 		$this->delete_all_attributes_lookup_data( false );
 		update_option( 'woocommerce_attribute_lookup_enabled', $enable_usage ? 'yes' : 'no' );
+		wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
 	}
 
 	/**
@@ -378,6 +383,7 @@ class DataRegenerator {
 			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
 			$this->check_can_do_lookup_table_regeneration( $product_id );
 			$this->data_store->create_data_for_product( $product_id, $this->data_store->optimized_data_access_is_enabled() );
+			wc_get_container()->get( CacheController::class )->invalidate_filter_data_cache();
 		} else {
 			$this->initiate_regeneration();
 		}
