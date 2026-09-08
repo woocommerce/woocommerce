@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
@@ -104,16 +105,9 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			),
 		);
 
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template_content
-		);
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result[0]->content );
-
 		$this->assertEquals(
-			$expected_single_product_template_without_whitespace,
-			$result_without_whitespace
+			self::strip_whitespace( $expected_single_product_template_content ),
+			self::strip_whitespace( $result[0]->content )
 		);
 	}
 
@@ -195,16 +189,9 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			),
 		);
 
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template_content
-		);
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result[0]->content );
-
 		$this->assertEquals(
-			$expected_single_product_template_without_whitespace,
-			$result_without_whitespace
+			self::strip_whitespace( $expected_single_product_template_content ),
+			self::strip_whitespace( $result[0]->content )
 		);
 	}
 
@@ -235,16 +222,9 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
 		$this->assertEquals(
-			$result_without_whitespace,
-			$expected_single_product_template_without_whitespace
+			self::strip_whitespace( $result ),
+			self::strip_whitespace( $expected_single_product_template )
 		);
 	}
 
@@ -277,28 +257,9 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$result_without_whitespace
-		);
-
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
-		$expected_single_product_template_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$expected_single_product_template_without_whitespace
-		);
-
 		$this->assertEquals(
-			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
+			self::strip_whitespace_and_password_form_ids( $result ),
+			self::strip_whitespace_and_password_form_ids( $expected_single_product_template )
 		);
 	}
 
@@ -408,28 +369,36 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$result_without_whitespace
-		);
-
-		$expected_single_product_template_without_whitespace = preg_replace(
-			'/\s+/',
-			'',
-			$expected_single_product_template
-		);
-
-		$expected_single_product_template_without_whitespace_without_custom_pwbox_ids = preg_replace(
-			'/pwbox-\d+/',
-			'',
-			$expected_single_product_template_without_whitespace
-		);
-
 		$this->assertEquals(
-			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
+			self::strip_whitespace_and_password_form_ids( $result ),
+			self::strip_whitespace_and_password_form_ids( $expected_single_product_template )
 		);
+	}
+
+	/**
+	 * Remove whitespace so template HTML can be compared without formatting differences.
+	 *
+	 * @param string $content Template HTML.
+	 * @return string
+	 */
+	private static function strip_whitespace( string $content ): string {
+		$stripped = preg_replace( '/\s+/', '', $content );
+
+		return is_string( $stripped ) ? $stripped : '';
+	}
+
+	/**
+	 * Remove whitespace and dynamic password form IDs so HTML can be compared.
+	 *
+	 * WordPress generates unique IDs like pwbox-123 on each call to get_the_password_form().
+	 *
+	 * @param string $content Template HTML.
+	 * @return string
+	 */
+	private static function strip_whitespace_and_password_form_ids( string $content ): string {
+		$without_whitespace = self::strip_whitespace( $content );
+		$stripped           = preg_replace( '/pwbox-\d+/', '', $without_whitespace );
+
+		return is_string( $stripped ) ? $stripped : $without_whitespace;
 	}
 }
