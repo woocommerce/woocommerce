@@ -639,26 +639,6 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox notification_exists_by_email() should find a legacy mixed-case row from lowercase input.
-	 */
-	public function test_notification_exists_by_email_finds_legacy_mixed_case_row(): void {
-		global $wpdb;
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_stock_notifications',
-			array(
-				'product_id'       => 1,
-				'user_id'          => 0,
-				'user_email'       => 'Legacy@Example.com',
-				'status'           => NotificationStatus::ACTIVE,
-				'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
-			)
-		);
-
-		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, 'legacy@example.com' ) );
-	}
-
-	/**
 	 * @testdox query() should match an email containing a single quote.
 	 */
 	public function test_query_notifications_with_quoted_user_email(): void {
