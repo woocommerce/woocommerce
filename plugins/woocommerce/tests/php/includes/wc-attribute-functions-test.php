@@ -342,64 +342,68 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $product_id, 'The fixture product should be created.' );
 		wp_set_object_terms( $product_id, array( (int) $term['term_id'] ), $attribute['taxonomy'] );
 
+		// Record whether the queued count for this taxonomy resolves while it is still registered.
+		$counted_while_registered = false;
+		$count_callback           = static function ( $tt_id, $taxonomy_name ) use ( $attribute, &$counted_while_registered ): void {
+			if ( $taxonomy_name === $attribute['taxonomy'] && taxonomy_exists( $taxonomy_name ) ) {
+				$counted_while_registered = true;
+			}
+		};
+		add_action( 'edited_term_taxonomy', $count_callback, 10, 2 );
+
 		wp_defer_term_counting( true );
 
 		try {
 			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered.' );
+			$this->assertTrue( $counted_while_registered, 'The queued term count should be resolved before the taxonomy is unregistered.' );
 
-			// Flushing the queue must not reach for the now-unregistered taxonomy.
-			wp_defer_term_counting( false );
+			$this->assertSame( array(), $this->drain_deferred_term_counts(), 'Draining the queue must not resolve the unregistered taxonomy.' );
 		} finally {
-			if ( ! taxonomy_exists( $attribute['taxonomy'] ) ) {
-				register_taxonomy( $attribute['taxonomy'], array( 'product' ) );
-			}
-			wp_defer_term_counting( false );
+			remove_action( 'edited_term_taxonomy', $count_callback, 10 );
+			$this->drain_deferred_term_counts();
 			wp_delete_post( $product_id, true );
 			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
 		}
 	}
+
 	/**
-	 * @testdox Should leave an unrelated taxonomy's deferred counts queued when no terms were deleted.
+	 * @testdox Should flush counts the caller already queued for the taxonomy before unregistering it.
 	 */
-	public function test_wc_delete_attribute_without_terms_leaves_other_deferred_counts_queued(): void {
-		$slug      = $this->get_unique_attribute_slug( 'no-terms' );
+	public function test_wc_delete_attribute_flushes_counts_queued_by_the_caller(): void {
+		$slug      = $this->get_unique_attribute_slug( 'caller-queue' );
 		$attribute = $this->create_registered_attribute( $slug );
 
-		$category = wp_insert_term( 'Deferred category ' . $slug, 'product_cat' );
-		$this->assertIsArray( $category, 'The fixture category should be created.' );
+		$term = wp_insert_term( 'Caller deleted term', $attribute['taxonomy'] );
+		$this->assertIsArray( $term, 'The fixture term should be created.' );
 
 		$product_id = wp_insert_post(
 			array(
 				'post_type'   => 'product',
-				'post_title'  => 'Unrelated taxonomy product',
+				'post_title'  => 'Caller queued counting product',
 				'post_status' => 'publish',
 			)
 		);
 		$this->assertIsInt( $product_id, 'The fixture product should be created.' );
+		wp_set_object_terms( $product_id, array( (int) $term['term_id'] ), $attribute['taxonomy'] );
 
 		wp_defer_term_counting( true );
 
 		try {
-			// Queue a count for a taxonomy this deletion has nothing to do with.
-			wp_set_object_terms( $product_id, array( (int) $category['term_id'] ), 'product_cat' );
-			$this->assertSame( 0, $this->get_term_count( (int) $category['term_id'] ), 'The unrelated count should start deferred.' );
+			// The caller removes the term itself, which queues a count for the taxonomy.
+			// The attribute then has no terms left for wc_delete_attribute() to remove.
+			$this->assertTrue( wp_delete_term( (int) $term['term_id'], $attribute['taxonomy'] ), 'The fixture term should be deleted by the caller.' );
 
-			// The attribute has no terms, so nothing of ours is queued and nothing needs flushing.
 			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
-			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should still be unregistered.' );
-			$this->assertSame( 0, $this->get_term_count( (int) $category['term_id'] ), 'The unrelated taxonomy should still be deferred.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered.' );
 
-			wp_defer_term_counting( false );
-			$this->assertSame( 1, $this->get_term_count( (int) $category['term_id'] ), "The caller's own flush should resolve the unrelated count." );
+			$this->assertSame( array(), $this->drain_deferred_term_counts(), 'Draining the queue must not resolve the unregistered taxonomy.' );
 		} finally {
-			wp_defer_term_counting( false );
+			$this->drain_deferred_term_counts();
 			wp_delete_post( $product_id, true );
-			wp_delete_term( (int) $category['term_id'], 'product_cat' );
 			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
 		}
 	}
-
-
 
 	/**
 	 * Describes the behavior of the wc_update_attribute() function.
@@ -570,15 +574,32 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reads a term's stored count straight from the database, bypassing caches.
+	 * Stops deferring term counts, which drains WordPress's queue, and captures any PHP warnings raised while doing so.
 	 *
-	 * @param int $term_id Term ID.
-	 * @return int
+	 * The queue resolves each taxonomy by name, so a queued taxonomy that was unregistered
+	 * in the meantime surfaces as a warning. Capturing it keeps the assertion independent
+	 * of PHPUnit converting warnings to exceptions.
+	 *
+	 * @return string[] Warning messages raised during the drain.
 	 */
-	private function get_term_count( int $term_id ): int {
-		global $wpdb;
+	private function drain_deferred_term_counts(): array {
+		$warnings = array();
 
-		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT count FROM {$wpdb->term_taxonomy} WHERE term_id = %d", $term_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The test must observe the stored count, not a cached one.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception, and PHPUnit 10 stops doing that.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				$warnings[] = $errstr;
+				return true;
+			}
+		);
+
+		try {
+			wp_defer_term_counting( false );
+		} finally {
+			restore_error_handler();
+		}
+
+		return $warnings;
 	}
 
 	/**
