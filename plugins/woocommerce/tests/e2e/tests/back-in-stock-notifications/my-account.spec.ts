@@ -240,9 +240,7 @@ test.describe(
 							name: 'Stock notifications',
 						} )
 					).toBeVisible();
-					await expect( page ).toHaveURL(
-						new RegExp( `${ MY_ACCOUNT_ENDPOINT }$` )
-					);
+					await expect( page ).toHaveURL( MY_ACCOUNT_ENDPOINT );
 					await expect(
 						page.getByText( /Verification email sent to/ )
 					).toBeVisible();
