@@ -171,7 +171,7 @@ class ProductCollectionData extends ControllerTestCase {
 				array(
 					'attribute' => 'pa_size',
 					'operator'  => 'in',
-					'slug'      => array( 'large' ),
+					'slug'      => array( 'large-slug' ),
 				),
 			)
 		);

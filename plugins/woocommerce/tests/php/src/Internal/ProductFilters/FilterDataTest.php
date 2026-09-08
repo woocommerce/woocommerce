@@ -292,8 +292,10 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	public function test_get_attribute_counts_respect_hide_out_of_stock_items(): void {
 		$red_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'red-slug' );
 		$red_term      = get_term_by( 'slug', 'red-slug', 'pa_color' );
+		$green_term    = get_term_by( 'slug', 'green-slug', 'pa_color' );
 
 		$this->assertInstanceOf( \WP_Term::class, $red_term );
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
 
 		self::with_direct_product_attribute_lookup_updates(
 			function () use ( $red_variation ) {
@@ -309,7 +311,9 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$this->assertSame( 1, $this->sut->get_attribute_counts( $query_vars, 'pa_color' )[ $red_term->term_id ] ?? 0, 'The out-of-stock variation counts while out-of-stock items are shown.' );
 
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
-		$this->assertArrayNotHasKey( $red_term->term_id, $this->sut->get_attribute_counts( $query_vars, 'pa_color' ), 'The out-of-stock variation stops counting once out-of-stock items are hidden, so the cache key has to include the option.' );
+		$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+		$this->assertArrayNotHasKey( $red_term->term_id, $counts, 'The out-of-stock variation stops counting once out-of-stock items are hidden, so the cache key has to include the option.' );
+		$this->assertSame( 2, $counts[ $green_term->term_id ] ?? 0, 'Products 5 and 6 both keep an in-stock green variation, so hiding out-of-stock items must not drop them.' );
 	}
 
 	/**
