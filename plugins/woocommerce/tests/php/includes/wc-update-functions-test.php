@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
@@ -29,6 +30,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		delete_option( 'woocommerce_cart_behavior_on_logout' );
 		parent::tearDown();
 	}
 
@@ -618,5 +620,35 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
 		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
+	}
+
+	/**
+	 * @testdox Existing stores are moved to the 'clear' cart behavior, overwriting the 'preserve' default that WC_Install::create_options() seeds before the update callbacks run.
+	 */
+	public function test_wc_update_11203_set_cart_behavior_on_logout_for_existing_stores(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.2.0-3', $db_updates );
+		$this->assertContains( 'wc_update_11203_set_cart_behavior_on_logout_for_existing_stores', $db_updates['11.2.0-3'] );
+
+		update_option( 'woocommerce_cart_behavior_on_logout', CartBehaviorOnLogout::PRESERVE );
+
+		wc_update_11203_set_cart_behavior_on_logout_for_existing_stores();
+
+		$this->assertSame( CartBehaviorOnLogout::CLEAR, get_option( 'woocommerce_cart_behavior_on_logout' ) );
+	}
+
+	/**
+	 * @testdox The cart behavior migration writes the option even when create_options() has not seeded it.
+	 */
+	public function test_wc_update_11203_set_cart_behavior_on_logout_without_seeded_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		delete_option( 'woocommerce_cart_behavior_on_logout' );
+
+		wc_update_11203_set_cart_behavior_on_logout_for_existing_stores();
+
+		$this->assertSame( CartBehaviorOnLogout::CLEAR, get_option( 'woocommerce_cart_behavior_on_logout' ) );
 	}
 }
