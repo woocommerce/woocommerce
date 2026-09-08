@@ -52882,12 +52882,6 @@ parameters:
 			path: src/Blocks/Domain/Services/CheckoutLink.php
 
 		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutLink.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CreateAccount\:\:customer_new_account\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
