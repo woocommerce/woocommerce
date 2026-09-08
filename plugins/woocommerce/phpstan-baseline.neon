@@ -53842,18 +53842,6 @@ parameters:
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
 		-
-			message: '#^Parameter \#2 \$blocks of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) expects array\<Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\>, array\<int\|string, array\<string, array\|string\>\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \$blocks of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:has_block_including_patterns\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
 			message: '#^Parameter \$template of method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:update_template_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: class.notFound
 			count: 1
