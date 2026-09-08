@@ -25,11 +25,13 @@ namespace Automattic\WooCommerce\Internal\Caches;
  * Known limitations:
  *
  * - The read layer describes what WC_Coupon_Data_Store_CPT resolves, so wc_get_coupon_id_by_code()
- *   only runs it while that data store is in use. A custom coupon data store registered through
- *   the `woocommerce_data_stores` filter may resolve further statuses, or coupons that are not
- *   posts at all, and keeps the write layer as its only coverage (what it had before this class
+ *   only runs it while that exact data store is in use. A custom coupon data store registered
+ *   through the `woocommerce_data_stores` filter may resolve further statuses, or coupons that are
+ *   not posts at all, and keeps the write layer as its only coverage (what it had before this class
  *   existed). Rejecting its entries instead would disable the lookup cache for those sites, since
- *   every read would write an entry the next read throws away.
+ *   every read would write an entry the next read throws away. The check is on the class name, so
+ *   a store that extends WC_Coupon_Data_Store_CPT is treated the same way, even one that inherits
+ *   get_ids_by_code() unchanged and would pass the check.
  * - Renaming the code of a coupon that stays published crosses no boundary, so the old code
  *   keeps resolving to the coupon until the cache entry expires or the coupon is unpublished.
  *   This is pre-existing behaviour, not something this class introduced. The read layer does not
