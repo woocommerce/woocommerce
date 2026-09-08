@@ -464,6 +464,53 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get a product variation by one of its attributes.
+	 *
+	 * @param WC_Product $product   Parent product.
+	 * @param string     $taxonomy  Attribute taxonomy name.
+	 * @param string     $term_slug Attribute term slug.
+	 * @return \WC_Product_Variation
+	 * @throws \RuntimeException When the variation cannot be found.
+	 */
+	protected function get_variation_by_attribute( WC_Product $product, string $taxonomy, string $term_slug ): \WC_Product_Variation {
+		foreach ( $product->get_children() as $child_id ) {
+			$variation = wc_get_product( $child_id );
+
+			if ( ! $variation instanceof \WC_Product_Variation ) {
+				continue;
+			}
+
+			$variation_term_slug = $variation->get_attributes()[ $taxonomy ] ?? '';
+
+			if ( $term_slug === $variation_term_slug ) {
+				return $variation;
+			}
+		}
+
+		throw new \RuntimeException( 'Unable to find the requested product variation.' );
+	}
+
+	/**
+	 * Assert that a variation has no attribute lookup rows.
+	 *
+	 * @param \WC_Product_Variation $variation Variation product.
+	 */
+	protected function assert_variation_has_no_lookup_rows( \WC_Product_Variation $variation ): void {
+		global $wpdb;
+
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d",
+					$variation->get_id()
+				)
+			),
+			'The variation should have no attribute lookup rows.'
+		);
+	}
+
+	/**
 	 * Build and create attributes from variations data.
 	 *
 	 * @param array $variations_data Variation data.

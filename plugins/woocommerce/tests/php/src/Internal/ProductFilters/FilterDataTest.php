@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -255,6 +257,59 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	/**
+	 * @testdox A disabled variation does not contribute to its attribute term count.
+	 */
+	public function test_get_attribute_counts_exclude_disabled_variations(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+		$red_term        = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $green_variation ) {
+				$green_variation->set_status( ProductStatus::PRIVATE );
+				$green_variation->save();
+			}
+		);
+		$this->assert_variation_has_no_lookup_rows( $green_variation );
+
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+		$counts     = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+
+		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5\'s published red variation still counts.' );
+		$this->assertSame( 1, $counts[ $green_term->term_id ] ?? 0, 'Only Product 6 counts for green while Product 5\'s green variation is disabled.' );
+	}
+
+	/**
+	 * @testdox Attribute counts leave out out-of-stock variations while out-of-stock items are hidden from the catalog.
+	 */
+	public function test_get_attribute_counts_respect_hide_out_of_stock_items(): void {
+		$red_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'red-slug' );
+		$red_term      = get_term_by( 'slug', 'red-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $red_variation ) {
+				$red_variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+				$red_variation->save();
+			}
+		);
+
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$this->assertSame( 1, $this->sut->get_attribute_counts( $query_vars, 'pa_color' )[ $red_term->term_id ] ?? 0, 'The out-of-stock variation counts while out-of-stock items are shown.' );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$this->assertArrayNotHasKey( $red_term->term_id, $this->sut->get_attribute_counts( $query_vars, 'pa_color' ), 'The out-of-stock variation stops counting once out-of-stock items are hidden, so the cache key has to include the option.' );
 	}
 
 	/**
