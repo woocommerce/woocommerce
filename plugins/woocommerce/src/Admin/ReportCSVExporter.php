@@ -44,6 +44,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $controller;
 
 	/**
+	 * Detail appended to the name the export is downloaded as.
+	 *
+	 * @var string
+	 */
+	protected $download_suffix = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -110,10 +117,43 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Get file path to export to.
 	 *
+	 * Always the stored name, never the name the export is downloaded as.
+	 *
 	 * @return string
 	 */
 	protected function get_file_path() {
-		return self::get_reports_directory() . $this->get_filename();
+		return self::get_reports_directory() . parent::get_filename();
+	}
+
+	/**
+	 * Get the name the export is downloaded as.
+	 *
+	 * The stored file keeps its own name, which only has to identify the export. See get_file_path().
+	 *
+	 * @return string
+	 */
+	public function get_filename() {
+		$filename = parent::get_filename();
+
+		if ( '' === $this->download_suffix ) {
+			return $filename;
+		}
+
+		return sanitize_file_name( preg_replace( '/\.csv$/', '', $filename ) . '-' . $this->download_suffix . '.csv' );
+	}
+
+	/**
+	 * Add detail to the name the export is downloaded as, leaving the stored file's name alone.
+	 *
+	 * Lets a download say what the report covers, such as the date range, when the stored name
+	 * only identifies the export.
+	 *
+	 * @since 11.2.0
+	 * @param string $suffix Detail to append to the download's name, e.g. a date range.
+	 * @return void
+	 */
+	public function set_download_suffix( $suffix ) {
+		$this->download_suffix = sanitize_file_name( $suffix );
 	}
 
 	/**

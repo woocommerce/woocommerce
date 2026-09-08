@@ -43,6 +43,13 @@ class ReportCSVEmail extends \WC_Email {
 	protected $download_url;
 
 	/**
+	 * Date range the report covers, formatted for display. Empty when the report has no range.
+	 *
+	 * @var string
+	 */
+	protected $report_date_range = '';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -111,9 +118,16 @@ class ReportCSVEmail extends \WC_Email {
 	/**
 	 * Get email subject.
 	 *
+	 * Says which period the report covers when it has one, so a merchant running the same report
+	 * over several date ranges can tell the emails apart without opening them.
+	 *
 	 * @return string
 	 */
 	public function get_default_subject() {
+		if ( '' !== $this->report_date_range ) {
+			return __( '[{site_title}]: Your {report_name} Report for {report_date_range} is ready', 'woocommerce' );
+		}
+
 		return __( '[{site_title}]: Your {report_name} Report download is ready', 'woocommerce' );
 	}
 
@@ -127,6 +141,7 @@ class ReportCSVEmail extends \WC_Email {
 			$this->template_html,
 			array(
 				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
 				'sent_to_admin' => true,
@@ -149,6 +164,7 @@ class ReportCSVEmail extends \WC_Email {
 			$this->template_plain,
 			array(
 				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
 				'sent_to_admin' => true,
@@ -177,11 +193,16 @@ class ReportCSVEmail extends \WC_Email {
 	 * @param int    $user_id User ID to email.
 	 * @param string $report_type The type of report export being emailed.
 	 * @param string $download_url The URL for downloading the report.
+	 * @param string $date_range Optional. The date range the report covers, formatted for display.
+	 *                           Empty for reports that are not limited to a period, such as Stock.
 	 */
-	public function trigger( $user_id, $report_type, $download_url ) {
-		$user               = new \WP_User( $user_id );
-		$this->recipient    = $user->user_email;
-		$this->download_url = $download_url;
+	public function trigger( $user_id, $report_type, $download_url, $date_range = '' ) {
+		$user                    = new \WP_User( $user_id );
+		$this->recipient         = $user->user_email;
+		$this->download_url      = $download_url;
+		$this->report_date_range = is_string( $date_range ) ? $date_range : '';
+
+		$this->placeholders['{report_date_range}'] = $this->report_date_range;
 
 		if ( isset( $this->report_labels[ $report_type ] ) ) {
 			$this->report_type                   = $this->report_labels[ $report_type ];

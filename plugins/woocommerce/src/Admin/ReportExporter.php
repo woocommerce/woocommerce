@@ -146,7 +146,7 @@ class ReportExporter {
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
-				$email_action_args = array( get_current_user_id(), $export_id, $report_type );
+				$email_action_args = array( get_current_user_id(), $export_id, $report_type, $report_args );
 				self::schedule_action( 'email_report_download_link', $email_action_args );
 			}
 		}
@@ -220,6 +220,87 @@ class ReportExporter {
 	}
 
 	/**
+	 * Get the date range a report export covers.
+	 *
+	 * Reports are not all limited to a period. Stock, for one, has no date range at all.
+	 *
+	 * @since 11.2.0
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return string[] The range's `after` and `before` dates as `Y-m-d`, or an empty array when the report has no range.
+	 */
+	public static function get_export_date_range( $report_args ) {
+		if ( ! is_array( $report_args ) ) {
+			return array();
+		}
+
+		$date_range = array();
+
+		foreach ( array( 'after', 'before' ) as $bound ) {
+			// Report args arrive from a REST request, so they hold whatever the caller sent. Take the
+			// date as written rather than converting it: the report reads these as store local time.
+			if (
+				empty( $report_args[ $bound ] ) ||
+				! is_string( $report_args[ $bound ] ) ||
+				! preg_match( '/^(\d{4}-\d{2}-\d{2})/', $report_args[ $bound ], $matches )
+			) {
+				return array();
+			}
+
+			$date_range[ $bound ] = $matches[1];
+		}
+
+		return $date_range;
+	}
+
+	/**
+	 * Get the date range a report export covers, formatted for display.
+	 *
+	 * @since 11.2.0
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return string Date range in the site's date format, or an empty string when the report has no range.
+	 */
+	public static function get_export_date_range_label( $report_args ) {
+		$date_range = self::get_export_date_range( $report_args );
+
+		if ( ! $date_range ) {
+			return '';
+		}
+
+		$after  = self::format_date_range_bound( $date_range['after'] );
+		$before = self::format_date_range_bound( $date_range['before'] );
+
+		if ( '' === $after || '' === $before ) {
+			return '';
+		}
+
+		if ( $after === $before ) {
+			return $after;
+		}
+
+		/* translators: 1: first day of the period a report covers, 2: last day of that period. */
+		return sprintf( __( '%1$s - %2$s', 'woocommerce' ), $after, $before );
+	}
+
+	/**
+	 * Format one end of a report's date range for display.
+	 *
+	 * @since 11.2.0
+	 * @param string $date Date as `Y-m-d`.
+	 * @return string The date in the store's date format, or an empty string when it cannot be read.
+	 */
+	private static function format_date_range_bound( $date ) {
+		// Read and formatted in UTC so the date reads back exactly as the merchant picked it.
+		$utc    = new \DateTimeZone( 'UTC' );
+		$parsed = \DateTimeImmutable::createFromFormat( 'Y-m-d|', $date, $utc );
+
+		if ( false === $parsed ) {
+			return '';
+		}
+
+		return (string) wp_date( get_option( 'date_format' ), $parsed->getTimestamp(), $utc );
+	}
+
+	/**
 	 * Serve the export file.
 	 */
 	public static function download_export_file() {
@@ -243,6 +324,12 @@ class ReportExporter {
 
 		$exporter = new ReportCSVExporter();
 		$exporter->set_filename( wp_unslash( $_GET['filename'] ) );
+
+		// The stored name only identifies the export, so the emailed link carries the report's date
+		// range to name the download after the period it covers. It never reaches the file path.
+		if ( ! empty( $_GET['date_range'] ) && is_string( $_GET['date_range'] ) ) {
+			$exporter->set_download_suffix( wp_unslash( $_GET['date_range'] ) );
+		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Say so rather than serving an empty CSV: the exporter creates a blank file for a path
@@ -272,21 +359,29 @@ class ReportExporter {
 	 * @param int    $user_id User ID that requested the email.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param array  $report_args Optional. Report parameters the export was queued with. Exports queued
+	 *                            before WooCommerce 11.2.0 run without them.
 	 * @return void
 	 */
-	public static function email_report_download_link( $user_id, $export_id, $report_type ) {
+	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
 		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( 100 === $percent_complete ) {
-			$query_args   = array(
+			$query_args = array(
 				'action'   => self::DOWNLOAD_EXPORT_ACTION,
 				'filename' => "wc-{$report_type}-report-export-{$export_id}",
 			);
+
+			$date_range = self::get_export_date_range( $report_args );
+			if ( $date_range ) {
+				$query_args['date_range'] = $date_range['after'] . '-to-' . $date_range['before'];
+			}
+
 			$download_url = add_query_arg( $query_args, admin_url() );
 
 			\WC_Emails::instance();
 			$email = new ReportCSVEmail();
-			$email->trigger( $user_id, $report_type, $download_url );
+			$email->trigger( $user_id, $report_type, $download_url, self::get_export_date_range_label( $report_args ) );
 		}
 	}
 }

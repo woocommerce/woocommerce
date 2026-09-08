@@ -149,6 +149,109 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A report's date range is read from the arguments it was exported with.
+	 *
+	 * @testWith ["2025-06-01T00:00:00", "2025-06-30T23:59:59", "2025-06-01", "2025-06-30"]
+	 *           ["2025-06-01", "2025-06-01", "2025-06-01", "2025-06-01"]
+	 *
+	 * @param string $after           The export's `after` argument.
+	 * @param string $before          The export's `before` argument.
+	 * @param string $expected_after  Expected first day of the range.
+	 * @param string $expected_before Expected last day of the range.
+	 */
+	public function test_date_range_is_read_from_report_args( string $after, string $before, string $expected_after, string $expected_before ): void {
+		$this->assertSame(
+			array(
+				'after'  => $expected_after,
+				'before' => $expected_before,
+			),
+			ReportExporter::get_export_date_range(
+				array(
+					'after'  => $after,
+					'before' => $before,
+				)
+			),
+			'The range should be the dates the report was run for, as written.'
+		);
+	}
+
+	/**
+	 * @testdox Arguments without a usable date range produce no range.
+	 *
+	 * @testWith [{}]
+	 *           [{"after": "2025-06-01T00:00:00"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": ""}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": "last month"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": ["2025-06-30"]}]
+	 *
+	 * @param array $report_args Report parameters the export was queued with.
+	 */
+	public function test_report_args_without_a_date_range( array $report_args ): void {
+		$this->assertSame(
+			array(),
+			ReportExporter::get_export_date_range( $report_args ),
+			'A report that is not limited to a period should report no date range.'
+		);
+	}
+
+	/**
+	 * @testdox The date range is labelled in the store's date format.
+	 */
+	public function test_date_range_label_uses_the_store_date_format(): void {
+		update_option( 'date_format', 'F j, Y' );
+
+		$this->assertSame(
+			'June 1, 2025 - June 30, 2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				)
+			),
+			'The label should read as the merchant picked the range.'
+		);
+	}
+
+	/**
+	 * @testdox A single day range is labelled as one date rather than a range.
+	 */
+	public function test_single_day_date_range_label(): void {
+		update_option( 'date_format', 'F j, Y' );
+
+		$this->assertSame(
+			'June 1, 2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-01T23:59:59',
+				)
+			),
+			'A one day report should not repeat the same date twice.'
+		);
+	}
+
+	/**
+	 * @testdox An export is downloaded under a name that says which period it covers.
+	 */
+	public function test_download_is_named_after_the_period_it_covers(): void {
+		$filename = $this->create_export( 'wc-products-report-export-1234567890' );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( $filename );
+		$exporter->set_download_suffix( '2025-06-01-to-2025-06-30' );
+
+		$this->assertSame(
+			'wc-products-report-export-1234567890-2025-06-01-to-2025-06-30.csv',
+			$exporter->get_filename(),
+			'The download should be named after the period the report covers.'
+		);
+		$this->assertTrue(
+			$exporter->export_file_exists(),
+			'The stored export should still be found under the name it was written with.'
+		);
+	}
+
+	/**
 	 * @testdox Cleanup runs from the daily WooCommerce Admin event.
 	 */
 	public function test_cleanup_is_hooked_to_the_daily_event(): void {
