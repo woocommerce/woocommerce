@@ -8,6 +8,7 @@ import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { Subscription, MySubscriptionsTable } from '../types';
 import {
 	actions,
+	autoUpdates,
 	subscriptionStatus,
 	expiry,
 	nameAndStatus,
@@ -18,11 +19,20 @@ export function subscriptionRow(
 	item: Subscription,
 	table: MySubscriptionsTable
 ): TableRow[] {
-	return [
-		nameAndStatus( item, table ),
+	const row = [
+		nameAndStatus( item ),
 		expiry( item ),
 		subscriptionStatus( item, table ),
 		version( item, table ),
-		actions( item ),
 	];
+
+	// Rows in "Available to use" are not the copy running on this store, so their auto-update
+	// state says nothing useful.
+	if ( table === 'installed' ) {
+		row.push( autoUpdates( item ) );
+	}
+
+	row.push( actions( item ) );
+
+	return row;
 }

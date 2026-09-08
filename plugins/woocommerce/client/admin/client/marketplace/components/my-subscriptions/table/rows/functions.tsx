@@ -251,10 +251,7 @@ function appendUTMParams( url: string ) {
 	] );
 }
 
-export function nameAndStatus(
-	subscription: Subscription,
-	table: MySubscriptionsTable
-): TableRow {
+export function nameAndStatus( subscription: Subscription ): TableRow {
 	// This is the fallback icon element with products without
 	let iconElement = <Icon icon={ plugins } size={ 40 } />;
 
@@ -292,11 +289,6 @@ export function nameAndStatus(
 				{ subscription.product_name }
 			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ /* Rows in "Available to use" are not the copy running on this store, so their
-				     auto-update state says nothing useful. */ }
-				{ table === 'installed' && (
-					<AutoUpdateStatus subscription={ subscription } />
-				) }
 				{ subscription.is_shared && (
 					<StatusPopover
 						text={ __( 'Shared with you', 'woocommerce' ) }
@@ -429,6 +421,16 @@ export function version(
 ): TableRow {
 	return {
 		display: getVersion( subscription, table ),
+	};
+}
+
+export function autoUpdates( subscription: Subscription ): TableRow {
+	return {
+		display: (
+			<div className="woocommerce-marketplace__my-subscriptions__auto-updates">
+				<AutoUpdateStatus subscription={ subscription } />
+			</div>
+		),
 	};
 }
 

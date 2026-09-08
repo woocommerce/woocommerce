@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
+import { Icon, info } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -73,19 +74,18 @@ export function getAutoUpdateBlockers( subscription: Subscription ): string[] {
 }
 
 /**
- * Warns when a subscription's installed plugin won't update itself.
+ * The "Automatic updates" cell of an installed row.
  *
- * Two different problems share this slot: the plugin's auto-update setting being off, which can be
- * fixed here, and the setting being on while something else holds the update back, which can't.
- *
- * Renders nothing for a healthy row, so the table stays uncluttered.
+ * Offers to turn the plugin's or theme's auto-update setting on or off. When the setting is on
+ * but something else holds the update back, shows "Blocked" with the reasons instead, since none
+ * of them can be fixed here. A setting that can't be changed from here is shown as plain text.
  */
 export default function AutoUpdateStatus( props: {
 	subscription: Subscription;
 } ): React.JSX.Element | null {
 	const { subscription } = props;
 	const { loadSubscriptions } = useContext( SubscriptionsContext );
-	const [ isEnabling, setIsEnabling ] = useState( false );
+	const [ isSaving, setIsSaving ] = useState( false );
 
 	const local = subscription.local;
 
@@ -93,110 +93,109 @@ export default function AutoUpdateStatus( props: {
 		return null;
 	}
 
-	function enableAutoUpdate() {
-		recordEvent( 'marketplace_enable_auto_update_clicked', {
-			product_id: subscription.product_id,
-			product_zip_slug: subscription.zip_slug,
-		} );
+	function setAutoUpdate( enabled: boolean ) {
+		recordEvent(
+			enabled
+				? 'marketplace_enable_auto_update_clicked'
+				: 'marketplace_disable_auto_update_clicked',
+			{
+				product_id: subscription.product_id,
+				product_zip_slug: subscription.zip_slug,
+			}
+		);
 
-		setIsEnabling( true );
+		setIsSaving( true );
 		removeNotice( subscription.product_key );
 
-		setProductAutoUpdate( subscription, true )
+		setProductAutoUpdate( subscription, enabled )
 			.then( () => loadSubscriptions( false ) )
 			.then( () => {
-				speak(
-					sprintf(
-						/* translators: %s is the product name. */
-						__( 'Auto-updates enabled for %s.', 'woocommerce' ),
-						subscription.product_name
-					)
-				);
+				const announcement = enabled
+					? /* translators: %s is the product name. */
+					  __( 'Auto-updates enabled for %s.', 'woocommerce' )
+					: /* translators: %s is the product name. */
+					  __( 'Auto-updates disabled for %s.', 'woocommerce' );
+
+				speak( sprintf( announcement, subscription.product_name ) );
 			} )
 			.catch( ( error: { data?: { message?: string } } ) => {
+				const failure = enabled
+					? __( 'Auto-updates could not be enabled.', 'woocommerce' )
+					: __(
+							'Auto-updates could not be disabled.',
+							'woocommerce'
+					  );
+
 				// The endpoint answers with wp_send_json_error(), which nests the reason under data.
 				const reason = error?.data?.message;
 
 				addNotice(
 					subscription.product_key,
-					reason
-						? sprintf(
-								/* translators: %s is the reason the endpoint gave, a full sentence. */
-								__(
-									'Auto-updates could not be enabled. %s',
-									'woocommerce'
-								),
-								reason
-						  )
-						: __(
-								'Auto-updates could not be enabled.',
-								'woocommerce'
-						  ),
+					reason ? `${ failure } ${ reason }` : failure,
 					NoticeStatus.Error
 				);
 			} )
-			.finally( () => setIsEnabling( false ) );
+			.finally( () => setIsSaving( false ) );
 	}
 
-	if ( ! local.auto_update ) {
-		const explanation = local.auto_update_manageable ? (
-			<>
-				{ __(
-					'New versions will not install on their own, including security releases.',
-					'woocommerce'
-				) }{ ' ' }
-				<Button
-					variant="link"
-					onClick={ enableAutoUpdate }
-					isBusy={ isEnabling }
-					disabled={ isEnabling }
-				>
-					{ __( 'Enable auto-updates', 'woocommerce' ) }
-				</Button>
-			</>
-		) : (
-			__(
-				'New versions will not install on their own, including security releases. Auto-updates are controlled outside this screen.',
-				'woocommerce'
-			)
-		);
+	const blockers = local.auto_update
+		? getAutoUpdateBlockers( subscription )
+		: [];
 
+	if ( blockers.length > 0 ) {
 		return (
 			<StatusPopover
-				text={ __( 'Auto-updates are off', 'woocommerce' ) }
-				level={ StatusLevel.Warning }
-				explanation={ explanation }
+				icon={ <Icon icon={ info } size={ 16 } /> }
+				text={ __( 'Blocked', 'woocommerce' ) }
+				level={ StatusLevel.Error }
+				explanation={
+					<>
+						<p>
+							{ __(
+								'Auto-updates are on, but it will not update because:',
+								'woocommerce'
+							) }
+						</p>
+						<ul className="woocommerce-marketplace__my-subscriptions__auto-update-blockers">
+							{ blockers.map( ( blocker ) => (
+								<li key={ blocker }>{ blocker }</li>
+							) ) }
+						</ul>
+					</>
+				}
 				explanationOnHover
 			/>
 		);
 	}
 
-	const blockers = getAutoUpdateBlockers( subscription );
-
-	if ( blockers.length === 0 ) {
-		return null;
+	if ( ! local.auto_update_manageable ) {
+		return (
+			<StatusPopover
+				text={
+					local.auto_update
+						? __( 'On', 'woocommerce' )
+						: __( 'Off', 'woocommerce' )
+				}
+				level={ StatusLevel.Info }
+				explanation={ __(
+					'Auto-updates for this product are controlled outside this screen.',
+					'woocommerce'
+				) }
+				explanationOnHover
+			/>
+		);
 	}
 
 	return (
-		<StatusPopover
-			text={ __( 'Auto-updates blocked', 'woocommerce' ) }
-			level={ StatusLevel.Error }
-			explanation={
-				<>
-					<p>
-						{ __(
-							'Auto-updates are on, but it will not update because:',
-							'woocommerce'
-						) }
-					</p>
-					<ul className="woocommerce-marketplace__my-subscriptions__auto-update-blockers">
-						{ blockers.map( ( blocker ) => (
-							<li key={ blocker }>{ blocker }</li>
-						) ) }
-					</ul>
-				</>
-			}
-			explanationOnHover
-		/>
+		<Button
+			variant="link"
+			onClick={ () => setAutoUpdate( ! local.auto_update ) }
+			isBusy={ isSaving }
+			disabled={ isSaving }
+		>
+			{ local.auto_update
+				? __( 'Disable auto-updates', 'woocommerce' )
+				: __( 'Enable auto-updates', 'woocommerce' ) }
+		</Button>
 	);
 }

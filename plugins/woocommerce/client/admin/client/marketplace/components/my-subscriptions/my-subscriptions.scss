@@ -195,6 +195,11 @@
 	white-space: nowrap;
 	font-size: 12px;
 
+	svg {
+		fill: currentColor;
+		margin-inline-end: $grid-unit-05;
+	}
+
 	&--error {
 		color: var(--wp-red-red-70, #8a2424);
 		background: var(--wp-red-red-0, #fcf0f1);
@@ -245,9 +250,17 @@
 .woocommerce-marketplace__my-subscriptions-version {
 	padding: 6px 12px;
 }
-.woocommerce-marketplace__my-subscriptions__table__header--version > span {
+.woocommerce-marketplace__my-subscriptions__table__header--version > span,
+.woocommerce-marketplace__my-subscriptions__table__header--auto-updates > span {
 	display: inline-block;
 	padding: 0 12px;
+}
+
+// Lines up with the link button, which carries its own 6px 12px padding.
+.woocommerce-marketplace__my-subscriptions__auto-updates {
+	.woocommerce-marketplace__my-subscriptions__product-status {
+		margin: 6px 12px;
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions {
