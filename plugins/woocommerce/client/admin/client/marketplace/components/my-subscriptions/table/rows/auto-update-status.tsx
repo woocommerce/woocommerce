@@ -11,6 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import RefreshIcon from '../../../../assets/images/refresh.svg';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
 import { NoticeStatus } from '../../../../contexts/types';
 import {
@@ -186,12 +187,25 @@ export default function AutoUpdateStatus( props: {
 		);
 	}
 
+	if ( isSaving ) {
+		return (
+			<Button variant="link" disabled accessibleWhenDisabled>
+				<img
+					src={ RefreshIcon }
+					alt=""
+					className="woocommerce-marketplace__my-subscriptions__auto-updates-saving-icon"
+				/>
+				{ local.auto_update
+					? __( 'Disabling…', 'woocommerce' )
+					: __( 'Enabling…', 'woocommerce' ) }
+			</Button>
+		);
+	}
+
 	return (
 		<Button
 			variant="link"
 			onClick={ () => setAutoUpdate( ! local.auto_update ) }
-			isBusy={ isSaving }
-			disabled={ isSaving }
 		>
 			{ local.auto_update
 				? __( 'Disable auto-updates', 'woocommerce' )

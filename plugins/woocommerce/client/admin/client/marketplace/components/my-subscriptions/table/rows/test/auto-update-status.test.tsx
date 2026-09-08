@@ -304,6 +304,46 @@ describe( 'AutoUpdateStatus', () => {
 		);
 	} );
 
+	it( 'shows a progress label while enabling', async () => {
+		let finish: () => void = () => {};
+		( setProductAutoUpdate as jest.Mock ).mockReturnValueOnce(
+			new Promise< void >( ( resolve ) => {
+				finish = resolve;
+			} )
+		);
+		renderStatus( subscriptionWith( {} ) );
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+		);
+
+		// Disabled through aria-disabled, so focus stays on the control while it works.
+		expect(
+			await screen.findByRole( 'button', { name: 'Enabling…' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+
+		finish();
+
+		expect(
+			await screen.findByRole( 'button', { name: 'Enable auto-updates' } )
+		).not.toHaveAttribute( 'aria-disabled' );
+	} );
+
+	it( 'shows a progress label while disabling', async () => {
+		( setProductAutoUpdate as jest.Mock ).mockReturnValueOnce(
+			new Promise( () => {} )
+		);
+		renderStatus( subscriptionWith( { auto_update: true } ) );
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+		);
+
+		expect(
+			await screen.findByRole( 'button', { name: 'Disabling…' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
 	it( "surfaces the endpoint's reason when enabling fails", async () => {
 		// The shape wp_send_json_error() produces.
 		( setProductAutoUpdate as jest.Mock ).mockRejectedValueOnce( {
