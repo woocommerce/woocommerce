@@ -1,0 +1,16 @@
+Temporary probe for the todo tracking workflow. Delete before merge.
+
+Isolating one variable: whether a URL on the same line as the todo keyword
+stops the matcher seeing it. All four below are invented, not real work.
+
+// TODO: Alpha has no link at all.
+
+// TODO: Beta has an inline link https://github.com/woocommerce/woocommerce/pull/12345 mid sentence.
+
+/**
+ * TODO: Gamma keeps its link on a continuation line.
+ *
+ * See https://github.com/woocommerce/woocommerce/pull/12345
+ */
+
+// TODO: Delta has a bare domain github.com/woocommerce/woocommerce/pull/12345 with no scheme.
