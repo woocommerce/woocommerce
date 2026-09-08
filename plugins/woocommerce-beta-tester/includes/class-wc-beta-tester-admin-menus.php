@@ -270,6 +270,9 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 		$settings = WC_Beta_Tester::get_settings();
 		switch ( $settings->channel ) {
+			case 'nightly':
+				$current_channel = __( 'Nightly', 'woocommerce-beta-tester' );
+				break;
 			case 'beta':
 				$current_channel = __( 'Beta', 'woocommerce-beta-tester' );
 				break;
