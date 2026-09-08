@@ -349,8 +349,8 @@ class SignupService {
 		}
 
 		if ( ! $is_logged_in ) {
-			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? wp_unslash( $source['wc_bis_email'] ) : '';
-			$email        = EmailNormalizer::sanitize( $posted_email );
+			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : '';
+			$email        = is_email( $posted_email ) ? EmailNormalizer::normalize( $posted_email ) : '';
 			if ( '' === $email ) {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}
@@ -358,8 +358,9 @@ class SignupService {
 			$data['user_id']    = 0;
 			$data['user_email'] = $email;
 
-			// Check if user exists with this email.
-			$user = get_user_by( 'email', $email );
+			// Look up the account with the letter case as entered: `wp_users.user_email` is never
+			// normalized, so on a case-sensitive collation the lowercased form would miss it.
+			$user = get_user_by( 'email', $posted_email );
 			if ( $user ) {
 				$data['user_id'] = $user->ID;
 			}

@@ -64,13 +64,16 @@ class NotificationCreatePage {
 		} elseif ( isset( $_POST['user_email'] ) && ! empty( $_POST['user_email'] ) ) {
 
 			$posted_email              = wp_unslash( $_POST['user_email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized below, after the type check.
-			$posted_data['user_email'] = is_string( $posted_email ) ? EmailNormalizer::sanitize( $posted_email ) : '';
+			$posted_email              = is_string( $posted_email ) ? sanitize_email( $posted_email ) : '';
+			$posted_data['user_email'] = is_email( $posted_email ) ? EmailNormalizer::normalize( $posted_email ) : '';
 			if ( '' === $posted_data['user_email'] ) {
 				NotificationsPage::add_notice( __( 'Please enter a valid email address.', 'woocommerce' ), 'error' );
 				return;
 			}
 
-			$user                   = get_user_by( 'email', $posted_data['user_email'] );
+			// Look up the account with the letter case as entered: `wp_users.user_email` is never
+			// normalized, so on a case-sensitive collation the lowercased form would miss it.
+			$user                   = get_user_by( 'email', $posted_email );
 			$posted_data['user_id'] = is_a( $user, 'WP_User' ) ? $user->ID : 0;
 		}
 

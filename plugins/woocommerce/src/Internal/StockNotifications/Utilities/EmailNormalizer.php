@@ -26,16 +26,4 @@ final class EmailNormalizer {
 	public static function normalize( string $email ): string {
 		return strtolower( trim( $email ) );
 	}
-
-	/**
-	 * Sanitize and normalize an untrusted email address.
-	 *
-	 * @param string $email The raw email address.
-	 * @return string The normalized address, or an empty string when it is not a valid email.
-	 */
-	public static function sanitize( string $email ): string {
-		$email = self::normalize( sanitize_email( $email ) );
-
-		return is_email( $email ) ? $email : '';
-	}
 }
