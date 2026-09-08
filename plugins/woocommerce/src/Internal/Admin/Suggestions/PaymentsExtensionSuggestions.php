@@ -2993,15 +2993,16 @@ class PaymentsExtensionSuggestions {
 	public function get_country_extensions( string $country_code, string $context = '' ): array {
 		$country_code = strtoupper( $country_code );
 
-		if ( empty( $this->country_extensions[ $country_code ] ) ||
-			! is_array( $this->country_extensions[ $country_code ] ) ) {
-
-			return array();
-		}
-
 		// Key on the user since incentive visibility and dismissals are user-specific.
 		$memo_key = get_current_user_id() . '__' . $country_code . '__' . $context;
 		if ( isset( $this->country_extensions_memo[ $memo_key ] ) ) {
+			return $this->country_extensions_memo[ $memo_key ];
+		}
+
+		if ( empty( $this->country_extensions[ $country_code ] ) ||
+			! is_array( $this->country_extensions[ $country_code ] ) ) {
+
+			$this->country_extensions_memo[ $memo_key ] = array();
 			return $this->country_extensions_memo[ $memo_key ];
 		}
 
