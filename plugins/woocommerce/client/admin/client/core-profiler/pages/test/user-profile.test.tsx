@@ -92,31 +92,7 @@ describe( 'UserProfile', () => {
 		expect( platformSelector ).toBeInTheDocument();
 	} );
 
-	// The readonly attribute is what keeps the touch keyboard closed. jsdom
-	// cannot render an operating-system keyboard, so the suppression itself
-	// is only verifiable on a physical device.
-	it( 'should render the platform selector input as readonly', () => {
-		render(
-			// @ts-ignore
-			<UserProfile
-				{ ...{
-					...props,
-					context: {
-						userProfile: {
-							businessChoice: 'im_already_selling',
-							sellingOnlineAnswer: 'yes_im_selling_online',
-							sellingPlatforms: null,
-						},
-					},
-				} }
-			/>
-		);
-		expect(
-			screen.getByLabelText( /Use up and down arrow keys to navigate/i )
-		).toHaveAttribute( 'readonly' );
-	} );
-
-	it( 'should still allow selecting a platform from the read-only selector', () => {
+	it( 'should allow selecting a platform from the read-only selector', () => {
 		render(
 			// @ts-ignore
 			<UserProfile
@@ -133,9 +109,12 @@ describe( 'UserProfile', () => {
 			/>
 		);
 
-		fireEvent.focus(
-			screen.getByLabelText( /Use up and down arrow keys to navigate/i )
+		const platformSelector = screen.getByLabelText(
+			/Use up and down arrow keys to navigate/i
 		);
+		expect( platformSelector ).toHaveAttribute( 'readonly' );
+
+		fireEvent.focus( platformSelector );
 		fireEvent.click( screen.getByText( 'Amazon' ) );
 		screen
 			.getByRole( 'button', {
