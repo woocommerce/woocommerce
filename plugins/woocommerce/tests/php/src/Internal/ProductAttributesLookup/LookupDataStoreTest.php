@@ -1368,6 +1368,32 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'run_update_callback' fires 'woocommerce_product_attributes_lookup_updated' once the table has been updated.
+	 */
+	public function test_run_update_callback_fires_updated_action() {
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action, $this->get_lookup_table_data() );
+			},
+			10,
+			2
+		);
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+
+		$this->assertSame(
+			array( array( $variation->get_id(), LookupDataStore::ACTION_INSERT, array( $this->variation_lookup_row( $product, $variation ) ) ) ),
+			$received,
+			'The action fires once, with the product id and action, after the rows have been written.'
+		);
+	}
+
+	/**
 	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
 	 * and one published, in-stock variation defined by the first term ('term_2_1').
 	 *
