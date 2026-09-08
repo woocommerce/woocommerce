@@ -177,6 +177,35 @@
 					]
 				},
 				{
+					"name": "PHP: 8.3 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:env",
+					"shardingArguments": [],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
+						"i18n/postcode-validation-rules.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.test.json",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"phpVersion": "8.3",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"php-unit-php-8.3-wp-latest"
+					]
+				},
+				{
 					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
