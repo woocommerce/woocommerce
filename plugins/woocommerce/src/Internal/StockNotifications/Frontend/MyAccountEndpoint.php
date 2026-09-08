@@ -29,6 +29,26 @@ class MyAccountEndpoint {
 	public const ENDPOINT = 'stock-notifications';
 
 	/**
+	 * Option holding the endpoint slug, editable under Settings > Advanced > Account endpoints.
+	 */
+	public const ENDPOINT_OPTION = 'woocommerce_myaccount_stock_notifications_endpoint';
+
+	/**
+	 * Get the configured endpoint slug.
+	 *
+	 * The slug is what appears in the URL. {@see self::ENDPOINT} stays the query var
+	 * key everything else is wired to, the same split core uses for its own endpoints.
+	 * An empty slug disables the endpoint.
+	 *
+	 * @return string The configured slug, or an empty string when the endpoint is disabled.
+	 */
+	public static function get_endpoint_slug(): string {
+		$slug = get_option( self::ENDPOINT_OPTION, self::ENDPOINT );
+
+		return is_string( $slug ) ? $slug : self::ENDPOINT;
+	}
+
+	/**
 	 * Query argument triggered by the cancel form post.
 	 */
 	public const CANCEL_ACTION = 'wc_bis_cancel_notification';
@@ -79,12 +99,13 @@ class MyAccountEndpoint {
 	}
 
 	/**
-	 * Register the `stock-notifications` rewrite endpoint / query var.
+	 * Register the stock notifications rewrite endpoint / query var.
 	 *
 	 * Hooking `woocommerce_get_query_vars` wires us into {@see \WC_Query::add_endpoints()}
 	 * so WordPress registers the rewrite rule and our slug lands in `$wp->query_vars`.
+	 * `add_endpoints()` skips empty slugs, so a blank setting leaves the endpoint unregistered.
 	 *
-	 * @param array<string, string> $vars Existing query vars keyed by endpoint slug.
+	 * @param array<string, string> $vars Existing query vars keyed by endpoint key.
 	 * @return array<string, string>
 	 */
 	public function register_query_var( $vars ) {
@@ -92,7 +113,7 @@ class MyAccountEndpoint {
 			return $vars;
 		}
 
-		$vars[ self::ENDPOINT ] = self::ENDPOINT;
+		$vars[ self::ENDPOINT ] = self::get_endpoint_slug();
 		return $vars;
 	}
 
@@ -108,6 +129,11 @@ class MyAccountEndpoint {
 		unset( $endpoints );
 
 		if ( ! is_array( $items ) ) {
+			return $items;
+		}
+
+		// A blank endpoint slug disables the endpoint, so the link would 404.
+		if ( '' === self::get_endpoint_slug() ) {
 			return $items;
 		}
 
