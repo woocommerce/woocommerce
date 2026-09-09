@@ -937,18 +937,34 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Checks whether an order status value would raise an Error when the 'wc-' prefix is concatenated.
+	 * Normalizes an order status value before it is prefixed.
 	 *
-	 * Only objects without a __toString() method qualify. Arrays and null merely warn or convert
-	 * silently and are then reduced to '' by WP_Query's sanitize_key(), so they must keep their
-	 * pre-existing behaviour of dropping the status clause rather than emptying the result set.
+	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
+	 * later status checks do not invoke extension code repeatedly.
 	 *
 	 * @since 11.2.0
-	 * @param mixed $status The status value to check.
-	 * @return bool True if concatenating the value would raise an Error.
+	 * @param mixed $status            The status value to normalize.
+	 * @param mixed $normalized_status The normalized value, passed by reference.
+	 * @return bool True when the value can continue through status normalization.
 	 */
-	private function is_unusable_status( $status ) {
-		return is_object( $status ) && ! method_exists( $status, '__toString' );
+	private function normalize_status_value( $status, &$normalized_status ) {
+		$normalized_status = $status;
+
+		if ( ! is_object( $status ) ) {
+			return true;
+		}
+
+		if ( ! method_exists( $status, '__toString' ) ) {
+			return false;
+		}
+
+		try {
+			$normalized_status = (string) $status;
+		} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -972,27 +988,49 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Checks whether any leaf of a query arg value cannot be used where a string is expected.
+	 * Normalizes the leaves of a customer query value.
 	 *
-	 * Recurses because a nested array is a supported grouping construct for some args, so an array
-	 * is only unusable when something inside it is.
+	 * Nested arrays are supported grouping constructs. Stringable leaves are converted once so the
+	 * customer meta-query builder receives only scalar values.
 	 *
 	 * @since 11.2.0
-	 * @param mixed $value The value to check.
-	 * @return bool True if any leaf cannot be used as a string, false otherwise.
+	 * @param mixed $value            The value to normalize.
+	 * @param mixed $normalized_value The normalized value, passed by reference.
+	 * @return bool True when every leaf can be used as a string.
 	 */
-	private function contains_unusable_value( $value ) {
+	private function normalize_customer_value( $value, &$normalized_value ) {
 		if ( is_array( $value ) ) {
-			foreach ( $value as $item ) {
-				if ( $this->contains_unusable_value( $item ) ) {
-					return true;
+			$normalized_value = array();
+
+			foreach ( $value as $key => $item ) {
+				$normalized_item = null;
+
+				if ( ! $this->normalize_customer_value( $item, $normalized_item ) ) {
+					return false;
 				}
+
+				$normalized_value[ $key ] = $normalized_item;
 			}
 
+			return true;
+		}
+
+		if ( is_scalar( $value ) ) {
+			$normalized_value = $value;
+			return true;
+		}
+
+		if ( ! is_object( $value ) || ! method_exists( $value, '__toString' ) ) {
 			return false;
 		}
 
-		return ! $this->is_usable_as_string( $value );
+		try {
+			$normalized_value = (string) $value;
+		} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1069,51 +1107,46 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		$has_unusable_status = false;
-
 		// Add the 'wc-' prefix to status if needed. Statuses arrive as an array or a
 		// comma-separated string; normalize to an array so the case normalization and prefix
 		// check only need to run once. Status slugs are stored lowercase, so an uppercase
-		// value like 'WC-COMPLETED' must be lowercased first — otherwise it is not recognized,
-		// and WP_Query's own sanitization strips the uppercase letters and drops the status
-		// clause, returning every order.
+		// value like 'WC-COMPLETED' must be lowercased first.
+		$has_unusable_status = false;
+
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			$statuses = is_string( $query_vars['post_status'] )
 				? explode( ',', $query_vars['post_status'] )
 				: (array) $query_vars['post_status'];
 
+			$normalized_statuses = array();
 			foreach ( $statuses as $status ) {
-				if ( $this->is_unusable_status( $status ) ) {
+				$normalized_status = null;
+				if ( ! $this->normalize_status_value( $status, $normalized_status ) ) {
 					$has_unusable_status = true;
 					break;
 				}
-			}
-
-			// Drop entries that can't be used as strings before strtolower().
-			$statuses = array_filter(
-				$statuses,
-				static function ( $s ) {
-					return is_string( $s ) || ( is_object( $s ) && method_exists( $s, '__toString' ) );
-				}
-			);
-
-			// If nothing remains, keep a sentinel so the guard below rejects the query.
-			if ( empty( $statuses ) ) {
-				$statuses = array( '' );
+				$normalized_statuses[] = $normalized_status;
 			}
 
 			if ( $has_unusable_status ) {
 				unset( $query_vars['post_status'] );
 			} else {
+				$statuses = array_filter( $normalized_statuses, 'is_string' );
+
+				// Keep a sentinel when no status survives so the unknown-status check fails closed.
+				if ( empty( $statuses ) ) {
+					$statuses = array( '' );
+				}
+
 				foreach ( $statuses as &$status ) {
-					$status = strtolower( (string) $status );
+					$status = strtolower( $status );
 					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
 				}
+				unset( $status );
 
 				$query_vars['post_status'] = $statuses;
 			}
 		}
-
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
 		// WP_Query omits the status clause when none of the requested statuses are registered, which would return all orders.
@@ -1186,19 +1219,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
-			$values = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$values            = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$normalized_values = null;
 
 			// Reaches is_email()/strlen() in WP core and fatals before
-			// get_orders_generate_customer_meta_query() can return its WP_Error. The check recurses
+			// get_orders_generate_customer_meta_query() can return its WP_Error. Normalize recursively
 			// because a nested array is a supported AND-group shape, not malformed input.
-			if ( $this->contains_unusable_value( $values ) ) {
+			if ( ! $this->normalize_customer_value( $values, $normalized_values ) ) {
 				$this->fail_query_closed(
 					$wp_query_args,
 					'woocommerce_order_query_invalid_customer',
 					__( 'Invalid customer query.', 'woocommerce' )
 				);
 			} else {
-				$customer_query = $this->get_orders_generate_customer_meta_query( $values );
+				$wp_query_args['customer'] = is_array( $query_vars['customer'] ) ? $normalized_values : $normalized_values[0];
+				$customer_query            = $this->get_orders_generate_customer_meta_query( $normalized_values );
 				if ( is_wp_error( $customer_query ) ) {
 					$wp_query_args['errors'][] = $customer_query;
 				} else {

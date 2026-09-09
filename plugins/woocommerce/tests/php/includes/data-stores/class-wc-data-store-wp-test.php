@@ -343,6 +343,57 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A date Stringable whose conversion throws fails the query closed.
+	 */
+	public function test_parse_date_for_wp_query_handles_throwing_stringable(): void {
+		$query_var = new class() {
+			/**
+			 * Simulate a failed string conversion.
+			 */
+			public function __toString(): string {
+				throw new TypeError( 'String conversion failed.' );
+			}
+		};
+
+		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array( 'p' => 123 ) );
+
+		$this->assertNotEmpty( $result['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
+		$this->assertSame( array( 0 ), $result['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
+		$this->assertArrayNotHasKey( 'p', $result, 'A single-post alias must not override the fail-closed marker.' );
+	}
+
+	/**
+	 * @testdox A valid date Stringable is converted once before parsing.
+	 */
+	public function test_parse_date_for_wp_query_converts_stringable_once(): void {
+		$query_var = new class() {
+			/** @var int */
+			public $conversion_count = 0;
+
+			/**
+			 * Return a date only on the first conversion.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				++$this->conversion_count;
+
+				if ( 1 < $this->conversion_count ) {
+					throw new TypeError( 'String conversion repeated.' );
+				}
+
+				return '2024-07-04';
+			}
+		};
+		$expected  = $this->sut->parse_date_for_wp_query( '2024-07-04', 'post_date', array() );
+
+		$actual = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+
+		$this->assertSame( $expected, $actual, 'The Stringable date must retain the scalar date behavior.' );
+		$this->assertSame( 1, $query_var->conversion_count, 'A date Stringable must not be converted twice.' );
+	}
+
+	/**
 	 * @testdox Day-precision meta date queries should anchor on local midnight on sites using a manual UTC offset.
 	 */
 	public function test_day_precision_meta_boundaries_use_manual_utc_offset(): void {
