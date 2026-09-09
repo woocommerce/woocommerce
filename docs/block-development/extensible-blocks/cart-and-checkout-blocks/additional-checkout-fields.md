@@ -282,8 +282,6 @@ woocommerce_register_additional_checkout_field(
 
 A date field holds a calendar date with no time component, so only the `Y`, `M`, `W` and `D` parts of a duration are meaningful. A duration carrying a time component, such as `PT1H` or `P1DT12H`, is rejected at registration.
 
-You can combine weeks with other date units. For example, `P1W2D` means nine days and `P1M2W` means one month and fourteen days. On PHP 7, WooCommerce converts weeks to days before parsing the duration.
-
 ##### Pass the duration, don't resolve it yourself
 
 ```php
@@ -294,6 +292,8 @@ You can combine weeks with other date units. For example, `P1W2D` means nine day
 This ends up resolving to a date that may not always be up to date between registration, field rendering, and value submission. Instead, pass P1D, which will be evaluated at input time and submission time.
 
 Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would form an invalid range in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
+
+If mixed (absolute and durations) end up overlapping, WooCommerce will ignore them and the field will be boundless and will emit a log warning.
 
 The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
