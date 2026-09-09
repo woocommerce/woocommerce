@@ -220,6 +220,20 @@ class LookupDataStore {
 				break;
 		}
 
+		$this->announce_table_updated( $product_id, $action );
+	}
+
+	/**
+	 * Announce that the lookup table has been updated, so the data derived from it is invalidated.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int $product_id The product or variation the data was updated for, or 0 for the whole table.
+	 * @param int $action The update that was performed, one of the ACTION_ constants.
+	 *
+	 * @return void
+	 */
+	public function announce_table_updated( int $product_id, int $action ): void {
 		/**
 		 * Fires after the product attributes lookup table has been updated.
 		 *
@@ -227,8 +241,8 @@ class LookupDataStore {
 		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
 		 * in a scheduled action.
 		 *
-		 * It fires once per run_update_callback() call, whether or not any row actually changed, and also
-		 * after the whole table is regenerated or cleaned up.
+		 * It also fires after the whole table is regenerated or cleaned up, with a product id of 0. Listeners
+		 * must not assume a row changed: an update that turns out to be a no-op can still announce itself.
 		 *
 		 * @since 11.2.0
 		 *

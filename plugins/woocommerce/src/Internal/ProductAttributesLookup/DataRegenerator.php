@@ -286,8 +286,7 @@ class DataRegenerator {
 		$this->delete_all_attributes_lookup_data( false );
 		update_option( 'woocommerce_attribute_lookup_enabled', $enable_usage ? 'yes' : 'no' );
 
-		/** This action is documented in LookupDataStore::run_update_callback(). */
-		do_action( 'woocommerce_product_attributes_lookup_updated', 0, LookupDataStore::ACTION_INSERT ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$this->data_store->announce_table_updated( 0, LookupDataStore::ACTION_INSERT );
 	}
 
 	/**
@@ -301,9 +300,7 @@ class DataRegenerator {
 	 */
 	public function regenerate_for_product( int $product_id, bool $use_optimized_db_access ): void {
 		$this->data_store->create_data_for_product( $product_id, $use_optimized_db_access );
-
-		/** This action is documented in LookupDataStore::run_update_callback(). */
-		do_action( 'woocommerce_product_attributes_lookup_updated', $product_id, LookupDataStore::ACTION_INSERT ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$this->data_store->announce_table_updated( $product_id, LookupDataStore::ACTION_INSERT );
 	}
 
 	/**
