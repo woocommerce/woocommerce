@@ -41116,12 +41116,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:cast_numbers\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:create_interval_subtotals\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
