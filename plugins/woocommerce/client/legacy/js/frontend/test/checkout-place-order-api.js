@@ -16,6 +16,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	let $termsCheckbox;
 	let $termsRow;
 	let $updateOrderReviewNotices;
+	let $checkoutNotices;
 	let capturedApi;
 	let capturedAjaxRequests;
 	let jQueryMock;
@@ -91,6 +92,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			remove: jest.fn(),
 		};
 		$updateOrderReviewNotices = {
+			remove: jest.fn(),
+		};
+		$checkoutNotices = {
 			remove: jest.fn(),
 		};
 
@@ -314,6 +318,11 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'.woocommerce-NoticeGroup-updateOrderReview'
 			) {
 				return $updateOrderReviewNotices;
+			}
+			if (
+				selectorOrCallback === '.woocommerce-NoticeGroup-checkout'
+			) {
+				return $checkoutNotices;
 			}
 			if (
 				selectorOrCallback === 'form.checkout_coupon' ||
@@ -728,6 +737,39 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				'updated_checkout',
 				expect.anything()
 			);
+		} );
+
+		test( 'should clear a stale place-order notice when rendering a non-error one', () => {
+			// A failed place order leaves `.woocommerce-NoticeGroup-checkout` on the page.
+			// The next non-error notice supersedes it, but must leave every other notice.
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				has_errors: false,
+				messages:
+					'<div class="woocommerce-message">Coupon applied.</div>',
+			} );
+
+			expect( $checkoutNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $form.prepend ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Coupon applied.' )
+			);
+		} );
+
+		test( 'should ignore messages on a response that reports no notice', () => {
+			// A third-party callback can answer this endpoint before Core does. Trunk
+			// rendered nothing for a `success` result, so neither do we.
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				messages:
+					'<div class="woocommerce-message">Third-party notice.</div>',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $checkoutNotices.remove ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
 		test( 'should treat a response without the error flag as a failure', () => {

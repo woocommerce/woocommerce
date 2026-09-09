@@ -828,15 +828,27 @@ jQuery( function ( $ ) {
 							? data.has_errors
 							: !! data && 'failure' === data.result;
 
-					// Remove notices from all sources before rendering an error.
+					// Whether this response has a notice to render. `result` is the legacy
+					// signal for that and third-party callbacks still set it, so keep honoring
+					// it alongside the error flag.
+					var rendersNotices =
+						!! data &&
+						!! data.messages &&
+						( hasErrors || 'failure' === data.result );
+
 					if ( hasErrors ) {
+						// Remove notices from all sources before rendering an error.
 						$(
 							'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
 						).remove();
+					} else if ( rendersNotices ) {
+						// A non-error notice supersedes a failed place order, but leaves every
+						// other notice on the page alone.
+						$( '.woocommerce-NoticeGroup-checkout' ).remove();
 					}
 
 					// Add notices returned by this event.
-					if ( data && data.messages ) {
+					if ( rendersNotices ) {
 						$form.prepend(
 							'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
 								data.messages +
