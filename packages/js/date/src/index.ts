@@ -537,7 +537,6 @@ export function getCurrentPeriod(
 	const primaryStart = getStoreTimeZoneMoment().startOf( period );
 	const primaryEnd = getStoreTimeZoneMoment();
 
-	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
 	let secondaryStart;
 	let secondaryEnd;
 	let secondaryShift: SecondaryShift = 'year';
@@ -550,11 +549,7 @@ export function getCurrentPeriod(
 		}
 	} else {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
-		// Set the end time to 23:59:59.
-		secondaryEnd = secondaryStart
-			.clone()
-			.add( daysSoFar + 1, 'days' )
-			.subtract( 1, 'seconds' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' ).endOf( 'day' );
 	}
 	return anchorRangeToStoreTimeZone( {
 		primaryStart,

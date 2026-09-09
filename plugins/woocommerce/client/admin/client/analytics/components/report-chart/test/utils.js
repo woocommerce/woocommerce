@@ -613,6 +613,36 @@ describe( 'buildChartData across every date range shape', () => {
 		expect( problems ).toEqual( [] );
 	} );
 
+	test( 'pins a comparison value to a hardcoded calendar day', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		const range = builders.last_year( 'previous_period' );
+		const primary = pickerFor( range.primaryStart, range.primaryEnd );
+		const secondary = pickerFor(
+			range.secondaryStart,
+			range.secondaryEnd,
+			range.secondaryShift
+		);
+		const chartData = buildChartData(
+			{ data: { totals: {}, intervals: intervalsFor( primary ) } },
+			{ data: { totals: {}, intervals: intervalsFor( secondary ) } },
+			primary,
+			secondary,
+			'previous_period',
+			'orders_count',
+			'day',
+			'number'
+		);
+
+		expect( secondaryByDate( chartData, '2025-03-01' ) ).toEqual( {
+			labelDate: '2024-03-01 00:00:00',
+			value: 20240301,
+		} );
+		expect( secondaryByDate( chartData, '2025-12-31' ) ).toEqual( {
+			labelDate: '2024-12-31 00:00:00',
+			value: 20241231,
+		} );
+	} );
+
 	test( 'every custom range shows each comparison value under its own date', () => {
 		const problems = [];
 

@@ -1550,6 +1550,18 @@ describe( 'secondary range shift', () => {
 		).toBe( 'offset' );
 	} );
 
+	it( 'ends a year shifted current period on the same calendar day a year earlier', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-06-15T12:00:00' ) );
+		const { secondaryStart, secondaryEnd } = getCurrentPeriod(
+			'year',
+			'previous_year'
+		);
+		expect( secondaryStart.format( isoDateFormat ) ).toBe( '2024-01-01' );
+		expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+			'2024-06-15 23:59:59'
+		);
+	} );
+
 	it( 'is exposed on the secondary date picker options', () => {
 		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
 		expect(
