@@ -12,32 +12,43 @@ import * as navigation from '@woocommerce/navigation';
 import { PAGES_FILTER } from '../controller';
 import { _Layout as Layout } from '../index';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn().mockImplementation( ( callback ) => {
-		const selector = {
-			getActivePlugins: jest.fn().mockReturnValue( [] ),
-			isJetpackConnected: jest.fn().mockReturnValue( false ),
-			getInstalledPlugins: jest.fn().mockReturnValue( [] ),
-			isResolving: jest.fn().mockReturnValue( false ),
-			hasFinishedResolution: jest.fn().mockReturnValue( true ),
-			getCurrentUser: jest.fn().mockReturnValue( {
-				currentUserCan: jest.fn().mockReturnValue( true ),
-			} ),
-			getOption: jest.fn().mockReturnValue( 'wc-admin' ),
-			getNotices: jest.fn().mockReturnValue( [] ),
-			getNotes: jest.fn().mockReturnValue( [] ),
-			hasStartedResolution: jest.fn().mockReturnValue( true ),
-		};
-		return callback( () => selector );
-	} ),
-} ) );
+// Backs both useSelect's getCurrentUser (used around the app) and the plain
+// select().getCurrentUser() that controller.js's permission check reads
+// directly, so a single mock controls both consistently.
+const mockedGetCurrentUser = jest.fn().mockReturnValue( {
+	is_super_admin: true,
+} );
+
+jest.mock( '@wordpress/data', () => {
+	const actual = jest.requireActual( '@wordpress/data' );
+	return {
+		...actual,
+		select: jest.fn().mockImplementation( ( store ) => ( {
+			...actual.select( store ),
+			getCurrentUser: ( ...args ) => mockedGetCurrentUser( ...args ),
+		} ) ),
+		useSelect: jest.fn().mockImplementation( ( callback ) => {
+			const selector = {
+				getActivePlugins: jest.fn().mockReturnValue( [] ),
+				isJetpackConnected: jest.fn().mockReturnValue( false ),
+				getInstalledPlugins: jest.fn().mockReturnValue( [] ),
+				isResolving: jest.fn().mockReturnValue( false ),
+				hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				getCurrentUser: ( ...args ) => mockedGetCurrentUser( ...args ),
+				getOption: jest.fn().mockReturnValue( 'wc-admin' ),
+				getNotices: jest.fn().mockReturnValue( [] ),
+				getNotes: jest.fn().mockReturnValue( [] ),
+				hasStartedResolution: jest.fn().mockReturnValue( true ),
+			};
+			return callback( () => selector );
+		} ),
+	};
+} );
 
 jest.mock( '@woocommerce/data', () => {
 	const originalModule = jest.requireActual( '@woocommerce/data' );
 	return {
 		...originalModule,
-		useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
 		useUserPreferences: jest.fn().mockReturnValue( {} ),
 	};
 } );
@@ -81,6 +92,7 @@ describe( 'Layout', () => {
 		);
 		jest.useFakeTimers();
 		jest.clearAllMocks();
+		mockedGetCurrentUser.mockReturnValue( { is_super_admin: true } );
 	} );
 
 	afterEach( () => {
@@ -107,7 +119,8 @@ describe( 'Layout', () => {
 	} );
 
 	describe( 'NoMatch', () => {
-		const message = 'Sorry, you are not allowed to access this page.';
+		const message =
+			'We couldn’t find that page. Check the address for a typo, or return to WooCommerce Home.';
 
 		it( 'should render a loading spinner first and then the error message after the delay', () => {
 			mockPath( '/incorrect-path' );
@@ -121,7 +134,61 @@ describe( 'Layout', () => {
 			} );
 
 			expect( screen.queryByText( 'spinner' ) ).not.toBeInTheDocument();
+			// The page title (from the breadcrumb) and the card heading
+			// should agree - one for the header, one for the card content.
+			expect(
+				screen.getAllByRole( 'heading', { name: 'Page not found' } )
+			).toHaveLength( 2 );
 			expect( screen.getByText( message ) ).toBeInTheDocument();
+		} );
+
+		it( 'should show an access denied message when the path matches a real page the user cannot access', () => {
+			// /setup-wizard is a real, always-registered page requiring the
+			// manage_woocommerce capability - simulate a user without it.
+			mockedGetCurrentUser.mockReturnValue( {
+				is_super_admin: false,
+				capabilities: {},
+			} );
+			mockPath( '/setup-wizard' );
+			render( <Layout /> );
+
+			act( () => {
+				jest.runOnlyPendingTimers();
+			} );
+
+			// Both the page title and the card heading should say the same
+			// thing here too - this is exactly the case that used to be
+			// wrong, telling a user without access to check for a typo.
+			expect(
+				screen.getAllByRole( 'heading', { name: 'Access denied' } )
+			).toHaveLength( 2 );
+			expect(
+				screen.getByText(
+					'You do not have permission to view this page. Ask a site administrator for help.'
+				)
+			).toBeInTheDocument();
+			expect( screen.queryByText( message ) ).not.toBeInTheDocument();
+		} );
+
+		it( 'should still show a not found message for an unmatched path even when the user lacks other capabilities', () => {
+			mockedGetCurrentUser.mockReturnValue( {
+				is_super_admin: false,
+				capabilities: {},
+			} );
+			mockPath( '/this-path-matches-nothing' );
+			render( <Layout /> );
+
+			act( () => {
+				jest.runOnlyPendingTimers();
+			} );
+
+			expect(
+				screen.getAllByRole( 'heading', { name: 'Page not found' } )
+			).toHaveLength( 2 );
+			expect( screen.getByText( message ) ).toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'heading', { name: 'Access denied' } )
+			).not.toBeInTheDocument();
 		} );
 
 		it( 'should render the page added after the initial filter has been run, not show the error message', () => {

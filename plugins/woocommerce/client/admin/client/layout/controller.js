@@ -6,7 +6,9 @@ import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
+import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { matchPath } from 'react-router-dom';
 import {
 	getNewPath,
 	getPersistedQuery,
@@ -17,6 +19,7 @@ import {
 	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
+import { userStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -71,6 +74,61 @@ const LaunchStore = lazy( () =>
 const MobileAppLoginPage = lazy( () =>
 	import( /* webpackChunkName: "mobile-app-login" */ '../mobile-app-login' )
 );
+
+/**
+ * Whether the current user has the given capability. A plain, non-hook
+ * equivalent of useUser().currentUserCan(), safe to call from contexts like
+ * a breadcrumbs callback where hooks aren't available.
+ *
+ * @param {string} capability The capability to check.
+ * @return {boolean} True if the current user has the capability.
+ */
+function userCanAccessPage( capability ) {
+	if ( ! capability ) {
+		return true;
+	}
+
+	const user = select( userStore ).getCurrentUser();
+
+	if ( ! user ) {
+		return false;
+	}
+
+	if ( user.is_super_admin ) {
+		return true;
+	}
+
+	return Boolean( user.capabilities && user.capabilities[ capability ] );
+}
+
+/**
+ * Whether a path matches a real, registered page that the current user
+ * lacks the capability to view - as opposed to a path that matches nothing
+ * at all. Pages the user can't access are dropped from the route list
+ * before NoMatch ever renders, so the only way to tell the two situations
+ * apart is to check the full, unfiltered page list directly.
+ *
+ * @param {string} path  The current path.
+ * @param {Array}  pages The full list of registered pages, unfiltered by capability.
+ * @return {boolean} True if the path matches a page the user can't access.
+ */
+export function isPermissionDeniedPath( path, pages ) {
+	if ( ! path ) {
+		return false;
+	}
+
+	return pages.some( ( page ) => {
+		if ( ! page.path || page.path === '*' || ! page.capability ) {
+			return false;
+		}
+
+		if ( userCanAccessPage( page.capability ) ) {
+			return false;
+		}
+
+		return Boolean( matchPath( { path: page.path, end: true }, path ) );
+	} );
+}
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
@@ -292,9 +350,11 @@ export const getPages = ( reports = [] ) => {
 	filteredPages.push( {
 		container: NoMatch,
 		path: '*',
-		breadcrumbs: [
+		breadcrumbs: ( { match } ) => [
 			...initialBreadcrumbs,
-			__( 'Not allowed', 'woocommerce' ),
+			isPermissionDeniedPath( match?.url, filteredPages )
+				? __( 'Access denied', 'woocommerce' )
+				: __( 'Page not found', 'woocommerce' ),
 		],
 		wpOpenMenu: 'toplevel_page_woocommerce',
 	} );
