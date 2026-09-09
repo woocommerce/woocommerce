@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce variation slug collision queries during batch creation.
