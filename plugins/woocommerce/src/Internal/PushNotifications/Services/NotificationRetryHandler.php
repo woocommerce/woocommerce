@@ -72,6 +72,12 @@ class NotificationRetryHandler {
 	 * If the maximum number of retries has been reached, logs a permanent
 	 * failure instead of scheduling another attempt.
 	 *
+	 * Every path that ends without a scheduled retry calls
+	 * {@see Notification::reset_processing_meta()}, including a scheduling call
+	 * that returns 0. Action Scheduler returns 0 when it is not initialised or
+	 * when the store rejects the action, and nothing else would then clear the
+	 * claimed marker that {@see NotificationProcessor::process()} checks.
+	 *
 	 * @param Notification $notification    The notification that failed.
 	 * @param int|null     $retry_after     Optional Retry-After value from WPCOM (seconds).
 	 * @param int          $current_attempt The attempt number that just failed (0-based).
@@ -113,7 +119,7 @@ class NotificationRetryHandler {
 			return;
 		}
 
-		as_schedule_single_action(
+		$action_id = as_schedule_single_action(
 			time() + $delay,
 			self::RETRY_HOOK,
 			array(
@@ -124,6 +130,19 @@ class NotificationRetryHandler {
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
 			true
 		);
+
+		if ( ! $action_id ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Push notification retry could not be scheduled (type=%s, resource_id=%d, attempt=%d).',
+					$notification->get_type(),
+					$notification->get_resource_id(),
+					$next_attempt
+				),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			$notification->reset_processing_meta();
+		}
 	}
 
 	/**
