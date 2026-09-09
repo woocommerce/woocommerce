@@ -86,6 +86,14 @@ describe( 'MySubscriptionsAccount', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'puts the dismiss button first in the tab order', () => {
+		const { container } = render( <MySubscriptionsAccount /> );
+
+		const focusables = container.querySelectorAll( 'button, a' );
+
+		expect( focusables[ 0 ] ).toHaveAccessibleName( 'Dismiss this notice' );
+	} );
+
 	it( 'opens the disconnect confirmation from the inline link', () => {
 		render( <MySubscriptionsAccount /> );
 

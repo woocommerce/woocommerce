@@ -51,6 +51,8 @@
 		position: absolute;
 		inset-inline-end: $grid-unit-10;
 		top: $grid-unit-10;
+		// Rendered before the heading for tab order, so lift it above the heading's positioned box.
+		z-index: 1;
 	}
 }
 

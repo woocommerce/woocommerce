@@ -75,6 +75,13 @@ export default function MySubscriptionsAccount( {
 	return (
 		<>
 			<section className="woocommerce-marketplace__my-subscriptions__account">
+				{ /* Rendered first so it is first in the tab order, matching where it sits visually. */ }
+				<Button
+					className="woocommerce-marketplace__my-subscriptions__account-dismiss"
+					icon={ closeSmall }
+					label={ __( 'Dismiss this notice', 'woocommerce' ) }
+					onClick={ handleDismiss }
+				/>
 				<h2 className="woocommerce-marketplace__my-subscriptions__account-header">
 					<Icon icon={ link } size={ 24 } />
 					{ sprintf(
@@ -115,12 +122,6 @@ export default function MySubscriptionsAccount( {
 						{ __( 'View account', 'woocommerce' ) }
 					</Button>
 				</div>
-				<Button
-					className="woocommerce-marketplace__my-subscriptions__account-dismiss"
-					icon={ closeSmall }
-					label={ __( 'Dismiss this notice', 'woocommerce' ) }
-					onClick={ handleDismiss }
-				/>
 			</section>
 			{ isDisconnectModalOpen && (
 				<HeaderAccountModal
