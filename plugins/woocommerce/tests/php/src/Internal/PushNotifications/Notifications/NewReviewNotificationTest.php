@@ -13,6 +13,15 @@ use WC_Unit_Test_Case;
  * Tests for the NewReviewNotification class.
  */
 class NewReviewNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return a payload with all required keys for an existing review.
 	 */
@@ -305,13 +314,12 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$product      = WC_Helper_Product::create_simple_product();
 		$comment_id   = WC_Helper_Product::create_product_review( $product->get_id() );
 		$notification = new NewReviewNotification( $comment_id );
-		$triggered_at = time() - 300;
 
-		update_comment_meta( $comment_id, NotificationProcessor::TRIGGERED_META_KEY, (string) $triggered_at );
+		update_comment_meta( $comment_id, NotificationProcessor::TRIGGERED_META_KEY, (string) self::TRIGGERED_AT );
 
 		$payload = $notification->to_payload();
 
-		$this->assertSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
 	}
 
 	/**

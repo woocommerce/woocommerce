@@ -14,6 +14,15 @@ use WC_Unit_Test_Case;
  * Tests for the StockNotification class.
  */
 class StockNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return store_stock as the notification type.
 	 */
@@ -434,17 +443,16 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
 		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_LOW_STOCK );
-		$triggered_at = time() - 300;
 
 		$product->update_meta_data(
 			NotificationProcessor::TRIGGERED_META_KEY . '_' . StockNotification::EVENT_LOW_STOCK,
-			(string) $triggered_at
+			(string) self::TRIGGERED_AT
 		);
 		$product->save_meta_data();
 
 		$payload = $notification->to_payload();
 
-		$this->assertSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
 	}
 
 	/**
@@ -457,17 +465,16 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 	public function test_to_payload_timestamp_is_scoped_per_event_type(): void {
 		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_OUT_OF_STOCK );
-		$triggered_at = time() - 300;
 
 		$product->update_meta_data(
 			NotificationProcessor::TRIGGERED_META_KEY . '_' . StockNotification::EVENT_LOW_STOCK,
-			(string) $triggered_at
+			(string) self::TRIGGERED_AT
 		);
 		$product->save_meta_data();
 
 		$payload = $notification->to_payload();
 
-		$this->assertNotSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+		$this->assertNotSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
 		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
 	}
 
