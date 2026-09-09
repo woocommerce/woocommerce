@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use WC_Settings_Advanced;
 use WC_Settings_Products;
+use WP_REST_Request;
 
 /**
  * SettingsControllerTests data tests.
@@ -144,5 +145,23 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 10, has_filter( $hook, 'wc_sanitize_endpoint_slug' ) );
 		$this->assertSame( 'restock-alerts', apply_filters( $hook, 'Restock Alerts' ) );
 		$this->assertSame( 'stock-notifications', apply_filters( $hook, 'stock-notifications' ) );
+	}
+
+	/**
+	 * @testdox The My Account endpoint setting is sanitized the same way when saved through the REST settings API.
+	 */
+	public function test_my_account_endpoint_setting_is_sanitized_via_rest() {
+		new StockNotificationsSettings();
+
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/settings/advanced/' . MyAccountEndpoint::ENDPOINT_OPTION );
+		$request->set_body_params( array( 'value' => 'Restock Alerts' ) );
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Saving the endpoint setting via REST should succeed.' );
+		$this->assertSame( 'restock-alerts', get_option( MyAccountEndpoint::ENDPOINT_OPTION ), 'The value saved via the REST settings API should be sanitized as an endpoint slug, matching the classic admin settings save path.' );
 	}
 }
