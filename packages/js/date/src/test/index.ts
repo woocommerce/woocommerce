@@ -1551,6 +1551,14 @@ describe( 'secondary range shift', () => {
 	} );
 
 	it( 'is exposed on the secondary date picker options', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		expect(
+			getCurrentDates( {
+				period: 'last_year',
+				compare: 'previous_period',
+			} ).secondary.shift
+		).toBe( 'year' );
+
 		const custom = {
 			period: 'custom',
 			after: '2024-12-01',
