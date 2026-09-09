@@ -53,6 +53,35 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the taxable address unchanged when tax is not based on shipping.
+	 *
+	 * @dataProvider provider_tax_bases_other_than_shipping
+	 *
+	 * @param string $tax_based_on Tax location setting.
+	 */
+	public function test_leaves_address_unchanged_when_tax_is_not_based_on_shipping( string $tax_based_on ): void {
+		$this->add_product_to_cart( true );
+		update_option( 'woocommerce_tax_based_on', $tax_based_on );
+		$taxable_address = array( 'DE', 'BE', '10115', 'Berlin' );
+
+		$result = $this->sut->use_billing_address_for_cart_without_shipping( $taxable_address, $this->customer );
+
+		$this->assertSame( $taxable_address, $result, 'The configured taxable address should remain unchanged.' );
+	}
+
+	/**
+	 * Provides tax location settings other than shipping.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_tax_bases_other_than_shipping(): array {
+		return array(
+			'base address'    => array( TaxBasedOn::BASE ),
+			'billing address' => array( TaxBasedOn::BILLING ),
+		);
+	}
+
+	/**
 	 * @testdox Leaves the taxable address unchanged when the cart is empty.
 	 */
 	public function test_leaves_address_unchanged_for_empty_cart(): void {

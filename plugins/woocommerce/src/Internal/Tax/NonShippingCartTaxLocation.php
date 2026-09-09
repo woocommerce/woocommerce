@@ -4,8 +4,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Tax;
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 /**
- * Selects the billing address as the tax location for carts whose products do not need shipping.
+ * Selects the billing address for shipping-based tax when cart products do not need shipping.
  *
  * @since 11.2.0
  */
@@ -22,7 +24,7 @@ class NonShippingCartTaxLocation {
 	}
 
 	/**
-	 * Use the customer's billing address when no product in a non-empty cart needs shipping.
+	 * Use the customer's billing address for shipping-based tax when no product in a non-empty cart needs shipping.
 	 *
 	 * @since 11.2.0
 	 *
@@ -31,6 +33,10 @@ class NonShippingCartTaxLocation {
 	 * @return mixed The taxable address.
 	 */
 	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer ) {
+		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
+			return $taxable_address;
+		}
+
 		$cart = WC()->cart;
 		if ( ! $cart instanceof \WC_Cart || $cart->is_empty() || ! $customer instanceof \WC_Customer || $cart->get_customer() !== $customer ) {
 			return $taxable_address;
