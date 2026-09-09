@@ -99,7 +99,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @testdox set_data() rejects an invalid array @type.
 	 *
 	 * @testWith [[]]
-	 *           [["Product", 123]]
+	 *           [["Product", ["Review"]]]
 	 *           [["Product", "Invalid-Type"]]
 	 *           [["Product", "ABCDEFGHIJKLMNOPQRSTU"]]
 	 *
