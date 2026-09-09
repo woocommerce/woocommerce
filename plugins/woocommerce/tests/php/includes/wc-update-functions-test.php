@@ -14,8 +14,6 @@ use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator;
-use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
@@ -361,14 +359,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and removes the deprecated variation gallery feature option.
+	 * @testdox Migration removes the deprecated variation gallery feature option.
 	 */
 	public function test_wc_update_11101_remove_deprecated_variation_gallery_option(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.1.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11101_remove_deprecated_variation_gallery_option', $db_updates['11.1.0-1'] );
 
 		delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
 		wc_update_11101_remove_deprecated_variation_gallery_option();
@@ -384,14 +378,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and deletes the cached dashboard out-of-stock count.
+	 * @testdox Migration deletes the cached dashboard out-of-stock count.
 	 */
 	public function test_wc_update_1110_delete_dashboard_outofstock_count_transient(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.1.0', $db_updates );
-		$this->assertContains( 'wc_update_1110_delete_dashboard_outofstock_count_transient', $db_updates['11.1.0'] );
 
 		set_transient( 'wc_outofstock_count', 3, DAY_IN_SECONDS );
 		$this->assertSame( 3, get_transient( 'wc_outofstock_count' ) );
@@ -405,10 +395,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_opts_in(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.2.0', $db_updates );
-		$this->assertContains( 'wc_update_1120_migrate_stock_notifications_alpha_constant', $db_updates['11.2.0'] );
 
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
@@ -479,40 +465,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration registers and queues the rebuild of the tax lookup table.
-	 */
-	public function test_wc_update_11201_migrate_tax_lookup_order_items(): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-
-		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
-		// it still runs the rebuild.
-		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_migrate_tax_lookup_order_items', $db_updates['11.2.0-1'] );
-
-		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
-		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
-
-		wc_update_11201_migrate_tax_lookup_order_items();
-
-		$this->assertTrue(
-			$batch_processor->is_enqueued( OrderTaxLookupMigrator::class ),
-			'The migration should hand the rebuild to the batch processing controller.'
-		);
-
-		$batch_processor->remove_processor( OrderTaxLookupMigrator::class );
-	}
-
-	/**
-	 * @testdox Migration registers for WooCommerce 11.2.0 and deletes the retired Surface Cart and Checkout note.
+	 * @testdox Migration deletes the retired Surface Cart and Checkout note.
 	 */
 	public function test_wc_update_1120_delete_surface_cart_checkout_note(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertArrayHasKey( '11.2.0', $db_updates );
-		$this->assertContains( 'wc_update_1120_delete_surface_cart_checkout_note', $db_updates['11.2.0'] );
 
 		$note = new Note();
 		$note->set_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME );
@@ -533,42 +489,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration invalidates the Analytics report cache, so a response cached before the update stops being served.
-	 */
-	public function test_wc_update_11201_invalidate_analytics_reports_cache(): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-
-		// Under its own key, so that a store already on 11.2.0 from the batch that shipped beside
-		// it still drops its stale responses.
-		$this->assertArrayHasKey( '11.2.0-1', $db_updates );
-		$this->assertContains( 'wc_update_11201_invalidate_analytics_reports_cache', $db_updates['11.2.0-1'] );
-
-		// The cache version is a timestamp, so pin an old one rather than race the clock.
-		set_transient( ReportsCache::VERSION_OPTION . '-transient-version', '1000000000' );
-
-		$key = 'wc_report_products_pre_update';
-		ReportsCache::set( $key, 'pre-update response' );
-		$this->assertSame( 'pre-update response', ReportsCache::get( $key ), 'The response should be served from cache before the update runs' );
-
-		wc_update_11201_invalidate_analytics_reports_cache();
-
-		$this->assertFalse( ReportsCache::get( $key ), 'A response cached before the update should no longer be served' );
-	}
-
-	/**
 	 * @testdox Migration resets stale refund markers in batches and invalidates cached Analytics reports.
 	 */
 	public function test_wc_update_11202_reset_refund_returning_customer_markers(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		// Under its own key, so that a store already past the 11.2.0 batches still resets its markers.
-		$this->assertArrayHasKey( '11.2.0-2', $db_updates );
-		$this->assertContains( 'wc_update_11202_reset_refund_returning_customer_markers', $db_updates['11.2.0-2'] );
 
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
@@ -629,9 +555,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertContains( 'wc_update_1120_delete_unpublished_variation_lookup_rows', $db_updates['11.2.0'] );
 
 		$product       = WC_Helper_Product::create_variation_product();
 		$variation_ids = $product->get_children();

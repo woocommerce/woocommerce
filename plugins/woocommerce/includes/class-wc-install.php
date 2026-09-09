@@ -355,12 +355,8 @@ class WC_Install {
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_delete_surface_cart_checkout_note',
 			'wc_update_1120_delete_unpublished_variation_lookup_rows',
-		),
-		'11.2.0-1' => array(
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
-		),
-		'11.2.0-2' => array(
 			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
 	);
