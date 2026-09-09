@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the DataViews stylesheet on classic settings tabs so the Settings > Emails listing renders with its table styles again.
