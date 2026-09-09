@@ -62527,12 +62527,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:update_stock_status_for\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$code of class WC_Data_Exception constructor expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
