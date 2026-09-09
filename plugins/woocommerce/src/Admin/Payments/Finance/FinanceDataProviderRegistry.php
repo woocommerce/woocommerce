@@ -64,7 +64,7 @@ final class FinanceDataProviderRegistry {
 
 		// TODO: Validate that the payment gateway is permitted to provide finance data.
 
-		if ( isset( $this->providers[ $gateway_id ] ) ) {
+		if ( $this->is_registered( $gateway_id ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -79,6 +79,18 @@ final class FinanceDataProviderRegistry {
 
 		$this->providers[ $gateway_id ] = $provider;
 		return true;
+	}
+
+	/**
+	 * Whether a finance data provider is registered for a payment gateway.
+	 *
+	 * @param string $gateway_id The payment gateway id.
+	 * @return bool
+	 *
+	 * @since 11.2.0
+	 */
+	public function is_registered( string $gateway_id ): bool {
+		return isset( $this->providers[ $gateway_id ] );
 	}
 
 	/**
