@@ -8,11 +8,14 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 
 /**
  * Class StockNotificationsDataStoreTests.
  */
 class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The data store instance.
@@ -26,6 +29,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->data_store = wc_get_container()->get( StockNotificationsDataStore::class );
 	}
 
@@ -37,6 +41,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
