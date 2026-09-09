@@ -14,14 +14,49 @@ use WC_Settings_Products;
 class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 
 	/**
+	 * The controller whose hooks the tests exercise.
+	 *
+	 * @var StockNotificationsSettings
+	 */
+	private $controller;
+
+	/**
+	 * Set up before each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		// Only AdminManager resolves the controller, and only in admin context. Built directly
+		// rather than through the container, whose cached instance loses its hooks after the first test.
+		$this->controller = new StockNotificationsSettings();
+	}
+
+	/**
+	 * @testdox The Customer stock notifications section is added to the Products tab right after Inventory.
+	 */
+	public function test_customer_stock_notifications_section_is_added_after_inventory() {
+		$sut = new WC_Settings_Products();
+
+		// Other features hook sections in too, so assert the position rather than the full list.
+		$section_ids = array_keys( $sut->get_sections() );
+		$inventory   = array_search( 'inventory', $section_ids, true );
+
+		$this->assertNotFalse( $inventory );
+		$this->assertSame( 'customer_stock_notifications', $section_ids[ $inventory + 1 ] );
+	}
+
+	/**
+	 * @testdox The Customer stock notifications section is appended when there is no Inventory section to follow.
+	 */
+	public function test_customer_stock_notifications_section_is_appended_without_inventory() {
+		$sections = $this->controller->add_customer_stock_notifications_section( array( '' => 'General' ) );
+
+		$this->assertSame( array( '', 'customer_stock_notifications' ), array_keys( $sections ) );
+	}
+
+	/**
 	 * @testdox get_settings('customer_stock_notifications') should return all the settings for the customer stock notifications section.
 	 */
 	public function test_get_customer_stock_notifications_settings_returns_all_settings() {
-		// Get customer stock notification settings.
-		// This is required because this class is loaded only in admin context,
-		// and this test doesn't run with an admin user.
-		wc_get_container()->get( StockNotificationsSettings::class );
-
 		$sut = new WC_Settings_Products();
 
 		$settings              = $sut->get_settings_for_section( 'customer_stock_notifications' );
@@ -43,10 +78,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	 * @testdox The My Account endpoint setting is added to the Advanced tab, inside the account endpoints group, right after Downloads.
 	 */
 	public function test_my_account_endpoint_setting_is_added_to_the_advanced_tab() {
-		// Instantiated directly rather than through the container: the container caches the
-		// instance from the previous test, whose hooks the test case has since torn down.
-		new StockNotificationsSettings();
-
 		$sut = new WC_Settings_Advanced();
 
 		$settings = $sut->get_settings_for_section( '' );
@@ -70,5 +101,16 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_myaccount_downloads_endpoint', $ids[ $setting_index - 1 ], 'The endpoint setting should sit right after Downloads.' );
 		$this->assertSame( 'text', $settings[ $setting_index ]['type'] );
 		$this->assertSame( MyAccountEndpoint::ENDPOINT, $settings[ $setting_index ]['default'] );
+	}
+
+	/**
+	 * @testdox The My Account endpoint setting is sanitized as an endpoint slug on save.
+	 */
+	public function test_my_account_endpoint_setting_is_sanitized_on_save() {
+		$hook = 'woocommerce_admin_settings_sanitize_option_' . MyAccountEndpoint::ENDPOINT_OPTION;
+
+		$this->assertSame( 10, has_filter( $hook, 'wc_sanitize_endpoint_slug' ) );
+		$this->assertSame( 'restock-alerts', apply_filters( $hook, 'Restock Alerts' ) );
+		$this->assertSame( 'stock-notifications', apply_filters( $hook, 'stock-notifications' ) );
 	}
 }
