@@ -670,10 +670,44 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			);
 		}
 
-		wc_update_11203_normalize_stock_notification_emails();
+		$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A table smaller than one batch should complete in a single run' );
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared on completion' );
 
 		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$this->assertSame( array( 'legacy@example.com', 'padded@example.com', 'canonical@example.com' ), $emails );
+	}
+
+	/**
+	 * @testdox Migration resumes from the persisted cursor and leaves rows before it untouched.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_resumes_from_cursor(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		$ids   = array();
+		foreach ( array( 'Before@Example.com', 'After@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+			$ids[] = $wpdb->insert_id;
+		}
+
+		update_option( 'woocommerce_update_11203_last_stock_notification_id', $ids[0], false );
+
+		wc_update_11203_normalize_stock_notification_emails();
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'Before@Example.com', 'after@example.com' ), $emails );
 	}
 }
