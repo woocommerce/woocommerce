@@ -23,6 +23,13 @@ defined( 'ABSPATH' ) || exit;
 final class Payout {
 
 	/**
+	 * Payment gateway id.
+	 *
+	 * @var string
+	 */
+	private string $gateway_id;
+
+	/**
 	 * Provider-issued payout identifier.
 	 *
 	 * @var string
@@ -81,6 +88,7 @@ final class Payout {
 	/**
 	 * Constructor.
 	 *
+	 * @param string                  $gateway_id      Payment gateway id.
 	 * @param string                  $id              Provider-issued payout identifier, stable across requests.
 	 * @param string                  $currency        Three-letter ISO 4217 currency code. Case-insensitive.
 	 * @param string                  $amount          The payout amount as a decimal string in major currency units.
@@ -92,7 +100,12 @@ final class Payout {
 	 *
 	 * @since 11.2.0
 	 */
-	public function __construct( string $id, string $currency, string $amount, string $status, \DateTimeInterface $date_initiated, ?\DateTimeInterface $date_expected = null, ?string $provider_status = null ) {
+	public function __construct( string $gateway_id, string $id, string $currency, string $amount, string $status, \DateTimeInterface $date_initiated, ?\DateTimeInterface $date_expected = null, ?string $provider_status = null ) {
+		$gateway_id = trim( $gateway_id );
+		if ( '' === $gateway_id ) {
+			throw new \InvalidArgumentException( 'The payment gateway id must not be empty.' );
+		}
+
 		$id = trim( $id );
 		if ( '' === $id ) {
 			throw new \InvalidArgumentException( 'The payout id must not be empty.' );
@@ -102,6 +115,7 @@ final class Payout {
 			throw new \InvalidArgumentException( 'The payout status must be one of the PayoutStatus constants.' );
 		}
 
+		$this->gateway_id     = $gateway_id;
 		$this->id             = $id;
 		$this->currency       = FinanceDataValidator::normalize_currency( $currency );
 		$this->amount         = FinanceDataValidator::validate_amount( $amount );
@@ -148,6 +162,17 @@ final class Payout {
 	public function set_provider_status( ?string $provider_status ): self {
 		$this->provider_status = self::normalize_optional_string( $provider_status );
 		return $this;
+	}
+
+	/**
+	 * Get the payment gateway id.
+	 *
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_gateway_id(): string {
+		return $this->gateway_id;
 	}
 
 	/**

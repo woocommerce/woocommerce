@@ -65,6 +65,7 @@ class FinanceDataSerializer {
 		}
 
 		return array(
+			'provider_id'      => $balance->get_gateway_id(),
 			'currency'         => $balance->get_currency(),
 			'amount'           => $balance->get_amount(),
 			'available_amount' => $balance->get_available_amount(),
@@ -84,6 +85,7 @@ class FinanceDataSerializer {
 		$date_expected = $payout->get_date_expected();
 
 		return array(
+			'provider_id'     => $payout->get_gateway_id(),
 			'id'              => $payout->get_id(),
 			'currency'        => $payout->get_currency(),
 			'amount'          => $payout->get_amount(),

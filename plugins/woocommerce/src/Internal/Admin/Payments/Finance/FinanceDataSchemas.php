@@ -66,26 +66,26 @@ class FinanceDataSchemas {
 						'context'     => array( 'view', 'edit' ),
 						'readonly'    => true,
 						'properties'  => array(
-							'gateway_id' => array(
+							'provider_id' => array(
 								'type'        => 'string',
 								'description' => esc_html__( 'The payment gateway id.', 'woocommerce' ),
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'title'      => array(
+							'title'       => array(
 								'type'        => 'string',
 								'description' => esc_html__( 'The payment gateway title.', 'woocommerce' ),
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'icon_url'   => array(
+							'icon_url'    => array(
 								'type'        => array( 'string', 'null' ),
 								'format'      => 'uri',
 								'description' => esc_html__( 'The URL of the payment gateway icon.', 'woocommerce' ),
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'data_types' => array(
+							'data_types'  => array(
 								'type'        => 'array',
 								'description' => esc_html__( 'The finance data types the gateway supports and the data-model version of each.', 'woocommerce' ),
 								'context'     => array( 'view', 'edit' ),
@@ -201,6 +201,12 @@ class FinanceDataSchemas {
 			'readonly'             => true,
 			'additionalProperties' => false,
 			'properties'           => array(
+				'provider_id'      => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The payment gateway id.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'currency'         => $this->get_currency_schema(),
 				'amount'           => array(
 					'type'        => 'string',
@@ -252,6 +258,12 @@ class FinanceDataSchemas {
 			'readonly'             => true,
 			'additionalProperties' => false,
 			'properties'           => array(
+				'provider_id'      => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The payment gateway id.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'id'              => array(
 					'type'        => 'string',
 					'description' => esc_html__( 'The provider-issued payout identifier.', 'woocommerce' ),

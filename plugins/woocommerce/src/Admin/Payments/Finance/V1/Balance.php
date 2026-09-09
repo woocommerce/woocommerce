@@ -22,6 +22,13 @@ defined( 'ABSPATH' ) || exit;
 final class Balance {
 
 	/**
+	 * Payment gateway id.
+	 *
+	 * @var string
+	 */
+	private string $gateway_id;
+
+	/**
 	 * Three-letter ISO 4217 currency code, uppercase.
 	 *
 	 * @var string
@@ -52,15 +59,17 @@ final class Balance {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $currency Three-letter ISO 4217 currency code. Case-insensitive.
-	 * @param string $amount   The balance as a decimal string in major currency units, for example "1234.56".
+	 * @param string $gateway_id Payment gateway id.
+	 * @param string $currency   Three-letter ISO 4217 currency code. Case-insensitive.
+	 * @param string $amount     The balance as a decimal string in major currency units, for example "1234.56".
 	 * @throws \InvalidArgumentException When the currency or amount is not valid.
 	 *
 	 * @since 11.2.0
 	 */
-	public function __construct( string $currency, string $amount ) {
-		$this->currency = FinanceDataValidator::normalize_currency( $currency );
-		$this->amount   = FinanceDataValidator::validate_amount( $amount );
+	public function __construct( string $gateway_id, string $currency, string $amount ) {
+		$this->gateway_id = $gateway_id;
+		$this->currency   = FinanceDataValidator::normalize_currency( $currency );
+		$this->amount     = FinanceDataValidator::validate_amount( $amount );
 	}
 
 	/**
@@ -88,6 +97,17 @@ final class Balance {
 	public function set_payout_link( ?Link $link ): self {
 		$this->payout_link = $link;
 		return $this;
+	}
+
+	/**
+	 * Get the payment gateway id.
+	 *
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_gateway_id(): string {
+		return $this->gateway_id;
 	}
 
 	/**
