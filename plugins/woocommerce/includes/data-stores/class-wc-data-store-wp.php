@@ -355,11 +355,22 @@ class WC_Data_Store_WP {
 		$raw_start = '';
 		$raw_end   = '';
 
-		// Reaches preg_match() below, which raises a TypeError that escapes the catch. Treated as
-		// an unparseable date, like other malformed values. Note this is fail-open for meta-backed
-		// keys, whose clause compares as a string: callers needing to fail closed must check first.
+		// Treat values that cannot be converted to a string as unparseable dates. Callers guard
+		// non-stringable values before invoking this public, overridable method. A Stringable can
+		// still throw during conversion, so normalize it once before parsing and fail closed if it
+		// does; dropping a requested date constraint could otherwise widen the query.
 		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
 			$query_var = '';
+		} elseif ( is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
+			try {
+				$query_var = (string) $query_var;
+			} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+				$wp_query_args['post__in'] = array( 0 );
+				unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+
+				return $wp_query_args;
+			}
 		}
 
 		try {

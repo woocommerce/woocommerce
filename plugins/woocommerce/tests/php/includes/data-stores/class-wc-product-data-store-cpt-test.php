@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -766,5 +767,48 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array(), $result, 'A malformed date query must not be reopened by a filter.' );
+	}
+
+	/**
+	 * @testdox A throwing product date Stringable stays closed when a filter replaces the query args.
+	 */
+	public function test_throwing_stringable_product_date_stays_closed_after_filter_rebuild(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$date_value         = new class() {
+			/**
+			 * Simulate a failed string conversion.
+			 */
+			public function __toString(): string {
+				throw new TypeError( 'String conversion failed.' );
+			}
+		};
+		$replace_query_args = static function () {
+			return array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			);
+		};
+
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+
+		try {
+			$sut    = new WC_Product_Data_Store_CPT();
+			$result = $sut->query(
+				array(
+					'date_on_sale_from' => $date_value,
+					'return'            => 'ids',
+					'limit'             => -1,
+					'paginate'          => false,
+					'type'              => ProductType::SIMPLE,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'A failed date conversion must not be reopened by a filter.' );
 	}
 }

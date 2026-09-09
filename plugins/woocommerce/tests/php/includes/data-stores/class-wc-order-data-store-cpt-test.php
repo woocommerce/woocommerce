@@ -1807,6 +1807,43 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throwing order date Stringable stays closed when a filter replaces the query args.
+	 */
+	public function test_throwing_stringable_order_date_stays_closed_after_filter_rebuild(): void {
+		OrderHelper::create_order();
+
+		$date_value         = self::create_throwing_stringable();
+		$replace_query_args = static function () {
+			return array(
+				'post_type'      => 'shop_order',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			);
+		};
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
+
+		try {
+			$sut    = new WC_Order_Data_Store_CPT();
+			$result = $sut->query(
+				array(
+					'date_paid' => $date_value,
+					'return'    => 'ids',
+					'limit'     => -1,
+					'paginate'  => false,
+					'status'    => 'any',
+					'type'      => 'shop_order',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
+		}
+
+		$this->assertSame( array(), $result, 'A failed date conversion must not be reopened by a filter.' );
+	}
+
+	/**
 	 * @testdox An unusable customer fails the query closed instead of fatalling in WP core.
 	 */
 	public function test_unusable_customer_matches_no_orders(): void {
@@ -1913,6 +1950,215 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( $order->get_id(), $result, 'A stringable status must keep filtering as its string value.' );
+	}
+
+	/**
+	 * @testdox A status Stringable whose conversion throws fails the query closed.
+	 */
+	public function test_throwing_stringable_status_fails_closed(): void {
+		$status   = self::create_throwing_stringable();
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		$sut      = new WC_Order_Data_Store_CPT();
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		try {
+			$result = $sut->query(
+				array(
+					'status'   => $status,
+					'return'   => 'ids',
+					'limit'    => -1,
+					'paginate' => false,
+					'type'     => 'shop_order',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		}
+
+		$this->assertSame( array(), $result, 'A failed status conversion must return no orders.' );
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
+	}
+
+	/**
+	 * @testdox A status list keeps a valid sibling when another Stringable conversion throws.
+	 */
+	public function test_status_list_keeps_valid_sibling_of_throwing_stringable(): void {
+		$completed = OrderHelper::create_order();
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
+
+		$pending = OrderHelper::create_order();
+		$pending->set_status( OrderStatus::PENDING );
+		$pending->save();
+
+		$status = self::create_throwing_stringable();
+		$sut    = new WC_Order_Data_Store_CPT();
+
+		$result = $sut->query(
+			array(
+				'status'   => array( OrderStatus::COMPLETED, $status ),
+				'return'   => 'ids',
+				'limit'    => -1,
+				'paginate' => false,
+				'type'     => 'shop_order',
+			)
+		);
+
+		$this->assertContains( $completed->get_id(), $result, 'The valid status must remain active.' );
+		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still narrow the query.' );
+	}
+
+	/**
+	 * @testdox A throwing status Stringable with no narrowing sibling fails closed.
+	 */
+	public function test_throwing_stringable_status_with_inert_sibling_fails_closed(): void {
+		$status   = self::create_throwing_stringable();
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+		$sut      = new WC_Order_Data_Store_CPT();
+
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+
+		try {
+			$result = $sut->query(
+				array(
+					'status'   => array( $status, 'bogus-not-a-status' ),
+					'return'   => 'ids',
+					'limit'    => -1,
+					'paginate' => false,
+					'type'     => 'shop_order',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
+		}
+
+		$this->assertSame( array(), $result, 'A failed status conversion without a narrowing sibling must return no orders.' );
+		$this->assertNotEmpty( $captured['errors'] ?? array(), 'A non-narrowing survivor must not reopen the failed query.' );
+		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
+	}
+
+	/**
+	 * @testdox Status normalization does not swallow errors from the public status filter.
+	 */
+	public function test_status_filter_error_still_propagates(): void {
+		$throw_error = static function () {
+			throw new Error( 'Status filter failed.' );
+		};
+		$sut         = new WC_Order_Data_Store_CPT();
+
+		add_filter( 'wc_order_statuses', $throw_error, 99 );
+		$this->expectException( Error::class );
+		$this->expectExceptionMessage( 'Status filter failed.' );
+
+		try {
+			$sut->query(
+				array(
+					'status'   => OrderStatus::COMPLETED,
+					'return'   => 'ids',
+					'limit'    => -1,
+					'paginate' => false,
+					'type'     => 'shop_order',
+				)
+			);
+		} finally {
+			remove_filter( 'wc_order_statuses', $throw_error, 99 );
+		}
+	}
+
+	/**
+	 * Customer nesting shapes for throwing Stringable coverage.
+	 *
+	 * @return array<string, array{0: bool}>
+	 */
+	public function provider_customer_stringable_shapes(): array {
+		return array(
+			'scalar' => array( false ),
+			'nested' => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Throwing customer Stringables fail closed at every supported nesting level.
+	 *
+	 * @dataProvider provider_customer_stringable_shapes
+	 *
+	 * @param bool $nested Whether to nest the Stringable in a customer group.
+	 */
+	public function test_throwing_stringable_customer_values_fail_closed( bool $nested ): void {
+		$order = OrderHelper::create_order();
+		$order->set_billing_email( 'nested@example.com' );
+		$order->save();
+
+		$customer = self::create_throwing_stringable();
+		$value    = $nested ? array( array( 'nested@example.com', $customer ) ) : $customer;
+		$sut      = new WC_Order_Data_Store_CPT();
+
+		$result = $sut->query(
+			array(
+				'customer' => $value,
+				'return'   => 'ids',
+				'limit'    => -1,
+				'paginate' => false,
+				'status'   => 'any',
+				'type'     => 'shop_order',
+			)
+		);
+
+		$this->assertSame( array(), $result, 'A failed customer conversion must return no orders.' );
+	}
+
+	/**
+	 * @testdox A customer Stringable is converted once before the customer query is built.
+	 */
+	public function test_customer_stringable_is_converted_once(): void {
+		$order = OrderHelper::create_order();
+		$order->set_billing_email( 'single-cast@example.com' );
+		$order->save();
+
+		$customer = new class() {
+			/** @var int */
+			public $conversion_count = 0;
+
+			/**
+			 * Return an email only on the first conversion.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				++$this->conversion_count;
+
+				if ( 1 < $this->conversion_count ) {
+					throw new TypeError( 'String conversion repeated.' );
+				}
+
+				return 'single-cast@example.com';
+			}
+		};
+		$sut      = new WC_Order_Data_Store_CPT();
+
+		$result = $sut->query(
+			array(
+				'customer' => $customer,
+				'return'   => 'ids',
+				'limit'    => -1,
+				'paginate' => false,
+				'status'   => 'any',
+				'type'     => 'shop_order',
+			)
+		);
+
+		$this->assertContains( $order->get_id(), $result, 'The normalized customer email must still filter the query.' );
+		$this->assertSame( 1, $customer->conversion_count, 'A customer Stringable must not be converted twice.' );
 	}
 
 	/**
@@ -2273,5 +2519,21 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertContains( $completed->get_id(), $result, 'An unregistered status must not drop a valid sibling.' );
 		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still restrict the query.' );
+	}
+
+	/**
+	 * Creates a Stringable whose conversion fails.
+	 *
+	 * @return object
+	 */
+	private static function create_throwing_stringable(): object {
+		return new class() {
+			/**
+			 * Simulate a failed string conversion.
+			 */
+			public function __toString(): string {
+				throw new TypeError( 'String conversion failed.' );
+			}
+		};
 	}
 }
