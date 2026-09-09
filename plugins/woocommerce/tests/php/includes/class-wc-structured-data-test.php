@@ -177,6 +177,43 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox woocommerce_structured_data_context receives the string grouping key and complete @type array.
+	 */
+	public function test_structured_data_context_receives_array_type_and_string_grouping_key(): void {
+		$markup           = array(
+			'@type' => array( 'Review', 'Product' ),
+			'name'  => 'Multi-type product',
+		);
+		$filter_arguments = array();
+
+		add_filter(
+			'woocommerce_structured_data_context',
+			static function ( $context, $data, $type, $value ) use ( &$filter_arguments ) {
+				$filter_arguments = array(
+					'type'  => $type,
+					'value' => $value,
+				);
+
+				return $context;
+			},
+			10,
+			4
+		);
+
+		$this->structured_data->set_data( $markup );
+		$this->structured_data->get_structured_data( array( 'product', 'review' ) );
+
+		$this->assertSame(
+			array(
+				'type'  => 'product',
+				'value' => array( $markup ),
+			),
+			$filter_arguments,
+			'The context filter should receive the selected string grouping key and the unmodified multi-type node.'
+		);
+	}
+
+	/**
 	 * @testdox get_structured_data() excludes multi-type nodes without a requested type.
 	 */
 	public function test_get_structured_data_excludes_array_type_without_requested_match(): void {
