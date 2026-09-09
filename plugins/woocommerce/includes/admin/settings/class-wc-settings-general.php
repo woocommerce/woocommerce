@@ -452,6 +452,29 @@ class WC_Settings_General extends WC_Settings_Page {
 			"
 		);
 	}
+
+	/**
+	 * Save settings and validate that thousand and decimal separators are different.
+	 *
+	 * @since 10.9.0
+	 */
+	public function save() {
+		$previous_thousand_sep = (string) get_option( 'woocommerce_price_thousand_sep', ',' );
+		$previous_decimal_sep  = (string) get_option( 'woocommerce_price_decimal_sep', '.' );
+		$thousand_sep          = isset( $_POST['woocommerce_price_thousand_sep'] ) ? wc_clean( wp_unslash( $_POST['woocommerce_price_thousand_sep'] ) ) : $previous_thousand_sep;
+		$decimal_sep           = isset( $_POST['woocommerce_price_decimal_sep'] ) ? wc_clean( wp_unslash( $_POST['woocommerce_price_decimal_sep'] ) ) : $previous_decimal_sep;
+
+		if ( $thousand_sep === $decimal_sep && '' !== $thousand_sep ) {
+			// Revert to previous values.
+			$_POST['woocommerce_price_thousand_sep'] = $previous_thousand_sep;
+			$_POST['woocommerce_price_decimal_sep']  = $previous_decimal_sep;
+
+			// Add admin notice.
+			WC_Admin_Settings::add_error( __( 'The thousand separator and decimal separator cannot be the same character. The previous values have been restored.', 'woocommerce' ) );
+		}
+
+		parent::save();
+	}
 }
 
 return new WC_Settings_General();
