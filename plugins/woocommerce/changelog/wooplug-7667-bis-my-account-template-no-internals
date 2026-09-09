@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stop the My Account stock notifications template from calling the internal MyAccountEndpoint class; template data is now prepared by MyAccountView.
