@@ -39,6 +39,7 @@ These hooks run on every Woo page load, some affect the blocks, some don't, some
 | `woocommerce_after_get_rates_for_package` | Fully supported ✅ | |
 | `woocommerce_checkout_init` | Fully supported ✅ | |
 | `woocommerce_customer_loaded` | Fully supported ✅ | |
+| `woocommerce_thankyou` | Partially supported 🔶 | Template hook that fires only when the order-received (thank you) page renders in the browser. The Checkout block redirects there after a successful order, so it fires for block checkouts, but it never fires for headless Store API checkouts that skip that page (e.g. after an off-site gateway redirect). For post-purchase logic use `woocommerce_payment_complete` or `woocommerce_order_status_*` instead. `woocommerce_store_api_checkout_order_processed` fires only for Store API orders and runs before payment, so it suits pre-payment processing rather than post-payment logic. |
 
 ### WooCommerce lifecycle _filters_
 
