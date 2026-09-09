@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent malformed date arguments to legacy order and product queries, and malformed status or customer arguments to legacy order queries, from raising an uncaught fatal error.
+Prevent malformed date, order status, and customer query arguments from causing fatal errors in legacy data stores.
