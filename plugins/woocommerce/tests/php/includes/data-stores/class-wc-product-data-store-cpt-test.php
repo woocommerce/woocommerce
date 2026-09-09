@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
