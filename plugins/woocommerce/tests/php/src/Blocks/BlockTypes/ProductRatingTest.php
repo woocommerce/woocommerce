@@ -13,25 +13,23 @@ use WP_Block;
 class ProductRatingTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Uses live block context for review links, ignoring saved ancestry attributes.
+	 * @testdox Uses the current page and query context for review links, ignoring saved ancestry attributes.
 	 * @dataProvider review_link_contexts
 	 *
 	 * @param string $block_name Block to render.
 	 * @param string $context_name Product context to simulate.
 	 */
-	public function test_review_links_use_block_context( string $block_name, string $context_name ): void {
+	public function test_review_links_use_page_and_query_context( string $block_name, string $context_name ): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_review_count( 2 );
 		$product->set_average_rating( '4.5' );
 		$product->set_reviews_allowed( true );
 		$product->save();
 		update_option( 'woocommerce_enable_reviews', 'yes' );
-		$this->go_to( get_permalink( $product->get_id() ) );
+		$this->go_to( 'single-product-block' === $context_name ? home_url( '/' ) : get_permalink( $product->get_id() ) );
 
 		$context = array( 'postId' => $product->get_id() );
-		if ( 'single-product-block' === $context_name ) {
-			$context['singleProduct'] = true;
-		} elseif ( 'query-loop' === $context_name ) {
+		if ( 'query-loop' === $context_name ) {
 			$context['queryId'] = 0;
 		}
 
@@ -68,7 +66,7 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Receives review-link context from the actual Single Product parent block.
+	 * @testdox Links to the product page when rendered inside a Single Product block on a regular page.
 	 * @testWith ["woocommerce/product-rating"]
 	 *           ["woocommerce/product-rating-counter"]
 	 *
@@ -91,7 +89,7 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '#reviews"', $html, 'The parent block should supply the context needed for product review links.' );
+		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '#reviews"', $html, 'Ratings embedded on a regular page should link to the product reviews.' );
 	}
 
 	/**

@@ -44,7 +44,7 @@ class ProductRatingCounter extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId', 'singleProduct' ];
+		return [ 'query', 'queryId', 'postId' ];
 	}
 
 	/**
@@ -68,8 +68,8 @@ class ProductRatingCounter extends AbstractBlock {
 		if ( $product && $product->get_review_count() > 0 ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$is_descendent_of_single_product_block    = ! empty( $block->context['singleProduct'] );
-			$is_descendent_of_single_product_template = ! $is_descendent_of_single_product_block && ! isset( $block->context['queryId'] ) && is_product() && get_queried_object_id() === (int) $post_id;
+			$is_descendent_of_single_product_template = ! isset( $block->context['queryId'] ) && is_product() && get_queried_object_id() === (int) $post_id;
+			$is_descendent_of_single_product_block    = ! isset( $block->context['queryId'] ) && ! $is_descendent_of_single_product_template;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
