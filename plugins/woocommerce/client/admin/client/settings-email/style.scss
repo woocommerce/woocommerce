@@ -7,6 +7,13 @@
 	.dataviews-wrapper {
 		background-color: $white;
 	}
+	.woocommerce-email-listing-placeholder {
+		align-items: center;
+		display: flex;
+		height: 40px;
+		justify-content: center;
+		padding: 12px;
+	}
 	.woocommerce-email-listing-description {
 		display: inline-block;
 		margin-top: 4px;
