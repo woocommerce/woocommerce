@@ -96,9 +96,18 @@ runs:
           run: |
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
               # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallelized between PHP/JS.
-              # JS deps installation is abit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
+              # JS deps installation is a bit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
               composer install --working-dir=./plugins/woocommerce --quiet &
-              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile
+              composer_pid=$!
+              pnpm_status=0
+              # --ignore-scripts suppresses the plugin's postinstall, which would start a second composer install into the same directory; the background process above owns that install instead.
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --ignore-scripts || pnpm_status=$?
+              composer_status=0
+              wait "$composer_pid" || composer_status=$?
+              if [[ "$pnpm_status" -ne 0 ]]; then
+                exit "$pnpm_status"
+              fi
+              exit "$composer_status"
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile
             fi
