@@ -61,14 +61,16 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass the block attributes to the query args filter.
+	 * @testdox Should pass the default query args and the block attributes to the filter.
 	 */
-	public function test_query_args_filter_receives_block_attributes(): void {
-		$received = null;
+	public function test_query_args_filter_receives_query_args_and_block_attributes(): void {
+		$received_args       = null;
+		$received_attributes = null;
 		add_filter(
 			'woocommerce_blocks_product_categories_query_args',
-			function ( $args, $attributes ) use ( &$received ) {
-				$received = $attributes;
+			function ( $args, $attributes ) use ( &$received_args, &$received_attributes ) {
+				$received_args       = $args;
+				$received_attributes = $attributes;
 				return $args;
 			},
 			10,
@@ -77,9 +79,16 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 
 		$this->render_block( '{"hasCount":false,"isDropdown":true}' );
 
-		$this->assertIsArray( $received, 'The filter should receive the block attributes.' );
-		$this->assertFalse( $received['hasCount'], 'hasCount should reflect the block markup.' );
-		$this->assertTrue( $received['isDropdown'], 'isDropdown should reflect the block markup.' );
+		$this->assertIsArray( $received_args, 'The filter should receive the query args.' );
+		$this->assertSame( 'product_cat', $received_args['taxonomy'], 'The taxonomy should be product_cat.' );
+		$this->assertTrue( $received_args['hide_empty'], 'Empty categories should be hidden by default.' );
+		$this->assertTrue( $received_args['pad_counts'], 'Counts should be padded.' );
+		$this->assertTrue( $received_args['hierarchical'], 'The query should be hierarchical.' );
+		$this->assertArrayNotHasKey( 'child_of', $received_args, 'child_of should only be set on category archives.' );
+
+		$this->assertIsArray( $received_attributes, 'The filter should receive the block attributes.' );
+		$this->assertFalse( $received_attributes['hasCount'], 'hasCount should reflect the block markup.' );
+		$this->assertTrue( $received_attributes['isDropdown'], 'isDropdown should reflect the block markup.' );
 	}
 
 	/**
@@ -96,13 +105,14 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep querying product categories even if the filter changes the taxonomy.
+	 * @testdox Should keep querying full product category objects even if the filter changes the taxonomy or fields.
 	 */
-	public function test_filter_cannot_change_the_taxonomy(): void {
+	public function test_filter_cannot_change_the_taxonomy_or_fields(): void {
 		add_filter(
 			'woocommerce_blocks_product_categories_query_args',
 			function ( $args ) {
 				$args['taxonomy'] = 'category';
+				$args['fields']   = 'ids';
 				return $args;
 			}
 		);
@@ -110,6 +120,47 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 		$output = $this->render_block();
 
 		$this->assertStringContainsString( $this->item_name_markup( 'Events' ), $output, 'Product categories should still be rendered.' );
+	}
+
+	/**
+	 * @testdox Should show the children of an excluded parent at the top level.
+	 */
+	public function test_excluding_a_parent_keeps_its_children_at_the_top_level(): void {
+		$excluded = array( $this->categories['Apparel'] );
+		add_filter(
+			'woocommerce_blocks_product_categories_query_args',
+			function ( $args ) use ( $excluded ) {
+				$args['exclude'] = $excluded;
+				return $args;
+			}
+		);
+
+		$output = $this->render_block();
+
+		$this->assertStringNotContainsString( $this->item_name_markup( 'Apparel' ), $output, 'Apparel should be excluded.' );
+		$this->assertStringContainsString( $this->item_name_markup( 'Hats' ), $output, 'Hats should still be rendered.' );
+		$this->assertStringNotContainsString( 'wc-block-product-categories-list--depth-1', $output, 'Hats should be rendered at the top level.' );
+	}
+
+	/**
+	 * @testdox Should render an included child category without its parent.
+	 */
+	public function test_including_only_a_child_renders_it(): void {
+		$included = array( $this->categories['Hats'] );
+		add_filter(
+			'woocommerce_blocks_product_categories_query_args',
+			function ( $args ) use ( $included ) {
+				$args['include'] = $included;
+				return $args;
+			}
+		);
+
+		$output = $this->render_block();
+
+		$this->assertStringContainsString( $this->item_name_markup( 'Hats' ), $output, 'Hats should be rendered.' );
+		foreach ( array( 'Apparel', 'Memberships', 'Events' ) as $name ) {
+			$this->assertStringNotContainsString( $this->item_name_markup( $name ), $output, "$name should not be rendered." );
+		}
 	}
 
 	/**

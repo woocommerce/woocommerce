@@ -161,8 +161,9 @@ class ProductCategories extends AbstractDynamicBlock {
 			$args = $filtered_args;
 		}
 
-		// The block always links to product categories, so the taxonomy is not overridable.
+		// The renderer builds product_cat links and reads term objects, so neither is overridable.
 		$args['taxonomy'] = 'product_cat';
+		$args['fields']   = 'all';
 
 		$categories = get_terms( $args );
 
@@ -199,17 +200,18 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return array
 	 */
 	protected function build_category_tree( $categories, $children_only ) {
-		$categories_by_parent = [];
+		$parent_id = $children_only ? get_queried_object_id() : 0;
+		$term_ids  = array_flip( array_column( $categories, 'term_id' ) );
 
+		$categories_by_parent = [];
 		foreach ( $categories as $category ) {
-			if ( ! isset( $categories_by_parent[ 'cat-' . $category->parent ] ) ) {
-				$categories_by_parent[ 'cat-' . $category->parent ] = [];
-			}
-			$categories_by_parent[ 'cat-' . $category->parent ][] = $category;
+			// A filter can drop a parent but keep its children. Like core's Walker, show those orphans at the top level.
+			$parent = isset( $term_ids[ $category->parent ] ) ? $category->parent : $parent_id;
+
+			$categories_by_parent[ 'cat-' . $parent ][] = $category;
 		}
 
-		$parent_id = $children_only ? get_queried_object_id() : 0;
-		$tree      = $categories_by_parent[ 'cat-' . $parent_id ]; // these are top level categories. So all parents.
+		$tree = $categories_by_parent[ 'cat-' . $parent_id ] ?? [];
 		unset( $categories_by_parent[ 'cat-' . $parent_id ] );
 
 		foreach ( $tree as $category ) {
