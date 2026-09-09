@@ -1,0 +1,144 @@
+name: Plugin Upgrade Test
+on:
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - ready_for_review
+        paths:
+            - '**'
+            - '!docs/**'
+            - '!**/changelog/**'
+            - '!**/changelog.txt'
+            - '!**/readme.txt'
+            - '!.gitignore'
+            - '!.coderabbit.yml'
+            - '!CODEOWNERS'
+            - '!**/*.md'
+            - '!.husky/**'
+            - '!.cursor/**'
+            - '!.github/**'
+            - '.github/workflows/pr-plugin-upgrade-test.yml'
+            - '.github/workflows/scripts/test-plugin-update/**'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions: {}
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+    build:
+        name: Build PR plugin zip
+        if: github.event.pull_request.draft == false
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+            - name: Build plugin zip
+              run: |
+                  cd "$GITHUB_WORKSPACE/plugins/woocommerce"
+                  # Default PLUGIN_SLUG ('woocommerce') => woocommerce.zip with an
+                  # internal woocommerce/ directory: a valid in-place upgrade target.
+                  bash bin/build-zip.sh
+
+            - name: Upload plugin zip artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: woocommerce-dev-build
+                  path: plugins/woocommerce/woocommerce.zip
+                  retention-days: 1
+
+    test:
+        name: Test upgrades to the PR build
+        needs: build
+        if: github.event.pull_request.draft == false
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        # Full build runs in the build job; this job does WP setup + downloads +
+        # 4 upgrade scenarios (incl. WooCommerce DB migrations), so allow headroom.
+        timeout-minutes: 30
+        services:
+            db:
+                image: mariadb:lts
+                env:
+                    MARIADB_ROOT_PASSWORD: wordpress
+                    MARIADB_DATABASE: wordpress
+                ports:
+                    - 3306:3306
+                options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=5
+        env:
+            PLUGIN_SLUG: woocommerce
+            PLUGIN_FILE: woocommerce/woocommerce.php
+            WP_HOST: 127.0.0.1
+            WP_PORT: '8080'
+            DB_HOST: 127.0.0.1
+            DB_PORT: '3306'
+            DB_NAME: wordpress
+            DB_USER: root
+            DB_PASS: wordpress
+            ADMIN_USER: admin
+            ADMIN_PASS: password
+            ADMIN_EMAIL: admin@example.com
+            ZIPDIR: ${{ github.workspace }}/zips
+            DB_DUMP: ${{ github.workspace }}/db.sql
+            MU_PLUGIN_SRC: ${{ github.workspace }}/.github/workflows/scripts/test-plugin-update/mu-plugin.php
+            TRUNK_URL: https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            # runner.temp is not available in job-level env, so derive the
+            # runner-scratch paths here and share them via $GITHUB_ENV.
+            - name: Configure scratch paths
+              run: |
+                  {
+                      echo "WP_PATH=$RUNNER_TEMP/wordpress"
+                      echo "WORKDIR=$RUNNER_TEMP/work"
+                      echo "DEV_ZIP_SRC=$RUNNER_TEMP/artifact/woocommerce.zip"
+                  } >> "$GITHUB_ENV"
+
+            - name: Setup PHP and WP-CLI
+              uses: shivammathur/setup-php@v2
+              with:
+                  # 8.3 is within WooCommerce's supported range and matches the PHP the
+                  # built zip targets; bump in step with the plugin's supported versions.
+                  php-version: '8.3'
+                  extensions: mysqli, gd, zip, mbstring, intl, exif
+                  # Keep opcache off for the CLI SAPI so php -S reads the swapped plugin
+                  # files fresh mid-request — the condition the autoload race (#65337) needs.
+                  ini-values: opcache.enable=0, opcache.enable_cli=0
+                  coverage: none
+                  tools: wp-cli
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+
+            - name: Download PR plugin zip
+              uses: actions/download-artifact@v4
+              with:
+                  name: woocommerce-dev-build
+                  path: ${{ runner.temp }}/artifact
+
+            - name: Set up WordPress
+              run: .github/workflows/scripts/test-plugin-update/setup.sh
+
+            - name: Prepare plugin zips
+              run: .github/workflows/scripts/test-plugin-update/prepare-zips.sh
+
+            - name: Test upgrades
+              run: .github/workflows/scripts/test-plugin-update/test.sh
