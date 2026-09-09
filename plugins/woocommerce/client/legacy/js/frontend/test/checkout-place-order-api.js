@@ -689,6 +689,18 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
+		test( 'should ignore a non-boolean error flag and use the result', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				has_errors: 'false',
+				messages: '',
+			} );
+
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
 		test( 'should treat a response without the error flag as a failure', () => {
 			sendCheckoutUpdateResponse( {
 				result: 'failure',
