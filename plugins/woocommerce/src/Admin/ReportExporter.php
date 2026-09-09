@@ -168,7 +168,7 @@ class ReportExporter {
 		$report_args['page'] = $page_number;
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
-		$exporter->set_filename( "wc-{$report_type}-report-export-{$export_id}" );
+		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 		$exporter->generate_file();
 
 		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
@@ -218,6 +218,41 @@ class ReportExporter {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the name a report export is stored under.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return string
+	 */
+	private static function get_export_filename( $report_type, $export_id ) {
+		return "wc-{$report_type}-report-export-{$export_id}";
+	}
+
+	/**
+	 * Get the URL a finished report export is downloaded from.
+	 *
+	 * @since 11.2.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @param array  $report_args Optional. Report parameters the export was queued with. When they name
+	 *                            a date range, the link carries it so the download is named after it.
+	 * @return string
+	 */
+	public static function get_download_url( $report_type, $export_id, $report_args = array() ) {
+		$query_args = array(
+			'action'   => self::DOWNLOAD_EXPORT_ACTION,
+			'filename' => self::get_export_filename( $report_type, $export_id ),
+		);
+
+		$date_range = self::get_export_date_range( $report_args );
+		if ( $date_range ) {
+			$query_args['date_range'] = $date_range['after'] . '-to-' . $date_range['before'];
+		}
+
+		return add_query_arg( $query_args, admin_url() );
 	}
 
 	/**
@@ -384,17 +419,7 @@ class ReportExporter {
 		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( 100 === $percent_complete ) {
-			$query_args = array(
-				'action'   => self::DOWNLOAD_EXPORT_ACTION,
-				'filename' => "wc-{$report_type}-report-export-{$export_id}",
-			);
-
-			$date_range = self::get_export_date_range( $report_args );
-			if ( $date_range ) {
-				$query_args['date_range'] = $date_range['after'] . '-to-' . $date_range['before'];
-			}
-
-			$download_url = add_query_arg( $query_args, admin_url() );
+			$download_url = self::get_download_url( $report_type, $export_id, $report_args );
 
 			\WC_Emails::instance();
 			$email = new ReportCSVEmail();
