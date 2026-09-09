@@ -57,6 +57,15 @@ class FilterData {
 	}
 
 	/**
+	 * Get the product attributes lookup data store.
+	 *
+	 * @return LookupDataStore
+	 */
+	private function lookup_data_store(): LookupDataStore {
+		return wc_get_container()->get( LookupDataStore::class );
+	}
+
+	/**
 	 * Get price data for current products.
 	 *
 	 * @param array $query_vars The WP_Query arguments.
@@ -285,14 +294,12 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
-
 			// The lookup table usage option is 'no' while a regeneration is running, after an aborted
 			// regeneration is cleaned up, and when an admin disabled the table. Its rows are incomplete
 			// in all of those states, so the counts come from the parent terms then, which is the same
 			// condition under which the main product query filters through the table.
-			$attribute_count_sql = $lookup_data_store->usage_is_enabled()
-				? $this->get_attribute_counts_sql_from_lookup_table( $lookup_data_store, $product_ids, $attribute_to_count )
+			$attribute_count_sql = $this->lookup_data_store()->usage_is_enabled()
+				? $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count )
 				: $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -315,15 +322,14 @@ class FilterData {
 	/**
 	 * Build the attribute count query that reads the product attributes lookup table.
 	 *
-	 * @param LookupDataStore $lookup_data_store  The product attributes lookup data store.
-	 * @param string          $product_ids        Comma separated list of product ids.
-	 * @param string          $attribute_to_count Attribute taxonomy name.
+	 * @param string $product_ids        Comma separated list of product ids.
+	 * @param string $attribute_to_count Attribute taxonomy name.
 	 * @return string The SQL query.
 	 */
-	private function get_attribute_counts_sql_from_lookup_table( LookupDataStore $lookup_data_store, string $product_ids, string $attribute_to_count ): string {
+	private function get_attribute_counts_sql_from_lookup_table( string $product_ids, string $attribute_to_count ): string {
 		global $wpdb;
 
-		$lookup_table_name = $lookup_data_store->get_lookup_table_name();
+		$lookup_table_name = $this->lookup_data_store()->get_lookup_table_name();
 		$taxonomy_sql      = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
 		$in_stock_clause   = $this->hide_out_of_stock_items() ? 'AND in_stock = 1' : '';
 
@@ -546,7 +552,7 @@ class FilterData {
 						'extra'                   => $extra,
 						'filter_type'             => $filter_type,
 						'hide_out_of_stock_items' => $this->hide_out_of_stock_items(),
-						'lookup_table_in_use'     => wc_get_container()->get( LookupDataStore::class )->usage_is_enabled(),
+						'lookup_table_in_use'     => $this->lookup_data_store()->usage_is_enabled(),
 					)
 				)
 			)
