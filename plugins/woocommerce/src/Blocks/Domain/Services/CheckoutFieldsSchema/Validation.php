@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Internal\Checkout\DateFormatLimitParser;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Parsers\DefaultVocabulary;
 use Opis\JsonSchema\Parsers\SchemaParser;
 use Opis\JsonSchema\SchemaLoader;
@@ -212,11 +214,44 @@ class Validation {
 			self::$meta_schema_json
 		);
 
-		if ( $result->hasError() ) {
-			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', esc_html( (string) $result->error() ) );
+		$error = $result->error();
+		if ( null !== $error ) {
+			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', self::format_schema_error( $error ) );
 		}
 
 		return true;
+	}
+
+	/**
+	 * Describes schema errors at the failing keyword instead of the outer schema wrapper.
+	 *
+	 * @param ValidationError $error The schema validation error.
+	 * @return string The error paths and messages.
+	 */
+	private static function format_schema_error( ValidationError $error ): string {
+		$formatter = new ErrorFormatter();
+		$errors    = $formatter->format(
+			$error,
+			true,
+			static function ( ValidationError $error ) use ( $formatter ): string {
+				if ( 'const' === $error->keyword() ) {
+					return sprintf( 'The value must be %s', wp_json_encode( $error->args()['const'] ) );
+				}
+				$schema = $error->schema()->info()->data();
+				if ( 'enum' === $error->keyword() && is_object( $schema ) && isset( $schema->enum ) ) {
+					return sprintf( 'The value must be one of: %s', implode( ', ', array_map( 'wp_json_encode', $schema->enum ) ) );
+				}
+				return $formatter->formatErrorMessage( $error );
+			}
+		);
+		$messages  = [];
+		foreach ( $errors as $path => $details ) {
+			// The properties/test prefix belongs to our meta-schema check, not the supplied rule.
+			$path       = rawurldecode( preg_replace( '#^/properties/test(?=/|$)#', '', $path ) ?? $path );
+			$messages[] = sprintf( 'At "%s": %s.', $path ? $path : '/', implode( '; ', $details ) );
+		}
+
+		return implode( ' ', $messages );
 	}
 
 	/**

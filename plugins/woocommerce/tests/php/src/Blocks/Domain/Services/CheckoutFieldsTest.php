@@ -212,6 +212,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'plugin-namespace/delivery-date', $fields, 'Date fields should be a supported field type.' );
 		$this->assertSame( 'date', $fields['plugin-namespace/delivery-date']['type'] );
+		$this->assertSame( array(), $fields['plugin-namespace/delivery-date']['validation'], 'A date field without custom rules should not gain a validation schema.' );
 
 		// The constraint rules themselves are covered by DateFieldTypeTest; this only checks registration carries them through unresolved.
 		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
@@ -321,6 +322,62 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Date comparison schemas default to date strings and keep supplied keywords.
+	 *
+	 * @testWith [[], "string"]
+	 *           [{"type": "string"}, "string"]
+	 *           [{"format": "date"}, "string"]
+	 *           [{"type": ["string", "null"], "format": "date"}, ["string", "null"]]
+	 *
+	 * @param array        $schema The supplied schema keywords.
+	 * @param string|array $type   The expected schema type.
+	 */
+	public function test_date_comparison_schema_defaults( array $schema, $type ): void {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => array_merge( array( 'formatMinimum' => '2026-05-02' ), $schema ),
+			)
+		);
+
+		$fields = $this->controller->get_additional_fields();
+		$this->assertArrayHasKey( 'plugin-namespace/check-out', $fields, 'Date limits should register without explicit type and format keywords.' );
+		$field = $fields['plugin-namespace/check-out'];
+
+		$this->assertSame( $type, $field['validation']['type'] );
+		$this->assertSame( 'date', $field['validation']['format'] );
+		$this->assertTrue( $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-02' ) ) );
+		$this->assertWPError( $this->controller->is_valid_field( $field, $this->stay_document_object( '', '2026-05-01' ) ) );
+	}
+
+	/**
+	 * @testdox Date schema defaults do not replace invalid keywords supplied by the caller.
+	 *
+	 * @testWith [{"format": "date-time"}]
+	 *           [{"format": null}]
+	 *           [{"type": null}]
+	 *
+	 * @param array $schema The invalid schema keywords.
+	 */
+	public function test_date_schema_defaults_preserve_invalid_keywords( array $schema ): void {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/check-out',
+				'label'      => 'Check-out',
+				'location'   => 'order',
+				'type'       => 'date',
+				'validation' => array_merge( array( 'formatMaximum' => '2026-05-02' ), $schema ),
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/check-out', $this->controller->get_additional_fields() );
+	}
+
+	/**
 	 * @testdox A $data rule orders one date field against another.
 	 *
 	 * @testWith ["2026-05-01", "2026-05-02", true]
@@ -394,6 +451,8 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		);
 		if ( $allow_empty ) {
 			$validation = array( 'anyOf' => array( array( 'const' => '' ), $validation ) );
+		} else {
+			unset( $validation['type'], $validation['format'] );
 		}
 
 		woocommerce_register_additional_checkout_field(

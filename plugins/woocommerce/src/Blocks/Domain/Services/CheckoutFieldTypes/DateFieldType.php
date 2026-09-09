@@ -23,6 +23,30 @@ class DateFieldType extends AbstractFieldType {
 	private const DATE_PATTERN = '\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])';
 
 	/**
+	 * Defaults date comparison schemas to date strings without replacing supplied keywords.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $schema The supplied validation schema.
+	 * @return array The schema with defaults applied.
+	 */
+	public function prepare_validation_schema( array $schema ): array {
+		foreach ( array( 'formatMinimum', 'formatMaximum', 'formatExclusiveMinimum', 'formatExclusiveMaximum' ) as $keyword ) {
+			if ( array_key_exists( $keyword, $schema ) ) {
+				return array_merge(
+					array(
+						'type'   => 'string',
+						'format' => 'date',
+					),
+					$schema
+				);
+			}
+		}
+
+		return $schema;
+	}
+
+	/**
 	 * Processes the options for a date field and returns the new field_options array.
 	 *
 	 * @param array $field_data The field data array to be updated.
