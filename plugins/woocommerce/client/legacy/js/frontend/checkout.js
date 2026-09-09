@@ -1403,6 +1403,9 @@ jQuery( function ( $ ) {
 		},
 		show_login_form: function () {
 			var $form = $( 'form.login, form.woocommerce-form--login' );
+			if ( ! $form.length ) {
+				return;
+			}
 			if ( $form.is( ':visible' ) ) {
 				// If already visible, hide it.
 				$form.slideToggle( {

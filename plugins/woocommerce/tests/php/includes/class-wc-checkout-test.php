@@ -37,6 +37,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
 			}
+
+			public function process_customer( $data ) {
+				return parent::process_customer( $data );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -672,6 +676,44 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the login form is present.
 		$this->assertStringContainsString( 'woocommerce-form-login', $output );
+	}
+
+	/**
+	 * @testdox Existing-account registration errors link to My Account and redirect back to checkout.
+	 */
+	public function test_existing_account_registration_error_has_checkout_login_fallback(): void {
+		$email = 'existing-checkout-customer@example.com';
+		self::factory()->user->create(
+			array(
+				'user_email' => $email,
+				'user_login' => 'existing-checkout-customer',
+			)
+		);
+		wp_set_current_user( 0 );
+
+		$expected_url = esc_url(
+			add_query_arg(
+				'redirect_to',
+				wc_get_checkout_url(),
+				wc_get_page_permalink( 'myaccount' )
+			)
+		);
+
+		try {
+			$this->sut->process_customer(
+				array(
+					'billing_email' => $email,
+					'createaccount' => true,
+				)
+			);
+			$this->fail( 'Expected account creation with an existing email to fail.' );
+		} catch ( Exception $exception ) {
+			$this->assertStringContainsString(
+				'href="' . $expected_url . '"',
+				$exception->getMessage(),
+				'The login link should fall back to My Account and return the customer to checkout.'
+			);
+		}
 	}
 
 	/**
