@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import { RadioControl } from '@woocommerce/blocks-components';
+import { getSelectedOrFirstRateId } from '@woocommerce/base-utils';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 
 /**
@@ -44,7 +45,7 @@ const PackageRates = ( {
 	// Store selected rate ID in local state so shipping rates changes are shown in the UI instantly.
 	const [ selectedOption, setSelectedOption ] = useState<
 		string | undefined
-	>( selectedRateId ?? rates[ 0 ]?.rate_id );
+	>( () => getSelectedOrFirstRateId( rates ) );
 
 	// Standalone controls synchronize on mount and replace pending selections.
 	// Core disables this effect and coordinates initial selections in the parent.

@@ -7,6 +7,7 @@ import { usePrevious } from '@woocommerce/base-hooks';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
 import {
+	getSelectedOrFirstRateId,
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
@@ -41,6 +42,10 @@ const Packages = ( {
 	// Attempt initialization once; failed rates remain unchecked so shoppers can retry them.
 	const initializedPackageIds = useRef< Set< string | number > >( new Set() );
 
+	// Initial selection is coordinated here rather than in each rate list because
+	// a multi-package checkout renders every list inside a collapsed Panel, which
+	// does not mount its children until the shopper opens it. Running from the
+	// parent initializes every package whether or not its panel is open.
 	useEffect( () => {
 		const currentPackageIds = new Set(
 			packages.map( ( shippingPackage ) => shippingPackage.package_id )
@@ -53,12 +58,9 @@ const Packages = ( {
 		} );
 
 		packages.forEach( ( shippingPackage ) => {
-			const selectedRate = shippingPackage.shipping_rates.find(
-				( rate ) => rate.selected
+			const rateId = getSelectedOrFirstRateId(
+				shippingPackage.shipping_rates
 			);
-			const rateId =
-				selectedRate?.rate_id ??
-				shippingPackage.shipping_rates[ 0 ]?.rate_id;
 
 			if ( ! rateId ) {
 				initializedPackageIds.current.delete(
