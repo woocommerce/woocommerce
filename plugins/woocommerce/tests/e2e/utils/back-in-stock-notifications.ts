@@ -44,19 +44,13 @@ export const BIS_FEATURE_OPTION =
 /**
  * Fail early, with the fix, when the env can't run these specs.
  *
- * Both are provisioned by `bin/test-env-setup.sh`, which only runs on env
- * create or `--update`. On a stale env the feature UI simply never renders and
- * notification batches keep their one-minute delay, so every spec fails as an
- * unexplained timeout.
+ * Provisioned by `bin/test-env-setup.sh`, which only runs on env create or
+ * `--update`. On a stale env the notification batches keep their one-minute
+ * delay, so every spec fails as an unexplained timeout.
  */
 export async function assertBISEnvReady(): Promise< void > {
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
 	const checks = [
-		{
-			command: `wp option get ${ BIS_FEATURE_OPTION }`,
-			expected: /^yes$/m,
-			problem: `the "${ BIS_FEATURE_OPTION }" feature flag is not enabled, so none of the Back in Stock Notifications UI renders`,
-		},
 		{
 			command: 'wp plugin list --status=active --field=name',
 			expected: /^woocommerce-e2e-test-helper$/m,

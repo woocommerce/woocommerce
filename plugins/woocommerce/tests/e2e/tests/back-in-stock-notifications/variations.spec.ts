@@ -6,6 +6,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_EMAIL_ELEMENTS,
 	BIS_EMAIL_LINKS,
+	BIS_FEATURE_OPTION,
 	bisEmailBody,
 	bisEmailSubject,
 	bisFormLocator,
@@ -24,6 +25,7 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — variable products and variations',
@@ -31,8 +33,13 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
 		} );
 
 		test.describe( 'Single opt-in', () => {

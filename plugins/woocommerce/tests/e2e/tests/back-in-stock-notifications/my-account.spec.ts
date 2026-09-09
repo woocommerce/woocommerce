@@ -8,6 +8,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { expect, request, tags } from '../../fixtures/fixtures';
 import {
+	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
 	resetBISOptions,
 	setBISOptions,
@@ -15,6 +16,7 @@ import {
 	test,
 } from '../../utils/back-in-stock-notifications';
 import { logInFromMyAccount } from '../../utils/login';
+import { setOption } from '../../utils/options';
 
 const MY_ACCOUNT_ENDPOINT = 'my-account/stock-notifications/';
 const TABLE = '.woocommerce-customer-stock-notifications-table';
@@ -58,8 +60,13 @@ test.describe(
 	'Back in Stock Notifications — My Account',
 	{ tag: [ tags.SERVICES ] },
 	() => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
 		} );
 
 		test.describe( 'Logged-in customer with signups', () => {
