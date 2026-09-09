@@ -60,7 +60,9 @@ class PTKPatternsStore {
 		// - The WooCommerce plugin is updated.
 		add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
-		add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
+		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
+			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'flush_cached_patterns' ) );
+		}
 		add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 

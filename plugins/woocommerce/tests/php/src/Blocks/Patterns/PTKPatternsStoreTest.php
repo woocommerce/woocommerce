@@ -571,4 +571,27 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		$this->pattern_store->flush_or_fetch_patterns();
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch requested right after a flush should not be held back by the cooldown' );
 	}
+
+	/**
+	 * @testdox Deactivating a plugin other than WooCommerce should keep the cached patterns.
+	 */
+	public function test_deactivating_another_plugin_keeps_the_cached_patterns() {
+		$patterns = array( array( 'ID' => 1 ) );
+		update_option( PTKPatternsStore::OPTION_NAME, $patterns, false );
+
+		do_action( 'deactivated_plugin', 'some-other-plugin/some-other-plugin.php', false );
+
+		$this->assertSame( $patterns, get_option( PTKPatternsStore::OPTION_NAME ), 'Another plugin being deactivated should not flush the WooCommerce patterns cache' );
+	}
+
+	/**
+	 * @testdox Deactivating WooCommerce should flush the cached patterns.
+	 */
+	public function test_deactivating_woocommerce_flushes_the_cached_patterns() {
+		update_option( PTKPatternsStore::OPTION_NAME, array( array( 'ID' => 1 ) ), false );
+
+		do_action( 'deactivate_' . WC_PLUGIN_BASENAME, false );
+
+		$this->assertFalse( get_option( PTKPatternsStore::OPTION_NAME ), 'Deactivating WooCommerce should flush the patterns cache' );
+	}
 }

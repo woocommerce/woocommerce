@@ -53148,7 +53148,7 @@ parameters:
 		-
 			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
-			count: 3
+			count: 2
 			path: src/Blocks/Patterns/PTKPatternsStore.php
 
 		-
