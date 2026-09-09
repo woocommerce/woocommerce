@@ -159,10 +159,12 @@ class FinanceRestController extends RestApiControllerBase {
 	 * @return array|WP_Error
 	 */
 	protected function get_payouts( WP_REST_Request $request ) {
-		$cursor   = $request->get_param( 'cursor' );
-		$per_page = $request->get_param( 'per_page' );
-		$query    = new FinanceDataQuery(
-			is_string( $cursor ) ? $cursor : null,
+		$next_cursor = $request->get_param( 'next_cursor' );
+		$prev_cursor = $request->get_param( 'prev_cursor' );
+		$per_page    = $request->get_param( 'per_page' );
+		$query       = new FinanceDataQuery(
+			is_string( $next_cursor ) ? $next_cursor : null,
+			is_string( $prev_cursor ) ? $prev_cursor : null,
 			null === $per_page ? FinanceDataQuery::DEFAULT_PER_PAGE : (int) $per_page
 		);
 
@@ -199,8 +201,14 @@ class FinanceRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_get_payouts(): array {
 		return array(
-			'cursor'   => array(
-				'description' => esc_html__( 'Opaque cursor from a previous response, to fetch the next or previous page.', 'woocommerce' ),
+			'next_cursor'   => array(
+				'description' => esc_html__( 'Opaque cursor from a previous response, to fetch the next page.', 'woocommerce' ),
+				'type'        => 'string',
+				'maxLength'   => 2048,
+				'required'    => false,
+			),
+			'prev_cursor'   => array(
+				'description' => esc_html__( 'Opaque cursor from a previous response, to fetch the previous page.', 'woocommerce' ),
 				'type'        => 'string',
 				'maxLength'   => 2048,
 				'required'    => false,
