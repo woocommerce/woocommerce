@@ -360,6 +360,51 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
+	// Locale-formatted amounts (comma decimal separator).
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox set_minimum_amount throws exception when a comma-decimal minimum exceeds existing maximum.
+	 */
+	public function test_set_minimum_amount_throws_when_comma_decimal_exceeds_maximum(): void {
+		$original_decimal_separator = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		try {
+			$coupon = new WC_Coupon();
+			$coupon->set_maximum_amount( '100,00' );
+
+			try {
+				$coupon->set_minimum_amount( '100,50' );
+				$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+			} catch ( \WC_Data_Exception $e ) {
+				$this->assertSame( 'coupon_invalid_minimum_amount', $e->getErrorCode() );
+			}
+		} finally {
+			update_option( 'woocommerce_price_decimal_sep', $original_decimal_separator );
+		}
+	}
+
+	/**
+	 * @testdox set_maximum_amount succeeds and stores the normalized value when a comma-decimal maximum satisfies the existing minimum.
+	 */
+	public function test_set_maximum_amount_succeeds_when_comma_decimal_satisfies_minimum(): void {
+		$original_decimal_separator = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		try {
+			$coupon = new WC_Coupon();
+			$coupon->set_minimum_amount( '100.50' );
+
+			$coupon->set_maximum_amount( '100,75' );
+
+			$this->assertSame( '100.75', $coupon->get_maximum_amount() );
+		} finally {
+			update_option( 'woocommerce_price_decimal_sep', $original_decimal_separator );
+		}
+	}
+
+	// -------------------------------------------------------------------------
 	// Atomic set_props() validation (both amounts supplied together).
 	// -------------------------------------------------------------------------
 
