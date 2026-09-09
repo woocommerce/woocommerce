@@ -185,20 +185,6 @@ class DateFieldType extends AbstractFieldType {
 	}
 
 	/**
-	 * Converts a YYYY-MM-DD date to the YYYYMMDD integer used in schema validation.
-	 *
-	 * @param mixed $value The value.
-	 * @param array $field The field.
-	 * @return int|null The date as YYYYMMDD, or null when there is no date to compare.
-	 */
-	public function to_document_value( $value, array $field ) {
-		$date = is_string( $value ) && '' !== $value ? $this->parse_date( $value ) : null;
-
-		// Null rather than 0, so a blank date is skipped by numeric keywords instead of ordered by them.
-		return null === $date ? null : (int) $date->format( 'Ymd' );
-	}
-
-	/**
 	 * Formats a stored YYYY-MM-DD date using the store's date format.
 	 *
 	 * @param mixed $value The stored value.

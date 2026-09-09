@@ -4,6 +4,10 @@ declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
+use Automattic\WooCommerce\Internal\Checkout\DateFormatLimitParser;
+use Opis\JsonSchema\Parsers\DefaultVocabulary;
+use Opis\JsonSchema\Parsers\SchemaParser;
+use Opis\JsonSchema\SchemaLoader;
 use Opis\JsonSchema\{
 	Helper,
 	Validator
@@ -20,6 +24,16 @@ class Validation {
 	 * @var string
 	 */
 	private static $meta_schema_json = '';
+
+	/**
+	 * Date comparison keywords shared with ajv-formats.
+	 */
+	private const FORMAT_LIMIT_KEYWORDS = [
+		'formatMinimum',
+		'formatMaximum',
+		'formatExclusiveMinimum',
+		'formatExclusiveMaximum',
+	];
 
 	/**
 	 * Keywords that may hold a `$data` reference instead of a literal value, because
@@ -113,7 +127,11 @@ class Validation {
 		}
 
 		try {
-			$validator = new Validator();
+			$vocabulary = new DefaultVocabulary();
+			foreach ( self::FORMAT_LIMIT_KEYWORDS as $keyword ) {
+				$vocabulary->appendKeyword( new DateFormatLimitParser( $keyword ) );
+			}
+			$validator = new Validator( new SchemaLoader( new SchemaParser( [], [], $vocabulary ) ) );
 			$result    = $validator->validate(
 				Helper::toJSON( $document_object->get_data() ),
 				Helper::toJSON( $rules )
@@ -202,7 +220,7 @@ class Validation {
 	}
 
 	/**
-	 * Extend the meta draft-07 schema so include $data support in keywords that support it.
+	 * Adds $data references and date comparisons to the draft-07 meta schema.
 	 *
 	 * @return string The meta schema as JSON.
 	 */
@@ -219,7 +237,15 @@ class Validation {
 		$meta_schema['definitions']['dataRef'] = [
 			'type'                 => 'object',
 			'required'             => [ '$data' ],
-			'properties'           => [ '$data' => [ 'type' => 'string' ] ],
+			'properties'           => [
+				'$data' => [
+					'type'  => 'string',
+					'anyOf' => [
+						[ 'format' => 'json-pointer' ],
+						[ 'format' => 'relative-json-pointer' ],
+					],
+				],
+			],
 			'additionalProperties' => false,
 		];
 
@@ -229,6 +255,22 @@ class Validation {
 					$meta_schema['properties'][ $keyword ],
 					[ '$ref' => '#/definitions/dataRef' ],
 				],
+			];
+		}
+
+		foreach ( self::FORMAT_LIMIT_KEYWORDS as $keyword ) {
+			$meta_schema['properties'][ $keyword ]   = [
+				'anyOf' => [
+					[
+						'type'   => 'string',
+						'format' => 'date',
+					],
+					[ '$ref' => '#/definitions/dataRef' ],
+				],
+			];
+			$meta_schema['dependencies'][ $keyword ] = [
+				'required'   => [ 'format' ],
+				'properties' => [ 'format' => [ 'const' => 'date' ] ],
 			];
 		}
 

@@ -344,28 +344,6 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A blank date only skips the ordering rule on the side that carries it.
-	 *
-	 * Opis reports "Invalid $data" whenever a $data pointer resolves to something that is not a
-	 * number, so a blank check-in fails the check-out field rather than being skipped, even though
-	 * the rule allows null. A blank check-out is skipped, because the keyword only applies to numbers.
-	 *
-	 * @testWith ["2026-05-01", "", true]
-	 *           ["", "2026-05-04", false]
-	 *
-	 * @param string $check_in  The value of the referenced field.
-	 * @param string $check_out The value of the field carrying the rule.
-	 * @param bool   $is_valid  Whether the pair should pass validation.
-	 */
-	public function test_a_blank_date_only_skips_the_rule_on_its_own_side( string $check_in, string $check_out, bool $is_valid ) {
-		$this->register_stay_dates( array( 'integer', 'null' ) );
-
-		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
-
-		$this->assertSame( $is_valid, true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ) );
-	}
-
-	/**
 	 * @testdox Each field type contributes its own keywords to the REST API value schema.
 	 */
 	public function test_prepare_field_value_schema() {
@@ -387,10 +365,14 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 
 	/**
 	 * Registers a pair of date fields where the second must fall after the first.
-	 *
-	 * @param string|array $rule_type The type the ordering rule accepts.
 	 */
-	private function register_stay_dates( $rule_type = 'integer' ) {
+	private function register_stay_dates() {
+		$validation = array(
+			'type'                   => 'string',
+			'format'                 => 'date',
+			'formatExclusiveMinimum' => array( '$data' => '1/plugin-namespace~1check-in' ),
+		);
+
 		woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'plugin-namespace/check-in',
@@ -405,10 +387,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 				'label'      => 'Check-out',
 				'location'   => 'order',
 				'type'       => 'date',
-				'validation' => array(
-					'type'             => $rule_type,
-					'exclusiveMinimum' => array( '$data' => '1/plugin-namespace~1check-in' ),
-				),
+				'validation' => $validation,
 			)
 		);
 	}

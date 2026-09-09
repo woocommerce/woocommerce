@@ -252,29 +252,6 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Converts a set of additional field values into their document object representation.
-	 *
-	 * Each field type decides how its own values are represented.
-	 *
-	 * @param mixed $values Key value pairs of field values, keyed by field ID.
-	 * @return mixed The values, with each registered additional field converted by its type.
-	 */
-	public function prepare_values_for_document_object( $values ) {
-		$prepared = (array) $values;
-
-		foreach ( $prepared as $key => $value ) {
-			$field = $this->additional_fields[ $key ] ?? null;
-
-			if ( $field ) {
-				$prepared[ $key ] = $this->get_field_type( $field )->to_document_value( $value, $field );
-			}
-		}
-
-		// Cast back so an empty set stays an empty object rather than becoming an empty JSON array.
-		return is_object( $values ) ? (object) $prepared : $prepared;
-	}
-
-	/**
 	 * Returns true if the field is required. Takes rules into consideration if a document object is provided.
 	 *
 	 * @param array|string        $field The field array or field key.

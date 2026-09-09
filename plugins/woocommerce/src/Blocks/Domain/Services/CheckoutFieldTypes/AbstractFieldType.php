@@ -167,17 +167,6 @@ abstract class AbstractFieldType {
 	}
 
 	/**
-	 * Converts a value into the representation used when field rules are evaluated.
-	 *
-	 * @param mixed $value The value.
-	 * @param array $field The field.
-	 * @return mixed The value as it should appear in the document object.
-	 */
-	public function to_document_value( $value, array $field ) {
-		return $value;
-	}
-
-	/**
 	 * Formats a stored value for display based on the field type.
 	 *
 	 * @param mixed $value The stored value.

@@ -5,8 +5,6 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use WC_Cart;
 use WC_Customer;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
-use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
@@ -97,16 +95,6 @@ class DocumentObject {
 	}
 
 	/**
-	 * Converts additional field values into their document object representation.
-	 *
-	 * @param mixed $values Key value pairs of field values, keyed by field ID.
-	 * @return mixed The converted values.
-	 */
-	protected function prepare_additional_fields( $values ) {
-		return Package::container()->get( CheckoutFields::class )->prepare_values_for_document_object( $values );
-	}
-
-	/**
 	 * Set document object context.
 	 *
 	 * @param null|string $context Context to set.
@@ -190,13 +178,7 @@ class DocumentObject {
 	 * @return array Checkout data context.
 	 */
 	protected function get_checkout_data() {
-		$checkout_data = $this->request_data['checkout'] ?? [];
-
-		if ( isset( $checkout_data['additional_fields'] ) ) {
-			$checkout_data['additional_fields'] = $this->prepare_additional_fields( $checkout_data['additional_fields'] );
-		}
-
-		return $checkout_data;
+		return $this->request_data['checkout'] ?? [];
 	}
 
 	/**
@@ -217,11 +199,6 @@ class DocumentObject {
 			),
 			'additional_fields' => $this->request_data['customer']['additional_fields'] ?? (object) [],
 		];
-
-		// Address locations keep their additional fields inside the address itself.
-		foreach ( [ 'shipping_address', 'billing_address', 'additional_fields' ] as $key ) {
-			$customer_data[ $key ] = $this->prepare_additional_fields( $customer_data[ $key ] );
-		}
 
 		if ( 'shipping_address' === $this->context ) {
 			$customer_data['address'] = $customer_data['shipping_address'];
