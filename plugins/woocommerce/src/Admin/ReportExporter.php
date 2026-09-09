@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * ReportExporter Class.
@@ -238,10 +239,12 @@ class ReportExporter {
 		foreach ( array( 'after', 'before' ) as $bound ) {
 			// Report args arrive from a REST request, so they hold whatever the caller sent. Take the
 			// date as written rather than converting it: the report reads these as store local time.
+			// The shape alone is not enough, since a date like 2025-06-31 would roll over to July 1.
 			if (
 				empty( $report_args[ $bound ] ) ||
 				! is_string( $report_args[ $bound ] ) ||
-				! preg_match( '/^(\d{4}-\d{2}-\d{2})/', $report_args[ $bound ], $matches )
+				! preg_match( '/^(\d{4}-\d{2}-\d{2})/', $report_args[ $bound ], $matches ) ||
+				! TimeUtil::is_valid_date( $matches[1], 'Y-m-d' )
 			) {
 				return array();
 			}

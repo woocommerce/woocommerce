@@ -178,11 +178,17 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Arguments without a usable date range produce no range.
 	 *
+	 * A date that does not exist counts as unusable. Left alone it would roll over, so an export
+	 * run for June 31 would be labelled and named July 1.
+	 *
 	 * @testWith [{}]
 	 *           [{"after": "2025-06-01T00:00:00"}]
 	 *           [{"after": "2025-06-01T00:00:00", "before": ""}]
 	 *           [{"after": "2025-06-01T00:00:00", "before": "last month"}]
 	 *           [{"after": "2025-06-01T00:00:00", "before": ["2025-06-30"]}]
+	 *           [{"after": "2025-06-31T00:00:00", "before": "2025-06-30T23:59:59"}]
+	 *           [{"after": "2025-06-01T00:00:00", "before": "2025-13-45T00:00:00"}]
+	 *           [{"after": "2025-02-29T00:00:00", "before": "2025-03-01T00:00:00"}]
 	 *
 	 * @param array $report_args Report parameters the export was queued with.
 	 */
