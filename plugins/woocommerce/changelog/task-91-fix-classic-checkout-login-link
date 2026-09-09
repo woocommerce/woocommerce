@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the classic checkout login link when the inline login form is unavailable.
