@@ -911,6 +911,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Query failures already logged during this PHP execution, keyed by site and error code.
+	 *
+	 * @var array
+	 */
+	private static $logged_query_failures = array();
+
+	/**
 	 * Normalizes an order status value before it is prefixed.
 	 *
 	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
@@ -1019,6 +1026,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function fail_query_closed( &$wp_query_args, $code, $message ) {
 		$wp_query_args['errors'][] = new WP_Error( $code, $message );
+		$dedupe_key                = get_current_blog_id() . '|' . $code;
+
+		if ( isset( self::$logged_query_failures[ $dedupe_key ] ) ) {
+			return;
+		}
+
+		self::$logged_query_failures[ $dedupe_key ] = true;
+
+		wc_get_logger()->warning(
+			__( 'Malformed order query args. Returning no orders.', 'woocommerce' ),
+			array(
+				'code'   => $code,
+				'origin' => __METHOD__,
+				'source' => 'legacy-order-query',
+			)
+		);
 	}
 
 	/**

@@ -1669,6 +1669,59 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Query failure warnings are deduplicated independently for each site.
+	 */
+	public function test_query_failure_logging_is_deduped_per_site(): void {
+		$warning_count = 0;
+		$logger        = $this->createMock( WC_Logger_Interface::class );
+		$logger->method( 'warning' )->willReturnCallback(
+			static function ( $message, $context ) use ( &$warning_count ) {
+				unset( $message, $context );
+				++$warning_count;
+			}
+		);
+
+		$inject_logger = static function () use ( $logger ) {
+			return $logger;
+		};
+
+		$logged_query_failures = new ReflectionProperty( WC_Order_Data_Store_CPT::class, 'logged_query_failures' );
+		$logged_query_failures->setAccessible( true );
+		$previous_failures = $logged_query_failures->getValue();
+		$previous_blog_id  = $GLOBALS['blog_id'] ?? 1;
+
+		$logged_query_failures->setValue( null, array() );
+		add_filter( 'woocommerce_logging_class', $inject_logger );
+
+		try {
+			$args = array(
+				'status' => new stdClass(),
+				'return' => 'ids',
+				'limit'  => -1,
+			);
+
+			$first_result  = wc_get_orders( $args );
+			$second_result = wc_get_orders( $args );
+
+			$this->assertSame( array(), $first_result, 'The first malformed query must fail closed.' );
+			$this->assertSame( array(), $second_result, 'A deduplicated query must still fail closed.' );
+			$this->assertSame( 1, $warning_count, 'The same failure should be logged once per site.' );
+
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test-only: simulate another site without changing database tables.
+			$GLOBALS['blog_id'] = $previous_blog_id + 1;
+			$third_result       = wc_get_orders( $args );
+
+			$this->assertSame( array(), $third_result, 'The malformed query on another site must fail closed.' );
+			$this->assertSame( 2, $warning_count, 'The same failure should be logged again for another site.' );
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original site context.
+			$GLOBALS['blog_id'] = $previous_blog_id;
+			remove_filter( 'woocommerce_logging_class', $inject_logger );
+			$logged_query_failures->setValue( null, $previous_failures );
+		}
+	}
+
+	/**
 	 * @testdox Malformed date args match no orders rather than returning every order.
 	 *
 	 * @dataProvider provider_malformed_date_keys
