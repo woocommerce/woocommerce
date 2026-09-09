@@ -88,7 +88,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle isoFormat dates', () => {
 		const myMoment = toMoment( 'YYYY', '2018-04-15' );
-		if ( myMoment === null ) fail( 'myMoment should not be null' );
+		if ( myMoment === null ) {
+			fail( 'myMoment should not be null' );
+		}
 
 		expect( moment.isMoment( myMoment ) ).toBe( true );
 		expect( myMoment.isValid() ).toBe( true );
@@ -96,7 +98,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle local formats', () => {
 		const longDate = toMoment( 'MMMM D, YYYY', 'April 15, 2018' );
-		if ( longDate === null ) fail( 'longDate should not be null' );
+		if ( longDate === null ) {
+			fail( 'longDate should not be null' );
+		}
 
 		expect( moment.isMoment( longDate ) ).toBe( true );
 		expect( longDate.isValid() ).toBe( true );
@@ -105,7 +109,9 @@ describe( 'toMoment', () => {
 		expect( longDate.year() ).toBe( 2018 );
 
 		const shortDate = toMoment( 'DD/MM/YYYY', '15/04/2018' );
-		if ( shortDate === null ) fail( 'shortDate should not be null' );
+		if ( shortDate === null ) {
+			fail( 'shortDate should not be null' );
+		}
 
 		expect( moment.isMoment( shortDate ) ).toBe( true );
 		expect( shortDate.isValid() ).toBe( true );
@@ -1516,7 +1522,74 @@ describe( 'getDateDifferenceInDays', () => {
 	} );
 } );
 
+describe( 'secondary range shift', () => {
+	afterEach( () => {
+		jest.useRealTimers();
+	} );
+
+	it( 'is a year shift for previous year and for the year presets, an offset otherwise', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
+
+		expect( getLastPeriod( 'month', 'previous_year' ).secondaryShift ).toBe(
+			'year'
+		);
+		expect(
+			getCurrentPeriod( 'week', 'previous_year' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getCurrentPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'month', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+		expect(
+			getCurrentPeriod( 'quarter', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+	} );
+
+	it( 'is exposed on the secondary date picker options', () => {
+		const custom = {
+			period: 'custom',
+			after: '2024-12-01',
+			before: '2025-12-01',
+		};
+
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_year' } ).secondary
+				.shift
+		).toBe( 'year' );
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_period' } )
+				.secondary.shift
+		).toBe( 'offset' );
+	} );
+} );
+
 describe( 'getPreviousDate', () => {
+	it( 'should use the shift over the compare value when given', () => {
+		const yearShifted = getPreviousDate(
+			'2024-03-01',
+			'2024-01-01',
+			'2023-01-01',
+			'previous_period',
+			'day',
+			'year'
+		);
+		expect( yearShifted.format( isoDateFormat ) ).toBe( '2023-03-01' );
+
+		const offset = getPreviousDate(
+			'2025-03-01',
+			'2024-12-01',
+			'2023-12-01',
+			'previous_year',
+			'day',
+			'offset'
+		);
+		expect( offset.format( isoDateFormat ) ).toBe( '2024-02-29' );
+	} );
 	it( 'should return valid date for previous period by days', () => {
 		const date = '2018-08-21';
 		const primaryStart = '2018-08-25';

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `shift` to the secondary range returned by `getCurrentDates` (and `secondaryShift` to `DateValue`) stating whether it is a calendar year shift or a day offset of the primary range, and let `getPreviousDate` use it.

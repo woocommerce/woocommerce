@@ -1,4 +1,14 @@
 /**
+ * External dependencies
+ */
+import moment from 'moment';
+import {
+	getCurrentDates,
+	getCurrentPeriod,
+	getLastPeriod,
+} from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import { buildChartData } from '../utils';
@@ -57,7 +67,8 @@ function buildDayChartData(
 	secondaryIntervals,
 	key = 'orders_count',
 	type = 'number',
-	compare = 'previous_year'
+	compare = 'previous_year',
+	shift
 ) {
 	return buildChartData(
 		{ data: { totals: {}, intervals: primaryIntervals } },
@@ -73,6 +84,7 @@ function buildDayChartData(
 			range: '',
 			after: secondaryIntervals[ 0 ].date_start,
 			before: '',
+			shift,
 		},
 		compare,
 		key,
@@ -480,12 +492,46 @@ describe( 'buildChartData', () => {
 		} );
 	} );
 
-	test( 'should not pad under previous period when the primary range has the 29th Feb', () => {
+	test( 'should show zero for a day missing from the comparison data without shifting the rest', () => {
+		const primary = generateDayIntervals( '2021-02-27', '2021-03-02' );
+		const secondary = generateDayIntervals( '2020-02-27', '2020-03-02', {
+			'2020-02-27': 1,
+			'2020-02-28': 2,
+			'2020-02-29': 3,
+			'2020-03-01': 4,
+			'2020-03-02': 5,
+		} ).filter(
+			( interval ) => ! interval.date_start.startsWith( '2020-02-28' )
+		);
+
+		const chartData = buildDayChartData( primary, secondary );
+
+		expect( secondaryByDate( chartData, '2021-02-27' ) ).toEqual( {
+			labelDate: '2020-02-27 00:00:00',
+			value: 1,
+		} );
+		expect( secondaryByDate( chartData, '2021-02-28' ) ).toEqual( {
+			labelDate: '2020-02-28 00:00:00',
+			value: 0,
+		} );
+		expect( secondaryByDate( chartData, '2021-03-01' ) ).toEqual( {
+			labelDate: '2020-03-01 00:00:00',
+			value: 4,
+		} );
+		expect( secondaryByDate( chartData, '2021-03-02' ) ).toEqual( {
+			labelDate: '2020-03-02 00:00:00',
+			value: 5,
+		} );
+	} );
+
+	test( 'should pad the 29th Feb under a year shifted previous period', () => {
+		// Last year 2024 compared to the previous period is the whole of 2023.
 		const primary = generateDayIntervals( '2024-01-01', '2024-12-31' );
 		const secondary = generateDayIntervals( '2023-01-01', '2023-12-31', {
 			'2023-02-28': 5,
 			'2023-03-01': 1,
 			'2023-03-02': 2,
+			'2023-12-31': 9,
 		} );
 
 		const chartData = buildDayChartData(
@@ -493,7 +539,8 @@ describe( 'buildChartData', () => {
 			secondary,
 			'orders_count',
 			'number',
-			'previous_period'
+			'previous_period',
+			'year'
 		);
 
 		expect( secondaryByDate( chartData, '2024-02-28' ) ).toEqual( {
@@ -501,12 +548,16 @@ describe( 'buildChartData', () => {
 			value: 5,
 		} );
 		expect( secondaryByDate( chartData, '2024-02-29' ) ).toEqual( {
+			labelDate: '-',
+			value: 0,
+		} );
+		expect( secondaryByDate( chartData, '2024-03-01' ) ).toEqual( {
 			labelDate: '2023-03-01 00:00:00',
 			value: 1,
 		} );
-		expect( secondaryByDate( chartData, '2024-03-01' ) ).toEqual( {
-			labelDate: '2023-03-02 00:00:00',
-			value: 2,
+		expect( secondaryByDate( chartData, '2024-12-31' ) ).toEqual( {
+			labelDate: '2023-12-31 00:00:00',
+			value: 9,
 		} );
 	} );
 
@@ -570,5 +621,196 @@ describe( 'buildChartData', () => {
 			labelDate: '2023-03-02 00:00:00',
 			value: 3,
 		} );
+	} );
+} );
+
+describe( 'buildChartData across every date range shape', () => {
+	// Every day gets a value only it can produce, so a chart value can be
+	// traced back to the day it came from.
+	const valueOf = ( day ) => Number( day.replace( /-/g, '' ) );
+
+	const builders = {
+		today: ( compare ) => getCurrentPeriod( 'day', compare ),
+		yesterday: ( compare ) => getLastPeriod( 'day', compare ),
+		week: ( compare ) => getCurrentPeriod( 'week', compare ),
+		last_week: ( compare ) => getLastPeriod( 'week', compare ),
+		month: ( compare ) => getCurrentPeriod( 'month', compare ),
+		last_month: ( compare ) => getLastPeriod( 'month', compare ),
+		quarter: ( compare ) => getCurrentPeriod( 'quarter', compare ),
+		last_quarter: ( compare ) => getLastPeriod( 'quarter', compare ),
+		year: ( compare ) => getCurrentPeriod( 'year', compare ),
+		last_year: ( compare ) => getLastPeriod( 'year', compare ),
+	};
+	const clocks = [
+		'2021-02-28T12:00:00',
+		'2024-02-29T12:00:00',
+		'2024-03-15T12:00:00',
+		'2025-03-15T12:00:00',
+		'2025-12-31T12:00:00',
+		'2026-09-09T12:00:00',
+	];
+	const customRanges = [
+		[ '2021-01-01', '2021-03-31' ],
+		[ '2021-02-01', '2021-02-28' ],
+		[ '2024-02-01', '2024-03-31' ],
+		[ '2024-01-01', '2025-01-31' ],
+		[ '2024-12-01', '2025-12-01' ],
+		[ '2016-01-01', '2019-12-31' ],
+	];
+	const compares = [ 'previous_period', 'previous_year' ];
+
+	function pickerFor( start, end, shift ) {
+		return {
+			label: '',
+			range: '',
+			after: start.clone().startOf( 'day' ),
+			before: end.clone().startOf( 'day' ),
+			shift,
+		};
+	}
+
+	function daysBetween( picker ) {
+		const days = [];
+		const day = picker.after.clone();
+		while ( ! day.isAfter( picker.before, 'day' ) ) {
+			days.push( day.format( 'YYYY-MM-DD' ) );
+			day.add( 1, 'days' );
+		}
+		return days;
+	}
+
+	function intervalsFor( picker ) {
+		return daysBetween( picker ).map( ( day ) =>
+			generateDateInterval( day, day, day, {
+				orders_count: valueOf( day ),
+			} )
+		);
+	}
+
+	function problemsFor( name, primary, secondary, compare ) {
+		const chartData = buildChartData(
+			{ data: { totals: {}, intervals: intervalsFor( primary ) } },
+			{ data: { totals: {}, intervals: intervalsFor( secondary ) } },
+			primary,
+			secondary,
+			compare,
+			'orders_count',
+			'day',
+			'number'
+		);
+		const secondaryDays = daysBetween( secondary );
+		const problems = [];
+
+		chartData.forEach( ( point ) => {
+			const { labelDate, labelDateEnd, value } = point.secondary;
+			let expected = 0;
+			[ labelDate, labelDateEnd ]
+				.filter( Boolean )
+				.map( ( date ) => date.slice( 0, 10 ) )
+				.forEach( ( day ) => {
+					if ( secondaryDays.includes( day ) ) {
+						expected += valueOf( day );
+					}
+				} );
+			if ( value !== expected ) {
+				problems.push(
+					`${ name } ${
+						point.date
+					}: shows ${ value } under "${ labelDate }${
+						labelDateEnd ? ` - ${ labelDateEnd }` : ''
+					}", expected ${ expected }`
+				);
+			}
+		} );
+
+		// No comparison day up to the last labelled one may go missing. Under
+		// a year shift the 29th Feb right after the last label is folded into
+		// it, so it counts too.
+		const lastLabel = (
+			chartData
+				.map( ( point ) => point.secondary.labelDate )
+				.filter( ( labelDate ) => labelDate !== '-' )
+				.sort()
+				.pop() || ''
+		).slice( 0, 10 );
+		const yearShifted = secondary.shift === 'year';
+		const expectedTotal = secondaryDays
+			.filter(
+				( day ) =>
+					day <= lastLabel ||
+					( yearShifted &&
+						day.slice( 5 ) === '02-29' &&
+						moment( day )
+							.subtract( 1, 'days' )
+							.format( 'YYYY-MM-DD' ) <= lastLabel )
+			)
+			.reduce( ( total, day ) => total + valueOf( day ), 0 );
+		const chartTotal = chartData.reduce(
+			( total, point ) => total + point.secondary.value,
+			0
+		);
+		if ( chartTotal !== expectedTotal ) {
+			problems.push(
+				`${ name }: chart total ${ chartTotal }, comparison days total ${ expectedTotal }`
+			);
+		}
+
+		return problems;
+	}
+
+	afterEach( () => {
+		jest.useRealTimers();
+	} );
+
+	test( 'every preset at every clock shows each comparison value under its own date', () => {
+		const problems = [];
+
+		clocks.forEach( ( clock ) => {
+			jest.useFakeTimers().setSystemTime( new Date( clock ) );
+			Object.entries( builders ).forEach( ( [ preset, build ] ) => {
+				compares.forEach( ( compare ) => {
+					const range = build( compare );
+					problems.push(
+						...problemsFor(
+							`${ preset }/${ compare } at ${ clock }`,
+							pickerFor( range.primaryStart, range.primaryEnd ),
+							pickerFor(
+								range.secondaryStart,
+								range.secondaryEnd,
+								range.secondaryShift
+							),
+							compare
+						)
+					);
+				} );
+			} );
+		} );
+
+		expect( problems ).toEqual( [] );
+	} );
+
+	test( 'every custom range shows each comparison value under its own date', () => {
+		const problems = [];
+
+		customRanges.forEach( ( [ after, before ] ) => {
+			compares.forEach( ( compare ) => {
+				const { primary, secondary } = getCurrentDates( {
+					period: 'custom',
+					compare,
+					after,
+					before,
+				} );
+				problems.push(
+					...problemsFor(
+						`custom ${ after }..${ before }/${ compare }`,
+						primary,
+						secondary,
+						compare
+					)
+				);
+			} );
+		} );
+
+		expect( problems ).toEqual( [] );
 	} );
 } );
