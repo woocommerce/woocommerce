@@ -161,8 +161,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
@@ -196,8 +194,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
@@ -230,8 +226,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ false }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
@@ -261,8 +255,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ false }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
@@ -290,8 +282,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
@@ -318,8 +308,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
@@ -347,8 +335,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
@@ -374,7 +360,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
@@ -408,8 +393,6 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
-						aspectRatio=""
-						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
