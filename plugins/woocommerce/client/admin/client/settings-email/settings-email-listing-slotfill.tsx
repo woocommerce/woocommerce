@@ -202,8 +202,8 @@ const EditTemplateButton = ( {
 // Same look as the server-rendered placeholder the slot shows before this
 // fill mounts, so the switch to React is not visible.
 const ListViewPlaceholder = () => (
-	<div className="woocommerce-email-listing-placeholder">
-		<h3>{ __( 'Loading…', 'woocommerce' ) }</h3>
+	<div className="woocommerce-email-listing-placeholder" role="status">
+		<p>{ __( 'Loading…', 'woocommerce' ) }</p>
 	</div>
 );
 

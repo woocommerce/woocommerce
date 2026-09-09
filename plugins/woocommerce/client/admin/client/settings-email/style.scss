@@ -13,6 +13,14 @@
 		height: 40px;
 		justify-content: center;
 		padding: 12px;
+
+		// Heading-sized text: the default paragraph size reads too small for a
+		// page-level loading message.
+		p {
+			font-size: 1.3em;
+			font-weight: 600;
+			margin: 0;
+		}
 	}
 	.woocommerce-email-listing-description {
 		display: inline-block;
