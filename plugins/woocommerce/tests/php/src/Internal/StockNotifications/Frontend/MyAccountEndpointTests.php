@@ -13,12 +13,15 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for the customer-facing MyAccount back-in-stock notifications endpoint.
  */
 class MyAccountEndpointTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * Location passed to the last suppressed redirect, or null if none happened.
@@ -32,6 +35,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		\wc_clear_notices();
 		$this->redirect_location = null;
 		add_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
@@ -45,12 +49,14 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->redirect_location = null;
 		\wc_clear_notices();
 		\wp_set_current_user( 0 );
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$_GET = array();
 		global $wp;
 		if ( isset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] ) ) {
 			unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
 		}
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -854,6 +860,41 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( MyAccountEndpoint::ENDPOINT, $vars );
 		$this->assertSame( MyAccountEndpoint::ENDPOINT, $vars[ MyAccountEndpoint::ENDPOINT ] );
+	}
+
+	/**
+	 * A blank endpoint setting drops the menu item, since the endpoint is unregistered.
+	 */
+	public function test_menu_item_is_skipped_when_the_endpoint_is_disabled(): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, '' );
+
+		$endpoint = new MyAccountEndpoint();
+		$items    = $endpoint->register_menu_item( array( 'downloads' => 'Downloads' ), array() );
+
+		$this->assertArrayNotHasKey( MyAccountEndpoint::ENDPOINT, $items );
+	}
+
+	/**
+	 * The query var keeps its key and takes its slug from the endpoint setting.
+	 */
+	public function test_query_var_uses_the_configured_slug(): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, 'restock-alerts' );
+
+		$endpoint = new MyAccountEndpoint();
+		$vars     = $endpoint->register_query_var( array( 'orders' => 'orders' ) );
+
+		$this->assertSame( 'restock-alerts', $vars[ MyAccountEndpoint::ENDPOINT ] );
+	}
+
+	/**
+	 * The slug falls back to the default when the option is unset or not a string.
+	 */
+	public function test_get_endpoint_slug_falls_back_to_the_default(): void {
+		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
+		$this->assertSame( MyAccountEndpoint::ENDPOINT, MyAccountEndpoint::get_endpoint_slug() );
+
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, array( 'not-a-string' ) );
+		$this->assertSame( MyAccountEndpoint::ENDPOINT, MyAccountEndpoint::get_endpoint_slug() );
 	}
 
 	/**

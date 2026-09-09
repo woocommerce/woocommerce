@@ -1,4 +1,3 @@
-/* stylelint-disable no-descending-specificity */
 
 @import "variables";
 
@@ -184,7 +183,7 @@ body {
 
 				&::before {
 					content: "\f333";
-					font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+					font-family: dashicons;
 				}
 			}
 
@@ -206,7 +205,7 @@ body {
 
 			&::before {
 				content: "\f502";
-				font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+				font-family: dashicons;
 				position: absolute;
 				left: 0;
 				top: 0;
@@ -226,7 +225,7 @@ body {
 
 			&::before {
 				content: "\f182";
-				font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+				font-family: dashicons;
 				position: absolute;
 				left: 0;
 				top: 0;
@@ -375,7 +374,7 @@ body {
 
 			li a::before {
 				color: #82878c;
-				font: 400 20px/1 dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+				font: 400 20px/1 dashicons;
 				speak: never;
 				display: inline-block;
 				padding: 0 10px 0 0;
@@ -874,7 +873,7 @@ body {
 
 	.wc-wizard-service-enable::before {
 		content: "\f343"; // up chevron
-		font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+		font-family: dashicons;
 		color: #666;
 		font-size: 25px;
 		margin-top: -7px;
@@ -1131,7 +1130,7 @@ h3.jetpack-reasons {
 	line-height: 1.5;
 	margin: 5px 0;
 
-	& > * {
+	> * {
 		display: block;
 	}
 
@@ -1500,19 +1499,19 @@ p.jetpack-terms {
 			background-color: #f4a224;
 			max-height: 3em;
 			max-width: 3em;
-			padding: calc( ( 3.5em - 3em ) / 2 );
+			padding: calc(( 3.5em - 3em ) / 2);
 		}
 
 		&.recommended-item-icon-automated_taxes {
 			background-color: #d0011b;
 			max-height: 1.75em;
-			padding: calc( ( 3.5em - 1.75em ) / 2 );
+			padding: calc(( 3.5em - 1.75em ) / 2);
 		}
 
 		&.recommended-item-icon-mailchimp {
 			background-color: #ffe01b;
 			height: 2em;
-			padding: calc( ( 3.5em - 2em ) / 2 );
+			padding: calc(( 3.5em - 2em ) / 2);
 		}
 
 		&.recommended-item-icon-woocommerce_services {
@@ -1627,4 +1626,3 @@ p.jetpack-terms {
 		}
 	}
 }
-/* stylelint-enable */
