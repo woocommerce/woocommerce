@@ -12,12 +12,15 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for the customer-facing MyAccount back-in-stock notifications endpoint.
  */
 class MyAccountEndpointTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * Location passed to the last suppressed redirect, or null if none happened.
@@ -31,6 +34,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		\wc_clear_notices();
 		$this->redirect_location = null;
 		add_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
@@ -51,6 +55,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		if ( isset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] ) ) {
 			unset( $wp->query_vars[ MyAccountEndpoint::ENDPOINT ] );
 		}
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
