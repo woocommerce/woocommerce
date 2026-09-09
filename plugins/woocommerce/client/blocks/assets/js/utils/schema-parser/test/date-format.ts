@@ -41,4 +41,25 @@ describe( 'Date schema comparisons', () => {
 			).toBe( expected );
 		}
 	} );
+
+	it.each( [
+		[ {}, true ],
+		[ { reference: '' }, true ],
+		[ { reference: null }, false ],
+		[ { reference: 20260501 }, false ],
+		[ { reference: false }, false ],
+	] )( 'handles reference values %j', ( values, expected ) => {
+		const validate = schemaParser.compile( {
+			type: 'object',
+			properties: {
+				date: {
+					format: 'date',
+					formatMinimum: { $data: '1/reference' },
+				},
+			},
+		} );
+		expect( validate( { ...values, date: '2026-05-02' } ) ).toBe(
+			expected
+		);
+	} );
 } );

@@ -60,8 +60,18 @@ final class DateFormatLimit implements Keyword {
 			? $this->limit->data( $context->rootData(), $context->currentDataPath(), $this )
 			: $this->limit;
 
+		// AJV skips an unresolved $data reference, but rejects one with the wrong type.
+		if ( $this === $limit ) {
+			return null;
+		}
+
 		if ( ! is_string( $limit ) ) {
 			return $this->error( $schema, $context, $this->keyword, 'The date limit must be a string.' );
+		}
+
+		// ajv-formats does not compare dates when either string is empty.
+		if ( '' === $limit || '' === $context->currentData() ) {
+			return null;
 		}
 
 		$comparison = strcmp( $context->currentData(), $limit );
