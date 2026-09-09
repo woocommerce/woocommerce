@@ -952,26 +952,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Checks whether a status value would actually narrow the query.
-	 *
-	 * WP_Query builds its status clause by intersecting the requested list with get_post_stati(),
-	 * so a value naming no registered status contributes nothing and the clause disappears.
-	 * Truthiness is not the test: 'not-a-status' is truthy and still filters nothing. 'any' is the
-	 * exception, since WP_Query turns it into exclusion clauses instead.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $status The status value to check.
-	 * @return bool True if the value narrows the query, false otherwise.
-	 */
-	private function status_narrows_query( $status ) {
-		if ( 'any' === $status ) {
-			return true;
-		}
-
-		return in_array( sanitize_key( $status ), get_post_stati(), true );
-	}
-
-	/**
 	 * Normalizes the leaves of a customer query value.
 	 *
 	 * Nested arrays are supported grouping constructs. Stringable leaves are converted once so the
