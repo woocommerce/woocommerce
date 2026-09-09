@@ -988,15 +988,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Marks a query as unsatisfiable, so it returns no orders rather than running without the
-	 * filter the caller asked for.
-	 *
-	 * Two mechanisms are used together. `errors` is what {@see self::query()} checks to skip
-	 * WP_Query entirely, while `post__in => array( 0 )` also makes the translated arguments
-	 * unsatisfiable if they are passed to WP_Query elsewhere. Both markers are reasserted after
-	 * the `woocommerce_order_data_store_cpt_get_orders_query` filter in case a callback rebuilds
-	 * the array. Any caller-supplied `p` is removed because WP_Query honours it in preference to
-	 * `post__in`.
+	 * Marks a query as invalid, so it returns no orders rather than running without the filter the
+	 * caller asked for.
 	 *
 	 * @since 11.2.0
 	 * @param array  $wp_query_args WP_Query args, passed by reference.
@@ -1006,11 +999,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function fail_query_closed( &$wp_query_args, $code, $message ) {
 		$wp_query_args['errors'][] = new WP_Error( $code, $message );
-		$wp_query_args['post__in'] = array( 0 );
-
-		// WP_Query honours 'p' and its aliases in preference to post__in, so a caller-supplied
-		// 'p' would return that order despite the query being failed closed.
-		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 	}
 
 	/**
@@ -1202,8 +1190,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
-		$query_errors = $wp_query_args['errors'] ?? array();
-
 		/**
 		 * Filters the WP_Query arguments used for a legacy order query.
 		 *
@@ -1214,14 +1200,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @param WC_Order_Data_Store_CPT $data_store   Current order data store.
 		 */
 		$wp_query_args = apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
-
-		if ( ! empty( $query_errors ) ) {
-			if ( empty( $wp_query_args['errors'] ) ) {
-				$wp_query_args['errors'] = $query_errors;
-			}
-			$wp_query_args['post__in'] = array( 0 );
-			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
-		}
 
 		return $wp_query_args;
 	}

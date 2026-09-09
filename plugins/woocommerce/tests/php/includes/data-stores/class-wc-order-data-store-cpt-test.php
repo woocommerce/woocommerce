@@ -1634,63 +1634,17 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * WP_Query vars that resolve to 'p', which takes precedence over post__in.
-	 *
-	 * @return array<string, array{0: string}>
+	 * @testdox The public order query filter can replace a failed query with valid arguments.
 	 */
-	public function provider_post_id_query_vars(): array {
-		return array(
-			'p'             => array( 'p' ),
-			'page_id'       => array( 'page_id' ),
-			'attachment_id' => array( 'attachment_id' ),
-			'subpost_id'    => array( 'subpost_id' ),
-		);
-	}
+	public function test_order_filter_can_replace_failed_query(): void {
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
 
-	/**
-	 * @testdox A failed-closed query stays closed even if a filter drops the errors key.
-	 *
-	 * @dataProvider provider_post_id_query_vars
-	 *
-	 * @param string $id_var The WP_Query var carrying the order ID.
-	 */
-	public function test_fail_closed_query_survives_a_filter_dropping_errors( string $id_var ): void {
-		$order = OrderHelper::create_order();
-
-		$drop_errors = static function ( $args ) {
-			unset( $args['errors'] );
-			return $args;
-		};
-
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $drop_errors, 99 );
-
-		try {
-			// WP_Query honours 'p' over post__in, so the backstop only holds if 'p' is removed.
-			$result = wc_get_orders(
-				array(
-					'status' => new stdClass(),
-					$id_var  => $order->get_id(),
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $drop_errors, 99 );
-		}
-
-		$this->assertSame( array(), $result, 'post__in must not be bypassed by a caller-supplied p.' );
-	}
-
-	/**
-	 * @testdox A failed-closed query stays closed when a filter replaces the query args.
-	 */
-	public function test_fail_closed_query_survives_a_filter_rebuilding_args(): void {
-		OrderHelper::create_order();
-
-		$replace_query_args = static function () {
+		$replace_query_args = static function () use ( $order_id ) {
 			return array(
 				'post_type'      => 'shop_order',
 				'post_status'    => 'any',
+				'post__in'       => array( $order_id ),
 				'posts_per_page' => -1,
 				'fields'         => 'ids',
 			);
@@ -1711,7 +1665,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
 		}
 
-		$this->assertSame( array(), $result, 'A malformed query must not be reopened by a filter.' );
+		$this->assertSame( array( $order_id ), array_values( $result ), 'The public filter must remain authoritative.' );
 	}
 
 	/**
@@ -1750,44 +1704,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'An unusable date filter must fail closed rather than dropping the filter and returning every order.'
 		);
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed in case a filter drops the errors key.' );
-	}
-
-	/**
-	 * @testdox A throwing order date Stringable stays closed when a filter replaces the query args.
-	 */
-	public function test_throwing_stringable_order_date_stays_closed_after_filter_rebuild(): void {
-		OrderHelper::create_order();
-
-		$date_value         = self::create_throwing_stringable();
-		$replace_query_args = static function () {
-			return array(
-				'post_type'      => 'shop_order',
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-			);
-		};
-
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
-
-		try {
-			$sut    = new WC_Order_Data_Store_CPT();
-			$result = $sut->query(
-				array(
-					'date_paid' => $date_value,
-					'return'    => 'ids',
-					'limit'     => -1,
-					'paginate'  => false,
-					'status'    => 'any',
-					'type'      => 'shop_order',
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $replace_query_args, 99 );
-		}
-
-		$this->assertSame( array(), $result, 'A failed date conversion must not be reopened by a filter.' );
 	}
 
 	/**
@@ -1816,7 +1732,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $result, 'An unusable customer must not return orders.' );
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed.' );
 	}
 
 	/**
@@ -1929,7 +1844,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $result, 'A failed status conversion must return no orders.' );
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
 	}
 
 	/**
@@ -2140,7 +2054,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A status that cannot be used as a string must not fall back to querying every order.'
 		);
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed in case a filter drops the errors key.' );
 	}
 
 
