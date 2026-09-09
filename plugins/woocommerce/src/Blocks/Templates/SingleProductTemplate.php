@@ -247,7 +247,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			'core/pattern' !== $block_name ||
 			! isset( $block['attrs']['slug'] )
 		) {
-				return false;
+			return false;
 		}
 
 		// The 'Related Products' pattern of the Product Collection block is
