@@ -240,7 +240,6 @@ class ItemQuantityLimits {
 	 * HTML: entities are decoded first so stored names read naturally, then
 	 * any resulting markup is stripped.
 	 *
-	 * @since 11.2.0
 	 * @param string $name Product or order item name.
 	 * @param float  $step Allowed stepping value.
 	 * @return \Exception

@@ -182,13 +182,16 @@ test.describe(
 			const modalContent = modal.locator( '.wc-backbone-modal-content' );
 			await expect( modalContent ).toBeVisible();
 
-			await modal
-				.locator( 'input[name="item_qty"]' )
-				.first()
-				.fill( '2.5' );
+			const qtyInput = modal.locator( 'input[name="item_qty"]' ).first();
+			await qtyInput.fill( '2.5' );
 			await modal.locator( '#btn-ok' ).click();
 
 			// With step validation, the modal stays open showing the browser message.
+			expect(
+				await qtyInput.evaluate(
+					( input: HTMLInputElement ) => input.validationMessage
+				)
+			).not.toBe( '' );
 			await expect( modalContent ).toBeVisible();
 		} );
 	}

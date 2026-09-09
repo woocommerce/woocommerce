@@ -2459,11 +2459,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	public function test_save_order_items_rejects_step_mismatch_quantity() {
 		$this->_setRole( 'administrator' );
 
-		$order        = \WC_Helper_Order::create_order();
-		$items        = array_values( $order->get_items() );
-		$item         = $items[0];
-		$item_id      = $item->get_id();
-		$original_qty = $item->get_quantity();
+		$order             = \WC_Helper_Order::create_order();
+		$items             = array_values( $order->get_items() );
+		$item              = $items[0];
+		$item_id           = $item->get_id();
+		$original_qty      = $item->get_quantity();
+		$original_total    = $item->get_total();
+		$original_subtotal = $item->get_subtotal();
 
 		$_POST['order_id'] = $order->get_id();
 		$_POST['security'] = wp_create_nonce( 'order-item' );
@@ -2482,6 +2484,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
 		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+		$this->assertEquals( $original_total, $fresh_item->get_total() );
+		$this->assertEquals( $original_subtotal, $fresh_item->get_subtotal() );
 	}
 
 	/**
