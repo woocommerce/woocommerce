@@ -34,147 +34,101 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include stored post types without running an exact aggregation.
+	 * @testdox Should preserve exact numeric-string counts through the status endpoint.
 	 */
-	public function test_get_post_type_counts_uses_estimates(): void {
-		global $wpdb;
-
-		$post_id = self::factory()->post->create( array( 'post_status' => 'trash' ) );
-		$wpdb->update( $wpdb->posts, array( 'post_type' => "count'test" ), array( 'ID' => $post_id ) );
-		self::factory()->post->create(
-			array(
-				'post_type'   => 'count_draft',
-				'post_status' => 'draft',
-			)
-		);
-		$empty_type_id = self::factory()->post->create();
-		$wpdb->update( $wpdb->posts, array( 'post_type' => '' ), array( 'ID' => $empty_type_id ) );
-		$queries = array();
-		add_filter(
-			'query',
-			static function ( $query ) use ( &$queries ) {
-				$queries[] = $query;
-				return $query;
-			}
-		);
-
-		$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
-		$this->assertArrayHasKey( "count'test", $counts, 'Unregistered post types and trashed posts should be included.' );
-		$this->assertArrayHasKey( '', $counts, 'An empty stored type should not end discovery before other types.' );
-		$this->assertArrayHasKey( 'count_draft', $counts, 'Drafts should be included.' );
-		$this->assertIsString( $counts['count_draft'], 'Counts should retain their numeric-string representation.' );
-		$this->assertCount( count( $counts ) + 2, $queries, 'Discovery should use one lookup per type plus an end lookup and one batched EXPLAIN.' );
-		$this->assertStringStartsWith( 'EXPLAIN ', end( $queries ), 'The UNION must be explained, never executed.' );
-		$this->assertStringNotContainsString( 'COUNT(', implode( ' ', $queries ), 'An exact aggregation should not run.' );
-	}
-
-	/**
-	 * @testdox Should associate query estimates with their post types and preserve the REST response shape.
-	 */
-	public function test_get_post_type_counts_returns_database_estimates(): void {
-		add_filter(
-			'query',
-			static function ( $query ) {
-				if ( 0 === strpos( $query, 'SELECT post_type FROM' ) ) {
-					if ( false === strpos( $query, 'WHERE' ) ) {
-						return "SELECT 'product' AS post_type";
-					}
-					return false !== strpos( $query, "'product'" ) ? "SELECT 'revision' AS post_type" : 'SELECT NULL AS post_type WHERE 1 = 0';
-				}
-				if ( 0 === strpos( $query, 'EXPLAIN ' ) ) {
-					return 'SELECT 2 AS id, 500000 AS `rows` UNION ALL SELECT 1, 174000';
-				}
-				return $query;
-			}
-		);
+	public function test_post_type_counts_remain_exact(): void {
+		self::factory()->post->create_many( 3, array( 'post_type' => 'count_test' ) );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
 		$request->set_param( '_fields', 'post_type_counts' );
 		$response = rest_do_request( $request );
 
-		$this->assertSame( 200, $response->get_status(), 'The status endpoint should remain available.' );
-		$this->assertSame(
-			array(
-				'post_type_counts' => array(
-					array(
-						'type'  => 'product',
-						'count' => '174000',
-					),
-					array(
-						'type'  => 'revision',
-						'count' => '500000',
-					),
-				),
-			),
-			json_decode( wp_json_encode( $response->get_data() ), true ),
-			'The endpoint should return estimates in the existing type/count structure.'
-		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '3', array_column( $response->get_data()['post_type_counts'], 'count', 'type' )['count_test'] );
 	}
 
 	/**
-	 * @testdox Should return an empty array when either database query fails and retry on the next call.
-	 * @param string $prefix Query prefix to fail.
-	 * @testWith ["SELECT post_type FROM"]
-	 *           ["EXPLAIN "]
+	 * @testdox Should omit the aggregation when the caller requests other fields.
 	 */
-	public function test_get_post_type_counts_handles_query_errors( string $prefix ): void {
-		global $wpdb;
-
-		self::factory()->post->create( array( 'post_type' => 'count_error' ) );
-		$fail_query = static function ( $query ) use ( $prefix ) {
-			return 0 === strpos( $query, $prefix ) ? 'SELECT * FROM nonexistent_status_count_table' : $query;
-		};
-		add_filter( 'query', $fail_query );
-		$suppress_errors = $wpdb->suppress_errors();
-		try {
-			$this->assertSame( array(), $this->sut->get_post_type_counts(), 'Database failures should not produce invented counts.' );
-		} finally {
-			remove_filter( 'query', $fail_query );
-			$wpdb->suppress_errors( $suppress_errors );
-		}
-		$this->assertArrayHasKey( 'count_error', array_column( $this->sut->get_post_type_counts(), 'count', 'type' ), 'The next call should retry.' );
-	}
-
-	/**
-	 * @testdox Should return no counts without explaining an empty query when there are no post types.
-	 */
-	public function test_get_post_type_counts_handles_empty_table(): void {
-		global $wpdb;
-
+	public function test_field_selection_skips_post_counts(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$aggregations = 0;
 		add_filter(
 			'query',
-			static function ( $query ) {
-				return 0 === strpos( $query, 'SELECT post_type FROM' ) ? 'SELECT NULL AS post_type WHERE 1 = 0' : $query;
+			static function ( $query ) use ( &$aggregations ) {
+				if ( false !== strpos( $query, 'GROUP BY post_type' ) ) {
+					++$aggregations;
+				}
+				return $query;
 			}
 		);
-		$before = $wpdb->num_queries;
-		$this->assertSame( array(), $this->sut->get_post_type_counts(), 'An empty posts table should have no counts.' );
-		$this->assertSame( $before + 1, $wpdb->num_queries, 'There should be no EXPLAIN for an empty type list.' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
+		$request->set_param( '_fields', 'settings' );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'post_type_counts', $response->get_data() );
+		$this->assertSame( 0, $aggregations, 'Selecting other fields should avoid the count query.' );
 	}
 
 	/**
-	 * @testdox Should discover types from the current site after switching sites.
+	 * @testdox Should preserve exact counts for each site after switching sites.
 	 * @group ms-required
 	 */
-	public function test_get_post_type_counts_are_site_scoped(): void {
+	public function test_post_type_counts_are_site_scoped(): void {
 		if ( ! is_multisite() ) {
 			$this->markTestSkipped( 'This test requires multisite.' );
 		}
-
-		self::factory()->post->create( array( 'post_type' => 'count_original' ) );
+		self::factory()->post->create( array( 'post_type' => 'count_test' ) );
 		$site_id = self::factory()->blog->create();
 		switch_to_blog( $site_id );
 		try {
-			self::factory()->post->create( array( 'post_type' => 'count_other' ) );
-			$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
-			$this->assertArrayHasKey( 'count_other', $counts, 'Counts should use the switched site posts table.' );
-			$this->assertArrayNotHasKey( 'count_original', $counts, 'Other sites should not leak into the result.' );
+			self::factory()->post->create_many( 2, array( 'post_type' => 'count_test' ) );
+			$this->assertSame( '2', array_column( $this->sut->get_post_type_counts(), 'count', 'type' )['count_test'] );
 		} finally {
 			restore_current_blog();
 		}
-		$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
-		$this->assertArrayHasKey( 'count_original', $counts, 'Restoring the site should restore its type list.' );
-		$this->assertArrayNotHasKey( 'count_other', $counts, 'The switched site should not leak into the result.' );
+		$this->assertSame( '1', array_column( $this->sut->get_post_type_counts(), 'count', 'type' )['count_test'] );
+	}
+
+	/**
+	 * @testdox Should request deferred counts only when explicitly needed or required by extension callbacks.
+	 * @param bool $explicit Whether counts were explicitly requested.
+	 * @param bool $extension Whether a report callback is attached.
+	 * @param bool $expected Whether counts should be requested immediately.
+	 * @testWith [false, false, false]
+	 *           [true, false, true]
+	 *           [false, true, true]
+	 */
+	public function test_admin_report_count_compatibility( bool $explicit, bool $extension, bool $expected ): void {
+		remove_all_actions( 'woocommerce_system_status_report' );
+		add_action( 'woocommerce_system_status_report', array( Automattic\WooCommerce\Internal\Admin\SystemStatusReport::get_instance(), 'system_status_report' ) );
+		add_action( 'woocommerce_system_status_report', array( new ActionScheduler_AdminView(), 'system_status_report' ) );
+		if ( $extension ) {
+			add_action( 'woocommerce_system_status_report', '__return_null' );
+		}
+		$requested_fields = null;
+		add_filter(
+			'rest_pre_dispatch',
+			static function ( $result, $server, $request ) use ( &$requested_fields ) {
+				if ( '/wc/v3/system_status' === $request->get_route() ) {
+					$requested_fields = $request->get_param( '_fields' );
+					return new WP_REST_Response( array() );
+				}
+				return $result;
+			},
+			10,
+			3
+		);
+
+		WC_Admin_Status::get_report_data( $explicit );
+		if ( $expected ) {
+			$this->assertNull( $requested_fields, 'Existing callbacks and explicit requests should receive the complete report.' );
+		} else {
+			$this->assertContains( 'environment', $requested_fields );
+			$this->assertContains( 'database', $requested_fields );
+			$this->assertNotContains( 'post_type_counts', $requested_fields );
+		}
 	}
 
 	/**

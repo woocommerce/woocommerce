@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
+use Automattic\WooCommerce\Internal\Admin\SystemStatusReport;
 use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,6 +29,45 @@ class WC_Admin_Status {
 	 */
 	public static function output() {
 		include_once __DIR__ . '/views/html-admin-page-status.php';
+	}
+
+	/**
+	 * Get status data, deferring post counts unless requested or needed by report callbacks.
+	 *
+	 * @since 11.2.0
+	 * @param bool $include_post_counts Whether to include post counts immediately.
+	 * @return array|WP_Error
+	 */
+	public static function get_report_data( bool $include_post_counts = false ) {
+		$params = array();
+		if ( ! $include_post_counts && ! self::has_report_data_callbacks() ) {
+			$schema            = ( new WC_REST_System_Status_Controller() )->get_item_schema();
+			$params['_fields'] = array_values( array_diff( array_keys( $schema['properties'] ), array( 'post_type_counts' ) ) );
+		}
+
+		return wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status', $params );
+	}
+
+	/**
+	 * Check for callbacks that may consume the complete report data.
+	 *
+	 * @return bool
+	 */
+	private static function has_report_data_callbacks(): bool {
+		global $wp_filter;
+
+		$priorities = $wp_filter['woocommerce_system_status_report']->callbacks ?? array();
+		foreach ( $priorities as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$function = $callback['function'];
+				// These built-in sections do not consume report data; subclasses and extensions may do so.
+				if ( is_array( $function ) && is_object( $function[0] ) && in_array( get_class( $function[0] ), array( SystemStatusReport::class, ActionScheduler_AdminView::class ), true ) && 'system_status_report' === $function[1] ) {
+					continue;
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

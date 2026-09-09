@@ -749,7 +749,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'post_type_counts'   => array(
-					'description' => __( 'Approximate post counts by post type, based on database query estimates.', 'woocommerce' ),
+					'description' => __( 'Total post count.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
@@ -1154,62 +1154,16 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get approximate post counts by type from database query estimates.
+	 * Get array of counts of objects. Orders, products, etc.
 	 *
 	 * @return array
 	 */
 	public function get_post_type_counts() {
 		global $wpdb;
 
-		$post_types = array();
-		$post_type  = null;
-		do {
-			// Jump past each type's index range instead of scanning every post to discover distinct types.
-			$query = null === $post_type
-				? "SELECT post_type FROM {$wpdb->posts} ORDER BY post_type LIMIT 1"
-				: $wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE post_type > %s ORDER BY post_type LIMIT 1", $post_type );
-			$row   = $wpdb->get_row( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The range condition is prepared above; the initial query has no user input.
-			if ( ! empty( $wpdb->last_error ) ) {
-				return array();
-			}
-			$post_type = $row->post_type ?? null;
-			if ( null !== $post_type ) {
-				$post_types[] = $post_type;
-			}
-		} while ( null !== $post_type );
+		$post_type_counts = $wpdb->get_results( "SELECT post_type AS 'type', count(1) AS 'count' FROM {$wpdb->posts} GROUP BY post_type;" );
 
-		if ( empty( $post_types ) ) {
-			return array();
-		}
-
-		$queries = array();
-		foreach ( $post_types as $post_type ) {
-			$queries[] = $wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE post_type = %s", $post_type );
-		}
-
-		// EXPLAIN estimates each type's index range without executing the UNION queries.
-		$estimates = $wpdb->get_results( 'EXPLAIN FORMAT=TRADITIONAL ' . implode( ' UNION ALL ', $queries ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Each UNION branch is prepared above.
-		if ( ! is_array( $estimates ) || ! empty( $wpdb->last_error ) ) {
-			return array();
-		}
-
-		$counts = array();
-		foreach ( $estimates as $estimate ) {
-			if ( ! isset( $estimate->id, $estimate->rows ) || ! is_numeric( $estimate->rows ) ) {
-				continue;
-			}
-
-			$index = (int) $estimate->id - 1;
-			if ( isset( $post_types[ $index ] ) ) {
-				$counts[ $index ] = (object) array(
-					'type'  => $post_types[ $index ],
-					'count' => (string) max( 0, (int) $estimate->rows ),
-				);
-			}
-		}
-
-		ksort( $counts );
-		return array_values( $counts );
+		return is_array( $post_type_counts ) ? $post_type_counts : array();
 	}
 
 	/**

@@ -1,4 +1,4 @@
-/* global jQuery, woocommerce_admin_system_status, wcSetClipboard, wcClearClipboard */
+/* global jQuery, woocommerce_admin_system_status, wcSetClipboard, wcClearClipboard, wp */
 jQuery( function ( $ ) {
 	/**
 	 * Users country and state fields
@@ -14,14 +14,128 @@ jQuery( function ( $ ) {
 					'a.help_tip, a.woocommerce-help-tip, woocommerce-product-type-tip',
 					this.preventTipTipClick
 				)
-				.on( 'click', 'a.debug-report', this.generateReport )
+				.on( 'click', 'a.debug-report', this.requestReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
 				.on( 'click', '#copy-for-github', this.copyGithubReport )
 				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
 				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
 				.on( 'click', '#download-for-support', this.downloadReport );
 
+			const loadCountsButton = document.getElementById( 'wc-status-load-post-counts' );
+			if ( loadCountsButton ) {
+				loadCountsButton.addEventListener( 'click', () => this.loadPostCounts().catch( () => {} ) );
+			}
+			const withoutCountsButton = document.getElementById( 'wc-status-report-without-counts' );
+			if ( withoutCountsButton ) {
+				withoutCountsButton.addEventListener( 'click', () => {
+					const body = document.querySelector( '#wc-status-post-counts tbody' );
+					body.replaceChildren( this.postCountRow( wp.i18n.__( 'Post counts', 'woocommerce' ),
+						wp.i18n.__( 'Unavailable — count request failed.', 'woocommerce' ) ) );
+					this.reportWithoutCounts = true;
+					this.generateReport.call( document.querySelector( 'a.debug-report' ) );
+					withoutCountsButton.style.display = 'none';
+				} );
+			}
 			this.maybePollTools();
+		},
+
+		postCountsRequest: null,
+		reportWithoutCounts: false,
+
+		/**
+		 * Build a report row without interpreting post type names as HTML.
+		 */
+		postCountRow: function( type, count ) {
+			const row = document.createElement( 'tr' );
+			[ type, '', count ].forEach( ( value, index ) => {
+				const cell = document.createElement( 'td' );
+				cell.textContent = value;
+				if ( index === 1 ) {
+					cell.className = 'help';
+				}
+				row.appendChild( cell );
+			} );
+			return row;
+		},
+
+		/**
+		 * Load exact counts once per page, sharing an in-flight request with report generation.
+		 */
+		loadPostCounts: function() {
+			const table = document.getElementById( 'wc-status-post-counts' );
+			if ( ! table || table.dataset.loaded === 'true' ) {
+				return Promise.resolve();
+			}
+			if ( this.postCountsRequest ) {
+				return this.postCountsRequest;
+			}
+
+			const button = document.getElementById( 'wc-status-load-post-counts' );
+			const status = document.getElementById( 'wc-status-post-counts-message' );
+			button.disabled = true;
+			status.textContent = wp.i18n.__( 'Counting posts… You can continue viewing the rest of this page.', 'woocommerce' );
+			table.setAttribute( 'aria-busy', 'true' );
+
+			this.postCountsRequest = wp.apiFetch( { path: '/wc/v3/system_status?_fields=post_type_counts' } )
+				.then( ( response ) => {
+					if ( ! Array.isArray( response.post_type_counts ) || ! response.post_type_counts.every( ( item ) =>
+						item && typeof item.type === 'string' && /^\d+$/.test( String( item.count ) ) ) ) {
+						throw new Error( 'Invalid post counts response.' );
+					}
+					const body = table.querySelector( 'tbody' );
+					const rows = response.post_type_counts.map( ( item ) => this.postCountRow( item.type, item.count ) );
+					if ( ! rows.length ) {
+						rows.push( this.postCountRow(
+							wp.i18n.__( 'Post counts', 'woocommerce' ), wp.i18n.__( 'No posts found.', 'woocommerce' )
+						) );
+					}
+					body.replaceChildren( ...rows );
+					table.dataset.loaded = 'true';
+					table.setAttribute( 'aria-busy', 'false' );
+					button.style.display = 'none';
+					document.getElementById( 'wc-status-report-without-counts' ).style.display = 'none';
+					status.textContent = wp.i18n.__( 'Counts collected just now.', 'woocommerce' );
+					if ( this.reportWithoutCounts ) {
+						this.reportWithoutCounts = false;
+						this.generateReport.call( document.querySelector( 'a.debug-report' ) );
+					}
+				} )
+				.catch( ( error ) => {
+					this.postCountsRequest = null;
+					table.setAttribute( 'aria-busy', 'false' );
+					button.disabled = false;
+					button.textContent = wp.i18n.__( 'Try again', 'woocommerce' );
+					status.textContent = wp.i18n.__(
+						'Post counts could not be loaded. The rest of your system information is available.', 'woocommerce'
+					);
+					throw error;
+				} );
+			return this.postCountsRequest;
+		},
+
+		/**
+		 * Wait for post counts before offering a complete report for copying or download.
+		 */
+		requestReport: function( event ) {
+			event.preventDefault();
+			const button = this;
+			if ( button.getAttribute( 'aria-disabled' ) === 'true' ) {
+				return;
+			}
+			const originalLabel = button.textContent;
+			const withoutCountsButton = document.getElementById( 'wc-status-report-without-counts' );
+			withoutCountsButton.style.display = 'none';
+			button.setAttribute( 'aria-disabled', 'true' );
+			button.textContent = wp.i18n.__( 'Preparing report…', 'woocommerce' );
+			wcSystemStatus.loadPostCounts().then( () => {
+				button.removeAttribute( 'aria-disabled' );
+				button.textContent = originalLabel;
+				wcSystemStatus.generateReport.call( button );
+			}, () => {
+				button.removeAttribute( 'aria-disabled' );
+				button.textContent = wp.i18n.__( 'Retry system report', 'woocommerce' );
+				withoutCountsButton.style.display = '';
+			} );
 		},
 
 		/**

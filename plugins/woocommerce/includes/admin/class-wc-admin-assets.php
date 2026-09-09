@@ -812,8 +812,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// System status.
 			if ( $wc_screen_id . '_page_wc-status' === $screen_id ) {
-				wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'wc-clipboard' ), $version );
+				wp_register_script( 'wc-admin-system-status', WC()->plugin_url() . '/assets/js/admin/system-status' . $suffix . '.js', array( 'wc-clipboard', 'wp-api-fetch', 'wp-i18n' ), $version );
 				wp_enqueue_script( 'wc-admin-system-status' );
+				wp_set_script_translations( 'wc-admin-system-status', 'woocommerce' );
 				wp_localize_script(
 					'wc-admin-system-status',
 					'woocommerce_admin_system_status',

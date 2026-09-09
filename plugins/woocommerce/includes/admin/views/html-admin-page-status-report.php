@@ -7,13 +7,18 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$report             = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
+$report = WC_Admin_Status::get_report_data( isset( $_GET['wc_status_load_post_counts'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only selects whether this read-only report includes counts.
+if ( is_wp_error( $report ) ) {
+	echo '<div class="notice notice-error"><p>' . esc_html__( 'The system status report could not be loaded. Please reload the page.', 'woocommerce' ) . '</p></div>';
+	return;
+}
+
+$post_counts_loaded = array_key_exists( 'post_type_counts', $report );
 $environment        = $report['environment'];
 $database           = $report['database'];
 $post_type_counts   = isset( $report['post_type_counts'] ) ? $report['post_type_counts'] : array();
@@ -55,6 +60,7 @@ if ( file_exists( $plugin_path ) ) {
 		<a class="button-secondary docs" href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
 			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
 		</a>
+		<button type="button" class="button-secondary" id="wc-status-report-without-counts" style="display: none"><?php esc_html_e( 'Generate without post counts', 'woocommerce' ); ?></button>
 	</p>
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
@@ -544,13 +550,11 @@ if ( file_exists( $plugin_path ) ) {
 		<?php endif; ?>
 	</tbody>
 </table>
-<?php if ( $post_type_counts ) : ?>
-	<table class="wc_status_table widefat" cellspacing="0">
+	<table class="wc_status_table widefat" id="wc-status-post-counts" data-loaded="<?php echo $post_counts_loaded ? 'true' : 'false'; ?>" cellspacing="0">
 		<thead>
 		<tr>
 			<th colspan="3" data-export-label="Post Type Counts">
 				<h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2>
-				<p><?php esc_html_e( 'Counts are approximate database estimates and may differ substantially from exact totals.', 'woocommerce' ); ?></p>
 			</th>
 		</tr>
 		</thead>
@@ -561,14 +565,24 @@ if ( file_exists( $plugin_path ) ) {
 				<tr>
 					<td><?php echo esc_html( $ptype['type'] ); ?></td>
 					<td class="help">&nbsp;</td>
-					<td><?php echo '~' . absint( $ptype['count'] ); ?></td>
+					<td><?php echo absint( $ptype['count'] ); ?></td>
 				</tr>
 				<?php
 			}
 			?>
 		</tbody>
+		<?php if ( ! $post_counts_loaded ) : ?>
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					<p id="wc-status-post-counts-message" role="status" aria-live="polite"><?php esc_html_e( 'Load post counts if you need them for troubleshooting. This may take a while on large sites.', 'woocommerce' ); ?></p>
+					<button type="button" class="button hide-if-no-js" id="wc-status-load-post-counts"><?php esc_html_e( 'Load post counts', 'woocommerce' ); ?></button>
+					<noscript><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&wc_status_load_post_counts=1' ) ); ?>"><?php esc_html_e( 'Load post counts', 'woocommerce' ); ?></a></noscript>
+				</td>
+			</tr>
+		</tfoot>
+		<?php endif; ?>
 	</table>
-<?php endif; ?>
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
