@@ -817,7 +817,8 @@ const getCurrentDatesMemoized = memoize<
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
-		secondaryEnd
+		secondaryEnd,
+		secondaryShift
 	) =>
 		[
 			period,
@@ -826,6 +827,7 @@ const getCurrentDatesMemoized = memoize<
 			primaryEnd && primaryEnd.format(),
 			secondaryStart && secondaryStart.format(),
 			secondaryEnd && secondaryEnd.format(),
+			secondaryShift,
 		].join( ':' )
 );
 
