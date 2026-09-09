@@ -73,12 +73,14 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_account_menu_items() {
 		$this->assertEquals(
 			array(
-				'dashboard'       => 'Dashboard',
-				'orders'          => 'Orders',
-				'downloads'       => 'Downloads',
-				'edit-address'    => 'Addresses',
-				'edit-account'    => 'Account details',
-				'customer-logout' => 'Log out',
+				'dashboard'           => 'Dashboard',
+				'orders'              => 'Orders',
+				'downloads'           => 'Downloads',
+				// Back in Stock Notifications is enabled for the whole suite in bootstrap.php.
+				'stock-notifications' => 'Stock notifications',
+				'edit-address'        => 'Addresses',
+				'edit-account'        => 'Account details',
+				'customer-logout'     => 'Log out',
 			),
 			wc_get_account_menu_items()
 		);

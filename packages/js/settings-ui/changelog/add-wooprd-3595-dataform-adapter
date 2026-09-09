@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a DataForm adapter that maps the Settings UI schema to a single DataForm field list and form configuration.

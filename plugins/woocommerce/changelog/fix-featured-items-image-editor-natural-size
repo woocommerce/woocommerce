@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the real image dimensions in the Featured Product and Featured Category image editor, which opened at a square default after WordPress 6.2 merged the image editing provider into the editor component.

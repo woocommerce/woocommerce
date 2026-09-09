@@ -144,6 +144,15 @@ When creating PRs, **always use the template** from `.github/PULL_REQUEST_TEMPLA
 
 For bug fixes, always reference the PR that introduced the bug using: `Bug introduced in PR #XXXXX.`
 
+### Review Requirements
+
+PRs against `trunk` require an approving review from a human by default. `docs/contribution/contributing/deciding-pr-high-impact.md` defines when that requirement may be bypassed (clearly low-impact changes: docs, typos, tests, tooling outside the release package) and when an independent human review is always required (anything on the High-Impact list, plus security, privacy, data integrity, backward compatibility, and performance-sensitive paths).
+
+Two rules matter for agents:
+
+- Never present an AI review, whether your own or another agent's, as satisfying the human review requirement. The author and their agents are a single workflow, not independent reviewers.
+- When a PR qualifies as High-Impact, say so and recommend requesting an independent human review; never suggest merging it without one.
+
 ## Testing Environment
 
 - PHP tests run in Docker via `wp-env`
@@ -216,7 +225,7 @@ Database migrations live in `WC_Install::$db_updates`; read that class for the c
 
 ## Comments and Docblocks
 
-Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
 
 When writing a comment or docblock description:
 
@@ -299,6 +308,8 @@ This is part of the WooCommerce monorepo:
 ## Automated Code Reviews
 
 For code review standards and critical violations to flag, use the **`woocommerce-code-review` skill**.
+
+Automated reviews complement the [Review Requirements](#review-requirements); they never satisfy the human review requirement.
 
 ## Notes for AI Agents
 

@@ -163,6 +163,28 @@ class WC_Helper_Subscriptions_API {
 			WC_Helper::get_subscriptions();
 			WC_Helper::get_product_usage_notice_rules();
 			WC_Helper::fetch_helper_connection_info();
+
+			// get_subscriptions() swallows Helper API failures and returns an empty
+			// array, so a refresh that could not reach WooCommerce.com would
+			// otherwise report success over an empty list. Surface the recorded
+			// failure instead. Checked before serving, since serving exits.
+			$api_error = WC_Helper::get_api_error();
+
+			if ( null !== $api_error ) {
+				wp_send_json_error(
+					array(
+						'message' => $api_error['message'],
+						// The upstream WooCommerce.com status, carried in the body
+						// rather than used as the response status. The failure is
+						// between this store and WooCommerce.com, so relaying it
+						// would have this endpoint claim the caller was rate
+						// limited or unauthorized when neither is true.
+						'code'    => $api_error['code'],
+					),
+					400
+				);
+			}
+
 			self::get_subscriptions();
 		} catch ( Exception $e ) {
 			wp_send_json_error(

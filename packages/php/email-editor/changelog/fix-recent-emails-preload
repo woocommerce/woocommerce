@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preload the recent emails used by the template selection modal, and add the woocommerce_email_editor_preload_rest_api_routes filter.

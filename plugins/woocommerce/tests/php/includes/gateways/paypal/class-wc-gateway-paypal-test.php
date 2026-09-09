@@ -20,7 +20,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	private $transaction_id_26960 = 'dummy_id_26960';
 
 	/**
-	 * @var string Dummy indentifiable error message.
+	 * @var string Dummy identifiable error message.
 	 */
 	private $error_message_26960 = 'Paypal error for GH issue 26960';
 
