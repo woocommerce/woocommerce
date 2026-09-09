@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix state name with special characters like carat or double quotes in My Account address
