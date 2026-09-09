@@ -94,9 +94,6 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		return SPONSORED_PRODUCT_LABEL === product.label;
 	}
 
-	// The "Sponsored" label is the text half of the paid-placement disclosure;
-	// the colored stripe from inlineCss() is the other half. Keep the label
-	// wherever the stripe shows, including compact cards that hide the vendor.
 	const showSponsoredLabel = ! isLoading && isSponsored();
 	const showVendorDetails = showVendor || showSponsoredLabel;
 

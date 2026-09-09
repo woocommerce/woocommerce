@@ -27,9 +27,7 @@
 	}
 
 	.woocommerce-marketplace__header-title {
-		// The standard wc-admin page header is hidden on this page, so this
-		// heading is the only page title. Sized like the Settings > Payments
-		// title so it stands out from the tab labels below it.
+		// Must stay larger than the tab labels below it.
 		font-size: 16px;
 		font-weight: 600;
 		margin: 0;
