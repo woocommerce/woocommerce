@@ -90,6 +90,8 @@ final class FinanceDataProviderRegistry {
 	 * @since 11.2.0
 	 */
 	public function is_registered( string $gateway_id ): bool {
+		$this->initialize();
+
 		return isset( $this->providers[ $gateway_id ] );
 	}
 
