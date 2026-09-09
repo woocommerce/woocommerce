@@ -220,6 +220,56 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The date range is labelled in the store's timezone, not in UTC.
+	 *
+	 * A date format that names the timezone should name the merchant's own, and the date itself
+	 * should read the same whichever timezone the store keeps.
+	 *
+	 * @testWith ["Europe/Sofia", "Y-m-d T", "2025-06-01 EEST"]
+	 *           ["America/Los_Angeles", "Y-m-d T", "2025-06-01 PDT"]
+	 *           ["Pacific/Kiritimati", "F j, Y", "June 1, 2025"]
+	 *           ["Pacific/Midway", "F j, Y", "June 1, 2025"]
+	 *
+	 * @param string $timezone Store timezone.
+	 * @param string $format   Store date format.
+	 * @param string $expected Expected label for a one day report.
+	 */
+	public function test_date_range_label_uses_the_store_timezone( string $timezone, string $format, string $expected ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'date_format', $format );
+
+		$this->assertSame(
+			$expected,
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-01T23:59:59',
+				)
+			),
+			'The label should read in the store timezone rather than UTC.'
+		);
+	}
+
+	/**
+	 * @testdox The date range label goes through the WooCommerce date format, so a store can filter it.
+	 */
+	public function test_date_range_label_uses_the_woocommerce_date_format(): void {
+		update_option( 'date_format', 'F j, Y' );
+		add_filter( 'woocommerce_date_format', fn() => 'd/m/Y' );
+
+		$this->assertSame(
+			'01/06/2025 - 30/06/2025',
+			ReportExporter::get_export_date_range_label(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				)
+			),
+			'The label should honour woocommerce_date_format like the rest of WooCommerce date output.'
+		);
+	}
+
+	/**
 	 * @testdox A single day range is labelled as one date rather than a range.
 	 */
 	public function test_single_day_date_range_label(): void {

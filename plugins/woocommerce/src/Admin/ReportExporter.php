@@ -291,15 +291,15 @@ class ReportExporter {
 	 * @return string The date in the store's date format, or an empty string when it cannot be read.
 	 */
 	private static function format_date_range_bound( $date ) {
-		// Read and formatted in UTC so the date reads back exactly as the merchant picked it.
-		$utc    = new \DateTimeZone( 'UTC' );
-		$parsed = \DateTimeImmutable::createFromFormat( 'Y-m-d|', $date, $utc );
+		// Read in the store's own timezone, so the date reads back as the merchant picked it and a
+		// date format that names the timezone names theirs rather than UTC. Midday is a safe anchor.
+		$parsed = \DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $date . ' 12:00:00', wp_timezone() );
 
 		if ( false === $parsed ) {
 			return '';
 		}
 
-		return (string) wp_date( get_option( 'date_format' ), $parsed->getTimestamp(), $utc );
+		return (string) wp_date( wc_date_format(), $parsed->getTimestamp() );
 	}
 
 	/**
