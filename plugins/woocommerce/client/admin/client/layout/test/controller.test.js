@@ -50,6 +50,36 @@ describe( 'getPages', () => {
 			expect( paths ).not.toContain( path );
 		} );
 	} );
+
+	it( 'registers finance pages under the Finance menu when payments_finance is enabled', () => {
+		isFeatureEnabled.mockImplementation(
+			( feature ) => feature === 'payments_finance'
+		);
+
+		const pages = getPages().filter( ( page ) =>
+			page.path.startsWith( '/finance/' )
+		);
+
+		expect( pages.map( ( page ) => page.path ) ).toEqual( [
+			'/finance/overview',
+			'/finance/payouts',
+		] );
+		pages.forEach( ( page ) => {
+			expect( page.wpOpenMenu ).toBe(
+				'toplevel_page_wc-admin-path--finance-overview'
+			);
+			expect( page.capability ).toBe( 'manage_woocommerce' );
+		} );
+	} );
+
+	it( 'does not register finance pages when payments_finance is disabled', () => {
+		isFeatureEnabled.mockReturnValue( false );
+
+		const paths = getPages().map( ( page ) => page.path );
+
+		expect( paths ).not.toContain( '/finance/overview' );
+		expect( paths ).not.toContain( '/finance/payouts' );
+	} );
 } );
 
 describe( 'updateLinkHref', () => {

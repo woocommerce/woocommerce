@@ -34,14 +34,23 @@ class FinanceController implements RegisterHooksInterface {
 	private FinanceRestController $rest_controller;
 
 	/**
+	 * The finance admin menu.
+	 *
+	 * @var FinanceMenu
+	 */
+	private FinanceMenu $menu;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FinanceRestController $rest_controller The finance REST controller.
+	 * @param FinanceMenu           $menu            The finance admin menu.
 	 */
-	final public function init( FinanceRestController $rest_controller ): void {
+	final public function init( FinanceRestController $rest_controller, FinanceMenu $menu ): void {
 		$this->rest_controller = $rest_controller;
+		$this->menu            = $menu;
 	}
 
 	/**
@@ -54,7 +63,7 @@ class FinanceController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle the init hook: register the REST controller when the feature is enabled.
+	 * Handle the init hook: register the REST controller and the admin menu when the feature is enabled.
 	 *
 	 * @internal
 	 */
@@ -64,6 +73,7 @@ class FinanceController implements RegisterHooksInterface {
 		}
 
 		$this->rest_controller->register();
+		$this->menu->register();
 	}
 
 	/**

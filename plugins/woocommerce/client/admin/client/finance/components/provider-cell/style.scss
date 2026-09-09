@@ -1,0 +1,12 @@
+.woocommerce-finance-provider-cell {
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smaller;
+
+	&__icon {
+		inline-size: 24px;
+		block-size: 24px;
+		object-fit: contain;
+		border-radius: 4px;
+	}
+}

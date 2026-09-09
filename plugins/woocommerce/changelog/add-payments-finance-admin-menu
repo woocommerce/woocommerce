@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Finance admin menu with Overview and Payouts pages, showing payment provider balances and payouts behind the payments_finance feature flag.

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Payments\Finance;
 
 use Automattic\WooCommerce\Internal\Admin\Payments\Finance\FinanceController;
 use Automattic\WooCommerce\Internal\Admin\Payments\Finance\FinanceDataSchemas;
+use Automattic\WooCommerce\Internal\Admin\Payments\Finance\FinanceMenu;
 use Automattic\WooCommerce\Internal\Admin\Payments\Finance\FinanceRestController;
 use Automattic\WooCommerce\Internal\Admin\Payments\Finance\FinanceService;
 use WC_Unit_Test_Case;
@@ -36,6 +37,13 @@ class FinanceControllerTest extends WC_Unit_Test_Case {
 	private FinanceRestController $rest_controller;
 
 	/**
+	 * The admin menu injected into the SUT.
+	 *
+	 * @var FinanceMenu
+	 */
+	private FinanceMenu $menu;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -44,8 +52,10 @@ class FinanceControllerTest extends WC_Unit_Test_Case {
 		$this->rest_controller = new FinanceRestController();
 		$this->rest_controller->init( $this->getMockBuilder( FinanceService::class )->getMock(), new FinanceDataSchemas() );
 
+		$this->menu = new FinanceMenu();
+
 		$this->sut = new FinanceController();
-		$this->sut->init( $this->rest_controller );
+		$this->sut->init( $this->rest_controller, $this->menu );
 	}
 
 	/**
@@ -85,10 +95,11 @@ class FinanceControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->sut->is_enabled() );
 		$this->assertFalse( has_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this->rest_controller, 'handle_woocommerce_rest_api_get_rest_namespaces' ) ) );
+		$this->assertFalse( has_action( 'admin_menu', array( $this->menu, 'handle_admin_menu' ) ) );
 	}
 
 	/**
-	 * @testdox Should register the REST controller and its routes when the feature is enabled.
+	 * @testdox Should register the REST controller, its routes and the admin menu when the feature is enabled.
 	 */
 	public function test_registers_rest_controller_and_routes_when_enabled(): void {
 		update_option( self::OPTION, 'yes' );
@@ -97,6 +108,7 @@ class FinanceControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->sut->is_enabled() );
 		$this->assertSame( 10, has_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this->rest_controller, 'handle_woocommerce_rest_api_get_rest_namespaces' ) ) );
+		$this->assertSame( 10, has_action( 'admin_menu', array( $this->menu, 'handle_admin_menu' ) ) );
 
 		$this->clear_rest_server();
 		$routes = rest_get_server()->get_routes( 'wc-admin' );

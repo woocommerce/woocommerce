@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add the payments_finance_last_provider user preference type used by the Finance payouts page.
