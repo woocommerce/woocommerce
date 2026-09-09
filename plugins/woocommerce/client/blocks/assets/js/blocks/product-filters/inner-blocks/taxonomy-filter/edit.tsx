@@ -28,6 +28,8 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
+import { createHierarchicalList } from '../../utils/create-hierarchical-list';
+import { getProductCollectionQueryState } from '../../utils/get-product-collection-query-state';
 
 type WPTaxonomyTerm = {
 	id: number;
@@ -49,57 +51,6 @@ const EMPTY_TAXONOMY_TERMS_RESULT = Object.freeze( {
 	isTermsLoading: false,
 } );
 
-// Create hierarchical structure: parents followed by their children
-function createHierarchicalList(
-	terms: FilterOptionItem[],
-	sortOrder: string
-) {
-	const children = new Map();
-
-	// First: categorize terms by parent (numeric WP term ID)
-	terms.forEach( ( term ) => {
-		const parentId = term.parent ?? 0;
-		if ( ! children.has( parentId ) ) {
-			children.set( parentId, [] );
-		}
-		children.get( parentId ).push( term );
-	} );
-
-	// Next: sort them
-	children.keys().forEach( ( key ) => {
-		children.set(
-			key,
-			sortFilterOptions( children.get( key ), sortOrder )
-		);
-	} );
-
-	// Last: build hierarchical list
-	const result: FilterOptionItem[] = [];
-	function addTermsRecursively(
-		termList: FilterOptionItem[],
-		depth = 0,
-		visited = new Set< number >()
-	) {
-		if ( depth > 10 ) {
-			return;
-		}
-		termList.forEach( ( term ) => {
-			if ( ! term.termId || visited.has( term.termId ) ) {
-				return;
-			}
-			visited.add( term.termId );
-			result.push( { ...term, depth } );
-			const termChildren = children.get( term.termId ) || [];
-			if ( termChildren.length > 0 ) {
-				addTermsRecursively( termChildren, depth + 1, visited );
-			}
-		} );
-	}
-
-	addTermsRecursively( children.get( 0 ) );
-	return result;
-}
-
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
 
@@ -120,11 +71,36 @@ const Edit = ( props: EditProps ) => {
 	const [ isOptionsLoading, setIsOptionsLoading ] = useState< boolean >(
 		! isPreview
 	);
+	const localQueryState = getProductCollectionQueryState(
+		props.context.query
+	);
+	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
+		useCollectionData( {
+			queryTaxonomy: isPreview ? undefined : taxonomy,
+			queryState: localQueryState ?? {},
+			isEditor: true,
+		} );
+	const shouldScopeTerms = localQueryState !== null && hideEmpty;
+	const includedTermIds =
+		shouldScopeTerms &&
+		objectHasProp( filteredCounts, 'taxonomy_counts' ) &&
+		Array.isArray( filteredCounts.taxonomy_counts )
+			? filteredCounts.taxonomy_counts
+					.filter( ( { count } ) => count > 0 )
+					.map( ( { term } ) => term )
+					.sort( ( a, b ) => a - b )
+					.join( ',' )
+			: '';
 
 	// Fetch taxonomy terms using WordPress core data
 	const { taxonomyTerms, isTermsLoading } = useSelect(
 		( select ) => {
-			if ( isPreview || ! taxonomy ) {
+			if (
+				isPreview ||
+				! taxonomy ||
+				( shouldScopeTerms &&
+					( isFilterCountsLoading || ! includedTermIds ) )
+			) {
 				return EMPTY_TAXONOMY_TERMS_RESULT;
 			}
 
@@ -132,7 +108,8 @@ const Edit = ( props: EditProps ) => {
 				select( coreStore );
 
 			const selectArgs = {
-				per_page: 15,
+				per_page: shouldScopeTerms ? -1 : 15,
+				...( shouldScopeTerms && { include: includedTermIds } ),
 				hide_empty: hideEmpty,
 				orderby: 'name',
 				order: 'asc',
@@ -149,16 +126,15 @@ const Edit = ( props: EditProps ) => {
 				] ),
 			};
 		},
-		[ taxonomy, hideEmpty, isPreview ]
+		[
+			taxonomy,
+			hideEmpty,
+			isPreview,
+			shouldScopeTerms,
+			isFilterCountsLoading,
+			includedTermIds,
+		]
 	);
-
-	// Fetch taxonomy counts using the updated useCollectionData hook
-	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
-		useCollectionData( {
-			queryTaxonomy: isPreview ? undefined : taxonomy,
-			queryState: {},
-			isEditor: true,
-		} );
 
 	useEffect( () => {
 		if ( isPreview ) {

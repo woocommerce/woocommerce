@@ -33,6 +33,7 @@ import type { Attributes } from './types';
 import type { FilterItemFields } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import RatingStars from './components/rating-stars';
+import { getProductCollectionQueryState } from '../../utils/get-product-collection-query-state';
 
 const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes, clientId } = props;
@@ -64,12 +65,15 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 		}
 	);
 
-	const [ queryState ] = useQueryStateByContext();
+	const [ globalQueryState ] = useQueryStateByContext();
+	const localQueryState = getProductCollectionQueryState(
+		props.context.query
+	);
 
 	const { data: collectionFilters, isLoading: filteredCountsLoading } =
 		useCollectionData( {
 			queryRating: true,
-			queryState,
+			queryState: localQueryState ?? globalQueryState,
 			isEditor: true,
 		} );
 
