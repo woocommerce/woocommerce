@@ -1155,13 +1155,22 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 	/**
 	 * Get array of counts of objects. Orders, products, etc.
+	 * Counts are cached for one hour to avoid repeated scans of large posts tables.
 	 *
 	 * @return array
 	 */
 	public function get_post_type_counts() {
 		global $wpdb;
 
-		$post_type_counts = $wpdb->get_results( "SELECT post_type AS 'type', count(1) AS 'count' FROM {$wpdb->posts} GROUP BY post_type;" );
+		$post_type_counts = get_transient( 'wc_system_status_post_type_counts' );
+
+		if ( false === $post_type_counts ) {
+			$post_type_counts = $wpdb->get_results( "SELECT post_type AS 'type', count(1) AS 'count' FROM {$wpdb->posts} GROUP BY post_type;" );
+
+			if ( is_array( $post_type_counts ) && empty( $wpdb->last_error ) ) {
+				set_transient( 'wc_system_status_post_type_counts', $post_type_counts, HOUR_IN_SECONDS );
+			}
+		}
 
 		return is_array( $post_type_counts ) ? $post_type_counts : array();
 	}

@@ -22,6 +22,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = new WC_REST_System_Status_V2_Controller();
 		delete_transient( 'wc_system_status_theme_info' );
+		delete_transient( 'wc_system_status_post_type_counts' );
 	}
 
 	/**
@@ -31,6 +32,59 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		parent::tearDown();
 		remove_all_filters( 'wc_get_template' );
 		delete_transient( 'wc_system_status_theme_info' );
+	}
+
+	/**
+	 * @testdox Should reuse post counts without another aggregation and refresh them after cache eviction.
+	 */
+	public function test_get_post_type_counts_caches_and_refreshes_counts(): void {
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$query_count = 0;
+		add_filter(
+			'query',
+			function ( $query ) use ( &$query_count ) {
+				if ( false !== strpos( $query, 'GROUP BY post_type' ) ) {
+					++$query_count;
+				}
+				return $query;
+			}
+		);
+
+		$counts = $this->sut->get_post_type_counts();
+		$this->assertSame( '1', array_column( $counts, 'count', 'type' )['status_count_test'], 'Counts should include custom post types.' );
+
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$this->assertEquals( $counts, ( new WC_REST_System_Status_V2_Controller() )->get_post_type_counts(), 'New controller instances should reuse cached counts.' );
+		$this->assertSame( 1, $query_count, 'Cached reads should not repeat the aggregation.' );
+
+		delete_transient( 'wc_system_status_post_type_counts' );
+		$counts = $this->sut->get_post_type_counts();
+		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Missing cache should refresh counts from the database.' );
+		$this->assertSame( 2, $query_count, 'Refreshing should run one more aggregation.' );
+	}
+
+	/**
+	 * @testdox Should retry a failed post-count query instead of caching its empty result.
+	 */
+	public function test_get_post_type_counts_does_not_cache_query_errors(): void {
+		global $wpdb;
+
+		$fail_query = static function ( $query ) {
+			return false !== strpos( $query, 'GROUP BY post_type' ) ? 'SELECT * FROM nonexistent_status_count_table' : $query;
+		};
+		add_filter( 'query', $fail_query );
+		$suppress_errors = $wpdb->suppress_errors();
+		try {
+			$this->assertSame( array(), $this->sut->get_post_type_counts(), 'Query errors should preserve the empty-array response.' );
+			$this->assertFalse( get_transient( 'wc_system_status_post_type_counts' ), 'A failed query should not be cached.' );
+		} finally {
+			remove_filter( 'query', $fail_query );
+			$wpdb->suppress_errors( $suppress_errors );
+		}
+
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$counts = $this->sut->get_post_type_counts();
+		$this->assertSame( '1', array_column( $counts, 'count', 'type' )['status_count_test'], 'The next request should retry the query.' );
 	}
 
 	/**
