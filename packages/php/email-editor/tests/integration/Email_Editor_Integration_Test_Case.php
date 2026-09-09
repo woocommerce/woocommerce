@@ -51,6 +51,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	public Container $di_container;
 
 	/**
+	 * Registries replaced by swap_enqueue_registries(), until restored.
+	 *
+	 * @var array{styles: mixed, scripts: mixed}|null
+	 */
+	private $original_enqueue_registries;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -322,5 +329,37 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$this->di_container = $container;
+	}
+
+	/**
+	 * Replace the global styles and scripts registries with fresh ones.
+	 *
+	 * Enqueue state is global and WP_UnitTestCase does not reset it. Call from setUp()
+	 * in tests that enqueue assets, and restore_enqueue_registries() from tearDown().
+	 */
+	protected function swap_enqueue_registries(): void {
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolate enqueue state per test, as core's own script and style tests do.
+		$this->original_enqueue_registries = array(
+			'styles'  => $GLOBALS['wp_styles'] ?? null,
+			'scripts' => $GLOBALS['wp_scripts'] ?? null,
+		);
+
+		$GLOBALS['wp_styles']  = new \WP_Styles();
+		$GLOBALS['wp_scripts'] = new \WP_Scripts();
+		// phpcs:enable
+	}
+
+	/**
+	 * Restore the registries replaced by swap_enqueue_registries().
+	 */
+	protected function restore_enqueue_registries(): void {
+		if ( null === $this->original_enqueue_registries ) {
+			return;
+		}
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the registries swapped in swap_enqueue_registries().
+		$GLOBALS['wp_styles']  = $this->original_enqueue_registries['styles'];
+		$GLOBALS['wp_scripts'] = $this->original_enqueue_registries['scripts'];
+		// phpcs:enable
+		$this->original_enqueue_registries = null;
 	}
 }
