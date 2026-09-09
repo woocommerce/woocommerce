@@ -153,6 +153,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 *
 	 * @testWith ["2025-06-01T00:00:00", "2025-06-30T23:59:59", "2025-06-01", "2025-06-30"]
 	 *           ["2025-06-01", "2025-06-01", "2025-06-01", "2025-06-01"]
+	 *           ["2024-02-01T00:00:00", "2024-02-29T23:59:59", "2024-02-01", "2024-02-29"]
 	 *
 	 * @param string $after           The export's `after` argument.
 	 * @param string $before          The export's `before` argument.
