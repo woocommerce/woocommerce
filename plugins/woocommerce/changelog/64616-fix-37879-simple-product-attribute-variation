@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Product_Attribute::get_variation() incorrectly returning true for attributes on non-variable product types.

@@ -632,7 +632,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$attribute->set_options( $options );
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
-				$attribute->set_variation( $meta_value['is_variation'] );
+				// Only set used_for_variation when the product type actually supports variations.
+				$attribute->set_variation( $product->is_type( ProductType::VARIABLE ) ? (bool) $meta_value['is_variation'] : false );
 
 				/**
 				 * Filter product attribute after initialization.
