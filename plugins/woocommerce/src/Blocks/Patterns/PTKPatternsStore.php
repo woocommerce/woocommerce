@@ -17,6 +17,20 @@ class PTKPatternsStore {
 	 */
 	const FETCH_PATTERNS_ACTION = 'fetch_patterns';
 
+	/**
+	 * Transient set when a fetch is scheduled. While it exists, no further fetch is scheduled.
+	 *
+	 * @since 11.2.0
+	 */
+	const SCHEDULE_COOLDOWN_TRANSIENT = 'wc_ptk_fetch_patterns_cooldown';
+
+	/**
+	 * Minimum time between two scheduled fetches, in seconds.
+	 *
+	 * @since 11.2.0
+	 */
+	const SCHEDULE_COOLDOWN = DAY_IN_SECONDS;
+
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
 	);
@@ -103,16 +117,27 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an action if it's not already pending.
+	 * Schedule an action if it's not already pending and no fetch was scheduled within the cooldown.
+	 *
+	 * The cooldown guards against a failing fetch being rescheduled on every page load: a failed
+	 * action is not pending, so without it each request that finds the cache empty would queue a
+	 * new one. The first fetch is still scheduled immediately.
+	 *
+	 * @since 11.2.0 Scheduling is skipped while the cooldown transient exists.
 	 *
 	 * @param string $action The action name to schedule.
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
+		if ( get_transient( self::SCHEDULE_COOLDOWN_TRANSIENT ) ) {
+			return;
+		}
+
 		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
 
+		set_transient( self::SCHEDULE_COOLDOWN_TRANSIENT, time(), self::SCHEDULE_COOLDOWN );
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
 	}
 

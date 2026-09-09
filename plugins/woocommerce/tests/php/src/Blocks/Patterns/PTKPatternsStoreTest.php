@@ -35,6 +35,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// Clean up any existing actions before each test.
 		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+		delete_transient( PTKPatternsStore::SCHEDULE_COOLDOWN_TRANSIENT );
 
 		$this->ptk_client    = $this->createMock( PTKClient::class );
 		$this->pattern_store = new PTKPatternsStore( $this->ptk_client );
@@ -519,5 +520,38 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// Restore the original action count.
 		$wp_actions['action_scheduler_init'] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
+	 * @testdox get_patterns should schedule the first fetch immediately but not another one within the cooldown.
+	 */
+	public function test_get_patterns_does_not_reschedule_within_cooldown() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'The first call should schedule a fetch immediately' );
+
+		// A failed run leaves no pending action behind; before the cooldown this let every page load schedule a new one.
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+
+		$this->pattern_store->get_patterns();
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A second call within the cooldown should not schedule another fetch' );
+	}
+
+	/**
+	 * @testdox get_patterns should schedule a fetch again once the cooldown has expired.
+	 */
+	public function test_get_patterns_schedules_again_after_cooldown_expires() {
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+
+		// Simulate the transient timing out.
+		delete_transient( PTKPatternsStore::SCHEDULE_COOLDOWN_TRANSIENT );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch should be scheduled again after the cooldown expires' );
 	}
 }
