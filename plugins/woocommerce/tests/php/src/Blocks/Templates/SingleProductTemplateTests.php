@@ -382,9 +382,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 * @return string
 	 */
 	private static function strip_whitespace( string $content ): string {
-		$stripped = preg_replace( '/\s+/', '', $content );
-
-		return is_string( $stripped ) ? $stripped : '';
+		return preg_replace( '/\s+/', '', $content );
 	}
 
 	/**
@@ -397,8 +395,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 */
 	private static function strip_whitespace_and_password_form_ids( string $content ): string {
 		$without_whitespace = self::strip_whitespace( $content );
-		$stripped           = preg_replace( '/pwbox-\d+/', '', $without_whitespace );
 
-		return is_string( $stripped ) ? $stripped : $without_whitespace;
+		return preg_replace( '/pwbox-\d+/', '', $without_whitespace );
 	}
 }
