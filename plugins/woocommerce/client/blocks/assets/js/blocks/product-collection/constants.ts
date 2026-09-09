@@ -128,77 +128,58 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 	{},
 	[
 		[
-			'core/group',
+			'woocommerce/product-image',
 			{
+				showSaleBadge: false,
 				style: {
 					dimensions: {
-						minHeight: '100%',
+						aspectRatio: '1/1',
 					},
-					spacing: {
-						blockGap: '0.75rem',
-					},
-				},
-				layout: {
-					type: 'flex',
-					orientation: 'vertical',
-					flexWrap: 'nowrap',
-					justifyContent: 'center',
 				},
 			},
 			[
 				[
-					'woocommerce/product-image',
+					'woocommerce/product-sale-badge',
 					{
-						showSaleBadge: false,
-						style: {
-							dimensions: {
-								aspectRatio: '1/1',
-							},
-						},
-					},
-					[
-						[
-							'woocommerce/product-sale-badge',
-							{
-								align: 'right',
-							},
-						],
-					],
-				],
-				[
-					'core/post-title',
-					{
-						level: 2,
-						fontSize: 'medium',
-						style: {
-							layout: {
-								selfStretch: 'fill',
-								flexSize: null,
-							},
-							typography: {
-								lineHeight: '1.4',
-								textAlign: 'center',
-							},
-						},
-						isLink: true,
-						__woocommerceNamespace: PRODUCT_TITLE_NAME,
-					},
-				],
-				[
-					'woocommerce/product-price',
-					{
-						textAlign: 'center',
-						fontSize: 'small',
-					},
-				],
-				[
-					'woocommerce/product-button',
-					{
-						textAlign: 'center',
-						fontSize: 'small',
+						align: 'right',
 					},
 				],
 			],
+		],
+		[
+			'core/post-title',
+			{
+				textAlign: 'center',
+				level: 2,
+				fontSize: 'medium',
+				style: {
+					spacing: {
+						margin: {
+							bottom: '0.75rem',
+							top: '0',
+						},
+					},
+					typography: {
+						lineHeight: '1.4',
+					},
+				},
+				isLink: true,
+				__woocommerceNamespace: PRODUCT_TITLE_NAME,
+			},
+		],
+		[
+			'woocommerce/product-price',
+			{
+				textAlign: 'center',
+				fontSize: 'small',
+			},
+		],
+		[
+			'woocommerce/product-button',
+			{
+				textAlign: 'center',
+				fontSize: 'small',
+			},
 		],
 	],
 ];

@@ -220,6 +220,152 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Error codes whose WP_Error data is machine output rather than a readable detail.
+	 *
+	 * `activate_plugin()` puts the plugin's whole captured output buffer in the error data,
+	 * which is never something a merchant can act on.
+	 */
+	private const OPAQUE_ERROR_DATA_CODES = array( 'unexpected_output' );
+
+	/**
+	 * Longest reason we pass on.
+	 *
+	 * Reasons reach a notice, the persisted install log option and a Tracks property, so an
+	 * upgrader payload of unknown size must never travel untrimmed.
+	 */
+	private const MAX_ERROR_REASON_LENGTH = 300;
+
+	/**
+	 * Make a reason safe to show, store and transmit.
+	 *
+	 * Reasons come from WordPress and from values that reach us through filters, so they can
+	 * carry markup or be arbitrarily long. WordPress also writes some messages as multiple
+	 * paragraphs, so block boundaries become spaces first: stripping the tags would otherwise
+	 * run the last word of one paragraph into the first word of the next.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $text The raw reason.
+	 * @return string The reason, HTML-stripped, whitespace-collapsed and length-capped.
+	 */
+	private static function normalize_reason( string $text ): string {
+		$spaced = preg_replace( '#<(?:/p|/div|/li|/h[1-6]|br\s*/?)>#i', ' ', $text ) ?? $text;
+		$reason = trim( wp_strip_all_tags( $spaced, true ) );
+
+		if ( mb_strlen( $reason ) > self::MAX_ERROR_REASON_LENGTH ) {
+			$reason = trim( mb_substr( $reason, 0, self::MAX_ERROR_REASON_LENGTH ) ) . "\u{2026}";
+		}
+
+		return $reason;
+	}
+
+	/**
+	 * Read a version requirement from plugin header data.
+	 *
+	 * The headers come from `get_plugin_data()` on the unpacked package, whose values pass
+	 * through filters, so the value is not guaranteed to be a string.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $value The raw `RequiresPHP` or `RequiresWP` value.
+	 * @return string The version, or an empty string when the value is not one.
+	 */
+	private static function get_required_version( $value ): string {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		return trim( (string) $value );
+	}
+
+	/**
+	 * Build a merchant-readable reason from the first WP_Error among the given candidates.
+	 *
+	 * WordPress's upgrader reports the real failure (unmet PHP/WP version, filesystem, download)
+	 * as a WP_Error whose message is a short sentence and whose data is often the detail sentence.
+	 * Non-error candidates (false, null, true) are skipped.
+	 *
+	 * The data is only appended when it reads as a detail: codes listed in
+	 * OPAQUE_ERROR_DATA_CODES carry raw plugin output instead, and the result is capped at
+	 * MAX_ERROR_REASON_LENGTH because callers persist and transmit it.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed ...$candidates Values that may be WP_Error instances, in order of preference.
+	 * @return string The reason, HTML-stripped, trimmed and length-capped, or an empty string when none is available.
+	 */
+	public static function get_error_reason( ...$candidates ): string {
+		foreach ( $candidates as $candidate ) {
+			if ( ! is_wp_error( $candidate ) ) {
+				continue;
+			}
+
+			// Both come from WP_Error::add(), which stores whatever a filter callback passed in.
+			$message = $candidate->get_error_message();
+			$data    = $candidate->get_error_data();
+
+			$parts = is_string( $message ) ? array( $message ) : array();
+			if ( is_string( $data ) && ! in_array( $candidate->get_error_code(), self::OPAQUE_ERROR_DATA_CODES, true ) ) {
+				$parts[] = $data;
+			}
+
+			return self::normalize_reason( implode( ' ', array_map( 'trim', $parts ) ) );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Compose a reason for an install that failed an unmet PHP or WordPress version requirement.
+	 *
+	 * WordPress reports these with copy written for the zip-upload flow ("the uploaded plugin requires"),
+	 * so build our own sentence from the versions it actually checked: the package headers it read
+	 * in `Plugin_Upgrader::check_package()`, which can differ from the wp.org listing metadata.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $error       The WP_Error from the upgrader skin, or any non-error value.
+	 * @param mixed $plugin_data The headers of the package that failed, as `Plugin_Upgrader::$new_plugin_data` holds them.
+	 * @return string The reason, or an empty string when the error is not a requirement failure.
+	 */
+	public static function get_requirements_error_reason( $error, $plugin_data ): string {
+		if ( ! is_wp_error( $error ) || ! is_array( $plugin_data ) ) {
+			return '';
+		}
+
+		switch ( $error->get_error_code() ) {
+			case 'incompatible_php_required_version':
+				$required_php = self::get_required_version( $plugin_data['RequiresPHP'] ?? null );
+				if ( '' === $required_php ) {
+					return '';
+				}
+				return self::normalize_reason(
+					sprintf(
+						/* translators: 1: PHP version the plugin requires, 2: PHP version this site runs. */
+						__( 'It requires PHP %1$s or newer, but this site runs PHP %2$s.', 'woocommerce' ),
+						$required_php,
+						PHP_VERSION
+					)
+				);
+			case 'incompatible_wp_required_version':
+				$required_wp = self::get_required_version( $plugin_data['RequiresWP'] ?? null );
+				if ( '' === $required_wp ) {
+					return '';
+				}
+				return self::normalize_reason(
+					sprintf(
+						/* translators: 1: WordPress version the plugin requires, 2: WordPress version this site runs. */
+						__( 'It requires WordPress %1$s or newer, but this site runs WordPress %2$s.', 'woocommerce' ),
+						$required_wp,
+						get_bloginfo( 'version' )
+					)
+				);
+		}
+
+		return '';
+	}
+
+	/**
 	 * Install an array of plugins.
 	 *
 	 * @param array                     $plugins Plugins to install.
@@ -306,11 +452,7 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
-				$error_message = sprintf(
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'We couldn\'t install `%s`. Try again in a few minutes, or install it later from the Extensions page.', 'woocommerce' ),
-					$slug
-				);
+				$error_message = __( 'Try again in a few minutes, or install it later from the Extensions page.', 'woocommerce' );
 
 				$errors->add( $plugin, $error_message );
 				$logger && $logger->add_error( $plugin, $error_message );
@@ -325,7 +467,31 @@ class PluginsHelper {
 			 */
 			do_action( 'woocommerce_plugins_install_before', $slug, $source );
 
-			$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
+			// Plugin_Upgrader::install() only returns errors raised once the package is unpacked.
+			// A failed filesystem connection, download or unpack is only reported to the skin, so
+			// keep it there for the reason below.
+			$skin = new class() extends Automatic_Upgrader_Skin {
+				/**
+				 * The last error the upgrader reported.
+				 *
+				 * @var WP_Error|null
+				 */
+				public $last_error = null;
+
+				/**
+				 * Record the error before passing it on.
+				 *
+				 * @param string|WP_Error $errors The error the upgrader reports.
+				 */
+				public function error( $errors ): void {
+					if ( is_wp_error( $errors ) ) {
+						$this->last_error = $errors;
+					}
+					parent::error( $errors );
+				}
+			};
+
+			$upgrader = new Plugin_Upgrader( $skin );
 			$result   = $upgrader->install( $api->download_link );
 			// result can be false or WP_Error.
 			$results[ $plugin ] = $result;
@@ -361,11 +527,13 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
-				$install_error_message = sprintf(
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'We couldn\'t install `%s`. Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' ),
-					$slug
-				);
+				$install_error_message = self::get_requirements_error_reason( $skin->result, $upgrader->new_plugin_data );
+				if ( '' === $install_error_message ) {
+					$install_error_message = self::get_error_reason( $skin->result, $result, $skin->last_error );
+				}
+				if ( '' === $install_error_message ) {
+					$install_error_message = __( 'Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' );
+				}
 				$errors->add(
 					$plugin,
 					$install_error_message
@@ -479,8 +647,7 @@ class PluginsHelper {
 			$path = isset( $plugin_paths[ $slug ] ) ? $plugin_paths[ $slug ] : false;
 
 			if ( ! $path ) {
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-				$message = sprintf( __( 'The requested plugin `%s`. is not yet installed.', 'woocommerce' ), $slug );
+				$message = __( 'The plugin is not installed yet.', 'woocommerce' );
 				$errors->add(
 					$plugin,
 					$message
@@ -501,8 +668,10 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_activate_error', $slug, $result );
 
-				/* translators: %s: plugin slug (example: woocommerce-services) */
-				$message = sprintf( __( 'The requested plugin `%s` could not be activated.', 'woocommerce' ), $slug );
+				$message = self::get_error_reason( $result );
+				if ( '' === $message ) {
+					$message = __( 'The plugin could not be activated.', 'woocommerce' );
+				}
 				$errors->add(
 					$plugin,
 					$message

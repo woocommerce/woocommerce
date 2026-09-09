@@ -38,4 +38,4 @@ array(
 )
 ```
 
-Use native fields when possible and register custom components only for fields that need plugin-specific UI.
+Use DataForm's built-in controls when possible and register custom components only for fields that need plugin-specific UI.

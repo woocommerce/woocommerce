@@ -695,9 +695,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: calculate_taxes_is_vat_excempt
+	 * Test: calculate_taxes_is_vat_exempt
 	 */
-	public function test_calculate_taxes_is_vat_excempt() {
+	public function test_calculate_taxes_is_vat_exempt() {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -1037,7 +1037,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( 100 );
 		$object->set_currency( 'USD' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>100.00</bdi></span>', $object->get_formatted_order_total() );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>100.00</bdi></span>', $object->get_formatted_order_total() );
 	}
 
 	/**

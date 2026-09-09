@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update wp-coding-standards/wpcs to 3.4.1 (security release) in the phpcs lint tooling.

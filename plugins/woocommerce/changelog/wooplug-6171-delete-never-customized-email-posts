@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Email editor: delete previously generated email posts that were never customized, so those emails render from the current template files and site locale.

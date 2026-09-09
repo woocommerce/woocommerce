@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the stray blue box drawn around the selected Marketplace tab on WordPress 7.1.

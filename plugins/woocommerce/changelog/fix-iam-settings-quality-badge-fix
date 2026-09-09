@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ignore a stale quality_badge URL param in marketplace search requests when the badge is disabled or IAM settings are unavailable, so the listing cannot stay silently filtered without the toggle that clears it.
