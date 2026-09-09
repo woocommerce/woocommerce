@@ -9,7 +9,7 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { useRef } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { useProduct } from '@woocommerce/entities';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -79,6 +79,21 @@ const Edit = ( {
 	const showAllControls =
 		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
 	const showSaleBadge = showAllControls ? false : attributes.showSaleBadge;
+
+	// Persist this so PHP doesn't render the legacy sale badge alongside the inner block.
+	useEffect( () => {
+		if (
+			( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) &&
+			attributes.showSaleBadge !== false
+		) {
+			setAttributes( { showSaleBadge: false } );
+		}
+	}, [
+		isDescendentOfQueryLoop,
+		isDescendentOfSingleProductBlock,
+		attributes.showSaleBadge,
+		setAttributes,
+	] );
 
 	const innerBlockProps = useInnerBlocksProps(
 		{
