@@ -3844,11 +3844,19 @@ function wc_update_1120_delete_unpublished_variation_lookup_rows() {
 		$variation_ids   = array_map( 'intval', $variation_ids );
 		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
 
-		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough.
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough. The
+		// status is checked again here: with direct updates on, a variation re-enabled since the batch was
+		// selected already has its rows back, and they must stay.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
 		$deleted = $wpdb->query(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
-			$wpdb->prepare( "DELETE FROM {$lookup_table} WHERE product_id IN ( {$id_placeholders} )", $variation_ids )
+			$wpdb->prepare(
+				"DELETE lookup FROM {$lookup_table} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+				WHERE lookup.product_id IN ( {$id_placeholders} ) AND posts.post_status != %s",
+				array_merge( $variation_ids, array( ProductStatus::PUBLISH ) )
+			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false !== $deleted ) {
 			update_option( $last_id_option, end( $variation_ids ), false );

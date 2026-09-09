@@ -695,4 +695,59 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			'The batch cursor is cleaned up once the migration is done.'
 		);
 	}
+
+	/**
+	 * @testdox Migration keeps the rows of a variation that was published after its batch was selected.
+	 */
+	public function test_wc_update_1120_delete_unpublished_variation_lookup_rows_rechecks_the_status_at_delete_time(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$wpdb->insert(
+			$lookup_table,
+			array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => 'pa_size',
+				'term_id'                => 1,
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			),
+			array( '%d', '%d', '%s', '%d', '%d', '%d' )
+		);
+
+		// With direct updates on, a save that re-enables the variation writes its rows back between the batch
+		// SELECT and the DELETE. Publishing it the moment the DELETE is issued reproduces that ordering.
+		$republished = false;
+		add_filter(
+			'query',
+			function ( $query ) use ( &$republished, $lookup_table, $variation_id ) {
+				if ( ! $republished && str_starts_with( ltrim( $query ), 'DELETE' ) && str_contains( $query, $lookup_table ) ) {
+					$republished = true;
+					global $wpdb;
+					$wpdb->update( $wpdb->posts, array( 'post_status' => ProductStatus::PUBLISH ), array( 'ID' => $variation_id ) );
+				}
+				return $query;
+			}
+		);
+
+		while ( wc_update_1120_delete_unpublished_variation_lookup_rows() ) {
+			continue;
+		}
+
+		$this->assertTrue( $republished, 'The variation is published while the batch DELETE is issued.' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
+		$this->assertSame( array( $variation_id ), $remaining, 'The rows of a variation published since its batch was selected are kept.' );
+	}
 }
