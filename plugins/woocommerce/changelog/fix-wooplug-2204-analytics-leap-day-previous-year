@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix analytics chart previous year data showing one day late when the previous year range contains 29th February.

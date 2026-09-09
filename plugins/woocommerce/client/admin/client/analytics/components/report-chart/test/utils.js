@@ -25,6 +25,48 @@ function generateDateInterval( interval, startDate, endDate, subtotals ) {
 	};
 }
 
+function formatDay( date ) {
+	const month = String( date.getMonth() + 1 ).padStart( 2, '0' );
+	const day = String( date.getDate() ).padStart( 2, '0' );
+	return `${ date.getFullYear() }-${ month }-${ day }`;
+}
+
+function generateDayIntervals( startDate, endDate, ordersByDate = {} ) {
+	const intervals = [];
+	const day = new Date( `${ startDate }T00:00:00` );
+	const end = new Date( `${ endDate }T00:00:00` );
+	while ( day <= end ) {
+		const date = formatDay( day );
+		intervals.push(
+			generateDateInterval( date, date, date, {
+				orders_count: ordersByDate[ date ] || 0,
+			} )
+		);
+		day.setDate( day.getDate() + 1 );
+	}
+	return intervals;
+}
+
+function buildDayChartData( primaryIntervals, secondaryIntervals ) {
+	return buildChartData(
+		{ data: { totals: {}, intervals: primaryIntervals } },
+		{ data: { totals: {}, intervals: secondaryIntervals } },
+		{ label: 'Custom', range: '', after: '', before: '' },
+		{ label: 'Previous year', range: '', after: '', before: '' },
+		'previous_year',
+		'orders_count',
+		'day'
+	);
+}
+
+function secondaryByDate( chartData, date ) {
+	const entry = chartData.find( ( d ) => d.date === `${ date }T00:00:00` );
+	return {
+		labelDate: entry.secondary.labelDate,
+		value: entry.secondary.value,
+	};
+}
+
 describe( 'buildChartData', () => {
 	test( 'should bump up data since 29th Feb for previous year and compare by day', () => {
 		const primaryData = {
@@ -266,6 +308,85 @@ describe( 'buildChartData', () => {
 				},
 			},
 		] );
+	} );
+
+	test( 'should drop the 29th Feb from previous year data when the primary range has no leap day', () => {
+		const primary = generateDayIntervals( '2021-02-27', '2021-03-02' );
+		const secondary = generateDayIntervals( '2020-02-27', '2020-03-02', {
+			'2020-02-29': 1,
+			'2020-03-01': 2,
+			'2020-03-02': 3,
+		} );
+
+		const chartData = buildDayChartData( primary, secondary );
+
+		expect( chartData ).toHaveLength( 4 );
+		expect( secondaryByDate( chartData, '2021-02-28' ) ).toEqual( {
+			labelDate: '2020-02-28 00:00:00',
+			value: 0,
+		} );
+		expect( secondaryByDate( chartData, '2021-03-01' ) ).toEqual( {
+			labelDate: '2020-03-01 00:00:00',
+			value: 2,
+		} );
+		expect( secondaryByDate( chartData, '2021-03-02' ) ).toEqual( {
+			labelDate: '2020-03-02 00:00:00',
+			value: 3,
+		} );
+	} );
+
+	test( 'should drop the 29th Feb from previous year data when both ranges span a leap year', () => {
+		// Both ranges touch 2024, but only the previous year range contains the leap day.
+		const primary = generateDayIntervals( '2024-12-31', '2025-03-02' );
+		const secondary = generateDayIntervals( '2023-12-31', '2024-03-02', {
+			'2024-02-29': 1,
+			'2024-03-01': 2,
+			'2024-03-02': 3,
+		} );
+
+		const chartData = buildDayChartData( primary, secondary );
+
+		expect( secondaryByDate( chartData, '2025-02-28' ) ).toEqual( {
+			labelDate: '2024-02-28 00:00:00',
+			value: 0,
+		} );
+		expect( secondaryByDate( chartData, '2025-03-01' ) ).toEqual( {
+			labelDate: '2024-03-01 00:00:00',
+			value: 2,
+		} );
+		expect( secondaryByDate( chartData, '2025-03-02' ) ).toEqual( {
+			labelDate: '2024-03-02 00:00:00',
+			value: 3,
+		} );
+	} );
+
+	test( 'should bump up data since 29th Feb when both ranges span a leap year', () => {
+		// Both ranges touch 2024, but only the primary range contains the leap day.
+		const primary = generateDayIntervals( '2024-02-27', '2025-01-02' );
+		const secondary = generateDayIntervals( '2023-02-27', '2024-01-02', {
+			'2023-02-28': 1,
+			'2023-03-01': 2,
+			'2023-03-02': 3,
+		} );
+
+		const chartData = buildDayChartData( primary, secondary );
+
+		expect( secondaryByDate( chartData, '2024-02-28' ) ).toEqual( {
+			labelDate: '2023-02-28 00:00:00',
+			value: 1,
+		} );
+		expect( secondaryByDate( chartData, '2024-02-29' ) ).toEqual( {
+			labelDate: '-',
+			value: 0,
+		} );
+		expect( secondaryByDate( chartData, '2024-03-01' ) ).toEqual( {
+			labelDate: '2023-03-01 00:00:00',
+			value: 2,
+		} );
+		expect( secondaryByDate( chartData, '2024-03-02' ) ).toEqual( {
+			labelDate: '2023-03-02 00:00:00',
+			value: 3,
+		} );
 	} );
 } );
 

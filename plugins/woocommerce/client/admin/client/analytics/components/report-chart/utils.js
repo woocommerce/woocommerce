@@ -2,13 +2,10 @@
  * External dependencies
  */
 import { find, get } from 'lodash';
+import moment from 'moment';
 import { flattenFilters } from '@woocommerce/navigation';
 import { format as formatDate } from '@wordpress/date';
-import {
-	containsLeapYear,
-	getPreviousDate,
-	isLeapYear,
-} from '@woocommerce/date';
+import { containsLeapYear, getPreviousDate } from '@woocommerce/date';
 
 export const DEFAULT_FILTER = 'all';
 
@@ -74,6 +71,26 @@ export function dataContainsLeapYear( data ) {
 }
 
 /**
+ * Returns true if the date is the 29th of February.
+ *
+ * @param {moment.Moment} date Date to check
+ * @return {boolean} True if the date is a leap day.
+ */
+function isLeapDay( date ) {
+	return date.month() === 1 && date.date() === 29;
+}
+
+/**
+ * Returns true if the date is the 1st of March.
+ *
+ * @param {moment.Moment} date Date to check
+ * @return {boolean} True if the date is the first of March.
+ */
+function isFirstOfMarch( date ) {
+	return date.month() === 2 && date.date() === 1;
+}
+
+/**
  * Builds chart data for the given parameters.
  *
  * @param {Object} primaryData         Primary data
@@ -94,8 +111,6 @@ export function buildChartData(
 	selectedChartKey,
 	currentInterval
 ) {
-	const primarydataContainsLeapYear = dataContainsLeapYear( primaryData );
-	const secondarydataContainsLeapYear = dataContainsLeapYear( secondaryData );
 	const primaryDataIntervals = [ ...primaryData.data.intervals ];
 	const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
 
@@ -112,7 +127,7 @@ export function buildChartData(
 		const primaryLabelDate = interval.date_start;
 		const primaryValue = interval.subtotals[ selectedChartKey ] || 0;
 
-		const secondaryInterval = secondaryDataIntervals[ index ];
+		let secondaryInterval = secondaryDataIntervals[ index ];
 		const secondaryLabel = `${ secondaryDatePicker.label } (${ secondaryDatePicker.range })`;
 
 		const secondaryDateMoment = getPreviousDate(
@@ -130,45 +145,32 @@ export function buildChartData(
 				secondaryInterval.subtotals[ selectedChartKey ] ) ||
 			0;
 
-		if ( currentInterval === 'day' ) {
-			if (
-				primarydataContainsLeapYear &&
-				! secondarydataContainsLeapYear &&
-				secondaryDataIntervals?.[ index ]
-			) {
-				// Only fix the data if the date is in 29th Feb and secondary data is in 1st March,
-				// which signifies incorrect comparison.
-				const primaryDate = new Date( interval.date_start );
-				const secondaryDate = new Date(
-					secondaryDataIntervals[ index ].date_start
-				);
-				if (
-					isLeapYear( primaryDate.getFullYear() ) &&
-					primaryDate.getMonth() === 1 &&
-					primaryDate.getDate() === 29 &&
-					secondaryDate.getMonth() === 2 &&
-					secondaryDate.getDate() === 1
-				) {
-					// This is going to be displayed as "Invalid date" label from D3.js, but desirable imo since
-					// 29th February is not a valid date for non-leap years.
-					secondaryLabelDate = '-';
-					secondaryValue = 0;
+		if ( currentInterval === 'day' && secondaryInterval ) {
+			const primaryDate = moment( interval.date_start );
+			const secondaryDate = moment( secondaryInterval.date_start );
 
-					// Move the data up by 1 day for the missing leap day
-					// so everything else is shifted to the right correctly.
-					secondaryDataIntervals.splice(
-						index,
-						0,
-						secondaryDataIntervals[ index ]
-					);
-				}
+			if ( isLeapDay( primaryDate ) && isFirstOfMarch( secondaryDate ) ) {
+				// The secondary range has no leap day, so its intervals run one short
+				// from here on. Pad it with a blank slot so later days line up again.
+				// The label renders as "Invalid date", which is desirable since
+				// 29th February is not a valid date for non-leap years.
+				secondaryLabelDate = '-';
+				secondaryValue = 0;
+				secondaryDataIntervals.splice( index, 0, secondaryInterval );
 			} else if (
-				! primarydataContainsLeapYear &&
-				secondarydataContainsLeapYear
+				isLeapDay( secondaryDate ) &&
+				isFirstOfMarch( primaryDate )
 			) {
-				// Todo: Do something about secondary data having leap year while first does not.
-				// Currently, there are issues to render chart where primary data does not have the date since
-				// the x-axis is based on primary data.
+				// The secondary range has a leap day the primary range lacks, so its
+				// intervals run one long from here on. The x-axis is built from the
+				// primary dates, so the leap day has no slot to render in: drop it
+				// so later days line up again.
+				secondaryDataIntervals.splice( index, 1 );
+				secondaryInterval = secondaryDataIntervals[ index ];
+				secondaryValue =
+					( secondaryInterval &&
+						secondaryInterval.subtotals[ selectedChartKey ] ) ||
+					0;
 			}
 		}
 
