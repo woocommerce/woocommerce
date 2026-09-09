@@ -106,8 +106,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			self::strip_whitespace( $expected_single_product_template_content ),
-			self::strip_whitespace( $result[0]->content )
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template_content ),
+			TemplateContentUtils::strip_whitespace( $result[0]->content )
 		);
 	}
 
@@ -190,8 +190,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			self::strip_whitespace( $expected_single_product_template_content ),
-			self::strip_whitespace( $result[0]->content )
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template_content ),
+			TemplateContentUtils::strip_whitespace( $result[0]->content )
 		);
 	}
 
@@ -223,8 +223,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			self::strip_whitespace( $result ),
-			self::strip_whitespace( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace( $result ),
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template )
 		);
 	}
 
@@ -258,8 +258,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			self::strip_whitespace_and_password_form_ids( $result ),
-			self::strip_whitespace_and_password_form_ids( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
 		);
 	}
 
@@ -370,32 +370,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			self::strip_whitespace_and_password_form_ids( $result ),
-			self::strip_whitespace_and_password_form_ids( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
 		);
-	}
-
-	/**
-	 * Remove whitespace so template HTML can be compared without formatting differences.
-	 *
-	 * @param string $content Template HTML.
-	 * @return string
-	 */
-	private static function strip_whitespace( string $content ): string {
-		return preg_replace( '/\s+/', '', $content );
-	}
-
-	/**
-	 * Remove whitespace and dynamic password form IDs so HTML can be compared.
-	 *
-	 * WordPress generates unique IDs like pwbox-123 on each call to get_the_password_form().
-	 *
-	 * @param string $content Template HTML.
-	 * @return string
-	 */
-	private static function strip_whitespace_and_password_form_ids( string $content ): string {
-		$without_whitespace = self::strip_whitespace( $content );
-
-		return preg_replace( '/pwbox-\d+/', '', $without_whitespace );
 	}
 }
