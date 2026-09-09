@@ -358,27 +358,6 @@ class WC_Shipping {
 				}
 			}
 
-			// Hide shipping rates when free shipping is available.
-			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
-				$free_shipping = array();
-				$local_pickup  = array();
-
-				foreach ( $package['rates'] as $rate ) {
-					if ( 'free_shipping' === $rate->method_id ) {
-						$free_shipping[ $rate->id ] = $rate;
-						continue;
-					}
-
-					if ( $this->shipping_methods[ $rate->method_id ]->supports( 'local-pickup' ) || 'local_pickup' === $rate->method_id ) {
-						$local_pickup[ $rate->id ] = $rate;
-					}
-				}
-
-				if ( ! empty( $free_shipping ) ) {
-					$package['rates'] = array_merge( $free_shipping, $local_pickup );
-				}
-			}
-
 			/**
 			 * Filter the calculated shipping rates.
 			 *
@@ -393,6 +372,32 @@ class WC_Shipping {
 			// unfiltered value, as e.g. a 3pd could have set it to "false" to remove rates.
 			if ( ! is_array( $package['rates'] ) ) {
 				$package['rates'] = array();
+			}
+
+			// Hide shipping rates when free shipping is available. Runs after the woocommerce_package_rates filter
+			// so that free shipping only counts as available if it survived filtering; otherwise an extension that
+			// removes free shipping would leave the customer with no rates at all.
+			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
+				$free_shipping = array();
+				$local_pickup  = array();
+
+				foreach ( $package['rates'] as $rate ) {
+					if ( 'free_shipping' === $rate->method_id ) {
+						$free_shipping[ $rate->id ] = $rate;
+						continue;
+					}
+
+					// The rate may have been added by a filter callback, so its method is not necessarily registered here.
+					$rate_method = $this->shipping_methods[ $rate->method_id ] ?? null;
+
+					if ( 'local_pickup' === $rate->method_id || ( $rate_method && $rate_method->supports( 'local-pickup' ) ) ) {
+						$local_pickup[ $rate->id ] = $rate;
+					}
+				}
+
+				if ( ! empty( $free_shipping ) ) {
+					$package['rates'] = array_merge( $free_shipping, $local_pickup );
+				}
 			}
 
 			// Store in session to avoid recalculation.

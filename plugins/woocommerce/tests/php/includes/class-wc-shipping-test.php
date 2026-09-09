@@ -42,8 +42,9 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	 * @param string $option_value Option value for woocommerce_shipping_hide_rates_when_free.
 	 * @param array  $shipping_methods Available shipping methods.
 	 * @param array  $expected_rates Expected rates.
+	 * @param array  $hidden_rates Rates expected to be hidden.
 	 */
-	public function test_calculate_shipping_for_hide_rates_when_free( string $option_value, array $shipping_methods, array $expected_rates ) {
+	public function test_calculate_shipping_for_hide_rates_when_free( string $option_value, array $shipping_methods, array $expected_rates, array $hidden_rates ) {
 		update_option( 'woocommerce_shipping_hide_rates_when_free', $option_value );
 
 		$shipping_methods_hook = fn () => $shipping_methods;
@@ -66,7 +67,61 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( $rate, $result['rates'] );
 		}
 
+		foreach ( $hidden_rates as $rate ) {
+			$this->assertArrayNotHasKey( $rate, $result['rates'] );
+		}
+
 		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+	}
+
+	/**
+	 * @testdox paid rates stay visible when the package rates filter removes free shipping.
+	 */
+	public function test_hide_rates_when_free_respects_free_shipping_removed_by_filter() {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$shipping_methods_hook = fn () => array( new WC_Shipping_Flat_Rate( 1 ), new WC_Shipping_Free_Shipping( 1 ) );
+		$remove_free_shipping  = function ( $rates ) {
+			unset( $rates['free_shipping:1'] );
+			return $rates;
+		};
+
+		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		add_filter( 'woocommerce_package_rates', $remove_free_shipping );
+
+		$result = $this->sut->calculate_shipping_for_package( $this->get_hide_rates_test_package() );
+
+		remove_filter( 'woocommerce_package_rates', $remove_free_shipping );
+		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+
+		$this->assertArrayHasKey( 'flat_rate:1', $result['rates'], 'Paid rates should remain when a filter removes free shipping.' );
+	}
+
+	/**
+	 * @testdox a paid rate added by the package rates filter for an unregistered method is hidden without errors.
+	 */
+	public function test_hide_rates_when_free_handles_filter_added_rate_for_unregistered_method() {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$shipping_methods_hook = fn () => array( new WC_Shipping_Free_Shipping( 1 ) );
+		$add_unregistered_rate = function ( $rates ) {
+			$rates['custom_carrier:1'] = new WC_Shipping_Rate( 'custom_carrier:1', 'Custom Carrier', 5, array(), 'custom_carrier' );
+			return $rates;
+		};
+
+		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		add_filter( 'woocommerce_package_rates', $add_unregistered_rate );
+
+		$result = $this->sut->calculate_shipping_for_package( $this->get_hide_rates_test_package() );
+
+		remove_filter( 'woocommerce_package_rates', $add_unregistered_rate );
+		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+
+		$this->assertSame(
+			array( 'free_shipping:1' ),
+			array_keys( $result['rates'] ),
+			'Free shipping should hide a paid rate added by a filter for a method that is not registered.'
+		);
 	}
 
 	/**
@@ -336,6 +391,23 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get a package for hide-rates-when-free tests.
+	 *
+	 * @return array
+	 */
+	private function get_hide_rates_test_package(): array {
+		return array(
+			'contents'      => array(),
+			'contents_cost' => 10,
+			'destination'   => array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '00000',
+			),
+		);
+	}
+
+	/**
 	 * Get a package for shipping hash tests.
 	 *
 	 * @return array
@@ -392,16 +464,19 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				'no',
 				array( $flat_rate, $free_shipping, $local_pickup, $custom_pickup ),
 				array( 'flat_rate:1', 'free_shipping:1', 'local_pickup:1', 'custom_pickup:1' ),
+				array(),
 			),
 			'hide enabled - with free shipping'    => array(
 				'yes',
 				array( $flat_rate, $free_shipping, $local_pickup, $custom_pickup ),
 				array( 'free_shipping:1', 'local_pickup:1', 'custom_pickup:1' ),
+				array( 'flat_rate:1' ),
 			),
 			'hide enabled - without free shipping' => array(
 				'yes',
 				array( $flat_rate, $local_pickup, $custom_pickup ),
 				array( 'flat_rate:1', 'local_pickup:1', 'custom_pickup:1' ),
+				array(),
 			),
 		);
 	}
