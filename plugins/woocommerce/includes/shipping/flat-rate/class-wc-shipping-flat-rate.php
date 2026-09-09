@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Shipping\FlatRate\WeightPlaceholder;
+
 /**
  * WC_Shipping_Flat_Rate class.
  */
@@ -69,7 +71,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Evaluate a cost from a sum/string.
 	 *
 	 * @param  string $sum Sum of shipping.
-	 * @param  array  $args Args, must contain `cost` and `qty` keys. Having `array()` as default is for back compat reasons.
+	 * @param  array  $args Args, must contain `cost` and `qty` keys, and may contain a numeric `weight` key (since 11.1.0), which defaults to 0. Having `array()` as default is for back compat reasons.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
@@ -85,6 +87,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$locale         = localeconv();
 		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
 		$this->fee_cost = $args['cost'];
+
+		// Expanded before the shortcodes below, since the weight is substituted rather than registered as one.
+		$sum = $this->get_weight_placeholder()->expand( (string) $sum, $args['weight'] ?? null );
 
 		// Expand shortcodes.
 		add_shortcode( 'fee', array( $this, 'fee' ) );
@@ -103,7 +108,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			)
 		);
 
-		remove_shortcode( 'fee', array( $this, 'fee' ) );
+		remove_shortcode( 'fee' );
 
 		// Remove whitespace from string.
 		$sum = preg_replace( '/\s+/', '', $sum );
@@ -156,6 +161,17 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Get the [weight] placeholder handler.
+	 *
+	 * Private so that the placeholder adds no new subclassing surface.
+	 *
+	 * @return WeightPlaceholder
+	 */
+	private function get_weight_placeholder() {
+		return wc_get_container()->get( WeightPlaceholder::class );
+	}
+
+	/**
 	 * Calculate the shipping costs.
 	 *
 	 * @param array $package Package of items from cart.
@@ -177,8 +193,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] = $this->evaluate_cost(
 				$cost,
 				array(
-					'qty'  => $this->get_package_item_qty( $package ),
-					'cost' => $package['contents_cost'],
+					'qty'    => $this->get_package_item_qty( $package ),
+					'cost'   => $package['contents_cost'],
+					'weight' => $this->get_weight_placeholder()->get_for_package( $package ),
 				)
 			);
 		}
@@ -203,8 +220,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$class_cost = $this->evaluate_cost(
 					$class_cost_string,
 					array(
-						'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-						'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+						'qty'    => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+						'cost'   => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+						'weight' => $this->get_weight_placeholder()->get_for_items( $products ),
 					)
 				);
 
@@ -322,13 +340,29 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$dummy_cost = $this->evaluate_cost(
 			$value,
 			array(
-				'cost' => 1,
-				'qty'  => 1,
+				'cost'   => 1,
+				'qty'    => 1,
+				'weight' => 1,
 			)
 		);
 		if ( false === $dummy_cost ) {
 			throw new Exception( WC_Eval_Math::$last_error );
 		}
+
+		// A package weighs nothing when none of its items have a weight set, which is a common configuration.
+		// Reject costs that can't be evaluated in that case, rather than silently offering the rate for free.
+		$zero_weight_cost = $this->evaluate_cost(
+			$value,
+			array(
+				'cost'   => 1,
+				'qty'    => 1,
+				'weight' => 0,
+			)
+		);
+		if ( false === $zero_weight_cost ) {
+			throw new Exception( esc_html__( 'This cost can\'t be calculated when no item in the cart has a weight. Use [weight min="1"] to set a minimum billable weight.', 'woocommerce' ) );
+		}
+
 		return $value;
 	}
 }

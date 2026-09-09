@@ -8,8 +8,15 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Utilities\I18nUtil;
 
-$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', 'woocommerce' ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', 'woocommerce' );
+// This description is shown as a tooltip, and wc_sanitize_tooltip() strips <code> tags, so the placeholders are
+// listed as `placeholder = meaning` pairs rather than relying on markup to delimit them.
+$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. 10.00 * [qty].', 'woocommerce' ) . '<br/><br/>' . sprintf(
+	/* translators: %s: store weight unit label, e.g. kg */
+	__( 'Supports the following placeholders: [qty] = number of items, [cost] = total cost of items, [weight] = total weight of items in %s, [fee percent="10" min_fee="20" max_fee=""] = percentage based fee.', 'woocommerce' ),
+	I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
+) . '<br/><br/>' . __( 'The weight accepts an optional minimum and maximum, e.g. [weight min="1" max="20"].', 'woocommerce' );
 $cost_link = sprintf( '<span id="wc-shipping-advanced-costs-help-text">%s <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">%s</a>.</span>', __( 'Charge a flat rate per item, or enter a cost formula to charge a percentage based cost or a minimum fee. Learn more about', 'woocommerce' ), __( 'advanced costs', 'woocommerce' ) );
 
 $settings = array(

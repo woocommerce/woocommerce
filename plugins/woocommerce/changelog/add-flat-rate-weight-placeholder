@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `[weight]` placeholder to flat rate shipping cost formulas, resolving to the total weight of the shippable items in the package or shipping class, in the store's weight unit. Accepts optional `min` and `max` attributes, e.g. `[weight min="1" max="20"]`.
