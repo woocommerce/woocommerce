@@ -153,27 +153,6 @@ ol {
 	display: none;
 }
 
-/*
- * Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
- */
-[data-rich-text-comment],
-[data-rich-text-format-boundary] {
-	border-radius: 2px;
-}
-
-[data-rich-text-comment] {
-	background-color: var(
-		--wp-components-color-accent,
-		var(--wp-admin-theme-color, #3858e9)
-	);
-
-	span {
-		color: var(--wp-components-color-accent-inverted, #fff);
-		filter: none;
-		padding: 0 2px;
-	}
-}
-
 /**
  * Override the default gap for social links block in the editor.
  * This is needed because we do not want to have a gap between the social links and also for a WYSIWYG experience.
