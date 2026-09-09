@@ -357,6 +357,8 @@ class WC_Data_Store_WP {
 		// Validate here so overrides can normalize custom date formats before calling the parent parser.
 		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
 			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+			$wp_query_args['post__in'] = array( 0 );
+			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 
 			return $wp_query_args;
 		} elseif ( is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
@@ -364,6 +366,8 @@ class WC_Data_Store_WP {
 				$query_var = (string) $query_var;
 			} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
 				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+				$wp_query_args['post__in'] = array( 0 );
+				unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 
 				return $wp_query_args;
 			}

@@ -2523,6 +2523,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['orderby'] = 'post__in';
 		}
 
+		$query_errors = $wp_query_args['errors'] ?? array();
+
 		/**
 		 * Filters the WP_Query arguments used for a legacy product query.
 		 *
@@ -2533,6 +2535,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * @param WC_Product_Data_Store_CPT $data_store   Current product data store.
 		 */
 		$wp_query_args = apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
+
+		if ( ! empty( $query_errors ) ) {
+			if ( empty( $wp_query_args['errors'] ) ) {
+				$wp_query_args['errors'] = $query_errors;
+			}
+			$wp_query_args['post__in'] = array( 0 );
+			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+		}
 
 		return $wp_query_args;
 	}

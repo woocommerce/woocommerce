@@ -348,9 +348,11 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 			}
 		};
 
-		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array( 'p' => 123 ) );
 
 		$this->assertNotEmpty( $result['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
+		$this->assertSame( array( 0 ), $result['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
+		$this->assertArrayNotHasKey( 'p', $result, 'A single-post alias must not override the fail-closed marker.' );
 	}
 
 	/**

@@ -911,6 +911,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Query failures already logged during this PHP execution, keyed by site and error code.
+	 *
+	 * @var array
+	 */
+	private static $logged_query_failures = array();
+
+	/**
 	 * Normalizes an order status value before it is prefixed.
 	 *
 	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
@@ -939,6 +946,26 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether a status value would actually narrow the query.
+	 *
+	 * WP_Query builds its status clause by intersecting the requested list with get_post_stati(),
+	 * so a value naming no registered status contributes nothing and the clause disappears.
+	 * Truthiness is not the test: 'not-a-status' is truthy and still filters nothing. 'any' is the
+	 * exception, since WP_Query turns it into exclusion clauses instead.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $status The status value to check.
+	 * @return bool True if the value narrows the query, false otherwise.
+	 */
+	private function status_narrows_query( $status ) {
+		if ( 'any' === $status ) {
+			return true;
+		}
+
+		return in_array( sanitize_key( $status ), get_post_stati(), true );
 	}
 
 	/**
@@ -988,8 +1015,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Marks a query as invalid, so it returns no orders rather than running without the filter the
-	 * caller asked for.
+	 * Marks a query as unsatisfiable for both the data store short-circuit and WP_Query. The
+	 * markers are reasserted after the public query filter runs.
 	 *
 	 * @since 11.2.0
 	 * @param array  $wp_query_args WP_Query args, passed by reference.
@@ -999,6 +1026,25 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	private function fail_query_closed( &$wp_query_args, $code, $message ) {
 		$wp_query_args['errors'][] = new WP_Error( $code, $message );
+		$wp_query_args['post__in'] = array( 0 );
+		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+
+		$dedupe_key = get_current_blog_id() . '|' . $code;
+
+		if ( isset( self::$logged_query_failures[ $dedupe_key ] ) ) {
+			return;
+		}
+
+		self::$logged_query_failures[ $dedupe_key ] = true;
+
+		wc_get_logger()->warning(
+			__( 'Malformed order query args. Returning no orders.', 'woocommerce' ),
+			array(
+				'code'   => $code,
+				'origin' => __METHOD__,
+				'source' => 'legacy-order-query',
+			)
+		);
 	}
 
 	/**
@@ -1036,23 +1082,25 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			if ( is_array( $query_vars['post_status'] ) ) {
-				$normalized_statuses = array();
+				$usable_statuses = array();
 
 				foreach ( $query_vars['post_status'] as $status ) {
 					$normalized_status = null;
 
 					if ( ! $this->normalize_status_value( $status, $normalized_status ) ) {
 						$has_unusable_status = true;
-						break;
+						continue;
 					}
 
-					$normalized_statuses[] = wc_is_order_status( 'wc-' . $normalized_status ) ? 'wc-' . $normalized_status : $normalized_status;
+					$usable_statuses[] = wc_is_order_status( 'wc-' . $normalized_status ) ? 'wc-' . $normalized_status : $normalized_status;
 				}
+
+				$query_vars['post_status'] = $usable_statuses;
+				$has_unusable_status       = $has_unusable_status
+					&& ! array_filter( $usable_statuses, array( $this, 'status_narrows_query' ) );
 
 				if ( $has_unusable_status ) {
 					unset( $query_vars['post_status'] );
-				} else {
-					$query_vars['post_status'] = $normalized_statuses;
 				}
 			} else {
 				$normalized_status = null;
@@ -1190,6 +1238,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
+		$query_errors = $wp_query_args['errors'] ?? array();
+
 		/**
 		 * Filters the WP_Query arguments used for a legacy order query.
 		 *
@@ -1200,6 +1250,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @param WC_Order_Data_Store_CPT $data_store   Current order data store.
 		 */
 		$wp_query_args = apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
+
+		if ( ! empty( $query_errors ) ) {
+			if ( empty( $wp_query_args['errors'] ) ) {
+				$wp_query_args['errors'] = $query_errors;
+			}
+			$wp_query_args['post__in'] = array( 0 );
+			unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
+		}
 
 		return $wp_query_args;
 	}
