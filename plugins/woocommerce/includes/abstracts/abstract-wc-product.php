@@ -106,7 +106,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'brand_ids'          => array(),
 		'shipping_class_id'  => 0,
 		'downloads'          => array(),
-		'image_id'           => 0,
+		'image_id'           => '',
 		'gallery_image_ids'  => array(),
 		'download_limit'     => -1,
 		'download_expiry'    => -1,
@@ -701,14 +701,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since 3.0.0
-	 * @since 11.2.0 Returns an integer, even when a filter returns another type.
-	 *
-	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return int Attachment ID, or 0 when no image is set.
+	 * @since  3.0.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
 	 */
 	public function get_image_id( $context = 'view' ) {
-		return absint( $this->get_prop( 'image_id', $context ) );
+		return $this->get_prop( 'image_id', $context );
 	}
 
 	/**
@@ -1467,13 +1465,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Normalizes the value with absint(): non-numeric values become 0, negative values their absolute value.
-	 *
 	 * @param int|string $image_id Product image id.
 	 * @return void
 	 */
 	public function set_image_id( $image_id = '' ) {
-		$this->set_prop( 'image_id', absint( $image_id ) );
+		$this->set_prop( 'image_id', $image_id );
 	}
 
 	/**
@@ -2229,16 +2225,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-		$image = '';
-		if ( $this->get_image_id() ) {
-			$image_alt = get_post_meta( $this->get_image_id(), '_wp_attachment_image_alt', true );
+		$image    = '';
+		$image_id = (int) $this->get_image_id();
+		if ( $image_id ) {
+			$image_alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 			$attr      = wp_parse_args(
 				$attr,
 				array(
 					'alt' => $image_alt ? $image_alt : $this->get_name(),
 				)
 			);
-			$image     = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
+			$image     = wp_get_attachment_image( $image_id, $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {
