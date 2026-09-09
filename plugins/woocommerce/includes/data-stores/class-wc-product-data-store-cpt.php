@@ -1420,6 +1420,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
 				AND lookup.global_unique_id = %s
+				ORDER BY posts.ID ASC
 				LIMIT 1
 				",
 				$global_unique_id

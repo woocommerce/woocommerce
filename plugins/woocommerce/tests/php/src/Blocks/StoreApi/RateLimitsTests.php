@@ -89,7 +89,7 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		$body = json_decode( $spy_rest_server->sent_body );
 		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
-		$this->assertEquals( 400, $body->data->status );
+		$this->assertEquals( 429, $body->data->status );
 
 		$this->assertEquals( $rate_limiting_options->limit, $spy_rest_server->sent_headers['RateLimit-Limit'] );
 		$this->assertIsInt( $spy_rest_server->sent_headers['RateLimit-Reset'] );
