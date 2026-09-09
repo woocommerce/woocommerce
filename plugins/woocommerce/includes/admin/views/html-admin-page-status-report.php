@@ -548,7 +548,10 @@ if ( file_exists( $plugin_path ) ) {
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 		<tr>
-			<th colspan="3" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Post Type Counts">
+				<h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2>
+				<p><?php esc_html_e( 'Counts are cached for up to one hour. To refresh them, clear WooCommerce transients under WooCommerce > Status > Tools.', 'woocommerce' ); ?></p>
+			</th>
 		</tr>
 		</thead>
 		<tbody>

@@ -536,6 +536,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		$ran = true;
 		switch ( $tool ) {
 			case 'clear_transients':
+				delete_transient( 'wc_system_status_post_type_counts' );
 				wc_delete_product_transients();
 				wc_delete_shop_order_transients();
 				delete_transient( 'wc_count_comments' );

@@ -88,6 +88,66 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh expired post counts after one hour.
+	 */
+	public function test_get_post_type_counts_refreshes_after_expiry(): void {
+		if ( wp_using_ext_object_cache() ) {
+			$this->markTestSkipped( 'This test expires the database-backed transient.' );
+		}
+
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$before = time();
+		$this->sut->get_post_type_counts();
+		$timeout = (int) get_option( '_transient_timeout_wc_system_status_post_type_counts' );
+		$this->assertGreaterThanOrEqual( $before + HOUR_IN_SECONDS, $timeout, 'Counts should be cached for one hour.' );
+		$this->assertLessThanOrEqual( time() + HOUR_IN_SECONDS, $timeout, 'The cache should not outlive one hour.' );
+
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		update_option( '_transient_timeout_wc_system_status_post_type_counts', time() - 1 );
+		$counts = $this->sut->get_post_type_counts();
+		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Expired counts should be regenerated.' );
+	}
+
+	/**
+	 * @testdox Should refresh post counts after running the Clear transients tool.
+	 */
+	public function test_clear_transients_refreshes_post_type_counts(): void {
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$this->sut->get_post_type_counts();
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+
+		$result = ( new WC_REST_System_Status_Tools_V2_Controller() )->execute_tool( 'clear_transients' );
+		$this->assertTrue( $result['success'], 'The Clear transients tool should succeed.' );
+		$counts = $this->sut->get_post_type_counts();
+		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Clearing transients should refresh the counts.' );
+	}
+
+	/**
+	 * @testdox Should keep cached post counts separate when switching sites.
+	 * @group ms-required
+	 */
+	public function test_get_post_type_counts_are_site_scoped(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'This test requires multisite.' );
+		}
+
+		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
+		$original_counts = $this->sut->get_post_type_counts();
+		$site_id         = self::factory()->blog->create();
+
+		switch_to_blog( $site_id );
+		try {
+			self::factory()->post->create_many( 2, array( 'post_type' => 'status_count_test' ) );
+			$counts = $this->sut->get_post_type_counts();
+			$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Another site should have its own counts.' );
+		} finally {
+			restore_current_blog();
+		}
+
+		$this->assertEquals( $original_counts, $this->sut->get_post_type_counts(), 'Switching sites should preserve the original cache.' );
+	}
+
+	/**
 	 * @testdox Should detect template override via wc_get_template filter.
 	 */
 	public function test_get_theme_info_detects_wc_get_template_filter_override(): void {
