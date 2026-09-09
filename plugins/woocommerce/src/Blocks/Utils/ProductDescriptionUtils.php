@@ -16,7 +16,23 @@ class ProductDescriptionUtils {
 	private static array $formatting_product_descriptions = array();
 
 	/**
-	 * Format a product description while preventing same-product recursive formatting.
+	 * Whether the current visitor can access a product's description.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return bool
+	 */
+	private static function is_description_accessible( \WC_Product $product ): bool {
+		if ( post_password_required( $product->get_id() ) ) {
+			return false;
+		}
+
+		$parent_id = $product->get_parent_id();
+
+		return ! $parent_id || ! post_password_required( $parent_id );
+	}
+
+	/**
+	 * Format an accessible product description while preventing same-product recursion.
 	 *
 	 * @param \WC_Product $product         Product object.
 	 * @param callable    $format_callback Callback that formats the product description.
@@ -25,7 +41,7 @@ class ProductDescriptionUtils {
 	public static function guarded_format( \WC_Product $product, callable $format_callback ): string {
 		$product_id = $product->get_id();
 
-		if ( isset( self::$formatting_product_descriptions[ $product_id ] ) ) {
+		if ( ! self::is_description_accessible( $product ) || isset( self::$formatting_product_descriptions[ $product_id ] ) ) {
 			return '';
 		}
 

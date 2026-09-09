@@ -199,7 +199,13 @@ export const resolveFieldComponent = (
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.typeRenderers?.[ field.type ]
-		);
+		) ??
+		( field.type === 'integer'
+			? findInMatchingRegistrations(
+					context,
+					( registration ) => registration.typeRenderers?.number
+			  )
+			: undefined );
 
 	if ( resolvedComponent ) {
 		return resolvedComponent;

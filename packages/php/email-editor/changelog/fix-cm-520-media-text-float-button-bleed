@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep Media & Text blocks in normal document flow so a button placed after one no longer paints its background across it. The wrapper table's align="left" rendered as a float in email clients, pulling the block out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS.
