@@ -190,13 +190,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	public function test_attribute_clauses_exclude_disabled_variations(): void {
 		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
 
-		self::with_direct_product_attribute_lookup_updates(
-			function () use ( $green_variation ) {
-				$green_variation->set_status( ProductStatus::PRIVATE );
-				$green_variation->save();
-			}
-		);
-		$this->assert_variation_has_no_lookup_rows( $green_variation );
+		$this->disable_variation( $green_variation );
 
 		$this->assertEqualsCanonicalizing(
 			array( 'Product 6' ),

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use WC_Product;
 use WC_Product_Variable;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -488,6 +489,22 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		}
 
 		throw new \RuntimeException( 'Unable to find the requested product variation.' );
+	}
+
+	/**
+	 * Disable a variation the way the "Enabled" checkbox does, and confirm its lookup rows are gone.
+	 *
+	 * @param \WC_Product_Variation $variation Variation product.
+	 */
+	protected function disable_variation( \WC_Product_Variation $variation ): void {
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $variation ) {
+				$variation->set_status( ProductStatus::PRIVATE );
+				$variation->save();
+			}
+		);
+
+		$this->assert_variation_has_no_lookup_rows( $variation );
 	}
 
 	/**

@@ -260,30 +260,34 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * Get the id of a 'pa_color' term by slug.
+	 *
+	 * @param string $slug The term slug.
+	 * @return int
+	 */
+	private function color_term_id( string $slug ): int {
+		$term = get_term_by( 'slug', $slug, 'pa_color' );
+		$this->assertInstanceOf( \WP_Term::class, $term );
+
+		return $term->term_id;
+	}
+
+	/**
 	 * @testdox A disabled variation does not contribute to its attribute term count.
 	 */
 	public function test_get_attribute_counts_exclude_disabled_variations(): void {
 		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
-		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
-		$red_term        = get_term_by( 'slug', 'red-slug', 'pa_color' );
+		$green_term_id   = $this->color_term_id( 'green-slug' );
+		$red_term_id     = $this->color_term_id( 'red-slug' );
 
-		$this->assertInstanceOf( \WP_Term::class, $green_term );
-		$this->assertInstanceOf( \WP_Term::class, $red_term );
-
-		self::with_direct_product_attribute_lookup_updates(
-			function () use ( $green_variation ) {
-				$green_variation->set_status( ProductStatus::PRIVATE );
-				$green_variation->save();
-			}
-		);
-		$this->assert_variation_has_no_lookup_rows( $green_variation );
+		$this->disable_variation( $green_variation );
 
 		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
 		$query_vars = array_filter( $wp_query->query_vars );
 		$counts     = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
-		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5\'s published red variation still counts.' );
-		$this->assertSame( 1, $counts[ $green_term->term_id ] ?? 0, 'Only Product 6 counts for green while Product 5\'s green variation is disabled.' );
+		$this->assertSame( 1, $counts[ $red_term_id ] ?? 0, 'Product 5\'s published red variation still counts.' );
+		$this->assertSame( 1, $counts[ $green_term_id ] ?? 0, 'Only Product 6 counts for green while Product 5\'s green variation is disabled.' );
 	}
 
 	/**
@@ -292,11 +296,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	public function test_get_attribute_counts_fall_back_to_parent_terms_while_the_lookup_table_is_not_in_use(): void {
 		global $wpdb;
 
-		$green_term = get_term_by( 'slug', 'green-slug', 'pa_color' );
-		$red_term   = get_term_by( 'slug', 'red-slug', 'pa_color' );
-
-		$this->assertInstanceOf( \WP_Term::class, $green_term );
-		$this->assertInstanceOf( \WP_Term::class, $red_term );
+		$green_term_id = $this->color_term_id( 'green-slug' );
+		$red_term_id   = $this->color_term_id( 'red-slug' );
 
 		// A regeneration truncates the table and turns its usage off, and a cleaned up abort leaves it
 		// off with the table still incomplete, so the rows can be missing for a long while.
@@ -307,15 +308,15 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$query_vars = array_filter( $wp_query->query_vars );
 		$counts     = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
-		$this->assertSame( 2, $counts[ $green_term->term_id ] ?? 0, 'Products 5 and 6 still carry the green term, so the counts stay complete while the table is out of use.' );
-		$this->assertSame( 1, $counts[ $red_term->term_id ] ?? 0, 'Product 5 still carries the red term, so the counts stay complete while the table is out of use.' );
+		$this->assertSame( 2, $counts[ $green_term_id ] ?? 0, 'Products 5 and 6 still carry the green term, so the counts stay complete while the table is out of use.' );
+		$this->assertSame( 1, $counts[ $red_term_id ] ?? 0, 'Product 5 still carries the red term, so the counts stay complete while the table is out of use.' );
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 
 		$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
-		$this->assertArrayNotHasKey( $green_term->term_id, $counts, 'Once the table is in use again the counts come from the empty lookup table.' );
-		$this->assertArrayNotHasKey( $red_term->term_id, $counts, 'Once the table is in use again the counts come from the empty lookup table.' );
+		$this->assertArrayNotHasKey( $green_term_id, $counts, 'Once the table is in use again the counts come from the empty lookup table.' );
+		$this->assertArrayNotHasKey( $red_term_id, $counts, 'Once the table is in use again the counts come from the empty lookup table.' );
 	}
 
 	/**
@@ -323,11 +324,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 */
 	public function test_get_attribute_counts_respect_hide_out_of_stock_items(): void {
 		$red_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'red-slug' );
-		$red_term      = get_term_by( 'slug', 'red-slug', 'pa_color' );
-		$green_term    = get_term_by( 'slug', 'green-slug', 'pa_color' );
-
-		$this->assertInstanceOf( \WP_Term::class, $red_term );
-		$this->assertInstanceOf( \WP_Term::class, $green_term );
+		$red_term_id   = $this->color_term_id( 'red-slug' );
+		$green_term_id = $this->color_term_id( 'green-slug' );
 
 		self::with_direct_product_attribute_lookup_updates(
 			function () use ( $red_variation ) {
@@ -340,12 +338,12 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$query_vars = array_filter( $wp_query->query_vars );
 
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
-		$this->assertSame( 1, $this->sut->get_attribute_counts( $query_vars, 'pa_color' )[ $red_term->term_id ] ?? 0, 'The out-of-stock variation counts while out-of-stock items are shown.' );
+		$this->assertSame( 1, $this->sut->get_attribute_counts( $query_vars, 'pa_color' )[ $red_term_id ] ?? 0, 'The out-of-stock variation counts while out-of-stock items are shown.' );
 
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 		$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
-		$this->assertArrayNotHasKey( $red_term->term_id, $counts, 'The out-of-stock variation stops counting once out-of-stock items are hidden, so the cache key has to include the option.' );
-		$this->assertSame( 2, $counts[ $green_term->term_id ] ?? 0, 'Products 5 and 6 both keep an in-stock green variation, so hiding out-of-stock items must not drop them.' );
+		$this->assertArrayNotHasKey( $red_term_id, $counts, 'The out-of-stock variation stops counting once out-of-stock items are hidden, so the cache key has to include the option.' );
+		$this->assertSame( 2, $counts[ $green_term_id ] ?? 0, 'Products 5 and 6 both keep an in-stock green variation, so hiding out-of-stock items must not drop them.' );
 	}
 
 	/**
