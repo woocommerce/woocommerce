@@ -239,7 +239,7 @@ Each order item carries its metadata in `item_data`, a list of entries:
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `id` | integer \| null | The order item metadata row ID. `null` when an extension added the entry through `woocommerce_order_item_get_formatted_meta_data` without a stored row behind it. |
+| `id` | integer \| null | The order item metadata row ID. `null` when no displayed metadata row backs the entry, which is the case for anything an extension added through `woocommerce_order_item_get_formatted_meta_data`. |
 | `key` | string | Metadata key. |
 | `value` | string | Metadata value. |
 | `display_key` | string | Key, formatted for display. |
