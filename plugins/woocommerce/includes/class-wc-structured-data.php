@@ -53,7 +53,8 @@ class WC_Structured_Data {
 	 * @since 3.0.0
 	 * @since 11.2.0 Added support for multiple schema types in `@type`.
 	 *
-	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings; any invalid array member rejects the node.
+	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings.
+	 *                      Every type must contain 1 to 20 ASCII letters; any invalid array member rejects the node.
 	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */

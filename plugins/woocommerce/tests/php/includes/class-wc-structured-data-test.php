@@ -43,10 +43,16 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox set_data() accepts a valid list of @type values.
+	 *
+	 * @testWith [["Car", "Product"]]
+	 *           [["A"]]
+	 *           [["ABCDEFGHIJKLMNOPQRST"]]
+	 *
+	 * @param array $types Structured data types.
 	 */
-	public function test_set_data_accepts_valid_array_type(): void {
+	public function test_set_data_accepts_valid_array_type( array $types ): void {
 		$markup = array(
-			'@type' => array( 'Car', 'Product' ),
+			'@type' => $types,
 			'name'  => 'Test product',
 		);
 
@@ -95,6 +101,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @testWith [[]]
 	 *           [["Product", 123]]
 	 *           [["Product", "Invalid-Type"]]
+	 *           [["Product", "ABCDEFGHIJKLMNOPQRSTU"]]
 	 *
 	 * @param array $types Structured data types.
 	 */
