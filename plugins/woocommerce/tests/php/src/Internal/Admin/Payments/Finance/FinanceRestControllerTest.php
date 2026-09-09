@@ -93,7 +93,7 @@ class FinanceRestControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the providers payload from the service.
 	 */
 	public function test_get_providers_returns_service_payload(): void {
-		$payload = array( 'providers' => array( array( 'gateway_id' => 'mock' ) ) );
+		$payload = array( 'providers' => array( array( 'provider_id' => 'mock' ) ) );
 		$this->mock_service->expects( $this->once() )
 			->method( 'get_providers' )
 			->willReturn( $payload );
@@ -143,21 +143,22 @@ class FinanceRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should build the payouts query from the cursor and per_page parameters.
+	 * @testdox Should build the payouts query from the next_cursor, prev_cursor and per_page parameters.
 	 */
 	public function test_get_payouts_builds_query_from_parameters(): void {
 		$this->mock_service->expects( $this->once() )
 			->method( 'get_payouts' )
 			->with(
 				'mock',
-				$this->callback( fn( FinanceDataQuery $query ) => 'abc' === $query->get_cursor() && 5 === $query->get_per_page() )
+				$this->callback( fn( FinanceDataQuery $query ) => 'to-next' === $query->get_next_cursor() && 'to-prev' === $query->get_prev_cursor() && 5 === $query->get_per_page() )
 			)
 			->willReturn( array( 'items' => array() ) );
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers/mock/payouts' );
 		$request->set_query_params(
 			array(
-				'cursor'   => 'abc',
-				'per_page' => '5',
+				'next_cursor' => 'to-next',
+				'prev_cursor' => 'to-prev',
+				'per_page'    => '5',
 			)
 		);
 
@@ -174,7 +175,7 @@ class FinanceRestControllerTest extends WC_Unit_Test_Case {
 			->method( 'get_payouts' )
 			->with(
 				'mock',
-				$this->callback( fn( FinanceDataQuery $query ) => null === $query->get_cursor() && FinanceDataQuery::DEFAULT_PER_PAGE === $query->get_per_page() )
+				$this->callback( fn( FinanceDataQuery $query ) => null === $query->get_next_cursor() && null === $query->get_prev_cursor() && FinanceDataQuery::DEFAULT_PER_PAGE === $query->get_per_page() )
 			)
 			->willReturn( array( 'items' => array() ) );
 
@@ -205,11 +206,16 @@ class FinanceRestControllerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should reject a cursor longer than 2048 characters.
+	 *
+	 * @testWith ["next_cursor"]
+	 *           ["prev_cursor"]
+	 *
+	 * @param string $parameter The cursor parameter.
 	 */
-	public function test_get_payouts_rejects_overlong_cursor(): void {
+	public function test_get_payouts_rejects_overlong_cursor( string $parameter ): void {
 		$this->mock_service->expects( $this->never() )->method( 'get_payouts' );
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers/mock/payouts' );
-		$request->set_query_params( array( 'cursor' => str_repeat( 'a', 2049 ) ) );
+		$request->set_query_params( array( $parameter => str_repeat( 'a', 2049 ) ) );
 
 		$response = $this->server->dispatch( $request );
 

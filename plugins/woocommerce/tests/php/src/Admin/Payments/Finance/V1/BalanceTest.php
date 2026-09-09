@@ -13,11 +13,12 @@ use WC_Unit_Test_Case;
 class BalanceTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should uppercase the currency, keep the amount and default the optional fields to null.
+	 * @testdox Should keep the gateway id, uppercase the currency, keep the amount and default the optional fields to null.
 	 */
-	public function test_normalizes_currency_and_defaults_optionals(): void {
-		$sut = new Balance( 'usd', '1234.56' );
+	public function test_stores_gateway_id_normalizes_currency_and_defaults_optionals(): void {
+		$sut = new Balance( 'mock_gateway', 'usd', '1234.56' );
 
+		$this->assertSame( 'mock_gateway', $sut->get_gateway_id() );
 		$this->assertSame( 'USD', $sut->get_currency() );
 		$this->assertSame( '1234.56', $sut->get_amount() );
 		$this->assertNull( $sut->get_available_amount() );
@@ -37,7 +38,7 @@ class BalanceTest extends WC_Unit_Test_Case {
 	public function test_rejects_invalid_currency( string $currency ): void {
 		$this->expectException( \InvalidArgumentException::class );
 
-		new Balance( $currency, '1.00' );
+		new Balance( 'mock', $currency, '1.00' );
 	}
 
 	/**
@@ -56,7 +57,7 @@ class BalanceTest extends WC_Unit_Test_Case {
 	public function test_rejects_invalid_amount( string $amount ): void {
 		$this->expectException( \InvalidArgumentException::class );
 
-		new Balance( 'USD', $amount );
+		new Balance( 'mock', 'USD', $amount );
 	}
 
 	/**
@@ -71,7 +72,7 @@ class BalanceTest extends WC_Unit_Test_Case {
 	 * @param string $amount The amount.
 	 */
 	public function test_accepts_valid_amounts( string $amount ): void {
-		$sut = new Balance( 'USD', $amount );
+		$sut = new Balance( 'mock', 'USD', $amount );
 
 		$this->assertSame( $amount, $sut->get_amount() );
 	}
@@ -81,7 +82,7 @@ class BalanceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_sets_and_clears_optional_fields(): void {
 		$link = new Link( 'Deposit now', 'https://example.com/payouts' );
-		$sut  = new Balance( 'EUR', '50.00' );
+		$sut  = new Balance( 'mock', 'EUR', '50.00' );
 
 		$sut->set_available_amount( '10.00' )->set_payout_link( $link );
 
@@ -100,6 +101,6 @@ class BalanceTest extends WC_Unit_Test_Case {
 	public function test_rejects_invalid_available_amount(): void {
 		$this->expectException( \InvalidArgumentException::class );
 
-		( new Balance( 'USD', '1.00' ) )->set_available_amount( 'ten' );
+		( new Balance( 'mock', 'USD', '1.00' ) )->set_available_amount( 'ten' );
 	}
 }

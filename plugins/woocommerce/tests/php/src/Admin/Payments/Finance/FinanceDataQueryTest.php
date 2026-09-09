@@ -17,7 +17,8 @@ class FinanceDataQueryTest extends WC_Unit_Test_Case {
 	public function test_defaults(): void {
 		$sut = new FinanceDataQuery();
 
-		$this->assertNull( $sut->get_cursor() );
+		$this->assertNull( $sut->get_next_cursor() );
+		$this->assertNull( $sut->get_prev_cursor() );
 		$this->assertSame( 10, $sut->get_per_page() );
 	}
 
@@ -34,24 +35,30 @@ class FinanceDataQueryTest extends WC_Unit_Test_Case {
 	 * @param int $expected The expected.
 	 */
 	public function test_clamps_per_page( int $per_page, int $expected ): void {
-		$sut = new FinanceDataQuery( null, $per_page );
+		$sut = new FinanceDataQuery( null, null, $per_page );
 
 		$this->assertSame( $expected, $sut->get_per_page() );
 	}
 
 	/**
-	 * @testdox Should keep a cursor and turn an empty one into null.
+	 * @testdox Should keep each cursor separately and turn an empty one into null.
 	 *
-	 * @testWith ["abc", "abc"]
-	 *           ["", null]
-	 *           [null, null]
+	 * @testWith ["to-next", "to-prev", "to-next", "to-prev"]
+	 *           ["to-next", null, "to-next", null]
+	 *           [null, "to-prev", null, "to-prev"]
+	 *           ["", "to-prev", null, "to-prev"]
+	 *           ["to-next", "", "to-next", null]
+	 *           ["", "", null, null]
 	 *
-	 * @param string|null $cursor   The cursor.
-	 * @param string|null $expected The expected.
+	 * @param string|null $next_cursor   The next cursor.
+	 * @param string|null $prev_cursor   The previous cursor.
+	 * @param string|null $expected_next The expected next cursor.
+	 * @param string|null $expected_prev The expected previous cursor.
 	 */
-	public function test_normalizes_cursor( ?string $cursor, ?string $expected ): void {
-		$sut = new FinanceDataQuery( $cursor );
+	public function test_normalizes_cursors( ?string $next_cursor, ?string $prev_cursor, ?string $expected_next, ?string $expected_prev ): void {
+		$sut = new FinanceDataQuery( $next_cursor, $prev_cursor );
 
-		$this->assertSame( $expected, $sut->get_cursor() );
+		$this->assertSame( $expected_next, $sut->get_next_cursor() );
+		$this->assertSame( $expected_prev, $sut->get_prev_cursor() );
 	}
 }

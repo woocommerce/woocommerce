@@ -42,7 +42,7 @@ class FinanceDataProviderRegistryTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = new FinanceDataProviderRegistry();
 
-		$mock_gateway = $this->createMock( WC_Payment_Gateway::class );
+		$mock_gateway     = $this->createMock( WC_Payment_Gateway::class );
 		$mock_gateway->id = self::MOCK_GATEWAY_ID;
 
 		$this->gateway_hook = function ( $gateways ) use ( $mock_gateway ) {
@@ -102,6 +102,22 @@ class FinanceDataProviderRegistryTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->register( $second ) );
 
 		$this->assertSame( $first, $this->sut->get_provider( self::MOCK_GATEWAY_ID ) );
+	}
+
+	/**
+	 * @testdox Should report whether a provider is registered for the exact gateway id.
+	 */
+	public function test_is_registered_reports_exact_gateway_id(): void {
+		$this->assertFalse( $this->sut->is_registered( self::MOCK_GATEWAY_ID ) );
+
+		$this->sut->register( new FakeFinanceDataProvider( self::MOCK_GATEWAY_ID ) );
+
+		$this->assertTrue( $this->sut->is_registered( self::MOCK_GATEWAY_ID ) );
+		$this->assertFalse( $this->sut->is_registered( strtoupper( self::MOCK_GATEWAY_ID ) ), 'Gateway ids are case sensitive.' );
+
+		$this->sut->unregister_all();
+
+		$this->assertFalse( $this->sut->is_registered( self::MOCK_GATEWAY_ID ), 'A reset should forget the provider.' );
 	}
 
 	/**

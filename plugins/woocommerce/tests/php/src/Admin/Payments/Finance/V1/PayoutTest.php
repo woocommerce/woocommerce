@@ -18,8 +18,9 @@ class PayoutTest extends WC_Unit_Test_Case {
 	public function test_stores_required_fields_and_defaults_optionals(): void {
 		$initiated = new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' );
 
-		$sut = new Payout( 'po_123', 'gbp', '250.00', PayoutStatus::PENDING, $initiated );
+		$sut = new Payout( 'mock_gateway', 'po_123', 'gbp', '250.00', PayoutStatus::PENDING, $initiated );
 
+		$this->assertSame( 'mock_gateway', $sut->get_gateway_id() );
 		$this->assertSame( 'po_123', $sut->get_id() );
 		$this->assertSame( 'GBP', $sut->get_currency() );
 		$this->assertSame( '250.00', $sut->get_amount() );
@@ -28,6 +29,31 @@ class PayoutTest extends WC_Unit_Test_Case {
 		$this->assertNull( $sut->get_bank_account() );
 		$this->assertNull( $sut->get_date_expected() );
 		$this->assertNull( $sut->get_provider_status() );
+	}
+
+	/**
+	 * @testdox Should trim the gateway id and the payout id.
+	 */
+	public function test_trims_gateway_id_and_id(): void {
+		$sut = new Payout( '  mock_gateway  ', "\tpo_123\n", 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable() );
+
+		$this->assertSame( 'mock_gateway', $sut->get_gateway_id() );
+		$this->assertSame( 'po_123', $sut->get_id() );
+	}
+
+	/**
+	 * @testdox Should reject an empty or whitespace-only gateway id.
+	 *
+	 * @testWith [""]
+	 *           ["   "]
+	 *
+	 * @param string $gateway_id The gateway id.
+	 */
+	public function test_rejects_empty_gateway_id( string $gateway_id ): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'gateway id' );
+
+		new Payout( $gateway_id, 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable() );
 	}
 
 	/**
@@ -40,8 +66,9 @@ class PayoutTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rejects_empty_id( string $id ): void {
 		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'payout id' );
 
-		new Payout( $id, 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable() );
+		new Payout( 'mock', $id, 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable() );
 	}
 
 	/**
@@ -56,7 +83,7 @@ class PayoutTest extends WC_Unit_Test_Case {
 	public function test_rejects_unknown_status( string $status ): void {
 		$this->expectException( \InvalidArgumentException::class );
 
-		new Payout( 'po_1', 'USD', '1.00', $status, new \DateTimeImmutable() );
+		new Payout( 'mock', 'po_1', 'USD', '1.00', $status, new \DateTimeImmutable() );
 	}
 
 	/**
@@ -69,7 +96,7 @@ class PayoutTest extends WC_Unit_Test_Case {
 	 * @param string $status The status.
 	 */
 	public function test_accepts_each_status( string $status ): void {
-		$sut = new Payout( 'po_1', 'USD', '1.00', $status, new \DateTimeImmutable() );
+		$sut = new Payout( 'mock', 'po_1', 'USD', '1.00', $status, new \DateTimeImmutable() );
 
 		$this->assertSame( $status, $sut->get_status() );
 	}
@@ -79,7 +106,7 @@ class PayoutTest extends WC_Unit_Test_Case {
 	 */
 	public function test_normalizes_optional_strings(): void {
 		$expected = new \DateTime( '2026-09-03T00:00:00+00:00' );
-		$sut      = new Payout( 'po_1', 'USD', '1.00', PayoutStatus::COMPLETE, new \DateTimeImmutable() );
+		$sut      = new Payout( 'mock', 'po_1', 'USD', '1.00', PayoutStatus::COMPLETE, new \DateTimeImmutable() );
 
 		$sut->set_bank_account( '  Chase ****1234  ' )->set_provider_status( 'in_transit' )->set_date_expected( $expected );
 

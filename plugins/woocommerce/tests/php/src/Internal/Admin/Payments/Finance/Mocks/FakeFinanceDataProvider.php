@@ -30,6 +30,13 @@ class FakeFinanceDataProvider implements FinanceDataProviderInterface, BalancePr
 	public array $supported_data_types;
 
 	/**
+	 * The icon URL.
+	 *
+	 * @var string
+	 */
+	public string $icon_url = '';
+
+	/**
 	 * The page returned by get_balances().
 	 *
 	 * @var FinanceDataPage|null
@@ -85,6 +92,15 @@ class FakeFinanceDataProvider implements FinanceDataProviderInterface, BalancePr
 	 */
 	public function get_payment_gateway_id(): string {
 		return $this->gateway_id;
+	}
+
+	/**
+	 * Get the icon URL.
+	 *
+	 * @return string
+	 */
+	public function get_icon_url(): string {
+		return $this->icon_url;
 	}
 
 	/**

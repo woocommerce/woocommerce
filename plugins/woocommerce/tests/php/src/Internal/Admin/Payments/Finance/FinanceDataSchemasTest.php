@@ -57,10 +57,10 @@ class FinanceDataSchemasTest extends WC_Unit_Test_Case {
 	public function test_serialized_balances_match_schema(): void {
 		$page = new FinanceDataPage(
 			array(
-				( new Balance( 'USD', '1234.56' ) )
+				( new Balance( 'mock', 'USD', '1234.56' ) )
 					->set_available_amount( '1000.00' )
 					->set_payout_link( new Link( 'Deposit now', home_url( '/payouts' ) ) ),
-				new Balance( 'EUR', '-5.00' ),
+				new Balance( 'mock', 'EUR', '-5.00' ),
 			)
 		);
 
@@ -73,11 +73,11 @@ class FinanceDataSchemasTest extends WC_Unit_Test_Case {
 	public function test_serialized_payouts_match_schema(): void {
 		$page = new FinanceDataPage(
 			array(
-				( new Payout( 'po_1', 'GBP', '250.00', PayoutStatus::COMPLETE, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) )
+				( new Payout( 'mock', 'po_1', 'GBP', '250.00', PayoutStatus::COMPLETE, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) )
 					->set_bank_account( 'Barclays ****1234' )
 					->set_date_expected( new \DateTimeImmutable( '2026-09-03T00:00:00+00:00' ) )
 					->set_provider_status( 'paid' ),
-				new Payout( 'po_2', 'GBP', '10.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-02T12:00:00+00:00' ) ),
+				new Payout( 'mock', 'po_2', 'GBP', '10.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-02T12:00:00+00:00' ) ),
 			),
 			true,
 			'next-cursor',
@@ -88,21 +88,33 @@ class FinanceDataSchemasTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should describe the providers list response.
+	 * @testdox Should describe the providers list response, with and without an icon.
 	 */
 	public function test_providers_payload_matches_schema(): void {
 		$payload = array(
 			'providers' => array(
 				array(
-					'gateway_id' => 'woocommerce_payments',
-					'title'      => 'WooPayments',
-					'data_types' => array(
+					'provider_id' => 'woocommerce_payments',
+					'title'       => 'WooPayments',
+					'icon_url'    => home_url( '/wp-content/plugins/woocommerce-payments/assets/images/logo.svg' ),
+					'data_types'  => array(
 						array(
 							'type'           => 'balance',
 							'schema_version' => 1,
 						),
 						array(
 							'type'           => 'payouts',
+							'schema_version' => 1,
+						),
+					),
+				),
+				array(
+					'provider_id' => 'mock',
+					'title'       => 'Mock Gateway',
+					'icon_url'    => null,
+					'data_types'  => array(
+						array(
+							'type'           => 'balance',
 							'schema_version' => 1,
 						),
 					),
@@ -123,7 +135,7 @@ class FinanceDataSchemasTest extends WC_Unit_Test_Case {
 	 */
 	public function test_payout_schema_rejects_invalid_items( array $overrides ): void {
 		$payout = ( new FinanceDataSerializer() )->serialize_payout(
-			new Payout( 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) )
+			new Payout( 'mock', 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) )
 		);
 		$data   = array(
 			'schema_version' => 1,

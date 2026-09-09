@@ -52,4 +52,13 @@ class FakeBaseFinanceDataProvider implements FinanceDataProviderInterface {
 	public function get_supported_data_types(): array {
 		return $this->supported_data_types;
 	}
+
+	/**
+	 * Get the icon URL.
+	 *
+	 * @return string
+	 */
+	public function get_icon_url(): string {
+		return '';
+	}
 }

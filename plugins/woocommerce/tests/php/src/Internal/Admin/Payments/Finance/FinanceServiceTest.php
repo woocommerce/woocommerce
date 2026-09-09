@@ -88,10 +88,13 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list providers whose gateway exists, with only the data types core can serve.
+	 * @testdox Should list providers whose gateway exists, with their icon and only the data types core can serve.
 	 */
 	public function test_lists_providers_with_servable_data_types(): void {
-		$this->registry->register( new FakeFinanceDataProvider( 'mock' ) );
+		$icon_url           = home_url( '/wp-content/plugins/mock/icon.svg' );
+		$provider           = new FakeFinanceDataProvider( 'mock' );
+		$provider->icon_url = $icon_url;
+		$this->registry->register( $provider );
 		$this->registry->register( new FakeBaseFinanceDataProvider( 'mock_two', array( FinanceDataSource::BALANCE => 1 ) ) );
 		$this->registry->register(
 			new FakeFinanceDataProvider(
@@ -109,9 +112,10 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 			array(
 				'providers' => array(
 					array(
-						'gateway_id' => 'mock',
-						'title'      => 'Mock Gateway',
-						'data_types' => array(
+						'provider_id' => 'mock',
+						'title'       => 'Mock Gateway',
+						'icon_url'    => $icon_url,
+						'data_types'  => array(
 							array(
 								'type'           => 'balance',
 								'schema_version' => 1,
@@ -123,9 +127,10 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 						),
 					),
 					array(
-						'gateway_id' => 'mock_three',
-						'title'      => 'Mock Three',
-						'data_types' => array(
+						'provider_id' => 'mock_three',
+						'title'       => 'Mock Three',
+						'icon_url'    => null,
+						'data_types'  => array(
 							array(
 								'type'           => 'payouts',
 								'schema_version' => 1,
@@ -137,6 +142,40 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 			$result
 		);
 		$this->assertCount( 2, $this->logger->get_messages( 'debug' ), 'The unimplemented type and the unsupported version should each be logged.' );
+	}
+
+	/**
+	 * @testdox Should only keep icon URLs that stay on the store's own host.
+	 *
+	 * @dataProvider icon_url_provider
+	 *
+	 * @param string      $icon_url The icon URL the provider declares.
+	 * @param string|null $expected The icon URL in the response.
+	 */
+	public function test_keeps_only_local_icon_urls( string $icon_url, ?string $expected ): void {
+		$provider           = new FakeFinanceDataProvider( 'mock' );
+		$provider->icon_url = $icon_url;
+		$this->registry->register( $provider );
+
+		$result = $this->sut->get_providers();
+
+		$this->assertSame( $expected, $result['providers'][0]['icon_url'] );
+	}
+
+	/**
+	 * Icon URLs a provider may declare, with the value the response should carry.
+	 *
+	 * @return array
+	 */
+	public function icon_url_provider(): array {
+		$home_url = get_home_url();
+
+		return array(
+			'plugin asset on the store host' => array( $home_url . '/wp-content/plugins/mock/icon.svg', $home_url . '/wp-content/plugins/mock/icon.svg' ),
+			'another host'                   => array( 'https://cdn.example.net/mock/icon.svg', null ),
+			'path traversal'                 => array( $home_url . '/wp-content/plugins/../uploads/icon.svg', null ),
+			'empty'                          => array( '', null ),
+		);
 	}
 
 	/**
@@ -159,7 +198,7 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_balances_returns_envelope(): void {
 		$provider                = new FakeFinanceDataProvider( 'mock' );
-		$provider->balances_page = new FinanceDataPage( array( ( new Balance( 'usd', '10.00' ) )->set_available_amount( '5.00' ) ) );
+		$provider->balances_page = new FinanceDataPage( array( ( new Balance( 'mock', 'usd', '10.00' ) )->set_available_amount( '5.00' ) ) );
 		$this->registry->register( $provider );
 
 		$result = $this->sut->get_balances( 'mock' );
@@ -169,9 +208,11 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 		$this->assertNull( $result['next_cursor'] );
 		$this->assertNull( $result['prev_cursor'] );
 		$this->assertCount( 1, $result['items'] );
+		$this->assertSame( 'mock', $result['items'][0]['provider_id'] );
 		$this->assertSame( 'USD', $result['items'][0]['currency'] );
 		$this->assertSame( '5.00', $result['items'][0]['available_amount'] );
-		$this->assertNull( $provider->last_query->get_cursor() );
+		$this->assertNull( $provider->last_query->get_next_cursor() );
+		$this->assertNull( $provider->last_query->get_prev_cursor() );
 	}
 
 	/**
@@ -180,20 +221,22 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	public function test_get_payouts_passes_query_and_returns_pagination(): void {
 		$provider               = new FakeFinanceDataProvider( 'mock' );
 		$provider->payouts_page = new FinanceDataPage(
-			array( new Payout( 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) ),
+			array( new Payout( 'mock', 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) ),
 			true,
 			'next-cursor',
 			'prev-cursor'
 		);
 		$this->registry->register( $provider );
 
-		$result = $this->sut->get_payouts( 'mock', new FinanceDataQuery( 'abc', 5 ) );
+		$result = $this->sut->get_payouts( 'mock', new FinanceDataQuery( 'to-next', 'to-prev', 5 ) );
 
-		$this->assertSame( 'abc', $provider->last_query->get_cursor() );
+		$this->assertSame( 'to-next', $provider->last_query->get_next_cursor() );
+		$this->assertSame( 'to-prev', $provider->last_query->get_prev_cursor() );
 		$this->assertSame( 5, $provider->last_query->get_per_page() );
 		$this->assertTrue( $result['has_more'] );
 		$this->assertSame( 'next-cursor', $result['next_cursor'] );
 		$this->assertSame( 'prev-cursor', $result['prev_cursor'] );
+		$this->assertSame( 'mock', $result['items'][0]['provider_id'] );
 		$this->assertSame( 'po_1', $result['items'][0]['id'] );
 	}
 
@@ -291,7 +334,7 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	public function test_rejects_items_of_wrong_type(): void {
 		$provider                = new FakeFinanceDataProvider( 'mock' );
 		$provider->balances_page = new FinanceDataPage(
-			array( new Payout( 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) )
+			array( new Payout( 'mock', 'po_1', 'USD', '1.00', PayoutStatus::PENDING, new \DateTimeImmutable( '2026-09-01T12:00:00+00:00' ) ) )
 		);
 		$this->registry->register( $provider );
 
