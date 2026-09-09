@@ -1467,7 +1467,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Converts image IDs to integers.
+	 * @since 11.2.0 Normalizes the value with absint(): non-numeric values become 0, negative values their absolute value.
 	 *
 	 * @param int|string $image_id Product image id.
 	 * @return void
