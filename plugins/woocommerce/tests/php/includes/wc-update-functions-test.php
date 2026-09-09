@@ -625,13 +625,13 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Migration deletes the lookup rows of unpublished variations and keeps every other row.
 	 */
-	public function test_wc_update_11203_delete_unpublished_variation_lookup_rows(): void {
+	public function test_wc_update_1120_delete_unpublished_variation_lookup_rows(): void {
 		global $wpdb;
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$db_updates = WC_Install::get_db_update_callbacks();
-		$this->assertContains( 'wc_update_11203_delete_unpublished_variation_lookup_rows', $db_updates['11.2.0-3'] );
+		$this->assertContains( 'wc_update_1120_delete_unpublished_variation_lookup_rows', $db_updates['11.2.0'] );
 
 		$product       = WC_Helper_Product::create_variation_product();
 		$variation_ids = $product->get_children();
@@ -674,7 +674,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			2
 		);
 
-		wc_update_11203_delete_unpublished_variation_lookup_rows();
+		wc_update_1120_delete_unpublished_variation_lookup_rows();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );

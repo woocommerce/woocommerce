@@ -3813,7 +3813,7 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
  *
  * @return void
  */
-function wc_update_11203_delete_unpublished_variation_lookup_rows() {
+function wc_update_1120_delete_unpublished_variation_lookup_rows() {
 	global $wpdb;
 
 	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
