@@ -92,6 +92,7 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_settings_are_registered_outside_admin(): void {
 		$this->assertFalse( is_admin(), 'This test must run outside the admin context, as REST requests do.' );
+		$this->init_stock_notifications_services();
 
 		$products_page = null;
 		foreach ( WC_Admin_Settings::get_settings_pages() as $page ) {
