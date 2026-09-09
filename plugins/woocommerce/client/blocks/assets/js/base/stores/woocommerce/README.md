@@ -157,6 +157,21 @@ printf(
 
 The second argument to `wp_interactivity_data_wp_context` (`'woocommerce/products'`) namespaces the context to the `woocommerce/products` store; the JS store's `getContext< ProductContext >( 'woocommerce/products' )` calls read from it.
 
+#### Composite and custom product templates
+
+Grouped products are not special because of their product type alone. They work because the template does two things for each rendered child item:
+
+1. Load the child product into the store before descendants bind to `state.productInContext.*`.
+2. Wrap the child item's markup in a local `woocommerce/products` context so descendants resolve the child product instead of the parent product.
+
+That same pattern applies to custom composite product types, such as bundle-like extensions that register their own Add to Cart + Options block template part. Core does not automatically infer or hydrate child items for custom product types. If an extension renders child-product UI and wants descendants to use `state.productInContext`, it should:
+
+-   Load the parent product with `wc_interactivity_api_load_product()`.
+-   Load each rendered child product before outputting bindings that read from `state.productInContext`.
+-   Wrap each child item's subtree with `wp_interactivity_data_wp_context( [ 'productId' => $child_id, 'variationId' => null ], 'woocommerce/products' )`.
+
+For grouped products in core, see `GroupedProductItem::get_product_row()` for the server-side wrapper pattern.
+
 ### Reading product data in a block
 
 Once state is populated and a current product is set, blocks read from it either through directives (SSR + client) or through a JS store reference.
