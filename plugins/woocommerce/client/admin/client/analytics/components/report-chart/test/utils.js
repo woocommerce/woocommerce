@@ -3,9 +3,11 @@
  */
 import moment from 'moment';
 import {
+	getAllowedIntervalsForQuery,
 	getCurrentDates,
 	getCurrentPeriod,
 	getLastPeriod,
+	getPreviousDate,
 } from '@woocommerce/date';
 
 /**
@@ -374,6 +376,7 @@ describe( 'buildChartData', () => {
 	test.each( [
 		[ 'avg_items_per_order', 'average' ],
 		[ 'avg_order_value', 'currency' ],
+		[ 'conversion_rate', 'percent' ],
 	] )(
 		'should not fold the 29th Feb of the previous year for the %s average',
 		( key, type ) => {
@@ -629,6 +632,115 @@ describe( 'buildChartData across every date range shape', () => {
 						compare
 					)
 				);
+			} );
+		} );
+
+		expect( problems ).toEqual( [] );
+	} );
+
+	// Intervals coarser than a day are matched by position, so every point
+	// must be labelled with the interval it was actually plotted from.
+	function bucketIntervals( start, end, interval ) {
+		const intervals = [];
+		let bucketStart = start.clone();
+		while ( ! bucketStart.isAfter( end ) ) {
+			const nextStart = bucketStart
+				.clone()
+				.startOf( interval )
+				.add( 1, interval );
+			intervals.push( {
+				date_start: bucketStart.format( 'YYYY-MM-DD HH:mm:ss' ),
+				date_end: moment
+					.min( nextStart.clone().subtract( 1, 'seconds' ), end )
+					.format( 'YYYY-MM-DD HH:mm:ss' ),
+				subtotals: {
+					orders_count: Number( bucketStart.format( 'YYYYMMDDHH' ) ),
+				},
+			} );
+			bucketStart = nextStart;
+		}
+		return intervals;
+	}
+
+	test( 'every preset at every coarser interval labels the interval it plots', () => {
+		const problems = [];
+
+		clocks.forEach( ( clock ) => {
+			jest.useFakeTimers().setSystemTime( new Date( clock ) );
+			Object.entries( builders ).forEach( ( [ preset, build ] ) => {
+				compares.forEach( ( compare ) => {
+					const range = build( compare );
+					const primary = {
+						label: '',
+						range: '',
+						after: range.primaryStart,
+						before: range.primaryEnd,
+					};
+					const secondary = {
+						label: '',
+						range: '',
+						after: range.secondaryStart,
+						before: range.secondaryEnd,
+						shift: range.secondaryShift,
+					};
+					getAllowedIntervalsForQuery( { period: preset, compare } )
+						.filter( ( interval ) => interval !== 'day' )
+						.forEach( ( interval ) => {
+							const secondaryIntervals = bucketIntervals(
+								secondary.after,
+								secondary.before,
+								interval
+							);
+							const chartData = buildChartData(
+								{
+									data: {
+										totals: {},
+										intervals: bucketIntervals(
+											primary.after,
+											primary.before,
+											interval
+										),
+									},
+								},
+								{
+									data: {
+										totals: {},
+										intervals: secondaryIntervals,
+									},
+								},
+								primary,
+								secondary,
+								compare,
+								'orders_count',
+								interval,
+								'number'
+							);
+							chartData.forEach( ( point, index ) => {
+								const plotted = secondaryIntervals[ index ];
+								// Positional intervals keep the label they always had:
+								// the compare based one, with no shift applied.
+								const expectedLabel = getPreviousDate(
+									point.primary.labelDate,
+									primary.after,
+									secondary.after,
+									compare,
+									interval
+								).format( 'YYYY-MM-DD HH:mm:ss' );
+								const expectedValue = plotted
+									? plotted.subtotals.orders_count
+									: 0;
+								if (
+									point.secondary.labelDate !==
+										expectedLabel ||
+									point.secondary.value !== expectedValue
+								) {
+									problems.push(
+										`${ preset }/${ compare }/${ interval } at ${ clock } ${ point.date }: label ${ point.secondary.labelDate }, value ${ point.secondary.value }, expected ${ expectedLabel }`
+									);
+								}
+							} );
+						} );
+				} );
 			} );
 		} );
 

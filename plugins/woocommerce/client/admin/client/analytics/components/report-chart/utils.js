@@ -53,16 +53,18 @@ export function createDateFormatter( format ) {
 
 /**
  * Returns true if the values of a chart metric can be added up across days.
- * Averages cannot. Core names them `avg_*` and types most of them as
- * `average`, but `avg_order_value` is typed as `currency` for formatting,
- * so both signals are checked.
+ * Averages and percentages cannot. Core names averages `avg_*` and types most
+ * of them as `average`, but `avg_order_value` is typed as `currency` for
+ * formatting, so both signals are checked.
  *
  * @param {string} key  Chart key, e.x: `orders_count`
  * @param {string} type Chart type, e.x: `number`
  * @return {boolean} True if the values can be summed.
  */
 function isAdditiveMetric( key, type ) {
-	return type !== 'average' && ! key.startsWith( 'avg_' );
+	return (
+		type !== 'average' && type !== 'percent' && ! key.startsWith( 'avg_' )
+	);
 }
 
 /**
@@ -131,7 +133,7 @@ export function buildChartData(
 			secondaryDatePicker.after,
 			comparison,
 			currentInterval,
-			shift
+			matchByDate ? shift : undefined
 		);
 		let secondaryLabelDate = secondaryDateMoment.format(
 			'YYYY-MM-DD HH:mm:ss'
