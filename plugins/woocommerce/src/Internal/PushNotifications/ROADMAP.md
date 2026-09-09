@@ -151,7 +151,7 @@ This library will be in the `src/Internal` directory and is not intended to be u
 
 - **Get driver status:**
     - Endpoint: `GET /wp-json/wc-push-notifications/status`
-    - Auth: Jetpack blog token, or any logged in user. No role is required, because WPCOM reads this endpoint and signs those requests with the blog token, which identifies no user.
+    - Auth: Jetpack blog token, or a user holding one of the roles allowed to use push notifications. The blog token identifies no user, so a role check on its own would reject the requests WPCOM makes to this endpoint.
     - Returns the installed notification drivers, each with `connected` (its underlying connection is present), `enabled` (the driver itself isn't disabled), and `available` (`connected && enabled`, i.e. configured and usable, which is not a statement about delivery) flags, plus the `preferred_driver`, the first available driver in precedence order. `preferred_driver` is the site's preference, not a statement about what is delivering notifications to a given app, which also depends on the app version and on whether its token registered successfully. The `jetpack-sync` driver is listed only when the Jetpack Sync package is installed; the `remote-push-notification-proxy` driver ships with core and is always listed. Stays reachable even when push notifications are disabled, so clients can read the driver state and fall back to Jetpack Sync when the proxy isn't available.
 
     ```json

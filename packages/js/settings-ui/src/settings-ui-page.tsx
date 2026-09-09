@@ -94,10 +94,6 @@ const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
-const clearLegacyFormPrompt = () => {
-	window.onbeforeunload = null;
-};
-
 const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	let redirectInput = form.querySelector< HTMLInputElement >(
 		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
@@ -383,6 +379,9 @@ const ShellHeader = ( {
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
 									}
+									aria-current={
+										item.active ? 'page' : undefined
+									}
 									href={ item.href }
 									key={ item.id }
 								>
@@ -406,6 +405,9 @@ const ShellHeader = ( {
 										item.active
 											? 'wc-settings-ui-shell__tab is-active'
 											: 'wc-settings-ui-shell__tab'
+									}
+									aria-current={
+										item.active ? 'page' : undefined
 									}
 									href={ item.href }
 									key={ item.id }
@@ -480,7 +482,6 @@ export const SettingsUIPage = ( {
 
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
-		clearLegacyFormPrompt();
 	}, [] );
 
 	const submitSettingsForm = useCallback(
@@ -692,23 +693,34 @@ export const SettingsUIPage = ( {
 		() => dataFormAdapter.getForm( values ),
 		[ dataFormAdapter, values ]
 	);
+	const allFields = useMemo( () => getAllFields( schema ), [ schema ] );
+	const fieldsById = useMemo(
+		() => new Map( allFields.map( ( field ) => [ field.id, field ] ) ),
+		[ allFields ]
+	);
 	const handleDataFormChange = useCallback(
 		( nextValues: Record< string, SettingsValue | undefined > ) => {
 			const merged: Partial< SettingsValues > = {};
 
-			// Package controls emit undefined for a cleared value; the settings
-			// vocabulary represents that as an empty string.
 			Object.entries( nextValues ).forEach( ( [ fieldId, value ] ) => {
-				merged[ fieldId ] = typeof value === 'undefined' ? '' : value;
+				const fieldType = fieldsById.get( fieldId )?.type;
+				const emptyValue =
+					fieldType === 'number' ||
+					fieldType === 'integer' ||
+					fieldType === 'datetime-local'
+						? null
+						: '';
+				merged[ fieldId ] =
+					typeof value === 'undefined' ? emptyValue : value;
 			} );
 
 			setValues( merged );
 		},
-		[ setValues ]
+		[ fieldsById, setValues ]
 	);
 
 	const formPostFields =
-		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
+		saveStrategy.adapter === 'form_post' ? allFields : [];
 
 	const showHeader = schema.shell?.header === 'visible';
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
@@ -779,6 +791,9 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							initialCanonicalValue={ initialValues[ field.id ] }
+							serializeDateTimeAsStoreLocal
+							strict
 							key={ field.id }
 						/>
 					) ) }

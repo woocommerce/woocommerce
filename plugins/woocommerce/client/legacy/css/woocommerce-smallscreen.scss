@@ -6,8 +6,8 @@
 /**
  * Imports
  */
-@import 'mixins';
-@import 'variables';
+@import "mixins";
+@import "variables";
 
 /**
  * Style begins
@@ -16,12 +16,15 @@
 .woocommerce-page {
 
 	table.shop_table_responsive {
+
 		thead {
 			display: none;
 		}
 
 		tbody {
+
 			tr:first-child {
+
 				td:first-child {
 					border-top: 0;
 				}
@@ -44,20 +47,22 @@
 				}
 
 				&::before {
-					content: attr(data-title) ': ';
+					content: attr(data-title) ": ";
 					font-weight: 700;
 					float: left;
 				}
 
 				&.product-remove,
 				&.actions {
+
 					&::before {
 						display: none;
 					}
 				}
 			}
 
-			&:nth-child( 2n ) {
+			&:nth-child(2n) {
+
 				td {
 					background-color: rgba(0, 0, 0, 0.025);
 				}
@@ -66,8 +71,11 @@
 	}
 
 	table.my_account_orders {
+
 		tr {
+
 			td {
+
 				&.order-actions {
 					text-align: left;
 
@@ -88,6 +96,7 @@
 	 * Product attributes table
 	 */
 	table.shop_attributes {
+
 		tr {
 			display: block;
 
@@ -127,6 +136,7 @@
 	 * General layout
 	 */
 	.col2-set {
+
 		.col-1,
 		.col-2 {
 			float: none;
@@ -137,14 +147,15 @@
 	/**
 	 * Products
 	 */
-	ul.products[class*='columns-'] {
+	ul.products[class*="columns-"] {
+
 		li.product {
 			width: 48%;
 			float: left;
 			clear: both;
 			margin: 0 0 2.992em;
 
-			&:nth-child( 2n ) {
+			&:nth-child(2n) {
 				float: right;
 				clear: none !important; // This should never clear.
 			}
@@ -156,6 +167,7 @@
 	 */
 	div.product,
 	#content div.product {
+
 		div.images,
 		div.summary {
 			float: none;
@@ -168,6 +180,7 @@
 	 */
 	table.cart,
 	#content table.cart {
+
 		.product-thumbnail {
 			display: none;
 		}
@@ -177,6 +190,7 @@
 
 			.coupon {
 				float: none;
+
 				@include clearfix();
 				padding-bottom: 0.5em;
 
@@ -211,6 +225,7 @@
 	}
 
 	.cart-collaterals {
+
 		.cart_totals,
 		.shipping_calculator,
 		.cross-sells {
@@ -224,7 +239,9 @@
 	 * Checkout
 	 */
 	&.woocommerce-checkout {
+
 		form.login {
+
 			.form-row {
 				width: 100%;
 				float: none;
@@ -233,6 +250,7 @@
 	}
 
 	#payment {
+
 		.terms {
 			text-align: left;
 			padding: 0;
@@ -250,6 +268,7 @@
 	 * Account
 	 */
 	.lost_reset_password {
+
 		.form-row-first,
 		.form-row-last {
 			width: 100%;
@@ -260,6 +279,7 @@
 }
 
 .woocommerce-account {
+
 	.woocommerce-MyAccount-navigation,
 	.woocommerce-MyAccount-content {
 		float: none;
@@ -271,7 +291,9 @@
  * Twenty Thirteen specific styles
  */
 .single-product {
+
 	.twentythirteen {
+
 		.panel {
 			padding-left: 20px !important;
 			padding-right: 20px !important;
