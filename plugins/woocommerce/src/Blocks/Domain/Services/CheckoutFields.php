@@ -453,7 +453,12 @@ class CheckoutFields {
 			return false;
 		}
 
-		return $this->get_field_type( $options )->validate_options( $options );
+		$field_type = $this->get_field_type( $options );
+		if ( isset( $options['validation'] ) && is_array( $options['validation'] ) ) {
+			$options['validation'] = $field_type->prepare_validation_schema( $options['validation'] );
+		}
+
+		return $field_type->validate_options( $options );
 	}
 
 	/**

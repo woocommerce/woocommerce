@@ -19,6 +19,18 @@ use WP_Error;
 abstract class AbstractFieldType {
 
 	/**
+	 * Adds type-specific defaults to a field's validation schema.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $schema The supplied validation schema.
+	 * @return array The schema with defaults applied.
+	 */
+	public function prepare_validation_schema( array $schema ): array {
+		return $schema;
+	}
+
+	/**
 	 * Validates the options that apply to every field type: callbacks, hidden state, and rule schemas.
 	 *
 	 * Subclasses adding checks should call this parent method first.

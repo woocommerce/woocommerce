@@ -14,6 +14,31 @@ use WP_UnitTestCase;
 class ValidationTest extends WP_UnitTestCase {
 
 	/**
+	 * @testdox Invalid schemas report the failing keyword and a reason without internal wrappers or placeholders.
+	 *
+	 * @testWith [{"formatMinimum": "2026-05-01"}, "/", "format"]
+	 *           [{"format": "time", "formatMinimum": "2026-05-01"}, "/format", "The value must be \"date\""]
+	 *           [{"format": "date", "formatMaximum": 20260501}, "/formatMaximum", "string"]
+	 *           [{"format": "date", "formatMaximum": "2026-02-30"}, "/formatMaximum", "date"]
+	 *           [{"format": "date", "formatMinimum": {"$data": "not-a-pointer"}}, "/formatMinimum/$data", "json-pointer"]
+	 *           [{"anyOf": [{"maxLength": -1}]}, "/anyOf/0/maxLength", "0"]
+	 *
+	 * @param array  $rules  The invalid schema.
+	 * @param string $path   The expected keyword path.
+	 * @param string $reason The expected explanation.
+	 */
+	public function test_schema_error_explains_invalid_keyword( array $rules, string $path, string $reason ): void {
+		$error = Validation::is_valid_schema( $rules );
+
+		$this->assertWPError( $error );
+		$message = $error->get_error_message();
+		$this->assertStringContainsString( 'At "' . $path . '"', $message );
+		$this->assertStringContainsString( $reason, $message );
+		$this->assertStringNotContainsString( '/properties/test', $message );
+		$this->assertStringNotContainsString( '{properties}', $message );
+	}
+
+	/**
 	 * @testdox A $data reference is accepted wherever the keyword's own value would be.
 	 *
 	 * One keyword per shape draft-07 gives these keywords: a number, a string, and an array.
