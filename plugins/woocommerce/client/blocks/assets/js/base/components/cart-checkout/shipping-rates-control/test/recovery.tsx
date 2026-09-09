@@ -113,6 +113,9 @@ test( 'failed initialization stays retryable without automatically repeating rej
 		} );
 		expect( apiFetch ).toHaveBeenCalledTimes( 1 );
 
+		// The click starts a store update that only settles once the fake timers
+		// run, so both have to happen inside the same act boundary.
+		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {
 			await user.click( flatRate );
 			await jest.runOnlyPendingTimersAsync();
@@ -131,6 +134,9 @@ test( 'failed initialization stays retryable without automatically repeating rej
 				},
 			],
 		} );
+		// The click starts a store update that only settles once the fake timers
+		// run, so both have to happen inside the same act boundary.
+		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {
 			await user.click( flatRate );
 			await jest.runOnlyPendingTimersAsync();
