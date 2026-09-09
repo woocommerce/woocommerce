@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache System Status post counts for one hour to avoid repeated slow queries on large stores.
