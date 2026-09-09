@@ -350,13 +350,11 @@ class WC_Install {
 		'11.1.0-1' => array(
 			'wc_update_11101_remove_deprecated_variation_gallery_option',
 		),
-		'11.1.1'   => array(
-			'wc_update_1111_cleanup_inherited_variation_images',
-		),
 		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
 			'wc_update_1120_delete_surface_cart_checkout_note',
+			'wc_update_1120_cleanup_inherited_variation_images',
 		),
 		'11.2.0-1' => array(
 			'wc_update_11201_migrate_tax_lookup_order_items',
