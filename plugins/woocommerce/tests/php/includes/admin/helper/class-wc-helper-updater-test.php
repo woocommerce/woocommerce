@@ -27,6 +27,13 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Products sent in the mocked update-check request.
+	 *
+	 * @var array|null
+	 */
+	private $mocked_request_products;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -50,6 +57,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private function cleanup_transients() {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 	}
 
 	/**
@@ -64,6 +73,83 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		return $method->invoke( null, $payload );
+	}
+
+	/**
+	 * @testdox Update-data entry points skip malformed subscription records.
+	 *
+	 * @dataProvider malformed_subscription_entry_points
+	 *
+	 * @param string $entry_point Updater method to test.
+	 */
+	public function test_update_data_entry_points_skip_malformed_subscriptions( string $entry_point ): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				'corrupted',
+				array( 'product_key' => 'missing-id' ),
+				array( 'product_id' => array( 456 ) ),
+				array( 'product_id' => 0 ),
+				array( 'product_id' => -10 ),
+				array( 'product_id' => 900001.9 ),
+				array( 'product_id' => '900002.9' ),
+				array( 'product_id' => '9e5' ),
+				array( 'product_id' => '+900003' ),
+				array( 'product_id' => ' 900004 ' ),
+				array( 'product_id' => true ),
+				array( 'product_id' => 900005 ),
+				array(
+					'product_id'  => 900006,
+					'connections' => 'corrupted',
+				),
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+				),
+				array(
+					'product_id'  => '456',
+					'connections' => array(),
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+
+		try {
+			$result = call_user_func( array( WC_Helper_Updater::class, $entry_point ) );
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame( $this->mocked_updates, $result, 'Malformed subscriptions should not interrupt the update check' );
+		$this->assertIsArray( $this->mocked_request_products, 'The valid subscription should trigger an update-check request' );
+		$this->assertSame(
+			array( 123, 456 ),
+			array_values(
+				array_intersect(
+					array( 123, 456, 900000, 900001, 900002, 900003, 900004, 900005, 900006 ),
+					array_keys( $this->mocked_request_products )
+				)
+			),
+			'Only valid test subscription IDs should be included in the request'
+		);
+		$this->assertSame(
+			456,
+			$this->mocked_request_products[456]['product_id'],
+			'String subscription IDs should be normalized to integers in the update request'
+		);
+	}
+
+	/**
+	 * Data provider for subscription update entry points.
+	 *
+	 * @return array
+	 */
+	public function malformed_subscription_entry_points() {
+		return array(
+			'available extension downloads' => array( 'get_available_extensions_downloads_data' ),
+			'all extension updates'         => array( 'get_update_data' ),
+		);
 	}
 
 	/**
@@ -140,6 +226,61 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$result = $this->call_update_check( $payload );
 
 		$this->assertEquals( $cached_data['products'], $result, 'Result should match cached version' );
+	}
+
+	/**
+	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
+	 */
+	public function test_update_check_preserves_cache_when_rate_limited(): void {
+		$cached_data = array(
+			'hash'     => 'a-stale-hash',
+			'updated'  => time(),
+			'products' => array(
+				123 => array(
+					'version' => '1.2.3',
+					'slug'    => 'test-plugin',
+				),
+			),
+			'errors'   => array(),
+		);
+
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		$http_mock = static function () {
+			return array(
+				'headers'  => array( 'retry-after' => '60' ),
+				'response' => array(
+					'code'    => 429,
+					'message' => 'Too Many Requests',
+				),
+				'body'     => '{"code":"wccom_rest_limit_reached","data":{"status":429}}',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $cached_data['products'], $result, 'A rate-limited check should serve the previously cached products' );
+		$this->assertSame(
+			$cached_data,
+			get_transient( '_woocommerce_helper_updates' ),
+			'A 429 should leave the cached update data untouched rather than replacing it with an empty result'
+		);
+		$this->assertNotFalse(
+			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'A 429 should record a backoff window for the update-check endpoint'
+		);
 	}
 
 	/**
@@ -447,6 +588,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		if ( strpos( $url, 'woocommerce.com' ) === false && strpos( $url, 'api.woocommerce.com' ) === false ) {
 			return $preempt;
 		}
+
+		$request_body                  = json_decode( $args['body'] ?? '', true );
+		$this->mocked_request_products = $request_body['products'] ?? null;
 
 		return array(
 			'response' => array(

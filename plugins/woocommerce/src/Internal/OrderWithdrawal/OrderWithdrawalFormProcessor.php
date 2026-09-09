@@ -3,7 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Throwable;
 use WC_Geolocation;
 use WC_Order;
@@ -37,6 +40,9 @@ final class OrderWithdrawalFormProcessor {
 	private const LOGGER_SOURCE                       = 'order-withdrawal';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
+	private const WITHDRAWAL_WINDOW_IN_DAYS           = 14;
+	private const WITHDRAWAL_WINDOW_IN_SECONDS        = self::WITHDRAWAL_WINDOW_IN_DAYS * DAY_IN_SECONDS;
+	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-order-';
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
 	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
@@ -266,19 +272,15 @@ final class OrderWithdrawalFormProcessor {
 
 		$matched_order = $this->get_matching_order( $data );
 
-		if ( $matched_order ) {
-			if ( $this->has_order_withdrawal_request( $matched_order ) ) {
-				wc_add_notice(
-					__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
-					'error'
-				);
+		if ( $matched_order && $this->has_order_withdrawal_request( $matched_order ) ) {
+			wc_add_notice(
+				__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
+				'error'
+			);
 
-				$this->apply_rate_limits( $rate_limit_ids, -1 );
+			$this->apply_rate_limits( $rate_limit_ids, -1 );
 
-				return false;
-			}
-
-			$this->add_order_withdrawal_note( $matched_order, $data );
+			return false;
 		}
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
@@ -290,6 +292,8 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( $matched_order ) {
 			$this->mark_order_withdrawal_requested( $matched_order );
+			$this->add_order_withdrawal_note( $matched_order, $data );
+			$this->add_order_withdrawal_inbox_note( $matched_order );
 		}
 
 		return true;
@@ -360,7 +364,7 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Get an order only when every submitted order-identifying field matches.
+	 * Get an order only when the submitted email and order number match.
 	 *
 	 * @param array<string,string> $data Form data.
 	 */
@@ -413,15 +417,13 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Whether a candidate order exactly matches the submitted identifying data.
+	 * Whether a candidate order matches the submitted email and order number.
 	 *
 	 * @param WC_Order             $order Candidate order.
 	 * @param array<string,string> $data  Form data.
 	 */
 	private function order_matches_form_data( WC_Order $order, array $data ): bool {
 		return $this->normalize_order_number( (string) $order->get_order_number() ) === $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] )
-			&& $this->text_values_match( $order->get_billing_first_name( 'edit' ), $data[ self::FIELD_FIRST_NAME ] )
-			&& $this->text_values_match( $order->get_billing_last_name( 'edit' ), $data[ self::FIELD_LAST_NAME ] )
 			&& $this->text_values_match( $order->get_billing_email( 'edit' ), $data[ self::FIELD_EMAIL ] );
 	}
 
@@ -458,19 +460,10 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function add_order_withdrawal_note( WC_Order $order, array $data ): void {
 		$note = sprintf(
-			/* translators: 1: customer name, 2: customer email address. */
-			__( 'Order withdrawal requested by %1$s (%2$s).', 'woocommerce' ),
-			$this->get_customer_name( $data ),
-			$data[ self::FIELD_EMAIL ]
+			/* translators: %s: withdrawal type label. */
+			__( 'Order withdrawal requested. Withdrawal type: %s.', 'woocommerce' ),
+			$this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] )
 		);
-
-		if ( self::WITHDRAWAL_TYPE_SPECIFIC === $data[ self::FIELD_WITHDRAWAL_TYPE ] ) {
-			$note .= "\n\n" . sprintf(
-				/* translators: %s: items the customer listed for partial withdrawal. */
-				__( 'Items requested for withdrawal: %s', 'woocommerce' ),
-				$data[ self::FIELD_ADDITIONAL_DETAILS ]
-			);
-		}
 
 		try {
 			if ( ! $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) ) ) {
@@ -479,6 +472,104 @@ final class OrderWithdrawalFormProcessor {
 		} catch ( Throwable $e ) {
 			$this->log_order_note_error( $order, $e );
 		}
+	}
+
+	/**
+	 * Add a withdrawal request notification to the merchant's WooCommerce inbox.
+	 *
+	 * @param WC_Order $matched_order Matched order.
+	 */
+	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
+		try {
+			$content = sprintf(
+				/* translators: %s: order number. */
+				__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
+				$matched_order->get_order_number()
+			);
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$content .= ' ' . $this->get_withdrawal_window_warning_message();
+			}
+
+			$note = new Note();
+			$note->set_title(
+				sprintf(
+					/* translators: %s: order number. */
+					__( 'Order withdrawal request for #%s', 'woocommerce' ),
+					$matched_order->get_order_number()
+				)
+			);
+			$note->set_content( $content );
+			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . $matched_order->get_id() );
+			$note->set_source( 'woocommerce-admin' );
+
+			$order_url = $matched_order->get_edit_order_url();
+
+			if ( '' !== $order_url ) {
+				$note->add_action( 'view-order', __( 'View order', 'woocommerce' ), $order_url );
+			}
+
+			$note->save();
+		} catch ( Throwable $e ) {
+			$this->log_inbox_note_error( $e, $matched_order->get_id() );
+		}
+	}
+
+	/**
+	 * Delete the withdrawal request inbox notification associated with an order.
+	 *
+	 * @param int|WC_Order $order Order ID or order object.
+	 */
+	public function delete_order_withdrawal_inbox_note_for_order( $order ): void {
+		if ( $order instanceof WC_Order ) {
+			$order_id = $order->get_id();
+		} elseif ( is_int( $order ) ) {
+			if ( ! OrderUtil::is_order( $order ) ) {
+				return;
+			}
+
+			$order_id = $order;
+		} else {
+			return;
+		}
+
+		if ( 0 >= $order_id ) {
+			return;
+		}
+
+		try {
+			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . $order_id );
+		} catch ( Throwable $e ) {
+			$this->log_inbox_note_error( $e, $order_id );
+		}
+	}
+
+	/**
+	 * Whether the matched order is outside the valid withdrawal request window.
+	 *
+	 * @param WC_Order $order Matched order.
+	 */
+	private function is_order_outside_withdrawal_window( WC_Order $order ): bool {
+		$date_created = $order->get_date_created( 'edit' );
+
+		if ( ! $date_created ) {
+			return false;
+		}
+
+		return ( time() - self::WITHDRAWAL_WINDOW_IN_SECONDS ) > $date_created->getTimestamp();
+	}
+
+	/**
+	 * Get the warning shown to merchants when a request is outside the valid window.
+	 */
+	private function get_withdrawal_window_warning_message(): string {
+		return sprintf(
+			/* translators: 1: number of days since the order was placed. 2: length of the withdrawal window in days. */
+			__( 'This order is older than %1$d days. Only orders within %2$d days of delivery are eligible for withdrawal.', 'woocommerce' ),
+			self::WITHDRAWAL_WINDOW_IN_DAYS,
+			self::WITHDRAWAL_WINDOW_IN_DAYS
+		);
 	}
 
 	/**
@@ -588,6 +679,10 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( $matched_order instanceof WC_Order ) {
 			$order_url = $matched_order->get_edit_order_url();
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$body .= '<p>' . esc_html( $this->get_withdrawal_window_warning_message() ) . '</p>';
+			}
 
 			$body .= sprintf(
 				'<p>%s</p>',
@@ -716,6 +811,19 @@ final class OrderWithdrawalFormProcessor {
 
 		wc_get_logger()->warning(
 			sprintf( 'Order withdrawal email failed: %s', $message ),
+			array( 'source' => self::LOGGER_SOURCE )
+		);
+	}
+
+	/**
+	 * Log an inbox note failure without failing the submission.
+	 *
+	 * @param Throwable $e        Inbox note error.
+	 * @param int       $order_id Order ID.
+	 */
+	private function log_inbox_note_error( Throwable $e, int $order_id ): void {
+		wc_get_logger()->warning(
+			sprintf( 'Order withdrawal inbox note could not be processed for order %1$d. Error: %2$s', $order_id, $e->getMessage() ),
 			array( 'source' => self::LOGGER_SOURCE )
 		);
 	}

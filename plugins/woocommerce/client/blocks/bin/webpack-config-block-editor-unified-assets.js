@@ -78,22 +78,25 @@ const requestToUnifiedEditorHandle = ( request ) => {
 };
 
 const getUnifiedEditorPackageAliases = () => ( {
-	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
+	'@woocommerce/block-data': path.resolve(
+		__dirname,
+		`../packages/public-api/block-data`
+	),
 	'@woocommerce/blocks-checkout': path.resolve(
 		__dirname,
-		`../packages/checkout`
+		`../packages/public-api/blocks-checkout`
 	),
 	'@woocommerce/blocks-checkout-events': path.resolve(
 		__dirname,
-		`../assets/js/events`
+		`../packages/public-api/blocks-checkout-events`
 	),
 	'@woocommerce/blocks-components': path.resolve(
 		__dirname,
-		`../packages/components`
+		`../packages/public-api/blocks-components`
 	),
 	'@woocommerce/blocks-registry': path.resolve(
 		__dirname,
-		`../assets/js/blocks-registry`
+		`../packages/public-api/blocks-registry`
 	),
 	'@woocommerce/data': path.resolve(
 		__dirname,
@@ -101,7 +104,7 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/price-format': path.resolve(
 		__dirname,
-		`../packages/prices`
+		`../packages/public-api/price-format`
 	),
 	'@woocommerce/sanitize': path.resolve(
 		__dirname,
@@ -109,15 +112,15 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/settings': path.resolve(
 		__dirname,
-		`../assets/js/settings/shared`
+		`../packages/public-api/settings`
 	),
 	'@woocommerce/shared-context': path.resolve(
 		__dirname,
-		`../assets/js/shared/context/`
+		`../packages/public-api/shared-context/`
 	),
 	'@woocommerce/shared-hocs': path.resolve(
 		__dirname,
-		`../assets/js/shared/hocs/`
+		`../packages/public-api/shared-hocs/`
 	),
 } );
 

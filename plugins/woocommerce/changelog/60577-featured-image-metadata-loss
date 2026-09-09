@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent featured image metadata loss when a WooCommerce image size is not registered.

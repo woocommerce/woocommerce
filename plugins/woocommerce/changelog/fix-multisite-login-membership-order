@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Tighten multisite site-membership handling during login.

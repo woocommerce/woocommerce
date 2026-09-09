@@ -42,8 +42,19 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return mixed Results from the data store.
 	 */
 	protected function get_datastore_data( $query_args = array() ) {
-		$query = new Query( $query_args );
-		return $query->get_data();
+		$query       = new Query( $query_args );
+		$report_data = $query->get_data();
+
+		// Warm the user caches in one query so the per-item role lookup in
+		// prepare_item_for_response() doesn't query per row.
+		if ( ! empty( $report_data->data ) ) {
+			$user_ids = array_filter( array_map( 'absint', wp_list_pluck( $report_data->data, 'user_id' ) ) );
+			if ( ! empty( $user_ids ) ) {
+				cache_users( $user_ids );
+			}
+		}
+
+		return $report_data;
 	}
 
 	/**
@@ -240,7 +251,11 @@ class Controller extends GenericController implements ExportableInterface {
 		// Last active date is local time.
 		$data['date_last_active_gmt'] = wc_rest_prepare_date_response( $data['date_last_active'], false );
 		$data['date_last_active']     = wc_rest_prepare_date_response( $data['date_last_active'] );
-		$data                         = $this->filter_response_by_context( $data, $context );
+		$data['role']                 = $this->get_user_role_names( $data['user_id'] ?? 0 );
+		// Rows can be served from a report cache written before these columns existed.
+		$data['billing_phone']  = $data['billing_phone'] ?? '';
+		$data['shipping_phone'] = $data['shipping_phone'] ?? '';
+		$data                   = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
@@ -256,6 +271,35 @@ class Controller extends GenericController implements ExportableInterface {
 		 * @since 4.0.0
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_customers', $response, $report, $request );
+	}
+
+	/**
+	 * Get the localized role names of a user as a comma-separated string.
+	 *
+	 * Roles are resolved at response time rather than stored in the customer
+	 * lookup table, since role changes (e.g. via WP_User::set_role() or plugins
+	 * editing capabilities directly) would leave a stored copy stale.
+	 *
+	 * @param int $user_id User ID, 0 for guest customers.
+	 * @return string Comma-separated localized role names, empty for guests and deleted users.
+	 */
+	protected function get_user_role_names( $user_id ) {
+		if ( empty( $user_id ) ) {
+			return '';
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return '';
+		}
+
+		$role_names = array();
+		foreach ( $user->roles as $role ) {
+			$name         = wp_roles()->role_names[ $role ] ?? $role;
+			$role_names[] = translate_user_role( $name );
+		}
+
+		return implode( ', ', $role_names );
 	}
 
 	/**
@@ -332,6 +376,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'role'                 => array(
+					'description' => __( 'Role(s) of the user, comma-separated. Empty for guest customers.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'country'              => array(
 					'description' => __( 'Country / Region.', 'woocommerce' ),
 					'type'        => 'string',
@@ -352,6 +402,18 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 				'postcode'             => array(
 					'description' => __( 'Postal code.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'billing_phone'        => array(
+					'description' => __( 'Billing phone.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'shipping_phone'       => array(
+					'description' => __( 'Shipping phone.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -689,6 +751,10 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
+		// Appending keeps positional consumers of the released columns working, and
+		// this order must match getHeadersContent() in
+		// client/admin/client/analytics/report/customers/table.js, which produces the
+		// browser-side CSV for single-page reports from the same Download button.
 		$export_columns = array(
 			'name'            => __( 'Name', 'woocommerce' ),
 			'username'        => __( 'Username', 'woocommerce' ),
@@ -702,6 +768,9 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => __( 'City', 'woocommerce' ),
 			'region'          => __( 'Region', 'woocommerce' ),
 			'postcode'        => __( 'Postal Code', 'woocommerce' ),
+			'billing_phone'   => __( 'Billing Phone', 'woocommerce' ),
+			'shipping_phone'  => __( 'Shipping Phone', 'woocommerce' ),
+			'role'            => __( 'Role', 'woocommerce' ),
 		);
 
 		/**
@@ -736,12 +805,15 @@ class Controller extends GenericController implements ExportableInterface {
 			'city'            => $item['city'],
 			'region'          => $item['state'],
 			'postcode'        => $item['postcode'],
+			'billing_phone'   => $item['billing_phone'] ?? '',
+			'shipping_phone'  => $item['shipping_phone'] ?? '',
+			'role'            => $item['role'] ?? '',
 		);
 
 		/**
 		 * Filter the column values of an item being exported.
 		 *
-		 * @param object $export_item Key value pair of Column ID => Row Value.
+		 * @param array  $export_item Key value pair of Column ID => Row Value.
 		 * @param object $item        Single report item/row.
 		 * @since 4.0.0
 		 */

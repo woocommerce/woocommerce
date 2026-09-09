@@ -14,6 +14,16 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 /* translators: %1$s: report name, %2$s: download URL */
 echo wp_kses_post( sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce' ), $report_name, $download_url ) );
 
+echo "\n\n";
+
+/**
+ * Length of time the download link stays valid, passed in by ReportCSVEmail.
+ *
+ * @var string $retention
+ */
+/* translators: %s: length of time the download link stays valid, e.g. "1 week" */
+echo esc_html( sprintf( __( 'This link is available for %s.', 'woocommerce' ), $retention ) );
+
 echo "\n\n----------------------------------------\n\n";
 
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

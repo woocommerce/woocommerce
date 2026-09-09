@@ -27,9 +27,24 @@ class WC_Form_Handler {
 	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
 
 	/**
+	 * IDs of orders whose cancellation requests cancel_order() handled without an explicit redirect in this request, as keys.
+	 *
+	 * @var array<int, true>
+	 */
+	private static $handled_cancel_order_ids = array();
+
+	/**
+	 * Whether redirect_after_cancel_order() should redirect once wp_loaded finishes.
+	 *
+	 * @var bool
+	 */
+	private static $cancel_order_redirect_pending = false;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'wp_headers', array( __CLASS__, 'set_reset_password_bridge_headers' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
@@ -40,6 +55,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'process_lost_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_reset_password' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), PHP_INT_MAX );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
 
@@ -51,10 +67,44 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Prevent storage and referrer disclosure of password-reset bridge handles.
+	 *
+	 * @since 11.2.0
+	 * @internal
+	 *
+	 * @param array<string, string> $headers Response headers.
+	 * @return array<string, string> Filtered response headers.
+	 */
+	public static function set_reset_password_bridge_headers( $headers ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['reset-token'] ) || empty( $_GET['show-reset-form'] ) ) {
+			return $headers;
+		}
+
+		$bridge_handle = wc_clean( wp_unslash( $_GET['reset-token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! WC_Shortcode_My_Account::is_password_reset_bridge_handle( $bridge_handle ) || ! is_account_page() ) {
+			return $headers;
+		}
+
+		WC_Cache_Helper::set_nocache_constants();
+		$headers = array_merge( $headers, wp_get_nocache_headers() );
+
+		/*
+		 * WC_Cache_Helper::prevent_caching() drops no-store for logged-out visitors to preserve
+		 * bfcache, and wp_get_nocache_headers() is filterable. Spell the directives out so a page
+		 * carrying a reset credential is never stored, whatever those two decided.
+		 */
+		$headers['Cache-Control']   = 'no-cache, no-store, must-revalidate, max-age=0, private';
+		$headers['Referrer-Policy'] = 'no-referrer';
+
+		return $headers;
+	}
+
+	/**
 	 * Remove key and user ID (or user login, as a fallback) from query string, set cookie, and redirect to account page to show the form.
 	 */
 	public static function redirect_reset_password_link() {
-		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( is_account_page() && isset( $_GET['key'] ) && is_string( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			// If available, get $user_id from query string parameter for fallback purposes.
 			if ( isset( $_GET['login'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -62,6 +112,7 @@ class WC_Form_Handler {
 				$user_id = $user ? $user->ID : 0;
 			} else {
 				$user_id = absint( $_GET['id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$user    = get_userdata( $user_id );
 			}
 
 			// If the reset token is not for the current user, ignore the reset request (don't redirect).
@@ -71,18 +122,24 @@ class WC_Form_Handler {
 				return;
 			}
 
-			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
-			$value   = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
-			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
-			wp_safe_redirect(
-				add_query_arg(
-					array(
-						'show-reset-form' => 'true',
-						'action'          => $action,
-					),
-					wc_lostpassword_url()
-				)
+			$action        = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$reset_key     = wp_unslash( $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$value         = sprintf( '%d:%s', $user_id, $reset_key );
+			$redirect_args = array(
+				'show-reset-form' => 'true',
+				'action'          => $action,
 			);
+
+			$validated_user = $user ? check_password_reset_key( $reset_key, $user->user_login ) : null;
+			$bridge_token   = WC_Shortcode_My_Account::create_password_reset_bridge_token( $validated_user );
+
+			if ( $bridge_token ) {
+				$redirect_args['reset-token'] = $bridge_token;
+			}
+
+			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+			nocache_headers();
+			wp_safe_redirect( add_query_arg( $redirect_args, wc_lostpassword_url() ) );
 			exit;
 		}
 	}
@@ -195,7 +252,7 @@ class WC_Form_Handler {
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
-			if ( ! empty( $field['required'] ) && empty( $value ) ) {
+			if ( ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false ) && empty( $value ) ) {
 				/* translators: %s: Field name. */
 				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $key ) );
 			}
@@ -497,7 +554,7 @@ class WC_Form_Handler {
 			ob_start();
 
 			// Pay for existing order.
-			$order_key = wp_unslash( $_GET['key'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order_key = is_string( $_GET['key'] ) ? wp_unslash( $_GET['key'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $wp->query_vars['order-pay'] );
 			$order     = wc_get_order( $order_id );
 
@@ -866,9 +923,20 @@ class WC_Form_Handler {
 		) {
 			wc_nocache_headers();
 
-			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order_key = is_string( $_GET['order'] ) ? wp_unslash( $_GET['order'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_id  = absint( $_GET['order_id'] );
-			$order     = wc_get_order( $order_id );
+
+			if ( doing_action( 'wp_loaded' ) ) {
+				// Only a wp_loaded dispatch arms the deferred clean redirect. Without an explicit redirect, calls outside wp_loaded return control to the caller.
+				self::$cancel_order_redirect_pending = true;
+			}
+
+			if ( isset( self::$handled_cancel_order_ids[ $order_id ] ) ) {
+				// Already handled earlier in this request, for example by a direct call from another callback.
+				return;
+			}
+
+			$order = wc_get_order( $order_id );
 			/**
 			 * Filter valid order statuses for cancel.
 			 *
@@ -881,6 +949,10 @@ class WC_Form_Handler {
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
 			$order_can_cancel = $order->has_status( $valid_statuses );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			if ( WC()->session instanceof WC_Session_Handler && ! WC()->session->has_session() ) {
+				WC()->session->set_customer_session_cookie( true );
+			}
 
 			if ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
@@ -902,7 +974,36 @@ class WC_Form_Handler {
 				wp_safe_redirect( $redirect );
 				exit;
 			}
+
+			self::$handled_cancel_order_ids[ $order_id ] = true;
 		}
+	}
+
+	/**
+	 * Redirect to a clean URL after cancel_order() handled a request during wp_loaded without an explicit redirect.
+	 *
+	 * This runs at the end of wp_loaded, after a re-registered priority-20 cancel_order() callback.
+	 * Keeping the redirect out of cancel_order() preserves its return behavior for code
+	 * that calls it directly without an explicit redirect, while browser requests still
+	 * leave the state-changing URL.
+	 *
+	 * @since 11.2.0
+	 */
+	public static function redirect_after_cancel_order(): void {
+		if ( ! self::$cancel_order_redirect_pending ) {
+			return;
+		}
+
+		self::$cancel_order_redirect_pending = false;
+		self::$handled_cancel_order_ids      = array();
+
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$redirect    = remove_query_arg( array( 'cancel_order', 'order', 'order_id', 'redirect', '_wpnonce' ), $request_uri );
+		$redirect    = $redirect ? $redirect : wc_get_cart_url();
+		$redirect    = $redirect ? $redirect : home_url();
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**

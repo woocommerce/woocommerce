@@ -8,9 +8,9 @@ import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
+import { config as checkoutStoreConfig } from '@woocommerce/block-data/checkout';
 import * as mockUseStoreCart from '../use-store-cart';
 import { useStoreCartItemQuantity } from '../use-store-cart-item-quantity';
-import { config as checkoutStoreConfig } from '../../../../../data/checkout';
 
 jest.mock( '../use-store-cart', () => ( {
 	useStoreCart: jest.fn(),

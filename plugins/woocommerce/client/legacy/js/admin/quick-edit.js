@@ -2,6 +2,10 @@
 jQuery(
 	function( $ ) {
 		function init_sale_datepickers( $row ) {
+			if ( ! $.fn.datepicker ) {
+				return;
+			}
+
 			var $date_from = $row.find( 'input[name="_sale_price_dates_from"]' ),
 				$date_to   = $row.find( 'input[name="_sale_price_dates_to"]' );
 

@@ -11,8 +11,8 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/cart/default-state';
-import { allSettings } from '../../../settings/shared/settings-init';
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
+import { allSettings } from '@woocommerce/settings';
 
 import Cart from '../block';
 

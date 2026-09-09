@@ -18,6 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -30,16 +31,21 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailPostsCleanup;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -3348,7 +3354,6 @@ function wc_update_1050_enable_autoload_options() {
 	$feature_options = array(
 		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
 		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
-		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
 		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
 	);
 
@@ -3584,6 +3589,21 @@ function wc_update_1100_enable_point_of_sale_feature() {
 }
 
 /**
+ * Remove the deprecated variation gallery feature option from the database.
+ *
+ * The variation gallery feature flag is deprecated as of 11.1.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('variation_gallery')
+ * returns the deprecated_value directly without reading from the database.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+	delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
+}
+
+/**
  * Delete the cached dashboard out-of-stock product count.
  *
  * @since 11.1.0
@@ -3592,4 +3612,191 @@ function wc_update_1100_enable_point_of_sale_feature() {
  */
 function wc_update_1110_delete_dashboard_outofstock_count_transient() {
 	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
+}
+
+/**
+ * Delete never-customized block email posts so those emails render from the
+ * file templates again (picking up template updates and the current site
+ * locale). Customized posts are kept untouched. See WOOPLUG-6171.
+ *
+ * @since 11.1.0
+ *
+ * @return bool Always false (one-shot migration).
+ */
+function wc_update_1110_cleanup_block_email_posts(): bool {
+	return WCEmailPostsCleanup::run();
+}
+
+/**
+ * Flush the persistent product count cache to purge potentially drifted counter values from v11.0-RC1.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_flush_product_count_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Caches\ProductCountCache::class ) ) {
+		( new \Automattic\WooCommerce\Caches\ProductCountCache() )->flush( 'product' );
+	}
+}
+
+/**
+ * Clean up the state left behind by the removed abandoned cart recovery feature.
+ *
+ * The feature shipped in 11.0.x behind the experimental, default-off
+ * `abandoned_cart_recovery` flag and has now been removed in full: the email, its
+ * settings, the manual-send order action, the settings-page recommendations, and the
+ * email-unsubscribe endpoint and table. Sites that opted in can be left holding
+ * queued Action Scheduler sends, options and unsubscribe rows that no remaining code
+ * reads, so clear them here rather than orphaning them.
+ *
+ *
+ * Names are hardcoded rather than referenced through the classes that used to own
+ * them, because those classes no longer exist.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_remove_abandoned_cart_recovery() {
+	global $wpdb;
+
+	// Cancel queued automated sends. Nothing listens to the hook any more, so a
+	// due action would run as an inert no-op, but leaving it queued keeps dead
+	// rows in the Action Scheduler store until then.
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
+	}
+
+	delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
+	delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
+	delete_option( 'woocommerce_abandoned_cart_recovery_recommendations_hidden' );
+	delete_transient( 'wc_abandoned_cart_recovery_enabled_notice' );
+
+	// The unsubscribes table only ever held opt-outs for this email, and the GDPR
+	// eraser that covered it is gone too, so drop it rather than leave hashed
+	// recipient addresses behind with no erasure path.
+	$unsubscribes_table = $wpdb->prefix . 'wc_email_unsubscribes';
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from the wpdb prefix.
+	$wpdb->query( "DROP TABLE IF EXISTS {$unsubscribes_table}" );
+}
+
+/**
+ * Migrate the Back in Stock Notifications alpha opt-in from the
+ * WOOCOMMERCE_BIS_ALPHA_ENABLED constant to the feature toggle.
+ *
+ * The option is written with update_option() rather than add_option() because
+ * WC_Install::create_options() runs first and has already seeded every Features
+ * screen checkbox with its default. No store can have chosen 'no' deliberately:
+ * the toggle does not exist before this release.
+ *
+ * Writing the option fires 'updated_option', which FeaturesController turns into
+ * FEATURE_ENABLED_CHANGED_ACTION, so the feature's own activation side effects
+ * (the data retention task and the rewrite rules flush) run from there.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_migrate_stock_notifications_alpha_constant() {
+	if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+		return;
+	}
+
+	update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes', true );
+}
+
+/**
+ * Delete the retired Surface Cart and Checkout inbox note.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_1120_delete_surface_cart_checkout_note(): void {
+	InboxNotifications::delete_surface_cart_checkout_blocks_notification();
+}
+
+/**
+ * Invalidate the Analytics report cache.
+ *
+ * Report responses are cached for a week and keyed on the query arguments alone, so a report
+ * run before the update keeps serving its pre-update answer. That hides the corrected result
+ * for category and product filters that have no product in common.
+ *
+ * @since 11.2.0
+ *
+ * @return void
+ */
+function wc_update_11201_invalidate_analytics_reports_cache() {
+	if ( class_exists( \Automattic\WooCommerce\Admin\API\Reports\Cache::class ) ) {
+		\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+	}
+}
+
+/**
+ * Reset stale returning-customer markers on refund rows.
+ *
+ * Refund rows in the order stats table are written with a NULL returning_customer, but earlier
+ * first-order recalculations could overwrite that marker and never restore it. Customer aggregates
+ * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
+ * and restores the Orders report fallback to the refunded order's value.
+ *
+ * Batches walk the table by order ID. A database error stops the migration and is logged instead
+ * of retried, because the report queries stay correct without the reset.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_11202_reset_refund_returning_customer_markers() {
+	global $wpdb;
+
+	$last_id_option    = 'woocommerce_update_11202_last_refund_order_id';
+	$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+	$orders_table      = OrderUtil::get_table_for_orders();
+	$hpos_enabled      = OrderUtil::custom_orders_table_usage_is_enabled();
+	$order_id_column   = $hpos_enabled ? 'id' : 'ID';
+	$order_type_column = $hpos_enabled ? 'type' : 'post_type';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+	$refund_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT stats.order_id FROM {$order_stats_table} AS stats
+			INNER JOIN {$orders_table} AS orders ON orders.{$order_id_column} = stats.order_id
+			WHERE stats.order_id > %d AND stats.returning_customer IS NOT NULL AND orders.{$order_type_column} = 'shop_order_refund'
+			ORDER BY stats.order_id ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' === $wpdb->last_error && ! empty( $refund_ids ) ) {
+		$refund_ids      = array_map( 'intval', $refund_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $refund_ids ), '%d' ) );
+		$updated         = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name cannot be prepared; placeholders are generated per ID.
+			$wpdb->prepare( "UPDATE {$order_stats_table} SET returning_customer = NULL WHERE order_id IN ( {$id_placeholders} )", $refund_ids )
+		);
+
+		if ( false !== $updated ) {
+			update_option( $last_id_option, end( $refund_ids ), false );
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped resetting refund returning-customer markers: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_11202_reset_refund_returning_customer_markers' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// Reports cached against half-migrated data would otherwise keep being served.
+	wc_update_11201_invalidate_analytics_reports_cache();
+
+	return false;
 }

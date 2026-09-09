@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent variations from being automatically included in product exports when a specific type filter (e.g. variable only) is set.

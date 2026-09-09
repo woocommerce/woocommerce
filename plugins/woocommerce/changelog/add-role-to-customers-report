@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Role column to the Analytics > Customers report and its CSV export, showing each customer's WordPress role(s).

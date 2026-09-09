@@ -130,7 +130,7 @@ class Endpoint {
 				$needs_save = true;
 			}
 			if ( $needs_save ) {
-				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+				$this->queue_pending_rewrite_flush();
 			}
 			return;
 		}
@@ -146,7 +146,7 @@ class Endpoint {
 						'post_status' => 'publish',
 					)
 				);
-				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+				$this->queue_pending_rewrite_flush();
 			}
 			return;
 		}
@@ -169,7 +169,7 @@ class Endpoint {
 		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
-		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+		$this->queue_pending_rewrite_flush();
 	}
 
 	/**
@@ -405,14 +405,60 @@ class Endpoint {
 	 * flush by setting `woocommerce_review_order_flush_rewrite_pending`;
 	 * `add_rewrite_rule()` doesn't fire until `init` priority 10, so the
 	 * flush has to happen later. `wp_loaded` runs after every `init`
-	 * callback, which is the earliest safe moment.
+	 * callback, which is the earliest safe moment. Installing requests and
+	 * WP-CLI requests that skip the active theme leave the endpoint-specific
+	 * queue intact for the next normal request, when the complete rewrite graph
+	 * is available.
 	 */
 	public function maybe_flush_pending_rewrite(): void {
-		if ( 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
+		if ( wp_installing() || $this->wp_cli_skips_active_theme() || 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
 			return;
 		}
+
 		flush_rewrite_rules( false );
 		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+	}
+
+	/**
+	 * Determine whether WP-CLI skipped the active theme.
+	 *
+	 * @return bool
+	 */
+	private function wp_cli_skips_active_theme(): bool {
+		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
+
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( $get_wp_cli_config ) ) {
+			return false;
+		}
+
+		$skipped_themes = $get_wp_cli_config( 'skip-themes' );
+
+		if ( true === $skipped_themes ) {
+			return true;
+		}
+
+		if ( ! is_array( $skipped_themes ) ) {
+			$skipped_themes = explode( ',', (string) $skipped_themes );
+		}
+
+		return in_array( get_stylesheet(), $skipped_themes, true );
+	}
+
+	/**
+	 * Queue the endpoint-specific soft flush for `maybe_flush_pending_rewrite()`.
+	 *
+	 * While WordPress is installing, `update_option()` writes the row but skips every
+	 * cache update, so a persistent object cache keeps serving the previous value and
+	 * the next request never sees the queued flush. Evict both places the option can
+	 * be cached, mirroring `WC_Post_Types::flush_rewrite_rules()`.
+	 */
+	private function queue_pending_rewrite_flush(): void {
+		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+
+		if ( wp_installing() ) {
+			wp_cache_delete( 'woocommerce_review_order_flush_rewrite_pending', 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+		}
 	}
 
 	/**
@@ -524,23 +570,27 @@ class Endpoint {
 	 * Render the Review Order page body for the WC-managed page.
 	 *
 	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
-	 * Returns an empty string when the request did not arrive through the
-	 * tokenised rewrite, so a logged-in admin previewing the page directly
-	 * sees nothing rather than a partial form.
+	 * Confirms the current page and order key before rendering.
 	 *
 	 * @return string
 	 */
 	public function render_shortcode(): string {
 		global $wp;
 
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return '';
+		}
+
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			return '';
 		}
 
-		$order_id = absint( $wp->query_vars[ self::QUERY_VAR ] );
-		$order    = $order_id ? wc_get_order( $order_id ) : false;
-		if ( ! $order instanceof WC_Order ) {
-			// gate_request() will already have 404'd; this is defensive.
+		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
 			return '';
 		}
 

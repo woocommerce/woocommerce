@@ -498,15 +498,20 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A spam verdict recorded against one variation's explicit meta value must not block a sibling variation.
+	 * A spam verdict recorded against one variation's explicit meta value is scoped to that variation and
+	 * doesn't block a sibling. A verdict on a review predating VARIATION_META_KEY (pre-10.9.0) has no
+	 * per-variation identity to scope to, so it blocks the whole product on that order instead.
 	 *
-	 * @testWith ["A", "error"]
-	 *           ["B", "ok"]
+	 * @testWith [true, "A", "error"]
+	 *           [true, "B", "ok"]
+	 *           [false, "A", "error"]
+	 *           [false, "B", "error"]
 	 *
+	 * @param bool   $with_variation_meta False simulates a review written before 10.9.0, with no VARIATION_META_KEY row.
 	 * @param string $resubmit Which variation, "A" or "B", resubmits a review.
 	 * @param string $expected_status Expected row status for that resubmission.
 	 */
-	public function test_resubmit_after_spam_verdict_is_scoped_to_its_variation( string $resubmit, string $expected_status ): void {
+	public function test_resubmit_after_spam_verdict_is_scoped_to_its_variation( bool $with_variation_meta, string $resubmit, string $expected_status ): void {
 		$variable      = WC_Helper_Product::create_variation_product();
 		$variation_ids = $variable->get_children();
 		$variation_a   = wc_get_product( $variation_ids[0] );
@@ -533,8 +538,11 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			)
 		);
 		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
-		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		if ( $with_variation_meta ) {
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		}
 		wp_spam_comment( $comment_id );
+		ItemEligibility::reset_cache();
 
 		$target = 'A' === $resubmit ? $variation_a : $variation_b;
 		$item   = 'A' === $resubmit ? $item_a : $item_b;

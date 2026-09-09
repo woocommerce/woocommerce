@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { useDispatch } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { validationStore } from '@woocommerce/block-data';
@@ -32,7 +32,7 @@ export default {
 	decorators: [ ( StoryComponent ) => <StoryComponent /> ],
 } as Meta< CountryInputWithCountriesProps >;
 
-const Template: Story< CountryInputWithCountriesProps > = ( args ) => {
+const Template: StoryFn< CountryInputWithCountriesProps > = ( args ) => {
 	const [ selectedCountry, selectCountry ] = useState< CountryCode | '' >(
 		''
 	);

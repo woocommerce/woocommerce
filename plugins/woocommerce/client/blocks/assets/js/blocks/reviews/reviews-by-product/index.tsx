@@ -34,6 +34,13 @@ registerBlockType( metadata, {
 	attributes: {
 		...sharedAttributes,
 		/**
+		 * Number of reviews to skip.
+		 */
+		offset: {
+			type: 'number',
+			default: 0,
+		},
+		/**
 		 * The id of the product to load reviews for.
 		 */
 		productId: {

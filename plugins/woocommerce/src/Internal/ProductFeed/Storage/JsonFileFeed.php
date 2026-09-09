@@ -128,7 +128,7 @@ class JsonFileFeed implements ResumableFeedInterface {
 		$this->file_url       = null;
 
 		if ( null !== $resume_identifier ) {
-			if ( ! $this->is_valid_feed_identifier( $resume_identifier ) ) {
+			if ( ! self::is_valid_feed_identifier( $resume_identifier ) ) {
 				throw new Exception(
 					esc_html(
 						sprintf(
@@ -258,7 +258,7 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 */
 	public function delete( string $identifier ): void {
 		// Never turn an identifier that is actually a path into a delete outside the feed directory.
-		if ( ! $this->is_valid_feed_identifier( $identifier ) ) {
+		if ( ! self::is_valid_feed_identifier( $identifier ) ) {
 			return;
 		}
 
@@ -278,7 +278,7 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 * @param string $identifier The feed file identifier to check.
 	 * @return bool True if the identifier is a safe, plain `.json` file name.
 	 */
-	private function is_valid_feed_identifier( string $identifier ): bool {
+	private static function is_valid_feed_identifier( string $identifier ): bool {
 		return '' !== $identifier
 			&& wp_basename( $identifier ) === $identifier
 			&& 'json' === strtolower( (string) pathinfo( $identifier, PATHINFO_EXTENSION ) );
@@ -413,9 +413,48 @@ class JsonFileFeed implements ResumableFeedInterface {
 
 		// Resolve the upload directory (also refreshes its .htaccess for file access) and build the URL.
 		$upload_dir     = $this->get_upload_dir();
-		$this->file_url = $upload_dir['url'] . $this->file_name;
+		$this->file_url = self::build_file_url( $upload_dir['url'], $this->file_name );
 
 		return $this->file_url;
+	}
+
+	/**
+	 * Builds the current URL for a feed identifier.
+	 *
+	 * @param string $identifier The feed file identifier.
+	 * @return string|null The feed URL, or null if the identifier is invalid.
+	 *
+	 * @since 11.2.0
+	 */
+	public static function get_file_url_for_identifier( string $identifier ): ?string {
+		if ( ! self::is_valid_feed_identifier( $identifier ) ) {
+			return null;
+		}
+
+		$upload_dir    = wp_upload_dir( null, false, true );
+		$directory_url = self::build_directory_url( untrailingslashit( $upload_dir['baseurl'] ) );
+		return self::build_file_url( $directory_url, rawurlencode( $identifier ) );
+	}
+
+	/**
+	 * Builds the feed directory URL from an uploads base URL.
+	 *
+	 * @param string $uploads_base_url The uploads base URL.
+	 * @return string The feed directory URL with a trailing slash.
+	 */
+	private static function build_directory_url( string $uploads_base_url ): string {
+		return $uploads_base_url . '/' . self::UPLOAD_DIR . '/';
+	}
+
+	/**
+	 * Appends a feed identifier to its directory URL.
+	 *
+	 * @param string $directory_url The feed directory URL with a trailing slash.
+	 * @param string $identifier    The feed file identifier.
+	 * @return string The feed file URL.
+	 */
+	private static function build_file_url( string $directory_url, string $identifier ): string {
+		return $directory_url . $identifier;
 	}
 
 	/**
@@ -461,7 +500,7 @@ class JsonFileFeed implements ResumableFeedInterface {
 			);
 		}
 
-		$directory_url = $upload_dir['baseurl'] . '/' . self::UPLOAD_DIR . '/';
+		$directory_url = self::build_directory_url( $upload_dir['baseurl'] );
 
 		// Follow the format, returned by `wp_upload_dir()`.
 		$this->prepared_upload_dir = array(

@@ -68,6 +68,31 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the single-row wrapper's vertical alignment.
+	 *
+	 * @testdox Should top-align the single-row wrapper to avoid baseline spacing below its content.
+	 */
+	public function test_it_top_aligns_the_single_row_wrapper(): void {
+		$parsed_block = array(
+			'innerBlocks' => array(
+				array(
+					'blockName' => 'dummy/block',
+					'innerHTML' => 'Dummy 1',
+				),
+			),
+			'email_attrs' => array(),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		$this->assertStringContainsString(
+			'style="display:inline-block;vertical-align:top"',
+			$output,
+			'The inline wrapper table should opt out of baseline alignment.'
+		);
+	}
+
+	/**
 	 * Test it handles justifying the content.
 	 */
 	public function testItHandlesJustification(): void {

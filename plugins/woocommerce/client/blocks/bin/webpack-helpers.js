@@ -81,11 +81,23 @@ const getAlias = ( options = {} ) => {
 		),
 		'@woocommerce/block-data': path.resolve(
 			__dirname,
-			`../assets/js/data`
+			`../packages/public-api/block-data`
+		),
+		'@woocommerce/blocks-checkout': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-checkout`
+		),
+		'@woocommerce/blocks-checkout-events': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-checkout-events`
 		),
 		'@woocommerce/blocks-components': path.resolve(
 			__dirname,
-			`../packages/components`
+			`../packages/public-api/blocks-components`
+		),
+		'@woocommerce/blocks-registry': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-registry`
 		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
@@ -108,11 +120,30 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }previews/`
 		),
-		'@woocommerce/types': path.resolve( __dirname, `../assets/js/types/` ),
+		'@woocommerce/price-format': path.resolve(
+			__dirname,
+			`../packages/public-api/price-format`
+		),
+		'@woocommerce/settings': path.resolve(
+			__dirname,
+			`../packages/public-api/settings`
+		),
+		'@woocommerce/shared-context': path.resolve(
+			__dirname,
+			`../packages/public-api/shared-context`
+		),
+		'@woocommerce/shared-hocs': path.resolve(
+			__dirname,
+			`../packages/public-api/shared-hocs`
+		),
+		'@woocommerce/types': path.resolve(
+			__dirname,
+			`../packages/public-api/types/`
+		),
 		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
 		'@woocommerce/entities': path.resolve(
 			__dirname,
-			`../assets/js/entities/`
+			`../packages/internal/entities/`
 		),
 		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
 		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),

@@ -10,6 +10,7 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { getSetting, ADMIN_URL } from '@woocommerce/settings';
+import { SITE_TITLE } from '@woocommerce/settings/default-constants';
 import {
 	Disabled,
 	PanelBody,
@@ -25,7 +26,6 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { SITE_TITLE } from '../../../settings/shared/default-constants';
 import Form from './form';
 
 const defaultTemplate = [

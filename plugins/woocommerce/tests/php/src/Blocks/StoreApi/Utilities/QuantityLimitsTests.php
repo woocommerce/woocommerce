@@ -5,38 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * QuantityLimitsTests class.
  */
-class QuantityLimitsTests extends TestCase {
-	/**
-	 * @var string
-	 */
-	private $manage_stock;
-
-	/**
-	 * Set up test environment.
-	 */
-	public function setUp(): void {
-		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
-		parent::setUp();
-	}
-
-	/**
-	 * Clean up test environment.
-	 */
-	public function tearDown(): void {
-		update_option( 'woocommerce_manage_stock', $this->manage_stock );
-		// Clean up custom filters.
-		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
-		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
-		remove_all_filters( 'woocommerce_quantity_input_args' );
-		parent::tearDown();
-	}
-
+class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Enable float support for tests.
 	 */
@@ -45,16 +18,6 @@ class QuantityLimitsTests extends TestCase {
 		remove_all_filters( 'woocommerce_stock_amount' );
 		// Add only floatval.
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
-	}
-
-	/**
-	 * Disable float support and restore integer support.
-	 */
-	private function disable_float_support() {
-		// Remove all existing filters first.
-		remove_all_filters( 'woocommerce_stock_amount' );
-		// Add only intval.
-		add_filter( 'woocommerce_stock_amount', 'intval' );
 	}
 
 	/**

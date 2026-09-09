@@ -2,6 +2,33 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.1](https://github.com/woocommerce/email-editor/releases/tag/2.17.1) - 2026-09-07 
+
+-   Patch - Restrict the send preview email endpoint to posts of registered email post types. [#68414]
+
+## [2.17.0](https://github.com/woocommerce/email-editor/releases/tag/2.17.0) - 2026-09-03 
+
+-   Patch - Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails. [#67790]
+-   Patch - Guard against non-array return values from the woocommerce_email_editor_preload_rest_api_routes filter. [#68021]
+-   Patch - Preload the recent emails used by the template selection modal, and add the woocommerce_email_editor_preload_rest_api_routes filter. [#67911]
+-   Patch - Render spacing between Social Links icons in emails and match pill-shape icon padding with the editor. [#67642]
+-   Patch - Render the email editor HTML only once per request — a plugin calling WP_Screen::get() from admin_enqueue_scripts (e.g. Yoast SEO Premium) re-fires the replace_editor filter mid-render and echoed a second editor container that broke the editor [#68150]
+-   Minor - Add a value-interception extension point to the Personalizer. [#66874]
+
+## [2.16.1](https://github.com/woocommerce/email-editor/releases/tag/2.16.1) - 2026-08-14 
+
+-   Patch - Render a block's background color once instead of twice, which made a translucent palette color appear darker than intended. [#67673]
+
+## [2.16.0](https://github.com/woocommerce/email-editor/releases/tag/2.16.0) - 2026-08-12 
+
+-   Patch - Center table header cells in rendered emails when no alignment is set, so they match the editor canvas instead of falling back to left. [#67443]
+-   Patch - Prevent inline button wrapper tables from leaving extra baseline space below buttons in rendered block emails. [#67466]
+-   Patch - Prevent long unbreakable words in paragraph, heading, and site title blocks from expanding the wrapping table and breaking the rendered email layout. [#67519]
+-   Patch - Update PHP development dependencies to versions that resolve reported security advisories. [#67595]
+-   Minor - Add Renderer::render_from_content() for rendering block markup that has no backing post, such as file-based templates. See docs/rendering.md. [#67025]
+-   Minor - Add rendering context awareness to the Personalizer: personalize_content() accepts a text/html rendering context which is exposed to tag callbacks, Personalization_Tag supports an optional text value type with automatic escaping in HTML content, and tags embedded inside larger link URLs are now replaced correctly. [#66937]
+-   Minor - Allow integrations to authorize and handle send-preview requests without a backing post [#67025]
+
 ## [2.15.1](https://github.com/woocommerce/email-editor/releases/tag/2.15.1) - 2026-07-30 
 
 -   Patch - Ensure block captions keep only the allowed formatting tags and attributes, including when the authored caption markup is malformed. [#67079]

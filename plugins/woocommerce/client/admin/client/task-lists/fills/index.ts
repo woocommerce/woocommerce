@@ -13,12 +13,16 @@ import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {
-		void import( './import-products' );
+		void import(
+			/* webpackChunkName: "import-products" */ './import-products'
+		);
 	} else {
-		void import( './products' );
+		void import( /* webpackChunkName: "products" */ './products' );
 	}
 };
 
 void possiblyImportProductTask();
 
-void import( './shipping-recommendation' );
+void import(
+	/* webpackChunkName: "shipping-recommendation" */ './shipping-recommendation'
+);

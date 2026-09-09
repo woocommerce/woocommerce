@@ -241,6 +241,17 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Non-string taxonomy filter values are ignored.
+	 */
+	public function test_non_string_taxonomy_filter_values_are_ignored(): void {
+		$query                           = new \WP_Query();
+		$query->query_vars['categories'] = array( 'cat-1' );
+		$clauses                         = array( 'where' => '' );
+
+		$this->assertSame( $clauses, $this->sut->add_query_clauses( $clauses, $query ) );
+	}
+
+	/**
 	 * @testdox A hierarchical category filter must match products in descendant categories without a child_of query per chosen term.
 	 *
 	 * @testWith [["hcat-parent"], ["In Parent", "In Child", "In Grandchild"]]

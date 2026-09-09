@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Deprecate the WC_Brands recount methods in favor of the shared term recount functions.

@@ -4,12 +4,8 @@
 		"./typings/**/*",
 		"./assets/js/**/*",
 		"./assets/js/**/*.json",
-		"./assets/js/blocks-registry/**/*",
-		"./packages/checkout/**/*",
-		"./packages/components/**/*",
-		"./assets/js/entities/**/*",
-		"./packages/prices/**/*",
-		"./assets/js/data/**/*",
+		"./packages/public-api/**/*",
+		"./packages/internal/**/*",
 		"./assets/js/middleware/**/*",
 		"./assets/js/blocks/**/block.json",
 		"./assets/js/atomic/blocks/**/block.json",
@@ -21,6 +17,7 @@
 	],
 	"exclude": [
 		"./storybook/build",
+		"./storybook/dist",
 		"./storybook/webpack.config.js",
 		"./storybook/preview.js",
 		"./bin"

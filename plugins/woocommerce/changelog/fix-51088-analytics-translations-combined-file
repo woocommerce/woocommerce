@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Regenerate the missing combined translation file for WooCommerce Admin scripts on demand, so Analytics and other admin screens no longer show untranslated strings when the file is absent.

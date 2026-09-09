@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the site timezone instead of the server timezone for the default reference date in TimeInterval::get_timeframe_dates(), so remote spec timeframe rules select the correct period near period boundaries.

@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/admin-layout",
 	"version": "2.0.0",
-	"description": "WooCommerce admin layout copmonents and utilities.",
+	"description": "WooCommerce admin layout components and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
@@ -92,7 +92,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
 	"peerDependencies": {

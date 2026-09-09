@@ -14,7 +14,18 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 32px;
+	flex-wrap: wrap;
+	gap: 16px 32px;
+}
+
+/* Below this width the category selector becomes a full-width dropdown;
+   stack the badge filter above it at full width to match. */
+@media screen and (max-width: $break-medium) {
+	.woocommerce-marketplace__sub-header {
+		align-items: stretch;
+		flex-direction: column;
+		gap: $grid-unit-15;
+	}
 }
 
 .woocommerce-marketplace__sub-header__categories {

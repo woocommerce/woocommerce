@@ -9,11 +9,18 @@ declare( strict_types = 1 );
 
 /**
  * Class WC_Coupon_Data_Store_CPT_Test.
+ *
+ * Covers the woocommerce_coupon_updated_props action (per-save payload) and its
+ * deprecated predecessor woocommerce_coupon_object_updated_props (payload
+ * accumulated across saves through one data store instance). Tests without a
+ * listener on the deprecated action also implicitly verify that saving a coupon
+ * triggers no deprecation notice, because the WordPress test case fails on any
+ * unexpected deprecation.
  */
 class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * The payload of every woocommerce_coupon_object_updated_props fire, in order.
+	 * The payload of every woocommerce_coupon_updated_props fire, in order.
 	 *
 	 * @var array[]
 	 */
@@ -28,14 +35,14 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Record the payload of every woocommerce_coupon_object_updated_props fire.
+	 * Record the payload of every woocommerce_coupon_updated_props fire.
 	 *
 	 * Registered at priority 10 so that it observes the outer payload before any
 	 * listener registered at a later priority can trigger a nested save.
 	 */
 	private function capture_updated_props(): void {
 		add_action(
-			'woocommerce_coupon_object_updated_props',
+			'woocommerce_coupon_updated_props',
 			function ( $coupon, $updated_props ) {
 				$this->captured_payloads[] = $updated_props;
 			},
@@ -155,7 +162,7 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$nested_save_done = false;
 
 		add_action(
-			'woocommerce_coupon_object_updated_props',
+			'woocommerce_coupon_updated_props',
 			function ( $listener_coupon ) use ( &$nested_save_done ) {
 				if ( $nested_save_done ) {
 					return;
@@ -229,9 +236,92 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should populate the deprecated updated-props property only for the duration of the hook.
+	 * @testdox Should keep firing the deprecated action with its historical accumulated payload.
 	 */
-	public function test_deprecated_updated_props_property_mirrors_the_current_save(): void {
+	public function test_deprecated_action_receives_accumulated_props(): void {
+		$this->setExpectedDeprecated( 'woocommerce_coupon_object_updated_props' );
+
+		$coupon = $this->create_settled_coupon();
+
+		$received = array();
+		add_action(
+			'woocommerce_coupon_object_updated_props',
+			function ( $coupon, $updated_props ) use ( &$received ) {
+				$received[] = $updated_props;
+			},
+			10,
+			2
+		);
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'amount', 'amount' ) ),
+			$received,
+			'A listener on the deprecated action must keep receiving the historical accumulate-with-duplicates payload.'
+		);
+	}
+
+	/**
+	 * @testdox Should accumulate deprecated-action props across coupons when a store instance is shared.
+	 */
+	public function test_deprecated_action_accumulates_across_coupons_when_store_is_shared(): void {
+		$this->setExpectedDeprecated( 'woocommerce_coupon_object_updated_props' );
+
+		$store = new WC_Coupon_Data_Store_CPT();
+
+		// Returning an object shares one store instance across every coupon in this test.
+		$store_filter = function () use ( $store ) {
+			return $store;
+		};
+		add_filter( 'woocommerce_coupon_data_store', $store_filter );
+
+		$fires = array();
+
+		try {
+			$coupon_a = WC_Helper_Coupon::create_coupon( 'shared-store-a' );
+			$coupon_a->save();
+			$coupon_b = WC_Helper_Coupon::create_coupon( 'shared-store-b' );
+			$coupon_b->save();
+
+			add_action(
+				'woocommerce_coupon_object_updated_props',
+				function ( $coupon, $accumulated_props ) use ( &$fires ) {
+					$fires[] = array(
+						'coupon_id'   => $coupon->get_id(),
+						'accumulated' => $accumulated_props,
+					);
+				},
+				10,
+				2
+			);
+
+			$coupon_a->set_amount( 5 );
+			$coupon_a->save();
+
+			$coupon_b->set_usage_limit( 3 );
+			$coupon_b->save();
+		} finally {
+			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
+		}
+
+		$this->assertCount( 2, $fires, 'Each coupon save should fire the deprecated action exactly once.' );
+		$this->assertSame( $coupon_b->get_id(), $fires[1]['coupon_id'], 'The second fire belongs to coupon B.' );
+		$this->assertSame(
+			array( 'amount', 'usage_limit' ),
+			array_slice( $fires[1]['accumulated'], -2 ),
+			'With a shared store instance, coupon B\'s payload retains the prop written for coupon A: accumulation belongs to the store instance, not the coupon.'
+		);
+	}
+
+	/**
+	 * @testdox Should keep accumulating in the deprecated updated-props property.
+	 */
+	public function test_deprecated_updated_props_property_keeps_accumulating(): void {
 		$store = new class() extends WC_Coupon_Data_Store_CPT {
 			/**
 			 * Expose the deprecated updated-props state that a subclass may still read.
@@ -249,35 +339,22 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_coupon_data_store', $store_filter );
 
-		$observed_during_hook = null;
-
 		try {
 			$coupon = $this->create_settled_coupon();
 
-			add_action(
-				'woocommerce_coupon_object_updated_props',
-				function () use ( $store, &$observed_during_hook ) {
-					$observed_during_hook = $store->get_updated_props();
-				},
-				10,
-				2
-			);
-
 			$coupon->set_amount( 5 );
+			$coupon->save();
+
+			$coupon->set_amount( 10 );
 			$coupon->save();
 		} finally {
 			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
 		}
 
 		$this->assertSame(
-			array( 'amount' ),
-			$observed_during_hook,
-			'A subclass reading the deprecated property during the hook should see the current save\'s props.'
-		);
-		$this->assertSame(
-			array(),
-			$store->get_updated_props(),
-			'The deprecated property must be emptied after the hook so no props carry over to the next save.'
+			array( 'amount', 'amount' ),
+			array_slice( $store->get_updated_props(), -2 ),
+			'A subclass reading the deprecated property must keep seeing the historical accumulated list after saves.'
 		);
 	}
 }
