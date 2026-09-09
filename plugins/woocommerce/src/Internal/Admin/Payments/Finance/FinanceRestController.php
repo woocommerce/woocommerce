@@ -201,19 +201,19 @@ class FinanceRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_get_payouts(): array {
 		return array(
-			'next_cursor'   => array(
+			'next_cursor' => array(
 				'description' => esc_html__( 'Opaque cursor from a previous response, to fetch the next page.', 'woocommerce' ),
 				'type'        => 'string',
 				'maxLength'   => 2048,
 				'required'    => false,
 			),
-			'prev_cursor'   => array(
+			'prev_cursor' => array(
 				'description' => esc_html__( 'Opaque cursor from a previous response, to fetch the previous page.', 'woocommerce' ),
 				'type'        => 'string',
 				'maxLength'   => 2048,
 				'required'    => false,
 			),
-			'per_page' => array(
+			'per_page'    => array(
 				'description' => esc_html__( 'Maximum number of payouts to return.', 'woocommerce' ),
 				'type'        => 'integer',
 				'default'     => FinanceDataQuery::DEFAULT_PER_PAGE,

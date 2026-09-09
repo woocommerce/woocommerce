@@ -258,7 +258,7 @@ class FinanceDataSchemas {
 			'readonly'             => true,
 			'additionalProperties' => false,
 			'properties'           => array(
-				'provider_id'      => array(
+				'provider_id'     => array(
 					'type'        => 'string',
 					'description' => esc_html__( 'The payment gateway id.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),

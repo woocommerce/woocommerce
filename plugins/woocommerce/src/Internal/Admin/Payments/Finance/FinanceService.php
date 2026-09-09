@@ -121,10 +121,10 @@ class FinanceService {
 			}
 
 			$providers[] = array(
-				'gateway_id' => $gateway_id,
-				'title'      => (string) $gateway->get_method_title(),
-				'icon_url'   => $icon_url,
-				'data_types' => $data_types,
+				'provider_id' => $gateway_id,
+				'title'       => (string) $gateway->get_method_title(),
+				'icon_url'    => $icon_url,
+				'data_types'  => $data_types,
 			);
 		}
 

@@ -115,13 +115,13 @@ final class Payout {
 			throw new \InvalidArgumentException( 'The payout status must be one of the PayoutStatus constants.' );
 		}
 
-		$this->gateway_id     = $gateway_id;
-		$this->id             = $id;
-		$this->currency       = FinanceDataValidator::normalize_currency( $currency );
-		$this->amount         = FinanceDataValidator::validate_amount( $amount );
-		$this->status         = $status;
-		$this->date_initiated = $date_initiated;
-		$this->date_expected  = $date_expected;
+		$this->gateway_id      = $gateway_id;
+		$this->id              = $id;
+		$this->currency        = FinanceDataValidator::normalize_currency( $currency );
+		$this->amount          = FinanceDataValidator::validate_amount( $amount );
+		$this->status          = $status;
+		$this->date_initiated  = $date_initiated;
+		$this->date_expected   = $date_expected;
 		$this->provider_status = self::normalize_optional_string( $provider_status );
 	}
 

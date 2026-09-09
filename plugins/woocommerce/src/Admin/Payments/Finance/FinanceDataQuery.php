@@ -63,7 +63,7 @@ final class FinanceDataQuery {
 	public function __construct( ?string $next_cursor = null, ?string $prev_cursor = null, int $per_page = self::DEFAULT_PER_PAGE ) {
 		$this->next_cursor = ( null === $next_cursor || '' === $next_cursor ) ? null : $next_cursor;
 		$this->prev_cursor = ( null === $prev_cursor || '' === $prev_cursor ) ? null : $prev_cursor;
-		$this->per_page = max( 1, min( self::MAX_PER_PAGE, $per_page ) );
+		$this->per_page    = max( 1, min( self::MAX_PER_PAGE, $per_page ) );
 	}
 
 	/**
