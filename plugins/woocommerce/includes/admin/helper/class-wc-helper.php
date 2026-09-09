@@ -1080,6 +1080,7 @@ class WC_Helper {
 
 		// Ignore all previously dismissed connected notices.
 		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECT_NOTICE, '', true );
+		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, '', true );
 
 		$connect_url = add_query_arg(
 			array(
