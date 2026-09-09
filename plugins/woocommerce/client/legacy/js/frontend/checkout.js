@@ -869,9 +869,14 @@ jQuery( function ( $ ) {
 						args.current_target.id.indexOf( 'shipping_method' ) !==
 							-1
 					) {
-						document
-							.getElementById( args.current_target.id )
-							.focus();
+						// The refreshed fragment may no longer offer the method that was selected.
+						var shippingInput = document.getElementById(
+							args.current_target.id
+						);
+
+						if ( shippingInput ) {
+							shippingInput.focus();
+						}
 					}
 
 					// Fire updated_checkout event.

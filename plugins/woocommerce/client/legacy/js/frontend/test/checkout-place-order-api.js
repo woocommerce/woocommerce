@@ -617,9 +617,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			jest.useRealTimers();
 		} );
 
-		const sendCheckoutUpdateResponse = ( response ) => {
+		const sendCheckoutUpdateResponse = ( response, args ) => {
 			mockBody.trigger( 'update_checkout', [
-				{ update_shipping_method: false },
+				args || { update_shipping_method: false },
 			] );
 			jest.runOnlyPendingTimers();
 
@@ -699,6 +699,35 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $allNotices.remove ).not.toHaveBeenCalled();
 			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
 			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should keep firing updated_checkout when the shipping method is gone', () => {
+			// The refreshed fragment can drop the method that triggered the update, so
+			// the element the focus restore points at is no longer in the document.
+			expect(
+				document.getElementById( 'shipping_method_0_flat_rate1' )
+			).toBeNull();
+
+			expect( () =>
+				sendCheckoutUpdateResponse(
+					{
+						result: 'success',
+						has_errors: false,
+						messages: '',
+					},
+					{
+						update_shipping_method: false,
+						current_target: {
+							id: 'shipping_method_0_flat_rate1',
+						},
+					}
+				)
+			).not.toThrow();
+
+			expect( mockBody.trigger ).toHaveBeenCalledWith(
+				'updated_checkout',
+				expect.anything()
+			);
 		} );
 
 		test( 'should treat a response without the error flag as a failure', () => {
