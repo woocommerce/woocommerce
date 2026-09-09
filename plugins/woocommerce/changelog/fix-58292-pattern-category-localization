@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix block pattern categories being registered under garbled, untranslated names on non-English sites by deriving the category from the pattern's stable slug instead of its localized title.

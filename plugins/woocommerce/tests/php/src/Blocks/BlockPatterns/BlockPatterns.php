@@ -194,6 +194,60 @@ class BlockPatterns extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that PTK categories are normalized to the canonical title derived
+	 * from their slug, rather than the (possibly localized or malformed) title.
+	 *
+	 * A German Patterns Toolkit response can return a category whose title is a
+	 * raw translation note (for example `_woo_featured_selling" translates to
+	 * "_woo_vorgestellter_verkauf" in German.`). The slug is the stable,
+	 * locale-independent identifier, so the canonical title is built from it.
+	 */
+	public function test_ptk_pattern_categories_are_normalized_from_slug() {
+		$tracking_backup = get_option( 'woocommerce_allow_tracking' );
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+
+		$patterns = array(
+			array(
+				'ID'         => 1,
+				'name'       => 'featured-product',
+				'title'      => 'Featured Product',
+				'html'       => '<p>Content</p>',
+				'categories' => array(
+					'_woo_featured_selling' => array(
+						'slug'        => '_woo_featured_selling',
+						'title'       => '_woo_featured_selling" translates to "_woo_vorgestellter_verkauf" in German.',
+						'description' => '',
+					),
+				),
+			),
+		);
+
+		$this->ptk_patterns_store
+			->method( 'get_patterns' )
+			->willReturn( $patterns );
+
+		$this->pattern_registry
+			->expects( $this->once() )
+			->method( 'register_block_pattern' )
+			->with(
+				1,
+				$this->callback(
+					function ( $pattern_data ) {
+						return array( 'Featured selling' ) === $pattern_data['categories'];
+					}
+				),
+			);
+
+		$this->block_patterns->register_ptk_patterns();
+
+		if ( false === $tracking_backup ) {
+			delete_option( 'woocommerce_allow_tracking' );
+		} else {
+			update_option( 'woocommerce_allow_tracking', $tracking_backup );
+		}
+	}
+
+	/**
 	 * Tests if patterns are registered with the cached data.
 	 */
 	public function test_invalid_cached_block_patterns_registration() {
