@@ -167,12 +167,37 @@ class WC_Cache_Helper {
 	 * The counts are invalidated on product save too, but the table is usually updated later, in a scheduled
 	 * action, and counts cached in between would otherwise stay stale until they expire.
 	 *
+	 * Only the attributes of the updated product are invalidated, matching the save-time invalidation in
+	 * WC_Product_Data_Store_CPT::clear_caches(). A whole-table regeneration or cleanup passes no product,
+	 * so every attribute is invalidated instead.
+	 *
 	 * @since 11.2.0
+	 *
+	 * @param int $product_id The product or variation the lookup data was updated for, or 0 for the whole table.
 	 *
 	 * @return void
 	 */
-	public static function invalidate_attribute_count_after_lookup_update() {
-		self::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+	public static function invalidate_attribute_count_after_lookup_update( $product_id = 0 ) {
+		$product = $product_id ? wc_get_product( $product_id ) : false;
+
+		if ( ! $product ) {
+			self::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+			return;
+		}
+
+		$attribute_keys = array_keys( $product->get_attributes() );
+
+		// A variation carries only the attributes that define it, while the counts are cached against the
+		// parent's full set.
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id ) {
+			$parent = wc_get_product( $parent_id );
+			if ( $parent ) {
+				$attribute_keys = array_merge( $attribute_keys, array_keys( $parent->get_attributes() ) );
+			}
+		}
+
+		self::invalidate_attribute_count( array_unique( $attribute_keys ) );
 	}
 
 	/**
