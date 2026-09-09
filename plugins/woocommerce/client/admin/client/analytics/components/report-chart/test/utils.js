@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { buildChartData, dataContainsLeapYear } from '../utils';
+import { buildChartData } from '../utils';
 
 function generateDateInterval( interval, startDate, endDate, subtotals ) {
 	const subtotalsDefault = {
@@ -507,71 +507,5 @@ describe( 'buildChartData', () => {
 			labelDate: '2023-03-02 00:00:00',
 			value: 3,
 		} );
-	} );
-} );
-
-describe( 'dataContainsLeapYear', () => {
-	it( 'should return false when intervals are empty', () => {
-		const data = {
-			data: {
-				intervals: [],
-			},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( false );
-	} );
-
-	it( 'should return false when intervals are undefined', () => {
-		const data = {
-			data: {},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( false );
-	} );
-
-	it( 'should return false when interval does not include a leap year', () => {
-		const data = {
-			data: {
-				intervals: [
-					{ date_start: '2019-01-01', date_end: '2019-01-01' },
-					{ date_start: '2019-12-31', date_end: '2019-12-31' },
-				],
-			},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( false );
-	} );
-
-	// Test with multiple intervals where none include a leap year
-	it( 'should return false when no intervals include a leap year', () => {
-		const data = {
-			data: {
-				intervals: [
-					{ date_start: '2019-01-01', date_end: '2019-06-30' },
-					{ date_start: '2019-07-01', date_end: '2019-12-31' },
-				],
-			},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( false );
-	} );
-
-	// Test with multiple intervals where one includes a leap year
-	it( 'should return true when any interval includes a leap year', () => {
-		const data = {
-			data: {
-				intervals: [
-					{ date_start: '2020-01-01', date_end: '2020-01-01' },
-					{ date_start: '2020-01-02', date_end: '2020-01-02' },
-				],
-			},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( true );
-	} );
-
-	// Test with malformed date formats
-	it( 'should handle invalid date formats gracefully', () => {
-		const data = {
-			data: {
-				intervals: [ { date_start: null, date_end: '2020-99-99' } ],
-			},
-		};
-		expect( dataContainsLeapYear( data ) ).toBe( false );
 	} );
 } );

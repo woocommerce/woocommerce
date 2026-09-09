@@ -149,7 +149,6 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'd', ( d ) => line( d.values ) );
 
 	const minDataPointSpacing = 36;
-
 	// eslint-disable-next-line no-unused-expressions
 	width / params.uniqueDates.length > minDataPointSpacing &&
 		series
