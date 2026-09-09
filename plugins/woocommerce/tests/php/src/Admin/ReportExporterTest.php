@@ -242,8 +242,13 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			'wc-products-report-export-1234567890-2025-06-01-to-2025-06-30.csv',
-			$exporter->get_filename(),
+			$exporter->get_download_filename(),
 			'The download should be named after the period the report covers.'
+		);
+		$this->assertSame(
+			$filename,
+			$exporter->get_filename(),
+			'Naming the download should leave the stored export name alone.'
 		);
 		$this->assertTrue(
 			$exporter->export_file_exists(),
