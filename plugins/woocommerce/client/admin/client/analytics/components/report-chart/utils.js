@@ -145,6 +145,7 @@ export function buildChartData(
 			secondaryInterval = secondaryDataIntervals[ index ];
 		} else if (
 			yearShifted &&
+			index > 0 &&
 			secondaryDateMoment.date() !== moment( interval.date_start ).date()
 		) {
 			// A primary 29th February has no counterpart a year earlier: moment
