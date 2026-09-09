@@ -604,8 +604,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 		} );
 	} );
-	// Notices returned by update_order_review are rendered for every result, but
-	// only a failure clears the existing ones and revalidates the form fields.
+	// update_order_review keeps `result` as the legacy "a notice was rendered" signal, so
+	// notices are rendered for every result and only `has_errors` clears the existing ones,
+	// revalidates the form fields, and scrolls. Responses without the flag fall back to `result`.
 	describe( 'Checkout update notices', () => {
 		beforeEach( () => {
 			jest.useFakeTimers();
@@ -632,7 +633,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		test( 'should render successful notices without validating checkout fields', () => {
 			sendCheckoutUpdateResponse( {
-				result: 'success',
+				result: 'failure',
+				has_errors: false,
 				messages:
 					'<div class="woocommerce-message">Coupon applied.</div>',
 			} );
@@ -653,6 +655,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		test( 'should preserve failure notice replacement and field validation', () => {
 			sendCheckoutUpdateResponse( {
 				result: 'failure',
+				has_errors: true,
 				messages:
 					'<ul class="woocommerce-error"><li>Invalid address.</li></ul>',
 			} );
@@ -674,12 +677,27 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		test( 'should leave notices and fields unchanged for message-free success', () => {
 			sendCheckoutUpdateResponse( {
 				result: 'success',
+				has_errors: false,
 				messages: '',
 			} );
 
 			expect( $form.prepend ).not.toHaveBeenCalled();
 			expect( $allNotices.remove ).not.toHaveBeenCalled();
 			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+		} );
+
+		test( 'should treat a response without the error flag as a failure', () => {
+			sendCheckoutUpdateResponse( {
+				result: 'failure',
+				messages:
+					'<ul class="woocommerce-error"><li>Invalid address.</li></ul>',
+			} );
+
+			expect( $allNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $checkoutFields.trigger ).toHaveBeenNthCalledWith(
+				1,
+				'validate'
+			);
 		} );
 	} );
 } );

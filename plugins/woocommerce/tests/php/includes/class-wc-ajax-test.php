@@ -1763,14 +1763,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Update order review classifies notices by error presence and preserves reload behavior.
+	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
 	 * @dataProvider provide_update_order_review_notice_cases
 	 *
-	 * @param array[] $notices         Notices to add during the checkout update.
-	 * @param string  $expected_result Expected AJAX result.
-	 * @param bool    $reload_checkout Whether the callback requests a checkout reload.
+	 * @param array[] $notices             Notices to add during the checkout update.
+	 * @param string  $expected_result     Expected legacy AJAX result, which only reports whether a notice was rendered.
+	 * @param bool    $expected_has_errors Expected error flag.
+	 * @param bool    $reload_checkout     Whether the callback requests a checkout reload.
 	 */
-	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $reload_checkout ): void {
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout ): void {
 		$product            = null;
 		$callback           = null;
 		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
@@ -1816,7 +1817,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			$this->assertIsArray( $response, 'The checkout update should return a JSON array.' );
 			$this->assertSame( $post_data, $captured_post_data, 'The public update hook should receive the exact posted checkout data.' );
-			$this->assertSame( $expected_result, $response['result'], 'Only a rendered response containing an error should fail.' );
+			$this->assertSame( $expected_result, $response['result'], 'The legacy result should keep reporting whether any notice was rendered.' );
+			$this->assertSame( $expected_has_errors, $response['has_errors'], 'Only a response containing an error notice should report errors.' );
 			$this->assertSame( $reload_checkout, $response['reload'], 'The response should preserve the requested reload state.' );
 			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
 			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
@@ -1853,6 +1855,9 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	/**
 	 * Data provider for update order review notice classification.
 	 *
+	 * The legacy result stays `failure` whenever a notice was rendered, whatever its type, so only
+	 * the error flag tells a real failure apart from a success or info notice.
+	 *
 	 * @return array[]
 	 */
 	public static function provide_update_order_review_notice_cases(): array {
@@ -1865,7 +1870,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 						'class'   => 'woocommerce-message',
 					),
 				),
-				'success',
+				'failure',
+				false,
 				false,
 			),
 			'neutral notice'              => array(
@@ -1876,7 +1882,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 						'class'   => 'woocommerce-info',
 					),
 				),
-				'success',
+				'failure',
+				false,
 				false,
 			),
 			'error notice'                => array(
@@ -1888,6 +1895,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 					),
 				),
 				'failure',
+				true,
 				false,
 			),
 			'mixed notices with an error' => array(
@@ -1904,6 +1912,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 					),
 				),
 				'failure',
+				true,
 				false,
 			),
 			'error notice with reload'    => array(
@@ -1915,6 +1924,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 					),
 				),
 				'success',
+				false,
 				true,
 			),
 		);

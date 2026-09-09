@@ -818,8 +818,17 @@ jQuery( function ( $ ) {
 
 					var $form = $( 'form.checkout' );
 
+					// `result` only reports whether the response carries a notice, so a success
+					// or info notice reads as `failure` there. Prefer the explicit error flag and
+					// fall back to `result` for responses that predate it, such as a third-party
+					// callback that answers this endpoint before Core does.
+					var hasErrors =
+						data && 'undefined' !== typeof data.has_errors
+							? !! data.has_errors
+							: !! data && 'failure' === data.result;
+
 					// Remove notices from all sources before rendering an error.
-					if ( data && 'failure' === data.result ) {
+					if ( hasErrors ) {
 						$(
 							'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
 						).remove();
@@ -833,11 +842,12 @@ jQuery( function ( $ ) {
 								'</div>'
 						); // eslint-disable-line max-len
 					} else if ( data && 'failure' === data.result ) {
+						// A response that reports a notice without carrying one: render it as-is.
 						$form.prepend( data );
 					}
 
 					// Check for error.
-					if ( data && 'failure' === data.result ) {
+					if ( hasErrors ) {
 						// Lose focus for all fields
 						$form
 							.find( '.input-text, select, input:checkbox' )
@@ -853,7 +863,7 @@ jQuery( function ( $ ) {
 					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
 					if (
 						data &&
-						'success' === data.result &&
+						! hasErrors &&
 						args.current_target &&
 						args.current_target.id.indexOf( 'shipping_method' ) !==
 							-1

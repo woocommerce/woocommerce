@@ -491,18 +491,35 @@ class WC_AJAX {
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
 
+		/**
+		 * Filter the HTML fragments returned with a checkout update, keyed by the selector each one replaces.
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param array $fragments Checkout fragments keyed by selector.
+		 */
+		$fragments = apply_filters(
+			'woocommerce_update_order_review_fragments',
+			array(
+				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
+			)
+		);
+
+		/*
+		 * `result` is the legacy signal and only reports whether the response carries any rendered
+		 * notice, so a success or info notice still reads as `failure`. Third-party checkout scripts
+		 * and `updated_checkout` listeners have consumed it that way since 2014, so it keeps that
+		 * meaning. Use `has_errors` to tell a real failure apart from a notice that merely has
+		 * something to show.
+		 */
 		wp_send_json(
 			array(
-				'result'    => $has_error_notices ? 'failure' : 'success',
-				'messages'  => $messages,
-				'reload'    => $reload_checkout,
-				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments',
-					array(
-						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
-						'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
-					)
-				),
+				'result'     => empty( $messages ) ? 'success' : 'failure',
+				'has_errors' => $has_error_notices,
+				'messages'   => $messages,
+				'reload'     => $reload_checkout,
+				'fragments'  => $fragments,
 			)
 		);
 	}
