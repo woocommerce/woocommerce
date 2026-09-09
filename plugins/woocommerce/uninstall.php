@@ -27,6 +27,37 @@ wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
+/*
+ * WordPress deactivates a plugin before running its uninstall.php, so `plugins_loaded` has already
+ * fired without WooCommerce. When WooCommerce is the only plugin bundling Action Scheduler, nothing
+ * has loaded the library and the cleanup below would be skipped, leaving every pending action behind.
+ *
+ * Requiring the bundled bootstrap is enough to fully initialize it: the file self-initializes once
+ * `plugins_loaded` has fired (the same path it uses when loaded from a theme).
+ *
+ * That initialization fires `action_scheduler_init`, and WordPress does not deactivate WooCommerce
+ * extensions before deleting WooCommerce, so a still-active extension's callback runs here without
+ * WooCommerce loaded. Anything it throws is caught: leaving actions behind is the bug we are fixing,
+ * but aborting uninstall_plugin() would also stop WordPress from deleting the plugin's files.
+ */
+$wc_bootstrapped_action_scheduler = false;
+
+if ( ! class_exists( 'ActionScheduler', false ) ) {
+	$wc_action_scheduler_bootstrap = __DIR__ . '/packages/action-scheduler/action-scheduler.php';
+
+	if ( is_readable( $wc_action_scheduler_bootstrap ) ) {
+		try {
+			require_once $wc_action_scheduler_bootstrap;
+			$wc_bootstrapped_action_scheduler = class_exists( 'ActionScheduler', false );
+		} catch ( Throwable $e ) {
+			// Leave the flag false; the guards below skip the cleanup rather than aborting uninstall.
+			$wc_bootstrapped_action_scheduler = false;
+		}
+	}
+
+	unset( $wc_action_scheduler_bootstrap );
+}
+
 if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized() && function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
 	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
@@ -39,7 +70,22 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'wc_admin_daily' );
 	as_unschedule_all_actions( 'generate_category_lookup_table' );
 	as_unschedule_all_actions( 'wc_admin_unsnooze_admin_notes' );
+
+	/*
+	 * Initializing Action Scheduler above makes it schedule its own daily housekeeping action. Nothing
+	 * else on this site had loaded it, so it is going away with WooCommerce and that action would be
+	 * left behind by the very cleanup we just ran.
+	 */
+	if ( $wc_bootstrapped_action_scheduler ) {
+		as_unschedule_all_actions( 'action_scheduler_run_recurring_actions_schedule_hook' );
+
+		// Also drop the queue runner's shutdown hook, which would otherwise write a lock option row
+		// (and, when the Action Scheduler tables have been dropped below, query missing tables).
+		ActionScheduler::runner()->unhook_dispatch_async_request();
+	}
 }
+
+unset( $wc_bootstrapped_action_scheduler );
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
