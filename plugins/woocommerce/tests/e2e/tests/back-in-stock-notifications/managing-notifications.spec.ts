@@ -9,6 +9,7 @@ import type { Page } from '@playwright/test';
 import { expect, request, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
+	BIS_FEATURE_OPTION,
 	bisAdminListUrl,
 	bisEmailSubject,
 	resetBISOptions,
@@ -18,6 +19,7 @@ import {
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
+import { setOption } from '../../utils/options';
 
 /**
  * Click the notification edit-form "Update" button.
@@ -40,8 +42,13 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
+		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
 			await resetBISOptions( request, baseURL! );
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
 		} );
 
 		// Grouped by opt-in mode rather than flipping the option inside a test:
