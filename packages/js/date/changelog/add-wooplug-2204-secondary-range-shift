@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix the previous year comparison range for Year, Quarter, Month and Week to date ending one day early or late when the period spans 29th February. Previous year totals and percentages on those views change accordingly, in Analytics, the Dashboard store performance indicators and leaderboards, and the date picker's comparison range label. The secondary range now also states how it was derived (`shift`, and `secondaryShift` on `DateValue`), and `getPreviousDate` accepts it.
+Fix to date previous year ranges ending a day early or late around 29th February, and expose how the secondary range was derived via `shift`.
