@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
@@ -125,7 +126,7 @@ class PendingNotificationStore {
 		// them from the same place; see Notification::get_safety_net_args().
 		$args = $notification->get_safety_net_args();
 
-		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
+		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
 			return;
 		}
 
