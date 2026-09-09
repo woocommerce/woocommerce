@@ -364,7 +364,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the password form is added when product blocks are at the top level of the template.
+	 * @testdox Adds the password form when product blocks are at the top level of the template.
 	 */
 	public function test_replace_top_level_single_product_blocks_with_input_form() {
 		$default_single_product_template = '
