@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -1004,6 +1005,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product_item->set_variation_id( 0 );
 		}
 
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
+
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
@@ -1030,6 +1033,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
+
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
@@ -1053,6 +1058,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
 			}
 		}
+
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
@@ -1544,6 +1551,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1792,6 +1802,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1883,6 +1896,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(

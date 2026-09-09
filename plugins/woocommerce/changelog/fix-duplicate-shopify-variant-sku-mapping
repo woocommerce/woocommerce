@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove the duplicated Variant SKU entry from the Shopify importer column mapping.
