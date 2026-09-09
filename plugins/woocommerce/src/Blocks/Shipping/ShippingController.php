@@ -450,7 +450,7 @@ class ShippingController {
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
 		$chosen_method_instance = explode( ':', $chosen_method )[1] ?? 0;
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
 		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && in_array( $chosen_method_id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
 			$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
 			$pickup_location  = $pickup_locations[ $chosen_method_instance ] ?? array();
@@ -492,7 +492,7 @@ class ShippingController {
 			return $location;
 		}
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
 		if ( true !== apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			return $location;
 		}
