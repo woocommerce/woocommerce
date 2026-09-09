@@ -213,7 +213,9 @@ class LookupDataStore {
 				}
 				break;
 			case self::ACTION_UPDATE_STOCK:
-				$this->update_stock_status_for( $product );
+				if ( 0 === $this->update_stock_status_for( $product ) ) {
+					return;
+				}
 				break;
 			case self::ACTION_DELETE:
 				$this->delete_data_for( $product_id );
@@ -241,8 +243,9 @@ class LookupDataStore {
 		 * action rather than on product save: unless direct updates are enabled, the table is updated later,
 		 * in a scheduled action.
 		 *
-		 * It also fires after the whole table is regenerated or cleaned up, with a product id of 0. Listeners
-		 * must not assume a row changed: an update that turns out to be a no-op can still announce itself.
+		 * It also fires after the whole table is regenerated or cleaned up, with a product id of 0. A stock
+		 * update that leaves every row unchanged is not announced; a regeneration that rewrites identical rows
+		 * still is, so listeners must not assume a row changed.
 		 *
 		 * @since 11.2.0
 		 *
@@ -305,13 +308,14 @@ class LookupDataStore {
 	 * Update the stock status of the lookup table entries for a given product.
 	 *
 	 * @param \WC_Product $product The product to update the entries for.
+	 * @return int The number of rows whose in_stock flag changed.
 	 */
-	private function update_stock_status_for( \WC_Product $product ) {
+	private function update_stock_status_for( \WC_Product $product ): int {
 		global $wpdb;
 
 		$in_stock = $product->is_in_stock();
 
-		$wpdb->query(
+		return (int) $wpdb->query(
 			$wpdb->prepare(
 				'UPDATE %i SET in_stock = %d WHERE product_id = %d',
 				$this->lookup_table_name,

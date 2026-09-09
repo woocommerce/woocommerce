@@ -1394,6 +1394,36 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'run_update_callback' does not fire 'woocommerce_product_attributes_lookup_updated' for a stock update that changes no row.
+	 */
+	public function test_run_update_callback_does_not_fire_updated_action_when_stock_update_changes_no_row() {
+		$variation = $this->create_variable_product_with_one_variation()[1];
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_INSERT );
+
+		$received = array();
+		add_action(
+			'woocommerce_product_attributes_lookup_updated',
+			function ( $product_id, $action ) use ( &$received ) {
+				$received[] = array( $product_id, $action );
+			},
+			10,
+			2
+		);
+
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+		$this->assertSame( array(), $received, 'The variation is still in stock, so no row changed and nothing is announced.' );
+
+		$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$variation->save();
+		$this->sut->run_update_callback( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK );
+		$this->assertSame(
+			array( array( $variation->get_id(), LookupDataStore::ACTION_UPDATE_STOCK ) ),
+			$received,
+			'The in_stock flag changed, so the update is announced.'
+		);
+	}
+
+	/**
 	 * @testdox 'run_update_callback' invalidates the classic layered nav counts, which are derived from the table.
 	 */
 	public function test_run_update_callback_invalidates_layered_nav_counts() {
