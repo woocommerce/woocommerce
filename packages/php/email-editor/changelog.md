@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.2](https://github.com/woocommerce/email-editor/releases/tag/2.17.2) - 2026-09-09 
+
+-   Patch - Keep Media & Text blocks in normal document flow so a button placed after one no longer paints its background across it. The wrapper table's align="left" rendered as a float in email clients, pulling the block out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS. [#68443]
+
 ## [2.17.1](https://github.com/woocommerce/email-editor/releases/tag/2.17.1) - 2026-09-07 
 
 -   Patch - Restrict the send preview email endpoint to posts of registered email post types. [#68414]
