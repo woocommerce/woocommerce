@@ -314,6 +314,144 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A download link that names a date range is served under a name that says so.
+	 */
+	public function test_download_request_names_the_download_after_the_date_range(): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request( array( 'date_range' => '2025-06-01-to-2025-06-30' ) ) );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			'wc-products-report-export-1234567890-2025-06-01-to-2025-06-30.csv',
+			$exporter->get_download_filename(),
+			'The date range on the link should reach the name the export is downloaded as.'
+		);
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_filename(),
+			'The date range on the link should never change the name the export is stored under.'
+		);
+	}
+
+	/**
+	 * @testdox A download link without a date range keeps the stored export name.
+	 */
+	public function test_download_request_without_a_date_range(): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request() );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_download_filename(),
+			'A link that names no period should download under the stored name, as it did before.'
+		);
+	}
+
+	/**
+	 * @testdox A hostile date range cannot escape the download name or the reports directory.
+	 *
+	 * @testWith ["../../../../etc/passwd", "wc-products-report-export-1234567890-etcpasswd.csv"]
+	 *           ["a\r\nX-Injected: 1", "wc-products-report-export-1234567890-a-X-Injected-1.csv"]
+	 *           ["setup.bat", "wc-products-report-export-1234567890-setup.bat_.csv"]
+	 *
+	 * @param string $date_range Date range as it arrives on the link.
+	 * @param string $expected   Expected download name.
+	 */
+	public function test_download_request_sanitises_the_date_range( string $date_range, string $expected ): void {
+		$this->act_as_reports_user();
+
+		$exporter = $this->request_export( $this->download_request( array( 'date_range' => $date_range ) ) );
+
+		$this->assertNotNull( $exporter, 'A valid download request should be served.' );
+		$this->assertSame(
+			$expected,
+			$exporter->get_download_filename(),
+			'The date range only names the download, so it must not carry separators or a second extension.'
+		);
+		$this->assertSame(
+			'wc-products-report-export-1234567890.csv',
+			$exporter->get_filename(),
+			'The date range must never reach the path the export is read from.'
+		);
+	}
+
+	/**
+	 * @testdox A download request is refused without the reports capability.
+	 */
+	public function test_download_request_requires_the_reports_capability(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+
+		$this->assertNull(
+			$this->request_export( $this->download_request() ),
+			'A user who cannot view reports should not be served an export.'
+		);
+	}
+
+	/**
+	 * @testdox Requests that do not ask for an export are left alone.
+	 *
+	 * @testWith [{}]
+	 *           [{"action": "edit", "filename": "wc-products-report-export-1234567890"}]
+	 *           [{"action": "woocommerce_admin_download_report_csv"}]
+	 *           [{"action": "woocommerce_admin_download_report_csv", "filename": ""}]
+	 *           [{"action": "woocommerce_admin_download_report_csv", "filename": ["x"]}]
+	 *
+	 * @param array $request Request parameters, as the download handler reads them.
+	 */
+	public function test_requests_that_do_not_ask_for_an_export( array $request ): void {
+		$this->act_as_reports_user();
+
+		$this->assertNull(
+			$this->request_export( $request ),
+			'The download handler should leave requests that are not report downloads alone.'
+		);
+	}
+
+	/**
+	 * Sign in as a user allowed to view reports.
+	 *
+	 * @return void
+	 */
+	private function act_as_reports_user(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+	}
+
+	/**
+	 * Build the parameters of a valid download link.
+	 *
+	 * @param array $extra Parameters to add to the request.
+	 * @return array
+	 */
+	private function download_request( array $extra = array() ): array {
+		return array_merge(
+			array(
+				'action'   => ReportExporter::DOWNLOAD_EXPORT_ACTION,
+				'filename' => 'wc-products-report-export-1234567890',
+			),
+			$extra
+		);
+	}
+
+	/**
+	 * Build the exporter that a download request would be served by.
+	 *
+	 * Reaches the handler's own reading of the request, so that dropping the date range on the way
+	 * from the link to the download's name fails a test.
+	 *
+	 * @param array $request Request parameters, as the download handler reads them from `$_GET`.
+	 * @return ReportCSVExporter|null
+	 */
+	private function request_export( array $request ) {
+		$method = new \ReflectionMethod( ReportExporter::class, 'get_requested_export' );
+		$method->setAccessible( true );
+
+		return $method->invoke( null, $request );
+	}
+
+	/**
 	 * @testdox The emailed download link names the period the export covers.
 	 */
 	public function test_emailed_link_carries_the_date_range(): void {

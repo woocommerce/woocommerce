@@ -303,36 +303,51 @@ class ReportExporter {
 	}
 
 	/**
-	 * Serve the export file.
+	 * Build the exporter a download request is asking for.
+	 *
+	 * A read-only download of a report the requesting user is already allowed to view, gated on
+	 * the view_woocommerce_reports capability, so a nonce would only prevent nuisance CSRF. The
+	 * action is compared verbatim against a fixed name, and set_filename() applies
+	 * sanitize_file_name(), which keeps the path inside the reports directory. A nonce is not an
+	 * option here either: nonces last 24 hours, and this link is emailed and kept for a week.
+	 *
+	 * @param array $request Unslashed request parameters, expected to be `$_GET`.
+	 * @return ReportCSVExporter|null The exporter for the requested export, or null when the request asks for no export.
 	 */
-	public static function download_export_file() {
-		/*
-		 * A read-only download of a report the requesting user is already allowed to view, gated on
-		 * the view_woocommerce_reports capability, so a nonce would only prevent nuisance CSRF. The
-		 * action is compared verbatim against a fixed name, and set_filename() applies
-		 * sanitize_file_name(), which keeps the path inside the reports directory. A nonce is not an
-		 * option here either: nonces last 24 hours, and this link is emailed and kept for a week.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	private static function get_requested_export( $request ) {
 		if (
-			! isset( $_GET['action'] ) ||
-			self::DOWNLOAD_EXPORT_ACTION !== wp_unslash( $_GET['action'] ) ||
-			empty( $_GET['filename'] ) ||
-			! is_string( $_GET['filename'] ) ||
+			! is_array( $request ) ||
+			! isset( $request['action'] ) ||
+			self::DOWNLOAD_EXPORT_ACTION !== $request['action'] ||
+			empty( $request['filename'] ) ||
+			! is_string( $request['filename'] ) ||
 			! current_user_can( 'view_woocommerce_reports' )
 		) {
-			return;
+			return null;
 		}
 
 		$exporter = new ReportCSVExporter();
-		$exporter->set_filename( wp_unslash( $_GET['filename'] ) );
+		$exporter->set_filename( $request['filename'] );
 
 		// The stored name only identifies the export, so the emailed link carries the report's date
 		// range to name the download after the period it covers. It never reaches the file path.
-		if ( ! empty( $_GET['date_range'] ) && is_string( $_GET['date_range'] ) ) {
-			$exporter->set_download_suffix( wp_unslash( $_GET['date_range'] ) );
+		if ( ! empty( $request['date_range'] ) && is_string( $request['date_range'] ) ) {
+			$exporter->set_download_suffix( $request['date_range'] );
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		return $exporter;
+	}
+
+	/**
+	 * Serve the export file.
+	 */
+	public static function download_export_file() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read in get_requested_export(), which documents why there is no nonce and validates every value it reads.
+		$exporter = self::get_requested_export( wp_unslash( $_GET ) );
+
+		if ( ! $exporter ) {
+			return;
+		}
 
 		// Say so rather than serving an empty CSV: the exporter creates a blank file for a path
 		// that no longer exists, which reads as a report with no results.
