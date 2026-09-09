@@ -22,7 +22,6 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = new WC_REST_System_Status_V2_Controller();
 		delete_transient( 'wc_system_status_theme_info' );
-		delete_transient( 'wc_system_status_post_type_counts' );
 	}
 
 	/**
@@ -35,95 +34,126 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reuse post counts without another aggregation and refresh them after cache eviction.
+	 * @testdox Should include stored post types without running an exact aggregation.
 	 */
-	public function test_get_post_type_counts_caches_and_refreshes_counts(): void {
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$query_count = 0;
+	public function test_get_post_type_counts_uses_estimates(): void {
+		global $wpdb;
+
+		$post_id = self::factory()->post->create( array( 'post_status' => 'trash' ) );
+		$wpdb->update( $wpdb->posts, array( 'post_type' => "count'test" ), array( 'ID' => $post_id ) );
+		self::factory()->post->create(
+			array(
+				'post_type'   => 'count_draft',
+				'post_status' => 'draft',
+			)
+		);
+		$empty_type_id = self::factory()->post->create();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => '' ), array( 'ID' => $empty_type_id ) );
+		$queries = array();
 		add_filter(
 			'query',
-			function ( $query ) use ( &$query_count ) {
-				if ( false !== strpos( $query, 'GROUP BY post_type' ) ) {
-					++$query_count;
-				}
+			static function ( $query ) use ( &$queries ) {
+				$queries[] = $query;
 				return $query;
 			}
 		);
 
-		$counts = $this->sut->get_post_type_counts();
-		$this->assertSame( '1', array_column( $counts, 'count', 'type' )['status_count_test'], 'Counts should include custom post types.' );
-
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$this->assertEquals( $counts, ( new WC_REST_System_Status_V2_Controller() )->get_post_type_counts(), 'New controller instances should reuse cached counts.' );
-		$this->assertSame( 1, $query_count, 'Cached reads should not repeat the aggregation.' );
-
-		delete_transient( 'wc_system_status_post_type_counts' );
-		$counts = $this->sut->get_post_type_counts();
-		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Missing cache should refresh counts from the database.' );
-		$this->assertSame( 2, $query_count, 'Refreshing should run one more aggregation.' );
+		$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
+		$this->assertArrayHasKey( "count'test", $counts, 'Unregistered post types and trashed posts should be included.' );
+		$this->assertArrayHasKey( '', $counts, 'An empty stored type should not end discovery before other types.' );
+		$this->assertArrayHasKey( 'count_draft', $counts, 'Drafts should be included.' );
+		$this->assertIsString( $counts['count_draft'], 'Counts should retain their numeric-string representation.' );
+		$this->assertCount( count( $counts ) + 2, $queries, 'Discovery should use one lookup per type plus an end lookup and one batched EXPLAIN.' );
+		$this->assertStringStartsWith( 'EXPLAIN ', end( $queries ), 'The UNION must be explained, never executed.' );
+		$this->assertStringNotContainsString( 'COUNT(', implode( ' ', $queries ), 'An exact aggregation should not run.' );
 	}
 
 	/**
-	 * @testdox Should retry a failed post-count query instead of caching its empty result.
+	 * @testdox Should associate query estimates with their post types and preserve the REST response shape.
 	 */
-	public function test_get_post_type_counts_does_not_cache_query_errors(): void {
+	public function test_get_post_type_counts_returns_database_estimates(): void {
+		add_filter(
+			'query',
+			static function ( $query ) {
+				if ( 0 === strpos( $query, 'SELECT post_type FROM' ) ) {
+					if ( false === strpos( $query, 'WHERE' ) ) {
+						return "SELECT 'product' AS post_type";
+					}
+					return false !== strpos( $query, "'product'" ) ? "SELECT 'revision' AS post_type" : 'SELECT NULL AS post_type WHERE 1 = 0';
+				}
+				if ( 0 === strpos( $query, 'EXPLAIN ' ) ) {
+					return 'SELECT 2 AS id, 500000 AS `rows` UNION ALL SELECT 1, 174000';
+				}
+				return $query;
+			}
+		);
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
+		$request->set_param( '_fields', 'post_type_counts' );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The status endpoint should remain available.' );
+		$this->assertSame(
+			array(
+				'post_type_counts' => array(
+					array(
+						'type'  => 'product',
+						'count' => '174000',
+					),
+					array(
+						'type'  => 'revision',
+						'count' => '500000',
+					),
+				),
+			),
+			json_decode( wp_json_encode( $response->get_data() ), true ),
+			'The endpoint should return estimates in the existing type/count structure.'
+		);
+	}
+
+	/**
+	 * @testdox Should return an empty array when either database query fails and retry on the next call.
+	 * @param string $prefix Query prefix to fail.
+	 * @testWith ["SELECT post_type FROM"]
+	 *           ["EXPLAIN "]
+	 */
+	public function test_get_post_type_counts_handles_query_errors( string $prefix ): void {
 		global $wpdb;
 
-		$fail_query = static function ( $query ) {
-			return false !== strpos( $query, 'GROUP BY post_type' ) ? 'SELECT * FROM nonexistent_status_count_table' : $query;
+		self::factory()->post->create( array( 'post_type' => 'count_error' ) );
+		$fail_query = static function ( $query ) use ( $prefix ) {
+			return 0 === strpos( $query, $prefix ) ? 'SELECT * FROM nonexistent_status_count_table' : $query;
 		};
 		add_filter( 'query', $fail_query );
 		$suppress_errors = $wpdb->suppress_errors();
 		try {
-			$this->assertSame( array(), $this->sut->get_post_type_counts(), 'Query errors should preserve the empty-array response.' );
-			$this->assertFalse( get_transient( 'wc_system_status_post_type_counts' ), 'A failed query should not be cached.' );
+			$this->assertSame( array(), $this->sut->get_post_type_counts(), 'Database failures should not produce invented counts.' );
 		} finally {
 			remove_filter( 'query', $fail_query );
 			$wpdb->suppress_errors( $suppress_errors );
 		}
-
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$counts = $this->sut->get_post_type_counts();
-		$this->assertSame( '1', array_column( $counts, 'count', 'type' )['status_count_test'], 'The next request should retry the query.' );
+		$this->assertArrayHasKey( 'count_error', array_column( $this->sut->get_post_type_counts(), 'count', 'type' ), 'The next call should retry.' );
 	}
 
 	/**
-	 * @testdox Should refresh expired post counts after one hour.
+	 * @testdox Should return no counts without explaining an empty query when there are no post types.
 	 */
-	public function test_get_post_type_counts_refreshes_after_expiry(): void {
-		if ( wp_using_ext_object_cache() ) {
-			$this->markTestSkipped( 'This test expires the database-backed transient.' );
-		}
+	public function test_get_post_type_counts_handles_empty_table(): void {
+		global $wpdb;
 
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$before = time();
-		$this->sut->get_post_type_counts();
-		$timeout = (int) get_option( '_transient_timeout_wc_system_status_post_type_counts' );
-		$this->assertGreaterThanOrEqual( $before + HOUR_IN_SECONDS, $timeout, 'Counts should be cached for one hour.' );
-		$this->assertLessThanOrEqual( time() + HOUR_IN_SECONDS, $timeout, 'The cache should not outlive one hour.' );
-
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		update_option( '_transient_timeout_wc_system_status_post_type_counts', time() - 1 );
-		$counts = $this->sut->get_post_type_counts();
-		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Expired counts should be regenerated.' );
+		add_filter(
+			'query',
+			static function ( $query ) {
+				return 0 === strpos( $query, 'SELECT post_type FROM' ) ? 'SELECT NULL AS post_type WHERE 1 = 0' : $query;
+			}
+		);
+		$before = $wpdb->num_queries;
+		$this->assertSame( array(), $this->sut->get_post_type_counts(), 'An empty posts table should have no counts.' );
+		$this->assertSame( $before + 1, $wpdb->num_queries, 'There should be no EXPLAIN for an empty type list.' );
 	}
 
 	/**
-	 * @testdox Should refresh post counts after running the Clear transients tool.
-	 */
-	public function test_clear_transients_refreshes_post_type_counts(): void {
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$this->sut->get_post_type_counts();
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-
-		$result = ( new WC_REST_System_Status_Tools_V2_Controller() )->execute_tool( 'clear_transients' );
-		$this->assertTrue( $result['success'], 'The Clear transients tool should succeed.' );
-		$counts = $this->sut->get_post_type_counts();
-		$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Clearing transients should refresh the counts.' );
-	}
-
-	/**
-	 * @testdox Should keep cached post counts separate when switching sites.
+	 * @testdox Should discover types from the current site after switching sites.
 	 * @group ms-required
 	 */
 	public function test_get_post_type_counts_are_site_scoped(): void {
@@ -131,20 +161,20 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$this->markTestSkipped( 'This test requires multisite.' );
 		}
 
-		self::factory()->post->create( array( 'post_type' => 'status_count_test' ) );
-		$original_counts = $this->sut->get_post_type_counts();
-		$site_id         = self::factory()->blog->create();
-
+		self::factory()->post->create( array( 'post_type' => 'count_original' ) );
+		$site_id = self::factory()->blog->create();
 		switch_to_blog( $site_id );
 		try {
-			self::factory()->post->create_many( 2, array( 'post_type' => 'status_count_test' ) );
-			$counts = $this->sut->get_post_type_counts();
-			$this->assertSame( '2', array_column( $counts, 'count', 'type' )['status_count_test'], 'Another site should have its own counts.' );
+			self::factory()->post->create( array( 'post_type' => 'count_other' ) );
+			$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
+			$this->assertArrayHasKey( 'count_other', $counts, 'Counts should use the switched site posts table.' );
+			$this->assertArrayNotHasKey( 'count_original', $counts, 'Other sites should not leak into the result.' );
 		} finally {
 			restore_current_blog();
 		}
-
-		$this->assertEquals( $original_counts, $this->sut->get_post_type_counts(), 'Switching sites should preserve the original cache.' );
+		$counts = array_column( $this->sut->get_post_type_counts(), 'count', 'type' );
+		$this->assertArrayHasKey( 'count_original', $counts, 'Restoring the site should restore its type list.' );
+		$this->assertArrayNotHasKey( 'count_other', $counts, 'The switched site should not leak into the result.' );
 	}
 
 	/**
