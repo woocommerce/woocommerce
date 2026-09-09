@@ -344,19 +344,25 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
-	 * `get_formatted_meta_data()` skips hidden rows, so an appended entry's next-int key can be a
-	 * hidden row's ID: a hidden row saved right after the item's visible ones sits on that number.
+	 * `get_formatted_meta_data()` skips hidden, empty and non-scalar rows, so an appended entry's
+	 * next-int key can be one of their IDs: a skipped row saved right after the item's visible ones
+	 * sits on exactly that number. On a store that happens when an extension saves a hidden or blank
+	 * field beside a displayed one, and when stock reduction writes `_reduced_stock` after payment.
 	 *
-	 * @testdox Order item_data does not report a hidden meta row's ID for an appended entry.
+	 * @testWith ["_reduced_stock", 1]
+	 *           ["Empty note", ""]
+	 *           ["Options", {"size": "L"}]
+	 *
+	 * @testdox Order item_data does not report a skipped meta row's ID for an appended entry.
+	 *
+	 * @param string $skipped_key   A metadata key the formatter leaves out.
+	 * @param mixed  $skipped_value The value stored against it.
 	 */
-	public function test_item_data_ignores_hidden_meta_rows_when_matching_ids(): void {
+	public function test_item_data_ignores_skipped_meta_rows_when_matching_ids( string $skipped_key, $skipped_value ): void {
 		$order = $this->create_guest_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'Gift message', 'Happy birthday', true );
-		$item->save();
-
-		// What `wc_reduce_stock_levels()` does once the order is paid.
-		$item->add_meta_data( '_reduced_stock', 1, true );
+		$item->add_meta_data( $skipped_key, $skipped_value, true );
 		$item->save();
 
 		$row_ids = array_values( wp_list_pluck( $item->get_meta_data(), 'id' ) );
@@ -364,7 +370,7 @@ class Order extends ControllerTestCase {
 		$this->assertSame(
 			$row_ids[0] + 1,
 			$row_ids[1],
-			'The hidden row must follow the visible one for this to exercise the collision.'
+			'The skipped row must follow the visible one for this to exercise the collision.'
 		);
 
 		add_filter(
@@ -388,7 +394,7 @@ class Order extends ControllerTestCase {
 
 		$item_data = rest_get_server()->dispatch( $request )->get_data()['items'][0]['item_data'];
 
-		$this->assertCount( 2, $item_data, 'The hidden row must not become an entry of its own.' );
+		$this->assertCount( 2, $item_data, 'The skipped row must not become an entry of its own.' );
 		$this->assertSame( $row_ids[0], $item_data[0]['id'] );
 		$this->assertSame( 'Appended', $item_data[1]['key'] );
 		$this->assertNull( $item_data[1]['id'], 'An entry with no stored row has no ID to report.' );
