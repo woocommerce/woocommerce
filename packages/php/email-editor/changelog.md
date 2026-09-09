@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.1](https://github.com/woocommerce/email-editor/releases/tag/2.17.1) - 2026-09-07 
+
+-   Patch - Restrict the send preview email endpoint to posts of registered email post types. [#68414]
+
 ## [2.17.0](https://github.com/woocommerce/email-editor/releases/tag/2.17.0) - 2026-09-03 
 
 -   Patch - Ensure pill-shaped social link padding uses locale-independent decimal formatting in rendered emails. [#67790]

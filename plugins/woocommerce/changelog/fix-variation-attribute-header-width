@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow variation attribute selectors to use available header space and wrap on narrow screens.
