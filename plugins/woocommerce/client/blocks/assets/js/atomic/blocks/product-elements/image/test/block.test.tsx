@@ -161,12 +161,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -195,12 +196,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -228,12 +230,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ false }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -258,12 +261,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ false }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -286,12 +290,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithoutImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -313,12 +318,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -341,12 +347,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -367,12 +374,12 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 						aspectRatio="3/5"
 					/>
 				</ProductDataContextProvider>
@@ -401,12 +408,13 @@ describe( 'Product Image Block', () => {
 					isLoading={ false }
 				>
 					<Block
+						aspectRatio=""
+						scale="cover"
 						showProductLink={ true }
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);

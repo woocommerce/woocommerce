@@ -44,15 +44,15 @@ class ProductRatingCounter extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return [ 'query', 'queryId', 'postId', 'singleProduct' ];
 	}
 
 	/**
 	 * Include and render the block.
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param string   $content    Block content. Default empty string.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes. Default empty array.
+	 * @param string    $content    Block content. Default empty string.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -68,8 +68,8 @@ class ProductRatingCounter extends AbstractBlock {
 		if ( $product && $product->get_review_count() > 0 ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$is_descendent_of_single_product_template = is_singular( 'product' ) && get_queried_object_id() === (int) $post_id;
-			$is_descendent_of_single_product_block    = ! $is_descendent_of_single_product_template;
+			$is_descendent_of_single_product_block    = ! empty( $block->context['singleProduct'] );
+			$is_descendent_of_single_product_template = ! $is_descendent_of_single_product_block && ! isset( $block->context['queryId'] ) && is_product() && get_queried_object_id() === (int) $post_id;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );

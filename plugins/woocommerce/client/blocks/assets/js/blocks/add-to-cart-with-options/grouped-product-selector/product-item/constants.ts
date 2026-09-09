@@ -70,7 +70,6 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 							[
 								'woocommerce/product-price',
 								{
-									isDescendentOfSingleProductBlock: true,
 									fontSize: 'medium',
 									textAlign: 'right',
 									style: {

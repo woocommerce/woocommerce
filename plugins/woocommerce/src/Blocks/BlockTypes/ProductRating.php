@@ -22,25 +22,6 @@ class ProductRating extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'productId'                           => 0,
-			'isDescendentOfQueryLoop'             => false,
-			'textAlign'                           => '',
-			'isDescendentOfSingleProductBlock'    => false,
-			'isDescendentOfSingleProductTemplate' => false,
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
 	 * Overwrite parent method to prevent script registration.
 	 *
 	 * It is necessary to register and enqueues assets during the render
@@ -63,15 +44,15 @@ class ProductRating extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return [ 'query', 'queryId', 'postId', 'singleProduct' ];
 	}
 
 	/**
 	 * Include and render the block.
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param string   $content    Block content. Default empty string.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes. Default empty array.
+	 * @param string    $content    Block content. Default empty string.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -89,9 +70,8 @@ class ProductRating extends AbstractBlock {
 			&& wc_reviews_enabled() ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$parsed_attributes                        = $this->parse_attributes( $attributes );
-			$is_descendent_of_single_product_block    = $parsed_attributes['isDescendentOfSingleProductBlock'];
-			$is_descendent_of_single_product_template = $parsed_attributes['isDescendentOfSingleProductTemplate'];
+			$is_descendent_of_single_product_block    = ! empty( $block->context['singleProduct'] );
+			$is_descendent_of_single_product_template = ! $is_descendent_of_single_product_block && ! isset( $block->context['queryId'] ) && is_product() && get_queried_object_id() === (int) $post_id;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
@@ -104,7 +84,7 @@ class ProductRating extends AbstractBlock {
 			 * @param int    $count  Total number of ratings.
 			 * @return string
 			 */
-			$filter_rating_html = function( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
+			$filter_rating_html = function ( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
 				$product_permalink = get_permalink( $post_id );
 				$reviews_count     = $count;
 				$average_rating    = $rating;

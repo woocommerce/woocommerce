@@ -43,7 +43,6 @@ const CartCrossSellsProduct = ( {
 							showProductLink={ true }
 							saleBadgeAlign={ 'left' }
 							imageSizing={ ImageSizing.SINGLE }
-							isDescendentOfQueryLoop={ false }
 							scale={ 'cover' }
 							aspectRatio={ '1:1' }
 						/>
@@ -53,8 +52,6 @@ const CartCrossSellsProduct = ( {
 							showProductLink={ true }
 						/>
 						<ProductRating
-							isDescendentOfQueryLoop={ false }
-							isDescendentOfSingleProductBlock={ false }
 							productId={ product.id }
 							postId={ 0 }
 							shouldDisplayMockedReviewsWhenProductHasNoReviews={
