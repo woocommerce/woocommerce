@@ -14,8 +14,8 @@ import clsx from 'clsx';
 import DatePickerContent from './content';
 import DropdownButton from '../dropdown-button';
 
-const shortDateFormatPlaceholder = __( 'MM/DD/YYYY', 'woocommerce' );
-const shortDateFormat = 'MM/DD/YYYY';
+const shortDateFormatPlaceholder = __( 'YYYY-MM-DD', 'woocommerce' );
+const shortDateFormat = 'YYYY-MM-DD';
 
 /**
  * Select a range of dates or single dates.
