@@ -40,7 +40,8 @@
 	input[type="text"],
 	input[type="number"],
 	input[type="password"],
-	input[type="email"] {
+	input[type="email"],
+	input[type="date"] {
 		@include reset-typography();
 		@include font-for-inputs-locked();
 		padding: $gap $gap-small;
@@ -75,6 +76,115 @@
 		}
 	}
 
+	&:not(.is-active) input[type="date"] {
+		// Hide browser default mask (dd/mm/YYYY) when a date field is not active (no value, not focused).
+		// Use text-indent here because using transparent would conflict with our calendar icon-hiding hack.
+		text-indent: -9999px;
+
+		&::-webkit-datetime-edit {
+			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
+			opacity: 0;
+			transition: none;
+		}
+	}
+
+	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	input[type="date"]::-webkit-datetime-edit {
+		transition: opacity 150ms ease 150ms;
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		input[type="date"]::-webkit-datetime-edit {
+			transition: none;
+		}
+	}
+
+	// Clean out chrome default padding on segments that makes the field visually off compared to other fields.
+	input[type="date"] {
+		&::-webkit-datetime-edit,
+		&::-webkit-datetime-edit-fields-wrapper {
+			padding: 0;
+		}
+
+		&::-webkit-datetime-edit-day-field,
+		&::-webkit-datetime-edit-month-field,
+		&::-webkit-datetime-edit-year-field,
+		&::-webkit-datetime-edit-text {
+			padding-inline: 0;
+			// Overrides the tabular figures back to normal.
+			font-variant-numeric: normal;
+		}
+	}
+
+	// The native webkit indicator is hidden but kept in place as the click target that opens the picker.
+	// The visible icon is our own so that we can control its position freely.
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		padding: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	// Firefox paints its native calendar icon with currentColor and exposes no pseudo-element to hide it,
+	// so we make the color transparent (hiding the icon) and repaint the text via -webkit-text-fill-color.
+	// Both borders derive from currentColor too, so they get explicit colors instead.
+	@supports (-moz-appearance: none) {
+		input[type="date"] {
+			// $universal-border-strong is derived from currentColor, so the resting border needs its own
+			// explicit color. The dark variant already has one.
+			border-color: color-mix(in srgb, $input-text-light 80%, transparent);
+
+			&,
+			&:focus {
+				color: transparent;
+				-webkit-text-fill-color: $input-text-light;
+			}
+
+			&:focus {
+				border-color: $input-text-light;
+			}
+
+			.has-dark-controls & {
+				&,
+				&:focus {
+					color: transparent;
+					-webkit-text-fill-color: $input-text-dark;
+				}
+
+				&:focus {
+					border-color: $input-text-dark;
+				}
+			}
+		}
+	}
+
+	.wc-block-components-text-input__date-icon {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+		// The icon is decorative only, and clicks should pass through to the native hidden calendar button.
+		pointer-events: none;
+		color: $input-text-light;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
+		}
+	}
+
 	input[type="number"] {
 		appearance: textfield;
 		-moz-appearance: textfield;
@@ -92,7 +202,8 @@
 	&.is-active input[type="text"],
 	&.is-active input[type="number"],
 	&.is-active input[type="password"],
-	&.is-active input[type="email"] {
+	&.is-active input[type="email"],
+	&.is-active input[type="date"] {
 		padding: $gap-large $gap-smaller + 1px $gap-smaller;
 
 		&:focus {

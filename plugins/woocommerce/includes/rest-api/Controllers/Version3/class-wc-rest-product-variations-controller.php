@@ -1033,7 +1033,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup truncates SKUs to 100 chars.
 				$args,
 				array(
 					'key'     => '_sku',
@@ -1058,7 +1058,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -1069,13 +1069,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Price filter.
 		if ( is_bool( $request['has_price'] ) ) {
 			if ( $request['has_price'] ) {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'AND',
@@ -1091,7 +1091,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					)
 				);
 			} else {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'OR',
@@ -1111,7 +1111,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_stock_status',

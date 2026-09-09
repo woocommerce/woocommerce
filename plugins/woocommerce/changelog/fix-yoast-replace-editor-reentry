@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the block email editor loading in a broken state when a plugin (e.g. Yoast SEO Premium) calls WP_Screen::get() from admin_enqueue_scripts, re-entering the replace_editor filter mid-render
