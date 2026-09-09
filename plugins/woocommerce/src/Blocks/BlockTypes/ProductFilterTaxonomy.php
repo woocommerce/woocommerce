@@ -367,7 +367,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array Term counts with term_id as key and count as value.
 	 */
 	private function get_taxonomy_term_counts( $block, $taxonomy ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$block_context = $block->context;
+		if ( ! isset( $block_context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -396,10 +397,13 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			);
 		}
 
-		// Remove from tax_query if present.
+		$is_local_collection = true === ( $block_context['query']['isProductCollectionBlock'] ?? false )
+			&& false === ( $block_context['query']['inherit'] ?? null );
+
 		if ( ! empty( $query_vars['tax_query'] ) ) {
+			$removal_key = $is_local_collection ? 'filter_taxonomy' : 'taxonomy';
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $taxonomy );
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], $removal_key, $taxonomy );
 		}
 
 		$counts = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_taxonomy_counts( $query_vars, $taxonomy );

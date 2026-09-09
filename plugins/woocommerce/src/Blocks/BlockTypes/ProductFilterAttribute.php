@@ -277,7 +277,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$block_context = $block->context;
+		if ( ! isset( $block_context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -294,9 +295,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 		}
 
-		if ( ! empty( $query_vars['tax_query'] ) ) {
+		$is_local_collection = true === ( $block_context['query']['isProductCollectionBlock'] ?? false )
+			&& false === ( $block_context['query']['inherit'] ?? null );
+
+		if ( ! empty( $query_vars['tax_query'] ) && ( ! $is_local_collection || 'and' !== strtolower( $query_type ) ) ) {
+			$removal_key = $is_local_collection ? 'filter_taxonomy' : 'taxonomy';
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], $removal_key, $slug );
 		}
 
 		$container        = wc_get_container();

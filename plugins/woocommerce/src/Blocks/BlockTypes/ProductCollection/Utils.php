@@ -78,8 +78,8 @@ class Utils {
 	}
 
 	/**
-	 * Remove query array from tax or meta query by searching for arrays that
-	 * contain exact key => value pair.
+	 * Remove matching tax or meta query clauses and prune empty groups.
+	 * Preserve all values in the remaining clauses.
 	 *
 	 * @param array  $queries tax_query or meta_query.
 	 * @param string $key     Array key to search for.
@@ -93,16 +93,27 @@ class Utils {
 		}
 
 		foreach ( $queries as $query_key => $query ) {
-			if ( isset( $query[ $key ] ) && $query[ $key ] === $value ) {
-				unset( $queries[ $query_key ] );
+			if ( ! is_array( $query ) ) {
+				continue;
 			}
 
-			if ( isset( $query['relation'] ) || ! isset( $query[ $key ] ) ) {
-				$queries[ $query_key ] = self::remove_query_array( $query, $key, $value );
+			if ( isset( $query[ $key ] ) && $query[ $key ] === $value ) {
+				unset( $queries[ $query_key ] );
+				continue;
+			}
+
+			// Leaf values can contain arrays and falsy values that must remain unchanged.
+			if ( isset( $query['taxonomy'] ) || isset( $query['key'] ) || array_key_exists( 'terms', $query ) || array_key_exists( 'value', $query ) ) {
+				continue;
+			}
+
+			$queries[ $query_key ] = self::remove_query_array( $query, $key, $value );
+			if ( empty( $queries[ $query_key ] ) ) {
+				unset( $queries[ $query_key ] );
 			}
 		}
 
-		return self::remove_empty_array_recursive( $queries );
+		return 1 === count( $queries ) && isset( $queries['relation'] ) ? array() : $queries;
 	}
 
 	/**
@@ -191,20 +202,5 @@ class Utils {
 		);
 
 		return $context;
-	}
-
-	/**
-	 * Remove falsy item from array, recursively.
-	 *
-	 * @param array $array The input array to filter.
-	 */
-	private static function remove_empty_array_recursive( $array ) {
-		$array = array_filter( $array );
-		foreach ( $array as $key => $item ) {
-			if ( is_array( $item ) ) {
-				$array[ $key ] = self::remove_empty_array_recursive( $item );
-			}
-		}
-		return $array;
 	}
 }
