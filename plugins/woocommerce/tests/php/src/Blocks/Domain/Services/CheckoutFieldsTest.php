@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use WP_UnitTestCase;
 
@@ -215,6 +216,27 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		// The constraint rules themselves are covered by DateFieldTypeTest; this only checks registration carries them through unresolved.
 		$this->assertSame( 'P0D', $fields['plugin-namespace/appointment-date']['min'] );
 		$this->assertSame( 'P30D', $fields['plugin-namespace/appointment-date']['max'] );
+	}
+
+	/**
+	 * @testdox Old order dates can be edited without the current checkout limits.
+	 */
+	public function test_order_editor_omits_date_constraints(): void {
+		$sut   = Package::container()->get( CheckoutFieldsAdmin::class );
+		$order = new \WC_Order();
+		$key   = '_wc_other/plugin-namespace/appointment-date';
+		$order->set_created_via( 'store-api' );
+		$order->update_meta_data( $key, '1900-01-01' );
+
+		$fields = $sut->admin_order_fields( array(), $order );
+		$field  = $fields['plugin-namespace/appointment-date'];
+
+		$this->assertSame( '1900-01-01', $field['value'] );
+		$this->assertArrayNotHasKey( 'min', $field['custom_attributes'] ?? array() );
+		$this->assertArrayNotHasKey( 'max', $field['custom_attributes'] ?? array() );
+
+		$sut->update_callback( $key, '1900-01-02', $order );
+		$this->assertSame( '1900-01-02', $order->get_meta( $key ) );
 	}
 
 	/**

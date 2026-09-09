@@ -128,26 +128,70 @@ class DateFieldTypeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A min that resolves later than the max fails registration.
+	 * @testdox An inverted range keeps the field, drops both limits, and logs only during value validation.
 	 *
 	 * @testWith ["2025-12-31", "2025-01-01"]
 	 *           ["P2M", "P1M"]
 	 *           ["-P13Y", "-P18Y"]
+	 *           ["P0D", "1900-01-01"]
+	 *           ["2999-12-31", "P0D"]
 	 *
 	 * @param string $min The min constraint.
 	 * @param string $max The max constraint.
 	 */
-	public function test_inverted_constraints_are_registration_errors( string $min, string $max ) {
-		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+	public function test_inverted_constraints_are_ignored( string $min, string $max ): void {
+		$warnings = 0;
+		$logger   = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->exactly( 2 ) )->method( 'warning' )->with(
+			$this->stringContains( 'Date limits for checkout field "test/date-of-birth" were ignored' ),
+			$this->arrayHasKey( 'source' )
+		)->willReturnCallback(
+			static function () use ( &$warnings ) {
+				++$warnings;
+			}
+		);
+		add_filter(
+			'woocommerce_logging_class',
+			static function () use ( $logger ) {
+				return $logger;
+			}
+		);
 
-		$this->assertFalse(
-			$this->register(
-				array(
-					'min' => $min,
-					'max' => $max,
-				)
+		$field_data = $this->register(
+			array(
+				'min' => $min,
+				'max' => $max,
 			)
 		);
+		$this->assertIsArray( $field_data );
+		$this->assertSame( $min, $field_data['min'] );
+		$this->assertSame( $max, $field_data['max'] );
+		$field      = $this->date_field( $field_data );
+		$form_field = $this->field_type->prepare_form_field( $field );
+
+		$this->assertArrayNotHasKey( 'min', $form_field['custom_attributes'] );
+		$this->assertArrayNotHasKey( 'max', $form_field['custom_attributes'] );
+		$this->assertSame( 0, $warnings, 'Rendering the field should not log a warning.' );
+		$this->assertNull( $this->field_type->validate( '1800-01-01', $field ) );
+		$this->assertSame( 1, $warnings, 'Validating a submitted date should log one warning.' );
+		$this->assertNull( $this->field_type->validate( '3000-01-01', $field ) );
+		$this->assertInstanceOf( WP_Error::class, $this->field_type->validate( '2026-02-31', $field ) );
+	}
+
+	/**
+	 * @testdox Equal limits allow only that date.
+	 */
+	public function test_equal_constraints_allow_one_date(): void {
+		$field = $this->date_field(
+			array(
+				'min' => '2026-08-26',
+				'max' => '2026-08-26',
+			)
+		);
+
+		$this->assertNull( $this->field_type->validate( '2026-08-26', $field ) );
+		$this->assertInstanceOf( WP_Error::class, $this->field_type->validate( '2026-08-25', $field ) );
+		$this->assertInstanceOf( WP_Error::class, $this->field_type->validate( '2026-08-27', $field ) );
 	}
 
 	/**
@@ -181,6 +225,11 @@ class DateFieldTypeTest extends WP_UnitTestCase {
 	 *           ["2026-03-31", "-P1M", "2026-02-28"]
 	 *           ["2024-02-29", "P1Y", "2025-02-28"]
 	 *           ["2026-01-31", "P1M15D", "2026-03-15"]
+	 *           ["2026-08-26", "P2W", "2026-09-09"]
+	 *           ["2026-08-26", "P1W2D", "2026-09-04"]
+	 *           ["2026-08-26", "-P1W2D", "2026-08-17"]
+	 *           ["2026-08-26", "P1M2W", "2026-10-10"]
+	 *           ["2026-01-31", "P1M2W3D", "2026-03-17"]
 	 *
 	 * @param string $today      The current date in the store timezone.
 	 * @param string $constraint The constraint to resolve.
@@ -192,6 +241,7 @@ class DateFieldTypeTest extends WP_UnitTestCase {
 		// private resolver is called directly to pin the day the arithmetic starts from.
 		$resolve = new \ReflectionMethod( $this->field_type, 'resolve_constraint' );
 		$resolve->setAccessible( true );
+		$constraint = $this->register( array( 'min' => $constraint ) )['min'];
 
 		$this->assertSame( $expected, $resolve->invoke( $this->field_type, $constraint, new \DateTimeImmutable( $today, wp_timezone() ) ) );
 	}
@@ -204,7 +254,7 @@ class DateFieldTypeTest extends WP_UnitTestCase {
 			$this->date_field(
 				array(
 					'min' => 'P0D',
-					'max' => '2026-12-31',
+					'max' => '2999-12-31',
 				)
 			)
 		);
@@ -212,7 +262,7 @@ class DateFieldTypeTest extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'min' => $this->date_relative_to_today( 'today' ),
-				'max' => '2026-12-31',
+				'max' => '2999-12-31',
 			),
 			$form_field['custom_attributes']
 		);

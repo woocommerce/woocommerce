@@ -38,7 +38,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  */
 import { Select } from '../../select';
 import AddressLineFields from './address-line-fields';
-import { resolveDateConstraint } from './date-constraints';
+import { resolveDateConstraints } from './date-constraints';
 import { FormProps } from './types';
 import { useFormFields } from './use-form-fields';
 import { useFormValidation } from './use-form-validation';
@@ -425,8 +425,7 @@ const Form = <
 						type={ field.type }
 						{ ...( field.type === 'date'
 							? {
-									min: resolveDateConstraint( field.min ),
-									max: resolveDateConstraint( field.max ),
+									...resolveDateConstraints( field ),
 									icon: (
 										<span
 											className="wc-block-components-text-input__date-icon"

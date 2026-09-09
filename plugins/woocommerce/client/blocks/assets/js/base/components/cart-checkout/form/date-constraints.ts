@@ -73,3 +73,24 @@ export const resolveDateConstraint = (
 		return undefined;
 	}
 };
+
+/**
+ * Resolves both date limits and drops them when the range has no valid date.
+ *
+ * @param field     The date field's registered constraints.
+ * @param field.min The minimum date or duration.
+ * @param field.max The maximum date or duration.
+ */
+export const resolveDateConstraints = ( field: {
+	min?: string;
+	max?: string;
+} ): { min: string | undefined; max: string | undefined } => {
+	const min = resolveDateConstraint( field.min );
+	const max = resolveDateConstraint( field.max );
+
+	if ( min && max && min > max ) {
+		return { min: undefined, max: undefined };
+	}
+
+	return { min, max };
+};

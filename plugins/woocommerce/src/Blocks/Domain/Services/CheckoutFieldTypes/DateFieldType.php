@@ -72,7 +72,7 @@ class DateFieldType extends AbstractFieldType {
 			}
 
 			try {
-				$interval = new \DateInterval( $body );
+				$interval = self::parse_duration( $body );
 			} catch ( \Exception $e ) {
 				return $this->registration_error(
 					$id,
@@ -90,26 +90,31 @@ class DateFieldType extends AbstractFieldType {
 				);
 			}
 
-			// The body parsed as-is, so re-attaching the sign (dropping an explicit "+") makes it canonical
-			// ISO 8601-2: at most one leading "-", which is all resolve_constraint() and the client expect.
+			// Keep the duration unresolved and drop an explicit plus sign.
 			$field_data[ $constraint ] = ( -1 === $sign ? '-' : '' ) . $body;
 		}
 
-		$min = $field_data['min'] ?? null;
-		$max = $field_data['max'] ?? null;
+		return $field_data;
+	}
 
-		// When having 2 constraints, we can end up in impossible cases, in which the min is later than the max.
-		if ( isset( $min, $max )
-			&& $this->is_absolute_date( $min ) === $this->is_absolute_date( $max )
-			&& $this->resolve_constraint( $min ) > $this->resolve_constraint( $max ) ) {
-			return $this->registration_error(
-				$id,
-				sprintf( 'The "min" constraint (%s) must not resolve to a date later than the "max" constraint (%s).', $min, $max ),
-				'11.2.0'
-			);
+	/**
+	 * Parses a duration without losing weeks on PHP 7.
+	 *
+	 * @param string $duration The unsigned ISO duration.
+	 * @return \DateInterval The parsed duration.
+	 */
+	private static function parse_duration( string $duration ): \DateInterval {
+		if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
+			$duration = preg_replace_callback(
+				'/(\d+)W(?:(\d+)D)?/',
+				static function ( $matches ) {
+					return ( (int) $matches[1] * 7 + (int) ( $matches[2] ?? 0 ) ) . 'D';
+				},
+				$duration
+			) ?? '';
 		}
 
-		return $field_data;
+		return new \DateInterval( $duration );
 	}
 
 	/**
@@ -147,7 +152,7 @@ class DateFieldType extends AbstractFieldType {
 			);
 		}
 
-		[ 'min' => $min, 'max' => $max ] = $this->get_constraints( $field );
+		[ 'min' => $min, 'max' => $max ] = $this->get_constraints( $field, true );
 
 		// Both sides are YYYY-MM-DD, so a string comparison orders them correctly.
 		if ( $min && $value < $min ) {
@@ -216,14 +221,31 @@ class DateFieldType extends AbstractFieldType {
 	/**
 	 * Returns the resolved min and max dates for a date field.
 	 *
-	 * @param array $field The field.
+	 * @param array $field             The field.
+	 * @param bool  $log_invalid_range Whether to log an invalid range during value validation.
 	 * @return array Array with "min" and "max" keys, each a YYYY-MM-DD date or null when unconstrained.
 	 */
-	private function get_constraints( array $field ): array {
-		return array(
+	private function get_constraints( array $field, bool $log_invalid_range = false ): array {
+		$constraints = array(
 			'min' => isset( $field['min'] ) ? $this->resolve_constraint( $field['min'] ) : null,
 			'max' => isset( $field['max'] ) ? $this->resolve_constraint( $field['max'] ) : null,
 		);
+
+		if ( isset( $constraints['min'], $constraints['max'] ) && $constraints['min'] > $constraints['max'] ) {
+			if ( $log_invalid_range ) {
+				wc_get_logger()->warning(
+					sprintf( 'Date limits for checkout field "%s" were ignored because min (%s) is after max (%s).', $field['id'], $constraints['min'], $constraints['max'] ),
+					array( 'source' => 'checkout-fields' )
+				);
+			}
+
+			return array(
+				'min' => null,
+				'max' => null,
+			);
+		}
+
+		return $constraints;
 	}
 
 	/**
@@ -248,7 +270,7 @@ class DateFieldType extends AbstractFieldType {
 		}
 
 		$sign     = '-' === $value[0] ? -1 : 1;
-		$interval = new \DateInterval( ltrim( $value, '-' ) );
+		$interval = self::parse_duration( ltrim( $value, '-' ) );
 		$today    = new \DateTimeImmutable( $reference ? $reference->format( 'Y-m-d' ) : 'today', wp_timezone() );
 
 		// Handles the DateInterval bug in which months days overflow to the next month instead of staying in the current month.
