@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Load System Status post counts when requested, while preserving immediate counts for extension report sections.
