@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\Templates;
 
@@ -25,6 +26,31 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
+		add_filter( 'get_post_metadata', array( $this, 'handle_get_post_metadata' ), 10, 4 );
+	}
+
+	/**
+	 * Associate the current Shop page with the catalog without overwriting its saved page template.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $value Short-circuited metadata value, or null.
+	 * @param int    $post_id Post ID.
+	 * @param string $meta_key Metadata key.
+	 * @param bool   $single Whether to return a single value.
+	 * @return mixed
+	 */
+	public function handle_get_post_metadata( $value, $post_id, $meta_key, $single ) {
+		if (
+			null === $value &&
+			'_wp_page_template' === $meta_key &&
+			wp_is_block_theme() &&
+			wc_get_page_id( 'shop' ) === $post_id
+		) {
+			return $single ? self::SLUG : array( self::SLUG );
+		}
+
+		return $value;
 	}
 
 	/**
