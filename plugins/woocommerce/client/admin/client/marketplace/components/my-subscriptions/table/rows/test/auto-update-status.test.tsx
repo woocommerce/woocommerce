@@ -118,7 +118,9 @@ describe( 'AutoUpdateStatus', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
 		).toBeInTheDocument();
-		expect( screen.queryByText( 'Blocked' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Blocked' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'shows the setting as text when it cannot be changed from here', async () => {
@@ -132,7 +134,7 @@ describe( 'AutoUpdateStatus', () => {
 		expect(
 			screen.queryByRole( 'button', { name: /auto-updates/ } )
 		).not.toBeInTheDocument();
-		fireEvent.click( screen.getByText( 'On' ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'On' } ) );
 
 		expect(
 			await screen.findByText(
@@ -144,7 +146,9 @@ describe( 'AutoUpdateStatus', () => {
 	it( 'shows off as text when it cannot be changed from here', () => {
 		renderStatus( subscriptionWith( { auto_update_manageable: false } ) );
 
-		expect( screen.getByText( 'Off' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Off' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'treats a theme like a plugin', () => {
@@ -166,7 +170,9 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		expect( screen.queryByText( 'Blocked' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Blocked' } )
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
 		).toBeInTheDocument();
@@ -176,7 +182,7 @@ describe( 'AutoUpdateStatus', () => {
 		setSiteSettings( { wooUpdateManagerActive: false } );
 		renderStatus( subscriptionWith( { auto_update: true } ) );
 
-		fireEvent.click( screen.getByText( 'Blocked' ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
 
 		expect(
 			await screen.findByText(
@@ -191,7 +197,7 @@ describe( 'AutoUpdateStatus', () => {
 			subscriptionWith( { type: 'theme', auto_update: true } )
 		);
 
-		fireEvent.click( screen.getByText( 'Blocked' ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
 
 		expect(
 			await screen.findByText(
@@ -204,7 +210,9 @@ describe( 'AutoUpdateStatus', () => {
 		setSiteSettings( { wooUpdateManagerActive: false } );
 		renderStatus( subscriptionWith( {} ) );
 
-		expect( screen.queryByText( 'Blocked' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Blocked' } )
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
 		).toBeInTheDocument();
@@ -218,7 +226,7 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		fireEvent.click( screen.getByText( 'Blocked' ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
 
 		expect(
 			await screen.findByText( 'There is no subscription for it.' )
@@ -236,7 +244,7 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		fireEvent.click( screen.getByText( 'Blocked' ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
 
 		expect(
 			await screen.findByText( 'The subscription has expired.' )
@@ -256,7 +264,9 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 
-		expect( screen.queryByText( 'Blocked' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Blocked' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'enables auto-updates, refreshes the row and announces the change', async () => {
