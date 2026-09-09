@@ -257,6 +257,78 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The emailed download link names the period the export covers.
+	 */
+	public function test_emailed_link_carries_the_date_range(): void {
+		$sent = $this->email_completed_export(
+			array(
+				array(
+					'after'  => '2025-06-01T00:00:00',
+					'before' => '2025-06-30T23:59:59',
+				),
+			)
+		);
+
+		$this->assertStringContainsString(
+			'date_range=2025-06-01-to-2025-06-30',
+			$sent['body'],
+			'The emailed link should name the period the export covers.'
+		);
+	}
+
+	/**
+	 * @testdox An export queued before the date range was added still emails a working link.
+	 */
+	public function test_emailed_link_for_an_export_queued_without_report_args(): void {
+		// Exports queued by an earlier release carry three arguments, not four.
+		$sent = $this->email_completed_export( array() );
+
+		$this->assertStringContainsString(
+			'Your Products Report download is ready',
+			$sent['subject'],
+			'An export queued without report arguments should keep the original subject.'
+		);
+		$this->assertStringContainsString(
+			'action=woocommerce_admin_download_report_csv',
+			$sent['body'],
+			'An export queued without report arguments should still be emailed a download link.'
+		);
+		$this->assertStringNotContainsString(
+			'date_range=',
+			$sent['body'],
+			'An export with no known date range should not claim one.'
+		);
+	}
+
+	/**
+	 * Email the download link for a finished export and return the message that went out.
+	 *
+	 * Dispatched through the hook Action Scheduler fires, so the number of arguments a queued
+	 * action carries is what decides how the callback is reached.
+	 *
+	 * @param array $queued_args Arguments the queued action carries after the report type.
+	 * @return array The sent message.
+	 */
+	private function email_completed_export( array $queued_args ): array {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = (string) microtime( true );
+		$hook      = ReportExporter::get_action( 'email_report_download_link' );
+		$mailer    = tests_retrieve_phpmailer_instance();
+
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 100 );
+
+		$this->assertNotFalse( has_action( $hook ), 'The export email action should be registered.' );
+
+		do_action_ref_array( $hook, array_merge( array( $user_id, $export_id, 'products' ), $queued_args ) );
+
+		$sent = end( $mailer->mock_sent );
+
+		$this->assertIsArray( $sent, 'A finished export should be emailed to the user who asked for it.' );
+
+		return $sent;
+	}
+
+	/**
 	 * @testdox Cleanup runs from the daily WooCommerce Admin event.
 	 */
 	public function test_cleanup_is_hooked_to_the_daily_event(): void {
