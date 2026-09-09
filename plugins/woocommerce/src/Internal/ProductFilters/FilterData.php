@@ -296,8 +296,15 @@ class FilterData {
 
 			// The lookup table usage option is 'no' while a regeneration is running, after an aborted
 			// regeneration is cleaned up, and when an admin disabled the table. Its rows are incomplete
-			// in all of those states, so the counts come from the parent terms then, which is the same
-			// condition under which the main product query filters through the table.
+			// in all of those states, so the counts come from the parent terms then. That matches the
+			// storefront's main product query, which filters through the table only when Filterer says
+			// usage is on. It does not match QueryClauses::add_attribute_clauses(), which always reads
+			// the table, so with usage off and an attribute filter applied the id set above is already
+			// empty and these counts come back empty too. The fallback only yields complete counts while
+			// no attribute filter is active.
+			//
+			// The two branches also differ on stock: only the lookup branch can honour
+			// 'woocommerce_hide_out_of_stock_items', because parent term relationships carry no stock.
 			$attribute_count_sql = $this->lookup_data_store()->usage_is_enabled()
 				? $this->get_attribute_counts_sql_from_lookup_table( $product_ids, $attribute_to_count )
 				: $this->get_attribute_counts_sql_from_term_relationships( $product_ids, $attribute_to_count );
