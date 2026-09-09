@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvali
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use stdClass;
 use WC_Unit_Test_Case;
 
 /**
@@ -993,22 +994,23 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertSame( 77, $rest_format['id'] );
 		$this->assertSame( 'rest-format-uuid', $rest_format['device_uuid'] );
 		$this->assertSame( PushToken::PLATFORM_APPLE, $rest_format['platform'] );
-		$this->assertSame( array( 'app_version' => '21.1' ), $rest_format['metadata'] );
+		$this->assertEquals( (object) array( 'app_version' => '21.1' ), $rest_format['metadata'] );
 		$this->assertSame( '2026-08-01T09:30:00', $rest_format['created_at_gmt'] );
 		$this->assertSame( '2026-08-11T14:45:12', $rest_format['last_confirmed_at_gmt'] );
 		$this->assertSame( $wpcom_format, array_intersect_key( $rest_format, $wpcom_format ) );
 	}
 
 	/**
-	 * @testdox Tests the REST format reports metadata as an array when a token has none.
+	 * @testdox Tests the REST format reports metadata as an empty object when a token has none.
 	 *
 	 * Browser tokens and tokens registered before metadata existed have no value
-	 * stored, and the tooling should not have to handle both null and an array.
+	 * stored. An object rather than null or an empty array keeps the field one
+	 * type for the consumer, and matches the `object` type the schema declares.
 	 */
-	public function test_rest_format_reports_absent_metadata_as_an_empty_array() {
+	public function test_rest_format_reports_absent_metadata_as_an_empty_object() {
 		$rest_format = ( new PushToken() )->to_rest_format();
 
-		$this->assertSame( array(), $rest_format['metadata'] );
+		$this->assertEquals( new stdClass(), $rest_format['metadata'] );
 		$this->assertNull( $rest_format['id'] );
 		$this->assertNull( $rest_format['device_uuid'] );
 		$this->assertNull( $rest_format['platform'] );
