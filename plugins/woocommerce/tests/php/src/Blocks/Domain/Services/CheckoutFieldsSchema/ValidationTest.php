@@ -114,6 +114,33 @@ class ValidationTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Missing and blank date references skip comparison, while wrong types fail.
+	 *
+	 * @testWith [[], true]
+	 *           [{"reference": ""}, true]
+	 *           [{"reference": null}, false]
+	 *           [{"reference": 20260501}, false]
+	 *           [{"reference": false}, false]
+	 *
+	 * @param array $values   The referenced field values.
+	 * @param bool  $expected Whether the comparison should pass.
+	 */
+	public function test_empty_date_references( array $values, bool $expected ): void {
+		$sut = $this->createMock( DocumentObject::class );
+		$sut->method( 'get_data' )->willReturn( array_merge( $values, array( 'date' => '2026-05-02' ) ) );
+		$rules = array(
+			'properties' => array(
+				'date' => array(
+					'format'        => 'date',
+					'formatMinimum' => array( '$data' => '1/reference' ),
+				),
+			),
+		);
+
+		$this->assertSame( $expected, ! is_wp_error( Validation::validate_document_object( $sut, $rules ) ) );
+	}
+
+	/**
 	 * @testdox Date limit rules require a date format and a date string or valid pointer.
 	 *
 	 * @testWith [{"formatMinimum": "2026-05-01"}, false]

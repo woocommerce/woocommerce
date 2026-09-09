@@ -344,6 +344,24 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Optional blank dates do not trigger a cross-field comparison.
+	 *
+	 * @testWith ["2026-05-01", "", true]
+	 *           ["", "2026-05-04", true]
+	 *
+	 * @param string $check_in  The value of the referenced field.
+	 * @param string $check_out The value of the field carrying the rule.
+	 * @param bool   $is_valid  Whether the pair should pass validation.
+	 */
+	public function test_blank_dates_skip_cross_field_comparisons( string $check_in, string $check_out, bool $is_valid ) {
+		$this->register_stay_dates( true );
+
+		$field = $this->controller->get_additional_fields()['plugin-namespace/check-out'];
+
+		$this->assertSame( $is_valid, true === $this->controller->is_valid_field( $field, $this->stay_document_object( $check_in, $check_out ) ) );
+	}
+
+	/**
 	 * @testdox Each field type contributes its own keywords to the REST API value schema.
 	 */
 	public function test_prepare_field_value_schema() {
@@ -365,13 +383,18 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 
 	/**
 	 * Registers a pair of date fields where the second must fall after the first.
+	 *
+	 * @param bool $allow_empty Whether the schema accepts an empty check-out.
 	 */
-	private function register_stay_dates() {
+	private function register_stay_dates( bool $allow_empty = false ) {
 		$validation = array(
 			'type'                   => 'string',
 			'format'                 => 'date',
 			'formatExclusiveMinimum' => array( '$data' => '1/plugin-namespace~1check-in' ),
 		);
+		if ( $allow_empty ) {
+			$validation = array( 'anyOf' => array( array( 'const' => '' ), $validation ) );
+		}
 
 		woocommerce_register_additional_checkout_field(
 			array(
