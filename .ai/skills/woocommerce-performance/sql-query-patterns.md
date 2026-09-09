@@ -74,7 +74,9 @@ GROUP BY terms.term_id
 
 **Why it matters:** `wp_posts` is the largest table. Starting from `wp_term_taxonomy` gives the optimizer a narrow driving side (~174 rows for a product taxonomy) versus starting from `wp_posts` or the `(product × term)` cross-product in a lookup table (~25k rows). Eliminating the join also prevents the fan-out problem (Pattern C).
 
-**Canonical example:** `FilterData::get_attribute_counts` in `src/Internal/ProductFilters/FilterData.php`.
+**Canonical example:** `Filterer::get_product_counts_query_using_lookup_table` in `src/Internal/ProductAttributesLookup/Filterer.php`.
+
+**When correctness forces the cross-product anyway:** `FilterData::get_attribute_counts` used this pattern until WooCommerce 11.2.0, when it had to switch to `wc_product_attributes_lookup`: parent term relationships list every attribute term regardless of variation status, so they still count terms carried only by disabled variations. Measured on 2,000 variable products x 50 variations (100k lookup rows for one taxonomy), the lookup form reads 100k rows in ~23 ms against ~20k rows in ~4 ms for the term-relationship form. No index fixes it — `product_or_parent_id` is the 4th column of `taxonomy_term_id_in_stock_product_or_parent_id`, and forcing the primary key or a purpose-built `(taxonomy, product_or_parent_id, term_id, in_stock)` index is slower still. The gap tracks variations per product and disappears once row counts are comparable (at 5 variations per product the lookup form wins, ~2.8 ms vs ~3.6 ms). When you must take this trade, reduce how often the query runs rather than trying to reshape it.
 
 ---
 
