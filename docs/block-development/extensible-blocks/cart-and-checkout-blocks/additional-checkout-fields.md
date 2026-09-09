@@ -293,7 +293,7 @@ This ends up resolving to a date that may not always be up to date between regis
 
 Registration fails with a `_doing_it_wrong` notice if a constraint can't be parsed. Express both bounds in the same unit, i.e. avoid `'min' => 'P30D'`, `'max' => 'P1M'` as it would form an invalid range in February for example. Avoid mixing absolute and durations unless you're sure they won't overlap at some point in the future.
 
-If mixed (absolute and durations) end up overlapping, WooCommerce will ignore them and the field will be boundless and will emit a log warning.
+If mixed dates (absolute and durations) resolve to an invalid range, where min is later than max, WooCommerce will ignore them and the field will be boundless and will emit a log warning.
 
 The input value will follow the browser's locale settings, the DB value will be in YYYY-MM-DD, and the final rendered value (in pages and emails) will follow the site's date format, set in **Settings -> General**.
 
