@@ -3923,7 +3923,9 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
  *
  * Lookups on `user_email` use plain SQL equality, so rows written before emails were
  * normalized would not match on a case-sensitive collation. Processes one batch per
- * call and requeues itself while rows remain.
+ * call and requeues itself while rows remain. A database error stops the migration
+ * and is logged instead of retried: an unnormalized row only keeps the pre-migration
+ * lookup behaviour, and the log names it for manual repair.
  *
  * @since 11.2.0
  *
@@ -3943,6 +3945,15 @@ function wc_update_11203_normalize_stock_notification_emails() {
 			$batch_size
 		)
 	);
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped normalizing stock notification emails: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		delete_option( $last_id_option );
+		return false;
+	}
 
 	// Normalize in PHP rather than with SQL LOWER()/TRIM() so stored values match exactly
 	// what EmailNormalizer produces at lookup time.
@@ -3965,9 +3976,11 @@ function wc_update_11203_normalize_stock_notification_emails() {
 		);
 		if ( false === $updated ) {
 			wc_get_logger()->error(
-				sprintf( 'Failed to normalize the customer email of stock notification #%d: %s', (int) $row->id, $wpdb->last_error ),
+				sprintf( 'Stopped normalizing stock notification emails at notification #%d: %s', (int) $row->id, $wpdb->last_error ),
 				array( 'source' => 'wc-updater' )
 			);
+			delete_option( $last_id_option );
+			return false;
 		}
 	}
 

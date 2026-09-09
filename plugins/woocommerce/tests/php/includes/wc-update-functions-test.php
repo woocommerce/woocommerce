@@ -710,4 +710,46 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'Before@Example.com', 'after@example.com' ), $emails );
 	}
+
+	/**
+	 * @testdox Migration stops at the first failed write, clears its cursor and does not request another run.
+	 */
+	public function test_wc_update_11203_normalize_stock_notification_emails_stops_on_failed_write(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$table = $wpdb->prefix . 'wc_stock_notifications';
+		foreach ( array( 'First@Example.com', 'Second@Example.com' ) as $email ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'product_id'       => 1,
+					'user_id'          => 0,
+					'user_email'       => $email,
+					'status'           => 'active',
+					'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				)
+			);
+		}
+
+		$break_update = function ( $query ) use ( $table ) {
+			return 0 === strpos( $query, "UPDATE `{$table}` SET `user_email`" ) ? "UPDATE `{$table}` SET `no_such_column` = 1" : $query;
+		};
+		add_filter( 'query', $break_update );
+		$suppressed = $wpdb->suppress_errors();
+
+		try {
+			$this->assertFalse( wc_update_11203_normalize_stock_notification_emails(), 'A failed write should not request another run' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_update );
+		}
+
+		$this->assertFalse( get_option( 'woocommerce_update_11203_last_stock_notification_id' ), 'The cursor should be cleared after a failed write' );
+
+		$emails = $wpdb->get_col( "SELECT user_email FROM {$table} WHERE product_id = 1 ORDER BY id" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->assertSame( array( 'First@Example.com', 'Second@Example.com' ), $emails, 'No row should be rewritten after the write fails' );
+	}
 }
