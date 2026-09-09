@@ -674,7 +674,11 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			2
 		);
 
-		wc_update_1120_delete_unpublished_variation_lookup_rows();
+		$batches = 0;
+		while ( wc_update_1120_delete_unpublished_variation_lookup_rows() ) {
+			++$batches;
+			$this->assertLessThan( 10, $batches, 'The migration reschedules itself until every batch is done.' );
+		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
@@ -683,7 +687,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array( array( 0, LookupDataStore::ACTION_DELETE ) ),
 			$received,
-			'The migration announces the update once, so the data derived from the table is invalidated.'
+			'The migration announces the update once it is done, so the data derived from the table is invalidated.'
+		);
+
+		$this->assertFalse(
+			get_option( 'woocommerce_update_1120_last_unpublished_variation_id' ),
+			'The batch cursor is cleaned up once the migration is done.'
 		);
 	}
 }

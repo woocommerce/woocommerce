@@ -3809,34 +3809,64 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
  * counted terms that only a disabled variation carried. Rows are now only written for published variations
  * and a status change refreshes them, but rows written before that are never revisited.
  *
+ * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it.
+ *
  * @since 11.2.0
  *
- * @return void
+ * @return bool True when another batch is left to process.
  */
 function wc_update_1120_delete_unpublished_variation_lookup_rows() {
 	global $wpdb;
 
 	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
 	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
-		return;
+		return false;
 	}
 
-	$lookup_table = $lookup_data_store->get_lookup_table_name();
+	$last_id_option = 'woocommerce_update_1120_last_unpublished_variation_id';
+	$lookup_table   = $lookup_data_store->get_lookup_table_name();
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for.
-	$wpdb->query(
+	// Driving from the posts side keeps the batch bounded by unpublished variations, which are the selective
+	// set here, and lets the query use the post_type/post_status index instead of scanning the lookup table.
+	$variation_ids = $wpdb->get_col(
 		$wpdb->prepare(
-			"DELETE lookup FROM {$lookup_table} AS lookup
-			INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
-			WHERE lookup.is_variation_attribute = 1
-			AND posts.post_type = 'product_variation'
-			AND posts.post_status != %s",
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID > %d AND post_type = 'product_variation' AND post_status != %s
+			ORDER BY ID ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 ),
 			ProductStatus::PUBLISH
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' === $wpdb->last_error && ! empty( $variation_ids ) ) {
+		$variation_ids   = array_map( 'intval', $variation_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough.
+		$deleted = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
+			$wpdb->prepare( "DELETE FROM {$lookup_table} WHERE product_id IN ( {$id_placeholders} )", $variation_ids )
+		);
+
+		if ( false !== $deleted ) {
+			update_option( $last_id_option, end( $variation_ids ), false );
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped deleting the lookup rows of unpublished variations: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1120_delete_unpublished_variation_lookup_rows' )
+		);
+	}
+
+	delete_option( $last_id_option );
 
 	// The listeners of the action drop the counts cached from the old rows.
-	/** This action is documented in LookupDataStore::run_update_callback(). */
-	do_action( 'woocommerce_product_attributes_lookup_updated', 0, LookupDataStore::ACTION_DELETE ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+	$lookup_data_store->announce_table_updated( 0, LookupDataStore::ACTION_DELETE );
+
+	return false;
 }
