@@ -125,6 +125,10 @@ class Bootstrap {
 		$this->container->get( AssetsController::class );
 		$this->container->get( DependencyDetection::class );
 
+		// Created on every request, cron included, so the fetch_patterns callback it registers is in place
+		// when WP-Cron runs the scheduled action.
+		$this->container->get( PTKPatternsStore::class );
+
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
 			$this->add_build_notice();
@@ -146,10 +150,6 @@ class Bootstrap {
 			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
-
-			if ( is_admin() || $is_rest ) {
-				$this->container->get( PTKPatternsStore::class );
-			}
 
 			if ( is_admin() ) {
 				$this->container->get( TemplateOptions::class )->init();
