@@ -209,10 +209,12 @@ class PTKPatternsStore {
 	 * Reset the cached patterns to fetch them again from the PTK.
 	 *
 	 * @since 10.4.1 Unscheduling is deferred if Action Scheduler hasn't initialized yet.
+	 * @since 11.2.0 The scheduling cooldown is cleared so a fetch requested after the flush is not held back.
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
+		delete_transient( self::SCHEDULE_COOLDOWN_TRANSIENT );
 
 		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
 			return;

@@ -554,4 +554,21 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		$this->pattern_store->get_patterns();
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch should be scheduled again after the cooldown expires' );
 	}
+
+	/**
+	 * @testdox flush_cached_patterns should clear the cooldown so the next fetch is scheduled immediately.
+	 */
+	public function test_flush_cached_patterns_clears_the_cooldown() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		delete_option( PTKPatternsStore::OPTION_NAME );
+
+		$this->pattern_store->get_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'The first call should schedule a fetch' );
+
+		$this->pattern_store->flush_cached_patterns();
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Flushing should unschedule the pending fetch' );
+
+		$this->pattern_store->flush_or_fetch_patterns();
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'A fetch requested right after a flush should not be held back by the cooldown' );
+	}
 }
