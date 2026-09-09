@@ -175,6 +175,7 @@ export function buildChartData(
 		if ( currentInterval === 'day' && secondaryInterval ) {
 			const primaryDate = moment( interval.date_start );
 			const secondaryDate = moment( secondaryInterval.date_start );
+			const nextPrimaryInterval = primaryDataIntervals[ index + 1 ];
 			const nextSecondaryInterval = secondaryDataIntervals[ index + 1 ];
 
 			if ( isLeapDay( primaryDate ) && isFirstOfMarch( secondaryDate ) ) {
@@ -188,11 +189,17 @@ export function buildChartData(
 			} else if (
 				isTwentyEighthOfFebruary( primaryDate ) &&
 				nextSecondaryInterval &&
-				isLeapDay( moment( nextSecondaryInterval.date_start ) )
+				isLeapDay( moment( nextSecondaryInterval.date_start ) ) &&
+				! (
+					nextPrimaryInterval &&
+					isLeapDay( moment( nextPrimaryInterval.date_start ) )
+				)
 			) {
 				// The secondary range has a leap day the primary range lacks, so its
-				// intervals run one long from here on. The x-axis is built from the
-				// primary dates, so the leap day has no slot of its own. Fold it into
+				// intervals run one long from here on. When both ranges have the leap
+				// day at this position (an equal-length previous period spanning two
+				// leap years) they already line up and nothing is done. Otherwise the
+				// x-axis, built from the primary dates, has no slot for it. Fold it into
 				// the 28th and label the point as covering both days, so the line
 				// still accounts for everything the legend total counts. Averages
 				// cannot be folded, so for those the 29th is left out of the line.

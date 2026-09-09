@@ -56,14 +56,25 @@ function buildDayChartData(
 	primaryIntervals,
 	secondaryIntervals,
 	key = 'orders_count',
-	type = 'number'
+	type = 'number',
+	compare = 'previous_year'
 ) {
 	return buildChartData(
 		{ data: { totals: {}, intervals: primaryIntervals } },
 		{ data: { totals: {}, intervals: secondaryIntervals } },
-		{ label: 'Custom', range: '', after: '', before: '' },
-		{ label: 'Previous year', range: '', after: '', before: '' },
-		'previous_year',
+		{
+			label: 'Custom',
+			range: '',
+			after: primaryIntervals[ 0 ].date_start,
+			before: '',
+		},
+		{
+			label: 'Previous period',
+			range: '',
+			after: secondaryIntervals[ 0 ].date_start,
+			before: '',
+		},
+		compare,
 		key,
 		'day',
 		type
@@ -433,6 +444,41 @@ describe( 'buildChartData', () => {
 			} );
 		}
 	);
+
+	test( 'should leave data alone when both ranges have the 29th Feb at the same position', () => {
+		// A four year custom range compared to the previous period: both sides are
+		// 1461 days long and both contain a leap day at the same index.
+		const primary = generateDayIntervals( '2016-01-01', '2019-12-31', {
+			'2016-02-29': 7,
+		} );
+		const secondary = generateDayIntervals( '2012-01-01', '2015-12-31', {
+			'2012-02-28': 28,
+			'2012-02-29': 29,
+			'2012-03-01': 301,
+		} );
+
+		const chartData = buildDayChartData(
+			primary,
+			secondary,
+			'orders_count',
+			'number',
+			'previous_period'
+		);
+
+		expect( chartData ).toHaveLength( 1461 );
+		expect( secondaryByDate( chartData, '2016-02-28' ) ).toEqual( {
+			labelDate: '2012-02-28 00:00:00',
+			value: 28,
+		} );
+		expect( secondaryByDate( chartData, '2016-02-29' ) ).toEqual( {
+			labelDate: '2012-02-29 00:00:00',
+			value: 29,
+		} );
+		expect( secondaryByDate( chartData, '2016-03-01' ) ).toEqual( {
+			labelDate: '2012-03-01 00:00:00',
+			value: 301,
+		} );
+	} );
 
 	test( 'should bump up data since 29th Feb when both ranges span a leap year', () => {
 		// Both ranges touch 2024, but only the primary range contains the leap day.
