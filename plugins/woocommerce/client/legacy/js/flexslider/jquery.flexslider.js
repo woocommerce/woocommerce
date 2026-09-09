@@ -273,9 +273,8 @@
                 }
               }
 
-              var liElement = $( '<li>' );
+              var liElement = $( '<li></li>' );
               item.appendTo( liElement );
-              liElement.append( '</li>' );
 
               slider.controlNavScaffold.append(liElement);
               j++;
