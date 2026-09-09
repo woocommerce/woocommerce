@@ -234,13 +234,20 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	 * @testdox get_quantity_input_step defaults to any when the stored quantity does not align with the step.
 	 */
 	public function test_step_defaults_to_any_for_stored_decimal_quantity(): void {
-		$order = WC_Helper_Order::create_order();
-		$items = array_values( $order->get_items() );
-		$item  = $items[0];
-		$item->set_quantity( 2.5 );
-		$item->save();
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		try {
+			$order = WC_Helper_Order::create_order();
+			$items = array_values( $order->get_items() );
+			$item  = $items[0];
+			$item->set_quantity( 2.5 );
+			$item->save();
 
-		$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item ) );
+			$this->assertSame( 'any', $this->sut->get_quantity_input_step( $item ) );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
 	}
 
 	/**
@@ -358,17 +365,24 @@ class ItemQuantityLimitsTest extends WC_Unit_Test_Case {
 	public function test_validate_posted_accepts_existing_decimal_quantity(): void {
 		$this->expectNotToPerformAssertions();
 
-		$order = WC_Helper_Order::create_order();
-		$items = array_values( $order->get_items() );
-		$item  = $items[0];
-		$item->set_quantity( 2.5 );
-		$item->save();
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		try {
+			$order = WC_Helper_Order::create_order();
+			$items = array_values( $order->get_items() );
+			$item  = $items[0];
+			$item->set_quantity( 2.5 );
+			$item->save();
 
-		$this->sut->validate_posted_item_quantities(
-			$order,
-			array(
-				'order_item_qty' => array( $item->get_id() => '2.5' ),
-			)
-		);
+			$this->sut->validate_posted_item_quantities(
+				$order,
+				array(
+					'order_item_qty' => array( $item->get_id() => '2.5' ),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
 	}
 }

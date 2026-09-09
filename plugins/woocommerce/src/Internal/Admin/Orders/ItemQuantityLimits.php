@@ -164,7 +164,8 @@ class ItemQuantityLimits {
 		$order_items     = null;
 
 		foreach ( $items['order_item_qty'] as $item_id => $posted_qty ) {
-			$qty = (float) wc_stock_amount( wp_unslash( $posted_qty ) );
+			$raw_qty = wc_format_decimal( wp_unslash( $posted_qty ) );
+			$qty     = is_numeric( $raw_qty ) ? (float) $raw_qty : (float) wc_stock_amount( wp_unslash( $posted_qty ) );
 
 			// Fast path: when a non-negative integer quantity is posted and no filters
 			// are attached, it can neither violate the default minimum (0 or negative)
