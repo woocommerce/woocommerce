@@ -329,11 +329,27 @@ function wc_get_attribute_type_label( $type ) {
  * Check if attribute name is reserved.
  * https://codex.wordpress.org/Function_Reference/register_taxonomy#Reserved_Terms.
  *
+ * Global attributes (the default) are checked against the WordPress reserved terms, because
+ * they are registered as taxonomies and a reserved name would collide with WordPress query
+ * vars.
+ *
+ * Custom (per-product) attributes are not taxonomies, so the WordPress reserved terms don't
+ * apply to them. Pass 'custom' as the attribute type to check against the WooCommerce-specific
+ * 'variation' structural key instead: it collides with the cart and order item array key of the
+ * same name when a custom attribute called 'variation' is stored as order item meta, so reading
+ * $item['variation'] via ArrayAccess returns the attribute value instead of the variation data.
+ *
  * @since  2.4.0
- * @param  string $attribute_name Attribute name.
+ * @since  11.2.0 Added the `$attribute_type` parameter.
+ * @param  string $attribute_name Attribute name (the slug, already sanitized).
+ * @param  string $attribute_type Attribute type, either 'global' (default) or 'custom'.
  * @return bool
  */
-function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
+function wc_check_if_attribute_name_is_reserved( $attribute_name, $attribute_type = 'global' ) {
+	if ( 'custom' === $attribute_type ) {
+		return 'variation' === $attribute_name;
+	}
+
 	// Forbidden attribute names.
 	$reserved_terms = array(
 		'attachment',

@@ -358,4 +358,22 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			array( 'ĂnîC°Dę', 'anicde' ),
 		);
 	}
+
+	/**
+	 * @testdox wc_check_if_attribute_name_is_reserved() flags WordPress reserved terms for global attributes and the 'variation' structural key for custom attributes.
+	 *
+	 * @testWith ["type", true, false]
+	 *           ["color", false, false]
+	 *           ["variation", false, true]
+	 *           ["variation_id", false, false]
+	 *           ["variation_data", false, false]
+	 *
+	 * @param string $name            Attribute slug to check.
+	 * @param bool   $reserved_global Whether the name is reserved for global attributes.
+	 * @param bool   $reserved_custom Whether the name is reserved for custom attributes.
+	 */
+	public function test_wc_check_if_attribute_name_is_reserved( string $name, bool $reserved_global, bool $reserved_custom ) {
+		$this->assertSame( $reserved_global, wc_check_if_attribute_name_is_reserved( $name ), "\"$name\" global reservation mismatch." );
+		$this->assertSame( $reserved_custom, wc_check_if_attribute_name_is_reserved( $name, 'custom' ), "\"$name\" custom reservation mismatch." );
+	}
 }
