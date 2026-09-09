@@ -287,7 +287,6 @@ class ReportExporter {
 	/**
 	 * Format one end of a report's date range for display.
 	 *
-	 * @since 11.2.0
 	 * @param string $date Date as `Y-m-d`.
 	 * @return string The date in the store's date format, or an empty string when it cannot be read.
 	 */

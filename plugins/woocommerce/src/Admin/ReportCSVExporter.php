@@ -138,7 +138,8 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			return $filename;
 		}
 
-		return sanitize_file_name( preg_replace( '/\.csv$/', '', $filename ) . '-' . $this->download_suffix . '.csv' );
+		// Stripped and restored the way set_filename() does it, so the name keeps a single .csv.
+		return sanitize_file_name( str_replace( '.csv', '', $filename ) . '-' . $this->download_suffix . '.csv' );
 	}
 
 	/**
