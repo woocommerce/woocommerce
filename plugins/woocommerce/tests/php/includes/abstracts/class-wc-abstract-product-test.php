@@ -148,13 +148,13 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product->set_image_id( 12 );
 		add_filter(
 			'woocommerce_product_get_image_id',
-			static function ( $image_id ) {
-				return (string) $image_id;
+			static function () {
+				return '13';
 			}
 		);
 
-		$this->assertSame( 12, $product->get_image_id(), 'A numeric-string filter result should be cast to an integer.' );
-		$this->assertSame( 12, $product->get_image_id( 'edit' ), 'The edit-context image ID is not filtered and stays an integer.' );
+		$this->assertSame( 13, $product->get_image_id(), 'The view-context getter should return the filtered ID, cast to an integer.' );
+		$this->assertSame( 12, $product->get_image_id( 'edit' ), 'The edit-context image ID is not filtered and stays the stored integer.' );
 	}
 
 	/**

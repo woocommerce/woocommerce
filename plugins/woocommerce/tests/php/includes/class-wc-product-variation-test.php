@@ -95,14 +95,15 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	public function test_filtered_image_id_is_cast_to_integer() {
 		$variation = new WC_Product_Variation();
 		$variation->set_parent_data( array( 'image_id' => 12 ) );
+		// Only rewrite the inherited parent ID, so the variation's own empty value still falls through to the parent.
 		add_filter(
 			'woocommerce_product_variation_get_image_id',
 			static function ( $image_id ) {
-				return (string) $image_id;
+				return 12 === $image_id ? '13' : $image_id;
 			}
 		);
 
-		$this->assertSame( 12, $variation->get_image_id(), 'A numeric-string filter result should be cast to an integer.' );
+		$this->assertSame( 13, $variation->get_image_id(), 'The inherited image ID should come back filtered and cast to an integer.' );
 	}
 
 	/**
