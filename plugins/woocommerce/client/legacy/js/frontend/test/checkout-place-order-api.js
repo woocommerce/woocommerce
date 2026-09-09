@@ -650,6 +650,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $updateOrderReviewNotices.remove ).toHaveBeenCalledTimes( 1 );
 			expect( $allNotices.remove ).not.toHaveBeenCalled();
 			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
 		test( 'should preserve failure notice replacement and field validation', () => {
@@ -672,6 +673,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				2,
 				'blur'
 			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
 		} );
 
 		test( 'should leave notices and fields unchanged for message-free success', () => {
@@ -684,6 +686,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $form.prepend ).not.toHaveBeenCalled();
 			expect( $allNotices.remove ).not.toHaveBeenCalled();
 			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
 		test( 'should treat a response without the error flag as a failure', () => {
@@ -698,6 +701,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				1,
 				'validate'
 			);
+			expect( jQueryMock.scroll_to_notices ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
 } );
