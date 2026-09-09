@@ -359,6 +359,9 @@ class WC_Install {
 			'wc_update_11201_migrate_tax_lookup_order_items',
 			'wc_update_11201_invalidate_analytics_reports_cache',
 		),
+		'11.2.0-2' => array(
+			'wc_update_11202_reset_refund_returning_customer_markers',
+		),
 	);
 
 	/**
@@ -2111,6 +2114,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
+	taxable_amount double DEFAULT 0 NOT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
