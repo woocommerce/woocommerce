@@ -13,6 +13,15 @@ use WC_Unit_Test_Case;
  * Tests for the NewOrderNotification class.
  */
 class NewOrderNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return a payload with all required keys for an existing order.
 	 */
@@ -98,14 +107,13 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
 		$order        = WC_Helper_Order::create_order();
 		$notification = new NewOrderNotification( $order->get_id() );
-		$triggered_at = time() - 300;
 
-		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) $triggered_at );
+		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) self::TRIGGERED_AT );
 		$order->save_meta_data();
 
 		$payload = $notification->to_payload();
 
-		$this->assertSame( gmdate( 'c', $triggered_at ), $payload['timestamp'] );
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
 	}
 
 	/**
