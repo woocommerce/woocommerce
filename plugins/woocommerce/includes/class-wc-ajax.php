@@ -3241,6 +3241,13 @@ class WC_AJAX {
 			return;
 		}
 
+		$is_percentage = '%' === substr( $value, -1 );
+		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
+		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
+			return;
+		}
+		$adjustment = (float) $adjustment;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 			if ( ! $variation instanceof WC_Product_Variation ) {
@@ -3253,11 +3260,10 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( '%' === substr( $value, -1 ) ) {
-				$percent    = wc_format_decimal( substr( $value, 0, -1 ) );
-				$sale_price = (float) $regular_price - NumberUtil::round( ( (float) $regular_price / 100 ) * (float) $percent, wc_get_price_decimals() );
+			if ( $is_percentage ) {
+				$sale_price = (float) $regular_price - NumberUtil::round( ( (float) $regular_price / 100 ) * $adjustment, wc_get_price_decimals() );
 			} else {
-				$sale_price = (float) $regular_price - (float) $value;
+				$sale_price = (float) $regular_price - $adjustment;
 			}
 
 			$variation->set_sale_price( (string) NumberUtil::round( max( 0, $sale_price ), wc_get_price_decimals() ) );
