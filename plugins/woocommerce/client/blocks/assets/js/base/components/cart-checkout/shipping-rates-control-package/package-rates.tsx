@@ -43,11 +43,8 @@ const PackageRates = ( {
 		string | undefined
 	>( selectedRateId ?? rates[ 0 ]?.rate_id );
 
-	// Update on mount, we do it every time to:
-	// - sync the initial value with the server
-	// - or reset pending request to change shipping rate that might be coming
-	//   from other components (e.g. local pickup), selectShippingRate thunk in
-	//   the cart store properly handles aborting the previous request if needed
+	// Standalone controls synchronize on mount and replace pending selections.
+	// Core disables this effect and coordinates initial selections in the parent.
 	useEffect( () => {
 		if ( selectRateOnMount && selectedOption ) {
 			onSelectRate( selectedOption );
@@ -59,13 +56,17 @@ const PackageRates = ( {
 
 	// Update the selected option if cart state changes in the data store.
 	useEffect( () => {
-		if ( selectedRateId && selectedRateId !== selectedOption ) {
+		if (
+			selectRateOnMount &&
+			selectedRateId &&
+			selectedRateId !== selectedOption
+		) {
 			setSelectedOption( selectedRateId );
 		}
 		// We want to explicitly react to changes in the data store only here, local state is managed
 		// through different code path.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedRateId ] );
+	}, [ selectedRateId, selectRateOnMount ] );
 
 	if ( rates.length === 0 ) {
 		return noResultsMessage;
@@ -75,12 +76,16 @@ const PackageRates = ( {
 		<RadioControl
 			className={ className }
 			onChange={ ( value: string ) => {
-				setSelectedOption( value );
+				if ( selectRateOnMount ) {
+					setSelectedOption( value );
+				}
 				onSelectRate( value );
 			} }
 			highlightChecked={ highlightChecked }
 			disabled={ disabled }
-			selected={ selectedOption ?? '' }
+			selected={
+				( selectRateOnMount ? selectedOption : selectedRateId ) ?? ''
+			}
 			options={ rates.map( renderOption ) }
 			descriptionStackingDirection="column"
 		/>

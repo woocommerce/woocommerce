@@ -38,18 +38,17 @@ const Packages = ( {
 	context = '',
 }: PackagesProps ): JSX.Element | null => {
 	const { selectShippingRate } = useShippingData();
-	const synchronizedPackageIds = useRef< Set< string | number > >(
-		new Set()
-	);
+	// Attempt initialization once; failed rates remain unchecked so shoppers can retry them.
+	const initializedPackageIds = useRef< Set< string | number > >( new Set() );
 
 	useEffect( () => {
 		const currentPackageIds = new Set(
 			packages.map( ( shippingPackage ) => shippingPackage.package_id )
 		);
 
-		synchronizedPackageIds.current.forEach( ( packageId ) => {
+		initializedPackageIds.current.forEach( ( packageId ) => {
 			if ( ! currentPackageIds.has( packageId ) ) {
-				synchronizedPackageIds.current.delete( packageId );
+				initializedPackageIds.current.delete( packageId );
 			}
 		} );
 
@@ -62,19 +61,19 @@ const Packages = ( {
 				shippingPackage.shipping_rates[ 0 ]?.rate_id;
 
 			if ( ! rateId ) {
-				synchronizedPackageIds.current.delete(
+				initializedPackageIds.current.delete(
 					shippingPackage.package_id
 				);
 				return;
 			}
 
 			if (
-				synchronizedPackageIds.current.has( shippingPackage.package_id )
+				initializedPackageIds.current.has( shippingPackage.package_id )
 			) {
 				return;
 			}
 
-			synchronizedPackageIds.current.add( shippingPackage.package_id );
+			initializedPackageIds.current.add( shippingPackage.package_id );
 			selectShippingRate( rateId, shippingPackage.package_id );
 		} );
 	}, [ packages, selectShippingRate ] );

@@ -264,3 +264,47 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 	expect( firstRate ).toBeChecked();
 	expect( secondRate ).not.toBeChecked();
 } );
+
+test( 'Core clears a rejected selection so the shopper can retry it', async () => {
+	const selectShippingRate = jest.fn();
+	( useShippingData as jest.Mock ).mockReturnValue( {
+		selectShippingRate,
+		shippingRates: [ testPackageData ],
+	} );
+	( useStoreCart as jest.Mock ).mockReturnValue( { cartItems: [] } );
+	const selectedPackage = {
+		...testPackageData,
+		shipping_rates: testPackageData.shipping_rates.map(
+			( rate, index ) => ( {
+				...rate,
+				selected: index === 0,
+			} )
+		),
+	};
+	const { rerender } = render(
+		<ShippingRatesControlPackage
+			packageData={ selectedPackage }
+			packageId={ 0 }
+			selectRateOnMount={ false }
+			noResultsMessage={ <span>No rates</span> }
+		/>
+	);
+	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $10.00' } );
+	expect( flatRate ).toBeChecked();
+
+	// Pickup is filtered out of Shipping, leaving no visible selected rate after rollback.
+	rerender(
+		<ShippingRatesControlPackage
+			packageData={ testPackageData }
+			packageId={ 0 }
+			selectRateOnMount={ false }
+			noResultsMessage={ <span>No rates</span> }
+		/>
+	);
+	expect( flatRate ).not.toBeChecked();
+	expect( selectShippingRate ).not.toHaveBeenCalled();
+
+	await userEvent.click( flatRate );
+	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
+	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:1', 0 );
+} );
