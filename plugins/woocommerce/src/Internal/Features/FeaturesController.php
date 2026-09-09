@@ -579,6 +579,19 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'payments_finance'                     => array(
+				'name'                         => __( 'Payments finance data', 'woocommerce' ),
+				'description'                  => __(
+					'Expose payment provider balances and payouts to the WooCommerce admin through the REST API.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden until the finance UI ships.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'fulfillments'                         => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(

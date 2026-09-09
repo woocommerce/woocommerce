@@ -10,6 +10,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Payments\Finance\FinanceDataProviderInterface;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;

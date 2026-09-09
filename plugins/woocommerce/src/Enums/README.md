@@ -11,10 +11,12 @@ The enum classes make it easier to reference string values and avoid typos. They
 - [CurrencyPosition](./CurrencyPosition.php) - Enumerates the possible values of the `woocommerce_currency_pos` option.
 - [DefaultCustomerAddress](./DefaultCustomerAddress.php) - Enumerates the possible values of the `woocommerce_default_customer_address` option.
 - [DimensionUnit](./DimensionUnit.php) - Enumerates the possible values of the `woocommerce_dimension_unit` option.
+- [FinanceDataSource](./FinanceDataSource.php) - Enumerates the types of finance data a payment gateway can expose to the WooCommerce admin.
 - [OrderInternalStatus](./OrderInternalStatus.php) - Enumerates the possible internal statuses of an order (when stored in the database).
 - [OrderItemType](./OrderItemType.php) - Enumerates the possible types of an order line item.
 - [OrderStatus](./OrderStatus.php) - Enumerates the possible statuses of an order.
 - [PaymentGatewayFeatures](./PaymentGatewayFeatures.php) - Enumerates the possible features of a payment gateway.
+- [PayoutStatus](./PayoutStatus.php) - Enumerates the possible high-level statuses of a payment provider payout.
 - [ProductStatus](./ProductStatus.php) - Enumerates the possible statuses of a product.
 - [ProductStockStatus](./ProductStockStatus.php) - Enumerates the possible stock statuses of a product.
 - [ProductType](./ProductType.php) - Enumerates the possible types of a product.
