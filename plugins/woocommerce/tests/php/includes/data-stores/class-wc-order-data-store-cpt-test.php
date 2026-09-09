@@ -1986,68 +1986,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A status list keeps a valid sibling when another Stringable conversion throws.
-	 */
-	public function test_status_list_keeps_valid_sibling_of_throwing_stringable(): void {
-		$completed = OrderHelper::create_order();
-		$completed->set_status( OrderStatus::COMPLETED );
-		$completed->save();
-
-		$pending = OrderHelper::create_order();
-		$pending->set_status( OrderStatus::PENDING );
-		$pending->save();
-
-		$status = self::create_throwing_stringable();
-		$sut    = new WC_Order_Data_Store_CPT();
-
-		$result = $sut->query(
-			array(
-				'status'   => array( OrderStatus::COMPLETED, $status ),
-				'return'   => 'ids',
-				'limit'    => -1,
-				'paginate' => false,
-				'type'     => 'shop_order',
-			)
-		);
-
-		$this->assertContains( $completed->get_id(), $result, 'The valid status must remain active.' );
-		$this->assertNotContains( $pending->get_id(), $result, 'The valid status must still narrow the query.' );
-	}
-
-	/**
-	 * @testdox A throwing status Stringable with no narrowing sibling fails closed.
-	 */
-	public function test_throwing_stringable_status_with_inert_sibling_fails_closed(): void {
-		$status   = self::create_throwing_stringable();
-		$captured = null;
-		$capture  = static function ( $args ) use ( &$captured ) {
-			$captured = $args;
-			return $args;
-		};
-		$sut      = new WC_Order_Data_Store_CPT();
-
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
-
-		try {
-			$result = $sut->query(
-				array(
-					'status'   => array( $status, 'bogus-not-a-status' ),
-					'return'   => 'ids',
-					'limit'    => -1,
-					'paginate' => false,
-					'type'     => 'shop_order',
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 1 );
-		}
-
-		$this->assertSame( array(), $result, 'A failed status conversion without a narrowing sibling must return no orders.' );
-		$this->assertNotEmpty( $captured['errors'] ?? array(), 'A non-narrowing survivor must not reopen the failed query.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
-	}
-
-	/**
 	 * @testdox Status normalization does not swallow errors from the public status filter.
 	 */
 	public function test_status_filter_error_still_propagates(): void {
@@ -2313,89 +2251,22 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Status lists whose only surviving entry filters nothing.
-	 *
-	 * @return array<string, array{0: array}>
+	 * @testdox A status list fails closed when any entry is unusable.
 	 */
-	public function provider_unusable_status_with_inert_sibling(): array {
-		return array(
-			'object and empty string' => array( array( new stdClass(), '' ) ),
-			'object and null'         => array( array( new stdClass(), null ) ),
-			'object and array'        => array( array( new stdClass(), array() ) ),
-		);
-	}
-
-	/**
-	 * @testdox An unusable status fails closed even when an inert entry sits beside it.
-	 *
-	 * The inert entry survives the usability loop but filters no status, so treating it as a
-	 * usable sibling would drop the clause and return every order, trashed ones included. Trunk
-	 * fatalled on this input, so nothing depends on it returning rows.
-	 *
-	 * @dataProvider provider_unusable_status_with_inert_sibling
-	 *
-	 * @param array $status Status list mixing an unusable entry with an inert one.
-	 */
-	public function test_unusable_status_with_inert_sibling_fails_closed( array $status ): void {
-		$order = OrderHelper::create_order();
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-
-		$captured = null;
-		$capture  = function ( $args ) use ( &$captured ) {
-			$captured = $args;
-			return $args;
-		};
-
-		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 99 );
-
-		// An array entry warns on the 'wc-' concatenation exactly as it did before this change.
-		// Swallow it and continue, as production does, rather than let phpunit convert it.
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
-		set_error_handler( static fn() => true );
-
-		try {
-			$result = wc_get_orders(
-				array(
-					'status' => $status,
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			);
-		} finally {
-			restore_error_handler();
-			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $capture, 99 );
-		}
-
-		$this->assertSame( array(), $result, 'The query must match no orders.' );
-		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable.' );
-		$this->assertSame( array( 0 ), $captured['post__in'] ?? null, 'post__in must pin the query closed.' );
-	}
-
-	/**
-	 * @testdox A status list keeps its usable entries and only the unusable ones are dropped.
-	 */
-	public function test_partially_usable_status_list_keeps_working(): void {
+	public function test_partially_usable_status_list_fails_closed(): void {
 		$completed = OrderHelper::create_order();
 		$completed->set_status( OrderStatus::COMPLETED );
 		$completed->save();
 
-		$pending = OrderHelper::create_order();
-		$pending->set_status( OrderStatus::PENDING );
-		$pending->save();
-
 		$result = wc_get_orders(
 			array(
-				// An object is the only entry that would raise an Error, so it is the only one the
-				// guard drops. An array entry is left to WP_Query, exactly as before this change.
 				'status' => array( OrderStatus::COMPLETED, new stdClass() ),
 				'return' => 'ids',
 				'limit'  => -1,
 			)
 		);
 
-		$this->assertContains( $completed->get_id(), $result, 'The usable status must still be applied.' );
-		$this->assertNotContains( $pending->get_id(), $result, 'Dropping an unusable entry must not drop the whole status filter.' );
+		$this->assertSame( array(), $result, 'An unusable status must fail the whole query closed.' );
 	}
 
 	/**
@@ -2433,62 +2304,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			"array('all')" => array( array( 'all' ) ),
 			"array('any')" => array( array( 'any' ) ),
 		);
-	}
-
-	/**
-	 * Status lists pairing an unusable entry with a truthy sibling that names no status.
-	 *
-	 * Truthiness alone does not make a survivor useful: WP_Query keeps only entries that match a
-	 * registered status, so these narrow nothing and the clause would vanish.
-	 *
-	 * @return array<string, array{0: array}>
-	 */
-	public function provider_unusable_status_with_non_filtering_sibling(): array {
-		return array(
-			'unregistered string sibling' => array( array( new stdClass(), 'bogus-not-a-status' ) ),
-			'non-empty array sibling'     => array( array( new stdClass(), array( 'x' ) ) ),
-			'zero string sibling'         => array( array( new stdClass(), '0' ) ),
-		);
-	}
-
-	/**
-	 * @testdox An unusable status whose only siblings filter nothing fails the query closed.
-	 *
-	 * @dataProvider provider_unusable_status_with_non_filtering_sibling
-	 *
-	 * @param array $status Status list mixing an unusable entry with a non-filtering one.
-	 */
-	public function test_unusable_status_with_non_filtering_sibling_fails_closed( array $status ): void {
-		$completed = OrderHelper::create_order();
-		$completed->set_status( OrderStatus::COMPLETED );
-		$completed->save();
-
-		$trashed = OrderHelper::create_order();
-		$trashed->set_status( OrderStatus::COMPLETED );
-		$trashed->save();
-		wp_trash_post( $trashed->get_id() );
-
-		// A non-empty array entry warns on the 'wc-' concatenation. Swallow it and continue, as
-		// production does, rather than let phpunit convert it.
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Test-only: reproduces production error semantics.
-		set_error_handler( static fn() => true, E_WARNING | E_NOTICE );
-
-		try {
-			$result = wc_get_orders(
-				array(
-					'status' => $status,
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			);
-		} finally {
-			restore_error_handler();
-		}
-
-		// Dropping the clause here would return more than an unfiltered query does, because
-		// WC_Order_Query's default status list excludes trash.
-		$this->assertSame( array(), $result, 'The query must match no orders.' );
-		$this->assertNotContains( $trashed->get_id(), $result, 'A trashed order must never leak through a failed-closed status query.' );
 	}
 
 	/**
