@@ -90,6 +90,21 @@ describe( 'CountryInput', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'falls back to the country code when the countries setting is not an object', () => {
+		// A plugin can replace the setting through the shared settings filter.
+		allSettings.countries = null as unknown as typeof allSettings.countries;
+
+		render( <CountryInput { ...defaultProps } value="GB" /> );
+
+		const unavailableOption = screen.getByRole( 'option', {
+			name: 'GB',
+		} ) as HTMLOptionElement;
+
+		expect( unavailableOption ).toBeInTheDocument();
+		expect( unavailableOption.disabled ).toBe( true );
+		expect( screen.getByLabelText( 'Country/Region' ) ).toHaveValue( 'GB' );
+	} );
+
 	it( 'removes the unavailable option once an allowed country is selected', () => {
 		const { rerender } = render(
 			<CountryInput { ...defaultProps } value="GB" />

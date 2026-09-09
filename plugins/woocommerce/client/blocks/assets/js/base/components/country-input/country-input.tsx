@@ -3,8 +3,8 @@
  */
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import { getSetting } from '@woocommerce/settings';
-import { objectHasProp } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
+import { isObject, isString, objectHasProp } from '@woocommerce/types';
 import clsx from 'clsx';
 
 /**
@@ -41,14 +41,18 @@ export const CountryInput = ( {
 			selectedCountry &&
 			! objectHasProp( countries, selectedCountry )
 		) {
-			const allCountries = getSetting< Record< string, string > >(
+			const allCountries = getSettingWithCoercion(
 				'countries',
-				{}
+				{},
+				isObject
 			);
+			const countryName = allCountries[ selectedCountry ];
 			countryOptions.push( {
 				value: selectedCountry,
 				label: decodeEntities(
-					allCountries[ selectedCountry ] || selectedCountry
+					isString( countryName ) && countryName
+						? countryName
+						: selectedCountry
 				),
 				disabled: true,
 			} );
