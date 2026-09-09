@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Product Search block: opt-in "Show products while typing" setting that renders live product results — image, name and price — from the Store API in a dropdown under the search input.
