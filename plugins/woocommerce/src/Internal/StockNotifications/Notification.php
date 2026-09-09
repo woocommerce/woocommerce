@@ -428,11 +428,17 @@ class Notification extends \WC_Data {
 			return '';
 		}
 
-		if ( $product->is_type( 'variation' ) && ! empty( $this->get_meta( 'posted_attributes' ) ) ) {
-			return $product->get_permalink( array( 'item_meta_array' => $this->get_meta( 'posted_attributes' ) ) );
-		} else {
+		$posted_attributes = $this->get_meta( 'posted_attributes' );
+		if ( ! $product instanceof \WC_Product_Variation || empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
 			return $product->get_permalink();
 		}
+
+		// Posted attributes hold only the values chosen for "Any" attributes, so merge them over the variation's own attributes to build a complete link.
+		// Keys that no longer belong to the variation (e.g. a removed attribute) are dropped so they don't leak into the URL.
+		$variation_attributes = $product->get_variation_attributes();
+		$attributes           = array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
+
+		return $product->get_permalink( array( 'variation' => $attributes ) );
 	}
 
 	/**
