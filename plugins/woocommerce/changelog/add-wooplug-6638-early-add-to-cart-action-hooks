@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_before_add_to_cart_action and woocommerce_add_to_cart_action_allowed hooks so external code can observe and gate classic add to cart requests before cart manipulation begins.
