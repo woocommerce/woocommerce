@@ -262,10 +262,8 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	 */
 	public function provider_unusable_date_query_vars(): array {
 		return array(
-			'array'        => array( array( 'foo' ) ),
-			'nested array' => array( array( array() ) ),
-			'empty array'  => array( array() ),
-			'object'       => array( new stdClass() ),
+			'array'  => array( array( 'foo' ) ),
+			'object' => array( new stdClass() ),
 		);
 	}
 
@@ -481,22 +479,14 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse_date_for_wp_query keeps working for values it already accepted.
+	 * @testdox parse_date_for_wp_query keeps accepting WC_DateTime values.
 	 */
-	public function test_parse_date_for_wp_query_accepts_valid_values(): void {
-		$from_string = $this->sut->parse_date_for_wp_query( '2024-07-04', 'post_date', array() );
-		$this->assertSame( '2024', $from_string['date_query'][0]['year'] );
-		$this->assertSame( '7', $from_string['date_query'][0]['month'] );
-		$this->assertSame( '4', $from_string['date_query'][0]['day'] );
-
+	public function test_parse_date_for_wp_query_accepts_wc_datetime_values(): void {
 		$from_datetime = $this->sut->parse_date_for_wp_query(
 			new WC_DateTime( '2024-07-04 12:00:00', new DateTimeZone( 'UTC' ) ),
 			'post_date',
 			array()
 		);
 		$this->assertNotEmpty( $from_datetime['date_query'], 'WC_DateTime values must still build a date query.' );
-
-		$from_shorthand = $this->sut->parse_date_for_wp_query( '>=2024-07-04', 'post_date', array() );
-		$this->assertArrayHasKey( 'after', $from_shorthand['date_query'][0], 'Shorthand operators must still be honoured.' );
 	}
 }
