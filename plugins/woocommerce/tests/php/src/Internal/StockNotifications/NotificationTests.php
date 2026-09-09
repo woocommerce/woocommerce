@@ -11,6 +11,16 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
  */
 class NotificationTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->enable_stock_notifications_feature();
+	}
+
 	/**
 	 * @after
 	 */
@@ -19,6 +29,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
