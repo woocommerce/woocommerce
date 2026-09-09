@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: fix the custom date range calendar reading out the wrong date to screen reader users.
