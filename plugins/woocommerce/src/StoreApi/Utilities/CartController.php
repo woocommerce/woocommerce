@@ -1426,10 +1426,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $variation_attribute_name ] )
 						:
-						html_entity_decode(
-							wp_strip_all_tags( $variation_data[ $variation_attribute_name ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $variation_attribute_name ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1447,10 +1449,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute_label ] )
 						:
-						html_entity_decode(
-							wp_strip_all_tags( $variation_data[ $attribute_label ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute_label ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1462,10 +1466,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute['name'] ] )
 						:
-						html_entity_decode(
-							wp_strip_all_tags( $variation_data[ $attribute['name'] ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute['name'] ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 			}
 		}
