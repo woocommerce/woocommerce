@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use approximate database estimates for System Status post counts to avoid counting every post on large stores.
