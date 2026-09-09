@@ -261,6 +261,16 @@ final class BlockTypesController {
 				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
+		// The heading markup here must stay in step with the cross-sells Product Collection block in
+		// WC_Install::get_cart_block_content(); the pattern replaces markup that block used to inline.
+		register_block_pattern(
+			'woocommerce/cart-cross-sells-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} --><h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
 	}
 
 	/**

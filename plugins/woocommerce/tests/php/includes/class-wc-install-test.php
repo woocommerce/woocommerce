@@ -787,4 +787,55 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
 		);
 	}
+
+	/**
+	 * @testdox Should reference a block pattern instead of baking the translated cross-sells heading into the Cart page content.
+	 */
+	public function test_cart_block_content_references_cross_sells_pattern(): void {
+		$method = new ReflectionMethod( WC_Install::class, 'get_cart_block_content' );
+		$method->setAccessible( true );
+		$content = $method->invoke( null );
+
+		$this->assertStringContainsString(
+			'<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->',
+			$content,
+			'The cross-sells heading should be stored as a pattern reference so it is translated at render time.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$content,
+			'The cross-sells heading must not be frozen into the page content in the install-time locale.'
+		);
+	}
+
+	/**
+	 * @testdox Should render the cross-sells heading from the referenced pattern with the markup the installer used to inline.
+	 */
+	public function test_cart_cross_sells_message_pattern_renders_installer_markup(): void {
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		$this->assertTrue(
+			$registry->is_registered( 'woocommerce/cart-cross-sells-message' ),
+			'The cart-cross-sells-message pattern must be registered during bootstrap; the installed Cart page renders nothing for it otherwise.'
+		);
+
+		$rendered = do_blocks( '<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->' );
+
+		$this->assertStringContainsString(
+			'You may be interested in',
+			$rendered,
+			'The cart-cross-sells-message pattern should render the cross-sells heading.'
+		);
+		// The pattern predates #60278, which restyled the heading in the installer without updating the
+		// pattern. These two assertions catch the styling drifting apart again and visibly changing the cart.
+		$this->assertStringContainsString(
+			'has-text-align-left',
+			$rendered,
+			'The rendered cross-sells heading should keep the alignment the installer previously inlined.'
+		);
+		$this->assertStringContainsString(
+			'margin-bottom:1rem',
+			$rendered,
+			'The rendered cross-sells heading should keep the bottom margin the installer previously inlined.'
+		);
+	}
 }
