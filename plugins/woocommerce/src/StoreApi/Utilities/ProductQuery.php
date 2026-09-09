@@ -123,7 +123,8 @@ class ProductQuery implements QueryClausesGenerator {
 			'product_brand' => 'brand',
 		);
 
-		$taxonomies = array_merge( $all_product_taxonomies, $default_taxonomies );
+		$taxonomies                = array_merge( $all_product_taxonomies, $default_taxonomies );
+		$taxonomy_include_children = $request['taxonomy_include_children'] ?? array();
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
@@ -131,10 +132,11 @@ class ProductQuery implements QueryClausesGenerator {
 				$type        = is_numeric( $request[ $key ][0] ) ? 'term_id' : 'slug';
 				$operator    = $request->get_param( $key . '_operator' ) && isset( $operator_mapping[ $request->get_param( $key . '_operator' ) ] ) ? $operator_mapping[ $request->get_param( $key . '_operator' ) ] : 'IN';
 				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => $type,
-					'terms'    => $request[ $key ],
-					'operator' => $operator,
+					'taxonomy'         => $taxonomy,
+					'field'            => $type,
+					'terms'            => $request[ $key ],
+					'operator'         => $operator,
+					'include_children' => $taxonomy_include_children[ $taxonomy ] ?? true,
 				);
 			}
 		}
@@ -150,10 +152,11 @@ class ProductQuery implements QueryClausesGenerator {
 				if ( in_array( $attribute['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 					$operator      = isset( $attribute['operator'], $operator_mapping[ $attribute['operator'] ] ) ? $operator_mapping[ $attribute['operator'] ] : 'IN';
 					$att_queries[] = array(
-						'taxonomy' => $attribute['attribute'],
-						'field'    => ! empty( $attribute['term_id'] ) ? 'term_id' : 'slug',
-						'terms'    => ! empty( $attribute['term_id'] ) ? $attribute['term_id'] : $attribute['slug'],
-						'operator' => $operator,
+						'taxonomy'         => $attribute['attribute'],
+						'field'            => ! empty( $attribute['term_id'] ) ? 'term_id' : 'slug',
+						'terms'            => ! empty( $attribute['term_id'] ) ? $attribute['term_id'] : $attribute['slug'],
+						'operator'         => $operator,
+						'include_children' => $taxonomy_include_children[ $attribute['attribute'] ] ?? true,
 					);
 				}
 			}

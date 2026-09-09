@@ -941,4 +941,201 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
 	}
+
+	/**
+	 * @testdox Taxonomy descendant options control product membership and collection aggregates.
+	 * @dataProvider taxonomy_include_children_provider
+	 * @param string     $taxonomy Taxonomy to filter.
+	 * @param string     $parameter Request parameter for the taxonomy.
+	 * @param array|null $options Descendant options, or null to omit the parameter.
+	 * @param bool       $include_child Whether the child-only product should match.
+	 */
+	public function test_taxonomy_include_children( string $taxonomy, string $parameter, ?array $options, bool $include_child ): void {
+		$fixtures  = new FixtureData();
+		$products  = array( $this->products[0], $this->products[1], $fixtures->get_simple_product( array() ) );
+		$parent_id = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+		$child_id  = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'parent'   => $parent_id,
+			)
+		);
+		$terms     = array( array( $parent_id ), array( $child_id ), array( $parent_id, $child_id ) );
+		$prices    = array( '17', '93', '29' );
+
+		foreach ( $products as $index => $product ) {
+			wp_set_object_terms( $product->get_id(), $terms[ $index ], $taxonomy );
+			$product->set_regular_price( $prices[ $index ] );
+			$product->set_price( $prices[ $index ] );
+			$product->save();
+		}
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $parameter, (string) $parent_id );
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'order', 'asc' );
+		if ( null !== $options ) {
+			$request->set_param( 'taxonomy_include_children', $options );
+		}
+		$response = rest_get_server()->dispatch( $request );
+		$expected = array( $products[0]->get_id(), $products[2]->get_id() );
+		if ( $include_child ) {
+			$expected[] = $products[1]->get_id();
+		}
+		sort( $expected );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected, wp_list_pluck( $response->get_data(), 'id' ) );
+		$this->assertSame( count( $expected ), $response->get_headers()['X-WP-Total'] );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$request->set_param( $parameter, (string) $parent_id );
+		$request->set_param( 'calculate_price_range', true );
+		if ( null !== $options ) {
+			$request->set_param( 'taxonomy_include_children', $options );
+		}
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '1700', $data['price_range']->min_price );
+		$this->assertSame( $include_child ? '9300' : '2900', $data['price_range']->max_price );
+	}
+
+	/**
+	 * Descendant options for built-in hierarchical product taxonomies.
+	 *
+	 * @return array
+	 */
+	public function taxonomy_include_children_provider(): array {
+		$cases = array();
+		foreach ( array(
+			'product_cat'   => 'category',
+			'product_brand' => 'brand',
+		) as $taxonomy => $parameter ) {
+			$cases[ $taxonomy . ' omitted' ]       = array( $taxonomy, $parameter, null, true );
+			$cases[ $taxonomy . ' unrelated key' ] = array( $taxonomy, $parameter, array( 'product_tag' => false ), true );
+			$cases[ $taxonomy . ' false' ]         = array( $taxonomy, $parameter, array( $taxonomy => false ), false );
+			$cases[ $taxonomy . ' true' ]          = array( $taxonomy, $parameter, array( $taxonomy => true ), true );
+			$cases[ $taxonomy . ' string false' ]  = array( $taxonomy, $parameter, array( $taxonomy => 'false' ), false );
+			$cases[ $taxonomy . ' string true' ]   = array( $taxonomy, $parameter, array( $taxonomy => 'true' ), true );
+		}
+		return $cases;
+	}
+
+	/**
+	 * @testdox Both product routes reject malformed taxonomy descendant options.
+	 * @dataProvider invalid_taxonomy_include_children_provider
+	 * @param string $route Route under test.
+	 * @param mixed  $options Invalid descendant options.
+	 */
+	public function test_invalid_taxonomy_include_children( string $route, $options ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' . $route );
+		$request->set_param( 'taxonomy_include_children', $options );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $data['code'] );
+		$this->assertArrayHasKey( 'taxonomy_include_children', $data['data']['params'] );
+	}
+
+	/**
+	 * Malformed descendant maps and values for both product routes.
+	 *
+	 * @return array
+	 */
+	public function invalid_taxonomy_include_children_provider(): array {
+		$cases = array();
+		foreach ( array( '', '/collection-data' ) as $route ) {
+			foreach ( array( 'false', array( 'product_cat' => 'invalid' ), array( 'product_cat' => array( false ) ), array( 'product_cat' => 2 ) ) as $index => $options ) {
+				$cases[ $route . ' invalid ' . $index ] = array( $route, $options );
+			}
+		}
+		return $cases;
+	}
+
+	/**
+	 * @testdox Custom taxonomy and attribute filters honor taxonomy descendant options.
+	 * @dataProvider custom_taxonomy_include_children_provider
+	 * @param bool      $is_attribute Whether to use the attribute filter.
+	 * @param bool|null $include_children Descendant option, or null to omit it.
+	 */
+	public function test_custom_taxonomy_include_children( bool $is_attribute, ?bool $include_children ): void {
+		$taxonomy     = $is_attribute ? 'pa_region' : 'region_include_children';
+		$attribute_id = $is_attribute ? wc_create_attribute(
+			array(
+				'name' => 'Region',
+				'slug' => 'region',
+			)
+		) : null;
+		register_taxonomy( $taxonomy, array( 'product' ), array( 'hierarchical' => true ) );
+
+		try {
+			$parent_id = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+			$child_id  = self::factory()->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+					'parent'   => $parent_id,
+				)
+			);
+			wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), $taxonomy );
+			wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			if ( $is_attribute ) {
+				$request->set_param(
+					'attributes',
+					array(
+						array(
+							'attribute' => $taxonomy,
+							'term_id'   => $parent_id,
+						),
+					)
+				);
+			} else {
+				$parameter              = '_unstable_tax_' . $taxonomy;
+				$_REQUEST[ $parameter ] = (string) $parent_id;
+				$this->initialize_store_api_server();
+				$request->set_param( $parameter, (string) $parent_id );
+			}
+			if ( null !== $include_children ) {
+				$request->set_param( 'taxonomy_include_children', array( $taxonomy => $include_children ) );
+			}
+			$request->set_param( 'orderby', 'id' );
+			$request->set_param( 'order', 'asc' );
+			$response = rest_get_server()->dispatch( $request );
+			$expected = array( $this->products[0]->get_id() );
+			if ( false !== $include_children ) {
+				$expected[] = $this->products[1]->get_id();
+			}
+			sort( $expected );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $expected, wp_list_pluck( $response->get_data(), 'id' ) );
+		} finally {
+			unset( $_REQUEST[ '_unstable_tax_' . $taxonomy ] );
+			unregister_taxonomy( $taxonomy );
+			if ( $is_attribute ) {
+				wc_delete_attribute( $attribute_id );
+			}
+		}
+	}
+
+	/**
+	 * Custom taxonomy and attribute descendant options.
+	 *
+	 * @return array
+	 */
+	public function custom_taxonomy_include_children_provider(): array {
+		return array(
+			'custom omitted'    => array( false, null ),
+			'custom false'      => array( false, false ),
+			'custom true'       => array( false, true ),
+			'attribute omitted' => array( true, null ),
+			'attribute false'   => array( true, false ),
+			'attribute true'    => array( true, true ),
+		);
+	}
 }
