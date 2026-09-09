@@ -149,6 +149,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		/**
 		 * Filters the `get_terms()` arguments used by the Product Categories List block.
 		 * Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output.
+		 * The `taxonomy` and `fields` arguments are reset after filtering, and a non-array return value is ignored.
 		 *
 		 * @since 11.2.0
 		 *

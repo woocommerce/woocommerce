@@ -633,7 +633,7 @@ apply_filters( 'woocommerce_blocks_product_categories_query_args', array $args, 
 
 ### Description
 
-Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output.
+Use `exclude_tree` rather than `exclude` to hide a category and its children in hierarchical output. The `taxonomy` and `fields` arguments are reset after filtering, and a non-array return value is ignored.
 
 ### Parameters
 
