@@ -90,6 +90,22 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variation getter filter returning a numeric string still yields an integer image ID.
+	 */
+	public function test_filtered_image_id_is_cast_to_integer() {
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_data( array( 'image_id' => 12 ) );
+		add_filter(
+			'woocommerce_product_variation_get_image_id',
+			static function ( $image_id ) {
+				return (string) $image_id;
+			}
+		);
+
+		$this->assertSame( 12, $variation->get_image_id(), 'A numeric-string filter result should be cast to an integer.' );
+	}
+
+	/**
 	 * @testdox By default the defined Cost of Goods Sold is null, and the value is absolute.
 	 */
 	public function test_default_cogs_values() {

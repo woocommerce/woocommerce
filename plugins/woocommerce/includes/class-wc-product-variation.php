@@ -367,7 +367,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Consistently returns an integer.
+	 * @since 11.2.0 Returns an integer, even when a filter returns another type.
 	 *
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int Attachment ID, or 0 when no image is set.
@@ -379,7 +379,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
-		return $image_id;
+		return absint( $image_id );
 	}
 
 	/**

@@ -702,13 +702,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Consistently returns an integer.
+	 * @since 11.2.0 Returns an integer, even when a filter returns another type.
 	 *
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int Attachment ID, or 0 when no image is set.
 	 */
 	public function get_image_id( $context = 'view' ) {
-		return $this->get_prop( 'image_id', $context );
+		return absint( $this->get_prop( 'image_id', $context ) );
 	}
 
 	/**

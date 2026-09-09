@@ -141,6 +141,23 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A getter filter returning a numeric string still yields an integer image ID.
+	 */
+	public function test_filtered_image_id_is_cast_to_integer() {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 12 );
+		add_filter(
+			'woocommerce_product_get_image_id',
+			static function ( $image_id ) {
+				return (string) $image_id;
+			}
+		);
+
+		$this->assertSame( 12, $product->get_image_id(), 'A numeric-string filter result should be cast to an integer.' );
+		$this->assertSame( 12, $product->get_image_id( 'edit' ), 'The edit-context image ID is not filtered and stays an integer.' );
+	}
+
+	/**
 	 * @testdox Ensure that individual Downloadable Products follow the rules regarding Approved Download Directories.
 	 */
 	public function test_fetching_of_approved_downloads() {
