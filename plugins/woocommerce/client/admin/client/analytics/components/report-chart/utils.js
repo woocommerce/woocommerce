@@ -153,10 +153,15 @@ export function buildChartData(
 				secondaryInterval.subtotals[ selectedChartKey ] ) ||
 			0;
 
-		if ( currentInterval === 'day' && secondaryInterval ) {
+		// Only a previous year comparison can leave the two ranges a leap day
+		// apart. Previous period ranges are equal length by construction.
+		if (
+			currentInterval === 'day' &&
+			comparison === 'previous_year' &&
+			secondaryInterval
+		) {
 			const primaryDate = moment( interval.date_start );
 			const secondaryDate = moment( secondaryInterval.date_start );
-			const nextPrimaryInterval = primaryDataIntervals[ index + 1 ];
 			const nextSecondaryInterval = secondaryDataIntervals[ index + 1 ];
 
 			if ( isLeapDay( primaryDate ) && isFirstOfMarch( secondaryDate ) ) {
@@ -170,21 +175,11 @@ export function buildChartData(
 			} else if (
 				isTwentyEighthOfFebruary( primaryDate ) &&
 				nextSecondaryInterval &&
-				isLeapDay( moment( nextSecondaryInterval.date_start ) ) &&
-				! (
-					nextPrimaryInterval &&
-					isLeapDay( moment( nextPrimaryInterval.date_start ) )
-				)
+				isLeapDay( moment( nextSecondaryInterval.date_start ) )
 			) {
-				// The secondary range has a leap day the primary range lacks, so its
-				// intervals run one long from here on. When both ranges have the leap
-				// day at this position (an equal-length previous period spanning two
-				// leap years) they already line up and nothing is done. Otherwise the
-				// x-axis, built from the primary dates, has no slot for it. Fold it into
-				// the 28th and label the point as covering both days, so the line
-				// still accounts for everything the legend total counts. Averages
-				// cannot be folded, so for those the 29th is left out of the line.
-				// Either way the extra interval is removed so later days line up.
+				// The x-axis has no column for the secondary leap day. Fold it into
+				// the 28th so the line still adds up to the legend total. Averages
+				// cannot be added, so those only drop the extra interval.
 				if ( isAdditiveMetric( selectedChartKey, selectedChartType ) ) {
 					secondaryValue +=
 						nextSecondaryInterval.subtotals[ selectedChartKey ] ||

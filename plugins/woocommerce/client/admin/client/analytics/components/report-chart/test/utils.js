@@ -445,9 +445,72 @@ describe( 'buildChartData', () => {
 		}
 	);
 
-	test( 'should leave data alone when both ranges have the 29th Feb at the same position', () => {
-		// A four year custom range compared to the previous period: both sides are
-		// 1461 days long and both contain a leap day at the same index.
+	test( 'should not fold under previous period when the comparison range has the 29th Feb', () => {
+		const primary = generateDayIntervals( '2024-12-01', '2025-12-01' );
+		const secondary = generateDayIntervals( '2023-12-01', '2024-11-30', {
+			'2024-02-28': 5,
+			'2024-02-29': 1,
+			'2024-03-01': 2,
+			'2024-11-30': 9,
+		} );
+
+		const chartData = buildDayChartData(
+			primary,
+			secondary,
+			'orders_count',
+			'number',
+			'previous_period'
+		);
+
+		expect( secondaryByDate( chartData, '2025-02-28' ) ).toEqual( {
+			labelDate: '2024-02-28 00:00:00',
+			value: 5,
+		} );
+		expect( secondaryByDate( chartData, '2025-03-01' ) ).toEqual( {
+			labelDate: '2024-02-29 00:00:00',
+			value: 1,
+		} );
+		expect( secondaryByDate( chartData, '2025-03-02' ) ).toEqual( {
+			labelDate: '2024-03-01 00:00:00',
+			value: 2,
+		} );
+		expect( secondaryByDate( chartData, '2025-12-01' ) ).toEqual( {
+			labelDate: '2024-11-30 00:00:00',
+			value: 9,
+		} );
+	} );
+
+	test( 'should not pad under previous period when the primary range has the 29th Feb', () => {
+		const primary = generateDayIntervals( '2024-01-01', '2024-12-31' );
+		const secondary = generateDayIntervals( '2023-01-01', '2023-12-31', {
+			'2023-02-28': 5,
+			'2023-03-01': 1,
+			'2023-03-02': 2,
+		} );
+
+		const chartData = buildDayChartData(
+			primary,
+			secondary,
+			'orders_count',
+			'number',
+			'previous_period'
+		);
+
+		expect( secondaryByDate( chartData, '2024-02-28' ) ).toEqual( {
+			labelDate: '2023-02-28 00:00:00',
+			value: 5,
+		} );
+		expect( secondaryByDate( chartData, '2024-02-29' ) ).toEqual( {
+			labelDate: '2023-03-01 00:00:00',
+			value: 1,
+		} );
+		expect( secondaryByDate( chartData, '2024-03-01' ) ).toEqual( {
+			labelDate: '2023-03-02 00:00:00',
+			value: 2,
+		} );
+	} );
+
+	test( 'should leave data alone under previous period when both ranges have the 29th Feb', () => {
 		const primary = generateDayIntervals( '2016-01-01', '2019-12-31', {
 			'2016-02-29': 7,
 		} );
