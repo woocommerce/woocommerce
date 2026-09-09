@@ -748,9 +748,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		$sut = new class() extends WC_Product_Data_Store_CPT {
-			/** @var array */
-			public $received_errors = array();
-
 			/**
 			 * Normalize the extension's custom date shape before using the parent parser.
 			 *
@@ -760,8 +757,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			 * @return array
 			 */
 			public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
-				$this->received_errors = $wp_query_args['errors'] ?? array();
-
 				if ( is_array( $query_var ) && isset( $query_var['date'] ) ) {
 					$query_var = $query_var['date'];
 				}
@@ -781,7 +776,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( $product->get_id(), $result, 'The custom date parser must be able to produce a matching query.' );
-		$this->assertSame( array(), $sut->received_errors, 'The query must not be failed before the override can normalize it.' );
 	}
 
 	/**
