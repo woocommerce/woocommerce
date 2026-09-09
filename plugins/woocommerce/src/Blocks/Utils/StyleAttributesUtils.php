@@ -3,6 +3,9 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 
 /**
  * StyleAttributesUtils class used for getting class and style from attributes.
+ *
+ * Prefer Core Block Supports. For explicit style generation, use wp_style_engine_get_styles().
+ * Avoid new uses of this class; migrate existing ones when touched, preserving rendered styles.
  */
 class StyleAttributesUtils {
 
