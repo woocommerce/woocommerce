@@ -2752,24 +2752,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a product whose sale has ended while its stored price is still the sale price.
-	 *
-	 * @return WC_Product
-	 */
-	private function create_missed_sale_end_product(): WC_Product {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->set_sale_price( 50 );
-		$product->save();
-
-		update_post_meta( $product->get_id(), '_price', 50 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
-
-		return $product;
-	}
-
-	/**
 	 * @testdox Every product is processed when the backlog spans more than one batch.
 	 */
 	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
@@ -3266,5 +3248,23 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			get_post_meta( $product->get_id(), '_price', true ),
 			'Fixture precondition: the product should have been processed.'
 		);
+	}
+
+	/**
+	 * Create a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return WC_Product
+	 */
+	private function create_missed_sale_end_product(): WC_Product {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		return $product;
 	}
 }
