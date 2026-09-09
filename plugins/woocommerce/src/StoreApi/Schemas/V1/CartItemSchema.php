@@ -157,9 +157,11 @@ class CartItemSchema extends ItemSchema {
 		/**
 		 * Filters cart item data.
 		 *
-		 * Entries are metadata meant for display next to the cart item. Set `raw_key` so
-		 * clients can find your entry without matching a translated label. Data you do not
-		 * intend to display belongs in your `extensions` namespace.
+		 * Allows extensions to attach their own name/value pairs to a cart item, which the Store
+		 * API returns in the item's `item_data` field.
+		 *
+		 * Set `raw_key` so clients can find your entry without matching a translated label.
+		 * Data you do not intend to display belongs in your `extensions` namespace.
 		 *
 		 * @since 4.3.0
 		 *

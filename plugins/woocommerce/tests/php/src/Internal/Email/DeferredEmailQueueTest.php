@@ -6,12 +6,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Email;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification as StockNotification;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the DeferredEmailQueue class.
  */
 class DeferredEmailQueueTest extends WC_Unit_Test_Case {
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -32,6 +34,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->sut = new DeferredEmailQueue();
 		$this->reset_queue_singleton();
 		add_filter(
@@ -55,6 +58,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
 		$this->set_wc_emails_deferred_queue( null );
 		$this->delete_stock_notifications();
+		$this->restore_stock_notifications_feature_option();
 		$this->reset_queue_singleton();
 		parent::tearDown();
 	}

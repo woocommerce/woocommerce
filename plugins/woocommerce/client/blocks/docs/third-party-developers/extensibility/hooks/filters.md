@@ -70,6 +70,7 @@
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
+- [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
@@ -565,7 +566,20 @@ apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array $d
 
 ### Description
 
-Accepts an array of hooked data. The array should be in the following format: [ [ hook => `<hook-name>`, function => `<function-name>`, priority => `<priority>`, ], ... ] Where:
+Accepts an array of hooked data. The array should be in the following format:
+
+```text
+[
+  [
+    hook => <hook-name>,
+    function => <function-name>,
+    priority => <priority>,
+ ],
+ ...
+]
+```
+
+Where:
 
 - hook-name is the name of the hook that have the functions hooked to.
 - function-name is the hooked function name.
@@ -662,13 +676,13 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', bool $is_cacheabl
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $is_cacheable | bool | The list of script dependencies. |
+| $is_cacheable | bool | Whether the product grid is cacheable. True to enable cache, false to disable. |
 | $query_args | array | Query args for the products query passed to BlocksWpQuery. |
 
 ### Returns
 
 
-`array` True to enable cache, false to disable cache.
+`bool` True to enable cache, false to disable cache.
 
 ### Source
 
@@ -1039,7 +1053,7 @@ apply_filters( 'woocommerce_get_default_value_for_{$key}', null $value, string $
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
@@ -1062,7 +1076,7 @@ apply_filters( 'woocommerce_get_default_value_for_{$missing_field}', null $value
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
@@ -1080,7 +1094,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ### Description
 
-Entries are metadata meant for display next to the cart item. Set `raw_key` so clients can find your entry without matching a translated label. Data you do not intend to display belongs in your `extensions` namespace.
+Allows extensions to attach their own name/value pairs to a cart item, which the Store API returns in the item's `item_data` field.
 
 ### Parameters
 
@@ -1176,8 +1190,15 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 Allow filtering of the add to cart button arguments.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args' )
+apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $args | array | Button arguments, with a `class` string and an `attributes` array. |
+| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -1453,17 +1474,17 @@ apply_filters( 'woocommerce_product_tabs', array $tabs )
 ## woocommerce_quantity_input_placeholder
 
 
-Filter the placeholder value allowed for the product.
+Filter the placeholder shown in the quantity input.
 
 ```php
-apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Product $product )
+apply_filters( 'woocommerce_quantity_input_placeholder', int $placeholder, \WC_Product $product )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $max_value | int | Maximum quantity value. |
+| $placeholder | int | Placeholder for the quantity input. |
 | $product | \WC_Product | Product object. |
 
 ### Source
@@ -1478,14 +1499,14 @@ apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Pro
 Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 
 ```php
-apply_filters( 'woocommerce_return_previous_exceptions', bool $ )
+apply_filters( 'woocommerce_return_previous_exceptions', bool $return_previous_exceptions )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $ | bool | The WP_DEBUG mode. |
+| $return_previous_exceptions | bool | Whether to include the previous exception. Defaults to the WP_DEBUG value. |
 
 ### Source
 
@@ -1709,6 +1730,41 @@ This hook allows the cart item images to be changed. This is specific to the car
 ### Source
 
 - [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
+## woocommerce_store_api_cart_item_quantity_validation
+
+
+Filters the validation result for a cart item quantity being updated via the Store API.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $valid, int|float $quantity, \WC_Product $product, array $cart_item )
+```
+
+### Description
+
+Return a \WP_Error to reject the new quantity; the Store API sends its code and message in a 400 response. Throwing a RouteException works too. Any other return value, including false, is ignored and the quantity is accepted. Notices added with wc_add_notice() are not read here. Core validation failures (min, max, multiple_of, read-only), and cart items whose data key is not a WC_Product, return early and never reach this filter.
+
+This does not run when a product is first added to the cart; use the woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing quantity.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $valid | true | Always true; core validation failures bypass this filter. |
+| $quantity | int, float | The new quantity, already normalized through wc_stock_amount(). |
+| $product | \WC_Product | The product object. |
+| $cart_item | array | Cart item. |
+
+### Returns
+
+
+`\WP_Error, true`
+
+### Source
+
+- [StoreApi/Utilities/QuantityLimits.php](../../../../../../src/StoreApi/Utilities/QuantityLimits.php)
 
 ---
 

@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 
 /**
  * Settings controller for Customer Stock Notifications.
@@ -22,12 +23,71 @@ class SettingsController {
 		// Add the Customer Stock Notifications settings.
 		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_customer_stock_notifications_settings' ), 100, 2 );
 
+		// Add the My Account endpoint setting to the Advanced tab.
+		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_my_account_endpoint_setting' ), 100, 2 );
+
 		// Display admin notices about incompatible settings combinations.
 		add_action( 'admin_notices', array( $this, 'output_admin_notices' ) );
 
 		// Display and save product-level stock notifications option.
 		add_action( 'woocommerce_product_options_stock_status', array( $this, 'add_disable_stock_notifications_checkbox' ), 20 );
 		add_action( 'woocommerce_admin_process_product_object', array( $this, 'process_product_object' ) );
+	}
+
+	/**
+	 * Add the stock notifications endpoint setting to Settings > Advanced > Account endpoints.
+	 *
+	 * Sits with the core account endpoints rather than in the feature's own section, since
+	 * everything that reads it is the endpoint plumbing core owns. Unlike the core entries it
+	 * only shows while the feature is enabled, because this controller loads with the feature.
+	 *
+	 * @param array  $settings   Original settings.
+	 * @param string $section_id Settings section identifier.
+	 * @return array New settings.
+	 */
+	public function add_my_account_endpoint_setting( $settings, $section_id ) {
+
+		if ( ! is_array( $settings ) ) {
+			return $settings;
+		}
+
+		if ( '' !== $section_id ) {
+			return $settings;
+		}
+
+		$setting = array(
+			'title'    => __( 'Stock notifications', 'woocommerce' ),
+			'desc'     => __( 'Endpoint for the "My account &rarr; Stock notifications" page.', 'woocommerce' ),
+			'id'       => MyAccountEndpoint::ENDPOINT_OPTION,
+			'type'     => 'text',
+			'default'  => MyAccountEndpoint::ENDPOINT,
+			'desc_tip' => true,
+		);
+
+		// Slot it right after Downloads so it sits with the other list endpoints,
+		// otherwise before Logout so Logout stays last, otherwise at the end of the group.
+		$position = 0;
+		foreach ( array_values( $settings ) as $index => $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['id'] ) ) {
+				continue;
+			}
+			if ( 'woocommerce_myaccount_downloads_endpoint' === $field['id'] ) {
+				$position = $index + 1;
+				break;
+			}
+			if ( 'woocommerce_logout_endpoint' === $field['id'] || ( 'account_endpoint_options' === $field['id'] && 'sectionend' === ( $field['type'] ?? '' ) ) ) {
+				$position = $index;
+				break;
+			}
+		}
+
+		if ( 0 === $position ) {
+			return $settings;
+		}
+
+		array_splice( $settings, $position, 0, array( $setting ) );
+
+		return $settings;
 	}
 
 	/**
