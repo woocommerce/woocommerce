@@ -911,16 +911,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Query failures already logged during this PHP execution, keyed by site and error code.
-	 *
-	 * A malformed query no longer stops the caller, so a loop over bad data would otherwise write
-	 * one log line per iteration.
-	 *
-	 * @var array
-	 */
-	private static $logged_query_failures = array();
-
-	/**
 	 * Normalizes an order status value before it is prefixed.
 	 *
 	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
@@ -1021,25 +1011,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// WP_Query honours 'p' and its aliases in preference to post__in, so a caller-supplied
 		// 'p' would return that order despite the query being failed closed.
 		unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
-
-		// One line per distinct failure per site, since a loop over stored bad data would
-		// otherwise log every iteration. The site keeps multisite loops independently visible.
-		$dedupe_key = get_current_blog_id() . '|' . $code;
-
-		if ( isset( self::$logged_query_failures[ $dedupe_key ] ) ) {
-			return;
-		}
-
-		self::$logged_query_failures[ $dedupe_key ] = true;
-
-		wc_get_logger()->warning(
-			__( 'Malformed order query args. Returning no orders.', 'woocommerce' ),
-			array(
-				'code'   => $code,
-				'origin' => __METHOD__,
-				'source' => 'legacy-order-query',
-			)
-		);
 	}
 
 	/**
