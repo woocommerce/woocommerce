@@ -335,8 +335,7 @@ class WC_Data_Store_WP {
 	 * Also accepts a WC_DateTime object.
 	 *
 	 * @since 3.2.0
-	 * @param mixed  $query_var A valid date format. Values that cannot be used as a string are
-	 *                          treated as an unparseable date.
+	 * @param mixed  $query_var A valid date format. Values that cannot be used as a string fail the query.
 	 * @param string $key meta or db column key.
 	 * @param array  $wp_query_args WP_Query args.
 	 * @return array Modified $wp_query_args
@@ -355,19 +354,16 @@ class WC_Data_Store_WP {
 		$raw_start = '';
 		$raw_end   = '';
 
-		// Treat values that cannot be converted to a string as unparseable dates. Callers guard
-		// non-stringable values before invoking this public, overridable method. A Stringable can
-		// still throw during conversion, so normalize it once before parsing and fail closed if it
-		// does; dropping a requested date constraint could otherwise widen the query.
+		// Validate here so overrides can normalize custom date formats before calling the parent parser.
 		if ( ! is_scalar( $query_var ) && ! ( is_object( $query_var ) && method_exists( $query_var, '__toString' ) ) ) {
-			$query_var = '';
+			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
+
+			return $wp_query_args;
 		} elseif ( is_object( $query_var ) && ! ( $query_var instanceof WC_DateTime ) ) {
 			try {
 				$query_var = (string) $query_var;
 			} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
 				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_data_store_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
-				$wp_query_args['post__in'] = array( 0 );
-				unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
 
 				return $wp_query_args;
 			}

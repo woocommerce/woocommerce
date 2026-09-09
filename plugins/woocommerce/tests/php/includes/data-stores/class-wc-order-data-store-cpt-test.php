@@ -2162,21 +2162,19 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A malformed date still reaches an overridden parser after the query is failed closed.
+	 * @testdox A custom array date can be normalized by an overridden parser before the parent validates it.
 	 */
-	public function test_malformed_date_still_invokes_overridden_parser(): void {
-		$store           = new class() extends WC_Order_Data_Store_CPT {
-			/** @var bool */
-			public $parse_date_was_called = false;
+	public function test_custom_array_date_override_can_normalize_before_parent_parser(): void {
+		$order = OrderHelper::create_order();
+		$order->set_date_paid( '2024-07-04T12:00:00' );
+		$order->save();
 
-			/** @var mixed */
-			public $received_query_var;
-
+		$store = new class() extends WC_Order_Data_Store_CPT {
 			/** @var array */
 			public $received_errors = array();
 
 			/**
-			 * Observe the public parser call.
+			 * Normalize the extension's custom date shape before using the parent parser.
 			 *
 			 * @param mixed  $query_var     A date query value.
 			 * @param string $key           Meta or database column key.
@@ -2184,18 +2182,19 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			 * @return array
 			 */
 			public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
-				$this->parse_date_was_called = true;
-				$this->received_query_var    = $query_var;
-				$this->received_errors       = $wp_query_args['errors'] ?? array();
+				$this->received_errors = $wp_query_args['errors'] ?? array();
+
+				if ( is_array( $query_var ) && isset( $query_var['date'] ) ) {
+					$query_var = $query_var['date'];
+				}
 
 				return parent::parse_date_for_wp_query( $query_var, $key, $wp_query_args );
 			}
 		};
-		$malformed_value = new stdClass();
 
 		$result = $store->query(
 			array(
-				'date_paid' => $malformed_value,
+				'date_paid' => array( 'date' => '2024-07-04' ),
 				'limit'     => -1,
 				'paginate'  => false,
 				'return'    => 'ids',
@@ -2204,10 +2203,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array(), $result, 'The malformed query must fail closed.' );
-		$this->assertTrue( $store->parse_date_was_called, 'The public parser override must still run.' );
-		$this->assertSame( $malformed_value, $store->received_query_var, 'The override must receive the raw value.' );
-		$this->assertNotEmpty( $store->received_errors, 'The query must be failed closed before the override runs.' );
+		$this->assertContains( $order->get_id(), $result, 'The custom date parser must be able to produce a matching query.' );
+		$this->assertSame( array(), $store->received_errors, 'The query must not be failed before the override can normalize it.' );
 	}
 
 

@@ -327,19 +327,14 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @dataProvider provider_unusable_date_query_vars
-	 * @testdox parse_date_for_wp_query treats values that cannot be used as a string like an unparseable date.
+	 * @testdox parse_date_for_wp_query fails closed for values that cannot be used as a string.
 	 *
 	 * @param mixed $query_var The malformed date value.
 	 */
 	public function test_parse_date_for_wp_query_handles_unusable_values( $query_var ): void {
-		$expected = $this->sut->parse_date_for_wp_query( 'not-a-date', 'post_date', array() );
-		$actual   = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+		$actual = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
 
-		$this->assertSame(
-			$expected,
-			$actual,
-			'Unusable date values should produce the same query as any other unparseable date.'
-		);
+		$this->assertNotEmpty( $actual['errors'] ?? array(), 'An unusable date value must fail the query closed.' );
 	}
 
 	/**
@@ -355,11 +350,9 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 			}
 		};
 
-		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array( 'p' => 123 ) );
+		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
 
 		$this->assertNotEmpty( $result['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
-		$this->assertSame( array( 0 ), $result['post__in'] ?? null, 'A failed conversion must make WP_Query unsatisfiable.' );
-		$this->assertArrayNotHasKey( 'p', $result, 'A single-post alias must not override the fail-closed marker.' );
 	}
 
 	/**

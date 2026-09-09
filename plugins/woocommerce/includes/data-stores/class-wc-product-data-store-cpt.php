@@ -2498,15 +2498,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
-				$date_value = $query_vars[ $query_var_key ];
-
-				// Fail closed before calling the public parser, so an override still receives the raw value.
-				if ( ! is_scalar( $date_value ) && ! ( is_object( $date_value ) && method_exists( $date_value, '__toString' ) ) ) {
-					$wp_query_args['errors'][] = new WP_Error( 'woocommerce_product_query_invalid_date', __( 'Invalid date query.', 'woocommerce' ) );
-					$wp_query_args['post__in'] = array( 0 );
-					unset( $wp_query_args['p'], $wp_query_args['page_id'], $wp_query_args['attachment_id'], $wp_query_args['subpost_id'] );
-				}
-
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
 				foreach ( $existing_queries as $query_index => $query_contents ) {

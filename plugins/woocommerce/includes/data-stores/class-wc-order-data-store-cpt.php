@@ -921,22 +921,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	private static $logged_query_failures = array();
 
 	/**
-	 * Checks whether a query arg value can safely be used where a string is expected.
-	 *
-	 * PHP 8 raises a TypeError when an array or non-stringable object reaches a string-typed
-	 * parameter or an internal string function, and an Error when a non-stringable object is
-	 * concatenated. An array concatenated only warns. None is an Exception, so none is caught by
-	 * the try/catch blocks on this path.
-	 *
-	 * @since 11.2.0
-	 * @param mixed $value The value to check.
-	 * @return bool True if the value can be used as a string, false otherwise.
-	 */
-	private function is_usable_as_string( $value ) {
-		return is_scalar( $value ) || ( is_object( $value ) && method_exists( $value, '__toString' ) );
-	}
-
-	/**
 	 * Normalizes an order status value before it is prefixed.
 	 *
 	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
@@ -1185,20 +1169,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
-				$date_value = $query_vars[ $query_var_key ];
-
-				// Fail closed rather than run without the filter: for the meta-backed keys
-				// (_date_paid, _date_completed) the clause compares as a string, so dropping it
-				// returns every order that has the meta. The value still goes through the public,
-				// overridable parse_date_for_wp_query() so an extension's override is not skipped.
-				if ( ! $this->is_usable_as_string( $date_value ) ) {
-					$this->fail_query_closed(
-						$wp_query_args,
-						'woocommerce_order_query_invalid_date',
-						__( 'Invalid date query.', 'woocommerce' )
-					);
-				}
-
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
 				$meta_query_index = array_search( $db_key, $existing_queries, true );
