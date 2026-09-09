@@ -29,7 +29,7 @@ export const ShippingRatesControlPackage = ( {
 	collapsible,
 	showItems,
 	highlightChecked = false,
-	selectRateOnMount = true,
+	manageSelectionLocally = true,
 }: PackageProps ) => {
 	const { selectShippingRate, shippingRates } = useShippingData();
 	const { cartItems } = useStoreCart();
@@ -133,7 +133,7 @@ export const ShippingRatesControlPackage = ( {
 		),
 		renderOption,
 		highlightChecked,
-		selectRateOnMount,
+		manageSelectionLocally,
 	};
 
 	if ( shouldBeCollapsible ) {

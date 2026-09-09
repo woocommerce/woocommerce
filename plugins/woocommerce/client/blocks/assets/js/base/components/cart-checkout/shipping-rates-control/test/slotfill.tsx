@@ -193,7 +193,7 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		expect( mockShippingRatesControlPackage ).toHaveBeenCalledTimes( 4 );
 		mockShippingRatesControlPackage.mock.calls.forEach( ( [ props ] ) => {
 			expect( props ).toEqual(
-				expect.objectContaining( { selectRateOnMount: false } )
+				expect.objectContaining( { manageSelectionLocally: false } )
 			);
 		} );
 	} );

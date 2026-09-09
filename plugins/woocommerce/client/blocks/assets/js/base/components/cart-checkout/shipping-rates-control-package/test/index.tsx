@@ -99,7 +99,7 @@ test( 'skips mount selection when disabled but still handles user selection', as
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
-			selectRateOnMount={ false }
+			manageSelectionLocally={ false }
 		/>
 	);
 
@@ -285,7 +285,7 @@ test( 'Core clears a rejected selection so the shopper can retry it', async () =
 		<ShippingRatesControlPackage
 			packageData={ selectedPackage }
 			packageId={ 0 }
-			selectRateOnMount={ false }
+			manageSelectionLocally={ false }
 			noResultsMessage={ <span>No rates</span> }
 		/>
 	);
@@ -297,7 +297,7 @@ test( 'Core clears a rejected selection so the shopper can retry it', async () =
 		<ShippingRatesControlPackage
 			packageData={ testPackageData }
 			packageId={ 0 }
-			selectRateOnMount={ false }
+			manageSelectionLocally={ false }
 			noResultsMessage={ <span>No rates</span> }
 		/>
 	);

@@ -94,7 +94,7 @@ const Packages = ( {
 					showItems={ showItems }
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
-					selectRateOnMount={ false }
+					manageSelectionLocally={ false }
 				/>
 			) ) }
 		</>
