@@ -174,8 +174,22 @@ class StockNotification extends Notification {
 		return array(
 			$this->get_type(),
 			$this->get_resource_id(),
-			array( 'event_type' => $this->event_type ),
+			$this->get_identity_data(),
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * Without it a rebuilt stock notification falls back to the constructor's
+	 * low_stock default and reads and writes another event's delivery state.
+	 *
+	 * @return array{event_type: string}
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_identity_data(): array {
+		return array( 'event_type' => $this->event_type );
 	}
 
 	/**

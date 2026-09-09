@@ -173,6 +173,20 @@ abstract class Notification {
 	}
 
 	/**
+	 * Extra fields that identify this notification beyond its type and resource
+	 * ID, in the form {@see self::from_array()} accepts.
+	 *
+	 * Identity only, for the reasons {@see self::get_safety_net_args()} gives.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_identity_data(): array {
+		return array();
+	}
+
+	/**
 	 * Canonical positional ActionScheduler arguments for the safety-net job.
 	 *
 	 * Single source of truth shared by the scheduler (and its dedupe guard) and

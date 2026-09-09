@@ -63,7 +63,7 @@ class NotificationRetryHandler {
 	 * @since 10.8.0
 	 */
 	public function register(): void {
-		add_action( self::RETRY_HOOK, array( $this, 'handle_retry' ), 10, 3 );
+		add_action( self::RETRY_HOOK, array( $this, 'handle_retry' ), 10, 4 );
 	}
 
 	/**
@@ -111,14 +111,24 @@ class NotificationRetryHandler {
 			return;
 		}
 
+		$args = array(
+			'type'        => $notification->get_type(),
+			'resource_id' => $notification->get_resource_id(),
+			'attempt'     => $next_attempt,
+		);
+
+		$identity_data = $notification->get_identity_data();
+
+		// Appended only when there is any, so `$unique` still matches a retry
+		// scheduled before this field existed.
+		if ( ! empty( $identity_data ) ) {
+			$args['extra'] = $identity_data;
+		}
+
 		as_schedule_single_action(
 			time() + $delay,
 			self::RETRY_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $notification->get_resource_id(),
-				'attempt'     => $next_attempt,
-			),
+			$args,
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
 			true
 		);
@@ -127,23 +137,29 @@ class NotificationRetryHandler {
 	/**
 	 * ActionScheduler callback for retry jobs.
 	 *
-	 * Reconstructs the notification from the stored type and resource ID,
-	 * then delegates to the processor with is_retry=true.
+	 * Reconstructs the notification from the stored identity, then delegates to
+	 * the processor with is_retry=true.
+	 *
+	 * `$extra` defaults to empty so retries scheduled before it was added still
+	 * run, rebuilding a stock notification as low_stock as they always did.
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
 	 * @param int    $attempt     The current retry attempt number (1-based).
+	 * @param array  $extra       Identity fields from {@see Notification::get_identity_data()}.
 	 * @return void
 	 *
 	 * @since 10.8.0
 	 */
-	public function handle_retry( string $type, int $resource_id, int $attempt ): void {
+	public function handle_retry( string $type, int $resource_id, int $attempt, array $extra = array() ): void {
 		try {
+			// `+` rather than array_merge for the reason given in
+			// NotificationProcessor::handle_safety_net().
 			$notification = Notification::from_array(
 				array(
 					'type'        => $type,
 					'resource_id' => $resource_id,
-				)
+				) + $extra
 			);
 		} catch ( Exception $e ) {
 			wc_get_logger()->error(
