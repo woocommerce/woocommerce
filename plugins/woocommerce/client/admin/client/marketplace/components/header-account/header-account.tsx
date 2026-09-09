@@ -7,6 +7,7 @@ import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
+	VisuallyHidden,
 } from '@wordpress/components';
 import {
 	Icon,
@@ -30,6 +31,8 @@ import { connectUrl } from '../../utils/functions';
 // Make TS happy: The MenuItem component passes these as an href prop to the underlying button.
 interface MenuItemProps extends ComponentProps< typeof OriginalMenuItem > {
 	href?: string; // Explicitly declare `href`
+	target?: string;
+	rel?: string;
 }
 
 const MenuItem = ( props: MenuItemProps ) => <OriginalMenuItem { ...props } />;
@@ -55,6 +58,13 @@ export default function HeaderAccount( {
 	const accountURL = MARKETPLACE_MY_ACCOUNT_PATH;
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
 	const isInApp = page === 'wc-addons';
+
+	const newTabProps = { target: '_blank', rel: 'noopener noreferrer' };
+	const newTabText = (
+		<VisuallyHidden as="span">
+			{ __( '(opens in a new tab)', 'woocommerce' ) }
+		</VisuallyHidden>
+	);
 
 	const avatar = () => {
 		// Render the default avatar SVG when the user isn't connected, when
@@ -126,7 +136,13 @@ export default function HeaderAccount( {
 					/>
 					<span className="woocommerce-marketplace__main-text">
 						{ userEmail }
+						{ newTabText }
 					</span>
+					<Icon
+						icon={ external }
+						size={ 16 }
+						className="woocommerce-marketplace__menu-external-icon"
+					/>
 				</>
 			);
 		}
@@ -186,6 +202,7 @@ export default function HeaderAccount( {
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"
 								href={ accountOrConnect }
+								{ ...( isConnected ? newTabProps : {} ) }
 								onClick={ () => {
 									if ( isConnected ) {
 										recordEvent(
@@ -205,6 +222,7 @@ export default function HeaderAccount( {
 							{ page === 'wc-addons' && ! isConnected && (
 								<MenuItem
 									href={ accountURL }
+									{ ...newTabProps }
 									onClick={ () =>
 										recordEvent(
 											'header_account_view_click',
@@ -221,6 +239,7 @@ export default function HeaderAccount( {
 										'Your WooCommerce.com account',
 										'woocommerce'
 									) }
+									{ newTabText }
 								</MenuItem>
 							) }
 						</MenuGroup>

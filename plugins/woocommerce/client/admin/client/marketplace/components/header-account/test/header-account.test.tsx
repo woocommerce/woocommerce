@@ -43,11 +43,18 @@ describe( 'HeaderAccount menu', () => {
 		expect(
 			screen.getByRole( 'menuitem', { name: /Connect account/ } )
 		).toHaveAttribute( 'href', 'http://example.test/connect' );
+		const accountItem = screen.getByRole( 'menuitem', {
+			name: 'Your WooCommerce.com account (opens in a new tab)',
+		} );
+		expect( accountItem ).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/my-account/'
+		);
+		expect( accountItem ).toHaveAttribute( 'target', '_blank' );
+		expect( accountItem ).toHaveAttribute( 'rel', 'noopener noreferrer' );
 		expect(
-			screen.getByRole( 'menuitem', {
-				name: 'Your WooCommerce.com account',
-			} )
-		).toHaveAttribute( 'href', 'https://woocommerce.com/my-account/' );
+			screen.getByRole( 'menuitem', { name: /Connect account/ } )
+		).not.toHaveAttribute( 'target' );
 		expect(
 			document.querySelector( 'a[href*="my-dashboard"]' )
 		).toBeNull();
@@ -61,12 +68,18 @@ describe( 'HeaderAccount menu', () => {
 		};
 		openMenu( 'wc-addons' );
 
-		expect(
-			screen.getByRole( 'menuitem', { name: 'merchant@example.com' } )
-		).toHaveAttribute( 'href', 'https://woocommerce.com/my-account/' );
+		const emailItem = screen.getByRole( 'menuitem', {
+			name: 'merchant@example.com (opens in a new tab)',
+		} );
+		expect( emailItem ).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/my-account/'
+		);
+		expect( emailItem ).toHaveAttribute( 'target', '_blank' );
+		expect( emailItem ).toHaveAttribute( 'rel', 'noopener noreferrer' );
 		expect(
 			screen.queryByRole( 'menuitem', {
-				name: 'Your WooCommerce.com account',
+				name: /Your WooCommerce.com account/,
 			} )
 		).toBeNull();
 		expect(
@@ -82,7 +95,7 @@ describe( 'HeaderAccount menu', () => {
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole( 'menuitem', {
-				name: 'Your WooCommerce.com account',
+				name: /Your WooCommerce.com account/,
 			} )
 		).toBeNull();
 	} );
