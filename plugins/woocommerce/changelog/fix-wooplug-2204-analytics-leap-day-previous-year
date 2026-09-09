@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix analytics chart previous year data showing one day late when the previous year range contains 29th February.
+Fix analytics chart previous year data showing one day late when the previous year range contains 29th February, and fix the previous year comparison range for Year, Quarter and Week to date ending one day early or late when the period spans 29th February. Previous year totals and percentages on those views change accordingly.

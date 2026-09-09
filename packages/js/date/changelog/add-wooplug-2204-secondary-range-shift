@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: fix
 
-Add `shift` to the secondary range returned by `getCurrentDates` (and `secondaryShift` to `DateValue`) stating whether it is a calendar year shift or a day offset of the primary range, and let `getPreviousDate` use it.
+Fix the previous year comparison range for Year, Quarter and Week to date ending one day early or late when the period spans 29th February. Previous year totals and percentages on those views change accordingly. The secondary range now also states how it was derived (`shift`, and `secondaryShift` on `DateValue`), and `getPreviousDate` accepts it.
