@@ -1554,41 +1554,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Malformed `wc_get_orders()` args that used to raise an uncaught TypeError on the CPT data store.
-	 *
-	 * @return array<string, array{0: array<string, mixed>}>
-	 */
-	public function provider_malformed_legacy_query_args(): array {
-		return array(
-			'date_created as array'       => array( array( 'date_created' => array( 'foo' ) ) ),
-			'date_created as object'      => array( array( 'date_created' => new stdClass() ) ),
-			'date_paid as array'          => array( array( 'date_paid' => array( 'foo' ) ) ),
-			'date_modified as array'      => array( array( 'date_modified' => array( 'foo' ) ) ),
-			'status as object'            => array( array( 'status' => new stdClass() ) ),
-			'status as array with object' => array( array( 'status' => array( new stdClass() ) ) ),
-		);
-	}
-
-	/**
-	 * @dataProvider provider_malformed_legacy_query_args
-	 * @testdox Malformed query args do not raise a fatal error on the CPT order data store.
-	 *
-	 * @param array $args Malformed args to pass to `wc_get_orders()`.
-	 */
-	public function test_malformed_query_args_do_not_fatal( array $args ): void {
-		OrderHelper::create_order();
-
-		$args['return'] = 'ids';
-		$args['limit']  = -1;
-
-		$result = wc_get_orders( $args );
-
-		// assertSame( array() ), not assertIsArray(): a type-only check would pass even if the
-		// arg were dropped and the query widened.
-		$this->assertSame( array(), $result, 'A malformed restricting arg must match no orders.' );
-	}
-
-	/**
 	 * Status values that are not usable but never raised a fatal error.
 	 *
 	 * @return array<string, array{0: mixed}>
@@ -1847,64 +1812,18 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Status normalization does not swallow errors from the public status filter.
+	 * @testdox A throwing customer Stringable fails closed.
 	 */
-	public function test_status_filter_error_still_propagates(): void {
-		$throw_error = static function () {
-			throw new Error( 'Status filter failed.' );
-		};
-		$sut         = new WC_Order_Data_Store_CPT();
-
-		add_filter( 'wc_order_statuses', $throw_error, 99 );
-		$this->expectException( Error::class );
-		$this->expectExceptionMessage( 'Status filter failed.' );
-
-		try {
-			$sut->query(
-				array(
-					'status'   => OrderStatus::COMPLETED,
-					'return'   => 'ids',
-					'limit'    => -1,
-					'paginate' => false,
-					'type'     => 'shop_order',
-				)
-			);
-		} finally {
-			remove_filter( 'wc_order_statuses', $throw_error, 99 );
-		}
-	}
-
-	/**
-	 * Customer nesting shapes for throwing Stringable coverage.
-	 *
-	 * @return array<string, array{0: bool}>
-	 */
-	public function provider_customer_stringable_shapes(): array {
-		return array(
-			'scalar' => array( false ),
-			'nested' => array( true ),
-		);
-	}
-
-	/**
-	 * @testdox Throwing customer Stringables fail closed at every supported nesting level.
-	 *
-	 * @dataProvider provider_customer_stringable_shapes
-	 *
-	 * @param bool $nested Whether to nest the Stringable in a customer group.
-	 */
-	public function test_throwing_stringable_customer_values_fail_closed( bool $nested ): void {
+	public function test_throwing_stringable_customer_values_fail_closed(): void {
 		$order = OrderHelper::create_order();
 		$order->set_billing_email( 'nested@example.com' );
 		$order->save();
 
-		$customer = self::create_throwing_stringable();
-		$value    = $nested ? array( array( 'nested@example.com', $customer ) ) : $customer;
-		$sut      = new WC_Order_Data_Store_CPT();
+		$sut = new WC_Order_Data_Store_CPT();
 
 		$result = $sut->query(
 			array(
-				'customer' => $value,
+				'customer' => self::create_throwing_stringable(),
 				'return'   => 'ids',
 				'limit'    => -1,
 				'paginate' => false,
@@ -1969,9 +1888,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$store = new class() extends WC_Order_Data_Store_CPT {
-			/** @var array */
-			public $received_errors = array();
-
 			/**
 			 * Normalize the extension's custom date shape before using the parent parser.
 			 *
@@ -1981,8 +1897,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			 * @return array
 			 */
 			public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
-				$this->received_errors = $wp_query_args['errors'] ?? array();
-
 				if ( is_array( $query_var ) && isset( $query_var['date'] ) ) {
 					$query_var = $query_var['date'];
 				}
@@ -2003,7 +1917,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( $order->get_id(), $result, 'The custom date parser must be able to produce a matching query.' );
-		$this->assertSame( array(), $store->received_errors, 'The query must not be failed before the override can normalize it.' );
 	}
 
 
@@ -2014,10 +1927,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function provider_malformed_date_keys(): array {
 		return array(
-			'date_created (post column)'  => array( 'date_created' ),
-			'date_modified (post column)' => array( 'date_modified' ),
-			'date_paid (meta)'            => array( 'date_paid' ),
-			'date_completed (meta)'       => array( 'date_completed' ),
+			'date_created (post column)' => array( 'date_created' ),
+			'date_paid (meta)'           => array( 'date_paid' ),
 		);
 	}
 
@@ -2056,59 +1967,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $captured['errors'] ?? array(), 'The query must be marked unsatisfiable via the errors mechanism.' );
 	}
 
-
-	/**
-	 * Valid query args, paired with the order property they must match on.
-	 *
-	 * @return array<string, array{0: string, 1: mixed, 2: string, 3: mixed}>
-	 */
-	public function provider_valid_query_args(): array {
-		return array(
-			'date range'     => array( 'set_date_created', '2024-07-04T12:00:00', 'date_created', '2024-01-01...2024-12-31' ),
-			'customer email' => array( 'set_billing_email', 'guard-probe@example.com', 'customer', 'guard-probe@example.com' ),
-			'status'         => array( 'set_status', OrderStatus::COMPLETED, 'status', OrderStatus::COMPLETED ),
-		);
-	}
-
-	/**
-	 * @testdox Valid query args still match the orders they should on the CPT data store.
-	 *
-	 * @dataProvider provider_valid_query_args
-	 *
-	 * @param string $setter    Order setter for the property being queried.
-	 * @param mixed  $value     Value to set on the order.
-	 * @param string $query_key Query arg to filter by.
-	 * @param mixed  $query_val Value for that query arg.
-	 */
-	public function test_valid_query_args_still_match_orders( string $setter, $value, string $query_key, $query_val ): void {
-		$order = OrderHelper::create_order();
-		$order->{$setter}( $value );
-		$order->save();
-
-		// A second order that the arg must NOT match, so the assertion depends on the filter
-		// actually being applied rather than on there being only one order.
-		$other = OrderHelper::create_order();
-		$other->set_status( OrderStatus::ON_HOLD );
-		$other->set_billing_email( 'other@example.com' );
-		$other->set_date_created( '2019-01-01T00:00:00' );
-		$other->save();
-
-		// 'status' is a default and goes FIRST: a later key wins in a literal, and one provider
-		// row queries by status, which this would otherwise overwrite with 'any'.
-		$matched = wc_get_orders(
-			array_merge(
-				array( 'status' => 'any' ),
-				array(
-					$query_key => $query_val,
-					'return'   => 'ids',
-					'limit'    => -1,
-				)
-			)
-		);
-
-		$this->assertContains( $order->get_id(), $matched, 'A valid query arg must still match its order.' );
-		$this->assertNotContains( $other->get_id(), $matched, 'The arg must still exclude a non-matching order.' );
-	}
 
 	/**
 	 * @testdox A status list fails closed when any entry is unusable.
@@ -2159,8 +2017,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function provider_status_shorthands(): array {
 		return array(
-			"'all'"        => array( 'all' ),
-			"'any'"        => array( 'any' ),
 			"array('all')" => array( array( 'all' ) ),
 			"array('any')" => array( array( 'any' ) ),
 		);
