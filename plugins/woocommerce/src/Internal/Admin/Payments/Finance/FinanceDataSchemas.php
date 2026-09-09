@@ -78,6 +78,13 @@ class FinanceDataSchemas {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
+							'icon_url'   => array(
+								'type'        => array( 'string', 'null' ),
+								'format'      => 'uri',
+								'description' => esc_html__( 'The URL of the payment gateway icon.', 'woocommerce' ),
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
 							'data_types' => array(
 								'type'        => 'array',
 								'description' => esc_html__( 'The finance data types the gateway supports and the data-model version of each.', 'woocommerce' ),

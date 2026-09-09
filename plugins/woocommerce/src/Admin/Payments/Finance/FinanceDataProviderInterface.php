@@ -32,6 +32,15 @@ interface FinanceDataProviderInterface {
 	public function get_payment_gateway_id(): string;
 
 	/**
+	 * Get the URL of the icon for the payment provider.
+	 *
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_icon_url(): string;
+
+	/**
 	 * Get the finance data types this provider supports and the data-model version it implements for each.
 	 *
 	 * Keys are {@see \Automattic\WooCommerce\Enums\FinanceDataSource} constants, values are integer versions. The version names the

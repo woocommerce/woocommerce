@@ -85,6 +85,8 @@ class FinanceService {
 		$gateways  = $this->get_all_gateways();
 		$providers = array();
 
+		$home_url = get_home_url();
+
 		foreach ( $this->registry->get_providers() as $gateway_id => $provider ) {
 			$gateway = $gateways[ $gateway_id ] ?? null;
 			if ( ! $gateway instanceof WC_Payment_Gateway ) {
@@ -113,9 +115,15 @@ class FinanceService {
 				continue;
 			}
 
+			$icon_url = $provider->get_icon_url();
+			if ( ! str_starts_with( $icon_url, $home_url ) || str_contains( $icon_url, '..' ) ) {
+				$icon_url = null;
+			}
+
 			$providers[] = array(
 				'gateway_id' => $gateway_id,
 				'title'      => (string) $gateway->get_method_title(),
+				'icon_url'   => $icon_url,
 				'data_types' => $data_types,
 			);
 		}
