@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotifica
 use Exception;
 use RuntimeException;
 use ReflectionClass;
+use stdClass;
 use WC_Data_Exception;
 use WC_Unit_Test_Case;
 use WP_Error;
@@ -1616,17 +1617,17 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( $push_token->get_id(), $token_data['id'] );
 		$this->assertSame( 'device-fields-test-uuid', $token_data['device_uuid'] );
 		$this->assertSame( PushToken::PLATFORM_APPLE, $token_data['platform'] );
-		$this->assertSame( array( 'app_version' => '21.1' ), $token_data['metadata'] );
+		$this->assertEquals( (object) array( 'app_version' => '21.1' ), $token_data['metadata'] );
 	}
 
 	/**
-	 * @testdox Should return an empty array for a token registered without metadata.
+	 * @testdox Should return an empty object for a token registered without metadata.
 	 *
 	 * Metadata is optional on registration, and browser tokens and anything
 	 * registered before metadata existed have none. The tooling should not have
-	 * to handle both an array and null for the same field.
+	 * to handle both an object and null for the same field.
 	 */
-	public function test_index_returns_an_empty_array_for_a_token_without_metadata(): void {
+	public function test_index_returns_an_empty_object_for_a_token_without_metadata(): void {
 		$this->mock_jetpack_connection_manager_is_connected();
 		wc_get_container()->get( PushNotifications::class )->on_init();
 
@@ -1649,7 +1650,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$token_data = $controller->index( $request )->get_data()['tokens'][0];
 
 		$this->assertArrayHasKey( 'metadata', $token_data );
-		$this->assertSame( array(), $token_data['metadata'] );
+		$this->assertEquals( new stdClass(), $token_data['metadata'] );
 	}
 
 	/**

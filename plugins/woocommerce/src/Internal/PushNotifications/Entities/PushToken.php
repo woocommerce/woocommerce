@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvali
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Utilities\TimeUtil;
+use stdClass;
 
 /**
  * Object representation of a push token.
@@ -613,7 +614,10 @@ class PushToken {
 	 * also the per-token payload the dispatcher POSTs to the WPCOM send
 	 * endpoint, so adding fields to it would change every notification request.
 	 *
-	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: array, created_at_gmt: string|null, last_confirmed_at_gmt: string|null}
+	 * Metadata is cast to an object so that an empty value encodes as `{}` rather
+	 * than `[]`, matching the `object` type the schema declares for it.
+	 *
+	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null, id: int|null, device_uuid: string|null, platform: string|null, metadata: stdClass, created_at_gmt: string|null, last_confirmed_at_gmt: string|null}
 	 *
 	 * @since 11.2.0
 	 */
@@ -624,7 +628,7 @@ class PushToken {
 				'id'                    => $this->id,
 				'device_uuid'           => $this->device_uuid,
 				'platform'              => $this->platform,
-				'metadata'              => $this->metadata ?? array(),
+				'metadata'              => (object) ( $this->metadata ?? array() ),
 				'created_at_gmt'        => $this->to_rest_datetime( $this->created_at_gmt ),
 				'last_confirmed_at_gmt' => $this->to_rest_datetime( $this->last_confirmed_at_gmt ),
 			)
