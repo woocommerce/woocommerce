@@ -323,9 +323,9 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Date field values are exposed to rules as YYYYMMDD integers, in every location.
+	 * @testdox Date field values remain YYYY-MM-DD strings in every location.
 	 */
-	public function test_date_values_are_converted_to_integers() {
+	public function test_date_values_remain_strings() {
 		$this->register_date_fields();
 
 		$document_object = new DocumentObject(
@@ -343,20 +343,20 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 
 		$data = $document_object->get_data();
 
-		$this->assertSame( 20260115, $data['customer']['additional_fields']['namespace/contact_date'] );
-		$this->assertSame( 20260304, $data['customer']['billing_address']['namespace/address_date'] );
-		$this->assertSame( 20261231, $data['checkout']['additional_fields']['namespace/order_date'] );
+		$this->assertSame( '2026-01-15', $data['customer']['additional_fields']['namespace/contact_date'] );
+		$this->assertSame( '2026-03-04', $data['customer']['billing_address']['namespace/address_date'] );
+		$this->assertSame( '2026-12-31', $data['checkout']['additional_fields']['namespace/order_date'] );
 	}
 
 	/**
-	 * @testdox A date value that is not a real date becomes null, so numeric rules skip it instead of ordering it.
+	 * @testdox Blank and invalid dates remain unchanged for schema validation.
 	 *
 	 * @testWith [""]
 	 *           ["2026-02-31"]
 	 *
 	 * @param string $value The submitted value.
 	 */
-	public function test_unusable_date_values_become_null( string $value ) {
+	public function test_invalid_date_values_remain_unchanged( string $value ) {
 		$this->register_date_fields();
 
 		$document_object = new DocumentObject(
@@ -371,7 +371,7 @@ class DocumentObjectTests extends \WC_Unit_Test_Case {
 		$data = $document_object->get_data();
 
 		$this->assertArrayHasKey( 'namespace/order_date', $data['checkout']['additional_fields'] );
-		$this->assertNull( $data['checkout']['additional_fields']['namespace/order_date'] );
+		$this->assertSame( $value, $data['checkout']['additional_fields']['namespace/order_date'] );
 	}
 
 	/**
