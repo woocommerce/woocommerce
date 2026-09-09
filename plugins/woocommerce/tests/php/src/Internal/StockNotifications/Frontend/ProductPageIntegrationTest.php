@@ -11,12 +11,15 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelect
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the ProductPageIntegration class.
  */
 class ProductPageIntegrationTest extends WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -43,7 +46,23 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 
+		// The container caches the instance and the hooks it added in an earlier test are gone
+		// after that test tore down, so re-resolve the services to hook the product page again.
+		$this->enable_stock_notifications_feature();
+		$this->init_stock_notifications_services();
+
 		$this->sut = wc_get_container()->get( ProductPageIntegration::class );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->restore_stock_notifications_feature_option();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
