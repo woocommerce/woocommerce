@@ -477,14 +477,9 @@ class OrdersTableQuery {
 		foreach ( $date_keys as $date_key ) {
 			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
-
-			if ( ! is_scalar( $date_value ) && ! ( is_object( $date_value ) && method_exists( $date_value, '__toString' ) ) ) {
-				throw new \Exception( 'Invalid date_query' );
-			}
-
-			$operator  = '=';
-			$dates_raw = array();
-			$dates     = array();
+			$operator   = '=';
+			$dates_raw  = array();
+			$dates      = array();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';

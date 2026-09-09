@@ -155,56 +155,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An array date returns an empty result in every result format.
-	 * @testWith [false, "ids"]
-	 *           [false, "objects"]
-	 *           [true, "ids"]
-	 *           [true, "objects"]
-	 *
-	 * @param bool   $paginate    Whether to paginate the results.
-	 * @param string $return_type The type of results to return.
-	 */
-	public function test_array_date_returns_empty_result( bool $paginate, string $return_type ): void {
-		OrderHelper::create_order();
-
-		$result = wc_get_orders(
-			array(
-				'date_created' => array( '2024-07-04' ),
-				'limit'        => 10,
-				'paginate'     => $paginate,
-				'return'       => $return_type,
-				'status'       => 'any',
-			)
-		);
-
-		if ( $paginate ) {
-			$this->assertSame( array(), $result->orders, 'Paginated array date queries should return no orders.' );
-			$this->assertSame( 0, $result->total, 'Paginated array date queries should report no matching orders.' );
-			$this->assertSame( 0, $result->max_num_pages, 'Paginated array date queries should report no pages.' );
-		} else {
-			$this->assertSame( array(), $result, 'Array date queries should return no orders.' );
-		}
-	}
-
-	/**
-	 * @testdox A Stringable date continues to match orders.
-	 */
-	public function test_stringable_date_continues_to_match_orders(): void {
-		$order        = OrderHelper::create_order();
-		$date_created = $order->get_date_created();
-
-		$result = wc_get_orders(
-			array(
-				'date_created' => $date_created,
-				'return'       => 'ids',
-				'status'       => 'any',
-			)
-		);
-
-		$this->assertContains( $order->get_id(), $result, 'Stringable date queries should continue to return matching orders.' );
-	}
-
-	/**
 	 * @testDox 'suppress_filters' arg is honored in queries.
 	 */
 	public function test_query_suppress_filters() {
