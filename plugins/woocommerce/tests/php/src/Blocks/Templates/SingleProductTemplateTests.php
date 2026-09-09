@@ -211,8 +211,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			TemplateContentUtils::strip_whitespace( $result ),
-			TemplateContentUtils::strip_whitespace( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
 		);
 	}
 
@@ -246,8 +246,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result ),
-			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
 
@@ -358,8 +358,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result ),
-			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template )
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace_and_password_form_ids( $result )
 		);
 	}
 }
