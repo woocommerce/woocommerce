@@ -391,7 +391,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, $pending_2->get_id() ) ), $html );
 		$this->assertStringContainsString( esc_url( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, $active->get_id() ) ), $html );
 		$this->assertStringNotContainsString( MyAccountEndpoint::ACTION_FIELD . '=' . MyAccountEndpoint::ACTION_RESEND . '&#038;notification_id=' . $active->get_id(), $html );
-		$this->assertStringContainsString( 'aria-label="Resend email for ', $html );
+		$this->assertStringContainsString( 'aria-label="Resend verification email for ', $html );
 		$this->assertStringNotContainsString( 'wc_bis_resend_notification=', $html );
 	}
 

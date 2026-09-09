@@ -79,7 +79,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 				$action_label_name .= ' ' . $variation;
 			}
 			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
-			$resend_label = sprintf( __( 'Resend email for %s', 'woocommerce' ), $action_label_name );
+			$resend_label = sprintf( __( 'Resend verification email for %s', 'woocommerce' ), $action_label_name );
 			/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
 			$cancel_label = sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $action_label_name );
 			?>

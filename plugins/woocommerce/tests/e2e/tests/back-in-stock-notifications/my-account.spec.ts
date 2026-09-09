@@ -135,7 +135,7 @@ test.describe(
 						} );
 					await expect( pendingRow ).toBeVisible();
 					await expect(
-						pendingRow.getByRole( 'link', { name: 'Resend email' } )
+						pendingRow.getByRole( 'link', { name: 'Resend verification email' } )
 					).toBeVisible();
 					await expect(
 						pendingRow.getByRole( 'link', { name: 'Cancel' } )
@@ -166,7 +166,7 @@ test.describe(
 						activeRow.getByRole( 'link', { name: 'Cancel' } )
 					).toBeVisible();
 					await expect(
-						activeRow.getByRole( 'link', { name: 'Resend email' } )
+						activeRow.getByRole( 'link', { name: 'Resend verification email' } )
 					).toHaveCount( 0 );
 					await expect(
 						activeTable.locator( 'tbody tr' )
@@ -231,7 +231,7 @@ test.describe(
 					await expect( row ).toBeVisible();
 
 					await row
-						.getByRole( 'link', { name: 'Resend email' } )
+						.getByRole( 'link', { name: 'Resend verification email' } )
 						.click();
 
 					// The redirect after the GET lands us back on the clean tab URL with a notice.
@@ -247,7 +247,7 @@ test.describe(
 
 					// The row is still pending and still offers the actions.
 					await expect(
-						row.getByRole( 'link', { name: 'Resend email' } )
+						row.getByRole( 'link', { name: 'Resend verification email' } )
 					).toBeVisible();
 				} finally {
 					await restApi.delete(
