@@ -303,8 +303,10 @@ class WC_Helper_Updater {
 				$notice,
 				array(
 					'a' => array(
-						'href'  => array(),
-						'class' => array(),
+						'href'   => array(),
+						'class'  => array(),
+						'target' => array(),
+						'rel'    => array(),
 					),
 				)
 			)
@@ -344,7 +346,7 @@ class WC_Helper_Updater {
 
 		$notice = sprintf(
 			/* translators: 1: URL of the WooCommerce.com connect page */
-			__( 'Extension distributed via WooCommerce.com. <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to get updates and support.', 'woocommerce' ),
+			__( 'Extension distributed via WooCommerce.com. <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> for security updates, product improvements, and support.', 'woocommerce' ),
 			esc_url( $connect_page_url )
 		);
 
@@ -401,8 +403,8 @@ class WC_Helper_Updater {
 	/**
 	 * Message for a plugin row whose product the connected account holds no subscription for.
 	 *
-	 * Links to the product page so the reader can see what a subscription covers before buying.
-	 * Falls back to the cart when the update data carries no product URL.
+	 * Opens the product page in a new tab so the reader can see what a subscription covers before
+	 * buying. Falls back to the cart when the update data carries no product URL.
 	 *
 	 * @since 11.2.0
 	 *
@@ -433,7 +435,7 @@ class WC_Helper_Updater {
 
 		return sprintf(
 			/* translators: 1: URL of the WooCommerce.com product page */
-			__( 'You don\'t have a subscription for this extension. <a href="%1$s" class="woocommerce-purchase-subscription">Subscribe</a> to get updates and support.', 'woocommerce' ),
+			__( 'You don\'t have an active subscription for this product. <a href="%1$s" class="woocommerce-purchase-subscription" target="_blank" rel="noopener noreferrer">Subscribe</a> now for security updates, product improvements, and support.', 'woocommerce' ),
 			esc_url( $purchase_link )
 		);
 	}
@@ -453,23 +455,10 @@ class WC_Helper_Updater {
 		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions_for_product( $product_id );
 
 		if ( ! empty( $expired_subscription ) ) {
-			$renew_link = add_query_arg(
-				array(
-					'add-to-cart'  => $product_id,
-					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_plugin_row_renew',
-				),
-				PluginsHelper::WOO_CART_PAGE_URL
-			);
-
-			/* translators: 1: Product regular price */
-			$product_price = ! empty( $expired_subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $expired_subscription['product_regular_price'] ) ) : '';
-
 			return sprintf(
-				/* translators: 1: URL of the WooCommerce.com cart with the product added, 2: Product price */
-				__( 'Your subscription for this extension expired. <a href="%1$s" class="woocommerce-renew-subscription">Renew %2$s</a>to keep getting updates and support.', 'woocommerce' ),
-				esc_url( $renew_link ),
-				$product_price
+				/* translators: 1: URL of the WooCommerce.com cart set up to renew the subscription */
+				__( 'Your subscription for this extension has expired. <a href="%1$s" class="woocommerce-renew-subscription" target="_blank" rel="noopener noreferrer">Renew your subscription</a> for security updates, product improvements, and support.', 'woocommerce' ),
+				esc_url( self::get_renew_link( $expired_subscription, 'pu_plugin_row_renew' ) )
 			);
 		}
 
@@ -491,6 +480,32 @@ class WC_Helper_Updater {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Cart link that renews one specific subscription.
+	 *
+	 * A plain add-to-cart link would buy a new subscription instead. This is the same link the
+	 * My Subscriptions screen and the product usage notice use.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array  $subscription Subscription record from the WooCommerce.com API.
+	 * @param string $campaign     utm_campaign value for the link.
+	 *
+	 * @return string
+	 */
+	private static function get_renew_link( array $subscription, string $campaign ): string {
+		return add_query_arg(
+			array(
+				'renew_product' => $subscription['product_id'] ?? '',
+				'product_key'   => $subscription['product_key'] ?? '',
+				'order_id'      => $subscription['order_id'] ?? '',
+				'utm_source'    => 'pu',
+				'utm_campaign'  => $campaign,
+			),
+			PluginsHelper::WOO_CART_PAGE_URL
+		);
 	}
 
 	/**
@@ -600,15 +615,7 @@ class WC_Helper_Updater {
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
 		if ( ! empty( $expired_subscription ) ) {
-
-			$renew_link = add_query_arg(
-				array(
-					'add-to-cart'  => $product_id,
-					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_plugin_screen_renew',
-				),
-				PluginsHelper::WOO_CART_PAGE_URL
-			);
+			$renew_link = self::get_renew_link( $expired_subscription, 'pu_plugin_screen_renew' );
 
 			/* translators: 1: Product regular price */
 			$product_price = ! empty( $expired_subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $expired_subscription['product_regular_price'] ) ) : '';

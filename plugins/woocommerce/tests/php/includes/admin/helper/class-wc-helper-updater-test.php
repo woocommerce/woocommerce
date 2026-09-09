@@ -594,6 +594,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'woo-connect-notice', $output, 'The notice row should be rendered.' );
 		$this->assertStringContainsString( 'woocommerce-connect-your-store', $output, 'The notice should link to the connect page.' );
+		$this->assertStringContainsString( '>Connect your store</a> for security updates, product improvements, and support.', $output );
 	}
 
 	/**
@@ -689,6 +690,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'products/test-woo-extension', $output, 'The link should point at the product page.' );
 		$this->assertStringContainsString( 'utm_campaign=pu_plugin_row_purchase', $output, 'The link should carry the campaign parameters.' );
 		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output, 'The link should carry the tracked class.' );
+		$this->assertStringContainsString( 'target="_blank"', $output, 'The product page should open in a new tab.' );
+		$this->assertStringContainsString( 'rel="noopener noreferrer"', $output, 'A new tab must not get a handle on the admin window.' );
+		$this->assertStringContainsString( '>Subscribe</a> now for security updates, product improvements, and support.', $output );
 	}
 
 	/**
@@ -718,7 +722,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Renewal notice renders with the price when the subscription has expired.
+	 * @testdox Renewal notice renders when the subscription has expired.
 	 */
 	public function test_subscription_notice_renders_renewal_for_an_expired_subscription(): void {
 		$this->prepare_plugins_screen();
@@ -736,22 +740,37 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
 
-		$this->assertStringContainsString( 'Renew for &#036;59', $output, 'The price should ride along in the link text.' );
-		$this->assertStringContainsString( 'add-to-cart=123', $output, 'Renewal should add the product to the cart.' );
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output );
+		$this->assertStringContainsString( '>Renew your subscription</a> for security updates, product improvements, and support.', $output );
+		$this->assertStringNotContainsString( '&#036;59', $output, 'The price is no longer part of the message.' );
+		$this->assertStringContainsString( 'renew_product=123', $output, 'Renewal should renew the subscription, not buy a new one.' );
+		$this->assertStringContainsString( 'product_key=key', $output, 'The link should name the subscription being renewed.' );
+		$this->assertStringContainsString( 'order_id=456', $output, 'The link should name the order being renewed.' );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
 		$this->assertStringContainsString( 'woocommerce-renew-subscription', $output, 'The link should carry the tracked class.' );
+		$this->assertStringContainsString( 'target="_blank"', $output, 'The cart should open in a new tab.' );
+		$this->assertStringContainsString( 'rel="noopener noreferrer"', $output, 'A new tab must not get a handle on the admin window.' );
 	}
 
 	/**
-	 * @testdox Renewal notice omits the price when the API sent none.
+	 * @testdox The update-row message renews the exact expired subscription too.
 	 */
-	public function test_subscription_notice_renders_renewal_without_a_price(): void {
+	public function test_update_row_notice_renews_the_expired_subscription(): void {
 		$this->prepare_plugins_screen();
-		delete_site_transient( 'update_plugins' );
 		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
 
-		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
 
-		$this->assertStringContainsString( 'Renew </a>to keep getting updates', $output, 'The sentence should still read without a price.' );
+		$this->assertStringContainsString( 'renew_product=123', $output );
+		$this->assertStringContainsString( 'product_key=key', $output );
+		$this->assertStringContainsString( 'order_id=456', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_screen_renew', $output );
+		$this->assertStringNotContainsString( 'add-to-cart', $output );
 	}
 
 	/**
@@ -810,6 +829,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			array(
 				'product_id'  => 123,
 				'product_key' => 'key',
+				'order_id'    => 456,
 				'expired'     => false,
 				'expiring'    => false,
 				'lifetime'    => false,
