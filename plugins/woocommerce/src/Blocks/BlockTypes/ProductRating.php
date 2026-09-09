@@ -70,8 +70,9 @@ class ProductRating extends AbstractBlock {
 			&& wc_reviews_enabled() ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$is_descendent_of_single_product_template = ! isset( $block->context['queryId'] ) && is_product() && get_queried_object_id() === (int) $post_id;
-			$is_descendent_of_single_product_block    = ! isset( $block->context['queryId'] ) && ! $is_descendent_of_single_product_template;
+			$global_product                           = $GLOBALS['product'] ?? null;
+			$is_descendent_of_single_product_block    = ! isset( $block->context['queryId'] ) && ( ! $global_product instanceof \WC_Product || (int) $post_id !== $global_product->get_id() );
+			$is_descendent_of_single_product_template = ! isset( $block->context['queryId'] ) && ! $is_descendent_of_single_product_block;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );

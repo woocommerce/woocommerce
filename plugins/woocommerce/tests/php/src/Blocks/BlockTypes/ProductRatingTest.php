@@ -13,20 +13,21 @@ use WP_Block;
 class ProductRatingTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Uses the current page and query context for review links, ignoring saved ancestry attributes.
+	 * @testdox Uses the global product and query context for review links, ignoring saved ancestry attributes.
 	 * @dataProvider review_link_contexts
 	 *
 	 * @param string $block_name Block to render.
 	 * @param string $context_name Product context to simulate.
+	 * @param string $global_product_state Global product to simulate.
 	 */
-	public function test_review_links_use_page_and_query_context( string $block_name, string $context_name ): void {
+	public function test_review_links_use_global_product_and_query_context( string $block_name, string $context_name, string $global_product_state ): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_review_count( 2 );
 		$product->set_average_rating( '4.5' );
 		$product->set_reviews_allowed( true );
 		$product->save();
 		update_option( 'woocommerce_enable_reviews', 'yes' );
-		$this->go_to( 'single-product-block' === $context_name ? home_url( '/' ) : get_permalink( $product->get_id() ) );
+		$this->go_to( get_permalink( $product->get_id() ) );
 
 		$context = array( 'postId' => $product->get_id() );
 		if ( 'query-loop' === $context_name ) {
@@ -47,7 +48,28 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 			$context
 		);
 
-		$html = $sut->render();
+		$previous_product = $GLOBALS['product'] ?? null;
+		try {
+			if ( 'missing' === $global_product_state ) {
+				unset( $GLOBALS['product'] );
+			} elseif ( 'invalid' === $global_product_state ) {
+				$GLOBALS['product'] = false;
+			} elseif ( 'different' === $global_product_state ) {
+				$GLOBALS['product'] = WC_Helper_Product::create_simple_product();
+			} else {
+				$GLOBALS['product'] = $product;
+			}
+
+			$expected_global_product = $GLOBALS['product'] ?? null;
+			$html                    = $sut->render();
+			$this->assertSame( $expected_global_product, $GLOBALS['product'] ?? null, 'Rendering a rating must not replace the global product.' );
+		} finally {
+			if ( null === $previous_product ) {
+				unset( $GLOBALS['product'] );
+			} else {
+				$GLOBALS['product'] = $previous_product;
+			}
+		}
 		$this->assertStringContainsString( 'wc-block-components-product-rating', $html, 'The rating block should render.' );
 
 		if ( 'single-product-block' === $context_name ) {
@@ -93,15 +115,23 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Provides the rating blocks and their product contexts.
+	 * Provides the rating blocks, product contexts, and global product states.
 	 *
-	 * @return array<string, array{string, string}>
+	 * @return array<string, array{string, string, string}>
 	 */
 	public function review_link_contexts(): array {
-		$cases = array();
+		$contexts = array(
+			array( 'single-product-template', 'matching' ),
+			array( 'single-product-block', 'missing' ),
+			array( 'single-product-block', 'invalid' ),
+			array( 'single-product-block', 'different' ),
+			array( 'query-loop', 'matching' ),
+			array( 'query-loop', 'different' ),
+		);
+		$cases    = array();
 		foreach ( array( 'woocommerce/product-rating', 'woocommerce/product-rating-counter' ) as $block_name ) {
-			foreach ( array( 'single-product-block', 'single-product-template', 'query-loop' ) as $context_name ) {
-				$cases[ $block_name . ' in ' . $context_name ] = array( $block_name, $context_name );
+			foreach ( $contexts as list( $context_name, $global_product_state ) ) {
+				$cases[ $block_name . ' in ' . $context_name . ' with ' . $global_product_state . ' global product' ] = array( $block_name, $context_name, $global_product_state );
 			}
 		}
 		return $cases;
