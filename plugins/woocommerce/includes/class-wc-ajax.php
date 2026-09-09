@@ -494,7 +494,7 @@ class WC_AJAX {
 		/**
 		 * Filter the HTML fragments returned with a checkout update, keyed by the selector each one replaces.
 		 *
-		 * @since 2.4.0
+		 * @since 2.3.0
 		 *
 		 * @param array $fragments Checkout fragments keyed by selector.
 		 */
