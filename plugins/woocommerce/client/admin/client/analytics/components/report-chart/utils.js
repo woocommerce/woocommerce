@@ -91,6 +91,30 @@ function isFirstOfMarch( date ) {
 }
 
 /**
+ * Returns true if the date is the 28th of February.
+ *
+ * @param {moment.Moment} date Date to check
+ * @return {boolean} True if the date is the 28th of February.
+ */
+function isTwentyEighthOfFebruary( date ) {
+	return date.month() === 1 && date.date() === 28;
+}
+
+/**
+ * Returns true if the values of a chart metric can be added up across days.
+ * Averages cannot. Core names them `avg_*` and types most of them as
+ * `average`, but `avg_order_value` is typed as `currency` for formatting,
+ * so both signals are checked.
+ *
+ * @param {string} key  Chart key, e.x: `orders_count`
+ * @param {string} type Chart type, e.x: `number`
+ * @return {boolean} True if the values can be summed.
+ */
+function isAdditiveMetric( key, type ) {
+	return type !== 'average' && ! key.startsWith( 'avg_' );
+}
+
+/**
  * Builds chart data for the given parameters.
  *
  * @param {Object} primaryData         Primary data
@@ -100,6 +124,7 @@ function isFirstOfMarch( date ) {
  * @param {string} comparison          Comparison type, e.x: `previous_year`
  * @param {string} selectedChartKey    Chart key, e.x: `orders_count`
  * @param {string} currentInterval     Chart interval, e.x: `day`
+ * @param {string} selectedChartType   Chart type, e.x: `number`
  * @return {Object} Chart data
  */
 export function buildChartData(
@@ -109,7 +134,8 @@ export function buildChartData(
 	secondaryDatePicker,
 	comparison,
 	selectedChartKey,
-	currentInterval
+	currentInterval,
+	selectedChartType
 ) {
 	const primaryDataIntervals = [ ...primaryData.data.intervals ];
 	const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
@@ -127,7 +153,7 @@ export function buildChartData(
 		const primaryLabelDate = interval.date_start;
 		const primaryValue = interval.subtotals[ selectedChartKey ] || 0;
 
-		let secondaryInterval = secondaryDataIntervals[ index ];
+		const secondaryInterval = secondaryDataIntervals[ index ];
 		const secondaryLabel = `${ secondaryDatePicker.label } (${ secondaryDatePicker.range })`;
 
 		const secondaryDateMoment = getPreviousDate(
@@ -140,6 +166,7 @@ export function buildChartData(
 		let secondaryLabelDate = secondaryDateMoment.format(
 			'YYYY-MM-DD HH:mm:ss'
 		);
+		let secondaryLabelDateEnd;
 		let secondaryValue =
 			( secondaryInterval &&
 				secondaryInterval.subtotals[ selectedChartKey ] ) ||
@@ -148,6 +175,7 @@ export function buildChartData(
 		if ( currentInterval === 'day' && secondaryInterval ) {
 			const primaryDate = moment( interval.date_start );
 			const secondaryDate = moment( secondaryInterval.date_start );
+			const nextSecondaryInterval = secondaryDataIntervals[ index + 1 ];
 
 			if ( isLeapDay( primaryDate ) && isFirstOfMarch( secondaryDate ) ) {
 				// The secondary range has no leap day, so its intervals run one short
@@ -158,19 +186,24 @@ export function buildChartData(
 				secondaryValue = 0;
 				secondaryDataIntervals.splice( index, 0, secondaryInterval );
 			} else if (
-				isLeapDay( secondaryDate ) &&
-				isFirstOfMarch( primaryDate )
+				isTwentyEighthOfFebruary( primaryDate ) &&
+				nextSecondaryInterval &&
+				isLeapDay( moment( nextSecondaryInterval.date_start ) )
 			) {
 				// The secondary range has a leap day the primary range lacks, so its
 				// intervals run one long from here on. The x-axis is built from the
-				// primary dates, so the leap day has no slot to render in: drop it
-				// so later days line up again.
-				secondaryDataIntervals.splice( index, 1 );
-				secondaryInterval = secondaryDataIntervals[ index ];
-				secondaryValue =
-					( secondaryInterval &&
-						secondaryInterval.subtotals[ selectedChartKey ] ) ||
-					0;
+				// primary dates, so the leap day has no slot of its own. Fold it into
+				// the 28th and label the point as covering both days, so the line
+				// still accounts for everything the legend total counts. Averages
+				// cannot be folded, so for those the 29th is left out of the line.
+				// Either way the extra interval is removed so later days line up.
+				if ( isAdditiveMetric( selectedChartKey, selectedChartType ) ) {
+					secondaryValue +=
+						nextSecondaryInterval.subtotals[ selectedChartKey ] ||
+						0;
+					secondaryLabelDateEnd = nextSecondaryInterval.date_start;
+				}
+				secondaryDataIntervals.splice( index + 1, 1 );
 			}
 		}
 
@@ -184,6 +217,9 @@ export function buildChartData(
 			secondary: {
 				label: secondaryLabel,
 				labelDate: secondaryLabelDate,
+				...( secondaryLabelDateEnd && {
+					labelDateEnd: secondaryLabelDateEnd,
+				} ),
 				value: secondaryValue,
 			},
 		} );

@@ -8,10 +8,37 @@ import { utcParse as d3UTCParse } from 'd3-time-format';
  */
 import dummyOrders from './fixtures/dummy-orders';
 import orderedKeys from './fixtures/dummy-ordered-keys';
-import { getOrderedKeys, isDataEmpty } from '../index';
+import { getDateLabel, getOrderedKeys, isDataEmpty } from '../index';
 
 const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
 const testOrderedKeys = getOrderedKeys( dummyOrders );
+
+describe( 'getDateLabel', () => {
+	const formatter = ( date ) =>
+		`${ date.getFullYear() }-${ date.getMonth() + 1 }-${ date.getDate() }`;
+
+	it( 'formats a single date given as a string', () => {
+		expect( getDateLabel( formatter, '2020-02-28 00:00:00' ) ).toEqual(
+			'2020-2-28'
+		);
+	} );
+
+	it( 'formats a single date given as a Date', () => {
+		expect( getDateLabel( formatter, new Date( 2020, 1, 28 ) ) ).toEqual(
+			'2020-2-28'
+		);
+	} );
+
+	it( 'joins both ends when the point covers a date range', () => {
+		expect(
+			getDateLabel(
+				formatter,
+				'2020-02-28 00:00:00',
+				'2020-02-29 00:00:00'
+			)
+		).toEqual( '2020-2-28 - 2020-2-29' );
+	} );
+} );
 
 describe( 'parseDate', () => {
 	it( 'correctly parse date in the expected format', () => {

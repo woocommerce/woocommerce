@@ -31,7 +31,12 @@ function formatDay( date ) {
 	return `${ date.getFullYear() }-${ month }-${ day }`;
 }
 
-function generateDayIntervals( startDate, endDate, ordersByDate = {} ) {
+function generateDayIntervals(
+	startDate,
+	endDate,
+	valuesByDate = {},
+	key = 'orders_count'
+) {
 	const intervals = [];
 	const day = new Date( `${ startDate }T00:00:00` );
 	const end = new Date( `${ endDate }T00:00:00` );
@@ -39,7 +44,7 @@ function generateDayIntervals( startDate, endDate, ordersByDate = {} ) {
 		const date = formatDay( day );
 		intervals.push(
 			generateDateInterval( date, date, date, {
-				orders_count: ordersByDate[ date ] || 0,
+				[ key ]: valuesByDate[ date ] || 0,
 			} )
 		);
 		day.setDate( day.getDate() + 1 );
@@ -47,24 +52,28 @@ function generateDayIntervals( startDate, endDate, ordersByDate = {} ) {
 	return intervals;
 }
 
-function buildDayChartData( primaryIntervals, secondaryIntervals ) {
+function buildDayChartData(
+	primaryIntervals,
+	secondaryIntervals,
+	key = 'orders_count',
+	type = 'number'
+) {
 	return buildChartData(
 		{ data: { totals: {}, intervals: primaryIntervals } },
 		{ data: { totals: {}, intervals: secondaryIntervals } },
 		{ label: 'Custom', range: '', after: '', before: '' },
 		{ label: 'Previous year', range: '', after: '', before: '' },
 		'previous_year',
-		'orders_count',
-		'day'
+		key,
+		'day',
+		type
 	);
 }
 
 function secondaryByDate( chartData, date ) {
 	const entry = chartData.find( ( d ) => d.date === `${ date }T00:00:00` );
-	return {
-		labelDate: entry.secondary.labelDate,
-		value: entry.secondary.value,
-	};
+	const { labelDate, labelDateEnd, value } = entry.secondary;
+	return { labelDate, labelDateEnd, value };
 }
 
 describe( 'buildChartData', () => {
@@ -310,9 +319,10 @@ describe( 'buildChartData', () => {
 		] );
 	} );
 
-	test( 'should drop the 29th Feb from previous year data when the primary range has no leap day', () => {
+	test( 'should fold the 29th Feb of the previous year into the 28th when the primary range has no leap day', () => {
 		const primary = generateDayIntervals( '2021-02-27', '2021-03-02' );
 		const secondary = generateDayIntervals( '2020-02-27', '2020-03-02', {
+			'2020-02-28': 5,
 			'2020-02-29': 1,
 			'2020-03-01': 2,
 			'2020-03-02': 3,
@@ -321,9 +331,14 @@ describe( 'buildChartData', () => {
 		const chartData = buildDayChartData( primary, secondary );
 
 		expect( chartData ).toHaveLength( 4 );
+		expect( secondaryByDate( chartData, '2021-02-27' ) ).toEqual( {
+			labelDate: '2020-02-27 00:00:00',
+			value: 0,
+		} );
 		expect( secondaryByDate( chartData, '2021-02-28' ) ).toEqual( {
 			labelDate: '2020-02-28 00:00:00',
-			value: 0,
+			labelDateEnd: '2020-02-29 00:00:00',
+			value: 6,
 		} );
 		expect( secondaryByDate( chartData, '2021-03-01' ) ).toEqual( {
 			labelDate: '2020-03-01 00:00:00',
@@ -335,7 +350,24 @@ describe( 'buildChartData', () => {
 		} );
 	} );
 
-	test( 'should drop the 29th Feb from previous year data when both ranges span a leap year', () => {
+	test( 'should fold the 29th Feb of the previous year when the primary range ends in February', () => {
+		const primary = generateDayIntervals( '2021-02-01', '2021-02-28' );
+		const secondary = generateDayIntervals( '2020-02-01', '2020-02-29', {
+			'2020-02-28': 5,
+			'2020-02-29': 1,
+		} );
+
+		const chartData = buildDayChartData( primary, secondary );
+
+		expect( chartData ).toHaveLength( 28 );
+		expect( secondaryByDate( chartData, '2021-02-28' ) ).toEqual( {
+			labelDate: '2020-02-28 00:00:00',
+			labelDateEnd: '2020-02-29 00:00:00',
+			value: 6,
+		} );
+	} );
+
+	test( 'should fold the 29th Feb of the previous year when both ranges span a leap year', () => {
 		// Both ranges touch 2024, but only the previous year range contains the leap day.
 		const primary = generateDayIntervals( '2024-12-31', '2025-03-02' );
 		const secondary = generateDayIntervals( '2023-12-31', '2024-03-02', {
@@ -348,7 +380,8 @@ describe( 'buildChartData', () => {
 
 		expect( secondaryByDate( chartData, '2025-02-28' ) ).toEqual( {
 			labelDate: '2024-02-28 00:00:00',
-			value: 0,
+			labelDateEnd: '2024-02-29 00:00:00',
+			value: 1,
 		} );
 		expect( secondaryByDate( chartData, '2025-03-01' ) ).toEqual( {
 			labelDate: '2024-03-01 00:00:00',
@@ -359,6 +392,47 @@ describe( 'buildChartData', () => {
 			value: 3,
 		} );
 	} );
+
+	test.each( [
+		[ 'avg_items_per_order', 'average' ],
+		[ 'avg_order_value', 'currency' ],
+	] )(
+		'should not fold the 29th Feb of the previous year for the %s average',
+		( key, type ) => {
+			const primary = generateDayIntervals( '2021-02-27', '2021-03-02' );
+			const secondary = generateDayIntervals(
+				'2020-02-27',
+				'2020-03-02',
+				{
+					'2020-02-28': 5,
+					'2020-02-29': 1,
+					'2020-03-01': 2,
+					'2020-03-02': 3,
+				},
+				key
+			);
+
+			const chartData = buildDayChartData(
+				primary,
+				secondary,
+				key,
+				type
+			);
+
+			expect( secondaryByDate( chartData, '2021-02-28' ) ).toEqual( {
+				labelDate: '2020-02-28 00:00:00',
+				value: 5,
+			} );
+			expect( secondaryByDate( chartData, '2021-03-01' ) ).toEqual( {
+				labelDate: '2020-03-01 00:00:00',
+				value: 2,
+			} );
+			expect( secondaryByDate( chartData, '2021-03-02' ) ).toEqual( {
+				labelDate: '2020-03-02 00:00:00',
+				value: 3,
+			} );
+		}
+	);
 
 	test( 'should bump up data since 29th Feb when both ranges span a leap year', () => {
 		// Both ranges touch 2024, but only the primary range contains the leap day.
