@@ -43,6 +43,18 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
+			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox Registers the taxable address filter.
 	 */
 	public function test_registers_taxable_address_filter(): void {
