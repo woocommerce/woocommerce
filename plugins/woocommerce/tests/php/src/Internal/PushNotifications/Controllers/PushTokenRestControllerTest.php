@@ -507,8 +507,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'a', 32 ) );
-		// Only 32 characters instead of 64.
+		$request->set_param( 'token', str_repeat( 'a', 32 ) ); // Only 32 characters instead of 64.
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-short' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );

@@ -8,9 +8,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
-use DateTimeImmutable;
-use DateTimeZone;
 use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * Object representation of a push token.
@@ -28,6 +27,13 @@ class PushToken {
 	 * created before `device_locale` was added.
 	 */
 	const DEFAULT_DEVICE_LOCALE = 'en_US';
+
+	/**
+	 * The MySQL zero date, which WordPress writes when a date is unknown.
+	 *
+	 * @since 11.2.0
+	 */
+	const ZERO_DATETIME = '0000-00-00 00:00:00';
 
 	/**
 	 * Platform identifier for Apple devices.
@@ -438,9 +444,28 @@ class PushToken {
 	 * @return string|null
 	 */
 	private function validate_gmt_datetime( ?string $datetime ): ?string {
-		$parsed = $this->parse_gmt_datetime( $datetime );
+		$datetime = null === $datetime ? '' : trim( $datetime );
 
-		return null === $parsed ? null : $parsed->format( 'Y-m-d H:i:s' );
+		if ( '' === $datetime || self::ZERO_DATETIME === $datetime ) {
+			return null;
+		}
+
+		$normalized = str_replace( 'T', ' ', $datetime );
+
+		if ( ! TimeUtil::is_valid_date( $normalized ) ) {
+			wc_get_logger()->warning(
+				'Unparseable push token timestamp.',
+				array(
+					'source'   => PushNotifications::FEATURE_NAME,
+					'token_id' => $this->id,
+					'value'    => $datetime,
+				)
+			);
+
+			return null;
+		}
+
+		return $normalized;
 	}
 
 	/**
@@ -448,81 +473,11 @@ class PushToken {
 	 * `wc_rest_prepare_date_response()` gives every other `_gmt` field in the
 	 * Woo REST API.
 	 *
-	 * That function is not called directly because its string branch hands the
-	 * value to `WC_DateTime`, which accepts the input this contract refuses.
-	 * {@see self::parse_gmt_datetime()} for the cases.
-	 *
-	 * @param string|null $datetime The GMT datetime string.
+	 * @param string|null $datetime A datetime already through {@see self::validate_gmt_datetime()}.
 	 * @return string|null
 	 */
 	private function to_rest_datetime( ?string $datetime ): ?string {
-		$parsed = $this->parse_gmt_datetime( $datetime );
-
-		return null === $parsed ? null : $parsed->format( 'Y-m-d\TH:i:s' );
-	}
-
-	/**
-	 * Parses a GMT `Y-m-d H:i:s` datetime, or returns null if it is not one.
-	 *
-	 * Values are GMT by construction, from `post_date_gmt`, `post_modified_gmt`
-	 * or `gmdate()`, so the parse names UTC rather than inheriting the store's
-	 * timezone.
-	 *
-	 * The format is matched exactly because the permissive parsers accept input
-	 * this contract does not allow:
-	 *
-	 *     '0000-00-00 00:00:00'       => else year -0001
-	 *     ''                          => else the current time
-	 *     '2026-02-30 09:30:00'       => else silently 2026-03-02
-	 *     '2026-08-01T09:30:00+05:00' => else read as +05:00
-	 *
-	 * `createFromFormat()` rejects the offset, but performs the rollover and
-	 * only reports it, so the warning check is needed too.
-	 *
-	 * The `T` separator {@see self::to_rest_datetime()} emits is accepted, so a
-	 * token can be rebuilt from its own output. An offset is always refused.
-	 *
-	 * @param string|null $datetime The GMT datetime string.
-	 * @return DateTimeImmutable|null
-	 */
-	private function parse_gmt_datetime( ?string $datetime ): ?DateTimeImmutable {
-		$original = null === $datetime ? '' : trim( $datetime );
-
-		if ( '' === $original || '0000-00-00 00:00:00' === $original ) {
-			return null;
-		}
-
-		$datetime = (string) preg_replace(
-			'/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})$/',
-			'$1 $2',
-			$original
-		);
-
-		// The leading `!` resets fields the format does not set, so a short
-		// match cannot inherit today's date.
-		$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $datetime, new DateTimeZone( 'UTC' ) );
-		$errors = DateTimeImmutable::getLastErrors();
-
-		// Returning the false straight out would be a TypeError against this
-		// method's `?DateTimeImmutable`, and TypeError extends Error, so no
-		// catch block on the send path would stop it becoming a fatal.
-		if ( false === $parsed || ( $errors && ( $errors['warning_count'] || $errors['error_count'] ) ) ) {
-			// The empty and zero-date returns above stay unlogged. Both mean
-			// the date is unknown, which is expected, and reporting them would
-			// bury this.
-			wc_get_logger()->warning(
-				'Unparseable push token timestamp.',
-				array(
-					'source'   => PushNotifications::FEATURE_NAME,
-					'token_id' => $this->id,
-					'value'    => $original,
-				)
-			);
-
-			return null;
-		}
-
-		return $parsed;
+		return null === $datetime ? null : str_replace( ' ', 'T', $datetime );
 	}
 
 	/**

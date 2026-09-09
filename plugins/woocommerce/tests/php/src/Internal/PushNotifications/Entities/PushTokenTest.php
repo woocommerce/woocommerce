@@ -904,25 +904,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * which is expected rather than a fault. Reporting them would bury the
 	 * entries that matter.
 	 *
-	 * @dataProvider unknown_timestamp_provider
+	 * @testWith [""]
+	 *           ["0000-00-00 00:00:00"]
+	 *
 	 * @param string $stored The stored value standing for an unknown date.
 	 */
 	public function test_it_does_not_log_an_unknown_timestamp( string $stored ) {
 		new PushToken( array( 'created_at_gmt' => $stored ) );
 
 		$this->assertEmpty( $this->captured_logs );
-	}
-
-	/**
-	 * Provides the stored values that mean the date is unknown.
-	 *
-	 * @return array<string, array<string>>
-	 */
-	public function unknown_timestamp_provider(): array {
-		return array(
-			'empty string' => array( '' ),
-			'zero date'    => array( '0000-00-00 00:00:00' ),
-		);
 	}
 
 	/**
