@@ -1303,7 +1303,16 @@ jQuery( function ( $ ) {
 					value = window.prompt( promptMessage );
 
 					if ( value != null ) {
-						if ( value.indexOf( '%' ) >= 0 ) {
+						if (
+							do_variation_action ===
+							'variable_sale_price_from_regular_price'
+						) {
+							// Preserve invalid input for server-side validation instead of coercing it to zero.
+							data.value = value.trim().replace(
+								woocommerce_admin.mon_decimal_point,
+								'.'
+							);
+						} else if ( value.indexOf( '%' ) >= 0 ) {
 							data.value =
 								accounting.unformat(
 									value.replace( '%', '' ),
