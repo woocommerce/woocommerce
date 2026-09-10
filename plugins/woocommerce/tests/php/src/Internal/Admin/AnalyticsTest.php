@@ -219,6 +219,44 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Does not flag refunds that match the order total apart from floating-point noise, even with many price decimals.
+	 */
+	public function test_fix_ignores_floating_point_noise_with_many_price_decimals(): void {
+		global $wpdb;
+
+		add_filter(
+			'wc_get_price_decimals',
+			function () {
+				return 8;
+			}
+		);
+		$order = $this->create_refunded_order( array( 0.1, 49.7, 0.2 ) );
+
+		// Summed in refund ID order, -0.1 + -49.7 + -0.2 is -50.00000000000001 in floating point.
+		$amounts = array( -0.1, -49.7, -0.2 );
+		$ids     = array_map( fn( $refund ) => $refund->get_id(), $order->get_refunds() );
+		sort( $ids );
+		foreach ( $ids as $index => $refund_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->update(
+				$wpdb->prefix . 'wc_order_stats',
+				array(
+					'net_total'      => $amounts[ $index ],
+					'tax_total'      => 0,
+					'shipping_total' => 0,
+				),
+				array( 'order_id' => $refund_id )
+			);
+		}
+
+		$this->run_fix();
+
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertSame( 0, $state['fixed'], 'A correctly refunded order should not be re-imported' );
+		$this->assertSame( 0, $state['unresolved'] );
+	}
+
+	/**
 	 * @testdox Pages through full batches and order ID ranges until the highest order ID is covered.
 	 */
 	public function test_fix_pages_through_batches_and_ranges(): void {
@@ -303,6 +341,41 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		wp_cache_delete( Analytics::REFUND_DOUBLE_COUNT_OPTION, 'options' );
 		$this->assertSame( 'cancelled', Analytics::get_refund_double_count_state()['status'] );
 		$this->assertFalse( as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ), 'The cancelled run should not schedule another batch' );
+	}
+
+	/**
+	 * @testdox A batch of an older run does not write into a newer run started while it was re-importing orders.
+	 */
+	public function test_batch_does_not_write_into_a_newer_run(): void {
+		global $wpdb;
+
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+		$this->sut->run_refund_double_count_tool();
+		$old_run_id = Analytics::get_refund_double_count_state()['run_id'];
+		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
+
+		$newer_run = array_merge(
+			Analytics::get_refund_double_count_state(),
+			array(
+				'run_id' => 'newer-run',
+				'fixed'  => 0,
+			)
+		);
+		add_action(
+			'woocommerce_analytics_update_order_stats',
+			function () use ( $wpdb, $newer_run ) {
+				$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $newer_run ) ), array( 'option_name' => Analytics::REFUND_DOUBLE_COUNT_OPTION ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		);
+
+		$this->sut->process_refund_double_count_fix_batch( 0, $old_run_id );
+
+		wp_cache_delete( Analytics::REFUND_DOUBLE_COUNT_OPTION, 'options' );
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertSame( 'newer-run', $state['run_id'] );
+		$this->assertSame( 'running', $state['status'], 'The older batch must not complete the newer run' );
+		$this->assertSame( 0, $state['fixed'], 'The older batch must not add to the newer run counters' );
 	}
 
 	/**
