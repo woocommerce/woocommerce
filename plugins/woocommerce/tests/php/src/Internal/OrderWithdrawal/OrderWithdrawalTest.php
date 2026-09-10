@@ -6,13 +6,13 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\CustomerOrderWithdrawalRequestedEmail;
-use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFeatureHighlightNotification;
+use WC_Email_Customer_Order_Withdrawal_Requested;
+use WC_Email_Order_Withdrawal_Requested;
 use WC_Order;
 use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
@@ -113,6 +113,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-order-withdrawal-requested.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-order-withdrawal-requested.php';
 
 		$this->sut                         = new OrderWithdrawalFormProcessor();
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -930,7 +934,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @testdox Customer order withdrawal email should reject malformed trigger data.
 	 */
 	public function test_customer_order_withdrawal_email_rejects_malformed_trigger_data(): void {
-		$email   = new CustomerOrderWithdrawalRequestedEmail();
+		$email   = new WC_Email_Customer_Order_Withdrawal_Requested();
 		$capture = $this->capture_wp_mail();
 
 		try {
@@ -956,7 +960,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @testdox Merchant order withdrawal email should reject malformed trigger data.
 	 */
 	public function test_merchant_order_withdrawal_email_rejects_malformed_trigger_data(): void {
-		$email   = new OrderWithdrawalRequestedEmail();
+		$email   = new WC_Email_Order_Withdrawal_Requested();
 		$capture = $this->capture_wp_mail();
 
 		try {

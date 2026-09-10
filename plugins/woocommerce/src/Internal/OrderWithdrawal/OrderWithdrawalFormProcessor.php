@@ -5,12 +5,12 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\CustomerOrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailDataFormatter;
-use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalRequestedEmail;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Throwable;
+use WC_Email_Customer_Order_Withdrawal_Requested;
+use WC_Email_Order_Withdrawal_Requested;
 use WC_Geolocation;
 use WC_Order;
 use WC_Rate_Limiter;
@@ -644,9 +644,9 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at Unix timestamp for the submission.
 	 */
 	private function send_customer_order_withdrawal_email( array $data, int $submitted_at ): bool {
-		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Order_Withdrawal_Requested'] ?? new CustomerOrderWithdrawalRequestedEmail();
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Order_Withdrawal_Requested'] ?? include WC_ABSPATH . 'includes/emails/class-wc-email-customer-order-withdrawal-requested.php';
 
-		if ( ! $email instanceof CustomerOrderWithdrawalRequestedEmail ) {
+		if ( ! $email instanceof WC_Email_Customer_Order_Withdrawal_Requested ) {
 			return false;
 		}
 
@@ -665,9 +665,9 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int                  $submitted_at  Unix timestamp for the submission.
 	 */
 	private function send_merchant_order_withdrawal_email( array $data, ?WC_Order $matched_order, int $submitted_at ): bool {
-		$email = WC()->mailer()->get_emails()['WC_Email_Order_Withdrawal_Requested'] ?? new OrderWithdrawalRequestedEmail();
+		$email = WC()->mailer()->get_emails()['WC_Email_Order_Withdrawal_Requested'] ?? include WC_ABSPATH . 'includes/emails/class-wc-email-order-withdrawal-requested.php';
 
-		if ( ! $email instanceof OrderWithdrawalRequestedEmail ) {
+		if ( ! $email instanceof WC_Email_Order_Withdrawal_Requested ) {
 			return false;
 		}
 
