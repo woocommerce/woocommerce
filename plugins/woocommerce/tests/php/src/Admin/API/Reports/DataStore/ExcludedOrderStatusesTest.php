@@ -12,6 +12,25 @@ use WC_Unit_Test_Case;
 class ExcludedOrderStatusesTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Filter hooks added during a test, as [ tag, callback ] pairs, removed again in tearDown().
+	 *
+	 * @var array[]
+	 */
+	private $added_filters = array();
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->added_filters as $added_filter ) {
+			remove_filter( $added_filter[0], $added_filter[1] );
+		}
+		$this->added_filters = array();
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox get_excluded_report_order_statuses defaults to pending, failed, cancelled (plus auto-draft, trash) when not filtered.
 	 */
 	public function test_default_excluded_order_statuses_without_filter(): void {
@@ -40,16 +59,59 @@ class ExcludedOrderStatusesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_excluded_report_order_statuses falls back to the built-in default when the woocommerce_analytics_excluded_order_statuses filter returns a non-array.
+	 * @testdox get_excluded_report_order_statuses reflects a custom status added by the default-statuses filter when the option has never been saved.
+	 */
+	public function test_default_excluded_order_statuses_filter_reaches_runtime(): void {
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		$callback = array( $this, 'add_custom_excluded_status' );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+
+		$statuses = $this->invoke_get_excluded_report_order_statuses();
+
+		$this->assertContains( 'custom-excluded-status', $statuses, 'A status added by the filter should reach the runtime consumer.' );
+	}
+
+	/**
+	 * @testdox get_excluded_report_order_statuses respects an explicitly saved empty selection instead of restoring the defaults.
+	 */
+	public function test_saved_empty_excluded_statuses_are_respected(): void {
+		update_option( 'woocommerce_excluded_report_order_statuses', array() );
+
+		$statuses = $this->invoke_get_excluded_report_order_statuses();
+
+		$this->assertNotContains( 'pending', $statuses, 'A cleared selection must not fall back to the built-in defaults.' );
+		$this->assertNotContains( 'failed', $statuses, 'A cleared selection must not fall back to the built-in defaults.' );
+		$this->assertNotContains( 'cancelled', $statuses, 'A cleared selection must not fall back to the built-in defaults.' );
+	}
+
+	/**
+	 * Filter callback that appends a custom status to the excluded defaults.
+	 *
+	 * @param array $statuses Default statuses.
+	 * @return array
+	 */
+	public function add_custom_excluded_status( $statuses ) {
+		$statuses[] = 'custom-excluded-status';
+		return $statuses;
+	}
+
+	/**
+	 * @testdox get_excluded_report_order_statuses falls back to the pre-filter value and triggers a doing_it_wrong notice when the woocommerce_analytics_excluded_order_statuses filter returns a non-array.
 	 */
 	public function test_excluded_order_statuses_filter_invalid_type_falls_back(): void {
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Admin\API\Reports\DataStore::get_excluded_report_order_statuses' );
 		add_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_false' );
 
 		$statuses = $this->invoke_get_excluded_report_order_statuses();
 
 		remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_false' );
 
-		$this->assertSame( array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' ), $statuses );
+		$this->assertContains( 'pending', $statuses );
+		$this->assertContains( 'cancelled', $statuses );
+		$this->assertContains( 'failed', $statuses );
+		$this->assertContains( 'auto-draft', $statuses );
+		$this->assertContains( 'trash', $statuses );
 	}
 
 	/**

@@ -211,7 +211,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_valid_order_statuses_or_default() only falls back for non-array or empty values.
+	 * @testdox get_valid_order_statuses_or_default() keeps arrays as-is (dropping non-strings) and falls back only for unusable values.
 	 * @dataProvider provider_valid_order_statuses_or_default
 	 * @param mixed $value    Value to validate.
 	 * @param array $expected Expected result.
@@ -229,10 +229,61 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function provider_valid_order_statuses_or_default(): array {
 		return array(
-			'non-empty array passes through' => array( array( 'refunded' ), array( 'refunded' ) ),
-			'non-array value falls back'     => array( false, array( 'processing', 'on-hold' ) ),
-			'empty array falls back'         => array( array(), array( 'processing', 'on-hold' ) ),
+			'non-empty array passes through'              => array( array( 'refunded' ), array( 'refunded' ) ),
+			'non-array value falls back'                  => array( false, array( 'processing', 'on-hold' ) ),
+			'empty array passes through'                  => array( array(), array() ),
+			'nested array elements are dropped'           => array( array( 'refunded', array( 'nested' ) ), array( 'refunded' ) ),
+			'non-string elements are dropped'             => array( array( 'refunded', 42, null ), array( 'refunded' ) ),
+			'all-non-string array falls back as unusable' => array( array( 42, null ), array( 'processing', 'on-hold' ) ),
 		);
+	}
+
+	/**
+	 * @testdox A default order statuses filter is the source of truth for runtime consumers, not just the settings UI.
+	 */
+	public function test_default_excluded_order_statuses_accessor_applies_filter(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses' );
+
+		$statuses = Settings::get_default_excluded_order_statuses();
+
+		$this->assertContains( 'refunded', $statuses, 'The filtered status should reach runtime consumers.' );
+	}
+
+	/**
+	 * @testdox The actionable default accessor applies its filter.
+	 */
+	public function test_default_actionable_order_statuses_accessor_applies_filter(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+
+		$statuses = Settings::get_default_actionable_order_statuses();
+
+		$this->assertContains( 'refunded', $statuses, 'The filtered status should reach runtime consumers.' );
+	}
+
+	/**
+	 * @testdox A saved empty selection is respected, so unchecking every status does not restore the defaults.
+	 */
+	public function test_saved_empty_selection_is_respected(): void {
+		$result = Settings::get_valid_order_statuses_or_default( array(), array( 'pending', 'cancelled', 'failed' ) );
+
+		$this->assertSame( array(), $result, 'An explicitly saved empty selection must not be replaced by the built-in default.' );
+	}
+
+	/**
+	 * @testdox A filter returning an empty array keeps the settings UI empty, agreeing with the runtime accessors.
+	 */
+	public function test_filter_returning_empty_array_keeps_ui_empty(): void {
+		$empty_filter = function () {
+			return array();
+		};
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array(), $setting['default'], 'An empty filtered default should stay empty in the UI.' );
+		$this->assertSame( array(), Settings::get_default_excluded_order_statuses(), 'The UI and runtime consumers should agree.' );
 	}
 
 	/**

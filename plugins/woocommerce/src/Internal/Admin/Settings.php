@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -81,39 +82,115 @@ class Settings {
 	}
 
 	/**
-	 * Validate a filtered list of default order statuses against the known statuses, falling back
-	 * to the built-in default if the filter returned something unusable.
+	 * Validate a filtered list of default order statuses for display in the Settings UI.
+	 *
+	 * Drops slugs that are not registered or synced (they cannot be shown as checkboxes).
+	 * An explicitly empty list stays empty so the UI agrees with the runtime accessors; a
+	 * non-empty list with nothing displayable left falls back to the built-in default, and
+	 * a non-array falls back too. This cross-check is a display-only concern: runtime
+	 * consumers of the same options accept any string slug via
+	 * get_valid_order_statuses_or_default().
 	 *
 	 * @param mixed $statuses     Value returned by a default-order-statuses filter.
 	 * @param array $all_statuses Known order statuses, keyed by status slug.
-	 * @param array $fallback     Built-in default to use if $statuses is invalid.
+	 * @param array $fallback     Built-in default to use if nothing displayable remains.
 	 * @return array
 	 */
 	private function sanitize_default_order_statuses( $statuses, $all_statuses, $fallback ) {
-		if ( ! is_array( $statuses ) ) {
-			return $fallback;
+		$valid_statuses = self::get_valid_order_statuses_or_default( $statuses, $fallback );
+		if ( empty( $valid_statuses ) ) {
+			return $valid_statuses;
 		}
-		$sanitized = array_values( array_intersect( $statuses, array_keys( $all_statuses ) ) );
+		$sanitized = array_values( array_intersect( $valid_statuses, array_keys( $all_statuses ) ) );
 		return empty( $sanitized ) ? $fallback : $sanitized;
 	}
 
 	/**
-	 * Validate a value that should be a non-empty array of order status slugs (an option value
-	 * or a default-order-statuses filter's return value), falling back to the built-in default
-	 * if it isn't usable.
+	 * The default order statuses excluded from Analytics report totals, before a merchant
+	 * saves the option. Single source of truth for the Settings UI and every runtime
+	 * consumer, so the filtered value applies everywhere without saving the option.
 	 *
-	 * Cheap type/emptiness check only - does not cross-check slugs against registered or synced
-	 * order statuses. Runtime call sites intentionally accept slugs outside that set and must
-	 * not pay for OrdersDataStore::get_all_statuses()'s DB-backed lookup on every request. Only
-	 * add_settings() needs the fuller cross-check, via sanitize_default_order_statuses().
+	 * @since 11.2.0
 	 *
-	 * @since 11.1.0
+	 * @return array
+	 */
+	public static function get_default_excluded_order_statuses(): array {
+		$builtin_default = array( OrderStatus::PENDING, OrderStatus::CANCELLED, OrderStatus::FAILED );
+
+		/**
+		 * Filters the default set of order statuses excluded from Analytics report totals.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array $default_statuses Default excluded order statuses.
+		 */
+		$filtered = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', $builtin_default );
+
+		return self::get_valid_order_statuses_or_default( $filtered, $builtin_default );
+	}
+
+	/**
+	 * The default order statuses considered actionable in Analytics, before a merchant
+	 * saves the option. Single source of truth for the Settings UI and every runtime
+	 * consumer, so the filtered value applies everywhere without saving the option.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array
+	 */
+	public static function get_default_actionable_order_statuses(): array {
+		$builtin_default = array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD );
+
+		/**
+		 * Filters the default set of order statuses considered actionable in Analytics.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array $default_statuses Default actionable order statuses.
+		 */
+		$filtered = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', $builtin_default );
+
+		return self::get_valid_order_statuses_or_default( $filtered, $builtin_default );
+	}
+
+	/**
+	 * Validate a value that should be an array of order status slugs (an option value or a
+	 * default-order-statuses filter's return value), falling back to the passed default if
+	 * it is not an array.
+	 *
+	 * An explicitly saved empty array passes through: the merchant intentionally cleared
+	 * the selection, and replacing it with the defaults would make reports disagree with
+	 * the Settings page. Non-string elements are dropped so a broken filter return value
+	 * cannot raise warnings or reach trim() downstream.
+	 *
+	 * This is a cheap type check only. Slugs are not cross-checked against registered or
+	 * synced order statuses, because runtime call sites intentionally accept slugs outside
+	 * that set and must not pay for OrdersDataStore::get_all_statuses()'s DB-backed lookup
+	 * on every request. Only add_settings() needs the fuller display cross-check, via
+	 * sanitize_default_order_statuses().
+	 *
+	 * @since 11.2.0
+	 *
 	 * @param mixed $value    Value to validate.
-	 * @param array $fallback Built-in default to use if $value is not a non-empty array.
+	 * @param array $fallback Default to use if $value is not an array.
 	 * @return array
 	 */
 	public static function get_valid_order_statuses_or_default( $value, array $fallback ): array {
-		return ( is_array( $value ) && ! empty( $value ) ) ? array_values( $value ) : $fallback;
+		if ( ! is_array( $value ) ) {
+			return $fallback;
+		}
+
+		// An intentionally empty array means "no statuses" and must survive as-is, whether
+		// it came from a saved option or a filter.
+		if ( empty( $value ) ) {
+			return array();
+		}
+
+		$statuses = array_values( array_filter( $value, 'is_string' ) );
+
+		// A non-empty array whose elements are all unusable is treated as invalid, so a
+		// broken callback does not silently empty the selection.
+		return empty( $statuses ) ? $fallback : $statuses;
 	}
 
 	/**
@@ -358,23 +435,10 @@ class Settings {
 		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
 		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
 
-		/**
-		 * Filters the default set of order statuses excluded from Analytics report totals.
-		 *
-		 * @since 11.1.0
-		 * @param array $default_statuses Default excluded order statuses.
-		 */
-		$default_excluded_statuses = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
-		$default_excluded_statuses = $this->sanitize_default_order_statuses( $default_excluded_statuses, $all_statuses, array( 'pending', 'cancelled', 'failed' ) );
-
-		/**
-		 * Filters the default set of order statuses considered actionable in Analytics.
-		 *
-		 * @since 11.1.0
-		 * @param array $default_statuses Default actionable order statuses.
-		 */
-		$default_actionable_statuses = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( 'processing', 'on-hold' ) );
-		$default_actionable_statuses = $this->sanitize_default_order_statuses( $default_actionable_statuses, $all_statuses, array( 'processing', 'on-hold' ) );
+		// Only the Settings UI needs the display cross-check; runtime consumers use the
+		// accessor values as-is.
+		$default_excluded_statuses   = $this->sanitize_default_order_statuses( self::get_default_excluded_order_statuses(), $all_statuses, array( OrderStatus::PENDING, OrderStatus::CANCELLED, OrderStatus::FAILED ) );
+		$default_actionable_statuses = $this->sanitize_default_order_statuses( self::get_default_actionable_order_statuses(), $all_statuses, array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD ) );
 
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',

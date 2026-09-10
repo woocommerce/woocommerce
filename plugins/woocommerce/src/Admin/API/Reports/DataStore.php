@@ -843,15 +843,14 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @return array
 	 */
 	protected static function get_excluded_report_order_statuses() {
-		/**
-		 * Filters the default set of order statuses excluded from Analytics report totals.
-		 *
-		 * @since 11.1.0
-		 * @param array $default_statuses Default excluded order statuses.
-		 */
-		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'failed', 'cancelled' ) ) );
-		$excluded_statuses = Settings::get_valid_order_statuses_or_default( $excluded_statuses, array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it.
+		$pre_filter_statuses = $excluded_statuses;
 
 		/**
 		 * Filter the list of excluded order statuses for customer history and analytics reports.
@@ -861,7 +860,8 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		 */
 		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
 		}
 		return $excluded_statuses;
 	}
