@@ -443,7 +443,9 @@ CREATE TABLE $meta_table_name (
 		if ( ! empty( $args['status'] ) ) {
 			$statuses = array_values( array_filter( array_map( 'strval', (array) $args['status'] ) ) );
 			if ( ! empty( $statuses ) ) {
-				$where[]      = 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+				$where[]      = 1 === count( $statuses )
+					? 'status = %s'
+					: 'status IN (' . implode( ',', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 				$where_values = array_merge( $where_values, $statuses );
 			}
 		}
