@@ -1,3 +1,6 @@
+# pr-readiness-comment.yml triggers off this workflow's name; renaming it
+# silently disables that bot unless its `on.workflow_run.workflows` list is
+# updated in the same change.
 name: 'CI'
 on:
   pull_request:
