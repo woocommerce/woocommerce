@@ -2993,7 +2993,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		add_action(
 			'clean_object_term_cache',
 			function ( $object_ids, $object_type ) use ( $parent, $variation, &$fired_with_wrong_type ) {
-				$object_ids = (array) $object_ids;
+				$object_ids = array_map( 'intval', (array) $object_ids );
 
 				if ( in_array( $parent->get_id(), $object_ids, true ) && 'product' !== $object_type ) {
 					$fired_with_wrong_type = true;
