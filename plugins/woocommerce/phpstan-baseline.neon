@@ -1063,12 +1063,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-product.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
 			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1076,12 +1070,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, array\|WC_Product_Download given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/abstracts/abstract-wc-product.php
@@ -6208,12 +6196,6 @@ parameters:
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, int\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/admin/meta-boxes/views/html-variation-admin.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function wp_get_attachment_thumb_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-
@@ -15285,12 +15267,6 @@ parameters:
 		-
 			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
-			count: 1
-			path: includes/class-wc-structured-data.php
-
-		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_url expects int, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/class-wc-structured-data.php
 
@@ -29524,12 +29500,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_src expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -29543,24 +29513,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$date of method WC_Product\:\:set_date_on_sale_to\(\) expects int\|string\|null, int\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_post expects int\|WP_Post\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_the_title expects int\|WP_Post, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -49150,12 +49102,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractProductGrid.php
 
 		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractProductGrid.php
-
-		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractProductGrid\:\:get_rating_html\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -63933,12 +63879,6 @@ parameters:
 		-
 			message: '#^Offset ''cogs_value'' on array\{id\: mixed, name\: mixed, image\: mixed, product_id\: mixed, product_data\: mixed, quantity\: mixed, price\: 0\|float, tax_class\: mixed, \.\.\.\} in isset\(\) does not exist\.$#'
 			identifier: isset.offset
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
-
-		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_url expects int, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
 

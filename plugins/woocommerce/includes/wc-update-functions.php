@@ -40,6 +40,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
@@ -3715,6 +3716,121 @@ function wc_update_1120_migrate_stock_notifications_alpha_constant() {
  */
 function wc_update_1120_delete_surface_cart_checkout_note(): void {
 	InboxNotifications::delete_surface_cart_checkout_blocks_notification();
+}
+
+/**
+ * Remove variation featured images that duplicate the parent product's featured image.
+ *
+ * The classic editor used to persist the inherited parent image onto variations on save,
+ * freezing dynamic inheritance. Removing values that still equal the parent's canonical
+ * thumbnail is display-neutral; diverged values may be deliberate and are kept. Skipped
+ * for stores upgrading from before 10.9.0, which predates the variation gallery.
+ * A database error stops the cleanup and is logged.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True to run again for the next batch, false when completed.
+ */
+function wc_update_1120_cleanup_inherited_variation_images() {
+	global $wpdb;
+
+	$state_option     = 'woocommerce_update_1120_cleanup_state';
+	$completed_option = 'woocommerce_update_1120_completed_at';
+	$batch_size       = 250;
+
+	// A manual db-version rollback replays all update callbacks; this one deletes data, so it must not run twice.
+	if ( get_option( $completed_option ) ) {
+		return false;
+	}
+
+	// Still the pre-update version here: the option is only bumped by the final update callback.
+	if ( version_compare( (string) get_option( 'woocommerce_db_version' ), '10.9.0', '<' ) ) {
+		return false;
+	}
+
+	$state = get_option( $state_option, array() );
+	$state = is_array( $state ) ? $state : array();
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names cannot be prepared.
+	$matching_variations = (array) $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT variation.ID AS variation_id,
+				variation.post_parent AS parent_id,
+				GROUP_CONCAT(DISTINCT variation_thumb.meta_value) AS inherited_image_ids
+			FROM {$wpdb->posts} AS variation
+			INNER JOIN {$wpdb->postmeta} AS variation_thumb
+				ON variation_thumb.post_id = variation.ID
+				AND variation_thumb.meta_key = '_thumbnail_id'
+			INNER JOIN {$wpdb->postmeta} AS parent_thumb
+				ON parent_thumb.post_id = variation.post_parent
+				AND parent_thumb.meta_key = '_thumbnail_id'
+			WHERE variation.ID > %d
+				AND variation.post_type = 'product_variation'
+				AND variation_thumb.meta_value <> ''
+				AND variation_thumb.meta_value = parent_thumb.meta_value
+			GROUP BY variation.ID
+			ORDER BY variation.ID ASC
+			LIMIT %d",
+			(int) ( $state['last_processed_id'] ?? 0 ),
+			$batch_size + 1
+		),
+		ARRAY_A
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped cleaning up inherited variation images: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1120_cleanup_inherited_variation_images' )
+		);
+		delete_option( $state_option );
+
+		return false;
+	}
+
+	$has_more            = count( $matching_variations ) > $batch_size;
+	$matching_variations = array_slice( $matching_variations, 0, $batch_size );
+
+	$cleaned_count = (int) ( $state['cleaned_count'] ?? 0 );
+
+	foreach ( $matching_variations as $matching_variation ) {
+		// The join matches any parent thumbnail row; only the canonical value is safe to delete.
+		$canonical_parent_thumbnail = (int) get_post_meta( (int) $matching_variation['parent_id'], '_thumbnail_id', true );
+		$deleted_any                = false;
+
+		foreach ( wp_parse_id_list( $matching_variation['inherited_image_ids'] ) as $inherited_image_id ) {
+			if ( $inherited_image_id === $canonical_parent_thumbnail && delete_post_meta( (int) $matching_variation['variation_id'], '_thumbnail_id', $inherited_image_id ) ) {
+				$deleted_any = true;
+			}
+		}
+
+		if ( $deleted_any ) {
+			++$cleaned_count;
+		}
+	}
+
+	if ( $has_more ) {
+		$last_processed = end( $matching_variations );
+		update_option(
+			$state_option,
+			array(
+				'last_processed_id' => (int) $last_processed['variation_id'],
+				'cleaned_count'     => $cleaned_count,
+			),
+			false
+		);
+
+		return true;
+	}
+
+	delete_option( $state_option );
+	update_option( $completed_option, time(), false );
+	VariationGalleryTelemetry::record_event(
+		VariationGalleryTelemetry::EVENT_INHERITED_IMAGE_CLEANUP_COMPLETED,
+		array( 'cleaned_count' => $cleaned_count )
+	);
+
+	return false;
 }
 
 /**
