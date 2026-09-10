@@ -4,9 +4,9 @@
 import { useMemo, memo } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
-import { Icon, blockDefault } from '@wordpress/icons';
+import { blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
-import { Notice, Stack } from '@wordpress/ui';
+import { EmptyState, Notice, Stack } from '@wordpress/ui';
 // @ts-expect-error No types available for this component
 // eslint-disable-next-line
 import { BlockPreview } from '@wordpress/block-editor';
@@ -26,19 +26,18 @@ type Props = {
 
 function TemplateNoResults() {
 	return (
-		<div className="email-editor-template-select__no-results">
-			<Icon
-				className="email-editor-template-select__no-results-icon"
-				icon={ blockDefault }
-			/>
-			<p>{ __( 'No recent templates.', __i18n_text_domain__ ) }</p>
-			<p>
+		<EmptyState.Root className="email-editor-template-select__no-results">
+			<EmptyState.Icon icon={ blockDefault } />
+			<EmptyState.Title>
+				{ __( 'No recent templates.', __i18n_text_domain__ ) }
+			</EmptyState.Title>
+			<EmptyState.Description>
 				{ __(
 					'Your recent creations will appear here as soon as you begin.',
 					__i18n_text_domain__
 				) }
-			</p>
-		</div>
+			</EmptyState.Description>
+		</EmptyState.Root>
 	);
 }
 
