@@ -124,7 +124,7 @@ class ProductQuery implements QueryClausesGenerator {
 		);
 
 		$taxonomies                = array_merge( $all_product_taxonomies, $default_taxonomies );
-		$taxonomy_include_children = $request['taxonomy_include_children'] ?? array();
+		$taxonomy_include_children = is_array( $request['taxonomy_include_children'] ) ? $request['taxonomy_include_children'] : array();
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
