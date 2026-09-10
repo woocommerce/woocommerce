@@ -133,6 +133,24 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect an existing pending guest signup when the same email later signs up as a logged-in user with double opt-in enabled.
+	 */
+	public function test_pending_guest_signup_detected_for_logged_in_user_with_double_opt_in() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$guest_result = $this->sut->signup( $product->get_id(), 0, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS_DOUBLE_OPT_IN, $guest_result->get_code() );
+		$this->assertSame( NotificationStatus::PENDING, $guest_result->get_notification()->get_status() );
+
+		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $user_result->get_code() );
+		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
+	}
+
+	/**
 	 * @testdox Should detect an existing logged-in signup when the same email later signs up as a guest.
 	 */
 	public function test_logged_in_signup_detected_for_guest_with_same_email() {
