@@ -10,12 +10,15 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for SignupService email dispatch.
  */
 class SignupServiceTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -36,6 +39,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 
@@ -64,6 +68,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 

@@ -76,6 +76,7 @@ export type CurrencyCode =
 	| 'CAD'
 	| 'CDF'
 	| 'CHF'
+	| 'CHW'
 	| 'CLP'
 	| 'CNY'
 	| 'COP'

@@ -558,6 +558,45 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An admin order save that leaves empty tax placeholders on items records no base for that rate.
+	 */
+	public function test_sync_order_taxes_ignores_placeholder_tax_entries(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id       = $this->insert_tax_rate();
+		$other_rate_id = $this->insert_tax_rate( '7', 2 );
+		$order         = $this->create_taxed_de_order();
+
+		// An admin save without recalculating stores '' for rates that never applied to the
+		// item. Blank the second rate on the fee and shipping only, so its base must come
+		// from the product line alone.
+		foreach ( $order->get_items( array( OrderItemType::FEE, OrderItemType::SHIPPING ) ) as $item ) {
+			$taxes                            = $item->get_taxes();
+			$taxes['total'][ $other_rate_id ] = '';
+			if ( isset( $taxes['subtotal'] ) ) {
+				$taxes['subtotal'][ $other_rate_id ] = '';
+			}
+			$item->set_taxes( $taxes );
+			$item->save();
+		}
+		$order->update_taxes();
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d",
+				$order->get_id()
+			),
+			OBJECT_K
+		);
+		$this->assertSame( 200.0, (float) $amounts[ $other_rate_id ]->taxable_amount, 'Placeholder entries must not add the fee and shipping totals to the rate.' );
+		$this->assertSame( 215.0, (float) $amounts[ $rate_id ]->taxable_amount, 'The rate without placeholders must keep its full base.' );
+	}
+
+	/**
 	 * @testdox Syncing an order records the base of a compound tax rate including the taxes it compounds over.
 	 */
 	public function test_sync_order_taxes_records_taxable_amount_for_compound_rate(): void {
