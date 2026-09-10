@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, createEvent } from '@testing-library/react';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import { previewCart as mockPreviewCart } from '../../../../../previews/cart';
 import SummaryBlock from '../frontend';
+import { CheckoutOrderSummarySlot } from '../slotfills';
 
 const baseContext = jest.requireMock( '@woocommerce/base-context' );
 
@@ -69,6 +71,10 @@ const containerWidthOf = ( containerClassName ) => ( {
 	isLarge: containerClassName === 'is-large',
 } );
 
+/**
+ * @param {string} containerClassName Class name for the measured width.
+ * @return {import('@testing-library/react').RenderResult} The render result.
+ */
 const renderAt = ( containerClassName ) => {
 	baseContext.useContainerWidthContext.mockReturnValue(
 		containerWidthOf( containerClassName )
@@ -114,6 +120,37 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 				fireEvent.keyDown( bar, { key } );
 				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
 			} );
+
+			// Without this the browser still acts on the key: Space scrolls the
+			// page out from under the summary that just opened, and Enter
+			// submits the checkout form the bar sits inside.
+			it.each( [ 'Enter', ' ' ] )(
+				'suppresses the browser default for %p',
+				( key ) => {
+					renderAt( containerClassName );
+
+					const bar = screen.getByRole( 'button', {
+						name: /Order summary/,
+					} );
+					const event = createEvent.keyDown( bar, { key } );
+					fireEvent( bar, event );
+
+					expect( event.defaultPrevented ).toBe( true );
+				}
+			);
+
+			it( 'collapses again when activated a second time', () => {
+				renderAt( containerClassName );
+
+				const bar = screen.getByRole( 'button', {
+					name: /Order summary/,
+				} );
+				fireEvent.click( bar );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
+
+				fireEvent.click( bar );
+				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
+			} );
 		}
 	);
 
@@ -126,5 +163,54 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 		expect( bar ).not.toHaveAttribute( 'role' );
 		expect( bar ).not.toHaveAttribute( 'tabindex' );
 		expect( bar ).not.toHaveAttribute( 'aria-expanded' );
+	} );
+} );
+
+describe( 'Checkout Order Summary fill', () => {
+	/**
+	 * Renders the block together with the slot the fill targets, so the second
+	 * summary instance actually appears in the tree.
+	 *
+	 * @param {string} containerClassName Class name for the measured width.
+	 * @return {import('@testing-library/react').RenderResult} The render result.
+	 */
+	const renderWithSlot = ( containerClassName ) => {
+		baseContext.useContainerWidthContext.mockReturnValue(
+			containerWidthOf( containerClassName )
+		);
+		return render(
+			<SlotFillProvider>
+				<SummaryBlock>
+					<div />
+				</SummaryBlock>
+				<CheckoutOrderSummarySlot />
+			</SlotFillProvider>
+		);
+	};
+
+	/**
+	 * @param {HTMLElement} container Render container.
+	 * @return {NodeList} The rendered fill wrappers.
+	 */
+	const fillsIn = ( container ) =>
+		container.querySelectorAll(
+			'.checkout-order-summary-block-fill-wrapper'
+		);
+
+	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
+		'when the container reports %p',
+		( containerClassName ) => {
+			it( 'renders the second summary into the slot', () => {
+				const { container } = renderWithSlot( containerClassName );
+
+				expect( fillsIn( container ) ).toHaveLength( 1 );
+			} );
+		}
+	);
+
+	it( 'renders no fill once the container is large enough for two columns', () => {
+		const { container } = renderWithSlot( 'is-large' );
+
+		expect( fillsIn( container ) ).toHaveLength( 0 );
 	} );
 } );

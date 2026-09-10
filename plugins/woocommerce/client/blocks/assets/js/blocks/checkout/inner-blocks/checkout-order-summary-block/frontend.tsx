@@ -6,15 +6,14 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { useId, useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
  * Internal dependencies
  */
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
-import { useContainerWidthContext } from '../../../../base/context';
 import { FormStepHeading } from '../../form-step';
+import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
 const FrontendBlock = ( {
 	children,
@@ -24,35 +23,15 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isLarge } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
+	const { isOpen, isLarge, ariaControlsId, toggleProps } =
+		useOrderSummaryToggle();
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const ariaControlsId = useId();
 
-	// Checked as `! isLarge` rather than by listing the smaller sizes: the
-	// container width is unknown until the resize observer first reports, and
-	// the CSS has already collapsed the summary by then. Assuming the collapsed
-	// presentation while unsure keeps the bar operable; the reverse leaves it
-	// inert with no other way to see the totals.
-	const orderSummaryProps = ! isLarge
-		? {
-				role: 'button',
-				onClick: () => setIsOpen( ! isOpen ),
-				'aria-expanded': isOpen,
-				'aria-controls': ariaControlsId,
-				tabIndex: 0,
-				onKeyDown: ( event: React.KeyboardEvent ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setIsOpen( ! isOpen );
-					}
-				},
-		  }
-		: {};
-
-	// Render the summary once here in the block and once in the fill. The fill can be slotted once elsewhere. The fill is only
-	// rendered on small and mobile screens.
+	// Render the summary once here in the block and once in the fill, so the
+	// fill can be slotted elsewhere. Below the large breakpoint both render and
+	// the CSS decides which one is visible.
 	return (
 		<>
 			<div className={ className }>
@@ -63,7 +42,7 @@ const FrontendBlock = ( {
 							'is-open': isOpen,
 						}
 					) }
-					{ ...orderSummaryProps }
+					{ ...toggleProps }
 				>
 					<p
 						className="wc-block-components-checkout-order-summary__title-text"
