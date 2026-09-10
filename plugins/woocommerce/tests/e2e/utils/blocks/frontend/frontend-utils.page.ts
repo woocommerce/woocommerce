@@ -163,9 +163,7 @@ export class FrontendUtils {
 		await this.goToCart();
 
 		// Check if cart is already empty
-		const emptyCartMessage = this.page.getByText(
-			'Your cart is currently empty!'
-		);
+		const emptyCartMessage = this.page.getByText( 'Your cart is empty' );
 		if ( await emptyCartMessage.isVisible() ) {
 			return; // Cart is already empty
 		}
