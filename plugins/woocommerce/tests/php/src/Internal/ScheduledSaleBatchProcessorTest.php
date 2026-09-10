@@ -17,6 +17,7 @@ use WC_Product;
 use WC_Product_Variable;
 use WC_Product_Variation;
 use WC_Unit_Test_Case;
+use WP_Object_Cache;
 
 /**
  * Tests for the ScheduledSaleBatchProcessor class.
@@ -73,26 +74,68 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An external object cache keeps the persistent-capable groups out of the release.
+	 * @testdox An external object cache has only its in-memory copy dropped, never a shared group.
 	 */
-	public function test_leaves_shared_groups_alone_on_an_external_cache(): void {
+	public function test_drops_only_the_runtime_copy_on_an_external_cache(): void {
 		$product = $this->create_missed_sale_end_product();
 
-		wp_cache_set( 'sentinel', 'keep me', 'products' );
-		wp_cache_set( 'sentinel', 'keep me', 'term-queries' );
+		$spy = new class() extends WP_Object_Cache {
+			/**
+			 * Groups passed to flush_group().
+			 *
+			 * @var string[]
+			 */
+			public $flushed_groups = array();
 
+			/**
+			 * How many times the whole in-memory cache was flushed.
+			 *
+			 * The default cache implements wp_cache_flush_runtime() as a full flush.
+			 *
+			 * @var int
+			 */
+			public $runtime_flushes = 0;
+
+			/**
+			 * Record the group instead of flushing it.
+			 *
+			 * @param string $group Group name.
+			 * @return bool
+			 */
+			public function flush_group( $group ) {
+				$this->flushed_groups[] = $group;
+				return true;
+			}
+
+			/**
+			 * Count the call, then flush.
+			 *
+			 * @return bool
+			 */
+			public function flush() {
+				++$this->runtime_flushes;
+				return parent::flush();
+			}
+		};
+
+		$real_cache = $GLOBALS['wp_object_cache'];
 		// Cast null to false because passing null reads rather than restores the flag.
 		$was_external = (bool) wp_using_ext_object_cache( true );
 
 		try {
+			$GLOBALS['wp_object_cache'] = $spy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Swapped back in finally.
 			$this->sut->process( array( $product->get_id() ), 'end' );
 		} finally {
+			$GLOBALS['wp_object_cache'] = $real_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			wp_using_ext_object_cache( $was_external );
 		}
 
-		$this->assertSame( 'keep me', wp_cache_get( 'sentinel', 'products' ), 'The products group must survive when an external object cache is in use.' );
-		$this->assertSame( 'keep me', wp_cache_get( 'sentinel', 'term-queries' ), 'The term-queries group must survive when an external object cache is in use.' );
-		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'The product must still settle with the shared groups left alone.' );
+		// The real cache still holds the meta primed before the swap.
+		wp_cache_delete( $product->get_id(), 'post_meta' );
+
+		$this->assertSame( array(), $spy->flushed_groups, 'No shared group may be flushed when an external object cache is in use.' );
+		$this->assertSame( 1, $spy->runtime_flushes, 'The in-memory copy should be dropped once per batch.' );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'The product must still settle on an external cache.' );
 	}
 
 	/**

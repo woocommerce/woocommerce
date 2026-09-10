@@ -61,7 +61,7 @@ class ScheduledSaleBatchProcessor {
 		// product_objects entries are released by id, which reaches a real wp_cache_delete()
 		// on every cache backend. The products and term-queries groups cannot be addressed
 		// by product id, so they are only flushed when the cache is request-local; a shared
-		// external cache is left untouched.
+		// external cache only has its in-memory copy dropped.
 		$product_cache = FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME )
 			? wc_get_container()->get( ProductCache::class )
 			: null;
@@ -175,6 +175,11 @@ class ScheduledSaleBatchProcessor {
 		if ( $flush_shared_groups ) {
 			wp_cache_flush_group( 'products' );
 			wp_cache_flush_group( 'term-queries' );
+		} elseif ( wp_cache_supports( 'flush_runtime' ) ) {
+			// A persistent cache keeps a request-local copy of everything it serves, so the
+			// entries above that cannot be deleted by id would accumulate for the whole
+			// backlog. Drop the in-memory copy only; the shared backend is untouched.
+			wp_cache_flush_runtime();
 		}
 	}
 }
