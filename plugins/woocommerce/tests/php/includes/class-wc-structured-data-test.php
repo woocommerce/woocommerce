@@ -21,6 +21,217 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() preserves scalar @type grouping.
+	 */
+	public function test_get_structured_data_preserves_scalar_type_grouping(): void {
+		$markup = array(
+			'@type' => 'Product',
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => 'Product',
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Scalar structured data should retain its existing grouping and output.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() accepts a valid list of @type values.
+	 *
+	 * @testWith [["Car", "Product"]]
+	 *           [["A"]]
+	 *           [["ABCDEFGHIJKLMNOPQRST"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_accepts_valid_array_type( array $types ): void {
+		$markup = array(
+			'@type' => $types,
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid array @type should be accepted.'
+		);
+		$this->assertSame(
+			array( $markup ),
+			$this->structured_data->get_data(),
+			'A valid list of @type values should retain its values and order.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() normalizes a non-list @type array before storage.
+	 */
+	public function test_set_data_normalizes_non_list_array_type(): void {
+		$markup = array(
+			'@type' => array(
+				0 => 'Product',
+				2 => 'Book',
+			),
+			'name'  => 'Test product',
+		);
+
+		$this->assertTrue(
+			$this->structured_data->set_data( $markup ),
+			'A valid non-list @type array should be accepted.'
+		);
+		$this->assertSame(
+			array(
+				array(
+					'@type' => array( 'Product', 'Book' ),
+					'name'  => 'Test product',
+				),
+			),
+			$this->structured_data->get_data(),
+			'A non-list @type array should be reindexed so it encodes as a JSON list.'
+		);
+	}
+
+	/**
+	 * @testdox set_data() rejects an invalid array @type.
+	 *
+	 * @testWith [[]]
+	 *           [["Product", ["Review"]]]
+	 *           [["Product", "Invalid-Type"]]
+	 *           [["Product", "ABCDEFGHIJKLMNOPQRSTU"]]
+	 *
+	 * @param array $types Structured data types.
+	 */
+	public function test_set_data_rejects_invalid_array_type( array $types ): void {
+		$this->assertFalse(
+			$this->structured_data->set_data( array( '@type' => $types ) ),
+			'Empty arrays, non-string members, and pattern-invalid members should be rejected.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() emits array @type values for matching or unfiltered requests.
+	 *
+	 * @testWith [["Car", "Product"], ["product"]]
+	 *           [["Thing", "CustomType"], ["customtype"]]
+	 *           [["Car", "Product"], []]
+	 *
+	 * @param string[] $schema_types    Schema types stored in the markup.
+	 * @param string[] $requested_types Lower-case output types requested by the caller.
+	 */
+	public function test_get_structured_data_outputs_array_type( array $schema_types, array $requested_types ): void {
+		$markup = array(
+			'@type' => $schema_types,
+			'name'  => 'Test product',
+		);
+		$this->structured_data->set_data( $markup );
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => $schema_types,
+				'name'     => 'Test product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'Array @type markup should survive grouping and page-type filtering.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() groups multi-type nodes by requested type priority.
+	 */
+	public function test_get_structured_data_groups_array_type_by_requested_priority(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => 'Product',
+				'name'  => 'Scalar product',
+			)
+		);
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Review', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@graph'   => array(
+					array(
+						'@type' => 'Product',
+						'name'  => 'Scalar product',
+					),
+					array(
+						'@type' => array( 'Review', 'Product' ),
+						'name'  => 'Multi-type product',
+					),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'product', 'review' ) ),
+			'Multi-type nodes should join the group selected by the requested type order.'
+		);
+	}
+
+	/**
+	 * @testdox woocommerce_structured_data_context receives the string grouping key and complete @type array.
+	 */
+	public function test_structured_data_context_receives_array_type_and_string_grouping_key(): void {
+		$markup           = array(
+			'@type' => array( 'Review', 'Product' ),
+			'name'  => 'Multi-type product',
+		);
+		$filter_arguments = array();
+
+		add_filter(
+			'woocommerce_structured_data_context',
+			static function ( $context, $data, $type, $value ) use ( &$filter_arguments ) {
+				$filter_arguments = array(
+					'type'  => $type,
+					'value' => $value,
+				);
+
+				return $context;
+			},
+			10,
+			4
+		);
+
+		$this->structured_data->set_data( $markup );
+		$this->structured_data->get_structured_data( array( 'product', 'review' ) );
+
+		$this->assertSame(
+			array(
+				'type'  => 'product',
+				'value' => array( $markup ),
+			),
+			$filter_arguments,
+			'The context filter should receive the selected string grouping key and the unmodified multi-type node.'
+		);
+	}
+
+	/**
+	 * @testdox get_structured_data() excludes multi-type nodes without a requested type.
+	 */
+	public function test_get_structured_data_excludes_array_type_without_requested_match(): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Thing', 'CreativeWork' ),
+				'name'  => 'Unrequested node',
+			)
+		);
+
+		$this->assertSame(
+			array(),
+			$this->structured_data->get_structured_data( array( 'product' ) ),
+			'Multi-type nodes without a requested type should be excluded.'
+		);
+	}
+
+	/**
 	 * Test is_valid_gtin function
 	 *
 	 * @return void

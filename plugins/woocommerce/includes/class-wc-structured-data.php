@@ -50,12 +50,28 @@ class WC_Structured_Data {
 	/**
 	 * Sets data.
 	 *
-	 * @param  array $data  Structured data.
+	 * @since 3.0.0
+	 * @since 11.2.0 Added support for multiple schema types in `@type`.
+	 *
+	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings.
+	 *                      Every type must contain 1 to 20 ASCII letters; any invalid array member rejects the node.
 	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */
 	public function set_data( $data, $reset = false ) {
-		if ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
+		if ( isset( $data['@type'] ) && is_array( $data['@type'] ) ) {
+			if ( empty( $data['@type'] ) ) {
+				return false;
+			}
+
+			foreach ( $data['@type'] as $type ) {
+				if ( ! is_string( $type ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $type ) ) {
+					return false;
+				}
+			}
+
+			$data['@type'] = array_values( $data['@type'] );
+		} elseif ( ! isset( $data['@type'] ) || ! preg_match( '|^[a-zA-Z]{1,20}$|', $data['@type'] ) ) {
 			return false;
 		}
 
@@ -96,7 +112,15 @@ class WC_Structured_Data {
 
 		// Put together the values of same type of structured data.
 		foreach ( $this->get_data() as $value ) {
-			$data[ strtolower( $value['@type'] ) ][] = $value;
+			if ( is_array( $value['@type'] ) ) {
+				$value_types    = array_map( 'strtolower', $value['@type'] );
+				$matching_types = array_intersect( $types, $value_types );
+				$type           = $matching_types ? reset( $matching_types ) : reset( $value_types );
+
+				$data[ $type ][] = $value;
+			} else {
+				$data[ strtolower( $value['@type'] ) ][] = $value;
+			}
 		}
 
 		// Wrap the multiple values of each type inside a graph... Then add context to each type.
