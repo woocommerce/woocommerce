@@ -5,6 +5,15 @@ import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
 import { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import {
+	getCategoryImageId,
+	getCategoryImageSrc,
+} from './featured-category/utils';
 
 /**
  * Internal dependencies
@@ -21,7 +30,7 @@ export const BLOCK_NAMES = {
 	featuredProduct: 'woocommerce/featured-product',
 } as const;
 
-export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
+const FEATURED_CATEGORY_CONTENT_TEMPLATE = (
 	category: WP_REST_API_Category
 ): InnerBlockTemplate[] => [
 	[ 'woocommerce/category-title', { level: 2, textAlign: 'center' } ],
@@ -38,13 +47,60 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 			[
 				'core/button',
 				{
+					className: 'wc-block-featured-category__link',
 					text: __( 'Shop now', 'woocommerce' ),
 					url: category.permalink,
+					metadata: {
+						bindings: {
+							url: {
+								source: 'core/term-data',
+								args: { field: 'link' },
+							},
+						},
+					},
 				},
 			],
 		],
 	],
 ];
+
+export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
+	category: WP_REST_API_Category,
+	useCover = false
+): InnerBlockTemplate[] => {
+	const content = FEATURED_CATEGORY_CONTENT_TEMPLATE( category );
+	if ( ! useCover ) {
+		return content;
+	}
+
+	const imageId = getCategoryImageId( category );
+	const imageUrl =
+		getCategoryImageSrc( category ) ||
+		getSetting< string >( 'placeholderImgSrcFullSize', '' );
+
+	return [
+		[
+			'core/cover',
+			{
+				backgroundType: 'image',
+				className: 'wc-block-featured-category__cover',
+				id: imageId || undefined,
+				url: imageUrl,
+				dimRatio: 50,
+				minHeight: 500,
+				minHeightUnit: 'px',
+				contentPosition: 'center center',
+				metadata: {
+					bindings: {
+						id: { source: 'woocommerce/term-image' },
+						url: { source: 'woocommerce/term-image' },
+					},
+				},
+			},
+			content,
+		],
+	];
+};
 
 export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 	product: ProductResponseItem

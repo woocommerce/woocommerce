@@ -18,6 +18,7 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
+import { getSetting } from '@woocommerce/settings';
 import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
 
 /**
@@ -36,6 +37,10 @@ import {
 	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
 	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
 } from './constants';
+import {
+	getCategoryImageId,
+	getCategoryImageSrc,
+} from './featured-category/utils';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -50,6 +55,7 @@ export interface FeaturedItemRequiredAttributes {
 	imageFit: 'cover' | 'none';
 	isRepeated: boolean;
 	linkText: string;
+	layout?: string;
 	mediaId: number;
 	mediaSrc: string;
 	minHeight: number;
@@ -239,21 +245,40 @@ export const withFeaturedItem =
 				);
 			}
 
+			const useCover = attributes.layout === 'cover';
+			const innerBlocks = (
+				<InnerBlocks
+					template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
+						category,
+						useCover
+					) }
+					templateLock={ false }
+				/>
+			);
+
 			return (
 				<BlockContextProvider
 					value={ {
 						termId: category.term_id,
 						termTaxonomy: 'product_cat',
+						taxonomy: 'product_cat',
+						'woocommerce/termImageId':
+							getCategoryImageId( category ),
+						'woocommerce/termImageUrl':
+							getCategoryImageSrc( category ) ||
+							getSetting< string >(
+								'placeholderImgSrcFullSize',
+								''
+							),
 					} }
 				>
-					<div className={ `${ className }__inner-blocks` }>
-						<InnerBlocks
-							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
-								category
-							) }
-							templateLock={ false }
-						/>
-					</div>
+					{ useCover ? (
+						innerBlocks
+					) : (
+						<div className={ `${ className }__inner-blocks` }>
+							{ innerBlocks }
+						</div>
+					) }
 				</BlockContextProvider>
 			);
 		};
@@ -271,6 +296,10 @@ export const withFeaturedItem =
 		const styleProps = useStyleProps( attributes );
 
 		const renderItem = () => {
+			if ( category && attributes.layout === 'cover' ) {
+				return renderInnerBlocks();
+			}
+
 			const {
 				contentAlign,
 				dimRatio,

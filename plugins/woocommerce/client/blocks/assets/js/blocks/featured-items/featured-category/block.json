@@ -88,6 +88,15 @@
 		"categoryId": {
 			"type": "number"
 		},
+		"layout": {
+			"type": "string"
+		},
+		"source": {
+			"type": "string"
+		},
+		"termTaxonomy": {
+			"type": "string"
+		},
 		"overlayColor": {
 			"type": "string",
 			"default": "#000000"
@@ -108,9 +117,10 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"usesContext": [ "termId", "termTaxonomy" ],
+	"usesContext": [ "termId", "termTaxonomy", "taxonomy" ],
 	"providesContext": {
 		"termId": "categoryId",
-		"termTaxonomy": "termTaxonomy"
+		"termTaxonomy": "termTaxonomy",
+		"taxonomy": "termTaxonomy"
 	}
 }

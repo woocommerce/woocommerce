@@ -16,7 +16,12 @@ import { BLOCK_NAMES, DEFAULT_EDITOR_SIZE } from './constants';
 import { EditorBlock } from './types';
 import { useBackgroundImage } from './use-background-image';
 
-type MediaAttributes = { align: string; mediaId: number; mediaSrc: string };
+type MediaAttributes = {
+	align: string;
+	layout?: string;
+	mediaId: number;
+	mediaSrc: string;
+};
 type MediaSize = { height: number; width: number };
 
 interface WithImageEditorRequiredProps< T > {
@@ -154,6 +159,13 @@ export const withImageEditor =
 				mediaSrc,
 				blockName: name,
 			} );
+
+		if (
+			name === BLOCK_NAMES.featuredCategory &&
+			attributes.layout === 'cover'
+		) {
+			return <Component { ...props } />;
+		}
 
 		if ( isEditingImage ) {
 			return (
