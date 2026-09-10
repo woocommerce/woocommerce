@@ -3236,11 +3236,7 @@ class WC_AJAX {
 			return;
 		}
 
-		$value = wc_clean( (string) $value );
-		if ( ! is_string( $value ) ) {
-			return;
-		}
-
+		$value         = (string) $value;
 		$is_percentage = '%' === substr( $value, -1 );
 		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
 		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
@@ -3260,13 +3256,9 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( $is_percentage ) {
-				$sale_price = (float) $regular_price - NumberUtil::round( ( (float) $regular_price / 100 ) * $adjustment, wc_get_price_decimals() );
-			} else {
-				$sale_price = (float) $regular_price - $adjustment;
-			}
+			$reduction = $is_percentage ? ( (float) $regular_price / 100 ) * $adjustment : $adjustment;
 
-			$variation->set_sale_price( (string) NumberUtil::round( max( 0, $sale_price ), wc_get_price_decimals() ) );
+			$variation->set_sale_price( (string) NumberUtil::round( max( 0, (float) $regular_price - $reduction ), wc_get_price_decimals() ) );
 			$variation->save();
 		}
 	}
