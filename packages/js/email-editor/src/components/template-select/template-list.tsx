@@ -28,9 +28,9 @@ type Props = {
 
 function TemplateNoResults() {
 	return (
-		<div className="block-editor-inserter__no-results">
+		<div className="email-editor-template-select__no-results">
 			<Icon
-				className="block-editor-inserter__no-results-icon"
+				className="email-editor-template-select__no-results-icon"
 				icon={ blockDefault }
 			/>
 			<p>{ __( 'No recent templates.', __i18n_text_domain__ ) }</p>
@@ -73,14 +73,14 @@ function TemplateListBox( {
 	}
 
 	return (
-		<div className="block-editor-block-patterns-list" role="listbox">
+		<div className="email-editor-template-select__templates" role="listbox">
 			{ templates.map( ( template ) => (
 				<div
 					key={ `${ template.slug }_${ template.displayName }_${ template.id }` }
-					className="block-editor-block-patterns-list__list-item email-editor-pattern__list-item"
+					className="email-editor-template-select__template"
 				>
 					<div
-						className="block-editor-block-patterns-list__item"
+						className="email-editor-template-select__template-button"
 						role="button"
 						tabIndex={ 0 }
 						onClick={ () => {
@@ -113,8 +113,8 @@ function TemplateListBox( {
 								] }
 							/>
 
-							<HStack className="block-editor-patterns__pattern-details">
-								<h4 className="block-editor-block-patterns-list__item-title">
+							<HStack className="email-editor-template-select__template-details">
+								<h4 className="email-editor-template-select__template-title">
 									{ template.displayName }
 								</h4>
 							</HStack>
@@ -148,7 +148,7 @@ export function TemplateList( {
 	);
 
 	return (
-		<div className="block-editor-block-patterns-explorer__list">
+		<div className="email-editor-template-select__list">
 			{ selectedCategory === 'recent' && (
 				<div className="email-editor-recent-templates-info">
 					<HStack spacing={ 1 } expanded={ false } justify="start">

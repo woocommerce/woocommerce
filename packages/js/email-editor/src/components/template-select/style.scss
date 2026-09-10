@@ -1,17 +1,84 @@
-/* Move the less specific selector before the more specific one */
+@import "~@wordpress/base-styles/variables";
+@import "~@wordpress/base-styles/breakpoints";
+@import "~@wordpress/base-styles/mixins";
 
-.block-editor-block-patterns-list__item .block-editor-block-preview__container {
-	align-items: flex-start !important;
+$email-editor-template-select-sidebar-width: 280px;
+
+.email-editor-template-select__sidebar {
+	padding-bottom: $grid-unit-30;
+
+	@include break-medium() {
+		bottom: 0;
+		inset-inline-start: 0;
+		overflow-x: visible;
+		overflow-y: auto;
+		padding: $grid-unit-30;
+		position: absolute;
+		top: $header-height + $grid-unit-10;
+		width: $email-editor-template-select-sidebar-width;
+	}
 }
 
-.block-editor-block-patterns-explorer
-	.block-editor-block-patterns-list
-	.block-editor-block-preview__container {
-	max-height: 300px !important;
+.email-editor-template-select__panel {
+	@include break-medium() {
+		margin-inline-start: $email-editor-template-select-sidebar-width;
+	}
 }
 
-.block-editor-block-patterns-list__list-item {
+.email-editor-template-select__list {
+	padding: $grid-unit-30 0 $grid-unit-40;
+}
+
+.email-editor-template-select__templates {
+	display: grid;
+	grid-gap: $grid-unit-40;
+	grid-template-columns: repeat(1, 1fr);
+	margin-bottom: $grid-unit-20;
+
+	@include break-xlarge() {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	@include break-huge() {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.email-editor-template-select__template {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	cursor: pointer;
+	min-height: 240px;
 	overflow: hidden;
+	position: relative;
+}
+
+.email-editor-template-select__template-button {
+	height: 100%;
+
+	.block-editor-block-preview__container {
+		align-items: flex-start;
+		border-radius: 4px;
+		display: flex;
+		max-height: 300px;
+	}
+}
+
+.email-editor-template-select__template-details {
+	align-items: center;
+	margin-top: $grid-unit-10;
+	padding-bottom: $grid-unit-05;
+}
+
+.email-editor-template-select__template-title {
+	flex-grow: 1;
+	padding-inline-start: 1rem;
+	text-align: start;
+}
+
+.email-editor-template-select__no-results {
+	padding: $grid-unit-40;
+	text-align: center;
 }
 
 .email-editor-recent-templates-info {
@@ -24,31 +91,10 @@
 	}
 }
 
-.email-editor-pattern__list-item {
-	border: 1px solid #ddd;
-	border-radius: 4px;
-
-	.block-editor-block-preview__container::after {
-		outline: unset !important;
-		outline-offset: unset !important;
-	}
-
-	.block-editor-block-patterns-list__item-title {
-		font-size: unset !important;
-		padding-left: 1rem;
-	}
-}
-
-.block-editor-block-patterns-explorer.no-sidebar
-	.block-editor-block-patterns-explorer__list {
-	margin-left: 0;
-	padding-left: 2rem;
-}
-
 .email-editor-modal-footer {
 	background-color: #fff;
 	bottom: 0;
+	inset-inline-end: 0;
 	padding: 1rem 2rem;
 	position: absolute;
-	right: 0;
 }
