@@ -274,4 +274,47 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	public function return_large_batch_limit() {
 		return 500;
 	}
+	/** Valid tax IDs must be validated as input strings before becoming integer query IDs. */
+	public function test_export_validates_tax_ids_before_sanitizing(): void {
+		$controller = $this->getMockBuilder( \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller::class )
+			->onlyMethods( array( 'get_items' ) )->getMock();
+		$controller->expects( $this->once() )->method( 'get_items' )->willReturnCallback(
+			function ( $request ) {
+				$this->assertSame( array( 123, 456 ), $request->get_param( 'taxes' ) );
+				return new WP_REST_Response( array(), 200, array( 'X-WP-Total' => 0 ) );
+			}
+		);
+		$exporter = new \Automattic\WooCommerce\Admin\ReportCSVExporter( 'taxes', array( 'taxes' => '123,456' ) );
+		$property = new ReflectionProperty( $exporter, 'controller' );
+		$property->setAccessible( true );
+		$property->setValue( $exporter, $controller );
+		$exporter->prepare_data_to_export();
+	}
+
+	/** A sanitizer failure must stop export before the report data query. */
+	public function test_export_stops_on_sanitizer_error(): void {
+		$controller = $this->getMockBuilder( \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller::class )
+			->onlyMethods( array( 'get_collection_params', 'get_items' ) )->getMock();
+		$sanitized  = false;
+		$controller->method( 'get_collection_params' )->willReturn(
+			array(
+				'selection' => array(
+					'type'              => 'string',
+					'validate_callback' => 'rest_validate_request_arg',
+					'sanitize_callback' => static function () use ( &$sanitized ) {
+						$sanitized = true;
+						return new WP_Error( 'fixture_sanitization_failed', 'Synthetic sanitizer failure.' );
+					},
+				),
+			)
+		);
+		$controller->expects( $this->never() )->method( 'get_items' );
+		$exporter = new \Automattic\WooCommerce\Admin\ReportCSVExporter( 'taxes', array( 'selection' => 'valid-string' ) );
+		$property = new ReflectionProperty( $exporter, 'controller' );
+		$property->setAccessible( true );
+		$property->setValue( $exporter, $controller );
+		$exporter->prepare_data_to_export();
+		$this->assertTrue( $sanitized );
+		$this->assertSame( 0, $exporter->get_total_rows() );
+	}
 }

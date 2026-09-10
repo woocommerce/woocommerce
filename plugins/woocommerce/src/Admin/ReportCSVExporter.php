@@ -339,13 +339,15 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		$request->set_attributes( array( 'args' => $params ) );
 		$request->set_default_params( $defaults );
 		$request->set_query_params( $this->report_args );
-		$request->sanitize_params();
 
 		// Enforce the report's own schema on every export path, including direct
 		// ReportExporter::queue_report_export() callers that bypass the REST
 		// route's validation. Never pass unvalidated args (e.g. orderby) to the
 		// query.
 		$validity = $request->has_valid_params();
+		if ( ! is_wp_error( $validity ) ) {
+			$validity = $request->sanitize_params();
+		}
 		if ( is_wp_error( $validity ) ) {
 			wc_get_logger()->warning(
 				sprintf( 'Skipping %s report export: %s', $this->report_type, $validity->get_error_message() ),

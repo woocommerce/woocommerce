@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate report export parameters before sanitizing them so valid tax filters do not produce empty exports.
