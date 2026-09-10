@@ -611,8 +611,10 @@ class PushTokensDataStore {
 	 * @return void
 	 */
 	public function flush_last_sent_at(): void {
-		// Lets a later `record_last_sent_at()` re-assert both hooks. They stay
-		// registered either way, and `add_action()` is idempotent here.
+		// Lets a later `record_last_sent_at()` re-assert the Action Scheduler
+		// hook, which fires once per action. It cannot re-arm `shutdown`:
+		// WP_Hook iterates a copy of its callbacks, so a stamp recorded during
+		// shutdown after this ran is dropped. No path does that today.
 		$this->last_sent_at_flush_registered = false;
 
 		if ( empty( $this->pending_last_sent_at ) ) {
@@ -636,9 +638,9 @@ class PushTokensDataStore {
 				wc_get_logger()->warning(
 					'Failed to record last sent time for push tokens.',
 					array(
-						'source'    => PushNotifications::FEATURE_NAME,
-						'token_ids' => array_keys( $chunk ),
-						'error'     => $e->getMessage(),
+						'source'      => PushNotifications::FEATURE_NAME,
+						'token_count' => count( $chunk ),
+						'error'       => $e->getMessage(),
 					)
 				);
 			}
@@ -775,9 +777,9 @@ class PushTokensDataStore {
 		wc_get_logger()->warning(
 			'Could not record last sent time for push tokens.',
 			array(
-				'source'    => PushNotifications::FEATURE_NAME,
-				'token_ids' => $post_ids,
-				'error'     => $error,
+				'source'      => PushNotifications::FEATURE_NAME,
+				'token_count' => count( $post_ids ),
+				'error'       => $error,
 			)
 		);
 	}
@@ -806,9 +808,9 @@ class PushTokensDataStore {
 		wc_get_logger()->warning(
 			'Failed to record last sent time for push tokens.',
 			array(
-				'source'    => PushNotifications::FEATURE_NAME,
-				'token_ids' => $post_ids,
-				'error'     => $wpdb->last_error,
+				'source'      => PushNotifications::FEATURE_NAME,
+				'token_count' => count( $post_ids ),
+				'error'       => $wpdb->last_error,
 			)
 		);
 	}
