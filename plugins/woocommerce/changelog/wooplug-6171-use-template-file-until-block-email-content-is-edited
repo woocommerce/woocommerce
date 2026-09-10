@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Email editor: render emails from file-based templates until they are customized and saved, so uncustomized emails always reflect the current template files and site locale.

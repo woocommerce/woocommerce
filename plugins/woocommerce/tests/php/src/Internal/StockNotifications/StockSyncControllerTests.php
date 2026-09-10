@@ -16,6 +16,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
  */
 class StockSyncControllerTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
 	/**
 	 * @var StockSyncController
 	 */
@@ -26,6 +28,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->sut           = new StockSyncController();
 		$eligibility_service = new EligibilityService();
 		$eligibility_service->init( new StockManagementHelper() );
@@ -37,6 +40,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 		unset( $this->sut );
 	}

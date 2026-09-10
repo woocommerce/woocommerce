@@ -11,6 +11,45 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox Installing-mode requests queue the endpoint rewrite without replacing persisted rules.
+	 */
+	public function test_endpoint_rewrite_is_deferred_during_installing_mode(): void {
+		global $wp_rewrite;
+
+		$original_installing     = wp_installing();
+		$original_rules          = get_option( 'rewrite_rules', null );
+		$original_queue          = get_option( 'woocommerce_queue_flush_rewrite_rules', null );
+		$original_top_rules      = $wp_rewrite->extra_rules_top;
+		$persisted_rewrite_rules = array( '^third-party/?$' => 'index.php?third-party=1' );
+
+		update_option( 'rewrite_rules', $persisted_rewrite_rules );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		wp_installing( true );
+
+		try {
+			( new CheckoutLink() )->add_checkout_link_endpoint();
+			$this->assertSame( $persisted_rewrite_rules, get_option( 'rewrite_rules' ), 'Installing mode must preserve the complete rules from the prior normal request.' );
+
+			wp_installing( false );
+
+			$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'Installing mode should queue the missing checkout-link rule.' );
+			$this->assertArrayHasKey( '^checkout-link$', $wp_rewrite->extra_rules_top, 'The endpoint should still register its rule for the current request.' );
+		} finally {
+			wp_installing( false );
+			delete_option( 'rewrite_rules' );
+			delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+			if ( null !== $original_rules ) {
+				add_option( 'rewrite_rules', $original_rules );
+			}
+			if ( null !== $original_queue ) {
+				add_option( 'woocommerce_queue_flush_rewrite_rules', $original_queue );
+			}
+			$wp_rewrite->extra_rules_top = $original_top_rules;
+			wp_installing( $original_installing );
+		}
+	}
+
+	/**
 	 * Test that products and coupon are added and token in url.
 	 */
 	public function test_products_and_coupon_are_added_and_token_in_url() {

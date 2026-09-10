@@ -313,6 +313,18 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the page output always starts `window.wcAnalytics` from a fresh
+	 * object. A `window.wcAnalytics || {}` fallback keeps a same-named DOM element
+	 * alive, and the assignments that follow silently fail to land on it.
+	 */
+	public function test_page_output_initializes_config_from_a_fresh_object(): void {
+		$output = $this->render_analytics_data();
+
+		$this->assertStringContainsString( 'window.wcAnalytics = {};', $output );
+		$this->assertStringNotContainsString( 'window.wcAnalytics ||', $output );
+	}
+
+	/**
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
 	 * where pixel.wp.com can learn the visitor's real IP, user agent and
@@ -384,7 +396,7 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		$this->assertNotEmpty( $queue, 'A search event should have been queued.' );
 
 		$event = end( $queue );
-		$this->assertSame( 'search', $event['eventName'], 'The queued event should be the search event.' );
+		$this->assertSame( 'search_performed', $event['eventName'], 'The queued event should be the search event.' );
 
 		return (string) ( $event['props']['search_query'] ?? '' );
 	}

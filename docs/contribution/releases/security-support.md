@@ -6,7 +6,7 @@ sidebar_position: 10
 
 # Security Patch Support Policy
 
-When a security fix warrants it (CVSS score >=9), WooCommerce will provide security patches for the **last 21 major versions**. If the current stable WooCommerce version is 11.0, that means version **9.0 and newer**. Otherwise, we publish fixes for the latest version.
+When a security fix warrants it (CVSS score >=9), WooCommerce will provide security patches for the **last 21 major versions**. If the current stable WooCommerce version is 11.1, that means version **9.1 and newer**. Otherwise, we publish fixes for the latest version.
 
 "Major version" follows WooCommerce's release numbering (`10.8`, `10.9`, `11.0`, ...), not semantic versioning. At the current release cadence, 21 major versions correspond to roughly two years of releases.
 
@@ -26,4 +26,4 @@ Security vulnerabilities must be reported privately through Automattic's HackerO
 
 ## Keeping this page current
 
-The release run-book's publish steps include moving the supported-version floor forward when the stable release of a new major version ships.
+When the stable release of a new major version is published, an automated workflow opens a pull request that bumps the minimum supported version on this page. The release DRI reviews and merges it as part of the post-release tasks.

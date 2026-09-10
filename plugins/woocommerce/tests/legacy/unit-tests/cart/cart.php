@@ -1091,7 +1091,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>68,50</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&euro;</span>68,50</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '12.36', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1100,7 +1100,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product4->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>112,00</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&euro;</span>112,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '20.19', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 
@@ -1111,7 +1111,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product6->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&euro;</span>239,00</bdi></span>';
+		$expected_price = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&euro;</span>239,00</bdi></span>';
 		$this->assertEquals( $expected_price, WC()->cart->get_total() );
 		$this->assertEquals( '43.09', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
 	}
@@ -1792,9 +1792,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * test_add_invidual_use_coupon.
+	 * test_add_individual_use_coupon.
 	 */
-	public function test_add_invidual_use_coupon() {
+	public function test_add_individual_use_coupon() {
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon->set_individual_use( true );
 		$iu_coupon->save();
@@ -1898,9 +1898,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * test_cart_object_istantiation.
+	 * test_cart_object_instantiation.
 	 */
-	public function test_cart_object_istantiation() {
+	public function test_cart_object_instantiation() {
 		$cart = new WC_Cart();
 		$this->assertInstanceOf( 'WC_Cart', $cart );
 	}

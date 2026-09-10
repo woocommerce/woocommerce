@@ -262,7 +262,8 @@ class DataUtils {
 			if ( $refund_total_missing && isset( $line_item['refund_tax'] ) ) {
 				return new WP_Error(
 					'invalid_line_item',
-					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' )
+					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -299,7 +300,8 @@ class DataUtils {
 						/* translators: %d: line item id */
 						__( 'Cannot auto-compute refund for line item %d: source quantity is zero. Provide an explicit refund_total.', 'woocommerce' ),
 						(int) $line_item_id
-					)
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -449,7 +451,7 @@ class DataUtils {
 
 					foreach ( $line_item['refund_tax'] as $refund_tax ) {
 						if ( ! isset( $refund_tax['id'], $refund_tax['refund_total'] ) ) {
-							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ) );
+							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ), array( 'status' => WP_Http::BAD_REQUEST ) );
 						}
 						$tax_id           = $refund_tax['id'];
 						$tax_refund_total = $refund_tax['refund_total'];
@@ -461,7 +463,8 @@ class DataUtils {
 								/* translators: %s: tax IDs */
 									__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
 									implode( ', ', $allowed_tax_ids )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 
@@ -495,13 +498,21 @@ class DataUtils {
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
 						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
 						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
+							// 400, not the 422 the over-refund caps above use: this is the
+							// status the released wc/v4 envelope already backfills for this
+							// error, so anything else would change a shipped response. It
+							// also keeps the code-to-status mapping one-to-one across this
+							// file — invalid_refund_amount is 400 at every site, sharing the
+							// code with the wrong-sign guard above, which is malformed
+							// input, while each 422 carries its own over-refund code.
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
 								/* translators: %s: remaining refundable tax total */
 									__( 'Refund tax total cannot be greater than the remaining refundable tax for this line item (%s).', 'woocommerce' ),
 									wc_format_decimal( $remaining_tax, $price_decimals )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 					}

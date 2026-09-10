@@ -3,13 +3,14 @@
  */
 import isPostcode from '../is-postcode';
 import type { IsPostcodeProps } from '../is-postcode';
+import postcodeValidationFixtures from './postcode-validation-fixtures.json';
 
 describe( 'isPostcode', () => {
 	const cases = [
 		// Austrian postcodes
 		[ true, '1000', 'AT' ],
 		[ true, '9999', 'AT' ],
-		[ false, '0000', 'AT' ],
+		[ true, '0000', 'AT' ],
 		[ false, '10000', 'AT' ],
 
 		// Bosnian postcodes
@@ -64,7 +65,7 @@ describe( 'isPostcode', () => {
 		// French postcodes
 		[ true, '01000', 'FR' ],
 		[ true, '99999', 'FR' ],
-		[ true, '01 000', 'FR' ],
+		[ false, '01 000', 'FR' ],
 		[ false, '1234', 'FR' ],
 
 		// British postcodes
@@ -87,6 +88,7 @@ describe( 'isPostcode', () => {
 
 		// Irish postcodes
 		[ true, 'A65F4E2', 'IE' ],
+		[ true, 'a65f4e2', 'IE' ],
 		[ true, 'A65 F4E2', 'IE' ],
 		[ true, 'A65-F4E2', 'IE' ],
 		[ false, 'B23F854', 'IE' ],
@@ -190,15 +192,50 @@ describe( 'isPostcode', () => {
 		[ true, '12345', 'TW' ],
 		[ true, '123', 'TW' ],
 
+		// Countries using the postcode-validator fallback still apply the
+		// character guard shared with PHP.
+		[ true, '2000', 'AU' ],
+		[ false, '2000#', 'AU' ],
+
 		// Unknown country codes — assumed valid since no regex applies.
 		[ true, '12345', 'XX' ],
 		[ true, 'anything', 'ZZ' ],
 		[ true, '', 'XX' ],
+		[ false, 'anything#', 'XX' ],
+
+		// Object prototype keys are unknown country codes, not shared rules.
+		[ true, '12345', 'constructor' ],
+		[ true, '12345', '__proto__' ],
+		[ true, '12345', 'toString' ],
 	];
 
 	test.each( cases )( '%s: %s for %s', ( result, postcode, country ) =>
 		expect( isPostcode( { postcode, country } as IsPostcodeProps ) ).toBe(
 			result
 		)
+	);
+
+	test( 'returns false for non-string runtime values', () => {
+		expect(
+			isPostcode( {
+				postcode: null,
+				country: 'GB',
+			} as unknown as IsPostcodeProps )
+		).toBe( false );
+		expect(
+			isPostcode( {
+				postcode: 'SW1A 1AA',
+				country: null,
+			} as unknown as IsPostcodeProps )
+		).toBe( false );
+	} );
+} );
+
+describe( 'shared postcode validation contract', () => {
+	test.each( postcodeValidationFixtures )(
+		'$expected: $postcode for $country',
+		( { expected, postcode, country } ) => {
+			expect( isPostcode( { postcode, country } ) ).toBe( expected );
+		}
 	);
 } );

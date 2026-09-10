@@ -660,7 +660,7 @@ class Content_Renderer {
 		 * Layout CSS assumes the top level block will have a single DIV wrapper with children. Since our blocks use tables,
 		 * we need to adjust this to look for children in the TD element. This may requires more advanced replacement but
 		 * this works in the current version of Gutenberg.
-		 * Example rule we're targetting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
+		 * Example rule we're targeting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
 		 */
 		$block_support_styles = preg_replace(
 			'/group-is-layout-(\d+) >/',

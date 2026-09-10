@@ -349,6 +349,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * uses `woocommerce_rest_*`, so errors crossing into a v3 response are
 	 * renamed at this boundary. Codes that already carry the prefix pass through
 	 * unchanged, and the message and data (including the HTTP status) are kept.
+	 * An unprefixed engine error whose data carries no HTTP status is backfilled
+	 * with 400, the same default the wc/v4 envelope applies, so it is not served
+	 * as a 500. An already-prefixed code returns untouched above and so misses
+	 * that backfill, which leaves no gap: every prefixed error reaching this
+	 * endpoint is built by normalize_line_item() with an explicit status.
 	 *
 	 * @param WP_Error $error The error whose code should be prefixed.
 	 *
@@ -361,7 +366,20 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			return $error;
 		}
 
-		return new WP_Error( 'woocommerce_rest_' . $code, $error->get_error_message(), $error->get_error_data() );
+		// Every DataUtils error site attaches array data; the guard below is here
+		// so a non-array payload cannot turn the $data['status'] write into a
+		// fatal. Replacing such a payload rather than nesting it mirrors the wc/v4
+		// envelope, which likewise reads a status only out of array data and drops
+		// the rest, so both versions answer an identical error identically.
+		$data = $error->get_error_data();
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+		if ( ! isset( $data['status'] ) ) {
+			$data['status'] = 400;
+		}
+
+		return new WP_Error( 'woocommerce_rest_' . $code, $error->get_error_message(), $data );
 	}
 
 	/**

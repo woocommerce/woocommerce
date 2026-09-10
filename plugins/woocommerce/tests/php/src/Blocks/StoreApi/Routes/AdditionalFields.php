@@ -16,7 +16,7 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
  * AdditionalFields Controller Tests.
  *
  *
- * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
  */
 class AdditionalFields extends \WP_Test_REST_TestCase {
 	use MockeryPHPUnitIntegration;
@@ -627,7 +627,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
+	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox, date).
 	 */
 	public function test_invalid_type_in_registration() {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
@@ -641,7 +641,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						$id,
 						'invalid',
-						implode( ', ', array( 'text', 'select', 'checkbox' ) )
+						implode( ', ', array( 'text', 'select', 'checkbox', 'date' ) )
 					)
 				),
 			)
@@ -1437,6 +1437,95 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 
 		// Ensures the field isn't registered.
 		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
+	}
+
+	/**
+	 * @testdox Date fields reject invalid dates before persistence and accept clean optional values.
+	 *
+	 * @testWith ["cart/update-customer", "billing", "2026-02-31", 400]
+	 *           ["cart/update-customer", "shipping", "2026-02-29", 400]
+	 *           ["cart/update-customer", "billing", "not-a-date", 400]
+	 *           ["cart/update-customer", "billing", "0", 400]
+	 *           ["cart/update-customer", "billing", "2024-02-29", 200]
+	 *           ["cart/update-customer", "shipping", " 2026-08-26 ", 200]
+	 *           ["cart/update-customer", "billing", "", 200]
+	 *           ["cart/update-customer", "billing", null, 200]
+	 *           ["checkout", "billing", "2026-02-31", 400]
+	 *           ["checkout", "shipping", "2026-02-29", 400]
+	 *           ["checkout", "billing", " 2026-08-26 ", 200]
+	 *           ["checkout", "shipping", "", 200]
+	 *           ["checkout", "contact", "2026-02-31", 400]
+	 *           ["checkout", "order", "2026-02-29", 400]
+	 *           ["checkout", "contact", " 2026-08-26 ", 200]
+	 *           ["checkout", "order", " 2026-08-26 ", 200]
+	 *
+	 * @param string      $route           Store API route.
+	 * @param string      $location        Field location or address group.
+	 * @param string|null $value           Submitted date, or null to omit the field.
+	 * @param int         $expected_status Expected response status.
+	 */
+	public function test_date_field_validation_before_persistence( string $route, string $location, ?string $value, int $expected_status ): void {
+		$this->unregister_fields();
+		$id         = 'test/delivery-date';
+		$is_address = in_array( $location, array( 'billing', 'shipping' ), true );
+		$group      = $is_address ? $location : 'other';
+		$param      = $is_address ? $location . '_address' : 'additional_fields';
+
+		$callback_calls = 0;
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => $id,
+				'label'             => 'Delivery date',
+				'location'          => $is_address ? 'address' : $location,
+				'type'              => 'date',
+				'validate_callback' => static function () use ( &$callback_calls ) {
+					++$callback_calls;
+					return true;
+				},
+			)
+		);
+		$this->controller->persist_field_for_customer( $id, '2026-08-01', WC()->customer, $group );
+
+		$address = array(
+			'first_name' => 'Jane',
+			'last_name'  => 'Doe',
+			'address_1'  => '123 Main Street',
+			'city'       => 'New York',
+			'state'      => 'NY',
+			'postcode'   => '10001',
+			'country'    => 'US',
+		);
+		$params  = array(
+			'billing_address'   => array_merge( $address, array( 'email' => 'jane@example.com' ) ),
+			'shipping_address'  => $address,
+			'payment_method'    => WC_Gateway_BACS::ID,
+			'additional_fields' => array(),
+		);
+		if ( null !== $value ) {
+			$params[ $param ][ $id ] = $value;
+		}
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/' . $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $params );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( $expected_status, $response->get_status(), wp_json_encode( $data ) );
+		if ( 'cart/update-customer' === $route ) {
+			$this->assertSame( 0, $callback_calls, 'Address type validation must not add calls to extension callbacks.' );
+		}
+		if ( 400 === $expected_status ) {
+			$this->assertSame( 'rest_invalid_param', $data['code'] );
+			$this->assertStringContainsString( 'Delivery date', wp_json_encode( $data['data']['details'] ) );
+			$this->assertSame( '2026-08-01', $this->controller->get_field_from_object( $id, WC()->customer, $group ) );
+			return;
+		}
+
+		$object   = 'checkout' === $route ? wc_get_order( $data['order_id'] ) : WC()->customer;
+		$expected = null === $value ? '2026-08-01' : trim( $value );
+		$this->assertSame( $expected, $this->controller->get_field_from_object( $id, $object, $group ) );
 	}
 
 	/**

@@ -223,7 +223,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'rest_api_init' );
 		} finally {
 			if ( null === $rest_api_init_hook ) {
@@ -541,7 +540,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	/**
 	 * Normalizes a block of HTML.
-	 * Line breaks, tabs and redundand whitespaces are removed.
+	 * Line breaks, tabs and redundant whitespaces are removed.
 	 *
 	 * @param string $html The block of HTML to normalize.
 	 *

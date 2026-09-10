@@ -933,4 +933,326 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame( '', $result['token'] );
 		$this->assertEmpty( $result['arguments'] );
 	}
+
+	/**
+	 * Test that a registered value interceptor receives the resolved value, the raw
+	 * source token, and the html rendering context for a content tag, and that its
+	 * return value is written instead of the resolved value.
+	 */
+	public function testValueInterceptorForContentTag(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'first_name',
+				'user-firstname',
+				'User',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return $context['subscriber_name'] ?? 'Default Name';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return '{placeholder-1}';
+			}
+		);
+
+		$this->personalizer->set_context( array( 'subscriber_name' => 'John' ) );
+		$html_content = '<p>Hello, <!--[user-firstname default="Guest"]-->!</p>';
+		$this->assertSame( '<p>Hello, {placeholder-1}!</p>', $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame(
+			array(
+				array( 'John', '[user-firstname default="Guest"]', Personalizer::RENDERING_CONTEXT_HTML ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that clearing the value interceptor with null restores default behavior.
+	 */
+	public function testValueInterceptorCanBeCleared(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'first_name',
+				'user-firstname',
+				'User',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $context parameter is not used in this test.
+					return 'John';
+				}
+			)
+		);
+
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+				return '{placeholder-1}';
+			}
+		);
+		$html_content = '<p>Hello, <!--[user-firstname]-->!</p>';
+		$this->assertSame( '<p>Hello, {placeholder-1}!</p>', $this->personalizer->personalize_content( $html_content ) );
+		// The second call verifies that the interceptor persists across personalize_content() calls.
+		$this->assertSame( '<p>Hello, {placeholder-1}!</p>', $this->personalizer->personalize_content( $html_content ) );
+
+		$this->personalizer->set_value_interceptor( null );
+		$this->assertSame( '<p>Hello, John!</p>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test that the interceptor is not called for tokens without a registered tag.
+	 */
+	public function testValueInterceptorNotCalledForUnknownTag(): void {
+		$calls = 0;
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+				++$calls;
+				return $value;
+			}
+		);
+
+		$html_content = '<p>Hello, <!--[mailpoet/unknown-tag]-->!</p>';
+		$this->assertSame( $html_content, $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
+	 * Test that the interceptor receives the text rendering context for tags inside
+	 * <title> and the html rendering context for tags in the body.
+	 */
+	public function testValueInterceptorReceivesTextContextInTitle(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'first_name',
+				'user-firstname',
+				'User',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+					return 'John';
+				}
+			)
+		);
+
+		$contexts = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$contexts ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $source parameter is not used in this test.
+				$contexts[] = $rendering_context;
+				return Personalizer::RENDERING_CONTEXT_TEXT === $rendering_context ? '{title-placeholder}' : $value;
+			}
+		);
+
+		$html_content = '<html><head><title>Hi <!--[user-firstname]-->!</title></head><body><p>Hi <!--[user-firstname]-->!</p></body></html>';
+		$result       = $this->personalizer->personalize_content( $html_content );
+		$this->assertSame( '<html><head><title>Hi {title-placeholder}!</title></head><body><p>Hi John!</p></body></html>', $result );
+		$this->assertSame( array( Personalizer::RENDERING_CONTEXT_TEXT, Personalizer::RENDERING_CONTEXT_HTML ), $contexts );
+	}
+
+	/**
+	 * Test that the interceptor receives the escaped value of a text value type tag
+	 * in the html rendering context and that its return value is written verbatim.
+	 */
+	public function testValueInterceptorReceivesEscapedTextValue(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'shop_name',
+				'test/shop-name',
+				'Test',
+				function () {
+					return 'Tom & Jerry';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $source parameter is not used in this test.
+				$calls[] = array( $value, $rendering_context );
+				return '{shop-placeholder}';
+			}
+		);
+
+		$this->assertSame( '<p>{shop-placeholder}</p>', $this->personalizer->personalize_content( '<p><!--[test/shop-name]--></p>' ) );
+		$this->assertSame(
+			array(
+				array( 'Tom &amp; Jerry', Personalizer::RENDERING_CONTEXT_HTML ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that the interceptor receives the fully resolved href, the raw
+	 * data-link-href source, and the href rendering context, and that its return
+	 * value is written as the href.
+	 */
+	public function testValueInterceptorForDataLinkHref(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+					return 'https://example.com/store';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return 'https://intercepted.example.com';
+			}
+		);
+
+		$html_content = '<a data-link-href="[woocommerce/store-url]" href="#" contenteditable="true">Click here</a>';
+		$result       = $this->personalizer->personalize_content( $html_content );
+		$this->assertStringContainsString( 'href="https://intercepted.example.com"', $result );
+		$this->assertStringNotContainsString( 'data-link-href', $result );
+		$this->assertStringNotContainsString( 'contenteditable', $result );
+		$this->assertSame(
+			array(
+				array( 'https://example.com/store', '[woocommerce/store-url]', Personalizer::RENDERING_CONTEXT_HREF ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that the interceptor receives the resolved value, the tag token found in
+	 * the href, and the href rendering context for a plain anchor with an embedded
+	 * tag, and that its return value is written as the href.
+	 */
+	public function testValueInterceptorForPlainHrefTag(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+					return 'https://example.com/store';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return 'https://intercepted.example.com';
+			}
+		);
+
+		$html_content = '<a href="http://[woocommerce/store-url]">Click here</a>';
+		$this->assertSame( '<a href="https://intercepted.example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame(
+			array(
+				array( 'https://example.com/store', '[woocommerce/store-url]', Personalizer::RENDERING_CONTEXT_HREF ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that the interceptor is called once per tag token embedded in a plain
+	 * href and that each return value replaces its token in the URL.
+	 */
+	public function testValueInterceptorForMultipleHrefTokens(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'One',
+				'test/one',
+				'Test',
+				function () {
+					return 'first-value';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Two',
+				'test/two',
+				'Test',
+				function () {
+					return 'second-value';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return '[test/one]' === $source ? 'ONE' : 'TWO';
+			}
+		);
+
+		// Note: WordPress encodes & as &#038; in URLs.
+		$this->assertSame(
+			'<a href="https://example.com/?a=ONE&#038;b=TWO">Click</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?a=[test/one]&b=[test/two]">Click</a>' )
+		);
+		$this->assertSame(
+			array(
+				array( 'first-value', '[test/one]', Personalizer::RENDERING_CONTEXT_HREF ),
+				array( 'second-value', '[test/two]', Personalizer::RENDERING_CONTEXT_HREF ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that an interceptor return value at the href sites is escaped as a URL when
+	 * written into the href attribute: esc_url() strips characters not allowed in URLs
+	 * (such as curly braces) and prepends a missing scheme.
+	 */
+	public function testValueInterceptorHrefReturnIsEscapedAsUrl(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'test/store-url',
+				'Test',
+				function () {
+					return 'https://example.com/store';
+				}
+			)
+		);
+
+		$this->personalizer->set_value_interceptor(
+			function (): string {
+				return '{{placeholder-1}}';
+			}
+		);
+
+		$this->assertSame(
+			'<a  href="http://placeholder-1">Click here</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/store-url]" href="#">Click here</a>' ),
+			'The data-link-href site should write the interceptor return through esc_url()'
+		);
+		$this->assertSame(
+			'<a href="https://example.com/?ref=placeholder-1">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?ref=[test/store-url]">Click here</a>' ),
+			'The plain-href site should write the interceptor return through esc_url()'
+		);
+	}
+
+	/**
+	 * Test that set_value_interceptor() returns the previously registered interceptor
+	 * so a consumer replacing it temporarily can restore it.
+	 */
+	public function testValueInterceptorSetterReturnsPrevious(): void {
+		$first  = function (): string {
+			return 'first';
+		};
+		$second = function (): string {
+			return 'second';
+		};
+
+		$this->assertNull( $this->personalizer->set_value_interceptor( $first ) );
+		$this->assertSame( $first, $this->personalizer->set_value_interceptor( $second ) );
+		$this->assertSame( $second, $this->personalizer->set_value_interceptor( null ) );
+	}
 }

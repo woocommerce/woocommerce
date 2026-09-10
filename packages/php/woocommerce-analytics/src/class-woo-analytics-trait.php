@@ -266,15 +266,25 @@ trait Woo_Analytics_Trait {
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
 		 *
+		 * See `WC_Analytics_Tracking::get_properties()` for the full contract
+		 * around `$is_client_supplied`.
+		 *
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
+		 * @since 0.18.0 Added the `$is_client_supplied` parameter. This call site
+		 *               also began passing `$event_name`, which the hook already had.
 		 *
-		 * @param array $properties Array of event props to be filtered.
+		 * @param array  $properties Array of event props to be filtered.
+		 * @param string $event_name Event name. Empty string here: this call builds
+		 *                           common properties, not properties for a specific event.
+		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
 		$properties = apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			'',
+			false
 		);
 
 		return $properties;
@@ -298,7 +308,9 @@ trait Woo_Analytics_Trait {
 		/** This filter is documented in src/class-woo-analytics-trait.php */
 		return apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			'',
+			false
 		);
 	}
 
@@ -343,7 +355,7 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Gets product categories or varation attributes as a formatted concatenated string
+	 * Gets product categories or variation attributes as a formatted concatenated string
 	 *
 	 * @param object $product WC_Product.
 	 * @return string

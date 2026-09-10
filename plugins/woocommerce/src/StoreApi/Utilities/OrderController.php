@@ -766,11 +766,11 @@ class OrderController {
 						/**
 						 * Filters whether or not the product is in stock for this pay for order.
 						 *
-						 * @param boolean True if in stock.
+						 * @param boolean $is_in_stock True if in stock.
 						 * @param \WC_Product $product Product.
-						 * @param \WC_Order $order Order.
+						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
-						 * @since 9.8.0-dev
+						 * @since 8.1.0
 						 */
 						if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
 							return array(
@@ -792,11 +792,11 @@ class OrderController {
 						/**
 						 * Filters whether or not the product has enough stock.
 						 *
-						 * @param boolean True if has enough stock.
+						 * @param boolean $has_enough_stock True if has enough stock.
 						 * @param \WC_Product $product Product.
-						 * @param \WC_Order $order Order.
+						 * @param \WC_Order|\WC_Order_Refund|false $order Order.
 						 *
-						 * @since 9.8.0-dev
+						 * @since 8.1.0
 						 */
 						if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
 							/* translators: 1: product name 2: quantity in stock */

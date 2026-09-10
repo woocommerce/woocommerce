@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make focus indicators consistent on the Payments settings screen: stop the "More payment options" ring from appearing on mouse click, give it room to breathe, round the square rings on the drag handle and section header, and give the Official badge, the category info icons and the status badge info icon themed focus rings instead of the browser default. The highlighted row in the business location selector now follows the admin colour scheme too.

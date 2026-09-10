@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove the unused PHPUnit dev dependency and move symfony/process to a patched version.

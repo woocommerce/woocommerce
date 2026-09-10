@@ -1041,7 +1041,7 @@ class ListTable extends WP_List_Table {
 				'cb'               => '<input type="checkbox" />',
 				'order_number'     => esc_html__( 'Order', 'woocommerce' ),
 				'order_date'       => esc_html__( 'Date', 'woocommerce' ),
-				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
+				'order_status'     => esc_html_x( 'Status', 'Order status', 'woocommerce' ),
 				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
 				'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
 				'order_total'      => esc_html__( 'Total', 'woocommerce' ),
@@ -1649,7 +1649,7 @@ class ListTable extends WP_List_Table {
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) {
 				/* translators: %s: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				break;

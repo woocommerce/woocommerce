@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saved for Later declares its auto-injection after the Cart block via block.json blockHooks, injects wherever the Cart block is used, stays registered while the feature is off to prevent an unsupported-block notice, and allows only one instance per page

@@ -34,7 +34,8 @@ class OptionSanitizer {
 				2
 			);
 		}
-		// Cast "Out of stock threshold" field to absolute integer to prevent storing empty value.
+		// Normalize stock threshold settings to non-negative integers.
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_low_stock_amount', 'absint' );
 		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_no_stock_amount', 'absint' );
 	}
 

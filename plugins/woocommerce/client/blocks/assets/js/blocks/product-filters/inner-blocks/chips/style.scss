@@ -1,3 +1,7 @@
+:where(.wp-block-woocommerce-product-filter-chips) {
+	font-size: 0.8em;
+}
+
 :where(.wc-block-product-filter-chips__fieldset) {
 	display: contents;
 }
@@ -14,8 +18,10 @@
 	appearance: none;
 	background: transparent;
 	border-radius: 2px;
-	font-size: 0.8em;
 	font-family: inherit;
+	font-size: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
 	cursor: pointer;
 	color: inherit;
 
@@ -94,7 +100,6 @@
 	border: 0;
 	padding: 0;
 	font: inherit;
-	font-size: 0.875em;
 	color: inherit;
 	text-decoration: underline;
 	cursor: pointer;

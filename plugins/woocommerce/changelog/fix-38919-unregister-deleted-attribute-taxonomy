@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unregister a global product attribute's runtime taxonomy when the attribute is deleted so its slug can be reused in the same request.

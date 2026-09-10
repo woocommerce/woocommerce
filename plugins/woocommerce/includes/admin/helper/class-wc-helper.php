@@ -31,6 +31,21 @@ class WC_Helper {
 	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
 
 	/**
+	 * Transient holding the last failed Helper API subscriptions response, so the
+	 * failure can be surfaced to the merchant instead of rendering as an empty
+	 * subscription list.
+	 */
+	private const CACHE_KEY_API_ERROR = '_woocommerce_helper_subscriptions_api_error';
+
+	/**
+	 * Status codes that get_message_for_response_code() has purpose-written copy
+	 * for. Only these are worth re-deriving on read; for anything else the
+	 * message recorded at failure time is more specific than the generic
+	 * "HTTP status code %d" fallback. Keep in sync with that method.
+	 */
+	private const RESPONSE_CODES_WITH_SPECIFIC_MESSAGES = array( 403, 429 );
+
+	/**
 	 * Get an absolute path to the requested helper view.
 	 *
 	 * @param string $view The requested view file.
@@ -79,6 +94,125 @@ class WC_Helper {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Record the last failed Helper API subscriptions response.
+	 *
+	 * The message is stored alongside the code because it is often more specific
+	 * than anything we can rebuild from the status alone — a 401 carries
+	 * reconnect guidance, a 422 explains an unparseable body. Where we do have
+	 * purpose-written copy for a status, get_api_error() rebuilds it on read so
+	 * it lands in the viewer's locale instead of the recording request's.
+	 *
+	 * A 429 is held for the whole backoff window, otherwise the notice would
+	 * disappear while requests are still being suppressed and the screen would
+	 * silently revert to looking like an empty account.
+	 *
+	 * @param int    $code    HTTP status code, or 0 for a transport-level failure.
+	 * @param string $message Fallback message for failures with no HTTP status.
+	 * @return void
+	 */
+	private static function record_api_error( int $code, string $message ): void {
+		if ( $code < 100 ) {
+			// get_api_error() replaces this with merchant-facing guidance, and the
+			// catch in get_subscriptions() only logs failures from 404 up, so
+			// without this the transport detail would be lost entirely.
+			self::log( 'Could not reach the WooCommerce.com API: ' . $message, 'error' );
+		}
+
+		$ttl = 15 * MINUTE_IN_SECONDS;
+
+		if ( 429 === $code ) {
+			$retry_after = WC_Helper_API_Backoff::get_retry_after( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+
+			if ( null !== $retry_after ) {
+				$ttl = $retry_after;
+			}
+		}
+
+		set_transient(
+			self::CACHE_KEY_API_ERROR,
+			array(
+				'code'    => $code,
+				'message' => $message,
+			),
+			$ttl
+		);
+	}
+
+	/**
+	 * The last failed Helper API subscriptions response, if one is still current.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array{code:int, message:string, retry_after:int|null}|null Null when the last fetch succeeded.
+	 */
+	public static function get_api_error(): ?array {
+		$error = get_transient( self::CACHE_KEY_API_ERROR );
+
+		if ( ! is_array( $error ) || ! isset( $error['code'] ) ) {
+			return null;
+		}
+
+		$code           = (int) $error['code'];
+		$stored_message = (string) ( $error['message'] ?? '' );
+
+		// A rate limit is the one failure with a known end, and the generic copy
+		// ("a few minutes") understates a window that can run to hours. Read the
+		// backoff live so the figure counts down across page loads.
+		$retry_after = 429 === $code
+			? WC_Helper_API_Backoff::get_retry_after( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS )
+			: null;
+
+		if ( null !== $retry_after ) {
+			$now = time();
+
+			$message = sprintf(
+				/* translators: %s: localized duration until the request limit resets, e.g. "5 minutes" or "3 hours". */
+				__( 'You have exceeded the request limit. Please try again in %s.', 'woocommerce' ),
+				human_time_diff( $now, $now + $retry_after )
+			);
+		} elseif ( in_array( $code, self::RESPONSE_CODES_WITH_SPECIFIC_MESSAGES, true ) ) {
+			// We have copy written for this status, so rebuilding it costs nothing
+			// and gains the viewer's locale.
+			$message = self::get_message_for_response_code( $code );
+		} elseif ( $code < 100 ) {
+			// No HTTP status means the request never completed, so the recorded
+			// message is raw transport text ("cURL error 28: Operation timed
+			// out...") — untranslated developer detail that tells a merchant
+			// nothing. record_api_error() logs the specifics instead. The copy
+			// points at the store's own connectivity because that is the
+			// overwhelmingly likelier cause of a failed connection.
+			$message = __( 'Your store could not connect to WooCommerce.com. Please try again after a few minutes. If the issue persists, check whether your server can make outgoing requests.', 'woocommerce' );
+		} elseif ( '' !== $stored_message ) {
+			// Otherwise the recorded message wins. Rebuilding from the status
+			// would replace real guidance — the reconnect instructions on a 401,
+			// the invalid-response explanation on a 422 — with a bare
+			// "HTTP status code %d".
+			$message = $stored_message;
+		} else {
+			$message = self::get_message_for_response_code( $code );
+		}
+
+		if ( '' === $message ) {
+			return null;
+		}
+
+		return array(
+			'code'        => $code,
+			'message'     => $message,
+			'retry_after' => $retry_after,
+		);
+	}
+
+	/**
+	 * Clear the recorded Helper API subscriptions failure.
+	 *
+	 * @return void
+	 */
+	private static function clear_api_error(): void {
+		delete_transient( self::CACHE_KEY_API_ERROR );
 	}
 
 	/**
@@ -160,6 +294,7 @@ class WC_Helper {
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-options.php';
 		include_once __DIR__ . '/class-wc-helper-api.php';
+		include_once __DIR__ . '/class-wc-helper-api-backoff.php';
 		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
 		include_once __DIR__ . '/class-wc-woo-helper-connection.php';
 		include_once __DIR__ . '/class-wc-helper-updater.php';
@@ -945,6 +1080,7 @@ class WC_Helper {
 
 		// Ignore all previously dismissed connected notices.
 		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECT_NOTICE, '', true );
+		delete_metadata( 'user', 0, \Automattic\WooCommerce\Admin\PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, '', true );
 
 		$connect_url = add_query_arg(
 			array(
@@ -1142,6 +1278,10 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
+
+		// A manual refresh resets any rate-limit backoff so the subsequent
+		// Helper API calls (e.g. update-check) are made fresh rather than skipped.
+		WC_Helper_API_Backoff::clear_all();
 	}
 
 	/**
@@ -1937,10 +2077,17 @@ class WC_Helper {
 			delete_transient( $cache_key );
 		}
 
+		// If a previous subscriptions call was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. A manual
+		// refresh bypasses and clears the backoff (see WC_Helper_API_Backoff).
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ) ) {
+			return array();
+		}
+
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+			if ( WC_Helper_API_Backoff::is_refresh_request() ) :
 				$source = 'refresh-button';
 			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
@@ -1973,7 +2120,16 @@ class WC_Helper {
 
 			$code = wp_remote_retrieve_response_code( $request );
 			if ( 200 !== $code ) {
-				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+				// Respect server-side rate limiting: on a 429, record the reset window
+				// so we hold off on further subscriptions calls until then, and leave
+				// the cache alone. Caching an empty list here would outlive a shorter
+				// reset window and keep the site on an empty subscription list after
+				// WooCommerce.com already allows a retry. The backoff is the gate.
+				if ( 429 === (int) $code ) {
+					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS, $request );
+				} else {
+					set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+				}
 
 				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
@@ -2001,8 +2157,14 @@ class WC_Helper {
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
+			self::clear_api_error();
 			return $data;
 		} catch ( Exception $e ) {
+			// Record every failure, including those below 404, so the screen can
+			// explain itself instead of rendering an empty subscription list. This
+			// deliberately does not rethrow: callers rely on an empty array.
+			self::record_api_error( (int) $e->getCode(), $e->getMessage() );
+
 			if ( $e->getCode() < 404 ) {
 				self::remove_api_error_notice();
 			} else {

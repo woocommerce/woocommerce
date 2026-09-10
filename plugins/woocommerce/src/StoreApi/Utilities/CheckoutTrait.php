@@ -88,6 +88,13 @@ trait CheckoutTrait {
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
 
+		$session = WC()->session;
+		$session->set( 'order_awaiting_payment', $order->get_id() );
+		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
+		if ( is_callable( array( $session, 'save_data' ) ) ) {
+			$session->save_data();
+		}
+
 		try {
 			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
@@ -117,7 +124,7 @@ trait CheckoutTrait {
 			/**
 			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 			 *
-			 * @param bool The WP_DEBUG mode.
+			 * @param bool $return_previous_exceptions Whether to include the previous exception. Defaults to the WP_DEBUG value.
 			 */
 			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [

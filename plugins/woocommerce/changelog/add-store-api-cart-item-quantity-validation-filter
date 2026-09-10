@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a woocommerce_store_api_cart_item_quantity_validation filter so extensions can validate cart item quantity changes made via the Store API.
