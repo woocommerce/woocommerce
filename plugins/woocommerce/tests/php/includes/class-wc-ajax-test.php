@@ -1799,7 +1799,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
 	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
-	 * @dataProvider provide_update_order_review_notice_cases
+	 * @dataProvider update_order_review_notice_cases_provider
 	 *
 	 * @param array[] $notices                Notices to add during the checkout update.
 	 * @param string  $expected_result        Expected legacy AJAX result, which only reports whether a notice was rendered.
@@ -1901,7 +1901,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public static function provide_update_order_review_notice_cases(): array {
+	public static function update_order_review_notice_cases_provider(): array {
 		return array(
 			'no notices'                     => array(
 				array(),
