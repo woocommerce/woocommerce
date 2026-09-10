@@ -28,6 +28,9 @@ use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
 use WC_Order_Item_Fee;
 use WC_Order_Item_Coupon;
+use WC_Product;
+use WC_Product_Variation;
+use WC_Data_Exception;
 
 /**
  * UpdateUtils class.
@@ -347,6 +350,7 @@ class UpdateUtils {
 		return $product_id;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id_from_line_item().
 	/**
 	 * Create or update a line item, overridden to add COGS data as needed.
 	 *
@@ -355,13 +359,66 @@ class UpdateUtils {
 	 * @param object $item Passed when updating an item. Null during creation.
 	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
+	 * @throws WC_Data_Exception Invalid product data.
 	 */
 	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
+		$product              = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
+		$current_product_id   = $product_item ? (int) $product_item->get_product_id( 'edit' ) : 0;
+		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
+		// Restore variations only for same-product partial updates. A zero variation ID demotes only
+		// when posted with the parent product ID; by itself it resolves no product.
+		$same_product_update  = 'update' === $action
+			&& array_key_exists( 'product_id', $request_data )
+			&& $product instanceof WC_Product
+			&& (int) $request_data['product_id'] === $current_product_id
+			&& in_array( $product->get_id(), array( $current_product_id, $current_variation_id ), true );
+		$restore_variation_id = $same_product_update
+			&& $current_variation_id
+			&& ( ! array_key_exists( 'variation_id', $request_data ) || (int) $request_data['variation_id'] === $current_variation_id );
+		$clear_variation_id   = $same_product_update
+			&& $current_variation_id
+			&& array_key_exists( 'variation_id', $request_data )
+			&& 0 === (int) $request_data['variation_id'];
+
+		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
+			$product = wc_get_product( $current_product_id );
+		}
 
 		if ( $product && $product !== $item->get_product() ) {
-			$item->set_product( $product );
+			// A parent-only update must refresh product fields and validate the stored variation without
+			// calling set_product(), which would clear its historical attributes.
+			if ( $restore_variation_id && $product_item ) {
+				try {
+					$product_item->set_variation_id( $current_variation_id );
+					$product_item->set_name( $product->get_name() );
+					$product_item->set_tax_class( $product->get_tax_class() );
+				} catch ( WC_Data_Exception $e ) {
+					if (
+						'order_item_product_invalid_variation_id' !== $e->getErrorCode()
+						|| 'product_variation' === get_post_type( $current_variation_id )
+					) {
+						throw $e;
+					}
+					// The stored variation ID no longer identifies a variation: demote via set_product().
+					// A subclass veto reusing this error code for an already-deleted variation is indistinguishable
+					// from the core throw and is deliberately swallowed too: rethrowing for subclasses (e.g. via a
+					// get_class() check) would revive the 400 on every store substituting order item classes.
+					$product_item->set_product( $product );
+					wc_get_logger()->warning(
+						sprintf(
+							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
+							$product_item->get_id(),
+							$product_item->get_order_id(),
+							$current_variation_id
+						),
+						array( 'source' => 'rest-api' )
+					);
+				}
+			} else {
+				$item->set_product( $product );
+			}
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $request_data['quantity'] ) ? $request_data['quantity'] : 1;
@@ -387,6 +444,7 @@ class UpdateUtils {
 
 		return $item;
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.
