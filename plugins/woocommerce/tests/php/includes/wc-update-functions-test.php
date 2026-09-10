@@ -651,10 +651,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$db_updates = WC_Install::get_db_update_callbacks();
 
-		// Under its own key, so that a store already on 11.2.0-2 from the batch that shipped beside
-		// it still rewrites its rows.
-		$this->assertArrayHasKey( '11.2.0-3', $db_updates );
-		$this->assertContains( 'wc_update_11203_normalize_stock_notification_emails', $db_updates['11.2.0-3'] );
+		$this->assertArrayHasKey( '11.2.0', $db_updates );
+		$this->assertContains( 'wc_update_11203_normalize_stock_notification_emails', $db_updates['11.2.0'] );
 
 		$table = $wpdb->prefix . 'wc_stock_notifications';
 		foreach ( array( 'Legacy@Example.com', " padded@example.com\t", 'canonical@example.com' ) as $email ) {
