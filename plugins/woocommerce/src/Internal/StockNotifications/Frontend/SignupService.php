@@ -143,7 +143,8 @@ class SignupService {
 
 				// Double opt-in is not required, so activate the pending notification instead of creating one.
 				$notification->set_status( NotificationStatus::ACTIVE );
-				if ( ! $notification->save() ) {
+				$saved = $notification->save();
+				if ( \is_wp_error( $saved ) || ! $saved ) {
 					return new \WP_Error( self::ERROR_FAILED );
 				}
 
@@ -191,7 +192,7 @@ class SignupService {
 		}
 
 		$saved = $notification->save();
-		if ( ! $saved ) {
+		if ( \is_wp_error( $saved ) || ! $saved ) {
 			return new \WP_Error( self::ERROR_FAILED );
 		}
 
