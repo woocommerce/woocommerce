@@ -35,6 +35,7 @@ import { FilterOptionItem, FilterItemFields } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
+import { getProductCollectionQueryState } from '../../utils/get-product-collection-query-state';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -71,6 +72,9 @@ const Edit = ( props: EditProps ) => {
 				__experimental_visual: true,
 			},
 		} );
+	const localQueryState = getProductCollectionQueryState(
+		props.context.query
+	);
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
 		useCollectionData( {
@@ -78,7 +82,7 @@ const Edit = ( props: EditProps ) => {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType,
 			},
-			queryState: {},
+			queryState: localQueryState ?? {},
 			isEditor: true,
 		} );
 

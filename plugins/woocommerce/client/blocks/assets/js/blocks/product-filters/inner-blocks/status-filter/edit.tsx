@@ -19,6 +19,7 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
 import type { EditProps } from './types';
 import type { FilterItemFields } from '../../types';
+import { getProductCollectionQueryState } from '../../utils/get-product-collection-query-state';
 
 const Edit = ( props: EditProps ) => {
 	const { showCounts, hideEmpty } = props.attributes;
@@ -50,10 +51,13 @@ const Edit = ( props: EditProps ) => {
 		'stockStatusOptions',
 		{}
 	);
+	const localQueryState = getProductCollectionQueryState(
+		props.context.query
+	);
 
 	const { data: filteredCounts, isLoading } = useCollectionData( {
 		queryStock: true,
-		queryState: {},
+		queryState: localQueryState ?? {},
 		isEditor: true,
 	} );
 

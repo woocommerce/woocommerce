@@ -1,12 +1,63 @@
 /**
  * External dependencies
  */
+import type { Request } from '@playwright/test';
 import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
+
+const COLLECTION_DATA_PATH = '/wc/store/v1/products/collection-data';
+const COLLECTION_DATA_CALCULATION_FAMILIES = [
+	'calculate_attribute_counts',
+	'calculate_price_range',
+	'calculate_stock_status_counts',
+	'calculate_rating_counts',
+	'calculate_taxonomy_counts',
+] as const;
+
+const isCollectionDataRequest = ( request: Request ) =>
+	new URL( request.url() ).pathname.endsWith( COLLECTION_DATA_PATH );
+
+const hasQueryParameterFamily = (
+	searchParams: URLSearchParams,
+	parameter: string
+) => {
+	let hasParameter = false;
+	searchParams.forEach( ( _value, key ) => {
+		if ( key === parameter || key.startsWith( `${ parameter }[` ) ) {
+			hasParameter = true;
+		}
+	} );
+	return hasParameter;
+};
+
+const isColorAggregateCollectionDataRequest = ( request: Request ) => {
+	if ( ! isCollectionDataRequest( request ) ) {
+		return false;
+	}
+
+	const searchParams = new URL( request.url() ).searchParams;
+	let calculatesColorAttributeCounts = false;
+	searchParams.forEach( ( value, key ) => {
+		if (
+			key.startsWith( 'calculate_attribute_counts' ) &&
+			key.endsWith( '[taxonomy]' ) &&
+			value === 'pa_color'
+		) {
+			calculatesColorAttributeCounts = true;
+		}
+	} );
+
+	return (
+		calculatesColorAttributeCounts &&
+		COLLECTION_DATA_CALCULATION_FAMILIES.every( ( calculation ) =>
+			hasQueryParameterFamily( searchParams, calculation )
+		)
+	);
+};
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -662,7 +713,12 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.addFilter( 'Show product categories' );
-			await pageObject.checkTaxonomyTerm( 'categories', 'Music' );
+			await pageObject
+				.locateSidebarSettings()
+				.getByRole( 'treeitem', { name: /Clothing/ } )
+				.press( 'Enter' );
+			await pageObject.checkTaxonomyTerm( 'categories', 'Hoodies' );
+			await expect( pageObject.products ).toHaveCount( 3 );
 
 			const productCollectionBlock = await editor.getBlockByName(
 				'woocommerce/product-collection'
@@ -671,25 +727,93 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 				( await productCollectionBlock
 					.last()
 					.getAttribute( 'data-block' ) ) ?? '';
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-filters' },
-				{ clientId: productCollectionClientId }
+			const selectedCategoryIds = await page.evaluate(
+				( clientId ) =>
+					window.wp.data
+						.select( 'core/block-editor' )
+						.getBlock( clientId ).attributes.query.taxQuery
+						.product_cat,
+				productCollectionClientId
 			);
+			expect( selectedCategoryIds ).toHaveLength( 1 );
+			const selectedCategoryId = selectedCategoryIds[ 0 ];
+			expect( selectedCategoryId ).toEqual( expect.any( Number ) );
 
-			await expect( pageObject.products ).toHaveCount( 2 );
+			const observedRequests: Request[] = [];
+			const captureRequest = ( request: Request ) =>
+				observedRequests.push( request );
+			page.on( 'request', captureRequest );
+
+			try {
+				await editor.insertBlock(
+					{ name: 'woocommerce/product-filters' },
+					{ clientId: productCollectionClientId }
+				);
+
+				const colorFilter = await editor.getBlockByName(
+					'woocommerce/product-filter-attribute'
+				);
+				const colorFilterOptions = colorFilter.locator(
+					'.wc-block-product-filter-checkbox-list'
+				);
+				await expect( colorFilterOptions ).not.toHaveClass(
+					/is-loading/
+				);
+				await expect(
+					colorFilterOptions.getByText( 'Blue', { exact: true } )
+				).toBeVisible();
+				await expect(
+					colorFilterOptions.getByText( 'Yellow', { exact: true } )
+				).toHaveCount( 0 );
+				const categoryFilter = await editor.getBlockByName(
+					'woocommerce/product-filter-taxonomy'
+				);
+				await expect(
+					categoryFilter.getByText( 'Hoodies', { exact: true } )
+				).toBeVisible();
+				await expect(
+					categoryFilter.getByText( 'Music', { exact: true } )
+				).toHaveCount( 0 );
+
+				await expect
+					.poll( () =>
+						observedRequests.some(
+							isColorAggregateCollectionDataRequest
+						)
+					)
+					.toBe( true );
+
+				const collectionDataRequests = observedRequests.filter(
+					isCollectionDataRequest
+				);
+				for ( const request of collectionDataRequests ) {
+					expect(
+						new URL( request.url() ).searchParams.get( 'category' )
+					).toBe( selectedCategoryId.toString() );
+					expect(
+						new URL( request.url() ).searchParams.get(
+							'taxonomy_include_children[product_cat]'
+						)
+					).toBe( 'false' );
+				}
+			} finally {
+				page.off( 'request', captureRequest );
+			}
+
+			await expect( pageObject.products ).toHaveCount( 3 );
 
 			const postId = await editor.publishPost();
 			await page.goto( `/?p=${ postId }` );
 			await pageObject.refreshLocators( 'frontend' );
 
-			await expect( pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.products ).toHaveCount( 3 );
 
 			await page
 				.getByRole( 'textbox', {
 					name: 'Filter products by maximum price',
 				} )
 				.dblclick();
-			await page.keyboard.type( '5' );
+			await page.keyboard.type( '44' );
 			await page.keyboard.press( 'Tab' );
 
 			await expect( pageObject.products ).toHaveCount( 1 );

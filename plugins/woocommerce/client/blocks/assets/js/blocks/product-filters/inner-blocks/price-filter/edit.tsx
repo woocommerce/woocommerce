@@ -8,6 +8,7 @@ import {
 } from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,13 +16,17 @@ import { __ } from '@wordpress/i18n';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { getPriceFilterData } from './utils';
 import { InitialDisabled } from '../../components/initial-disabled';
+import { getProductCollectionQueryState } from '../../utils/get-product-collection-query-state';
 
-const Edit = () => {
+const Edit = ( props: BlockEditProps< Record< string, never > > ) => {
 	const blockProps = useBlockProps();
+	const localQueryState = getProductCollectionQueryState(
+		props.context.query
+	);
 
 	const { data, isLoading } = useCollectionData( {
 		queryPrices: true,
-		queryState: {},
+		queryState: localQueryState ?? {},
 		isEditor: true,
 	} );
 
