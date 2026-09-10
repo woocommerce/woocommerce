@@ -788,6 +788,31 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
+		test( 'should focus the shipping method that triggered a notice-free update', () => {
+			const shippingInput = document.createElement( 'input' );
+			shippingInput.id = 'shipping_method_0_flat_rate1';
+			document.body.appendChild( shippingInput );
+			const focus = jest.spyOn( shippingInput, 'focus' );
+
+			try {
+				sendCheckoutUpdateResponse(
+					{
+						result: 'success',
+						has_errors: false,
+						messages: '',
+					},
+					{
+						update_shipping_method: false,
+						current_target: { id: shippingInput.id },
+					}
+				);
+
+				expect( focus ).toHaveBeenCalledTimes( 1 );
+			} finally {
+				shippingInput.remove();
+			}
+		} );
+
 		test( 'should treat a response without the error flag as a failure', () => {
 			sendCheckoutUpdateResponse( {
 				result: 'failure',
