@@ -7,9 +7,6 @@ import { useSelect } from '@wordpress/data';
 import { Icon, blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { Notice, Stack } from '@wordpress/ui';
-import {
-	__experimentalHStack as HStack, // eslint-disable-line
-} from '@wordpress/components';
 // @ts-expect-error No types available for this component
 // eslint-disable-next-line
 import { BlockPreview } from '@wordpress/block-editor';
@@ -114,11 +111,15 @@ function TemplateListBox( {
 								] }
 							/>
 
-							<HStack className="email-editor-template-select__template-details">
+							<Stack
+								direction="row"
+								align="center"
+								className="email-editor-template-select__template-details"
+							>
 								<h4 className="email-editor-template-select__template-title">
 									{ template.displayName }
 								</h4>
-							</HStack>
+							</Stack>
 						</Async>
 					</div>
 				</div>
