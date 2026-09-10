@@ -38,6 +38,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_command_palette_assets' ) );
+			add_action( 'enqueue_block_assets', array( $this, 'enqueue_classic_theme_editor_fonts' ) );
 			add_action( 'admin_notices', array( $this, 'render_lost_connection_notice' ) );
 		}
 
@@ -115,11 +116,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
-				if ( ! wp_is_block_theme() ) {
-					wp_register_style( 'woocommerce-classictheme-editor-fonts', WC()->plugin_url() . '/assets/css/woocommerce-classictheme-editor-fonts.css', array(), $version );
-					wp_enqueue_style( 'woocommerce-classictheme-editor-fonts' );
-				}
-
 				$styles = WC_Frontend_Scripts::get_styles();
 
 				if ( $styles ) {
@@ -445,6 +441,30 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			);
 		}
 
+		/**
+		 * Enqueue classic-theme editor fonts.
+		 *
+		 * Hooked to `enqueue_block_assets` instead of `admin_enqueue_scripts` so the
+		 * stylesheet is added to the block editor iframe correctly.
+		 *
+		 * @return void
+		 */
+		public function enqueue_classic_theme_editor_fonts() {
+			if ( ! is_admin() || wp_is_block_theme() ) {
+				return;
+			}
+
+			$screen = get_current_screen();
+
+			if ( ! $screen || ! $screen->is_block_editor() ) {
+				return;
+			}
+
+			$version = Constants::get_constant( 'WC_VERSION' );
+
+			wp_register_style( 'woocommerce-classictheme-editor-fonts', WC()->plugin_url() . '/assets/css/woocommerce-classictheme-editor-fonts.css', array(), $version );
+			wp_enqueue_style( 'woocommerce-classictheme-editor-fonts' );
+		}
 
 		/**
 		 * Enqueue scripts.
