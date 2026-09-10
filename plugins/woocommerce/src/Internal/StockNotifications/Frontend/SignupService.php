@@ -59,6 +59,13 @@ class SignupService {
 	private EmailManager $email_manager;
 
 	/**
+	 * Signup rate limiter.
+	 *
+	 * @var SignupRateLimiter
+	 */
+	private SignupRateLimiter $rate_limiter;
+
+	/**
 	 * Init the service.
 	 *
 	 * @internal
@@ -66,19 +73,25 @@ class SignupService {
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 * @param EmailManager                  $email_manager The email manager.
+	 * @param SignupRateLimiter             $rate_limiter The signup rate limiter.
 	 */
 	final public function init(
 		EligibilityService $eligibility_service,
 		NotificationManagementService $notification_management_service,
-		EmailManager $email_manager
+		EmailManager $email_manager,
+		SignupRateLimiter $rate_limiter
 	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
+		$this->rate_limiter                    = $rate_limiter;
 	}
 
 	/**
 	 * Signup.
+	 *
+	 * Fail-closed: once the rate limit window is claimed it is not released, so a failure or an
+	 * exception raised further down still holds the customer back until the window expires.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -114,6 +127,9 @@ class SignupService {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
+		// Attempts that only find an existing active or pending sign-up, or activate an existing
+		// pending one, create nothing new and send no verification mail, so they are answered
+		// before the rate limit is consulted or claimed.
 		$notification = $this->is_already_signed_up( $product_id, $user_id, $user_email, $posted_attributes );
 		if ( $notification instanceof Notification ) {
 			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
@@ -125,9 +141,11 @@ class SignupService {
 					return new SignupResult( self::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $notification );
 				}
 
-				// If the notification is pending and double opt-in is not required, skip and activate the notification.
+				// Double opt-in is not required, so activate the pending notification instead of creating one.
 				$notification->set_status( NotificationStatus::ACTIVE );
-				$notification->save();
+				if ( ! $notification->save() ) {
+					return new \WP_Error( self::ERROR_FAILED );
+				}
 
 				/**
 				 * Action: woocommerce_customer_stock_notifications_signup
@@ -139,6 +157,17 @@ class SignupService {
 				do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
 				return new SignupResult( self::SIGNUP_SUCCESS, $notification );
 			}
+		}
+
+		if ( $this->rate_limiter->is_rate_limited( $user_email ) ) {
+			return new \WP_Error( self::ERROR_RATE_LIMITED );
+		}
+
+		// Claim the rate limit window before creating an account, storing a notification or
+		// sending mail. This narrows the window in which two near-simultaneous requests both
+		// get through; it does not close it.
+		if ( ! $this->rate_limiter->apply( $user_email ) ) {
+			return new \WP_Error( self::ERROR_FAILED );
 		}
 
 		$account_created = null;
@@ -476,7 +505,7 @@ class SignupService {
 			case self::ERROR_INVALID_OPT_IN:
 				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			case self::ERROR_RATE_LIMITED:
-				return wp_kses_post( __( 'You have already signed up too many times. Please try again later.', 'woocommerce' ) );
+				return wp_kses_post( __( 'Too many sign-up attempts. Please try again later.', 'woocommerce' ) );
 			default:
 				return wp_kses_post( __( 'Failed to sign up. Please try again.', 'woocommerce' ) );
 		}
