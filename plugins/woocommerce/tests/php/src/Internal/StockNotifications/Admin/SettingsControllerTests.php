@@ -151,8 +151,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	 * @testdox The My Account endpoint setting is sanitized the same way when saved through the REST settings API.
 	 */
 	public function test_my_account_endpoint_setting_is_sanitized_via_rest() {
-		new StockNotificationsSettings();
-
 		// Routes must register on rest_api_init; firing it explicitly makes the test's outcome
 		// independent of whatever REST server state an earlier test in the process left behind.
 		do_action( 'rest_api_init' );
