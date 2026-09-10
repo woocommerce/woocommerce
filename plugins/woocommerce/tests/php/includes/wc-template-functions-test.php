@@ -278,4 +278,46 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'page/%#%/', $pagination_args['format'] );
 		$this->assertStringContainsString( 'href="https://example.test/shop/"', $markup );
 	}
+
+	/**
+	 * @testdox wc_display_product_attributes() renders term names when the taxonomy is registered but missing from the global attribute list.
+	 */
+	public function test_display_product_attributes_without_global_attribute_entry(): void {
+		global $wc_product_attributes;
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$taxonomy        = $attribute->get_name();
+		$taxonomy_object = $wc_product_attributes[ $taxonomy ];
+		unset( $wc_product_attributes[ $taxonomy ] );
+		$warnings     = array();
+		$buffer_level = ob_get_level();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		ob_start();
+		try {
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			restore_error_handler();
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			$wc_product_attributes[ $taxonomy ] = $taxonomy_object;
+		}
+
+		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
+		$this->assertStringContainsString( 'Matte', $markup );
+	}
 }

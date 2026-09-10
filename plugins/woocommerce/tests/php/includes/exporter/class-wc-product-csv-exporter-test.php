@@ -203,4 +203,41 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * @testdox Exporting a product loaded before its global attribute is deleted leaves the value empty without a warning.
+	 */
+	public function test_export_row_for_product_loaded_before_its_global_attribute_is_deleted(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$product = wc_get_product( $product->get_id() );
+
+		wc_delete_attribute( $attribute->get_id() );
+
+		$exporter          = new WC_Product_CSV_Exporter();
+		$generate_row_data = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'generate_row_data' );
+		$generate_row_data->setAccessible( true );
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		try {
+			$row = $generate_row_data->invoke( $exporter, $product );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( array(), $warnings, 'Exporting the product should not raise warnings.' );
+		$this->assertSame( '', $row['attributes:value1'] );
+		$this->assertSame( 1, $row['attributes:taxonomy1'] );
+	}
 }
