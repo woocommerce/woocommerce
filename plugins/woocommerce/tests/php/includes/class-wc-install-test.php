@@ -445,6 +445,14 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			empty( $versions ) || version_compare( preg_replace( '/-.*$/', '', end( $versions ) ), WC()->stable_version(), '<=' ),
 			'WC_Install::$db_update_callbacks must not contain versions that are ahead of current stable (except, possibly, for suffix).',
 		);
+
+		// Sequential keys (X.Y.Z-1, X.Y.Z-2) are not needed for -dev versions.
+		if ( '-dev' === substr( WC()->version, -4 ) ) {
+			$this->assertEmpty(
+				preg_grep( '/^' . preg_quote( WC()->stable_version(), '/' ) . '-/', $versions ),
+				sprintf( 'WC_Install::$db_update_callbacks must not contain sequential keys for %1$s while the version is %2$s. Add the callbacks to the plain \'%1$s\' key instead.', WC()->stable_version(), WC()->version ),
+			);
+		}
 	}
 
 	/**

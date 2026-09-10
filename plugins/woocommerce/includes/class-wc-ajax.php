@@ -2181,7 +2181,7 @@ class WC_AJAX {
 
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
+		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit, $include_ids, $exclude_ids );
 
 		_prime_post_caches( $ids );
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
@@ -3221,6 +3221,49 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Sale Prices from Regular Prices.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 *
+	 * @return void
+	 */
+	private static function variation_bulk_action_variable_sale_price_from_regular_price( $variations, $data ) {
+		$value = $data['value'] ?? null;
+		if ( ! is_scalar( $value ) ) {
+			return;
+		}
+
+		$value         = (string) $value;
+		$is_percentage = '%' === substr( $value, -1 );
+		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
+		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
+			return;
+		}
+		$adjustment = (float) $adjustment;
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$regular_price = $variation->get_regular_price( 'edit' );
+
+			if ( '' === $regular_price || null === $regular_price ) {
+				continue;
+			}
+
+			$reduction = $is_percentage ? ( (float) $regular_price / 100 ) * $adjustment : $adjustment;
+
+			$variation->set_sale_price( (string) NumberUtil::round( max( 0, (float) $regular_price - $reduction ), wc_get_price_decimals() ) );
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Stock Status as In Stock.
 	 *
 	 * @param array $variations List of variations.
@@ -3609,6 +3652,7 @@ class WC_AJAX {
 	 *
 	 * @uses WC_AJAX::variation_bulk_set()
 	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_from_regular_price()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
 	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()

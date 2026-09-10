@@ -1729,6 +1729,38 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should set variation sale prices from their regular prices.
+	 * @testWith ["100", "10", "", "90"]
+	 *           ["100", "10%", "", "90"]
+	 *           ["100.55", "10.25", "", "90.3"]
+	 *           ["100.55", "10.5%", "", "89.99"]
+	 *           ["45", "23.5%", "", "34.43"]
+	 *           ["5", "10", "", "0"]
+	 *           ["", "10%", "", ""]
+	 *           ["100", "invalid", "25", "25"]
+	 *           ["100", "-10", "25", "25"]
+	 *
+	 * @param string $regular_price Regular price.
+	 * @param string $adjustment Price adjustment.
+	 * @param string $sale_price Existing sale price.
+	 * @param string $expected_sale_price Expected sale price.
+	 */
+	public function test_bulk_sale_price_from_regular_price( string $regular_price, string $adjustment, string $sale_price, string $expected_sale_price ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_price_from_regular_price' );
+		$method->setAccessible( true );
+		$method->invokeArgs( null, array( array( $variation->get_id() ), array( 'value' => $adjustment ) ) );
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $expected_sale_price, $variation->get_sale_price( 'edit' ), 'The sale price should be calculated from the regular price.' );
+	}
+
+	/**
 	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
 	 */
 	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
@@ -2383,6 +2415,47 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
 		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * The Grant access product search must honor the include/exclude parameters so
+	 * already-granted products do not reappear in the results.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68101
+	 */
+	public function test_json_search_downloadable_products_honors_include_and_exclude(): void {
+		$product_one = WC_Helper_Product::create_simple_product();
+		$product_one->set_name( 'Exclusit Download One' );
+		$product_one->set_downloadable( true );
+		$product_one->save();
+
+		$product_two = WC_Helper_Product::create_simple_product();
+		$product_two->set_name( 'Exclusit Download Two' );
+		$product_two->set_downloadable( true );
+		$product_two->save();
+
+		$this->_setRole( 'administrator' );
+
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['term']     = 'Exclusit Download';
+		$_GET['exclude']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The search should return a result set.' );
+		$this->assertArrayHasKey( $product_two->get_id(), $response, 'The non-excluded product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_one->get_id(), $response, 'An excluded (already granted) product must not reappear in the results.' );
+
+		// The include allowlist must be honored as well.
+		unset( $_GET['exclude'] );
+		$_GET['security'] = wp_create_nonce( 'search-products' );
+		$_GET['include']  = array( $product_one->get_id() );
+
+		$response = $this->do_ajax( 'woocommerce_json_search_downloadable_products_and_variations' );
+
+		$this->assertIsArray( $response, 'The include search should return a result set.' );
+		$this->assertArrayHasKey( $product_one->get_id(), $response, 'The included product must be part of the results.' );
+		$this->assertArrayNotHasKey( $product_two->get_id(), $response, 'A product outside the include allowlist must not be part of the results.' );
 	}
 
 	/**
