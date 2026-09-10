@@ -100,12 +100,20 @@ export type SettingsUIShell = {
 	navigationComponent?: string;
 };
 
+export type SettingsUIViewConfig = {
+	supported: boolean;
+	kind?: string;
+	name?: string;
+	version?: number;
+};
+
 export type SettingsUISchema = {
 	id: string;
 	title?: string;
 	section?: string;
 	save?: SettingsUISaveStrategy;
 	shell?: SettingsUIShell;
+	viewConfig?: SettingsUIViewConfig;
 	groups: Record< string, SettingsUIGroup >;
 };
 

@@ -226,6 +226,47 @@ class SettingsUISchema {
 		return self::canonicalize_schema_values_for_source( $schema, true );
 	}
 
+	/**
+	 * Build the layout-only DataForm configuration for a settings schema.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $schema Valid Settings UI schema.
+	 * @return array DataForm layout containing group and field identities only.
+	 */
+	public static function get_dataform_layout( array $schema ): array {
+		self::assert_valid_schema( $schema );
+
+		$form_fields = array();
+		foreach ( $schema['groups'] as $group ) {
+			$form_field = array(
+				'id'       => $group['id'],
+				'layout'   => ! empty( $group['title'] )
+					? array(
+						'type'          => 'card',
+						'isCollapsible' => false,
+					)
+					: array(
+						'type'       => 'card',
+						'withHeader' => false,
+					),
+				'children' => array_column( $group['fields'], 'id' ),
+			);
+
+			if ( ! empty( $group['title'] ) ) {
+				$form_field['label'] = $group['title'];
+			}
+
+			if ( ! empty( $group['description'] ) ) {
+				$form_field['description'] = wp_strip_all_tags( html_entity_decode( $group['description'], ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) );
+			}
+
+			$form_fields[] = $form_field;
+		}
+
+		return array( 'fields' => $form_fields );
+	}
+
 	// Exception messages are not HTML output. Dynamic values are sanitized once
 	// by invalid_schema() before the exception crosses the schema boundary.
 	// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped

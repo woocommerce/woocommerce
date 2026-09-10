@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIViewConfig;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -437,8 +438,9 @@ class Settings {
 				return $settings;
 			}
 
-			$page_id     = $context->get_page_id();
-			$section_key = $context->get_current_section_key();
+			$page_id              = $context->get_page_id();
+			$section_key          = $context->get_current_section_key();
+			$schema['viewConfig'] = SettingsUIViewConfig::get_metadata( $page_id, $section_key );
 		} catch ( \Throwable $e ) {
 			return $settings;
 		}

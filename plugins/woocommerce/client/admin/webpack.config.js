@@ -378,6 +378,10 @@ const jsConfig = {
 						return null;
 					}
 
+					if ( request === '@wordpress/views' ) {
+						return null;
+					}
+
 					if ( request.startsWith( '@wordpress/theme' ) ) {
 						return null;
 					}

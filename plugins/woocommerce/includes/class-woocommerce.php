@@ -1516,6 +1516,7 @@ final class WooCommerce {
 	 */
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
+		\Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIViewConfig::register_rest_filter();
 		foreach ( $pages as $page ) {
 			$this->register_wp_admin_settings_for( $page, 'page' );
 		}

@@ -210,6 +210,45 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Resolve a context from a normalized page and section identity.
+	 *
+	 * This resolver does not read wp-admin request globals, so REST callbacks can
+	 * build the same schema as an HTML settings request.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $page_id Settings page id.
+	 * @param string $section_key Section id, or "default" for the default section.
+	 * @return SettingsUIRequestContext|null
+	 */
+	public static function for_identity( string $page_id, string $section_key ): ?SettingsUIRequestContext {
+		if ( ! self::is_normalized_identity_part( $page_id ) || ! self::is_normalized_identity_part( $section_key ) ) {
+			return null;
+		}
+
+		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
+			return null;
+		}
+
+		$section = self::DEFAULT_SECTION_KEY === $section_key ? '' : $section_key;
+
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $page_id ) {
+				continue;
+			}
+
+			$context = self::for_settings_page( $settings_page, $section );
+			if ( ! $context->get_settings_ui_page() ) {
+				continue;
+			}
+
+			return self::has_section( $settings_page->get_sections(), $section ) ? $context : null;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Reset cached request contexts.
 	 */
 	public static function reset(): void {
@@ -266,6 +305,33 @@ class SettingsUIRequestContext {
 	 */
 	private static function get_section_key( string $section ): string {
 		return '' === $section ? self::DEFAULT_SECTION_KEY : $section;
+	}
+
+	/**
+	 * Check whether an identity part is already in its canonical form.
+	 *
+	 * @param string $part Identity part.
+	 * @return bool
+	 */
+	private static function is_normalized_identity_part( string $part ): bool {
+		return '' !== $part && sanitize_title( $part ) === $part;
+	}
+
+	/**
+	 * Check whether a settings page declares a section.
+	 *
+	 * @param array  $sections Settings sections keyed by section id.
+	 * @param string $section Section id. Empty string means the default section.
+	 * @return bool
+	 */
+	private static function has_section( array $sections, string $section ): bool {
+		foreach ( array_keys( $sections ) as $candidate ) {
+			if ( is_string( $candidate ) && $candidate === $section && ( '' === $candidate || sanitize_title( $candidate ) === $candidate ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

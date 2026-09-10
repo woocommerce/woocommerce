@@ -33,6 +33,11 @@ import type {
 	SettingsValues,
 } from './types';
 import { areValuesEqual } from './values';
+import { selectViewConfigLayout } from './view-config';
+import {
+	useViewConfigRuntime,
+	type ViewConfigRuntimeResult,
+} from './view-config-runtime';
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -432,14 +437,19 @@ const ShellHeader = ( {
 	);
 };
 
-export const SettingsUIPage = ( {
-	schema,
-	page,
-	section,
-}: {
+type SettingsUIPageProps = {
 	schema: SettingsUISchema;
 	page?: string;
 	section?: string;
+};
+
+const SettingsUIPageContent = ( {
+	schema,
+	page,
+	section,
+	viewConfigRuntime,
+}: SettingsUIPageProps & {
+	viewConfigRuntime: ViewConfigRuntimeResult;
 } ) => {
 	const [ initialValues, setInitialValues ] = useState< SettingsValues >(
 		() => getInitialValues( schema )
@@ -694,6 +704,20 @@ export const SettingsUIPage = ( {
 		[ dataFormAdapter, values ]
 	);
 	const allFields = useMemo( () => getAllFields( schema ), [ schema ] );
+	const knownFieldIds = useMemo(
+		() => new Set( allFields.map( ( field ) => field.id ) ),
+		[ allFields ]
+	);
+	const viewConfigDecision = useMemo(
+		() =>
+			selectViewConfigLayout( {
+				request: schema.viewConfig || { supported: false },
+				runtime: viewConfigRuntime,
+				localForm: dataForm,
+				knownFieldIds,
+			} ),
+		[ dataForm, knownFieldIds, schema.viewConfig, viewConfigRuntime ]
+	);
 	const fieldsById = useMemo(
 		() => new Map( allFields.map( ( field ) => [ field.id, field ] ) ),
 		[ allFields ]
@@ -746,6 +770,26 @@ export const SettingsUIPage = ( {
 			</Button>
 		) : undefined;
 
+	if ( viewConfigDecision.status === 'loading' ) {
+		return (
+			<ShellHeader
+				schema={ schema }
+				context={ context }
+				values={ values }
+				initialValues={ initialValues }
+			>
+				<div
+					className="wc-settings-ui wc-settings-ui--loading"
+					role="status"
+					aria-live="polite"
+					aria-busy="true"
+				>
+					{ __( 'Loading settings…', 'woocommerce' ) }
+				</div>
+			</ShellHeader>
+		);
+	}
+
 	return (
 		<ShellHeader
 			schema={ schema }
@@ -776,7 +820,7 @@ export const SettingsUIPage = ( {
 				<DataForm
 					data={ values }
 					fields={ dataFormAdapter.fields }
-					form={ dataForm }
+					form={ viewConfigDecision.form }
 					onChange={ handleDataFormChange }
 				/>
 				{ ! showHeader && saveButton ? (
@@ -800,5 +844,43 @@ export const SettingsUIPage = ( {
 				</div>
 			) : null }
 		</ShellHeader>
+	);
+};
+
+const ViewConfigSettingsUIPage = ( props: SettingsUIPageProps ) => {
+	const request = props.schema.viewConfig as {
+		supported: true;
+		kind: string;
+		name: string;
+		version: number;
+	};
+	const runtime = useViewConfigRuntime( {
+		kind: request.kind,
+		name: request.name,
+	} );
+
+	return <SettingsUIPageContent { ...props } viewConfigRuntime={ runtime } />;
+};
+
+export const SettingsUIPage = ( props: SettingsUIPageProps ) => {
+	const request = props.schema.viewConfig;
+	const hasIdentity =
+		request?.supported &&
+		typeof request.kind === 'string' &&
+		Boolean( request.kind ) &&
+		typeof request.name === 'string' &&
+		Boolean( request.name ) &&
+		typeof request.version === 'number';
+
+	return hasIdentity ? (
+		<ViewConfigSettingsUIPage { ...props } />
+	) : (
+		<SettingsUIPageContent
+			{ ...props }
+			viewConfigRuntime={ {
+				status: 'resolved',
+				config: request?.supported ? {} : undefined,
+			} }
+		/>
 	);
 };
