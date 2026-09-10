@@ -2786,12 +2786,13 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			);
 		}
 
+		$this->assertCount( 1, $before_payloads, 'The before hook must fire once, not once per batch.' );
+		$this->assertCount( 1, $after_payloads, 'The after hook must fire once, not once per batch.' );
+
 		$expected_ids = array_map( 'intval', $ids );
 		$before_ids   = array_map( 'intval', $before_payloads[0] );
 		$after_ids    = array_map( 'intval', $after_payloads[0] );
 
-		$this->assertCount( 1, $before_payloads, 'The before hook must fire once, not once per batch.' );
-		$this->assertCount( 1, $after_payloads, 'The after hook must fire once, not once per batch.' );
 		$this->assertEqualsCanonicalizing( $expected_ids, $before_ids, 'The before hook must receive the whole backlog.' );
 		$this->assertEqualsCanonicalizing( $expected_ids, $after_ids, 'The after hook must receive the whole backlog.' );
 		$this->assertSame( $before_payloads[0], $after_payloads[0], 'The hook payload must not change while batches are processed.' );
