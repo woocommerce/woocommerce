@@ -178,4 +178,59 @@ class NotificationTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( NewOrderNotification::class, $notification );
 		$this->assertSame( 42, $notification->get_resource_id() );
 	}
+
+	/**
+	 * Action Scheduler matches the safety-net cancel call and the retry dedupe
+	 * guard on the exact serialized arguments, and both derive from
+	 * get_identity_data(). A subclass that returns anything varying between two
+	 * instances of the same notification would stop those matching, which leaves
+	 * an uncancelled safety net to re-send and a row per trigger in
+	 * wp_actionscheduler_actions.
+	 *
+	 * @testdox Should return identity data that does not vary with volatile constructor state.
+	 * @dataProvider provider_notification_identity_pairs
+	 *
+	 * @param callable $build              Builds a notification from a volatile value.
+	 * @param bool     $has_volatile_state Whether this subclass has volatile state for $build to vary.
+	 */
+	public function test_get_identity_data_ignores_volatile_state( callable $build, bool $has_volatile_state ): void {
+		$one   = $build( 1 );
+		$other = $build( 999 );
+
+		if ( $has_volatile_state ) {
+			$this->assertNotSame(
+				$one->to_array(),
+				$other->to_array(),
+				'The provider case has to vary the volatile state, or the assertion below proves nothing.'
+			);
+		}
+
+		$this->assertSame( $one->get_identity_data(), $other->get_identity_data() );
+	}
+
+	/**
+	 * @testdox Should have an identity data case for every notification subclass.
+	 */
+	public function test_identity_data_provider_covers_every_subclass(): void {
+		$this->assertEqualsCanonicalizing(
+			array_keys( Notification::NOTIFICATION_CLASSES ),
+			array_keys( $this->provider_notification_identity_pairs() ),
+			'A new Notification subclass needs a case in the provider, so its identity data is checked too.'
+		);
+	}
+
+	/**
+	 * One entry per Notification subclass, each a callable that builds the same
+	 * notification from a volatile value, and a flag saying whether the subclass
+	 * has any volatile state for the callable to vary.
+	 *
+	 * @return array<string, array{callable, bool}>
+	 */
+	public function provider_notification_identity_pairs(): array {
+		return array(
+			'store_order'  => array( fn() => new NewOrderNotification( 42 ), false ),
+			'store_review' => array( fn() => new NewReviewNotification( 42 ), false ),
+			'store_stock'  => array( fn( int $volatile ) => new StockNotification( 42, StockNotification::EVENT_LOW_STOCK, $volatile ), true ),
+		);
+	}
 }

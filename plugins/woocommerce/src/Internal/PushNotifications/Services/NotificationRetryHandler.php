@@ -111,6 +111,9 @@ class NotificationRetryHandler {
 			return;
 		}
 
+		// Action Scheduler dispatches array_values( $args ), so these keys are
+		// decorative and the order alone decides which handle_retry() parameter
+		// each value lands in.
 		$args = array(
 			'type'        => $notification->get_type(),
 			'resource_id' => $notification->get_resource_id(),
@@ -119,8 +122,10 @@ class NotificationRetryHandler {
 
 		$identity_data = $notification->get_identity_data();
 
-		// Appended only when there is any, so `$unique` still matches a retry
-		// scheduled before this field existed.
+		// Appended only when there is any, so orders and reviews keep the exact
+		// argument list they had before this field existed and `$unique` still
+		// matches a retry scheduled before it. Stock retries do change, so
+		// during the deploy both formats can be pending for one product.
 		if ( ! empty( $identity_data ) ) {
 			$args['extra'] = $identity_data;
 		}

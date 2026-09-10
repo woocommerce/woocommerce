@@ -155,32 +155,6 @@ class StockNotification extends Notification {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Appends `event_type` because it is part of this notification's identity
-	 * (see {@see self::get_identifier()}): the same product can have distinct
-	 * low_stock / out_of_stock / on_backorder safety nets pending at once, and
-	 * the callback needs it to reconstruct the correct subtype.
-	 *
-	 * `stock_quantity_at_trigger` is deliberately omitted — it is volatile
-	 * payload data, not identity, and does not round-trip through every cancel
-	 * path, so including it in the match key would risk breaking cancellation.
-	 * The safety-net fallback message reads current product stock when it is
-	 * absent (see {@see self::build_message()}).
-	 *
-	 * @return array<int, mixed>
-	 *
-	 * @since 10.9.0
-	 */
-	public function get_safety_net_args(): array {
-		return array(
-			$this->get_type(),
-			$this->get_resource_id(),
-			$this->get_identity_data(),
-		);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
 	 * Without it a rebuilt stock notification falls back to the constructor's
 	 * low_stock default and reads and writes another event's delivery state.
 	 *

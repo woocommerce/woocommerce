@@ -53,6 +53,9 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		// Container first: a throw in the unschedule would otherwise leak the
+		// replacement into every later test in the process.
+		$this->reset_container_replacements();
 		as_unschedule_all_actions( NotificationRetryHandler::RETRY_HOOK );
 		parent::tearDown();
 	}
@@ -239,8 +242,6 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 
 		$order = wc_get_order( $this->order_id );
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
-
-		$this->reset_container_replacements();
 	}
 
 	/**
@@ -349,8 +350,6 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 		$refreshed = wc_get_product( $product->get_id() );
 		$this->assertNotEmpty( $refreshed->get_meta( NotificationProcessor::SENT_META_KEY . '_out_of_stock' ) );
 		$this->assertEmpty( $refreshed->get_meta( NotificationProcessor::SENT_META_KEY . '_low_stock' ) );
-
-		$this->reset_container_replacements();
 	}
 
 	/**
@@ -373,8 +372,7 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'store_stock', $captured->notification->get_type() );
 		$this->assertSame( $product->get_id(), $captured->notification->get_resource_id() );
-
-		$this->reset_container_replacements();
+		$this->assertSame( StockNotification::EVENT_LOW_STOCK, $captured->notification->get_event_type() );
 	}
 
 	/**

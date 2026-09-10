@@ -205,7 +205,17 @@ abstract class Notification {
 	 * @since 10.9.0
 	 */
 	public function get_safety_net_args(): array {
-		return array( $this->get_type(), $this->get_resource_id() );
+		$args          = array( $this->get_type(), $this->get_resource_id() );
+		$identity_data = $this->get_identity_data();
+
+		// Appended only when there is any, so a type without identity data keeps
+		// the exact argument list it had before this field existed and an
+		// in-flight safety net still cancels.
+		if ( ! empty( $identity_data ) ) {
+			$args[] = $identity_data;
+		}
+
+		return $args;
 	}
 
 	/**
