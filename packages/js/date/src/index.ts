@@ -450,6 +450,60 @@ function ensureMomentStartOfWeek() {
 ensureMomentStartOfWeek();
 
 /**
+ * Compares two lists of weekday names.
+ *
+ * @param {Array} names      - Names to compare.
+ * @param {Array} otherNames - Names to compare against.
+ * @return {boolean} - Whether both lists hold the same names in the same order.
+ */
+function isSameNames( names: string[], otherNames: string[] ) {
+	return (
+		names.length === otherNames.length &&
+		names.every( ( name, index ) => name === otherNames[ index ] )
+	);
+}
+
+/**
+ * Fills the moment locale's minimal weekday names in from the translated short
+ * ones. WordPress sets the locale up with translated `weekdays` and
+ * `weekdaysShort` but never `weekdaysMin`, so moment keeps its English fallback
+ * for that one. react-dates builds the calendar week header from `weekdaysMin`,
+ * which is why the date picker headers stay English on a translated site.
+ *
+ * The names are read back off moment so they always belong to the locale that
+ * is actually active.
+ */
+function ensureMomentWeekdayNames() {
+	const localeData = moment.localeData();
+	const weekdaysMin = localeData.weekdaysMin();
+	const weekdaysShort = localeData.weekdaysShort();
+
+	// A locale can hold its weekday names in shapes other than a plain list.
+	if ( ! Array.isArray( weekdaysMin ) || ! Array.isArray( weekdaysShort ) ) {
+		return;
+	}
+
+	const englishLocaleData = moment.localeData( 'en' );
+
+	// Anything that already replaced the English fallback is a better source
+	// than the short names, so leave it alone.
+	if ( ! isSameNames( weekdaysMin, englishLocaleData.weekdaysMin() ) ) {
+		return;
+	}
+
+	// The English fallback is already right for English locales.
+	if ( isSameNames( weekdaysShort, englishLocaleData.weekdaysShort() ) ) {
+		return;
+	}
+
+	moment.updateLocale( moment.locale(), {
+		weekdaysMin: [ ...weekdaysShort ],
+	} );
+}
+
+ensureMomentWeekdayNames();
+
+/**
  * Get a DateValue object for a period prior to the current period.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
