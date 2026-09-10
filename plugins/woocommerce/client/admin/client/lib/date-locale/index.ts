@@ -4,6 +4,19 @@
 import moment from 'moment';
 
 /**
+ * Compares two lists of weekday names.
+ *
+ * @param names      Names to compare.
+ * @param otherNames Names to compare against.
+ */
+function isSameNames( names: string[], otherNames: string[] ) {
+	return (
+		names.length === otherNames.length &&
+		names.every( ( name, index ) => name === otherNames[ index ] )
+	);
+}
+
+/**
  * WordPress sets moment's locale up with translated `weekdays` and
  * `weekdaysShort` but never `weekdaysMin`, so moment keeps its English
  * fallback for that one. react-dates builds the calendar week header from
@@ -13,17 +26,25 @@ import moment from 'moment';
  * always belong to the locale that is actually active.
  */
 export function initDateLocale() {
-	const weekdaysShort = moment.localeData().weekdaysShort();
-	const englishWeekdaysShort = moment.localeData( 'en' ).weekdaysShort();
+	const localeData = moment.localeData();
+	const weekdaysMin = localeData.weekdaysMin();
+	const weekdaysShort = localeData.weekdaysShort();
+
+	// A locale can hold its weekday names in shapes other than a plain list.
+	if ( ! Array.isArray( weekdaysMin ) || ! Array.isArray( weekdaysShort ) ) {
+		return;
+	}
+
+	const englishLocaleData = moment.localeData( 'en' );
+
+	// Anything that already replaced the English fallback is a better source
+	// than the short names, so leave it alone.
+	if ( ! isSameNames( weekdaysMin, englishLocaleData.weekdaysMin() ) ) {
+		return;
+	}
 
 	// The English fallback is already right for English locales.
-	const isUntranslated =
-		! Array.isArray( weekdaysShort ) ||
-		englishWeekdaysShort.every(
-			( name, index ) => name === weekdaysShort[ index ]
-		);
-
-	if ( isUntranslated ) {
+	if ( isSameNames( weekdaysShort, englishLocaleData.weekdaysShort() ) ) {
 		return;
 	}
 

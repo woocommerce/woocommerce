@@ -20,11 +20,23 @@ describe( 'initDateLocale', () => {
 		'Sat',
 	];
 	const ENGLISH_WEEKDAYS_MIN = [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ];
+	const GERMAN_WEEKDAYS_SHORT = [
+		'So.',
+		'Mo.',
+		'Di.',
+		'Mi.',
+		'Do.',
+		'Fr.',
+		'Sa.',
+	];
+	const GERMAN_WEEKDAYS_MIN = [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ];
+	const RUSSIAN_WEEKDAYS_SHORT = [ 'вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб' ];
 	const definedLocales: string[] = [];
 
 	/**
-	 * Define a locale the way WordPress does: translated weekday names, no
-	 * weekdaysMin, so moment falls back to the English ones.
+	 * Defines a locale and remembers it so afterEach can remove it again.
+	 * Without a weekdaysMin this is the shape WordPress leaves behind, and
+	 * moment falls back to the English names.
 	 *
 	 * @param name   Locale name, unique per test so moment never overrides one.
 	 * @param config Locale configuration.
@@ -85,6 +97,34 @@ describe( 'initDateLocale', () => {
 
 	it( 'leaves an English locale on the moment fallback', () => {
 		defineLocale( 'test_en', { weekdaysShort: ENGLISH_WEEKDAYS_SHORT } );
+
+		initDateLocale();
+
+		expect( moment.localeData().weekdaysMin() ).toEqual(
+			ENGLISH_WEEKDAYS_MIN
+		);
+	} );
+
+	it( 'keeps the weekdaysMin something else already supplied', () => {
+		defineLocale( 'test_de', {
+			weekdaysShort: GERMAN_WEEKDAYS_SHORT,
+			weekdaysMin: GERMAN_WEEKDAYS_MIN,
+		} );
+
+		initDateLocale();
+
+		expect( moment.localeData().weekdaysMin() ).toEqual(
+			GERMAN_WEEKDAYS_MIN
+		);
+	} );
+
+	it( 'leaves a locale that holds its short names in another shape alone', () => {
+		defineLocale( 'test_standalone', {
+			weekdaysShort: {
+				format: RUSSIAN_WEEKDAYS_SHORT,
+				standalone: RUSSIAN_WEEKDAYS_SHORT,
+			},
+		} );
 
 		initDateLocale();
 
