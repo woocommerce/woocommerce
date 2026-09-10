@@ -54,9 +54,9 @@ Covers the scenarios from the original plugin test plan that have a target in co
   through the same cookie. Both tests clear the cookie afterwards with
   `clearFilters()`.
 - Sign-ups are rate limited per client and per e-mail
-  (`woocommerce_customer_stock_notifications_signup_rate_limit_delays`), and
+  (`woocommerce_customer_stock_notifications_signup_rate_limit_options`), and
   the suite submits the form far more often than a shopper would from one
-  customer and one IP. `signUpOnProductPage()` zeroes both delays through the
+  customer and one IP. `signUpOnProductPage()` disables the limiter through the
   same cookie before every submit, so no spec has to opt in.
 - The email templates fork on `$is_guest`, which is "the signup has no
   `WP_User`", not "the shopper was logged out": a guest signup with an email

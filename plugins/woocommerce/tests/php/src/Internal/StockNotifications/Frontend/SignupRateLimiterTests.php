@@ -178,35 +178,81 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use the forwarded header when the store opts in through the filter.
+	 * @testdox Should use the forwarded header when the store enables proxy support.
 	 */
-	public function test_forwarded_header_is_used_when_opted_in(): void {
+	public function test_forwarded_header_is_used_with_proxy_support(): void {
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.5';
 
-		add_filter(
-			'woocommerce_customer_stock_notifications_signup_rate_limit_ip',
-			static function () {
-				return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '' ) );
-			}
-		);
+		$this->set_options( array( 'proxy_support' => true ) );
 
 		$this->sut->apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'A store behind a proxy should be able to key the rate limit on the forwarded address' );
+		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'A store behind a proxy should key the rate limit on the forwarded address' );
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.6';
+
+		$this->assertFalse( $this->sut->is_rate_limited( 'guest@example.com' ), 'Another forwarded address should not be held back' );
 	}
 
 	/**
-	 * @testdox Should switch the per-IP limit off when the filtered address is not an IP address.
+	 * @testdox Should switch the per-IP limit off when the forwarded address is not an IP address.
 	 */
-	public function test_invalid_ip_disables_the_ip_limit(): void {
-		add_filter( 'woocommerce_customer_stock_notifications_signup_rate_limit_ip', '__return_empty_string' );
+	public function test_invalid_forwarded_address_disables_the_ip_limit(): void {
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
+
+		$this->set_options( array( 'proxy_support' => true ) );
 
 		$this->sut->apply( 'shopper@example.com' );
 
 		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'An unresolved IP address should not be rate limited' );
 		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The per-e-mail limit should still apply' );
+	}
+
+	/**
+	 * @testdox Should switch rate limiting off when disabled through the options, without writing anything.
+	 */
+	public function test_disabled_option_switches_rate_limiting_off(): void {
+		$this->set_options( array( 'enabled' => false ) );
+
+		$queries = $this->record_queries(
+			function () {
+				$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
+				$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A disabled limiter should let every attempt through' );
+			}
+		);
+
+		foreach ( $queries as $query ) {
+			$this->assertStringNotContainsString( 'wc_rate_limits', $query, 'A disabled limiter should not touch the rate limits table' );
+		}
+	}
+
+	/**
+	 * @testdox Should fire an action naming the rate limit that was hit.
+	 */
+	public function test_exceeded_action_fires_with_the_rate_limit_id(): void {
+		$this->set_delays( 0, 30 );
+
+		$fired = array();
+		add_action(
+			'woocommerce_customer_stock_notifications_signup_rate_limit_exceeded',
+			static function ( $rate_limit_id, $user_email ) use ( &$fired ) {
+				$fired[] = array( $rate_limit_id, $user_email );
+			},
+			10,
+			2
+		);
+
+		$this->sut->apply( 'shopper@example.com' );
+
+		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ) );
+		$this->assertSame( array(), $fired, 'The action should not fire for an attempt that goes through' );
+
+		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ) );
+		$this->assertCount( 1, $fired, 'The action should fire once for a refused attempt' );
+		$this->assertStringStartsWith( 'stock_notifications_signup_email_', $fired[0][0], 'The action should receive the ID of the limit that was hit' );
+		$this->assertSame( 'shopper@example.com', $fired[0][1], 'The action should receive the e-mail address' );
 	}
 
 	/**
@@ -240,15 +286,10 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should still rate limit a logged-in user when the filtered IP address is invalid.
+	 * @testdox Should still rate limit a logged-in user when the client IP address is invalid.
 	 */
 	public function test_invalid_ip_does_not_disable_the_limit_for_logged_in_user(): void {
-		add_filter(
-			'woocommerce_customer_stock_notifications_signup_rate_limit_ip',
-			static function () {
-				return 'not-an-ip';
-			}
-		);
+		unset( $_SERVER['REMOTE_ADDR'] );
 
 		$this->set_delays( 30, 0 );
 
@@ -290,19 +331,14 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fall back to the default delays when the filter does not return an array.
+	 * @testdox Should fall back to the default options when the filter does not return an array.
 	 */
-	public function test_non_array_delays_fall_back_to_defaults(): void {
-		add_filter(
-			'woocommerce_customer_stock_notifications_signup_rate_limit_delays',
-			static function () {
-				return 'nope';
-			}
-		);
+	public function test_non_array_options_fall_back_to_defaults(): void {
+		$this->set_options( 'nope' );
 
 		$this->sut->apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'Non-array delays should fall back to the defaults, which still rate limit' );
+		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'Non-array options should fall back to the defaults, which still rate limit' );
 	}
 
 	/**
@@ -378,13 +414,24 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	 * @param mixed $email  Delay for the per-e-mail limit.
 	 */
 	private function set_delays( $client, $email ): void {
+		$this->set_options(
+			array(
+				'client_delay' => $client,
+				'email_delay'  => $email,
+			)
+		);
+	}
+
+	/**
+	 * Filter the options used by the limiter. Keys left out keep their default.
+	 *
+	 * @param mixed $options The options to return from the filter.
+	 */
+	private function set_options( $options ): void {
 		add_filter(
-			'woocommerce_customer_stock_notifications_signup_rate_limit_delays',
-			static function () use ( $client, $email ) {
-				return array(
-					'client' => $client,
-					'email'  => $email,
-				);
+			'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+			static function ( $defaults ) use ( $options ) {
+				return is_array( $options ) ? array_merge( $defaults, $options ) : $options;
 			}
 		);
 	}

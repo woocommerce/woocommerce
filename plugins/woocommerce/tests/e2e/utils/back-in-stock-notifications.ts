@@ -505,7 +505,7 @@ export function bisConsentCheckbox( page: Page ) {
  *
  * Core locks a client and an e-mail address out for a while after each
  * sign-up. The suite submits the form far more often than that from one
- * customer and one IP, so the delays are zeroed through the `e2e-filters`
+ * customer and one IP, so it is disabled through the `e2e-filters`
  * cookie the test helper plugin reads.
  *
  * @param {Page} page Playwright page whose context will submit the form.
@@ -513,8 +513,8 @@ export function bisConsentCheckbox( page: Page ) {
 export async function disableSignupRateLimit( page: Page ): Promise< void > {
 	await setFilterValue(
 		page,
-		'woocommerce_customer_stock_notifications_signup_rate_limit_delays',
-		{ client: 0, email: 0 }
+		'woocommerce_customer_stock_notifications_signup_rate_limit_options',
+		{ enabled: false }
 	);
 }
 

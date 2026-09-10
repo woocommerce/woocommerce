@@ -506,7 +506,7 @@ class SignupService {
 			case self::ERROR_INVALID_OPT_IN:
 				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			case self::ERROR_RATE_LIMITED:
-				return wp_kses_post( __( 'Too many sign-up attempts. Please try again later.', 'woocommerce' ) );
+				return wp_kses_post( __( 'Please wait a moment before signing up again.', 'woocommerce' ) );
 			default:
 				return wp_kses_post( __( 'Failed to sign up. Please try again.', 'woocommerce' ) );
 		}

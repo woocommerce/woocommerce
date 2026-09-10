@@ -167,11 +167,11 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_logged_in_signup_is_rate_limited_on_the_account_email() {
 		add_filter(
-			'woocommerce_customer_stock_notifications_signup_rate_limit_delays',
+			'woocommerce_customer_stock_notifications_signup_rate_limit_options',
 			static function () {
 				return array(
-					'client' => 0,
-					'email'  => 600,
+					'client_delay' => 0,
+					'email_delay'  => 600,
 				);
 			}
 		);
