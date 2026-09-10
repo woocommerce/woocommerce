@@ -46,7 +46,7 @@ class WC_Action_Queue_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should store the requested priority on a single action, clamped to the 0-255 range Action Scheduler accepts.
+	 * @testdox Should pass the requested priority to Action Scheduler, which clamps it to the 0-255 range it accepts.
 	 * @testWith [1, 1]
 	 *           [10, 10]
 	 *           [200, 200]
@@ -125,6 +125,71 @@ class WC_Action_Queue_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 25, $this->get_stored_priority( $action_id ) );
+	}
+
+	/**
+	 * @testdox Should schedule non-unique actions, so repeat calls do not collapse into one.
+	 */
+	public function test_priority_methods_schedule_non_unique_actions(): void {
+		$timestamp = time() + HOUR_IN_SECONDS;
+
+		$first  = $this->sut->schedule_single_with_priority( $timestamp, 'wc_action_queue_test_unique', array(), 'wc-action-queue-test', 5 );
+		$second = $this->sut->schedule_single_with_priority( $timestamp, 'wc_action_queue_test_unique', array(), 'wc-action-queue-test', 5 );
+
+		$this->assertNotSame( 0, $second, 'Action Scheduler returns 0 when a unique action is rejected as a duplicate' );
+		$this->assertNotEquals( $first, $second, 'Identical calls should produce two separate actions, as the plain queue methods do' );
+	}
+
+	/**
+	 * Third-party queues override the classic scheduling methods to intercept everything the
+	 * queue schedules. The priority methods have to route through them rather than around them.
+	 *
+	 * @testdox Should route through the overridable scheduling methods a subclass may have replaced.
+	 */
+	public function test_priority_methods_go_through_overridable_methods(): void {
+		// Anonymous so an incompatible signature would fail this test alone, not the whole suite.
+		$subclass = new class() extends WC_Action_Queue {
+			/**
+			 * Hooks intercepted by this override.
+			 *
+			 * @var array
+			 */
+			public $intercepted = array();
+
+			/**
+			 * Record the call instead of scheduling anything.
+			 *
+			 * @param int    $timestamp When the job would run.
+			 * @param string $hook The hook to trigger.
+			 * @param array  $args Arguments to pass when the hook triggers.
+			 * @param string $group The group to assign this job to.
+			 * @return int
+			 */
+			public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
+				$this->intercepted[] = $hook;
+				return 0;
+			}
+		};
+
+		$subclass->schedule_single_with_priority( time() + HOUR_IN_SECONDS, 'intercepted_single', array(), 'wc-action-queue-test', 5 );
+		$subclass->add_with_priority( 'intercepted_add', array(), 'wc-action-queue-test', 5 );
+
+		$this->assertSame(
+			array( 'intercepted_single', 'intercepted_add' ),
+			$subclass->intercepted,
+			'The priority methods must not bypass a subclass override of schedule_single()'
+		);
+	}
+
+	/**
+	 * @testdox Should leave the default priority in place after a priority-scoped call.
+	 */
+	public function test_priority_does_not_leak_into_later_calls(): void {
+		$this->sut->schedule_single_with_priority( time() + HOUR_IN_SECONDS, 'wc_action_queue_test_leak', array( 'first' => true ), 'wc-action-queue-test', 1 );
+
+		$action_id = $this->sut->schedule_single( time() + HOUR_IN_SECONDS, 'wc_action_queue_test_leak', array( 'second' => true ), 'wc-action-queue-test' );
+
+		$this->assertSame( 10, $this->get_stored_priority( $action_id ) );
 	}
 
 	/**
