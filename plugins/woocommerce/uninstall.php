@@ -46,14 +46,20 @@ if ( ! class_exists( 'ActionScheduler', false ) ) {
 	if ( is_readable( $wc_action_scheduler_bootstrap ) ) {
 		try {
 			require_once $wc_action_scheduler_bootstrap;
-
-			// WordPress deletes this plugin's files later in the same request, so the queue runner's
-			// shutdown hook would autoload Action Scheduler classes that no longer exist and fatal.
-			ActionScheduler::runner()->unhook_dispatch_async_request();
 		} catch ( Throwable $e ) {
-			// Nothing to recover, but leave a trace: the guard below silently skips the cleanup otherwise.
+			// Leave a trace; whether the cleanup below still runs depends on how far initialization got.
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- No WooCommerce logger during uninstall.
-			error_log( 'WooCommerce: could not load Action Scheduler during uninstall, scheduled actions were not removed. ' . $e->getMessage() );
+			error_log( 'WooCommerce: Action Scheduler threw while loading during uninstall: ' . $e->getMessage() );
+		} finally {
+			/*
+			 * WordPress deletes this plugin's files later in the same request, so the queue runner's
+			 * shutdown hook would autoload Action Scheduler classes that no longer exist and fatal.
+			 * The hook is registered before `action_scheduler_init` fires, so a throw from a callback on
+			 * that action still leaves it attached; is_initialized() is set at the same point.
+			 */
+			if ( class_exists( 'ActionScheduler', false ) && ActionScheduler::is_initialized() ) {
+				ActionScheduler::runner()->unhook_dispatch_async_request();
+			}
 		}
 	}
 
