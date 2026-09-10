@@ -763,4 +763,56 @@ describe( 'pushChanges', () => {
 			true // because the shipping rate impacting field was changed
 		);
 	} );
+	it( 'Does not lose a country change made while a push is already running', async () => {
+		jest.useFakeTimers();
+		updateCustomerDataMock.mockClear();
+
+		// Keep the first push running so the country changes while it is still in flight.
+		let resolveFirstPush: () => void = () => undefined;
+		updateCustomerDataMock.mockReturnValueOnce(
+			new Promise< void >( ( resolve ) => {
+				resolveFirstPush = resolve;
+			} )
+		);
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress: { ...initialShippingAddress, city: 'Houston' },
+		} );
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		const countryChangedAddress = {
+			...initialShippingAddress,
+			city: 'Houston',
+			country: 'GB',
+			state: '',
+			postcode: '',
+		};
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress: { ...countryChangedAddress },
+		} );
+
+		pushChanges();
+
+		// Pushes do not overlap, so the country change waits for the running one.
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		resolveFirstPush();
+		await Promise.resolve();
+		jest.advanceTimersByTime( 1500 );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
+		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{ shipping_address: { ...countryChangedAddress } },
+			true,
+			true // because the shipping rate impacting field was changed
+		);
+
+		jest.useRealTimers();
+	} );
 } );

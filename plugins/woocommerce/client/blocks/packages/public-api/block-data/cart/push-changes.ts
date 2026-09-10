@@ -256,7 +256,11 @@ export const pushChanges = ( debounced = true ): void => {
 			localState.customerData.shippingAddress.country;
 
 	if ( countryChanged ) {
-		debouncedUpdateCustomerData.flush();
+		// Push directly rather than flushing the debounce. When a push is already running,
+		// debouncedUpdateCustomerData reschedules itself, and flushing cancels that reschedule:
+		// the country change would then never reach the server. Calling updateCustomerData
+		// leaves the run scheduled above in place, so it still pushes once the current one ends.
+		updateCustomerData();
 	}
 };
 
