@@ -1777,8 +1777,21 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 		);
 
 		if ( ! wc_get_loop_prop( 'is_shortcode' ) ) {
-			$args['format'] = '';
-			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+			global $wp_rewrite;
+
+			$args['base'] = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+
+			if ( $wp_rewrite->using_permalinks() ) {
+				$args['format'] = user_trailingslashit( $wp_rewrite->pagination_base . '/%#%', 'paged' );
+
+				if ( ! $wp_rewrite->use_trailing_slashes ) {
+					$args['format'] = '/' . ltrim( $args['format'], '/' );
+				}
+			} else {
+				$args['format'] = false !== strpos( $args['base'], '?paged=%#%' ) ? '?paged=%#%' : '&paged=%#%';
+			}
+
+			$args['base'] = str_replace( $args['format'], '%_%', $args['base'] );
 		}
 
 		wc_get_template( 'loop/pagination.php', $args );
@@ -2211,11 +2224,8 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		// Enqueue variation scripts.
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
-		// Attach a reset snapshot only when variation-gallery swaps are enabled.
-		if (
-			\Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() &&
-			! isset( $attached_gallery_defaults[ $product->get_id() ] )
-		) {
+		// Attach the reset snapshot once per product.
+		if ( ! isset( $attached_gallery_defaults[ $product->get_id() ] ) ) {
 			wp_add_inline_script(
 				'wc-add-to-cart-variation',
 				sprintf(
@@ -2717,7 +2727,7 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			array(
 				'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of up-sells.php.
+				// Not used now, but used in previous version of cross-sells.php.
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
 				'columns'        => $columns,
@@ -4509,17 +4519,27 @@ function wc_get_theme_slug_for_templates() {
  * Gets and formats a list of cart item data + variations for display on the frontend.
  *
  * @since 3.3.0
- * @param array $cart_item Cart item object.
- * @param bool  $flat Should the data be returned flat or in a list.
+ * @since 11.2.0 Added the `$product_name` parameter.
+ * @param array       $cart_item   Cart item object.
+ * @param bool        $flat        Should the data be returned flat or in a list.
+ * @param string|null $product_name Product name displayed for the cart item, used to avoid
+ *                                  duplicating variation attributes. Defaults to the stored product name.
  * @return string
  */
-function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
+function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_name = null ) {
 	$item_data = array();
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
 	// This is because variation titles display the attributes.
 	if ( $cart_item['data']->is_type( ProductType::VARIATION ) && is_array( $cart_item['variation'] ) ) {
+		$product_name = is_string( $product_name ) ? $product_name : $cart_item['data']->get_name();
+		$product_name = wp_specialchars_decode( wp_strip_all_tags( $product_name ), ENT_QUOTES );
+
 		foreach ( $cart_item['variation'] as $name => $value ) {
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+			$value    = (string) $value;
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
 			if ( taxonomy_exists( $taxonomy ) ) {
@@ -4535,8 +4555,18 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 			}
 
-			// Check the nicename against the title.
-			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+			// The option-name filter can return anything; skip values that cannot be rendered.
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				continue;
+			}
+
+			// Variation values can be stored URL-encoded, while variation titles are built
+			// from decoded values by wc_get_formatted_variation(). Decode here so an encoded
+			// value is matched against the title and displayed the same way the title shows it.
+			$value = rawurldecode( (string) $value );
+
+			// Check the display value against the title.
+			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
 				continue;
 			}
 
@@ -4761,7 +4791,7 @@ function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme )
 		}
 	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
 		/*
-		 * When switching from a block theme to a clasic theme, check if we have set the option to
+		 * When switching from a block theme to a classic theme, check if we have set the option to
 		 * re-enable the store notice. If so, re-enable it.
 		 */
 		$enable_store_notice_in_classic_theme = wc_string_to_bool( get_option( $enable_store_notice_in_classic_theme_option, 'no' ) );

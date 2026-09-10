@@ -431,13 +431,17 @@ class Settings {
 			return $settings;
 		}
 
-		$schema = $context->get_schema();
-		if ( ! is_array( $schema ) ) {
+		try {
+			$schema = $context->get_schema();
+			if ( ! is_array( $schema ) ) {
+				return $settings;
+			}
+
+			$page_id     = $context->get_page_id();
+			$section_key = $context->get_current_section_key();
+		} catch ( \Throwable $e ) {
 			return $settings;
 		}
-
-		$page_id     = $context->get_page_id();
-		$section_key = $context->get_current_section_key();
 
 		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
 			$settings['settingsUI'] = array();
@@ -446,6 +450,8 @@ class Settings {
 			$settings['settingsUI'][ $page_id ] = array();
 		}
 
+		// PHP converts numeric-string array keys to integers. Keep groups as a JSON object for the client.
+		$schema['groups']                                   = (object) $schema['groups'];
 		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
 
 		return $settings;

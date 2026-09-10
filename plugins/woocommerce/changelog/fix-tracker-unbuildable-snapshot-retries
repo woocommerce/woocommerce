@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop rebuilding a WC Tracker snapshot on every daily run when building it fails.

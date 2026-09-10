@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product searches with terms containing " or " now apply the include, exclude, status, product type and post type filters to every OR group instead of only a single group, so admin product pickers no longer suggest drafts, excluded products or wrong-type products matched by those groups.

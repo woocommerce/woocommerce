@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid Product Filters block spacing values from being rendered.

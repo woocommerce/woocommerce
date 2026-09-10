@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Return HTTP 400 instead of 500 for invalid refund_tax and auto-compute inputs on the wc/v3 refunds compute_totals path, by adding the missing HTTP status to five shared-engine validation errors and defaulting status-less engine errors to 400 at the v3 boundary.

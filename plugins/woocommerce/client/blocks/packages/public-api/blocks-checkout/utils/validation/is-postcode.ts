@@ -6,21 +6,34 @@ import {
 	postcodeValidatorExistsForCountry,
 } from 'postcode-validator';
 
-const CUSTOM_REGEXES = new Map< string, RegExp >( [
-	[ 'BA', /^([7-8]{1})([0-9]{4})$/ ],
-	[
-		'GB',
-		/^([A-Z]){1}([0-9]{1,2}|[A-Z][0-9][A-Z]|[A-Z][0-9]{2}|[A-Z][0-9]|[0-9][A-Z]){1}([ ])?([0-9][A-Z]{2}){1}|BFPO(?:\s)?([0-9]{1,4})$|BFPO(c\/o[0-9]{1,3})$/i,
-	],
-	[ 'IN', /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/ ],
-	[ 'JP', /^([0-9]{3})([-]?)([0-9]{4})$/ ],
-	[ 'KH', /^[0-9]{6}$/ ], // Cambodia (6-digit postal code).
-	[ 'LI', /^(94[8-9][0-9])$/ ],
-	[ 'MN', /^[0-9]{5}(-[0-9]{4})?$/ ], // Mongolia (5-digit postal code or 5-digit postal code followed by a hyphen and 4-digit postal code).
-	[ 'NI', /^[1-9]{1}[0-9]{4}$/ ], // Nicaragua (5-digit postal code)
-	[ 'NL', /^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i ],
-	[ 'SI', /^([1-9][0-9]{3})$/ ],
-] );
+/**
+ * Internal dependencies
+ */
+import postcodeValidationData from '../../../../../../../i18n/postcode-validation-rules.json';
+
+type PostcodeValidationRule = {
+	pattern: string;
+	flags?: string;
+	normalization?: 'removeSpaces' | 'removeSpacesAndHyphens';
+};
+
+const SHARED_RULES = postcodeValidationData.rules as Record<
+	string,
+	PostcodeValidationRule
+>;
+
+const normalizePostcode = (
+	postcode: string,
+	normalization?: PostcodeValidationRule[ 'normalization' ]
+): string => {
+	if ( normalization === 'removeSpaces' ) {
+		return postcode.replace( / /g, '' );
+	}
+	if ( normalization === 'removeSpacesAndHyphens' ) {
+		return postcode.trim().replace( /[\s-]/g, '' );
+	}
+	return postcode;
+};
 
 export interface IsPostcodeProps {
 	postcode: string;
@@ -28,9 +41,25 @@ export interface IsPostcodeProps {
 }
 
 const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
-	const customRegex = CUSTOM_REGEXES.get( country );
-	if ( customRegex ) {
-		return customRegex.test( postcode );
+	if ( typeof postcode !== 'string' || typeof country !== 'string' ) {
+		return false;
+	}
+
+	// Mirror WC_Validation::is_postcode(): only ASCII whitespace, letters,
+	// digits, and hyphens may reach country-specific validation.
+	if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {
+		return false;
+	}
+
+	if ( Object.hasOwn( SHARED_RULES, country ) ) {
+		const sharedRule = SHARED_RULES[ country ];
+		const regex = new RegExp(
+			`^(?:${ sharedRule.pattern })$`,
+			sharedRule.flags || ''
+		);
+		return regex.test(
+			normalizePostcode( postcode, sharedRule.normalization )
+		);
 	}
 	// If the country is not in the upstream list, trying to validate it would throw, so we skip and assume
 	// that it is valid.

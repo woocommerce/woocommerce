@@ -153,7 +153,11 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$this->load_cart_session( $request );
+		try {
+			$this->load_cart_session( $request );
+		} catch ( \Throwable $error ) {
+			return $this->add_response_headers( $this->get_cart_session_error_response( $error ) );
+		}
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -672,9 +676,10 @@ class Checkout extends AbstractCartRoute {
 		// Order save-point: 2.
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -683,8 +688,8 @@ class Checkout extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-
+		 * @example docs/examples/checkout-order-processed.md
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );

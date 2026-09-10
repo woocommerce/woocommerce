@@ -14,7 +14,7 @@
 		"resolveJsonModule": true,
 		"jsx": "preserve",
 		"allowJs": true,
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"lib": [
 			"dom",
 			"esnext"

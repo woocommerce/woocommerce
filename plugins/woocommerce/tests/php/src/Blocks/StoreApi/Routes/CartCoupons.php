@@ -57,6 +57,57 @@ class CartCoupons extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Sequential percentage coupons should be projected in application order with exact discount totals.
+	 */
+	public function test_get_items_projects_sequential_percentage_coupons_in_application_order(): void {
+		update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		wc_empty_cart();
+
+		$this->product->set_regular_price( '100.00' );
+		$this->product->set_price( '100.00' );
+		$this->product->set_tax_status( 'none' );
+		$this->product->save();
+		$this->coupon->set_discount_type( 'percent' );
+		$this->coupon->set_amount( '20' );
+		$this->coupon->save();
+
+		$low_coupon = ( new FixtureData() )->get_coupon(
+			array(
+				'code'          => 'sequential-low',
+				'discount_type' => 'percent',
+				'amount'        => '10',
+			)
+		);
+
+		wc()->cart->add_to_cart( $this->product->get_id() );
+		wc()->cart->apply_coupon( $this->coupon->get_code() );
+		wc()->cart->apply_coupon( $low_coupon->get_code() );
+		wc()->cart->calculate_totals();
+
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart/coupons',
+			200,
+			array(
+				array(
+					'code'   => $this->coupon->get_code(),
+					'totals' => array(
+						'total_discount'     => '2000',
+						'total_discount_tax' => '0',
+					),
+				),
+				array(
+					'code'   => $low_coupon->get_code(),
+					'totals' => array(
+						'total_discount'     => '800',
+						'total_discount_tax' => '0',
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Test getting cart item by key.
 	 */
 	public function test_get_item() {

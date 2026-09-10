@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent product dashboard interactions from adding an invalid undefined query parameter to the URL.

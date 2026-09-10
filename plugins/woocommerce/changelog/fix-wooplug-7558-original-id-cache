@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache CSV importer original-ID lookups within each import batch, so CSVs with repeated IDs or many product references (grouped, upsell, cross-sell) no longer run the same postmeta query for every occurrence.

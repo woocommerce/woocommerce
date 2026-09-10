@@ -5,23 +5,10 @@
  * @package WooCommerce\Admin\Metaboxes\Views
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
-	?>
-	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
-		<div id="variable_product_options_inner">
-			<div id="<?php echo esc_attr( ProductVariationsClassicRedesign::ROOT_ID ); ?>"></div>
-		</div>
-	</div>
-	<?php
-	return;
 }
 
 $add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
@@ -103,6 +90,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<option value="variable_regular_price_increase"><?php esc_html_e( 'Increase regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_regular_price_decrease"><?php esc_html_e( 'Decrease regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price"><?php esc_html_e( 'Set sale prices', 'woocommerce' ); ?></option>
+						<option value="variable_sale_price_from_regular_price"><?php esc_html_e( 'Set sale prices to regular prices decreased by (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price_increase"><?php esc_html_e( 'Increase sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price_decrease"><?php esc_html_e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>

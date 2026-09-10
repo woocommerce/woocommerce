@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent fatal errors on plugins.php, update-core.php and the Extensions page when cached WooCommerce.com subscription data contains malformed entries.

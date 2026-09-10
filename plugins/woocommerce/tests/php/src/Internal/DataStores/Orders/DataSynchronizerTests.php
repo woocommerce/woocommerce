@@ -151,6 +151,24 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox An order edited after a full backfill is still detected as pending sync.
+	 */
+	public function test_has_orders_pending_sync_detects_stale_order_after_backfill_with_no_missing_orders() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+
+		$order = OrderHelper::create_complex_data_store_order();
+		$this->sut->process_batch( array( $order->get_id() ) );
+		$this->assertFalse( $this->sut->has_orders_pending_sync(), 'No orders should be pending sync right after a full backfill.' );
+
+		$order->set_date_modified( time() + 1000 );
+		$order->save();
+
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
+		$this->assertEquals( 1, $this->sut->get_current_orders_pending_sync_count() );
+	}
+
+	/**
 	 * When the CPT data store is authoritative, and an order is updated, we should propagate those changes to
 	 * the COT store immediately (rather than wait for sync to catch up). This guards against a situation where
 	 * the corresponding COT record is temporarily inaccurate.
