@@ -316,7 +316,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @param \WC_Order|\WC_Customer $wc_object Order or customer to read fields from.
 	 * @return array
 	 */
-	public function get_additional_fields_response( \WC_Data $wc_object ) {
+	protected function get_additional_fields_response( \WC_Data $wc_object ) {
 		$fields = $wc_object instanceof \WC_Order
 			? wp_parse_args(
 				$this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' ),

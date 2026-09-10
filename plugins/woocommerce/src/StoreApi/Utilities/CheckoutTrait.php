@@ -7,7 +7,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use WC_Customer;
 
 /**
@@ -357,11 +356,31 @@ trait CheckoutTrait {
 	 * @return DocumentObject The document object.
 	 */
 	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
-		// Ensure DocumentObject has all fields (posted, saved), not just posted.
-		$saved_fields      = $this->schema instanceof CheckoutSchema
-			? (array) $this->schema->get_additional_fields_response( $this->order instanceof \WC_Order ? $this->order : wc()->customer )
+		// Keep the order local so validation errors do not release its stock or coupon holds.
+		$order        = $this->order ?? $this->get_draft_order();
+		$saved_fields = wc()->customer instanceof WC_Customer
+			? $this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
 			: [];
-		$additional_fields = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+		if ( $order instanceof \WC_Order ) {
+			$saved_fields = wp_parse_args(
+				$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
+				$saved_fields
+			);
+		}
+
+		$field_values      = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+		$additional_fields = [];
+		$registered_fields = array_merge(
+			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
+			$this->additional_fields_controller->get_fields_for_location( 'order' )
+		);
+
+		// Conditions need raw values and explicit empty values for missing fields.
+		foreach ( $registered_fields as $key => $field ) {
+			$additional_fields[ $key ] = 'checkbox' === $field['type']
+				? (bool) ( $field_values[ $key ] ?? false )
+				: ( $field_values[ $key ] ?? '' );
+		}
 
 		return new DocumentObject(
 			[

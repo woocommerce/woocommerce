@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use WC_Gateway_BACS;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 /**
@@ -2954,18 +2955,19 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Returns a document object rule schema matching when the referral-source field equals "other" at the given path.
+	 * Returns a rule matching the referral-source value at the given path.
 	 *
 	 * @param string[] $path Property path to the object holding the field (e.g. [ 'checkout', 'additional_fields' ]).
+	 * @param string   $value The value to match.
 	 * @return array The rule schema.
 	 */
-	private function get_referral_source_is_other_rule( array $path = array( 'checkout', 'additional_fields' ) ) {
+	private function get_referral_source_rule( array $path = array( 'checkout', 'additional_fields' ), string $value = 'other' ) {
 		$rule = array(
 			'type'       => 'object',
 			'properties' => array(
 				'plugin-namespace/referral-source' => array(
 					'type'  => 'string',
-					'const' => 'other',
+					'const' => $value,
 				),
 			),
 		);
@@ -2990,7 +2992,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 			'contact' => array( 'customer', 'additional_fields' ),
 			'address' => array( 'customer', 'billing_address' ),
 		);
-		$rule       = $this->get_referral_source_is_other_rule( $rule_paths[ $location ] );
+		$rule       = $this->get_referral_source_rule( $rule_paths[ $location ] );
 
 		\woocommerce_register_additional_checkout_field(
 			array(
@@ -3026,7 +3028,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	/**
 	 * Builds a checkout request with a valid address and the given additional field values.
 	 *
-	 * @param string $method The request method (POST|PUT).
+	 * @param string $method The request method (POST|PUT|PATCH).
 	 * @param array  $additional_fields The additional field values to send.
 	 * @param array  $address_fields Additional address field values, merged into both addresses.
 	 * @return \WP_REST_Request The request.
@@ -3120,6 +3122,85 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		// The customer object survives reset_session, so clear the value this test persisted.
 		$this->controller->persist_field_for_customer( 'plugin-namespace/referral-source', '', wc()->customer, 'other' );
 		wc()->customer->save();
+	}
+
+	/**
+	 * @testdox A payment retry cannot clear a field required by a value saved on the order.
+	 * @testWith ["POST"]
+	 *           ["PUT"]
+	 *           ["PATCH"]
+	 * @param string $method The request method.
+	 */
+	public function test_conditional_required_field_uses_pending_order_value( string $method ): void {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$this->products[0]->set_manage_stock( true );
+		$this->products[0]->set_stock_quantity( 10 );
+		$this->products[0]->save();
+
+		$order = wc_create_order();
+		$order->add_product( $this->products[0], 1 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->set_total( 30 );
+		$order->set_cart_hash( wc()->cart->get_cart_hash() );
+		$this->controller->persist_field_for_order( 'plugin-namespace/referral-source', 'other', $order, 'other', false );
+		$this->controller->persist_field_for_order( 'plugin-namespace/referral-detail', 'a friend', $order, 'other', false );
+		$order->save();
+		wc_reserve_stock_for_order( $order );
+		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'The pending order must hold stock before the retry.' );
+		wc()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		$request  = $this->get_checkout_request_with_fields( $method, array( 'plugin-namespace/referral-detail' => '' ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'a friend', $this->controller->get_field_from_object( 'plugin-namespace/referral-detail', wc_get_order( $order->get_id() ) ), 'Rejected requests must leave the saved field unchanged.' );
+		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'Field validation errors must leave the existing stock hold unchanged.' );
+	}
+
+	/**
+	 * @testdox A partial update matches saved text without changing its punctuation.
+	 * @testWith ["order", "checkout"]
+	 *           ["contact", "customer"]
+	 * @param string $location The field location.
+	 * @param string $context The document object property holding the fields.
+	 */
+	public function test_conditional_hidden_field_uses_raw_saved_text( string $location, string $context ): void {
+		$this->unregister_fields();
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-source',
+				'label'    => 'Source',
+				'location' => $location,
+				'type'     => 'text',
+			)
+		);
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-detail',
+				'label'    => 'Please specify',
+				'location' => $location,
+				'type'     => 'text',
+				'hidden'   => array( 'not' => $this->get_referral_source_rule( array( $context, 'additional_fields' ), "John's" ) ),
+			)
+		);
+
+		$request  = $this->get_checkout_request_with_fields(
+			'PUT',
+			array(
+				'plugin-namespace/referral-source' => "John's",
+				'plugin-namespace/referral-detail' => 'first value',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'first value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'] );
+
+		$request  = $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-detail' => 'second value' ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'second value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'], 'The saved dependency must match the same rule as its posted value.' );
 	}
 
 	/**
