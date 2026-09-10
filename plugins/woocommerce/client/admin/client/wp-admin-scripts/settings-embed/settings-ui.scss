@@ -77,6 +77,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		margin-inline-start: auto;
 	}
 
+	// Descriptions the settings UI renders itself, for read-only info fields and
+	// for a description that sits beside a grouped control, rather than the ones
+	// DataForm paints as help text for its own controls.
+	.wc-settings-ui__field-description {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+		font-size: var(--wpds-typography-font-size-md);
+	}
+
 	.wc-settings-ui-shell__subtitle {
 		color: var(--wpds-color-foreground-content-neutral-weak);
 		margin: 0;

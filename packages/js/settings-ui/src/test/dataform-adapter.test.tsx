@@ -100,7 +100,6 @@ describe( 'dataform adapter', () => {
 			[ 'number', 'number' ],
 			[ 'integer', 'integer' ],
 			[ 'array', 'array' ],
-			[ 'relative_date_selector', 'text' ],
 		];
 
 		it.each( typeExpectations )(
@@ -844,8 +843,111 @@ describe( 'dataform adapter', () => {
 		} );
 	} );
 
+	describe( 'relative date fields', () => {
+		const retentionField: SettingsUIField = {
+			id: 'retention',
+			label: 'Retention',
+			type: 'relative_date_selector',
+			options: [
+				{ label: 'Day(s)', value: 'days' },
+				{ label: 'Week(s)', value: 'weeks' },
+			],
+		};
+
+		it( 'builds two built-in fields that project onto one stored value', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [ retentionField ] )
+			);
+
+			expect( adapter.fields.map( ( field ) => field.id ) ).toEqual( [
+				'retention__number',
+				'retention__unit',
+			] );
+			// Built-in controls, so neither field carries a custom renderer.
+			expect(
+				adapter.fields.every(
+					( field ) => ! field.Edit || field.Edit === 'select'
+				)
+			).toBe( true );
+
+			const item = { retention: { number: 3, unit: 'weeks' as const } };
+			const [ numberField, unitField ] = adapter.fields;
+			expect( numberField.getValue?.( { item } ) ).toBe( 3 );
+			expect( unitField.getValue?.( { item } ) ).toBe( 'weeks' );
+			expect( numberField.setValue?.( { item, value: 9 } ) ).toEqual( {
+				retention: { number: 9, unit: 'weeks' },
+			} );
+			expect( unitField.setValue?.( { item, value: 'days' } ) ).toEqual( {
+				retention: { number: 3, unit: 'days' },
+			} );
+		} );
+
+		it( 'groups both controls on one row under the field label', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [ retentionField ] )
+			);
+			const form = adapter.getForm( {
+				retention: { number: 3, unit: 'weeks' },
+			} );
+			const [ row ] = ( form.fields?.[ 0 ] as { children: unknown[] } )
+				.children as Array< {
+				id: string;
+				label: string;
+				layout: { type: string };
+				children: string[];
+			} >;
+
+			expect( row.id ).toBe( 'retention' );
+			expect( row.label ).toBe( 'Retention' );
+			expect( row.layout.type ).toBe( 'row' );
+			// Labels are hidden from vision but kept for screen readers.
+			expect( row.children ).toEqual( [
+				{
+					id: 'retention__number',
+					layout: { type: 'regular', labelPosition: 'none' },
+				},
+				{
+					id: 'retention__unit',
+					layout: { type: 'regular', labelPosition: 'none' },
+				},
+			] );
+		} );
+
+		it( 'drops the row when the field is hidden, so no orphan label renders', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [
+					{ id: 'enabled', label: 'Enabled', type: 'checkbox' },
+					{
+						...retentionField,
+						visibility: { controller: 'enabled', value: true },
+					},
+				] )
+			);
+
+			const shown = adapter.getForm( {
+				enabled: true,
+				retention: { number: 3, unit: 'weeks' },
+			} );
+			const hidden = adapter.getForm( {
+				enabled: false,
+				retention: { number: 3, unit: 'weeks' },
+			} );
+
+			const childIds = ( form: typeof shown ) =>
+				(
+					( form.fields?.[ 0 ] as { children: unknown[] } )
+						.children as Array< string | { id: string } >
+				 ).map( ( child ) =>
+					typeof child === 'string' ? child : child.id
+				);
+
+			expect( childIds( shown ) ).toContain( 'retention' );
+			expect( childIds( hidden ) ).not.toContain( 'retention' );
+		} );
+	} );
+
 	describe( 'mounted DataForm behaviour', () => {
-		it( 'edits a relative date with one bounded composite control', () => {
+		it( 'edits a relative date through two grouped built-in controls', () => {
 			const retentionField: SettingsUIField = {
 				id: 'retention',
 				label: 'Retention',
@@ -876,7 +978,6 @@ describe( 'dataform adapter', () => {
 			const select = container.querySelector( 'select' );
 			expect( input ).toHaveAttribute( 'min', '1' );
 			expect( input ).toHaveAttribute( 'step', '1' );
-			expect( input ).toHaveAttribute( 'placeholder', 'N/A' );
 			expect(
 				Array.from( select?.options ?? [] ).map(
 					( option ) => option.value
