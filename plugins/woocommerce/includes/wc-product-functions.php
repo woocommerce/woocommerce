@@ -13,9 +13,9 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
-use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Internal\ScheduledSaleBatchProcessor;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -847,108 +847,16 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
- * Products are processed in batches. Before hooks run before cache priming,
- * while after hooks run after the batch caches are cleared.
+ * Products are processed in batches by ScheduledSaleBatchProcessor. Before hooks run
+ * before any batch is primed; after hooks run after the last batch's caches are cleared.
  *
  * @since 3.0.0
  */
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
-	$product_util           = wc_get_container()->get( ProductUtil::class );
+	$processor              = wc_get_container()->get( ScheduledSaleBatchProcessor::class );
 	$must_refresh_transient = false;
-
-	$product_cache = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' )
-		? wc_get_container()->get( ProductCache::class )
-		: null;
-
-	$supports_flush_group = wp_cache_supports( 'flush_group' );
-	$flush_shared_groups  = $supports_flush_group && ! wp_using_ext_object_cache();
-
-	/**
-	 * Process scheduled-sale products in batches.
-	 *
-	 * @param (int|string|float|WC_Product|object)[] $product_ids Product references returned by the data store.
-	 * @param string                                 $mode        'start' or 'end'.
-	 */
-	$process_products = static function ( array $product_ids, string $mode ) use ( $product_util, $product_cache, $flush_shared_groups ): void {
-		// Sliced per iteration: array_chunk() would build every batch before the first runs.
-		$batch_size = 50;
-		$total      = count( $product_ids );
-
-		for ( $offset = 0; $offset < $total; $offset += $batch_size ) {
-			$chunk = array_slice( $product_ids, $offset, $batch_size );
-
-			// Normalize once so processing and cache cleanup use the same product IDs.
-			$batch_ids = array();
-
-			foreach ( $chunk as $chunk_entry ) {
-				if ( $chunk_entry instanceof WC_Product ) {
-					$batch_id = $chunk_entry->get_id();
-				} elseif ( is_object( $chunk_entry ) ) {
-					$batch_id = empty( $chunk_entry->ID ) ? 0 : (int) $chunk_entry->ID;
-				} else {
-					$batch_id = is_numeric( $chunk_entry ) ? (int) $chunk_entry : 0;
-				}
-
-				if ( $batch_id > 0 ) {
-					$batch_ids[] = $batch_id;
-				}
-			}
-
-			$batch_ids = array_values( array_unique( $batch_ids ) );
-
-			if ( ! $batch_ids ) {
-				continue;
-			}
-
-			_prime_post_caches( $batch_ids );
-
-			// Capture post types before product saves evict the primed posts.
-			$release_types = array_values( array_unique( array_filter( array_map( 'get_post_type', $batch_ids ) ) ) );
-
-			foreach ( $batch_ids as $product_id ) {
-				$product = wc_get_product( $product_id );
-
-				if ( $product ) {
-					// Only the price changes, so this does not reschedule the sale event.
-					wc_apply_sale_state_for_product( $product, $mode );
-				}
-
-				$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-			}
-
-			// Delete only this batch. clean_post_cache() would invalidate wider cache state
-			// that this function did not populate.
-			wp_cache_delete_multiple( $batch_ids, 'posts' );
-			wp_cache_delete_multiple( $batch_ids, 'post_meta' );
-			// Delete relationships directly because a batch can contain products and variations,
-			// while clean_object_term_cache() accepts one object type.
-			$release_taxonomies = array();
-
-			foreach ( $release_types as $release_type ) {
-				$release_taxonomies = array_merge( $release_taxonomies, get_object_taxonomies( $release_type ) );
-			}
-
-			foreach ( array_unique( $release_taxonomies ) as $release_taxonomy ) {
-				wp_cache_delete_multiple( $batch_ids, "{$release_taxonomy}_relationships" );
-			}
-
-			// Remove entries reloaded while clearing product transients.
-			if ( $product_cache ) {
-				foreach ( $batch_ids as $product_id ) {
-					$product_cache->remove( $product_id );
-				}
-			}
-
-			// These keys cannot be addressed by product ID. Flush their groups only when the
-			// cache is request-local, so shared external caches are untouched.
-			if ( $flush_shared_groups ) {
-				wp_cache_flush_group( 'products' );
-				wp_cache_flush_group( 'term-queries' );
-			}
-		}
-	};
 
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
@@ -956,7 +864,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		$process_products( $product_ids, 'start' );
+		$processor->process( $product_ids, 'start' );
 
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
@@ -968,7 +876,7 @@ function wc_scheduled_sales() {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		$process_products( $product_ids, 'end' );
+		$processor->process( $product_ids, 'end' );
 
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
