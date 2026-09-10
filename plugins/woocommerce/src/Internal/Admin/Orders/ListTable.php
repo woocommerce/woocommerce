@@ -1254,7 +1254,7 @@ class ListTable extends WP_List_Table {
 			'processing'     => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
 			'completed'      => __( 'Order fulfilled and complete.', 'woocommerce' ),
 			'failed'         => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
-			'checkout-draft' => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'checkout-draft' => __( 'Draft orders are created during order submission through the block checkout.', 'woocommerce' ),
 			'cancelled'      => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
 			'refunded'       => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
 		);

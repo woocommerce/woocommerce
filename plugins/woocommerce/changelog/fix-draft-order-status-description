@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correct the Draft order status description to reflect creation during block checkout submission.
