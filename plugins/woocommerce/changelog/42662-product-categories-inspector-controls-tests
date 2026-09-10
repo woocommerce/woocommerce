@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add e2e coverage for the Product Categories List block inspector controls: display style, product count, category images, and hierarchy.
