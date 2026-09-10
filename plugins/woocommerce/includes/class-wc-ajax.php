@@ -481,9 +481,12 @@ class WC_AJAX {
 		// Get messages if reload checkout is not true.
 		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
-			// Capture errors before printing, because wc_print_notices() clears the queue.
-			$has_error_notices = 0 < wc_notice_count( 'error' );
-			$messages          = wc_print_notices( true );
+			// Capture the error count before printing, because wc_print_notices() clears the queue.
+			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
+			// flag only reports errors that were rendered.
+			$error_notice_count = wc_notice_count( 'error' );
+			$messages           = wc_print_notices( true );
+			$has_error_notices  = 0 < $error_notice_count && '' !== $messages;
 		} else {
 			$has_error_notices = false;
 			$messages          = '';
