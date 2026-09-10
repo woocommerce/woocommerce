@@ -690,8 +690,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'products/test-woo-extension', $output, 'The link should point at the product page.' );
 		$this->assertStringContainsString( 'utm_campaign=pu_plugin_row_purchase', $output, 'The link should carry the campaign parameters.' );
 		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output, 'The link should carry the tracked class.' );
-		$this->assertStringContainsString( 'target="_blank"', $output, 'The product page should open in a new tab.' );
-		$this->assertStringContainsString( 'rel="noopener noreferrer"', $output, 'A new tab must not get a handle on the admin window.' );
+		$this->assertStringNotContainsString( 'target=', $output, 'Links in the notices stay in the admin tab.' );
 		$this->assertStringContainsString( '>Subscribe</a> now for security updates, product improvements, and support.', $output );
 	}
 
@@ -748,8 +747,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order_id=456', $output, 'The link should name the order being renewed.' );
 		$this->assertStringNotContainsString( 'add-to-cart', $output );
 		$this->assertStringContainsString( 'woocommerce-renew-subscription', $output, 'The link should carry the tracked class.' );
-		$this->assertStringContainsString( 'target="_blank"', $output, 'The cart should open in a new tab.' );
-		$this->assertStringContainsString( 'rel="noopener noreferrer"', $output, 'A new tab must not get a handle on the admin window.' );
+		$this->assertStringNotContainsString( 'target=', $output, 'Links in the notices stay in the admin tab.' );
 	}
 
 	/**

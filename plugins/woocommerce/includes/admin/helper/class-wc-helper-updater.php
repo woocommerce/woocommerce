@@ -303,10 +303,8 @@ class WC_Helper_Updater {
 				$notice,
 				array(
 					'a' => array(
-						'href'   => array(),
-						'class'  => array(),
-						'target' => array(),
-						'rel'    => array(),
+						'href'  => array(),
+						'class' => array(),
 					),
 				)
 			)
@@ -403,8 +401,8 @@ class WC_Helper_Updater {
 	/**
 	 * Message for a plugin row whose product the connected account holds no subscription for.
 	 *
-	 * Opens the product page in a new tab so the reader can see what a subscription covers before
-	 * buying. Falls back to the cart when the update data carries no product URL.
+	 * Links to the product page so the reader can see what a subscription covers before buying.
+	 * Falls back to the cart when the update data carries no product URL.
 	 *
 	 * @since 11.2.0
 	 *
@@ -435,7 +433,7 @@ class WC_Helper_Updater {
 
 		return sprintf(
 			/* translators: 1: URL of the WooCommerce.com product page */
-			__( 'You don\'t have an active subscription for this product. <a href="%1$s" class="woocommerce-purchase-subscription" target="_blank" rel="noopener noreferrer">Subscribe</a> now for security updates, product improvements, and support.', 'woocommerce' ),
+			__( 'You don\'t have an active subscription for this product. <a href="%1$s" class="woocommerce-purchase-subscription">Subscribe</a> now for security updates, product improvements, and support.', 'woocommerce' ),
 			esc_url( $purchase_link )
 		);
 	}
@@ -457,7 +455,7 @@ class WC_Helper_Updater {
 		if ( ! empty( $expired_subscription ) ) {
 			return sprintf(
 				/* translators: 1: URL of the WooCommerce.com cart set up to renew the subscription */
-				__( 'Your subscription for this extension has expired. <a href="%1$s" class="woocommerce-renew-subscription" target="_blank" rel="noopener noreferrer">Renew your subscription</a> for security updates, product improvements, and support.', 'woocommerce' ),
+				__( 'Your subscription for this extension has expired. <a href="%1$s" class="woocommerce-renew-subscription">Renew your subscription</a> for security updates, product improvements, and support.', 'woocommerce' ),
 				esc_url( self::get_renew_link( $expired_subscription, 'pu_plugin_row_renew' ) )
 			);
 		}
