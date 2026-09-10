@@ -3239,7 +3239,7 @@ class WC_AJAX {
 		$value         = (string) $value;
 		$is_percentage = '%' === substr( $value, -1 );
 		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
-		if ( ! is_numeric( $adjustment ) || 0 >= (float) $adjustment ) {
+		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
 			return;
 		}
 		$adjustment = (float) $adjustment;
