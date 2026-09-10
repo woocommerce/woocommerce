@@ -10687,12 +10687,6 @@ parameters:
 			path: includes/class-wc-countries.php
 
 		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$states\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/class-wc-countries.php
-
-		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -30088,12 +30082,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-report-reviews-totals-controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function get_comments expects array\{author_email\?\: string, author_url\?\: string, author__in\?\: array\<int\>, author__not_in\?\: array\<int\>, comment__in\?\: array\<int\>, comment__not_in\?\: array\<int\>, count\?\: bool, date_query\?\: array, \.\.\.\}, array\{count\: true, post_type\: ''product'', meta_key\: ''rating'', meta_value\: int\<1, 5\>\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-report-reviews-totals-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Report_Sales_V2_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 128 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -31194,7 +31182,7 @@ parameters:
 		-
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
-			count: 4
+			count: 3
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-
@@ -31254,12 +31242,6 @@ parameters:
 		-
 			message: '#^Method WC_Shortcode_My_Account\:\:view_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
-			message: '#^Parameter \#1 \$key of static method WC_Shortcode_My_Account\:\:check_password_reset_key\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
@@ -40270,18 +40252,6 @@ parameters:
 			path: src/Admin/API/Reports/Categories/DataStore.php
 
 		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:\$order is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -40573,18 +40543,6 @@ parameters:
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_DateTime\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
 			path: src/Admin/API/Reports/Coupons/DataStore.php
 
 		-
@@ -41200,12 +41158,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_included_products_array\(\) should return array but returns array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: return.type
 			count: 1
@@ -41407,12 +41359,6 @@ parameters:
 			message: '#^Part \$field \(array\|string\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Part \$id_field \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
@@ -43054,18 +43000,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_data\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -43676,24 +43610,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Taxes/Controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_rate_id\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_shipping_tax_total\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_tax_total\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:add_from_sql_params\(\) has no return type specified\.$#'
@@ -44406,18 +44322,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Parameter \#2 \$id_field of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_ids_table\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Part \$ids_table \(array\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
 			count: 1
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
@@ -49426,12 +49330,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductItem.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductItemSelector.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\GroupedProductItemSelector\:\:get_button_markup\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -51382,18 +51280,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterChips.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, string\|true\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterChips.php
-
-		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
@@ -52840,12 +52726,6 @@ parameters:
 			path: src/Blocks/Domain/Package.php
 
 		-
-			message: '#^Instanceof between WC_Data and WC_Data will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:add_fields_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52861,36 +52741,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:process_checkbox_field\(\) never returns false so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:process_field_options\(\) should return array but returns array\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:sync_customer_additional_fields_with_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:sync_order_additional_fields_with_customer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, array given\.$#'
-			identifier: argument.type
-			count: 2
 			path: src/Blocks/Domain/Services/CheckoutFields.php
 
 		-
@@ -53258,12 +53108,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/Integrations/IntegrationInterface.php
-
-		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Integrations/IntegrationRegistry.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Integrations\\IntegrationRegistry\:\:initialize\(\) has no return type specified\.$#'
@@ -54108,12 +53952,6 @@ parameters:
 		-
 			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
-			path: src/Blocks/Utils/StyleAttributesUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\StyleAttributesUtils\:\:join_styles\(\) should return array but returns string\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/Utils/StyleAttributesUtils.php
 
@@ -59122,12 +58960,6 @@ parameters:
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
-			message: '#^Access to offset ''id'' on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
 			message: '#^Access to property \$ID on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
 			identifier: class.notFound
 			count: 1
@@ -59154,12 +58986,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:update_user_data_values\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/WCAdminUser.php
-
-		-
-			message: '#^Parameter \$user of method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminUser\:\:get_user_data_values\(\) has invalid type Automattic\\WooCommerce\\Internal\\Admin\\WP_User\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/WCAdminUser.php
 
@@ -63121,12 +62947,6 @@ parameters:
 			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
 
 		-
-			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
-
-		-
 			message: '#^Constant Automattic\\WooCommerce\\Internal\\ReceiptRendering\\ReceiptRenderingEngine\:\:KNOWN_CARD_TYPES is unused\.$#'
 			identifier: classConstant.unused
 			count: 1
@@ -66931,12 +66751,6 @@ parameters:
 			path: src/Internal/StockNotifications/Notification.php
 
 		-
-			message: '#^Method WC_Product\:\:get_permalink\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Internal/StockNotifications/Notification.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\:\:\$product \(WC_Product\) does not accept null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -68353,18 +68167,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool The WP_DEBUG mode\.\)\: Unexpected token "The", expected variable at offset 115 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^PHPDoc tag @return has invalid value \(\\WC_Order\|null;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 99 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -68577,18 +68379,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:validate_billing_email_matches_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool The WP_DEBUG mode\.\)\: Unexpected token "The", expected variable at offset 115 on line 4$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

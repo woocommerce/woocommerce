@@ -353,9 +353,11 @@ class WC_Install {
 		'11.2.0'   => array(
 			'wc_update_1120_remove_abandoned_cart_recovery',
 			'wc_update_1120_migrate_stock_notifications_alpha_constant',
-		),
-		'11.2.0-1' => array(
+			'wc_update_1120_delete_surface_cart_checkout_note',
+			'wc_update_1120_cleanup_inherited_variation_images',
 			'wc_update_11201_migrate_tax_lookup_order_items',
+			'wc_update_11201_invalidate_analytics_reports_cache',
+			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
 	);
 
@@ -2044,7 +2046,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY global_unique_id (global_unique_id(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2108,6 +2111,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
+	taxable_amount double DEFAULT 0 NOT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sanitize the stock notifications My Account endpoint slug when saved from settings.
