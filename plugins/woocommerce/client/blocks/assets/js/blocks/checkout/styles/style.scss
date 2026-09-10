@@ -152,9 +152,8 @@
 	}
 }
 
-// Skeleton is shown before mobile classes are appended, so it has to infer the
-// container width from the viewport: ~1000px of viewport is the ~920px of
-// container the two-column layout needs.
+// Skeleton is shown before mobile classes are appended, so it goes by viewport
+// width: ~1000px of viewport is the ~920px of container the two columns need.
 @media only screen and (max-width: 999px) {
 	.wp-block-woocommerce-checkout.is-loading {
 		flex-direction: column;

@@ -8,9 +8,7 @@ import { useResizeObserver } from '@wordpress/compose';
  * Class names are based on the smaller of the breakpoints:
  * https://github.com/WordPress/gutenberg/tree/master/packages/viewport#usage
  * Values are also based on those breakpoints minus ~80px which is approximately
- * the left + right margin in Storefront with a font-size of 16px. `is-large` is
- * where the two-column layout appears, so it sits higher: it has to fit the
- * main column next to a fixed-width sidebar.
+ * the left + right margin in Storefront with a font-size of 16px.
  * Keep in sync with the `cart-checkout-*-container` mixins in
  * assets/css/abstracts/_mixins.scss.
  * _Note: `useContainerQueries` will return an empty class name `` until after

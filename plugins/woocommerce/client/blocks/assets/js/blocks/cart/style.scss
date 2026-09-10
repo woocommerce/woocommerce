@@ -207,8 +207,7 @@
 			margin: 0 auto $gap;
 		}
 
-		// The flex shorthands above size along the main axis, which is now
-		// vertical, so both columns have to opt back out of them.
+		// flex-basis sizes along the main axis, which is vertical here, so reset it.
 		.wp-block-woocommerce-cart-items-block,
 		.wp-block-woocommerce-cart-totals-block {
 			flex: none;

@@ -15,11 +15,9 @@
 
 	.wc-block-components-main {
 		box-sizing: border-box;
-		// Absorbs whatever the fixed-width sidebar leaves over. min-width is
-		// needed because the form's own content would otherwise stop the
-		// column shrinking and push the sidebar onto its own line.
 		flex: 1 1 0%;
 		margin: 0;
+		// Lets the column shrink past its content, so the sidebar stays beside it.
 		min-width: 0;
 	}
 }
@@ -40,8 +38,7 @@
 		flex-direction: column;
 		margin: 0 auto $gap;
 
-		// The flex shorthands above size along the main axis, which is now
-		// vertical, so both columns have to opt back out of them.
+		// flex-basis sizes along the main axis, which is vertical here, so reset it.
 		.wc-block-components-main,
 		.wc-block-components-sidebar {
 			flex: none;
