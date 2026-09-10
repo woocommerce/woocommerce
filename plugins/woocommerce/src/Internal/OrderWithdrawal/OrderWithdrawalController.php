@@ -96,9 +96,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
 
-		if ( $this->is_enabled() ) {
-			$this->email_preview->register();
-		}
+		$this->email_preview->register();
 	}
 
 	/**
