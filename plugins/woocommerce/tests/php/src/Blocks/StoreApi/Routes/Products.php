@@ -1116,9 +1116,10 @@ class Products extends ControllerTestCase {
 			$this->assertSame( $expected, wp_list_pluck( $response->get_data(), 'id' ) );
 		} finally {
 			unset( $_REQUEST[ '_unstable_tax_' . $taxonomy ] );
-			unregister_taxonomy( $taxonomy );
 			if ( $is_attribute ) {
 				wc_delete_attribute( $attribute_id );
+			} else {
+				unregister_taxonomy( $taxonomy );
 			}
 		}
 	}
