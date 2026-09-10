@@ -187,6 +187,25 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Write the `.headers` companion that marks the export as complete, unless it is already there.
+	 *
+	 * The parent writes it only when its own row count reaches 100%, which an export whose row total
+	 * changed while it ran never does. The exporter that confirms every page was written calls this.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function write_headers_row_file() {
+		if ( file_exists( $this->get_headers_row_file_path() ) ) {
+			return;
+		}
+
+		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	}
+
+	/**
 	 * Write the export to the output, leaving the file in place. Send the download headers first.
 	 *
 	 * @since 11.2.0
