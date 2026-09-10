@@ -108,6 +108,8 @@ class VariationsReportTable extends Component {
 				product_id: productId,
 				variation_id: variationId,
 			} = row;
+			const revenueIncomplete =
+				Number( row.reporting_missing_orders ) > 0;
 			const extendedInfo = row.extended_info || {};
 			const {
 				stock_status: stockStatus,
@@ -153,8 +155,12 @@ class VariationsReportTable extends Component {
 					value: itemsSold,
 				},
 				{
-					display: formatAmount( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( netRevenue ),
+					value: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
 					display: (
@@ -239,7 +245,10 @@ class VariationsReportTable extends Component {
 			},
 			{
 				label: __( 'net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( netRevenue ),
 			},
 			{
 				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),

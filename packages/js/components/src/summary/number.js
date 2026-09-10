@@ -78,7 +78,9 @@ const SummaryNumber = ( {
 					Math.abs( delta ),
 					prevLabel
 			  );
-	if ( ! delta ) {
+	if ( isNil( delta ) ) {
+		screenReaderLabel = __( 'Comparison unavailable', 'woocommerce' );
+	} else if ( ! delta ) {
 		screenReaderLabel = sprintf(
 			/* translators: previous value */
 			__( 'No change from %s', 'woocommerce' ),

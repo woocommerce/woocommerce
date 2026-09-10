@@ -16,7 +16,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-class CouponsReportTable extends Component {
+export class CouponsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -82,6 +82,7 @@ class CouponsReportTable extends Component {
 				coupon_id: couponId,
 				orders_count: ordersCount,
 			} = coupon;
+			const incomplete = Number( coupon.reporting_missing_orders ) > 0;
 			const extendedInfo = coupon.extended_info || {};
 			const {
 				code,
@@ -137,8 +138,12 @@ class CouponsReportTable extends Component {
 					value: ordersCount,
 				},
 				{
-					display: formatAmount( amount ),
-					value: getCurrencyFormatDecimal( amount ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( amount ),
+					value: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( amount ),
 				},
 				{
 					display: dateCreated ? (
@@ -189,7 +194,10 @@ class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'Amount discounted', 'woocommerce' ),
-				value: formatAmount( amount ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( amount ),
 			},
 		];
 	}

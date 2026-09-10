@@ -14,7 +14,7 @@ import { CurrencyContext } from '@woocommerce/currency';
  */
 import { getTaxCode } from './utils';
 import ReportTable from '../../components/report-table';
-class TaxesReportTable extends Component {
+export class TaxesReportTable extends Component {
 	constructor() {
 		super();
 
@@ -81,6 +81,7 @@ class TaxesReportTable extends Component {
 				total_tax: totalTax,
 				shipping_tax: shippingTax,
 			} = tax;
+			const incomplete = Number( tax.reporting_missing_orders ) > 0;
 			const taxCode = getTaxCode( tax );
 
 			const persistedQuery = getPersistedQuery( query );
@@ -108,16 +109,28 @@ class TaxesReportTable extends Component {
 					value: taxRate,
 				},
 				{
-					display: renderCurrency( totalTax ),
-					value: getCurrencyFormatDecimal( totalTax ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( totalTax ),
+					value: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( totalTax ),
 				},
 				{
-					display: renderCurrency( orderTax ),
-					value: getCurrencyFormatDecimal( orderTax ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( orderTax ),
+					value: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( orderTax ),
 				},
 				{
-					display: renderCurrency( shippingTax ),
-					value: getCurrencyFormatDecimal( shippingTax ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( shippingTax ),
+					value: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( shippingTax ),
 				},
 				{
 					display: formatValue(
@@ -157,15 +170,24 @@ class TaxesReportTable extends Component {
 			},
 			{
 				label: __( 'total tax', 'woocommerce' ),
-				value: formatAmount( totalTax ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( totalTax ),
 			},
 			{
 				label: __( 'order tax', 'woocommerce' ),
-				value: formatAmount( orderTax ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( orderTax ),
 			},
 			{
 				label: __( 'shipping tax', 'woocommerce' ),
-				value: formatAmount( shippingTax ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( shippingTax ),
 			},
 			{
 				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),

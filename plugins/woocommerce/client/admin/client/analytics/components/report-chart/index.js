@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
@@ -32,7 +33,12 @@ import {
 	createDateFormatter,
 	buildChartData,
 } from './utils';
-import { getEmptyMessage, hasEmptySearchResults } from '../utils';
+import {
+	getEmptyMessage,
+	hasEmptySearchResults,
+	hasMissingCurrencyData,
+	hasMissingCouponAllocationData,
+} from '../utils';
 
 /**
  * Component that renders the chart in reports.
@@ -45,6 +51,21 @@ export class ReportChart extends Component {
 				this.props.primaryData.isRequesting ||
 			nextProps.secondaryData.isRequesting !==
 				this.props.secondaryData.isRequesting ||
+			hasMissingCurrencyData( nextProps.primaryData?.data ) !==
+				hasMissingCurrencyData( this.props.primaryData?.data ) ||
+			hasMissingCurrencyData( nextProps.secondaryData?.data ) !==
+				hasMissingCurrencyData( this.props.secondaryData?.data ) ||
+			hasMissingCouponAllocationData( nextProps.primaryData?.data ) !==
+				hasMissingCouponAllocationData(
+					this.props.primaryData?.data
+				) ||
+			hasMissingCouponAllocationData( nextProps.secondaryData?.data ) !==
+				hasMissingCouponAllocationData(
+					this.props.secondaryData?.data
+				) ||
+			nextProps.emptySearchResults !== this.props.emptySearchResults ||
+			nextProps.mode !== this.props.mode ||
+			nextProps.selectedChart?.type !== this.props.selectedChart?.type ||
 			! isEqual( nextProps.query, this.props.query )
 		) {
 			return true;
@@ -234,7 +255,48 @@ export class ReportChart extends Component {
 	}
 
 	render() {
-		const { mode } = this.props;
+		const {
+			mode,
+			primaryData,
+			secondaryData,
+			selectedChart,
+			isRequesting,
+			emptySearchResults,
+		} = this.props;
+		const reports =
+			mode === 'item-comparison'
+				? [ primaryData ]
+				: [ primaryData, secondaryData ];
+		const missingAllocations = reports.some( ( report ) =>
+			hasMissingCouponAllocationData( report?.data )
+		);
+		if (
+			! isRequesting &&
+			! emptySearchResults &&
+			selectedChart?.type === 'currency' &&
+			reports.every(
+				( report ) =>
+					report && ! report.isRequesting && ! report.isError
+			) &&
+			( missingAllocations ||
+				reports.some( ( report ) =>
+					hasMissingCurrencyData( report.data )
+				) )
+		) {
+			return (
+				<div role="status">
+					{ missingAllocations
+						? __(
+								'Chart unavailable: historical coupon allocations are missing for one or more orders.',
+								'woocommerce'
+						  )
+						: __(
+								'Chart unavailable: historical currency data is missing for one or more orders.',
+								'woocommerce'
+						  ) }
+				</div>
+			);
+		}
 		if ( mode === 'item-comparison' ) {
 			return this.renderItemComparison();
 		}

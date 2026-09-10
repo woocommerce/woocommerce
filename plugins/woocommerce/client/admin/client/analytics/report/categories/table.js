@@ -18,7 +18,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 import CategoryBreacrumbs from './breadcrumbs';
 import ReportTable from '../../components/report-table';
 
-class CategoriesReportTable extends Component {
+export class CategoriesReportTable extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -84,6 +84,8 @@ class CategoriesReportTable extends Component {
 				products_count: productsCount,
 				orders_count: ordersCount,
 			} = categoryStat;
+			const revenueIncomplete =
+				Number( categoryStat.reporting_missing_orders ) > 0;
 			const category = categories.get( categoryId );
 			const persistedQuery = getPersistedQuery( query );
 
@@ -103,8 +105,12 @@ class CategoriesReportTable extends Component {
 					value: itemsSold,
 				},
 				{
-					display: renderCurrency( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( netRevenue ),
+					value: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
 					display: category && (
@@ -161,7 +167,10 @@ class CategoriesReportTable extends Component {
 			},
 			{
 				label: __( 'Net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( netRevenue ),
 			},
 			{
 				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),

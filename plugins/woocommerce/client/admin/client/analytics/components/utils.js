@@ -53,3 +53,37 @@ export function getEmptyMessage( query, limitBy ) {
 
 	return __( 'No data for the selected date range', 'woocommerce' );
 }
+
+/**
+ * Whether displayed totals, intervals or segments contain missing conversions.
+ *
+ * @param {Object} data Report data.
+ * @return {boolean} Whether any monetary contribution is unqualified.
+ */
+function hasMissingReportData( data, field ) {
+	const isIncomplete = ( subtotal ) =>
+		Number( subtotal?.[ field ] ) > 0 ||
+		Boolean(
+			subtotal?.segments?.some( ( segment ) =>
+				isIncomplete( segment.subtotals )
+			)
+		);
+	return (
+		isIncomplete( data?.totals ) ||
+		Boolean(
+			data?.intervals?.some( ( interval ) =>
+				isIncomplete( interval.subtotals )
+			)
+		)
+	);
+}
+
+/** Whether a report contains missing historical conversion data. */
+export function hasMissingCurrencyData( data ) {
+	return hasMissingReportData( data, 'reporting_missing_orders' );
+}
+
+/** Whether a coupon product breakdown lacks historical allocations. */
+export function hasMissingCouponAllocationData( data ) {
+	return hasMissingReportData( data, 'allocation_missing_orders' );
+}

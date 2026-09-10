@@ -44,6 +44,27 @@ export class ReportSummary extends Component {
 
 		const primaryValue = emptySearchResults ? 0 : primaryTotal;
 		const secondaryValue = emptySearchResults ? 0 : secondaryTotal;
+		const primaryIncomplete =
+			! emptySearchResults &&
+			type === 'currency' &&
+			Number( totals.primary?.reporting_missing_orders ) > 0;
+		const secondaryIncomplete =
+			! emptySearchResults &&
+			type === 'currency' &&
+			Number( totals.secondary?.reporting_missing_orders ) > 0;
+
+		if ( primaryIncomplete || secondaryIncomplete ) {
+			return {
+				delta: null,
+				prevValue: secondaryIncomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: this.formatVal( secondaryValue, type ),
+				value: primaryIncomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: this.formatVal( primaryValue, type ),
+				isIncomplete: true,
+			};
+		}
 
 		return {
 			delta: calculateDelta( primaryValue, secondaryValue ),
@@ -94,7 +115,8 @@ export class ReportSummary extends Component {
 				}
 				const href = getNewPath( newPath );
 				const isSelected = selectedChart.key === key;
-				const { delta, prevValue, value } = this.getValues( key, type );
+				const { delta, prevValue, value, isIncomplete } =
+					this.getValues( key, type );
 
 				return (
 					<SummaryNumber
@@ -111,7 +133,14 @@ export class ReportSummary extends Component {
 						prevValue={ prevValue }
 						selected={ isSelected }
 						value={ value }
-						labelTooltipText={ labelTooltipText }
+						labelTooltipText={
+							isIncomplete
+								? __(
+										'Historical currency data is missing for one or more orders. Monetary comparisons are unavailable.',
+										'woocommerce'
+								  )
+								: labelTooltipText
+						}
 						onLinkClickCallback={ () => {
 							// Wider than a certain breakpoint, there is no dropdown so avoid calling onToggle.
 							if ( onToggle ) {

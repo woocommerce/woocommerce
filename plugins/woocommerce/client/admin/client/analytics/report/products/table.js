@@ -27,7 +27,7 @@ import './style.scss';
 const manageStock = getAdminSetting( 'manageStock', 'no' );
 const stockStatuses = getAdminSetting( 'stockStatuses', {} );
 
-class ProductsReportTable extends Component {
+export class ProductsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -115,6 +115,8 @@ class ProductsReportTable extends Component {
 				net_revenue: netRevenue,
 				orders_count: ordersCount,
 			} = row;
+			const revenueIncomplete =
+				Number( row.reporting_missing_orders ) > 0;
 			const extendedInfo = row.extended_info || {};
 			const {
 				category_ids: categoryIds,
@@ -192,8 +194,12 @@ class ProductsReportTable extends Component {
 					value: itemsSold,
 				},
 				{
-					display: renderCurrency( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( netRevenue ),
+					value: revenueIncomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
 					display: (
@@ -305,7 +311,10 @@ class ProductsReportTable extends Component {
 			},
 			{
 				label: __( 'Net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				value:
+					Number( totals.reporting_missing_orders ) > 0
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( netRevenue ),
 			},
 			{
 				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),

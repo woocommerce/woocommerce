@@ -43,7 +43,7 @@ const summaryFields = [
 	'net_revenue',
 ];
 
-class RevenueReportTable extends Component {
+export class RevenueReportTable extends Component {
 	constructor() {
 		super();
 
@@ -134,6 +134,8 @@ class RevenueReportTable extends Component {
 		} = this.context;
 
 		return data.map( ( row ) => {
+			const incomplete =
+				Number( row.subtotals.reporting_missing_orders ) > 0;
 			const {
 				coupons,
 				gross_sales: grossSales,
@@ -177,38 +179,65 @@ class RevenueReportTable extends Component {
 					value: Number( ordersCount ),
 				},
 				{
-					display: renderCurrency( grossSales ),
-					value: getCurrencyFormatDecimal( grossSales ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( grossSales ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( grossSales ),
 				},
 				{
-					display: formatAmount( refunds ),
-					value: getCurrencyFormatDecimal( refunds ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( refunds ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( refunds ),
 				},
 				{
-					display: formatAmount( coupons ),
-					value: getCurrencyFormatDecimal( coupons ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: formatAmount( coupons ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( coupons ),
 				},
 				{
-					display: renderCurrency( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( netRevenue ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
-					display: renderCurrency( taxes ),
-					value: getCurrencyFormatDecimal( taxes ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( taxes ),
+					value: incomplete ? '' : getCurrencyFormatDecimal( taxes ),
 				},
 				{
-					display: renderCurrency( shipping ),
-					value: getCurrencyFormatDecimal( shipping ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( shipping ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( shipping ),
 				},
 				{
-					display: renderCurrency( totalSales ),
-					value: getCurrencyFormatDecimal( totalSales ),
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( totalSales ),
+					value: incomplete
+						? ''
+						: getCurrencyFormatDecimal( totalSales ),
 				},
 			];
 		} );
 	}
 
 	getSummary( totals, totalResults = 0 ) {
+		const incomplete = Number( totals.reporting_missing_orders ) > 0;
 		const {
 			orders_count: ordersCount = 0,
 			gross_sales: grossSales = 0,
@@ -232,31 +261,45 @@ class RevenueReportTable extends Component {
 			},
 			{
 				label: __( 'Gross sales', 'woocommerce' ),
-				value: formatAmount( grossSales ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( grossSales ),
 			},
 			{
 				label: __( 'Returns', 'woocommerce' ),
-				value: formatAmount( refunds ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( refunds ),
 			},
 			{
 				label: __( 'Coupons', 'woocommerce' ),
-				value: formatAmount( coupons ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( coupons ),
 			},
 			{
 				label: __( 'Net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( netRevenue ),
 			},
 			{
 				label: __( 'Taxes', 'woocommerce' ),
-				value: formatAmount( taxes ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( taxes ),
 			},
 			{
 				label: __( 'Shipping', 'woocommerce' ),
-				value: formatAmount( shipping ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( shipping ),
 			},
 			{
 				label: __( 'Total sales', 'woocommerce' ),
-				value: formatAmount( totalSales ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( totalSales ),
 			},
 		];
 	}

@@ -68,6 +68,53 @@ describe( 'ReportSummary', () => {
 		);
 	}
 
+	test.each( [
+		[ 1, 0, 'Unavailable' ],
+		[ 0, 1, '$100.00' ],
+	] )(
+		'withholds incomplete currency summaries and comparisons (%s, %s)',
+		( primaryMissing, secondaryMissing, expectedValue ) => {
+			renderChart( 'currency', 100, 50, false, false, {
+				summaryData: {
+					totals: {
+						primary: {
+							total_sales: 100,
+							reporting_missing_orders: primaryMissing,
+						},
+						secondary: {
+							total_sales: 50,
+							reporting_missing_orders: secondaryMissing,
+						},
+					},
+				},
+			} );
+			expect( screen.getByText( expectedValue ) ).toBeInTheDocument();
+			expect( screen.queryByText( '100%' ) ).not.toBeInTheDocument();
+			expect(
+				screen.getByLabelText( 'Comparison unavailable' )
+			).toBeInTheDocument();
+		}
+	);
+
+	test( 'keeps nonmonetary counts available when currency reporting is incomplete', () => {
+		renderChart( 'number', 100, 50, false, false, {
+			summaryData: {
+				totals: {
+					primary: {
+						total_sales: 100,
+						reporting_missing_orders: '1',
+					},
+					secondary: {
+						total_sales: 50,
+						reporting_missing_orders: '0',
+					},
+				},
+			},
+		} );
+		expect( screen.getByText( '100' ) ).toBeInTheDocument();
+		expect( screen.getByText( '100%' ) ).toBeInTheDocument();
+	} );
+
 	test( 'should set the correct prop values for the SummaryNumber components', async () => {
 		renderChart( 'number', 1000.5, 500.25 );
 
@@ -148,13 +195,27 @@ describe( 'ReportSummary', () => {
 		expect( screen.queryByText( 'Previous year: 0' ) ).toBeNull();
 	} );
 
-	test( 'should show 0s when displaying an empty search', async () => {
+	test( 'announces a comparison as unavailable when values are missing', async () => {
 		renderChart( 'number', null, undefined );
 
 		expect( screen.getAllByText( 'N/A' ) ).not.toBeNull();
 
-		const delta = screen.getByLabelText( 'No change from Previous year:' );
+		const delta = screen.getByLabelText( 'Comparison unavailable' );
 		expect( delta ).toBeInTheDocument();
+	} );
+
+	test( 'shows empty-result zero despite stale incomplete metadata', () => {
+		renderChart( 'currency', 100, 50, false, false, {
+			emptySearchResults: true,
+			summaryData: {
+				totals: {
+					primary: { total_sales: 100, reporting_missing_orders: 1 },
+					secondary: { total_sales: 50, reporting_missing_orders: 1 },
+				},
+			},
+		} );
+		expect( screen.getByText( '$0.00' ) ).toBeInTheDocument();
+		expect( screen.queryByText( 'Unavailable' ) ).not.toBeInTheDocument();
 	} );
 
 	test( 'should display AnalyticsError when isError is true', () => {
