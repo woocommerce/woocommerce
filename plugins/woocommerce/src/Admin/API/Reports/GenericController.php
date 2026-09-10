@@ -133,6 +133,12 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['free_orders']         = array(
+			'description'       => __( 'Whether orders with a total of zero are counted in this report. Defaults to the Analytics setting.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array( 'include', 'exclude' ),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['after']               = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',

@@ -289,6 +289,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->interval_query->add_sql_clause( 'where', "AND ( $where_subclause )" );
 			$this->interval_query->add_sql_clause( 'join', $from_clause );
 		}
+
+		// Added as its own clause rather than joining $where_subclause, which may
+		// be OR-combined when the request filters on specific statuses. Free
+		// orders are always excluded outright, never as one of several matches.
+		$free_orders_filter = $this->get_free_orders_subquery( $query_args );
+		if ( $free_orders_filter ) {
+			$this->total_query->add_sql_clause( 'where', "AND ( {$free_orders_filter} )" );
+			$this->interval_query->add_sql_clause( 'where', "AND ( {$free_orders_filter} )" );
+		}
 	}
 
 	/**

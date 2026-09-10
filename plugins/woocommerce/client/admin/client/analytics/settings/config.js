@@ -100,6 +100,28 @@ const baseConfig = {
 		} ),
 		defaultValue: [ 'pending', 'cancelled', 'failed' ],
 	},
+	woocommerce_analytics_excluded_orders: {
+		label: __( 'Excluded orders:', 'woocommerce' ),
+		inputType: 'checkbox',
+		options: [
+			{
+				value: 'zero_total',
+				label: sprintf(
+					/* translators: %s: zero formatted in the store currency, e.g. $0.00 */
+					__( 'Orders with a total of %s', 'woocommerce' ),
+					getAdminSetting( 'analyticsFreeOrderAmount', '0' )
+				),
+			},
+		],
+		helpText: __(
+			'Orders where the customer paid nothing are left out of report totals \u2014 a 100% off coupon, ' +
+				'a gift redemption, or a basket of entirely free items. An order that mixes paid and free items ' +
+				'still counts in full. Your net sales stay the same; order counts, items sold, and average order ' +
+				'value change.',
+			'woocommerce'
+		),
+		defaultValue: [],
+	},
 	woocommerce_actionable_order_statuses: {
 		label: __( 'Actionable statuses:', 'woocommerce' ),
 		inputType: 'checkboxGroup',

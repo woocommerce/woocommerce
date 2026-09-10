@@ -9,6 +9,7 @@ import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 /**
  * Internal dependencies
  */
+import { getFreeOrdersFilter } from '../free-orders-filter';
 import { getCouponLabels } from '../../../lib/async-requests';
 
 const COUPON_REPORT_CHARTS_FILTER = 'woocommerce_admin_coupons_report_charts';
@@ -137,4 +138,5 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 		showFilters: () => true,
 		filters: filterValues,
 	},
+	getFreeOrdersFilter( { defaultValue: 'include' } ),
 ] );

@@ -96,9 +96,15 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
+		$free_orders_filter  = $this->get_free_orders_subquery( $query_args );
+		if ( $order_status_filter || $free_orders_filter ) {
+			$clauses['join'] .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+		}
 		if ( $order_status_filter ) {
-			$clauses['join']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$clauses['where'] .= " AND ( {$order_status_filter} )";
+		}
+		if ( $free_orders_filter ) {
+			$clauses['where'] .= " AND ( {$free_orders_filter} )";
 		}
 
 		$this->add_time_period_sql_params( $query_args, $order_coupon_lookup_table );

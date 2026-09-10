@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Analytics: add an "Excluded orders" setting that leaves orders with a total of zero out of report totals, with a per-report control to include or exclude them.
