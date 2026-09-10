@@ -23,5 +23,11 @@
 		},
 		"typography": true
 	},
-	"usesContext": [ "termId", "termTaxonomy" ]
+	"usesContext": [
+		"termId",
+		"termTaxonomy",
+		"taxonomy",
+		"woocommerce/featuredCategoryTermId",
+		"woocommerce/featuredCategoryTaxonomy"
+	]
 }

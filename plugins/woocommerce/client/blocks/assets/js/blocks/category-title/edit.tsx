@@ -38,7 +38,8 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
-	};
+		taxonomy?: string;
+	} & Record< string, number | string | undefined >;
 }
 
 const DEFAULT_ATTRIBUTES = {
@@ -64,7 +65,13 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		level === 0 ? 'p' : `h${ level }`
 	) as keyof JSX.IntrinsicElements;
 
-	const { termId, termTaxonomy } = context;
+	const termId =
+		context[ 'woocommerce/featuredCategoryTermId' ] || context.termId;
+	const effectiveTaxonomy =
+		context[ 'woocommerce/featuredCategoryTaxonomy' ] ||
+		context.termTaxonomy ||
+		context.taxonomy ||
+		'product_cat';
 
 	const userCanEdit = useSelect(
 		( select ) => {
@@ -72,17 +79,17 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
+				name: effectiveTaxonomy,
 				id: termId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
-		termTaxonomy || 'product_cat',
+		effectiveTaxonomy,
 		'name',
 		termId ? String( termId ) : undefined
 	);
@@ -113,13 +120,13 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				coreStore
 			).getEntityRecord< WP_REST_API_Category >(
 				'taxonomy',
-				termTaxonomy || 'product_cat',
+				effectiveTaxonomy,
 				termId
 			);
 
 			return record?.link;
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const blockProps = useBlockProps( {
