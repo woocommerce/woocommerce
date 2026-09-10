@@ -147,7 +147,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 * The sent marker is the idempotency guard, so it must survive the cleanup
 	 * that clears the claimed and triggered markers.
 	 *
-	 * @testdox Should keep the sent meta when clearing bookkeeping meta.
+	 * @testdox Should keep the sent meta when clearing the delivery state.
 	 */
 	public function test_reset_processing_meta_keeps_the_sent_marker(): void {
 		$notification = new NewOrderNotification( $this->order_id );

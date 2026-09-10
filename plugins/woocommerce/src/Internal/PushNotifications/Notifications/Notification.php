@@ -133,7 +133,7 @@ abstract class Notification {
 	abstract public function delete_meta( string $key ): void;
 
 	/**
-	 * Clears the in-progress bookkeeping meta from this notification's resource.
+	 * Clears the in-progress delivery state from this notification's resource.
 	 *
 	 * Call this on every terminal path (success, no recipients, and each of the
 	 * retry handler's give-up branches) so a notification that has finished
