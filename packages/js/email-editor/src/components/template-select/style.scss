@@ -76,8 +76,7 @@ $email-editor-template-select-sidebar-width: 280px;
 }
 
 .email-editor-template-select__no-results {
-	padding: $grid-unit-40;
-	text-align: center;
+	margin-inline: auto;
 }
 
 .email-editor-modal-footer {
