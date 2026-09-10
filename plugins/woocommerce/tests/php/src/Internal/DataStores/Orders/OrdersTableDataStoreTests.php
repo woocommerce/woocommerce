@@ -385,7 +385,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order    = $this->create_complex_cot_order();
 		$order_id = $order->get_id();
 
-		$this->assertIsInteger( $order_id );
+		$this->assertIsInt( $order_id );
 		$this->assertLessThan( $order_id, 0 );
 
 		wp_cache_flush();

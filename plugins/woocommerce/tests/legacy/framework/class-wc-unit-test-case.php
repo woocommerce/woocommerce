@@ -575,18 +575,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Asserts that a variable is of type int.
-	 * TODO: After upgrading to PHPUnit 8 or newer, remove this method and replace calls with PHPUnit's built-in 'assertIsInt'.
-	 *
-	 * @param mixed $actual The value to check.
-	 * @param mixed $message Error message to use if the assertion fails.
-	 * @return bool mixed True if the value is of integer type, false otherwise.
-	 */
-	public static function assertIsInteger( $actual, $message = '' ) {
-		return self::assertIsInt( $actual, $message );
-	}
-
-	/**
 	 * Get recorded tracks event by name.
 	 *
 	 * @param string $event_name Event name.
