@@ -11,9 +11,8 @@ use WC_Rate_Limiter;
  *
  * Sign-ups are throttled per client (the logged-in user, or the IP address for guests) and per
  * e-mail address, so that neither a single client nor a single mailbox can be used to flood the
- * store with sign-ups or verification e-mails. The two windows are independent: the e-mail one
- * is longer than the client one, so a mailbox can't be flooded while a shopper can still sign up
- * for several products in a session.
+ * store with sign-ups or verification e-mails. The two windows are independent, so a mailbox
+ * is still covered when the same address is used from several clients.
  *
  * @internal
  */
@@ -42,7 +41,7 @@ class SignupRateLimiter {
 	/**
 	 * Default number of seconds an e-mail address has to wait between two sign-up attempts.
 	 */
-	private const RATE_LIMIT_EMAIL_DELAY = 3 * MINUTE_IN_SECONDS;
+	private const RATE_LIMIT_EMAIL_DELAY = MINUTE_IN_SECONDS / 2;
 
 	/**
 	 * Check whether the current sign-up attempt is rate limited.
