@@ -33,6 +33,8 @@
 			"sticky": true
 		},
 		"spacing": {
+			"margin": true,
+			"padding": true,
 			"blockGap": true
 		}
 	},
