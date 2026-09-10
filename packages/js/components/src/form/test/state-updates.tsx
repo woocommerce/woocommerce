@@ -606,10 +606,22 @@ describe( 'Form state updates', () => {
 		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
 	} );
 
-	// lodash's toPath() yields no segments for these names. setWith() writes
-	// each one as a literal key, except an empty array, which it drops.
-	it.each( [ '', '[', undefined, null, [] ] )(
-		'writes the zero-segment name %p under the key it lands on',
+	// setWith() writes each of these names as one literal key, since none is a
+	// dotted or balanced-bracket path. toPath() alone would split some of them
+	// ('a[' becomes 'a') or yield no segments at all ('', '[', null).
+	it.each( [
+		'',
+		'[',
+		undefined,
+		null,
+		'a[',
+		'a]',
+		'a[b',
+		'[x',
+		'items[0',
+		1.5,
+	] )(
+		'writes the name %p under the literal key lodash set() uses',
 		( name ) => {
 			const initialValues: Record< string, unknown > = { other: 2 };
 			const { onChange, onChanges } = renderForm(
@@ -617,21 +629,16 @@ describe( 'Form state updates', () => {
 				( { setValue } ) => (
 					<button
 						onClick={ () =>
-							setValue(
-								name as unknown as string,
-								'Updated'
-							)
+							setValue( name as unknown as string, 'Updated' )
 						}
 					>
-						Write zero-segment name
+						Write literal name
 					</button>
 				)
 			);
 
 			userEvent.click(
-				screen.getByRole( 'button', {
-					name: 'Write zero-segment name',
-				} )
+				screen.getByRole( 'button', { name: 'Write literal name' } )
 			);
 
 			const key = String( name );
@@ -645,4 +652,81 @@ describe( 'Form state updates', () => {
 			] );
 		}
 	);
+
+	it( 'leaves a held field alone when a name with an unbalanced bracket starts with it', () => {
+		const { onChange, onChanges } = renderForm(
+			{ a: 5, other: 2 },
+			( { setValue } ) => (
+				<button onClick={ () => setValue( 'a[', 'Updated' ) }>
+					Write unbalanced name
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Write unbalanced name' } )
+		);
+
+		const nextValues = { a: 5, other: 2, 'a[': 'Updated' };
+		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+		expect( onChange.mock.calls ).toEqual( [
+			[ { name: 'a[', value: 'Updated' }, nextValues, true ],
+		] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [ { name: 'a[', value: 'Updated' } ], nextValues, true ],
+		] );
+	} );
+
+	it( 'writes an array name as a path even when the form holds its joined key', () => {
+		const { onChange, onChanges } = renderForm(
+			{ 'a,b': 1, other: 2 } as Record< string, unknown >,
+			( { setValue } ) => (
+				<button
+					onClick={ () =>
+						setValue( [ 'a', 'b' ] as unknown as string, 'Updated' )
+					}
+				>
+					Write array name
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Write array name' } )
+		);
+
+		const nextValues = { 'a,b': 1, other: 2, a: { b: 'Updated' } };
+		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
+		expect( onChange.mock.calls ).toEqual( [
+			[ { name: 'a', value: { b: 'Updated' } }, nextValues, true ],
+		] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [ { name: 'a', value: { b: 'Updated' } } ], nextValues, true ],
+		] );
+	} );
+
+	it( 'drops a write to an empty-array path, as lodash set() does', () => {
+		const initialValues: Record< string, unknown > = { other: 2 };
+		const { validate, onChange, onChanges } = renderForm(
+			initialValues,
+			( { setValue } ) => (
+				<button
+					onClick={ () =>
+						setValue( [] as unknown as string, 'Updated' )
+					}
+				>
+					Write empty path
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Write empty path' } )
+		);
+
+		expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
+		expect( validate ).not.toHaveBeenCalled();
+		expect( onChange ).not.toHaveBeenCalled();
+		expect( onChanges ).not.toHaveBeenCalled();
+	} );
 } );
