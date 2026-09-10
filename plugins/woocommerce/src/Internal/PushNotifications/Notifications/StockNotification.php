@@ -311,7 +311,7 @@ class StockNotification extends Notification {
 	}
 
 	/**
-	 * Scopes a bookkeeping meta key to this notification's stock event.
+	 * Scopes a delivery state meta key to this notification's stock event.
 	 *
 	 * The same product can have low_stock, out_of_stock and on_backorder
 	 * notifications in flight at once, so each event type needs its own
