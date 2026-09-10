@@ -300,21 +300,42 @@ class ScheduledSaleBatchProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A malformed id does not stop the run or evict unrelated posts.
+	 * Malformed rows a replaced data store could return, built from the id they would cast onto.
+	 *
+	 * @return array
 	 */
-	public function test_survives_malformed_ids(): void {
+	public function provider_malformed_rows(): array {
+		return array(
+			'string with trailing junk' => array( fn( int $id ) => $id . 'abc' ),
+			'fractional float'          => array( fn( int $id ) => $id + 0.9 ),
+			'fractional string'         => array( fn( int $id ) => $id . '.9' ),
+			'object with junk ID'       => array( fn( int $id ) => (object) array( 'ID' => $id . 'abc' ) ),
+			'object with fractional ID' => array( fn( int $id ) => (object) array( 'ID' => $id + 0.9 ) ),
+			'object without ID'         => array( fn( int $id ) => (object) array( 'id' => $id ) ),
+			'negative int'              => array( fn( int $id ) => -$id ),
+			'exponent string'           => array( fn( int $id ) => $id . 'e0' ),
+		);
+	}
+
+	/**
+	 * @testdox A malformed row does not stop the run, and is dropped instead of cast onto another post.
+	 * @dataProvider provider_malformed_rows
+	 *
+	 * @param callable $make_row Builds the malformed row from the decoy post id.
+	 */
+	public function test_drops_malformed_rows( callable $make_row ): void {
 		$product = $this->create_missed_sale_end_product();
 
-		// A loose integer cast would turn this malformed value into the cached page ID.
-		$decoy_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
-		$malformed = $decoy_id . 'abc';
+		// A loose cast would turn the malformed row into the cached page ID.
+		$decoy_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$row      = $make_row( $decoy_id );
 		get_post( $decoy_id );
 		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'Fixture precondition: the decoy page should be primed before the run.' );
 
-		$this->sut->process( array( $product->get_id(), $malformed ), 'end' );
+		$this->sut->process( array( $product->get_id(), $row ), 'end' );
 
-		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'A malformed id stopped the run before the real product settled.' );
-		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), "The release cast '{$malformed}' onto post {$decoy_id} and evicted an unrelated page." );
+		$this->assertEquals( 100, get_post_meta( $product->get_id(), '_price', true ), 'A malformed row stopped the run before the real product settled.' );
+		$this->assertNotFalse( wp_cache_get( $decoy_id, 'posts' ), 'The release cast ' . wp_json_encode( $row ) . " onto post {$decoy_id} and evicted an unrelated page." );
 	}
 
 	/**

@@ -99,9 +99,9 @@ class ScheduledSaleBatchProcessor {
 			if ( $entry instanceof WC_Product ) {
 				$id = $entry->get_id();
 			} elseif ( is_object( $entry ) ) {
-				$id = empty( $entry->ID ) ? 0 : (int) $entry->ID;
+				$id = $this->to_whole_positive_int( $entry->ID ?? null );
 			} else {
-				$id = is_numeric( $entry ) ? (int) $entry : 0;
+				$id = $this->to_whole_positive_int( $entry );
 			}
 
 			if ( $id > 0 ) {
@@ -110,6 +110,28 @@ class ScheduledSaleBatchProcessor {
 		}
 
 		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Convert a value to a positive integer only when it already is one.
+	 *
+	 * @param mixed $value Value to convert.
+	 * @return int The value as an integer, or 0 when it is not a whole positive number.
+	 */
+	private function to_whole_positive_int( $value ): int {
+		if ( is_int( $value ) ) {
+			return max( $value, 0 );
+		}
+
+		if ( is_float( $value ) && floor( $value ) === $value ) {
+			return max( (int) $value, 0 );
+		}
+
+		if ( is_string( $value ) && ctype_digit( $value ) ) {
+			return (int) $value;
+		}
+
+		return 0;
 	}
 
 	/**
