@@ -771,15 +771,44 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Renewal accepts an order ID sent as a digit string.
+	 */
+	public function test_subscription_notice_renews_with_a_digit_string_order_id(): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions(
+			array(
+				$this->subscription(
+					array(
+						'expired'  => true,
+						'order_id' => '456',
+					)
+				),
+			)
+		);
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'renew_product=123', $output );
+		$this->assertStringContainsString( 'order_id=456', $output );
+	}
+
+	/**
 	 * Expired records that cannot be renewed by reference.
 	 *
 	 * @return array[]
 	 */
 	public function provider_records_missing_a_renewal_identifier(): array {
 		return array(
-			'no product key'  => array( array( 'product_key' => '' ) ),
-			'no order ID'     => array( array( 'order_id' => '' ) ),
-			'order ID absent' => array( array( 'order_id' => null ) ),
+			'no product key'         => array( array( 'product_key' => '' ) ),
+			'product key is false'   => array( array( 'product_key' => false ) ),
+			'product key is a list'  => array( array( 'product_key' => array( 'key' ) ) ),
+			'no order ID'            => array( array( 'order_id' => '' ) ),
+			'order ID absent'        => array( array( 'order_id' => null ) ),
+			'order ID is zero'       => array( array( 'order_id' => 0 ) ),
+			'order ID is false'      => array( array( 'order_id' => false ) ),
+			'order ID is a list'     => array( array( 'order_id' => array( 456 ) ) ),
+			'order ID is not digits' => array( array( 'order_id' => '45a6' ) ),
 		);
 	}
 

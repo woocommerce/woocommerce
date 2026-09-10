@@ -527,7 +527,10 @@ class WC_Helper_Updater {
 		$product_key = $subscription['product_key'] ?? '';
 		$order_id    = $subscription['order_id'] ?? '';
 
-		if ( '' === $product_key || '' === $order_id ) {
+		// The same shape check filter_valid_subscriptions() applies to the product ID.
+		$has_order_id = ( is_int( $order_id ) || ( is_string( $order_id ) && ctype_digit( $order_id ) ) ) && 0 < (int) $order_id;
+
+		if ( ! is_string( $product_key ) || '' === $product_key || ! $has_order_id ) {
 			return add_query_arg(
 				array(
 					'add-to-cart'  => $product_id,
