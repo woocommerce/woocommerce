@@ -75,8 +75,10 @@ class SignupRateLimiter {
 		foreach ( $this->get_rate_limits( $user_email ) as $rate_limit_id => $delay ) {
 			if ( ! WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay ) ) {
 				// Leave no partial window behind: a half-applied limit would block the
-				// customer on an attempt that never went through.
-				foreach ( $applied_rate_limit_ids as $applied_rate_limit_id ) {
+				// customer on an attempt that never went through. The failed limit is
+				// cleared too, since set_rate_limit() caches the new expiry even when the
+				// write itself fails.
+				foreach ( array_merge( array( $rate_limit_id ), $applied_rate_limit_ids ) as $applied_rate_limit_id ) {
 					WC_Rate_Limiter::set_rate_limit( $applied_rate_limit_id, -1 );
 				}
 

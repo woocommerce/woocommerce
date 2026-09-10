@@ -286,6 +286,7 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $applied, 'A sign-up attempt whose limits cannot be stored should not be let through' );
 		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'The per-IP limit should have been rolled back' );
+		$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The limit that could not be stored should have been cleared' );
 	}
 
 	/**
