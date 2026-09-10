@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error (Call to undefined function wc_print_notice) when a plugin renders WooCommerce templates during wp-cron or admin requests where the notice functions were not loaded.
