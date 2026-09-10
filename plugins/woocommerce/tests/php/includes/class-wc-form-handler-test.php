@@ -414,6 +414,44 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_cart_action() removes a string-valued coupon and ignores an array-valued one instead of fataling.
+	 * @dataProvider remove_coupon_value_provider
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 *
+	 * @param string|array $remove_coupon_value  Value of the remove_coupon request parameter.
+	 * @param bool         $expect_still_applied Whether the coupon should remain applied afterwards.
+	 */
+	public function test_update_cart_action_remove_coupon_value_handling( $remove_coupon_value, bool $expect_still_applied ): void {
+		$coupon  = WC_Helper_Coupon::create_coupon( 'save10' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'The coupon should be applied before the request is handled.' );
+
+		$_GET['remove_coupon']     = $remove_coupon_value;
+		$_REQUEST['remove_coupon'] = $remove_coupon_value;
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertSame( $expect_still_applied, WC()->cart->has_discount( $coupon->get_code() ), 'A string value should remove the coupon; a non-string value should leave it untouched.' );
+	}
+
+	/**
+	 * Provides remove_coupon request values and whether the coupon should survive the request.
+	 *
+	 * @return array<string,array{string|array,bool}>
+	 */
+	public function remove_coupon_value_provider(): array {
+		return array(
+			'string coupon code' => array( 'save10', false ),
+			'array-wrapped code' => array( array( 'save10' ), true ),
+			'nested array'       => array( array( array( 'save10' ) ), true ),
+		);
+	}
+
+	/**
 	 * @testdox save_account_details() saves other account fields when an email-like display name is unchanged.
 	 *
 	 * @covers WC_Form_Handler::save_account_details()
