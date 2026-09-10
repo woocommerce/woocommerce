@@ -160,8 +160,9 @@ class Settings {
 	 *
 	 * An explicitly saved empty array passes through: the merchant intentionally cleared
 	 * the selection, and replacing it with the defaults would make reports disagree with
-	 * the Settings page. Non-string elements are dropped so a broken filter return value
-	 * cannot raise warnings or reach trim() downstream.
+	 * the Settings page. Non-string elements are dropped, and string slugs are trimmed,
+	 * so a broken filter return value cannot raise warnings or leave a blank slug that
+	 * the Settings UI drops but runtime consumers keep.
 	 *
 	 * This is a cheap type check only. Slugs are not cross-checked against registered or
 	 * synced order statuses, because runtime call sites intentionally accept slugs outside
@@ -186,7 +187,15 @@ class Settings {
 			return array();
 		}
 
-		$statuses = array_values( array_filter( $value, 'is_string' ) );
+		$statuses = array_map( 'trim', array_filter( $value, 'is_string' ) );
+		$statuses = array_values(
+			array_filter(
+				$statuses,
+				static function ( $status ) {
+					return '' !== $status;
+				}
+			)
+		);
 
 		// A non-empty array whose elements are all unusable is treated as invalid, so a
 		// broken callback does not silently empty the selection.

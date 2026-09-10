@@ -86,6 +86,20 @@ class ExcludedOrderStatusesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_excluded_report_order_statuses trims padded slugs and drops blank ones saved in the option.
+	 */
+	public function test_blank_saved_statuses_do_not_reach_runtime(): void {
+		update_option( 'woocommerce_excluded_report_order_statuses', array( ' pending ', '', ' ' ) );
+
+		$statuses = $this->invoke_get_excluded_report_order_statuses();
+
+		$this->assertContains( 'pending', $statuses, 'A padded slug should be trimmed and kept.' );
+		$this->assertNotContains( ' pending ', $statuses, 'A padded slug must not reach runtime consumers untrimmed.' );
+		$this->assertNotContains( '', $statuses, 'A blank slug must not reach runtime consumers.' );
+		$this->assertNotContains( ' ', $statuses, 'A whitespace-only slug must not reach runtime consumers.' );
+	}
+
+	/**
 	 * Filter callback that appends a custom status to the excluded defaults.
 	 *
 	 * @param array $statuses Default statuses.

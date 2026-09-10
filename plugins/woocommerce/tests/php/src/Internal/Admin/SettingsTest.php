@@ -234,6 +234,9 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'empty array passes through'                  => array( array(), array() ),
 			'nested array elements are dropped'           => array( array( 'refunded', array( 'nested' ) ), array( 'refunded' ) ),
 			'non-string elements are dropped'             => array( array( 'refunded', 42, null ), array( 'refunded' ) ),
+			'blank string elements are dropped'           => array( array( 'refunded', '' ), array( 'refunded' ) ),
+			'slugs are trimmed'                           => array( array( ' refunded ' ), array( 'refunded' ) ),
+			'all-blank array falls back as unusable'      => array( array( ' ', '' ), array( 'processing', 'on-hold' ) ),
 			'all-non-string array falls back as unusable' => array( array( 42, null ), array( 'processing', 'on-hold' ) ),
 		);
 	}
