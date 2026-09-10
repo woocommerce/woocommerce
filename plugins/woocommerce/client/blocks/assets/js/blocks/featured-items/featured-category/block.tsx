@@ -18,6 +18,7 @@ import { withEditMode } from '../with-edit-mode';
 import { withEditingImage } from '../with-editing-image';
 import { withFeaturedItem } from '../with-featured-item';
 import { withUpdateButtonAttributes } from '../with-update-button-attributes';
+import { withCoverUpgrade } from './with-cover-upgrade';
 
 const GENERIC_CONFIG = {
 	icon: folderStarred,
@@ -47,6 +48,7 @@ const EDIT_MODE_CONFIG = {
 
 export default compose( [
 	withCategory,
+	withCoverUpgrade,
 	withSpokenMessages,
 	withUpdateButtonAttributes,
 	withEditingImage,
