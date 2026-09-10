@@ -896,29 +896,11 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Re-runs the real registration so the test exercises the pattern content BlockTypesController
-	 * ships, rather than a copy of it that could drift. Everything that method registers has to be
-	 * dropped first, since re-registering a live pattern is an incorrect usage. If the method gains a
-	 * pattern, this list needs it too — the omission shows up as a doing_it_wrong failure.
+	 * Rebuilds the patterns through the real registration, so the test exercises the content
+	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
+	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
 	 */
 	private function reregister_block_patterns(): void {
-		$slugs = array(
-			'woocommerce/order-confirmation-totals-heading',
-			'woocommerce/order-confirmation-downloads-heading',
-			'woocommerce/order-confirmation-shipping-heading',
-			'woocommerce/order-confirmation-billing-heading',
-			'woocommerce/cart-empty-message',
-			'woocommerce/cart-new-in-store-message',
-			'woocommerce/cart-cross-sells-message',
-		);
-
-		$registry = WP_Block_Patterns_Registry::get_instance();
-		foreach ( $slugs as $slug ) {
-			if ( $registry->is_registered( $slug ) ) {
-				unregister_block_pattern( $slug );
-			}
-		}
-
 		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
 	}
 }
