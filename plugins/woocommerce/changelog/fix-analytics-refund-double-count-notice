@@ -2,4 +2,4 @@ Significance: minor
 Type: fix
 Comment: Introduced by write-path bug fixed in PR #66320.
 
-Analytics: detect and repair historical orders whose partial-then-full refunds were double-counted in the Revenue Returns metric, with a settings notice to re-import the affected orders.
+Analytics: add a Status > Tools tool, plus an inbox note pointing to it, that finds and re-imports orders whose partial-then-full refunds were counted twice in the Revenue report's returns.

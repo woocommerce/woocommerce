@@ -3,11 +3,18 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use WC_Helper_Order;
+use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the refund double-count detection scan and fix in the Analytics class.
+ * Tests for the double-counted refunds fix tool in the Analytics class.
+ *
+ * Orders are real orders, so the detection query runs against the active order
+ * storage; the suite runs with HPOS both enabled and disabled.
  */
 class AnalyticsTest extends WC_Unit_Test_Case {
 
@@ -24,512 +31,409 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = Analytics::get_instance();
-		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
 		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
+		update_option( \WC_Install::INITIAL_INSTALLED_VERSION, '10.5.0' );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_stats" ); // phpcs:ignore WordPress.DB
-		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-		remove_all_filters( 'woocommerce_analytics_refund_double_count_batch_size' );
-		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK );
-		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
-		parent::tearDown();
+		try {
+			// Action Scheduler actions are not covered by the options rollback.
+			as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
+			as_unschedule_all_actions( 'woocommerce_analytics_refund_fix_batch' );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
-	 * Insert a row into the wc_order_stats table.
+	 * Create a $50 order, refund it with the given amounts, and import it into the order stats.
 	 *
-	 * @param array $overrides Column overrides.
+	 * @param float[] $refund_amounts Refund amounts, in the order they are created.
+	 * @return WC_Order
 	 */
-	private function insert_stat( array $overrides ): void {
-		global $wpdb;
-		$row = array_merge(
-			array(
-				'order_id'         => 0,
-				'parent_id'        => 0,
-				'date_created'     => '2024-01-01 00:00:00',
-				'date_created_gmt' => '2024-01-01 00:00:00',
-				'num_items_sold'   => 0,
-				'total_sales'      => 0,
-				'tax_total'        => 0,
-				'shipping_total'   => 0,
-				'net_total'        => 0,
-				'status'           => 'wc-completed',
-				'customer_id'      => 0,
-			),
-			$overrides
-		);
-		$wpdb->insert( $wpdb->prefix . 'wc_order_stats', $row ); // phpcs:ignore WordPress.DB
-	}
+	private function create_refunded_order( array $refund_amounts ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
 
-	/**
-	 * Persist a terminal (complete) scan state with the given count.
-	 *
-	 * @param int $count Affected-order count.
-	 */
-	private function set_complete_scan_state( int $count ): void {
-		update_option(
-			Analytics::REFUND_DOUBLE_COUNT_OPTION,
-			array(
-				'running_count' => $count,
-				'complete'      => true,
-			),
-			false
-		);
-	}
-
-	/**
-	 * Persist an incomplete scan state, optionally with attempt tracking fields.
-	 *
-	 * @param array $extra Extra state keys (scan_attempts, last_scan_attempt).
-	 */
-	private function set_incomplete_scan_state( array $extra = array() ): void {
-		update_option(
-			Analytics::REFUND_DOUBLE_COUNT_OPTION,
-			array_merge(
+		foreach ( $refund_amounts as $amount ) {
+			wc_create_refund(
 				array(
-					'running_count' => 0,
-					'complete'      => false,
-				),
-				$extra
+					'order_id' => $order->get_id(),
+					'amount'   => $amount,
+				)
+			);
+		}
+
+		OrdersScheduler::import( $order->get_id() );
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Rewrite the order's latest refund stats row to record the whole order total,
+	 * ignoring earlier refunds, as the bug fixed in #66320 did.
+	 *
+	 * @param WC_Order $order Order with at least two refunds.
+	 */
+	private function double_count_latest_refund( WC_Order $order ): void {
+		global $wpdb;
+
+		$stats_table      = $wpdb->prefix . 'wc_order_stats';
+		$latest_refund_id = max( array_map( fn( $refund ) => $refund->get_id(), $order->get_refunds() ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+		$parent = $wpdb->get_row( $wpdb->prepare( "SELECT net_total, tax_total, shipping_total FROM {$stats_table} WHERE order_id = %d", $order->get_id() ) );
+		$wpdb->update(
+			$stats_table,
+			array(
+				'net_total'      => -1 * $parent->net_total,
+				'tax_total'      => -1 * $parent->tax_total,
+				'shipping_total' => -1 * $parent->shipping_total,
 			),
-			false
+			array( 'order_id' => $latest_refund_id )
+		);
+		// phpcs:enable
+	}
+
+	/**
+	 * Sum of the refund stats rows of an order.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return float
+	 */
+	private function get_refunds_total( WC_Order $order ): float {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return (float) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( net_total + tax_total + shipping_total ) FROM {$wpdb->prefix}wc_order_stats WHERE parent_id = %d",
+				$order->get_id()
+			)
 		);
 	}
 
 	/**
-	 * Force the scan/fix batch size down to one so tests can exercise the
-	 * multi-batch path with a handful of rows.
+	 * Highest order ID in the order stats table.
+	 *
+	 * @return int
 	 */
-	private function use_batch_size_one(): void {
+	private function get_max_order_stats_id(): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		return (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" );
+	}
+
+	/**
+	 * Start a fix run through the tool and run its batches until none is left.
+	 *
+	 * @return int Number of batches run.
+	 */
+	private function run_fix(): int {
+		$this->sut->run_refund_double_count_tool();
+
+		$batches = 0;
+		while ( $batches < 50 ) {
+			$actions = as_get_scheduled_actions(
+				array(
+					'hook'     => Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK,
+					'status'   => \ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 1,
+				)
+			);
+			if ( empty( $actions ) ) {
+				break;
+			}
+
+			$args = reset( $actions )->get_args();
+			as_unschedule_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, $args, 'wc-admin-data' );
+			$this->sut->process_refund_double_count_fix_batch( ...$args );
+			++$batches;
+		}
+
+		return $batches;
+	}
+
+	/**
+	 * Set the fix batch and range sizes.
+	 *
+	 * @param int $batch_size Parent orders re-imported per batch.
+	 * @param int $range_size Order IDs checked per batch.
+	 */
+	private function set_batch_sizes( int $batch_size, int $range_size ): void {
 		add_filter(
 			'woocommerce_analytics_refund_double_count_batch_size',
-			function () {
-				return 1;
+			function () use ( $batch_size ) {
+				return $batch_size;
+			}
+		);
+		add_filter(
+			'woocommerce_analytics_refund_double_count_range_size',
+			function () use ( $range_size ) {
+				return $range_size;
 			}
 		);
 	}
 
 	/**
-	 * Create a parent order stat plus a partial refund and a buggy full refund
-	 * whose rows over-sum the parent total (the #66320 signature).
+	 * Get the tool registration, or null when the tool is not registered.
 	 *
-	 * @param int $parent_id Parent order ID.
+	 * @return array|null
 	 */
-	private function insert_double_counted_order( int $parent_id ): void {
-		$this->insert_stat(
-			array(
-				'order_id'       => $parent_id,
-				'net_total'      => 80,
-				'tax_total'      => 10,
-				'shipping_total' => 10,
-			)
-		);
-		// Partial refund of 30.
-		$this->insert_stat(
-			array(
-				'order_id'  => $parent_id + 100000,
-				'parent_id' => $parent_id,
-				'net_total' => -30,
-			)
-		);
-		// Buggy full refund: recorded -1x the whole parent total, ignoring the partial.
-		$this->insert_stat(
-			array(
-				'order_id'       => $parent_id + 100001,
-				'parent_id'      => $parent_id,
-				'net_total'      => -80,
-				'tax_total'      => -10,
-				'shipping_total' => -10,
-			)
-		);
+	private function get_tool(): ?array {
+		$tools = $this->sut->register_refund_double_count_tool( array() );
+
+		return $tools[ Analytics::REFUND_DOUBLE_COUNT_TOOL_ID ] ?? null;
 	}
 
 	/**
-	 * @testdox Scan flags a partial-then-full over-refund as one affected order.
+	 * @testdox Fixes only orders whose refunds add up to more than the order, leaving other refund patterns alone.
 	 */
-	public function test_scan_flags_partial_then_full_over_refund(): void {
-		$this->insert_double_counted_order( 1000 );
+	public function test_fix_repairs_only_double_counted_orders(): void {
+		$double_counted = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $double_counted );
+		$correct_partial_then_full = $this->create_refunded_order( array( 20, 30 ) );
+		$single_full               = $this->create_refunded_order( array( 50 ) );
+		$partials_under_total      = $this->create_refunded_order( array( 10, 10 ) );
 
-		$this->sut->process_refund_double_count_scan_batch( 0 );
+		$this->assertEqualsWithDelta( -70.0, $this->get_refunds_total( $double_counted ), 0.001, 'The fixture should over-refund the order' );
+
+		$this->run_fix();
 
 		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Scan should complete in a single batch' );
-		$this->assertSame( 1, $state['count'], 'The over-refunded order should be counted' );
+		$this->assertSame( 'complete', $state['status'] );
+		$this->assertSame( 1, $state['fixed'], 'Only the double-counted order should be fixed' );
+		$this->assertSame( 0, $state['unresolved'] );
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $double_counted ), 0.001, 'The re-import should correct the refund rows' );
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $correct_partial_then_full ), 0.001 );
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $single_full ), 0.001 );
+		$this->assertEqualsWithDelta( -20.0, $this->get_refunds_total( $partials_under_total ), 0.001 );
 	}
 
 	/**
-	 * @testdox Scan does not flag a single full refund.
+	 * @testdox Pages through full batches and order ID ranges until the highest order ID is covered.
 	 */
-	public function test_scan_ignores_single_full_refund(): void {
-		$this->insert_stat(
-			array(
-				'order_id'       => 2000,
-				'net_total'      => 80,
-				'tax_total'      => 10,
-				'shipping_total' => 10,
-			)
-		);
-		$this->insert_stat(
-			array(
-				'order_id'       => 2001,
-				'parent_id'      => 2000,
-				'net_total'      => -80,
-				'tax_total'      => -10,
-				'shipping_total' => -10,
-			)
-		);
+	public function test_fix_pages_through_batches_and_ranges(): void {
+		$first  = $this->create_refunded_order( array( 20, 30 ) );
+		$second = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $first );
+		$this->double_count_latest_refund( $second );
+		$this->set_batch_sizes( 1, 1000000 );
 
-		$this->sut->process_refund_double_count_scan_batch( 0 );
+		$batches = $this->run_fix();
 
-		$this->assertSame( 0, Analytics::get_refund_double_count_state()['count'], 'A single full refund is not a double-count' );
+		$this->assertSame( 3, $batches, 'Two full batches of one order, then a final batch that finds nothing' );
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['fixed'] );
+
+		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
+		$this->double_count_latest_refund( $first );
+		$this->set_batch_sizes( 100, (int) ceil( $this->get_max_order_stats_id() / 4 ) );
+
+		$batches = $this->run_fix();
+
+		$this->assertSame( 4, $batches, 'Each quarter of the order ID space should take one batch' );
+		$this->assertSame( 'complete', Analytics::get_refund_double_count_state()['status'] );
+		$this->assertSame( 1, Analytics::get_refund_double_count_state()['fixed'] );
 	}
 
 	/**
-	 * @testdox Scan does not flag multiple partial refunds that stay under the parent total.
+	 * @testdox Counts an order the re-import could not repair as unresolved instead of fixed.
 	 */
-	public function test_scan_ignores_partials_under_total(): void {
-		$this->insert_stat(
-			array(
-				'order_id'       => 3000,
-				'net_total'      => 80,
-				'tax_total'      => 10,
-				'shipping_total' => 10,
-			)
-		);
-		$this->insert_stat(
-			array(
-				'order_id'  => 3001,
-				'parent_id' => 3000,
-				'net_total' => -20,
-			)
-		);
-		$this->insert_stat(
-			array(
-				'order_id'  => 3002,
-				'parent_id' => 3000,
-				'net_total' => -30,
-			)
-		);
+	public function test_fix_counts_orders_it_could_not_repair(): void {
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+		add_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
 
-		$this->sut->process_refund_double_count_scan_batch( 0 );
-
-		$this->assertSame( 0, Analytics::get_refund_double_count_state()['count'], 'Partials summing under the parent total are legitimate' );
-	}
-
-	/**
-	 * @testdox Scan accumulates affected orders across multiple full-LIMIT batches within one window.
-	 */
-	public function test_scan_batches_and_accumulates(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 2000 );
-		$this->use_batch_size_one();
-
-		$this->sut->process_refund_double_count_scan_batch( 0 );
-		$mid_state = Analytics::get_refund_double_count_state();
-		$this->assertFalse( $mid_state['complete'], 'Scan should not complete while batches come back full' );
-		$this->assertSame( 1, $mid_state['count'], 'Only the first batch order is counted so far' );
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 1000 ), 'wc-admin-data' ),
-			'A full batch should schedule the next one from the last processed parent_id, staying inside the window'
-		);
-
-		$this->sut->process_refund_double_count_scan_batch( 1000 );
-		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The second batch order is accumulated' );
-
-		$this->sut->process_refund_double_count_scan_batch( 2000 );
-		$final_state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $final_state['complete'], 'Scan should complete once the last window comes back short' );
-		$this->assertSame( 2, $final_state['count'], 'Both batched orders should be counted' );
-	}
-
-	/**
-	 * @testdox Scan advances window by window and only completes past the highest order_id.
-	 */
-	public function test_scan_advances_across_windows(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 600000 );
-
-		$this->sut->process_refund_double_count_scan_batch( 0 );
-		$mid_state = Analytics::get_refund_double_count_state();
-		$this->assertFalse( $mid_state['complete'], 'A short batch must not end the scan while rows exist past the window' );
-		$this->assertSame( 1, $mid_state['count'], 'Only the first window order is counted so far' );
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( Analytics::REFUND_DOUBLE_COUNT_WINDOW ), 'wc-admin-data' ),
-			'An exhausted window should schedule the next batch from the window boundary'
-		);
-
-		$this->sut->process_refund_double_count_scan_batch( Analytics::REFUND_DOUBLE_COUNT_WINDOW );
-		$final_state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $final_state['complete'], 'Scan completes once the window covering the highest order_id is swept' );
-		$this->assertSame( 2, $final_state['count'], 'Orders from both windows should be counted' );
-	}
-
-	/**
-	 * @testdox Scan short-circuits to complete with zero count on old-data stores.
-	 */
-	public function test_scan_skips_old_data_stores(): void {
-		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
-		$this->insert_double_counted_order( 1000 );
-
-		$this->sut->process_refund_double_count_scan_batch( 0 );
+		$this->run_fix();
 
 		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Old-data stores mark the scan complete' );
-		$this->assertSame( 0, $state['count'], 'Old-data stores are handled by their own tool, not this scan' );
+		$this->assertSame( 'complete', $state['status'] );
+		$this->assertSame( 0, $state['fixed'] );
+		$this->assertSame( 1, $state['unresolved'] );
+		$this->assertSame( 'Check and fix', $this->get_tool()['button'], 'The tool should offer another run instead of Dismiss' );
 	}
 
 	/**
-	 * @testdox Fix batch resets the stored count to zero once the table is swept.
+	 * @testdox A batch from an older run does nothing.
 	 */
-	public function test_fix_batch_self_heals_count(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->set_complete_scan_state( 1 );
+	public function test_batch_of_an_older_run_does_nothing(): void {
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+		$this->sut->run_refund_double_count_tool();
+		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
 
-		$this->sut->process_refund_double_count_fix_batch( 0 );
+		$this->sut->process_refund_double_count_fix_batch( 0, 'an-older-run' );
 
-		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
-		$this->assertSame( 0, $state['count'], 'A completed fix sweep self-heals the count to zero' );
+		$this->assertEqualsWithDelta( -70.0, $this->get_refunds_total( $order ), 0.001, 'The stale batch should not re-import anything' );
+		$this->assertSame( 0, Analytics::get_refund_double_count_state()['fixed'] );
+		$this->assertFalse( as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ) );
 	}
 
 	/**
-	 * @testdox Fix batch advances the cursor past every selected parent and self-schedules while batches come back full.
+	 * @testdox A full historical import cancels a running fix; windowed or skip-existing imports do not.
+	 * @testWith [false, false, "cancelled"]
+	 *           [30, false, "running"]
+	 *           [false, true, "running"]
+	 *
+	 * @param int|bool $days          Days to import, or false for the full history.
+	 * @param bool     $skip_existing Whether the import skips existing orders.
+	 * @param string   $expected      Expected run status.
 	 */
-	public function test_fix_batch_pages_with_keyset_cursor(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 2000 );
-		$this->set_complete_scan_state( 2 );
-		$this->use_batch_size_one();
+	public function test_regenerate_cancels_running_fix_only_for_full_reimport( $days, bool $skip_existing, string $expected ): void {
+		$this->sut->run_refund_double_count_tool();
 
-		$this->sut->process_refund_double_count_fix_batch( 0 );
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 1000 ), 'wc-admin-data' ),
-			'The next fix batch should be scheduled from the last selected parent_id'
-		);
-		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The stored count only resets on the final batch' );
+		$this->sut->maybe_cancel_refund_double_count_fix_on_regenerate( $days, $skip_existing );
 
-		$this->sut->process_refund_double_count_fix_batch( 1000 );
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 2000 ), 'wc-admin-data' ),
-			'A full batch keeps advancing the cursor'
-		);
-
-		$this->sut->process_refund_double_count_fix_batch( 2000 );
-		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
-		$this->assertSame( 0, $state['count'], 'A short batch in the last window ends the sweep and self-heals the count' );
+		$this->assertSame( $expected, Analytics::get_refund_double_count_state()['status'] );
+		$this->assertSame( 'running' === $expected, as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ) );
 	}
 
 	/**
-	 * @testdox Fix batch advances window by window and only self-heals past the highest order_id.
+	 * @testdox Registers the tool only for stores installed before 11.1.0.
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           ["10.2.0", true]
+	 *           ["11.1.0-dev", true]
+	 *           ["11.1.0", false]
+	 *           ["11.2.0", false]
+	 *
+	 * @param string|null $initial_version Initial installed version, or null when not recorded.
+	 * @param bool        $expected        Whether the tool is registered.
 	 */
-	public function test_fix_batch_advances_across_windows(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 600000 );
-		$this->set_complete_scan_state( 2 );
-
-		$this->sut->process_refund_double_count_fix_batch( 0 );
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( Analytics::REFUND_DOUBLE_COUNT_WINDOW ), 'wc-admin-data' ),
-			'An exhausted window should schedule the next fix batch from the window boundary'
-		);
-		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The stored count only resets once the sweep reaches the last window' );
-
-		$this->sut->process_refund_double_count_fix_batch( Analytics::REFUND_DOUBLE_COUNT_WINDOW );
-		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
-		$this->assertSame( 0, $state['count'], 'The sweep self-heals once the window covering the highest order_id is done' );
-	}
-
-	/**
-	 * @testdox Self-heal reschedules an incomplete scan and counts the attempt.
-	 */
-	public function test_self_heal_reschedules_incomplete_scan(): void {
-		$this->set_incomplete_scan_state();
-
-		Analytics::maybe_reschedule_refund_double_count_scan();
-
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'An incomplete scan with no pending action should be rescheduled from zero'
-		);
-		$state = Analytics::get_refund_double_count_state();
-		$this->assertSame( 1, $state['attempts'], 'The reschedule should be recorded as an attempt' );
-		$this->assertGreaterThan( 0, $state['last_attempt'], 'The attempt timestamp should be recorded' );
-	}
-
-	/**
-	 * @testdox Self-heal does nothing when the state option does not exist.
-	 */
-	public function test_self_heal_noops_without_state_option(): void {
-		Analytics::maybe_reschedule_refund_double_count_scan();
-
-		$this->assertFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'Stores that never owed a scan (fresh installs) must not schedule one'
-		);
-	}
-
-	/**
-	 * @testdox Self-heal does nothing once the scan is complete.
-	 */
-	public function test_self_heal_noops_when_complete(): void {
-		$this->set_complete_scan_state( 3 );
-
-		Analytics::maybe_reschedule_refund_double_count_scan();
-
-		$this->assertFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'A completed scan must not be rescheduled'
-		);
-	}
-
-	/**
-	 * @testdox Self-heal does nothing while a scan action is already pending.
-	 */
-	public function test_self_heal_noops_when_scan_pending(): void {
-		$this->set_incomplete_scan_state();
-		as_schedule_single_action( time() + 3600, Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 500000 ), 'wc-admin-data' );
-
-		Analytics::maybe_reschedule_refund_double_count_scan();
-
-		$this->assertFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'A pending scan action must not be duplicated'
-		);
-		$this->assertSame( 0, Analytics::get_refund_double_count_state()['attempts'], 'No attempt is consumed when a scan is already queued' );
-	}
-
-	/**
-	 * @testdox Self-heal does nothing while a historical import is running.
-	 */
-	public function test_self_heal_noops_while_importing(): void {
-		$this->set_incomplete_scan_state();
-		as_schedule_single_action( time() + 3600, 'wc-admin_import_batch_init_orders', array(), 'wc-admin-data' );
-
-		try {
-			Analytics::maybe_reschedule_refund_double_count_scan();
-
-			$this->assertFalse(
-				as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-				'Scanning while an import rewrites wc_order_stats would count a moving target'
-			);
-		} finally {
-			as_unschedule_all_actions( 'wc-admin_import_batch_init_orders' );
+	public function test_tool_visibility_depends_on_initial_installed_version( ?string $initial_version, bool $expected ): void {
+		if ( null === $initial_version ) {
+			delete_option( \WC_Install::INITIAL_INSTALLED_VERSION );
+		} else {
+			update_option( \WC_Install::INITIAL_INSTALLED_VERSION, $initial_version );
 		}
+
+		$this->assertSame( $expected, null !== $this->get_tool() );
 	}
 
 	/**
-	 * @testdox Self-heal waits out the cooldown between attempts.
+	 * @testdox Does not register the tool for stores that still use the old full refund data.
 	 */
-	public function test_self_heal_respects_cooldown(): void {
-		$this->set_incomplete_scan_state(
+	public function test_tool_is_hidden_for_old_refund_data_stores(): void {
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
+
+		$this->assertNull( $this->get_tool() );
+	}
+
+	/**
+	 * @testdox Shows the button and status that match the run state.
+	 * @dataProvider provide_tool_states
+	 *
+	 * @param array  $state           Stored tool state.
+	 * @param bool   $pending_action  Whether a fix batch is pending.
+	 * @param string $expected_button Expected button label.
+	 * @param bool   $expected_off    Expected disabled flag.
+	 * @param string $expected_status Expected status text fragment.
+	 */
+	public function test_tool_reflects_run_state( array $state, bool $pending_action, string $expected_button, bool $expected_off, string $expected_status ): void {
+		update_option( Analytics::REFUND_DOUBLE_COUNT_OPTION, $state );
+		if ( $pending_action ) {
+			as_schedule_single_action( time() + 60, Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 0, 'run' ), 'wc-admin-data' );
+		}
+
+		$tool = $this->get_tool();
+
+		$this->assertSame( $expected_button, $tool['button'] );
+		$this->assertSame( $expected_off, $tool['disabled'] );
+		$this->assertStringContainsString( $expected_status, $tool['status_text'] );
+	}
+
+	/**
+	 * Tool states for test_tool_reflects_run_state.
+	 *
+	 * @return array
+	 */
+	public function provide_tool_states(): array {
+		return array(
+			'never run'       => array( array(), false, 'Check and fix', false, '' ),
+			'running'         => array(
+				array(
+					'run_id' => 'run',
+					'status' => 'running',
+					'fixed'  => 3,
+				),
+				true,
+				'Checking and fixing…',
+				true,
+				'3 orders fixed so far.',
+			),
+			'died mid-run'    => array(
+				array(
+					'run_id' => 'run',
+					'status' => 'running',
+				),
+				false,
+				'Check and fix',
+				false,
+				'The previous run did not finish.',
+			),
+			'nothing found'   => array( array( 'status' => 'complete' ), false, 'Dismiss', false, 'No affected orders were found.' ),
+			'fixed some'      => array(
+				array(
+					'status'       => 'complete',
+					'fixed'        => 2,
+					'completed_at' => time(),
+				),
+				false,
+				'Dismiss',
+				false,
+				'Fixed 2 orders on',
+			),
+			'left unresolved' => array(
+				array(
+					'status'     => 'complete',
+					'unresolved' => 1,
+				),
+				false,
+				'Check and fix',
+				false,
+				'1 order could not be fixed.',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Refuses to start a run while another run or the full refund data fix is in progress.
+	 * @testWith ["woocommerce_analytics_refund_double_count_fix_batch", "A fix is already in progress"]
+	 *           ["woocommerce_analytics_refund_fix_batch", "full refund data fix is still running"]
+	 *
+	 * @param string $pending_hook     Hook of the pending action.
+	 * @param string $expected_message Expected message fragment.
+	 */
+	public function test_tool_refuses_to_start_while_busy( string $pending_hook, string $expected_message ): void {
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
 			array(
-				'scan_attempts'     => 1,
-				'last_scan_attempt' => time(),
+				'run_id' => 'current',
+				'status' => 'running',
 			)
 		);
+		as_schedule_single_action( time() + 60, $pending_hook, array(), 'wc-admin-data' );
 
-		Analytics::maybe_reschedule_refund_double_count_scan();
-		$this->assertFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'A recent attempt must not be retried before the cooldown elapses'
-		);
+		$message = $this->sut->run_refund_double_count_tool();
 
-		$this->set_incomplete_scan_state(
-			array(
-				'scan_attempts'     => 1,
-				'last_scan_attempt' => time() - ( 2 * HOUR_IN_SECONDS ),
-			)
-		);
-
-		Analytics::maybe_reschedule_refund_double_count_scan();
-		$this->assertNotFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'A stale attempt should be retried once the cooldown has elapsed'
-		);
-		$this->assertSame( 2, Analytics::get_refund_double_count_state()['attempts'], 'The retry should increment the attempt counter' );
+		$this->assertStringContainsString( $expected_message, $message );
+		$this->assertSame( 'current', Analytics::get_refund_double_count_state()['run_id'], 'No new run should start' );
 	}
 
 	/**
-	 * @testdox Self-heal stops retrying once the attempt cap is reached.
+	 * @testdox Dismisses the tool after a run that left nothing to fix.
 	 */
-	public function test_self_heal_caps_attempts(): void {
-		$this->set_incomplete_scan_state(
-			array(
-				'scan_attempts'     => Analytics::REFUND_DOUBLE_COUNT_MAX_SCAN_ATTEMPTS,
-				'last_scan_attempt' => time() - ( 2 * HOUR_IN_SECONDS ),
-			)
-		);
+	public function test_tool_can_be_dismissed_after_a_clean_run(): void {
+		$this->run_fix();
 
-		Analytics::maybe_reschedule_refund_double_count_scan();
+		$this->sut->run_refund_double_count_tool();
 
-		$this->assertFalse(
-			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
-			'The scan must not be retried past the attempt cap'
-		);
-	}
-
-	/**
-	 * @testdox Scan progress writes preserve the attempt tracking fields.
-	 */
-	public function test_scan_progress_preserves_attempt_tracking(): void {
-		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 2000 );
-		$this->set_incomplete_scan_state(
-			array(
-				'scan_attempts'     => 2,
-				'last_scan_attempt' => time() - HOUR_IN_SECONDS,
-			)
-		);
-		$this->use_batch_size_one();
-
-		$this->sut->process_refund_double_count_scan_batch( 0 );
-
-		$this->assertSame( 2, Analytics::get_refund_double_count_state()['attempts'], 'A mid-scan progress write must not reset the retry budget' );
-	}
-
-	/**
-	 * @testdox Full-history regenerate with skip-existing unchecked resets the scan state for re-verification.
-	 */
-	public function test_regenerate_resets_state_when_not_skipping(): void {
-		$this->set_complete_scan_state( 5 );
-
-		$this->sut->maybe_reset_refund_double_count_on_regenerate( false, false );
-
-		$state = Analytics::get_refund_double_count_state();
-		$this->assertNotFalse( get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION ), 'The state must survive so a verification scan can run after the import' );
-		$this->assertFalse( $state['complete'], 'The stale result is discarded: the notice hides until the post-import scan completes' );
-		$this->assertSame( 0, $state['count'], 'The stale count is discarded' );
-		$this->assertSame( 0, $state['attempts'], 'A fresh scan cycle gets a fresh retry budget' );
-	}
-
-	/**
-	 * @testdox Regenerate with skip-existing checked keeps the stored scan state.
-	 */
-	public function test_regenerate_keeps_state_when_skipping(): void {
-		$this->set_complete_scan_state( 5 );
-
-		$this->sut->maybe_reset_refund_double_count_on_regenerate( false, true );
-
-		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A skip-existing import leaves affected orders untouched, so the count stays' );
-	}
-
-	/**
-	 * @testdox Windowed regenerate keeps the stored scan state even when not skipping existing rows.
-	 */
-	public function test_regenerate_keeps_state_on_windowed_import(): void {
-		$this->set_complete_scan_state( 5 );
-
-		$this->sut->maybe_reset_refund_double_count_on_regenerate( 30, false );
-
-		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A windowed import never reprocesses affected orders older than the window, so the count stays' );
+		$this->assertTrue( Analytics::get_refund_double_count_state()['dismissed'] );
+		$this->assertNull( $this->get_tool() );
 	}
 }

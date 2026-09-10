@@ -2,20 +2,24 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 
-/**
- * Internal dependencies
- */
-import ImportWarningNotice from './import-warning-notice';
-import getErrorMessage from './get-error-message';
-import { useImportStatus } from './use-import-status';
-
 const LOG_URL_PATH =
 	'admin.php?page=wc-status&tab=logs&source=wc-analytics-order-import';
+
+interface FailedImportsStatus {
+	failed_count: number;
+	failed_overflow_count: number;
+}
 
 interface RetryFailedResponse {
 	success: boolean;
@@ -27,6 +31,26 @@ interface RetryFailedResponse {
 }
 
 /**
+ * Extract a user-facing message from a caught request error.
+ *
+ * `@wordpress/api-fetch` rejects with the parsed REST error object
+ * (`{ code, message }`), which is a plain object — not an `Error` instance —
+ * so narrow on the `message` property instead of the constructor.
+ */
+function getErrorMessage( err: unknown, fallback: string ): string {
+	if (
+		typeof err === 'object' &&
+		err !== null &&
+		'message' in err &&
+		typeof err.message === 'string' &&
+		err.message !== ''
+	) {
+		return err.message;
+	}
+	return fallback;
+}
+
+/**
  * Shows a warning when some orders failed to import into analytics, with a
  * button to schedule a re-import of just those orders.
  *
@@ -34,9 +58,26 @@ interface RetryFailedResponse {
  * request fails (the notice is an auxiliary affordance).
  */
 function FailedOrdersNotice() {
-	const { status, refetch } = useImportStatus();
+	const [ status, setStatus ] = useState< FailedImportsStatus | null >(
+		null
+	);
 	const [ isRetrying, setIsRetrying ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices' );
+
+	const fetchStatus = useCallback( async () => {
+		try {
+			const data = await apiFetch< FailedImportsStatus >( {
+				path: '/wc-analytics/imports/status',
+			} );
+			setStatus( data );
+		} catch ( err ) {
+			// Fail silently — the notice is an auxiliary affordance.
+		}
+	}, [] );
+
+	useEffect( () => {
+		void fetchStatus();
+	}, [ fetchStatus ] );
 
 	const failedCount = status?.failed_count ?? 0;
 	const overflowCount = status?.failed_overflow_count ?? 0;
@@ -53,7 +94,7 @@ function FailedOrdersNotice() {
 				method: 'POST',
 			} );
 			createNotice( 'success', response.message );
-			await refetch();
+			await fetchStatus();
 		} catch ( err ) {
 			createNotice(
 				'error',
@@ -95,13 +136,22 @@ function FailedOrdersNotice() {
 	);
 
 	return (
-		<ImportWarningNotice
+		<Notice
 			className="woocommerce-settings-historical-data__failed-orders"
-			message={ message }
-			buttonLabel={ __( 'Retry failed imports', 'woocommerce' ) }
-			isBusy={ isRetrying }
-			onAction={ handleRetry }
-		/>
+			status="warning"
+			isDismissible={ false }
+		>
+			<p>{ message }</p>
+			<Button
+				variant="secondary"
+				isBusy={ isRetrying }
+				disabled={ isRetrying }
+				aria-disabled={ isRetrying }
+				onClick={ handleRetry }
+			>
+				{ __( 'Retry failed imports', 'woocommerce' ) }
+			</Button>
+		</Notice>
 	);
 }
 
