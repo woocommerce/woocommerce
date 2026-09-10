@@ -580,8 +580,59 @@ class SettingsUIRequestContext {
 			return new RegisteredSettingsSectionAdapter( $settings_page, $registered_section );
 		}
 
+		if ( ! self::page_supports_settings_ui( $settings_page, $section ) ) {
+			return null;
+		}
+
 		$settings_ui_page = $settings_page->get_settings_ui_page();
 		return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
+	}
+
+	/**
+	 * Whether a settings page renders one of its own sections through the Settings UI.
+	 *
+	 * Rendering is opt-out: a page renders through the Settings UI unless it says
+	 * otherwise, or a filter callback opts it out.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param \WC_Settings_Page $settings_page Settings page.
+	 * @param string            $section Section id. Empty string means the default section.
+	 * @return bool
+	 */
+	private static function page_supports_settings_ui( \WC_Settings_Page $settings_page, string $section ): bool {
+		$supported = true;
+
+		// A stale 10.9 copy of WC_Settings_Page has no opt-out method, and a page can
+		// throw from its own override. Both keep the opt-out default rather than fatal.
+		try {
+			if ( method_exists( $settings_page, 'supports_settings_ui' ) ) {
+				$supported = true === $settings_page->supports_settings_ui( $section );
+			}
+		} catch ( \Throwable $e ) {
+			self::log_resolution_failure( 'Settings UI page support', $settings_page->get_id(), $section, $e, __METHOD__ );
+			$supported = false;
+		}
+
+		/**
+		 * Filters whether a settings page section renders through the Settings UI.
+		 *
+		 * Returning false keeps the classic PHP renderer for that page and section.
+		 * This only covers a settings page's own sections; sections registered through
+		 * the settings section registry are not affected.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param bool              $supported     Whether the section renders through the Settings UI.
+		 * @param string            $page_id       Settings page id.
+		 * @param string            $section       Section id. An empty string means the default section.
+		 * @param \WC_Settings_Page $settings_page Settings page.
+		 */
+		$filtered = apply_filters( 'woocommerce_settings_ui_page_supported', $supported, $settings_page->get_id(), $section, $settings_page );
+
+		// Any callback in the chain can return a non-boolean, so a value that is not a
+		// boolean keeps what the page itself asked for.
+		return is_bool( $filtered ) ? $filtered : $supported;
 	}
 
 	/**

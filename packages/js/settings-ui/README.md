@@ -1,6 +1,6 @@
 # Settings UI
 
-React utilities for WooCommerce settings pages that opt in to the settings UI renderer.
+React utilities for WooCommerce settings pages that render through the settings UI renderer.
 
 > **This package is experimental.** Until it is marked as stable, its API and the settings UI schema can change in backwards-incompatible ways in any release.
 
@@ -8,7 +8,7 @@ For the full integration guide, see [Settings UI](../../../docs/extensions/setti
 
 ## Usage
 
-PHP settings pages continue to register through `WC_Settings_Page`. A page opts in by returning a settings UI adapter from `get_settings_ui_page()`. The adapter provides the canonical schema, save adapter, and any script handles that must load before the React app mounts.
+PHP settings pages continue to register through `WC_Settings_Page`. Rendering is opt-out: every page gets a settings UI adapter from `get_settings_ui_page()` unless it returns false from `supports_settings_ui()`. The adapter provides the canonical schema, save adapter, and any script handles that must load before the React app mounts.
 
 Custom JavaScript registers scoped components:
 

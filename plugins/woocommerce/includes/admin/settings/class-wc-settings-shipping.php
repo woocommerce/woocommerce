@@ -176,6 +176,22 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
+	 * Whether a section of this settings page renders through the settings UI.
+	 *
+	 * Only the shipping options section renders plain settings fields. Zones,
+	 * classes, shipping providers, and individual shipping methods render their
+	 * own screens, so they stay on the classic renderer.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $section Section id. An empty string means the default section.
+	 * @return bool
+	 */
+	public function supports_settings_ui( string $section ): bool {
+		return 'options' === $section;
+	}
+
+	/**
 	 * Output the settings.
 	 */
 	public function output() {

@@ -108,6 +108,22 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 
 	/**
+	 * Whether a section of this settings page renders through the settings UI.
+	 *
+	 * The payments tab renders the gateway list and the classic gateway forms
+	 * itself, so its own sections stay on the classic renderer. Sections
+	 * registered through the settings section registry are unaffected.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $section Section id. An empty string means the default section.
+	 * @return bool
+	 */
+	public function supports_settings_ui( string $section ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- The section is part of the opt-out contract; this implementation applies to every section.
+		return false;
+	}
+
+	/**
 	 * Output the settings.
 	 */
 	public function output() {

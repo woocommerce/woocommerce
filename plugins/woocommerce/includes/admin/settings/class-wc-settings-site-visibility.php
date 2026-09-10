@@ -31,6 +31,21 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 
 
 	/**
+	 * Whether a section of this settings page renders through the settings UI.
+	 *
+	 * The whole page is a slotfill placeholder that a React app fills in, so it
+	 * stays on the classic renderer.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $section Section id. An empty string means the default section.
+	 * @return bool
+	 */
+	public function supports_settings_ui( string $section ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- The section is part of the opt-out contract; this implementation applies to every section.
+		return false;
+	}
+
+	/**
 	 * Get settings for the default section.
 	 *
 	 * @return array

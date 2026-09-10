@@ -537,6 +537,22 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
+	 * Whether a section of this settings page renders through the settings UI.
+	 *
+	 * Page setup, REST API caching, and Blueprint use field types the settings UI
+	 * cannot draw, and webhooks and REST API keys render their own screens. The
+	 * remaining sections are plain settings fields.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $section Section id. An empty string means the default section.
+	 * @return bool
+	 */
+	public function supports_settings_ui( string $section ): bool {
+		return in_array( $section, array( 'woocommerce_com', 'legacy_api' ), true );
+	}
+
+	/**
 	 * Output the settings.
 	 */
 	public function output() {

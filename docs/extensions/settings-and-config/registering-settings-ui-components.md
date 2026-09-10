@@ -197,7 +197,7 @@ final class My_Plugin_Settings_Section extends SettingsSection {
 }
 ```
 
-For a full settings tab that opts in through a `WC_Settings_Page` adapter, return the handle from the adapter:
+For a full settings tab, return the handle from the page's settings UI adapter:
 
 ```php
 <?php

@@ -179,6 +179,166 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It renders a page that declares no settings UI adapter through the settings UI.
+	 */
+	public function test_page_without_an_explicit_adapter_renders_through_the_settings_ui(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_default_settings_test_page();
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertStringContainsString( 'data-wc-settings-page="settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+	}
+
+	/**
+	 * It keeps a page that opts out on the legacy renderer.
+	 */
+	public function test_page_that_opts_out_uses_legacy_output(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_classic_settings_test_page();
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
+	}
+
+	/**
+	 * It lets a page opt out of a single section.
+	 */
+	public function test_page_can_opt_out_of_a_single_section(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$page = new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Opt the classic section out of the settings UI renderer.
+			 *
+			 * @param string $section Section id.
+			 * @return bool
+			 */
+			public function supports_settings_ui( string $section ): bool {
+				return 'classic' !== $section;
+			}
+
+			/**
+			 * Get own sections.
+			 *
+			 * @return array
+			 */
+			protected function get_own_sections() {
+				return array(
+					''        => 'Default',
+					'classic' => 'Classic',
+				);
+			}
+
+			/**
+			 * Get settings for a section.
+			 *
+			 * @param string $section_id Section id.
+			 * @return array
+			 */
+			protected function get_settings_for_section_core( $section_id ) {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+
+		global $current_section;
+
+		$current_section = '';
+		ob_start();
+		$page->output();
+		$default_output = ob_get_clean();
+
+		unset( $GLOBALS['hide_save_button'] );
+		$current_section = 'classic';
+		ob_start();
+		$page->output();
+		$classic_output = ob_get_clean();
+
+		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $default_output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $classic_output );
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $classic_output );
+	}
+
+	/**
+	 * It lets a filter opt a page out of the settings UI renderer.
+	 */
+	public function test_filter_can_opt_a_page_out_of_the_settings_ui(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$opt_out = static function ( $supported, $page_id ) {
+			return 'settings_ui_flag_test' === $page_id ? false : $supported;
+		};
+		add_filter( 'woocommerce_settings_ui_page_supported', $opt_out, 10, 2 );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page();
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_settings_ui_page_supported', $opt_out, 10 );
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+	}
+
+	/**
+	 * It ignores a non-boolean value returned from the support filter.
+	 */
+	public function test_non_boolean_filter_value_keeps_the_page_decision(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$garbage = static function () {
+			return 'maybe';
+		};
+		add_filter( 'woocommerce_settings_ui_page_supported', $garbage );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_classic_settings_test_page();
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_settings_ui_page_supported', $garbage );
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+	}
+
+	/**
 	 * It emits developer feedback when settings UI rendering falls back to legacy output.
 	 */
 	public function test_settings_ui_fallback_emits_doing_it_wrong_notice(): void {
@@ -827,16 +987,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-		$page = new class() extends \WC_Settings_Page {
-			/**
-			 * Constructor.
-			 */
-			public function __construct() {
-				$this->id    = 'classic_settings_test';
-				$this->label = 'Classic settings test';
-			}
-		};
-		$this->set_current_settings_page_request( $page );
+		$this->set_current_settings_page_request( $this->get_classic_settings_test_page() );
 		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'Classic settings pages should not request the Settings UI stylesheet.' );
 
 		$this->set_current_settings_page_request( $this->get_settings_ui_test_page_with_failing_script_handles(), 'advanced' );
@@ -1010,6 +1161,80 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	 */
 	public function disable_settings_ui_feature( array $features ): array {
 		return array_values( array_diff( $features, array( 'settings-ui' ) ) );
+	}
+
+	/**
+	 * Build a settings page that opts out of the settings UI renderer.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_classic_settings_test_page(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'classic_settings_test';
+				$this->label = 'Classic settings test';
+			}
+
+			/**
+			 * Opt out of the settings UI renderer.
+			 *
+			 * @param string $section Section id.
+			 * @return bool
+			 */
+			public function supports_settings_ui( string $section ): bool {
+				return false;
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Classic settings test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page that relies on the default settings UI opt-out behavior.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_default_settings_test_page(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
 	}
 
 	/**
