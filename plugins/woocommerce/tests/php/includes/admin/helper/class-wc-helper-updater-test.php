@@ -524,9 +524,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_should_use_cached_update_data_rejects_non_string_hash() {
 		$data = array(
-			'hash'                     => 123,
-			// Not a string.
-							'products' => array(),
+			'hash'     => 123, // Not a string.
+			'products' => array(),
 		);
 
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject numeric hash' );
@@ -546,8 +545,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$data = array(
 			'hash'     => $hash,
-			'products' => 'string',
-		// Not an array.
+			'products' => 'string', // Not an array.
 		);
 		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject string products' );
 
@@ -608,8 +606,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'products'    => array(),
 			'updated'     => time(),
 			'errors'      => array(),
-			'extra_field' => 'extra_value',
-		// Extra key should not cause rejection.
+			'extra_field' => 'extra_value', // Extra key should not cause rejection.
 		);
 
 		$this->assertTrue(
