@@ -1809,7 +1809,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, bool $suppress_notice_output = false ): void {
 		$product            = null;
-		$callback           = null;
 		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
 		$original_customer  = clone WC()->customer;
 		$session_keys       = array( 'chosen_shipping_methods', 'chosen_payment_method', 'reload_checkout', 'refresh_totals', 'customer' );
@@ -1872,9 +1871,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				}
 			}
 		} finally {
-			if ( null !== $callback ) {
-				remove_action( 'woocommerce_checkout_update_order_review', $callback, 10 );
-			}
 			wc_clear_notices();
 			WC()->cart->empty_cart();
 			if ( $product instanceof WC_Product ) {
