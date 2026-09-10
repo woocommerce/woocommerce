@@ -423,7 +423,8 @@ class ReportExporter {
 
 			\WC_Emails::instance();
 			$email = new ReportCSVEmail();
-			$email->trigger( $user_id, $report_type, $download_url, self::get_export_date_range_label( $report_args ) );
+			$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
+			$email->trigger( $user_id, $report_type, $download_url );
 		}
 	}
 }

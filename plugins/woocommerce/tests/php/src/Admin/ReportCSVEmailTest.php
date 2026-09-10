@@ -26,11 +26,11 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	 */
 	private function create_email( string $date_range = '' ): ReportCSVEmail {
 		$email = new ReportCSVEmail();
+		$email->set_report_date_range( $date_range );
 
 		foreach ( array(
-			'report_type'       => 'Orders',
-			'download_url'      => 'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export',
-			'report_date_range' => $date_range,
+			'report_type'  => 'Orders',
+			'download_url' => 'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export',
 		) as $name => $value ) {
 			$property = new \ReflectionProperty( ReportCSVEmail::class, $name );
 			$property->setAccessible( true );
@@ -129,6 +129,19 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox trigger() keeps the parameters it shipped with, so a subclass overriding it still loads.
+	 */
+	public function test_trigger_keeps_its_original_parameters(): void {
+		$parameters = ( new \ReflectionMethod( ReportCSVEmail::class, 'trigger' ) )->getParameters();
+
+		$this->assertCount(
+			3,
+			$parameters,
+			'trigger() is public and overridable. Adding a parameter, even an optional one, fatals every subclass that overrides the original three. Pass anything new through a setter instead.'
+		);
+	}
+
+	/**
 	 * Send the email to a user and return the subject it went out with.
 	 *
 	 * @param string $date_range Optional. Date range the report covers, formatted for display.
@@ -137,12 +150,13 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 	private function trigger_and_get_subject( string $date_range = '' ): string {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$mailer  = tests_retrieve_phpmailer_instance();
+		$email   = new ReportCSVEmail();
 
-		( new ReportCSVEmail() )->trigger(
+		$email->set_report_date_range( $date_range );
+		$email->trigger(
 			$user_id,
 			'orders',
-			'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export',
-			$date_range
+			'https://example.org/?action=woocommerce_admin_download_report_csv&filename=wc-orders-report-export'
 		);
 
 		$sent = end( $mailer->mock_sent );

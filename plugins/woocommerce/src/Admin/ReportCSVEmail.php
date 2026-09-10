@@ -53,6 +53,8 @@ class ReportCSVEmail extends \WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->placeholders['{report_date_range}'] = '';
+
 		$this->id             = 'admin_report_export_download';
 		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
 		$this->template_html  = 'html-admin-report-export-download.php';
@@ -188,21 +190,31 @@ class ReportCSVEmail extends \WC_Email {
 	}
 
 	/**
+	 * Set the date range the report covers, so the email can say which period it is for.
+	 *
+	 * Call before trigger(). Reports that are not limited to a period, such as Stock, leave it unset.
+	 *
+	 * @since 11.2.0
+	 * @param string $date_range The date range the report covers, formatted for display.
+	 * @return void
+	 */
+	public function set_report_date_range( $date_range ) {
+		$this->report_date_range = is_string( $date_range ) ? $date_range : '';
+
+		$this->placeholders['{report_date_range}'] = $this->report_date_range;
+	}
+
+	/**
 	 * Trigger the sending of this email.
 	 *
 	 * @param int    $user_id User ID to email.
 	 * @param string $report_type The type of report export being emailed.
 	 * @param string $download_url The URL for downloading the report.
-	 * @param string $date_range Optional. The date range the report covers, formatted for display.
-	 *                           Empty for reports that are not limited to a period, such as Stock.
 	 */
-	public function trigger( $user_id, $report_type, $download_url, $date_range = '' ) {
-		$user                    = new \WP_User( $user_id );
-		$this->recipient         = $user->user_email;
-		$this->download_url      = $download_url;
-		$this->report_date_range = is_string( $date_range ) ? $date_range : '';
-
-		$this->placeholders['{report_date_range}'] = $this->report_date_range;
+	public function trigger( $user_id, $report_type, $download_url ) {
+		$user               = new \WP_User( $user_id );
+		$this->recipient    = $user->user_email;
+		$this->download_url = $download_url;
 
 		if ( isset( $this->report_labels[ $report_type ] ) ) {
 			$this->report_type                   = $this->report_labels[ $report_type ];
