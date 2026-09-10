@@ -20,6 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Action_Queue implements WC_Queue_Priority_Interface {
 
 	/**
+	 * Priority the scheduling methods below hand to Action Scheduler. Only ever set for the
+	 * duration of a single *_with_priority() call, so that those methods can go through the
+	 * long-standing overridable methods instead of around them.
+	 *
+	 * @since 11.2.0
+	 * @var int
+	 */
+	protected $priority = 10;
+
+	/**
 	 * Enqueue an action to run one time, as soon as possible
 	 *
 	 * @param string $hook The hook to trigger.
@@ -41,7 +51,7 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
-		return as_schedule_single_action( $timestamp, $hook, $args, $group );
+		return as_schedule_single_action( $timestamp, $hook, $args, $group, false, $this->priority );
 	}
 
 	/**
@@ -55,7 +65,7 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
-		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
+		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, false, $this->priority );
 	}
 
 	/**
@@ -79,7 +89,7 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
-		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );
+		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, false, $this->priority );
 	}
 
 	/**
@@ -94,7 +104,12 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function add_with_priority( $hook, $args = array(), $group = '', $priority = 10 ) {
-		return $this->schedule_single_with_priority( time(), $hook, $args, $group, $priority );
+		return $this->at_priority(
+			$priority,
+			function () use ( $hook, $args, $group ) {
+				return $this->add( $hook, $args, $group );
+			}
+		);
 	}
 
 	/**
@@ -110,7 +125,12 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_single_with_priority( $timestamp, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_single_action( $timestamp, $hook, $args, $group, false, $priority );
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $hook, $args, $group ) {
+				return $this->schedule_single( $timestamp, $hook, $args, $group );
+			}
+		);
 	}
 
 	/**
@@ -127,7 +147,12 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_recurring_with_priority( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group, false, $priority );
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $interval_in_seconds, $hook, $args, $group ) {
+				return $this->schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args, $group );
+			}
+		);
 	}
 
 	/**
@@ -145,7 +170,36 @@ class WC_Action_Queue implements WC_Queue_Priority_Interface {
 	 * @return int The action ID.
 	 */
 	public function schedule_cron_with_priority( $timestamp, $cron_schedule, $hook, $args = array(), $group = '', $priority = 10 ) {
-		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group, false, $priority );
+		return $this->at_priority(
+			$priority,
+			function () use ( $timestamp, $cron_schedule, $hook, $args, $group ) {
+				return $this->schedule_cron( $timestamp, $cron_schedule, $hook, $args, $group );
+			}
+		);
+	}
+
+	/**
+	 * Run a scheduling callback with the given priority in effect.
+	 *
+	 * Going through the callback, rather than calling Action Scheduler directly, keeps the
+	 * priority methods routed through add(), schedule_single(), schedule_recurring() and
+	 * schedule_cron() - which subclasses override.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param int      $priority Lower values take precedence over higher values.
+	 * @param callable $schedule Callback that schedules the action.
+	 * @return int The action ID.
+	 */
+	private function at_priority( $priority, callable $schedule ) {
+		$previous_priority = $this->priority;
+		$this->priority    = $priority;
+
+		try {
+			return $schedule();
+		} finally {
+			$this->priority = $previous_priority;
+		}
 	}
 
 	/**

@@ -30,6 +30,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *         $queue->schedule_single( $timestamp, $hook, $args, $group );
  *     }
  *
+ * A queue that inherits these methods rather than writing its own may end up ignoring the
+ * priority, so treat it as a hint rather than a guarantee.
+ *
+ * Like the WC_Queue_Interface methods, these always schedule non-unique actions. Action
+ * Scheduler's $unique argument is not exposed here.
+ *
  * @since 11.2.0
  */
 interface WC_Queue_Priority_Interface extends WC_Queue_Interface {
