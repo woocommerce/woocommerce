@@ -33,6 +33,26 @@ foreach ( $required_tax_classes as $slug => $name ) {
 		WP_CLI::error( sprintf( 'Could not create tax class "%1$s": %2$s', $slug, $result->get_error_message() ) );
 	}
 }
+
+// Core's tax settings spec changes these and restores only
+// woocommerce_calc_taxes. Blocks specs expect WooCommerce's defaults.
+$tax_option_defaults = array(
+	'woocommerce_prices_include_tax'    => 'no',
+	'woocommerce_tax_based_on'          => 'shipping',
+	'woocommerce_shipping_tax_class'    => 'inherit',
+	'woocommerce_tax_round_at_subtotal' => 'no',
+	'woocommerce_tax_display_shop'      => 'excl',
+	'woocommerce_tax_display_cart'      => 'excl',
+	'woocommerce_price_display_suffix'  => '',
+	'woocommerce_tax_total_display'     => 'itemized',
+);
+
+foreach ( $tax_option_defaults as $option => $value ) {
+	update_option( $option, $value );
+	if ( get_option( $option ) !== $value ) {
+		WP_CLI::error( sprintf( 'Could not reset %s.', $option ) );
+	}
+}
 PHP
 )"
 
