@@ -18,8 +18,6 @@
  *
  * @var array  $pending_rows      Rows awaiting email confirmation (capped, not paginated). See row keys below.
  * @var array  $active_rows       Active rows for the current page. See row keys below.
- * @var bool   $has_pending       Whether there are any pending rows to render.
- * @var bool   $has_items         Whether there are any rows (pending or active) to render.
  * @var int    $current_page      1-indexed current page number of the active table.
  * @var int    $total_pages       Total number of pages of active rows.
  * @var int    $total_items       Total number of active rows across all pages.
@@ -40,7 +38,6 @@
  *   - string resend_label Accessible label for the resend link.
  *   - string cancel_url   Nonce-protected URL that cancels the notification, or an empty string when the row cannot be cancelled.
  *   - string cancel_label Accessible label for the cancel link.
- *   - object notification The underlying notification object, for overrides that need more than the flattened row.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -54,6 +51,20 @@ $next_page_url     = isset( $next_page_url ) ? (string) $next_page_url : '';
 $shop_url          = isset( $shop_url ) ? (string) $shop_url : wc_get_page_permalink( 'shop' );
 
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+
+$row_defaults = array(
+	'id'           => 0,
+	'status'       => '',
+	'product_name' => '',
+	'product_url'  => '',
+	'variation'    => '',
+	'date_iso'     => '',
+	'date_display' => '',
+	'resend_url'   => '',
+	'resend_label' => '',
+	'cancel_url'   => '',
+	'cancel_label' => '',
+);
 
 $tables = array(
 	'pending' => array(
@@ -108,12 +119,18 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 		<thead>
 			<tr>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-product"><span class="nobr"><?php esc_html_e( 'Product', 'woocommerce' ); ?></span></th>
-				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date', 'woocommerce' ); ?></span></th>
+				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-date"><span class="nobr"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></span></th>
 				<th scope="col" class="woocommerce-customer-stock-notifications-table__header woocommerce-customer-stock-notifications-table__header-actions"><span class="nobr"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></span></th>
 			</tr>
 		</thead>
 		<tbody>
 		<?php foreach ( $table['rows'] as $row ) : ?>
+			<?php
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$row = wp_parse_args( $row, $row_defaults );
+			?>
 			<tr class="woocommerce-customer-stock-notifications-table__row woocommerce-customer-stock-notifications-table__row--status-<?php echo esc_attr( $row['status'] ); ?>">
 				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 					<?php
@@ -134,7 +151,7 @@ do_action( 'woocommerce_before_account_customer_stock_notifications', $has_items
 						<div class="description"><?php echo esc_html( $row['variation'] ); ?></div>
 					<?php endif; ?>
 				</td>
-				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date', 'woocommerce' ); ?>">
+				<td class="woocommerce-customer-stock-notifications-table__cell woocommerce-customer-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
 					<?php if ( '' !== $row['date_iso'] ) : ?>
 						<time datetime="<?php echo esc_attr( $row['date_iso'] ); ?>"><?php echo esc_html( $row['date_display'] ); ?></time>
 					<?php else : ?>

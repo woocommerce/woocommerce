@@ -36,8 +36,6 @@ final class MyAccountView {
 		return array(
 			'pending_rows'      => $this->get_rows( $pending, $current_page ),
 			'active_rows'       => $this->get_rows( $active, $current_page ),
-			'has_pending'       => ! empty( $pending ),
-			'has_items'         => ! empty( $pending ) || ! empty( $active ),
 			'current_page'      => $current_page,
 			'total_pages'       => $total_pages,
 			'total_items'       => max( 0, (int) ( $page['total_items'] ?? 0 ) ),
@@ -92,7 +90,6 @@ final class MyAccountView {
 				'cancel_url'   => $can_cancel ? MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, $id, $current_page ) : '',
 				/* translators: %s: product name, followed by its variation attributes when the sign-up is for a variation. */
 				'cancel_label' => $can_cancel ? sprintf( __( 'Cancel stock notification for %s', 'woocommerce' ), $label_name ) : '',
-				'notification' => $notification,
 			);
 		}
 

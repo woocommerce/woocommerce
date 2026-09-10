@@ -94,18 +94,30 @@ class MyAccountViewTest extends WC_Unit_Test_Case {
 		$row  = $args['pending_rows'][0];
 
 		$this->assertSame( array(), $args['active_rows'] );
-		$this->assertTrue( $args['has_pending'] );
-		$this->assertTrue( $args['has_items'] );
 		$this->assertSame( $notification->get_id(), $row['id'] );
 		$this->assertSame( NotificationStatus::PENDING, $row['status'] );
 		$this->assertSame( $product->get_title(), $row['product_name'] );
 		$this->assertSame( $product->get_permalink(), $row['product_url'] );
 		$this->assertSame( '', $row['variation'] );
+		$this->assertSame( $notification->get_date_created()->date( 'c' ), $row['date_iso'] );
+		$this->assertSame( wc_format_datetime( $notification->get_date_created() ), $row['date_display'] );
 		$this->assertSame( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_RESEND, $notification->get_id() ), $row['resend_url'] );
 		$this->assertSame( 'Resend verification email for ' . $product->get_title(), $row['resend_label'] );
 		$this->assertSame( MyAccountEndpoint::get_action_url( MyAccountEndpoint::ACTION_CANCEL, $notification->get_id() ), $row['cancel_url'] );
 		$this->assertSame( 'Cancel stock notification for ' . $product->get_title(), $row['cancel_label'] );
-		$this->assertSame( $notification, $row['notification'] );
+	}
+
+	/**
+	 * @testdox Should fall back to empty date strings when the notification has no date created.
+	 */
+	public function test_row_date_fields_fall_back_when_date_created_is_missing(): void {
+		$notification = new Notification();
+		$notification->set_status( NotificationStatus::PENDING );
+
+		$row = $this->sut->get_template_args( array( $notification ), array(), $this->page() )['pending_rows'][0];
+
+		$this->assertSame( '', $row['date_iso'] );
+		$this->assertSame( '', $row['date_display'] );
 	}
 
 	/**
@@ -118,8 +130,6 @@ class MyAccountViewTest extends WC_Unit_Test_Case {
 		$args = $this->sut->get_template_args( array(), array( $notification ), $this->page() );
 		$row  = $args['active_rows'][0];
 
-		$this->assertFalse( $args['has_pending'] );
-		$this->assertTrue( $args['has_items'] );
 		$this->assertSame( '', $row['resend_url'] );
 		$this->assertSame( '', $row['resend_label'] );
 		$this->assertNotSame( '', $row['cancel_url'] );
@@ -185,6 +195,7 @@ class MyAccountViewTest extends WC_Unit_Test_Case {
 	 *           [1, 3, false, true]
 	 *           [2, 3, true, true]
 	 *           [3, 3, true, false]
+	 *           [5, 3, true, false]
 	 *
 	 * @param int  $current_page 1-indexed current page.
 	 * @param int  $total_pages  Total number of pages.
@@ -206,8 +217,6 @@ class MyAccountViewTest extends WC_Unit_Test_Case {
 	public function test_empty_state(): void {
 		$args = $this->sut->get_template_args( array(), array(), $this->page() );
 
-		$this->assertFalse( $args['has_pending'] );
-		$this->assertFalse( $args['has_items'] );
 		$this->assertSame( array(), $args['pending_rows'] );
 		$this->assertSame( array(), $args['active_rows'] );
 		$this->assertSame( wc_get_page_permalink( 'shop' ), $args['shop_url'] );
