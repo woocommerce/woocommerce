@@ -248,6 +248,10 @@ WooCommerce names its enumerated string vocabularies — order statuses, product
 
 ## Block Development
 
+### Block Styling
+
+Prefer Core Block Supports. For explicit style generation, use `wp_style_engine_get_styles()`. Avoid new `StyleAttributesUtils` usages; migrate existing ones when touched, preserving rendered styles.
+
 ### `block.json` Attribute Defaults
 
 Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
