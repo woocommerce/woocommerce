@@ -316,7 +316,7 @@ class ReportExporter {
 		}
 
 		/* translators: 1: first day of the period a report covers, 2: last day of that period. */
-		return sprintf( __( '%1$s - %2$s', 'woocommerce' ), $after, $before );
+		return sprintf( _x( '%1$s - %2$s', 'Report date range: from-to', 'woocommerce' ), $after, $before );
 	}
 
 	/**
