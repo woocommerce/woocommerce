@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Show a connect prompt on WooCommerce.com extension rows in the plugins list when the store isn't connected and no update notice is present
+Add notices under WooCommerce.com extensions on the Plugins screen when the store isn't connected, the extension has no subscription, or its subscription has expired or is about to expire without auto-renew, and make the renew link renew that subscription rather than add the product to the cart
