@@ -32,6 +32,80 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
 
 	/**
+	 * Return report data without monetary aggregates whose currencies are incomplete.
+	 *
+	 * @param array $query_args Report query arguments.
+	 * @return stdClass|\WP_Error Report data or error.
+	 */
+	public function get_data( $query_args ) {
+		$data = parent::get_data( $query_args );
+		return is_wp_error( $data ) ? $data : $this->withhold_incomplete_amounts( $data );
+	}
+
+	/**
+	 * Separate currency-qualified responses from legacy cached aggregates.
+	 *
+	 * @param array $params Cache query parameters.
+	 * @return string Cache key.
+	 */
+	protected function get_cache_key( $params ) {
+		$params['reporting_contract_version']  = 1;
+		$params['reporting_columns_available'] = self::has_reporting_currency_columns();
+		$params['reporting_store_currency']    = get_woocommerce_currency();
+		return parent::get_cache_key( $params );
+	}
+
+	/**
+	 * Preserve counts while withholding incomplete totals, intervals and segments.
+	 *
+	 * @param mixed $value Report response node.
+	 * @param bool  $incomplete Whether the containing aggregate is incomplete.
+	 * @return mixed Response node with unavailable monetary fields set to null.
+	 */
+	private function withhold_incomplete_amounts( $value, $incomplete = false ) {
+		if ( ! is_array( $value ) && ! is_object( $value ) ) {
+			return $value;
+		}
+		$is_object  = is_object( $value );
+		$fields     = (array) $value;
+		$incomplete = $incomplete || ( $fields['reporting_missing_orders'] ?? 0 ) > 0;
+		if ( $incomplete ) {
+			foreach ( array( 'gross_sales', 'total_sales', 'coupons', 'refunds', 'taxes', 'shipping', 'net_revenue', 'avg_order_value' ) as $field ) {
+				if ( array_key_exists( $field, $fields ) ) {
+					$fields[ $field ] = null;
+				}
+			}
+		}
+		foreach ( $fields as $key => $field ) {
+			$fields[ $key ] = $this->withhold_incomplete_amounts( $field, $incomplete );
+		}
+		return $is_object ? (object) $fields : $fields;
+	}
+
+	/**
+	 * Cached reporting-column availability, keyed by table name.
+	 *
+	 * @var array
+	 */
+	private static $reporting_columns = array();
+
+	/**
+	 * Whether an installation has the reporting currency contract columns.
+	 *
+	 * @param bool $refresh Refresh after a schema update.
+	 * @return bool
+	 */
+	public static function has_reporting_currency_columns( bool $refresh = false ): bool {
+		global $wpdb;
+		$table = $wpdb->prefix . 'wc_order_stats';
+		if ( $refresh || ! isset( self::$reporting_columns[ $table ] ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Trusted table name.
+			self::$reporting_columns[ $table ] = 5 === count( $wpdb->get_col( "SHOW COLUMNS FROM {$table} WHERE Field IN ('reporting_currency', 'reporting_basis', 'source_currency', 'source_net_total', 'reporting_exchange_rate')" ) );
+		}
+		return self::$reporting_columns[ $table ];
+	}
+
+	/**
 	 * Option name to store whether the wc_order_stats table has a column `fulfillment_status`
 	 *
 	 * @var string
@@ -69,21 +143,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'orders_count'        => 'intval',
-		'num_items_sold'      => 'intval',
-		'gross_sales'         => 'floatval',
-		'total_sales'         => 'floatval',
-		'coupons'             => 'floatval',
-		'coupons_count'       => 'intval',
-		'refunds'             => 'floatval',
-		'taxes'               => 'floatval',
-		'shipping'            => 'floatval',
-		'net_revenue'         => 'floatval',
-		'avg_items_per_order' => 'floatval',
-		'avg_order_value'     => 'floatval',
-		'total_customers'     => 'intval',
-		'products'            => 'intval',
-		'segment_id'          => 'intval',
+		'reporting_missing_orders' => 'intval',
+		'orders_count'             => 'intval',
+		'num_items_sold'           => 'intval',
+		'gross_sales'              => 'floatval',
+		'total_sales'              => 'floatval',
+		'coupons'                  => 'floatval',
+		'coupons_count'            => 'intval',
+		'refunds'                  => 'floatval',
+		'taxes'                    => 'floatval',
+		'shipping'                 => 'floatval',
+		'net_revenue'              => 'floatval',
+		'avg_items_per_order'      => 'floatval',
+		'avg_order_value'          => 'floatval',
+		'total_customers'          => 'intval',
+		'products'                 => 'intval',
+		'segment_id'               => 'intval',
 	);
 
 	/**
@@ -111,6 +186,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
+		global $wpdb;
+
 		$table_name = self::get_db_table_name();
 		// Avoid ambiguous columns in SQL query.
 		// Identify refund rows by the sign of the whole row (net + tax + shipping), not net alone:
@@ -138,6 +215,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'avg_order_value'     => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$table_name}.net_total ELSE 0 END ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
 			'total_customers'     => "COUNT( DISTINCT( {$table_name}.customer_id ) ) as total_customers",
 		);
+		// Without the reporting schema no order amount can be qualified in the reporting currency.
+		$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $table_name.parent_id > 0 THEN $table_name.parent_id ELSE $table_name.order_id END) AS reporting_missing_orders";
+		if ( self::has_reporting_currency_columns() ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier comes from the internal stats table name; currency is parameterized.
+			$currency_match                                   = $wpdb->prepare( "`{$table_name}`.reporting_currency = %s", get_woocommerce_currency() );
+			$qualified                                        = "$currency_match AND $table_name.reporting_exchange_rate > 0 AND $table_name.reporting_basis IN ('native', 'historical_order_rate', 'historical_processor_rate')";
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $qualified THEN NULL ELSE CASE WHEN $table_name.parent_id > 0 THEN $table_name.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -348,6 +433,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->initialize_queries();
 
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
 		$selections = $this->selected_columns( $query_args );
 		$this->add_time_period_sql_params( $query_args, $table_name );
 		$this->add_intervals_sql_params( $query_args, $table_name );
@@ -580,29 +668,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$order_fulfillment_status = '';
+		if ( self::has_reporting_currency_columns() ) {
+			$data['reporting_currency']      = $order->get_currency();
+			$data['reporting_basis']         = 'native';
+			$data['reporting_exchange_rate'] = null;
+			$format[]                        = '%s';
+			$format[]                        = '%s';
+			$format[]                        = '%s';
+		}
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
 			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
 			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
 			$format[]                   = '%s';
 		}
 
-		/**
-		 * Filters order stats data.
-		 *
-		 * @param array $data Data written to order stats lookup table.
-		 * @param Order|OrderRefund $order  Order object.
-		 *
-		 * @since 4.0.0
-		 */
-		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
-
+		$parent_order = null;
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
 			// Refunds attach to the original order. Skip if the parent is another refund.
 			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
-				$data['parent_id'] = $parent_order->get_id();
-				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
-
 				$refund_type               = $order->get_meta( '_refund_type' );
 				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
 				$use_parent_refund_amounts = $uses_new_full_refund_data && (
@@ -631,6 +715,66 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						$data['shipping_total'] -= (float) $prior_refund->get_shipping_total();
 					}
 				}
+			}
+		}
+
+		$native_currency = $order->get_currency();
+		$monetary_keys   = array_flip( array( 'total_sales', 'net_total', 'tax_total', 'shipping_total' ) );
+		$native_amounts  = array_map( 'floatval', array_intersect_key( $data, $monetary_keys ) );
+		if ( self::has_reporting_currency_columns() ) {
+			$data['source_currency']  = $native_currency;
+			$data['source_net_total'] = $native_amounts['net_total'];
+		}
+
+		/**
+		 * Filters order stats data after refund component adjustments.
+		 *
+		 * @param array $data Data written to order stats lookup table.
+		 * @param Order|OrderRefund $order  Order object.
+		 *
+		 * @since 4.0.0
+		 */
+		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
+		if ( self::has_reporting_currency_columns() ) {
+			// Converters declare their native input after any earlier native adjustments.
+			$source_currency  = $data['source_currency'] ?? '';
+			$source_net_total = $data['source_net_total'] ?? null;
+			if ( $source_currency !== $native_currency || ! is_numeric( $source_net_total ) || ! is_finite( (float) $source_net_total ) ) {
+				$source_currency  = '';
+				$source_net_total = null;
+			}
+			// Normalize insertion order so filter key reordering cannot change SQL formats.
+			unset( $data['source_currency'], $data['source_net_total'] );
+			$data['source_currency']  = $source_currency;
+			$data['source_net_total'] = $source_net_total;
+			$format[]                 = '%s';
+			$format[]                 = '%f';
+		}
+		if ( isset( $data['reporting_currency'], $data['reporting_basis'] ) && 'native' === $data['reporting_basis'] && $order->get_currency() === $data['reporting_currency'] && array_map( 'floatval', array_intersect_key( $data, $monetary_keys ) ) !== $native_amounts ) {
+			// A legacy filter changed amounts without declaring their new basis.
+			$data['reporting_currency']      = '';
+			$data['reporting_basis']         = '';
+			$data['reporting_exchange_rate'] = null;
+			$data['source_currency']         = '';
+			$data['source_net_total']        = null;
+		}
+
+		if ( self::has_reporting_currency_columns() ) {
+			if ( 'native' === ( $data['reporting_basis'] ?? '' ) && ( $data['reporting_currency'] ?? '' ) === $native_currency ) {
+				$data['reporting_exchange_rate'] = 1.0;
+			} elseif ( ! is_numeric( $data['reporting_exchange_rate'] ?? null ) || ! is_finite( (float) $data['reporting_exchange_rate'] ) || (float) $data['reporting_exchange_rate'] <= 0 ) {
+				$data['reporting_exchange_rate'] = null;
+			}
+			if ( null !== $data['reporting_exchange_rate'] ) {
+				// wpdb's %f truncates rates to six decimals; retain the applied double.
+				$data['reporting_exchange_rate'] = str_replace( ',', '.', sprintf( '%.17g', (float) $data['reporting_exchange_rate'] ) );
+			}
+		}
+
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
+				$data['parent_id'] = $parent_order->get_id();
+				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 			}
 			/**
 			 * Refunds don't have date_completed and date_paid filled, so backfill each from

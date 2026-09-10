@@ -122,7 +122,13 @@ class Controller extends GenericStatsController {
 	 */
 	protected function get_item_properties_schema() {
 		return array(
-			'items_sold'   => array(
+			'reporting_missing_orders' => array(
+				'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'items_sold'               => array(
 				'title'       => __( 'Products sold', 'woocommerce' ),
 				'description' => __( 'Number of product items sold.', 'woocommerce' ),
 				'type'        => 'integer',
@@ -130,14 +136,14 @@ class Controller extends GenericStatsController {
 				'readonly'    => true,
 				'indicator'   => true,
 			),
-			'net_revenue'  => array(
+			'net_revenue'              => array(
 				'description' => __( 'Net sales.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'format'      => 'currency',
 			),
-			'orders_count' => array(
+			'orders_count'             => array(
 				'description' => __( 'Number of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),

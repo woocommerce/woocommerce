@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
@@ -47,23 +48,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'       => 'strval',
-		'date_end'         => 'strval',
-		'product_id'       => 'intval',
-		'items_sold'       => 'intval',
-		'net_revenue'      => 'floatval',
-		'orders_count'     => 'intval',
+		'date_start'               => 'strval',
+		'date_end'                 => 'strval',
+		'product_id'               => 'intval',
+		'items_sold'               => 'intval',
+		'net_revenue'              => 'floatval',
+		'reporting_missing_orders' => 'intval',
+		'orders_count'             => 'intval',
 		// Extended attributes.
-		'name'             => 'strval',
-		'price'            => 'floatval',
-		'image'            => 'strval',
-		'permalink'        => 'strval',
-		'stock_status'     => 'strval',
-		'stock_quantity'   => 'intval',
-		'low_stock_amount' => 'intval',
-		'category_ids'     => 'array_values',
-		'variations'       => 'array_values',
-		'sku'              => 'strval',
+		'name'                     => 'strval',
+		'price'                    => 'floatval',
+		'image'                    => 'strval',
+		'permalink'                => 'strval',
+		'stock_status'             => 'strval',
+		'stock_quantity'           => 'intval',
+		'low_stock_amount'         => 'intval',
+		'category_ids'             => 'array_values',
+		'variations'               => 'array_values',
+		'sku'                      => 'strval',
 	);
 
 	/**
@@ -121,6 +123,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN product_gross_revenue >= 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -235,6 +243,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
+		} elseif ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 		}
 	}
 
@@ -457,6 +467,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page_no' => 0,
 		);
 
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
 		$selections        = $this->selected_columns( $query_args );
 		$included_products = $this->get_included_products_array( $query_args );
 		$search_subquery   = $this->get_search_subquery( $query_args, $included_products );

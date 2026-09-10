@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
@@ -45,6 +46,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
+		'reporting_missing_orders' => 'intval',
 		'coupon_id'    => 'intval',
 		'amount'       => 'floatval',
 		'orders_count' => 'intval',
@@ -71,6 +73,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'amount'       => 'SUM(discount_amount) as amount',
 			'orders_count' => "COUNT(DISTINCT {$table_name}.order_id) as orders_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	// This method was already available as non-final, marking it as final now would make it backwards-incompatible.
@@ -122,6 +130,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$this->add_order_status_clause( $query_args, $order_coupon_lookup_table, $this->subquery );
+		if ( ! $this->get_status_subquery( $query_args ) && OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
+		}
 	}
 
 	/**
@@ -304,6 +315,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'pages'   => 0,
 			'page_no' => 0,
 		);
+
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
 
 		$selections       = $this->selected_columns( $query_args );
 		$included_coupons = $this->get_included_coupons_array( $query_args );

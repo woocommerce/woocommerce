@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Record the reporting currency and conversion basis for Analytics order amounts, leaving legacy conversion data unqualified until reimported.

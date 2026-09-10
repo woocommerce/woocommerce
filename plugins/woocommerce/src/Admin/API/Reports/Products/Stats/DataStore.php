@@ -28,14 +28,15 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'       => 'strval',
-		'date_end'         => 'strval',
-		'product_id'       => 'intval',
-		'items_sold'       => 'intval',
-		'net_revenue'      => 'floatval',
-		'orders_count'     => 'intval',
-		'products_count'   => 'intval',
-		'variations_count' => 'intval',
+		'date_start'               => 'strval',
+		'date_end'                 => 'strval',
+		'product_id'               => 'intval',
+		'items_sold'               => 'intval',
+		'net_revenue'              => 'floatval',
+		'reporting_missing_orders' => 'intval',
+		'orders_count'             => 'intval',
+		'products_count'           => 'intval',
+		'variations_count'         => 'intval',
 	);
 
 	/**
@@ -62,6 +63,8 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	 * @override ProductsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
+		parent::assign_report_columns();
+		$completeness         = $this->report_columns['reporting_missing_orders'] ?? null;
 		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'items_sold'       => 'SUM(product_qty) as items_sold',
@@ -70,6 +73,9 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			'products_count'   => 'COUNT(DISTINCT product_id) as products_count',
 			'variations_count' => 'COUNT(DISTINCT variation_id) as variations_count',
 		);
+		if ( null !== $completeness ) {
+			$this->report_columns['reporting_missing_orders'] = $completeness;
+		}
 	}
 
 	/**
@@ -103,6 +109,8 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$products_from_clause  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$products_where_clause .= " AND ( {$order_status_filter} )";
+		} elseif ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+			$products_from_clause .= " LEFT JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 		}
 
 		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
@@ -165,6 +173,9 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 
 		$this->initialize_queries();
 
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
 		$selections = $this->selected_columns( $query_args );
 
 		$this->update_sql_query_params( $query_args );

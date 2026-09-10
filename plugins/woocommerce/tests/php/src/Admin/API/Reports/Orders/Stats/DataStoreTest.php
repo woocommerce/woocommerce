@@ -16,6 +16,151 @@ use WP_Error;
  */
 class DataStoreTest extends WC_Unit_Test_Case {
 
+	/** Legacy amount filters cannot implicitly retain the native-currency claim. */
+	public function test_changed_amounts_without_declared_basis_are_unqualified(): void {
+		$order  = WC_Helper_Order::create_order();
+		$filter = static function ( $data ) {
+			$data['total_sales'] *= 2;
+			return $data;
+		};
+		add_filter( 'woocommerce_analytics_update_order_stats_data', $filter );
+		try {
+			OrdersStatsDataStore::sync_order( $order->get_id() );
+			global $wpdb;
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT reporting_currency, reporting_basis FROM {$wpdb->prefix}wc_order_stats WHERE order_id=%d", $order->get_id() ), ARRAY_A );
+			$this->assertSame(
+				array(
+					'reporting_currency' => '',
+					'reporting_basis'    => '',
+				),
+				$row
+			);
+		} finally {
+			remove_filter( 'woocommerce_analytics_update_order_stats_data', $filter );
+			WC_Helper_Order::delete_order( $order->get_id() );
+		}
+	}
+
+	/** Native import inputs survive conversion filters and retain their currency. */
+	public function test_native_snapshot_preserves_converter_input(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'GBP' );
+		$order->save();
+		$expected = (float) $order->get_total() - (float) $order->get_total_tax() - (float) $order->get_shipping_total();
+		$filter   = static function ( $data ) {
+			$adjusted                        = $data['net_total'] - 5;
+			$data['net_total']               = $adjusted * 2;
+			$data['reporting_currency']      = 'EUR';
+			$data['reporting_basis']         = 'historical_processor_rate';
+			$data['reporting_exchange_rate'] = 1.1638888888888888;
+			// Reinsert the converter input in reverse order to exercise database formats.
+			unset( $data['source_currency'], $data['source_net_total'] );
+			$data['source_net_total'] = $adjusted;
+			$data['source_currency']  = 'GBP';
+			return $data;
+		};
+		add_filter( 'woocommerce_analytics_update_order_stats_data', $filter );
+		try {
+			OrdersStatsDataStore::sync_order( $order->get_id() );
+			global $wpdb;
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT source_currency, source_net_total, net_total, reporting_exchange_rate FROM {$wpdb->prefix}wc_order_stats WHERE order_id=%d", $order->get_id() ), ARRAY_A );
+			$this->assertSame( 'GBP', $row['source_currency'] );
+			$this->assertSame( 1.1638888888888888, (float) $row['reporting_exchange_rate'] );
+			$this->assertEquals( $expected - 5, (float) $row['source_net_total'] );
+			$this->assertEquals( 2 * ( $expected - 5 ), (float) $row['net_total'] );
+		} finally {
+			remove_filter( 'woocommerce_analytics_update_order_stats_data', $filter );
+			WC_Helper_Order::delete_order( $order->get_id() );
+		}
+	}
+
+	/** Schema upgrade must not invent a conversion basis for existing rows. */
+	public function test_reporting_currency_upgrade_preserves_unknown_legacy_basis(): void {
+		global $wpdb;
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'GBP' );
+		$order->save();
+		try {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats DROP COLUMN reporting_currency, DROP COLUMN reporting_basis, DROP COLUMN source_currency, DROP COLUMN source_net_total, DROP COLUMN reporting_exchange_rate" );
+			$this->assertFalse( OrdersStatsDataStore::has_reporting_currency_columns( true ) );
+			OrdersStatsDataStore::sync_order( $order->get_id() );
+			$this->assertSame( '', $wpdb->last_error );
+			require_once WC_ABSPATH . 'includes/wc-update-functions.php';
+			wc_update_11203_add_reporting_currency_columns();
+			$this->assertTrue( OrdersStatsDataStore::has_reporting_currency_columns() );
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT reporting_currency, reporting_basis FROM {$wpdb->prefix}wc_order_stats WHERE order_id=%d", $order->get_id() ), ARRAY_A );
+			$this->assertSame(
+				array(
+					'reporting_currency' => '',
+					'reporting_basis'    => '',
+				),
+				$row
+			);
+			OrdersStatsDataStore::sync_order( $order->get_id() );
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT reporting_currency, reporting_basis FROM {$wpdb->prefix}wc_order_stats WHERE order_id=%d", $order->get_id() ), ARRAY_A );
+			$this->assertSame(
+				array(
+					'reporting_currency' => 'GBP',
+					'reporting_basis'    => 'native',
+				),
+				$row
+			);
+		} finally {
+			\WC_Install::create_tables();
+			OrdersStatsDataStore::has_reporting_currency_columns( true );
+			WC_Helper_Order::delete_order( $order->get_id() );
+		}
+	}
+
+	/** Currency conversion must apply to the final full-refund component values. */
+	public function test_full_refund_conversion_is_not_overwritten_by_parent_breakdown(): void {
+		update_option( 'woocommerce_db_version', '10.2.0' );
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'GBP' );
+		$order->set_cart_tax( 5 );
+		$order->set_total( 55 );
+		$order->save();
+		$order->update_status( 'completed' );
+		$seen_subjects = array();
+		$convert       = static function ( $data, $subject ) use ( &$seen_subjects ) {
+			$seen_subjects[] = $subject->get_id();
+			foreach ( array( 'total_sales', 'net_total', 'tax_total', 'shipping_total' ) as $key ) {
+				$data[ $key ] *= 2;
+			}
+			$data['date_created'] = '2024-01-02 03:04:05';
+			$data['status']       = 'wc-pending';
+			$data['parent_id']    = 99999;
+			return $data;
+		};
+		add_filter( 'woocommerce_analytics_update_order_stats_data', $convert, 10, 2 );
+		try {
+			$refund = wc_create_refund(
+				array(
+					'order_id'       => $order->get_id(),
+					'amount'         => 55,
+					'refund_payment' => false,
+				)
+			);
+			$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+			OrdersStatsDataStore::sync_order( $refund->get_id() );
+			global $wpdb;
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT total_sales, net_total, tax_total, shipping_total, date_paid, date_completed, parent_id, status FROM {$wpdb->prefix}wc_order_stats WHERE order_id=%d", $refund->get_id() ), ARRAY_A );
+			$this->assertContains( $refund->get_id(), $seen_subjects );
+			$this->assertSame( '2024-01-02 03:04:05', $row['date_paid'] );
+			$this->assertSame( '2024-01-02 03:04:05', $row['date_completed'] );
+			$this->assertSame( $order->get_id(), (int) $row['parent_id'] );
+			$this->assertSame( 'wc-refunded', $row['status'] );
+			$this->assertEqualsWithDelta( -110, (float) $row['total_sales'], 0.001 );
+			$this->assertEqualsWithDelta( -2 * ( $order->get_total() - $order->get_total_tax() - $order->get_shipping_total() ), (float) $row['net_total'], 0.001 );
+			$this->assertEqualsWithDelta( -2 * $order->get_total_tax(), (float) $row['tax_total'], 0.001 );
+			$this->assertEqualsWithDelta( -2 * $order->get_shipping_total(), (float) $row['shipping_total'], 0.001 );
+		} finally {
+			remove_filter( 'woocommerce_analytics_update_order_stats_data', $convert );
+			WC_Helper_Order::delete_order( $order->get_id() );
+		}
+	}
+
 	/**
 	 * Previous woocommerce_db_version for restore.
 	 *

@@ -72,16 +72,18 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test retrieving the stats through the data store.
 		$coupon_1_response = array(
-			'coupon_id'     => $coupon_1->get_id(),
-			'amount'        => floatval( $coupon_1_amount * 2 ),
-			'orders_count'  => 2,
-			'extended_info' => new ArrayObject(),
+			'coupon_id'                => $coupon_1->get_id(),
+			'amount'                   => floatval( $coupon_1_amount * 2 ),
+			'orders_count'             => 2,
+			'extended_info'            => new ArrayObject(),
+			'reporting_missing_orders' => 0,
 		);
 		$coupon_2_response = array(
-			'coupon_id'     => $coupon_2->get_id(),
-			'amount'        => floatval( $coupon_2_amount ),
-			'orders_count'  => 1,
-			'extended_info' => new ArrayObject(),
+			'coupon_id'                => $coupon_2->get_id(),
+			'amount'                   => floatval( $coupon_2_amount ),
+			'orders_count'             => 1,
+			'extended_info'            => new ArrayObject(),
+			'reporting_missing_orders' => 0,
 		);
 
 		// Order by coupon id DESC is the default.
@@ -205,10 +207,11 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$coupon_1_response = array(
-			'coupon_id'     => $coupon_1->get_id(),
-			'amount'        => $coupon_1_amount * 2,
-			'orders_count'  => 2,
-			'extended_info' => array(
+			'coupon_id'                => $coupon_1->get_id(),
+			'amount'                   => $coupon_1_amount * 2,
+			'orders_count'             => 2,
+			'reporting_missing_orders' => 0,
+			'extended_info'            => array(
 				'code'             => $coupon_1->get_code(),
 				'date_created'     => $c1_date_created,
 				'date_created_gmt' => $c1_date_created_gmt,
@@ -243,10 +246,11 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$coupon_2_response = array(
-			'coupon_id'     => $coupon_2->get_id(),
-			'amount'        => $coupon_2_amount,
-			'orders_count'  => 1,
-			'extended_info' => array(
+			'coupon_id'                => $coupon_2->get_id(),
+			'amount'                   => $coupon_2_amount,
+			'orders_count'             => 1,
+			'reporting_missing_orders' => 0,
+			'extended_info'            => array(
 				'code'             => $coupon_2->get_code(),
 				'date_created'     => $c2_date_created,
 				'date_created_gmt' => $c2_date_created_gmt,
@@ -388,16 +392,18 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test retrieving the stats through the data store.
 		$coupon_1_response = array(
-			'coupon_id'     => $coupon_1->get_id(),
-			'amount'        => floatval( $coupon_1_amount ),
-			'orders_count'  => 1,
-			'extended_info' => new ArrayObject(),
+			'coupon_id'                => $coupon_1->get_id(),
+			'amount'                   => floatval( $coupon_1_amount ),
+			'orders_count'             => 1,
+			'extended_info'            => new ArrayObject(),
+			'reporting_missing_orders' => 0,
 		);
 		$coupon_2_response = array(
-			'coupon_id'     => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
-			'amount'        => floatval( $coupon_2_amount ),
-			'orders_count'  => 1,
-			'extended_info' => new ArrayObject(),
+			'coupon_id'                => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
+			'amount'                   => floatval( $coupon_2_amount ),
+			'orders_count'             => 1,
+			'extended_info'            => new ArrayObject(),
+			'reporting_missing_orders' => 0,
 		);
 
 		// Order by coupon id DESC is the default.
@@ -441,10 +447,11 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$coupon_1_response = array(
-			'coupon_id'     => $coupon_1->get_id(),
-			'amount'        => floatval( $coupon_1_amount ),
-			'orders_count'  => 1,
-			'extended_info' => array(
+			'coupon_id'                => $coupon_1->get_id(),
+			'amount'                   => floatval( $coupon_1_amount ),
+			'orders_count'             => 1,
+			'reporting_missing_orders' => 0,
+			'extended_info'            => array(
 				'code'             => $coupon_1->get_code(),
 				'date_created'     => $c1_date_created,
 				'date_created_gmt' => $c1_date_created_gmt,
@@ -455,10 +462,11 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 
 		$coupon_2_response = array(
-			'coupon_id'     => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
-			'amount'        => floatval( $coupon_2_amount ),
-			'orders_count'  => 1,
-			'extended_info' => array(
+			'coupon_id'                => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
+			'amount'                   => floatval( $coupon_2_amount ),
+			'orders_count'             => 1,
+			'reporting_missing_orders' => 0,
+			'extended_info'            => array(
 				'code'             => '(Deleted)',
 				'date_created'     => '',
 				'date_created_gmt' => '',

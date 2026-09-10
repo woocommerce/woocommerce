@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
@@ -42,18 +43,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'   => 'strval',
-		'date_end'     => 'strval',
-		'product_id'   => 'intval',
-		'variation_id' => 'intval',
-		'items_sold'   => 'intval',
-		'net_revenue'  => 'floatval',
-		'orders_count' => 'intval',
-		'name'         => 'strval',
-		'price'        => 'floatval',
-		'image'        => 'strval',
-		'permalink'    => 'strval',
-		'sku'          => 'strval',
+		'reporting_missing_orders' => 'intval',
+		'date_start'               => 'strval',
+		'date_end'                 => 'strval',
+		'product_id'               => 'intval',
+		'variation_id'             => 'intval',
+		'items_sold'               => 'intval',
+		'net_revenue'              => 'floatval',
+		'orders_count'             => 'intval',
+		'name'                     => 'strval',
+		'price'                    => 'floatval',
+		'image'                    => 'strval',
+		'permalink'                => 'strval',
+		'sku'                      => 'strval',
 	);
 
 	/**
@@ -95,6 +97,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
 			'orders_count' => "COUNT(DISTINCT {$table_name}.order_id) as orders_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -198,13 +206,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
 
+		if ( ! $order_status_filter && OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_stats_lookup_table} ON {$order_product_lookup_table}.order_id = {$order_stats_lookup_table}.order_id" );
+		}
+
 		$attribute_order_items_subquery = $this->get_order_item_by_attribute_subquery( $query_args );
 		if ( $attribute_order_items_subquery ) {
-			// JOIN on product lookup if we haven't already.
-			if ( ! $order_status_filter ) {
-				$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
-			}
-
 			// Add subquery for matching attributes to WHERE.
 			$this->subquery->add_sql_clause( 'where', $attribute_order_items_subquery );
 		}
@@ -419,6 +426,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
+
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();

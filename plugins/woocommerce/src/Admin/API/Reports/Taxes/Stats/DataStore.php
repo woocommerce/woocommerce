@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
@@ -45,11 +46,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'tax_codes'    => 'intval',
-		'total_tax'    => 'floatval',
-		'order_tax'    => 'floatval',
-		'shipping_tax' => 'floatval',
-		'orders_count' => 'intval',
+		'reporting_missing_orders' => 'intval',
+		'tax_codes'                => 'intval',
+		'total_tax'                => 'floatval',
+		'order_tax'                => 'floatval',
+		'shipping_tax'             => 'floatval',
+		'orders_count'             => 'intval',
 	);
 
 	/**
@@ -93,6 +95,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			// match the released form for extension callbacks that inspect or rewrite it.
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -202,6 +210,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->initialize_queries();
 
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
 		$selections       = $this->selected_columns( $query_args );
 		$order_stats_join = "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 		$this->update_sql_query_params( $query_args );

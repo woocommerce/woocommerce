@@ -1,0 +1,6 @@
+Significance: minor
+Type: fix
+
+Count product coupon discounts once per order in Analytics breakdowns, deduplicate category ancestry, and mark unavailable historical allocations when only some coupons on an order are selected.
+
+Allow a parent product to be specified for coupon variation breakdowns, with validation for nonexistent parents.

@@ -173,6 +173,12 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 		);
 
+		$schema['properties']['reporting_missing_orders'] = array(
+			'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
+			'type' => 'integer',
+			'context' => array( 'view', 'edit' ),
+			'readonly' => true,
+		);
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -253,7 +259,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_item = array(
 			'code'         => $item['extended_info']['code'],
 			'orders_count' => $item['orders_count'],
-			'amount'       => $item['amount'],
+			'amount'       => ! empty( $item['reporting_missing_orders'] ) ? __( 'Unavailable', 'woocommerce' ) : $item['amount'],
 			'created'      => $item['extended_info']['date_created'],
 			'expires'      => $date_expires,
 			'type'         => $item['extended_info']['discount_type'],

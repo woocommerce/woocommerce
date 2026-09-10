@@ -35,6 +35,9 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Database rollback reuses tax IDs; request-level rate objects must not survive between fixtures.
+		$this->reset_container_resolutions();
+
 		$this->original_tax_option = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$this->user = $this->factory->user->create(
@@ -382,7 +385,8 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
+		$this->assertSame( 'integer', $properties['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'tax_rate_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'tax_rate', $properties );
@@ -502,5 +506,147 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order_es_2->calculate_totals( true );
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+	}
+	/** Server exports must distinguish unavailable tax amounts from actual zero. */
+	public function test_export_preserves_tax_availability(): void {
+		$controller        = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller();
+		$item              = array(
+			'tax_rate_id'              => 1,
+			'country'                  => 'GB',
+			'state'                    => '',
+			'name'                     => 'VAT',
+			'priority'                 => 1,
+			'tax_rate'                 => 20,
+			'total_tax'                => 6.98,
+			'order_tax'                => 5.82,
+			'shipping_tax'             => 1.16,
+			'orders_count'             => 2,
+			'reporting_missing_orders' => 1,
+		);
+		$export_controller = $this->getMockBuilder( \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller::class )->onlyMethods( array( 'get_items' ) )->getMock();
+		$response          = new \WP_REST_Response( array( $item ) );
+		$response->header( 'X-WP-Total', 1 );
+		$export_controller->expects( $this->once() )->method( 'get_items' )->willReturn( $response );
+		$exporter = new \Automattic\WooCommerce\Admin\ReportCSVExporter( 'taxes', array() );
+		$property = new \ReflectionProperty( $exporter, 'controller' );
+		$property->setAccessible( true );
+		$property->setValue( $exporter, $export_controller );
+		$exporter->set_filename( 'wc-tax-currency-test-' . wp_generate_uuid4() );
+		$path = \Automattic\WooCommerce\Admin\ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+		try {
+			$exporter->generate_file();
+			$this->assertTrue( $exporter->export_file_exists() );
+			ob_start();
+			$exporter->stream_export_file();
+			$csv = ob_get_clean();
+			$this->assertSame( 3, substr_count( $csv, 'Unavailable' ), $csv );
+			foreach ( array( '6.98', '5.82', '1.16' ) as $amount ) {
+				$this->assertStringNotContainsString( $amount, $csv );
+			}
+		} finally {
+			wp_delete_file( $path );
+			wp_delete_file( $path . '.headers' );
+		}
+		$missing = $controller->prepare_item_for_export( $item );
+		foreach ( array( 'total_tax', 'order_tax', 'shipping_tax' ) as $field ) {
+			$this->assertSame( 'Unavailable', $missing[ $field ] );
+		}
+		$this->assertSame( 20, $missing['rate'] );
+		$this->assertSame( 2, $missing['orders_count'] );
+		$item['reporting_missing_orders'] = 0;
+		$complete                         = $controller->prepare_item_for_export( $item );
+		foreach ( array( 'total_tax', 'order_tax', 'shipping_tax' ) as $field ) {
+			$this->assertSame( number_format( $item[ $field ], wc_get_price_decimals(), '.', '' ), $complete[ $field ] );
+			$item[ $field ] = 0;
+		}
+		$zero = $controller->prepare_item_for_export( $item );
+		foreach ( array( 'total_tax', 'order_tax', 'shipping_tax' ) as $field ) {
+			$this->assertSame( number_format( 0, wc_get_price_decimals(), '.', '' ), $zero[ $field ] );
+		}
+	}
+	/** Mixed canonical currencies must stay unavailable through report query and file output. */
+	public function test_mixed_currency_tax_report_file(): void {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		$currency = get_woocommerce_currency();
+		$rate     = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '7',
+				'tax_rate_name'     => 'Currency fixture',
+				'tax_rate_priority' => 1,
+			)
+		);
+		$this->assertGreaterThan( 0, $rate );
+		foreach ( array( $currency, 'GBP' === $currency ? 'EUR' : 'GBP' ) as $order_currency ) {
+			$order = WC_Helper_Order::create_order( $this->user );
+			$order->set_currency( $order_currency );
+			$tax = new WC_Order_Item_Tax();
+			$tax->set_rate( $rate );
+			$tax->set_tax_total( 5 );
+			$tax->set_shipping_tax_total( 2 );
+			$order->add_item( $tax );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+		}
+		$native_rate  = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate'          => '7',
+				'tax_rate_name'     => 'Native fixture',
+				'tax_rate_priority' => 1,
+			)
+		);
+		$native_order = WC_Helper_Order::create_order( $this->user );
+		$native_order->set_currency( $currency );
+		$native_tax = new WC_Order_Item_Tax();
+		$native_tax->set_rate( $native_rate );
+		$native_tax->set_tax_total( 5 );
+		$native_tax->set_shipping_tax_total( 2 );
+		$native_order->add_item( $native_tax );
+		$native_order->set_status( OrderStatus::COMPLETED );
+		$native_order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'taxes', (string) $rate );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$rows = $response->get_data();
+		$this->assertCount( 1, $rows );
+		$this->assertSame( 2, $rows[0]['orders_count'] );
+		$this->assertGreaterThan( 0, $rows[0]['reporting_missing_orders'] );
+		$export_args = array(
+			'taxes'   => $rate . ',' . $native_rate,
+			'orderby' => 'tax_rate_id',
+			'order'   => 'asc',
+		);
+		$one_row     = static function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_admin_taxes_report_export_batch_limit', $one_row );
+		$exporter  = new \Automattic\WooCommerce\Admin\ReportCSVExporter( 'taxes', $export_args );
+		$export_id = wp_generate_uuid4();
+		$exporter->set_filename( 'wc-taxes-report-export-' . $export_id );
+		$path = \Automattic\WooCommerce\Admin\ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+		try {
+			$queued_rows = \Automattic\WooCommerce\Admin\ReportExporter::queue_report_export( $export_id, 'taxes', $export_args, false );
+			$this->assertSame( 2, $queued_rows );
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+			$this->assertTrue( $exporter->export_file_exists() );
+			ob_start();
+			$exporter->stream_export_file();
+			$csv = ob_get_clean();
+			$this->assertSame( 3, substr_count( $csv, 'Unavailable' ), $csv );
+			$csv_rows = array_map( 'str_getcsv', explode( "\n", trim( $csv ) ) );
+			$this->assertCount( 3, $csv_rows );
+			$this->assertSame( array( 'Unavailable', 'Unavailable', 'Unavailable' ), array_slice( $csv_rows[1], 2, 3 ) );
+			$this->assertSame( array( '7.00', '5.00', '2.00' ), array_slice( $csv_rows[2], 2, 3 ) );
+			$this->assertSame( '2', $csv_rows[1][5] );
+			$this->assertSame( '1', $csv_rows[2][5] );
+		} finally {
+			remove_filter( 'woocommerce_admin_taxes_report_export_batch_limit', $one_row );
+			wp_delete_file( $path );
+			wp_delete_file( $path . '.headers' );
+		}
 	}
 }

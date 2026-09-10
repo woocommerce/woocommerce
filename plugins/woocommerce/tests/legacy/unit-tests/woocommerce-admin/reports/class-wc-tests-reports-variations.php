@@ -61,12 +61,13 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'variation_id'  => $variation->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 40.0, // $10 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'variation_id'             => $variation->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 40.0, // $10 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -131,12 +132,13 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'variation_id'  => $variation->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 40.0, // $10 * 4.
-					'orders_count'  => 1,
-					'extended_info' => array(
+					'product_id'               => $product->get_id(),
+					'variation_id'             => $variation->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 40.0, // $10 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => array(
 						'name'             => $variation->get_name(),
 						'image'            => $variation->get_image(),
 						'permalink'        => $variation->get_permalink(),
@@ -157,6 +159,18 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 			),
 		);
 		$this->assertEquals( $expected_data, $data );
+	}
+
+	/**
+	 * Attribute filtering must also work when extensions include all order statuses.
+	 */
+	public function test_attribute_filtering_without_status_exclusions() {
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+		try {
+			$this->test_attribute_filtering();
+		} finally {
+			remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+		}
 	}
 
 	/**

@@ -128,7 +128,13 @@ class Controller extends GenericStatsController {
 	 */
 	protected function get_item_properties_schema() {
 		return array(
-			'total_tax'    => array(
+			'reporting_missing_orders' => array(
+				'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'total_tax'                => array(
 				'description' => __( 'Total tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -136,7 +142,7 @@ class Controller extends GenericStatsController {
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'order_tax'    => array(
+			'order_tax'                => array(
 				'description' => __( 'Order tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -144,7 +150,7 @@ class Controller extends GenericStatsController {
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'shipping_tax' => array(
+			'shipping_tax'             => array(
 				'description' => __( 'Shipping tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -152,13 +158,13 @@ class Controller extends GenericStatsController {
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'orders_count' => array(
+			'orders_count'             => array(
 				'description' => __( 'Number of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'tax_codes'    => array(
+			'tax_codes'                => array(
 				'description' => __( 'Amount of tax codes.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),

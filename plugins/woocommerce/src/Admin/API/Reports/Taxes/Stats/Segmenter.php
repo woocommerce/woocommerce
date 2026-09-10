@@ -30,7 +30,18 @@ class Segmenter extends ReportsSegmenter {
 			'orders_count' => "COUNT(DISTINCT $lookup_table.order_id) as orders_count",
 		);
 
-		return $columns_mapping;
+		if ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+			$columns_mapping['reporting_missing_orders'] = $this->report_columns['reporting_missing_orders'];
+		}
+
+		/**
+		 * Filters tax segment expressions, including historical currency qualification.
+		 *
+		 * @since 11.2.0
+		 * @param array  $columns_mapping Metric names mapped to SELECT expressions.
+		 * @param string $lookup_table Tax lookup table.
+		 */
+		return apply_filters( 'woocommerce_analytics_taxes_segment_columns', $columns_mapping, $lookup_table );
 	}
 
 	/**

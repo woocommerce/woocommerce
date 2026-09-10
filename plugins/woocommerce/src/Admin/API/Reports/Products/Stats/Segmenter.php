@@ -32,7 +32,18 @@ class Segmenter extends ReportsSegmenter {
 			'variations_count' => "COUNT( DISTINCT $products_table.variation_id ) AS variations_count",
 		);
 
-		return $columns_mapping;
+		if ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+			$columns_mapping['reporting_missing_orders'] = $this->report_columns['reporting_missing_orders'];
+		}
+
+		/**
+		 * Filters product segment amounts and their currency qualification together.
+		 *
+		 * @since 11.2.0
+		 * @param array $columns_mapping Metric names mapped to SELECT expressions.
+		 * @param string $products_table Product lookup table name.
+		 */
+		return apply_filters( 'woocommerce_analytics_products_segment_columns', $columns_mapping, $products_table );
 	}
 
 	/**

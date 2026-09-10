@@ -3800,3 +3800,18 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 
 	return false;
 }
+
+/**
+ * Add explicit currency and basis fields without guessing legacy conversion.
+ *
+ * @return bool Whether the schema update must be retried.
+ * @since 11.2.0
+ */
+function wc_update_11203_add_reporting_currency_columns(): bool {
+	WC_Install::create_tables();
+	if ( ! \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::has_reporting_currency_columns( true ) ) {
+		return true;
+	}
+	wc_update_11201_invalidate_analytics_reports_cache();
+	return false;
+}

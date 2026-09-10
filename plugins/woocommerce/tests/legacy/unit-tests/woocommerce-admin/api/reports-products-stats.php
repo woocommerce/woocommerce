@@ -91,12 +91,13 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 
 		$expected_reports = array(
 			'totals'    => array(
-				'items_sold'       => 4,
-				'net_revenue'      => 100.0,
-				'orders_count'     => 1,
-				'products_count'   => 1,
-				'variations_count' => 1,
-				'segments'         => array(),
+				'items_sold'               => 4,
+				'net_revenue'              => 100.0,
+				'orders_count'             => 1,
+				'products_count'           => 1,
+				'variations_count'         => 1,
+				'segments'                 => array(),
+				'reporting_missing_orders' => 0,
 			),
 			'intervals' => array(
 				array(
@@ -106,12 +107,13 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 					'date_end'       => gmdate( 'Y-m-d 23:59:59', $time ),
 					'date_end_gmt'   => gmdate( 'Y-m-d 23:59:59', $time ),
 					'subtotals'      => (object) array(
-						'items_sold'       => 4,
-						'net_revenue'      => 100.0,
-						'orders_count'     => 1,
-						'products_count'   => 1,
-						'variations_count' => 1,
-						'segments'         => array(),
+						'items_sold'               => 4,
+						'net_revenue'              => 100.0,
+						'orders_count'             => 1,
+						'products_count'           => 1,
+						'variations_count'         => 1,
+						'segments'                 => array(),
+						'reporting_missing_orders' => 0,
 					),
 				),
 			),
@@ -161,12 +163,13 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals(
 			array(
-				'items_sold'       => 4,
-				'net_revenue'      => 100.0,
-				'orders_count'     => 1,
-				'products_count'   => 1,
-				'variations_count' => 1,
-				'segments'         => array(),
+				'items_sold'               => 4,
+				'net_revenue'              => 100.0,
+				'orders_count'             => 1,
+				'products_count'           => 1,
+				'variations_count'         => 1,
+				'segments'                 => array(),
+				'reporting_missing_orders' => 0,
 			),
 			$reports['totals'],
 			'Only the products matching the search should be aggregated'
@@ -211,12 +214,13 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals(
 			array(
-				'items_sold'       => 0,
-				'net_revenue'      => 0.0,
-				'orders_count'     => 0,
-				'products_count'   => 0,
-				'variations_count' => 0,
-				'segments'         => array(),
+				'items_sold'               => 0,
+				'net_revenue'              => 0.0,
+				'orders_count'             => 0,
+				'products_count'           => 0,
+				'variations_count'         => 0,
+				'segments'                 => array(),
+				'reporting_missing_orders' => 0,
 			),
 			$reports['totals'],
 			'A category holding no product leaves the search nothing to match'
@@ -423,11 +427,12 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'intervals', $properties );
 
 		$totals = $properties['totals']['properties'];
-		$this->assertEquals( 4, count( $totals ) );
+		$this->assertEquals( 5, count( $totals ) );
 		$this->assertArrayHasKey( 'net_revenue', $totals );
 		$this->assertArrayHasKey( 'items_sold', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
 		$this->assertArrayHasKey( 'segments', $totals );
+		$this->assertSame( 'integer', $totals['reporting_missing_orders']['type'] );
 
 		$intervals = $properties['intervals']['items']['properties'];
 		$this->assertEquals( 6, count( $intervals ) );
@@ -439,7 +444,7 @@ class WC_Admin_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subtotals', $intervals );
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
-		$this->assertEquals( 4, count( $subtotals ) );
+		$this->assertEquals( 5, count( $subtotals ) );
 		$this->assertArrayHasKey( 'net_revenue', $subtotals );
 		$this->assertArrayHasKey( 'items_sold', $subtotals );
 		$this->assertArrayHasKey( 'orders_count', $subtotals );

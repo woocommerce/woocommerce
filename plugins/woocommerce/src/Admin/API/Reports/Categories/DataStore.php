@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
@@ -56,11 +57,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'category_id'    => 'intval',
-		'items_sold'     => 'intval',
-		'net_revenue'    => 'floatval',
-		'orders_count'   => 'intval',
-		'products_count' => 'intval',
+		'reporting_missing_orders' => 'intval',
+		'category_id'              => 'intval',
+		'items_sold'               => 'intval',
+		'net_revenue'              => 'floatval',
+		'orders_count'             => 'intval',
+		'products_count'           => 'intval',
 	);
 
 	/**
@@ -85,6 +87,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'orders_count'   => "COUNT(DISTINCT {$table_name}.order_id) as orders_count",
 			'products_count' => "COUNT(DISTINCT {$table_name}.product_id) as products_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -116,6 +124,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$this->add_order_status_clause( $query_args, $order_product_lookup_table, $this->subquery );
+		if ( ! $this->get_status_subquery( $query_args ) && OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
+		}
 		$this->subquery->add_sql_clause( 'where', "AND {$wpdb->term_taxonomy}.taxonomy = 'product_cat'" );
 	}
 
@@ -238,6 +249,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
+		if ( isset( $this->report_columns['reporting_missing_orders'], $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], array( 'reporting_missing_orders' ) ) );
+		}
+
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();

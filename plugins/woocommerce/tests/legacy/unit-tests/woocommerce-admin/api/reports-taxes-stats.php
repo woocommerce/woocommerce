@@ -146,7 +146,8 @@ class WC_Admin_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 
 		$totals = $properties['totals']['properties'];
 
-		$this->assertEquals( 6, count( $totals ) );
+		$this->assertEquals( 7, count( $totals ) );
+		$this->assertSame( 'integer', $totals['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'order_tax', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
 		$this->assertArrayHasKey( 'shipping_tax', $totals );
@@ -164,7 +165,8 @@ class WC_Admin_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subtotals', $intervals );
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
-		$this->assertEquals( 6, count( $subtotals ) );
+		$this->assertEquals( 7, count( $subtotals ) );
+		$this->assertSame( 'integer', $subtotals['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'order_tax', $subtotals );
 		$this->assertArrayHasKey( 'orders_count', $subtotals );
 		$this->assertArrayHasKey( 'shipping_tax', $subtotals );

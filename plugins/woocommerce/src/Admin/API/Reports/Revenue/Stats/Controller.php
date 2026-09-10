@@ -119,75 +119,81 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 */
 	protected function get_item_properties_schema() {
 		return array(
-			'total_sales'    => array(
+			'reporting_missing_orders' => array(
+				'description' => __( 'Number of orders without amounts in the reporting currency. Monetary aggregates are unavailable when this is greater than zero.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'total_sales'              => array(
 				'description' => __( 'Total sales.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'net_revenue'    => array(
+			'net_revenue'              => array(
 				'description' => __( 'Net sales.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'coupons'        => array(
+			'coupons'                  => array(
 				'description' => __( 'Amount discounted by coupons.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'coupons_count'  => array(
+			'coupons_count'            => array(
 				'description' => __( 'Unique coupons count.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'format'      => 'currency',
 			),
-			'shipping'       => array(
+			'shipping'                 => array(
 				'title'       => __( 'Shipping', 'woocommerce' ),
 				'description' => __( 'Total of shipping.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'taxes'          => array(
+			'taxes'                    => array(
 				'description' => __( 'Total of taxes.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'format'      => 'currency',
 			),
-			'refunds'        => array(
+			'refunds'                  => array(
 				'title'       => __( 'Returns', 'woocommerce' ),
 				'description' => __( 'Total of returns.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'orders_count'   => array(
+			'orders_count'             => array(
 				'description' => __( 'Number of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'num_items_sold' => array(
+			'num_items_sold'           => array(
 				'description' => __( 'Items sold.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'gross_sales'    => array(
+			'gross_sales'              => array(
 				'description' => __( 'Gross sales.', 'woocommerce' ),
-				'type'        => 'number',
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
@@ -304,13 +310,13 @@ class Controller extends GenericStatsController implements ExportableInterface {
 		$export_item = array(
 			'date'         => $item['date_start'],
 			'orders_count' => $subtotals['orders_count'],
-			'gross_sales'  => self::csv_number_format( $subtotals['gross_sales'] ),
-			'refunds'      => self::csv_number_format( $subtotals['refunds'] ),
-			'coupons'      => self::csv_number_format( $subtotals['coupons'] ),
-			'net_revenue'  => self::csv_number_format( $subtotals['net_revenue'] ),
-			'taxes'        => self::csv_number_format( $subtotals['taxes'] ),
-			'shipping'     => self::csv_number_format( $subtotals['shipping'] ),
-			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
+			'gross_sales'  => null === $subtotals['gross_sales'] ? '' : self::csv_number_format( $subtotals['gross_sales'] ),
+			'refunds'      => null === $subtotals['refunds'] ? '' : self::csv_number_format( $subtotals['refunds'] ),
+			'coupons'      => null === $subtotals['coupons'] ? '' : self::csv_number_format( $subtotals['coupons'] ),
+			'net_revenue'  => null === $subtotals['net_revenue'] ? '' : self::csv_number_format( $subtotals['net_revenue'] ),
+			'taxes'        => null === $subtotals['taxes'] ? '' : self::csv_number_format( $subtotals['taxes'] ),
+			'shipping'     => null === $subtotals['shipping'] ? '' : self::csv_number_format( $subtotals['shipping'] ),
+			'total_sales'  => null === $subtotals['total_sales'] ? '' : self::csv_number_format( $subtotals['total_sales'] ),
 		);
 
 		/**

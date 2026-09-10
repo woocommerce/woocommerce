@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
@@ -18,6 +19,20 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
 
 	/**
+	 * Withhold a product breakdown whose historical coupon allocation is unknown.
+	 *
+	 * @param array $data Report values.
+	 * @return array Typed values, with unavailable amounts represented by null.
+	 */
+	protected function cast_numbers( $data ) {
+		$values = parent::cast_numbers( $data );
+		if ( ! empty( $values['allocation_missing_orders'] ) && array_key_exists( 'amount', $values ) ) {
+			$values['amount'] = null;
+		}
+		return $values;
+	}
+
+	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @override CouponsDataStore::$column_types
@@ -25,13 +40,15 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'     => 'strval',
-		'date_end'       => 'strval',
-		'date_start_gmt' => 'strval',
-		'date_end_gmt'   => 'strval',
-		'amount'         => 'floatval',
-		'coupons_count'  => 'intval',
-		'orders_count'   => 'intval',
+		'reporting_missing_orders'  => 'intval',
+		'allocation_missing_orders' => 'intval',
+		'date_start'                => 'strval',
+		'date_end'                  => 'strval',
+		'date_start_gmt'            => 'strval',
+		'date_end_gmt'              => 'strval',
+		'amount'                    => 'floatval',
+		'coupons_count'             => 'intval',
+		'orders_count'              => 'intval',
 	);
 
 	/**
@@ -73,6 +90,12 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 			'coupons_count' => 'COUNT(DISTINCT coupon_id) as coupons_count',
 			'orders_count'  => "COUNT(DISTINCT {$table_name}.order_id) as orders_count",
 		);
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$stats          = $wpdb->prefix . 'wc_order_stats';
+			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
+		}
 	}
 
 	/**
@@ -99,6 +122,10 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$clauses['join']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$clauses['where'] .= " AND ( {$order_status_filter} )";
+		}
+
+		if ( ! $order_status_filter && OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			$clauses['join'] .= " LEFT JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 		}
 
 		$this->add_time_period_sql_params( $query_args, $order_coupon_lookup_table );
@@ -152,6 +179,14 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		$table_name = self::get_db_table_name();
 
 		$this->initialize_queries();
+
+		if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$required_fields = array( 'allocation_missing_orders' );
+			if ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+				$required_fields[] = 'reporting_missing_orders';
+			}
+			$query_args['fields'] = array_unique( array_merge( $query_args['fields'], $required_fields ) );
+		}
 
 		$selections      = $this->selected_columns( $query_args );
 		$totals_query    = array();

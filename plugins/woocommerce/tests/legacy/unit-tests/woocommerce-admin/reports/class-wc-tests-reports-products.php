@@ -81,11 +81,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0, // $25 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0, // $25 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -158,18 +159,20 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product_2->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 80.0, // $20 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product_2->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 80.0, // $20 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 				1 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0, // $25 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0, // $25 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -190,18 +193,20 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0, // $25 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0, // $25 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 				1 => array(
-					'product_id'    => $product_2->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 80.0, // $20 * 4.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product_2->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 80.0, // $20 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -261,11 +266,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0, // $25 * 4.
-					'orders_count'  => 1,
-					'extended_info' => array(
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0, // $25 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => array(
 						'name'             => $product->get_name(),
 						'image'            => $product->get_image(),
 						'permalink'        => $product->get_permalink(),
@@ -342,11 +348,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0, // $25 * 4.
-					'orders_count'  => 1,
-					'extended_info' => array(
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0, // $25 * 4.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => array(
 						'name'             => $product->get_name(),
 						'image'            => $product->get_image(),
 						'permalink'        => $product->get_permalink(),
@@ -423,11 +430,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 3,
-					'net_revenue'   => 90.0, // $25 * 4 - $10 refund.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 3,
+					'net_revenue'              => 90.0, // $25 * 4 - $10 refund.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -544,11 +552,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 0,
-					'net_revenue'   => 0.0,
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 0,
+					'net_revenue'              => 0.0,
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -620,11 +629,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 0,
-					'net_revenue'   => 0.0, // $25 * 4 - $100 refund.
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 0,
+					'net_revenue'              => 0.0, // $25 * 4 - $100 refund.
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);
@@ -689,11 +699,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'page_no' => 1,
 			'data'    => array(
 				0 => array(
-					'product_id'    => $product->get_id(),
-					'items_sold'    => 4,
-					'net_revenue'   => 100.0,
-					'orders_count'  => 1,
-					'extended_info' => new ArrayObject(),
+					'product_id'               => $product->get_id(),
+					'items_sold'               => 4,
+					'net_revenue'              => 100.0,
+					'orders_count'             => 1,
+					'reporting_missing_orders' => 0,
+					'extended_info'            => new ArrayObject(),
 				),
 			),
 		);

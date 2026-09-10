@@ -93,16 +93,17 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		$query          = new OrdersStatsQuery( $args );
 		$expected_stats = $this->expected_stats_single_interval(
 			array(
-				'net_revenue'         => 68,
-				'avg_order_value'     => 80,
-				'orders_count'        => 1,
-				'avg_items_per_order' => 4,
-				'num_items_sold'      => 4,
-				'coupons'             => 20,
-				'coupons_count'       => 1,
-				'total_customers'     => 1,
-				'products'            => 1,
-				'segments'            => array(),
+				'reporting_missing_orders' => 0,
+				'net_revenue'              => 68,
+				'avg_order_value'          => 80,
+				'orders_count'             => 1,
+				'avg_items_per_order'      => 4,
+				'num_items_sold'           => 4,
+				'coupons'                  => 20,
+				'coupons_count'            => 1,
+				'total_customers'          => 1,
+				'products'                 => 1,
+				'segments'                 => array(),
 			),
 			$start_time,
 			$end_time

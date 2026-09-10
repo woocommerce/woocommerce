@@ -184,6 +184,12 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 		);
 
+		$schema['properties']['reporting_missing_orders'] = array(
+			'description' => __( 'Number of orders with missing historical currency data in this row.', 'woocommerce' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -262,9 +268,9 @@ class Controller extends GenericController implements ExportableInterface {
 				)
 			),
 			'rate'         => $item['tax_rate'],
-			'total_tax'    => self::csv_number_format( $item['total_tax'] ),
-			'order_tax'    => self::csv_number_format( $item['order_tax'] ),
-			'shipping_tax' => self::csv_number_format( $item['shipping_tax'] ),
+			'total_tax'    => ! empty( $item['reporting_missing_orders'] ) ? __( 'Unavailable', 'woocommerce' ) : self::csv_number_format( $item['total_tax'] ),
+			'order_tax'    => ! empty( $item['reporting_missing_orders'] ) ? __( 'Unavailable', 'woocommerce' ) : self::csv_number_format( $item['order_tax'] ),
+			'shipping_tax' => ! empty( $item['reporting_missing_orders'] ) ? __( 'Unavailable', 'woocommerce' ) : self::csv_number_format( $item['shipping_tax'] ),
 			'orders_count' => $item['orders_count'],
 		);
 

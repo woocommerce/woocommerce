@@ -362,6 +362,9 @@ class WC_Install {
 		'11.2.0-2' => array(
 			'wc_update_11202_reset_refund_returning_customer_markers',
 		),
+		'11.2.0-3' => array(
+			'wc_update_11203_add_reporting_currency_columns',
+		),
 	);
 
 	/**
@@ -1465,6 +1468,11 @@ class WC_Install {
 	tax_total double DEFAULT 0 NOT NULL,
 	shipping_total double DEFAULT 0 NOT NULL,
 	net_total double DEFAULT 0 NOT NULL,
+	reporting_currency varchar(10) DEFAULT '' NOT NULL,
+	reporting_basis varchar(32) DEFAULT '' NOT NULL,
+	reporting_exchange_rate double DEFAULT NULL,
+	source_currency varchar(10) DEFAULT '' NOT NULL,
+	source_net_total double DEFAULT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
 	customer_id bigint(20) unsigned NOT NULL" .

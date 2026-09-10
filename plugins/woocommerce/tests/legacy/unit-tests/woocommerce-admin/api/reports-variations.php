@@ -12,6 +12,98 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * Class WC_Admin_Tests_API_Reports_Variations
  */
 class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
+	/** Mixed currencies must not export an unqualified variation revenue sum. */
+	public function test_mixed_currency_variation_export(): void {
+		$previous_currency = get_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->product->get_id() );
+		$variation->set_regular_price( 25 );
+		$variation->set_sku( 'currency-variation-' . wp_generate_uuid4() );
+		$variation->save();
+		$orders = array();
+		try {
+			foreach ( array( 'EUR', 'GBP' ) as $currency ) {
+				$order    = wc_create_order();
+				$orders[] = $order;
+				$order->set_currency( $currency );
+				$order->add_product( $variation, 1 );
+				$order->calculate_totals();
+				$order->set_status( 'completed' );
+				$order->save();
+				\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+				\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+			}
+			wp_set_current_user( $this->user );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_param( 'products', array( $this->product->get_id() ) );
+			$request->set_param( 'extended_info', true );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$rows = $response->get_data();
+			$this->assertCount( 1, $rows );
+			$this->assertSame( $variation->get_id(), $rows[0]['variation_id'] );
+			$this->assertSame( 2, $rows[0]['items_sold'] );
+			$this->assertSame( 1, $rows[0]['reporting_missing_orders'] );
+			$export = ( new \Automattic\WooCommerce\Admin\API\Reports\Variations\Controller() )->prepare_item_for_export( $rows[0] );
+			$this->assertSame( 'Unavailable', $export['net_revenue'] );
+			$check_csv = function ( string $expected_amount, string $expected_count ) use ( $variation ) {
+				$exporter = new \Automattic\WooCommerce\Admin\ReportCSVExporter(
+					'variations',
+					array(
+						'products' => (string) $this->product->get_id(),
+						'orderby'  => 'items_sold',
+					)
+				);
+				$exporter->set_filename( 'wc-variations-currency-' . wp_generate_uuid4() );
+				$path = \Automattic\WooCommerce\Admin\ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+				try {
+					$exporter->generate_file();
+					$this->assertTrue( $exporter->export_file_exists() );
+					ob_start();
+					$exporter->stream_export_file();
+					$csv   = ob_get_clean();
+					$lines = array_map( 'str_getcsv', preg_split( '/\r?\n/', trim( $csv ) ) );
+					$this->assertCount( 2, $lines );
+					$this->assertSame( $this->product->get_name(), $lines[1][0] );
+					$this->assertSame( $variation->get_sku(), $lines[1][1] );
+					$this->assertSame( $expected_count, $lines[1][2] );
+					if ( 'Unavailable' === $expected_amount ) {
+						$this->assertSame( $expected_amount, $lines[1][3] );
+					} else {
+						$this->assertTrue( is_numeric( $lines[1][3] ) );
+						$this->assertEquals( (float) $expected_amount, (float) $lines[1][3] );
+					}
+				} finally {
+					wp_delete_file( $path );
+					wp_delete_file( $path . '.headers' );
+				}
+			};
+			$check_csv( 'Unavailable', '2' );
+			// A complete native-only cohort must recover its amount, not remain unavailable.
+			$orders[1]->set_status( 'cancelled' );
+			$orders[1]->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $orders[1]->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$rows = $response->get_data();
+			$this->assertCount( 1, $rows );
+			$this->assertSame( 0, $rows[0]['reporting_missing_orders'] );
+			$this->assertSame( 1, $rows[0]['items_sold'] );
+			$export = ( new \Automattic\WooCommerce\Admin\API\Reports\Variations\Controller() )->prepare_item_for_export( $rows[0] );
+			$this->assertEquals( 25.0, $export['net_revenue'] );
+			$check_csv( '25.0', '1' );
+		} finally {
+			foreach ( $orders as $order ) {
+				$order->delete( true );
+			}
+			$variation->delete( true );
+			update_option( 'woocommerce_currency', $previous_currency );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+		}
+	}
 
 	/**
 	 * Endpoints.
@@ -210,7 +302,8 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 6, count( $properties ) );
+		$this->assertEquals( 7, count( $properties ) );
+		$this->assertSame( 'integer', $properties['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'product_id', $properties );
 		$this->assertArrayHasKey( 'variation_id', $properties );
 		$this->assertArrayHasKey( 'items_sold', $properties );

@@ -24,11 +24,24 @@ class Segmenter extends ReportsSegmenter {
 	 * @return array Column => SELECT query mapping.
 	 */
 	protected function get_segment_selections_product_level( $products_table ) {
+		global $wpdb;
+		$coupons_table   = $wpdb->prefix . 'wc_order_coupon_lookup';
 		$columns_mapping = array(
-			'amount' => "SUM($products_table.coupon_amount) as amount",
+			'allocation_missing_orders' => "COUNT(DISTINCT CASE WHEN $coupons_table.matched_coupons < (SELECT COUNT(DISTINCT all_order_coupons.coupon_id) FROM $coupons_table AS all_order_coupons WHERE all_order_coupons.order_id = $coupons_table.order_id) THEN $coupons_table.order_id END) AS allocation_missing_orders",
+			'amount'                    => "SUM($products_table.coupon_amount) as amount",
 		);
 
-		return $columns_mapping;
+		if ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+			$columns_mapping['reporting_missing_orders'] = $this->report_columns['reporting_missing_orders'];
+		}
+		/**
+		 * Filters product-level coupon segment expressions and currency qualification.
+		 *
+		 * @since 11.2.0
+		 * @param array  $columns_mapping Metric names mapped to SELECT expressions.
+		 * @param string $products_table Product lookup table.
+		 */
+		return apply_filters( 'woocommerce_analytics_coupons_product_segment_columns', $columns_mapping, $products_table );
 	}
 
 	/**
@@ -68,7 +81,32 @@ class Segmenter extends ReportsSegmenter {
 			$columns_mapping = array_merge( $columns_mapping, $overrides );
 		}
 
-		return $columns_mapping;
+		if ( isset( $this->report_columns['reporting_missing_orders'] ) ) {
+			$columns_mapping['reporting_missing_orders'] = $this->report_columns['reporting_missing_orders'];
+		}
+		/**
+		 * Filters coupon-code segment expressions and currency qualification.
+		 *
+		 * @since 11.2.0
+		 * @param array $columns_mapping Metric names mapped to SELECT expressions.
+		 * @param string $coupons_lookup_table Coupon lookup table.
+		 */
+		return apply_filters( 'woocommerce_analytics_coupons_segment_columns', $columns_mapping, $coupons_lookup_table );
+	}
+
+	/**
+	 * Select matching orders once while retaining whether every coupon was selected.
+	 *
+	 * @param string $table_name Coupon lookup table.
+	 * @param array  $query Filtered report query clauses.
+	 * @return string Derived-table SQL.
+	 */
+	private function get_unique_coupon_orders_sql( $table_name, $query ) {
+		return "SELECT $table_name.order_id, MIN($table_name.date_created) AS date_created,
+			COUNT(DISTINCT $table_name.coupon_id) AS matched_coupons
+			FROM $table_name {$query['from_clause']}
+			WHERE 1=1 {$query['where_time_clause']} {$query['where_clause']}
+			GROUP BY $table_name.order_id";
 	}
 
 	/**
@@ -88,12 +126,11 @@ class Segmenter extends ReportsSegmenter {
 	protected function get_product_related_totals_segments( $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $totals_query, $unique_orders_table ) {
 		global $wpdb;
 
-		// Product-level numbers and order-level numbers can be fetched by the same query.
-		$segments_products = $wpdb->get_results(
+		// Coupon counts retain the coupon rows; monetary values use each order once.
+		$segments_orders = $wpdb->get_results(
 			"SELECT
 						$segmenting_groupby AS $segmenting_dimension_name
-						{$segmenting_selections['product_level']}
-						{$segmenting_selections['order_level']}
+												{$segmenting_selections['order_level']}
 					FROM
 						$table_name
 						$segmenting_from
@@ -108,7 +145,22 @@ class Segmenter extends ReportsSegmenter {
 			ARRAY_A
 		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
-		$totals_segments = $this->merge_segment_totals_results( $segmenting_dimension_name, $segments_products, array() );
+		$unique_orders = $this->get_unique_coupon_orders_sql( $table_name, $totals_query );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- These are SQL fragments from the report query builder, not raw request values.
+		$segments_products = $wpdb->get_results(
+			"SELECT
+				$segmenting_groupby AS $segmenting_dimension_name
+				{$segmenting_selections['product_level']}
+			FROM ($unique_orders) AS $table_name
+				$segmenting_from
+				{$totals_query['from_clause']}
+			WHERE 1=1 $segmenting_where
+			GROUP BY  $segmenting_groupby ",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cached by the containing report data store.
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$totals_segments = $this->merge_segment_totals_results( $segmenting_dimension_name, $segments_products, $segments_orders );
 		return $totals_segments;
 	}
 
@@ -134,13 +186,12 @@ class Segmenter extends ReportsSegmenter {
 		$orig_rowcount    = intval( $limit_parts[1] );
 		$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
 
-		// Product-level numbers and order-level numbers can be fetched by the same query.
-		$segments_products = $wpdb->get_results(
+		// Coupon counts retain the coupon rows; monetary values use each order once.
+		$segments_orders = $wpdb->get_results(
 			"SELECT
 						{$intervals_query['select_clause']} AS time_interval,
 						$segmenting_groupby AS $segmenting_dimension_name
-						{$segmenting_selections['product_level']}
-						{$segmenting_selections['order_level']}
+												{$segmenting_selections['order_level']}
 					FROM
 						$table_name
 						$segmenting_from
@@ -156,7 +207,22 @@ class Segmenter extends ReportsSegmenter {
 			ARRAY_A
 		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
-		$intervals_segments = $this->merge_segment_intervals_results( $segmenting_dimension_name, $segments_products, array() );
+		$unique_orders = $this->get_unique_coupon_orders_sql( $table_name, $intervals_query );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- These are SQL fragments from the report query builder, not raw request values.
+		$segments_products = $wpdb->get_results(
+			"SELECT {$intervals_query['select_clause']} AS time_interval,
+				$segmenting_groupby AS $segmenting_dimension_name
+				{$segmenting_selections['product_level']}
+			FROM ($unique_orders) AS $table_name
+				$segmenting_from
+				{$intervals_query['from_clause']}
+			WHERE 1=1 $segmenting_where
+			GROUP BY time_interval, $segmenting_groupby $segmenting_limit",
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cached by the containing report data store.
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$intervals_segments = $this->merge_segment_intervals_results( $segmenting_dimension_name, $segments_products, $segments_orders );
 		return $intervals_segments;
 	}
 
@@ -307,9 +373,13 @@ class Segmenter extends ReportsSegmenter {
 			$this->report_columns      = array_merge( $product_level_columns, $order_level_columns );
 			$segmenting_from           = "
 			INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)
-			LEFT JOIN {$wpdb->term_relationships} ON {$product_segmenting_table}.product_id = {$wpdb->term_relationships}.object_id
-			JOIN {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
-			LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->wc_category_lookup}.category_id
+			INNER JOIN (
+				SELECT DISTINCT {$wpdb->term_relationships}.object_id, {$wpdb->wc_category_lookup}.category_tree_id
+				FROM {$wpdb->term_relationships}
+				JOIN {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
+				JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->wc_category_lookup}.category_id
+				WHERE {$wpdb->term_taxonomy}.taxonomy = 'product_cat'
+			) AS {$wpdb->wc_category_lookup} ON {$product_segmenting_table}.product_id = {$wpdb->wc_category_lookup}.object_id
 			";
 			$segmenting_where          = " AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL";
 			$segmenting_groupby        = "{$wpdb->wc_category_lookup}.category_tree_id";

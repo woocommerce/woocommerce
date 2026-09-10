@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply Analytics order data filters after full-refund component calculations so currency conversions are preserved.

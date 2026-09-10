@@ -31,6 +31,27 @@ class Controller extends GenericStatsController {
 
 
 	/**
+	 * Validate the optional selector before the variation label lookup uses it.
+	 *
+	 * @param mixed           $value Parent IDs supplied by the client.
+	 * @param WP_REST_Request $request REST request.
+	 * @param string          $parameter Parameter name.
+	 * @return bool|\WP_Error Validation result.
+	 */
+	public function validate_variation_parent( $value, $request, $parameter ) {
+		$valid = rest_validate_request_arg( $value, $request, $parameter );
+		if ( is_wp_error( $valid ) || 'variation' !== $request['segmentby'] ) {
+			return $valid;
+		}
+		$parents = wp_parse_id_list( $value );
+		// The segmenter handles empty and ambiguous selectors with its existing error.
+		if ( 1 === count( $parents ) && ! wc_get_product( $parents[0] ) ) {
+			return new \WP_Error( 'rest_invalid_param', __( 'The parent product for the variation breakdown does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+		return true;
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -49,6 +70,9 @@ class Controller extends GenericStatsController {
 		$args['segmentby']           = $request['segmentby'];
 		$args['fields']              = $request['fields'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
+		if ( 'variation' === $request['segmentby'] ) {
+			$args['product_includes'] = (array) $request['product_includes'];
+		}
 
 		return $args;
 	}
@@ -98,21 +122,33 @@ class Controller extends GenericStatsController {
 	 */
 	protected function get_item_properties_schema() {
 		return array(
-			'amount'        => array(
-				'description' => __( 'Net discount amount.', 'woocommerce' ),
-				'type'        => 'number',
+			'allocation_missing_orders' => array(
+				'description' => __( 'Number of orders whose selected coupons cannot be historically allocated to this product breakdown.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'reporting_missing_orders'  => array(
+				'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'amount'                    => array(
+				'description' => __( 'Net discount amount. Null when the historical product allocation is unavailable.', 'woocommerce' ),
+				'type'        => array( 'number', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'coupons_count' => array(
+			'coupons_count'             => array(
 				'description' => __( 'Number of coupons.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'orders_count'  => array(
+			'orders_count'              => array(
 				'title'       => __( 'Discounted orders', 'woocommerce' ),
 				'description' => __( 'Number of discounted orders.', 'woocommerce' ),
 				'type'        => 'integer',
@@ -141,8 +177,8 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+		$params                     = parent::get_collection_params();
+		$params['orderby']['enum']  = $this->apply_custom_orderby_filters(
 			array(
 				'date',
 				'amount',
@@ -150,7 +186,7 @@ class Controller extends GenericStatsController {
 				'orders_count',
 			)
 		);
-		$params['coupons']         = array(
+		$params['coupons']          = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -159,7 +195,15 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby']       = array(
+		$params['product_includes'] = array(
+			'description'       => __( 'Parent product for a variation breakdown. Specify exactly one product ID when segmenting by variation.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array( 'type' => 'integer' ),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => array( $this, 'validate_variation_parent' ),
+		);
+		$params['segmentby']        = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(

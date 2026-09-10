@@ -11,6 +11,96 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * Class WC_Admin_Tests_API_Reports_Coupons
  */
 class WC_Admin_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
+	/** Coupon usage counts remain valid when the discount currencies cannot be combined. */
+	public function test_mixed_currency_coupon_export(): void {
+		$previous_currency = get_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'currency-' . wp_generate_uuid4() );
+		$orders  = array();
+		try {
+			foreach ( array( 'EUR', 'GBP' ) as $currency ) {
+				$order    = wc_create_order();
+				$orders[] = $order;
+				$order->set_currency( $currency );
+				$order->add_product( $product, 1 );
+				$this->assertTrue( $order->apply_coupon( $coupon ) );
+				$order->calculate_totals();
+				$order->set_status( 'completed' );
+				$order->save();
+				\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+				\Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_order_coupons( $order->get_id() );
+			}
+			wp_set_current_user( $this->user );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_param( 'coupons', array( $coupon->get_id() ) );
+			$request->set_param( 'extended_info', true );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$rows = $response->get_data();
+			$this->assertCount( 1, $rows );
+			$this->assertSame( $coupon->get_id(), $rows[0]['coupon_id'] );
+			$this->assertSame( 2, $rows[0]['orders_count'] );
+			$this->assertSame( 1, $rows[0]['reporting_missing_orders'] );
+			$export = ( new \Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller() )->prepare_item_for_export( $rows[0] );
+			$this->assertSame( 'Unavailable', $export['amount'] );
+			$check_csv = function ( string $expected_amount, string $expected_count ) use ( $coupon ) {
+				$exporter = new \Automattic\WooCommerce\Admin\ReportCSVExporter(
+					'coupons',
+					array(
+						'coupons' => (string) $coupon->get_id(),
+						'orderby' => 'orders_count',
+					)
+				);
+				$exporter->set_filename( 'wc-coupons-currency-' . wp_generate_uuid4() );
+				$path = \Automattic\WooCommerce\Admin\ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+				try {
+					$exporter->generate_file();
+					$this->assertTrue( $exporter->export_file_exists() );
+					ob_start();
+					$exporter->stream_export_file();
+					$csv   = ob_get_clean();
+					$lines = array_map( 'str_getcsv', preg_split( '/\r?\n/', trim( $csv ) ) );
+					$this->assertCount( 2, $lines );
+					$this->assertSame( $coupon->get_code(), $lines[1][0] );
+					$this->assertSame( $expected_count, $lines[1][1] );
+					if ( 'Unavailable' === $expected_amount ) {
+						$this->assertSame( $expected_amount, $lines[1][2] );
+					} else {
+						$this->assertTrue( is_numeric( $lines[1][2] ) );
+						$this->assertEquals( (float) $expected_amount, (float) $lines[1][2] );
+					}
+				} finally {
+					wp_delete_file( $path );
+					wp_delete_file( $path . '.headers' );
+				}
+			};
+			$check_csv( 'Unavailable', '2' );
+			// A complete native-only cohort must recover its amount, not remain unavailable.
+			$orders[1]->set_status( 'cancelled' );
+			$orders[1]->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $orders[1]->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$rows = $response->get_data();
+			$this->assertCount( 1, $rows );
+			$this->assertSame( 0, $rows[0]['reporting_missing_orders'] );
+			$this->assertSame( 1, $rows[0]['orders_count'] );
+			$export = ( new \Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller() )->prepare_item_for_export( $rows[0] );
+			$this->assertEquals( 1.0, $export['amount'] );
+			$check_csv( '1.0', '1' );
+		} finally {
+			foreach ( $orders as $order ) {
+				$order->delete( true );
+			}
+			$product->delete( true );
+			$coupon->delete( true );
+			update_option( 'woocommerce_currency', $previous_currency );
+			\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+		}
+	}
 
 	/**
 	 * Endpoints.
@@ -183,7 +273,8 @@ class WC_Admin_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 4, count( $properties ) );
+		$this->assertEquals( 5, count( $properties ) );
+		$this->assertSame( 'integer', $properties['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'coupon_id', $properties );
 		$this->assertArrayHasKey( 'amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
