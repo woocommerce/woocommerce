@@ -3237,9 +3237,9 @@ EOT;
 <!-- wp:woocommerce/empty-cart-block -->
 <div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
-<!-- wp:separator {"className":"is-style-dots"} -->
-<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
-<!-- /wp:separator -->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
