@@ -648,12 +648,17 @@ class PushTokensDataStore {
 			$insert_ids = array_values( array_diff( $ids, $existing ) );
 
 			if ( ! empty( $update_ids ) ) {
+				// Advance-only. Each request captures its timestamp when it
+				// dispatches and writes it on shutdown, so a slow request can
+				// reach this after a later one has already written a newer
+				// value. `Y-m-d H:i:s` compares lexicographically in date
+				// order, and a zero-row match returns 0 rather than false.
 				$update = $wpdb->prepare(
 					sprintf(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND post_id IN ( %s )",
+						"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND meta_value < %%s AND post_id IN ( %s )",
 						implode( ', ', array_fill( 0, count( $update_ids ), '%d' ) )
 					),
-					array_merge( array( $timestamp, self::LAST_SENT_AT_META_KEY ), $update_ids )
+					array_merge( array( $timestamp, self::LAST_SENT_AT_META_KEY, $timestamp ), $update_ids )
 				);
 
 				if ( ! is_string( $update ) || '' === $update ) {

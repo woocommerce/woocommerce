@@ -1065,6 +1065,27 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests an older stamp does not replace a newer one.
+	 *
+	 * Each request captures its timestamp when it dispatches and writes it on
+	 * shutdown, so a slow request can reach the update after a later one has
+	 * already written a newer value. The update is advance-only so the field
+	 * cannot go backwards.
+	 */
+	public function test_an_older_stamp_does_not_replace_a_newer_one() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+		$newer      = gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS );
+
+		update_post_meta( $push_token->get_id(), PushTokensDataStore::LAST_SENT_AT_META_KEY, $newer );
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$this->assertSame( $newer, $data_store->read( $push_token->get_id() )->get_last_sent_at_gmt() );
+	}
+
+	/**
 	 * @testdox Tests recording a send leaves the rest of the token record untouched.
 	 */
 	public function test_record_last_sent_at_does_not_disturb_other_token_data() {
