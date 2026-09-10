@@ -268,12 +268,15 @@ final class BlockTypesController {
 				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
-		// The heading markup here must stay in step with the cross-sells Product Collection block in
-		// WC_Install::get_cart_block_content(); the pattern replaces markup that block used to inline.
-		// The literal '…' matches the blocks JS defaults, so every path that renders this heading uses
-		// one msgid. The classic template still uses the '&hellip;' spelling, which is a separate string;
-		// bg_BG, mk_MK and th have translated only that one, so they render this heading in English until
-		// they translate the literal form — the same as they already do for a merchant-inserted block.
+		// This heading is what a merchant sees above the cart cross-sells, so it has to match what the
+		// editor inserts: the same markup and the same string as the heading in
+		// client/blocks/assets/js/blocks/product-collection/collections/cross-sells.tsx. The installed
+		// Cart page only stores this pattern's slug, so this content is the single definition of it.
+		//
+		// The literal '…' is that shared msgid. The classic template templates/cart/cross-sells.php uses
+		// the '&hellip;' spelling, which gettext treats as a separate string; bg_BG, mk_MK and th have
+		// translated only that one, so they render this heading in English until they translate the
+		// literal form — as they already do for an editor-inserted cross-sells block.
 		register_block_pattern(
 			'woocommerce/cart-cross-sells-message',
 			array(

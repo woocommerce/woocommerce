@@ -849,4 +849,76 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The rendered cross-sells heading should keep the bottom margin the installer previously inlined.'
 		);
 	}
+
+	/**
+	 * The point of the fix, asserted directly: the heading comes from the translation layer on each
+	 * request instead of the copy the installer used to freeze into post_content.
+	 *
+	 * The pattern resolves its own string when it registers, not when it renders, so a plain
+	 * switch_to_locale() here would prove nothing — the registry already holds the finished content.
+	 * Re-registering under the filter is what stands in for a request served in another language.
+	 *
+	 * @testdox Should take the cross-sells heading from the active translation rather than a frozen string.
+	 */
+	public function test_cart_cross_sells_heading_follows_the_active_translation(): void {
+		$slug      = 'woocommerce/cart-cross-sells-message';
+		$reference = '<!-- wp:pattern {"slug":"' . $slug . '"} /-->';
+		$sentinel  = 'PSEUDO_TRANSLATED_CROSS_SELLS_HEADING';
+
+		$translate = static function ( $translation, $text, $domain ) use ( $sentinel ) {
+			return ( 'woocommerce' === $domain && 'You may be interested in…' === $text ) ? $sentinel : $translation;
+		};
+
+		add_filter( 'gettext', $translate, 10, 3 );
+		$this->reregister_block_patterns();
+		$translated = do_blocks( $reference );
+		remove_filter( 'gettext', $translate, 10 );
+
+		// Leave the registry as this test found it, for anything that renders the pattern later.
+		$this->reregister_block_patterns();
+		$untranslated = do_blocks( $reference );
+
+		$this->assertStringContainsString(
+			$sentinel,
+			$translated,
+			'The heading should come from the translation layer, so a translated site renders translated copy.'
+		);
+		$this->assertStringNotContainsString(
+			'You may be interested in',
+			$translated,
+			'The English copy must not survive alongside the translation; that would mean it is frozen somewhere.'
+		);
+		$this->assertStringContainsString(
+			'You may be interested in…',
+			$untranslated,
+			'Dropping the translation should fall back to the English source string.'
+		);
+	}
+
+	/**
+	 * Re-runs the real registration so the test exercises the pattern content BlockTypesController
+	 * ships, rather than a copy of it that could drift. Everything that method registers has to be
+	 * dropped first, since re-registering a live pattern is an incorrect usage. If the method gains a
+	 * pattern, this list needs it too — the omission shows up as a doing_it_wrong failure.
+	 */
+	private function reregister_block_patterns(): void {
+		$slugs = array(
+			'woocommerce/order-confirmation-totals-heading',
+			'woocommerce/order-confirmation-downloads-heading',
+			'woocommerce/order-confirmation-shipping-heading',
+			'woocommerce/order-confirmation-billing-heading',
+			'woocommerce/cart-empty-message',
+			'woocommerce/cart-new-in-store-message',
+			'woocommerce/cart-cross-sells-message',
+		);
+
+		$registry = WP_Block_Patterns_Registry::get_instance();
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
+		}
+
+		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
+	}
 }
