@@ -634,6 +634,59 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Deleting order items should leave the item rows in place when the item meta deletion fails.
+	 */
+	public function test_delete_items_keeps_items_when_itemmeta_deletion_fails() {
+		global $wpdb;
+
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$count_items    = fn() => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$count_itemmeta = fn() => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items AS items ON itemmeta.order_item_id = items.order_item_id WHERE items.order_id = %d", $order_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$items_before    = $count_items();
+		$itemmeta_before = $count_itemmeta();
+		$this->assertGreaterThan( 0, $items_before, 'The order should start out with item rows.' );
+		$this->assertGreaterThan( 0, $itemmeta_before, 'The order should start out with item meta rows.' );
+
+		// Point the item meta DELETE at a table that does not exist, so that it fails the way a database error would.
+		$break_itemmeta_delete = function ( $query ) use ( $wpdb ) {
+			if ( 0 === strpos( $query, 'DELETE itemmeta' ) ) {
+				return "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta_missing WHERE order_item_id = 0";
+			}
+
+			return $query;
+		};
+
+		$logged_errors = array();
+		$logger        = $this->getMockBuilder( WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willReturnCallback(
+			function ( $message ) use ( &$logged_errors ) {
+				$logged_errors[] = $message;
+			}
+		);
+		$logger_filter = fn() => $logger;
+
+		add_filter( 'query', $break_itemmeta_delete );
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+		$previously_suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$order->get_data_store()->delete_items( $order );
+		} finally {
+			$wpdb->suppress_errors( $previously_suppressed );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			remove_filter( 'query', $break_itemmeta_delete );
+		}
+
+		$this->assertSame( $items_before, $count_items(), 'Order item rows should survive a failed item meta deletion.' );
+		$this->assertSame( $itemmeta_before, $count_itemmeta(), 'Order item meta rows should survive a failed item meta deletion.' );
+		$this->assertNotEmpty( $logged_errors, 'The failed item meta deletion should be logged as an error.' );
+		$this->assertStringContainsString( "order {$order_id}", $logged_errors[0], 'The logged error should name the order.' );
+	}
+
+	/**
 	 * @testDox Creating an order with a draft status should not trigger the "woocommerce_new_order" action.
 	 */
 	public function test_create_draft_order_doesnt_trigger_hook() {
