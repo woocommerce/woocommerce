@@ -730,7 +730,7 @@ class MiniCart extends AbstractBlock {
 			array(
 				'title'    => __( 'Empty Mini-Cart Message', 'woocommerce' ),
 				'inserter' => false,
-				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your shopping cart is empty', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . __( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
