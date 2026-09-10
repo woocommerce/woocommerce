@@ -1729,6 +1729,38 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should set variation sale prices from their regular prices.
+	 * @testWith ["100", "10", "", "90"]
+	 *           ["100", "10%", "", "90"]
+	 *           ["100.55", "10.25", "", "90.3"]
+	 *           ["100.55", "10.5%", "", "89.99"]
+	 *           ["45", "23.5%", "", "34.43"]
+	 *           ["5", "10", "", "0"]
+	 *           ["", "10%", "", ""]
+	 *           ["100", "invalid", "25", "25"]
+	 *           ["100", "-10", "25", "25"]
+	 *
+	 * @param string $regular_price Regular price.
+	 * @param string $adjustment Price adjustment.
+	 * @param string $sale_price Existing sale price.
+	 * @param string $expected_sale_price Expected sale price.
+	 */
+	public function test_bulk_sale_price_from_regular_price( string $regular_price, string $adjustment, string $sale_price, string $expected_sale_price ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_price_from_regular_price' );
+		$method->setAccessible( true );
+		$method->invokeArgs( null, array( array( $variation->get_id() ), array( 'value' => $adjustment ) ) );
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $expected_sale_price, $variation->get_sale_price( 'edit' ), 'The sale price should be calculated from the regular price.' );
+	}
+
+	/**
 	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
 	 */
 	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {

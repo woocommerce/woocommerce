@@ -1277,6 +1277,7 @@ jQuery( function ( $ ) {
 					break;
 				case 'variable_regular_price_increase':
 				case 'variable_regular_price_decrease':
+				case 'variable_sale_price_from_regular_price':
 				case 'variable_sale_price_increase':
 				case 'variable_sale_price_decrease':
 					let promptMessage =

@@ -66,17 +66,17 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * Ensure that a DB version callback is defined when there are updates.
 	 */
 	public function test_db_update_callbacks_exist() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
 		$all_callbacks = \WC_Install::get_db_update_callbacks();
 
 		foreach ( $all_callbacks as $version => $version_callbacks ) {
 			// Verify all callbacks have been defined.
 			foreach ( $version_callbacks as $version_callback ) {
-				if ( strpos( $version_callback, 'wc_admin_update' ) === 0 ) {
-					$this->assertTrue(
-						function_exists( $version_callback ),
-						"Callback {$version_callback}() is not defined."
-					);
-				}
+				$this->assertTrue(
+					function_exists( $version_callback ),
+					"Callback {$version_callback}() is not defined."
+				);
 			}
 		}
 	}
