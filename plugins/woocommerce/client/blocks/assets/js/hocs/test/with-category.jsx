@@ -132,6 +132,16 @@ describe( 'withCategory Component', () => {
 
 			expect( getCategory ).toHaveBeenLastCalledWith( 7 );
 		} );
+
+		it( 'does not load a product category from a different taxonomy', async () => {
+			mockUtils.getCategory.mockClear();
+			await renderComponent( {
+				attributes: { source: 'context' },
+				context: { termId: 42, taxonomy: 'category' },
+			} );
+			expect( mockUtils.getCategory ).not.toHaveBeenCalled();
+			expect( lastProps.category ).toBeNull();
+		} );
 	} );
 
 	describe( 'when the API returns an error', () => {

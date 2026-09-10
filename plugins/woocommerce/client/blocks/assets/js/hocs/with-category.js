@@ -53,8 +53,7 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 			const taxonomy =
 				props.context?.termTaxonomy || props.context?.taxonomy;
 			const shouldUseContext =
-				source === 'context' ||
-				( ! source && taxonomy === 'product_cat' );
+				source !== 'selected' && taxonomy === 'product_cat';
 
 			return shouldUseContext ? props.context?.termId : undefined;
 		}
