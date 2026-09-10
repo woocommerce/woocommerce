@@ -1614,12 +1614,8 @@ class SettingsUISchema {
 	 * @return array|null
 	 */
 	private static function get_field_visibility( array $setting, ?string $visibility_controller ): ?array {
-		$class_names = isset( $setting['class'] ) && is_string( $setting['class'] ) ? explode( ' ', $setting['class'] ) : array();
-		if ( in_array( 'manage_stock_field', $class_names, true ) ) {
-			return array(
-				'controller' => 'woocommerce_manage_stock',
-				'value'      => true,
-			);
+		if ( array_key_exists( 'visible_when', $setting ) ) {
+			return self::get_declared_field_visibility( $setting );
 		}
 
 		if ( 'yes' === ( $setting['show_if_checked'] ?? null ) && $visibility_controller ) {
@@ -1630,6 +1626,60 @@ class SettingsUISchema {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Read a field's declared visibility rule.
+	 *
+	 * A field states which other field reveals it, and at which value:
+	 *
+	 *     'visible_when' => array( 'field' => 'woocommerce_manage_stock', 'value' => true )
+	 *
+	 * The value may be a list, in which case any of its entries reveals the
+	 * field. The classic renderer ignores this key and keeps its own jQuery
+	 * rules, so the same relationship is expressed in both places for as long
+	 * as both renderers ship.
+	 *
+	 * Declaring the key states intent, so a malformed rule fails the schema
+	 * rather than silently leaving the field permanently visible.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return array{controller: string, value: mixed}
+	 * @throws \InvalidArgumentException When the declared rule is malformed.
+	 */
+	private static function get_declared_field_visibility( array $setting ): array {
+		$rule = $setting['visible_when'];
+		if ( ! is_array( $rule ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must be an array.', self::describe_field_id( $setting ) ) );
+		}
+
+		$controller = $rule['field'] ?? null;
+		if ( ! is_string( $controller ) || '' === $controller ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when field must be a non-empty string.', self::describe_field_id( $setting ) ) );
+		}
+
+		if ( ! array_key_exists( 'value', $rule ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must declare a value.', self::describe_field_id( $setting ) ) );
+		}
+
+		return array(
+			'controller' => $controller,
+			'value'      => $rule['value'],
+		);
+	}
+
+	/**
+	 * Describe a legacy field for an error message.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return string
+	 */
+	private static function describe_field_id( array $setting ): string {
+		$id = $setting['id'] ?? null;
+
+		return is_scalar( $id ) && '' !== (string) $id ? (string) $id : '(unknown)';
 	}
 
 	/**

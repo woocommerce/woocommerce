@@ -271,6 +271,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'           => '60',
 					'autoload'          => false,
 					'class'             => 'manage_stock_field',
+					'visible_when'      => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
@@ -282,6 +286,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'checkboxgroup' => 'start',
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
+					'visible_when'  => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
@@ -292,6 +300,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'checkboxgroup' => '',
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
+					'visible_when'  => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
@@ -302,18 +314,26 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'checkboxgroup' => 'end',
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
+					'visible_when'  => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
-					'title'    => __( 'Notification recipient(s)', 'woocommerce' ),
-					'desc'     => __( 'Enter recipients (comma separated) that will receive this notification.', 'woocommerce' ),
-					'id'       => 'woocommerce_stock_email_recipient',
-					'type'     => 'text',
-					'default'  => get_option( 'admin_email' ),
-					'css'      => 'width: 250px;',
-					'autoload' => false,
-					'desc_tip' => true,
-					'class'    => 'manage_stock_field',
+					'title'        => __( 'Notification recipient(s)', 'woocommerce' ),
+					'desc'         => __( 'Enter recipients (comma separated) that will receive this notification.', 'woocommerce' ),
+					'id'           => 'woocommerce_stock_email_recipient',
+					'type'         => 'text',
+					'default'      => get_option( 'admin_email' ),
+					'css'          => 'width: 250px;',
+					'autoload'     => false,
+					'desc_tip'     => true,
+					'class'        => 'manage_stock_field',
+					'visible_when' => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
@@ -330,6 +350,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'autoload'          => false,
 					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
+					'visible_when'      => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(
@@ -345,6 +369,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'default'           => '0',
 					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
+					'visible_when'      => array(
+						'field' => 'woocommerce_manage_stock',
+						'value' => true,
+					),
 				),
 
 				array(

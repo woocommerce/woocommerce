@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a visible_when settings key so a field can declare which other field reveals it, and use it for the Products inventory stock-management rules.
