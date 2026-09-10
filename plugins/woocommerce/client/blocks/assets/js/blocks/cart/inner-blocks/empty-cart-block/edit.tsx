@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
@@ -16,42 +16,51 @@ import {
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
 
-const browseStoreTemplate = SHOP_URL
+const returnToShopTemplate = SHOP_URL
 	? [
-			'core/paragraph',
-			{
-				align: 'center',
-				content: sprintf(
-					/* translators: %s is the link to the store product directory. */
-					__( '<a href="%s">Browse store</a>', 'woocommerce' ),
-					SHOP_URL
-				),
-				dropCap: false,
-			},
+			'core/buttons',
+			{ layout: { type: 'flex', justifyContent: 'center' } },
+			[
+				[
+					'core/button',
+					{
+						text: __( 'Return to shop', 'woocommerce' ),
+						url: SHOP_URL,
+					},
+				],
+			],
 	  ]
 	: null;
+
+// Recent WordPress versions center headings through the typography support and no longer
+// have a textAlign attribute; older ones only know textAlign. Unknown attributes are dropped
+// on insert, so passing both keeps the heading centered on every supported version.
+const centeredHeading = {
+	textAlign: 'center',
+	style: { typography: { textAlign: 'center' } },
+};
 
 const defaultTemplate = [
 	[
 		'core/heading',
 		{
-			textAlign: 'center',
-			content: __( 'Your cart is currently empty!', 'woocommerce' ),
+			...centeredHeading,
+			content: __( 'Your cart is empty', 'woocommerce' ),
 			level: 2,
-			className: 'with-empty-cart-icon wc-block-cart__empty-cart__title',
+			className: 'wc-block-cart__empty-cart__title',
 		},
 	],
-	browseStoreTemplate,
+	returnToShopTemplate,
 	[
-		'core/separator',
+		'core/spacer',
 		{
-			className: 'is-style-dots',
+			height: '40px',
 		},
 	],
 	[
 		'core/heading',
 		{
-			textAlign: 'center',
+			...centeredHeading,
 			content: __( 'New in store', 'woocommerce' ),
 			level: 2,
 		},
