@@ -66583,18 +66583,6 @@ parameters:
 			path: src/Internal/StockNotifications/Frontend/SignupService.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Frontend\\SignupService\:\:is_already_signed_up\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
-			message: '#^Parameter \#1 \$notification_id of static method Automattic\\WooCommerce\\Internal\\StockNotifications\\Factory\:\:get_notification\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
