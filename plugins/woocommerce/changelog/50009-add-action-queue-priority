@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add WC_Queue_Priority_Interface so WC()->queue() can schedule Action Scheduler actions at a given priority.
