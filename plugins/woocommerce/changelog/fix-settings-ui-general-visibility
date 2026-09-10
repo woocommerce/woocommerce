@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide the General settings country pickers unless the matching selling or shipping location is chosen, restoring the classic conditional behavior in the experimental Settings UI.
