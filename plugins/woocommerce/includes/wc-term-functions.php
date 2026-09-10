@@ -80,6 +80,39 @@ function wc_change_pre_get_terms( $terms_query ) {
 	}
 
 	if ( ! empty( $args['force_menu_order_sort'] ) ) {
+		// Sorting by menu order claims the primary meta clause for the 'order' meta key, so move any meta
+		// filter the caller asked for into meta_query, where it still applies as an additional clause.
+		$caller_meta_clause = array();
+
+		foreach ( array(
+			'key'         => 'meta_key',
+			'compare'     => 'meta_compare',
+			'type'        => 'meta_type',
+			'compare_key' => 'meta_compare_key',
+			'type_key'    => 'meta_type_key',
+		) as $clause_key => $query_var ) {
+			if ( ! empty( $args[ $query_var ] ) ) {
+				$caller_meta_clause[ $clause_key ] = $args[ $query_var ];
+				$args[ $query_var ]                = '';
+			}
+		}
+
+		// Matches how WP_Meta_Query::parse_query_vars() decides that a meta value was supplied.
+		if ( isset( $args['meta_value'] ) && '' !== $args['meta_value'] && ( ! is_array( $args['meta_value'] ) || $args['meta_value'] ) ) {
+			$caller_meta_clause['value'] = $args['meta_value'];
+			$args['meta_value']          = ''; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		}
+
+		if ( ! empty( $caller_meta_clause ) ) {
+			$args['meta_query'] = empty( $args['meta_query'] ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				? array( $caller_meta_clause )
+				: array(
+					'relation' => 'AND',
+					$caller_meta_clause,
+					$args['meta_query'],
+				);
+		}
+
 		$args['orderby']  = 'meta_value_num';
 		$args['meta_key'] = 'order'; // phpcs:ignore
 		$terms_query->meta_query->parse_query_vars( $args );
