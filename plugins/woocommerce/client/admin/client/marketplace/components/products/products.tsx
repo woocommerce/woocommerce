@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useContext } from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
@@ -69,7 +69,7 @@ export default function Products( props: ProductsProps ) {
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 
 	const containerClassName = clsx( baseContainerClass + labelForClassName );
-	const viewAllButonClassName = clsx(
+	const viewAllButtonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
 	);
@@ -79,6 +79,7 @@ export default function Products( props: ProductsProps ) {
 	const showQualityBadgeFilter = props.type === ProductType.extension;
 	const hasNoResults = ! isLoading && products.length === 0;
 	const showCategorySelector = Boolean( props.categorySelector );
+	const searchTerm = props.searchTerm?.trim() ?? '';
 
 	// The sub-header stays mounted across the loading/empty/loaded states so
 	// the filter toggle keeps keyboard focus while toggling triggers a refetch.
@@ -115,6 +116,15 @@ export default function Products( props: ProductsProps ) {
 
 	return (
 		<div className={ containerClassName }>
+			{ searchTerm && (
+				<h2 className="woocommerce-marketplace__search-results-heading">
+					{ sprintf(
+						/* translators: %s: the search term the merchant entered. */
+						__( 'Results for “%s”', 'woocommerce' ),
+						searchTerm
+					) }
+				</h2>
+			) }
 			{ subHeader }
 			{ isLoading && (
 				<ProductLoader hasTitle={ false } type={ props.type } />
@@ -147,7 +157,7 @@ export default function Products( props: ProductsProps ) {
 					<span key="wp-theme-directory-copy">
 						{ createInterpolateElement(
 							__(
-								' Browse the <a>WordPress.org theme directory</a> to discover more.',
+								'Browse the <a>WordPress.org theme directory</a> to discover more.',
 								'woocommerce'
 							),
 							{
@@ -168,7 +178,7 @@ export default function Products( props: ProductsProps ) {
 			) }
 			{ ! isLoading && ! hasNoResults && showAllButton && (
 				<Button
-					className={ viewAllButonClassName }
+					className={ viewAllButtonClassName }
 					variant="secondary"
 					text={ __( 'View all', 'woocommerce' ) }
 					onClick={ () => showSection( props.type ) }

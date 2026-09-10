@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cap variable product prices transient size.

@@ -44,7 +44,7 @@ class PaymentsExtensionSuggestions {
 	const AFTERPAY          = 'afterpay';
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
-	const KLARNA_CHECKOUT   = 'klarna_checkout';
+	const KUSTOM_CHECKOUT   = 'kustom_checkout';
 	const HELCIM            = 'helcim';
 	const KOMOJU            = 'komoju';
 	const HELIOPAY          = 'heliopay';
@@ -103,6 +103,15 @@ class PaymentsExtensionSuggestions {
 	 * @var array|null
 	 */
 	private ?array $extensions_base_details_memo = null;
+
+	/**
+	 * The memoized processed country extensions to avoid rebuilding the list multiple times during a request.
+	 *
+	 * Keyed by user, country code, and context. Cleared via clear_cache().
+	 *
+	 * @var array
+	 */
+	private array $country_extensions_memo = array();
 
 	/**
 	 * The payment extension list for each country.
@@ -180,7 +189,6 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -217,7 +225,6 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
-			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
@@ -237,7 +244,7 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::SQUARE          => array(
+			self::SQUARE => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -255,24 +262,11 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::AFFIRM          => array(
+			self::AFFIRM => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -287,7 +281,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::CLEARPAY,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -349,7 +343,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -359,24 +353,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/at/verkaeufer/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/at/agb/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -530,7 +511,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -540,24 +521,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/dk/erhverv/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/dk/vilkar/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -598,7 +566,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::VIVA_WALLET,
 			self::PAYTRAIL,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -608,22 +576,9 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/fi/yritys/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/fi/ehdot/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::PAYPAL_WALLET,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -726,7 +681,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 			self::AIRWALLEX,
 			self::VIVA_WALLET,
-			self::GOCARDLESS      => array(
+			self::GOCARDLESS => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -736,24 +691,11 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/de/verkaeufer/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/de/agb/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA     => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1011,23 +953,10 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/nl/zakelijk/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1055,23 +984,10 @@ class PaymentsExtensionSuggestions {
 			self::STRIPE,
 			self::MOLLIE,
 			self::VISA,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/no/bedrift/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/no/vilkar/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
-			self::KLARNA          => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1270,20 +1186,7 @@ class PaymentsExtensionSuggestions {
 			self::MOLLIE,
 			self::VISA,
 			self::VIVA_WALLET,
-			self::KLARNA_CHECKOUT => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-							'url'   => 'https://www.klarna.com/international/enterprise/',
-						),
-						array(
-							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-							'url'   => 'https://www.klarna.com/se/villkor/',
-						),
-					),
-				),
-			),
+			self::KUSTOM_CHECKOUT,
 			self::NEXI_CHECKOUT,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
@@ -2972,6 +2875,8 @@ class PaymentsExtensionSuggestions {
 	/**
 	 * Get the list of payment extensions details for a specific country.
 	 *
+	 * The list is memoized per user, country, and context for the duration of the request. Use clear_cache() to force a rebuild.
+	 *
 	 * @param string $country_code The two-letter country code.
 	 * @param string $context      Optional. The context ID of where these extensions are being used.
 	 *
@@ -2982,10 +2887,17 @@ class PaymentsExtensionSuggestions {
 	public function get_country_extensions( string $country_code, string $context = '' ): array {
 		$country_code = strtoupper( $country_code );
 
+		// Key on the user since incentive visibility and dismissals are user-specific.
+		$memo_key = get_current_user_id() . '__' . $country_code . '__' . $context;
+		if ( isset( $this->country_extensions_memo[ $memo_key ] ) ) {
+			return $this->country_extensions_memo[ $memo_key ];
+		}
+
 		if ( empty( $this->country_extensions[ $country_code ] ) ||
 			! is_array( $this->country_extensions[ $country_code ] ) ) {
 
-			return array();
+			$this->country_extensions_memo[ $memo_key ] = array();
+			return $this->country_extensions_memo[ $memo_key ];
 		}
 
 		// Process the extensions.
@@ -3033,6 +2945,8 @@ class PaymentsExtensionSuggestions {
 
 			$processed_extensions[] = $this->standardize_extension_details( $extension_details );
 		}
+
+		$this->country_extensions_memo[ $memo_key ] = $processed_extensions;
 
 		return $processed_extensions;
 	}
@@ -3119,6 +3033,24 @@ class PaymentsExtensionSuggestions {
 	 */
 	public function dismiss_incentive( string $incentive_id, string $suggestion_id, string $context = 'all' ): bool {
 		return $this->suggestion_incentives->dismiss_incentive( $incentive_id, $suggestion_id, $context );
+	}
+
+	/**
+	 * Clear the cached extension suggestions data.
+	 *
+	 * Call after changing store state that influences the suggestions list during a request.
+	 * Also useful for testing purposes.
+	 *
+	 * This only clears this class's memos, not the incentives provider's own caches.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->country_extensions_memo      = array();
+		$this->extensions_base_details_memo = null;
 	}
 
 	/**
@@ -4100,35 +4032,31 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::KLARNA_CHECKOUT   => array(
+			self::KUSTOM_CHECKOUT   => array(
 				'_type'       => self::TYPE_PSP,
-				'title'       => esc_html__( 'Klarna Checkout', 'woocommerce' ),
+				'title'       => esc_html__( 'Kustom Checkout', 'woocommerce' ),
 				'description' => esc_html__( 'A full checkout experience embedded on your site that includes all popular payment methods (Pay Now, Pay Later, Financing, Installments).', 'woocommerce' ),
-				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna-checkout.svg', WC_PLUGIN_FILE ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/kustom-checkout.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'klarna-checkout-for-woocommerce',
 				),
 				'links'       => array(
 					array(
-						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
-						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
-					),
-					array(
 						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
-						'url'   => 'https://woocommerce.com/products/klarna-checkout/',
+						'url'   => 'https://woocommerce.com/products/kustom-checkout/',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
-						'url'   => 'https://www.klarna.com/us/legal/',
+						'url'   => 'https://www.kustom.co/legal',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/klarna-checkout/',
+						'url'   => 'https://woocommerce.com/document/kustom-checkout/',
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
-						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=kustom-checkout',
 					),
 				),
 			),

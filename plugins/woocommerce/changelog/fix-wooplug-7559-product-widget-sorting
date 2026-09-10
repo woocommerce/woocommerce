@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Sort the products widget by sales and the top rated products widget by rating through the product lookup table instead of post meta.

@@ -505,7 +505,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		}
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
-		echo $this->get_admin_options_html(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		echo $this->get_admin_options_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Returns the extensible settings renderer's markup.
 	}
 
 	/**
