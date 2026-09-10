@@ -722,6 +722,56 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The downloads data reports an installed theme's file ID and version too.
+	 */
+	public function test_downloads_data_reports_installed_theme_version(): void {
+		$this->mock_local_woo_theme();
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			WC_Helper_Updater::get_available_extensions_downloads_data();
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame(
+			array(
+				'product_id' => 456,
+				'file_id'    => 'def456',
+				'version'    => '1.0.0',
+			),
+			$this->mocked_request_products[456],
+			'A theme must be reported the same way here as by get_update_data()'
+		);
+	}
+
+	/**
+	 * @testdox Both update entry points send the same payload, so they share one cached response.
+	 */
+	public function test_update_entry_points_send_the_same_payload(): void {
+		$this->mock_local_woo_plugin();
+		$this->mock_local_woo_theme();
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			WC_Helper_Updater::get_update_data();
+			$from_update_data = $this->mocked_request_products;
+
+			// Drop the cached response so the second entry point has to ask the server too.
+			delete_transient( '_woocommerce_helper_updates' );
+			$this->mocked_request_products = null;
+
+			WC_Helper_Updater::get_available_extensions_downloads_data();
+			$from_downloads_data = $this->mocked_request_products;
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertNotNull( $from_downloads_data, 'The second call should have gone to the server' );
+		$this->assertSame( $from_update_data, $from_downloads_data );
+	}
+
+	/**
 	 * @testdox The installed version is part of the update-check cache key.
 	 */
 	public function test_update_check_cache_key_includes_installed_version(): void {

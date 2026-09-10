@@ -452,40 +452,16 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Get update data for all plugins.
+	 * Get update data for all extensions, for the WP-CLI extension command.
+	 *
+	 * Sends the same payload as get_update_data(), so both share one cached response and
+	 * report the same installed versions.
 	 *
 	 * @return array Update data {product_id => data}
 	 * @see get_update_data
 	 */
 	public static function get_available_extensions_downloads_data() {
-		$payload = array();
-
-		// Scan subscriptions.
-		$subscriptions = WC_Helper::get_subscriptions();
-
-		foreach ( $subscriptions as $subscription ) {
-			$product_id = (int) $subscription['product_id'];
-
-			$payload[ $product_id ] = array(
-				'product_id' => $product_id,
-				'file_id'    => '',
-				'version'    => '',
-			);
-		}
-
-		// Scan local plugins which may or may not have a subscription.
-		foreach ( WC_Helper::get_local_woo_plugins() as $data ) {
-			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
-				$payload[ $data['_product_id'] ] = array(
-					'product_id' => $data['_product_id'],
-				);
-			}
-
-			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
-			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
-		}
-
-		return self::_update_check( $payload );
+		return self::_update_check( self::get_update_check_payload() );
 	}
 
 	/**
@@ -498,12 +474,25 @@ class WC_Helper_Updater {
 	 * @return array Update data {product_id => data}
 	 */
 	public static function get_update_data() {
+		return self::_update_check( self::get_update_check_payload() );
+	}
+
+	/**
+	 * The products to ask WooCommerce.com about, with the file ID and installed version of each.
+	 *
+	 * Covers every subscription plus every installed plugin and theme carrying a Woo header,
+	 * whether or not it has a subscription. Every caller has to send the same payload: the
+	 * server decides the autoupdate flag from the installed version, and the response is
+	 * cached under a hash of the payload.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array Payload keyed by product ID.
+	 */
+	private static function get_update_check_payload(): array {
 		$payload = array();
 
-		// Scan subscriptions.
-		$subscriptions = WC_Helper::get_subscriptions();
-
-		foreach ( $subscriptions as $subscription ) {
+		foreach ( WC_Helper::get_subscriptions() as $subscription ) {
 			$product_id = (int) $subscription['product_id'];
 
 			$payload[ $product_id ] = array(
@@ -513,8 +502,9 @@ class WC_Helper_Updater {
 			);
 		}
 
-		// Scan local plugins which may or may not have a subscription.
-		foreach ( WC_Helper::get_local_woo_plugins() as $data ) {
+		$installed = array_merge( WC_Helper::get_local_woo_plugins(), WC_Helper::get_local_woo_themes() );
+
+		foreach ( $installed as $data ) {
 			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
 				$payload[ $data['_product_id'] ] = array(
 					'product_id' => $data['_product_id'],
@@ -525,19 +515,7 @@ class WC_Helper_Updater {
 			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
-		// Scan local themes.
-		foreach ( WC_Helper::get_local_woo_themes() as $data ) {
-			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
-				$payload[ $data['_product_id'] ] = array(
-					'product_id' => $data['_product_id'],
-				);
-			}
-
-			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
-			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
-		}
-
-		return self::_update_check( $payload );
+		return $payload;
 	}
 
 	/**
