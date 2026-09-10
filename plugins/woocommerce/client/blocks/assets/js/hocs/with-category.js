@@ -27,6 +27,7 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 						? this.props.attributes.previewCategory
 						: null,
 			};
+			this.getCategoryId = this.getCategoryId.bind( this );
 			this.loadCategory = this.loadCategory.bind( this );
 		}
 
@@ -36,15 +37,30 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 
 		componentDidUpdate( prevProps ) {
 			if (
-				prevProps.attributes.categoryId !==
-				this.props.attributes.categoryId
+				this.getCategoryId( prevProps ) !==
+				this.getCategoryId( this.props )
 			) {
 				this.loadCategory();
 			}
 		}
 
+		getCategoryId( props = this.props ) {
+			const { categoryId, source } = props.attributes;
+			if ( categoryId || categoryId === 'preview' ) {
+				return categoryId;
+			}
+
+			const taxonomy =
+				props.context?.termTaxonomy || props.context?.taxonomy;
+			const shouldUseContext =
+				source === 'context' ||
+				( ! source && taxonomy === 'product_cat' );
+
+			return shouldUseContext ? props.context?.termId : undefined;
+		}
+
 		loadCategory() {
-			const { categoryId } = this.props.attributes;
+			const categoryId = this.getCategoryId();
 
 			if ( categoryId === 'preview' ) {
 				return;
