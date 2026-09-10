@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use WooCommerce Core versions in JavaScript deprecation notices.

@@ -72,7 +72,7 @@ const ConnectAccountPage = () => {
 			incentive_id: incentive.id,
 			source: determineTrackingSource(),
 		} );
-		updateOptions( {
+		void updateOptions( {
 			wcpay_welcome_page_viewed_timestamp: Math.floor(
 				Date.now() / 1000
 			),

@@ -20,7 +20,7 @@ export const JetpackPluginStates = {
 	NOT_OWNER_OF_CONNECTION: 'not-owner-of-connection',
 	/** Jetpack Plugin installed and WordPress.com user connected */
 	FULL_CONNECTION: 'full-connection',
-	/** Still retrieving Jetpack state from Wordpress Installation */
+	/** Still retrieving Jetpack state from WordPress Installation */
 	INITIALIZING: 'initializing',
 } as const;
 
@@ -63,7 +63,7 @@ export const useJetpackPluginState = () => {
 	 */
 	const onClickInstall = useCallback( () => {
 		const thisUrl = window.location.href;
-		installJetpackAndConnect(
+		void installJetpackAndConnect(
 			createErrorNotice,
 			() => thisUrl + '&jetpackState=returning'
 		);

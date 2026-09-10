@@ -28,8 +28,16 @@ class RouteException extends \Exception {
 	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
 	 */
 	public function __construct( $error_code, $message, $http_status_code = 400, $additional_data = [] ) {
-		$this->error_code      = $error_code;
-		$this->additional_data = array_filter( (array) $additional_data );
+		$this->error_code = $error_code;
+
+		// Only drop values the client cannot act on. `0` and `false` are meaningful here (e.g. a confirmed total of zero).
+		$this->additional_data = array_filter(
+			(array) $additional_data,
+			static function ( $value ) {
+				return null !== $value && '' !== $value && [] !== $value;
+			}
+		);
+
 		parent::__construct( $message, $http_status_code );
 	}
 

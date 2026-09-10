@@ -30,8 +30,28 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset( $_GET['page'] );
 		wp_dequeue_script( 'woocommerce_admin' );
+		wp_dequeue_script( 'woocommerce_quick-edit' );
+		wp_dequeue_script( 'jquery-ui-datepicker' );
 		wp_dequeue_script( 'heartbeat' );
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Quick Edit remains loadable when the optional datepicker is unavailable.
+	 */
+	public function test_quick_edit_does_not_depend_on_datepicker(): void {
+		set_current_screen();
+		$screen            = get_current_screen();
+		$screen->id        = 'edit-product';
+		$screen->base      = 'edit';
+		$screen->post_type = 'product';
+
+		$this->sut->admin_scripts();
+
+		$quick_edit = wp_scripts()->registered['woocommerce_quick-edit'];
+
+		$this->assertNotContains( 'jquery-ui-datepicker', $quick_edit->deps, 'Quick Edit should load even when another plugin deregisters the datepicker.' );
+		$this->assertTrue( wp_script_is( 'jquery-ui-datepicker', 'enqueued' ), 'The datepicker should still be requested when it is available.' );
 	}
 
 	/**

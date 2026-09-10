@@ -28,6 +28,7 @@ import { useInstanceId } from '@wordpress/compose';
 import { dispatch, select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { Icon, calendar } from '@wordpress/icons';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import clsx from 'clsx';
 import fastDeepEqual from 'fast-deep-equal/es6';
@@ -111,7 +112,7 @@ const Form = <
 			if ( hasValidationError ) {
 				return;
 			}
-			dispatch( validationStore ).setValidationErrors( {
+			void dispatch( validationStore ).setValidationErrors( {
 				[ `${ addressType }_${ key }` ]: {
 					message: error,
 					hidden: !! inputRef?.isFocused(),
@@ -132,7 +133,7 @@ const Form = <
 				}
 			} );
 			if ( errorsToClear.length ) {
-				dispatch( validationStore ).clearValidationErrors(
+				void dispatch( validationStore ).clearValidationErrors(
 					errorsToClear
 				);
 			}
@@ -421,6 +422,16 @@ const Form = <
 						}
 						{ ...fieldProps }
 						type={ field.type }
+						icon={
+							field.type === 'date' ? (
+								<span
+									className="wc-block-components-text-input__date-icon"
+									aria-hidden="true"
+								>
+									<Icon icon={ calendar } size={ 24 } />
+								</span>
+							) : null
+						}
 						ariaDescribedBy={ ariaDescribedBy }
 						value={
 							decodeEntities(

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Move Back in Stock Notifications activation from the WOOCOMMERCE_BIS_ALPHA_ENABLED wp-config constant to a normal feature toggle at WooCommerce → Settings → Advanced → Features → Experimental.

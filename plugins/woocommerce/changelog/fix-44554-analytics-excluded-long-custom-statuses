@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect excluded order statuses in Analytics reports when a custom status slug exceeds the 20-character storage limit

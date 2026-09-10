@@ -110,11 +110,11 @@ export const addCustomerEffortScoreExitPageListener = (
 	hasUnsavedChanges: () => boolean
 ) => {
 	// Pre-fetch the tracking option so that it is available before the unload event.
-	isTrackingAllowed();
+	void isTrackingAllowed();
 
 	eventListeners[ pageId ] = () => {
 		if ( hasUnsavedChanges() ) {
-			addExitPage( pageId );
+			void addExitPage( pageId );
 		}
 	};
 	window.addEventListener( 'unload', eventListeners[ pageId ] );
@@ -298,7 +298,7 @@ export function triggerExitPageCesSurvey() {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
 
 		if ( copy?.title?.length ) {
-			dispatch( store ).addCesSurvey( {
+			void dispatch( store ).addCesSurvey( {
 				...copy,
 				pageNow: window.pagenow,
 				adminPage: window.adminpage,

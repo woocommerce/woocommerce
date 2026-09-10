@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add rate-limit (HTTP 429) backoff for WooCommerce.com update-check and subscriptions API requests, respecting the Retry-After header.

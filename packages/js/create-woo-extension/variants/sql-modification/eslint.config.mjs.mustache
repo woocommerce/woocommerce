@@ -5,6 +5,18 @@ export default [
 	{
 		rules: {
 			'react/react-in-jsx-scope': 'off',
+			/* The scaffolded extension ships its own text domain, not WooCommerce's. */
+			'@wordpress/i18n-text-domain': [
+				'error',
+				{ allowedTextDomain: '{{textdomain}}' },
+			],
+		},
+	},
+	{
+		/* Node config files (e.g. webpack.config.js) use CommonJS require(). */
+		files: [ '**/*.config.js' ],
+		rules: {
+			'@typescript-eslint/no-require-imports': 'off',
 		},
 	},
 ];

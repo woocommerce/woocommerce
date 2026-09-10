@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a PHPCS sniff that flags unguarded use of the `%i` SQL identifier placeholder in `wpdb::prepare()` calls, so trusted identifiers are interpolated directly (or `%i` is guarded with `wpdb::has_cap( 'identifier_placeholders' )`).

@@ -718,53 +718,59 @@ const productGallery = {
 			}
 
 			const productImageSet = getProductImageSet( context.productId );
-			const syncFormVariationGallery = withScope( () => {
-				if ( ! productImageSet ) {
+			const syncFormVariationGallery = withScope(
+				( variationId?: number, featuredImageId?: number ) => {
+					if ( ! productImageSet ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const $variationIdInput = $form.querySelector(
+						SELECTORS.legacyVariationIdInput
+					) as HTMLInputElement | null;
+					const hasVariationIdInput = !! $variationIdInput;
+					const currentVariationId =
+						variationId ??
+						Number.parseInt( $variationIdInput?.value || '0', 10 );
+
+					// When the form exposes a variation_id input but it's empty,
+					// the merchant cleared the variation — restore the parent
+					// gallery instead of guessing from `current-image`.
+					if ( hasVariationIdInput && ! currentVariationId ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const currentImageId =
+						featuredImageId ??
+						Number.parseInt(
+							$form.getAttribute( 'current-image' ) || '0',
+							10
+						);
+					const variationImageSet = currentVariationId
+						? productImageSet.variations?.[ currentVariationId ]
+						: getVariationImageSetByCurrentImage(
+								productImageSet,
+								currentImageId
+						  );
+
+					if ( variationImageSet?.image_ids?.length ) {
+						actions.setImageData(
+							variationImageSet.image_ids,
+							currentImageId || variationImageSet.image_id
+						);
+						return;
+					}
+
 					actions.resetImageData();
-					return;
 				}
-
-				const $variationIdInput = $form.querySelector(
-					SELECTORS.legacyVariationIdInput
-				) as HTMLInputElement | null;
-				const hasVariationIdInput = !! $variationIdInput;
-				const currentVariationId = Number.parseInt(
-					$variationIdInput?.value || '0',
-					10
-				);
-
-				// When the form exposes a variation_id input but it's empty,
-				// the merchant cleared the variation — restore the parent
-				// gallery instead of guessing from `current-image`.
-				if ( hasVariationIdInput && ! currentVariationId ) {
-					actions.resetImageData();
-					return;
-				}
-
-				const currentImageId = Number.parseInt(
-					$form.getAttribute( 'current-image' ) || '0',
-					10
-				);
-				const variationImageSet = hasVariationIdInput
-					? productImageSet.variations?.[ currentVariationId ]
-					: getVariationImageSetByCurrentImage(
-							productImageSet,
-							currentImageId
-					  );
-
-				if ( variationImageSet?.image_ids?.length ) {
-					actions.setImageData(
-						variationImageSet.image_ids,
-						currentImageId || variationImageSet.image_id
-					);
-					return;
-				}
-
-				actions.resetImageData();
-			} );
+			);
 
 			const teardownJQuery = subscribeLegacyJQueryFormVariations( $form, {
-				onVariationFound: () => syncFormVariationGallery(),
+				// `found_variation` fires before the classic form updates its DOM.
+				// Pass its fresh IDs into the config-based gallery sync.
+				onVariationFound: ( variationId, featuredImageId ) =>
+					syncFormVariationGallery( variationId, featuredImageId ),
 				onVariationReset: () => actions.resetImageData(),
 			} );
 

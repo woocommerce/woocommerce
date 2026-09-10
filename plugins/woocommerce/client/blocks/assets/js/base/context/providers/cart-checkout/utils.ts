@@ -73,7 +73,7 @@ export const processCheckoutResponseHeaders = (
 
 	// Update user using headers.
 	if ( headers?.get( 'User-ID' ) ) {
-		__internalSetCustomerId(
+		void __internalSetCustomerId(
 			parseInt( headers.get( 'User-ID' ) || '0', 10 )
 		);
 	}

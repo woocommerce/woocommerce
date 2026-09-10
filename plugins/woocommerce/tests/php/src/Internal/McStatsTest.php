@@ -14,6 +14,8 @@ class McStatsTest extends \WC_Unit_Test_Case {
 	 * Set up. Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		$this->sut = wc_get_container()->get( McStats::class );
 	}
 

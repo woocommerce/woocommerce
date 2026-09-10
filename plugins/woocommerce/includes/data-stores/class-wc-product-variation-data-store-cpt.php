@@ -294,6 +294,42 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
+		$should_include_attributes = $this->should_include_attributes_in_title( $product );
+
+		/**
+		 * Filters the separator used between a variation product title and its attributes.
+		 *
+		 * @since 3.0.2
+		 * @param string     $separator Separator between the product title and attributes.
+		 * @param WC_Product $product Variation product object.
+		 */
+		$separator    = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
+		$title_base   = get_post_field( 'post_title', $product->get_parent_id() );
+		$title_suffix = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
+
+		/**
+		 * Filters the generated variation product title.
+		 *
+		 * @since 3.0.0
+		 * @param string     $title Generated variation title.
+		 * @param WC_Product $product Variation product object.
+		 * @param string     $title_base Parent product title.
+		 * @param string     $title_suffix Formatted attribute values, or an empty string.
+		 */
+		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
+	}
+
+	/**
+	 * Checks whether a variation title should include its attribute values.
+	 *
+	 * Shared by the stored variation title and the contextual names built for
+	 * selected "Any" attributes, so both follow the same rules.
+	 *
+	 * @since 11.2.0
+	 * @param WC_Product $product Variation product object.
+	 * @return bool
+	 */
+	public function should_include_attributes_in_title( $product ): bool {
 		$attributes = (array) $product->get_attributes();
 
 		// Do not include attributes if the product has 3+ attributes.
@@ -310,12 +346,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			}
 		}
 
-		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
-		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
-		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
-		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
-
-		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
+		/**
+		 * Filters whether variation product titles should include attributes.
+		 *
+		 * @since 3.0.2
+		 * @param bool       $should_include_attributes Whether attributes should be included.
+		 * @param WC_Product $product Variation product object.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
 	}
 
 	/**
@@ -345,12 +383,21 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	/**
 	 * Make sure we store the product version (to track data changes).
 	 *
-	 * @param WC_Product $product Product object.
+	 * @since 11.2.0 Skips wp_set_object_terms() when the product type is unchanged to avoid unnecessary term cache invalidation.
 	 * @since 3.0.0
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return void
 	 */
 	protected function update_version_and_type( &$product ) {
-		wp_set_object_terms( $product->get_id(), '', 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
+		$product_id = $product->get_id();
+		// Skip wp_set_object_terms() when the type is unchanged — it always clears the term cache even on no-op writes.
+		$stored_type_terms = get_the_terms( $product_id, 'product_type' );
+		if ( ! empty( $stored_type_terms ) ) {
+			wp_set_object_terms( $product_id, '', 'product_type' );
+		}
+
+		update_post_meta( $product_id, '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 	}
 
 	/**

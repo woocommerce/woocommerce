@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Cart and Checkout incompatible extensions notices (editor sidebar and storefront banner) dismissed when an incompatible extension or payment gateway is disabled, and warn again only when something the merchant has not yet acknowledged becomes incompatible. Dismissals are now stored per site. Existing dismissals carry over on single-site installs but not on multisite installs, where notices may need to be dismissed again after upgrading.

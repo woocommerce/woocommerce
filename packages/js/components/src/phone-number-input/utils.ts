@@ -72,7 +72,7 @@ const countryNames: Record< string, string > = mapValues(
 	{
 		AC: 'Ascension Island',
 		XK: 'Kosovo',
-		...( window.wcSettings?.countries || [] ),
+		...( window.wcSettings?.countries || {} ),
 	},
 	( name ) => decodeHtmlEntities( name )
 );

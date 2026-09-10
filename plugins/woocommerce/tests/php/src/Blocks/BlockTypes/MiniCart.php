@@ -92,6 +92,19 @@ class MiniCart extends \WP_UnitTestCase {
 						<img class="wp-image-block" src="https://example.com/image.jpg" alt="Example Image" />
 					<!-- /wp:image -->
 				</div>
+				<!-- /wp:woocommerce/mini-cart-title-block -->
+
+				<!-- wp:woocommerce/mini-cart-footer-block -->
+				<div class="wp-block-woocommerce-mini-cart-footer-block">
+					<!-- wp:woocommerce/mini-cart-cart-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-cart-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-cart-button-block -->
+
+					<!-- wp:woocommerce/mini-cart-checkout-button-block -->
+					<div class="wp-block-woocommerce-mini-cart-checkout-button-block"></div>
+					<!-- /wp:woocommerce/mini-cart-checkout-button-block -->
+				</div>
+				<!-- /wp:woocommerce/mini-cart-footer-block -->
 			</div>
 			<!-- /wp:woocommerce/filled-mini-cart-contents-block -->
 		</div>
@@ -233,6 +246,55 @@ class MiniCart extends \WP_UnitTestCase {
 			);
 			$this->assertFalse( $div_wrapper_still_exists, "The div wrapper with class {$class_name} should have been removed." );
 		}
+	}
+
+	/**
+	 * @testdox Should process legacy wrappers while preserving the pattern rendering lifecycle.
+	 */
+	public function test_render_pattern_backed_template(): void {
+		$pattern_name = 'woocommerce-tests/mini-cart-template-part';
+		register_block_pattern(
+			$pattern_name,
+			array(
+				'title'   => 'Mini Cart template part',
+				'content' => $this->current_template_with_user_edits,
+			)
+		);
+
+		$pattern_filter_calls = 0;
+		$pattern_filter       = static function ( $content ) use ( &$pattern_filter_calls ) {
+			++$pattern_filter_calls;
+			return $content . '<span data-pattern-filter-ran></span>';
+		};
+
+		add_filter( 'render_block_core/pattern', $pattern_filter, 10, 1 );
+
+		try {
+			$method = new \ReflectionMethod( MiniCartBlock::class, 'render_template_part_contents' );
+			$method->setAccessible( true );
+			$rendered_template = $method->invoke(
+				$this->mock,
+				'<!-- wp:pattern {"slug":"' . $pattern_name . '"} /-->'
+			);
+		} finally {
+			remove_filter( 'render_block_core/pattern', $pattern_filter, 10 );
+			unregister_block_pattern( $pattern_name );
+		}
+
+		$this->assertSame( 1, $pattern_filter_calls, 'The core pattern render filter should run exactly once.' );
+		$this->assertStringContainsString(
+			'data-pattern-filter-ran',
+			$rendered_template,
+			'The filtered pattern output should be preserved.'
+		);
+
+		$p                    = new \WP_HTML_Tag_Processor( $rendered_template );
+		$footer_wrapper_count = 0;
+		while ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-mini-cart-footer-block' ) ) ) {
+			++$footer_wrapper_count;
+		}
+
+		$this->assertSame( 1, $footer_wrapper_count, 'The rendered template should contain exactly one footer wrapper.' );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add an order-aware filter for failed order confirmation messages in classic and block renderers.

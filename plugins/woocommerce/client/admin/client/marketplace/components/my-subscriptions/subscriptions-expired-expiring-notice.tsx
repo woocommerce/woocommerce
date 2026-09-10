@@ -71,7 +71,7 @@ export default function SubscriptionsExpiredExpiringNotice(
 	const handleClose = () => {
 		recordEvent( eventKeys[ notice_id ].dismissed );
 		const data = { notice_id, dismiss_notice_nonce };
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,

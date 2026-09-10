@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore pending stock holds to prevent multiple payable orders from reserving the same stock.

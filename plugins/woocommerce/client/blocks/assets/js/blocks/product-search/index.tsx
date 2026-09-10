@@ -79,7 +79,7 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 	);
 
 	const updateBlock = () => {
-		replaceBlocks(
+		void replaceBlocks(
 			clientId,
 			createBlock( 'core/search', {
 				label:

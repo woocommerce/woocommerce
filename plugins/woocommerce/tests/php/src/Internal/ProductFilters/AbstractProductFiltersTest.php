@@ -105,6 +105,9 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Runs before each test.
+	 *
+	 * `parent::setUp()` is reached through `set_up_test_case()`, which exists so subclasses
+	 * can control where the per-test transaction starts relative to fixture creation.
 	 */
 	public function setUp(): void {
 		$this->set_up_test_case();

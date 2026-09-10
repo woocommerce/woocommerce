@@ -2005,18 +2005,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review1JSON = await review1.json();
 
-			// We need to update the review in order for the product's
-			// average_rating to be recalculated.
-			// See: https://github.com/woocommerce/woocommerce/issues/29906.
-			//await updateProductReview(review1.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review2 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2032,15 +2020,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review2JSON = await review2.json();
 
-			//await updateProductReview(review2.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review3 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2055,14 +2034,6 @@ test.describe.serial( 'Orders API tests', () => {
 				}
 			);
 			const review3JSON = await review3.json();
-
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
 
 			return [ review1JSON.id, review2JSON.id, review3JSON.id ];
 		};
