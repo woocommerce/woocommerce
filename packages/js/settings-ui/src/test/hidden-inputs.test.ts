@@ -444,12 +444,52 @@ describe( 'getHiddenInputs', () => {
 		] );
 	} );
 
-	it( 'keeps disabled fields in the form-post entry list', () => {
+	it( 'omits statically disabled fields like a classic form', () => {
 		expect(
 			getHiddenInputs( formPostField( { disabled: true } ), 2, {
 				initialCanonicalValue: 1,
 			} )
-		).toEqual( [ { name: 'quantity', value: '2' } ] );
+		).toEqual( [] );
+	} );
+
+	it.each( [ true, false ] )(
+		'omits a dynamically disabled checkbox with value %p',
+		( value ) => {
+			expect(
+				getHiddenInputs(
+					formPostField( {
+						type: 'checkbox',
+						save: {
+							adapter: 'form_post',
+							name: 'woocommerce_registration_generate_password',
+						},
+					} ),
+					value,
+					{ disabled: true }
+				)
+			).toEqual( [] );
+		}
+	);
+
+	it( 'serializes a checkbox when its live disabled rule is false', () => {
+		expect(
+			getHiddenInputs(
+				formPostField( {
+					type: 'checkbox',
+					save: {
+						adapter: 'form_post',
+						name: 'woocommerce_registration_generate_password',
+					},
+				} ),
+				true,
+				{ disabled: false }
+			)
+		).toEqual( [
+			{
+				name: 'woocommerce_registration_generate_password',
+				value: 'yes',
+			},
+		] );
 	} );
 
 	it( 'keeps hidden fields in the form-post entry list', () => {

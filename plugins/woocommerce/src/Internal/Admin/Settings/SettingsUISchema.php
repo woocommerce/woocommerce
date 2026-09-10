@@ -1489,6 +1489,18 @@ class SettingsUISchema {
 			$field['customAttributes'] = self::get_custom_attributes( $setting['custom_attributes'] );
 		}
 
+		if ( isset( $setting['disabled_when_all_unchecked'] ) && is_array( $setting['disabled_when_all_unchecked'] ) ) {
+			$field['disabledWhenAllUnchecked'] = array_values(
+				array_filter(
+					array_map(
+						static fn( $controller ): string => is_scalar( $controller ) ? (string) $controller : '',
+						$setting['disabled_when_all_unchecked']
+					),
+					static fn( string $controller ): bool => '' !== $controller
+				)
+			);
+		}
+
 		$visibility = self::get_field_visibility( $setting, $visibility_controller );
 		if ( $visibility ) {
 			$field['visibility'] = $visibility;
@@ -2044,6 +2056,35 @@ class SettingsUISchema {
 		self::assert_field_validation( $field );
 		self::assert_field_save( $field );
 		self::assert_visibility( $field );
+		self::assert_disabled_when_all_unchecked( $field );
+	}
+
+	/**
+	 * Assert the controllers for a live disabled-state rule.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_disabled_when_all_unchecked( array $field ): void {
+		if ( ! array_key_exists( 'disabledWhenAllUnchecked', $field ) ) {
+			return;
+		}
+
+		$controllers = $field['disabledWhenAllUnchecked'];
+		if ( ! is_array( $controllers ) || ! ArrayUtil::array_is_list( $controllers ) || empty( $controllers ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" disabledWhenAllUnchecked must be a non-empty list.', $field['id'] ) );
+		}
+
+		$seen = array();
+		foreach ( $controllers as $controller ) {
+			if ( ! is_string( $controller ) || '' === $controller ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" disabledWhenAllUnchecked controllers must be non-empty strings.', $field['id'] ) );
+			}
+
+			if ( isset( $seen[ $controller ] ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" disabledWhenAllUnchecked controller "%2$s" is duplicated.', $field['id'], $controller ) );
+			}
+			$seen[ $controller ] = true;
+		}
 	}
 
 	/**

@@ -111,15 +111,26 @@ export const getHiddenInputs = (
 	field: SettingsUIField,
 	value: SettingsValue,
 	{
+		disabled = false,
 		initialCanonicalValue,
 		serializeDateTimeAsStoreLocal = false,
 		strict = false,
 	}: {
+		disabled?: boolean;
 		initialCanonicalValue?: SettingsValue;
 		serializeDateTimeAsStoreLocal?: boolean;
 		strict?: boolean;
 	} = {}
 ): HiddenInput[] => {
+	if (
+		disabled ||
+		field.disabled ||
+		( typeof field.customAttributes?.disabled !== 'undefined' &&
+			field.customAttributes.disabled !== false )
+	) {
+		return [];
+	}
+
 	const adapter = field.save?.adapter || 'form_post';
 
 	if ( adapter === 'none' ) {
@@ -181,18 +192,21 @@ export const getHiddenInputs = (
 export const HiddenInputs = ( {
 	field,
 	value,
+	disabled = false,
 	initialCanonicalValue,
 	serializeDateTimeAsStoreLocal = false,
 	strict = false,
 }: {
 	field: SettingsUIField;
 	value: SettingsValue;
+	disabled?: boolean;
 	initialCanonicalValue?: SettingsValue;
 	serializeDateTimeAsStoreLocal?: boolean;
 	strict?: boolean;
 } ) => (
 	<>
 		{ getHiddenInputs( field, value, {
+			disabled,
 			initialCanonicalValue,
 			serializeDateTimeAsStoreLocal,
 			strict,

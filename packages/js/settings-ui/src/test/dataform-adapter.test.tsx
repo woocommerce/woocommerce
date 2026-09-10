@@ -768,6 +768,80 @@ describe( 'dataform adapter', () => {
 			);
 			expect( fieldDisabled.isDisabled ).toBe( true );
 		} );
+
+		it( 'derives disabled state from current unsaved controller values', () => {
+			const dependentField = {
+				id: 'registration_generate_password',
+				label: 'Send password setup link',
+				type: 'checkbox',
+				disabledWhenAllUnchecked: [
+					'checkout_registration',
+					'my_account_registration',
+					'subscriptions_registration',
+				],
+			} as SettingsUIField;
+			const field = buildDataFormField(
+				dependentField,
+				createOptions( [ dependentField ] )
+			);
+			const isDisabled = field.isDisabled;
+
+			expect( typeof isDisabled ).toBe( 'function' );
+			if ( typeof isDisabled !== 'function' ) {
+				throw new Error( 'Expected a live disabled-state callback.' );
+			}
+
+			const normalizedField = field as Parameters<
+				typeof isDisabled
+			>[ 0 ][ 'field' ];
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: false,
+					},
+					field: normalizedField,
+				} )
+			).toBe( true );
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: true,
+					},
+					field: normalizedField,
+				} )
+			).toBe( false );
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: false,
+						subscriptions_registration: true,
+					},
+					field: normalizedField,
+				} )
+			).toBe( false );
+		} );
+
+		it( 'includes the disabled tooltip in DataForm help', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					description: 'How this setting works.',
+					customAttributes: {
+						'disabled-tooltip':
+							'Enable account creation to use this feature.',
+					},
+				},
+				createOptions( [] )
+			);
+			const { container } = renderElement( <>{ field.description }</> );
+
+			expect( container.textContent ).toBe(
+				'How this setting works.Enable account creation to use this feature.'
+			);
+		} );
 	} );
 
 	describe( 'mounted DataForm behaviour', () => {

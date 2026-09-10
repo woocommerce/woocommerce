@@ -229,9 +229,53 @@ const createIsVisible = (
 const isAttributeSet = ( value: string | number | boolean | undefined ) =>
 	typeof value !== 'undefined' && value !== false;
 
-const isFieldDisabled = ( settingsField: SettingsUIField ) =>
+const isFieldStaticallyDisabled = ( settingsField: SettingsUIField ) =>
 	Boolean( settingsField.disabled ) ||
 	isAttributeSet( settingsField.customAttributes?.disabled );
+
+const getDisabledControllers = ( settingsField: SettingsUIField ) => {
+	const controllers = settingsField.disabledWhenAllUnchecked;
+
+	return Array.isArray( controllers )
+		? controllers.filter( ( controller ) => Boolean( controller ) )
+		: [];
+};
+
+export const isSettingsFieldDisabled = (
+	settingsField: SettingsUIField,
+	values: SettingsValues
+) => {
+	if ( isFieldStaticallyDisabled( settingsField ) ) {
+		return true;
+	}
+
+	const controllers = getDisabledControllers( settingsField );
+	return (
+		controllers.length > 0 &&
+		controllers.every( ( controller ) => values[ controller ] !== true )
+	);
+};
+
+const buildIsDisabled = (
+	settingsField: SettingsUIField
+): Field< SettingsValues >[ 'isDisabled' ] => {
+	if ( getDisabledControllers( settingsField ).length === 0 ) {
+		return isFieldStaticallyDisabled( settingsField );
+	}
+
+	return ( { item } ) => isSettingsFieldDisabled( settingsField, item );
+};
+
+const getFieldDescription = ( settingsField: SettingsUIField ) => {
+	const disabledTooltip =
+		settingsField.customAttributes?.[ 'disabled-tooltip' ];
+	const descriptions = [
+		settingsField.description,
+		typeof disabledTooltip === 'string' ? disabledTooltip : undefined,
+	].filter( Boolean );
+
+	return descriptions.length > 0 ? descriptions.join( '<br />' ) : undefined;
+};
 
 // Range constraints only validate against matching value types: numbers for
 // number fields, date strings for date fields. Other types have no range
@@ -347,13 +391,15 @@ export const buildDataFormField = (
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
-		description: createSettingsHelpElement( settingsField.description ),
+		description: createSettingsHelpElement(
+			getFieldDescription( settingsField )
+		),
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
 		isValid: buildValidationRules( settingsField, descriptor ),
 		isVisible: createIsVisible( settingsField, options ),
-		isDisabled: isFieldDisabled( settingsField ),
+		isDisabled: buildIsDisabled( settingsField ),
 	};
 
 	if ( registeredComponent ) {

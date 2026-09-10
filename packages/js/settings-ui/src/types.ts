@@ -60,6 +60,7 @@ export type SettingsUIField = {
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	disabledWhenAllUnchecked?: string[];
 	customAttributes?: Record< string, string | number | boolean >;
 	validation?: {
 		min?: number;

@@ -20,6 +20,18 @@ use Automattic\WooCommerce\Admin\Features\Features;
 class WC_Settings_Accounts extends WC_Settings_Page {
 
 	/**
+	 * Account creation settings that enable generated credentials.
+	 *
+	 * @var string[]
+	 */
+	private const ACCOUNT_CREATION_CONTROLLERS = array(
+		'woocommerce_enable_signup_and_login_from_checkout',
+		'woocommerce_enable_myaccount_registration',
+		'woocommerce_enable_delayed_account_creation',
+		'woocommerce_enable_signup_from_checkout_for_subscriptions',
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -79,23 +91,24 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'title'             => __( 'Account creation', 'woocommerce' ),
-				'desc'              => __( 'After checkout (recommended)', 'woocommerce' ),
-				'desc_tip'          => sprintf(
+				'title'                       => __( 'Account creation', 'woocommerce' ),
+				'desc'                        => __( 'After checkout (recommended)', 'woocommerce' ),
+				'desc_tip'                    => sprintf(
 					/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
 					__( 'Customers can create an account after their order is placed. Customize messaging %1$shere%2$s.', 'woocommerce' ),
 					'<a target="_blank" class="delayed-account-creation-customize-link" href="' . esc_url( admin_url( 'site-editor.php?postId=woocommerce%2Fwoocommerce%2F%2Forder-confirmation&postType=wp_template&canvas=edit' ) ) . '">',
 					'</a>'
 				),
-				'id'                => 'woocommerce_enable_delayed_account_creation',
-				'default'           => 'no',
-				'type'              => 'checkbox',
-				'checkboxgroup'     => 'start',
-				'autoload'          => false,
-				'custom_attributes' => array(
+				'id'                          => 'woocommerce_enable_delayed_account_creation',
+				'default'                     => 'no',
+				'type'                        => 'checkbox',
+				'checkboxgroup'               => 'start',
+				'autoload'                    => false,
+				'disabled_when_all_unchecked' => array( 'woocommerce_enable_guest_checkout' ),
+				'custom_attributes'           => array(
 					'disabled-tooltip' => __( 'Enable guest checkout to use this feature.', 'woocommerce' ),
 				),
-				'legend'            => __( 'Allow customers to create an account', 'woocommerce' ),
+				'legend'                      => __( 'Allow customers to create an account', 'woocommerce' ),
 			),
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
@@ -117,28 +130,30 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'title'             => __( 'Account creation options', 'woocommerce' ),
-				'desc'              => __( 'Send password setup link (recommended)', 'woocommerce' ),
-				'desc_tip'          => __( 'New users receive an email to set up their password.', 'woocommerce' ),
-				'id'                => 'woocommerce_registration_generate_password',
-				'default'           => 'yes',
-				'type'              => 'checkbox',
-				'checkboxgroup'     => 'start',
-				'autoload'          => false,
-				'custom_attributes' => array(
+				'title'                       => __( 'Account creation options', 'woocommerce' ),
+				'desc'                        => __( 'Send password setup link (recommended)', 'woocommerce' ),
+				'desc_tip'                    => __( 'New users receive an email to set up their password.', 'woocommerce' ),
+				'id'                          => 'woocommerce_registration_generate_password',
+				'default'                     => 'yes',
+				'type'                        => 'checkbox',
+				'checkboxgroup'               => 'start',
+				'autoload'                    => false,
+				'disabled_when_all_unchecked' => self::ACCOUNT_CREATION_CONTROLLERS,
+				'custom_attributes'           => array(
 					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
 				),
 			),
 			array(
-				'title'             => __( 'Account creation options', 'woocommerce' ),
-				'desc'              => __( 'Generate account login (recommended)', 'woocommerce' ),
-				'desc_tip'          => __( 'Generate a login for the account using first and/or last name. If neither is usable (e.g. invalid or missing) the email address will be used. If this option is unchecked, customers will need to set a username during account creation', 'woocommerce' ),
-				'id'                => 'woocommerce_registration_generate_username',
-				'default'           => 'yes',
-				'type'              => 'checkbox',
-				'checkboxgroup'     => 'end',
-				'autoload'          => false,
-				'custom_attributes' => array(
+				'title'                       => __( 'Account creation options', 'woocommerce' ),
+				'desc'                        => __( 'Generate account login (recommended)', 'woocommerce' ),
+				'desc_tip'                    => __( 'Generate a login for the account using first and/or last name. If neither is usable (e.g. invalid or missing) the email address will be used. If this option is unchecked, customers will need to set a username during account creation', 'woocommerce' ),
+				'id'                          => 'woocommerce_registration_generate_username',
+				'default'                     => 'yes',
+				'type'                        => 'checkbox',
+				'checkboxgroup'               => 'end',
+				'autoload'                    => false,
+				'disabled_when_all_unchecked' => self::ACCOUNT_CREATION_CONTROLLERS,
+				'custom_attributes'           => array(
 					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
 				),
 			),
@@ -354,7 +369,20 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	 * Output the HTML for the settings.
 	 */
 	public function output() {
+		global $current_section;
+
+		$section = is_string( $current_section ) ? $current_section : '';
+		$context = $this->get_settings_ui_request_context( $section );
+
 		parent::output();
+
+		try {
+			if ( $context && $context->is_rendering_enabled() && ! $context->has_schema_failed() && ! $context->has_script_handle_loading_failed() ) {
+				return;
+			}
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- A stale context must keep the classic script available.
+			// Keep the classic behavior when the Settings UI context is unavailable during an update.
+		}
 
 		// The following code toggles disabled state on the account options based on other values.
 		$script =
