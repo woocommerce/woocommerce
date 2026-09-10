@@ -320,12 +320,14 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			name: 'My Custom Collection - Product Context',
 			label: 'Block: My Custom Collection - Product Context',
 			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//single-product` ],
+			shouldShowProductPicker: true,
 		},
 		{
 			id: 'myCustomCollectionWithCartContext',
 			name: 'My Custom Collection - Cart Context',
 			label: 'Block: My Custom Collection - Cart Context',
 			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
+			shouldShowProductPicker: false,
 		},
 		{
 			id: 'myCustomCollectionWithOrderContext',
@@ -334,6 +336,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			previewLabelTemplate: [
 				`${ BLOCK_THEME_SLUG }//order-confirmation`,
 			],
+			shouldShowProductPicker: false,
 		},
 		{
 			id: 'myCustomCollectionWithArchiveContext',
@@ -342,6 +345,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			previewLabelTemplate: [
 				`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
 			],
+			shouldShowProductPicker: false,
 		},
 		{
 			id: 'myCustomCollectionMultipleContexts',
@@ -351,6 +355,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				`${ BLOCK_THEME_SLUG }//single-product`,
 				`${ BLOCK_THEME_SLUG }//order-confirmation`,
 			],
+			shouldShowProductPicker: true,
 		},
 	].forEach( ( collection ) => {
 		collection.previewLabelTemplate.forEach( ( template ) => {
@@ -388,11 +393,33 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
 			pageObject,
 			editor,
+			admin,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost(
 				collection.id as Collections
 			);
 
+			// Check visibility of product picker
+			const editorProductPicker = editor.canvas.locator(
+				SELECTORS.productPicker
+			);
+			const expectedVisibility = collection.shouldShowProductPicker
+				? 'toBeVisible'
+				: 'toBeHidden';
+			await expect( editorProductPicker )[ expectedVisibility ]();
+
+			if ( collection.shouldShowProductPicker ) {
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					editor.canvas
+				);
+			}
+
+			// At this point, the product picker should be hidden
+			await expect( editorProductPicker ).toBeHidden();
+
+			// Check visibility of preview label
 			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
@@ -504,78 +531,6 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		// Product picker should be shown in Editor
 		await page.reload();
 		await expect( deletedProductPicker ).toBeVisible();
-	} );
-
-	test.describe( 'with "usesReference" argument', () => {
-		[
-			{
-				id: 'myCustomCollectionWithProductContext',
-				name: 'My Custom Collection - Product Context',
-				label: 'Block: My Custom Collection - Product Context',
-				shouldShowProductPicker: true,
-			},
-			{
-				id: 'myCustomCollectionWithCartContext',
-				name: 'My Custom Collection - Cart Context',
-				label: 'Block: My Custom Collection - Cart Context',
-				shouldShowProductPicker: false,
-			},
-			{
-				id: 'myCustomCollectionWithOrderContext',
-				name: 'My Custom Collection - Order Context',
-				label: 'Block: My Custom Collection - Order Context',
-				shouldShowProductPicker: false,
-			},
-			{
-				id: 'myCustomCollectionWithArchiveContext',
-				name: 'My Custom Collection - Archive Context',
-				label: 'Block: My Custom Collection - Archive Context',
-				shouldShowProductPicker: false,
-			},
-			{
-				id: 'myCustomCollectionMultipleContexts',
-				name: 'My Custom Collection - Multiple Contexts',
-				label: 'Block: My Custom Collection - Multiple Contexts',
-				shouldShowProductPicker: true,
-			},
-		].forEach( ( collection ) => {
-			test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
-				pageObject,
-				editor,
-				admin,
-			} ) => {
-				await admin.createNewPost();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInPost(
-					collection.id as Collections
-				);
-
-				// Check visibility of product picker
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
-				);
-				const expectedVisibility = collection.shouldShowProductPicker
-					? 'toBeVisible'
-					: 'toBeHidden';
-				await expect( editorProductPicker )[ expectedVisibility ]();
-
-				if ( collection.shouldShowProductPicker ) {
-					await pageObject.chooseProductInEditorProductPickerIfAvailable(
-						editor.canvas
-					);
-				}
-
-				// At this point, the product picker should be hidden
-				await expect( editorProductPicker ).toBeHidden();
-
-				// Check visibility of preview label
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeHidden();
-			} );
-		} );
 	} );
 
 	test.describe( 'with "scope" argument', () => {
