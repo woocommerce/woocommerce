@@ -1648,45 +1648,64 @@ function wc_sanitize_endpoint_slug( $raw_value ) {
 /**
  * Removes useless non-displayable and problematic Unicode characters from a string.
  *
- * This function eliminates characters that can cause formatting issues, invisible text,
- * or unexpected behavior in copy-pasted text. Specifically, it removes:
+ * Covers the characters that are invisible to the reader but still count as content to
+ * anything matching on the string: soft hyphen, zero-width spaces and joiners, bidirectional
+ * marks, isolates and overrides, variation selectors, Hangul and Mongolian fillers, tag
+ * characters, and the byte order mark. Interlinear annotation marks (`U+FFF9`–`U+FFFB`) are
+ * removed too, though they are not invisible.
  *
- * - **Soft hyphen (`U+00AD`)** – Invisible unless text is broken across lines.
- * - **Zero-width spaces & joiners (`U+200B–U+200D`)** – Invisible and can cause copy/paste issues.
- * - **Directional markers (`U+200E–U+200F`, `U+202A–U+202E`)** – Can affect text rendering.
- * - **Byte Order Mark (BOM) (`U+FEFF`)** – Can interfere with encoding.
- * - **Interlinear annotation characters (`U+FFF9–U+FFFB`)** – Rarely used and unnecessary in checkout fields.
+ * Copy-pasting from PDFs, word processors and web pages routinely carries these along, and a
+ * reader has no way to see why the value they pasted is being rejected.
  *
- * It does **not** remove:
- *
- * - **Non-breaking space (`U+00A0`)** – Useful for preventing line breaks in addresses.
- * - **Word joiner (`U+2060`)** – Sometimes needed for proper text rendering in certain scripts.
+ * Non-breaking spaces (`U+00A0`, `U+202F`) are **not** removed. They are visible spaces, so
+ * deleting them would run words together rather than restore the intended text.
  *
  * @param string $raw_value The input string to sanitize.
  *
  * @return string The sanitized string without problematic characters.
  * @since 9.9.0
+ * @since 11.2.0 Removes every Unicode default-ignorable code point, including the word joiner
+ *               (`U+2060`) and the variation selectors earlier versions kept.
  */
 function wc_remove_non_displayable_chars( string $raw_value ): string {
-	$remove_chars = array(
-		"\u{00AD}", // Soft Hyphen.
-		"\u{200B}", // Zero Width Space.
-		"\u{200C}", // Zero Width Non-Joiner.
-		"\u{200D}", // Zero Width Joiner.
-		"\u{200E}", // Left-to-Right Mark.
-		"\u{200F}", // Right-to-Left Mark.
-		"\u{202A}", // Left-to-Right Embedding.
-		"\u{202B}", // Right-to-Left Embedding.
-		"\u{202C}", // Pop Directional Formatting.
-		"\u{202D}", // Left-to-Right Override.
-		"\u{202E}", // Right-to-Left Override.
-		"\u{FEFF}", // Byte Order Mark (BOM).
-		"\u{FFF9}", // Interlinear Annotation Anchor.
-		"\u{FFFA}", // Interlinear Annotation Separator.
-		"\u{FFFB}", // Interlinear Annotation Terminator.
+	// Ranges rather than \p{Default_Ignorable_Code_Point}: that property needs PCRE2 10.43,
+	// newer than the build many supported installs link against. An unsupported property
+	// makes preg_replace return null instead of failing loudly.
+	$pattern = '/['
+		. '\x{00AD}\x{034F}\x{061C}\x{115F}\x{1160}\x{17B4}\x{17B5}\x{180B}-\x{180F}'
+		. '\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{206F}\x{3164}'
+		. '\x{FE00}-\x{FE0F}\x{FEFF}\x{FFA0}\x{FFF0}-\x{FFFB}'
+		. '\x{1BCA0}-\x{1BCA3}\x{1D173}-\x{1D17A}\x{E0000}-\x{E0FFF}'
+		. ']/u';
+
+	$result = preg_replace( $pattern, '', $raw_value );
+
+	if ( null !== $result ) {
+		return $result;
+	}
+
+	// Malformed UTF-8 makes a /u pattern bail. Fall back to a byte-wise replacement over the
+	// soft hyphen, zero-width characters, bidirectional marks, BOM and interlinear annotation
+	// marks, so such input is cleaned no less than it was before this pattern existed.
+	$fallback_chars = array(
+		"\u{00AD}",
+		"\u{200B}",
+		"\u{200C}",
+		"\u{200D}",
+		"\u{200E}",
+		"\u{200F}",
+		"\u{202A}",
+		"\u{202B}",
+		"\u{202C}",
+		"\u{202D}",
+		"\u{202E}",
+		"\u{FEFF}",
+		"\u{FFF9}",
+		"\u{FFFA}",
+		"\u{FFFB}",
 	);
 
-	return str_replace( $remove_chars, '', $raw_value );
+	return str_replace( $fallback_chars, '', $raw_value );
 }
 
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
