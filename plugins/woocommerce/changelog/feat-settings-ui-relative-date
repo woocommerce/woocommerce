@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add relative date support to the experimental Settings UI so number-and-unit settings such as personal data retention render and save.

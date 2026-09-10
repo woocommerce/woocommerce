@@ -197,6 +197,7 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 -   `single_select_country`
 -   `single_select_page`
 -   `info`
+-   `relative_date_selector`
 
 Fields before the first `title` marker are placed into a default group automatically.
 

@@ -2,12 +2,15 @@
  * External dependencies
  */
 import type {
+	DataFormControlProps,
 	Field,
 	FieldTypeName,
 	Form,
 	FormField,
 	Rules,
 } from '@wordpress/dataviews';
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -21,13 +24,14 @@ import {
 } from './registry';
 import type {
 	SettingsFieldContext,
+	SettingsRelativeDateValue,
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUISchema,
 	SettingsValues,
 	SettingsVisibilityPredicate,
 } from './types';
-import { valueMatchesVisibilityRule } from './values';
+import { isRelativeDateValue, valueMatchesVisibilityRule } from './values';
 
 // The adapter assumes the canonical value vocabulary from the PHP schema
 // builder, so no value coercion happens here.
@@ -88,6 +92,73 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	// defaults it to a free-text token field.
 	select: { type: 'text', edit: 'select' },
 	array: { type: 'array', edit: 'select' },
+	relative_date_selector: { type: 'text' },
+};
+
+const RelativeDateSelector = ( {
+	data,
+	field,
+	onChange,
+	hideLabelFromVision,
+}: DataFormControlProps< SettingsValues > ) => {
+	const currentValue = field.getValue( { item: data } );
+	const value: SettingsRelativeDateValue = isRelativeDateValue( currentValue )
+		? currentValue
+		: { number: '', unit: 'days' };
+	const disabled = field.isDisabled( { item: data, field } );
+	const options = field.elements ?? [];
+
+	const updateValue = ( nextValue: SettingsRelativeDateValue ) => {
+		onChange( field.setValue( { item: data, value: nextValue } ) );
+	};
+
+	return (
+		<fieldset
+			className="wc-settings-ui__relative-date-selector"
+			disabled={ disabled }
+		>
+			<legend
+				className={
+					hideLabelFromVision ? 'screen-reader-text' : undefined
+				}
+			>
+				{ field.label }
+			</legend>
+			<input
+				type="number"
+				min={ 1 }
+				step={ 1 }
+				placeholder={ field.placeholder }
+				aria-label={ __( 'Number', 'woocommerce' ) }
+				value={ value.number }
+				onChange={ ( event ) => {
+					const nextNumber = event.target.value;
+					updateValue( {
+						...value,
+						number: nextNumber === '' ? '' : Number( nextNumber ),
+					} );
+				} }
+			/>
+			<select
+				aria-label={ __( 'Unit', 'woocommerce' ) }
+				value={ value.unit }
+				onChange={ ( event ) =>
+					updateValue( {
+						...value,
+						unit: event.target
+							.value as SettingsRelativeDateValue[ 'unit' ],
+					} )
+				}
+			>
+				{ options.map( ( option ) => (
+					<option key={ option.value } value={ option.value }>
+						{ option.label }
+					</option>
+				) ) }
+			</select>
+			{ field.description && <div>{ field.description }</div> }
+		</fieldset>
+	);
 };
 
 // Predicates fail open: a broken visibility callback renders the field or
@@ -307,6 +378,11 @@ export const buildDataFormField = (
 		// the label for a read-only field, so info reuses it as its body.
 		field.render = ( { field: normalizedField } ) =>
 			normalizedField.description ?? null;
+		return field;
+	}
+
+	if ( settingsField.type === 'relative_date_selector' ) {
+		field.Edit = RelativeDateSelector;
 		return field;
 	}
 

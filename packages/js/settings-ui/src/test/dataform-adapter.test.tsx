@@ -100,6 +100,7 @@ describe( 'dataform adapter', () => {
 			[ 'number', 'number' ],
 			[ 'integer', 'integer' ],
 			[ 'array', 'array' ],
+			[ 'relative_date_selector', 'text' ],
 		];
 
 		it.each( typeExpectations )(
@@ -770,6 +771,73 @@ describe( 'dataform adapter', () => {
 	} );
 
 	describe( 'mounted DataForm behaviour', () => {
+		it( 'edits a relative date with one bounded composite control', () => {
+			const retentionField: SettingsUIField = {
+				id: 'retention',
+				label: 'Retention',
+				type: 'relative_date_selector',
+				placeholder: 'N/A',
+				options: [
+					{ label: 'Day(s)', value: 'days' },
+					{ label: 'Week(s)', value: 'weeks' },
+					{ label: 'Month(s)', value: 'months' },
+					{ label: 'Year(s)', value: 'years' },
+				],
+			};
+			const options = createOptions( [ retentionField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { retention: { number: 30, unit: 'days' } as const };
+			const onChange = jest.fn();
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ onChange }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			const select = container.querySelector( 'select' );
+			expect( input ).toHaveAttribute( 'min', '1' );
+			expect( input ).toHaveAttribute( 'step', '1' );
+			expect( input ).toHaveAttribute( 'placeholder', 'N/A' );
+			expect(
+				Array.from( select?.options ?? [] ).map(
+					( option ) => option.value
+				)
+			).toEqual( [ 'days', 'weeks', 'months', 'years' ] );
+
+			act( () => {
+				const numberInput = input as globalThis.HTMLInputElement;
+				Object.getOwnPropertyDescriptor(
+					globalThis.HTMLInputElement.prototype,
+					'value'
+				)?.set?.call( numberInput, '' );
+				numberInput.dispatchEvent(
+					new Event( 'input', { bubbles: true } )
+				);
+			} );
+			expect( onChange ).toHaveBeenCalledWith( {
+				retention: { number: '', unit: 'days' },
+			} );
+
+			act( () => {
+				const unitSelect = select as globalThis.HTMLSelectElement;
+				Object.getOwnPropertyDescriptor(
+					globalThis.HTMLSelectElement.prototype,
+					'value'
+				)?.set?.call( unitSelect, 'months' );
+				unitSelect.dispatchEvent(
+					new Event( 'change', { bubbles: true } )
+				);
+			} );
+			expect( onChange ).toHaveBeenCalledWith( {
+				retention: { number: 30, unit: 'months' },
+			} );
+		} );
+
 		it( 'honours isDisabled on package controls', () => {
 			const enabledField: SettingsUIField = {
 				id: 'enabled_field',

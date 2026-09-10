@@ -124,6 +124,51 @@ describe( 'getHiddenInputs', () => {
 		] );
 	} );
 
+	it( 'serializes a relative date as nested number and unit inputs', () => {
+		expect(
+			getHiddenInputs(
+				{
+					id: 'retention',
+					label: 'Retention',
+					type: 'relative_date_selector',
+					save: { adapter: 'form_post', name: 'retention' },
+				},
+				{ number: 30, unit: 'days' }
+			)
+		).toEqual( [
+			{ name: 'retention[number]', value: '30' },
+			{ name: 'retention[unit]', value: 'days' },
+		] );
+	} );
+
+	it( 'serializes a blank relative date without using object string coercion', () => {
+		const inputs = getHiddenInputs(
+			{
+				id: 'retention',
+				label: 'Retention',
+				type: 'relative_date_selector',
+				save: {
+					adapter: 'form_post',
+					name: 'retention',
+					initialValue: '',
+				},
+			},
+			{ number: '', unit: 'months' },
+			{
+				initialCanonicalValue: { number: '', unit: 'months' },
+			}
+		);
+
+		expect( inputs ).toEqual( [
+			{ name: 'retention[number]', value: '' },
+			{ name: 'retention[unit]', value: 'months' },
+		] );
+		expect( inputs ).not.toContainEqual( {
+			name: 'retention',
+			value: '[object Object]',
+		} );
+	} );
+
 	it( 'omits an unchanged empty array like the classic form', () => {
 		expect(
 			getHiddenInputs(
