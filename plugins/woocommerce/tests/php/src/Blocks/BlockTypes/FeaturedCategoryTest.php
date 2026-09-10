@@ -18,6 +18,50 @@ class FeaturedCategoryTest extends WC_Unit_Test_Case {
 	private $attachment_ids = array();
 
 	/**
+	 * @testdox Should render untouched legacy content as Cover without changing the stored post.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $oldest Whether to use the original attribute-only format.
+	 */
+	public function test_legacy_content_uses_cover( bool $oldest ): void {
+		$category_id = $this->create_category( 'Legacy category' );
+		$attributes  = array(
+			'categoryId'   => $category_id,
+			'contentAlign' => 'left',
+			'minHeight'    => 650,
+			'imageFit'     => 'none',
+		);
+		if ( $oldest ) {
+			$attributes['editMode'] = false;
+			$attributes['showDesc'] = false;
+		}
+		$markup  = '<!-- wp:woocommerce/featured-category ' . wp_json_encode( $attributes ) . ' --><!-- wp:paragraph --><p>Custom content</p><!-- /wp:paragraph --><!-- /wp:woocommerce/featured-category -->';
+		$post_id = $this->factory->post->create( array( 'post_content' => $markup ) );
+		$output  = do_blocks( get_post_field( 'post_content', $post_id ) );
+		$this->assertStringContainsString( 'wp-block-cover', $output );
+		$this->assertStringContainsString( 'is-position-center-left', $output );
+		$this->assertStringContainsString( 'natural-image', $output );
+		$this->assertStringContainsString( 'min-height:650px', $output );
+		$this->assertStringContainsString( 'Custom content', $output );
+		$this->assertStringNotContainsString( 'woocommerce-placeholder', $output );
+		$this->assertSame( $markup, get_post_field( 'post_content', $post_id ) );
+		if ( $oldest ) {
+			$this->assertStringContainsString( 'Legacy category', $output );
+			$this->assertStringNotContainsString( 'wc-block-featured-category__description', $output );
+		}
+	}
+
+	/**
+	 * @testdox Should respect a custom URL after its category binding is disconnected.
+	 */
+	public function test_disconnected_category_button_keeps_custom_url(): void {
+		$category_id = $this->create_category( 'Custom link category' );
+		$markup      = '<!-- wp:woocommerce/featured-category {"layout":"cover","source":"context"} --><!-- wp:cover {"className":"wc-block-featured-category__cover"} --><div class="wp-block-cover wc-block-featured-category__cover"><div class="wp-block-cover__inner-container"><!-- wp:button {"className":"wc-block-featured-category__link"} --><div class="wp-block-button wc-block-featured-category__link"><a class="wp-block-button__link" href="https://example.com/custom">Custom</a></div><!-- /wp:button --></div></div><!-- /wp:cover --><!-- /wp:woocommerce/featured-category -->';
+		$output      = $this->render_with_term_context( $markup, $category_id );
+		$this->assertStringContainsString( 'href="https://example.com/custom"', $output );
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -47,8 +91,11 @@ HTML;
 
 	/**
 	 * @testdox Should replace a bound Cover image with the inherited category thumbnail.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $selected Whether the category is selected instead of inherited.
 	 */
-	public function test_renders_category_thumbnail_in_bound_cover(): void {
+	public function test_renders_category_thumbnail_in_bound_cover( bool $selected ): void {
 		$category_id   = $this->create_category( 'Cover category' );
 		$attachment_id = $this->create_attachment();
 		update_term_meta( $category_id, 'thumbnail_id', $attachment_id );
@@ -61,7 +108,10 @@ HTML;
 <!-- /wp:woocommerce/featured-category -->
 HTML;
 
-		$output = $this->render_with_term_context( $markup, $category_id );
+		if ( $selected ) {
+			$markup = str_replace( '"source":"context"', '"source":"selected","categoryId":' . $category_id . ',"termTaxonomy":"product_cat"', $markup );
+		}
+		$output = $this->render_with_term_context( $markup, $selected ? $this->create_category( 'Other category' ) : $category_id );
 
 		$this->assertStringContainsString( 'wp-block-woocommerce-featured-category', $output, 'The Cover should retain the Featured Category class.' );
 		$this->assertStringContainsString( esc_url( (string) $image_url ), $output, 'The category thumbnail should replace the fallback image.' );

@@ -64,17 +64,22 @@ class FeaturedCategory extends FeaturedItem {
 		$term_id  = absint( $block_instance->context['termId'] ?? 0 );
 		$taxonomy = $block_instance->context['termTaxonomy'] ?? $block_instance->context['taxonomy'] ?? '';
 
-		if ( ! $term_id || 'product_cat' !== $taxonomy ) {
+		$attachment_id = absint( $source_args['attachmentId'] ?? 0 );
+		if ( ! $attachment_id && ( ! $term_id || 'product_cat' !== $taxonomy ) ) {
 			return null;
 		}
 
-		$image_id = absint( get_term_meta( $term_id, 'thumbnail_id', true ) );
+		$image_id = $attachment_id ? $attachment_id : absint( get_term_meta( $term_id, 'thumbnail_id', true ) );
+		$size     = is_string( $source_args['size'] ?? null ) ? $source_args['size'] : 'full';
 		if ( 'id' === $attribute_name ) {
 			return $image_id ? $image_id : null;
 		}
 
 		if ( 'url' === $attribute_name ) {
-			$image_url = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : wc_placeholder_img_src();
+			if ( ! $image_id && ! empty( $source_args['noPlaceholder'] ) ) {
+				return '';
+			}
+			$image_url = $image_id ? wp_get_attachment_image_url( $image_id, $size ) : wc_placeholder_img_src();
 			return $image_url ? $image_url : null;
 		}
 
@@ -136,7 +141,7 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
-	 * Render either the legacy Featured Category layout or its Cover layout.
+	 * Render all Featured Category versions using Cover markup.
 	 *
 	 * @since 11.2.0
 	 *
@@ -148,41 +153,124 @@ class FeaturedCategory extends FeaturedItem {
 	protected function render( $attributes, $content, $block ) {
 		$attributes = $this->resolve_context_attributes( $attributes, $block );
 
-		if ( 'cover' !== ( $attributes['layout'] ?? '' ) ) {
-			return parent::render( $attributes, $content, $block );
-		}
-
 		$category = $this->get_item( $attributes );
 		if ( ! $category ) {
 			return '';
 		}
 
+		$is_legacy = 'cover' !== ( $attributes['layout'] ?? '' ) && ! $this->contains_cover( $block->parsed_block['innerBlocks'] ?? array() );
+		if ( $is_legacy ) {
+			$content = $this->render_legacy_cover( $attributes, $content, $category );
+		}
+		wp_enqueue_style( 'wp-block-cover' );
+
 		$processor = new \WP_HTML_Tag_Processor( $content );
-		if ( $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__cover' ) ) ) {
-			$processor->add_class( 'wp-block-woocommerce-featured-category' );
+		$cover     = $this->find_bound_cover( $block->parsed_block['innerBlocks'] ?? array() );
+		if ( $cover && $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__cover' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
+			$this->update_cover_image_markup( $processor, $category, $cover['attrs']['metadata']['bindings']['url']['args'] ?? array(), strpos( $cover['attrs']['className'] ?? '', 'wc-block-featured-category__natural-image' ) !== false );
 		}
 
-		if ( $this->has_bound_cover_image( $block ) && $processor->next_tag( array( 'class_name' => 'wp-block-cover__image-background' ) ) ) {
-			$this->update_cover_image_markup( $processor, $category );
+		$content = $processor->get_updated_html();
+		if ( ! empty( $attributes['ariaLabel'] ) ) {
+			$processor = new \WP_HTML_Tag_Processor( $content );
+			if ( $processor->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
+				$processor->set_attribute( 'aria-label', $attributes['ariaLabel'] );
+				$content = $processor->get_updated_html();
+			}
 		}
 
-		return $this->update_cover_button_markup(
-			$processor->get_updated_html(),
-			$category,
-			$attributes['ariaLabel'] ?? ''
-		);
+		$classes = 'wp-block-woocommerce-featured-category';
+		if ( ! empty( $attributes['align'] ) && 'none' !== $attributes['align'] ) {
+			$classes .= ' align' . sanitize_html_class( $attributes['align'] );
+		}
+		$classes .= ' ' . ( $attributes['className'] ?? '' );
+		$anchor   = empty( $attributes['anchor'] ) ? '' : ' id="' . esc_attr( $attributes['anchor'] ) . '"';
+		return '<div class="' . esc_attr( trim( $classes ) ) . '"' . $anchor . '>' . $content . '</div>';
 	}
 
 	/**
-	 * Whether the Cover child uses the WooCommerce term image binding.
+	 * Whether saved content already contains the current layout.
 	 *
-	 * @param \WP_Block $block Featured Category block instance.
+	 * @param array[] $blocks Parsed child blocks.
 	 * @return bool
 	 */
-	private function has_bound_cover_image( $block ) {
-		$cover_block = $this->find_bound_cover( $block->parsed_block['innerBlocks'] ?? array() );
+	private static function contains_cover( $blocks ) {
+		foreach ( $blocks as $child ) {
+			if ( 'core/cover' === ( $child['blockName'] ?? '' ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-		return null !== $cover_block;
+	/**
+	 * Adapt untouched posts to Cover without rewriting their saved content.
+	 *
+	 * @param array    $attributes Legacy attributes.
+	 * @param string   $content Already rendered inner blocks.
+	 * @param \WP_Term $category Selected category.
+	 * @return string
+	 */
+	private function render_legacy_cover( $attributes, $content, $category ) {
+		$natural  = 'cover' !== ( $attributes['imageFit'] ?? 'none' );
+		$classes  = 'wp-block-cover wc-block-featured-category__cover wc-block-featured-category__legacy';
+		$classes .= $natural ? ' wc-block-featured-category__natural-image' : '';
+		$position = in_array( $attributes['contentAlign'] ?? '', array( 'left', 'right' ), true ) ? $attributes['contentAlign'] : 'center';
+		if ( 'center' !== $position ) {
+			$classes .= ' has-custom-content-position is-position-center-' . $position;
+		}
+		$fixed    = ! empty( $attributes['hasParallax'] );
+		$repeated = ! empty( $attributes['isRepeated'] );
+		$classes .= $fixed ? ' has-parallax' : '';
+		$classes .= $repeated ? ' is-repeated' : '';
+		$padding  = $attributes['style']['spacing']['padding'] ?? null;
+		if ( is_string( $padding ) ) {
+			$attributes['style']['spacing']['padding'] = array_fill_keys( array( 'top', 'right', 'bottom', 'left' ), $padding );
+		}
+		$classes .= ' ' . \Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
+		$styles   = $this->get_styles( $attributes );
+		$styles  .= isset( $attributes['lineHeight'] ) ? 'line-height:' . esc_attr( $attributes['lineHeight'] ) . ';' : '';
+		$styles  .= isset( $attributes['style']['spacing']['padding'] ) ? '' : 'padding:0;';
+
+		$custom_id = absint( $attributes['mediaId'] ?? 0 );
+		$image_id  = $custom_id ? $custom_id : $this->get_item_image_id( $category );
+		$size      = ( empty( $attributes['align'] ) || 'none' === $attributes['align'] ) && ( $attributes['height'] ?? 500 ) <= 800 ? 'large' : 'full';
+		$image_url = $image_id ? wp_get_attachment_image_url( $image_id, $size ) : ( $attributes['mediaSrc'] ?? '' );
+		$image_url = $image_url ? $image_url : '';
+		$focal     = $attributes['focalPoint'] ?? array(
+			'x' => 0.5,
+			'y' => 0.5,
+		);
+		$focal_css = sprintf( '%s%% %s%%', (float) ( $focal['x'] ?? 0.5 ) * 100, (float) ( $focal['y'] ?? 0.5 ) * 100 );
+		$alt       = $attributes['alt'] ?? '';
+		if ( $fixed || $repeated ) {
+			$image = '<div class="wp-block-cover__image-background wc-block-featured-category__background-image" style="' . esc_attr( 'background-position:' . $focal_css . ';background-image:url("' . esc_url_raw( $image_url ) . '");' ) . '"></div>';
+		} else {
+			$image = '<img class="wp-block-cover__image-background wc-block-featured-category__background-image" src="' . esc_url( $image_url ) . '" alt="' . esc_attr( $alt ) . '" style="object-position:' . esc_attr( $focal_css ) . '" />';
+		}
+		if ( ! $image_url ) {
+			$image = '';
+		}
+		$dim                = max( 0, min( 100, (int) ( $attributes['dimRatio'] ?? 50 ) ) );
+		$overlay            = ! empty( $attributes['overlayGradient'] ) ? 'background:' . $attributes['overlayGradient'] : 'background-color:' . ( $attributes['overlayColor'] ?? '#000000' );
+		$overlay            = '<span aria-hidden="true" class="wp-block-cover__background has-background-dim" style="' . esc_attr( $overlay . ';opacity:' . $dim / 100 ) . '"></span>';
+		$historical_content = $this->render_attributes( $category, $attributes );
+		$markup             = '<div class="' . esc_attr( trim( $classes ) ) . '" style="' . esc_attr( $styles ) . '">' . $image . $overlay . '<div class="wp-block-cover__inner-container">' . $historical_content . '<div class="wp-block-group wc-block-featured-category__inner-blocks" style="padding:0 48px 16px">' . $content . '</div></div></div>';
+
+		// Cover's PHP callback expects saved HTML; attributes alone cannot create it.
+		return render_block(
+			array(
+				'blockName'    => 'core/cover',
+				'attrs'        => array(
+					'backgroundType'   => 'image',
+					'useFeaturedImage' => false,
+					'style'            => $attributes['style'] ?? array(),
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $markup,
+				'innerContent' => array( $markup ),
+			)
+		);
 	}
 
 	/**
@@ -213,11 +301,22 @@ class FeaturedCategory extends FeaturedItem {
 	 *
 	 * @param \WP_HTML_Tag_Processor $processor HTML processor positioned on the image.
 	 * @param \WP_Term               $category  Product category.
+	 * @param array                  $args Image binding arguments.
+	 * @param bool                   $natural Whether to retain natural image dimensions.
 	 */
-	private function update_cover_image_markup( $processor, $category ): void {
-		$image_id  = $this->get_item_image_id( $category );
-		$image_src = $image_id ? wp_get_attachment_image_src( $image_id, 'full' ) : false;
+	private function update_cover_image_markup( $processor, $category, $args = array(), $natural = false ): void {
+		$custom_id = absint( $args['attachmentId'] ?? 0 );
+		$image_id  = $custom_id ? $custom_id : $this->get_item_image_id( $category );
+		$size      = is_string( $args['size'] ?? null ) ? $args['size'] : 'full';
+		$image_src = $image_id ? wp_get_attachment_image_src( $image_id, $size ) : false;
 		$image_url = $image_src ? $image_src[0] : wc_placeholder_img_src();
+		if ( ! $image_src && ! empty( $args['noPlaceholder'] ) ) {
+			$processor->set_attribute( 'hidden', true );
+			$processor->remove_attribute( 'src' );
+			$processor->remove_attribute( 'srcset' );
+			return;
+		}
+		$processor->remove_attribute( 'hidden' );
 
 		if ( 'IMG' !== $processor->get_tag() ) {
 			$style = (string) $processor->get_attribute( 'style' );
@@ -248,9 +347,14 @@ class FeaturedCategory extends FeaturedItem {
 		$processor->set_attribute( 'width', (string) $image_src[1] );
 		$processor->set_attribute( 'height', (string) $image_src[2] );
 		$processor->add_class( 'wp-image-' . $image_id );
+		if ( $natural ) {
+			$processor->remove_attribute( 'srcset' );
+			$processor->remove_attribute( 'sizes' );
+			return;
+		}
 
-		$srcset = wp_get_attachment_image_srcset( $image_id, 'full' );
-		$sizes  = wp_get_attachment_image_sizes( $image_id, 'full' );
+		$srcset = wp_get_attachment_image_srcset( $image_id, $size );
+		$sizes  = wp_get_attachment_image_sizes( $image_id, $size );
 		if ( $srcset ) {
 			$processor->set_attribute( 'srcset', $srcset );
 		} else {
@@ -262,29 +366,6 @@ class FeaturedCategory extends FeaturedItem {
 		} else {
 			$processor->remove_attribute( 'sizes' );
 		}
-	}
-
-	/**
-	 * Update bound Cover buttons with the current category link.
-	 *
-	 * @param string   $content    Rendered Cover content.
-	 * @param \WP_Term $category   Product category.
-	 * @param string   $aria_label Optional accessible label for the first button.
-	 * @return string
-	 */
-	private function update_cover_button_markup( $content, $category, $aria_label ) {
-		$term_link = get_term_link( $category );
-		$processor = new \WP_HTML_Tag_Processor( $content );
-		if ( $processor->next_tag( array( 'class_name' => 'wc-block-featured-category__link' ) ) && $processor->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
-			if ( ! is_wp_error( $term_link ) ) {
-				$processor->set_attribute( 'href', $term_link );
-			}
-			if ( $aria_label ) {
-				$processor->set_attribute( 'aria-label', $aria_label );
-			}
-		}
-
-		return $processor->get_updated_html();
 	}
 
 	/**
