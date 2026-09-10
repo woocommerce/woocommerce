@@ -1863,7 +1863,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
 			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
 
-			if ( $reload_checkout || $suppress_notice_output ) {
+			if ( $reload_checkout || $suppress_notice_output || empty( $notices ) ) {
 				$this->assertSame( '', $response['messages'], 'The response should carry no rendered notices.' );
 			} else {
 				foreach ( $notices as $notice ) {
@@ -1903,6 +1903,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public static function provide_update_order_review_notice_cases(): array {
 		return array(
+			'no notices'                     => array(
+				array(),
+				'success',
+				false,
+				false,
+			),
 			'success notice'                 => array(
 				array(
 					array(
