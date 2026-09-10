@@ -52,6 +52,7 @@ add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
  * Adds support to get_terms for menu_order argument.
  *
  * @since 3.6.0
+ * @since 11.2.0 A term meta filter supplied by the caller is kept instead of being overwritten by the 'order' sorting key.
  * @param WP_Term_Query $terms_query Instance of WP_Term_Query.
  */
 function wc_change_pre_get_terms( $terms_query ) {
