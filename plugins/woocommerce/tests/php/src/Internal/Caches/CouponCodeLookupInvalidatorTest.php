@@ -279,6 +279,39 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A lookup entry holding several coupons should be validated in a single query when the post cache is cold.
+	 */
+	public function test_a_lookup_entry_of_several_coupons_is_validated_in_one_query(): void {
+		global $wpdb;
+
+		$code = 'cache-hit-batch';
+		$ids  = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$ids[] = wp_insert_post(
+				array(
+					'post_type'   => 'shop_coupon',
+					'post_title'  => $code,
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		wc_get_coupon_id_by_code( $code );
+		$cached_ids = array_map( 'absint', (array) wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ) );
+		sort( $cached_ids );
+		$this->assertSame( $ids, $cached_ids, 'Every published coupon sharing the code should be cached under it' );
+
+		// Cold post cache with a warm lookup entry, what a persistent object cache leaves behind between requests.
+		foreach ( $ids as $id ) {
+			wp_cache_delete( $id, 'posts' );
+		}
+
+		$queries_before = $wpdb->num_queries;
+		$this->assertContains( wc_get_coupon_id_by_code( $code ), $ids, 'One of the published coupons should resolve by code' );
+		$this->assertSame( $queries_before + 1, $wpdb->num_queries, 'Validating a cached entry should fetch the posts it holds in one query, not one query per coupon' );
+	}
+
+	/**
 	 * Make a coupon data store that resolves more than the published coupons the read-time check describes.
 	 *
 	 * @return callable The filter callback registering the store, to pass to remove_filter().

@@ -136,10 +136,10 @@ class CouponCodeLookupInvalidator {
 	 * Check whether a cached lookup entry can no longer be trusted.
 	 *
 	 * An entry is stale as soon as one of its ids no longer belongs to a published coupon, i.e.
-	 * the coupon was unpublished, trashed or deleted after the entry was written. The post is read
-	 * through get_post(), which serves it from the core post cache. Every post write cleans that
-	 * cache, so the check costs no query on a warm cache and does not depend on which key the
-	 * entry was cached under.
+	 * the coupon was unpublished, trashed or deleted after the entry was written. The posts are
+	 * read from the core post cache, which every post write cleans, so the check does not depend
+	 * on which key the entry was cached under. A cold post cache costs one query for the whole
+	 * entry, a warm one none.
 	 *
 	 * "Published coupon" is what WC_Coupon_Data_Store_CPT::get_ids_by_code() resolves, so callers
 	 * must only apply this to entries that data store wrote. See the known limitations above.
@@ -155,6 +155,9 @@ class CouponCodeLookupInvalidator {
 		if ( empty( $ids ) ) {
 			return true;
 		}
+
+		// A code can be cached with more than one id. Fetch the missing posts in one query rather than one each.
+		_prime_post_caches( $ids, false, false );
 
 		foreach ( $ids as $id ) {
 			$post = get_post( $id );
