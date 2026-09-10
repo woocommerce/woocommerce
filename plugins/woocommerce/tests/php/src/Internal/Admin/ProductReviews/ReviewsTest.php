@@ -93,6 +93,117 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `load_reviews_screen` registers the "per page" screen option bound to the dedicated reviews user option.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the property is not found.
+	 */
+	public function test_load_reviews_screen_registers_per_page_option(): void {
+		global $current_screen;
+
+		$previous_screen     = $current_screen;
+		$reviews             = wc_get_container()->get( Reviews::class );
+		$list_table_property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
+		$list_table_property->setAccessible( true );
+		$previous_list_table = $list_table_property->getValue( $reviews );
+
+		try {
+			set_current_screen( 'product_page_product-reviews' );
+
+			// Exercise the production wiring: registration must happen through `load_reviews_screen()`, so that
+			// dropping the `add_screen_options()` call from it would fail this test.
+			$reviews->load_reviews_screen();
+
+			$option = get_current_screen()->get_option( 'per_page' );
+
+			$this->assertIsArray( $option );
+			$this->assertArrayHasKey( 'option', $option );
+			$this->assertSame( Reviews::PER_PAGE_USER_OPTION_KEY, $option['option'] );
+			$this->assertArrayHasKey( 'default', $option );
+			$this->assertSame( 20, $option['default'] );
+		} finally {
+			$list_table_property->setValue( $reviews, $previous_list_table );
+			$current_screen = $previous_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox `set_reviews_per_page_option` saves values within the 1–999 bounds and rejects everything else.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
+	 *
+	 * @return void
+	 */
+	public function test_set_reviews_per_page_option(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// Values inside the 1–999 range are saved.
+		$this->assertSame( 1, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 1 ) );
+		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+		$this->assertSame( 999, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 999 ) );
+
+		// Values outside the range are always rejected, so nothing is saved.
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 0 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, -5 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
+
+		// Leaves other options untouched (returns the incoming status).
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, 'some_other_per_page', 55 ) );
+	}
+
+	/**
+	 * @testdox The dynamic screen-option filter saves valid values and rejects invalid values.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::__construct()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
+	 *
+	 * @return void
+	 */
+	public function test_set_reviews_per_page_option_filter(): void {
+		$reviews = new Reviews();
+		$hook    = 'set_screen_option_' . Reviews::PER_PAGE_USER_OPTION_KEY;
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+			$this->assertSame( 55, apply_filters( $hook, false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Exercises WordPress's dynamic Screen Options filter.
+			$this->assertFalse( apply_filters( $hook, 1000, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
+		} finally {
+			remove_filter( $hook, array( $reviews, 'set_reviews_per_page_option' ) );
+		}
+	}
+
+	/**
+	 * @testdox `apply_legacy_reviews_per_page_filter` re-applies the legacy `edit_comments_per_page` filter.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
+	 *
+	 * @return void
+	 */
+	public function test_apply_legacy_reviews_per_page_filter(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// With no legacy filter attached, the value passes through unchanged.
+		$this->assertSame( 20, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
+
+		// With a legacy `edit_comments_per_page` filter attached, its value is applied.
+		$legacy = static function () {
+			return 45;
+		};
+		add_filter( 'edit_comments_per_page', $legacy );
+
+		try {
+			$this->assertSame( 45, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
+		} finally {
+			remove_filter( 'edit_comments_per_page', $legacy );
+		}
+	}
+
+	/**
 	 * @testdox `get_pending_count_bubble` will return the HTML for the pending reviews (awaiting moderation).
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()
