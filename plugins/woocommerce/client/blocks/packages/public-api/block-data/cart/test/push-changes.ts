@@ -7,7 +7,7 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
-import { pushChanges } from '../push-changes';
+import { flushChanges, pushChanges } from '../push-changes';
 
 let updateCustomerDataMock = jest.fn();
 const getValidationErrorMock = jest.fn().mockReturnValue( undefined );
@@ -809,6 +809,65 @@ describe( 'pushChanges', () => {
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{ shipping_address: { ...countryChangedAddress } },
+			true,
+			true // because the shipping rate impacting field was changed
+		);
+
+		jest.useRealTimers();
+	} );
+	it( 'Keeps a scheduled push when a field is blurred while a push is running', async () => {
+		jest.useFakeTimers();
+		updateCustomerDataMock.mockClear();
+
+		// Keep the first push running so the next change is made while it is in flight.
+		let resolveFirstPush: () => void = () => undefined;
+		updateCustomerDataMock.mockReturnValueOnce(
+			new Promise< void >( ( resolve ) => {
+				resolveFirstPush = resolve;
+			} )
+		);
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				...initialBillingAddress,
+				email: 'jane.doe@mail.com',
+			},
+			shippingAddress: { ...initialShippingAddress },
+		} );
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		const typedAddress = {
+			...initialShippingAddress,
+			city: 'Houston',
+			state: 'TX',
+			postcode: '77058',
+		};
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				...initialBillingAddress,
+				email: 'jane.doe@mail.com',
+			},
+			shippingAddress: { ...typedAddress },
+		} );
+
+		pushChanges();
+
+		// Blurring the field flushes, which must not cancel the push scheduled above.
+		flushChanges();
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		resolveFirstPush();
+		await Promise.resolve();
+		jest.advanceTimersByTime( 1500 );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
+		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
+			{ shipping_address: { ...typedAddress } },
 			true,
 			true // because the shipping rate impacting field was changed
 		);

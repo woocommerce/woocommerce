@@ -85,14 +85,23 @@ test.describe( 'Shopper → Extensibility', () => {
 		test( 'Unpushed data is/is not overwritten depending on arg', async ( {
 			checkoutPageObject,
 		} ) => {
-			// Fill in the address so it pushes, then wait for the push to finish.
+			// Fill in the address, then wait until it has reached the server. The dirty flag is
+			// not enough on its own: it is cleared by whichever push finishes first, which can
+			// be an earlier one that did not carry the address.
 			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.page.waitForFunction(
-				() =>
-					window.localStorage.getItem(
-						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
-					) === 'false'
-			);
+			await expect
+				.poll(
+					async () =>
+						checkoutPageObject.page.evaluate( async () => {
+							const response = await fetch(
+								'/wp-json/wc/store/v1/cart'
+							);
+							const cart = await response.json();
+							return cart.shipping_address.postcode;
+						} ),
+					{ timeout: 15000 }
+				)
+				.toBe( '90210' );
 
 			// A postcode that fails validation is never pushed, so it only exists in the browser.
 			const postcode =

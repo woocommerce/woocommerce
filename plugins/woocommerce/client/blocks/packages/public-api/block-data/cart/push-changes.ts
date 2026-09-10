@@ -256,15 +256,21 @@ export const pushChanges = ( debounced = true ): void => {
 			localState.customerData.shippingAddress.country;
 
 	if ( countryChanged ) {
-		// Push directly rather than flushing the debounce. When a push is already running,
-		// debouncedUpdateCustomerData reschedules itself, and flushing cancels that reschedule:
-		// the country change would then never reach the server. Calling updateCustomerData
-		// leaves the run scheduled above in place, so it still pushes once the current one ends.
+		// Push now rather than flushing the debounce: while a push is running this is a no-op,
+		// and the run scheduled above still sends the change once that push finishes.
 		updateCustomerData();
 	}
 };
 
 // Cancel the debounced updateCustomerData function and trigger it immediately.
 export const flushChanges = (): void => {
-	debouncedUpdateCustomerData.flush();
+	if ( localState.doingPush ) {
+		// A push is already running, so this one would be a no-op anyway. Leave the scheduled
+		// run alone: flushing it here would cancel it, and the changes made during the running
+		// push would never reach the server.
+		return;
+	}
+
+	debouncedUpdateCustomerData.clear();
+	updateCustomerData();
 };
