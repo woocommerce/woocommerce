@@ -19,7 +19,6 @@ import type { BlockAlignment } from '@wordpress/blocks';
  */
 import { useBackgroundImage } from './use-background-image';
 import { EditorBlock, GenericBlockUIConfig } from './types';
-import { BLOCK_NAMES } from './constants';
 
 type Media = { id: number; url: string };
 
@@ -49,10 +48,8 @@ type WithBlockControlsProps< T extends EditorBlock< T > > =
 
 type BlockControlRequiredAttributes = {
 	contentAlign: BlockAlignment;
-	layout?: string;
 	mediaId: number;
 	mediaSrc: string;
-	source?: string;
 };
 
 interface BlockControlsProps {
@@ -155,33 +152,6 @@ export const withBlockControls =
 			mediaSrc,
 			blockName: name,
 		} );
-
-		if (
-			name === BLOCK_NAMES.featuredCategory &&
-			attributes.layout === 'cover'
-		) {
-			if ( attributes.source === 'context' ) {
-				return <Component { ...props } />;
-			}
-
-			return (
-				<>
-					<BlockControlsWrapper>
-						<ToolbarGroup
-							controls={ [
-								{
-									icon: 'edit',
-									title: editLabel,
-									onClick: () => setEditMode( ! editMode ),
-									isActive: editMode,
-								},
-							] }
-						/>
-					</BlockControlsWrapper>
-					<Component { ...props } />
-				</>
-			);
-		}
 
 		return (
 			<>

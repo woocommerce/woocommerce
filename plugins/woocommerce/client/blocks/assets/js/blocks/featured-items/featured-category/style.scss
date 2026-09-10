@@ -7,3 +7,29 @@
 .wc-block-featured-category {
 	@include wc-block-featured-item();
 }
+
+.wc-block-featured-category__cover.wc-block-featured-category__legacy {
+	overflow: hidden;
+	.wc-block-featured-category__title,
+	.wc-block-featured-category__description {
+		box-sizing: border-box;
+	}
+	> .wp-block-cover__inner-container {
+		width: 100%;
+	}
+	.wc-block-featured-category__inner-blocks {
+		box-sizing: border-box;
+		width: 100%;
+	}
+}
+
+:where(.wc-block-featured-category__legacy) {
+	color: #fff;
+}
+
+.wc-block-featured-category__cover.wc-block-featured-category__natural-image {
+	> .wp-block-cover__image-background {
+		object-fit: none;
+		background-size: auto;
+	}
+}

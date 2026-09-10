@@ -37,12 +37,9 @@ interface EditModeConfiguration extends GenericBlockUIConfig {
 
 type EditModeRequiredAttributes = {
 	categoryId?: number;
-	layout?: string;
 	mediaId: number;
 	mediaSrc: string;
 	productId?: number;
-	source?: string;
-	termTaxonomy?: string;
 };
 
 interface EditModeRequiredProps< T > {
@@ -53,11 +50,6 @@ interface EditModeRequiredProps< T > {
 	triggerUrlUpdate: () => void;
 	isLoading: boolean;
 	error?: ErrorObject | null;
-	context?: {
-		termId?: number;
-		termTaxonomy?: string;
-		taxonomy?: string;
-	};
 }
 
 type EditModeProps< T extends EditorBlock< T > > = T &
@@ -74,7 +66,6 @@ export const withEditMode =
 			setAttributes,
 			triggerUrlUpdate = () => void null,
 			error,
-			context,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
@@ -83,23 +74,11 @@ export const withEditMode =
 			categoryId?: number;
 			mediaId: number;
 			mediaSrc: string;
-			layout?: string;
-			source?: string;
-			termTaxonomy?: string;
 		} >();
-		const inheritedTaxonomy = context?.termTaxonomy || context?.taxonomy;
-		const inheritedCategoryId =
-			name === BLOCK_NAMES.featuredCategory &&
-			! attributes.categoryId &&
-			attributes.source !== 'selected' &&
-			inheritedTaxonomy === 'product_cat'
-				? context?.termId
-				: undefined;
 
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
-			( name === BLOCK_NAMES.featuredCategory &&
-				( attributes.categoryId || inheritedCategoryId ) );
+			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
 
 		// Only show edit mode for newly inserted blocks without existing selection
 		const [ editMode, setEditMode ] = useState< boolean >(
@@ -117,7 +96,7 @@ export const withEditMode =
 		const itemId =
 			name === BLOCK_NAMES.featuredProduct
 				? attributes?.productId
-				: attributes?.categoryId || inheritedCategoryId;
+				: attributes?.categoryId;
 
 		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
 			itemId,
@@ -125,25 +104,6 @@ export const withEditMode =
 		} );
 
 		const isPreviewMode = usePreviewMode();
-
-		useEffect( () => {
-			if (
-				inheritedCategoryId &&
-				( attributes.source !== 'context' ||
-					attributes.layout !== 'cover' )
-			) {
-				setAttributes( {
-					layout: 'cover',
-					source: 'context',
-					termTaxonomy: 'product_cat',
-				} );
-			}
-		}, [
-			attributes.layout,
-			attributes.source,
-			inheritedCategoryId,
-			setAttributes,
-		] );
 
 		useEffect( () => {
 			if ( isPreviewMode ) {
@@ -198,11 +158,8 @@ export const withEditMode =
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
 									setSelectedOptions( {
 										categoryId: id,
-										layout: 'cover',
 										mediaId: 0,
 										mediaSrc: '',
-										source: 'selected',
-										termTaxonomy: 'product_cat',
 									} );
 									triggerUrlUpdate();
 								} }

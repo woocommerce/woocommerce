@@ -13,7 +13,7 @@ import { ProductResponseItem } from '@woocommerce/types';
  */
 import { EditorBlock } from './types';
 interface WithUpdateButtonAttributes< T > {
-	attributes: EditorBlock< T >[ 'attributes' ] & { layout?: string };
+	attributes: EditorBlock< T >[ 'attributes' ];
 	editMode?: boolean;
 }
 
@@ -77,7 +77,6 @@ export const withUpdateButtonAttributes =
 
 		useEffect( () => {
 			if (
-				props.attributes.layout !== 'cover' &&
 				doUrlUpdate &&
 				buttonBlockId &&
 				! editMode &&
@@ -95,7 +94,6 @@ export const withUpdateButtonAttributes =
 			doUrlUpdate,
 			editMode,
 			permalink,
-			props.attributes.layout,
 			updateBlockAttributes,
 			url,
 		] );

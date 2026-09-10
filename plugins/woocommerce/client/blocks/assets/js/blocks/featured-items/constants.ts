@@ -47,7 +47,6 @@ const FEATURED_CATEGORY_CONTENT_TEMPLATE = (
 			[
 				'core/button',
 				{
-					className: 'wc-block-featured-category__link',
 					text: __( 'Shop now', 'woocommerce' ),
 					url: category.permalink,
 					metadata: {
@@ -65,13 +64,9 @@ const FEATURED_CATEGORY_CONTENT_TEMPLATE = (
 ];
 
 export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
-	category: WP_REST_API_Category,
-	useCover = false
+	category: WP_REST_API_Category
 ): InnerBlockTemplate[] => {
 	const content = FEATURED_CATEGORY_CONTENT_TEMPLATE( category );
-	if ( ! useCover ) {
-		return content;
-	}
 
 	const imageId = getCategoryImageId( category );
 	const imageUrl =

@@ -50,7 +50,6 @@ interface InspectorControlsRequiredAttributes
 	> {
 	alt: string;
 	backgroundImageSrc: string;
-	layout?: string;
 }
 
 interface InspectorControlsProps extends InspectorControlsRequiredAttributes {
@@ -362,13 +361,6 @@ export const withInspectorControls =
 			mediaSrc,
 			blockName: name,
 		} );
-
-		if (
-			name === BLOCK_NAMES.featuredCategory &&
-			attributes.layout === 'cover'
-		) {
-			return <Component { ...props } />;
-		}
 
 		return (
 			<>

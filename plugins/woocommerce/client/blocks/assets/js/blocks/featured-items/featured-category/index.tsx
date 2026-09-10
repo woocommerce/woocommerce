@@ -21,6 +21,12 @@ registerTermImageBinding();
 
 register( Block, example, metadata, {
 	deprecated,
+	supports: {
+		align: [ 'wide', 'full' ],
+		ariaLabel: true,
+		html: false,
+		interactivity: { clientNavigation: true },
+	},
 	// Namespaced keys keep undefined selected-category attributes from
 	// overwriting the term context supplied by Terms Query in the editor.
 	providesContext: {
