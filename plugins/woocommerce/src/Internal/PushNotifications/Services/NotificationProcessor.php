@@ -177,13 +177,7 @@ class NotificationProcessor {
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
 
 		if ( ! empty( $result['success'] ) ) {
-			/**
-			 * Stamped only on success, so the value reads unambiguously as
-			 * "WPCOM accepted a payload containing this token" — which is what
-			 * makes it useful for telling "we never targeted this device" apart
-			 * from "we targeted it and it didn't arrive" when diagnosing a
-			 * missing notification.
-			 */
+			// Success only, for the reason {@see PushToken::get_last_sent_at_gmt()} gives.
 			$this->data_store->record_last_sent_at( $tokens );
 
 			$notification->write_meta( self::SENT_META_KEY );

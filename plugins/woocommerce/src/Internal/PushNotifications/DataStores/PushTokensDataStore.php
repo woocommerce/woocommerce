@@ -604,9 +604,8 @@ class PushTokensDataStore {
 			array_merge( array( self::LAST_SENT_AT_META_KEY ), $post_ids )
 		);
 
-		// `prepare()` returns null on a placeholder mismatch, and `get_col()`
-		// would then skip the query and read `last_result` from whatever ran
-		// before, so the check cannot wait until after the read.
+		// Checked before the read, not after: a null here would leave
+		// `last_result` holding whatever ran previously.
 		if ( ! is_string( $select ) || '' === $select ) {
 			$this->warn_last_sent_at_not_recorded( $post_ids, 'Could not build the query to read existing stamps, skipping chunk.' );
 
@@ -649,16 +648,19 @@ class PushTokensDataStore {
 			$insert_ids = array_values( array_diff( $ids, $existing ) );
 
 			if ( ! empty( $update_ids ) ) {
-				$this->query_or_warn(
-					$wpdb->prepare(
-						sprintf(
-							"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND post_id IN ( %s )",
-							implode( ', ', array_fill( 0, count( $update_ids ), '%d' ) )
-						),
-						array_merge( array( $timestamp, self::LAST_SENT_AT_META_KEY ), $update_ids )
+				$update = $wpdb->prepare(
+					sprintf(
+						"UPDATE {$wpdb->postmeta} SET meta_value = %%s WHERE meta_key = %%s AND post_id IN ( %s )",
+						implode( ', ', array_fill( 0, count( $update_ids ), '%d' ) )
 					),
-					$update_ids
+					array_merge( array( $timestamp, self::LAST_SENT_AT_META_KEY ), $update_ids )
 				);
+
+				if ( ! is_string( $update ) || '' === $update ) {
+					$this->warn_last_sent_at_not_recorded( $update_ids, 'Could not build the update statement.' );
+				} elseif ( false === $wpdb->query( $update ) ) {
+					$this->warn_last_sent_at_not_recorded( $update_ids, $wpdb->last_error );
+				}
 			}
 
 			if ( ! empty( $insert_ids ) ) {
@@ -670,16 +672,19 @@ class PushTokensDataStore {
 					$insert_args[] = $timestamp;
 				}
 
-				$this->query_or_warn(
-					$wpdb->prepare(
-						sprintf(
-							"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES %s",
-							implode( ', ', array_fill( 0, count( $insert_ids ), '( %d, %s, %s )' ) )
-						),
-						$insert_args
+				$insert = $wpdb->prepare(
+					sprintf(
+						"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value ) VALUES %s",
+						implode( ', ', array_fill( 0, count( $insert_ids ), '( %d, %s, %s )' ) )
 					),
-					$insert_ids
+					$insert_args
 				);
+
+				if ( ! is_string( $insert ) || '' === $insert ) {
+					$this->warn_last_sent_at_not_recorded( $insert_ids, 'Could not build the insert statement.' );
+				} elseif ( false === $wpdb->query( $insert ) ) {
+					$this->warn_last_sent_at_not_recorded( $insert_ids, $wpdb->last_error );
+				}
 			}
 		}
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -703,37 +708,6 @@ class PushTokensDataStore {
 				'source'      => PushNotifications::FEATURE_NAME,
 				'token_count' => count( $post_ids ),
 				'error'       => $error,
-			)
-		);
-	}
-
-	/**
-	 * Runs a prepared statement, logging rather than throwing when it fails.
-	 *
-	 * @param string|null $query    The prepared SQL, or null if `prepare()` failed.
-	 * @param int[]       $post_ids The token post IDs the statement covers, for the log context.
-	 * @return void
-	 */
-	private function query_or_warn( ?string $query, array $post_ids ): void {
-		global $wpdb;
-
-		if ( ! is_string( $query ) || '' === $query ) {
-			$this->warn_last_sent_at_not_recorded( $post_ids, 'Could not build the query to write stamps.' );
-
-			return;
-		}
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( false !== $wpdb->query( $query ) ) {
-			return;
-		}
-
-		wc_get_logger()->warning(
-			'Failed to record last sent time for push tokens.',
-			array(
-				'source'      => PushNotifications::FEATURE_NAME,
-				'token_count' => count( $post_ids ),
-				'error'       => $wpdb->last_error,
 			)
 		);
 	}
