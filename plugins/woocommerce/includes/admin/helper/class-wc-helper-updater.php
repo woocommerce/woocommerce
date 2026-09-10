@@ -708,9 +708,11 @@ class WC_Helper_Updater {
 	/**
 	 * Run an update check API call.
 	 *
-	 * The call is cached based on the payload (product ids, file ids). If the payload
-	 * changes, the cache is going to miss. The installed version is sent to the API but
-	 * kept out of the cache key, so updating an extension doesn't force a fresh call.
+	 * The call is cached based on the payload (product ids, file ids, installed versions).
+	 * If the payload changes, the cache is going to miss. The installed version has to be
+	 * part of the key: the server decides the autoupdate flag from it, so a response cached
+	 * under another version, after an update or a rollback, would carry a decision made for
+	 * a build that is no longer installed.
 	 *
 	 * @param array $payload Information about the plugin to update.
 	 * @return array Update data for each requested product.
@@ -721,18 +723,7 @@ class WC_Helper_Updater {
 		}
 		ksort( $payload );
 
-		// Callers compare against the installed version themselves, so a response cached
-		// under an older one is still correct, and hashing the version would move the
-		// cache key on every extension update.
-		$hash_payload = array_map(
-			static function ( $product ) {
-				unset( $product['version'] );
-				return $product;
-			},
-			$payload
-		);
-
-		$hash = md5( wp_json_encode( $hash_payload ) );
+		$hash = md5( wp_json_encode( $payload ) );
 
 		$cache_key = '_woocommerce_helper_updates';
 		$data      = get_transient( $cache_key );

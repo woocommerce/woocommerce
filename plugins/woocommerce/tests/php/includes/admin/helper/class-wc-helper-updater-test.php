@@ -725,9 +725,10 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The installed version is left out of the update-check cache key.
+	 * @testdox The installed version is part of the update-check cache key.
 	 */
-	public function test_update_check_cache_key_ignores_installed_version(): void {
+	public function test_update_check_cache_key_includes_installed_version(): void {
+		// A response cached while 2.0.0 was installed, with the autoupdate decision made for it.
 		$cached_data = array(
 			'hash'     => md5(
 				wp_json_encode(
@@ -735,13 +736,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 						123 => array(
 							'product_id' => 123,
 							'file_id'    => 'abc123',
+							'version'    => '2.0.0',
 						),
 					)
 				)
 			),
 			'updated'  => time(),
 			'products' => array(
-				123 => array( 'version' => '2.0.0' ),
+				123 => array(
+					'version'    => '2.0.0',
+					'autoupdate' => false,
+				),
 			),
 			'errors'   => array(),
 		);
@@ -750,6 +755,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
 		try {
+			// The site has since rolled back to 1.5.0.
 			$result = $this->call_update_check(
 				array(
 					123 => array(
@@ -763,8 +769,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
 		}
 
-		$this->assertSame( $cached_data['products'], $result, 'A payload differing only by installed version should still hit the cache' );
-		$this->assertNull( $this->mocked_request_products, 'Updating an extension should not force a remote update-check' );
+		$this->assertSame( '1.5.0', $this->mocked_request_products[123]['version'] ?? null, 'A rollback must ask the server again, since the autoupdate flag was decided for the build that was installed at the time' );
+		$this->assertNotSame( $cached_data['products'], $result, 'The stale decision must not be served for a different build' );
 	}
 
 	/**
