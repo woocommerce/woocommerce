@@ -20,11 +20,11 @@ class SingleProduct extends AbstractBlock {
 	protected $block_name = 'single-product';
 
 	/**
-	 * Posts temporarily replaced while rendering product titles and excerpts.
+	 * Post temporarily replaced while rendering a product title or excerpt.
 	 *
-	 * @var array
+	 * @var \WP_Post|null|false
 	 */
-	private $previous_posts = array();
+	private $previous_post = false;
 
 	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
@@ -49,10 +49,11 @@ class SingleProduct extends AbstractBlock {
 	 * @return mixed
 	 */
 	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
-		if ( $this->previous_posts ) {
+		if ( false !== $this->previous_post ) {
 			global $post;
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact enclosing post, including secondary queries.
-			$post = array_pop( $this->previous_posts );
+			$post                = $this->previous_post;
+			$this->previous_post = false;
 		}
 
 		return $block_content;
@@ -81,34 +82,6 @@ class SingleProduct extends AbstractBlock {
 	}
 
 	/**
-	 * Extract the inner block names for the Single Product block. This way it's possible
-	 * to map all the inner blocks for a Single Product block and manipulate the data as needed.
-	 *
-	 * @param array $block The Single Product block or its inner blocks.
-	 * @param array $result Array of inner block names.
-	 *
-	 * @return array Array containing all the inner block names of a Single Product block.
-	 * @deprecated 11.2.0 WordPress now propagates the selected product context.
-	 */
-	protected function extract_single_product_inner_block_names( $block, &$result = [] ) {
-		wc_deprecated_function( __METHOD__, '11.2.0' );
-		if ( isset( $block['blockName'] ) ) {
-			$result[] = $block['blockName'];
-		}
-
-		if ( 'woocommerce/product-template' === $block['blockName'] || 'core/post-template' === $block['blockName'] ) {
-			return $result;
-		}
-
-		if ( isset( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				$this->extract_single_product_inner_block_names( $inner_block, $result );
-			}
-		}
-		return $result;
-	}
-
-	/**
 	 * Use the resolved product context for core blocks that read the global post.
 	 *
 	 * @param array $block Block attributes.
@@ -120,7 +93,7 @@ class SingleProduct extends AbstractBlock {
 		}
 
 		global $post;
-		$this->previous_posts[] = $post;
+		$this->previous_post = $post;
 		if ( empty( $context['postId'] ) ) {
 			return;
 		}
