@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve variation sale prices when a bulk decrease from regular prices is zero or empty.
