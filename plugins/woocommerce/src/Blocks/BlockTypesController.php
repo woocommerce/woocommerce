@@ -270,12 +270,15 @@ final class BlockTypesController {
 		);
 		// The heading markup here must stay in step with the cross-sells Product Collection block in
 		// WC_Install::get_cart_block_content(); the pattern replaces markup that block used to inline.
+		// The '&hellip;' entity is deliberate: it keeps the msgid the installer already used, so every
+		// locale renders the same heading it did before. The blocks JS defaults use a literal '…', a
+		// separate msgid that three locales (bg_BG, mk_MK, th) have not translated.
 		register_block_pattern(
 			'woocommerce/cart-cross-sells-message',
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} --><h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} --><h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . esc_html__( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
