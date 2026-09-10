@@ -753,6 +753,39 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Renewal falls back to adding the product to the cart when the record cannot name the subscription.
+	 *
+	 * @dataProvider provider_records_missing_a_renewal_identifier
+	 *
+	 * @param array $overrides Fields to change on the expired subscription record.
+	 */
+	public function test_subscription_notice_falls_back_to_the_cart_without_renewal_identifiers( array $overrides ): void {
+		$this->prepare_plugins_screen();
+		delete_site_transient( 'update_plugins' );
+		$this->set_subscriptions( array( $this->subscription( array_merge( array( 'expired' => true ), $overrides ) ) ) );
+
+		$output = $this->render_subscription_notice( $this->woo_plugin_file, $this->woo_plugin_data() );
+
+		$this->assertStringContainsString( 'Your subscription for this extension has expired.', $output, 'The merchant still learns the subscription expired.' );
+		$this->assertStringContainsString( 'add-to-cart=123', $output, 'A link that buys the product beats one that renews nothing.' );
+		$this->assertStringNotContainsString( 'renew_product', $output );
+		$this->assertStringContainsString( 'utm_campaign=pu_plugin_row_renew', $output );
+	}
+
+	/**
+	 * Expired records that cannot be renewed by reference.
+	 *
+	 * @return array[]
+	 */
+	public function provider_records_missing_a_renewal_identifier(): array {
+		return array(
+			'no product key'  => array( array( 'product_key' => '' ) ),
+			'no order ID'     => array( array( 'order_id' => '' ) ),
+			'order ID absent' => array( array( 'order_id' => null ) ),
+		);
+	}
+
+	/**
 	 * @testdox The update-row message renews the exact expired subscription too.
 	 */
 	public function test_update_row_notice_renews_the_expired_subscription(): void {

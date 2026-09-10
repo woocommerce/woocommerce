@@ -514,7 +514,8 @@ class WC_Helper_Updater {
 	 * Cart link that renews one specific subscription.
 	 *
 	 * A plain add-to-cart link would buy a new subscription instead. This is the same link the
-	 * My Subscriptions screen and the product usage notice use.
+	 * My Subscriptions screen and the product usage notice use. Renewing needs the product key
+	 * and the order ID; a record missing either gets the add-to-cart link, which still works.
 	 *
 	 * @since 11.2.0
 	 *
@@ -524,11 +525,26 @@ class WC_Helper_Updater {
 	 * @return string
 	 */
 	private static function get_renew_link( array $subscription, string $campaign ): string {
+		$product_id  = $subscription['product_id'];
+		$product_key = $subscription['product_key'] ?? '';
+		$order_id    = $subscription['order_id'] ?? '';
+
+		if ( '' === $product_key || '' === $order_id ) {
+			return add_query_arg(
+				array(
+					'add-to-cart'  => $product_id,
+					'utm_source'   => 'pu',
+					'utm_campaign' => $campaign,
+				),
+				PluginsHelper::WOO_CART_PAGE_URL
+			);
+		}
+
 		return add_query_arg(
 			array(
-				'renew_product' => $subscription['product_id'] ?? '',
-				'product_key'   => $subscription['product_key'] ?? '',
-				'order_id'      => $subscription['order_id'] ?? '',
+				'renew_product' => $product_id,
+				'product_key'   => $product_key,
+				'order_id'      => $order_id,
 				'utm_source'    => 'pu',
 				'utm_campaign'  => $campaign,
 			),
