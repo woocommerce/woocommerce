@@ -131,8 +131,11 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
-		// Set before registering rather than after: it guards against re-entry through the on-demand
-		// registration in Bootstrap, and a registration failure must not be retried on later filter fires.
+		if ( self::$register_blocks_has_run ) {
+			return;
+		}
+
+		// Set before registering rather than after, so a registration failure is not retried on a later call.
 		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
