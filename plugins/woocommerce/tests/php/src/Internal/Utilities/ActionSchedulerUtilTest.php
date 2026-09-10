@@ -107,21 +107,22 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `is_available` should report Action Scheduler as available when it is loaded.
+	 * @testdox `can_check_scheduled_actions` should be true when Action Scheduler is loaded.
 	 */
-	public function test_reports_action_scheduler_as_available(): void {
+	public function test_can_check_scheduled_actions_when_action_scheduler_is_loaded(): void {
 		$this->assertTrue(
-			ActionSchedulerUtil::is_available(),
-			'Action Scheduler is loaded in the test suite, so it should be reported as available'
+			ActionSchedulerUtil::can_check_scheduled_actions(),
+			'Action Scheduler is loaded in the test suite, so scheduled-action checks should be possible'
 		);
 	}
 
 	/**
 	 * The helper falls back to `as_next_scheduled_action` when `as_has_scheduled_action` is missing.
-	 * That branch cannot be exercised directly here - Action Scheduler is always fully loaded in the
-	 * test suite - so pin the property it relies on instead: with the bundled Action Scheduler the
-	 * two functions answer identically, so routing a call site through the fallback is a no-op for
-	 * every store that is not running an ancient copy.
+	 * Neither that branch nor the false branch of `can_check_scheduled_actions` can be exercised here:
+	 * Action Scheduler is always fully loaded in the test suite, and the function-mocking seam
+	 * (CodeHacker) only rewrites files under `includes/`, not `src/`. So pin the property the fallback
+	 * relies on instead: with the bundled Action Scheduler the two functions answer identically, so
+	 * routing a call site through the fallback is a no-op for every store not running an ancient copy.
 	 *
 	 * @testdox The `as_next_scheduled_action` fallback agrees with `as_has_scheduled_action`.
 	 * @dataProvider provider_fallback_equivalence

@@ -11,15 +11,14 @@ class ActionSchedulerUtil {
 	/**
 	 * Is a matching action currently scheduled (pending or in-progress)?
 	 *
-	 * `as_has_scheduled_action` is the cheapest way to answer this, but it only exists since Action
-	 * Scheduler 3.3.0. Another plugin can register an older copy of Action Scheduler early enough to
-	 * win the version race against the copy bundled with WooCommerce, so calling it directly risks a
-	 * `Call to undefined function` fatal. `as_next_scheduled_action` has been part of the API for far
-	 * longer, so it is the fallback - the same one WooCommerce already used at the call sites that
-	 * were guarded before this helper existed. On a copy old enough to lack `as_has_scheduled_action`
-	 * the fallback may only report pending actions rather than pending and in-progress ones, which
-	 * can mean a duplicate scheduling attempt on an already-degraded install. That is the accepted
-	 * trade for not fataling.
+	 * Prefers `as_has_scheduled_action`, which only exists since Action Scheduler 3.3.0: another plugin
+	 * can load an older copy early enough to win the version race against the one bundled with
+	 * WooCommerce, and a bare call is then a fatal. Falls back to the much older `as_next_scheduled_action`,
+	 * which on such a copy may report only pending actions, not in-progress ones - an accepted trade.
+	 *
+	 * Reports false when Action Scheduler is not loaded at all, indistinguishable from "nothing is
+	 * scheduled". A caller that treats a negative answer as licence to discard state should check
+	 * {@see self::can_check_scheduled_actions()} first.
 	 *
 	 * @since 11.2.0
 	 *
@@ -27,13 +26,7 @@ class ActionSchedulerUtil {
 	 * @param array|null $args  Args that have been passed to the action. Null matches any args.
 	 * @param string     $group The group the action is assigned to.
 	 *
-	 * When Action Scheduler is not loaded at all this reports false, which a caller cannot tell apart
-	 * from a genuine "nothing is scheduled". That is fine for the usual shape of caller, which
-	 * schedules the action immediately afterwards and would fail on that call anyway. A caller that
-	 * instead treats a negative answer as licence to discard state should check {@see self::is_available()}
-	 * first.
-	 *
-	 * @return bool True if a matching action is scheduled, false otherwise (including when Action Scheduler isn't loaded at all).
+	 * @return bool True if a matching action is scheduled, false otherwise.
 	 */
 	public static function has_scheduled_action( string $hook, ?array $args = null, string $group = '' ): bool {
 		foreach ( array( 'as_has_scheduled_action', 'as_next_scheduled_action' ) as $function ) {
@@ -50,16 +43,14 @@ class ActionSchedulerUtil {
 	}
 
 	/**
-	 * Is Action Scheduler loaded well enough to answer a scheduled-action question?
-	 *
-	 * Lets a caller distinguish "no matching action" from "no answer available" before acting
-	 * destructively on a false from {@see self::has_scheduled_action()}.
+	 * Can {@see self::has_scheduled_action()} actually query Action Scheduler, or would it report false
+	 * only because neither function it relies on is loaded?
 	 *
 	 * @since 11.2.0
 	 *
-	 * @return bool True if Action Scheduler is available, false otherwise.
+	 * @return bool True if a scheduled-action check can be answered, false otherwise.
 	 */
-	public static function is_available(): bool {
+	public static function can_check_scheduled_actions(): bool {
 		return function_exists( 'as_has_scheduled_action' ) || function_exists( 'as_next_scheduled_action' );
 	}
 }

@@ -851,7 +851,7 @@ class BatchProcessingController {
 		// Everything below reads "not scheduled" as grounds for recording a failure against a processor
 		// and eventually dropping it from the queue. Action Scheduler being unloaded also reads as
 		// "not scheduled", so bail rather than dismantle the queue over a missing dependency.
-		if ( ! ActionSchedulerUtil::is_available() ) {
+		if ( ! ActionSchedulerUtil::can_check_scheduled_actions() ) {
 			return;
 		}
 
