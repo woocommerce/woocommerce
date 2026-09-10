@@ -84,6 +84,15 @@ class FinanceDataSerializer {
 	public function serialize_payout( Payout $payout ): array {
 		$date_expected = $payout->get_date_expected();
 
+		$provider_link = $payout->get_provider_link();
+		$payout_link   = null;
+		if ( null !== $provider_link ) {
+			$payout_link = array(
+				'title' => $provider_link->get_title(),
+				'url'   => $provider_link->get_url(),
+			);
+		}
+
 		return array(
 			'provider_id'     => $payout->get_gateway_id(),
 			'id'              => $payout->get_id(),
@@ -94,6 +103,7 @@ class FinanceDataSerializer {
 			'date_expected'   => null === $date_expected ? null : self::format_date( $date_expected ),
 			'status'          => $payout->get_status(),
 			'provider_status' => $payout->get_provider_status(),
+			'provider_link'   => $payout_link,
 		);
 	}
 

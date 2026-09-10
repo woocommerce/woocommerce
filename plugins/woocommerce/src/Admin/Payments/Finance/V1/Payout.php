@@ -86,6 +86,13 @@ final class Payout {
 	private ?string $provider_status = null;
 
 	/**
+	 * Provider-specific link to the payout details in the provider's dashboard, or null when not available.
+	 *
+	 * @var Link|null
+	 */
+	private ?Link $provider_link = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string                  $gateway_id      Payment gateway id.
@@ -161,6 +168,19 @@ final class Payout {
 	 */
 	public function set_provider_status( ?string $provider_status ): self {
 		$this->provider_status = self::normalize_optional_string( $provider_status );
+		return $this;
+	}
+
+	/**
+	 * Set the provider-specific link to the payout details in the provider's dashboard.
+	 *
+	 * @param Link|null $provider_link Link to the payout details in the provider's dashboard, or null when not available.
+	 * @return self
+	 *
+	 * @since 11.2.0
+	 */
+	public function set_provider_link( ?Link $provider_link ): self {
+		$this->provider_link = $provider_link;
 		return $this;
 	}
 
@@ -261,6 +281,17 @@ final class Payout {
 	 */
 	public function get_provider_status(): ?string {
 		return $this->provider_status;
+	}
+
+	/**
+	 * Get the provider-specific link to the payout details in the provider's dashboard, or null when not available.
+	 *
+	 * @return Link|null
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_provider_link(): ?Link {
+		return $this->provider_link;
 	}
 
 	/**

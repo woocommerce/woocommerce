@@ -220,26 +220,9 @@ class FinanceDataSchemas {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'payout_link'      => array(
-					'type'        => array( 'object', 'null' ),
-					'description' => esc_html__( 'A link for initiating a payout, or null when not available.', 'woocommerce' ),
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => array(
-						'title' => array(
-							'type'        => 'string',
-							'description' => esc_html__( 'The link title.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'url'   => array(
-							'type'        => 'string',
-							'format'      => 'uri',
-							'description' => esc_html__( 'The link URL.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-					),
+				'payout_link'      => $this->get_link_schema(
+					esc_html__( 'A link for initiating a payout, or null when not available.', 'woocommerce' ),
+					true
 				),
 			),
 		);
@@ -310,6 +293,10 @@ class FinanceDataSchemas {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'provider_link'   => $this->get_link_schema(
+					esc_html__( "A link to the payout details in the provider's dashboard, or null when not available.", 'woocommerce' ),
+					true
+				),
 			),
 		);
 	}
@@ -326,6 +313,37 @@ class FinanceDataSchemas {
 			'description' => esc_html__( 'The three-letter ISO 4217 currency code.', 'woocommerce' ),
 			'context'     => array( 'view', 'edit' ),
 			'readonly'    => true,
+		);
+	}
+
+	/**
+	 * Get the schema for a Link object.
+	 *
+	 * @param string $description The link description.
+	 * @param bool   $nullable    Whether the link can be null. Defaults to true.
+	 * @return array
+	 */
+	private function get_link_schema( string $description, bool $nullable = true ): array {
+		return array(
+			'type'        => $nullable ? array( 'object', 'null' ) : 'object',
+			'description' => $description,
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+			'properties'  => array(
+				'title' => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'The link title.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'url'   => array(
+					'type'        => 'string',
+					'format'      => 'uri',
+					'description' => esc_html__( 'The link URL.', 'woocommerce' ),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			),
 		);
 	}
 }
