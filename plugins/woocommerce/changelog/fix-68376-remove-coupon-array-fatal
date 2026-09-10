@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error when the remove_coupon cart parameter is given an array value instead of a string.
