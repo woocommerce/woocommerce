@@ -39,6 +39,13 @@ test.describe( `${ blockData.slug } Block`, () => {
 			editor,
 			frontendUtils,
 		} ) => {
+			const dropdown = '.wc-block-product-categories__dropdown';
+			const blockInEditor = await editor.getBlockByName( blockData.slug );
+			await expect( blockInEditor.getByRole( 'listitem' ) ).toHaveCount(
+				6
+			);
+			await expect( blockInEditor.locator( dropdown ) ).toHaveCount( 0 );
+
 			await page
 				.getByRole( 'region', { name: 'Editor settings' } )
 				.getByRole( 'radio', { name: 'Dropdown' } )
@@ -46,9 +53,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const block = await frontendUtils.getBlockByName( blockData.slug );
-			await expect(
-				block.locator( '.wc-block-product-categories__dropdown' )
-			).toBeVisible();
+			await expect( block.locator( dropdown ) ).toBeVisible();
 			await expect( block.getByRole( 'listitem' ) ).toHaveCount( 0 );
 		} );
 
