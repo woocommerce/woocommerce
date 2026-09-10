@@ -476,6 +476,17 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				}
 			}
 
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only request override that changes rendering only.
+			$rendering_mode = isset( $_GET['wc_settings_ui'] ) ? wp_unslash( $_GET['wc_settings_ui'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Type checked and sanitized below.
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			if (
+				is_string( $rendering_mode )
+				&& 'classic' === sanitize_key( $rendering_mode )
+			) {
+				echo '<div class="notice notice-info inline"><p>' . esc_html__( 'This page uses the classic settings UI.', 'woocommerce' ) . '</p></div>';
+			}
+
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
 			$settings = $this->get_settings( $section );

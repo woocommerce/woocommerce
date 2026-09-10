@@ -561,6 +561,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertSame( $expected_query, $_GET, 'The override must not alter page or section routing.' );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$this->assertSame( 'existing-class', $classes );
+		$this->assertStringContainsString( 'This page uses the classic settings UI.', $classic_output );
 		$this->assertStringContainsString( 'name="woocommerce_settings_ui_drill_down_test"', $classic_output );
 		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $classic_output );
 		$this->assertTrue( empty( $GLOBALS['hide_save_button'] ), 'The classic Save button should remain visible.' );
@@ -575,6 +576,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$settings_ui_output = ob_get_clean();
 
 		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $settings_ui_output );
+		$this->assertStringNotContainsString( 'This page uses the classic settings UI.', $settings_ui_output );
 		$this->assertTrue( Features::is_enabled( 'settings-ui' ) );
 	}
 

@@ -109,6 +109,9 @@ describe( 'SettingsUIPage View Config', () => {
 		expect(
 			container.querySelectorAll( '.woocommerce-save-button' )
 		).toHaveLength( 1 );
+		expect( container ).not.toHaveTextContent(
+			'This page uses View Config.'
+		);
 		act( () => root.unmount() );
 	} );
 
@@ -127,6 +130,9 @@ describe( 'SettingsUIPage View Config', () => {
 		expect(
 			container.querySelectorAll( 'input:not([type="hidden"])' )
 		).toHaveLength( 2 );
+		expect( container ).not.toHaveTextContent(
+			'This page uses View Config.'
+		);
 		act( () => root.unmount() );
 	} );
 
@@ -143,6 +149,7 @@ describe( 'SettingsUIPage View Config', () => {
 		expect( form.querySelector( 'input[name="phone"]' ) ).toHaveValue(
 			'555-0100'
 		);
+		expect( container ).toHaveTextContent( 'This page uses View Config.' );
 
 		act( () => root.unmount() );
 	} );

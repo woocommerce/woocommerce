@@ -14,6 +14,7 @@ export type ViewConfigLayoutDecision =
 	| {
 			status: 'ready';
 			form: Form;
+			source: 'local' | 'view-config';
 	  };
 
 type ViewConfigResponse = {
@@ -142,7 +143,7 @@ export const selectViewConfigLayout = ( {
 	knownFieldIds: ReadonlySet< string >;
 } ): ViewConfigLayoutDecision => {
 	if ( ! request.supported ) {
-		return { status: 'ready', form: localForm };
+		return { status: 'ready', form: localForm, source: 'local' };
 	}
 
 	if ( runtime.status === 'loading' ) {
@@ -150,7 +151,7 @@ export const selectViewConfigLayout = ( {
 	}
 
 	if ( runtime.status === 'failed' ) {
-		return { status: 'ready', form: localForm };
+		return { status: 'ready', form: localForm, source: 'local' };
 	}
 
 	const response = isObject( runtime.config )
@@ -166,6 +167,6 @@ export const selectViewConfigLayout = ( {
 			: undefined;
 
 	return form
-		? { status: 'ready', form }
-		: { status: 'ready', form: localForm };
+		? { status: 'ready', form, source: 'view-config' }
+		: { status: 'ready', form: localForm, source: 'local' };
 };

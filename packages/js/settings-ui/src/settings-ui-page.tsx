@@ -816,6 +816,11 @@ const SettingsUIPageContent = ( {
 					{ saveNotice.message }
 				</Notice>
 			) : null }
+			{ viewConfigDecision.source === 'view-config' ? (
+				<Notice status="info" isDismissible={ false }>
+					{ __( 'This page uses View Config.', 'woocommerce' ) }
+				</Notice>
+			) : null }
 			<div className="wc-settings-ui">
 				<DataForm
 					data={ values }
