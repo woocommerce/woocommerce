@@ -4,8 +4,9 @@
 import { useMemo, memo } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
-import { Icon, info, blockDefault } from '@wordpress/icons';
+import { Icon, blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
+import { Notice, Stack } from '@wordpress/ui';
 import {
 	__experimentalHStack as HStack, // eslint-disable-line
 } from '@wordpress/components';
@@ -148,19 +149,20 @@ export function TemplateList( {
 	);
 
 	return (
-		<div className="email-editor-template-select__list">
+		<Stack
+			direction="column"
+			gap="xl"
+			className="email-editor-template-select__list"
+		>
 			{ selectedCategory === 'recent' && (
-				<div className="email-editor-recent-templates-info">
-					<HStack spacing={ 1 } expanded={ false } justify="start">
-						<Icon icon={ info } />
-						<p>
-							{ __(
-								'Templates created on the legacy editor will not appear here.',
-								__i18n_text_domain__
-							) }
-						</p>
-					</HStack>
-				</div>
+				<Notice.Root intent="info">
+					<Notice.Description>
+						{ __(
+							'Templates created on the legacy editor will not appear here.',
+							__i18n_text_domain__
+						) }
+					</Notice.Description>
+				</Notice.Root>
 			) }
 
 			<MemorizedTemplateListBox
@@ -168,6 +170,6 @@ export function TemplateList( {
 				onTemplateSelection={ onTemplateSelection }
 				selectedCategory={ selectedCategory }
 			/>
-		</div>
+		</Stack>
 	);
 }
