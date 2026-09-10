@@ -66,9 +66,11 @@ class Settings_Controller {
 		$settings['allowedIframeStyleHandles'] = $this->allowed_iframe_style_handles;
 		$editor_content_styles                 = file_get_contents( __DIR__ . '/content-editor.css' );
 		$shares_content_styles                 = file_get_contents( __DIR__ . '/content-shared.css' );
+		$rich_text_comment_styles              = file_get_contents( __DIR__ . '/rich-text-comment.css' );
 		$settings['styles']                    = array(
 			array( 'css' => $editor_content_styles ),
 			array( 'css' => $shares_content_styles ),
+			array( 'css' => $rich_text_comment_styles ),
 		);
 
 		$settings['autosaveInterval'] = 60;
