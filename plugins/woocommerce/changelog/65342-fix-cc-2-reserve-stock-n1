@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Store API: prime reserved-stock lookups once per cart request to remove a per-item N+1 against wp_wc_reserved_stock.
