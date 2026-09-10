@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix an issue in which conditional fields depending on a hidden field caused false positives.
+Fix conditional checkout fields when dependency values are missing, contain punctuation, or come from a saved order during payment retries.
