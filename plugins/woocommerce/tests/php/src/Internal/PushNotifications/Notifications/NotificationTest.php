@@ -209,6 +209,24 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Action Scheduler matches a scheduled action on its serialized arguments, so
+	 * the schedule and cancel paths agreeing is not enough. Both derive from
+	 * get_safety_net_args(), so a change there moves them together and stays
+	 * green while silently dropping the event type from every stock safety net.
+	 * These are the literal arguments that have to be stored.
+	 *
+	 * @testdox Should build the expected safety-net arguments for each notification subclass.
+	 * @dataProvider provider_notification_identity_pairs
+	 *
+	 * @param callable          $build              Builds a notification from a volatile value.
+	 * @param bool              $has_volatile_state Unused here; see the identity data test.
+	 * @param array<int, mixed> $expected_args      The safety-net arguments this subclass must produce.
+	 */
+	public function test_get_safety_net_args( callable $build, bool $has_volatile_state, array $expected_args ): void {
+		$this->assertSame( $expected_args, $build( 1 )->get_safety_net_args() );
+	}
+
+	/**
 	 * @testdox Should have an identity data case for every notification subclass.
 	 */
 	public function test_identity_data_provider_covers_every_subclass(): void {
@@ -220,17 +238,18 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * One entry per Notification subclass, each a callable that builds the same
-	 * notification from a volatile value, and a flag saying whether the subclass
-	 * has any volatile state for the callable to vary.
+	 * One entry per Notification subclass: a callable that builds the same
+	 * notification from a volatile value, a flag saying whether the subclass has
+	 * any volatile state for the callable to vary, and the exact safety-net
+	 * arguments Action Scheduler has to store for it.
 	 *
-	 * @return array<string, array{callable, bool}>
+	 * @return array<string, array{callable, bool, array<int, mixed>}>
 	 */
 	public function provider_notification_identity_pairs(): array {
 		return array(
-			'store_order'  => array( fn() => new NewOrderNotification( 42 ), false ),
-			'store_review' => array( fn() => new NewReviewNotification( 42 ), false ),
-			'store_stock'  => array( fn( int $volatile ) => new StockNotification( 42, StockNotification::EVENT_LOW_STOCK, $volatile ), true ),
+			'store_order'  => array( fn() => new NewOrderNotification( 42 ), false, array( 'store_order', 42 ) ),
+			'store_review' => array( fn() => new NewReviewNotification( 42 ), false, array( 'store_review', 42 ) ),
+			'store_stock'  => array( fn( int $volatile ) => new StockNotification( 42, StockNotification::EVENT_LOW_STOCK, $volatile ), true, array( 'store_stock', 42, array( 'event_type' => StockNotification::EVENT_LOW_STOCK ) ) ),
 		);
 	}
 }

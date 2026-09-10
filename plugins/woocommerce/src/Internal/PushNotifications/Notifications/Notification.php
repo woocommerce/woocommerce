@@ -208,9 +208,8 @@ abstract class Notification {
 		$args          = array( $this->get_type(), $this->get_resource_id() );
 		$identity_data = $this->get_identity_data();
 
-		// Appended only when there is any, so a type without identity data keeps
-		// the exact argument list it had before this field existed and an
-		// in-flight safety net still cancels.
+		// Skipped when empty so an in-flight safety net for a type without
+		// identity data still cancels.
 		if ( ! empty( $identity_data ) ) {
 			$args[] = $identity_data;
 		}
