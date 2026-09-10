@@ -346,6 +346,19 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 					),
 				),
 			),
+			'both forms combined'     => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'order',
+							'value'   => 2,
+							'compare' => '<=',
+						),
+					),
+				),
+			),
 		);
 	}
 }
