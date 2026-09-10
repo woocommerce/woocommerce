@@ -819,6 +819,72 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Adding custom variations preserves percent escapes in cart storage and the API response.
+	 * @testWith ["attribute_finish", "Black%20White"]
+	 *           ["Finish", "Black%20White"]
+	 *           ["finish", "Black%20White"]
+	 *           ["attribute_finish", ""]
+	 *           ["Finish", ""]
+	 *           ["finish", ""]
+	 *           ["Finish", "Black%20White", true]
+	 *           ["Finish", "", true]
+	 * @param string $attribute_name Posted attribute name.
+	 * @param string $variation_value Fixed value or an Any variation.
+	 * @param bool   $filter_label Whether the display label differs from the stored name.
+	 */
+	public function test_add_item_preserves_custom_attribute_percent_escapes( string $attribute_name, string $variation_value, bool $filter_label = false ): void {
+		wc_empty_cart();
+
+		if ( $filter_label ) {
+			add_filter(
+				'woocommerce_attribute_label',
+				static function () {
+					return 'Surface';
+				}
+			);
+		}
+
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => $variation_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => $attribute_name,
+						'value'     => 'Black%20White',
+					),
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'A matching custom attribute must be accepted.' );
+		$data = $response->get_data();
+		$this->assertCount( 1, $data['items'], 'The response should contain the added variation.' );
+		$this->assertSame( 'Black%20White', $data['items'][0]['variation'][0]['value'], 'The response must preserve literal percent escapes.' );
+		$cart = WC()->cart->get_cart();
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The cart must contain the selected variation.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'The cart must preserve the selected custom value.' );
+	}
+
+	/**
 	 * Test adding a variable product to cart returns proper variation data.
 	 */
 	public function test_add_variable_product_to_cart_returns_variation_data() {

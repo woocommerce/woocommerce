@@ -687,6 +687,54 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Ordering again preserves percent escapes and the selected variation.
+	 * @testWith ["Black%20White"]
+	 *           [""]
+	 * @param string $variation_value Fixed value or an Any variation.
+	 */
+	public function test_order_again_preserves_custom_attribute_percent_escapes( string $variation_value ): void {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+		WC()->cart->empty_cart();
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => $variation_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$this->assertContains( 'Black%20White', wc_get_product( $product->get_id() )->get_variation_attributes()['Finish'], 'The ordered option must be available on the product.' );
+
+		// Add the item after the status transition to isolate reordering from email display formatting.
+		$order = wc_create_order( array( 'customer_id' => $user_id ) );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order->add_product( $variation, 1, array( 'variation' => array( 'finish' => 'Black%20White' ) ) );
+
+		$order_items = wc_get_order( $order->get_id() )->get_items();
+		$order_item  = reset( $order_items );
+		$this->assertSame( 'Black%20White', $order_item->get_meta( 'finish' ), 'Stored order metadata should contain the literal selected value.' );
+
+		$sut    = new WC_Cart_Session( WC()->cart );
+		$method = new ReflectionMethod( WC_Cart_Session::class, 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$cart = $method->invoke( $sut, $order->get_id(), array() );
+
+		$this->assertCount( 1, $cart, 'The ordered variation should be restored.' );
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The variation ID must survive reordering.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'Reordering must preserve the selected custom value.' );
+	}
+
+	/**
 	 * @testdox Custom attribute values containing a percent escape can be added to the cart.
 	 */
 	public function test_add_to_cart_accepts_custom_attribute_values_containing_percent_escapes() {
