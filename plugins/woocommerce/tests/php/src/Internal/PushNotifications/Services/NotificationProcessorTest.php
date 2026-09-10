@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
@@ -104,18 +105,23 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->data_store->method( 'get_tokens_for_roles' )->willReturn(
-			array(
-				new PushToken(
-					array(
-						'user_id'       => 1,
-						'token'         => 'test-token',
-						'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
-						'platform'      => PushToken::PLATFORM_APPLE,
-						'device_locale' => 'en_US',
-						'device_uuid'   => 'test-uuid',
-					)
+		$this->data_store->method( 'resolve_tokens_for_roles' )->willReturn(
+			new PushTokenResolution(
+				array(
+					new PushToken(
+						array(
+							'user_id'       => 1,
+							'token'         => 'test-token',
+							'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+							'platform'      => PushToken::PLATFORM_APPLE,
+							'device_locale' => 'en_US',
+							'device_uuid'   => 'test-uuid',
+						)
+					),
 				),
+				PushTokenResolution::OUTCOME_RESOLVED,
+				1,
+				1
 			)
 		);
 	}
@@ -238,16 +244,24 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should mark as sent and return true when no tokens are available.
+	 * @testdox Should mark as sent and log diagnostics when role resolution returns no tokens.
+	 * @testWith ["no_eligible_users", 1, 0]
+	 *           ["no_valid_tokens", 1, 1]
+	 *
+	 * @param string $resolution_outcome           The expected resolution outcome.
+	 * @param int    $registered_token_owner_count The registered token owner count.
+	 * @param int    $eligible_user_count          The eligible user count.
 	 */
-	public function test_process_marks_sent_when_no_tokens(): void {
-		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'get_tokens_for_roles' )->willReturn( array() );
-
+	public function test_process_marks_sent_when_no_tokens(
+		string $resolution_outcome,
+		int $registered_token_owner_count,
+		int $eligible_user_count
+	): void {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
-		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
+		$sut = $this->create_processor_with_resolution(
+			new PushTokenResolution( array(), $resolution_outcome, $registered_token_owner_count, $eligible_user_count )
+		);
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -257,6 +271,56 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $this->order_id );
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertLogged(
+			'info',
+			'recipient resolution found no eligible tokens',
+			array(
+				'source'                       => PushNotifications::FEATURE_NAME,
+				'notification_type'            => 'store_order',
+				'resource_id'                  => $this->order_id,
+				'resolution_outcome'           => $resolution_outcome,
+				'registered_token_owner_count' => $registered_token_owner_count,
+				'eligible_user_count'          => $eligible_user_count,
+				'resolved_token_count'         => 0,
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should mark as sent without logging when the store has no registered tokens.
+	 */
+	public function test_process_marks_sent_without_logging_when_no_tokens_registered(): void {
+		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
+
+		$sut = $this->create_processor_with_resolution(
+			new PushTokenResolution( array(), PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS, 0, 0 )
+		);
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$result       = $sut->process( $notification );
+
+		$this->assertTrue( $result );
+
+		$order = wc_get_order( $this->order_id );
+
+		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertNotLogged( 'info', 'recipient resolution found no eligible tokens' );
+	}
+
+	/**
+	 * Builds a processor whose data store returns the given resolution.
+	 *
+	 * @param PushTokenResolution $resolution The resolution the data store should return.
+	 * @return NotificationProcessor
+	 */
+	private function create_processor_with_resolution( PushTokenResolution $resolution ): NotificationProcessor {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'resolve_tokens_for_roles' )->willReturn( $resolution );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
+
+		return $sut;
 	}
 
 	/**
@@ -284,6 +348,19 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $this->order_id );
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertLogged(
+			'info',
+			'recipient resolution found no eligible tokens',
+			array(
+				'source'                       => PushNotifications::FEATURE_NAME,
+				'notification_type'            => 'store_order',
+				'resource_id'                  => $this->order_id,
+				'resolution_outcome'           => PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES,
+				'registered_token_owner_count' => 1,
+				'eligible_user_count'          => 1,
+				'resolved_token_count'         => 1,
+			)
+		);
 	}
 
 	/**
@@ -312,8 +389,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		);
 
 		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'get_tokens_for_roles' )->willReturn(
-			array( $enabled_token, $disabled_token )
+		$data_store->method( 'resolve_tokens_for_roles' )->willReturn(
+			new PushTokenResolution(
+				array( $enabled_token, $disabled_token ),
+				PushTokenResolution::OUTCOME_RESOLVED,
+				2,
+				2
+			)
 		);
 
 		$preferences_service = $this->createMock( NotificationPreferencesService::class );
@@ -428,7 +510,14 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		);
 
 		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'get_tokens_for_roles' )->willReturn( $tokens );
+		$data_store->method( 'resolve_tokens_for_roles' )->willReturn(
+			new PushTokenResolution(
+				$tokens,
+				PushTokenResolution::OUTCOME_RESOLVED,
+				1,
+				1
+			)
+		);
 
 		$preferences_service = $this->createMock( NotificationPreferencesService::class );
 		// One user, two tokens — preferences must be read at most once for that user.

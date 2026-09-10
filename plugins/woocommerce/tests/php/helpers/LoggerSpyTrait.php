@@ -125,6 +125,30 @@ trait LoggerSpyTrait {
 	}
 
 	/**
+	 * Assert that no log message containing the substring was recorded at the given level.
+	 *
+	 * @param string $level     The log level to check (e.g., 'error', 'info', 'warning', 'debug').
+	 * @param string $substring The substring that must not appear in any message.
+	 * @return void
+	 */
+	protected function assertNotLogged( string $level, string $substring ): void { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- PHPUnit style.
+		$matches = array_filter(
+			$this->get_logs_by_level( $level ),
+			fn( $log ) => str_contains( $log['message'], $substring )
+		);
+
+		$this->assertEmpty(
+			$matches,
+			sprintf(
+				"Expected no %s log containing '%s', but found: %s",
+				$level,
+				$substring,
+				wp_json_encode( $matches, JSON_PRETTY_PRINT )
+			)
+		);
+	}
+
+	/**
 	 * Assert that no error was logged.
 	 *
 	 * @return void

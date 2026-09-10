@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
@@ -213,18 +214,23 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$data_store->method( 'get_tokens_for_roles' )->willReturn(
-			array(
-				new PushToken(
-					array(
-						'user_id'       => 1,
-						'token'         => 'test-token',
-						'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
-						'platform'      => PushToken::PLATFORM_APPLE,
-						'device_locale' => 'en_US',
-						'device_uuid'   => 'test-uuid',
-					)
+		$data_store->method( 'resolve_tokens_for_roles' )->willReturn(
+			new PushTokenResolution(
+				array(
+					new PushToken(
+						array(
+							'user_id'       => 1,
+							'token'         => 'test-token',
+							'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+							'platform'      => PushToken::PLATFORM_APPLE,
+							'device_locale' => 'en_US',
+							'device_uuid'   => 'test-uuid',
+						)
+					),
 				),
+				PushTokenResolution::OUTCOME_RESOLVED,
+				1,
+				1
 			)
 		);
 

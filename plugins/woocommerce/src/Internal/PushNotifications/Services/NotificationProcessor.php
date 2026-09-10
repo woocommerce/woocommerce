@@ -7,8 +7,9 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
-use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushTokenResolution;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
@@ -144,14 +145,10 @@ class NotificationProcessor {
 			$notification->write_meta( self::CLAIMED_META_KEY );
 		}
 
-		/**
-		 * Non-paginated result from get_tokens_for_roles.
-		 *
-		 * @var PushToken[] $tokens
-		 */
-		$tokens = $this->data_store->get_tokens_for_roles(
+		$resolution = $this->data_store->resolve_tokens_for_roles(
 			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
 		);
+		$tokens     = $resolution->get_tokens();
 
 		/**
 		 * Filter out tokens whose owning user does not want this notification.
@@ -169,6 +166,7 @@ class NotificationProcessor {
 		 * and return.
 		 */
 		if ( empty( $tokens ) ) {
+			$this->log_empty_recipient_resolution( $notification, $resolution );
 			$notification->write_meta( self::SENT_META_KEY );
 			$this->cancel_safety_net( $notification );
 			return true;
@@ -187,6 +185,39 @@ class NotificationProcessor {
 		$this->cancel_safety_net( $notification );
 
 		return false;
+	}
+
+	/**
+	 * Logs structured diagnostics when recipient resolution produces no tokens to dispatch.
+	 *
+	 * Skipped when the store has no registered tokens at all. That is the
+	 * expected state for any store that never connected a mobile app, and
+	 * logging it on every event would only add noise.
+	 *
+	 * @param Notification        $notification The notification being processed.
+	 * @param PushTokenResolution $resolution   The role-based token resolution.
+	 * @return void
+	 */
+	private function log_empty_recipient_resolution( Notification $notification, PushTokenResolution $resolution ): void {
+		$diagnostics = $resolution->get_diagnostics();
+
+		if ( PushTokenResolution::OUTCOME_NO_REGISTERED_TOKENS === $diagnostics['resolution_outcome'] ) {
+			return;
+		}
+
+		// Tokens were resolved, so the only way to end up with none is preference filtering.
+		if ( 0 < $diagnostics['resolved_token_count'] ) {
+			$diagnostics['resolution_outcome'] = PushTokenResolution::OUTCOME_FILTERED_BY_PREFERENCES;
+		}
+
+		wc_get_logger()->info(
+			'Push notification was not dispatched because recipient resolution found no eligible tokens.',
+			array(
+				'source'            => PushNotifications::FEATURE_NAME,
+				'notification_type' => $notification->get_type(),
+				'resource_id'       => $notification->get_resource_id(),
+			) + $diagnostics
+		);
 	}
 
 	/**
