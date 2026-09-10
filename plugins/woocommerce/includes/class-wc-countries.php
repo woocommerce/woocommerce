@@ -51,14 +51,62 @@ class WC_Countries {
 	private $country_locale_built_for = null;
 
 	/**
+	 * Locale most recently resolved by get_cache_locale().
+	 *
+	 * @var string|null
+	 */
+	private $last_cache_locale = null;
+
+	/**
+	 * Geographical cache entries being built, keyed by data type and locale.
+	 *
+	 * @var array<string, array<string, bool>>
+	 */
+	private $geo_cache_building = array();
+
+	/**
+	 * Geographical caches to restore when the current locale resolution ends, keyed by object ID.
+	 *
+	 * Null while no lookup is resolving the request locale.
+	 *
+	 * @var array<int, array{0: WC_Countries, 1: array}>|null
+	 */
+	private static $locale_resolution_snapshots = null;
+
+	/**
 	 * Get the active request locale for geographical cache entries.
+	 *
+	 * Locale filter callbacks may read country data. While determine_locale() runs, those nested lookups reuse
+	 * the last resolved locale instead of resolving it again, and whatever they cache is discarded afterwards.
 	 *
 	 * @return string
 	 */
 	private function get_cache_locale() {
-		$locale = determine_locale();
+		$object_id = spl_object_id( $this );
 
-		return is_string( $locale ) && $locale ? $locale : 'en_US';
+		if ( null !== self::$locale_resolution_snapshots ) {
+			if ( ! isset( self::$locale_resolution_snapshots[ $object_id ] ) ) {
+				self::$locale_resolution_snapshots[ $object_id ] = array( $this, $this->geo_cache );
+			}
+
+			return $this->last_cache_locale ?? 'en_US';
+		}
+
+		self::$locale_resolution_snapshots = array( $object_id => array( $this, $this->geo_cache ) );
+
+		try {
+			$locale = determine_locale();
+		} finally {
+			foreach ( self::$locale_resolution_snapshots as $snapshot ) {
+				$snapshot[0]->geo_cache = $snapshot[1];
+			}
+
+			self::$locale_resolution_snapshots = null;
+		}
+
+		$this->last_cache_locale = is_string( $locale ) && $locale ? $locale : 'en_US';
+
+		return $this->last_cache_locale;
 	}
 
 	/**
@@ -78,6 +126,19 @@ class WC_Countries {
 	}
 
 	/**
+	 * Read the countries or states property from inside the class.
+	 *
+	 * Uses a real property when the object has one, as a plain read would. Otherwise calls __get() directly, because
+	 * PHP returns null for a magic property that is already being read further up the stack (a locale filter can do that).
+	 *
+	 * @param string $key Property name.
+	 * @return mixed
+	 */
+	private function read_geo_property( $key ) {
+		return array_key_exists( $key, get_object_vars( $this ) ) ? $this->{$key} : $this->__get( $key );
+	}
+
+	/**
 	 * Get all countries.
 	 *
 	 * @return array
@@ -86,16 +147,34 @@ class WC_Countries {
 		$locale = $this->get_cache_locale();
 
 		if ( empty( $this->geo_cache['countries'][ $locale ] ) ) {
-			/**
-			 * Allows filtering of the list of countries in WC.
-			 *
-			 * @since 1.5.3
-			 *
-			 * @param array $countries
-			 */
-			$this->geo_cache['countries'][ $locale ] = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
-			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
-				wc_asort_by_locale( $this->geo_cache['countries'][ $locale ], $locale );
+			// A lookup made while this entry is being built (for example from a locale filter) gets no data instead of recursing.
+			if ( isset( $this->geo_cache_building['countries'][ $locale ] ) ) {
+				return array();
+			}
+
+			$this->geo_cache_building['countries'][ $locale ] = true;
+
+			try {
+				/**
+				 * Allows filtering of the list of countries in WC.
+				 *
+				 * @since 1.5.3
+				 *
+				 * @param array $countries
+				 */
+				$this->geo_cache['countries'][ $locale ] = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
+				/**
+				 * Filters whether the list of countries is sorted by name.
+				 *
+				 * @since 2.0.0
+				 *
+				 * @param bool $sort Whether to sort the countries. Default true.
+				 */
+				if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
+					wc_asort_by_locale( $this->geo_cache['countries'][ $locale ], $locale );
+				}
+			} finally {
+				unset( $this->geo_cache_building['countries'][ $locale ] );
 			}
 		}
 
@@ -150,14 +229,24 @@ class WC_Countries {
 		$locale = $this->get_cache_locale();
 
 		if ( empty( $this->geo_cache['continents'][ $locale ] ) ) {
-			/**
-			 * Allows filtering of continents in WC.
-			 *
-			 * @since 2.6.0
-			 *
-			 * @param array[array] $continents
-			 */
-			$this->geo_cache['continents'][ $locale ] = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
+			if ( isset( $this->geo_cache_building['continents'][ $locale ] ) ) {
+				return array();
+			}
+
+			$this->geo_cache_building['continents'][ $locale ] = true;
+
+			try {
+				/**
+				 * Allows filtering of continents in WC.
+				 *
+				 * @since 2.6.0
+				 *
+				 * @param array[array] $continents
+				 */
+				$this->geo_cache['continents'][ $locale ] = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
+			} finally {
+				unset( $this->geo_cache_building['continents'][ $locale ] );
+			}
 		}
 
 		return $this->geo_cache['continents'][ $locale ];
@@ -259,14 +348,24 @@ class WC_Countries {
 		$locale = $this->get_cache_locale();
 
 		if ( ! isset( $this->geo_cache['states'][ $locale ] ) ) {
-			/**
-			 * Allows filtering of country states in WC.
-			 *
-			 * @since 1.5.3
-			 *
-			 * @param array $states
-			 */
-			$this->geo_cache['states'][ $locale ] = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
+			if ( isset( $this->geo_cache_building['states'][ $locale ] ) ) {
+				return is_null( $cc ) ? array() : false;
+			}
+
+			$this->geo_cache_building['states'][ $locale ] = true;
+
+			try {
+				/**
+				 * Allows filtering of country states in WC.
+				 *
+				 * @since 1.5.3
+				 *
+				 * @param array $states
+				 */
+				$this->geo_cache['states'][ $locale ] = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
+			} finally {
+				unset( $this->geo_cache_building['states'][ $locale ] );
+			}
 		}
 
 		if ( ! is_null( $cc ) ) {
@@ -346,7 +445,7 @@ class WC_Countries {
 	 * @return array
 	 */
 	public function get_allowed_countries() {
-		$countries         = $this->countries;
+		$countries         = $this->read_geo_property( 'countries' );
 		$allowed_countries = get_option( 'woocommerce_allowed_countries' );
 
 		if ( 'all_except' === $allowed_countries ) {
@@ -363,7 +462,7 @@ class WC_Countries {
 
 			if ( $raw_countries ) {
 				foreach ( $raw_countries as $country ) {
-					$countries[ $country ] = $this->countries[ $country ];
+					$countries[ $country ] = $this->read_geo_property( 'countries' )[ $country ];
 				}
 			}
 		}
@@ -393,14 +492,14 @@ class WC_Countries {
 
 		// All indicates that all countries are allowed, regardless of where you sell to.
 		if ( 'all' === get_option( 'woocommerce_ship_to_countries' ) ) {
-			$countries = $this->countries;
+			$countries = $this->read_geo_property( 'countries' );
 		} elseif ( 'specific' === get_option( 'woocommerce_ship_to_countries' ) ) {
 			$countries     = array();
 			$raw_countries = get_option( 'woocommerce_specific_ship_to_countries', array() );
 
 			if ( $raw_countries ) {
 				foreach ( $raw_countries as $country ) {
-					$countries[ $country ] = $this->countries[ $country ];
+					$countries[ $country ] = $this->read_geo_property( 'countries' )[ $country ];
 				}
 			}
 		}
@@ -421,7 +520,7 @@ class WC_Countries {
 	 */
 	public function get_allowed_country_states() {
 		if ( get_option( 'woocommerce_allowed_countries' ) !== 'specific' ) {
-			return $this->states;
+			return $this->read_geo_property( 'states' );
 		}
 
 		$states = array();
@@ -429,7 +528,7 @@ class WC_Countries {
 		$raw_countries = get_option( 'woocommerce_specific_allowed_countries' );
 
 		if ( $raw_countries ) {
-			$all_states = $this->states;
+			$all_states = $this->read_geo_property( 'states' );
 
 			foreach ( $raw_countries as $country ) {
 				if ( isset( $all_states[ $country ] ) ) {
@@ -452,7 +551,7 @@ class WC_Countries {
 		}
 
 		if ( get_option( 'woocommerce_ship_to_countries' ) !== 'specific' ) {
-			return $this->states;
+			return $this->read_geo_property( 'states' );
 		}
 
 		$states = array();
@@ -460,7 +559,7 @@ class WC_Countries {
 		$raw_countries = get_option( 'woocommerce_specific_ship_to_countries' );
 
 		if ( $raw_countries ) {
-			$all_states = $this->states;
+			$all_states = $this->read_geo_property( 'states' );
 
 			foreach ( $raw_countries as $country ) {
 				if ( ! empty( $all_states[ $country ] ) ) {
@@ -584,8 +683,8 @@ class WC_Countries {
 	 * @param bool   $escape           If we should escape HTML.
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
-		if ( $this->countries ) {
-			foreach ( $this->countries as $key => $value ) {
+		if ( $this->read_geo_property( 'countries' ) ) {
+			foreach ( $this->read_geo_property( 'countries' ) as $key => $value ) {
 				$states = $this->get_states( $key );
 				if ( $states ) {
 					// Maybe default the selected state as the first one.
@@ -703,7 +802,7 @@ class WC_Countries {
 		$format = ( $country && isset( $formats[ $country ] ) ) ? $formats[ $country ] : $formats['default'];
 
 		// Handle full country name.
-		$full_country = ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
+		$full_country = ( isset( $this->read_geo_property( 'countries' )[ $country ] ) ) ? $this->read_geo_property( 'countries' )[ $country ] : $country;
 
 		// Country is not needed if the same as base.
 		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) ) {
@@ -711,7 +810,7 @@ class WC_Countries {
 		}
 
 		// Handle full state name.
-		$full_state = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
+		$full_state = ( $country && $state && isset( $this->read_geo_property( 'states' )[ $country ][ $state ] ) ) ? $this->read_geo_property( 'states' )[ $country ][ $state ] : $state;
 
 		// Substitute address parts into the string.
 		$replace = array_map(
@@ -934,6 +1033,9 @@ class WC_Countries {
 		$cache_locale = $this->get_cache_locale();
 
 		if ( empty( $this->locale ) || ( null !== $this->country_locale_built_for && $cache_locale !== $this->country_locale_built_for ) ) {
+			// Record the target first, so a lookup made during the rebuild (for example from a locale filter) does not rebuild again.
+			$this->country_locale_built_for = $cache_locale;
+
 			$this->locale = apply_filters(
 				'woocommerce_get_country_locale',
 				array(
@@ -1779,8 +1881,6 @@ class WC_Countries {
 				}
 			}
 			unset( $locale_entry );
-
-			$this->country_locale_built_for = $cache_locale;
 		}
 
 		return $this->locale;

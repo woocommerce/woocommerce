@@ -1,10 +1,87 @@
 <?php
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+
 /**
  * Tests for the WC_Countries class.
  */
 class WC_Countries_Test extends \WC_Unit_Test_Case {
+	/**
+	 * Depth at which the geographical locale filter stops reading, so a recursion fails the test instead of the run.
+	 */
+	private const LOCALE_FILTER_DEPTH_LIMIT = 10;
+
+	/**
+	 * Countries instance read by the geographical locale filter, or null to create one on each call.
+	 *
+	 * @var WC_Countries|null
+	 */
+	private $locale_filter_countries = null;
+
+	/**
+	 * WC_Countries method the geographical locale filter calls.
+	 *
+	 * @var string
+	 */
+	private $locale_filter_lookup = 'get_countries';
+
+	/**
+	 * Current nesting of the geographical locale filter.
+	 *
+	 * @var int
+	 */
+	private $locale_filter_depth = 0;
+
+	/**
+	 * Deepest nesting of the geographical locale filter.
+	 *
+	 * @var int
+	 */
+	private $locale_filter_max_depth = 0;
+
+	/**
+	 * Data the geographical locale filter received from its lookups.
+	 *
+	 * @var array
+	 */
+	private $locale_filter_lookups = array();
+
+	/**
+	 * Build counts keyed by data type and switched-locale stamp.
+	 *
+	 * @var array<string, array<string, int>>
+	 */
+	private $switched_locale_stamps = array();
+
+	/**
+	 * Default customer locations the locale filter received.
+	 *
+	 * @var array
+	 */
+	private $locale_filter_default_locations = array();
+
+	/**
+	 * Countries object replaced on WC() by a test.
+	 *
+	 * @var WC_Countries|null
+	 */
+	private $original_countries = null;
+
+	/**
+	 * Locale switcher replaced by a test.
+	 *
+	 * @var WP_Locale_Switcher|null
+	 */
+	private $original_locale_switcher = null;
+
+	/**
+	 * Locale made available to the replacement locale switcher.
+	 *
+	 * @var string
+	 */
+	private $available_test_locale = '';
+
 	/**
 	 * Locale exposed through the WordPress request-locale filter.
 	 *
@@ -200,6 +277,102 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Read geographical data from a locale filter, as a "language by visitor country" extension might.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $locale Current locale.
+	 * @return mixed
+	 */
+	public function read_geographical_data_in_locale_filter( $locale ) {
+		++$this->locale_filter_depth;
+		$this->locale_filter_max_depth = max( $this->locale_filter_max_depth, $this->locale_filter_depth );
+
+		if ( $this->locale_filter_depth < self::LOCALE_FILTER_DEPTH_LIMIT ) {
+			$countries                     = $this->locale_filter_countries ?? new WC_Countries();
+			$lookup                        = $this->locale_filter_lookup;
+			$this->locale_filter_lookups[] = $countries->$lookup();
+		}
+
+		--$this->locale_filter_depth;
+
+		return $locale;
+	}
+
+	/**
+	 * Read the default customer location from a locale filter, as a "language by visitor country" extension might.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $locale Current locale.
+	 * @return mixed
+	 */
+	public function read_default_location_in_locale_filter( $locale ) {
+		++$this->locale_filter_depth;
+		$this->locale_filter_max_depth = max( $this->locale_filter_max_depth, $this->locale_filter_depth );
+
+		if ( $this->locale_filter_depth < self::LOCALE_FILTER_DEPTH_LIMIT ) {
+			$this->locale_filter_default_locations[] = wc_get_customer_default_location();
+		}
+
+		--$this->locale_filter_depth;
+
+		return $locale;
+	}
+
+	/**
+	 * Ask WordPress for the locale while geographical data is built, as the just-in-time translation loader does.
+	 *
+	 * @internal
+	 *
+	 * @param array $data Geographical data.
+	 * @return array
+	 */
+	public function determine_locale_while_building( $data ) {
+		determine_locale();
+		return $data;
+	}
+
+	/**
+	 * Stamp country names with the switched locale.
+	 *
+	 * @internal
+	 *
+	 * @param array $countries Country names.
+	 * @return array
+	 */
+	public function stamp_country_names_with_switched_locale( $countries ) {
+		$countries['US'] = $this->record_switched_locale_stamp( 'countries' );
+		return $countries;
+	}
+
+	/**
+	 * Stamp country locale settings with the switched locale.
+	 *
+	 * @internal
+	 *
+	 * @param array $locale Country locale settings.
+	 * @return array
+	 */
+	public function stamp_country_locale_with_switched_locale( $locale ) {
+		$locale['US']['postcode']['label'] = $this->record_switched_locale_stamp( 'country_locale' );
+		return $locale;
+	}
+
+	/**
+	 * Make the test locale available to the replacement locale switcher.
+	 *
+	 * @internal
+	 *
+	 * @param array $languages Available languages.
+	 * @return array
+	 */
+	public function add_available_test_locale( $languages ) {
+		$languages[] = $this->available_test_locale;
+		return $languages;
+	}
+
+	/**
 	 * Return the option value that enables all countries.
 	 *
 	 * @internal
@@ -236,6 +409,38 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_get_country_locale', array( $this, 'filter_country_locale' ) );
 		remove_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
 		remove_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
+		remove_filter( 'locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		remove_filter( 'determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		remove_filter( 'pre_determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		remove_filter( 'woocommerce_countries', array( $this, 'determine_locale_while_building' ) );
+		remove_filter( 'woocommerce_states', array( $this, 'determine_locale_while_building' ) );
+		remove_filter( 'woocommerce_get_country_locale', array( $this, 'determine_locale_while_building' ) );
+		remove_filter( 'woocommerce_countries', array( $this, 'stamp_country_names_with_switched_locale' ) );
+		remove_filter( 'woocommerce_get_country_locale', array( $this, 'stamp_country_locale_with_switched_locale' ) );
+		remove_filter( 'get_available_languages', array( $this, 'add_available_test_locale' ) );
+		remove_filter( 'locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
+		remove_filter( 'determine_locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
+
+		if ( null !== $this->original_countries ) {
+			WC()->countries = $this->original_countries;
+		}
+
+		if ( null !== $this->original_locale_switcher ) {
+			restore_current_locale();
+			$GLOBALS['wp_locale_switcher'] = $this->original_locale_switcher; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the switcher replaced by the test.
+		}
+
+		$this->locale_filter_countries  = null;
+		$this->locale_filter_lookup     = 'get_countries';
+		$this->locale_filter_depth      = 0;
+		$this->locale_filter_max_depth  = 0;
+		$this->locale_filter_lookups    = array();
+		$this->switched_locale_stamps   = array();
+		$this->original_locale_switcher = null;
+		$this->available_test_locale    = '';
+
+		$this->locale_filter_default_locations = array();
+		$this->original_countries              = null;
 
 		$this->active_locale                   = 'en_US';
 		$this->geographical_filter_calls       = array();
@@ -452,6 +657,210 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A locale filter that reads geographical data runs once per lookup and gets complete data.
+	 *
+	 * @dataProvider provide_locale_filter_geographical_lookups
+	 *
+	 * @param string $hook   Locale hook the callback is attached to.
+	 * @param string $lookup WC_Countries method the callback calls.
+	 */
+	public function test_locale_filter_reading_geographical_data_does_not_recurse( $hook, $lookup ): void {
+		add_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
+		add_filter( $hook, array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		$sut                           = new WC_Countries();
+		$this->locale_filter_countries = $sut;
+		$this->locale_filter_lookup    = $lookup;
+		$source_countries              = include WC()->plugin_path() . '/i18n/countries.php';
+		$source_states                 = include WC()->plugin_path() . '/i18n/states.php';
+
+		foreach ( array( 'cold', 'warm' ) as $cache_state ) {
+			$this->assertSame( $source_countries['DE'], $sut->get_countries()['DE'], "Countries should be complete on a $cache_state cache." );
+			$this->assertSame( $source_states['US']['CA'], $sut->get_states( 'US' )['CA'], "States should be complete on a $cache_state cache." );
+			$this->assertArrayHasKey( 'default', $sut->get_country_locale(), "Country locale settings should be complete on a $cache_state cache." );
+		}
+
+		$lookups  = $this->locale_filter_lookups;
+		$expected = $sut->$lookup();
+
+		$this->assertSame( 1, $this->locale_filter_max_depth, 'A lookup inside the locale filter should not run the filter again.' );
+		$this->assertNotEmpty( $lookups, 'The locale filter should have read geographical data.' );
+
+		foreach ( $lookups as $data ) {
+			$this->assertSame( $expected, $data, 'The locale filter should get the same data as a direct lookup.' );
+		}
+	}
+
+	/**
+	 * @testdox A locale filter that creates its own countries instance does not recurse.
+	 */
+	public function test_locale_filter_creating_countries_instances_does_not_recurse(): void {
+		add_filter( 'determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		$sut = new WC_Countries();
+
+		$countries = $sut->get_countries();
+
+		$this->assertSame( 1, $this->locale_filter_max_depth, 'A lookup on a new instance inside the locale filter should not run the filter again.' );
+		$this->assertArrayHasKey( 'DE', $countries, 'Countries should be complete.' );
+		$this->assertArrayHasKey( 'DE', $this->locale_filter_lookups[0], 'The locale filter should get complete data from its own instance.' );
+	}
+
+	/**
+	 * @testdox Data built by a locale filter while the locale is being resolved is not cached for a guessed locale.
+	 */
+	public function test_geographical_data_built_while_resolving_the_locale_is_not_cached(): void {
+		$this->active_locale = 'fr_FR';
+		$this->register_geographical_filters();
+		add_filter( 'determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		$sut                           = new WC_Countries();
+		$this->locale_filter_countries = $sut;
+
+		$this->assertSame( 'fr_FR', $sut->get_countries()['US'], 'Countries should use the resolved request locale.' );
+
+		$this->active_locale = 'en_US';
+
+		$this->assertSame( 'en_US', $sut->get_countries()['US'], 'Countries for another locale should not reuse data built while resolving an earlier locale.' );
+	}
+
+	/**
+	 * @testdox A locale filter that reads the default customer location gets it while WooCommerce reads allowed countries.
+	 *
+	 * @dataProvider provide_default_location_locale_filters
+	 *
+	 * @param string $hook              Locale hook the callback is attached to.
+	 * @param string $allowed_countries Allowed countries mode.
+	 */
+	public function test_locale_filter_reading_default_location_during_allowed_countries_lookup( $hook, $allowed_countries ): void {
+		update_option( 'woocommerce_allowed_countries', $allowed_countries );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US', 'CA' ) );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
+		$sut                      = new WC_Countries();
+		$this->original_countries = WC()->countries;
+		WC()->countries           = $sut;
+		add_filter( $hook, array( $this, 'read_default_location_in_locale_filter' ), 20 );
+
+		foreach ( array( 'cold', 'warm' ) as $cache_state ) {
+			$this->assertArrayHasKey( 'CA', $sut->get_allowed_countries(), "Allowed countries should be complete on a $cache_state cache." );
+		}
+
+		$this->assertSame( 1, $this->locale_filter_max_depth, 'Reading the default location inside the locale filter should not run the filter again.' );
+		$this->assertNotEmpty( $this->locale_filter_default_locations, 'The locale filter should have read the default customer location.' );
+
+		foreach ( $this->locale_filter_default_locations as $location ) {
+			$this->assertSame(
+				array(
+					'country' => 'US',
+					'state'   => 'CA',
+				),
+				$location,
+				'The locale filter should get the store base location.'
+			);
+		}
+	}
+
+	/**
+	 * @testdox Helpers use country and state properties that a subclass declares.
+	 */
+	public function test_helpers_use_geographical_properties_declared_by_a_subclass(): void {
+		$sut = new class() extends WC_Countries {
+			/**
+			 * Declared country names.
+			 *
+			 * @var array
+			 */
+			public $countries = array(
+				'US' => 'Declared US',
+				'CA' => 'Declared CA',
+			);
+
+			/**
+			 * Declared state names.
+			 *
+			 * @var array
+			 */
+			public $states = array(
+				'US' => array( 'CA' => 'Declared California' ),
+			);
+		};
+
+		$this->assert_helpers_use_geographical_properties( $sut, 'Declared' );
+	}
+
+	/**
+	 * @testdox Helpers use country and state properties assigned on an instance.
+	 */
+	public function test_helpers_use_geographical_properties_assigned_on_an_instance(): void {
+		$sut            = new WC_Countries();
+		$sut->countries = array(
+			'US' => 'Assigned US',
+			'CA' => 'Assigned CA',
+		);
+		$sut->states    = array(
+			'US' => array( 'CA' => 'Assigned California' ),
+		);
+
+		$this->assert_helpers_use_geographical_properties( $sut, 'Assigned' );
+	}
+
+	/**
+	 * @testdox Asking for the locale while geographical data is being built does not build it again.
+	 *
+	 * @dataProvider provide_geographical_builds
+	 *
+	 * @param string $build_hook Filter that runs while the data is being built.
+	 * @param string $lookup     WC_Countries method that builds the data.
+	 */
+	public function test_locale_lookup_while_building_geographical_data_does_not_build_it_again( $build_hook, $lookup ): void {
+		add_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
+		$sut = new WC_Countries();
+		$sut->$lookup();
+		$this->locale_filter_countries = $sut;
+		$this->locale_filter_lookup    = $lookup;
+		add_filter( 'locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+		add_filter( $build_hook, array( $this, 'determine_locale_while_building' ) );
+		$this->active_locale = 'fr_FR';
+
+		$data = $sut->$lookup();
+
+		$this->assertLessThan( self::LOCALE_FILTER_DEPTH_LIMIT, $this->locale_filter_max_depth, 'Asking for the locale during a build should not start the same build again.' );
+		$this->assertNotEmpty( $data, 'The data built for the new locale should be complete.' );
+	}
+
+	/**
+	 * @testdox Switching locales keeps per-locale caches while a locale filter reads geographical data.
+	 *
+	 * @dataProvider provide_switched_locale_lookups
+	 *
+	 * @param string $lookup WC_Countries method the locale filter calls.
+	 */
+	public function test_switching_locales_keeps_per_locale_caches_with_a_geographical_locale_filter( $lookup ): void {
+		$this->use_locale_switcher_with( 'fr_FR' );
+		add_filter( 'woocommerce_countries', array( $this, 'stamp_country_names_with_switched_locale' ) );
+		add_filter( 'woocommerce_get_country_locale', array( $this, 'stamp_country_locale_with_switched_locale' ) );
+		$sut = new WC_Countries();
+		$this->assert_switched_locale_stamps( $sut, 'site' );
+		$this->locale_filter_countries = $sut;
+		$this->locale_filter_lookup    = $lookup;
+		add_filter( 'locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
+
+		$this->assertTrue( switch_to_locale( 'fr_FR' ), 'The test locale should be available to switch to.' );
+		$this->assert_switched_locale_stamps( $sut, 'fr_FR' );
+
+		restore_previous_locale();
+		$this->assert_switched_locale_stamps( $sut, 'site' );
+
+		$this->assertSame(
+			array(
+				'site'  => 1,
+				'fr_FR' => 1,
+			),
+			$this->switched_locale_stamps['countries'],
+			'Countries should be built once per locale.'
+		);
+		$this->assertLessThan( self::LOCALE_FILTER_DEPTH_LIMIT, $this->locale_filter_max_depth, 'The locale filter should not recurse through the geographical lookups.' );
+	}
+
+	/**
 	 * Tests for `get_country_from_alpha_3_code`.
 	 *
 	 * @param mixed $country_code Country code to test.
@@ -560,6 +969,131 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 			'allowed states'  => array( 'get_allowed_country_states', 'woocommerce_allowed_countries', 'woocommerce_specific_allowed_countries' ),
 			'shipping states' => array( 'get_shipping_country_states', 'woocommerce_ship_to_countries', 'woocommerce_specific_ship_to_countries' ),
 		);
+	}
+
+	/**
+	 * Locale hooks and the geographical lookups a callback on them makes.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_locale_filter_geographical_lookups() {
+		return array(
+			'locale reads countries'               => array( 'locale', 'get_countries' ),
+			'locale reads states'                  => array( 'locale', 'get_states' ),
+			'locale reads country locale settings' => array( 'locale', 'get_country_locale' ),
+			'determine_locale reads countries'     => array( 'determine_locale', 'get_countries' ),
+			'determine_locale reads continents'    => array( 'determine_locale', 'get_continents' ),
+			'pre_determine_locale reads states'    => array( 'pre_determine_locale', 'get_states' ),
+		);
+	}
+
+	/**
+	 * Filters that run while geographical data is built, and the lookups that build it.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_geographical_builds() {
+		return array(
+			'country list'            => array( 'woocommerce_countries', 'get_countries' ),
+			'state list'              => array( 'woocommerce_states', 'get_states' ),
+			'country locale settings' => array( 'woocommerce_get_country_locale', 'get_country_locale' ),
+		);
+	}
+
+	/**
+	 * Locale hooks and allowed-country modes for a locale filter that reads the default customer location.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_default_location_locale_filters() {
+		return array(
+			'locale, all countries'                => array( 'locale', 'all' ),
+			'locale, specific countries'           => array( 'locale', 'specific' ),
+			'determine_locale, all countries'      => array( 'determine_locale', 'all' ),
+			'determine_locale, specific countries' => array( 'determine_locale', 'specific' ),
+		);
+	}
+
+	/**
+	 * Lookups a locale filter makes while locales are switched.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_switched_locale_lookups() {
+		return array(
+			'countries'               => array( 'get_countries' ),
+			'country locale settings' => array( 'get_country_locale' ),
+		);
+	}
+
+	/**
+	 * Replace the global locale switcher with one that can switch to the given locale.
+	 *
+	 * @param string $locale Locale to make available.
+	 */
+	private function use_locale_switcher_with( $locale ): void {
+		$this->available_test_locale = $locale;
+		add_filter( 'get_available_languages', array( $this, 'add_available_test_locale' ) );
+
+		$this->original_locale_switcher = $GLOBALS['wp_locale_switcher'];
+		$GLOBALS['wp_locale_switcher']  = new WP_Locale_Switcher(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The core switcher reads available languages once, on construction.
+		$GLOBALS['wp_locale_switcher']->init();
+	}
+
+	/**
+	 * Record a build for the switched locale and return its stamp.
+	 *
+	 * @param string $type Data type.
+	 * @return string
+	 */
+	private function record_switched_locale_stamp( $type ) {
+		$stamp = is_locale_switched() ? $GLOBALS['wp_locale_switcher']->get_switched_locale() : 'site';
+
+		if ( ! isset( $this->switched_locale_stamps[ $type ][ $stamp ] ) ) {
+			$this->switched_locale_stamps[ $type ][ $stamp ] = 0;
+		}
+
+		++$this->switched_locale_stamps[ $type ][ $stamp ];
+
+		return $stamp;
+	}
+
+	/**
+	 * Assert that the country and state helpers read the object's countries and states properties.
+	 *
+	 * @param WC_Countries $sut    The system under test.
+	 * @param string       $prefix Prefix of the property values.
+	 */
+	private function assert_helpers_use_geographical_properties( WC_Countries $sut, $prefix ): void {
+		add_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
+		add_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		$this->assertSame( "$prefix US", $sut->get_allowed_countries()['US'], 'Allowed countries should use the countries property.' );
+		$this->assertSame( "$prefix US", $sut->get_shipping_countries()['US'], 'Shipping countries should use the countries property.' );
+		$this->assertSame( "$prefix California", $sut->get_allowed_country_states()['US']['CA'], 'Allowed states should use the states property.' );
+		$this->assertSame( "$prefix California", $sut->get_shipping_country_states()['US']['CA'], 'Shipping states should use the states property.' );
+		$this->assertStringContainsString(
+			"$prefix CA",
+			$sut->get_formatted_address(
+				array(
+					'city'    => 'Toronto',
+					'country' => 'CA',
+				)
+			),
+			'Formatted addresses should use the countries property.'
+		);
+	}
+
+	/**
+	 * Assert that countries and country locale settings carry the expected switched-locale stamp.
+	 *
+	 * @param WC_Countries $sut   The system under test.
+	 * @param string       $stamp Expected stamp.
+	 */
+	private function assert_switched_locale_stamps( WC_Countries $sut, $stamp ): void {
+		$this->assertSame( $stamp, $sut->get_countries()['US'], "Countries should use the $stamp locale cache." );
+		$this->assertSame( $stamp, $sut->get_country_locale()['US']['postcode']['label'], "Country locale settings should use the $stamp locale." );
 	}
 
 	/**
