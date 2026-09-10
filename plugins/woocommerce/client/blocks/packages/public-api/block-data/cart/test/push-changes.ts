@@ -8,8 +8,10 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { pushChanges } from '../push-changes';
+import { STORE_KEY as VALIDATION_STORE_KEY } from '../../validation/constants';
 
 let updateCustomerDataMock = jest.fn();
+const getValidationErrorMock = jest.fn().mockReturnValue( undefined );
 let getCustomerDataMock = jest.fn().mockReturnValue( {
 	billingAddress: {
 		first_name: 'John',
@@ -65,6 +67,8 @@ jest.mock( '../update-payment-methods', () => ( {
 
 async function resetToInitialAddressMock() {
 	pushChanges( false );
+	await Promise.resolve();
+	await Promise.resolve();
 	updateCustomerDataMock.mockReset();
 	updateCustomerDataMock.mockResolvedValue( jest.fn() );
 
@@ -94,6 +98,9 @@ async function resetToInitialAddressMock() {
 		},
 	} );
 	pushChanges( false );
+	await Promise.resolve();
+	await Promise.resolve();
+	updateCustomerDataMock.mockClear();
 }
 
 describe( 'pushChanges', () => {
@@ -109,14 +116,15 @@ describe( 'pushChanges', () => {
 						getCustomerData: getCustomerDataMock,
 					};
 				}
-				if ( storeNameOrDescriptor === validationStore ) {
+				if (
+					storeNameOrDescriptor === validationStore ||
+					storeNameOrDescriptor === VALIDATION_STORE_KEY
+				) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
 							.select( storeNameOrDescriptor ),
-						getValidationError: jest
-							.fn()
-							.mockReturnValue( undefined ),
+						getValidationError: getValidationErrorMock,
 					};
 				}
 				return jest
@@ -140,8 +148,115 @@ describe( 'pushChanges', () => {
 			}
 		);
 	} );
-	beforeEach( () => {
-		resetToInitialAddressMock();
+	beforeEach( async () => {
+		getValidationErrorMock.mockReset().mockReturnValue( undefined );
+		await resetToInitialAddressMock();
+	} );
+
+	it( 'Pushes a billing country change when state and postcode are automatically cleared', async () => {
+		const customerData = getCustomerDataMock();
+		getCustomerDataMock.mockReturnValue( {
+			...customerData,
+			billingAddress: {
+				...customerData.billingAddress,
+				country: 'FR',
+			},
+		} );
+		getValidationErrorMock.mockImplementation( ( errorId ) =>
+			[ 'billing_state', 'billing_postcode' ].includes( errorId )
+				? { message: 'Required field', hidden: true }
+				: undefined
+		);
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenCalledWith(
+			{
+				billing_address: {
+					...customerData.billingAddress,
+					country: 'FR',
+					state: '',
+					postcode: '',
+				},
+			},
+			true,
+			false
+		);
+	} );
+
+	it( 'Pushes a shipping country change when state and postcode are automatically cleared', async () => {
+		const customerData = getCustomerDataMock();
+		getCustomerDataMock.mockReturnValue( {
+			...customerData,
+			shippingAddress: {
+				...customerData.shippingAddress,
+				country: 'FR',
+			},
+		} );
+		getValidationErrorMock.mockImplementation( ( errorId ) =>
+			[ 'shipping_state', 'shipping_postcode' ].includes( errorId )
+				? { message: 'Required field', hidden: true }
+				: undefined
+		);
+
+		pushChanges( false );
+
+		await expect( updateCustomerDataMock ).toHaveBeenCalledWith(
+			{
+				shipping_address: {
+					...customerData.shippingAddress,
+					country: 'FR',
+					state: '',
+					postcode: '',
+				},
+			},
+			true,
+			true
+		);
+	} );
+
+	it( 'Does not push a country change with another invalid dirty field', () => {
+		const customerData = getCustomerDataMock();
+		getCustomerDataMock.mockReturnValue( {
+			...customerData,
+			billingAddress: {
+				...customerData.billingAddress,
+				country: 'FR',
+				email: 'invalid-email',
+			},
+		} );
+		getValidationErrorMock.mockImplementation( ( errorId ) =>
+			[ 'billing_state', 'billing_postcode', 'billing_email' ].includes(
+				errorId
+			)
+				? { message: 'Invalid field', hidden: true }
+				: undefined
+		);
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+	} );
+
+	it( 'Does not push a country change with a non-empty invalid postcode', () => {
+		const customerData = getCustomerDataMock();
+		getCustomerDataMock.mockReturnValue( {
+			...customerData,
+			billingAddress: {
+				...customerData.billingAddress,
+				country: 'FR',
+				postcode: 'INVALID',
+			},
+		} );
+		getValidationErrorMock.mockImplementation( ( errorId ) =>
+			[ 'billing_state', 'billing_postcode' ].includes( errorId )
+				? { message: 'Invalid field', hidden: true }
+				: undefined
+		);
+
+		pushChanges( false );
+
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
 	} );
 
 	it( 'Keeps props dirty if data did not persist due to an error', async () => {
