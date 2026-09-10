@@ -828,14 +828,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		$rendered = do_blocks( '<!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->' );
 
-		// The entity form is the msgid the installer already used, so every locale keeps the
-		// translation it had. The blocks JS defaults use a literal '…' instead — a separate msgid
-		// that bg_BG, mk_MK and th have not translated, so switching to it would drop those three
-		// locales back to English. Assert the entity so a later tidy-up cannot reintroduce that.
+		// The literal ellipsis is the msgid the blocks JS defaults use, so every path that renders this
+		// heading shares one string. Asserting the exact spelling keeps that alignment deliberate: the
+		// classic template's '&hellip;' variant is a different msgid with different translation coverage.
 		$this->assertStringContainsString(
-			'You may be interested in&hellip;',
+			'You may be interested in…',
 			$rendered,
-			'The pattern must keep the &hellip; msgid; the literal-ellipsis variant is untranslated in some locales.'
+			'The pattern should render the cross-sells heading with the literal-ellipsis msgid the blocks JS defaults use.'
 		);
 		// The pattern predates #60278, which restyled the heading in the installer without updating the
 		// pattern. These two assertions catch the styling drifting apart again and visibly changing the cart.
