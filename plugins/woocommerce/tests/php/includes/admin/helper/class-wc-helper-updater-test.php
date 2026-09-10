@@ -874,6 +874,62 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Update-row notices ignore a response whose ID is not one WooCommerce wrote.
+	 *
+	 * @dataProvider provider_foreign_update_response_ids
+	 *
+	 * @param mixed $id The response ID, or null for a response without one.
+	 */
+	public function test_update_row_notices_ignore_foreign_response_ids( $id ): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array( $this->subscription( array( 'expired' => true ) ) ) );
+
+		$response = is_null( $id ) ? new stdClass() : (object) array( 'id' => $id );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_expired_and_expiring_subscriptions( $this->woo_plugin_data(), $response );
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription( $this->woo_plugin_data(), $response );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output, 'Digits must not be scraped out of an ID that is not ours.' );
+	}
+
+	/**
+	 * Response IDs that must not resolve to product 123.
+	 *
+	 * @return array[]
+	 */
+	public function provider_foreign_update_response_ids(): array {
+		return array(
+			'missing'                => array( null ),
+			'empty'                  => array( '' ),
+			'not a string'           => array( 123 ),
+			'WordPress.org plugin'   => array( 'w.org/plugins/some-plugin' ),
+			'digits in the wrong id' => array( 'woocommerce-com-12foo3' ),
+			'prefix only'            => array( 'woocommerce-com-' ),
+			'trailing characters'    => array( 'woocommerce-com-123-beta' ),
+		);
+	}
+
+	/**
+	 * @testdox The no-subscription update-row notice renders for an ID WooCommerce wrote.
+	 */
+	public function test_update_row_notice_renders_for_a_product_without_a_subscription(): void {
+		$this->prepare_plugins_screen();
+		$this->set_subscriptions( array() );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_plugins_without_subscription(
+			$this->woo_plugin_data(),
+			(object) array( 'id' => 'woocommerce-com-123' )
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'add-to-cart=123', $output );
+		$this->assertStringContainsString( 'woocommerce-purchase-subscription', $output );
+	}
+
+	/**
 	 * Capture what the subscription notice callback prints for a plugin row.
 	 *
 	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.

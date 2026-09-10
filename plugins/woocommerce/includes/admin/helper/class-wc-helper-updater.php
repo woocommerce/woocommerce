@@ -483,6 +483,34 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Product ID carried by an update response WooCommerce wrote, or 0 for anything else.
+	 *
+	 * The updater sets the ID to "woocommerce-com-<product ID>". A filter can replace the
+	 * response, so anything that does not match exactly is treated as not ours rather than
+	 * having its digits scraped out.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $response Update response from the update_plugins transient.
+	 *
+	 * @return int
+	 */
+	private static function get_product_id_from_update_response( $response ): int {
+		if ( ! is_object( $response ) || ! isset( $response->id ) || ! is_string( $response->id ) ) {
+			return 0;
+		}
+
+		$prefix = 'woocommerce-com-';
+		if ( 0 !== strpos( $response->id, $prefix ) ) {
+			return 0;
+		}
+
+		$product_id = substr( $response->id, strlen( $prefix ) );
+
+		return ctype_digit( $product_id ) ? (int) $product_id : 0;
+	}
+
+	/**
 	 * Cart link that renews one specific subscription.
 	 *
 	 * A plain add-to-cart link would buy a new subscription instead. This is the same link the
@@ -607,10 +635,12 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
-		// Extract product ID from the response.
-		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
+		$product_id = self::get_product_id_from_update_response( $response );
+		if ( 0 === $product_id ) {
+			return;
+		}
 
-		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions_for_product( (int) $product_id );
+		list( $expired_subscription, $expiring_subscription ) = self::get_renewable_subscriptions_for_product( $product_id );
 
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
@@ -668,10 +698,8 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_plugins_without_subscription( $plugin_data, $response ) {
-		// Extract product ID from the response.
-		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
-
-		if ( WC_Helper::has_product_subscription( $product_id ) ) {
+		$product_id = self::get_product_id_from_update_response( $response );
+		if ( 0 === $product_id || WC_Helper::has_product_subscription( $product_id ) ) {
 			return;
 		}
 
