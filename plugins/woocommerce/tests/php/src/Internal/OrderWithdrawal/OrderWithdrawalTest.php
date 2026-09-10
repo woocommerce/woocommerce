@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailPreview;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
@@ -677,16 +679,19 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @testdox Should register cleanup hooks for HPOS and legacy order deletion.
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
-		$controller = new OrderWithdrawalController();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification() );
+		$controller    = new OrderWithdrawalController();
+		$email_preview = new OrderWithdrawalEmailPreview();
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification(), $email_preview );
 
 		try {
 			$controller->register();
 
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+			$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
 		} finally {
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
 			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
@@ -698,20 +703,57 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use standard dummy order data in order withdrawal email previews.
+	 */
+	public function test_order_withdrawal_email_preview_uses_standard_dummy_order_data(): void {
+		$this->enable_feature();
+
+		$email_preview_handler = new OrderWithdrawalEmailPreview();
+		$email_preview_handler->register();
+
+		try {
+			WC()->mailer()->init();
+
+			$email_preview = new EmailPreview();
+			$email_preview->set_email_type( WC_Email_Customer_Order_Withdrawal_Requested::class );
+			$customer_email = $email_preview->get_email();
+
+			$this->assertSame( 'John', $customer_email->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_FIRST_NAME ] );
+			$this->assertSame( 'Doe', $customer_email->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_LAST_NAME ] );
+			$this->assertSame( 'john@company.com', $customer_email->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] );
+			$this->assertSame( '12345', $customer_email->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER ] );
+			$this->assertSame( 'John Doe', $customer_email->placeholders['{order_billing_name}'] );
+			$this->assertGreaterThan( 0, $customer_email->submitted_at );
+
+			$email_preview->set_email_type( WC_Email_Order_Withdrawal_Requested::class );
+			$merchant_email = $email_preview->get_email();
+
+			$this->assertSame( $merchant_email->object, $merchant_email->matched_order );
+			$this->assertStringContainsString( '12345', $merchant_email->get_subject() );
+		} finally {
+			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview_handler, 'prepare_email_for_preview' ) );
+			$this->disable_feature();
+			WC()->mailer()->init();
+		}
+	}
+
+	/**
 	 * @testdox Should skip the feature highlight notification hooks when order withdrawal is enabled.
 	 */
 	public function test_controller_skips_feature_highlight_notification_hooks_when_feature_is_enabled(): void {
 		$this->enable_feature();
 
-		$controller   = new OrderWithdrawalController();
-		$notification = new OrderWithdrawalFeatureHighlightNotification();
+		$controller    = new OrderWithdrawalController();
+		$notification  = new OrderWithdrawalFeatureHighlightNotification();
+		$email_preview = new OrderWithdrawalEmailPreview();
 
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
 
 		try {
 			$controller->register();
 
 			$this->assertNotFalse( has_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ) ), 'The controller should defer feature highlight notification registration until init.' );
+			$this->assertNotFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ), 'The controller should initialize email previews when the feature is enabled.' );
 
 			$controller->maybe_register_feature_highlight_notification();
 
@@ -720,6 +762,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'maybe_register_feature_highlight_notification' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
 			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
