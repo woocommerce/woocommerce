@@ -464,8 +464,17 @@ class Analytics {
 	 * @return bool
 	 */
 	private static function is_current_refund_double_count_run( string $run_id ): bool {
-		$state = self::get_fresh_refund_double_count_state();
+		return self::is_running_state_of( self::get_fresh_refund_double_count_state(), $run_id );
+	}
 
+	/**
+	 * Whether the tool state belongs to the given run and that run is still running.
+	 *
+	 * @param array  $state  Tool state from get_refund_double_count_state().
+	 * @param string $run_id Run ID passed to a batch.
+	 * @return bool
+	 */
+	private static function is_running_state_of( array $state, string $run_id ): bool {
 		return '' !== $run_id && $run_id === $state['run_id'] && self::REFUND_DOUBLE_COUNT_STATUS_RUNNING === $state['status'];
 	}
 
@@ -688,8 +697,9 @@ class Analytics {
 
 		$stats_table = $wpdb->prefix . 'wc_order_stats';
 		$limit_sql   = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
-		// Half the smallest currency unit: absorbs floating-point noise but still catches a double-counted one-cent refund.
-		$tolerance_sql = $wpdb->prepare( '%f', 0.5 / ( 10 ** wc_get_price_decimals() ) );
+		// Half the smallest currency unit absorbs floating-point noise but still catches a double-counted
+		// one-cent refund. Capped at 5 decimals so the %f placeholder (6 decimals) never rounds it to zero.
+		$tolerance_sql = $wpdb->prepare( '%f', 0.5 / ( 10 ** min( wc_get_price_decimals(), 5 ) ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table and column names are hardcoded; the condition is prepared by the caller.
 		$parent_ids = $wpdb->get_col(
@@ -769,12 +779,13 @@ class Analytics {
 			);
 		}
 
-		// A newer run or a cancellation may have happened while the orders were re-imported.
-		if ( ! self::is_current_refund_double_count_run( $run_id ) ) {
+		// A newer run or a cancellation may have happened while the orders were re-imported. Check and
+		// write the same fresh copy of the state, so this batch never writes into another run's state.
+		$state = self::get_fresh_refund_double_count_state();
+		if ( ! self::is_running_state_of( $state, $run_id ) ) {
 			return;
 		}
 
-		$state       = self::get_refund_double_count_state();
 		$next_cursor = count( $parent_ids ) >= $batch_size ? (int) end( $parent_ids ) : $range_end;
 		$is_done     = $next_cursor >= $max_order_id;
 		$changes     = array(
@@ -787,7 +798,7 @@ class Analytics {
 			$changes['completed_at'] = time();
 		}
 
-		self::update_refund_double_count_state( $changes );
+		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( $state, $changes ), false );
 
 		if ( ! $is_done ) {
 			self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $next_cursor, $run_id ), 5 );
