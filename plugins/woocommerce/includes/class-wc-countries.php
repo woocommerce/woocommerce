@@ -82,9 +82,10 @@ class WC_Countries {
 	 * @return string
 	 */
 	private function get_cache_locale() {
-		$object_id = spl_object_id( $this );
-
 		if ( null !== self::$locale_resolution_snapshots ) {
+			$object_id = spl_object_id( $this );
+
+			// Every writer of $geo_cache calls this method first, so an instance is snapshotted before any nested write.
 			if ( ! isset( self::$locale_resolution_snapshots[ $object_id ] ) ) {
 				self::$locale_resolution_snapshots[ $object_id ] = array( $this, $this->geo_cache );
 			}
@@ -92,21 +93,32 @@ class WC_Countries {
 			return $this->last_cache_locale ?? 'en_US';
 		}
 
-		self::$locale_resolution_snapshots = array( $object_id => array( $this, $this->geo_cache ) );
+		self::$locale_resolution_snapshots = array();
 
 		try {
 			$locale = determine_locale();
 		} finally {
-			foreach ( self::$locale_resolution_snapshots as $snapshot ) {
-				$snapshot[0]->geo_cache = $snapshot[1];
-			}
-
-			self::$locale_resolution_snapshots = null;
+			self::restore_locale_resolution_snapshots();
 		}
 
 		$this->last_cache_locale = is_string( $locale ) && $locale ? $locale : 'en_US';
 
 		return $this->last_cache_locale;
+	}
+
+	/**
+	 * Restore the geographical caches that nested lookups changed while the locale was resolving, and end the resolution.
+	 *
+	 * This is a separate method so PHPStan does not treat the registry as the empty array set before determine_locale().
+	 *
+	 * @return void
+	 */
+	private static function restore_locale_resolution_snapshots() {
+		foreach ( self::$locale_resolution_snapshots ?? array() as $snapshot ) {
+			$snapshot[0]->geo_cache = $snapshot[1];
+		}
+
+		self::$locale_resolution_snapshots = null;
 	}
 
 	/**
