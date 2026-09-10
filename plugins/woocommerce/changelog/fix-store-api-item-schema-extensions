@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: the cart items endpoint now publishes and validates extensions registered against `cart-item`, rather than those registered against `product`. The order items schema, which isn't extendable, no longer advertises `product` extensions it never returned.

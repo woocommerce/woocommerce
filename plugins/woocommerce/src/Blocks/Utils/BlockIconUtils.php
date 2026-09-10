@@ -20,42 +20,22 @@ final class BlockIconUtils {
 			|
 			\#(?:[0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})
 			|
-			rgb\(
+			rgba?\(
 				[\x20\t\r\n\f]*
 				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?
+					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?(?:[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
 					|
 					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?(?:[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
 				)
 				[\x20\t\r\n\f]*
 			\)
 			|
-			rgba\(
+			hsla?\(
 				[\x20\t\r\n\f]*
 				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?
-					|
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?
-				)
-				[\x20\t\r\n\f]*
-			\)
-			|
-			hsl\(
-				[\x20\t\r\n\f]*
-				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%
+					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)% (?:[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
 					|
 					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%(?:[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?)?
-				)
-				[\x20\t\r\n\f]*
-			\)
-			|
-			hsla\(
-				[\x20\t\r\n\f]*
-				(?:
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*,[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?
-					|
-					[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:deg|grad|rad|turn)?[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]+[+-]?(?:\d+(?:\.\d*)?|\.\d+)%[\x20\t\r\n\f]*\/[\x20\t\r\n\f]*[+-]?(?:\d+(?:\.\d*)?|\.\d+)%?
 				)
 				[\x20\t\r\n\f]*
 			\)
@@ -70,7 +50,7 @@ final class BlockIconUtils {
 	 * @param array  $block_attributes Caller-local block attributes.
 	 * @return string Filtered SVG markup.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public static function get_cart_icon( $requested_icon, $icon_color, $block_name, $block_attributes ) {
 		$icon_name   = in_array( $requested_icon, array( 'bag', 'bag-alt' ), true ) ? $requested_icon : 'cart';
@@ -88,22 +68,28 @@ final class BlockIconUtils {
 	 * @param array  $block_attributes Caller-local block attributes.
 	 * @return string Filtered SVG markup.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public static function filter_block_icon( $default_svg, $icon_name, $block_name, $block_attributes ) {
 		/**
 		 * Filters eligible decorative block icon SVG markup during frontend/server rendering.
 		 *
-		 * Block attributes contain caller-local render-time context and are not a normalized cross-block schema.
-		 * The exact unchanged default is byte-preserved. Changed non-empty strings are sanitized and validated.
+		 * Supported callers are the Mini-Cart, Cart Link, and Customer Account primary icons. Block attributes contain caller-local render-time context and are not a normalized cross-block schema.
+		 * Mini-Cart and Cart Link report `cart`, `bag`, or `bag-alt`; Customer Account reports `default`, `line`, or `alt`. Match both the block name and icon name; future callers may add names.
+		 * This filter does not change editor previews, avatars, or functional controls such as the account dropdown caret. Text-only account blocks do not call it.
+		 * The exact unchanged default is byte-preserved. Changed non-empty strings are sanitized and validated as one static SVG.
+		 * Sanitization strips unsupported elements and attributes. The remaining markup must be one complete SVG containing only groups, paths, and basic shapes, without text or comments.
+		 * Inline styles, scripts, events, animation, images, references, gradients, masks, and filters are unsupported. Fill and stroke accept flat keywords/named colors, hex, and numeric RGB(A)/HSL(A); CSS escapes, variables, and resource URLs are rejected.
+		 * WooCommerce restores caller-owned root classes and decorative accessibility attributes, but the replacement owns its geometry and paint.
+		 * Use `currentColor` to inherit the control color. To retain an explicit Mini-Cart icon color, read it from the supplied block attributes and emit it in the replacement.
 		 * Empty or whitespace-only strings remove the icon. Non-string or invalid changed values fall back to the exact default.
 		 *
-		 * @param string $default_svg      Default SVG markup.
+		 * @param string $default_svg      Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks.
 		 * @param string $icon_name       Canonical icon name.
 		 * @param string $block_name      Block name.
 		 * @param array  $block_attributes Caller-local render-time block attributes.
 		 *
-		 * @since 11.1.0
+		 * @since 11.2.0
 		 */
 		$filtered_svg = apply_filters( 'woocommerce_blocks_icon_svg', $default_svg, $icon_name, $block_name, $block_attributes );
 
@@ -111,12 +97,12 @@ final class BlockIconUtils {
 			return $default_svg;
 		}
 
-		$filtered_svg = trim( $filtered_svg );
+		$filtered_svg = trim( $filtered_svg, " \t\r\n\f" );
 		if ( '' === $filtered_svg ) {
 			return '';
 		}
 
-		$sanitized_svg = trim( wp_kses( $filtered_svg, self::get_allowed_svg_html() ) );
+		$sanitized_svg = trim( wp_kses( $filtered_svg, self::get_allowed_svg_html() ), " \t\r\n\f" );
 		if ( ! self::is_valid_svg( $sanitized_svg ) ) {
 			return $default_svg;
 		}
@@ -212,7 +198,7 @@ final class BlockIconUtils {
 		while ( $processor->next_token() ) {
 			$token_type = $processor->get_token_type();
 			if ( '#text' === $token_type ) {
-				if ( '' !== trim( $processor->get_modifiable_text() ) ) {
+				if ( '' !== trim( $processor->get_modifiable_text(), " \t\r\n\f" ) ) {
 					return false;
 				}
 				continue;
@@ -273,7 +259,7 @@ final class BlockIconUtils {
 	 * @return bool Whether the value is supported.
 	 */
 	private static function is_safe_paint( string $paint ): bool {
-		return 1 === preg_match( self::SAFE_PAINT_PATTERN, $paint );
+		return 1 === preg_match( self::SAFE_PAINT_PATTERN, trim( $paint, " \t\r\n\f" ) );
 	}
 
 	/**

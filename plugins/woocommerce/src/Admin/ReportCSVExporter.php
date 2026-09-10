@@ -116,6 +116,48 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		return self::get_reports_directory() . $this->get_filename();
 	}
 
+	/**
+	 * Check whether a complete generated export is still on disk.
+	 *
+	 * The `.headers` companion is only written once the export reaches 100%, so a body without one
+	 * is an export that never finished and must not be served.
+	 *
+	 * @since 11.2.0
+	 * @return bool
+	 */
+	public function export_file_exists() {
+		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
+	}
+
+	/**
+	 * Write the export to the output, leaving the file in place. Send the download headers first.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function stream_export_file() {
+		$this->send_content( $this->get_headers_row_file() );
+
+		// Stream the body instead of reading it into memory. Exports are emailed precisely when the
+		// report is too large to return in one request, so it can be far larger than the memory limit.
+		readfile( $this->get_file_path() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile, WordPress.Security.EscapeOutput.OutputNotEscaped -- Streaming a generated CSV download.
+	}
+
+	/**
+	 * Serve the export file.
+	 *
+	 * Unlike the parent, this keeps the file so that the download link WooCommerce emails to the
+	 * merchant works more than once. ReportExporter::delete_expired_exports() removes it later.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function export() {
+		$this->send_headers();
+		$this->stream_export_file();
+		die();
+	}
+
 
 	/**
 	 * Setter for report type.
@@ -135,21 +177,16 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @param array $args The report args.
 	 */
 	public function set_report_args( $args ) {
-		// Use our own internal limit and include all extended info.
-		$report_args = array_merge(
-			$args,
-			array(
-				'per_page'      => $this->get_limit(),
-				'extended_info' => true,
-			)
-		);
-
 		// Should this happen externally?
-		if ( isset( $report_args['page'] ) ) {
-			$this->set_page( $report_args['page'] );
+		if ( isset( $args['page'] ) ) {
+			$this->set_page( $args['page'] );
 		}
 
-		$this->report_args = $report_args;
+		// Store the caller's args as-is. Our internal export args (batch size and
+		// extended info) are applied in prepare_data_to_export() after the
+		// caller's args have been validated, so they are never checked against
+		// the user-facing report schema.
+		$this->report_args = $args;
 	}
 
 	/**
@@ -158,16 +195,31 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return bool|WC_REST_Reports_Controller Report controller instance or boolean false on error.
 	 */
 	protected function map_report_controller() {
+		$controller_map = self::get_report_controller_map();
+
+		if ( isset( $controller_map[ $this->report_type ] ) ) {
+			// Load the controllers if accessing outside the REST API.
+			return new $controller_map[ $this->report_type ]();
+		}
+
+		// Should this do something else?
+		return false;
+	}
+
+	/**
+	 * Get the report type to report controller class map.
+	 *
+	 * @since 11.0.1
+	 * @return array Report type to report controller class map.
+	 */
+	private static function get_report_controller_map() {
 		/**
 		 * Used to add custom report controllers.
 		 *
-		 * @since x.x.x
-		 *
-		 * @params array $controller_map A report type to report controller class map.
-		 *
-		 * @returns array Report type to report controller class map.
+		 * @since 9.8.0
+		 * @param array $controller_map A report type to report controller class map.
 		 */
-		$controller_map = apply_filters(
+		return apply_filters(
 			'woocommerce_export_report_controller_map',
 			array(
 				'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
@@ -182,14 +234,25 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 				'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
 			)
 		);
+	}
 
-		if ( isset( $controller_map[ $this->report_type ] ) ) {
-			// Load the controllers if accessing outside the REST API.
-			return new $controller_map[ $this->report_type ]();
+	/**
+	 * Get a REST controller instance for a given report type, or false if unknown.
+	 *
+	 * @since 11.0.1
+	 * @param string $report_type Report type. E.g. 'orders'.
+	 * @return \WC_REST_Reports_Controller|false
+	 */
+	public static function get_report_controller( $report_type ) {
+		$controller_map = self::get_report_controller_map();
+
+		if ( ! isset( $controller_map[ $report_type ] ) ) {
+			return false;
 		}
 
-		// Should this do something else?
-		return false;
+		$controller = new $controller_map[ $report_type ]();
+
+		return $controller instanceof \WC_REST_Reports_Controller ? $controller : false;
 	}
 
 	/**
@@ -277,6 +340,30 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		$request->set_default_params( $defaults );
 		$request->set_query_params( $this->report_args );
 		$request->sanitize_params();
+
+		// Enforce the report's own schema on every export path, including direct
+		// ReportExporter::queue_report_export() callers that bypass the REST
+		// route's validation. Never pass unvalidated args (e.g. orderby) to the
+		// query.
+		$validity = $request->has_valid_params();
+		if ( is_wp_error( $validity ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Skipping %s report export: %s', $this->report_type, $validity->get_error_message() ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			$this->total_rows = 0;
+			$this->row_data   = array();
+			return;
+		}
+
+		// Apply our internal export args after validation. The batch size and
+		// extended info are ours, not user input, so they must not be validated
+		// against the user-facing schema (e.g. per_page's maximum). The batch
+		// size in particular is filterable via
+		// woocommerce_{$export_type}_export_batch_limit and can legitimately
+		// exceed the schema's per_page maximum.
+		$request->set_param( 'per_page', $this->get_limit() );
+		$request->set_param( 'extended_info', true );
 
 		// Does the controller have an export-specific item retrieval method?
 		// @todo - Potentially revisit. This is only for /revenue/stats/.

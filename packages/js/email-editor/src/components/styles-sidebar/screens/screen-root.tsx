@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { typography, color, layout } from '@wordpress/icons';
+import { typography, color, background, layout } from '@wordpress/icons';
 import {
 	__experimentalVStack as VStack, // eslint-disable-line
 	Card,
@@ -20,9 +20,11 @@ import {
  * Internal dependencies
  */
 import { Preview } from './preview';
+import { useHasBackgroundScreen } from '../hooks';
 import { recordEvent } from '../../../events';
 
 export function ScreenRoot(): JSX.Element {
+	const hasBackgroundScreen = useHasBackgroundScreen();
 	return (
 		<Card
 			size="small"
@@ -76,6 +78,29 @@ export function ScreenRoot(): JSX.Element {
 								</HStack>
 							</Item>
 						</NavigatorButton>
+						{ hasBackgroundScreen && (
+							<NavigatorButton
+								path="/background"
+								onClick={ () =>
+									recordEvent(
+										'styles_sidebar_navigation_click',
+										{ path: 'background' }
+									)
+								}
+							>
+								<Item>
+									<HStack justify="flex-start">
+										<Icon icon={ background } size={ 24 } />
+										<FlexItem>
+											{ __(
+												'Background',
+												__i18n_text_domain__
+											) }
+										</FlexItem>
+									</HStack>
+								</Item>
+							</NavigatorButton>
+						) }
 						<NavigatorButton
 							path="/layout"
 							onClick={ () =>

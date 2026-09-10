@@ -116,8 +116,8 @@ export const acceleratedPrepCommand = new Command( 'accelerated-prep' )
 			Logger.notice(
 				`Adding Woo header to main plugin file and creating changelog.txt on ${ workingBranch } branch`
 			);
-			addHeader( tmpRepoPath );
-			createChangelog( tmpRepoPath, version, date );
+			await addHeader( tmpRepoPath );
+			await createChangelog( tmpRepoPath, version, date );
 
 			if ( dryRun ) {
 				const diff = await git.diffSummary();

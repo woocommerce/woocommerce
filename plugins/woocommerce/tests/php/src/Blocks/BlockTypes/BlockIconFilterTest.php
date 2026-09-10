@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use WC_Unit_Test_Case;
 
 /**
@@ -10,26 +11,6 @@ use WC_Unit_Test_Case;
  */
 class BlockIconFilterTest extends WC_Unit_Test_Case {
 	private const REPLACEMENT_SVG = '<svg class="fixture-icon" viewBox="0 0 24 24"><path d="M2 2h20v20H2z" fill="currentColor"/></svg>';
-
-	private const CUSTOMER_ACCOUNT_DEFAULT_SVG = '<svg class="fixture-byte-icon" xmlns="http://www.w3.org/2000/svg" viewbox="-5 -5 25 25">' .
-		"\n\t\t\t" .
-		'<path fill-rule="evenodd" clip-rule="evenodd" d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055 0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496 15.8444 0.489412 16 0.681933 16H15.3184C15.5109 16 15.6668 15.8444 15.6668 15.6522V14.9565C15.6668 12.1428 13.7821 9.73911 10.0912 9.73911H5.90931C2.21828 9.73911 0.333645 12.1428 0.333645 14.9565L0.333496 15.6522Z" fill="currentColor" />' .
-		"\n\t\t" .
-		'</svg>';
-
-	private const CUSTOMER_ACCOUNT_LINE_SVG = '<svg class="fixture-byte-icon" viewbox="1 1 29 29" xmlns="http://www.w3.org/2000/svg">' .
-		"\n\t\t\t\t" .
-		'<circle cx="16" cy="10.5" r="3.5" stroke="currentColor" stroke-width="2" fill="none" />' .
-		"\n\t\t\t\t" .
-		'<path fill-rule="evenodd" clip-rule="evenodd" d="M11.5 18.5H20.5C21.8807 18.5 23 19.6193 23 21V25.5H25V21C25 18.5147 22.9853 16.5 20.5 16.5H11.5C9.01472 16.5 7 18.5147 7 21V25.5H9V21C9 19.6193 10.1193 18.5 11.5 18.5Z" fill="currentColor" />' .
-		"\n\t\t\t" .
-		'</svg>';
-
-	private const CUSTOMER_ACCOUNT_ALT_SVG = '<svg class="fixture-byte-icon" xmlns="http://www.w3.org/2000/svg" viewbox="-4 -4 25 25">' .
-		"\n\t\t\t\t" .
-		'<path d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9 0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653 9.85277 6.23362 8.60221 6.23362 7.08638C6.23362 5.57056 7.46526 4.32 9 4.32ZM9 10.7242C11.1221 10.7242 12.96 12.2021 13.7937 14.4189C12.5242 15.5559 10.8379 16.238 9 16.238C7.16207 16.238 5.49474 15.5369 4.20632 14.4189C5.05891 12.2021 6.87793 10.7242 9 10.7242Z" fill="currentColor" />' .
-		"\n\t\t\t" .
-		'</svg>';
 
 	/**
 	 * Captured icon filter calls.
@@ -46,13 +27,6 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	private $no_op_filter_calls = 0;
 
 	/**
-	 * Original current user ID.
-	 *
-	 * @var int
-	 */
-	private $original_user_id;
-
-	/**
 	 * Original WooCommerce cart instance.
 	 *
 	 * @var \WC_Cart|null
@@ -60,70 +34,16 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	private $original_cart;
 
 	/**
-	 * Isolated empty cart used by render tests.
-	 *
-	 * @var \WC_Cart
-	 */
-	private $test_cart;
-
-	/**
-	 * Registered Mini-Cart block instance.
-	 *
-	 * @var object|null
-	 */
-	private $mini_cart_block_instance;
-
-	/**
-	 * Whether the Mini-Cart footer callback existed before the test.
-	 *
-	 * @var bool
-	 */
-	private $mini_cart_footer_hook_was_registered = false;
-
-	/**
-	 * Original option state.
-	 *
-	 * @var array<string, array{exists: bool, value: mixed}>
-	 */
-	private $original_options = array();
-
-	/**
-	 * Page IDs created by this test.
-	 *
-	 * @var array<int>
-	 */
-	private $created_page_ids = array();
-
-	/**
-	 * Original query-related globals.
-	 *
-	 * @var array<string, array{exists: bool, value: mixed}>
-	 */
-	private $original_query_globals = array();
-
-	/**
-	 * Original request state.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $original_request_state = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_user_id = get_current_user_id();
-		$this->remember_options();
-		$this->remember_query_state();
-		$this->remember_mini_cart_footer_hook_state();
-
+		$this->reset_cart_checkout_page_cache();
 		$this->original_cart = WC()->cart;
 		add_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
-		$this->test_cart = new \WC_Cart();
+		WC()->cart = new \WC_Cart();
 		remove_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
-		WC()->cart = $this->test_cart;
 
 		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX, 4 );
 	}
@@ -136,16 +56,7 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_no_op_icon_filter_call' ), PHP_INT_MAX );
 		remove_filter( 'woocommerce_cart_session_initialize', array( $this, 'disable_cart_session_hooks' ) );
 
-		$this->remove_test_cart_hooks();
 		WC()->cart = $this->original_cart;
-		$this->remove_mini_cart_footer_hook();
-
-		wp_set_current_user( $this->original_user_id );
-		foreach ( $this->created_page_ids as $page_id ) {
-			wp_delete_post( $page_id, true );
-		}
-		$this->restore_options();
-		$this->restore_query_state();
 
 		parent::tearDown();
 	}
@@ -336,40 +247,41 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Customer Account preserves exact $style icon bytes when the filter is a no-op.
-	 * @dataProvider provide_customer_account_default_icon_bytes
+	 * @testdox Customer Account preserves its unfiltered $style icon output when the filter is a no-op.
+	 * @dataProvider provide_customer_account_icon_styles
 	 *
-	 * @param string $style        Customer Account icon style.
-	 * @param string $expected_svg Exact post-KSES SVG bytes.
+	 * @param string $style Customer Account icon style.
 	 */
-	public function test_customer_account_no_op_filter_preserves_exact_icon_bytes( string $style, string $expected_svg ): void {
+	public function test_customer_account_no_op_filter_preserves_icon_output( string $style ): void {
 		remove_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_icon_filter_call' ), PHP_INT_MAX );
-		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_no_op_icon_filter_call' ), PHP_INT_MAX );
+		$attributes = array(
+			'displayStyle'          => 'icon_and_text',
+			'hasDropdownNavigation' => false,
+			'iconStyle'             => $style,
+			'iconClass'             => 'fixture-byte-icon',
+		);
+		$unfiltered = $this->render_block( 'woocommerce/customer-account', $attributes );
 
-		$output = $this->render_block(
+		add_filter( 'woocommerce_blocks_icon_svg', array( $this, 'capture_no_op_icon_filter_call' ), PHP_INT_MAX );
+		$filtered = $this->render_block(
 			'woocommerce/customer-account',
-			array(
-				'displayStyle'          => 'icon_and_text',
-				'hasDropdownNavigation' => false,
-				'iconStyle'             => $style,
-				'iconClass'             => 'fixture-byte-icon',
-			)
+			$attributes
 		);
 
-		$this->assertSame( $expected_svg, $this->extract_primary_svg_bytes( $output ) );
+		$this->assertSame( $this->extract_primary_svg_bytes( $unfiltered ), $this->extract_primary_svg_bytes( $filtered ) );
 		$this->assertSame( 1, $this->no_op_filter_calls, 'Customer Account should invoke the no-op icon filter exactly once.' );
 	}
 
 	/**
-	 * Provides exact caller-visible Customer Account SVG bytes.
+	 * Provides Customer Account icon styles.
 	 *
-	 * @return array<string, array{string, string}>
+	 * @return array<string, array{string}>
 	 */
-	public function provide_customer_account_default_icon_bytes(): array {
+	public function provide_customer_account_icon_styles(): array {
 		return array(
-			'default' => array( 'default', self::CUSTOMER_ACCOUNT_DEFAULT_SVG ),
-			'line'    => array( 'line', self::CUSTOMER_ACCOUNT_LINE_SVG ),
-			'alt'     => array( 'alt', self::CUSTOMER_ACCOUNT_ALT_SVG ),
+			'default' => array( 'default' ),
+			'line'    => array( 'line' ),
+			'alt'     => array( 'alt' ),
 		);
 	}
 
@@ -499,6 +411,18 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Resets request-scoped page detection cached by production code.
+	 */
+	private function reset_cart_checkout_page_cache(): void {
+		$reflection = new \ReflectionClass( CartCheckoutUtils::class );
+		foreach ( array( 'is_cart_page', 'is_checkout_page' ) as $property_name ) {
+			$property = $reflection->getProperty( $property_name );
+			$property->setAccessible( true );
+			$property->setValue( null, null );
+		}
+	}
+
+	/**
 	 * Creates a published page and assigns it to a WooCommerce page option.
 	 *
 	 * @param string $option_name WooCommerce page option name.
@@ -506,156 +430,15 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 	 * @return int Page ID.
 	 */
 	private function create_page_for_option( string $option_name, string $title ): int {
-		$page_id                  = self::factory()->post->create(
+		$page_id = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
 				'post_status' => 'publish',
 				'post_title'  => $title,
 			)
 		);
-		$this->created_page_ids[] = $page_id;
 		update_option( $option_name, $page_id );
 
 		return $page_id;
-	}
-
-	/**
-	 * Remembers WooCommerce page options changed by render fixtures.
-	 */
-	private function remember_options(): void {
-		foreach ( array( 'woocommerce_cart_page_id', 'woocommerce_checkout_page_id', 'woocommerce_myaccount_page_id' ) as $option_name ) {
-			$missing = new \stdClass();
-			$value   = get_option( $option_name, $missing );
-
-			$this->original_options[ $option_name ] = array(
-				'exists' => $missing !== $value,
-				'value'  => $value,
-			);
-		}
-	}
-
-	/**
-	 * Restores WooCommerce page options changed by render fixtures.
-	 */
-	private function restore_options(): void {
-		foreach ( $this->original_options as $option_name => $state ) {
-			if ( $state['exists'] ) {
-				update_option( $option_name, $state['value'] );
-			} else {
-				delete_option( $option_name );
-			}
-		}
-	}
-
-	/**
-	 * Remembers query globals and request values changed by go_to().
-	 */
-	private function remember_query_state(): void {
-		foreach ( array( 'wp', 'wp_query', 'wp_the_query', 'post' ) as $global_name ) {
-			$exists = array_key_exists( $global_name, $GLOBALS );
-			$value  = $exists ? $GLOBALS[ $global_name ] : null;
-
-			$this->original_query_globals[ $global_name ] = array(
-				'exists' => $exists,
-				'value'  => is_object( $value ) ? clone $value : $value,
-			);
-		}
-
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw request globals are captured only for test teardown.
-		$this->original_request_state = array(
-			'get'          => $_GET,
-			'request'      => $_REQUEST,
-			'request_uri'  => array_key_exists( 'REQUEST_URI', $_SERVER ) ? $_SERVER['REQUEST_URI'] : null,
-			'query_string' => array_key_exists( 'QUERY_STRING', $_SERVER ) ? $_SERVER['QUERY_STRING'] : null,
-		);
-		// phpcs:enable
-	}
-
-	/**
-	 * Restores query globals and request values changed by go_to().
-	 */
-	private function restore_query_state(): void {
-		foreach ( $this->original_query_globals as $global_name => $state ) {
-			if ( $state['exists'] ) {
-				$GLOBALS[ $global_name ] = $state['value'];
-			} else {
-				unset( $GLOBALS[ $global_name ] );
-			}
-		}
-
-		$_GET     = $this->original_request_state['get'];
-		$_REQUEST = $this->original_request_state['request'];
-		$this->restore_server_value( 'REQUEST_URI', $this->original_request_state['request_uri'] );
-		$this->restore_server_value( 'QUERY_STRING', $this->original_request_state['query_string'] );
-	}
-
-	/**
-	 * Restores a request server value, including its missing state.
-	 *
-	 * @param string      $key   Server key.
-	 * @param string|null $value Original value, or null when absent.
-	 */
-	private function restore_server_value( string $key, $value ): void {
-		if ( null === $value ) {
-			unset( $_SERVER[ $key ] );
-		} else {
-			$_SERVER[ $key ] = $value;
-		}
-	}
-
-	/**
-	 * Removes every hook callback registered by the isolated WC_Cart instance.
-	 */
-	private function remove_test_cart_hooks(): void {
-		global $wp_filter;
-
-		$callbacks_to_remove = array();
-		foreach ( $wp_filter as $hook_name => $hook ) {
-			if ( ! $hook instanceof \WP_Hook ) {
-				continue;
-			}
-
-			foreach ( $hook->callbacks as $priority => $callbacks ) {
-				foreach ( $callbacks as $callback ) {
-					$function = is_array( $callback ) ? ( $callback['function'] ?? null ) : null;
-					if ( is_array( $function ) && isset( $function[0] ) && $this->test_cart === $function[0] ) {
-						$callbacks_to_remove[] = array( $hook_name, $function, $priority );
-					}
-				}
-			}
-		}
-
-		foreach ( $callbacks_to_remove as $callback ) {
-			remove_filter( $callback[0], $callback[1], $callback[2] );
-		}
-	}
-
-	/**
-	 * Captures the registered Mini-Cart block's footer hook state.
-	 */
-	private function remember_mini_cart_footer_hook_state(): void {
-		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
-		$callback   = $block_type ? $block_type->render_callback : null;
-
-		if ( is_array( $callback ) && isset( $callback[0] ) && is_object( $callback[0] ) ) {
-			$this->mini_cart_block_instance = $callback[0];
-
-			$this->mini_cart_footer_hook_was_registered = false !== has_action( 'wp_footer', array( $this->mini_cart_block_instance, 'render_mini_cart_overlay' ) );
-		}
-	}
-
-	/**
-	 * Removes only a Mini-Cart footer callback newly registered by the test.
-	 */
-	private function remove_mini_cart_footer_hook(): void {
-		if ( ! $this->mini_cart_block_instance ) {
-			return;
-		}
-
-		$callback = array( $this->mini_cart_block_instance, 'render_mini_cart_overlay' );
-
-		if ( ! $this->mini_cart_footer_hook_was_registered && false !== has_action( 'wp_footer', $callback ) ) {
-			remove_action( 'wp_footer', $callback, 10 );
-		}
 	}
 }

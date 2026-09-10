@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Limit the Recently Viewed Products widget query to the 15 most recent product IDs from the cookie. This prevents oversized cookies from increasing query workload while preserving normal browsing behavior.

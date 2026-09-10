@@ -391,4 +391,182 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $signatures );
 		$this->assertEmpty( $signatures );
 	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should return the same result on repeated calls.
+	 */
+	public function test_get_hook_callback_signatures_is_stable_across_repeated_calls() {
+		$hook_name = 'test_hook_memo_stable';
+
+		add_action( $hook_name, '__return_true', 10 );
+		add_action( $hook_name, fn() => true, 20 );
+
+		$first  = CallbackUtil::get_hook_callback_signatures( $hook_name );
+		$second = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertSame( $first, $second );
+		$this->assertSame( '__return_true', $first[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should pick up a callback added after a previous call.
+	 */
+	public function test_get_hook_callback_signatures_detects_added_callback() {
+		$hook_name = 'test_hook_memo_added';
+
+		add_action( $hook_name, '__return_true', 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		add_action( $hook_name, '__return_false', 30 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertArrayNotHasKey( 30, $before );
+		$this->assertArrayHasKey( 30, $after );
+		$this->assertSame( '__return_false', $after[30][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should pick up a callback removed after a previous call.
+	 */
+	public function test_get_hook_callback_signatures_detects_removed_callback() {
+		$hook_name = 'test_hook_memo_removed';
+
+		add_action( $hook_name, '__return_true', 10 );
+		add_action( $hook_name, '__return_false', 30 );
+		CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, '__return_false', 30 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertArrayHasKey( 10, $after );
+		$this->assertArrayNotHasKey( 30, $after );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should distinguish different classes exposing the same method name.
+	 */
+	public function test_get_hook_callback_signatures_detects_swapped_callback_object() {
+		$hook_name = 'test_hook_memo_swapped';
+
+		$first_object = new DummyCallbackClass();
+		add_action( $hook_name, array( $first_object, 'my_method' ), 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, array( $first_object, 'my_method' ), 10 );
+
+		$second_object = new AnotherDummyCallbackClass();
+		add_action( $hook_name, array( $second_object, 'my_method' ), 10 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertSame( DummyCallbackClass::class . '::my_method', $before[10][0] );
+		$this->assertSame( AnotherDummyCallbackClass::class . '::my_method', $after[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should return an empty array once every callback is removed.
+	 */
+	public function test_get_hook_callback_signatures_after_all_callbacks_removed() {
+		$hook_name = 'test_hook_memo_emptied';
+
+		add_action( $hook_name, '__return_true', 10 );
+		$this->assertNotEmpty( CallbackUtil::get_hook_callback_signatures( $hook_name ) );
+
+		remove_all_actions( $hook_name );
+
+		$this->assertEmpty( CallbackUtil::get_hook_callback_signatures( $hook_name ) );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should distinguish callbacks that fall back to the serialized signature.
+	 */
+	public function test_get_hook_callback_signatures_detects_replaced_unsupported_callback() {
+		$hook_name = 'test_hook_memo_unsupported';
+
+		// Shapes that get_callback_signature() serializes rather than naming.
+		$first  = array( 'first_target', 'first_method', 'extra' );
+		$second = array( 'second_target', 'second_method', 'extra' );
+
+		add_action( $hook_name, $first, 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, $first, 10 );
+		add_action( $hook_name, $second, 10 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertSame( CallbackUtil::get_callback_signature( $first ), $before[10][0] );
+		$this->assertSame( CallbackUtil::get_callback_signature( $second ), $after[10][0] );
+		$this->assertNotSame( $before[10][0], $after[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should distinguish two different closures registered at the same priority.
+	 */
+	public function test_get_hook_callback_signatures_detects_replaced_closure_at_same_priority() {
+		$hook_name = 'test_hook_memo_closure_swap';
+
+		$first_closure = function () {
+			return 1;
+		};
+		add_action( $hook_name, $first_closure, 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, $first_closure, 10 );
+
+		// Drop our own reference too, so the replacement is free to reuse the
+		// slot. Guards any future implementation that keys the memo on derived
+		// ids rather than on the callbacks array itself.
+		unset( $first_closure );
+
+		$second_closure = function () {
+			return 2;
+		};
+		add_action( $hook_name, $second_closure, 10 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertStringStartsWith( 'Closure@', $before[10][0] );
+		$this->assertStringStartsWith( 'Closure@', $after[10][0] );
+		$this->assertNotSame( $before[10][0], $after[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should return one signature per closure sharing a priority.
+	 */
+	public function test_get_hook_callback_signatures_with_two_closures_at_same_priority() {
+		$hook_name = 'test_hook_memo_two_closures';
+
+		add_action(
+			$hook_name,
+			function () {
+				return 1;
+			},
+			10
+		);
+		add_action(
+			$hook_name,
+			function () {
+				return 2;
+			},
+			10
+		);
+
+		$signatures = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertCount( 2, $signatures[10] );
+		$this->assertNotSame( $signatures[10][0], $signatures[10][1] );
+		$this->assertSame( $signatures, CallbackUtil::get_hook_callback_signatures( $hook_name ) );
+
+		remove_all_actions( $hook_name );
+	}
 }

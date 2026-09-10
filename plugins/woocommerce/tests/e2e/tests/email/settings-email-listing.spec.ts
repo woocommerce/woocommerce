@@ -118,4 +118,32 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Add 1 to account for header row
 		await expect( rows ).toHaveCount( 2 );
 	} );
+
+	test( 'Preview action renders the file template for emails without a saved post', async ( {
+		page,
+		baseURL,
+	} ) => {
+		await setBlockEmailEditorFeatureFlag( baseURL, 'yes' );
+
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
+		const listViewLocator = page.locator(
+			'.woocommerce-email-listing-listview'
+		);
+		await expect( listViewLocator ).toBeVisible();
+
+		// A row no other spec creates a post for, so it renders from the file
+		// template and the Preview action must use the admin preview page.
+		const row = listViewLocator.locator( 'tr', {
+			hasText: 'Order on hold',
+		} );
+		const popupPromise = page.waitForEvent( 'popup' );
+		await row.getByRole( 'button', { name: 'Preview' } ).click();
+		const popup = await popupPromise;
+
+		await expect( popup ).toHaveURL( /preview_woo_block_email/ );
+		// The wooemailtemplate chrome proves the block pipeline rendered it.
+		await expect( popup.locator( 'body' ) ).toContainText(
+			'All Rights Reserved'
+		);
+	} );
 } );

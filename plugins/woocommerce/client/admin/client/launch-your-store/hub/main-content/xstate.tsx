@@ -101,7 +101,7 @@ export const mainContentMachine = setup( {
 		navigateToHome: () => {
 			const { invalidateResolutionForStoreSelector } =
 				dispatch( onboardingStore );
-			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			void invalidateResolutionForStoreSelector( 'getTaskLists' );
 			navigateTo( { url: '/' } );
 		},
 	},

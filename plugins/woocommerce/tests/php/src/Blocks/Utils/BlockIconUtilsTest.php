@@ -13,15 +13,7 @@ use WC_Unit_Test_Case;
 class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	private const DEFAULT_SVG = '<svg class="required-icon another-required" viewBox="0 0 24 24"><path d="M1 1h22v22H1z" fill="currentColor"/></svg>';
 
-	private const STATIC_SVG_FIXTURE = '<svg class="fixture-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" fill-opacity="0.9" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="bevel" stroke-miterlimit="4" opacity="0.95" role="presentation"><g class="fixture-group" fill="red" stroke="#abc" opacity="0.75" transform="translate(1 1)"><rect class="fixture-rect" x="1" y="1" width="4" height="3" rx="1" ry="1"/><circle class="fixture-circle" cx="9" cy="3" r="2"/><ellipse class="fixture-ellipse" cx="15" cy="3" rx="3" ry="2"/><line class="fixture-line" x1="1" y1="8" x2="7" y2="8"/><polyline class="fixture-polyline" points="9,9 11,7 13,9"/><polygon class="fixture-polygon" points="15,9 17,7 19,9"/><path class="fixture-path" d="M2 12h18v8H2z" fill="#aabbccdd" fill-rule="evenodd" clip-rule="evenodd" stroke="rgba(1 2 3 / 50%)" stroke-width="2" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="3" opacity="0.6" transform="rotate(1)"/></g></svg>';
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_blocks_icon_svg' );
-		parent::tearDown();
-	}
+	private const STATIC_SVG_FIXTURE = '<svg class="fixture-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" fill-opacity="0.9" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="bevel" stroke-miterlimit="4" opacity="0.95" role="presentation"><g class="fixture-group" fill="red" stroke="#abc" opacity="0.75" transform="translate(1 1)"><rect class="fixture-rect" fill="none" x="1" y="1" width="4" height="3" rx="1" ry="1"/><circle class="fixture-circle" fill="none" cx="9" cy="3" r="2"/><ellipse class="fixture-ellipse" fill="none" cx="15" cy="3" rx="3" ry="2"/><line class="fixture-line" fill="none" x1="1" y1="8" x2="7" y2="8"/><polyline class="fixture-polyline" fill="none" points="9,9 11,7 13,9"/><polygon class="fixture-polygon" fill="none" points="15,9 17,7 19,9"/><path class="fixture-path" d="M2 12h18v8H2z" fill="#aabbccdd" fill-rule="evenodd" clip-rule="evenodd" stroke="rgba(1 2 3 / 50%)" stroke-width="2" stroke-linecap="square" stroke-linejoin="round" stroke-miterlimit="3" opacity="0.6" transform="rotate(1)"/></g></svg>';
 
 	/**
 	 * @testdox The exact default SVG is returned when no filter is registered.
@@ -95,6 +87,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 			'empty'            => array( '' ),
 			'spaces'           => array( '   ' ),
 			'mixed whitespace' => array( " \n\t " ),
+			'form feed'        => array( "\f" ),
 		);
 	}
 
@@ -169,12 +162,15 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'presentation', $processor->get_attribute( 'role' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'g' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-group' ) );
 		$this->assertSame( 'red', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '#abc', $processor->get_attribute( 'stroke' ) );
 		$this->assertSame( '0.75', $processor->get_attribute( 'opacity' ) );
 		$this->assertSame( 'translate(1 1)', $processor->get_attribute( 'transform' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'rect' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-rect' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '1', $processor->get_attribute( 'x' ) );
 		$this->assertSame( '1', $processor->get_attribute( 'y' ) );
 		$this->assertSame( '4', $processor->get_attribute( 'width' ) );
@@ -183,29 +179,40 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( '1', $processor->get_attribute( 'ry' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'circle' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-circle' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '9', $processor->get_attribute( 'cx' ) );
 		$this->assertSame( '3', $processor->get_attribute( 'cy' ) );
 		$this->assertSame( '2', $processor->get_attribute( 'r' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'ellipse' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-ellipse' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '15', $processor->get_attribute( 'cx' ) );
 		$this->assertSame( '3', $processor->get_attribute( 'cy' ) );
 		$this->assertSame( '3', $processor->get_attribute( 'rx' ) );
 		$this->assertSame( '2', $processor->get_attribute( 'ry' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'line' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-line' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '1', $processor->get_attribute( 'x1' ) );
 		$this->assertSame( '8', $processor->get_attribute( 'y1' ) );
 		$this->assertSame( '7', $processor->get_attribute( 'x2' ) );
 		$this->assertSame( '8', $processor->get_attribute( 'y2' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'polyline' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-polyline' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '9,9 11,7 13,9', $processor->get_attribute( 'points' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'polygon' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-polygon' ) );
+		$this->assertSame( 'none', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( '15,9 17,7 19,9', $processor->get_attribute( 'points' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'path' ) ) );
+		$this->assertTrue( $processor->has_class( 'fixture-path' ) );
 		$this->assertSame( 'M2 12h18v8H2z', $processor->get_attribute( 'd' ) );
 		$this->assertSame( '#aabbccdd', $processor->get_attribute( 'fill' ) );
 		$this->assertSame( 'evenodd', $processor->get_attribute( 'fill-rule' ) );
@@ -223,7 +230,7 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 * @testdox A valid changed SVG with surrounding whitespace is accepted and trimmed.
 	 */
 	public function test_filter_block_icon_trims_valid_replacement(): void {
-		$replacement = " \n\t<svg class=\"fixture-icon\" viewBox=\"0 0 24 24\"><path d=\"M1 1h22v22H1z\" fill=\"currentColor\"/></svg>\r\n ";
+		$replacement = " \n\t<?xml version=\"1.0\"?>\n<svg class=\"fixture-icon\" viewBox=\"0 0 24 24\">\n\t<path d=\"M1 1h22v22H1z\" fill=\"currentColor\"/></svg>\r\n ";
 
 		$result = $this->filter_with_replacement( $replacement );
 
@@ -249,15 +256,20 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function provide_invalid_svg_replacements(): array {
 		return array(
-			'plain text'           => array( 'hello' ),
-			'foreign content text' => array( '<svg><foreignObject><div>visible</div></foreignObject></svg>' ),
-			'script text'          => array( '<svg><script>alert(1)</script></svg>' ),
-			'title text'           => array( '<svg><title>visible</title><path d="M0 0"/></svg>' ),
-			'zero roots'           => array( '<path d="M0 0"/>' ),
-			'multiple roots'       => array( '<svg></svg><svg></svg>' ),
-			'malformed nesting'    => array( '<svg><g><path d="M0 0"/></svg></g>' ),
-			'comment token'        => array( '<svg><!-- comment --><path d="M0 0"/></svg>' ),
-			'incomplete input'     => array( '<svg><path d="M0 0"' ),
+			'plain text'            => array( 'hello' ),
+			'foreign content text'  => array( '<svg><foreignObject><div>visible</div></foreignObject></svg>' ),
+			'script text'           => array( '<svg><script>alert(1)</script></svg>' ),
+			'title text'            => array( '<svg><title>visible</title><path d="M0 0"/></svg>' ),
+			'zero roots'            => array( '<path d="M0 0"/>' ),
+			'multiple roots'        => array( '<svg></svg><svg></svg>' ),
+			'malformed nesting'     => array( '<svg><g><path d="M0 0"/></svg></g>' ),
+			'comment token'         => array( '<svg><!-- comment --><path d="M0 0"/></svg>' ),
+			'incomplete input'      => array( '<svg><path d="M0 0"' ),
+			'nul is not whitespace' => array( "\0" ),
+			'encoded URL paint'     => array( '<svg><path fill="&#117;rl(&#35;shape)"/></svg>' ),
+			'encoded text'          => array( '<svg>&lt;path/&gt;</svg>' ),
+			'CDATA'                 => array( '<svg><![CDATA[<path/>]]></svg>' ),
+			'unclosed group'        => array( '<svg><g></svg>' ),
 		);
 	}
 
@@ -321,17 +333,22 @@ class BlockIconUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function provide_safe_paints(): array {
 		$paints = array(
-			'none'            => 'none',
-			'current color'   => 'currentColor',
-			'named color'     => 'red',
-			'three digit hex' => '#abc',
-			'four digit hex'  => '#abcd',
-			'six digit hex'   => '#aabbcc',
-			'eight digit hex' => '#aabbccdd',
-			'rgb'             => 'rgb(1, 2, 3)',
-			'rgba'            => 'rgba(1 2 3 / 50%)',
-			'hsl'             => 'hsl(120deg 50% 25%)',
-			'hsla'            => 'hsla(.5turn, 50%, 25%, .8)',
+			'none'              => 'none',
+			'current color'     => 'currentColor',
+			'named color'       => 'red',
+			'three digit hex'   => '#abc',
+			'four digit hex'    => '#abcd',
+			'six digit hex'     => '#aabbcc',
+			'eight digit hex'   => '#aabbccdd',
+			'rgb'               => 'rgb(1, 2, 3)',
+			'rgba'              => 'rgba(1 2 3 / 50%)',
+			'hsl'               => 'hsl(120deg 50% 25%)',
+			'hsla'              => 'hsla(.5turn, 50%, 25%, .8)',
+			'paint whitespace'  => " \tred \n",
+			'rgb alpha alias'   => 'rgb(1, 2, 3, .5)',
+			'rgba opaque alias' => 'rgba(1 2 3)',
+			'hsl alpha alias'   => 'hsl(120, 50%, 25%, .8)',
+			'hsla opaque alias' => 'hsla(120 50% 25%)',
 		);
 		$cases  = array();
 

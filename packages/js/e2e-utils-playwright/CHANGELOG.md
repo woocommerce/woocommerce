@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.5.1) - 2026-08-14 
+
+-   Patch - Harden `getCanvas` so the non-iframed editor path also waits for the canvas, hidden leftover iframes are ignored, and a missing canvas fails loudly instead of silently resolving to the wrong document. [#65326]
+
 ## [0.5.0](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.5.0) - 2026-06-11 
 
 -   Minor - Enable the Interactivity API-powered Mini Cart by default. [#60823]

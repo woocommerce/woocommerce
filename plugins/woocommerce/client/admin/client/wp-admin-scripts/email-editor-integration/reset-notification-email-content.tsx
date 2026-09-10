@@ -121,7 +121,7 @@ const getResetNotificationEmailContentAction = () => {
 										| { content?: { raw?: string } }
 										| undefined;
 									if ( current ) {
-										receiveEntityRecords(
+										void receiveEntityRecords(
 											'postType',
 											item.type,
 											[
@@ -149,7 +149,7 @@ const getResetNotificationEmailContentAction = () => {
 										getItemTitle( item )
 									);
 
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'reset-notification-email-content-action',
 									} );
@@ -170,7 +170,7 @@ const getResetNotificationEmailContentAction = () => {
 											error.message as TranslatableText< string >;
 									}
 
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 								} finally {

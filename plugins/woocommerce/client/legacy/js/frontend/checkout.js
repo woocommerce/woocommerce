@@ -5,7 +5,36 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	/**
+	 * Percent-encode literal apostrophes in an already URL-encoded request body.
+	 *
+	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
+	 * server with literal apostrophes that some WAF rules reject.
+	 *
+	 * @param {string} data URL-encoded request body.
+	 * @return {string} Body with apostrophes encoded as %27.
+	 */
+	function encodeApostrophes( data ) {
+		return data.split( "'" ).join( '%27' );
+	}
+
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
+
+	// A paste can carry characters that render as nothing. The server strips them
+	// before validating, so flagging the field here would blame the customer for
+	// something invisible. Mirrors the strip in wc_remove_non_displayable_chars(),
+	// not the server's phone check — that one is stricter, so a number can pass
+	// here and still be refused on submit. No "u" flag, and surrogate pairs for the
+	// ranges above U+FFFF, so the pattern builds on any browser.
+	var invisible_chars = new RegExp(
+		'[\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F' +
+			'\\u200B-\\u200F\\u202A-\\u202E\\u2060-\\u206F\\u3164' +
+			'\\uFE00-\\uFE0F\\uFEFF\\uFFA0\\uFFF0-\\uFFFB]' +
+			'|\\uD82F[\\uDCA0-\\uDCA3]' +
+			'|\\uD834[\\uDD73-\\uDD7A]' +
+			'|[\\uDB40-\\uDB43][\\uDC00-\\uDFFF]',
+		'g'
+	);
 
 	/**
 	 * Create the API object passed to custom place order button render callbacks.
@@ -582,7 +611,13 @@ jQuery( function ( $ ) {
 				if ( validate_phone ) {
 					pattern = new RegExp( /[\s\#0-9_\-\+\/\(\)\.]/g );
 
-					if ( 0 < $this.val().replace( pattern, '' ).length ) {
+					if (
+						0 <
+						$this
+							.val()
+							.replace( invisible_chars, '' )
+							.replace( pattern, '' ).length
+					) {
 						$this.attr( 'aria-invalid', 'true' );
 						$parent
 							.removeClass( 'woocommerce-validated' )
@@ -717,7 +752,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -961,7 +996,7 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: $form.serialize(),
+					data: encodeApostrophes( $form.serialize() ),
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1087,7 +1122,7 @@ jQuery( function ( $ ) {
 				.find(
 					'.woocommerce-error[tabindex="-1"], .wc-block-components-notice-banner.is-error[tabindex="-1"]'
 				)
-				.focus();
+				.trigger( 'focus' );
 			$( document.body ).trigger( 'checkout_error', [ error_message ] );
 		},
 		wrapMessagesInsideLink: function ( $msgs ) {
@@ -1198,7 +1233,7 @@ jQuery( function ( $ ) {
 
 			$target
 				.find( '#coupon_code' )
-				.focus()
+				.trigger( 'focus' )
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
 				.attr( 'aria-describedby', 'coupon-error-notice' );
@@ -1267,7 +1302,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1293,6 +1328,11 @@ jQuery( function ( $ ) {
 							self.show_coupon_error(
 								response,
 								$coupon_field.parent()
+							);
+
+							$( document.body ).trigger(
+								'errored_coupon_in_checkout',
+								[ data.coupon_code, response ]
 							);
 						}
 
@@ -1336,7 +1376,7 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
-				data: data,
+				data: encodeApostrophes( $.param( data ) ),
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'

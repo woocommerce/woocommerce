@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the last_quarter end date in TimeInterval::get_timeframe_dates(), which used an invalid September 31 and rolled over to October 1, widening the quarter by a day.

@@ -10,13 +10,14 @@
 	},
 	"main": "index.js",
 	"files": [
-		"index.js"
+		"index.js",
+		"core-modules.js"
 	],
 	"scripts": {
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:lang:js": "eslint ./index.js",
-		"lint:fix:lang:js": "eslint ./index.js --fix"
+		"lint:lang:js": "eslint ./index.js ./core-modules.js",
+		"lint:fix:lang:js": "eslint ./index.js ./core-modules.js --fix"
 	},
 	"dependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*"
@@ -29,7 +30,8 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"index.js"
+					"index.js",
+					"core-modules.js"
 				]
 			}
 		}

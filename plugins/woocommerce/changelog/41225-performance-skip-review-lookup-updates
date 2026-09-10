@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve performance when product reviews are disabled by skipping product rating lookup table updates.

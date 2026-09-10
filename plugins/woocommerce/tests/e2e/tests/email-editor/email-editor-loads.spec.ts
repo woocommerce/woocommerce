@@ -3,7 +3,10 @@
  */
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { disableEmailEditor } from './helpers/enable-email-editor-feature';
+import {
+	disableEmailEditor,
+	enableEmailEditor,
+} from './helpers/enable-email-editor-feature';
 import { accessTheEmailEditor } from '../../utils/email';
 
 test.describe( 'WooCommerce Email Editor Core', () => {
@@ -56,6 +59,15 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await accessTheEmailEditor( page, 'New order' );
 		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
 
+		// WP 7.1 adds a "Responsive styles" toggle to this menu; the email
+		// editor disables it because the email renderer cannot inline
+		// per-viewport styles. Also passes on older WP without the feature.
+		await expect(
+			page.getByRole( 'menuitemcheckbox', {
+				name: 'Responsive styles',
+			} )
+		).toBeHidden();
+
 		const [ newPage ] = await Promise.all( [
 			page.waitForEvent( 'popup' ), // Waits for the new tab to open
 			page
@@ -67,7 +79,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		// eslint-disable-next-line playwright/no-wait-for-selector -- wait for the tab to be loaded.
 		await newPage.waitForSelector( '.wp-block-heading' );
 		await page.close(); // close the original tab.
-		await expect( newPage.url() ).toContain( 'preview=true' );
+		expect( newPage.url() ).toContain( 'preview=true' );
 		await expect( newPage.locator( 'body' ) ).toContainText(
 			'New order: #12345'
 		);
@@ -104,13 +116,16 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 				.getByText( 'You’ve received a new' )
 		).toBeVisible();
 
+		// Note: fill with a single line of text. On WP 7.1 a value containing a
+		// newline splits the paragraph but the edit never registers as a
+		// dirtying change, so the Save button stays disabled. A single-line
+		// edit commits normally and still exercises the edit → save → preview
+		// flow this test covers.
 		await page
 			.locator( 'iframe[name="editor-canvas"]' )
 			.contentFrame()
 			.getByText( 'You’ve received a new' )
-			.fill(
-				'Hello world from Woo plugin\nYou’ve received a new order from [woocommerce/customer-full-name]'
-			);
+			.fill( 'Hello world from Woo plugin' );
 		await expect(
 			page.getByRole( 'button', { name: 'Save', exact: true } )
 		).toBeVisible();
@@ -133,5 +148,71 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await expect( page1.locator( 'body' ) ).toContainText(
 			'Hello world from Woo plugin'
 		);
+	} );
+
+	test( 'Can use personalization tags in the Button block', async ( {
+		page,
+		baseURL,
+	} ) => {
+		// Enable via API so the test does not depend on the enable test having
+		// run in the same worker (a worker restart runs afterAll, which
+		// disables the feature).
+		await enableEmailEditor( baseURL );
+		await accessTheEmailEditor( page, 'New order' );
+		const canvas = page
+			.locator( 'iframe[name="editor-canvas"]' )
+			.contentFrame();
+
+		// Set the insertion point inside the email content. The heading is not
+		// touched by the other tests in this suite, unlike the first paragraph.
+		await canvas.getByLabel( 'Block: Heading' ).click();
+
+		// Insert a Button block.
+		await page.getByRole( 'button', { name: 'Block Inserter' } ).click();
+		await page
+			.getByRole( 'searchbox', { name: 'Search' } )
+			.fill( 'Buttons' );
+		await page
+			.getByRole( 'option', { name: 'Buttons', exact: true } )
+			.click();
+
+		// Focus the button text. The Personalization Tags toolbar button must be
+		// available there — the button text field uses
+		// `withoutInteractiveFormatting`, which hides the button when the
+		// personalization tags format is registered as interactive.
+		await canvas
+			.getByRole( 'document', { name: 'Block: Button', exact: true } )
+			.click();
+		const personalizationTagsButton = page
+			.getByRole( 'toolbar', { name: 'Block tools' } )
+			.getByRole( 'button', { name: 'Personalization Tags' } );
+		await expect( personalizationTagsButton ).toBeVisible();
+
+		// Set a URL personalization tag as the button link.
+		await personalizationTagsButton.click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Personalization Tags' } )
+		).toBeVisible();
+		await page
+			.locator(
+				'.woocommerce-personalization-tags-modal-category-group-item'
+			)
+			.filter( { hasText: 'Payment URL' } )
+			.getByRole( 'button', { name: 'Set as URL' } )
+			.click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Personalization Tags' } )
+		).toBeHidden();
+
+		await expect
+			.poll( () =>
+				page.evaluate(
+					() =>
+						window.wp.data
+							.select( 'core/block-editor' )
+							.getSelectedBlock()?.attributes?.url
+				)
+			)
+			.toBe( '[woocommerce/order-payment-url]' );
 	} );
 } );

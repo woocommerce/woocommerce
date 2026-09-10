@@ -308,4 +308,43 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 		// Clean up the order.
 		$order->delete( true );
 	}
+
+	/**
+	 * @testdox Order step logging can be disabled entirely via the woocommerce_order_step_logging_enabled filter.
+	 */
+	public function test_wc_log_order_step_can_be_disabled_via_filter(): void {
+		Constants::set_constant( 'WC_LOG_THRESHOLD', WC_Log_Levels::DEBUG );
+
+		add_filter( 'woocommerce_order_step_logging_enabled', '__return_false' );
+
+		$order = WC_Helper_Order::create_order();
+
+		wc_log_order_step(
+			'Step 1 - should not be logged',
+			array( 'order_object' => $order ),
+			false,
+			true
+		);
+
+		wc_log_order_step(
+			'Step 2 - Final - should not be logged',
+			array( 'order_object' => $order ),
+			true,
+			false
+		);
+
+		remove_filter( 'woocommerce_order_step_logging_enabled', '__return_false' );
+
+		$this->assertEmpty(
+			$this->get_log_files(),
+			'Expected no log files to be created when order step logging is disabled via filter'
+		);
+
+		$this->assertEmpty(
+			$order->get_meta( '_debug_log_source' ),
+			'Expected no debug log meta to be added to the order when order step logging is disabled via filter'
+		);
+
+		$order->delete( true );
+	}
 }

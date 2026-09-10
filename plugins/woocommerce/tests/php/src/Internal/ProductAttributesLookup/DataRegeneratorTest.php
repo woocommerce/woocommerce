@@ -196,7 +196,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_attribute_lookup_processed_count', 7 );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
@@ -254,7 +253,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
@@ -288,7 +286,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
@@ -315,7 +312,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			update_option( 'woocommerce_attribute_lookup_enabled', $previous_option_value );
 		}
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_installed' );
 
 		$actual_final_option_value = get_option( 'woocommerce_attribute_lookup_enabled' );

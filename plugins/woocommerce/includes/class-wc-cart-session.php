@@ -133,7 +133,9 @@ final class WC_Cart_Session {
 
 		if ( ! empty( $cart ) ) {
 			// Prime caches to reduce future queries.
-			_prime_post_caches( wp_list_pluck( $cart, 'product_id' ) );
+			$product_ids    = array_filter( array_column( $cart, 'product_id' ) );
+			$variations_ids = array_filter( array_column( $cart, 'variation_id' ) );
+			_prime_post_caches( array_merge( $product_ids, $variations_ids ) );
 		}
 
 		$cart_contents = array();
@@ -338,7 +340,7 @@ final class WC_Cart_Session {
 		}
 		if ( ! $this->cart->is_empty() ) {
 			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) {
 			$this->set_cart_cookies( false );
 		}
 		$this->dedupe_cookies();
@@ -576,8 +578,8 @@ final class WC_Cart_Session {
 			$cart = array();
 		}
 
-		$inital_cart_size = count( $cart );
-		$order_items      = $order->get_items();
+		$initial_cart_size = count( $cart );
+		$order_items       = $order->get_items();
 
 		foreach ( $order_items as $item ) {
 			$product_id     = (int) apply_filters( 'woocommerce_add_to_cart_product_id', $item->get_product_id() );
@@ -661,7 +663,7 @@ final class WC_Cart_Session {
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
-		$num_items_added             = $num_items_in_cart - $inital_cart_size;
+		$num_items_added             = $num_items_in_cart - $initial_cart_size;
 
 		if ( $num_items_in_original_order > $num_items_added ) {
 			wc_add_notice(

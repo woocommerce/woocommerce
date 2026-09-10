@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the full Recently Viewed Products cookie ID list for widget query filters to preserve extension compatibility.

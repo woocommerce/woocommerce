@@ -405,8 +405,8 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			$prepared_review['comment_date_gmt'] = current_time( 'mysql', true );
 		}
 
-		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) && rest_is_ip_address( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) { // WPCS: input var ok, sanitization ok.
-			$prepared_review['comment_author_IP'] = wc_clean( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ); // WPCS: input var ok.
+		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) && rest_is_ip_address( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Address is validated as an IP before it is unslashed and cleaned.
+			$prepared_review['comment_author_IP'] = wc_clean( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		} else {
 			$prepared_review['comment_author_IP'] = '127.0.0.1';
 		}
@@ -478,6 +478,17 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$review = get_comment( $review_id );
 
+		/*
+		 * Core has already updated wp_posts.comment_count, but the rating meta above was unavailable
+		 * during that update. Refresh the post-meta aggregates directly now that the meta is in place:
+		 * repeating wp_update_comment_count() would add count queries, post writes, edit hooks, and
+		 * deferral where an immediate post-meta aggregate refresh is required. Only an approved rated
+		 * review can change the aggregates.
+		 */
+		if ( ! empty( $request['rating'] ) && $review instanceof WP_Comment && '1' === $review->comment_approved ) {
+			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+		}
+
 		/**
 		 * Fires after a comment is created or updated via the REST API.
 		 *
@@ -536,6 +547,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		$id = (int) $review->comment_ID;
 
+		// Captured before the update: $review still holds the pre-update comment, so this is the
+		// product the review currently belongs to.
+		$original_product_id = (int) $review->comment_post_ID;
+
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
 			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
@@ -544,12 +559,18 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		if ( is_wp_error( $prepared_args ) ) {
 			return $prepared_args;
 		}
+		if ( ! is_array( $prepared_args ) ) {
+			return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 
-		if ( ! empty( $prepared_args['comment_post_ID'] ) ) {
-			if ( 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
+		if ( isset( $prepared_args['comment_post_ID'] ) ) {
+			$product_id = (int) $prepared_args['comment_post_ID'];
+			if ( 0 >= $product_id || 'product' !== get_post_type( $product_id ) ) {
 				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 		}
+
+		$core_counted_product_id = (int) ( $prepared_args['comment_post_ID'] ?? $original_product_id );
 
 		if ( empty( $prepared_args ) && isset( $request['status'] ) ) {
 			// Only the comment status is being changed.
@@ -559,10 +580,6 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				return new WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 		} elseif ( ! empty( $prepared_args ) ) {
-			if ( is_wp_error( $prepared_args ) ) {
-				return $prepared_args;
-			}
-
 			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
 				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
@@ -573,6 +590,18 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			if ( is_wp_error( $check_comment_lengths ) ) {
 				$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
 				return new WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			/*
+			 * Core stores update-side comment meta before it updates the comment count. Keep this value
+			 * as an integer so wp_slash() below cannot change its shape.
+			 */
+			if ( ! empty( $request['rating'] ) ) {
+				if ( array_key_exists( 'comment_meta', $prepared_args ) && ! is_array( $prepared_args['comment_meta'] ) ) {
+					return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+
+				$prepared_args['comment_meta']['rating'] = (int) $request['rating'];
 			}
 
 			$updated = wp_update_comment( wp_slash( (array) $prepared_args ) );
@@ -586,15 +615,28 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			}
 		}
 
-		if ( ! empty( $request['rating'] ) ) {
-			update_comment_meta( $id, 'rating', $request['rating'] );
+		// Re-read the comment because the same request can move the review to a different product.
+		$updated_review     = get_comment( $id );
+		$current_product_id = $updated_review instanceof WP_Comment ? (int) $updated_review->comment_post_ID : 0;
+
+		/*
+		 * Core chooses its count target before wp_update_comment_data can redirect the persisted review.
+		 * Refresh each affected product that Core did not count.
+		 */
+		if ( $updated_review instanceof WP_Comment ) {
+			foreach ( array_unique( array( $original_product_id, $current_product_id ) ) as $product_id_to_count ) {
+				if ( $product_id_to_count !== $core_counted_product_id ) {
+					wp_update_comment_count( $product_id_to_count );
+				}
+			}
 		}
+
+		$review = $updated_review;
 
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
 			update_comment_meta( $id, 'verified', $request['verified'] );
+			$review = get_comment( $id );
 		}
-
-		$review = get_comment( $id );
 
 		/** This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, false );

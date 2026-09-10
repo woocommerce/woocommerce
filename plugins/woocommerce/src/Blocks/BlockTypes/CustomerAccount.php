@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockIconUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
@@ -160,7 +160,7 @@ class CustomerAccount extends AbstractBlock {
 				href="<?php echo esc_url( $account_link ); ?>"
 				<?php echo $aria_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
-				<?php echo $this->render_icon( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_icon() returns the existing KSES-safe default or a utility-validated replacement. ?>
+				<?php echo $this->render_visual( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $label_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</a>
 		</div>
@@ -210,7 +210,7 @@ class CustomerAccount extends AbstractBlock {
 				data-wp-bind--aria-expanded="context.isDropdownOpen"
 				data-wp-on--click="actions.toggleDropdown"
 			>
-				<?php echo $this->render_icon( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_icon() returns the existing KSES-safe default or a utility-validated replacement. ?>
+				<?php echo $this->render_visual( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $label_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $this->render_caret_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</button>
@@ -298,42 +298,11 @@ class CustomerAccount extends AbstractBlock {
 	}
 
 	/**
-	 * Get the allowed SVG tags and attributes for wp_kses.
-	 *
-	 * @return array Allowed SVG elements and attributes.
-	 */
-	private function get_allowed_svg() {
-		return array(
-			'svg'    => array(
-				'class'   => true,
-				'xmlns'   => true,
-				'width'   => true,
-				'height'  => true,
-				'viewbox' => true,
-			),
-			'path'   => array(
-				'd'         => true,
-				'fill'      => true,
-				'fill-rule' => true,
-				'clip-rule' => true,
-			),
-			'circle' => array(
-				'cx'           => true,
-				'cy'           => true,
-				'r'            => true,
-				'stroke'       => true,
-				'stroke-width' => true,
-				'fill'         => true,
-			),
-		);
-	}
-
-	/**
 	 * Gets the icon to render depending on the iconStyle and displayStyle.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
-	 * @return string Label to render on the block
+	 * @return string SVG icon markup.
 	 */
 	private function render_icon( $attributes ) {
 		if ( self::TEXT_ONLY === $attributes['displayStyle'] ) {
@@ -341,8 +310,8 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		if ( self::DISPLAY_LINE === $attributes['iconStyle'] ) {
-			$canonical_name = self::DISPLAY_LINE;
-			$raw_svg        = '<svg class="' . $attributes['iconClass'] . '" viewBox="1 1 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+			$icon_name = self::DISPLAY_LINE;
+			$svg       = '<svg class="' . esc_attr( $attributes['iconClass'] ) . '" viewBox="1 1 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<circle
 					cx="16"
 					cy="10.5"
@@ -359,16 +328,16 @@ class CustomerAccount extends AbstractBlock {
 				/>
 			</svg>';
 		} elseif ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
-			$canonical_name = self::DISPLAY_ALT;
-			$raw_svg        = '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 25 25">
+			$icon_name = self::DISPLAY_ALT;
+			$svg       = '<svg class="' . esc_attr( $attributes['iconClass'] ) . '" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 25 25">
 				<path
 					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9 0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653 9.85277 6.23362 8.60221 6.23362 7.08638C6.23362 5.57056 7.46526 4.32 9 4.32ZM9 10.7242C11.1221 10.7242 12.96 12.2021 13.7937 14.4189C12.5242 15.5559 10.8379 16.238 9 16.238C7.16207 16.238 5.49474 15.5369 4.20632 14.4189C5.05891 12.2021 6.87793 10.7242 9 10.7242Z"
 					fill="currentColor"
 				/>
 			</svg>';
 		} else {
-			$canonical_name = 'default';
-			$raw_svg        = '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 25 25">
+			$icon_name = 'default';
+			$svg       = '<svg class="' . esc_attr( $attributes['iconClass'] ) . '" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 25 25">
 			<path
 				fill-rule="evenodd"
 				clip-rule="evenodd"
@@ -378,9 +347,40 @@ class CustomerAccount extends AbstractBlock {
 		</svg>';
 		}
 
-		$sanitized_default = wp_kses( $raw_svg, $this->get_allowed_svg() );
+		return BlockIconUtils::filter_block_icon( $svg, $icon_name, $this->get_full_block_name(), $attributes );
+	}
 
-		return BlockIconUtils::filter_block_icon( $sanitized_default, $canonical_name, $this->get_full_block_name(), $attributes );
+	/**
+	 * Render the user avatar and icon.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return string Avatar and icon markup.
+	 */
+	private function render_visual( $attributes ) {
+		if ( self::TEXT_ONLY === $attributes['displayStyle'] ) {
+			return '';
+		}
+
+		$icon    = $this->render_icon( $attributes );
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			// We use `blank` as the default so if the user has no avatar, the icon underneath is visible.
+			$avatar = get_avatar(
+				$user_id,
+				48,
+				'blank',
+				'',
+				array(
+					'class' => 'wc-block-customer-account__avatar',
+				)
+			);
+
+			if ( $avatar ) {
+				return '<div class="wc-block-customer-account__visual">' . $icon . wp_kses_post( $avatar ) . '</div>';
+			}
+		}
+		return '<div class="wc-block-customer-account__visual">' . $icon . '</div>';
 	}
 
 	/**

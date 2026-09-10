@@ -914,7 +914,10 @@ function wc_order_fully_refunded( $order_id ) {
 	$order      = wc_get_order( $order_id );
 	$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
-	if ( ! $max_refund ) {
+	// Numeric comparison, not truthiness: when prior refunds sum a float epsilon
+	// above the order total, the difference formats to '-0' — a truthy string that
+	// is numerically zero — which would otherwise create a ghost 0.00 refund below.
+	if ( (float) $max_refund <= 0 ) {
 		return;
 	}
 
@@ -1250,7 +1253,7 @@ function wc_get_order_notes( $args ) {
 
 	// Set WooCommerce order type.
 	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; the customer flag exists only as commentmeta, so a meta join is the only way to filter on it.
 			array(
 				'key'     => 'is_customer_note',
 				'value'   => 1,
@@ -1258,7 +1261,7 @@ function wc_get_order_notes( $args ) {
 			),
 		);
 	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; internal notes are identified by the absence of the is_customer_note meta, so NOT EXISTS is the only way to filter on them.
 			array(
 				'key'     => 'is_customer_note',
 				'compare' => 'NOT EXISTS',

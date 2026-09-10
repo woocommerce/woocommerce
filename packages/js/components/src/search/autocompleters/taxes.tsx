@@ -17,12 +17,14 @@ const completer: AutoCompleter = {
 	name: 'taxes',
 	className: 'woocommerce-search__tax-result',
 	options( search ) {
-		const query = search
-			? {
-					search,
-					per_page: 10,
-			  }
-			: {};
+		// Request the full page (up to the `/wc-analytics/taxes` endpoint's
+		// `per_page` maximum) instead of the default of 10. The dropdown has no
+		// "load more" control, so a low page size hid most of the configured tax
+		// rates from the advanced filter.
+		const query = {
+			per_page: 100,
+			...( search ? { search } : {} ),
+		};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/taxes', query ),
 		} );

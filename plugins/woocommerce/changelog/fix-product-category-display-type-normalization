@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Properly sanitize product category display settings before storage.

@@ -25,5 +25,20 @@
 		cursor: pointer;
 		display: inline-flex;
 		align-items: center;
+		border-radius: 2px;
+
+		&:focus {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: 0;
+		}
 	}
 }

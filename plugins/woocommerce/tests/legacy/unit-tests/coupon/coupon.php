@@ -28,7 +28,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * Cleans up after the test class.
 	 */
 	public function tearDown(): void {
-		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
 
 		parent::tearDown();

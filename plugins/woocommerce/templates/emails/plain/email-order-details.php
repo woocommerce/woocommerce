@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 11.1.0
+ * @version 11.2.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -64,9 +64,21 @@ $item_totals = $order->get_order_item_totals();
 if ( $item_totals ) {
 	foreach ( $item_totals as $total ) {
 		if ( $email_improvements_enabled ) {
-			// The shipping method name is already shown in the row header, so avoid duplicating it in the value cell.
-			if ( isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
-				$total['value'] = __( 'Free', 'woocommerce' );
+			if ( 'shipping' === ( $total['type'] ?? '' ) && isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
+				/**
+				 * Filters whether a zero cost shipping row shows 'Free!' in place of the repeated method name.
+				 *
+				 * Defaults to true only for Free Shipping. Other methods can cost nothing yet still use the
+				 * name to tell the customer something, such as 'Shipping TBD'.
+				 *
+				 * @since 11.2.0
+				 *
+				 * @param bool     $show_free_label Whether to replace the value with 'Free!'.
+				 * @param WC_Order $order           The order being emailed.
+				 */
+				if ( (bool) apply_filters( 'woocommerce_email_order_shipping_show_free_label', $order->has_shipping_method( 'free_shipping' ), $order ) ) {
+					$total['value'] = __( 'Free!', 'woocommerce' );
+				}
 			}
 			$label = $total['label'];
 			if ( isset( $total['meta'] ) ) {
