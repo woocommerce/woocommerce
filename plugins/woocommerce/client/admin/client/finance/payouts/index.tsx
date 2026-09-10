@@ -6,6 +6,7 @@ import { Notice, Spinner } from '@wordpress/components';
 import { EmptyContent } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+import type { ReactNode } from 'react';
 import type { View, DataViews as DataViewsType } from '@wordpress/dataviews';
 // @ts-expect-error - The /wp entry has no resolvable types under legacy node module resolution; see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
 import { DataViews as DataViewsWp } from '@wordpress/dataviews/wp';
@@ -22,8 +23,8 @@ import { FinanceDrawer } from '../components/drawer';
 import { PayoutDetails } from './payout-details';
 import {
 	getPayoutFields,
+	pinPayoutFields,
 	DEFAULT_VISIBLE_FIELDS,
-	PAYOUT_FIELD_IDS,
 } from './fields';
 import {
 	getPaginationInfo,
@@ -44,18 +45,23 @@ const DEFAULT_VIEW: View = {
 	page: 1,
 	perPage: DEFAULT_PER_PAGE,
 	fields: DEFAULT_VISIBLE_FIELDS,
-	titleField: PAYOUT_FIELD_IDS.provider,
-	showTitle: true,
 	layout: {},
 };
 
 const DEFAULT_LAYOUTS = { table: {} };
+
+// Body class that paints the whole admin page white while the Payouts page is mounted.
+const PAGE_BODY_CLASS = 'woocommerce-finance-payouts-page';
 
 const supportsPayouts = ( provider: FinanceProvider ): boolean =>
 	provider.data_types.some( ( dataType ) => dataType.type === 'payouts' );
 
 const getItemId = ( payout: Payout ): string =>
 	`${ payout.provider_id }:${ payout.id }`;
+
+const PayoutsWrapper = ( { children }: { children: ReactNode } ) => {
+	return <div className="woocommerce-finance-payouts">{ children }</div>;
+};
 
 export const FinancePayouts = () => {
 	const {
@@ -78,6 +84,11 @@ export const FinancePayouts = () => {
 		[ providers ]
 	);
 
+	useEffect( () => {
+		document.body.classList.add( PAGE_BODY_CLASS );
+		return () => document.body.classList.remove( PAGE_BODY_CLASS );
+	}, [] );
+
 	const { selectedId, selectProvider } = useLastProvider( payoutProviders );
 	const pagination = useCursorPagination( DEFAULT_PER_PAGE );
 	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
@@ -99,7 +110,12 @@ export const FinancePayouts = () => {
 
 	const formatAmount = useAmountFormatter();
 	const fields = useMemo(
-		() => getPayoutFields( { providersById, formatAmount } ),
+		() =>
+			getPayoutFields( {
+				providersById,
+				formatAmount,
+				onSelectPayout: setSelectedPayout,
+			} ),
 		[ providersById, formatAmount ]
 	);
 
@@ -122,30 +138,30 @@ export const FinancePayouts = () => {
 			return;
 		}
 
-		setView( nextView );
+		setView( { ...nextView, fields: pinPayoutFields( nextView.fields ) } );
 	};
 
 	if ( isLoadingProviders ) {
 		return (
-			<div className="woocommerce-finance-payouts">
+			<PayoutsWrapper>
 				<Spinner />
-			</div>
+			</PayoutsWrapper>
 		);
 	}
 
 	if ( providersError ) {
 		return (
-			<div className="woocommerce-finance-payouts">
+			<PayoutsWrapper>
 				<Notice status="error" isDismissible={ false }>
 					{ providersError.message }
 				</Notice>
-			</div>
+			</PayoutsWrapper>
 		);
 	}
 
 	if ( payoutProviders.length === 0 ) {
 		return (
-			<div className="woocommerce-finance-payouts">
+			<PayoutsWrapper>
 				<EmptyContent
 					title={ __( 'No payout providers', 'woocommerce' ) }
 					message={ __(
@@ -158,7 +174,7 @@ export const FinancePayouts = () => {
 					) }
 					actionURL={ getAdminLink( PAYMENTS_SETTINGS_PATH ) }
 				/>
-			</div>
+			</PayoutsWrapper>
 		);
 	}
 
@@ -169,7 +185,7 @@ export const FinancePayouts = () => {
 	);
 
 	return (
-		<div className="woocommerce-finance-payouts">
+		<PayoutsWrapper>
 			<ProviderSelect
 				providers={ payoutProviders }
 				value={ selectedId }
@@ -195,8 +211,6 @@ export const FinancePayouts = () => {
 				config={ { perPageSizes: PER_PAGE_SIZES } }
 				search={ false }
 				getItemId={ getItemId }
-				onClickItem={ setSelectedPayout }
-				isItemClickable={ () => true }
 				empty={
 					<p className="woocommerce-finance-payouts__empty">
 						{ __(
@@ -218,7 +232,7 @@ export const FinancePayouts = () => {
 					/>
 				</FinanceDrawer>
 			) }
-		</div>
+		</PayoutsWrapper>
 	);
 };
 

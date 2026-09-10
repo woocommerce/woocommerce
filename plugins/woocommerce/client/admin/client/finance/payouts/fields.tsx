@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Button, ExternalLink } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { Field } from '@wordpress/dataviews';
 
@@ -16,37 +17,62 @@ import type { FinanceProvider, Payout } from '../types';
 
 export const PAYOUT_FIELD_IDS = {
 	provider: 'provider',
+	id: 'id',
 	amount: 'amount',
 	status: 'status',
 	dateInitiated: 'date_initiated',
 	dateExpected: 'date_expected',
 	bankAccount: 'bank_account',
 	providerStatus: 'provider_status',
+	providerLink: 'provider_link',
 } as const;
 
 export const DEFAULT_VISIBLE_FIELDS = [
-	PAYOUT_FIELD_IDS.amount,
-	PAYOUT_FIELD_IDS.status,
+	PAYOUT_FIELD_IDS.provider,
 	PAYOUT_FIELD_IDS.dateInitiated,
-	PAYOUT_FIELD_IDS.dateExpected,
+	PAYOUT_FIELD_IDS.status,
+	PAYOUT_FIELD_IDS.providerStatus,
 	PAYOUT_FIELD_IDS.bankAccount,
+	PAYOUT_FIELD_IDS.id,
+	PAYOUT_FIELD_IDS.dateExpected,
+	PAYOUT_FIELD_IDS.amount,
+	PAYOUT_FIELD_IDS.providerLink,
+];
+
+const PINNED_FIELDS: string[] = [
+	PAYOUT_FIELD_IDS.provider,
+];
+
+/**
+ * Keep the provider as the first column, whatever order the view asks for.
+ *
+ * DataViews can only lock column moving for the whole table, so the order is normalised instead.
+ *
+ * @param fields The visible field ids from the view.
+ */
+export const pinPayoutFields = ( fields?: string[] ): string[] => [
+	...PINNED_FIELDS,
+	...( fields ?? [] ).filter( ( id ) => ! PINNED_FIELDS.includes( id ) ),
 ];
 
 type FieldDeps = {
 	providersById: Record< string, FinanceProvider >;
 	formatAmount: AmountFormatter;
+	onSelectPayout: ( payout: Payout ) => void;
 };
 
 /**
  * DataViews fields for a payout. Sorting and filtering are off because the API supports neither.
  *
- * @param deps               The dependencies used to render cells.
- * @param deps.providersById The known providers keyed by id.
- * @param deps.formatAmount  The amount formatter.
+ * @param deps                The dependencies used to render cells.
+ * @param deps.providersById  The known providers keyed by id.
+ * @param deps.formatAmount   The amount formatter.
+ * @param deps.onSelectPayout Called with the payout whose id was clicked.
  */
 export const getPayoutFields = ( {
 	providersById,
 	formatAmount,
+	onSelectPayout,
 }: FieldDeps ): Field< Payout >[] => [
 	{
 		id: PAYOUT_FIELD_IDS.provider,
@@ -61,6 +87,23 @@ export const getPayoutFields = ( {
 				provider={ providersById[ item.provider_id ] }
 				fallbackId={ item.provider_id }
 			/>
+		),
+	},
+	{
+		id: PAYOUT_FIELD_IDS.id,
+		label: __( 'Payout ID', 'woocommerce' ),
+		enableSorting: false,
+		enableHiding: false,
+		filterBy: false,
+		getValue: ( { item } ) => item.id,
+		render: ( { item } ) => (
+			<Button
+				className="woocommerce-finance-payouts__id-button"
+				variant="link"
+				onClick={ () => onSelectPayout( item ) }
+			>
+				{ item.id }
+			</Button>
 		),
 	},
 	{
@@ -109,5 +152,23 @@ export const getPayoutFields = ( {
 		enableSorting: false,
 		filterBy: false,
 		getValue: ( { item } ) => item.provider_status ?? EMPTY_VALUE,
+	},
+	{
+		id: PAYOUT_FIELD_IDS.providerLink,
+		label: __( 'Provider link', 'woocommerce' ),
+		enableSorting: false,
+		filterBy: false,
+		getValue: ( { item } ) => item.provider_link?.title ?? EMPTY_VALUE,
+		render: ( { item } ) =>
+			item.provider_link?.url ? (
+				<ExternalLink
+					href={ item.provider_link.url }
+					rel="noopener noreferrer"
+				>
+					{ item.provider_link.title }
+				</ExternalLink>
+			) : (
+				EMPTY_VALUE
+			),
 	},
 ];

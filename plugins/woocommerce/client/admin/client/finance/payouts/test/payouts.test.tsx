@@ -10,7 +10,7 @@ import {
 } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 import { useUserPreferences } from '@woocommerce/data';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -21,12 +21,17 @@ import type { FinanceProvider, Payout } from '../../types';
 type CapturedProps = {
 	view: { page?: number; perPage?: number; fields?: string[] };
 	onChangeView: ( view: CapturedProps[ 'view' ] ) => void;
-	fields: { id: string; enableSorting?: boolean; filterBy?: unknown }[];
+	fields: {
+		id: string;
+		enableSorting?: boolean;
+		enableHiding?: boolean;
+		filterBy?: unknown;
+		render?: ( props: { item: Payout } ) => ReactElement;
+	}[];
 	data: Payout[];
 	isLoading: boolean;
 	paginationInfo: { totalItems: number; totalPages: number };
 	search?: boolean;
-	onClickItem: ( item: Payout ) => void;
 	empty: ReactNode;
 };
 
@@ -162,8 +167,55 @@ describe( 'FinancePayouts', () => {
 			'/wc-admin/payments/finance/providers/bacs/payouts?per_page=10',
 		] );
 		expect(
-			screen.queryByLabelText( 'Payout provider' )
-		).not.toBeInTheDocument();
+			screen.getByRole( 'button', { name: /Payout provider/ } )
+		).toBeDisabled();
+	} );
+
+	it( 'pins the provider and payout id as the first non-hideable columns', async () => {
+		mockApi( [ provider( 'bacs', 'Bank transfer' ) ] );
+
+		render( <FinancePayouts /> );
+		await waitFor( () => expect( captured?.data ).toHaveLength( 2 ) );
+
+		expect( captured?.view.fields?.slice( 0, 2 ) ).toEqual( [
+			'provider',
+			'id',
+		] );
+		[ 'provider', 'id' ].forEach( ( id ) => {
+			expect(
+				captured?.fields.find( ( field ) => field.id === id )
+					?.enableHiding
+			).toBe( false );
+		} );
+
+		act(
+			() =>
+				captured?.onChangeView( {
+					...captured.view,
+					fields: [ 'amount', 'id', 'status', 'provider' ],
+				} )
+		);
+
+		expect( captured?.view.fields ).toEqual( [
+			'provider',
+			'id',
+			'amount',
+			'status',
+		] );
+	} );
+
+	it( 'paints the page white only while mounted', async () => {
+		mockApi( [ provider( 'bacs', 'Bank transfer' ) ] );
+
+		const { unmount } = render( <FinancePayouts /> );
+
+		expect( document.body ).toHaveClass(
+			'woocommerce-finance-payouts-page'
+		);
+		unmount();
+		expect( document.body ).not.toHaveClass(
+			'woocommerce-finance-payouts-page'
+		);
 	} );
 
 	it( 'fetches the next page with the stored cursor and can go back', async () => {
@@ -242,9 +294,15 @@ describe( 'FinancePayouts', () => {
 		act( () => captured?.onChangeView( { ...captured.view, page: 2 } ) );
 		await waitFor( () => expect( captured?.data ).toHaveLength( 1 ) );
 
-		fireEvent.change( screen.getByLabelText( 'Payout provider' ), {
-			target: { value: 'cheque' },
+		const toggle = screen.getByRole( 'button', {
+			name: /Payout provider/,
 		} );
+		expect( toggle ).toBeEnabled();
+		expect( toggle ).toHaveTextContent( 'Bank transfer' );
+		fireEvent.click( toggle );
+		fireEvent.click(
+			await screen.findByRole( 'menuitemradio', { name: 'Cheque' } )
+		);
 
 		await waitFor( () =>
 			expect( payoutRequests()[ 2 ] ).toBe(
@@ -276,13 +334,17 @@ describe( 'FinancePayouts', () => {
 		);
 	} );
 
-	it( 'opens the details drawer for the clicked payout', async () => {
+	it( 'opens the details drawer when the payout id is clicked', async () => {
 		mockApi( [ provider( 'bacs', 'Bank transfer' ) ] );
 
 		render( <FinancePayouts /> );
 		await waitFor( () => expect( captured?.data ).toHaveLength( 2 ) );
 
-		act( () => captured?.onClickItem( captured.data[ 1 ] ) );
+		// The DataViews mock renders no cells, so mount the id cell on its own and click it.
+		const IdCell = captured?.fields.find( ( field ) => field.id === 'id' )
+			?.render as ( props: { item: Payout } ) => ReactElement;
+		render( <IdCell item={ captured?.data[ 1 ] as Payout } /> );
+		fireEvent.click( screen.getByRole( 'button', { name: 'po_2' } ) );
 
 		const dialog = screen.getByRole( 'dialog', { name: 'Payout details' } );
 		expect( dialog ).toHaveTextContent( 'po_2' );

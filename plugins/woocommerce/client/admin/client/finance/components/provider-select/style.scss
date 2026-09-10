@@ -1,0 +1,25 @@
+.woocommerce-finance-provider-select {
+	display: flex;
+	flex-direction: column;
+	gap: $gap-smaller;
+	margin-block-end: $gap;
+
+	&__label {
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.4;
+		text-transform: uppercase;
+	}
+
+	&__toggle.components-button {
+		justify-content: space-between;
+		min-inline-size: 280px;
+		block-size: 40px;
+		padding-inline: $gap-small;
+		background: $white;
+	}
+
+	&__menu {
+		min-inline-size: 280px;
+	}
+}

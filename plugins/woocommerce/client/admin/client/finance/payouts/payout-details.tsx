@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
@@ -81,14 +81,17 @@ export const PayoutDetails = ( {
 					</div>
 				) ) }
 			</dl>
-			{ payout.link && (
+			{ payout?.provider_link?.url && (
 				<Button
-					variant="secondary"
-					href={ payout.link.url }
+					className="woocommerce-finance-payout-details__provider-link"
+					variant="primary"
+					href={ payout.provider_link.url }
 					target="_blank"
-					rel="noreferrer"
+					rel="noreferrer noopener"
 				>
-					{ payout.link.title }
+					{ payout.provider_link?.title ??
+						__( 'Payout details', 'woocommerce' ) }
+					<Icon icon="external" />
 				</Button>
 			) }
 		</div>

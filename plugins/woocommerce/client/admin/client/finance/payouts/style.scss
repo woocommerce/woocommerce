@@ -1,10 +1,10 @@
 @import "@wordpress/dataviews/build-style/style.css";
 
+body.woocommerce-finance-payouts-page {
+	background: $white;
+}
+
 .woocommerce-finance-payouts {
-	.woocommerce-finance-provider-select {
-		max-inline-size: 320px;
-		margin-block-end: $gap;
-	}
 
 	.components-notice {
 		margin: 0 0 $gap;
@@ -16,7 +16,19 @@
 		border-radius: 4px;
 	}
 
-	&__empty {
+	.woocommerce-finance-payouts__id-button.components-button {
+		padding: 0;
+		block-size: auto;
+		font-family: monospace;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			text-decoration: underline;
+		}
+	}
+
+	.woocommerce-finance-payouts__empty {
 		margin: 0;
 		padding: $gap-large;
 		text-align: center;
@@ -25,11 +37,11 @@
 }
 
 .woocommerce-finance-payout-details {
-	&__list {
+	.woocommerce-finance-payout-details__list {
 		margin: 0 0 $gap;
 	}
 
-	&__row {
+	.woocommerce-finance-payout-details__row {
 		display: grid;
 		grid-template-columns: minmax(120px, 1fr) 2fr;
 		gap: $gap-small;
@@ -43,5 +55,10 @@
 		dd {
 			margin: 0;
 		}
+	}
+
+	.woocommerce-finance-payout-details__provider-link {
+		width: 100%;
+		justify-content: center;
 	}
 }

@@ -44,8 +44,7 @@ export type Payout = {
 	date_expected: string | null;
 	status: PayoutStatus;
 	provider_status: string | null;
-	// Not sent by the API yet; reserved for a link to the payout in the provider dashboard.
-	link?: FinanceLink;
+	provider_link: FinanceLink | null;
 };
 
 export type FinancePage< T > = {
