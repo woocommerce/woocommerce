@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,6 +17,9 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore
  */
 class PushTokensDataStoreTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
+
 	/**
 	 * Tear down the test case.
 	 */
@@ -1274,6 +1278,46 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 1, $row_count );
+	}
+
+	/**
+	 * @testdox Tests a write that fails without throwing is reported.
+	 *
+	 * `wpdb::query()` returns false rather than throwing when the `query` filter
+	 * empties the statement, so nothing would surface the lost stamp unless the
+	 * return value is checked. The log is the only signal that stamps are not
+	 * being recorded.
+	 */
+	public function test_a_failed_write_of_stamps_is_logged() {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+
+		$empty_the_update = function ( $query ) {
+			return false !== strpos( $query, 'UPDATE' ) && false !== strpos( $query, 'last_sent_at_gmt' )
+				? ''
+				: $query;
+		};
+
+		add_filter( 'query', $empty_the_update );
+		$data_store->record_last_sent_at( array( $push_token ) );
+		$data_store->flush_last_sent_at();
+		remove_filter( 'query', $empty_the_update );
+
+		$row_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+				$push_token->get_id(),
+				PushTokensDataStore::LAST_SENT_AT_META_KEY
+			)
+		);
+
+		$this->assertSame( 1, $row_count );
+		$this->assertLogged( 'warning', 'Could not record last sent time for push tokens.' );
 	}
 
 	/**
