@@ -20,20 +20,11 @@ class SingleProduct extends AbstractBlock {
 	protected $block_name = 'single-product';
 
 	/**
-	 * Product ID of the current product to be displayed in the Single Product block.
-	 * This is used to replace the global post for the Single Product inner blocks.
-	 *
-	 * @var int
-	 */
-	protected $product_id = 0;
-
-	/**
-	 * Single Product inner blocks names.
-	 * This is used to map all the inner blocks for a Single Product block.
+	 * Posts temporarily replaced while rendering product titles and excerpts.
 	 *
 	 * @var array
 	 */
-	protected $single_product_inner_blocks_names = [];
+	private $previous_posts = array();
 
 	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
@@ -49,13 +40,7 @@ class SingleProduct extends AbstractBlock {
 	}
 
 	/**
-	 * Restore the global post variable right before generating the render output for the post title and/or post excerpt blocks.
-	 *
-	 * This is required due to the changes made via the replace_post_for_single_product_inner_block method.
-	 * It is a temporary fix to ensure these blocks work as expected until Gutenberg versions 15.2 and 15.6 are part of the core of WordPress.
-	 *
-	 * @see https://github.com/WordPress/gutenberg/pull/48001
-	 * @see https://github.com/WordPress/gutenberg/pull/49495
+	 * Restore the post that was current before rendering a product title or excerpt.
 	 *
 	 * @param  string    $block_content  The block content.
 	 * @param  array     $parsed_block  The full block, including name and attributes.
@@ -64,16 +49,17 @@ class SingleProduct extends AbstractBlock {
 	 * @return mixed
 	 */
 	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
-		if ( isset( $block_instance->context['singleProduct'] ) && $block_instance->context['singleProduct'] ) {
-			wp_reset_postdata();
+		if ( $this->previous_posts ) {
+			global $post;
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact enclosing post, including secondary queries.
+			$post = array_pop( $this->previous_posts );
 		}
 
 		return $block_content;
 	}
 
 	/**
-	 * Update the context by injecting the correct post data
-	 * for each one of the Single Product inner blocks.
+	 * Set the selected product context and let WordPress propagate it to inner blocks.
 	 *
 	 * @param array    $context Block context.
 	 * @param array    $block Block attributes.
@@ -84,11 +70,9 @@ class SingleProduct extends AbstractBlock {
 	public function update_context( $context, $block, $parent_block ) {
 		if ( 'woocommerce/single-product' === $block['blockName']
 			&& isset( $block['attrs']['productId'] ) ) {
-				$this->product_id = $block['attrs']['productId'];
-
-				$this->single_product_inner_blocks_names = array_reverse(
-					$this->extract_single_product_inner_block_names( $block )
-				);
+			$context['postId']        = $block['attrs']['productId'];
+			$context['postType']      = 'product';
+			$context['singleProduct'] = true;
 		}
 
 		$this->replace_post_for_single_product_inner_block( $block, $context );
@@ -104,8 +88,10 @@ class SingleProduct extends AbstractBlock {
 	 * @param array $result Array of inner block names.
 	 *
 	 * @return array Array containing all the inner block names of a Single Product block.
+	 * @deprecated 11.2.0 WordPress now propagates the selected product context.
 	 */
 	protected function extract_single_product_inner_block_names( $block, &$result = [] ) {
+		wc_deprecated_function( __METHOD__, '11.2.0' );
 		if ( isset( $block['blockName'] ) ) {
 			$result[] = $block['blockName'];
 		}
@@ -123,54 +109,29 @@ class SingleProduct extends AbstractBlock {
 	}
 
 	/**
-	 * Replace the global post for the Single Product inner blocks and reset it after.
-	 *
-	 * This is needed because some of the inner blocks may use the global post
-	 * instead of fetching the product through the `productId` attribute, so even if the
-	 * `productId` is passed to the inner block, it will still use the global post.
+	 * Use the resolved product context for core blocks that read the global post.
 	 *
 	 * @param array $block Block attributes.
 	 * @param array $context Block context.
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
-		if ( $this->single_product_inner_blocks_names ) {
-			// Find the block index in $this->single_product_inner_blocks_names
-			// starting from the end.
-			$block_index_reversed = array_search( $block['blockName'], array_reverse( $this->single_product_inner_blocks_names ), true );
-
-			if ( false !== $block_index_reversed ) {
-				$block_index = count( $this->single_product_inner_blocks_names ) - (int) $block_index_reversed - 1;
-
-				$block_name = $block['blockName'];
-
-				// Remove all blocks after the current one. In some cases, like
-				// in the Product Gallery block, inner blocks are rendered
-				// directly by the parent block, so we need to skip them.
-				$this->single_product_inner_blocks_names = array_slice( $this->single_product_inner_blocks_names, 0, $block_index );
-
-				/**
-				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
-				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
-				 *
-				 * Important: the original post data is restored in the restore_global_post method.
-				 *
-				 * @see https://github.com/WordPress/gutenberg/pull/48001
-				 * @see https://github.com/WordPress/gutenberg/pull/49495
-				 */
-				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
-					global $post;
-					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					$post = get_post( $this->product_id );
-
-					if ( $post instanceof \WP_Post ) {
-						setup_postdata( $post );
-					}
-				}
-
-				$context['postId']        = $this->product_id;
-				$context['singleProduct'] = true;
-			}
+		if ( ! in_array( $block['blockName'], array( 'core/post-title', 'core/post-excerpt' ), true ) ) {
+			return;
 		}
+
+		global $post;
+		$this->previous_posts[] = $post;
+		if ( empty( $context['postId'] ) ) {
+			return;
+		}
+
+		$product_post = get_post( $context['postId'] );
+		if ( ! $product_post instanceof \WP_Post || 'product' !== $product_post->post_type ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Core Post Title reads get_the_title() without a post ID.
+		$post = $product_post;
 	}
 
 	/**
