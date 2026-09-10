@@ -170,10 +170,64 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A registered native page converts transitional number and datetime values before validation.
+	 */
+	public function test_registered_native_page_schema_accepts_transitional_number_and_datetime_values(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+		$compatibility_notices = 0;
+		$notice_listener       = static function ( $function_name ) use ( &$compatibility_notices ): void {
+			if ( SettingsUISchema::class . '::canonicalize_schema_values' === $function_name ) {
+				++$compatibility_notices;
+			}
+		};
+		add_action( 'doing_it_wrong_run', $notice_listener );
+
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page(
+				null,
+				null,
+				null,
+				array(
+					array(
+						'id'    => 'acme_number',
+						'label' => 'Acme number',
+						'type'  => 'number',
+						'value' => '02',
+						'save'  => array( 'adapter' => 'form_post' ),
+					),
+					array(
+						'id'    => 'acme_datetime',
+						'label' => 'Acme datetime',
+						'type'  => 'datetime-local',
+						'value' => '2026-08-03T12:30',
+						'save'  => array( 'adapter' => 'form_post' ),
+					),
+				)
+			)
+		);
+
+		try {
+			$context = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' );
+			$schema  = $context->get_schema();
+		} finally {
+			remove_action( 'doing_it_wrong_run', $notice_listener );
+		}
+
+		$this->assertFalse( $context->has_schema_failed() );
+		$this->assertSame( 1, $compatibility_notices, 'All converted native fields should be reported in one compatibility notice.' );
+		$this->assertSame( 2, $schema['groups']['native_group']['fields'][0]['value'] );
+		$this->assertArrayNotHasKey( 'initialValue', $schema['groups']['native_group']['fields'][0]['save'] );
+		$this->assertSame( '2026-08-03T12:30:00+00:00', $schema['groups']['native_group']['fields'][1]['value'] );
+		$this->assertArrayNotHasKey( 'initialValue', $schema['groups']['native_group']['fields'][1]['save'] );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
 	 * @testdox Should canonicalize option values from a native Settings UI page provider.
 	 */
 	public function test_canonicalizes_option_values_from_native_settings_ui_page(): void {
-		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
 
 		$page = $this->get_parent_page();
 		SettingsSectionRegistry::get_instance()->register(
@@ -187,6 +241,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 						'label'   => 'Tier',
 						'type'    => 'select',
 						'value'   => 1,
+						'save'    => array( 'adapter' => 'form_post' ),
 						'options' => array(
 							array(
 								'label' => 'One',
@@ -209,6 +264,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$field = $schema['groups']['native_group']['fields'][0];
 		$this->assertSame( '1', $field['value'], 'The selected value should follow its options to string form.' );
 		$this->assertSame( array( '1', '2' ), array_column( $field['options'], 'value' ), 'Scalar option values should canonicalize to strings.' );
+		$this->assertArrayNotHasKey( 'initialValue', $field['save'], 'Existing option conversion should keep using its canonical string transport.' );
 	}
 
 	/**
