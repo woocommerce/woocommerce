@@ -841,14 +841,18 @@ jQuery( function ( $ ) {
 					var $form = $( 'form.checkout' );
 
 					// `result` only reports whether the response carries a notice, so a success
-					// or info notice reads as `failure` there. Prefer the explicit error flag,
-					// and fall back to `result` when it is missing or is not the boolean this
-					// endpoint documents, such as a third-party callback that answers before
+					// or info notice reads as `failure` there. Prefer the explicit error flag
+					// when it is the boolean this endpoint documents and, if it reports an
+					// error, the response carries the notice to show for it. Otherwise fall
+					// back to `result`, such as for a third-party callback that answers before
 					// Core does.
-					var hasErrors =
-						data && 'boolean' === typeof data.has_errors
-							? data.has_errors
-							: !! data && 'failure' === data.result;
+					var trustsErrorFlag =
+						!! data &&
+						'boolean' === typeof data.has_errors &&
+						( ! data.has_errors || !! data.messages );
+					var hasErrors = trustsErrorFlag
+						? data.has_errors
+						: !! data && 'failure' === data.result;
 
 					// Whether this response has a notice to render. `result` is the legacy
 					// signal for that and third-party callbacks still set it, so keep honoring

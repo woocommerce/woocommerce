@@ -772,6 +772,22 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
 		} );
 
+		test( 'should fall back to the result when the error flag has nothing to show', () => {
+			// A callback that answers before Core can report an error without carrying the
+			// notice for it. Trunk ignored that response, so acting on the flag alone would
+			// mark every required field invalid with nothing on the page to explain why.
+			sendCheckoutUpdateResponse( {
+				result: 'success',
+				has_errors: true,
+				messages: '',
+			} );
+
+			expect( $form.prepend ).not.toHaveBeenCalled();
+			expect( $allNotices.remove ).not.toHaveBeenCalled();
+			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
+			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();
+		} );
+
 		test( 'should treat a response without the error flag as a failure', () => {
 			sendCheckoutUpdateResponse( {
 				result: 'failure',
