@@ -423,13 +423,25 @@ class Analytics {
 	}
 
 	/**
+	 * Get the tool state from the database rather than the request cache, so that
+	 * a new run or a cancellation saved by another request is seen.
+	 *
+	 * @return array Tool state, as get_refund_double_count_state() returns it.
+	 */
+	private static function get_fresh_refund_double_count_state(): array {
+		wp_cache_delete( self::REFUND_DOUBLE_COUNT_OPTION, 'options' );
+
+		return self::get_refund_double_count_state();
+	}
+
+	/**
 	 * Merge changes into the stored double-counted refunds fix tool state.
 	 *
 	 * @param array $changes State keys to overwrite.
 	 * @return void
 	 */
 	private static function update_refund_double_count_state( array $changes ): void {
-		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( self::get_refund_double_count_state(), $changes ), false );
+		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( self::get_fresh_refund_double_count_state(), $changes ), false );
 	}
 
 	/**
@@ -452,7 +464,7 @@ class Analytics {
 	 * @return bool
 	 */
 	private static function is_current_refund_double_count_run( string $run_id ): bool {
-		$state = self::get_refund_double_count_state();
+		$state = self::get_fresh_refund_double_count_state();
 
 		return '' !== $run_id && $run_id === $state['run_id'] && self::REFUND_DOUBLE_COUNT_STATUS_RUNNING === $state['status'];
 	}
@@ -676,6 +688,8 @@ class Analytics {
 
 		$stats_table = $wpdb->prefix . 'wc_order_stats';
 		$limit_sql   = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
+		// Half the smallest currency unit: absorbs floating-point noise but still catches a double-counted one-cent refund.
+		$tolerance_sql = $wpdb->prepare( '%f', 0.5 / ( 10 ** wc_get_price_decimals() ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table and column names are hardcoded; the condition is prepared by the caller.
 		$parent_ids = $wpdb->get_col(
@@ -686,7 +700,7 @@ class Analytics {
 			WHERE {$parent_condition} AND o.parent_id = 0
 			GROUP BY o.order_id
 			HAVING COUNT(*) > 1
-				AND ABS( SUM( r.net_total + r.tax_total + r.shipping_total ) ) > MAX( o.net_total + o.tax_total + o.shipping_total ) + 0.01
+				AND ABS( SUM( r.net_total + r.tax_total + r.shipping_total ) ) > MAX( o.net_total + o.tax_total + o.shipping_total ) + {$tolerance_sql}
 			ORDER BY o.order_id ASC
 			{$limit_sql}"
 		);

@@ -197,6 +197,8 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function test_fix_repairs_only_double_counted_orders(): void {
 		$double_counted = $this->create_refunded_order( array( 20, 30 ) );
 		$this->double_count_latest_refund( $double_counted );
+		$one_cent_double_counted = $this->create_refunded_order( array( 0.01, 49.99 ) );
+		$this->double_count_latest_refund( $one_cent_double_counted );
 		$correct_partial_then_full = $this->create_refunded_order( array( 20, 30 ) );
 		$single_full               = $this->create_refunded_order( array( 50 ) );
 		$partials_under_total      = $this->create_refunded_order( array( 10, 10 ) );
@@ -207,9 +209,10 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$state = Analytics::get_refund_double_count_state();
 		$this->assertSame( 'complete', $state['status'] );
-		$this->assertSame( 1, $state['fixed'], 'Only the double-counted order should be fixed' );
+		$this->assertSame( 2, $state['fixed'], 'Only the two double-counted orders should be fixed' );
 		$this->assertSame( 0, $state['unresolved'] );
 		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $double_counted ), 0.001, 'The re-import should correct the refund rows' );
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $one_cent_double_counted ), 0.001, 'A double-counted one-cent refund should be fixed too' );
 		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $correct_partial_then_full ), 0.001 );
 		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $single_full ), 0.001 );
 		$this->assertEqualsWithDelta( -20.0, $this->get_refunds_total( $partials_under_total ), 0.001 );
@@ -272,6 +275,34 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->assertEqualsWithDelta( -70.0, $this->get_refunds_total( $order ), 0.001, 'The stale batch should not re-import anything' );
 		$this->assertSame( 0, Analytics::get_refund_double_count_state()['fixed'] );
 		$this->assertFalse( as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ) );
+	}
+
+	/**
+	 * @testdox A batch does not overwrite a cancellation that another request saved while it was re-importing orders.
+	 */
+	public function test_batch_respects_a_cancellation_saved_by_another_request(): void {
+		global $wpdb;
+
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+		$this->sut->run_refund_double_count_tool();
+		$run_id = Analytics::get_refund_double_count_state()['run_id'];
+		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
+
+		// Write straight to the table, as another request would, leaving this request's option cache stale.
+		$cancelled = array_merge( Analytics::get_refund_double_count_state(), array( 'status' => 'cancelled' ) );
+		add_action(
+			'woocommerce_analytics_update_order_stats',
+			function () use ( $wpdb, $cancelled ) {
+				$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $cancelled ) ), array( 'option_name' => Analytics::REFUND_DOUBLE_COUNT_OPTION ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+		);
+
+		$this->sut->process_refund_double_count_fix_batch( 0, $run_id );
+
+		wp_cache_delete( Analytics::REFUND_DOUBLE_COUNT_OPTION, 'options' );
+		$this->assertSame( 'cancelled', Analytics::get_refund_double_count_state()['status'] );
+		$this->assertFalse( as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ), 'The cancelled run should not schedule another batch' );
 	}
 
 	/**
