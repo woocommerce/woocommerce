@@ -90,6 +90,11 @@ class BlockIconFilterTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Mini-Cart filters its primary icon on the interactive render path.
+	 *
+	 * Full-suite cart tests define WOOCOMMERCE_CART irreversibly, so this path needs a fresh process.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_mini_cart_filters_primary_icon_on_interactive_render_path(): void {
 		$this->log_in_fixture_user();
