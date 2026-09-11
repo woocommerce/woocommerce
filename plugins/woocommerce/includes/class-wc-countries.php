@@ -1543,6 +1543,15 @@ class WC_Countries {
 							'label' => __( 'Department', 'woocommerce' ),
 						),
 					),
+					'QA' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'required' => false,
+						),
+					),
 					'RE' => array(
 						'state' => array(
 							'required' => false,

@@ -463,7 +463,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$image_size = $this->request['image_size'] ?? 'full';
 		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
 
-		$attachment_id   = $variation->get_image_id();
+		$attachment_id   = (int) $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
 		if ( is_null( $attachment_post ) ) {
 			return;

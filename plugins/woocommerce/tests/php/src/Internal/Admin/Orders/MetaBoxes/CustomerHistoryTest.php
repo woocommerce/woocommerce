@@ -40,6 +40,13 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	private $add_long_status_callback = null;
 
 	/**
+	 * Filters added during a test, as [ tag, callback ] pairs, removed in tearDown().
+	 *
+	 * @var array[]
+	 */
+	private $added_filters = array();
+
+	/**
 	 * Previous HPOS state.
 	 *
 	 * @var bool
@@ -96,6 +103,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		}
 
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		foreach ( $this->added_filters as $added_filter ) {
+			remove_filter( $added_filter[0], $added_filter[1] );
+		}
+		$this->added_filters = array();
 		if ( null !== $this->add_long_status_callback ) {
 			remove_filter( 'wc_order_statuses', $this->add_long_status_callback );
 			unset( $GLOBALS['wp_post_statuses']['wc-competition-completed'] );
@@ -491,6 +502,61 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should mention "pending payment"' );
 		$this->assertStringContainsString( 'failed', $output, 'Tooltip should mention "failed"' );
 		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should fall back to default excluded statuses when the default-statuses filter returns a non-array.
+	 */
+	public function test_tooltip_falls_back_when_default_excluded_statuses_filter_returns_non_array(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should still mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should still mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should still mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect a custom status added by the default-statuses filter when the option was never saved.
+	 */
+	public function test_tooltip_reflects_default_excluded_statuses_filter(): void {
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		$add_label  = function ( $statuses ) {
+			$statuses['wc-custom-excluded'] = 'Custom Excluded';
+			return $statuses;
+		};
+		$add_custom = function ( $statuses ) {
+			$statuses[] = 'custom-excluded';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_label );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+		$this->added_filters[] = array( 'wc_order_statuses', $add_label );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'custom excluded', $output, 'Tooltip should mention the status added by the default-statuses filter.' );
 	}
 
 	/**
