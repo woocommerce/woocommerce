@@ -74,7 +74,7 @@ class RefundDoubleCountToolNotice {
 		$note->add_action(
 			'refund-double-count-tool_view',
 			__( 'Check refunds', 'woocommerce' ),
-			admin_url( 'admin.php?page=wc-status&tab=tools' ),
+			admin_url( 'admin.php?page=wc-status&tab=tools#tool_' . Analytics::REFUND_DOUBLE_COUNT_TOOL_ID ),
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true
 		);
