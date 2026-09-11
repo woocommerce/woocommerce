@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Product Collection editor E2E tests from 62 to 22; Jest owns the built-in collection definitions, the inspector controls, and the pickers, and PHPUnit owns the collection presets and the queries the inspector's attributes produce.
+
