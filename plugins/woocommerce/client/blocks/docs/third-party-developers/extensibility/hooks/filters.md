@@ -72,6 +72,7 @@
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
 - [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
+- [woocommerce_store_api_expose_error_details](#woocommerce_store_api_expose_error_details)
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
@@ -1796,6 +1797,36 @@ This can be used to disable the nonce check when testing API endpoints via a RES
 
 - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 - [StoreApi/Routes/V1/ShopperListsNonceCheck.php](../../../../../../src/StoreApi/Routes/V1/ShopperListsNonceCheck.php)
+
+---
+
+## woocommerce_store_api_expose_error_details
+
+
+Filters whether unexpected Store API failures include the error message and exception class in the response.
+
+```php
+apply_filters( 'woocommerce_store_api_expose_error_details', bool $expose_error_details )
+```
+
+### Description
+
+Details are only ever sent to users who can manage WooCommerce; this filter cannot bypass that check. It defaults to WP_DEBUG so store staff can debug a production store without enabling debug mode site-wide.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $expose_error_details | bool | Whether to include the error message and exception class. Defaults to WP_DEBUG. |
+
+### Returns
+
+
+`bool`
+
+### Source
+
+- [StoreApi/Utilities/UnexpectedErrorResponse.php](../../../../../../src/StoreApi/Utilities/UnexpectedErrorResponse.php)
 
 ---
 
