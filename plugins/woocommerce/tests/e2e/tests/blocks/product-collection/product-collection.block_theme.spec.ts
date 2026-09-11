@@ -116,6 +116,47 @@ test.describe( 'Product Collection', () => {
 		}
 	} );
 
+	// The suite's only browser proof that an empty collection renders nothing on a
+	// published page, and that a No Results block still reaches a shopper.
+	test( 'Empty collection renders nothing, and No Results renders where that block is present', async ( {
+		page,
+		admin,
+		editor,
+		pageObject,
+	} ) => {
+		await admin.createNewPost();
+
+		// The collection with a No Results block goes first: its render state must not
+		// leak into the empty collection that follows it.
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInPost( 'productCatalog' );
+		await pageObject.addFilter( 'Price Range' );
+		await pageObject.setPriceRange( { max: '1' } );
+		await expect(
+			editor.canvas.getByText( 'No results found' )
+		).toBeVisible();
+
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInPost( 'featured' );
+		await pageObject.addFilter( 'Price Range' );
+		await pageObject.setPriceRange( { max: '1' } );
+
+		const featuredBlock = editor.canvas.getByLabel( 'Block: Featured' );
+		await expect(
+			featuredBlock.getByText( 'Featured products' )
+		).toBeVisible();
+		await expect(
+			featuredBlock.getByText( 'No products to display' )
+		).toBeVisible();
+
+		await pageObject.publishAndGoToFrontend();
+
+		const content = page.locator( 'main' );
+		await expect( content ).not.toContainText( 'Featured products' );
+		await expect( content ).not.toContainText( 'No products to display' );
+		await expect( page.getByText( 'No results found' ) ).toBeVisible();
+	} );
+
 	test.describe( 'Responsive', () => {
 		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
