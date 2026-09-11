@@ -51,6 +51,14 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $download_suffix = '';
 
 	/**
+	 * Pages run in any order, and the row total moves under them, so the last page to run is not the
+	 * end of the export. ReportExporter::finalize_export() marks it complete once every page is in.
+	 *
+	 * @var bool
+	 */
+	protected $completes_by_row_count = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -183,7 +191,71 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return bool
 	 */
 	public function export_file_exists() {
-		return file_exists( $this->get_file_path() ) && file_exists( $this->get_headers_row_file_path() );
+		return is_file( $this->get_file_path() ) && is_file( $this->get_headers_row_file_path() );
+	}
+
+	/**
+	 * Start the export from a clean, empty body with no completion mark.
+	 *
+	 * Called once when the export is queued, so the pages can append in whatever order the queue
+	 * runs them. The parent creates the body on page 1 only, and a page that ran earlier wrote nothing.
+	 * An export ID can be reused through the `woocommerce_admin_export_id` filter, so a previous
+	 * export's rows and its `.headers` mark must not carry over.
+	 *
+	 * @since 11.2.0
+	 * @return bool Whether the body exists.
+	 */
+	public function create_export_file() {
+		wp_delete_file( $this->get_headers_row_file_path() );
+
+		@file_put_contents( $this->get_file_path(), '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		@chmod( $this->get_file_path(), 0664 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+
+		return file_exists( $this->get_file_path() );
+	}
+
+	/**
+	 * Append this page to the export body, or throw.
+	 *
+	 * The parent would recreate the body on page 1, throwing away pages that ran before it, and log a
+	 * page it could not write while reporting nothing. Here a lost page fails the queued action, which
+	 * is how the export learns it is incomplete.
+	 *
+	 * @since 11.2.0
+	 * @throws \RuntimeException When the body is missing or the page could not be written to it.
+	 * @return void
+	 */
+	public function generate_file() {
+		if ( ! file_exists( $this->get_file_path() ) ) {
+			throw new \RuntimeException( sprintf( 'Export file %1$s is missing, so page %2$d could not be written.', esc_html( $this->get_filename() ), (int) $this->get_page() ) );
+		}
+
+		$this->prepare_data_to_export();
+
+		if ( false === $this->write_csv_data( $this->get_csv_data() ) ) {
+			throw new \RuntimeException( sprintf( 'Page %2$d of export %1$s could not be written.', esc_html( $this->get_filename() ), (int) $this->get_page() ) );
+		}
+	}
+
+	/**
+	 * Write the `.headers` companion that marks the export as complete, unless it is already there.
+	 *
+	 * The parent writes it only when its own row count reaches 100%, which an export whose row total
+	 * changed while it ran never does. The exporter that confirms every page was written calls this.
+	 *
+	 * @since 11.2.0
+	 * @return bool Whether the companion is on disk after the call.
+	 */
+	public function write_headers_row_file() {
+		if ( is_file( $this->get_headers_row_file_path() ) ) {
+			return true;
+		}
+
+		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		return is_file( $this->get_headers_row_file_path() );
 	}
 
 	/**

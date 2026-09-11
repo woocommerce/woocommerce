@@ -46,6 +46,13 @@ class ReportExporter {
 	const EXPORT_RETENTION_PERIOD = WEEK_IN_SECONDS;
 
 	/**
+	 * How long the email waits for pages that are still running before reporting the export as failed.
+	 *
+	 * @since 11.2.0
+	 */
+	const EXPORT_WAIT_LIMIT = HOUR_IN_SECONDS;
+
+	/**
 	 * Get all available scheduling actions.
 	 * Used to determine action hook names and clear events.
 	 *
@@ -133,6 +140,10 @@ class ReportExporter {
 	 * @return int Number of items to export.
 	 */
 	public static function queue_report_export( $export_id, $report_type, $report_args = array(), $send_email = false ) {
+		// Progress is read back from the queue by the JSON-quoted ID, which an int would not match.
+		$export_id   = (string) $export_id;
+		$report_args = self::freeze_report_period( $report_args );
+
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->prepare_data_to_export();
 
@@ -144,6 +155,10 @@ class ReportExporter {
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
 		if ( 0 < $num_batches ) {
+			// The body exists before any page runs, so the queue may run the pages in any order.
+			$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+			$exporter->create_export_file();
+
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
@@ -153,6 +168,49 @@ class ReportExporter {
 		}
 
 		return $total_rows;
+	}
+
+	/**
+	 * Cap the report period at the time of the request, so orders placed while the export runs are not in it.
+	 *
+	 * Each batch queries live data. With a period running into the future, new orders would shift the
+	 * pages under the export, duplicating some rows, dropping others, and moving the row count the
+	 * batches paginate by.
+	 *
+	 * Only an end the request sent is capped. Each report gives `before` its own meaning, and one it
+	 * did not ask for is a new filter: Customers turns it into an order date, which drops every
+	 * customer who never ordered.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return array Report parameters with a `before` that was sent lowered to now.
+	 */
+	public static function freeze_report_period( $report_args ) {
+		if ( ! is_array( $report_args ) || empty( $report_args['before'] ) || ! is_string( $report_args['before'] ) ) {
+			return $report_args;
+		}
+
+		$now = time();
+
+		try {
+			// Unspecified timezone means the local one, as the report data store reads it.
+			$before = new \DateTime( $report_args['before'], new \DateTimeZone( wc_timezone_string() ) );
+		} catch ( \Exception $e ) {
+			// Leave an unreadable value for the report's own validation to reject.
+			return $report_args;
+		}
+
+		if ( $before->getTimestamp() <= $now ) {
+			return $report_args;
+		}
+
+		// Local wall time with its offset spelled out, so the data store reads it back as this instant
+		// and the repeated hour when DST ends is not ambiguous. Not wp_date(): calendar plugins filter
+		// it into dates the report then rejects. wp_timezone() also covers stores set to a manual offset.
+		$report_args['before'] = ( new \DateTimeImmutable( '@' . $now ) )->setTimezone( wp_timezone() )->format( 'Y-m-d\TH:i:sP' );
+
+		return $report_args;
 	}
 
 	/**
@@ -171,7 +229,173 @@ class ReportExporter {
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 		$exporter->generate_file();
 
-		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+		// Progress is counted in queued pages, not rows. The row total is re-read from live data on every
+		// batch, so an order changing status mid-export would otherwise leave the export short of 100.
+		$progress = self::get_export_progress( $export_id );
+		if ( null === $progress ) {
+			// The pages ran inline, in order, in this one process, so the row count reaching 100 on a page means
+			// every later page is empty. Nothing else marks an inline export complete, so it is done here.
+			if ( 100 === $exporter->get_percent_complete() ) {
+				self::finalize_or_fail( $report_type, $export_id );
+			} else {
+				self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+			}
+			return;
+		}
+
+		// This page is still "in progress" in the queue while it runs, so count it as done here.
+		$pages_done = $progress['complete'] + 1;
+		if ( $pages_done >= $progress['pages'] && 0 === $progress['failed'] ) {
+			self::finalize_or_fail( $report_type, $export_id );
+			return;
+		}
+
+		self::update_export_percentage_complete( $report_type, $export_id, (int) floor( $pages_done / $progress['pages'] * 100 ) );
+	}
+
+	/**
+	 * Count this export's batch actions in the queue by outcome.
+	 *
+	 * The queue is the only record of how many pages were scheduled and which of them actually ran,
+	 * so completion is read from it rather than from a percentage each batch computes for itself.
+	 *
+	 * A large export is queued through chunk actions that each schedule a range of pages. A chunk that
+	 * has not run yet stands for pages the queue does not hold, so it counts as an unfinished page, and
+	 * a chunk that failed as a failed one. Otherwise the pages queued so far could all be complete
+	 * while whole ranges were still missing.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return array|null Counts keyed by `pages`, `complete`, `unfinished`, `failed`, plus the queue
+	 *                    log messages of failed batches under `errors`. Null when the queue holds
+	 *                    no batches for this export, e.g. when batches ran synchronously.
+	 */
+	public static function get_export_progress( $export_id ) {
+		$outcomes = array(
+			'complete'   => array( \ActionScheduler_Store::STATUS_COMPLETE ),
+			'unfinished' => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+			'failed'     => array( \ActionScheduler_Store::STATUS_FAILED, \ActionScheduler_Store::STATUS_CANCELED ),
+		);
+		$hooks    = array(
+			self::get_action( 'export_report' ) => array_keys( $outcomes ),
+			self::get_action( 'queue_batches' ) => array( 'unfinished', 'failed' ),
+		);
+		$progress = array(
+			'pages'  => 0,
+			'errors' => array(),
+		);
+
+		// Straight to the Action Scheduler store rather than through the queue interface: the statuses,
+		// the log lookup and the JSON-quoted search are all its own, and counting is cheaper than
+		// materializing IDs when an export runs to thousands of pages and every page counts them again.
+		$store = \ActionScheduler::store();
+
+		foreach ( $outcomes as $outcome => $statuses ) {
+			$progress[ $outcome ] = 0;
+
+			foreach ( $hooks as $hook => $counted_outcomes ) {
+				if ( ! in_array( $outcome, $counted_outcomes, true ) ) {
+					continue;
+				}
+
+				$query = array(
+					'hook'     => $hook,
+					'group'    => self::$group,
+					'status'   => $statuses,
+					// The quoted JSON form, so a longer export ID or an action ID cannot match.
+					'search'   => '"' . $export_id . '"',
+					'per_page' => -1,
+				);
+
+				// Failed actions are fetched by ID because the failure is read from their logs.
+				if ( 'failed' === $outcome ) {
+					$action_ids = $store->query_actions( $query );
+					$count      = count( $action_ids );
+
+					foreach ( $action_ids as $action_id ) {
+						// The failure is the last thing the queue logs for an action.
+						$log_entries = \ActionScheduler::logger()->get_logs( $action_id );
+						$log_entry   = end( $log_entries );
+						if ( $log_entry ) {
+							$progress['errors'][] = $log_entry->get_message();
+						}
+					}
+				} else {
+					$count = (int) $store->query_actions( $query, 'count' );
+				}
+
+				$progress[ $outcome ] += $count;
+				$progress['pages']    += $count;
+			}
+		}
+
+		return 0 === $progress['pages'] ? null : $progress;
+	}
+
+	/**
+	 * Mark an export as complete once every queued page has been written.
+	 *
+	 * The mark is a file. Reporting 100 without it would email a link the download route refuses.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return bool Whether the export is marked complete.
+	 */
+	public static function finalize_export( $report_type, $export_id ) {
+		$exporter = new ReportCSVExporter( $report_type );
+		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+
+		if ( ! $exporter->write_headers_row_file() ) {
+			wc_get_logger()->error(
+				sprintf( '%1$s report export %2$s could not be marked complete: %3$s could not be written.', $report_type, $export_id, $exporter->get_filename() . '.headers' ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			return false;
+		}
+
+		self::update_export_percentage_complete( $report_type, $export_id, 100 );
+
+		return true;
+	}
+
+	/**
+	 * Mark an export as complete from within a page action, failing the action when the mark cannot be written.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @throws \RuntimeException When the completion mark could not be written, so the page fails like a page that was lost.
+	 * @return void
+	 */
+	private static function finalize_or_fail( $report_type, $export_id ) {
+		if ( ! self::finalize_export( $report_type, $export_id ) ) {
+			throw new \RuntimeException( sprintf( 'Export %s could not be marked complete.', esc_html( $export_id ) ) );
+		}
+	}
+
+	/**
+	 * Mark the export complete if every queued page has been written, and say whether it is.
+	 *
+	 * Two pages that run at the same time each see the other as unfinished, so neither finalizes.
+	 * The email action does that for emailed exports. A caller polling the status endpoint has no
+	 * such action, so the status endpoint finalizes here.
+	 *
+	 * @internal
+	 * @since 11.2.0
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return bool Whether every queued page has been written.
+	 */
+	public static function finalize_if_complete( $report_type, $export_id ) {
+		$progress = self::get_export_progress( $export_id );
+
+		if ( null === $progress || $progress['unfinished'] > 0 || $progress['failed'] > 0 ) {
+			return false;
+		}
+
+		return self::finalize_export( $report_type, $export_id );
 	}
 
 	/**
@@ -413,18 +637,90 @@ class ReportExporter {
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Optional. Report parameters the export was queued with. Exports queued
 	 *                            before WooCommerce 11.2.0 run without them.
+	 * @param int    $wait_until  Optional. Time to stop waiting for pages that are still running. Set on the
+	 *                            first re-queue, so an export the queue never finishes is reported instead
+	 *                            of waited on forever.
 	 * @return void
 	 */
-	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
-		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
+	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array(), $wait_until = 0 ) {
+		$progress = self::get_export_progress( $export_id );
 
-		if ( 100 === $percent_complete ) {
-			$download_url = self::get_download_url( $report_type, $export_id, $report_args );
+		\WC_Emails::instance();
+		$email = new ReportCSVEmail();
+		$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
 
-			\WC_Emails::instance();
-			$email = new ReportCSVEmail();
-			$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
-			$email->trigger( $user_id, $report_type, $download_url );
+		// A page can be claimed by another runner between the dependency check and this call, so
+		// check again here rather than reporting on a file that is still being written.
+		if ( null !== $progress && $progress['unfinished'] > 0 ) {
+			$wait_until = (int) $wait_until;
+
+			if ( 0 === $wait_until ) {
+				$wait_until = time() + self::EXPORT_WAIT_LIMIT;
+			}
+
+			// A page can sit "in progress" for good when its runner died and the queue's cleanup is turned off.
+			if ( time() > $wait_until ) {
+				wc_get_logger()->error(
+					sprintf(
+						'%1$s report export %2$s gave up: %3$d of %4$d batches still had not finished after %5$s.',
+						$report_type,
+						$export_id,
+						$progress['unfinished'],
+						$progress['pages'],
+						human_time_diff( 0, self::EXPORT_WAIT_LIMIT )
+					),
+					array( 'source' => 'report-csv-exporter' )
+				);
+				$email->trigger_failed( $user_id, $report_type );
+				return;
+			}
+
+			/**
+			 * The queue.
+			 *
+			 * @var \WC_Queue_Interface $queue
+			 */
+			$queue = self::queue();
+			$queue->schedule_single(
+				time() + 5,
+				(string) self::get_action( 'email_report_download_link' ),
+				array( $user_id, $export_id, $report_type, $report_args, $wait_until ),
+				(string) self::$group
+			);
+			return;
 		}
+
+		if ( null !== $progress && $progress['failed'] > 0 ) {
+			wc_get_logger()->error(
+				sprintf(
+					'%1$s report export %2$s failed: %3$d of %4$d batches did not complete. %5$s',
+					$report_type,
+					$export_id,
+					$progress['failed'],
+					$progress['pages'],
+					implode( ' | ', $progress['errors'] )
+				),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			$email->trigger_failed( $user_id, $report_type );
+			return;
+		}
+
+		if ( null !== $progress ) {
+			if ( ! self::finalize_export( $report_type, $export_id ) ) {
+				$email->trigger_failed( $user_id, $report_type );
+				return;
+			}
+		} elseif ( 100 !== self::get_export_percentage_complete( $report_type, $export_id ) ) {
+			// Batches ran synchronously, so the only record is the percentage they left behind.
+			wc_get_logger()->error(
+				sprintf( '%1$s report export %2$s stopped at %3$s%%.', $report_type, $export_id, self::get_export_percentage_complete( $report_type, $export_id ) ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+			$email->trigger_failed( $user_id, $report_type );
+			return;
+		}
+
+		$email->trigger( $user_id, $report_type, self::get_download_url( $report_type, $export_id, $report_args ) );
 	}
 }

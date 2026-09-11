@@ -50,6 +50,14 @@ class ReportCSVEmail extends \WC_Email {
 	protected $report_date_range = '';
 
 	/**
+	 * Whether this email reports an export that could not be completed instead of a download link.
+	 *
+	 * @since 11.2.0
+	 * @var bool
+	 */
+	protected $failed = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -114,6 +122,10 @@ class ReportCSVEmail extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
+		if ( $this->failed ) {
+			return __( 'Your report export did not complete', 'woocommerce' );
+		}
+
 		return __( 'Your Report Download', 'woocommerce' );
 	}
 
@@ -126,6 +138,14 @@ class ReportCSVEmail extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
+		if ( $this->failed ) {
+			if ( '' !== $this->report_date_range ) {
+				return __( '[{site_title}]: Your {report_name} Report export for {report_date_range} did not complete', 'woocommerce' );
+			}
+
+			return __( '[{site_title}]: Your {report_name} Report export did not complete', 'woocommerce' );
+		}
+
 		if ( '' !== $this->report_date_range ) {
 			return __( '[{site_title}]: Your {report_name} Report for {report_date_range} is ready', 'woocommerce' );
 		}
@@ -140,7 +160,7 @@ class ReportCSVEmail extends \WC_Email {
 	 */
 	public function get_content_html() {
 		return wc_get_template_html(
-			$this->template_html,
+			$this->failed ? 'html-admin-report-export-failed.php' : $this->template_html,
 			array(
 				'report_name'   => $this->report_type,
 				'date_range'    => $this->report_date_range,
@@ -163,7 +183,7 @@ class ReportCSVEmail extends \WC_Email {
 	 */
 	public function get_content_plain() {
 		return wc_get_template_html(
-			$this->template_plain,
+			$this->failed ? 'plain-admin-report-export-failed.php' : $this->template_plain,
 			array(
 				'report_name'   => $this->report_type,
 				'date_range'    => $this->report_date_range,
@@ -212,9 +232,36 @@ class ReportCSVEmail extends \WC_Email {
 	 * @param string $download_url The URL for downloading the report.
 	 */
 	public function trigger( $user_id, $report_type, $download_url ) {
-		$user               = new \WP_User( $user_id );
-		$this->recipient    = $user->user_email;
 		$this->download_url = $download_url;
+
+		$this->send_to( $user_id, $report_type );
+	}
+
+	/**
+	 * Tell the user who asked for an export that it could not be completed, so they can request it again.
+	 *
+	 * @since 11.2.0
+	 * @param int    $user_id User ID to email.
+	 * @param string $report_type The type of report export that failed.
+	 * @return void
+	 */
+	public function trigger_failed( $user_id, $report_type ) {
+		$this->failed = true;
+
+		$this->send_to( $user_id, $report_type );
+	}
+
+	/**
+	 * Address and send the email.
+	 *
+	 * @since 11.2.0
+	 * @param int    $user_id User ID to email.
+	 * @param string $report_type The type of report export.
+	 * @return void
+	 */
+	protected function send_to( $user_id, $report_type ) {
+		$user            = new \WP_User( $user_id );
+		$this->recipient = $user->user_email;
 
 		if ( isset( $this->report_labels[ $report_type ] ) ) {
 			$this->report_type                   = $this->report_labels[ $report_type ];

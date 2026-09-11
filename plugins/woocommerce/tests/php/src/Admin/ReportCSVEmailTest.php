@@ -163,4 +163,52 @@ class ReportCSVEmailTest extends WC_Unit_Test_Case {
 
 		return $sent ? $sent['subject'] : '';
 	}
+
+	/**
+	 * @testdox A failed export is emailed as a failure, with no download link, in HTML and plain text.
+	 */
+	public function test_failed_export_email_says_so(): void {
+		reset_phpmailer_instance();
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		( new ReportCSVEmail() )->trigger_failed( 1, 'orders' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'A failed export should send exactly one email.' );
+		$sent = $mailer->mock_sent[0];
+
+		$this->assertSame( get_userdata( 1 )->user_email, $sent['to'][0][0], 'The email should go to the user who requested the export.' );
+		$this->assertStringContainsString( 'Your Orders Report export did not complete', $sent['subject'], 'The subject should name the report and say it failed.' );
+		$this->assertStringContainsString( 'Your Orders Report could not be exported', $sent['body'], 'The HTML body should say the export failed.' );
+		$this->assertStringNotContainsString( 'Download your', $sent['body'], 'A failed export has no link to download.' );
+
+		$email = new ReportCSVEmail();
+		$email->trigger_failed( 1, 'orders' );
+		$plain = $email->get_content_plain();
+
+		$this->assertStringContainsString( 'Your Orders Report could not be exported', $plain, 'The plain text body should say the export failed.' );
+		$this->assertStringNotContainsString( 'Download your', $plain, 'A failed export has no link to download.' );
+	}
+
+	/**
+	 * @testdox A failed export email says which period the report covered, when it had one.
+	 */
+	public function test_failed_export_email_states_the_date_range(): void {
+		reset_phpmailer_instance();
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$email = new ReportCSVEmail();
+		$email->set_report_date_range( 'June 1, 2025 - June 30, 2025' );
+		$email->trigger_failed( 1, 'orders' );
+
+		$sent = end( $mailer->mock_sent );
+
+		$this->assertIsArray( $sent, 'A failed export should be emailed.' );
+		$this->assertStringContainsString(
+			'Your Orders Report export for June 1, 2025 - June 30, 2025 did not complete',
+			$sent['subject'],
+			'The subject should name the period the failed export covered.'
+		);
+		$this->assertStringContainsString( 'Date range: June 1, 2025 - June 30, 2025', $sent['body'], 'The HTML body should name the period the failed export covered.' );
+		$this->assertStringContainsString( 'Date range: June 1, 2025 - June 30, 2025', $email->get_content_plain(), 'The plain text body should name the period the failed export covered.' );
+	}
 }

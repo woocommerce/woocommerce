@@ -249,6 +249,10 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			);
 		}
 
+		if ( 100 !== $percentage && ReportExporter::finalize_if_complete( $report_type, $export_id ) ) {
+			$percentage = 100;
+		}
+
 		$result = array(
 			'percent_complete' => $percentage,
 		);

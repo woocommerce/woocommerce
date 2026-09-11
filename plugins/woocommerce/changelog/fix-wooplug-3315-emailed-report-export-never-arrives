@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Emailed Analytics report exports now cover the orders that existed when the export was requested, complete even when orders change while it runs or when batches run concurrently, and email the requester when a batch fails instead of silently sending nothing.

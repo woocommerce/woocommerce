@@ -30,6 +30,16 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	protected $page = 1;
 
 	/**
+	 * Whether to write the headers row file, which marks the export complete, once the row count reaches 100%.
+	 *
+	 * An exporter whose pages can run in any order decides completion itself and sets this to false.
+	 *
+	 * @since 11.2.0
+	 * @var bool
+	 */
+	protected $completes_by_row_count = true;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -125,6 +135,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 *
 	 * @since 3.1.0
 	 * @param string $data Data.
+	 * @return void|false False when the data could not be written, so a caller can tell a written page from a lost one.
 	 */
 	protected function write_csv_data( $data ) {
 
@@ -171,6 +182,7 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 					),
 					$log_context
 				);
+				return false;
 			}
 		} else {
 			// fopen() raises a warning when it fails, so the last PHP error usually explains why (permissions, an
@@ -187,10 +199,11 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 				),
 				$log_context
 			);
+			return false;
 		}
 
 		// Add all columns when finished.
-		if ( 100 === $this->get_percent_complete() ) {
+		if ( $this->completes_by_row_count && 100 === $this->get_percent_complete() ) {
 			$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
 			// We need to use a temporary file to store headers, this will make our life so much easier.

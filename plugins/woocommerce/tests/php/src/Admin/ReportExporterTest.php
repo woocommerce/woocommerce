@@ -9,8 +9,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use WC_Helper_Order;
+use WC_Helper_Queue;
 use WC_Unit_Test_Case;
 
 /**
@@ -173,6 +177,118 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 				)
 			),
 			'The range should be the dates the report was run for, as written.'
+		);
+	}
+
+	/**
+	 * Create orders and import them into the analytics tables.
+	 *
+	 * @param int      $count   Number of orders.
+	 * @param int|null $created Creation timestamp, defaults to now.
+	 * @return int[] Order IDs.
+	 */
+	private function create_reported_orders( int $count, ?int $created = null ): array {
+		$ids = array();
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_status( 'completed' );
+			if ( null !== $created ) {
+				// Analytics may report by created, paid or completed date, so move all three.
+				$order->set_date_created( $created );
+				$order->set_date_paid( $created );
+				$order->set_date_completed( $created );
+			}
+			$order->save();
+
+			// The queue runner is not running during a test, so import directly rather than through it.
+			OrdersScheduler::import( $order->get_id() );
+			$ids[] = $order->get_id();
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Queue an emailed orders export, two orders per batch, and track its files for tear down.
+	 *
+	 * @return string Export ID.
+	 */
+	private function queue_orders_export(): string {
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+
+		$export_id = (string) time();
+		$args      = array(
+			'after'  => '2000-01-01T00:00:00',
+			'before' => '2100-01-01T00:00:00',
+		);
+
+		ReportExporter::queue_report_export( $export_id, 'orders', $args, true );
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 0 );
+
+		$path          = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		return $export_id;
+	}
+
+	/**
+	 * Batch limit filter callback.
+	 *
+	 * @return int
+	 */
+	public function two_rows_per_batch(): int {
+		return 2;
+	}
+
+	/**
+	 * Queue at most two pages per chunk, so a three page export goes through chunk actions.
+	 *
+	 * @param int    $batch_size Batch size.
+	 * @param string $name       Scheduler name.
+	 * @param string $action     Batch action name.
+	 * @return int
+	 */
+	public function two_pages_per_chunk( $batch_size, $name, $action ): int {
+		return 'queue_batches' === $action ? 2 : (int) $batch_size;
+	}
+
+	/**
+	 * Get the chunk actions queued for an export, oldest first.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return \ActionScheduler_Action[] Keyed by action ID.
+	 */
+	private function get_chunk_actions( string $export_id ): array {
+		return WC()->queue()->search(
+			array(
+				'hook'     => ReportExporter::get_action( 'queue_batches' ),
+				'search'   => '"' . $export_id . '"',
+				'group'    => ReportExporter::$group,
+				'per_page' => -1,
+				'orderby'  => 'action_id',
+				'order'    => 'ASC',
+			)
+		);
+	}
+
+	/**
+	 * Get this export's queued batch actions, keyed by action ID in page order.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return \ActionScheduler_Action[]
+	 */
+	private function get_batch_actions( string $export_id ): array {
+		return WC()->queue()->search(
+			array(
+				'hook'     => ReportExporter::get_action( 'export_report' ),
+				'search'   => '"' . $export_id . '"',
+				'group'    => ReportExporter::$group,
+				'per_page' => -1,
+				'orderby'  => 'action_id',
+				'order'    => 'ASC',
+			)
 		);
 	}
 
@@ -472,6 +588,641 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run one queued action.
+	 *
+	 * @param int $action_id Action ID.
+	 * @return void
+	 */
+	private function run_action( int $action_id ): void {
+		( new \ActionScheduler_QueueRunner() )->process_action( $action_id );
+	}
+
+	/**
+	 * Subjects of the emails sent so far.
+	 *
+	 * @return string[]
+	 */
+	private function get_sent_subjects(): array {
+		return array_column( tests_retrieve_phpmailer_instance()->mock_sent, 'subject' );
+	}
+
+	/**
+	 * Install a logger that records error calls.
+	 *
+	 * @return object Fake logger with a public `$errors` array.
+	 */
+	private function capture_log_errors(): object {
+		// phpcs:disable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
+		$logger = new class() implements \WC_Logger_Interface {
+			public array $errors = array();
+
+			public function add( $handle, $message, $level = \WC_Log_Levels::NOTICE ) {
+				unset( $handle, $message, $level );
+				return true;
+			}
+			public function log( $level, $message, $context = array() ) {
+				unset( $level, $message, $context );
+			}
+			public function emergency( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function alert( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function critical( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function error( $message, $context = array() ) {
+				unset( $context );
+				$this->errors[] = $message;
+			}
+			public function warning( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function notice( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function info( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+			public function debug( $message, $context = array() ) {
+				unset( $message, $context );
+			}
+		};
+		// phpcs:enable
+
+		add_filter(
+			'woocommerce_logging_class',
+			static function () use ( $logger ) {
+				return $logger;
+			}
+		);
+
+		return $logger;
+	}
+
+	/**
+	 * @testdox An export covers the orders that existed when it was requested, not ones placed while it ran.
+	 */
+	public function test_export_is_a_snapshot_of_the_request_time(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 3, time() - HOUR_IN_SECONDS );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->assertCount( 2, $batches, 'Three orders at two per batch should queue two pages.' );
+		$this->assertLessThanOrEqual( time(), strtotime( reset( $batches )->get_args()[3]['before'] ), 'The queued period should end at the request time.' );
+
+		$this->run_action( array_key_first( $batches ) );
+		$this->create_reported_orders( 2, time() + HOUR_IN_SECONDS );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+		$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Every queued page ran, so the export is complete.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The header row should be written once every queued page ran.' );
+		$this->assertCount( 3, file( $path ), 'Orders placed after the request should not be in the export.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox An export whose row count shrank while it ran is still finished and emailed.
+	 */
+	public function test_export_completes_when_orders_drop_out_mid_export(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$order_ids = $this->create_reported_orders( 4, time() - HOUR_IN_SECONDS );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->assertCount( 2, $batches, 'Four orders at two per batch should queue two pages.' );
+
+		$this->run_action( array_key_first( $batches ) );
+		foreach ( array_slice( $order_ids, 0, 3 ) as $order_id ) {
+			$order = wc_get_order( $order_id );
+			$order->set_status( 'cancelled' );
+			$order->save();
+			OrdersScheduler::import( $order_id );
+		}
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Every queued page ran, so the export is complete.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The header row should be written once every queued page ran.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox The report period is capped at the request time only when it runs into the future.
+	 */
+	public function test_report_period_is_capped_at_the_request_time(): void {
+		$past      = ReportExporter::freeze_report_period( array( 'before' => '2020-01-01T00:00:00' ) );
+		$future    = ReportExporter::freeze_report_period( array( 'before' => '2100-01-01T00:00:00' ) );
+		$open      = ReportExporter::freeze_report_period( array( 'after' => '2020-01-01T00:00:00' ) );
+		$customers = ReportExporter::freeze_report_period( array() );
+
+		$this->assertSame( '2020-01-01T00:00:00', $past['before'], 'A period that already ended is left alone.' );
+		$this->assertLessThanOrEqual( time(), strtotime( $future['before'] ), 'A period running into the future ends at the request time.' );
+		$this->assertArrayNotHasKey( 'before', $open, 'A request that sent no end must not be given one.' );
+		$this->assertArrayNotHasKey( 'before', $customers, 'A Customers export sends no dates, and its before is an order date, so it must not be given one.' );
+	}
+
+	/**
+	 * @testdox The cap is the store's local time on a store set to a manual UTC offset, and is not run through wp_date().
+	 */
+	public function test_report_period_cap_uses_the_store_utc_offset(): void {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', 10 );
+		// Calendar plugins rewrite wp_date() output into dates the report cannot parse.
+		add_filter( 'wp_date', array( $this, 'not_a_date' ) );
+
+		$capped = ReportExporter::freeze_report_period( array( 'before' => '2100-01-01T00:00:00' ) );
+
+		$this->assertStringEndsWith( '+10:00', $capped['before'], 'The cap should spell out the store offset.' );
+		$this->assertEqualsWithDelta(
+			time(),
+			( new \DateTime( $capped['before'], new \DateTimeZone( wc_timezone_string() ) ) )->getTimestamp(),
+			5,
+			'Read as the report data store reads it, the cap should be the request time, not the UTC clock.'
+		);
+	}
+
+	/**
+	 * @testdox A Customers export with no dates keeps customers who never ordered.
+	 */
+	public function test_customers_export_keeps_customers_without_orders(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		CustomersDataStore::update_registered_customer( $user_id );
+
+		$this->assertSame( 1, ReportExporter::queue_report_export( (string) time(), 'customers', array(), false ), 'The customer with no orders should be the one row exported.' );
+	}
+
+	/**
+	 * Stand-in for a calendar plugin's wp_date filter.
+	 *
+	 * @return string
+	 */
+	public function not_a_date(): string {
+		return 'not a date';
+	}
+
+	/**
+	 * @testdox A failed batch is logged and emailed as a failure instead of being silently dropped.
+	 */
+	public function test_failed_batch_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		add_action(
+			ReportExporter::get_action( 'export_report' ),
+			static function ( $page ) {
+				if ( 2 === (int) $page ) {
+					throw new \RuntimeException( 'database went away' );
+				}
+			},
+			1
+		);
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export with a missing page must not be served as complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for a broken export.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertCount( 1, $logger->errors, 'The failure should be logged.' );
+		$this->assertStringContainsString( 'database went away', $logger->errors[0], 'The log should carry the batch error.' );
+	}
+
+	/**
+	 * @testdox Pages that run out of order are all in the export.
+	 */
+	public function test_pages_run_out_of_order_are_all_exported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->assertCount( 3, $batches, 'Five orders at two per batch should queue three pages.' );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+		$path = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+
+		// Another runner picked the last page first.
+		$this->run_action( array_key_last( $batches ) );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'The last page by number is not the last page to run, so it must not mark the export complete.' );
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'Every page ran, so the export is complete.' );
+		$this->assertCount( 5, file( $path ), 'The page that ran first must be in the file.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox A page whose export file is gone fails instead of completing with nothing written.
+	 */
+	public function test_page_without_an_export_file_fails(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		wp_delete_file( ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv" );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'Nothing was written, so nothing must be served.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertStringContainsString( 'is missing', $logger->errors[0], 'The log should say the file was gone.' );
+	}
+
+	/**
+	 * @testdox A page that could not be written to the export file fails instead of completing.
+	 */
+	public function test_page_that_cannot_be_written_fails(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		// A stream that opens but refuses to append, as a read-only wrapper would.
+		add_filter( 'woocommerce_csv_exporter_fopen_mode', array( $this, 'read_only_mode' ) );
+		// fwrite() raises a notice on such a stream, which the test runner would turn into an exception of its own.
+		set_error_handler( '__return_true', E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+		restore_error_handler();
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'A page that was not written must not leave the export served as complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertNotEmpty( preg_grep( '/could not be written/', $logger->errors ), 'The log should say the page was lost.' );
+	}
+
+	/**
+	 * Open the export file read-only, so writes fail.
+	 *
+	 * @return string
+	 */
+	public function read_only_mode(): string {
+		return 'r';
+	}
+
+	/**
+	 * @testdox The email waits for a batch that another runner is still executing.
+	 */
+	public function test_email_waits_for_a_running_batch(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->run_action( array_key_first( $batches ) );
+		\ActionScheduler::store()->log_execution( array_key_last( $batches ) );
+
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+		$pending    = count(
+			WC()->queue()->search(
+				array(
+					'hook'     => $email_hook,
+					'status'   => 'pending',
+					'per_page' => -1,
+				)
+			)
+		);
+
+		ReportExporter::email_report_download_link( 1, $export_id, 'orders' );
+
+		$this->assertCount( 0, preg_grep( '/Orders Report/', $this->get_sent_subjects() ), 'Nothing should be emailed while a page is still being written.' );
+		$this->assertSame(
+			$pending + 1,
+			count(
+				WC()->queue()->search(
+					array(
+						'hook'     => $email_hook,
+						'status'   => 'pending',
+						'per_page' => -1,
+					)
+				)
+			),
+			'The email should be re-queued to check again later.'
+		);
+	}
+
+	/**
+	 * @testdox A page that never finishes is reported as a failed export once the wait runs out.
+	 */
+	public function test_export_with_a_page_that_never_finishes_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->run_action( array_key_first( $batches ) );
+		// Its runner died, and the queue's cleanup that would mark it failed is turned off.
+		\ActionScheduler::store()->log_execution( array_key_last( $batches ) );
+
+		ReportExporter::email_report_download_link( 1, $export_id, 'orders', array(), time() - 1 );
+
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that never finished.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertCount( 1, $logger->errors, 'Giving up should be logged.' );
+		$this->assertStringContainsString( '1 of 2 batches still had not finished', $logger->errors[0], 'The log should say which pages never ran.' );
+	}
+
+	/**
+	 * @testdox An export with no queued batches and a percentage short of 100 is reported as failed.
+	 */
+	public function test_export_that_stopped_short_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger    = $this->capture_log_errors();
+		$export_id = (string) time();
+
+		// Batches ran synchronously and left only their percentage behind.
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 50 );
+		ReportExporter::email_report_download_link( 1, $export_id, 'orders' );
+
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that stopped short.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertStringContainsString( 'stopped at 50%', $logger->errors[0], 'The log should carry the percentage it stopped at.' );
+	}
+
+	/**
+	 * @testdox A polled export whose last two pages ran at the same time still reaches 100.
+	 */
+	public function test_status_completes_an_export_whose_last_pages_overlapped(): void {
+		wp_set_current_user( 1 );
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+		$last_page = array_key_last( $batches );
+
+		// Run the last page inside the first, after the first has counted progress, so each sees the other unfinished.
+		add_action(
+			ReportExporter::get_action( 'export_report' ),
+			function ( $page ) use ( $last_page ) {
+				if ( 1 === (int) $page ) {
+					$this->run_action( $last_page );
+				}
+			},
+			20
+		);
+		$this->run_action( array_key_first( $batches ) );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertSame( 0, ReportExporter::get_export_progress( $export_id )['unfinished'], 'Both pages ran.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Neither page finalized, because each saw the other still running.' );
+		$this->assertFalse( $exporter->export_file_exists(), 'Nothing but finalize_export() may mark the export complete.' );
+
+		// The REST server outlives the test that built it, and the analytics routes load lazily through a
+		// filter that does not. Start a server here, with the namespace loaded up front.
+		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
+		$GLOBALS['wp_rest_server'] = null;
+		$request                   = new \WP_REST_Request( 'GET', "/wc-analytics/reports/orders/export/{$export_id}/status" );
+		$response                  = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 100, $response->get_data()['percent_complete'], 'The status endpoint should finish an export every page of which has been written.' );
+		$this->assertArrayHasKey( 'download_url', $response->get_data(), 'A finished export should offer its download.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The header row should be written once the status endpoint finished the export.' );
+	}
+
+	/**
+	 * @testdox An export whose pages run inline, with the queue turned off, is emailed a working link.
+	 */
+	public function test_export_run_without_the_queue_is_emailed(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), true );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertNull( ReportExporter::get_export_progress( $export_id ), 'Nothing was queued.' );
+		$this->assertCount( 3, file( $path ), 'Every page ran inline.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The export should be marked complete before the link goes out.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'The export should report complete.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox An export whose pages run inline, with the queue turned off and no email, is marked complete.
+	 */
+	public function test_export_run_without_the_queue_is_marked_complete(): void {
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertCount( 3, file( $path ), 'Every page ran inline.' );
+		$this->assertTrue( $exporter->export_file_exists(), 'The last page to run inline should mark the export complete.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'The export should report complete.' );
+	}
+
+	/**
+	 * @testdox An export queued under a reused ID starts from a clean file.
+	 */
+	public function test_reused_export_id_starts_from_a_clean_file(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = (string) time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The first export completed.' );
+		$this->assertCount( 3, file( $path ), 'The first export holds its three rows.' );
+
+		// A filter that hands out a constant ID queues the next export under the same name.
+		$this->create_reported_orders( 1 );
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'The previous export must not be served as the new one.' );
+		$this->assertSame( '', file_get_contents( $path ), 'The previous export\'s rows must not carry over.' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The new export completed.' );
+		$this->assertCount( 4, file( $path ), 'The new export holds its own rows and nothing else.' );
+	}
+
+	/**
+	 * @testdox An export ID given as a number is tracked in the queue like one given as a string.
+	 */
+	public function test_export_id_is_stored_as_a_string(): void {
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'two_rows_per_batch' ) );
+		$this->create_reported_orders( 3 );
+		$export_id = time();
+		$path      = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv";
+
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		ReportExporter::queue_report_export( $export_id, 'orders', array( 'after' => '2000-01-01T00:00:00' ), false );
+
+		$progress = ReportExporter::get_export_progress( (string) $export_id );
+
+		$this->assertNotNull( $progress, 'The queued pages should be found under the export ID.' );
+		$this->assertSame( 2, $progress['pages'], 'Three orders at two per batch should queue two pages.' );
+	}
+
+	/**
+	 * @testdox An export whose completion mark cannot be written is reported as failed, not as ready.
+	 */
+	public function test_export_whose_completion_mark_cannot_be_written_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$headers   = ReportCSVExporter::get_reports_directory() . "wc-orders-report-export-{$export_id}.csv.headers";
+
+		// Something else holds the path, so the mark cannot be written there.
+		mkdir( $headers ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+		rmdir( $headers ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export without its mark must not be served.' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'An export without its mark must not report complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that could not be marked complete.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertNotEmpty( preg_grep( '/could not be marked complete/', $logger->errors ), 'The log should say the mark could not be written.' );
+	}
+
+	/**
+	 * @testdox The email waits for pages that a queued chunk has not scheduled yet.
+	 */
+	public function test_email_waits_for_pages_a_chunk_has_yet_to_queue(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_regenerate_batch_size', array( $this, 'two_pages_per_chunk' ), 10, 3 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$chunks    = $this->get_chunk_actions( $export_id );
+
+		$this->assertCount( 2, $chunks, 'Three pages at two per chunk should queue two chunks.' );
+		$this->assertCount( 0, $this->get_batch_actions( $export_id ), 'No page is queued until a chunk runs.' );
+
+		$this->run_action( array_key_first( $chunks ) );
+		foreach ( array_keys( $this->get_batch_actions( $export_id ) ) as $action_id ) {
+			$this->run_action( $action_id );
+		}
+
+		$progress = ReportExporter::get_export_progress( $export_id );
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertSame( 2, $progress['complete'], 'The first chunk queued two pages, and both ran.' );
+		$this->assertSame( 1, $progress['unfinished'], 'The second chunk still has a page to queue.' );
+		$this->assertFalse( $exporter->export_file_exists(), 'Every queued page ran, but the export is not complete while a chunk is pending.' );
+
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+		$email_args = array(
+			'hook'     => $email_hook,
+			'search'   => '"' . $export_id . '"',
+			'status'   => 'pending',
+			'per_page' => -1,
+		);
+		$emails     = WC()->queue()->search( $email_args, 'ids' );
+
+		$this->assertCount( 1, $emails, 'The export should have queued one email action.' );
+
+		// No page is pending, so nothing blocks the email action. It has to see the chunk itself.
+		$this->run_action( (int) reset( $emails ) );
+
+		$this->assertCount( 0, preg_grep( '/Orders Report/', $this->get_sent_subjects() ), 'Nothing should be emailed while a chunk has pages to queue.' );
+		$this->assertCount( 1, WC()->queue()->search( $email_args, 'ids' ), 'The email should be re-queued to check again later.' );
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The export completes once the last chunk has queued its page and it ran.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox A chunk that failed to queue its pages is reported as a failed export.
+	 */
+	public function test_failed_chunk_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		add_filter( 'woocommerce_analytics_regenerate_batch_size', array( $this, 'two_pages_per_chunk' ), 10, 3 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$chunks    = $this->get_chunk_actions( $export_id );
+
+		$this->run_action( array_key_first( $chunks ) );
+		\ActionScheduler::store()->mark_failure( array_key_last( $chunks ) );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export missing a chunk of pages must not be served as complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for a broken export.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertCount( 1, $logger->errors, 'The failure should be logged.' );
+		$this->assertStringContainsString( '1 of 3 batches did not complete', $logger->errors[0], 'The failed chunk should count as a missing page.' );
+	}
+
+	/**
 	 * @testdox An export queued before the date range was added still emails a working link.
 	 */
 	public function test_emailed_link_for_an_export_queued_without_report_args(): void {
@@ -521,6 +1272,24 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $sent, 'A finished export should be emailed to the user who asked for it.' );
 
 		return $sent;
+	}
+
+	/**
+	 * @testdox Progress is counted in queued pages and is unknown when no pages were queued.
+	 */
+	public function test_progress_is_read_from_the_queue(): void {
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+
+		$this->run_action( array_key_first( $this->get_batch_actions( $export_id ) ) );
+		$progress = ReportExporter::get_export_progress( $export_id );
+
+		$this->assertSame( 2, $progress['pages'], 'Two pages were queued.' );
+		$this->assertSame( 1, $progress['complete'], 'One page has run.' );
+		$this->assertSame( 1, $progress['unfinished'], 'One page is still queued.' );
+		$this->assertSame( 0, $progress['failed'], 'No page failed.' );
+		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', $export_id ), 'Half of the queued pages ran.' );
+		$this->assertNull( ReportExporter::get_export_progress( 'never-queued' ), 'An export without queued pages has no progress to read.' );
 	}
 
 	/**
