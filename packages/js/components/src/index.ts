@@ -1,5 +1,19 @@
 export { default as AbbreviatedCard } from './abbreviated-card';
 export { default as AdvancedFilters } from './advanced-filters';
+export type {
+	ActiveFilter,
+	ActiveFilterValue,
+	AdvancedFilterAction,
+	AdvancedFilterConfig,
+	AdvancedFiltersProps,
+	FilterChange,
+	FilterConfig,
+	FilterInput,
+	FilterLabels,
+	FilterOption,
+	FilterRule,
+	Query,
+} from './advanced-filters';
 export * from './analytics';
 export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';

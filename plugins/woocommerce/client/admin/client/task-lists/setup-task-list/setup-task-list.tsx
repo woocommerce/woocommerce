@@ -116,11 +116,11 @@ export const SetupTaskList = ( {
 	);
 
 	const hideTasks = () => {
-		hideTaskList( id );
+		void hideTaskList( id );
 	};
 
 	const keepTasks = () => {
-		keepCompletedTasks( id );
+		void keepCompletedTasks( id );
 	};
 
 	const renderMenu = () => {
@@ -187,7 +187,7 @@ export const SetupTaskList = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		visitedTask( taskId );
+		void visitedTask( taskId );
 		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
@@ -212,11 +212,11 @@ export const SetupTaskList = ( {
 	};
 
 	const goToTask = ( task: TaskType ) => {
-		trackClick( task ).then( () => {
+		void trackClick( task ).then( () => {
 			if ( ! isComplete ) {
 				// Invalidate the task list selector cache to force a re-fetch.
 				// This ensures the task completion status is up-to-date after visiting a task.
-				invalidateResolutionForStoreSelector( 'getTaskLists' );
+				void invalidateResolutionForStoreSelector( 'getTaskLists' );
 			}
 		} );
 

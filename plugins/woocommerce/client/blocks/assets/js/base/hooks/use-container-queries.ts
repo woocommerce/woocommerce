@@ -9,6 +9,8 @@ import { useResizeObserver } from '@wordpress/compose';
  * https://github.com/WordPress/gutenberg/tree/master/packages/viewport#usage
  * Values are also based on those breakpoints minus ~80px which is approximately
  * the left + right margin in Storefront with a font-size of 16px.
+ * Keep in sync with the `cart-checkout-*-container` mixins in
+ * assets/css/abstracts/_mixins.scss.
  * _Note: `useContainerQueries` will return an empty class name `` until after
  * first render_
  *
@@ -33,7 +35,7 @@ export const useContainerQueries = (): [ React.ReactElement, string ] => {
 	const [ resizeListener, { width } ] = useResizeObserver();
 
 	let className = '';
-	if ( width > 700 ) {
+	if ( width > 920 ) {
 		className = 'is-large';
 	} else if ( width > 520 ) {
 		className = 'is-medium';

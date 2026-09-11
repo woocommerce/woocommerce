@@ -535,6 +535,198 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that YouTube embed handles Shorts and live URLs
+	 */
+	public function test_youtube_embed_handles_shorts_and_live_urls(): void {
+		foreach ( array( 'https://www.youtube.com/shorts/dQw4w9WgXcQ', 'https://www.youtube.com/live/dQw4w9WgXcQ', 'https://YouTube.com/watch?v=dQw4w9WgXcQ' ) as $url ) {
+			$parsed_youtube_embed = array(
+				'blockName' => 'core/embed',
+				'attrs'     => array(
+					'url'              => $url,
+					'type'             => 'video',
+					'providerNameSlug' => 'youtube',
+					'responsive'       => true,
+				),
+				'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+			);
+
+			$rendered = $this->embed_renderer->render( $parsed_youtube_embed['innerHTML'], $parsed_youtube_embed, $this->rendering_context );
+
+			$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered, "Thumbnail missing for {$url}" );
+			$this->assertStringContainsString( 'play2x.png', $rendered, "Play button missing for {$url}" );
+		}
+	}
+
+	/**
+	 * Test that YouTube URLs without an extractable video ID fall back to the oEmbed thumbnail lookup
+	 */
+	public function test_youtube_embed_falls_back_to_oembed_thumbnail_for_playlists(): void {
+		$mock_thumbnail_url   = 'https://i.ytimg.com/vi/abc/hqdefault.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Playlist',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'youtube.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$playlist_url         = 'https://www.youtube.com/playlist?list=PL590L5WQmH8dpP0RyH5pCfIaDEdt9nk7r';
+		$cache_key            = 'wc_email_vp_thumb_' . md5( $playlist_url );
+		$parsed_youtube_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => $playlist_url,
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">' . $playlist_url . '</div></figure>',
+		);
+
+		// Clear any cached thumbnail so the mocked oEmbed response is exercised.
+		delete_transient( $cache_key );
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_youtube_embed['innerHTML'], $parsed_youtube_embed, $this->rendering_context );
+
+			$this->assertStringContainsString( $mock_thumbnail_url, $rendered );
+			$this->assertStringContainsString( 'play2x.png', $rendered );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			delete_transient( $cache_key );
+		}
+	}
+
+	/**
+	 * Test that a /embed/videoseries playlist URL does not build a broken thumbnail
+	 *
+	 * The "videoseries" token would otherwise be captured as a video ID, producing a
+	 * broken img.youtube.com/vi/videoseries thumbnail. It is excluded so the URL falls
+	 * through to the oEmbed lookup; WP core has no provider pattern for this form, so
+	 * it degrades to a graceful link fallback.
+	 */
+	public function test_youtube_playlist_embed_url_does_not_build_broken_thumbnail(): void {
+		// Block the outbound oEmbed discovery request so the test stays offline-deterministic.
+		$filter_callback = function ( $preempt, $args, $url ) {
+			if ( strpos( $url, 'youtube.com' ) !== false ) {
+				return new \WP_Error( 'blocked', 'Blocked in test.' );
+			}
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$playlist_embed_url   = 'https://www.youtube.com/embed/videoseries?list=PL590L5WQmH8dpP0RyH5pCfIaDEdt9nk7r';
+		$parsed_youtube_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => $playlist_embed_url,
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">' . $playlist_embed_url . '</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_youtube_embed['innerHTML'], $parsed_youtube_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// No broken thumbnail, and the URL degrades to a link instead.
+		$this->assertStringNotContainsString( 'img.youtube.com/vi/videoseries', $rendered );
+		$this->assertStringContainsString( '<a href="' . $playlist_embed_url . '"', $rendered );
+	}
+
+	/**
+	 * Test that embed captions are rendered below the embed output
+	 */
+	public function test_renders_caption_below_embed(): void {
+		$parsed_youtube_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div><figcaption class="wp-element-caption">My <strong>video</strong> caption</figcaption></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_embed['innerHTML'], $parsed_youtube_embed, $this->rendering_context );
+
+		// The caption is wrapped in a centered div (matching content-editor.css),
+		// anchored to the caption text so the assertion cannot pass on the video
+		// renderer's own centered play-button wrapper.
+		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;">My <strong>video</strong> caption</div>', $rendered );
+		// The caption is appended after the embed output.
+		$thumbnail_pos = strpos( $rendered, 'img.youtube.com' );
+		$caption_pos   = strpos( $rendered, 'My <strong>video</strong> caption' );
+		$this->assertNotFalse( $thumbnail_pos, 'Expected the YouTube thumbnail in the output.' );
+		$this->assertNotFalse( $caption_pos, 'Expected the caption in the output.' );
+		$this->assertGreaterThan( $thumbnail_pos, $caption_pos );
+	}
+
+	/**
+	 * Test that captions are rendered for link fallbacks and sanitized
+	 */
+	public function test_renders_sanitized_caption_with_link_fallback(): void {
+		$parsed_unsupported_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://example.com/some-content',
+				'providerNameSlug' => 'unsupported',
+			),
+			'innerHTML' => '<figure class="wp-block-embed"><div class="wp-block-embed__wrapper">https://example.com/some-content</div><figcaption class="wp-element-caption">Caption<script>alert(1)</script></figcaption></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_unsupported_embed['innerHTML'], $parsed_unsupported_embed, $this->rendering_context );
+
+		// Link fallback with the caption appended, dangerous markup removed.
+		$this->assertStringContainsString( 'https://example.com/some-content', $rendered );
+		$this->assertStringContainsString( 'Caption', $rendered );
+		$this->assertStringNotContainsString( '<script>', $rendered );
+	}
+
+	/**
+	 * Test that a malformed caption cannot be completed by the wrapper markup.
+	 *
+	 * The renderer appends "</div>" after the sanitized caption, which a browser
+	 * consumes as part of any tag the caption leaves open. The sanitized caption
+	 * therefore has to be complete markup on its own, so that the wrapper cannot
+	 * turn a fragment into a live element in the browser-rendered editor preview.
+	 */
+	public function test_malformed_caption_does_not_survive_into_output(): void {
+		$parsed_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://example.com/some-content',
+				'providerNameSlug' => 'unsupported',
+			),
+			'innerHTML' => '<figure class="wp-block-embed"><div class="wp-block-embed__wrapper">https://example.com/some-content</div><figcaption class="wp-element-caption">caption<img src=x onerror="alert(1)"</figcaption></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_embed['innerHTML'], $parsed_embed, $this->rendering_context );
+
+		// The caption text is wrapped and appended, and the <img> is gone however
+		// the sanitizer disposed of it, so the trailing "</div>" completes nothing.
+		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;">caption', $rendered );
+		$this->assertStringNotContainsString( '<img', $rendered );
+	}
+
+	/**
 	 * Test that VideoPress embed is detected and renders as video player, including handling URLs with query parameters.
 	 */
 	public function test_renders_videopress_embed(): void {

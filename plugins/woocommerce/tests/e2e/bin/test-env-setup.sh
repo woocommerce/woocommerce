@@ -16,7 +16,7 @@ if [ ! -z ${CI+y} ]; then
     # Source from the e2e-test-bin directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
     $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-bin/test-env-setup.sh test-env-setup-ci.sh
-    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= bash test-env-setup-ci.sh
+    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= ENABLE_TRACKING="${ENABLE_TRACKING:-0}" bash test-env-setup-ci.sh
     exit $?
 fi
 
@@ -26,9 +26,6 @@ fi
 # `customer` role user). Harmless when WC is already active (PR/source-mapped).
 echo -e 'Activate WooCommerce \n'
 $WP_CLI_PREFIX wp plugin activate woocommerce
-
-echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
-$WP_CLI_PREFIX wp theme install storefront twentytwenty twentytwentytwo &
 
 echo -e 'Activate default theme \n'
 $WP_CLI_PREFIX wp theme activate twentytwentythree
@@ -52,6 +49,9 @@ if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 		--last_name='Smith' \
 		--user_registered='2022-01-01 12:23:45'
 fi
+
+echo -e 'Enable Back in Stock Notifications feature \n'
+$WP_CLI_PREFIX wp option update woocommerce_feature_customer_stock_notifications_enabled 'yes'
 
 echo -e 'Update Blog Name \n'
 $WP_CLI_PREFIX wp option update blogname 'WooCommerce Core E2E Test Suite'

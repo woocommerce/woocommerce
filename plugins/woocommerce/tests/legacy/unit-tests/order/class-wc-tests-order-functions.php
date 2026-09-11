@@ -1446,6 +1446,72 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fully refunding an order through partial refunds does not create a ghost 0.00 refund when a sub-cent residue remains.
+	 *
+	 * The order total can sit a fraction of a cent below the sum of its refunds
+	 * (the float sum of refund amounts lands epsilon-high on meta-based storage:
+	 * 25.94 + 51.88 = 77.820000000000007 vs a 77.82 total). The refunded-status
+	 * transition then computes a tiny negative remainder that wc_format_decimal()
+	 * renders as '-0' — a truthy string that is numerically zero — and
+	 * wc_order_fully_refunded() used to turn it into a third, ghost refund of
+	 * 0.00 with reason "Order fully refunded." The epsilon depends on the data
+	 * store's SUM precision, so the test pins it via the order total getter.
+	 */
+	public function test_wc_order_fully_refunded_ignores_negative_zero_remainder() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 12.97 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 6 );
+		$order->calculate_totals( true );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->assertEquals( 77.82, (float) $order->get_total() );
+
+		$item_id = array_keys( $order->get_items( 'line_item' ) )[0];
+
+		// Reproduce the epsilon deterministically on every data store: the total reads
+		// a hair below the 77.82 the two refunds sum to, so the remainder after the
+		// final refund is a tiny negative that wc_format_decimal() renders as '-0'.
+		$force_epsilon_total = function () {
+			return 77.81999999;
+		};
+		add_filter( 'woocommerce_order_get_total', $force_epsilon_total );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 25.94,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 2,
+						'refund_total' => 25.94,
+					),
+				),
+			)
+		);
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 51.88,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 4,
+						'refund_total' => 51.88,
+					),
+				),
+			)
+		);
+
+		remove_filter( 'woocommerce_order_get_total', $force_epsilon_total );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( OrderStatus::REFUNDED, $order->get_status(), 'The second refund consumes the rounded remainder and flips the order to refunded.' );
+		$this->assertCount( 2, $order->get_refunds(), 'Only the two real refunds exist — no ghost 0.00 "Order fully refunded." record.' );
+	}
+
+	/**
 	 * @testdox Creating a refund advances the parent order modified date.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/28969

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load the matching DataForm 17.1 stylesheet only for successfully resolved Settings UI pages.

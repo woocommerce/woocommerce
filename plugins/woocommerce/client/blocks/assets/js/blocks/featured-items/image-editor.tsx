@@ -6,11 +6,8 @@
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
-import {
-	__experimentalImageEditingProvider as ImageEditingProvider,
-	__experimentalImageEditor as GutenbergImageEditor,
-} from '@wordpress/block-editor';
-import type { ComponentType, Dispatch, SetStateAction } from 'react';
+import { __experimentalImageEditor as GutenbergImageEditor } from '@wordpress/block-editor';
+import type { ComponentType, Dispatch, RefObject, SetStateAction } from 'react';
 
 /**
  * Internal dependencies
@@ -24,7 +21,7 @@ type MediaSize = { height: number; width: number };
 
 interface WithImageEditorRequiredProps< T > {
 	attributes: MediaAttributes & EditorBlock< T >[ 'attributes' ];
-	backgroundImageSize: MediaSize;
+	backgroundImageSize: Partial< MediaSize >;
 	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
@@ -48,23 +45,23 @@ type WithImageEditorProps< T extends EditorBlock< T > > =
 interface ImageEditorProps {
 	align: string;
 	backgroundImageId: number;
-	backgroundImageSize: MediaSize;
+	backgroundImageSize: Partial< MediaSize >;
 	backgroundImageSrc: string;
-	containerRef: React.RefObject< HTMLDivElement >;
-	isEditingImage: boolean;
-	setAttributes: ( attrs: MediaAttributes ) => void;
+	containerRef: RefObject< HTMLDivElement >;
+	originalImgDimension: MediaSize;
+	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
 	setIsEditingImage: ( value: boolean ) => void;
 }
 
 // Adapted from:
 // https://github.com/WordPress/gutenberg/blob/v15.6.1/packages/block-library/src/image/use-client-width.js
 function useClientWidth(
-	ref: React.RefObject< HTMLDivElement >,
+	ref: RefObject< HTMLDivElement >,
 	dependencies: string[]
 ) {
 	const [ clientWidth, setClientWidth ]: [
 		number | undefined,
-		Dispatch< SetStateAction< number | undefined > >
+		Dispatch< SetStateAction< number | undefined > >,
 	] = useState();
 
 	const calculateClientWidth = useCallback( () => {
@@ -100,52 +97,33 @@ export const ImageEditor = ( {
 	backgroundImageSize,
 	backgroundImageSrc,
 	containerRef,
-	isEditingImage,
+	originalImgDimension,
 	setAttributes,
 	setIsEditingImage,
 }: ImageEditorProps ) => {
 	const clientWidth = useClientWidth( containerRef, [ align ] );
 
-	// Fallback for WP 6.1 or lower. In WP 6.2. ImageEditingProvider was merged
-	// with ImageEditor, see: https://github.com/WordPress/gutenberg/pull/47171
-	if ( typeof ImageEditingProvider === 'function' ) {
-		return (
-			<ImageEditingProvider
-				id={ backgroundImageId }
-				url={ backgroundImageSrc }
-				naturalHeight={
-					backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
-				}
-				naturalWidth={
-					backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
-				}
-				onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
-					setAttributes( { mediaId: id, mediaSrc: url } );
-				} }
-				isEditing={ isEditingImage }
-				onFinishEditing={ () => setIsEditingImage( false ) }
-			>
-				<GutenbergImageEditor
-					url={ backgroundImageSrc }
-					height={
-						backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height
-					}
-					width={
-						backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width
-					}
-				/>
-			</ImageEditingProvider>
-		);
-	}
+	// The rendered <img> only exists for plain backgrounds, so its measured
+	// size is missing for repeated/parallax ones and until it finishes
+	// loading. useBackgroundImage() measures the same file off-screen, which
+	// covers both cases; the constant is the last resort before either lands.
+	const editorHeight =
+		backgroundImageSize.height ||
+		originalImgDimension.height ||
+		DEFAULT_EDITOR_SIZE.height;
+	const editorWidth =
+		backgroundImageSize.width ||
+		originalImgDimension.width ||
+		DEFAULT_EDITOR_SIZE.width;
 
 	return (
 		<GutenbergImageEditor
 			id={ backgroundImageId }
 			url={ backgroundImageSrc }
-			height={ backgroundImageSize.height || DEFAULT_EDITOR_SIZE.height }
-			width={ backgroundImageSize.width || DEFAULT_EDITOR_SIZE.width }
-			naturalHeight={ backgroundImageSize.height }
-			naturalWidth={ backgroundImageSize.width }
+			height={ editorHeight }
+			width={ editorWidth }
+			naturalHeight={ editorHeight }
+			naturalWidth={ editorWidth }
 			onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
 				setAttributes( { mediaId: id, mediaSrc: url } );
 			} }
@@ -169,12 +147,13 @@ export const withImageEditor =
 				? props.product
 				: props.category;
 
-		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
-			item,
-			mediaId,
-			mediaSrc,
-			blockName: name,
-		} );
+		const { backgroundImageId, backgroundImageSrc, originalImgDimension } =
+			useBackgroundImage( {
+				item,
+				mediaId,
+				mediaSrc,
+				blockName: name,
+			} );
 
 		if ( isEditingImage ) {
 			return (
@@ -185,7 +164,7 @@ export const withImageEditor =
 						backgroundImageSize={ backgroundImageSize }
 						backgroundImageSrc={ backgroundImageSrc }
 						containerRef={ ref }
-						isEditingImage={ isEditingImage }
+						originalImgDimension={ originalImgDimension }
 						setAttributes={ setAttributes }
 						setIsEditingImage={ setIsEditingImage }
 					/>

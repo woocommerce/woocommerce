@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: restore the released unqualified parent_id form of the Taxes orders_count column carried by the woocommerce_admin_report_columns filter, and invalidate report caches on the first-ever save of the analytics date type.

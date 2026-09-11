@@ -47,7 +47,7 @@ class RegisteredSettingsSectionAdapter extends LegacySettingsPageAdapter {
 	 * @param string $section Unused. This adapter wraps a single registered section.
 	 * @return array
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 */
 	public function get_schema( string $section ): array {
 		$schema = parent::get_schema( $section );

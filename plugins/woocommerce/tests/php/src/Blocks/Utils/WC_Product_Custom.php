@@ -12,15 +12,6 @@ use WC_Product;
  */
 class WC_Product_Custom extends WC_Product {
 	/**
-	 * Initialize custom product.
-	 *
-	 * @param WC_Product|int $product Product instance or ID.
-	 */
-	public function __construct( $product = 0 ) {
-		parent::__construct();
-	}
-
-	/**
 	 * Get internal type.
 	 *
 	 * @return string

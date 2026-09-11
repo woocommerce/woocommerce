@@ -73,6 +73,15 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( defined( 'SHOP_IS_ON_FRONT' ) && SHOP_IS_ON_FRONT );
 		$this->assert_shop_page_queried_object( $query, $shop_page_id );
 
+		foreach ( array( 'categories', 'tags', 'brands' ) as $query_var ) {
+			$query        = new WP_Query();
+			$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$query->query( array( $query_var => 'filter-term' ) );
+
+			$this->assertSame( 'product_query', $query->get( 'wc_query' ), "{$query_var} should preserve the product query." );
+			$this->assert_shop_page_queried_object( $query, $shop_page_id );
+		}
+
 		// Reset main query, options and delete the page we created.
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		update_option( 'woocommerce_shop_page_id', $default_woocommerce_shop_page_id );

@@ -236,7 +236,7 @@ export const updateReleaseBranchChangelogs = async (
 			);
 			deletionCommitHash = (
 				await git.raw( [ 'rev-parse', 'HEAD' ] )
-			 ).trim();
+			).trim();
 			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 		} else {
 			Logger.notice(
@@ -394,7 +394,7 @@ export const updateBranchChangelog = async (
 				'--diff-filter=D',
 				deletionCommitHash,
 			] )
-		 )
+		)
 			.split( '\0' )
 			.map( ( file ) => file.trim() )
 			.filter( Boolean );

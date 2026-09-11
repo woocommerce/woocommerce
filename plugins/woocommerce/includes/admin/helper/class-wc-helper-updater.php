@@ -104,6 +104,10 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $plugin['_product_id'] );
 
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
 			}
@@ -172,6 +176,14 @@ class WC_Helper_Updater {
 			 */
 			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $theme['_product_id'] );
 
+			if ( isset( $data['requires_php'] ) ) {
+				$item['requires_php'] = $data['requires_php'];
+			}
+
+			if ( self::is_autoupdate_forced( $data, $item ) ) {
+				$item['autoupdate'] = true;
+			}
+
 			if ( version_compare( $theme['Version'], $data['version'], '<' ) ) {
 				$transient->response[ $slug ] = $item;
 			} else {
@@ -181,6 +193,38 @@ class WC_Helper_Updater {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Checks whether WooCommerce.com flagged this update to be installed automatically.
+	 *
+	 * Uses core's own `autoupdate` flag, the same one api.wordpress.org sets on WordPress.org
+	 * plugins, so these updates follow the same path through WP_Automatic_Updater::should_update().
+	 * The flag overrides the per-item setting and the site-wide plugins_auto_update_enabled and
+	 * themes_auto_update_enabled switches. AUTOMATIC_UPDATER_DISABLED, disable_autoupdate and the
+	 * auto_update_plugin and auto_update_theme filters still apply.
+	 *
+	 * The package checks are required: forcing an update that cannot be installed, either
+	 * because no package was supplied or because the subscription expired, only produces a
+	 * failed update email to every admin on the site.
+	 *
+	 * @since 11.2.0
+	 * @param array $data Product data returned by the Helper API update check.
+	 * @param array $item Update item built for the update transient.
+	 * @return bool
+	 */
+	private static function is_autoupdate_forced( $data, $item ) {
+		// The flag arrives from a remote response, so only a value that reads as boolean true
+		// counts. A truthy string such as "false", or an array, must not trigger an install.
+		if ( true !== filter_var( $data['autoupdate'] ?? null, FILTER_VALIDATE_BOOLEAN ) ) {
+			return false;
+		}
+
+		if ( empty( $item['package'] ) || ! is_string( $item['package'] ) ) {
+			return false;
+		}
+
+		return 0 !== strpos( $item['package'], 'woocommerce-com-expired-' );
 	}
 
 	/**
@@ -408,36 +452,16 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Get update data for all plugins.
+	 * Get update data for all extensions, for the WP-CLI extension command.
+	 *
+	 * Sends the same payload as get_update_data(), so both share one cached response and
+	 * report the same installed versions.
 	 *
 	 * @return array Update data {product_id => data}
 	 * @see get_update_data
 	 */
 	public static function get_available_extensions_downloads_data() {
-		$payload = array();
-
-		// Scan subscriptions.
-		$subscriptions = WC_Helper::get_subscriptions();
-
-		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
-				'file_id'    => '',
-			);
-		}
-
-		// Scan local plugins which may or may not have a subscription.
-		foreach ( WC_Helper::get_local_woo_plugins() as $data ) {
-			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
-				$payload[ $data['_product_id'] ] = array(
-					'product_id' => $data['_product_id'],
-				);
-			}
-
-			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
-		}
-
-		return self::_update_check( $payload );
+		return self::_update_check( self::get_update_check_payload() );
 	}
 
 	/**
@@ -450,20 +474,37 @@ class WC_Helper_Updater {
 	 * @return array Update data {product_id => data}
 	 */
 	public static function get_update_data() {
+		return self::_update_check( self::get_update_check_payload() );
+	}
+
+	/**
+	 * The products to ask WooCommerce.com about, with the file ID and installed version of each.
+	 *
+	 * Covers every subscription plus every installed plugin and theme carrying a Woo header,
+	 * whether or not it has a subscription. Every caller has to send the same payload: the
+	 * server decides the autoupdate flag from the installed version, and the response is
+	 * cached under a hash of the payload.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array Payload keyed by product ID.
+	 */
+	private static function get_update_check_payload(): array {
 		$payload = array();
 
-		// Scan subscriptions.
-		$subscriptions = WC_Helper::get_subscriptions();
+		foreach ( WC_Helper::get_subscriptions() as $subscription ) {
+			$product_id = (int) $subscription['product_id'];
 
-		foreach ( $subscriptions as $subscription ) {
-			$payload[ $subscription['product_id'] ] = array(
-				'product_id' => $subscription['product_id'],
+			$payload[ $product_id ] = array(
+				'product_id' => $product_id,
 				'file_id'    => '',
+				'version'    => '',
 			);
 		}
 
-		// Scan local plugins which may or may not have a subscription.
-		foreach ( WC_Helper::get_local_woo_plugins() as $data ) {
+		$installed = array_merge( WC_Helper::get_local_woo_plugins(), WC_Helper::get_local_woo_themes() );
+
+		foreach ( $installed as $data ) {
 			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
 				$payload[ $data['_product_id'] ] = array(
 					'product_id' => $data['_product_id'],
@@ -471,20 +512,10 @@ class WC_Helper_Updater {
 			}
 
 			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
+			$payload[ $data['_product_id'] ]['version'] = (string) ( $data['Version'] ?? '' );
 		}
 
-		// Scan local themes.
-		foreach ( WC_Helper::get_local_woo_themes() as $data ) {
-			if ( ! isset( $payload[ $data['_product_id'] ] ) ) {
-				$payload[ $data['_product_id'] ] = array(
-					'product_id' => $data['_product_id'],
-				);
-			}
-
-			$payload[ $data['_product_id'] ]['file_id'] = $data['_file_id'];
-		}
-
-		return self::_update_check( $payload );
+		return $payload;
 	}
 
 	/**
@@ -638,10 +669,28 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Extract the products from a cached update-check payload.
+	 *
+	 * Used on the paths that serve the previous cache rather than a fresh
+	 * response — while rate limited, and on the rate-limited response itself.
+	 *
+	 * @param mixed $data The data retrieved from the transient, of any shape.
+	 * @return array The cached products, or an empty array when there are none.
+	 */
+	private static function get_cached_products( $data ) {
+		return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
+			? $data['products']
+			: array();
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
-	 * The call is cached based on the payload (product ids, file ids). If
-	 * the payload changes, the cache is going to miss.
+	 * The call is cached based on the payload (product ids, file ids, installed versions).
+	 * If the payload changes, the cache is going to miss. The installed version has to be
+	 * part of the key: the server decides the autoupdate flag from it, so a response cached
+	 * under another version, after an update or a rollback, would carry a decision made for
+	 * a build that is no longer installed.
 	 *
 	 * @param array $payload Information about the plugin to update.
 	 * @return array Update data for each requested product.
@@ -651,6 +700,7 @@ class WC_Helper_Updater {
 			return array();
 		}
 		ksort( $payload );
+
 		$hash = md5( wp_json_encode( $payload ) );
 
 		$cache_key = '_woocommerce_helper_updates';
@@ -660,6 +710,18 @@ class WC_Helper_Updater {
 			return $data['products'];
 		}
 
+		// If a previous update-check was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. This
+		// backoff is independent of the payload hash above, so a changed payload
+		// (or a flushed cache) can't slip past it — but clicking the Marketplace
+		// "Refresh" button bypasses and clears it. Return the last cached
+		// products, if any, rather than an empty set.
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
+			return self::get_cached_products( $data );
+		}
+
+		$cached_data = $data;
+
 		$data = array(
 			'hash'     => $hash,
 			'updated'  => time(),
@@ -668,11 +730,7 @@ class WC_Helper_Updater {
 		);
 
 		// Detect if this is a manual refresh button click.
-		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$source      = '';
-		if ( stripos( $request_uri, 'wc/v3/marketplace/refresh' ) !== false ) {
-			$source = 'refresh-button';
-		}
+		$source = WC_Helper_API_Backoff::is_refresh_request() ? 'refresh-button' : '';
 
 		$request_body = array( 'products' => $payload );
 		if ( ! empty( $source ) ) {
@@ -696,8 +754,20 @@ class WC_Helper_Updater {
 			);
 		}
 
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+		$response_code = (int) wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $response_code ) {
 			$data['errors'][] = 'http-error';
+
+			// Respect server-side rate limiting: on a 429, record the reset window so
+			// we hold off on further update-check calls until then, and return the
+			// previously cached products without touching the cache. Caching this
+			// empty result for 12 hours would outlive the reset window, and it would
+			// discard the very products the backoff branch above serves while we wait.
+			if ( 429 === $response_code && is_array( $request ) ) {
+				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+
+				return self::get_cached_products( $cached_data );
+			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 		}

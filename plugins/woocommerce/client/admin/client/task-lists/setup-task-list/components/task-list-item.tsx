@@ -46,7 +46,7 @@ export const TaskListItem = ( {
 	const hasFills = Boolean( slot?.fills?.length );
 
 	const onDismissTask = ( onDismiss?: () => void ) => {
-		dismissTask( taskId );
+		void dismissTask( taskId );
 		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{

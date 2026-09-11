@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Memoize the regularized entity record so the global styles and template selectors return a stable reference, preventing an infinite re-render loop (React error #185) for users who lack the edit_theme_options capability.

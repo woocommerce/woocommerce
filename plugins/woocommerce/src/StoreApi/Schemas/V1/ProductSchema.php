@@ -6,7 +6,9 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\StockDisplayFormat;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
@@ -576,7 +578,7 @@ class ProductSchema extends AbstractSchema {
 				],
 			],
 			'is_password_protected' => [
-				'description' => __( 'Whether the product requires a password to access its content.', 'woocommerce' ),
+				'description' => __( 'Whether the product or its parent requires a password to access its content.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
@@ -593,9 +595,22 @@ class ProductSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $product ) {
 		$availability      = ProductAvailabilityUtils::get_product_availability( $product );
-		$password_required = post_password_required( $product->get_id() );
-		$short_description = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) );
-		$description       = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) );
+		$short_description = $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_short_description() ) );
+				}
+			)
+		);
+		$description       = $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_description() ) );
+				}
+			)
+		);
 
 		return [
 			'id'                    => $product->get_id(),
@@ -647,10 +662,26 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
-			'is_password_protected' => '' !== $product->get_post_password(),
+			'is_password_protected' => $this->is_password_protected( $product ),
 			self::EXTENDING_KEY     => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
+	}
+
+	/**
+	 * Whether the product or its parent is password-protected.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return bool
+	 */
+	private function is_password_protected( $product ) {
+		if ( '' !== $product->get_post_password() ) {
+			return true;
+		}
+
+		$parent_id = $product->get_parent_id();
+
+		return $parent_id && '' !== get_post_field( 'post_password', $parent_id, 'raw' );
 	}
 
 	/**
@@ -693,7 +724,7 @@ class ProductSchema extends AbstractSchema {
 		$stock_format    = get_option( 'woocommerce_stock_format' );
 
 		// Don't show the low stock badge if the settings doesn't allow it.
-		if ( 'no_amount' === $stock_format ) {
+		if ( StockDisplayFormat::NEVER === $stock_format ) {
 			return null;
 		}
 

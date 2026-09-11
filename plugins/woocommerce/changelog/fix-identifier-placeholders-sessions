@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Interpolate trusted session table names directly instead of using the `%i` placeholder, so session queries stay valid on database layers that run on a supported WordPress version but don't implement `%i`.

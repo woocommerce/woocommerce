@@ -37,7 +37,7 @@ export class ProductFiltersPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -53,7 +53,7 @@ export class ProductFiltersPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}

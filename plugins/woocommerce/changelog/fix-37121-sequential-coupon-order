@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sequential coupons with equal priorities calculate in application order.

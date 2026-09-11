@@ -529,6 +529,10 @@
               offset = null;
             };
 
+            // Register before a gesture starts so embedded WebViews keep touchmove events cancelable.
+            el.addEventListener('touchmove', function() {
+              // Intentionally empty.
+            }, false);
             el.addEventListener('touchstart', onTouchStart, false);
       },
       resize: function() {

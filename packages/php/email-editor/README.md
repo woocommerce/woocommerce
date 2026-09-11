@@ -111,6 +111,7 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_allowed_iframe_style_handles`            | `Array` $allowed_iframe_style_handles                            | `Array` $allowed_iframe_style_handles                        | Filter the list of allowed stylesheet handles in the editor iframe.                                                                                                    |
 | `woocommerce_email_editor_script_localization_data`                | `Array` $localization_data                                       | `Array` $localization_data                                   | Use to modify inlined JavaScript variables used by Email Editor client.                                                                                                |
 | `woocommerce_email_editor_styles_unsupported_props`                | `Array` $unsupported_props                                       | `Array` $unsupported_props                                   | Filter the list of unsupported style properties (as nested key paths) that will be removed before block styles are converted to CSS.                                   |
+| `woocommerce_email_editor_preload_rest_api_routes`                 | `Array` $routes, `string` $post_type, `int\|string` $post_id     | `Array` $routes                                              | REST API routes preloaded for the email editor. A preloaded route is only used when it matches the request made by the editor.                                         |
 
 ## Logging
 

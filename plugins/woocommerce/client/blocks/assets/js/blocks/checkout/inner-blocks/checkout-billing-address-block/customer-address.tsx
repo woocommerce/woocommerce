@@ -63,6 +63,7 @@ const CustomerAddress = () => {
 		editingBillingAddress,
 		billingAddress,
 		isInitialized,
+		setEditingBillingAddress,
 		validationErrors,
 	] );
 

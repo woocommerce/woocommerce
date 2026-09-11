@@ -491,7 +491,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			),
 		);
 
-		$overlayed = array(
+		$overlaid = array(
 			'apple'      => 'kiwi',
 			'pear'       => 'grape',
 			'vegetables' => array(
@@ -499,7 +499,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->assertEquals( $overlayed, wc_array_overlay( $a1, $a2 ) );
+		$this->assertEquals( $overlaid, wc_array_overlay( $a1, $a2 ) );
 	}
 
 	/**
@@ -611,35 +611,35 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_price() {
 		// Common prices.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1.00</bdi></span>', wc_price( 1 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1.10</bdi></span>', wc_price( 1.1 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1.17</bdi></span>', wc_price( 1.17 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1,111.17</bdi></span>', wc_price( 1111.17 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>0.00</bdi></span>', wc_price( 0 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1.00</bdi></span>', wc_price( 1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1.10</bdi></span>', wc_price( 1.1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1.17</bdi></span>', wc_price( 1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1,111.17</bdi></span>', wc_price( 1111.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>0.00</bdi></span>', wc_price( 0 ) );
 
 		// Different currency.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&pound;</span>1,111.17</bdi></span>', wc_price( 1111.17, array( 'currency' => 'GBP' ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&pound;</span>1,111.17</bdi></span>', wc_price( 1111.17, array( 'currency' => 'GBP' ) ) );
 
 		// Negative price.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi>-<span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi>-<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
 
 		// Aria hidden option.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi>-<span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi>-<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
 
 		// Bogus prices.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>0.00</bdi></span>', wc_price( null ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>0.00</bdi></span>', wc_price( 'Q' ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>0.00</bdi></span>', wc_price( 'ಠ_ಠ' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>0.00</bdi></span>', wc_price( null ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>0.00</bdi></span>', wc_price( 'Q' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>0.00</bdi></span>', wc_price( 'ಠ_ಠ' ) );
 
 		// Trim zeros.
 		add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1</bdi></span>', wc_price( 1.00 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1</bdi></span>', wc_price( 1.00 ) );
 		remove_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		// Ex tax label.
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
@@ -747,6 +747,37 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'is_negative', $filtered_args['wc_price_args'], 'The wc_price_args filter should retain its existing argument shape for ordinary prices.' );
 		$this->assertArrayNotHasKey( 'is_negative', $filtered_args['wc_price'], 'The wc_price filter should retain its existing argument shape for ordinary prices.' );
+	}
+
+	/**
+	 * Test that wc_price() direction-isolates the currency symbol, so RTL-script
+	 * symbols (e.g. the Lebanese Pound) cannot visually flip the configured
+	 * currency position or bleed into surrounding text.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/31637
+	 * @since 11.1.0
+	 */
+	public function test_wc_price_currency_symbol_is_direction_isolated() {
+		$original_position = get_option( 'woocommerce_currency_pos' );
+		$symbol            = '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span>';
+
+		$expected_by_position = array(
+			'left'        => $symbol . '15.00',
+			'right'       => '15.00' . $symbol,
+			'left_space'  => $symbol . '&nbsp;15.00',
+			'right_space' => '15.00&nbsp;' . $symbol,
+		);
+
+		foreach ( $expected_by_position as $position => $expected_price ) {
+			update_option( 'woocommerce_currency_pos', $position );
+			$this->assertEquals(
+				'<span class="woocommerce-Price-amount amount"><bdi>' . $expected_price . '</bdi></span>',
+				wc_price( 15, array( 'currency' => 'LBP' ) ),
+				"Currency position '{$position}' should render the direction-isolated symbol on the configured side"
+			);
+		}
+
+		update_option( 'woocommerce_currency_pos', $original_position );
 	}
 
 	/**
@@ -1102,7 +1133,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_sale_price() {
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>5.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;5.00.</span>', wc_format_sale_price( '10', '5' ) );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>5.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;5.00.</span>', wc_format_sale_price( '10', '5' ) );
 	}
 
 	/**
@@ -1111,7 +1142,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_price_range() {
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
 	}
 
 	/**
@@ -1160,7 +1191,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * Provides a mocked response for the oembed test. This way it is not necessary to perform
 	 * a regular request to an external server which would significantly slow down the tests.
 	 *
-	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 * This function is called by WP_HTTP_TestCase::http_request_listener().
 	 *
 	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
@@ -1282,7 +1313,82 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// String with non-breaking space (U+00A0), should be preserved.
 		$this->assertEquals( "Hello\xC2\xA0World", wc_remove_non_displayable_chars( "Hello\xC2\xA0World" ) );
 
-		// String with word joiner (U+2060), should be preserved.
-		$this->assertEquals( "Join\xE2\x81\xA0Me", wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
+		// String with narrow non-breaking space (U+202F), should be preserved.
+		$this->assertEquals( "Hello\xE2\x80\xAFWorld", wc_remove_non_displayable_chars( "Hello\xE2\x80\xAFWorld" ) );
+
+		// String with word joiner (U+2060), should be removed.
+		$this->assertEquals( 'JoinMe', wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
+	}
+
+	/**
+	 * Invisible characters that a copy-paste can carry into a form field.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_invisible_chars() {
+		return array(
+			'combining grapheme joiner (U+034F)' => array( "\u{034F}" ),
+			'arabic letter mark (U+061C)'        => array( "\u{061C}" ),
+			'hangul choseong filler (U+115F)'    => array( "\u{115F}" ),
+			'khmer vowel inherent aq (U+17B4)'   => array( "\u{17B4}" ),
+			'mongolian free variation (U+180B)'  => array( "\u{180B}" ),
+			'left-to-right isolate (U+2066)'     => array( "\u{2066}" ),
+			'pop directional isolate (U+2069)'   => array( "\u{2069}" ),
+			'hangul filler (U+3164)'             => array( "\u{3164}" ),
+			'variation selector-1 (U+FE00)'      => array( "\u{FE00}" ),
+			'variation selector-14 (U+FE0D)'     => array( "\u{FE0D}" ),
+			'variation selector-16 (U+FE0F)'     => array( "\u{FE0F}" ),
+			'halfwidth hangul filler (U+FFA0)'   => array( "\u{FFA0}" ),
+			'reserved format char (U+FFF0)'      => array( "\u{FFF0}" ),
+			'variation selector-17 (U+E0100)'    => array( "\u{E0100}" ),
+			'variation selector-256 (U+E01EF)'   => array( "\u{E01EF}" ),
+			'shorthand format control (U+1BCA0)' => array( "\u{1BCA0}" ),
+			'musical format control (U+1D173)'   => array( "\u{1D173}" ),
+			'tag latin small letter a (U+E0061)' => array( "\u{E0061}" ),
+		);
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() strips characters the reader cannot see.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @dataProvider data_provider_invisible_chars
+	 *
+	 * @param string $char The invisible character to strip.
+	 */
+	public function test_wc_remove_non_displayable_chars_strips_invisible_chars( $char ) {
+		$this->assertEquals( '+15551234567', wc_remove_non_displayable_chars( '+1' . $char . '5551234567' ) );
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() clears the phone number reported in issue #58000.
+	 *
+	 * The variation selector between "1" and "-" is invisible, so the customer had no way to
+	 * see why the number they pasted was rejected.
+	 *
+	 * @since 11.2.0
+	 */
+	public function test_wc_remove_non_displayable_chars_allows_pasted_phone_number_to_validate() {
+		$pasted = "+1\u{FE0D}-555-123-4567";
+
+		$this->assertFalse( WC_Validation::is_phone( $pasted ) );
+		$this->assertEquals( '+1-555-123-4567', wc_remove_non_displayable_chars( $pasted ) );
+		$this->assertTrue( WC_Validation::is_phone( wc_remove_non_displayable_chars( $pasted ) ) );
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars() still strips on malformed UTF-8.
+	 *
+	 * A /u pattern returns null rather than a string on invalid UTF-8, which would be fatal
+	 * against this function's return type. The fallback has to clean the input no less than
+	 * the byte-wise replacement this function used before.
+	 *
+	 * @since 11.2.0
+	 */
+	public function test_wc_remove_non_displayable_chars_handles_malformed_utf8() {
+		$malformed = "12\xC3\x2834\xC2\xAD56";
+
+		$this->assertEquals( "12\xC3\x28" . '3456', wc_remove_non_displayable_chars( $malformed ) );
 	}
 }

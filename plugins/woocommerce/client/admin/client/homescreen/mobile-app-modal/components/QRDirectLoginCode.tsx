@@ -101,7 +101,7 @@ export const QRDirectLoginCode = ( {
 		if ( availability.isLoading || ! availability.available ) {
 			return;
 		}
-		fetchToken();
+		void fetchToken();
 	}, [ availability.isLoading, availability.available, fetchToken ] );
 
 	// Bubble the consumed snapshot up to the parent so it can advance its
@@ -132,7 +132,7 @@ export const QRDirectLoginCode = ( {
 				variant="secondary"
 				onClick={ () => {
 					recordEvent( eventName );
-					refreshToken();
+					void refreshToken();
 				} }
 			>
 				{ buttonLabel }
@@ -194,7 +194,7 @@ export const QRDirectLoginCode = ( {
 							recordEvent(
 								'mobile_app_qr_direct_login_refreshed'
 							);
-							refreshToken();
+							void refreshToken();
 						} }
 					>
 						{ __( 'Try again', 'woocommerce' ) }
@@ -214,7 +214,7 @@ export const QRDirectLoginCode = ( {
 					variant="secondary"
 					onClick={ () => {
 						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
-						refreshToken();
+						void refreshToken();
 					} }
 				>
 					{ __( 'Generate new code', 'woocommerce' ) }
@@ -281,7 +281,7 @@ export const QRDirectLoginCode = ( {
 					variant="secondary"
 					onClick={ () => {
 						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
-						refreshToken();
+						void refreshToken();
 					} }
 				>
 					{ __( 'Start over', 'woocommerce' ) }
@@ -340,7 +340,7 @@ export const QRDirectLoginCode = ( {
 						className="woocommerce-qr-direct-login__renew"
 						onClick={ () => {
 							recordEvent( 'mobile_app_qr_direct_login_renewed' );
-							refreshToken();
+							void refreshToken();
 						} }
 					>
 						{ __( 'Renew code', 'woocommerce' ) }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Settings UI: hide the shell header for pages registered at the top level of settings, which keep the classic section links and a save button at the bottom of the page. Payments drill-down pages show the header with breadcrumbs in place of the top-level settings tabs.

@@ -30,10 +30,12 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 		'editor-save': {
 			content: __( 'Email saved.', __i18n_text_domain__ ),
 			removeActions: false,
+			// "Draft saved." is intentionally NOT rewritten: a saved draft is
+			// not used for sending, and "Email saved." would suggest it is.
 			contentCheck: ( content: string ) =>
-				// Intentionally without text domain to match the core translation.
-				// eslint-disable-next-line @wordpress/i18n-text-domain
-				content.includes( __( 'Post updated.' ) ),
+				// Intentionally without text domain to match the core translations.
+				content.includes( __( 'Post updated.' ) ) ||
+				content.includes( __( 'Post published.' ) ),
 		},
 	};
 }

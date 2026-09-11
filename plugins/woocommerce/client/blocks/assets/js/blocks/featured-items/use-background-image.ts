@@ -130,9 +130,7 @@ export function useBackgroundImage( {
 					return false;
 				} )();
 
-				if ( isImageBgTransparent !== hasTransparentPixels ) {
-					setIsImageBgTransparent( hasTransparentPixels );
-				}
+				setIsImageBgTransparent( hasTransparentPixels );
 			};
 		} else {
 			setIsImageBgTransparent( true );

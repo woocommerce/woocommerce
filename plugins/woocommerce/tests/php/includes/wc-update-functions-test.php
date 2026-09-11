@@ -5,13 +5,30 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
  * Class WC_Core_Functions_Test
  */
 class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
@@ -337,5 +354,290 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
 		wc_update_1100_enable_point_of_sale_feature();
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration removes the deprecated variation gallery feature option.
+	 */
+	public function test_wc_update_11101_remove_deprecated_variation_gallery_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		delete_option( VariationGalleryPackage::ENABLE_OPTION_NAME );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'no' );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+
+		update_option( VariationGalleryPackage::ENABLE_OPTION_NAME, 'yes' );
+		wc_update_11101_remove_deprecated_variation_gallery_option();
+		$this->assertFalse( get_option( VariationGalleryPackage::ENABLE_OPTION_NAME ) );
+	}
+
+	/**
+	 * @testdox Migration deletes the cached dashboard out-of-stock count.
+	 */
+	public function test_wc_update_1110_delete_dashboard_outofstock_count_transient(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		set_transient( 'wc_outofstock_count', 3, DAY_IN_SECONDS );
+		$this->assertSame( 3, get_transient( 'wc_outofstock_count' ) );
+
+		wc_update_1110_delete_dashboard_outofstock_count_transient();
+		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+	}
+
+	/**
+	 * @testdox Migration enables the customer_stock_notifications feature when the alpha constant is set.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_opts_in(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration leaves the feature untouched when the alpha constant is absent or falsy.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_without_opt_in(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
+		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertFalse( get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', false );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertFalse( get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration overwrites the 'no' that WC_Install::create_options() seeds before the update callbacks run.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_overwrites_seeded_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		wc_update_1120_migrate_stock_notifications_alpha_constant();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_customer_stock_notifications_enabled' ) );
+	}
+
+	/**
+	 * @testdox Migration lets FeaturesController announce the change, so the feature runs its own activation side effects.
+	 */
+	public function test_wc_update_1120_migrate_stock_notifications_alpha_constant_fires_feature_enabled_changed(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		$changes  = array();
+		$listener = function ( $feature_id, $enabled ) use ( &$changes ) {
+			$changes[ $feature_id ] = $enabled;
+		};
+
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, $listener, 10, 2 );
+
+		try {
+			wc_update_1120_migrate_stock_notifications_alpha_constant();
+		} finally {
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, $listener, 10 );
+		}
+
+		$this->assertArrayHasKey( 'customer_stock_notifications', $changes );
+		$this->assertTrue( $changes['customer_stock_notifications'] );
+	}
+
+	/**
+	 * @testdox Migration deletes the retired Surface Cart and Checkout note.
+	 */
+	public function test_wc_update_1120_delete_surface_cart_checkout_note(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$note = new Note();
+		$note->set_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME );
+		$note->set_title( 'Surface Cart and Checkout' );
+		$note->set_content( 'Test content' );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_source( 'PHPUNIT_TEST' );
+		$note->add_action( 'learn-more', 'Learn more', 'https://woocommerce.com/' );
+		$note->save();
+		$this->assertNotFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The retired note fixture should exist before the update.' );
+
+		wc_update_1120_delete_surface_cart_checkout_note();
+
+		$this->assertFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The retired note should be deleted during the update.' );
+
+		wc_update_1120_delete_surface_cart_checkout_note();
+		$this->assertFalse( Notes::get_note_by_name( InboxNotifications::SURFACE_CART_CHECKOUT_NOTE_NAME ), 'The update should remain safe when the note is already absent.' );
+	}
+
+	/**
+	 * @testdox Migration resets stale refund markers in batches and invalidates cached Analytics reports.
+	 */
+	public function test_wc_update_11202_reset_refund_returning_customer_markers(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5,
+				'line_items' => array(),
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		$get_marker        = static function ( int $order_id ) use ( $wpdb, $order_stats_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			return $wpdb->get_var( $wpdb->prepare( "SELECT returning_customer FROM {$order_stats_table} WHERE order_id = %d", $order_id ) );
+		};
+
+		// Older first-order recalculations could overwrite the refund's NULL marker.
+		$this->assertSame( 1, $wpdb->update( $order_stats_table, array( 'returning_customer' => 1 ), array( 'order_id' => $refund->get_id() ), array( '%d' ), array( '%d' ) ) );
+		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row should start with a non-stale marker.' );
+
+		$cache_key        = 'wc_update_11202_analytics_report';
+		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
+		$original_version = get_transient( $version_key );
+		set_transient( $version_key, 'stale-version' );
+
+		try {
+			ReportsCache::set( $cache_key, 'stale-value' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
+
+			$this->assertTrue( wc_update_11202_reset_refund_returning_customer_markers(), 'A batch with stale refund rows should request another run.' );
+			$this->assertSame( $refund->get_id(), (int) get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be stored between batches.' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ), 'The cache should stay valid until the last batch completes.' );
+
+			$this->assertFalse( wc_update_11202_reset_refund_returning_customer_markers(), 'A run with no stale refund rows should complete.' );
+			$this->assertFalse( get_option( 'woocommerce_update_11202_last_refund_order_id' ), 'The last processed order ID should be cleared on completion.' );
+			$this->assertFalse( ReportsCache::get( $cache_key ), 'The cache should be invalidated once the migration completes.' );
+		} finally {
+			delete_transient( $cache_key );
+			if ( false === $original_version ) {
+				delete_transient( $version_key );
+			} else {
+				set_transient( $version_key, $original_version );
+			}
+		}
+
+		$this->assertNull( $get_marker( $refund->get_id() ), 'The refund row marker should be reset to NULL.' );
+		$this->assertSame( '0', $get_marker( $order->get_id() ), 'The order row marker should be left unchanged.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
+	 */
+	public function test_wc_update_1120_removes_variation_thumbnail_duplicating_parent() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images(), 'A batch smaller than the limit should complete in one run.' );
+		$this->assertSame( '', get_post_meta( $variation_id, '_thumbnail_id', true ), 'The duplicated thumbnail should be removed so the variation inherits again.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images keeps a variation thumbnail that diverged from the parent's featured image.
+	 */
+	public function test_wc_update_1120_keeps_diverged_variation_thumbnail() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '88' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '88', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A diverged value may be a deliberate merchant choice and must survive the cleanup.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes only metadata values that duplicate the parent image.
+	 */
+	public function test_wc_update_1120_keeps_other_thumbnail_metadata_values() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+		add_post_meta( $variation_id, '_thumbnail_id', '88' );
+
+		wc_update_1120_cleanup_inherited_variation_images();
+
+		$this->assertSame( array( '88' ), get_post_meta( $variation_id, '_thumbnail_id', false ), 'Only the value duplicating the parent image should be removed.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images never runs again once completed, even if update callbacks are replayed.
+	 */
+	public function test_wc_update_1120_does_not_run_again_after_completion() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		update_option( 'woocommerce_update_1120_completed_at', time() );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching the parent after the one-time cleanup may be deliberate and must survive a replay.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images matches only the parent's canonical thumbnail, not stale duplicate rows.
+	 */
+	public function test_wc_update_1120_ignores_stale_duplicate_parent_thumbnail_rows() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '88', '77' );
+		$parent_id    = wp_get_post_parent_id( $variation_id );
+		add_post_meta( $parent_id, '_thumbnail_id', '77' );
+
+		wc_update_1120_cleanup_inherited_variation_images();
+
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'A value matching only a stale duplicate parent row may be deliberate and must survive.' );
+	}
+
+	/**
+	 * @testdox wc_update_1120_cleanup_inherited_variation_images skips stores upgrading from before the variation gallery existed.
+	 */
+	public function test_wc_update_1120_skips_stores_upgrading_from_before_10_9() {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '10.8.0' );
+		$variation_id = $this->create_variation_with_thumbnails( '77', '77' );
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '77', get_post_meta( $variation_id, '_thumbnail_id', true ), 'Stores never exposed to the bug must not be touched.' );
+	}
+
+	/**
+	 * Create a variable product and return its first variation's ID, with the given thumbnail meta on parent and variation.
+	 *
+	 * @param string $parent_thumbnail_id    Meta value for the parent's _thumbnail_id.
+	 * @param string $variation_thumbnail_id Meta value for the variation's _thumbnail_id.
+	 * @return int
+	 */
+	private function create_variation_with_thumbnails( string $parent_thumbnail_id, string $variation_thumbnail_id ): int {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		update_post_meta( $product->get_id(), '_thumbnail_id', $parent_thumbnail_id );
+		update_post_meta( $variation_id, '_thumbnail_id', $variation_thumbnail_id );
+
+		return $variation_id;
 	}
 }

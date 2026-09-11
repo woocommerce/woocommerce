@@ -3,6 +3,7 @@ export * from './attributes-query';
 export * from './attributes';
 export * from './colors';
 export * from './filters';
+export * from './navigation';
 export * from './notices';
 export * from './object-operations';
 export * from './products';

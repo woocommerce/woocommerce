@@ -343,7 +343,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 									) }
 									onClick={ () => {
 										onRemove();
-										removeItem();
+										void removeItem();
 										dispatchStoreEvent(
 											'cart-remove-item',
 											{

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Separate entity registration from tree-shaken helpers while deprecating the global utilities and manual registration functions.

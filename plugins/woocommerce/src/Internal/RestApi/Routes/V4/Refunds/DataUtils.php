@@ -197,6 +197,9 @@ class DataUtils {
 
 		// Precompute refunded quantities/totals once so the over-refund check
 		// below caps against remaining refundable quantity, not the original.
+		// Loaded here rather than passed in: the controller dispatches through this
+		// method so subclass overrides keep working, and WC_Order::get_refunds()
+		// serves repeat loads within the request from the object cache.
 		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
 		$seen_ids = array();
@@ -259,7 +262,8 @@ class DataUtils {
 			if ( $refund_total_missing && isset( $line_item['refund_tax'] ) ) {
 				return new WP_Error(
 					'invalid_line_item',
-					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' )
+					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -296,7 +300,8 @@ class DataUtils {
 						/* translators: %d: line item id */
 						__( 'Cannot auto-compute refund for line item %d: source quantity is zero. Provide an explicit refund_total.', 'woocommerce' ),
 						(int) $line_item_id
-					)
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -362,7 +367,23 @@ class DataUtils {
 				// equivalent for the inclusive form.
 				$line_refund_gross = (float) $line_item['refund_total'];
 				if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
+					$seen_tax_ids = array();
 					foreach ( $line_item['refund_tax'] as $tax ) {
+						// Reject duplicate tax IDs within a line: the gross sum here and
+						// calculate_refund_amount() count every entry, but the internal
+						// conversion keys taxes by ID, so a duplicate would silently
+						// overwrite its sibling and store less than the refund amount.
+						$tax_id = $tax['id'] ?? null;
+						if ( null !== $tax_id && isset( $seen_tax_ids[ $tax_id ] ) ) {
+							return new WP_Error(
+								'duplicate_tax_id',
+								__( 'Each tax can appear at most once per line item in refund_tax.', 'woocommerce' ),
+								array( 'status' => WP_Http::BAD_REQUEST )
+							);
+						}
+						if ( null !== $tax_id ) {
+							$seen_tax_ids[ $tax_id ] = true;
+						}
 						$line_refund_gross += (float) ( $tax['refund_total'] ?? 0 );
 					}
 				}
@@ -397,8 +418,11 @@ class DataUtils {
 					);
 				}
 
+				// Remaining is rounded to currency precision before both checks, so a
+				// sub-cent residue left by rounding drift counts as fully refunded
+				// rather than producing a "cannot exceed 0.00" rejection.
 				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = $item_total_with_tax - $refunded_total;
+				$remaining_total = NumberUtil::round( $item_total_with_tax - $refunded_total, $price_decimals );
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'line_item_already_refunded',
@@ -406,7 +430,7 @@ class DataUtils {
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
-				if ( $abs_refund_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+				if ( $abs_refund_total > $remaining_total ) {
 					return new WP_Error(
 						'refund_total_exceeds_remaining',
 						sprintf(
@@ -427,7 +451,7 @@ class DataUtils {
 
 					foreach ( $line_item['refund_tax'] as $refund_tax ) {
 						if ( ! isset( $refund_tax['id'], $refund_tax['refund_total'] ) ) {
-							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ) );
+							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ), array( 'status' => WP_Http::BAD_REQUEST ) );
 						}
 						$tax_id           = $refund_tax['id'];
 						$tax_refund_total = $refund_tax['refund_total'];
@@ -439,7 +463,8 @@ class DataUtils {
 								/* translators: %s: tax IDs */
 									__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
 									implode( ', ', $allowed_tax_ids )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 
@@ -473,13 +498,21 @@ class DataUtils {
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
 						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
 						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
+							// 400, not the 422 the over-refund caps above use: this is the
+							// status the released wc/v4 envelope already backfills for this
+							// error, so anything else would change a shipped response. It
+							// also keeps the code-to-status mapping one-to-one across this
+							// file — invalid_refund_amount is 400 at every site, sharing the
+							// code with the wrong-sign guard above, which is malformed
+							// input, while each 422 carries its own over-refund code.
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
 								/* translators: %s: remaining refundable tax total */
 									__( 'Refund tax total cannot be greater than the remaining refundable tax for this line item (%s).', 'woocommerce' ),
 									wc_format_decimal( $remaining_tax, $price_decimals )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 					}
@@ -647,6 +680,106 @@ class DataUtils {
 	}
 
 	/**
+	 * Compute the tax-inclusive refund total for a quantity-form line item, capped to
+	 * the line's remaining refundable amount.
+	 *
+	 * {@see compute_line_item_refund_total()} rounds each request independently, so a
+	 * sequence of partial quantity refunds can drift from the stored line gross by up
+	 * to a cent per request — round(unit × 2) + round(unit × 4) may exceed the line
+	 * total that round(unit × 6) would produce. The quantity form is "server, compute
+	 * the amount for me", so rather than rejecting its own arithmetic the server caps
+	 * the result:
+	 *
+	 * - The unit-derived amount is always clamped down to the remaining amount, so
+	 *   rounding drift can never push it over the remaining-amount cap the validators
+	 *   enforce. Shipping and fee lines carry a single unit whose derived amount is the
+	 *   full line total, so partially-refunded ones always resolve to their remainder
+	 *   through this clamp.
+	 * - A product quantity that consumes the line's remaining refundable units is
+	 *   topped up to the exact remaining amount — closing the line at currency
+	 *   precision with no stranded cents — but only when every prior refund on the
+	 *   line matches its own quantity-derived amount, i.e. the shortfall is provably
+	 *   accumulated rounding drift. An off-schedule prior refund (an explicit partial
+	 *   amount, or a dollar-only refund with no units) means the residue was
+	 *   deliberately withheld, and the quantity form must never silently pay it back
+	 *   out; the residue stays refundable through an explicit refund_total.
+	 *
+	 * When no refundable amount remains, the unclamped amount is returned as-is:
+	 * clamping to zero would trip the zero-refund guard with a misleading error, while
+	 * the validators reject the line with line_item_already_refunded. Explicit
+	 * client-supplied refund_total values are never capped — those stay strictly
+	 * validated.
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item        The order item.
+	 * @param int                                                            $quantity    The quantity to refund (>= 1).
+	 * @param array                                                          $refund_data Refund-history snapshot from {@see compute_refunded_quantities_and_totals()} (see its return shape).
+	 * @return float The tax-inclusive refund total, carrying the line's sign.
+	 *
+	 * @since 11.1.0
+	 */
+	private function compute_quantity_refund_total( $item, int $quantity, array $refund_data ): float {
+		$computed          = $this->compute_line_item_refund_total( $item, $quantity );
+		$price_decimals    = wc_get_price_decimals();
+		$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+		$refunded_total    = abs( (float) ( $refund_data['totals'][ $item->get_id() ] ?? 0.0 ) );
+		$remaining_total   = NumberUtil::round( abs( $signed_line_total ) - $refunded_total, $price_decimals );
+
+		if ( $remaining_total <= 0 ) {
+			return $computed;
+		}
+
+		$sign         = $signed_line_total < 0 ? -1.0 : 1.0;
+		$abs_computed = abs( $computed );
+
+		if ( $abs_computed > $remaining_total ) {
+			return $sign * $remaining_total;
+		}
+
+		if ( $item instanceof WC_Order_Item_Product && $abs_computed < $remaining_total ) {
+			$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 );
+			if (
+				$quantity >= $remaining_qty &&
+				$this->line_refund_history_matches_quantities( $item, $refund_data['line_refunds'][ $item->get_id() ] ?? array() )
+			) {
+				return $sign * $remaining_total;
+			}
+		}
+
+		return $computed;
+	}
+
+	/**
+	 * Whether every prior refund line for a product matches its quantity-derived amount.
+	 *
+	 * True means the difference between the line's refunded total and the sum of
+	 * unit-price amounts is pure rounding drift, so the final-chunk top-up in
+	 * {@see compute_quantity_refund_total()} can safely reconcile it. Gross values are
+	 * compared as formatted decimals at currency precision — never raw float
+	 * equality. A refund line with no units (qty 0, the dollar-only form) is
+	 * off-schedule by definition.
+	 *
+	 * @param WC_Order_Item_Product $item         The original order line.
+	 * @param array                 $line_refunds Prior refund lines as list<array{qty: int, gross: float}> (positive magnitudes).
+	 * @return bool
+	 */
+	private function line_refund_history_matches_quantities( WC_Order_Item_Product $item, array $line_refunds ): bool {
+		$price_decimals = wc_get_price_decimals();
+
+		foreach ( $line_refunds as $refund_line ) {
+			if ( $refund_line['qty'] <= 0 ) {
+				return false;
+			}
+
+			$expected = abs( $this->compute_line_item_refund_total( $item, $refund_line['qty'] ) );
+			if ( wc_format_decimal( $refund_line['gross'], $price_decimals ) !== wc_format_decimal( $expected, $price_decimals ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Round every caller-supplied refund_total to currency precision.
 	 *
 	 * Applied at the entry of both the preview and create flows so a value the client
@@ -672,7 +805,8 @@ class DataUtils {
 
 	/**
 	 * Fill in refund_total for any line item that omits it, computing the value from
-	 * the order item's unit price × quantity via compute_line_item_refund_total().
+	 * the order item's unit price × quantity via compute_quantity_refund_total(),
+	 * which caps the result to the line's remaining refundable amount.
 	 *
 	 * Items that already have refund_total (including an explicit 0) are left
 	 * untouched so validation can decide whether the explicit amount is valid.
@@ -697,8 +831,12 @@ class DataUtils {
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
 		// Round caller-supplied amounts up front so explicit values are stored at the
 		// same precision the preview validated and showed. Computed values below are
-		// already rounded by compute_line_item_refund_total().
+		// already rounded by compute_quantity_refund_total().
 		$line_items = $this->normalize_refund_totals( $line_items );
+
+		// Loaded lazily: only requests with at least one auto-computed line pay for
+		// the refund-history scan the remaining-amount cap needs.
+		$refund_data = null;
 
 		foreach ( $line_items as $key => $line_item ) {
 			// Treat a missing key and an explicit `null` value the same — both mean
@@ -739,7 +877,11 @@ class DataUtils {
 				continue;
 			}
 
-			$line_items[ $key ]['refund_total'] = $this->compute_line_item_refund_total( $item, $quantity );
+			if ( null === $refund_data ) {
+				$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+			}
+
+			$line_items[ $key ]['refund_total'] = $this->compute_quantity_refund_total( $item, $quantity, $refund_data );
 		}
 
 		return $line_items;
@@ -754,7 +896,9 @@ class DataUtils {
 	 * Each line item must have 'line_item_id' and at least one of 'quantity'
 	 * (positive int) or 'refund_total' (positive tax-inclusive float). When
 	 * 'refund_total' is present and positive it is used directly; otherwise the
-	 * total is computed from quantity via {@see compute_line_item_refund_total()}.
+	 * total is computed from quantity via {@see compute_quantity_refund_total()},
+	 * capped to the line's remaining refundable amount — the same computation the
+	 * create flow stores, so the previewed amounts always match the created refund.
 	 *
 	 * @param WC_Order $order      The order being previewed for refund.
 	 * @param array    $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
@@ -765,6 +909,7 @@ class DataUtils {
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
 		$price_decimals = wc_get_price_decimals();
+		$refund_data    = $this->compute_refunded_quantities_and_totals( $order );
 		$sections       = array(
 			'products' => array(
 				'items'    => array(),
@@ -800,14 +945,16 @@ class DataUtils {
 			 * @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item
 			 */
 			// When the caller provides an explicit refund_total (partial-amount form) use it
-			// directly. The quantity-based form computes the tax-inclusive total from unit price.
+			// directly. The quantity-based form computes the tax-inclusive total from unit price,
+			// capped to the line's remaining refundable amount — the same computation
+			// fill_missing_refund_totals() feeds the create flow.
 			// A non-zero check (not > 0) mirrors validate_preview_line_items(), which accepts a
 			// negative refund_total for a negative discount line and rejects a present-but-zero
 			// one before this method runs — so a signed value is honoured rather than falling
 			// through to the (possibly absent) quantity.
 			$refund_total_with_tax = isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) && 0.0 !== (float) $line_item['refund_total']
 				? NumberUtil::round( (float) $line_item['refund_total'], $price_decimals )
-				: $this->compute_line_item_refund_total( $item, (int) $line_item['quantity'] );
+				: $this->compute_quantity_refund_total( $item, (int) $line_item['quantity'], $refund_data );
 
 			// Split by the line's own stored total/tax ratio so the preview reflects what
 			// was actually charged and matches the split create stores (both call this).
@@ -1013,9 +1160,11 @@ class DataUtils {
 
 				// Cap against the remaining refundable amount for this line.
 				// compute_refunded_quantities_and_totals() tracks tax-inclusive totals
-				// for all item types so the comparison is consistent.
+				// for all item types so the comparison is consistent. Remaining is
+				// rounded to currency precision before both checks, matching
+				// validate_line_items(), so a sub-cent residue counts as fully refunded.
 				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = $item_total_with_tax - $refunded_total;
+				$remaining_total = NumberUtil::round( $item_total_with_tax - $refunded_total, $price_decimals );
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'line_item_already_refunded',
@@ -1023,7 +1172,7 @@ class DataUtils {
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
-				if ( $abs_refund_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+				if ( $abs_refund_total > $remaining_total ) {
 					return new WP_Error(
 						'refund_total_exceeds_remaining',
 						sprintf(
@@ -1065,31 +1214,19 @@ class DataUtils {
 				}
 			}
 
-			// Amount-from-quantity cap: when the amount is derived from quantity (no explicit
-			// refund_total), cap the computed tax-inclusive amount against the remaining line
-			// amount for every item type. Mirrors create, which auto-fills refund_total from
-			// quantity and then applies the same cap — so a product with prior amount-only
-			// refunds (units still uncounted) can no longer preview an over-refund.
+			// Amount-from-quantity: the server derives the amount itself via
+			// compute_quantity_refund_total(), which caps it to the remaining line amount,
+			// so the only invalid state left to reject is a line with nothing refundable
+			// remaining. Rounded to currency precision so a sub-cent residue left by
+			// rounding drift counts as fully refunded. Create fills refund_total through
+			// the same capped computation, so preview and create accept identical input.
 			if ( $has_quantity && ! $has_refund_total ) {
 				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = abs( $signed_line_total ) - $refunded_total;
+				$remaining_total = NumberUtil::round( abs( $signed_line_total ) - $refunded_total, $price_decimals );
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
 						'line_item_already_refunded',
 						__( 'This line item has already been fully refunded.', 'woocommerce' ),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
-				}
-
-				$requested_total = abs( $this->compute_line_item_refund_total( $item, $line_item['quantity'] ) );
-				if ( $requested_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
-					return new WP_Error(
-						'refund_total_exceeds_remaining',
-						sprintf(
-							/* translators: %s: remaining refundable amount */
-							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-							wc_format_decimal( $remaining_total, $price_decimals )
-						),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
 				}
@@ -1100,19 +1237,286 @@ class DataUtils {
 	}
 
 	/**
+	 * Run the full refund preview pipeline for one request.
+	 *
+	 * Normalizes the caller-supplied refund_total values, validates the line
+	 * items, builds the preview, and applies the two aggregate guards (a
+	 * non-positive total, and a total exceeding the order's remaining
+	 * refundable amount). Shared by the wc/v3 and wc/v4 preview endpoints so
+	 * a fix lands once; error codes are emitted unprefixed and each caller
+	 * applies its own surface convention (wc/v3 prefixes with
+	 * `woocommerce_rest_`, wc/v4 wraps in its error envelope).
+	 *
+	 * @param WC_Order $order      The order the preview is computed for.
+	 * @param array    $line_items Line items in schema format (line_item_id keyed).
+	 * @param string   $log_source Log source for invariant violations, per caller.
+	 * @return array|WP_Error Preview data, or WP_Error carrying its HTTP status in the error data.
+	 *
+	 * @since 11.1.0
+	 */
+	public function compute_refund_preview_or_error( WC_Order $order, array $line_items, string $log_source ) {
+		// Round caller-supplied refund_total values once, up front, so validation and
+		// the computed preview use the same precision the create flow stores. Reused
+		// for both validate and build below.
+		$line_items = $this->normalize_refund_totals( $line_items );
+
+		$validation_error = $this->validate_preview_line_items( $line_items, $order );
+
+		if ( is_wp_error( $validation_error ) ) {
+			return $validation_error;
+		}
+
+		try {
+			$preview = $this->build_refund_preview( $order, $line_items );
+		} catch ( \InvalidArgumentException $e ) {
+			// validate_preview_line_items above should have caught any bad input.
+			// If build_refund_preview still throws InvalidArgumentException, treat
+			// it as a server-side invariant violation, log for observability, and
+			// return a generic message (do not leak internal IDs to clients).
+			wc_get_logger()->error(
+				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => $log_source )
+			);
+			return new WP_Error(
+				'invalid_preview_request',
+				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => $log_source )
+			);
+			return new WP_Error(
+				'unexpected_preview_error',
+				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		// Reject a non-positive aggregate total up front. A refund of only a negative
+		// discount line, or a product plus discount that nets to zero, would otherwise
+		// preview successfully and then fail at create time.
+		if ( (float) $preview['total'] <= 0 ) {
+			return new WP_Error(
+				'invalid_refund_amount',
+				__( 'Refund total must be greater than zero.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Final guard: even when per-line validation passes, the aggregate
+		// preview total can still exceed the order's remaining refundable
+		// amount (e.g. an amount-only partial refund applied previously).
+		// `total` is already tax-inclusive; compare directly against max_refundable.
+		$preview_total_with_tax = abs( (float) $preview['total'] );
+		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
+			return new WP_Error(
+				'preview_exceeds_max_refundable',
+				sprintf(
+					/* translators: 1: requested preview total including tax, 2: remaining refundable */
+					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
+					$preview['max_refundable']
+				),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+
+		return $preview;
+	}
+
+	/**
+	 * Run the shared refund creation preparation pipeline for one request.
+	 *
+	 * Fills missing refund_total values from quantities, validates the line
+	 * items against the order's refund history, converts them to the internal
+	 * wc_create_refund() format, resolves the refund amount, and applies the
+	 * three aggregate guards (non-positive amount, an override below the line
+	 * items total, and an amount exceeding the order's remaining refundable
+	 * amount). Shared by the wc/v3 compute_totals path and the wc/v4 creation
+	 * endpoint so a fix lands once; error codes are emitted unprefixed with
+	 * their HTTP status in the error data, and each caller applies its own
+	 * surface convention. Request mutation, hooks, metadata, and the
+	 * wc_create_refund() call itself stay with the callers.
+	 *
+	 * The amount override is passed as a flag plus raw value because an
+	 * explicitly supplied zero or null must be rejected, never silently
+	 * replaced with the calculated total: a request meaning "refund nothing"
+	 * must not refund the full computed amount.
+	 *
+	 * @param WC_Order $order               The order the refund is prepared for.
+	 * @param array    $line_items          Line items in schema format (line_item_id keyed).
+	 * @param bool     $has_amount_override Whether the client explicitly supplied an amount.
+	 * @param mixed    $amount_override     The raw client-supplied amount, when $has_amount_override.
+	 * @param string   $log_source          Log source for invariant violations, per caller.
+	 * @return array|WP_Error Array with internal-format `line_items`, filled schema-format
+	 *                        `schema_line_items`, and the resolved raw `amount`, or WP_Error
+	 *                        carrying its HTTP status in the error data.
+	 *
+	 * @since 11.1.0
+	 */
+	public function prepare_refund_creation_or_error( WC_Order $order, array $line_items, bool $has_amount_override, $amount_override, string $log_source ) {
+		// Fill in refund_total for any line items that omit it. The simplified
+		// request form sends only {line_item_id, quantity}; the backend derives
+		// the tax-inclusive total from the order's unit price × quantity. Scoped
+		// try: compute_line_item_refund_total throws InvalidArgumentException on
+		// quantity < 1, but fill_missing_refund_totals pre-checks that condition,
+		// so this branch is defensive against a future invariant break only.
+		try {
+			$line_items = $this->fill_missing_refund_totals( $line_items, $order );
+		} catch ( \InvalidArgumentException $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund creation invariant violation on order %d (%s): %s', $order->get_id(), get_class( $e ), $e->getMessage() ),
+				array( 'source' => $log_source )
+			);
+			return new WP_Error(
+				'invalid_refund_request',
+				__( 'The refund could not be created due to an unexpected error.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		// The WP_Error already carries its HTTP status (400/422) in the error
+		// data, so create and preview return the same code for the same invalid
+		// input.
+		$validation_error = $this->validate_line_items( $line_items, $order );
+		if ( is_wp_error( $validation_error ) ) {
+			return $validation_error;
+		}
+
+		// Convert line items to internal format. refund_total is tax-inclusive when no
+		// explicit refund_tax is supplied (auto-computed values, or client values) — the
+		// converter splits the tax portion out via the line's stored total/tax ratio
+		// (split_inclusive_by_stored_ratio(), the same method the preview uses). When
+		// the client supplies an explicit refund_tax breakdown, refund_total is the
+		// tax-exclusive subtotal and the tax is added on top (core Woo semantics).
+		// Either way calculate_refund_amount sums refund_total + refund_tax to the
+		// gross line amount, so mixing the two forms across line items is well-defined.
+		$internal_line_items = $this->convert_line_items_to_internal_format( $line_items, $order );
+		$calculated_total    = ! empty( $line_items ) ? $this->calculate_refund_amount( $line_items ) : 0;
+
+		$amount = $has_amount_override ? $amount_override : $calculated_total;
+
+		if ( (float) $amount <= 0 ) {
+			return new WP_Error(
+				'invalid_refund_amount',
+				__( 'Refund total must be greater than zero.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Prevent under-refunding: the amount cannot be less than the calculated line
+		// items total. Over-refunding is allowed for goodwill/compensation scenarios.
+		if ( $has_amount_override && $calculated_total > 0 && NumberUtil::round( (float) $amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
+			return new WP_Error(
+				'invalid_refund_amount',
+				sprintf(
+					/* translators: %1$s: refund amount, %2$s: calculated total from line items */
+					__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
+					wc_format_decimal( $amount, wc_get_price_decimals() ),
+					wc_format_decimal( $calculated_total, wc_get_price_decimals() )
+				),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Over-refunding line items is allowed (goodwill), but the amount can never
+		// exceed the order's remaining refundable amount. Reject up-front with a clear
+		// 422 rather than relying on wc_create_refund's generic failure, mirroring the
+		// preview pipeline's preview_exceeds_max_refundable guard.
+		$remaining_refundable = (float) $order->get_remaining_refund_amount();
+		if ( NumberUtil::round( (float) $amount, wc_get_price_decimals() ) > NumberUtil::round( $remaining_refundable, wc_get_price_decimals() ) ) {
+			return new WP_Error(
+				'refund_exceeds_remaining',
+				sprintf(
+					/* translators: %1$s: requested refund amount, %2$s: remaining refundable amount */
+					__( 'Refund amount (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+					wc_format_decimal( $amount, wc_get_price_decimals() ),
+					wc_format_decimal( $remaining_refundable, wc_get_price_decimals() )
+				),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+
+		return array(
+			'line_items'        => $internal_line_items,
+			'schema_line_items' => $line_items,
+			'amount'            => $amount,
+		);
+	}
+
+	/**
+	 * Get the REST argument schema for a preview request's line_items parameter.
+	 *
+	 * Shared by the wc/v3 and wc/v4 preview endpoints so the accepted payload
+	 * cannot drift between versions.
+	 *
+	 * @return array
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_preview_line_items_arg_schema(): array {
+		return array(
+			'description'       => __( 'Line items to include in the refund preview.', 'woocommerce' ),
+			'type'              => 'array',
+			'required'          => true,
+			'minItems'          => 1,
+			'validate_callback' => 'rest_validate_request_arg',
+			// Hand-registered args get no default sanitizer; this coerces validated
+			// values to their schema types (numeric strings become numbers) like the
+			// args generated from an item schema.
+			'sanitize_callback' => 'rest_sanitize_request_arg',
+			'items'             => array(
+				'type'                 => 'object',
+				'required'             => array( 'line_item_id' ),
+				'additionalProperties' => false,
+				'properties'           => array(
+					'line_item_id' => array(
+						'description' => __( 'ID of the original order line item.', 'woocommerce' ),
+						'type'        => 'integer',
+						'minimum'     => 1,
+					),
+					'quantity'     => array(
+						'description' => __( 'Quantity to refund. Required when refund_total is omitted.', 'woocommerce' ),
+						'type'        => 'integer',
+						'minimum'     => 1,
+					),
+					'refund_total' => array(
+						// No `minimum` here on purpose: validate_preview_line_items() owns
+						// the sign rule and returns the actionable `invalid_refund_total`
+						// code. A refund_total must be non-zero and match the line's sign —
+						// negative is valid for a discount/credit line, positive for a normal
+						// line; zero and wrong-sign values are rejected. A schema `minimum`
+						// would wrongly forbid the negative form, and a generic
+						// `rest_invalid_param` is less useful to clients.
+						'description' => __( 'Tax-inclusive amount to refund for this line item. Must be non-zero and match the line\'s sign (negative for discount or credit lines, positive otherwise). Required when quantity is omitted.', 'woocommerce' ),
+						'type'        => array( 'number', 'null' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
 	 * Pre-compute refund data for all line items in an order.
 	 *
 	 * Loads refunds once and builds lookup maps for refunded quantities and totals per item ID,
 	 * avoiding repeated get_refunds() calls during serialization. Fee and shipping totals are
 	 * tax-inclusive so they can be compared directly against {@see compute_line_item_refund_total()}.
 	 *
+	 * line_refunds records each product refund line individually — quantity and tax-inclusive
+	 * gross, both as positive magnitudes — so the quantity-form top-up can verify that prior
+	 * refunds match their quantity-derived amounts before reconciling rounding drift.
+	 *
 	 * @param WC_Order $order Order instance.
-	 * @return array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>}
+	 * @return array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}
 	 */
 	public function compute_refunded_quantities_and_totals( WC_Order $order ): array {
-		$qtys       = array();
-		$totals     = array();
-		$tax_totals = array();
+		$qtys         = array();
+		$totals       = array();
+		$tax_totals   = array();
+		$line_refunds = array();
 
 		// Accumulate the already-refunded tax per original item, keyed by tax rate
 		// id, as a positive amount. Refund line items store taxes as negatives, so
@@ -1132,9 +1536,13 @@ class DataUtils {
 			 */
 			$refunded_line_items = $refund->get_items( 'line_item' );
 			foreach ( $refunded_line_items as $refunded_item ) {
-				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$qtys[ $original_id ]   = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$original_id                    = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$qtys[ $original_id ]           = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
+				$totals[ $original_id ]         = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$line_refunds[ $original_id ][] = array(
+					'qty'   => absint( $refunded_item->get_quantity() ),
+					'gross' => abs( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ),
+				);
 				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 			/**
@@ -1162,9 +1570,10 @@ class DataUtils {
 		}
 
 		return array(
-			'qtys'       => $qtys,
-			'totals'     => $totals,
-			'tax_totals' => $tax_totals,
+			'qtys'         => $qtys,
+			'totals'       => $totals,
+			'tax_totals'   => $tax_totals,
+			'line_refunds' => $line_refunds,
 		);
 	}
 }

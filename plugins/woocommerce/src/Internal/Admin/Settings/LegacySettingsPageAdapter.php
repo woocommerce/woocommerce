@@ -51,6 +51,7 @@ class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return array
+	 * @throws \InvalidArgumentException When legacy settings contain duplicate group ids.
 	 */
 	public function get_schema( string $section ): array {
 		return SettingsUISchema::from_legacy_settings(

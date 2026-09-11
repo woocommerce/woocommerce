@@ -120,7 +120,7 @@ export const TaskListCompletedHeader = ( {
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
-		updateOptions( {
+		void updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				CUSTOMER_EFFORT_SCORE_ACTION,
 				...( cesShownForActions || [] ),

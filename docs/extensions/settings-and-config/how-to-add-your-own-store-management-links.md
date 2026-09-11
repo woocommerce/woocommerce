@@ -1,6 +1,7 @@
 ---
 post_title: How to add store management links
-sidebar_label: Add store management links
+sidebar_label: Store management links
+sidebar_position: 6
 
 ---
 
