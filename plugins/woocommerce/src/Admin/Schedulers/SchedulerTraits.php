@@ -296,16 +296,31 @@ trait SchedulerTraits {
 			return;
 		}
 
-		if (
-			// Skip scheduling if Action Scheduler tables have not been initialized.
-			! get_option( 'schema-ActionScheduler_StoreSchema' ) ||
-			apply_filters( 'woocommerce_analytics_disable_action_scheduling', false )
-		) {
+		if ( self::is_action_scheduling_disabled() ) {
 			call_user_func_array( array( static::class, $action_name ), $args );
 			return;
 		}
 
 		self::queue()->schedule_single( time() + 5, $action_hook, $args, static::$group );
+	}
+
+	/**
+	 * Check whether actions run inline instead of being queued.
+	 *
+	 * That is the case when the Action Scheduler tables have not been created yet, or when the
+	 * `woocommerce_analytics_disable_action_scheduling` filter turns queueing off.
+	 *
+	 * @since 11.2.0
+	 * @return bool
+	 */
+	protected static function is_action_scheduling_disabled() {
+		/**
+		 * Filter whether analytics actions run inline instead of being queued through Action Scheduler.
+		 *
+		 * @since 4.0.0
+		 * @param bool $disabled Whether to run actions inline. Default false.
+		 */
+		return ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false );
 	}
 
 	/**

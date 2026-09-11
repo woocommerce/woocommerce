@@ -140,10 +140,14 @@ class ReportExporter {
 		$batch_size  = $exporter->get_limit();
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 
-		// Create batches, like initial import.
-		$report_batch_args = array( $export_id, $report_type, $report_args );
+		// Create batches, like initial import. Each batch is told how many there are, so completion
+		// does not depend on a row total that keeps moving while the export runs.
+		$report_batch_args = array( $export_id, $report_type, $report_args, $num_batches );
 
 		if ( 0 < $num_batches ) {
+			// Before the batches, not after: with queueing disabled they run right here, and a
+			// custom export id can be reused, so the previous run's 100 must not survive into this one.
+			self::reset_export_percentage_complete( $report_type, $export_id );
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
@@ -162,13 +166,18 @@ class ReportExporter {
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
+	 * @param int    $total_batches Optional. How many batches the export was queued as. Exports queued
+	 *                              before WooCommerce 11.2.0 run without it and measure progress by row.
 	 * @return void
 	 */
-	public static function export_report( $page_number, $export_id, $report_type, $report_args ) {
+	public static function export_report( $page_number, $export_id, $report_type, $report_args, $total_batches = 0 ) {
 		$report_args['page'] = $page_number;
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+		if ( $total_batches > 0 ) {
+			$exporter->set_total_batches( $total_batches );
+		}
 		$exporter->generate_file();
 
 		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
@@ -188,6 +197,9 @@ class ReportExporter {
 	/**
 	 * Update the completion percentage of a report export.
 	 *
+	 * Never lowers a stored percentage. Batches can finish out of order, so a later-running earlier
+	 * page must not take the export back from 100.
+	 *
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param int    $percentage Completion percentage.
@@ -197,7 +209,26 @@ class ReportExporter {
 		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
 		$status_key     = self::get_status_key( $report_type, $export_id );
 
+		if ( isset( $exports_status[ $status_key ] ) && $exports_status[ $status_key ] > $percentage ) {
+			return;
+		}
+
 		$exports_status[ $status_key ] = $percentage;
+
+		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
+	}
+
+	/**
+	 * Start a report export's completion percentage over at 0, whatever it held before.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return void
+	 */
+	private static function reset_export_percentage_complete( $report_type, $export_id ) {
+		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
+
+		$exports_status[ self::get_status_key( $report_type, $export_id ) ] = 0;
 
 		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
 	}
@@ -408,6 +439,10 @@ class ReportExporter {
 	/**
 	 * Process a report export email action.
 	 *
+	 * Emails the download link once every batch of the export has run. While batches are still
+	 * queued or running it reschedules itself, and when the export can no longer complete it logs
+	 * why rather than leaving the merchant waiting for an email that never comes.
+	 *
 	 * @param int    $user_id User ID that requested the email.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
@@ -416,15 +451,96 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
-		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
+		$log_context = array( 'source' => 'report-csv-exporter' );
 
-		if ( 100 === $percent_complete ) {
-			$download_url = self::get_download_url( $report_type, $export_id, $report_args );
-
-			\WC_Emails::instance();
-			$email = new ReportCSVEmail();
-			$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
-			$email->trigger( $user_id, $report_type, $download_url );
+		if ( self::find_export_batch( $export_id, $report_type, array( 'pending', 'in-progress' ) ) ) {
+			// Only found when actions are queued, so this cannot run inline and recurse.
+			self::schedule_action( 'email_report_download_link', array( $user_id, $export_id, $report_type, $report_args ) );
+			return;
 		}
+
+		// A batch cannot simply be re-run: batches append to one file and the first one truncates it.
+		if ( self::find_export_batch( $export_id, $report_type, array( 'failed', 'canceled' ) ) ) {
+			wc_get_logger()->error(
+				sprintf( 'Not emailing the %1$s report export %2$s: a batch of it failed or was canceled, so the file is incomplete.', $report_type, $export_id ),
+				$log_context
+			);
+			return;
+		}
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
+
+		if ( ! $exporter->export_file_exists() ) {
+			wc_get_logger()->error(
+				sprintf( 'Not emailing the %1$s report export %2$s: every batch has run but the export file is missing or was never finished.', $report_type, $export_id ),
+				$log_context
+			);
+			return;
+		}
+
+		self::update_export_percentage_complete( $report_type, $export_id, 100 );
+
+		$download_url = self::get_download_url( $report_type, $export_id, $report_args );
+
+		\WC_Emails::instance();
+		$email = new ReportCSVEmail();
+		$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
+
+		if ( ! $email->trigger( $user_id, $report_type, $download_url ) ) {
+			wc_get_logger()->error(
+				sprintf( 'The %1$s report export %2$s is ready but its download link could not be emailed to user %3$d.', $report_type, $export_id, $user_id ),
+				$log_context
+			);
+		}
+	}
+
+	/**
+	 * Find a queued batch of an export that is in one of the given states.
+	 *
+	 * Looks at the batch actions and at the actions that queue them in chunks. Large exports queue
+	 * their batches through the latter, so for a while no batch action exists yet.
+	 *
+	 * @param string   $export_id Unique ID for report (timestamp expected).
+	 * @param string   $report_type Report type. E.g. 'customers'.
+	 * @param string[] $statuses Action Scheduler statuses to look for.
+	 * @return \ActionScheduler_Action|null A matching action, or null when there is none.
+	 */
+	private static function find_export_batch( $export_id, $report_type, $statuses ) {
+		if ( self::is_action_scheduling_disabled() ) {
+			return null;
+		}
+
+		global $wpdb;
+
+		// Both kinds of action carry the export id followed by the report type. Matching that pair the
+		// way Action Scheduler stores it keeps a short custom export id from matching other exports.
+		// The search is a LIKE, and a custom id can hold "_", so escape it rather than match any character.
+		$args_fragment = $wpdb->esc_like( trim( (string) wp_json_encode( array( $export_id, $report_type ) ), '[]' ) );
+
+		/**
+		 * The queue, typed here because the trait's docblock names the interface without its namespace.
+		 *
+		 * @var \WC_Queue_Interface $queue
+		 */
+		$queue = self::queue();
+
+		foreach ( array( 'export_report', 'queue_batches' ) as $action_name ) {
+			$found = $queue->search(
+				array(
+					'hook'     => self::get_action( $action_name ),
+					'group'    => self::$group,
+					'status'   => $statuses,
+					'search'   => $args_fragment,
+					'per_page' => 1,
+				)
+			);
+
+			if ( $found ) {
+				return current( $found );
+			}
+		}
+
+		return null;
 	}
 }

@@ -36,6 +36,9 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		}
 		$this->paths = array();
 
+		// A test queue injected by a test is static state the base class does not reset.
+		ReportExporter::set_queue( null );
+
 		parent::tearDown();
 	}
 
@@ -506,10 +509,11 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 */
 	private function email_completed_export( array $queued_args ): array {
 		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$export_id = (string) microtime( true );
+		$export_id = $this->new_export_id();
 		$hook      = ReportExporter::get_action( 'email_report_download_link' );
 		$mailer    = tests_retrieve_phpmailer_instance();
 
+		$this->create_export( 'wc-products-report-export-' . $export_id );
 		ReportExporter::update_export_percentage_complete( 'products', $export_id, 100 );
 
 		$this->assertNotFalse( has_action( $hook ), 'The export email action should be registered.' );
@@ -521,6 +525,490 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $sent, 'A finished export should be emailed to the user who asked for it.' );
 
 		return $sent;
+	}
+
+	/**
+	 * Scheduler actions that mean an export has not finished yet.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_unfinished_export_actions(): array {
+		return array(
+			'a batch waiting to run'             => array( 'export_report', 'pending' ),
+			'a batch running right now'          => array( 'export_report', 'in-progress' ),
+			'batches still waiting to be queued' => array( 'queue_batches', 'pending' ),
+		);
+	}
+
+	/**
+	 * @testdox The download link is not emailed while a batch of the export has not run yet.
+	 *
+	 * @dataProvider provider_unfinished_export_actions
+	 *
+	 * @param string $action_name Scheduler action the export still has queued.
+	 * @param string $status      State that action is in.
+	 */
+	public function test_email_waits_for_a_batch_that_has_not_run( string $action_name, string $status ): void {
+		$user_id     = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id   = $this->new_export_id();
+		$report_args = array( 'after' => '2025-06-01T00:00:00' );
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		$this->queue_export_action( $action_name, $this->batch_args( $action_name, $export_id ), $status );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+		$before = time();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products', $report_args );
+
+		$this->assertEmpty( $mailer->mock_sent, 'The link must not be emailed before the export has finished.' );
+		$this->assertCount( 1, $queue->actions, 'The email should be tried again later.' );
+		$this->assertSame( ReportExporter::get_action( 'email_report_download_link' ), $queue->actions[0]['hook'] );
+		$this->assertSame( array( $user_id, $export_id, 'products', $report_args ), $queue->actions[0]['args'], 'The retry should carry the same arguments.' );
+		$this->assertSame( ReportExporter::$group, $queue->actions[0]['group'] );
+		$this->assertGreaterThanOrEqual( $before, $queue->actions[0]['timestamp'], 'The retry should be scheduled, not run inline.' );
+	}
+
+	/**
+	 * @testdox Batches of another export do not hold the email back.
+	 */
+	public function test_email_ignores_batches_of_other_exports(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = $this->new_export_id();
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		$this->queue_export_action( 'export_report', $this->batch_args( 'export_report', $export_id . '9' ) );
+		$this->queue_export_action( 'export_report', $this->batch_args( 'export_report', $export_id, 'orders' ) );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'A finished export should be emailed while unrelated exports are still running.' );
+		$this->assertEmpty( $queue->actions, 'Unrelated exports should not delay the email.' );
+	}
+
+	/**
+	 * @testdox An export id containing an underscore does not match batches of a similar id.
+	 */
+	public function test_email_does_not_treat_an_underscore_in_the_export_id_as_a_wildcard(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = 'monthly_1';
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		// One character apart, which an unescaped "_" would match.
+		$this->queue_export_action( 'export_report', $this->batch_args( 'export_report', 'monthly01' ) );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The finished export should be emailed.' );
+		$this->assertEmpty( $queue->actions, 'A similar export id should not hold the email back.' );
+	}
+
+	/**
+	 * @testdox Queueing an export under a reused id starts its progress over.
+	 */
+	public function test_queueing_an_export_starts_its_progress_over(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->create_products( 2 );
+
+		// A custom export id can be reused, leaving the previous run's 100 behind.
+		$export_id = 'reused';
+		ReportExporter::update_export_percentage_complete( 'stock', $export_id, 100 );
+
+		$this->use_test_queue();
+		ReportExporter::queue_report_export( $export_id, 'stock', array() );
+
+		$this->assertSame( 0, ReportExporter::get_export_percentage_complete( 'stock', $export_id ), 'A freshly queued export should not report the previous run as complete.' );
+	}
+
+	/**
+	 * @testdox The email action does not mistake itself for an unfinished batch.
+	 */
+	public function test_email_is_not_blocked_by_itself(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = $this->new_export_id();
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		// The email action's own arguments name the export too, and it is "in-progress" while it runs.
+		$this->queue_export_action( 'email_report_download_link', array( $user_id, $export_id, 'products', array() ), 'in-progress' );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The finished export should be emailed.' );
+		$this->assertEmpty( $queue->actions, 'The email action must not wait on itself.' );
+	}
+
+	/**
+	 * Terminal states a batch can end up in without having run.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_broken_export_actions(): array {
+		return array(
+			'a failed batch'   => array( 'failed' ),
+			'a canceled batch' => array( 'canceled' ),
+		);
+	}
+
+	/**
+	 * @testdox An export with a batch that cannot finish is logged instead of emailed.
+	 *
+	 * @dataProvider provider_broken_export_actions
+	 *
+	 * @param string $status State the batch ended in.
+	 */
+	public function test_email_is_not_sent_when_a_batch_cannot_finish( string $status ): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = $this->new_export_id();
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		$this->queue_export_action( 'export_report', $this->batch_args( 'export_report', $export_id ), $status );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+		$logged = $this->watch_log();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertEmpty( $mailer->mock_sent, 'An incomplete export must not be emailed as if it were complete.' );
+		$this->assertEmpty( $queue->actions, 'An export that cannot finish should not be checked again.' );
+		$this->assert_logged( $logged, 'failed or was canceled', $export_id );
+	}
+
+	/**
+	 * @testdox An export whose file never finished is logged instead of emailed.
+	 */
+	public function test_email_is_not_sent_when_the_export_file_is_incomplete(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = $this->new_export_id();
+		$filename  = $this->create_export( 'wc-products-report-export-' . $export_id );
+
+		wp_delete_file( ReportCSVExporter::get_reports_directory() . $filename . '.headers' );
+
+		$mailer = $this->fresh_mailer();
+		$logged = $this->watch_log();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertEmpty( $mailer->mock_sent, 'A link to an unfinished file must not be emailed.' );
+		$this->assert_logged( $logged, 'missing or was never finished', $export_id );
+	}
+
+	/**
+	 * @testdox Emailing the link records the export as complete, even when a batch finished out of order.
+	 */
+	public function test_email_records_the_export_as_complete(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = $this->new_export_id();
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		// Batches can finish out of order, leaving an earlier page's percentage stored last.
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 97 );
+
+		$mailer = $this->fresh_mailer();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The finished export should be emailed.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'products', $export_id ) );
+	}
+
+	/**
+	 * @testdox A finished export whose link cannot be emailed is logged.
+	 */
+	public function test_email_that_cannot_be_sent_is_logged(): void {
+		$export_id = $this->new_export_id();
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+
+		$mailer = $this->fresh_mailer();
+		$logged = $this->watch_log();
+
+		// User 0 has no email address.
+		ReportExporter::email_report_download_link( 0, $export_id, 'products' );
+
+		$this->assertEmpty( $mailer->mock_sent, 'Nothing can be sent without a recipient.' );
+		$this->assert_logged( $logged, 'could not be emailed', $export_id );
+	}
+
+	/**
+	 * @testdox Progress is measured by batch when the batch count is known, so the last batch always reaches 100.
+	 */
+	public function test_progress_is_measured_by_batch_when_the_batch_count_is_known(): void {
+		$exporter = new ReportCSVExporter();
+		$exporter->set_limit( 5 );
+		$exporter->set_page( 2 );
+
+		$total_rows = new \ReflectionProperty( $exporter, 'total_rows' );
+		$total_rows->setAccessible( true );
+		$total_rows->setValue( $exporter, 10 );
+
+		$this->assertSame( 50, $exporter->get_percent_complete(), 'Without a batch count, progress is measured by row.' );
+
+		$exporter->set_total_batches( 3 );
+
+		$this->assertSame( 66, $exporter->get_percent_complete(), 'With a batch count, progress is measured by batch.' );
+
+		$exporter->set_page( 3 );
+		$this->assertSame( 100, $exporter->get_percent_complete(), 'The last batch should reach 100 whatever the row total says.' );
+
+		$exporter->set_page( 4 );
+		$this->assertSame( 100, $exporter->get_percent_complete(), 'Progress should never exceed 100.' );
+	}
+
+	/**
+	 * @testdox A stored completion percentage never goes backwards.
+	 */
+	public function test_progress_never_goes_backwards(): void {
+		$export_id = $this->new_export_id();
+
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 40 );
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 60 );
+		$this->assertSame( 60, ReportExporter::get_export_percentage_complete( 'products', $export_id ) );
+
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 100 );
+		ReportExporter::update_export_percentage_complete( 'products', $export_id, 40 );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'products', $export_id ), 'A later-running earlier batch must not take the export back from 100.' );
+	}
+
+	/**
+	 * @testdox A batch queued before the batch count was added still runs and finishes.
+	 */
+	public function test_batch_queued_without_a_batch_count_still_runs(): void {
+		$export_id = $this->new_export_id();
+		$exporter  = $this->track_generated_export( 'stock', $export_id );
+
+		// Exports queued by an earlier release carry four arguments, not five.
+		do_action_ref_array( ReportExporter::get_action( 'export_report' ), array( 1, $export_id, 'stock', array() ) );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', $export_id ) );
+		$this->assertTrue( $exporter->export_file_exists(), 'The only batch should leave a complete export behind.' );
+	}
+
+	/**
+	 * @testdox The export is emailed even when rows are added while it runs.
+	 */
+	public function test_export_is_emailed_when_rows_are_added_while_it_runs(): void {
+		$admin = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		add_filter( 'woocommerce_admin_stock_report_export_batch_limit', array( $this, 'batch_limit_of_five' ) );
+
+		$this->create_products( 6 );
+
+		$export_id = $this->new_export_id();
+		$exporter  = $this->track_generated_export( 'stock', $export_id );
+		$mailer    = $this->fresh_mailer();
+
+		$total_rows = ReportExporter::queue_report_export( $export_id, 'stock', array(), true );
+		$this->assertEquals( 6, $total_rows );
+
+		// Two batches were queued. More products now make the second batch's rows no longer add up to
+		// the total it re-reads, which a row-based percentage would leave short of 100 forever.
+		$this->create_products( 5 );
+
+		\WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The download link should be emailed once the export has finished.' );
+		$this->assertSame( get_userdata( $admin )->user_email, $mailer->mock_sent[0]['to'][0][0] );
+		$this->assertStringContainsString( 'Stock Report', $mailer->mock_sent[0]['subject'] );
+		$this->assertStringContainsString( 'filename=wc-stock-report-export-' . $export_id, $mailer->mock_sent[0]['body'] );
+		$this->assertTrue( $exporter->export_file_exists(), 'The emailed link should point at a complete export.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', $export_id ) );
+	}
+
+	/**
+	 * @testdox With queueing disabled the export runs and is emailed inline.
+	 */
+	public function test_export_is_emailed_when_actions_run_inline(): void {
+		$admin = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$this->create_products( 2 );
+
+		$export_id = $this->new_export_id();
+		$exporter  = $this->track_generated_export( 'stock', $export_id );
+		$mailer    = $this->fresh_mailer();
+
+		ReportExporter::queue_report_export( $export_id, 'stock', array(), true );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The download link should be emailed as soon as the inline export finishes.' );
+		$this->assertTrue( $exporter->export_file_exists() );
+
+		// The REST controller records 0% after queueing, which must not undo an export that already ran.
+		ReportExporter::update_export_percentage_complete( 'stock', $export_id, 0 );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', $export_id ) );
+	}
+
+	/**
+	 * Batch size used to keep the end-to-end exports small.
+	 *
+	 * @return int
+	 */
+	public function batch_limit_of_five(): int {
+		return 5;
+	}
+
+	/**
+	 * Make an export id the way the REST controller does.
+	 *
+	 * @return string
+	 */
+	private function new_export_id(): string {
+		return str_replace( '.', '', (string) microtime( true ) );
+	}
+
+	/**
+	 * Arguments a queued action of an export carries.
+	 *
+	 * @param string $action_name `export_report` for a batch, `queue_batches` for a chunk of batches.
+	 * @param string $export_id   Export the action belongs to.
+	 * @param string $report_type Report type.
+	 * @return array
+	 */
+	private function batch_args( string $action_name, string $export_id, string $report_type = 'products' ): array {
+		if ( 'queue_batches' === $action_name ) {
+			return array( 1, 11, 'export_report', array( $export_id, $report_type, array(), 1060 ) );
+		}
+
+		return array( 2, $export_id, $report_type, array(), 3 );
+	}
+
+	/**
+	 * Queue a scheduler action and leave it in the given state.
+	 *
+	 * @param string $action_name Scheduler action name.
+	 * @param array  $args        Action arguments.
+	 * @param string $status      Action Scheduler status to leave it in.
+	 * @return int Action ID.
+	 */
+	private function queue_export_action( string $action_name, array $args, string $status = 'pending' ): int {
+		$action_id = as_schedule_single_action( time() + HOUR_IN_SECONDS, ReportExporter::get_action( $action_name ), $args, ReportExporter::$group );
+		$store     = \ActionScheduler::store();
+
+		switch ( $status ) {
+			case 'in-progress':
+				$store->log_execution( $action_id );
+				break;
+			case 'failed':
+				$store->mark_failure( $action_id );
+				break;
+			case 'canceled':
+				$store->cancel_action( $action_id );
+				break;
+		}
+
+		return $action_id;
+	}
+
+	/**
+	 * Record what the exporter schedules instead of queueing it. Searches still hit the real store.
+	 *
+	 * @return \WC_Admin_Test_Action_Queue
+	 */
+	private function use_test_queue(): \WC_Admin_Test_Action_Queue {
+		$queue = new \WC_Admin_Test_Action_Queue();
+		ReportExporter::set_queue( $queue );
+
+		return $queue;
+	}
+
+	/**
+	 * Get the mock mailer with nothing sent yet.
+	 *
+	 * @return \MockPHPMailer
+	 */
+	private function fresh_mailer() {
+		reset_phpmailer_instance();
+
+		return tests_retrieve_phpmailer_instance();
+	}
+
+	/**
+	 * Collect everything logged from now on. Filters are restored by the base tear down.
+	 *
+	 * @return \ArrayObject Entries with `message` and `context` keys.
+	 */
+	private function watch_log(): \ArrayObject {
+		$logged = new \ArrayObject();
+
+		add_filter(
+			'woocommerce_logger_log_message',
+			function ( $message, $level, $context ) use ( $logged ) {
+				$logged[] = array(
+					'message' => $message,
+					'level'   => $level,
+					'context' => $context,
+				);
+				return $message;
+			},
+			10,
+			3
+		);
+
+		return $logged;
+	}
+
+	/**
+	 * Assert that an export error naming the export was logged under the exporter's log source.
+	 *
+	 * @param \ArrayObject $logged    Collected log entries.
+	 * @param string       $reason    Text the message should contain.
+	 * @param string       $export_id Export the message should name.
+	 * @return void
+	 */
+	private function assert_logged( \ArrayObject $logged, string $reason, string $export_id ): void {
+		foreach ( $logged as $entry ) {
+			if ( false === strpos( $entry['message'], $reason ) ) {
+				continue;
+			}
+
+			$this->assertSame( 'error', $entry['level'] );
+			$this->assertSame( 'report-csv-exporter', $entry['context']['source'] ?? null, 'Export problems should be logged under the exporter source.' );
+			$this->assertStringContainsString( $export_id, $entry['message'], 'The log should say which export it is about.' );
+			return;
+		}
+
+		$this->fail( sprintf( 'Expected an error mentioning "%s" to be logged.', $reason ) );
+	}
+
+	/**
+	 * Register the files a real export of a report will write, so tear down removes them.
+	 *
+	 * @param string $report_type Report type.
+	 * @param string $export_id   Export id.
+	 * @return ReportCSVExporter Exporter pointed at the export, for checking what was written.
+	 */
+	private function track_generated_export( string $report_type, string $export_id ): ReportCSVExporter {
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-{$report_type}-report-export-{$export_id}" );
+
+		$path          = ReportCSVExporter::get_reports_directory() . $exporter->get_filename();
+		$this->paths[] = $path;
+		$this->paths[] = $path . '.headers';
+
+		return $exporter;
+	}
+
+	/**
+	 * Create simple products for the stock report to list.
+	 *
+	 * @param int $count How many.
+	 * @return void
+	 */
+	private function create_products( int $count ): void {
+		for ( $i = 0; $i < $count; $i++ ) {
+			\WC_Helper_Product::create_simple_product();
+		}
 	}
 
 	/**

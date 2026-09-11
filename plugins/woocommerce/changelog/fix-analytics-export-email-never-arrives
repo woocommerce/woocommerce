@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Email the Analytics report export link once every batch has finished, instead of never when rows changed during the export or a batch failed.
