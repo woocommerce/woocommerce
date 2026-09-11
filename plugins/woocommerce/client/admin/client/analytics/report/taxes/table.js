@@ -54,6 +54,11 @@ class TaxesReportTable extends Component {
 				isSortable: true,
 			},
 			{
+				label: __( 'Taxable amount', 'woocommerce' ),
+				key: 'taxable_amount',
+				isSortable: true,
+			},
+			{
 				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
@@ -80,7 +85,13 @@ class TaxesReportTable extends Component {
 				tax_rate_id: taxRateId,
 				total_tax: totalTax,
 				shipping_tax: shippingTax,
+				taxable_amount: taxableAmount,
 			} = tax;
+			// A zero base under a non-zero tax marks a lookup row recorded before the
+			// taxable amount existed (or a manual tax line) - unknown, not zero.
+			const hasTaxableAmount =
+				taxableAmount !== undefined &&
+				! ( taxableAmount === 0 && totalTax !== 0 );
 			const taxCode = getTaxCode( tax );
 
 			const persistedQuery = getPersistedQuery( query );
@@ -118,6 +129,14 @@ class TaxesReportTable extends Component {
 				{
 					display: renderCurrency( shippingTax ),
 					value: getCurrencyFormatDecimal( shippingTax ),
+				},
+				{
+					display: hasTaxableAmount
+						? renderCurrency( taxableAmount )
+						: __( 'N/A', 'woocommerce' ),
+					value: hasTaxableAmount
+						? getCurrencyFormatDecimal( taxableAmount )
+						: '',
 				},
 				{
 					display: formatValue(

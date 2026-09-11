@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect verification email enabled filters when showing the customer email verification prompt.

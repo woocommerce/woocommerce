@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -1930,5 +1931,285 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'small', 'large', 'huge' ), $sizes );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox read_price_data prunes the transient when hash buckets exceed the size cap.
+	 */
+	public function test_read_price_data_prunes_unbound_transient(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$version    = WC_Cache_Helper::get_transient_version( 'product' );
+
+		// Compute the current price hash so we can place it first in the seeded transient.
+		$data_store   = new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function __construct() { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				$this->prices_array = array();
+			}
+
+			public function get_price_hash( &$product, $for_display = false ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		$current_hash = $data_store->get_price_hash( $product, false );
+
+		// Seed an unbound transient with the current hash near the head to verify pruning moves it to the tail.
+		$entry = array(
+			'price'         => array(),
+			'regular_price' => array(),
+			'sale_price'    => array(),
+			'version'       => $version,
+		);
+		foreach ( $product->get_children() as $child_id ) {
+			$entry['price'][ $child_id ]         = '10.00';
+			$entry['regular_price'][ $child_id ] = '15.00';
+			$entry['sale_price'][ $child_id ]    = '10.00';
+		}
+
+		$unbound                        = array();
+		$unbound[ md5( 'hash_first' ) ] = $entry;
+		$unbound[ $current_hash ]       = $entry;
+		for ( $i = 0; $i < 38; $i++ ) {
+			$unbound[ md5( 'hash_' . $i ) ] = $entry;
+		}
+		$stored = wp_json_encode( $unbound );
+		set_transient( 'wc_var_prices_' . $product_id, $stored, DAY_IN_SECONDS * 30 );
+
+		// Before pruning: 40 buckets, exceeds 8KB, current hash is near the head (position 2).
+		$this->assertSame( 40, count( $unbound ), 'Seeded transient should contain 40 hash buckets before pruning.' );
+		$this->assertGreaterThan( 8192, strlen( $stored ), 'Seeded transient JSON should exceed 8KB before pruning.' );
+
+		// Enable taxes so the missing opposite hash triggers recalculation + pruning.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$display_hash = $data_store->get_price_hash( $product, true );
+		$data_store->read_price_data( $product, true );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// After pruning: fewer buckets, under 8KB, both hashes moved from head to tail.
+		$stored = json_decode( (string) get_transient( 'wc_var_prices_' . $product_id ), true );
+		$this->assertLessThan( count( $unbound ), count( $stored ), 'Unbound transient should be pruned to fewer hash buckets.' );
+		$this->assertLessThanOrEqual( 8192, strlen( wp_json_encode( $stored ) ), 'Pruned transient JSON should not exceed 8KB.' );
+		$this->assertSame( array( $display_hash, $current_hash ), array_slice( array_keys( $stored ), -2 ), 'Display and opposite price hashes should be the last two entries after pruning.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * Creates a variation under the class fixture product with the given stored state.
+	 *
+	 * @param string      $status        Post status.
+	 * @param string|null $stock_status  Value for `_stock_status`, or null to leave the meta absent.
+	 * @param string      $regular_price Regular price ('' for none).
+	 * @param string      $sale_price    Sale price ('' for none).
+	 * @return int Variation ID.
+	 */
+	private function create_stored_variation( string $status, ?string $stock_status, string $regular_price, string $sale_price ): int {
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( self::$product_id );
+		$variation->set_status( $status );
+		$variation->set_regular_price( $regular_price );
+		$variation->set_sale_price( $sale_price );
+		$variation->set_stock_status( $stock_status ?? ProductStockStatus::IN_STOCK );
+		$variation->save();
+		if ( null === $stock_status ) {
+			delete_post_meta( $variation->get_id(), '_stock_status' );
+		}
+		if ( '' === $regular_price && '' !== $sale_price ) {
+			// The CRUD layer blanks a sale price without a regular price; write it directly to model legacy or direct-meta data.
+			update_post_meta( $variation->get_id(), '_sale_price', $sale_price );
+		}
+		return $variation->get_id();
+	}
+
+	/**
+	 * @testdox stored_state_allows_purchase applies the published, not-out-of-stock, priced rule.
+	 *
+	 * @testWith [ "publish", "instock", "10", "", true ]
+	 *           [ "publish", "onbackorder", "10", "", true ]
+	 *           [ "publish", "", "10", "", true ]
+	 *           [ "publish", "instock", "0", "", true ]
+	 *           [ "publish", "instock", "", "5", true ]
+	 *           [ "publish", "outofstock", "10", "", false ]
+	 *           [ "publish", "instock", "", "", false ]
+	 *           [ "private", "instock", "10", "", false ]
+	 *           [ "draft", "instock", "10", "", false ]
+	 *
+	 * @param string $status        Post status.
+	 * @param string $stock_status  Stock status.
+	 * @param string $regular_price Regular price.
+	 * @param string $sale_price    Sale price.
+	 * @param bool   $expected      Expected result.
+	 */
+	public function test_stored_state_allows_purchase( string $status, string $stock_status, string $regular_price, string $sale_price, bool $expected ): void {
+		$this->assertSame( $expected, WC_Product_Variable_Data_Store_CPT::stored_state_allows_purchase( $status, $stock_status, $regular_price, $sale_price ) );
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates keeps only published, not-out-of-stock, priced variations, in input order.
+	 */
+	public function test_get_purchasable_variation_candidates_filters_on_stored_state_and_preserves_order(): void {
+		$sut = new WC_Product_Variable_Data_Store_CPT();
+
+		$out_of_stock = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::OUT_OF_STOCK, '10', '' );
+		$unpriced     = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '' );
+		$private      = $this->create_stored_variation( ProductStatus::PRIVATE, ProductStockStatus::IN_STOCK, '10', '' );
+		$in_stock     = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+		$backorder    = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::ON_BACKORDER, '10', '' );
+		$free         = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '0', '' );
+		$sale_only    = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '', '5' );
+		$no_stock_row = $this->create_stored_variation( ProductStatus::PUBLISH, null, '10', '' );
+
+		$input  = array( $backorder, $out_of_stock, $in_stock, $unpriced, $free, $private, $sale_only, $no_stock_row, 999999999 );
+		$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), $input );
+
+		$this->assertSame(
+			array( $backorder, $in_stock, $free, $sale_only, $no_stock_row ),
+			$result,
+			'Candidates must be the stored-state subset in the same order as the input.'
+		);
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates returns an empty array for empty input without querying.
+	 */
+	public function test_get_purchasable_variation_candidates_returns_empty_for_empty_input(): void {
+		global $wpdb;
+		$sut = new WC_Product_Variable_Data_Store_CPT();
+
+		$product        = wc_get_product( self::$product_id );
+		$queries_before = $wpdb->num_queries;
+		$result         = $sut->get_purchasable_variation_candidates( $product, array() );
+
+		$this->assertSame( array(), $result );
+		$this->assertSame( $queries_before, $wpdb->num_queries, 'Empty input must not hit the database.' );
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates deduplicates and casts input IDs.
+	 */
+	public function test_get_purchasable_variation_candidates_deduplicates_and_casts_ids(): void {
+		$sut      = new WC_Product_Variable_Data_Store_CPT();
+		$in_stock = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+
+		$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( (string) $in_stock, $in_stock, "$in_stock" ) );
+
+		$this->assertSame( array( $in_stock ), $result );
+	}
+
+	/**
+	 * @testdox SQL and primed-cache paths classify the same stored rows identically, using the first duplicate row.
+	 *
+	 * @testWith [ "publish", ["instock"], ["10"], [""], true ]
+	 *           [ "private", ["instock"], ["10"], [""], false ]
+	 *           [ "publish", ["outofstock"], ["10"], [""], false ]
+	 *           [ "publish", ["onbackorder"], ["10"], [""], true ]
+	 *           [ "publish", ["instock"], [""], [""], false ]
+	 *           [ "publish", ["instock"], ["0"], [""], true ]
+	 *           [ "publish", ["instock"], [""], ["5"], true ]
+	 *           [ "publish", [], ["10"], [""], true ]
+	 *           [ "publish", ["instock"], [["10"]], [""], false ]
+	 *           [ "publish", ["instock"], [""], [["5"]], false ]
+	 *           [ "publish", ["instock"], ["", "10"], [""], false ]
+	 *           [ "publish", ["instock"], ["10", ""], [""], true ]
+	 *           [ "publish", ["instock"], [""], ["", "5"], false ]
+	 *           [ "publish", ["instock"], [""], ["5", ""], true ]
+	 *           [ "publish", ["", "outofstock"], ["10"], [""], true ]
+	 *           [ "publish", ["outofstock", ""], ["10"], [""], false ]
+	 *
+	 * @param string $status        Post status.
+	 * @param array  $stock_rows    Stock metadata rows in insertion order.
+	 * @param array  $regular_rows  Regular-price metadata rows in insertion order.
+	 * @param array  $sale_rows     Sale-price metadata rows in insertion order.
+	 * @param bool   $expected      Whether the variation is a stored-state candidate.
+	 */
+	public function test_get_purchasable_variation_candidates_matches_primed_cache( string $status, array $stock_rows, array $regular_rows, array $sale_rows, bool $expected ): void {
+		$sut          = new WC_Product_Variable_Data_Store_CPT();
+		$variation_id = $this->create_stored_variation( $status, ProductStockStatus::IN_STOCK, '', '' );
+		$product      = new WC_Product_Variable( self::$product_id );
+
+		// Bypass CRUD upserts to preserve duplicate rows and malformed or missing metadata.
+		foreach (
+			array(
+				'_stock_status'  => $stock_rows,
+				'_regular_price' => $regular_rows,
+				'_sale_price'    => $sale_rows,
+			) as $key => $rows
+		) {
+			delete_post_meta( $variation_id, $key );
+			foreach ( $rows as $value ) {
+				add_post_meta( $variation_id, $key, $value );
+			}
+		}
+
+		$sql_candidates = $sut->get_purchasable_variation_candidates( $product, array( $variation_id ) );
+		clean_post_cache( $variation_id );
+		_prime_post_caches( array( $variation_id ) );
+		$cache_candidate = $this->invokeMethod( $product, 'variation_may_be_purchasable', array( $variation_id ) );
+
+		$this->assertSame( $expected ? array( $variation_id ) : array(), $sql_candidates, 'SQL must classify the stored rows using their first value.' );
+		$this->assertSame( $expected, $cache_candidate, 'The primed-cache path must agree with the expected SQL classification.' );
+	}
+
+	/**
+	 * @testdox get_purchasable_variation_candidates logs a failure from either read and still answers.
+	 *
+	 * @testWith [ "posts" ]
+	 *           [ "postmeta" ]
+	 *
+	 * @param string $table Table whose read is broken.
+	 */
+	public function test_get_purchasable_variation_candidates_logs_a_failed_read( string $table ): void {
+		$sut          = new WC_Product_Variable_Data_Store_CPT();
+		$variation_id = $this->create_stored_variation( ProductStatus::PUBLISH, ProductStockStatus::IN_STOCK, '10', '' );
+
+		$logger = new class() extends WC_Logger {
+			/**
+			 * Captured error messages.
+			 *
+			 * @var array
+			 */
+			public $errors = array();
+
+			/**
+			 * Records an error.
+			 *
+			 * @param string $message Message.
+			 * @param array  $context Context.
+			 */
+			public function error( $message, $context = array() ) {
+				$this->errors[] = array( $message, $context );
+			}
+		};
+
+		$logger_filter = static function () use ( $logger ) {
+			return $logger;
+		};
+
+		// Break only the read under test, so a clean sibling query cannot mask it.
+		$query_filter = static function ( $query ) use ( $table ) {
+			global $wpdb;
+			$name = $wpdb->{$table};
+			return str_contains( $query, "FROM {$name} WHERE" ) ? str_replace( $name, $name . '_missing', $query ) : $query;
+		};
+
+		global $wpdb;
+
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+		add_filter( 'query', $query_filter );
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+
+		try {
+			$result = $sut->get_purchasable_variation_candidates( wc_get_product( self::$product_id ), array( $variation_id ) );
+		} finally {
+			// suppress_errors() is not part of what the test case restores, so a throw here would silence
+			// database errors for the rest of the run.
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			remove_filter( 'query', $query_filter );
+			$wpdb->suppress_errors( $previous_suppress_errors );
+		}
+
+		$this->assertCount( 1, $logger->errors, "A failed read of {$table} must be logged once." );
+		$this->assertSame( self::$product_id, $logger->errors[0][1]['product_id'] );
+		$this->assertSame( array(), $result, 'A failed read defers every variation rather than promoting it.' );
 	}
 }

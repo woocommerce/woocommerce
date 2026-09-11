@@ -321,6 +321,7 @@ class ProductsReportTable extends Component {
 			filters,
 			hideCompare,
 			isRequesting,
+			limitProperties,
 			query,
 		} = this.props;
 
@@ -350,6 +351,7 @@ class ProductsReportTable extends Component {
 				labels={ labels }
 				query={ query }
 				searchBy="products"
+				limitProperties={ limitProperties }
 				baseSearchQuery={ baseSearchQuery }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
@@ -370,12 +372,9 @@ ProductsReportTable.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query, isRequesting } = props;
+		const { isRequesting } = props;
 
-		if (
-			isRequesting ||
-			( query.search && ! ( query.products && query.products.length ) )
-		) {
+		if ( isRequesting ) {
 			return {};
 		}
 

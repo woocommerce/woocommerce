@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move the quality badge above the price on in-app marketplace cards (between the name and the price on compact cards), centre compact card content vertically, and pin the price row to the bottom of regular cards.

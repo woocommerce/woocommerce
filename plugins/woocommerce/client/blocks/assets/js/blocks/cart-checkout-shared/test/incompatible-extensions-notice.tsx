@@ -14,16 +14,25 @@ import {
 } from '@woocommerce/editor-components/incompatible-extension-notice/storage';
 import { IncompatibleExtensionsFrontendNotice } from '../incompatible-extensions-notice';
 
+const SITE_A = 1;
+const SITE_B = 2;
+
 let mockIsAdmin = true;
+let mockSiteId = SITE_A;
+let mockIsMultisite = false;
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),
-	// A getter, not a value: the viewer changes between renders.
+	// Getters, not values: the viewer and site change between renders.
 	get CURRENT_USER_IS_ADMIN() {
 		return mockIsAdmin;
 	},
-	CURRENT_SITE_ID: 1,
-	IS_MULTISITE: false,
+	get CURRENT_SITE_ID() {
+		return mockSiteId;
+	},
+	get IS_MULTISITE() {
+		return mockIsMultisite;
+	},
 } ) );
 
 // Use the real localStorage-backed hook (via its source module) without pulling
@@ -86,6 +95,8 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 		window.localStorage.clear();
 		setIncompatibleExtensions( [] );
 		mockIsAdmin = true;
+		mockSiteId = SITE_A;
+		mockIsMultisite = false;
 	} );
 
 	describe( 'rendering', () => {
@@ -304,6 +315,32 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			);
 
 			expect( container ).toBeEmptyDOMElement();
+		} );
+	} );
+
+	// Sites on a subdirectory multisite share one localStorage origin, so the
+	// storefront banner must use the current site's key rather than another
+	// site's acknowledgement.
+	describe( 'site scoping', () => {
+		it( 'does not carry a dismissal to another site on the same origin', () => {
+			mockIsMultisite = true;
+			setIncompatibleExtensions( [
+				{ id: 'test-plugin', title: 'Test Plugin' },
+			] );
+			const { unmount } = render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+			fireEvent.click(
+				screen.getByRole( 'button', { name: 'Dismiss' } )
+			);
+			unmount();
+
+			mockSiteId = SITE_B;
+
+			render(
+				<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
+			);
+			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
 		} );
 	} );
 

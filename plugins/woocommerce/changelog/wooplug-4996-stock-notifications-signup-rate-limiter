@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Rate limit stock notification sign-ups per client and e-mail address.

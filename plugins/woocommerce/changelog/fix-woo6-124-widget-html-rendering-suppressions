@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace legacy WPCS suppression comments in the widget rendering paths with exact PHPCS annotations, and run the remaining widget form setting labels through wp_kses_post().

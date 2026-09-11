@@ -22,7 +22,7 @@ export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
 
 	return (
 		<FulfillmentCard
-			isCollapsable={ true }
+			isCollapsible={ true }
 			header={
 				<>
 					<PostListIcon />
