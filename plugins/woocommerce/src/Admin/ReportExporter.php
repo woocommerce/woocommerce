@@ -269,7 +269,8 @@ class ReportExporter {
 		$queue = self::queue();
 
 		foreach ( $outcomes as $outcome => $statuses ) {
-			$actions = $queue->search(
+			// IDs only: an export can run to thousands of pages, and every page counts them again.
+			$action_ids = $queue->search(
 				array(
 					'hook'     => self::get_action( 'export_report' ),
 					'group'    => self::$group,
@@ -277,14 +278,15 @@ class ReportExporter {
 					// The quoted JSON form, so a longer export ID or an action ID cannot match.
 					'search'   => '"' . $export_id . '"',
 					'per_page' => -1,
-				)
+				),
+				'ids'
 			);
 
-			$progress[ $outcome ] = count( $actions );
-			$progress['pages']   += count( $actions );
+			$progress[ $outcome ] = count( $action_ids );
+			$progress['pages']   += count( $action_ids );
 
 			if ( 'failed' === $outcome ) {
-				foreach ( array_keys( $actions ) as $action_id ) {
+				foreach ( $action_ids as $action_id ) {
 					// The failure is the last thing the queue logs for an action.
 					$log_entries = \ActionScheduler::logger()->get_logs( $action_id );
 					$log_entry   = end( $log_entries );
