@@ -14,8 +14,20 @@ use WC_Unit_Test_Case;
  */
 class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 
-	private const PAST   = '2020-01-01 00:00:00';
-	private const FUTURE = '2999-01-01 00:00:00';
+	private const PAST            = '2020-01-01 00:00:00';
+	private const FUTURE          = '2999-01-01 00:00:00';
+	private const SPECS_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_specs';
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		try {
+			delete_transient( self::SPECS_TRANSIENT );
+		} finally {
+			parent::tearDown();
+		}
+	}
 
 	/**
 	 * @testdox An alert whose end date has passed stops showing.
@@ -123,14 +135,48 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Notes from another source are left alone.
+	 */
+	public function test_notes_from_another_source_are_left_alone(): void {
+		$note_id = $this->create_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, self::PAST, 'woocommerce-core' );
+
+		RemoteInboxNotificationsEngine::retire_expired_alerts();
+
+		$this->assertSame(
+			Note::E_WC_ADMIN_NOTE_UNACTIONED,
+			( new Note( $note_id ) )->get_status(),
+			'Only notes from woocommerce.com carry a remote inbox end date.'
+		);
+	}
+
+	/**
+	 * @testdox The daily engine run retires expired alerts.
+	 */
+	public function test_run_retires_expired_alerts(): void {
+		$note_id = $this->create_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, self::PAST );
+
+		// An empty spec list for the current locale keeps run() from fetching the feed.
+		set_transient( self::SPECS_TRANSIENT, array( get_user_locale() => array() ) );
+
+		RemoteInboxNotificationsEngine::run();
+
+		$this->assertSame(
+			Note::E_WC_ADMIN_NOTE_PENDING,
+			( new Note( $note_id ) )->get_status(),
+			'run() should retire an expired alert even when no specs are served.'
+		);
+	}
+
+	/**
 	 * Create an admin note.
 	 *
 	 * @param string      $type           Note type.
 	 * @param string      $status         Note status.
 	 * @param string|null $publish_before End date to store on the note, or null to store none.
+	 * @param string      $source         Note source.
 	 * @return int Note ID.
 	 */
-	private function create_note( string $type, string $status, ?string $publish_before ): int {
+	private function create_note( string $type, string $status, ?string $publish_before, string $source = 'woocommerce.com' ): int {
 		$content_data = new \stdClass();
 
 		if ( null !== $publish_before ) {
@@ -143,7 +189,7 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 		$note->set_content( 'Test content' );
 		$note->set_content_data( $content_data );
 		$note->set_type( $type );
-		$note->set_source( 'woocommerce.com' );
+		$note->set_source( $source );
 		$note->set_status( $status );
 		$note->save();
 

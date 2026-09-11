@@ -163,41 +163,58 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * @return void
 	 */
 	public static function retire_expired_alerts() {
-		$notes = Notes::get_notes(
-			'edit',
-			array(
-				'type'     => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
-				'status'   => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
-				// Alerts are shown one at a time and only a handful are ever live at once.
-				'per_page' => 100,
-			)
-		);
+		try {
+			$data_store = Notes::load_data_store();
 
-		// Read the date the same way a live spec would, so a note behaves the same either way.
-		$rule_processor = new PublishBeforeTimeRuleProcessor();
-
-		foreach ( $notes as $note_id => $note_data ) {
-			$content_data = $note_data['content_data'];
-
-			if ( ! isset( $content_data->publish_before ) ) {
-				continue;
+			// A filtered data store may not have this internal read.
+			if ( ! $data_store->has_callable( 'lookup_notes' ) ) {
+				return;
 			}
 
-			$rule = (object) array( 'publish_before' => $content_data->publish_before );
+			// Read the rows rather than building a Note for each one, which would query the
+			// table again per note. Most runs have nothing to change.
+			// @phpstan-ignore-next-line method.notFound -- proxied by WC_Data_Store::__call() and guarded by has_callable() above.
+			$notes = $data_store->lookup_notes(
+				array(
+					'type'   => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
+					'status' => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+					'source' => array( 'woocommerce.com' ),
+				)
+			);
 
-			// The date is stored in a free form column, so don't trust it to be readable.
-			if ( ! $rule_processor->validate( $rule ) || $rule_processor->process( $rule, new \stdClass() ) ) {
-				continue;
+			// Read the date the same way a live spec would, so a note behaves the same either way.
+			$rule_processor = new PublishBeforeTimeRuleProcessor();
+
+			foreach ( $notes as $note_row ) {
+				$content_data = json_decode( $note_row->content_data );
+
+				if ( ! isset( $content_data->publish_before ) ) {
+					continue;
+				}
+
+				$rule = (object) array( 'publish_before' => $content_data->publish_before );
+
+				// The date is stored in a free form column, so don't trust it to be readable.
+				if ( ! $rule_processor->validate( $rule ) || $rule_processor->process( $rule, new \stdClass() ) ) {
+					continue;
+				}
+
+				$note = Notes::get_note( $note_row->note_id );
+
+				if ( ! $note instanceof Note ) {
+					continue;
+				}
+
+				$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
+				$note->save();
 			}
-
-			$note = Notes::get_note( $note_id );
-
-			if ( ! $note instanceof Note ) {
-				continue;
-			}
-
-			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
-			$note->save();
+		} catch ( \Throwable $e ) {
+			// run() also fires on plugin activation, where an unusable notes data store would
+			// otherwise break the activation. log_errors() only writes on dev and local.
+			wc_get_logger()->error(
+				'Could not retire expired store alerts: ' . $e->getMessage(),
+				array( 'source' => 'remote-inbox-notifications' )
+			);
 		}
 	}
 
