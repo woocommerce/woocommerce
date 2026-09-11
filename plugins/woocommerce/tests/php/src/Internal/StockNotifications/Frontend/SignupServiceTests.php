@@ -273,6 +273,31 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let the signup through when the rate limit window cannot be claimed.
+	 */
+	public function test_signup_proceeds_when_the_rate_limit_cannot_be_claimed() {
+		$rate_limiter = $this->createMock( SignupRateLimiter::class );
+		$rate_limiter->method( 'is_rate_limited' )->willReturn( false );
+		$rate_limiter->method( 'apply' )->willReturn( false );
+
+		$eligibility_service = new EligibilityService();
+		$eligibility_service->init( new StockManagementHelper() );
+
+		$notification_management_service = new NotificationManagementService();
+		$notification_management_service->init( $this->email_manager );
+
+		$sut = new SignupService();
+		$sut->init( $eligibility_service, $notification_management_service, $this->email_manager, $rate_limiter );
+
+		$product = $this->create_out_of_stock_product();
+		$result  = $sut->signup( $product->get_id(), 0, 'guest@example.com' );
+
+		$this->assertNotWPError( $result, 'A signup should not fail because the rate limit window could not be claimed' );
+		$this->assertEquals( SignupService::SIGNUP_SUCCESS, $result->get_code(), 'The signup should report success' );
+		$this->assertInstanceOf( Notification::class, $sut->is_already_signed_up( $product->get_id(), 0, 'guest@example.com' ), 'The notification should have been created' );
+	}
+
+	/**
 	 * Create an out-of-stock simple product for signup.
 	 *
 	 * @return \WC_Product_Simple

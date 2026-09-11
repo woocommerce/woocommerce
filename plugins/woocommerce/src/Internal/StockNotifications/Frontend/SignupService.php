@@ -66,6 +66,13 @@ class SignupService {
 	private SignupRateLimiter $rate_limiter;
 
 	/**
+	 * The logger.
+	 *
+	 * @var \WC_Logger_Interface
+	 */
+	private $logger;
+
+	/**
 	 * Init the service.
 	 *
 	 * @internal
@@ -85,13 +92,15 @@ class SignupService {
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
 		$this->rate_limiter                    = $rate_limiter;
+		$this->logger                          = \wc_get_logger();
 	}
 
 	/**
 	 * Signup.
 	 *
 	 * Fail-closed: once the rate limit window is claimed it is not released, so a failure or an
-	 * exception raised further down still holds the customer back until the window expires.
+	 * exception raised further down still holds the customer back until the window expires. A
+	 * window that cannot be claimed at all is the exception, and lets the sign-up through.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -167,8 +176,15 @@ class SignupService {
 		// Claim the rate limit window before creating an account, storing a notification or
 		// sending mail. This narrows the window in which two near-simultaneous requests both
 		// get through; it does not close it.
+		//
+		// A claim only fails when the rate limit table cannot be written to, which a shopper
+		// can neither cause nor resolve. Let the sign-up through rather than turn a broken
+		// limiter into a store-wide sign-up outage.
 		if ( ! $this->rate_limiter->apply( $user_email ) ) {
-			return new \WP_Error( self::ERROR_FAILED );
+			$this->logger->warning(
+				'Could not claim the stock notification sign-up rate limit window. Allowing the sign-up to proceed.',
+				array( 'source' => 'stock-notifications-signup-errors' )
+			);
 		}
 
 		$account_created = null;
