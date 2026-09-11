@@ -194,6 +194,19 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Deprecated account-creation codes should still map to a message.
+	 */
+	public function test_deprecated_account_created_codes_still_resolve(): void {
+		$product      = $this->create_out_of_stock_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+
+		$this->assertStringContainsString( 'a new account has been created', $this->sut->get_signup_user_message( 'success_account_created', $notification ) );
+		$this->assertStringContainsString( 'An account has been created', $this->sut->get_signup_user_message( 'success_account_created_double_opt_in', $notification ) );
+		$this->assertStringContainsString( 'consent to the creation of a new account', $this->sut->get_error_message( 'invalid_opt_in' ) );
+	}
+
+	/**
 	 * @testdox parse() should reject a guest email that is not a valid address.
 	 *
 	 * @testWith ["not an email"]

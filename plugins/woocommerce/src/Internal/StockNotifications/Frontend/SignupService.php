@@ -33,6 +33,21 @@ class SignupService {
 	public const ERROR_RATE_LIMITED     = 'rate_limited';
 	public const ERROR_INVALID_USER     = 'invalid_user';
 	public const ERROR_INVALID_EMAIL    = 'invalid_email';
+
+	/**
+	 * @deprecated 11.2.0 Guest sign-ups no longer create accounts. Never emitted.
+	 */
+	public const SIGNUP_SUCCESS_ACCOUNT_CREATED = 'success_account_created';
+
+	/**
+	 * @deprecated 11.2.0 Guest sign-ups no longer create accounts. Never emitted.
+	 */
+	public const SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN = 'success_account_created_double_opt_in';
+
+	/**
+	 * @deprecated 11.2.0 The account-creation consent checkbox was removed. Never emitted.
+	 */
+	public const ERROR_INVALID_OPT_IN = 'invalid_opt_in';
 	// phpcs:enable
 
 	/**
@@ -418,6 +433,8 @@ class SignupService {
 				return wp_kses_post( __( 'Invalid email address.', 'woocommerce' ) );
 			case self::ERROR_RATE_LIMITED:
 				return wp_kses_post( __( 'You have already signed up too many times. Please try again later.', 'woocommerce' ) );
+			case self::ERROR_INVALID_OPT_IN: // Deprecated code kept for callers passing the old code.
+				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			default:
 				return wp_kses_post( __( 'Failed to sign up. Please try again.', 'woocommerce' ) );
 		}
@@ -442,6 +459,15 @@ class SignupService {
 
 			case self::SIGNUP_SUCCESS_DOUBLE_OPT_IN:
 				$message = esc_html__( 'Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail.', 'woocommerce' );
+				break;
+
+			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED: // Deprecated code kept for callers passing the old code.
+				/* translators: Product name */
+				$message = sprintf( esc_html__( 'You have successfully signed up and will be notified when "%s" is back in stock! Note that a new account has been created for you; please check your e-mail for details.', 'woocommerce' ), $notification->get_product_name() );
+				break;
+
+			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN: // Deprecated code kept for callers passing the old code.
+				$message = esc_html__( 'Thanks for signing up! An account has been created for you. Please complete the sign-up process by following the verification link sent to your e-mail.', 'woocommerce' );
 				break;
 
 			case self::SIGNUP_ALREADY_JOINED:
