@@ -62,6 +62,8 @@ class ChequeGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 			),
 		);
 
+		$core_field_overrides = array_merge( $core_field_overrides, $this->get_shipping_method_restriction_field_overrides( $gateway ) );
+
 		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides );
 
 		$group = array(
