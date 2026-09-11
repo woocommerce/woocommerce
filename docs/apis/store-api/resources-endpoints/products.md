@@ -36,6 +36,7 @@ GET /products?type=simple
 GET /products?sku=sku-1,sku-2
 GET /products?featured=true
 GET /products?category=22
+GET /products?category=22&taxonomy_include_children[product_cat]=false
 GET /products?brand=adidas
 GET /products?_unstable_tax_my-taxonomy=my-taxonomy-term-id
 GET /products?tag=special-items
@@ -70,6 +71,7 @@ GET /products?return_rating_counts=true
 | `sku`                                       | string  |    no    | Limit result set to products with specific SKU(s). Use commas to separate.                                                                                                                                                            |
 | `featured`                                  | boolean |    no    | Limit result set to featured products.                                                                                                                                                                                                |
 | `category`                                  | string  |    no    | Limit result set to products assigned to categories IDs or slugs, separated by commas.                                                                                                                                                |
+| `taxonomy_include_children`                 | object  |    no    | Whether to include descendants for each taxonomy filter, keyed by taxonomy name (for example, `product_cat`, `product_brand`, or `pa_color`). Values are booleans; omitted taxonomies include descendants. Applies to category, tag, brand, custom taxonomy, and attribute filters. |
 | `category_operator`                         | string  |    no    | Operator to compare product category terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                                     |
 | `brand`                                     | string  |    no    | Limit result set to products assigned to brands IDs or slugs, separated by commas.                                                                                                                                                    |
 | `brand_operator`                            | string  |    no    | Operator to compare product brand terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                                        |
@@ -86,6 +88,8 @@ GET /products?return_rating_counts=true
 | `catalog_visibility`                        | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                                                                                           |
 | `rating`                                    | array   |    no    | Limit result set to products with a certain average rating. Allowed values: `1`, `2`, `3`, `4`, `5`.                                                                                                                                  |
 | `related`                                   | integer |    no    | Limit result set to products related to a specific product ID.                                                                                                                                                                        |
+
+Set `taxonomy_include_children[product_cat]=false` with `category=22` to match products assigned directly to category 22. Products assigned only to descendants are excluded; products assigned to both category 22 and a descendant still match. This option also applies to `/products/collection-data`.
 
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"

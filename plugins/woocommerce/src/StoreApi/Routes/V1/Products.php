@@ -266,6 +266,16 @@ class Products extends AbstractRoute {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['taxonomy_include_children'] = array(
+			'description'          => __( 'Whether to include descendants for each taxonomy filter, keyed by taxonomy name. Omitted taxonomies include descendants.', 'woocommerce' ),
+			'type'                 => 'object',
+			'additionalProperties' => array(
+				'type' => 'boolean',
+			),
+			'validate_callback'    => 'rest_validate_request_arg',
+			'sanitize_callback'    => 'rest_sanitize_request_arg',
+		);
+
 		$params['category'] = array(
 			'description'       => __( 'Limit result set to products assigned a set of category IDs or slugs, separated by commas.', 'woocommerce' ),
 			'type'              => 'string',
