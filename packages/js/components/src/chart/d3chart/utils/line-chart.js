@@ -10,6 +10,7 @@ import { first, get } from 'lodash';
  * Internal dependencies
  */
 import { smallBreak, wideBreak } from './breakpoints';
+import { getDateLabel } from './index';
 
 /**
  * Describes getDateSpaces
@@ -97,6 +98,7 @@ export const getLineData = ( data, orderedKeys ) =>
 			date: d.date,
 			// To have actual date for the screenReader, we need to use label date.
 			labelDate: d[ row.key ].labelDate,
+			labelDateEnd: d[ row.key ].labelDateEnd,
 			focus: row.focus,
 			value: get( d, [ row.key, 'value' ], 0 ),
 			visible: row.visible,
@@ -174,10 +176,10 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'tabindex', '0' )
 			.attr( 'role', 'graphics-symbol' )
 			.attr( 'aria-label', ( d ) => {
-				const label = formats.screenReaderFormat(
-					d.labelDate instanceof Date
-						? d.labelDate
-						: moment( d.labelDate ).toDate()
+				const label = getDateLabel(
+					formats.screenReaderFormat,
+					d.labelDate,
+					d.labelDateEnd
 				);
 				return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 			} )

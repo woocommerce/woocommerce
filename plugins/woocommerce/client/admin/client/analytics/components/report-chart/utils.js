@@ -2,13 +2,10 @@
  * External dependencies
  */
 import { find, get } from 'lodash';
+import moment from 'moment';
 import { flattenFilters } from '@woocommerce/navigation';
 import { format as formatDate } from '@wordpress/date';
-import {
-	containsLeapYear,
-	getPreviousDate,
-	isLeapYear,
-} from '@woocommerce/date';
+import { getPreviousDate } from '@woocommerce/date';
 
 export const DEFAULT_FILTER = 'all';
 
@@ -55,22 +52,19 @@ export function createDateFormatter( format ) {
 }
 
 /**
- * Returns true if the data contains a leap year.
+ * Returns true if the values of a chart metric can be added up across days.
+ * Averages and percentages cannot. Core names averages `avg_*` and types most
+ * of them as `average`, but `avg_order_value` is typed as `currency` for
+ * formatting, so both signals are checked.
  *
- * @param {Object} data Chart interval data
- * @return {boolean} True if data contains a leap year.
+ * @param {string} key  Chart key, e.x: `orders_count`
+ * @param {string} type Chart type, e.x: `number`
+ * @return {boolean} True if the values can be summed.
  */
-export function dataContainsLeapYear( data ) {
-	if ( data?.data?.intervals?.length > 1 ) {
-		const start = data.data.intervals[ 0 ].date_start;
-		const end =
-			data.data.intervals[ data.data.intervals.length - 1 ].date_end;
-
-		if ( containsLeapYear( start, end ) ) {
-			return true;
-		}
-	}
-	return false;
+function isAdditiveMetric( key, type ) {
+	return (
+		type !== 'average' && type !== 'percent' && ! key.startsWith( 'avg_' )
+	);
 }
 
 /**
@@ -83,6 +77,7 @@ export function dataContainsLeapYear( data ) {
  * @param {string} comparison          Comparison type, e.x: `previous_year`
  * @param {string} selectedChartKey    Chart key, e.x: `orders_count`
  * @param {string} currentInterval     Chart interval, e.x: `day`
+ * @param {string} selectedChartType   Chart type, e.x: `number`
  * @return {Object} Chart data
  */
 export function buildChartData(
@@ -92,12 +87,31 @@ export function buildChartData(
 	secondaryDatePicker,
 	comparison,
 	selectedChartKey,
-	currentInterval
+	currentInterval,
+	selectedChartType
 ) {
-	const primarydataContainsLeapYear = dataContainsLeapYear( primaryData );
-	const secondarydataContainsLeapYear = dataContainsLeapYear( secondaryData );
-	const primaryDataIntervals = [ ...primaryData.data.intervals ];
-	const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
+	const primaryDataIntervals = primaryData.data.intervals;
+	const secondaryDataIntervals = secondaryData.data.intervals;
+	const shift = secondaryDatePicker.shift;
+	const yearShifted = shift
+		? shift === 'year'
+		: comparison === 'previous_year';
+
+	// Day intervals are matched by date, so a secondary range that is a leap
+	// day longer or shorter than the primary one cannot push later days out of
+	// line. Coarser intervals do not start on comparable dates (a week starts
+	// on its own weekday), so those keep matching by position.
+	const matchByDate = currentInterval === 'day';
+	const secondaryIntervalsByDate = new Map(
+		matchByDate
+			? secondaryDataIntervals.map( ( secondaryInterval ) => [
+					moment( secondaryInterval.date_start ).format(
+						'YYYY-MM-DD'
+					),
+					secondaryInterval,
+			  ] )
+			: []
+	);
 
 	const chartData = [];
 
@@ -112,63 +126,63 @@ export function buildChartData(
 		const primaryLabelDate = interval.date_start;
 		const primaryValue = interval.subtotals[ selectedChartKey ] || 0;
 
-		const secondaryInterval = secondaryDataIntervals[ index ];
 		const secondaryLabel = `${ secondaryDatePicker.label } (${ secondaryDatePicker.range })`;
-
 		const secondaryDateMoment = getPreviousDate(
 			interval.date_start,
 			primaryDatePicker.after,
 			secondaryDatePicker.after,
 			comparison,
-			currentInterval
+			currentInterval,
+			matchByDate ? shift : undefined
 		);
 		let secondaryLabelDate = secondaryDateMoment.format(
 			'YYYY-MM-DD HH:mm:ss'
 		);
+		let secondaryLabelDateEnd;
+		let secondaryInterval;
+
+		if ( ! matchByDate ) {
+			secondaryInterval = secondaryDataIntervals[ index ];
+		} else if (
+			yearShifted &&
+			index > 0 &&
+			secondaryDateMoment.date() !== moment( interval.date_start ).date()
+		) {
+			// A primary 29th February has no counterpart a year earlier: moment
+			// clamps it to the 28th, which already belongs to the primary 28th.
+			// The label renders as "Invalid date", which is desirable since
+			// 29th February is not a valid date for non-leap years.
+			secondaryLabelDate = '-';
+		} else {
+			secondaryInterval = secondaryIntervalsByDate.get(
+				secondaryDateMoment.format( 'YYYY-MM-DD' )
+			);
+		}
+
 		let secondaryValue =
 			( secondaryInterval &&
 				secondaryInterval.subtotals[ selectedChartKey ] ) ||
 			0;
 
-		if ( currentInterval === 'day' ) {
-			if (
-				primarydataContainsLeapYear &&
-				! secondarydataContainsLeapYear &&
-				secondaryDataIntervals?.[ index ]
-			) {
-				// Only fix the data if the date is in 29th Feb and secondary data is in 1st March,
-				// which signifies incorrect comparison.
-				const primaryDate = new Date( interval.date_start );
-				const secondaryDate = new Date(
-					secondaryDataIntervals[ index ].date_start
-				);
-				if (
-					isLeapYear( primaryDate.getFullYear() ) &&
-					primaryDate.getMonth() === 1 &&
-					primaryDate.getDate() === 29 &&
-					secondaryDate.getMonth() === 2 &&
-					secondaryDate.getDate() === 1
-				) {
-					// This is going to be displayed as "Invalid date" label from D3.js, but desirable imo since
-					// 29th February is not a valid date for non-leap years.
-					secondaryLabelDate = '-';
-					secondaryValue = 0;
-
-					// Move the data up by 1 day for the missing leap day
-					// so everything else is shifted to the right correctly.
-					secondaryDataIntervals.splice(
-						index,
-						0,
-						secondaryDataIntervals[ index ]
-					);
-				}
-			} else if (
-				! primarydataContainsLeapYear &&
-				secondarydataContainsLeapYear
-			) {
-				// Todo: Do something about secondary data having leap year while first does not.
-				// Currently, there are issues to render chart where primary data does not have the date since
-				// the x-axis is based on primary data.
+		if (
+			matchByDate &&
+			yearShifted &&
+			secondaryInterval &&
+			isAdditiveMetric( selectedChartKey, selectedChartType )
+		) {
+			// A secondary 29th February has no column on a non-leap primary axis.
+			// Fold it into the 28th so the line still adds up to the legend total.
+			const dayAfter = secondaryDateMoment.clone().add( 1, 'days' );
+			const leapDayInterval =
+				dayAfter.month() === 1 && dayAfter.date() === 29
+					? secondaryIntervalsByDate.get(
+							dayAfter.format( 'YYYY-MM-DD' )
+					  )
+					: undefined;
+			if ( leapDayInterval ) {
+				secondaryValue +=
+					leapDayInterval.subtotals[ selectedChartKey ] || 0;
+				secondaryLabelDateEnd = leapDayInterval.date_start;
 			}
 		}
 
@@ -182,6 +196,9 @@ export function buildChartData(
 			secondary: {
 				label: secondaryLabel,
 				labelDate: secondaryLabelDate,
+				...( secondaryLabelDateEnd && {
+					labelDateEnd: secondaryLabelDateEnd,
+				} ),
 				value: secondaryValue,
 			},
 		} );

@@ -19,32 +19,46 @@ export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
  * DateValue Object
  *
  * @typedef  {Object} DateValue - DateValue data about the selected period.
- * @property {moment.Moment} primaryStart   - Primary start of the date range.
- * @property {moment.Moment} primaryEnd     - Primary end of the date range.
- * @property {moment.Moment} secondaryStart - Secondary start of the date range.
- * @property {moment.Moment} secondaryEnd   - Secondary End of the date range.
+ * @property {moment.Moment}  primaryStart     - Primary start of the date range.
+ * @property {moment.Moment}  primaryEnd       - Primary end of the date range.
+ * @property {moment.Moment}  secondaryStart   - Secondary start of the date range.
+ * @property {moment.Moment}  secondaryEnd     - Secondary End of the date range.
+ * @property {SecondaryShift} [secondaryShift] - How the secondary range was derived from the primary one.
  */
 export type DateValue = {
 	primaryStart: moment.Moment;
 	primaryEnd: moment.Moment;
 	secondaryStart: moment.Moment;
 	secondaryEnd: moment.Moment;
+	secondaryShift?: SecondaryShift;
 };
+
+/**
+ * How a secondary (comparison) date range relates to the primary one.
+ *
+ * `year`: the same calendar dates one year earlier, so a primary date maps to
+ * the secondary date with the same month and day.
+ * `offset`: shifted back by the distance between the two range starts, so a
+ * primary date maps to the secondary date the same number of days earlier.
+ */
+export type SecondaryShift = 'year' | 'offset';
 
 /**
  * DataPickerOptions Object
  *
  * @typedef  {Object}  DataPickerOptions - Describes the date range supplied by the date picker.
- * @property {string}        label  - The translated value of the period.
- * @property {string}        range  - The human readable value of a date range.
- * @property {moment.Moment} after  - Start of the date range.
- * @property {moment.Moment} before - End of the date range.
+ * @property {string}         label   - The translated value of the period.
+ * @property {string}         range   - The human readable value of a date range.
+ * @property {moment.Moment}  after   - Start of the date range.
+ * @property {moment.Moment}  before  - End of the date range.
+ * @property {SecondaryShift} [shift] - Secondary range only: how it was derived from the primary one.
  */
 export type DataPickerOptions = {
 	label: string;
 	range: string;
 	after: moment.Moment;
 	before: moment.Moment;
+	shift?: SecondaryShift;
 };
 
 /**
@@ -418,6 +432,7 @@ function anchorRangeToStoreTimeZone( range: DateValue ): DateValue {
 		primaryEnd: anchorToStoreTimeZone( range.primaryEnd ),
 		secondaryStart: anchorToStoreTimeZone( range.secondaryStart ),
 		secondaryEnd: anchorToStoreTimeZone( range.secondaryEnd ),
+		secondaryShift: range.secondaryShift,
 	};
 }
 
@@ -468,6 +483,7 @@ export function getLastPeriod(
 	const primaryEnd = primaryStart.clone().endOf( period );
 	let secondaryStart;
 	let secondaryEnd;
+	let secondaryShift: SecondaryShift = 'year';
 
 	if ( compare === 'previous_period' ) {
 		if ( period === 'year' ) {
@@ -480,6 +496,7 @@ export function getLastPeriod(
 			const daysDiff = primaryEnd.diff( primaryStart, 'days' );
 			secondaryEnd = primaryStart.clone().subtract( 1, 'days' );
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
+			secondaryShift = 'offset';
 		}
 	} else if ( period === 'week' ) {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
@@ -499,6 +516,7 @@ export function getLastPeriod(
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
+		secondaryShift,
 	} );
 }
 
@@ -519,26 +537,26 @@ export function getCurrentPeriod(
 	const primaryStart = getStoreTimeZoneMoment().startOf( period );
 	const primaryEnd = getStoreTimeZoneMoment();
 
-	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
 	let secondaryStart;
 	let secondaryEnd;
+	let secondaryShift: SecondaryShift = 'year';
 
 	if ( compare === 'previous_period' ) {
 		secondaryStart = primaryStart.clone().subtract( 1, period );
 		secondaryEnd = primaryEnd.clone().subtract( 1, period );
+		if ( period !== 'year' ) {
+			secondaryShift = 'offset';
+		}
 	} else {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
-		// Set the end time to 23:59:59.
-		secondaryEnd = secondaryStart
-			.clone()
-			.add( daysSoFar + 1, 'days' )
-			.subtract( 1, 'seconds' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' ).endOf( 'day' );
 	}
 	return anchorRangeToStoreTimeZone( {
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
+		secondaryShift,
 	} );
 }
 
@@ -597,6 +615,7 @@ const getDateValue = memoize<
 						primaryEnd: before,
 						secondaryStart,
 						secondaryEnd,
+						secondaryShift: 'offset',
 					};
 				}
 				return {
@@ -604,6 +623,7 @@ const getDateValue = memoize<
 					primaryEnd: before,
 					secondaryStart: after.clone().subtract( 1, 'years' ),
 					secondaryEnd: before.clone().subtract( 1, 'years' ),
+					secondaryShift: 'year',
 				};
 		}
 	},
@@ -727,6 +747,7 @@ export const getDateParamsFromQuery = (
  * @param {Object}           primaryEnd     - primary query start DateTime, in Moment instance.
  * @param {Object}           secondaryStart - secondary query start DateTime, in Moment instance.
  * @param {Object}           secondaryEnd   - secondary query start DateTime, in Moment instance.
+ * @param {SecondaryShift}   secondaryShift - how the secondary range was derived from the primary one.
  * @return {{primary: DataPickerOptions, secondary: DataPickerOptions}} - Primary and secondary DataPickerOptions objects
  */
 const getCurrentDatesMemoized = memoize<
@@ -738,6 +759,7 @@ const getCurrentDatesMemoized = memoize<
 			moment.Moment,
 			moment.Moment,
 			moment.Moment,
+			SecondaryShift | undefined,
 		]
 	) => {
 		primary: DataPickerOptions;
@@ -750,7 +772,8 @@ const getCurrentDatesMemoized = memoize<
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
-		secondaryEnd
+		secondaryEnd,
+		secondaryShift
 	) => {
 		const primaryItem = find(
 			presetValues,
@@ -779,6 +802,7 @@ const getCurrentDatesMemoized = memoize<
 				range: getRangeLabel( secondaryStart, secondaryEnd ),
 				after: secondaryStart,
 				before: secondaryEnd,
+				shift: secondaryShift,
 			},
 		};
 	},
@@ -788,7 +812,8 @@ const getCurrentDatesMemoized = memoize<
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
-		secondaryEnd
+		secondaryEnd,
+		secondaryShift
 	) =>
 		[
 			period,
@@ -797,6 +822,7 @@ const getCurrentDatesMemoized = memoize<
 			primaryEnd && primaryEnd.format(),
 			secondaryStart && secondaryStart.format(),
 			secondaryEnd && secondaryEnd.format(),
+			secondaryShift,
 		].join( ':' )
 );
 
@@ -826,8 +852,13 @@ export const getCurrentDates = (
 		throw Error( 'Invalid date range' );
 	}
 
-	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
-		dateValue;
+	const {
+		primaryStart,
+		primaryEnd,
+		secondaryStart,
+		secondaryEnd,
+		secondaryShift,
+	} = dateValue;
 
 	return getCurrentDatesMemoized(
 		period,
@@ -835,7 +866,8 @@ export const getCurrentDates = (
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
-		secondaryEnd
+		secondaryEnd,
+		secondaryShift
 	);
 };
 
@@ -858,31 +890,42 @@ export const getDateDifferenceInDays = (
 /**
  * Get the previous date for either the previous period of year.
  *
- * @param {string}                 date     - Base date
- * @param {string}                 date1    - primary start
- * @param {string}                 date2    - secondary start
+ * @param {moment.MomentInput}     date     - Base date
+ * @param {moment.MomentInput}     date1    - primary start
+ * @param {moment.MomentInput}     date2    - secondary start
  * @param {string}                 compare  - `previous_period`  or `previous_year`
  * @param {moment.unitOfTime.Diff} interval - interval
+ * @param {SecondaryShift}         [shift]  - how the secondary range was derived, see `DataPickerOptions.shift`. Takes precedence over `compare` when given.
  * @return {Object}  - Calculated date
  */
 export const getPreviousDate = (
-	date: string,
-	date1: string,
-	date2: string,
+	date: moment.MomentInput,
+	date1: moment.MomentInput,
+	date2: moment.MomentInput,
 	compare = 'previous_year',
-	interval: moment.unitOfTime.Diff | moment.DurationInputArg2
+	interval: moment.unitOfTime.Diff | moment.DurationInputArg2,
+	shift?: SecondaryShift
 ) => {
 	const dateMoment = moment( date );
+	const yearShifted = shift ? shift === 'year' : compare === 'previous_year';
 
-	if ( compare === 'previous_year' ) {
+	if ( yearShifted ) {
 		return dateMoment.clone().subtract( 1, 'years' );
 	}
 
-	const _date1 = moment( date1 );
-	const _date2 = moment( date2 );
-	const difference = _date1.diff( _date2, interval );
+	// Range boundaries are anchored to their own UTC offset, so two starts on
+	// different sides of a DST change differ by an hour as instants and the
+	// diff floors to one interval short. Compare and shift the wall-clock
+	// dates instead, then return a local moment like the year shift does.
+	const wallClock = ( value: moment.MomentInput ) =>
+		moment.utc( moment( value ).format( defaultDateTimeFormat ) );
+	const difference = wallClock( date1 ).diff( wallClock( date2 ), interval );
 
-	return dateMoment.clone().subtract( difference, interval );
+	return moment(
+		wallClock( date )
+			.subtract( difference, interval )
+			.format( defaultDateTimeFormat )
+	);
 };
 
 /**
