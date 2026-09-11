@@ -310,9 +310,10 @@ function activateProductPlugin( subscription: Subscription ): Promise< void > {
 }
 
 /**
- * Turn plugin auto-updates on or off for a subscription's installed plugin.
+ * Turn auto-updates on or off for the plugin or theme backing a subscription.
  *
- * Writes the same `auto_update_plugins` option the WordPress Plugins screen writes.
+ * Writes the same `auto_update_plugins` / `auto_update_themes` option the
+ * WordPress Plugins and Themes screens write.
  */
 function setProductAutoUpdate(
 	subscription: Subscription,
