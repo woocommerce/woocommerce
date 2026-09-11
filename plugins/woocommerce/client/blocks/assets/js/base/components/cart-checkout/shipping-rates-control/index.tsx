@@ -50,6 +50,11 @@ const Packages = ( {
 	// Running it from the parent also reaches packages whose list is not mounted, such
 	// as a consumer that renders them in collapsed panels.
 	useEffect( () => {
+		// The rate lists own their selection in the editor, so leave it to them.
+		if ( isEditor ) {
+			return;
+		}
+
 		const currentPackageIds = new Set(
 			packages.map( ( shippingPackage ) => shippingPackage.package_id )
 		);
@@ -81,7 +86,7 @@ const Packages = ( {
 			initializedPackageIds.current.add( shippingPackage.package_id );
 			selectShippingRate( rateId, shippingPackage.package_id );
 		} );
-	}, [ packages, selectShippingRate ] );
+	}, [ packages, selectShippingRate, isEditor ] );
 
 	// If there are no packages, return nothing.
 	if ( ! packages.length ) {

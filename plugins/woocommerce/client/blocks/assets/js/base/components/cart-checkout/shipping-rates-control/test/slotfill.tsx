@@ -394,10 +394,11 @@ describe( 'ShippingRatesControl slot rendering', () => {
 	} );
 
 	it( 'lets the rate lists own their selection in the editor only', () => {
+		const selectShippingRate = jest.fn();
 		( useShippingData as jest.Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
-			selectShippingRate: jest.fn(),
+			selectShippingRate,
 		} );
 
 		render(
@@ -415,6 +416,7 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		// thunk returns early there, so the rate list has to render its own state or
 		// clicking a rate in the block preview would do nothing.
 		mockShippingRatesControlPackage.mockClear();
+		selectShippingRate.mockClear();
 		( useEditorContext as jest.Mock ).mockReturnValue( { isEditor: true } );
 		try {
 			render(
@@ -429,6 +431,9 @@ describe( 'ShippingRatesControl slot rendering', () => {
 			expect( mockShippingRatesControlPackage ).toHaveBeenCalledWith(
 				expect.objectContaining( { manageSelectionLocally: true } )
 			);
+			// Selecting from here as well would fire set-selected-shipping-rate
+			// twice per package for anything listening in the editor.
+			expect( selectShippingRate ).not.toHaveBeenCalled();
 		} finally {
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
