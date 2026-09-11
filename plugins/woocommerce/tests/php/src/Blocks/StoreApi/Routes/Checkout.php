@@ -3607,6 +3607,32 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox A failure while the order sits in a custom status the site declares payable is reported, not recovered.
+	 */
+	public function test_failure_in_a_custom_payable_status_is_not_recovered() {
+		// Short on purpose: the status column holds twenty characters, prefix included.
+		$status_name = 'awaiting_review';
+		$this->register_custom_order_status( $status_name, true );
+
+		// A gateway that parks the order in the custom status and then declines. No payment was
+		// taken, so the status must read as awaiting payment rather than as moved past it.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) use ( $status_name ) {
+				$context->order->update_status( $status_name );
+				throw new \Exception( 'Your card was declined.' );
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 400, $response->get_status(), 'A decline while the order is awaiting payment must be reported: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_process_payment_error', $response->get_data()['code'] );
+		$this->assertFalse( WC()->cart->is_empty(), 'The cart must survive so the shopper can retry.' );
+	}
+
+	/**
 	 * Gateways read the redirect back out of payment_details on the client rather than out of
 	 * redirect_url, so a recovered result has to carry it in both. WooPayments reads
 	 * paymentDetails.redirect and calls String.match() on it, which throws on undefined and

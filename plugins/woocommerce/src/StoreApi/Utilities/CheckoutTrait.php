@@ -188,22 +188,38 @@ trait CheckoutTrait {
 	 * something moved it on. This is about the status, not the money: an order parked on-hold
 	 * for review counts, because sending the shopper back to place it again would be wrong.
 	 *
-	 * A plain status check on purpose. needs_payment() would fold in the order total and two
-	 * filters, so a fully discounted order, or a site filtering the payable statuses, could
-	 * flip the answer for a live order.
+	 * The statuses a site declares payable count as awaiting payment, so a custom status an
+	 * extension parks the order in before the gateway runs is not mistaken for a paid one.
+	 * Not needs_payment(): that folds in the order total, and a fully discounted order that
+	 * failed would then keep its stock and coupon holds.
 	 *
 	 * @param \WC_Order $order Order object.
 	 * @return bool
 	 */
 	private function order_moved_past_payment( \WC_Order $order ): bool {
+		/**
+		 * Filter the valid order statuses for payment.
+		 *
+		 * The same filter WC_Order::needs_payment() applies. A status a site declares payable
+		 * counts as awaiting payment here too, so a failure while the order is in it is reported
+		 * rather than recovered as one that took payment.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array     $valid_order_statuses Array of valid order statuses for payment.
+		 * @param \WC_Order $order                Order object.
+		 */
+		$payable_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+
 		return ! $order->has_status(
-			array(
-				OrderStatus::CHECKOUT_DRAFT,
-				OrderStatus::PENDING,
-				OrderStatus::FAILED,
-				OrderStatus::CANCELLED,
-				OrderStatus::REFUNDED,
-				OrderStatus::TRASH,
+			array_merge(
+				(array) $payable_statuses,
+				array(
+					OrderStatus::CHECKOUT_DRAFT,
+					OrderStatus::CANCELLED,
+					OrderStatus::REFUNDED,
+					OrderStatus::TRASH,
+				)
 			)
 		);
 	}
