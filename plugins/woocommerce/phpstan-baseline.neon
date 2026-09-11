@@ -9685,12 +9685,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Parameter \#2 \$value of function wc_setcookie expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
