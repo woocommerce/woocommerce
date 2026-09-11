@@ -10662,11 +10662,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-comments.php
 
-		-
-			message: '#^Access to an undefined property WC_Countries\:\:\$countries\.$#'
-			identifier: property.notFound
-			count: 5
-			path: includes/class-wc-countries.php
 
 		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
