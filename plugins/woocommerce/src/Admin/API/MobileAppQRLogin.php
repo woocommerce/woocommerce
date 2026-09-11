@@ -1842,6 +1842,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
+		$canonical_session = isset( $record['challenge']['session_id'] ) ? (string) $record['challenge']['session_id'] : '';
+		if ( '' === $canonical_session || ! hash_equals( $canonical_session, $session_id ) ) {
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
 		$state    = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		$response = array( 'state' => $state );
 
