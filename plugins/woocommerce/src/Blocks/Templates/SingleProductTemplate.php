@@ -243,9 +243,23 @@ class SingleProductTemplate extends AbstractTemplate {
 			return true;
 		}
 
-		return 'core/pattern' === $block_name
-			&& isset( $block['attrs']['slug'] )
-			&& 'woocommerce-blocks/related-products' === $block['attrs']['slug'];
+		if (
+			'core/pattern' !== $block_name ||
+			! isset( $block['attrs']['slug'] )
+		) {
+			return false;
+		}
+
+		$pattern = \WP_Block_Patterns_Registry::get_instance()->get_registered( $block['attrs']['slug'] );
+
+		if ( empty( $pattern['content'] ) ) {
+			return false;
+		}
+
+		return BlockTemplateUtils::has_block_including_patterns(
+			$single_product_template_blocks,
+			parse_blocks( $pattern['content'] )
+		);
 	}
 
 	/**
