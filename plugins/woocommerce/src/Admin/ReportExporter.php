@@ -493,9 +493,12 @@ class ReportExporter {
 			return null;
 		}
 
+		global $wpdb;
+
 		// Both kinds of action carry the export id followed by the report type. Matching that pair the
 		// way Action Scheduler stores it keeps a short custom export id from matching other exports.
-		$args_fragment = trim( (string) wp_json_encode( array( $export_id, $report_type ) ), '[]' );
+		// The search is a LIKE, and a custom id can hold "_", so escape it rather than match any character.
+		$args_fragment = $wpdb->esc_like( trim( (string) wp_json_encode( array( $export_id, $report_type ) ), '[]' ) );
 
 		/**
 		 * The queue, typed here because the trait's docblock names the interface without its namespace.

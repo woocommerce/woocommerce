@@ -591,6 +591,26 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An export id containing an underscore does not match batches of a similar id.
+	 */
+	public function test_email_does_not_treat_an_underscore_in_the_export_id_as_a_wildcard(): void {
+		$user_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$export_id = 'monthly_1';
+
+		$this->create_export( 'wc-products-report-export-' . $export_id );
+		// One character apart, which an unescaped "_" would match.
+		$this->queue_export_action( 'export_report', $this->batch_args( 'export_report', 'monthly01' ) );
+
+		$queue  = $this->use_test_queue();
+		$mailer = $this->fresh_mailer();
+
+		ReportExporter::email_report_download_link( $user_id, $export_id, 'products' );
+
+		$this->assertCount( 1, $mailer->mock_sent, 'The finished export should be emailed.' );
+		$this->assertEmpty( $queue->actions, 'A similar export id should not hold the email back.' );
+	}
+
+	/**
 	 * @testdox The email action does not mistake itself for an unfinished batch.
 	 */
 	public function test_email_is_not_blocked_by_itself(): void {
