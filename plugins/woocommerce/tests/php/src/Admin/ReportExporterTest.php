@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
@@ -720,15 +721,17 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 * @testdox The report period is capped at the request time only when it runs into the future.
 	 */
 	public function test_report_period_is_capped_at_the_request_time(): void {
-		$past   = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2020-01-01T00:00:00' ) );
-		$future = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
-		$open   = ReportExporter::freeze_report_period( 'orders', array( 'after' => '2020-01-01T00:00:00' ) );
-		$stock  = ReportExporter::freeze_report_period( 'stock', array( 'after' => '2020-01-01T00:00:00' ) );
+		$past      = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2020-01-01T00:00:00' ) );
+		$future    = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
+		$open      = ReportExporter::freeze_report_period( 'orders', array( 'after' => '2020-01-01T00:00:00' ) );
+		$customers = ReportExporter::freeze_report_period( 'customers', array() );
+		$stock     = ReportExporter::freeze_report_period( 'stock', array( 'before' => '2100-01-01T00:00:00' ) );
 
 		$this->assertSame( '2020-01-01T00:00:00', $past['before'], 'A period that already ended is left alone.' );
 		$this->assertLessThanOrEqual( time(), strtotime( $future['before'] ), 'A period running into the future ends at the request time.' );
-		$this->assertLessThanOrEqual( time(), strtotime( $open['before'] ), 'A period with no end ends at the request time.' );
-		$this->assertArrayNotHasKey( 'before', $stock, 'A report without a period is left alone.' );
+		$this->assertArrayNotHasKey( 'before', $open, 'A request that sent no end must not be given one.' );
+		$this->assertArrayNotHasKey( 'before', $customers, 'Customers reads before as an order date, so an export without one must not be given one.' );
+		$this->assertSame( '2100-01-01T00:00:00', $stock['before'], 'A report without a period is left alone.' );
 	}
 
 	/**
@@ -737,8 +740,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	public function test_report_period_cap_uses_the_store_utc_offset(): void {
 		update_option( 'timezone_string', '' );
 		update_option( 'gmt_offset', 10 );
-
-		$capped = ReportExporter::freeze_report_period( 'orders', array( 'after' => '2020-01-01T00:00:00' ) );
+		$capped = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
 
 		$this->assertStringEndsWith( '+10:00', $capped['before'], 'The cap should spell out the store offset.' );
 		$this->assertEqualsWithDelta(
@@ -747,6 +749,16 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			5,
 			'Read as the report data store reads it, the cap should be the request time, not the UTC clock.'
 		);
+	}
+
+	/**
+	 * @testdox A Customers export with no dates keeps customers who never ordered.
+	 */
+	public function test_customers_export_keeps_customers_without_orders(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		CustomersDataStore::update_registered_customer( $user_id );
+
+		$this->assertSame( 1, ReportExporter::queue_report_export( (string) time(), 'customers', array(), false ), 'The customer with no orders should be the one row exported.' );
 	}
 
 	/**

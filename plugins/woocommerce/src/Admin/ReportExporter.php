@@ -160,17 +160,22 @@ class ReportExporter {
 	/**
 	 * Cap the report period at the time of the request, so orders placed while the export runs are not in it.
 	 *
-	 * Each batch queries live data. With an open-ended period, new orders would shift the pages under the
-	 * export, duplicating some rows, dropping others, and moving the row count the batches paginate by.
+	 * Each batch queries live data. With a period running into the future, new orders would shift the
+	 * pages under the export, duplicating some rows, dropping others, and moving the row count the
+	 * batches paginate by.
+	 *
+	 * Only an end the request sent is capped. Each report gives `before` its own meaning, and one it
+	 * did not ask for is a new filter: Customers turns it into an order date, which drops every
+	 * customer who never ordered.
 	 *
 	 * @internal
 	 * @since 11.2.0
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
-	 * @return array Report parameters with `before` no later than now, for reports that take one.
+	 * @return array Report parameters with a `before` that was sent lowered to now, for reports that take one.
 	 */
 	public static function freeze_report_period( $report_type, $report_args ) {
-		if ( ! is_array( $report_args ) ) {
+		if ( ! is_array( $report_args ) || empty( $report_args['before'] ) || ! is_string( $report_args['before'] ) ) {
 			return $report_args;
 		}
 
@@ -181,18 +186,16 @@ class ReportExporter {
 
 		$now = time();
 
-		if ( ! empty( $report_args['before'] ) && is_string( $report_args['before'] ) ) {
-			try {
-				// Unspecified timezone means the local one, as the report data store reads it.
-				$before = new \DateTime( $report_args['before'], new \DateTimeZone( wc_timezone_string() ) );
-			} catch ( \Exception $e ) {
-				// Leave an unreadable value for the report's own validation to reject.
-				return $report_args;
-			}
+		try {
+			// Unspecified timezone means the local one, as the report data store reads it.
+			$before = new \DateTime( $report_args['before'], new \DateTimeZone( wc_timezone_string() ) );
+		} catch ( \Exception $e ) {
+			// Leave an unreadable value for the report's own validation to reject.
+			return $report_args;
+		}
 
-			if ( $before->getTimestamp() <= $now ) {
-				return $report_args;
-			}
+		if ( $before->getTimestamp() <= $now ) {
+			return $report_args;
 		}
 
 		// Local wall time with its offset spelled out. The data store reads a bare time as local, and on a
