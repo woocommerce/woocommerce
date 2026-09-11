@@ -518,4 +518,52 @@ class MiniCart extends \WP_UnitTestCase {
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
+
+	/**
+	 * @testdox Should dequeue the view script module before it is printed when rendered on the cart page.
+	 */
+	public function test_view_script_module_is_dequeued_on_cart_page(): void {
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		$this->assertSame( 1, has_action( 'wp_head', array( $this->mock, 'dequeue_view_script_module' ) ), 'Dequeue callback should run early on wp_head.' );
+		$this->assertSame( 1, has_action( 'wp_footer', array( $this->mock, 'dequeue_view_script_module' ) ), 'Dequeue callback should run early on wp_footer.' );
+		$this->assertContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'WordPress should have enqueued the view script module after rendering the block.' );
+
+		$this->mock->dequeue_view_script_module();
+
+		$this->assertNotContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should not be enqueued on the cart page.' );
+	}
+
+	/**
+	 * @testdox Should keep the view script module enqueued when rendered outside the cart and checkout pages.
+	 */
+	public function test_view_script_module_stays_enqueued_outside_cart_and_checkout(): void {
+		if ( \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CART' ) || \Automattic\Jetpack\Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			$this->markTestSkipped( 'A previous test forced the cart or checkout context for the rest of the process.' );
+		}
+
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		$this->assertFalse( has_action( 'wp_head', array( $this->mock, 'dequeue_view_script_module' ) ), 'Dequeue callback should not be hooked outside the cart and checkout pages.' );
+		$this->assertFalse( has_action( 'wp_footer', array( $this->mock, 'dequeue_view_script_module' ) ), 'Dequeue callback should not be hooked outside the cart and checkout pages.' );
+		$this->assertContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should stay enqueued on regular pages.' );
+	}
+
+	/**
+	 * Return the identifiers of the currently enqueued script modules.
+	 *
+	 * `WP_Script_Modules` exposes no public accessor for its queue, and printing the
+	 * modules is not an option because WordPress prints each module only once per process.
+	 *
+	 * @return string[]
+	 */
+	private function get_enqueued_script_module_ids(): array {
+		$queue = new \ReflectionProperty( \WP_Script_Modules::class, 'queue' );
+		$queue->setAccessible( true );
+		return $queue->getValue( wp_script_modules() );
+	}
 }

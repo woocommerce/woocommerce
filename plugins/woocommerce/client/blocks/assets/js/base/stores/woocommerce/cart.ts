@@ -1167,7 +1167,8 @@ const { actions } = store< Store >(
 
 			*refreshCartItems(): AsyncAction< void > {
 				// Skip when the server did not provide the interactivity
-				// state this store needs (e.g. cart/checkout pages).
+				// state this store needs, e.g. when a block imports this
+				// store without loading the shared cart state.
 				if ( ! state.restUrl ) {
 					return;
 				}
