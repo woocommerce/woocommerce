@@ -114,6 +114,63 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The gallery header renders a label with a help tip instead of a Manage link, count, or hint paragraph.
+	 */
+	public function test_render_variation_gallery_field_renders_label_and_help_tip_without_manage_link() {
+		$variation = $this->create_variation();
+		$image_id  = $this->create_attachment( 'Header test image' );
+
+		$variation->set_gallery_image_ids( array( $image_id ) );
+		$variation->save();
+
+		$output = $this->render_variation_gallery_field( $variation );
+
+		$this->assertStringContainsString( 'class="wc-variation-gallery-field__title"', $output );
+		$this->assertStringContainsString( 'class="woocommerce-help-tip"', $output );
+		$this->assertStringContainsString( 'First image is used as the primary. Drag to reorder.', $output );
+		$this->assertStringNotContainsString( 'wc-variation-gallery-field__count', $output );
+		$this->assertStringNotContainsString( 'wc-variation-gallery-field__hint', $output );
+		$this->assertStringNotContainsString( 'button-link wc-variation-gallery-manage', $output );
+		$this->assertStringNotContainsString( '>Manage<', $output );
+	}
+
+	/**
+	 * @testdox The add tile renders last in the thumbnail list and opens the same picker as the empty-state CTA.
+	 */
+	public function test_render_variation_gallery_field_renders_add_tile_after_thumbnails() {
+		$variation = $this->create_variation();
+		$first     = $this->create_attachment( 'Tile test image 1' );
+		$second    = $this->create_attachment( 'Tile test image 2' );
+
+		$variation->set_gallery_image_ids( array( $first, $second ) );
+		$variation->save();
+
+		$output = $this->render_variation_gallery_field( $variation );
+
+		$last_thumbnail = strpos( $output, 'data-attachment_id="' . $second . '"' );
+		$add_tile       = strpos( $output, '<li class="wc-variation-gallery-add">' );
+
+		$this->assertIsInt( $last_thumbnail );
+		$this->assertIsInt( $add_tile );
+		$this->assertGreaterThan( $last_thumbnail, $add_tile, 'Add tile should be rendered after the last thumbnail.' );
+		$this->assertSame( 1, substr_count( $output, 'wc-variation-gallery-add__button' ) );
+		$this->assertStringContainsString( 'class="wc-variation-gallery-add__button wc-variation-gallery-manage"', $output );
+		$this->assertStringContainsString( 'aria-label="Add images to variation gallery"', $output );
+	}
+
+	/**
+	 * @testdox Empty galleries keep the hero CTA as the only add affordance and hide the tile with the thumbnail list.
+	 */
+	public function test_render_variation_gallery_field_empty_state_keeps_hero_cta() {
+		$variation = $this->create_variation();
+		$output    = $this->render_variation_gallery_field( $variation );
+
+		$this->assertStringContainsString( 'wc-variation-gallery-field is-empty', $output );
+		$this->assertStringContainsString( 'wc-variation-gallery-field__empty-cta wc-variation-gallery-manage', $output );
+		$this->assertStringContainsString( 'wc-variation-gallery-add__button', $output );
+	}
+
+	/**
 	 * @testdox Saving an empty variation gallery clears featured + gallery and disables the legacy fallback.
 	 */
 	public function test_saving_empty_variation_gallery_disables_legacy_fallback() {
