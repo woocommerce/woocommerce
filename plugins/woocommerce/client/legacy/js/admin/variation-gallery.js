@@ -18,9 +18,8 @@ jQuery( function ( $ ) {
 		fieldHeroImg: '.wc-variation-gallery-field__hero-img',
 		fieldHeroBroken: '.wc-variation-gallery-field__hero-broken',
 		fieldHeroEmptyCta: '.wc-variation-gallery-field__empty-cta',
-		fieldHint: '.wc-variation-gallery-field__hint',
-		fieldCount: '.wc-variation-gallery-field__count',
 		fieldImageIdsInput: '.wc-variation-gallery-image-ids',
+		addTile: '.wc-variation-gallery-add',
 		thumb: '.wc-variation-gallery-thumb',
 		thumbButton: '.wc-variation-gallery-thumb__button',
 		thumbRemove: '.wc-variation-gallery-thumb__remove',
@@ -84,22 +83,6 @@ jQuery( function ( $ ) {
 			attachmentJson.url ||
 			''
 		);
-	};
-
-	/**
-	 * Map an image count to the i18n template key used to label the field.
-	 *
-	 * @param {number} count
-	 * @return {string}
-	 */
-	const getCountTemplateKey = ( count ) => {
-		if ( count === 0 ) {
-			return 'countZero';
-		}
-		if ( count === 1 ) {
-			return 'countSingular';
-		}
-		return 'countPlural';
 	};
 
 	/**
@@ -214,6 +197,8 @@ jQuery( function ( $ ) {
 						$list.removeClass( 'is-sorting' );
 					},
 					update() {
+						variationGallery.moveAddTileLast( $list );
+
 						const wasPrimary =
 							variationGallery.getActiveAttachmentId( $field );
 						variationGallery.setActiveIndex( $field, 0 );
@@ -547,6 +532,8 @@ jQuery( function ( $ ) {
 				);
 			} );
 
+			$list.append( this.buildAddTileMarkup() );
+
 			if ( $list.data( 'wc-variation-gallery-sortable' ) ) {
 				$list.sortable( 'refresh' );
 			}
@@ -605,6 +592,42 @@ jQuery( function ( $ ) {
 
 			$button.append( $brokenWrapper, $srLabel );
 			return $li.append( $button, $remove );
+		},
+
+		/**
+		 * Build the markup for the trailing "add images" tile.
+		 *
+		 * @return {jQuery}
+		 */
+		buildAddTileMarkup() {
+			const $icon = $( '<span></span>' )
+				.addClass( 'dashicons dashicons-plus-alt2' )
+				.attr( 'aria-hidden', 'true' );
+			const $button = $( '<button type="button"></button>' )
+				.addClass(
+					'wc-variation-gallery-add__button wc-variation-gallery-manage'
+				)
+				.attr(
+					'aria-label',
+					l10n.addTileLabel || 'Add images to variation gallery'
+				)
+				.append( $icon );
+
+			return $( '<li></li>' )
+				.addClass( 'wc-variation-gallery-add' )
+				.append( $button );
+		},
+
+		/**
+		 * Move the add tile back to the end of the list.
+		 *
+		 * The tile is not sortable, but a thumbnail can still be dropped past
+		 * it, which would leave it stranded mid-list.
+		 *
+		 * @param {jQuery} $list
+		 */
+		moveAddTileLast( $list ) {
+			$list.append( $list.children( SELECTORS.addTile ) );
 		},
 
 		/**
@@ -918,9 +941,8 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Refresh the count label, the empty-state class, and the hint
-		 * visibility from the field's current image count. Pass an
-		 * explicit count to skip the DOM lookup.
+		 * Refresh the empty-state class from the field's current image
+		 * count. Pass an explicit count to skip the DOM lookup.
 		 *
 		 * @param {jQuery}      $field
 		 * @param {number|null} [precomputedCount=null]
@@ -930,12 +952,8 @@ jQuery( function ( $ ) {
 				precomputedCount === null
 					? this.getFieldIds( $field ).length
 					: precomputedCount;
-			const template = l10n[ getCountTemplateKey( count ) ] || '%d';
-			const label = template.replace( '%d', count );
 
 			$field.toggleClass( CLASSES.isEmpty, count === 0 );
-			$field.find( SELECTORS.fieldCount ).text( label );
-			$field.find( SELECTORS.fieldHint ).prop( 'hidden', count === 0 );
 		},
 
 		restoreMediaPostId() {
