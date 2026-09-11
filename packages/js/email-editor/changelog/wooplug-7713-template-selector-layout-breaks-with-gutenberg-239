@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the template selector layout with Gutenberg 23.9+ by giving it its own styles and using Tabs from @wordpress/ui for the category list

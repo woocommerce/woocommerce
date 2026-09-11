@@ -261,18 +261,24 @@ For Jest (or any non-webpack test runner), the runtime fallback applies, so unit
 globalThis.__i18n_text_domain__ = 'your-text-domain';
 ```
 
-#### Global Styles Engine
+#### Packages that must be bundled
 
-A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
+The email editor package depends on a few `@wordpress/*` packages that are **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, they are not available globally in WordPress environments and must be bundled:
 
-**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors: `"Cannot find module '@wordpress/global-styles-engine'"`.
+-   `@wordpress/global-styles-engine` (since 1.4.3)
+-   `@wordpress/ui` (since 2.5.0)
 
-**Solution**: Configure your webpack dependency extraction plugin to bundle this package instead of treating it as an external:
+**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors such as `"Cannot find module '@wordpress/global-styles-engine'"`.
+
+**Solution**: Configure your webpack dependency extraction plugin to bundle these packages instead of treating them as externals:
 
 ```javascript
 new DependencyExtractionWebpackPlugin( {
     requestToExternal( request ) {
-        if ( request === '@wordpress/global-styles-engine' ) {
+        if (
+            request === '@wordpress/global-styles-engine' ||
+            request === '@wordpress/ui'
+        ) {
             // Return null to bundle this package instead of treating it as external
             return null;
         }

@@ -4,11 +4,9 @@
 import { useMemo, memo } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
-import { Icon, info, blockDefault } from '@wordpress/icons';
+import { blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
-import {
-	__experimentalHStack as HStack, // eslint-disable-line
-} from '@wordpress/components';
+import { EmptyState, Notice, Stack } from '@wordpress/ui';
 // @ts-expect-error No types available for this component
 // eslint-disable-next-line
 import { BlockPreview } from '@wordpress/block-editor';
@@ -28,19 +26,18 @@ type Props = {
 
 function TemplateNoResults() {
 	return (
-		<div className="block-editor-inserter__no-results">
-			<Icon
-				className="block-editor-inserter__no-results-icon"
-				icon={ blockDefault }
-			/>
-			<p>{ __( 'No recent templates.', __i18n_text_domain__ ) }</p>
-			<p>
+		<EmptyState.Root className="email-editor-template-select__no-results">
+			<EmptyState.Icon icon={ blockDefault } />
+			<EmptyState.Title>
+				{ __( 'No recent templates.', __i18n_text_domain__ ) }
+			</EmptyState.Title>
+			<EmptyState.Description>
 				{ __(
 					'Your recent creations will appear here as soon as you begin.',
 					__i18n_text_domain__
 				) }
-			</p>
-		</div>
+			</EmptyState.Description>
+		</EmptyState.Root>
 	);
 }
 
@@ -73,14 +70,14 @@ function TemplateListBox( {
 	}
 
 	return (
-		<div className="block-editor-block-patterns-list" role="listbox">
+		<div className="email-editor-template-select__templates" role="listbox">
 			{ templates.map( ( template ) => (
 				<div
 					key={ `${ template.slug }_${ template.displayName }_${ template.id }` }
-					className="block-editor-block-patterns-list__list-item email-editor-pattern__list-item"
+					className="email-editor-template-select__template"
 				>
 					<div
-						className="block-editor-block-patterns-list__item"
+						className="email-editor-template-select__template-button"
 						role="button"
 						tabIndex={ 0 }
 						onClick={ () => {
@@ -113,11 +110,15 @@ function TemplateListBox( {
 								] }
 							/>
 
-							<HStack className="block-editor-patterns__pattern-details">
-								<h4 className="block-editor-block-patterns-list__item-title">
+							<Stack
+								direction="row"
+								align="center"
+								className="email-editor-template-select__template-details"
+							>
+								<h4 className="email-editor-template-select__template-title">
 									{ template.displayName }
 								</h4>
-							</HStack>
+							</Stack>
 						</Async>
 					</div>
 				</div>
@@ -148,19 +149,20 @@ export function TemplateList( {
 	);
 
 	return (
-		<div className="block-editor-block-patterns-explorer__list">
+		<Stack
+			direction="column"
+			gap="xl"
+			className="email-editor-template-select__list"
+		>
 			{ selectedCategory === 'recent' && (
-				<div className="email-editor-recent-templates-info">
-					<HStack spacing={ 1 } expanded={ false } justify="start">
-						<Icon icon={ info } />
-						<p>
-							{ __(
-								'Templates created on the legacy editor will not appear here.',
-								__i18n_text_domain__
-							) }
-						</p>
-					</HStack>
-				</div>
+				<Notice.Root intent="info">
+					<Notice.Description>
+						{ __(
+							'Templates created on the legacy editor will not appear here.',
+							__i18n_text_domain__
+						) }
+					</Notice.Description>
+				</Notice.Root>
 			) }
 
 			<MemorizedTemplateListBox
@@ -168,6 +170,6 @@ export function TemplateList( {
 				onTemplateSelection={ onTemplateSelection }
 				selectedCategory={ selectedCategory }
 			/>
-		</div>
+		</Stack>
 	);
 }
