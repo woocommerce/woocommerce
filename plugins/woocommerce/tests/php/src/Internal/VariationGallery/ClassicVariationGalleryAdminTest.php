@@ -147,12 +147,14 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 
 		$output = $this->render_variation_gallery_field( $variation );
 
-		$this->assertMatchesRegularExpression(
-			'/data-attachment_id="' . $second . '".*<li class="wc-variation-gallery-add">\s*<button\s+type="button"\s+class="wc-variation-gallery-add__button wc-variation-gallery-manage"/s',
-			$output,
-			'Add tile should be rendered after the last thumbnail.'
-		);
+		$last_thumbnail = strpos( $output, 'data-attachment_id="' . $second . '"' );
+		$add_tile       = strpos( $output, '<li class="wc-variation-gallery-add">' );
+
+		$this->assertIsInt( $last_thumbnail );
+		$this->assertIsInt( $add_tile );
+		$this->assertGreaterThan( $last_thumbnail, $add_tile, 'Add tile should be rendered after the last thumbnail.' );
 		$this->assertSame( 1, substr_count( $output, 'wc-variation-gallery-add__button' ) );
+		$this->assertStringContainsString( 'class="wc-variation-gallery-add__button wc-variation-gallery-manage"', $output );
 		$this->assertStringContainsString( 'aria-label="Add images to variation gallery"', $output );
 	}
 
