@@ -40,6 +40,16 @@ interface FinanceDataProviderInterface {
 	 */
 	public function get_icon_url(): string;
 
+
+	/**
+	 * Get the title of the payment provider.
+	 *
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_title(): string;
+
 	/**
 	 * Get the finance data types this provider supports and the data-model version it implements for each.
 	 *
