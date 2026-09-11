@@ -558,14 +558,7 @@ class PushTokensDataStore {
 				// fires between the action running and `mark_complete()`, inside
 				// the runner's own Throwable catch, so an Error escaping here
 				// would record a delivered notification's action as failed.
-				wc_get_logger()->warning(
-					'Failed to record last sent time for push tokens.',
-					array(
-						'source'      => PushNotifications::FEATURE_NAME,
-						'token_count' => count( $chunk ),
-						'error'       => $e->getMessage(),
-					)
-				);
+				$this->warn_last_sent_at_not_recorded( array_keys( $chunk ), $e->getMessage() );
 			}
 		}
 	}
