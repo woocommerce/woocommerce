@@ -51,6 +51,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $download_suffix = '';
 
 	/**
+	 * How many batches the export was split into when it was queued, or 0 when unknown.
+	 *
+	 * @var int
+	 */
+	protected $total_batches = 0;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -344,13 +351,34 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Set how many batches the export was split into when it was queued.
+	 *
+	 * Once set, completion is measured by batch rather than by row. Each batch re-reads the
+	 * report's row total, which keeps moving while orders come in, so a row-based percentage can
+	 * end an export at 99 or 101 and never hit 100.
+	 *
+	 * @since 11.2.0
+	 * @param int $total_batches Number of batches, as computed when the export was queued.
+	 * @return void
+	 */
+	public function set_total_batches( $total_batches ) {
+		$this->total_batches = absint( $total_batches );
+	}
+
+	/**
 	 * Get total % complete.
 	 *
-	 * Forces an int from parent::get_percent_complete(), which can return a float.
+	 * Measured by batch when the batch count is known (see set_total_batches()), so the last
+	 * batch always reports 100. Otherwise forces an int from parent::get_percent_complete(),
+	 * which can return a float.
 	 *
 	 * @return int Percent complete.
 	 */
 	public function get_percent_complete() {
+		if ( $this->total_batches > 0 ) {
+			return (int) min( 100, floor( $this->get_page() / $this->total_batches * 100 ) );
+		}
+
 		return intval( parent::get_percent_complete() );
 	}
 

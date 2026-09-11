@@ -210,6 +210,7 @@ class ReportCSVEmail extends \WC_Email {
 	 * @param int    $user_id User ID to email.
 	 * @param string $report_type The type of report export being emailed.
 	 * @param string $download_url The URL for downloading the report.
+	 * @return bool Whether the email was sent. False when the user has no email address or sending failed.
 	 */
 	public function trigger( $user_id, $report_type, $download_url ) {
 		$user               = new \WP_User( $user_id );
@@ -221,12 +222,7 @@ class ReportCSVEmail extends \WC_Email {
 			$this->placeholders['{report_name}'] = $this->report_type;
 		}
 
-		$this->send(
-			$this->get_recipient(),
-			$this->get_subject(),
-			$this->get_content(),
-			$this->get_headers(),
-			$this->get_attachments()
-		);
+		// Not send_notification(): this email has no settings, so it is never "enabled".
+		return $this->send_if_recipient();
 	}
 }
