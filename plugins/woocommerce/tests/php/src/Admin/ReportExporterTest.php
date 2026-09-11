@@ -721,17 +721,15 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	 * @testdox The report period is capped at the request time only when it runs into the future.
 	 */
 	public function test_report_period_is_capped_at_the_request_time(): void {
-		$past      = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2020-01-01T00:00:00' ) );
-		$future    = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
-		$open      = ReportExporter::freeze_report_period( 'orders', array( 'after' => '2020-01-01T00:00:00' ) );
-		$customers = ReportExporter::freeze_report_period( 'customers', array() );
-		$stock     = ReportExporter::freeze_report_period( 'stock', array( 'before' => '2100-01-01T00:00:00' ) );
+		$past      = ReportExporter::freeze_report_period( array( 'before' => '2020-01-01T00:00:00' ) );
+		$future    = ReportExporter::freeze_report_period( array( 'before' => '2100-01-01T00:00:00' ) );
+		$open      = ReportExporter::freeze_report_period( array( 'after' => '2020-01-01T00:00:00' ) );
+		$customers = ReportExporter::freeze_report_period( array() );
 
 		$this->assertSame( '2020-01-01T00:00:00', $past['before'], 'A period that already ended is left alone.' );
 		$this->assertLessThanOrEqual( time(), strtotime( $future['before'] ), 'A period running into the future ends at the request time.' );
 		$this->assertArrayNotHasKey( 'before', $open, 'A request that sent no end must not be given one.' );
-		$this->assertArrayNotHasKey( 'before', $customers, 'Customers reads before as an order date, so an export without one must not be given one.' );
-		$this->assertSame( '2100-01-01T00:00:00', $stock['before'], 'A report without a period is left alone.' );
+		$this->assertArrayNotHasKey( 'before', $customers, 'A Customers export sends no dates, and its before is an order date, so it must not be given one.' );
 	}
 
 	/**
@@ -743,7 +741,7 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		// Calendar plugins rewrite wp_date() output into dates the report cannot parse.
 		add_filter( 'wp_date', array( $this, 'not_a_date' ) );
 
-		$capped = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
+		$capped = ReportExporter::freeze_report_period( array( 'before' => '2100-01-01T00:00:00' ) );
 
 		$this->assertStringEndsWith( '+10:00', $capped['before'], 'The cap should spell out the store offset.' );
 		$this->assertEqualsWithDelta(

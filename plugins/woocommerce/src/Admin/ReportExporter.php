@@ -142,7 +142,7 @@ class ReportExporter {
 	public static function queue_report_export( $export_id, $report_type, $report_args = array(), $send_email = false ) {
 		// Progress is read back from the queue by the JSON-quoted ID, which an int would not match.
 		$export_id   = (string) $export_id;
-		$report_args = self::freeze_report_period( $report_type, $report_args );
+		$report_args = self::freeze_report_period( $report_args );
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->prepare_data_to_export();
@@ -183,17 +183,11 @@ class ReportExporter {
 	 *
 	 * @internal
 	 * @since 11.2.0
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param array  $report_args Report parameters, passed to data query.
-	 * @return array Report parameters with a `before` that was sent lowered to now, for reports that take one.
+	 * @param array $report_args Report parameters, passed to data query.
+	 * @return array Report parameters with a `before` that was sent lowered to now.
 	 */
-	public static function freeze_report_period( $report_type, $report_args ) {
+	public static function freeze_report_period( $report_args ) {
 		if ( ! is_array( $report_args ) || empty( $report_args['before'] ) || ! is_string( $report_args['before'] ) ) {
-			return $report_args;
-		}
-
-		$controller = ReportCSVExporter::get_report_controller( $report_type );
-		if ( ! $controller || ! isset( $controller->get_collection_params()['before'] ) ) {
 			return $report_args;
 		}
 
