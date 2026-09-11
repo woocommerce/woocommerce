@@ -39,9 +39,7 @@ export const DEFAULT_VISIBLE_FIELDS = [
 	PAYOUT_FIELD_IDS.providerLink,
 ];
 
-const PINNED_FIELDS: string[] = [
-	PAYOUT_FIELD_IDS.provider,
-];
+const PINNED_FIELDS: string[] = [ PAYOUT_FIELD_IDS.provider ];
 
 /**
  * Keep the provider as the first column, whatever order the view asks for.
