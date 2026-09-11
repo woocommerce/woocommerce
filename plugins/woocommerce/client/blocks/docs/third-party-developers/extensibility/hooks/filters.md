@@ -24,6 +24,7 @@
 - [woocommerce_apply_individual_use_coupon](#woocommerce_apply_individual_use_coupon)
 - [woocommerce_apply_with_individual_use_coupon](#woocommerce_apply_with_individual_use_coupon)
 - [woocommerce_blocks_hook_compatibility_additional_data](#woocommerce_blocks_hook_compatibility_additional_data)
+- [woocommerce_blocks_icon_svg](#woocommerce_blocks_icon_svg)
 - [woocommerce_blocks_pre_get_routes_from_namespace](#woocommerce_blocks_pre_get_routes_from_namespace)
 - [woocommerce_blocks_product_filters_selected_items](#woocommerce_blocks_product_filters_selected_items)
 - [woocommerce_blocks_product_grid_add_to_cart_attributes](#woocommerce_blocks_product_grid_add_to_cart_attributes)
@@ -595,6 +596,34 @@ Where:
 ### Source
 
 - [Blocks/Templates/AbstractTemplateCompatibility.php](../../../../../../src/Blocks/Templates/AbstractTemplateCompatibility.php)
+
+---
+
+## woocommerce_blocks_icon_svg
+
+
+Filters eligible decorative block icon SVG markup during frontend/server rendering.
+
+```php
+apply_filters( 'woocommerce_blocks_icon_svg', string $default_svg, string $icon_name, string $block_name, array $block_attributes )
+```
+
+### Description
+
+Supported callers are the Mini-Cart, Cart Link, and Customer Account primary icons. Block attributes contain caller-local render-time context and are not a normalized cross-block schema. Mini-Cart and Cart Link report `cart`, `bag`, or `bag-alt`; Customer Account reports `default`, `line`, or `alt`. Match both the block name and icon name; future callers may add names. This filter does not change editor previews, avatars, or functional controls such as the account dropdown caret. Text-only account blocks do not call it. The exact unchanged default is byte-preserved. Changed non-empty strings are sanitized and validated as one static SVG. Sanitization strips unsupported elements and attributes. The remaining markup must be one complete SVG containing only groups, paths, and basic shapes, without text or comments. Inline styles, scripts, events, animation, images, references, gradients, masks, and filters are unsupported. Fill and stroke accept flat keywords/named colors, hex, and numeric RGB(A)/HSL(A); CSS escapes, variables, and resource URLs are rejected. WooCommerce restores caller-owned root classes and decorative accessibility attributes, but the replacement owns its geometry and paint. Use `currentColor` to inherit the control color. To retain an explicit Mini-Cart icon color, read it from the supplied block attributes and emit it in the replacement. Empty or whitespace-only strings remove the icon. Non-string or invalid changed values fall back to the exact default.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $default_svg | string | Current SVG markup, initially the bundled default. Earlier callbacks may have replaced it; validation runs after all callbacks. |
+| $icon_name | string | Canonical icon name. |
+| $block_name | string | Block name. |
+| $block_attributes | array | Caller-local render-time block attributes. |
+
+### Source
+
+- [Blocks/Utils/BlockIconUtils.php](../../../../../../src/Blocks/Utils/BlockIconUtils.php)
 
 ---
 
