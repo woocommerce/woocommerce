@@ -272,8 +272,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'autoload'          => false,
 					'class'             => 'manage_stock_field',
 					'visible_when'      => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -287,8 +288,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
 					'visible_when'  => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -301,8 +303,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
 					'visible_when'  => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -315,8 +318,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'autoload'      => false,
 					'class'         => 'manage_stock_field',
 					'visible_when'  => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -331,8 +335,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip'     => true,
 					'class'        => 'manage_stock_field',
 					'visible_when' => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -351,8 +356,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
 					'visible_when'      => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 
@@ -370,8 +376,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip'          => true,
 					'class'             => 'manage_stock_field',
 					'visible_when'      => array(
-						'field' => 'woocommerce_manage_stock',
-						'value' => true,
+						'field'    => 'woocommerce_manage_stock',
+						'operator' => 'is',
+						'value'    => true,
 					),
 				),
 

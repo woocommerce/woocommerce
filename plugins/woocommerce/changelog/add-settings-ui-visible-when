@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add a visible_when settings key so a field can declare which other field reveals it, and use it for the Products inventory stock-management rules.
+Add a visible_when settings key so a field can declare which other field reveals it, with which operator and at which value, and use it for the Products inventory stock-management rules.

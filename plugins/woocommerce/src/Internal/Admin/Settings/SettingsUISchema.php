@@ -1629,16 +1629,31 @@ class SettingsUISchema {
 	}
 
 	/**
+	 * Operators a declared visibility rule may use.
+	 *
+	 * These names come from the DataViews filter vocabulary, so a rule reads the
+	 * same way here as a filter does in the client. Only the two that the
+	 * canonical `visibility` value already expresses are accepted; the rest of
+	 * the DataViews set needs the schema and the client evaluator to widen
+	 * first.
+	 *
+	 * @var string[]
+	 */
+	private const VISIBILITY_OPERATORS = array( 'is', 'isAny' );
+
+	/**
 	 * Read a field's declared visibility rule.
 	 *
 	 * A field states which other field reveals it, and at which value:
 	 *
-	 *     'visible_when' => array( 'field' => 'woocommerce_manage_stock', 'value' => true )
+	 *     'visible_when' => array( 'field' => 'woocommerce_manage_stock', 'operator' => 'is', 'value' => true )
 	 *
-	 * The value may be a list, in which case any of its entries reveals the
-	 * field. The classic renderer ignores this key and keeps its own jQuery
-	 * rules, so the same relationship is expressed in both places for as long
-	 * as both renderers ship.
+	 * `operator` is optional and defaults to `is`. `isAny` takes a list and
+	 * reveals the field when the controlling value matches any entry.
+	 *
+	 * The classic renderer ignores this key and keeps its own jQuery rules, so
+	 * the same relationship is expressed in both places for as long as both
+	 * renderers ship.
 	 *
 	 * Declaring the key states intent, so a malformed rule fails the schema
 	 * rather than silently leaving the field permanently visible.
@@ -1651,22 +1666,45 @@ class SettingsUISchema {
 	 */
 	private static function get_declared_field_visibility( array $setting ): array {
 		$rule = $setting['visible_when'];
+		$id   = self::describe_field_id( $setting );
 		if ( ! is_array( $rule ) ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must be an array.', self::describe_field_id( $setting ) ) );
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must be an array.', $id ) );
 		}
 
 		$controller = $rule['field'] ?? null;
 		if ( ! is_string( $controller ) || '' === $controller ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" visible_when field must be a non-empty string.', self::describe_field_id( $setting ) ) );
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when field must be a non-empty string.', $id ) );
 		}
 
 		if ( ! array_key_exists( 'value', $rule ) ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must declare a value.', self::describe_field_id( $setting ) ) );
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when must declare a value.', $id ) );
 		}
 
+		$operator = $rule['operator'] ?? 'is';
+		if ( ! in_array( $operator, self::VISIBILITY_OPERATORS, true ) ) {
+			throw self::invalid_schema(
+				sprintf(
+					'Field "%1$s" visible_when operator must be one of %2$s.',
+					$id,
+					implode( ', ', self::VISIBILITY_OPERATORS )
+				)
+			);
+		}
+
+		$value = $rule['value'];
+		if ( 'isAny' === $operator && ( ! is_array( $value ) || ! ArrayUtil::array_is_list( $value ) || empty( $value ) ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when isAny value must be a non-empty list.', $id ) );
+		}
+
+		if ( 'is' === $operator && is_array( $value ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visible_when is value must be a single value; use isAny for a list.', $id ) );
+		}
+
+		// The canonical `visibility` value already means "any of these" when it
+		// is a list, so both operators compile onto the shape the client reads.
 		return array(
 			'controller' => $controller,
-			'value'      => $rule['value'],
+			'value'      => $value,
 		);
 	}
 
