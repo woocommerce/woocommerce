@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Add Cover layout controls to Featured Category blocks while preserving existing content.
+Use a nested Cover block in the Featured Category block for background and layout controls.
