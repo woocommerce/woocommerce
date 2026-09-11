@@ -23,11 +23,30 @@ class CartLogoutBehaviorTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The session handler the suite installed, put back after tests that swap in the real one.
+	 *
+	 * @var \WC_Session|null
+	 */
+	private $original_session;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new CartLogoutBehavior();
+		$this->sut              = new CartLogoutBehavior();
+		$this->original_session = WC()->session;
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		// use_real_session_handler() replaces WC()->session with a live WC_Session_Handler, and the base
+		// teardown does not reset it, so later tests would inherit it instead of the mock.
+		WC()->session = $this->original_session;
+
+		parent::tearDown();
 	}
 
 	/**
