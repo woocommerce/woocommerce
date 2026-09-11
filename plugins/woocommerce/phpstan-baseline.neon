@@ -66583,12 +66583,6 @@ parameters:
 			path: src/Internal/StockNotifications/Frontend/SignupService.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/StockNotifications/Frontend/SignupService.php
-
-		-
 			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1

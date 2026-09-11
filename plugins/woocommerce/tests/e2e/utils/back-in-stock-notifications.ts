@@ -29,8 +29,6 @@ export const BIS_OPTIONS = {
 	doubleOptIn:
 		'woocommerce_customer_stock_notifications_require_double_opt_in',
 	requireAccount: 'woocommerce_customer_stock_notifications_require_account',
-	createAccountOnSignup:
-		'woocommerce_customer_stock_notifications_create_account_on_signup',
 } as const;
 
 /**
@@ -87,13 +85,12 @@ export async function assertBISEnvReady(): Promise< void > {
 /**
  * Configure the BIS feature options for a test. Omitted keys are left untouched.
  *
- * @param {APIRequest} request                         Playwright request fixture.
- * @param {string}     baseURL                         Test site base URL.
- * @param {Object}     options                         BIS option toggles.
- * @param {boolean}    [options.allowSignups]          Whether the signup form is rendered on product pages.
- * @param {boolean}    [options.doubleOptIn]           Whether signups require email verification before activating.
- * @param {boolean}    [options.requireAccount]        Whether signups are limited to logged-in users.
- * @param {boolean}    [options.createAccountOnSignup] Whether a guest signup also registers a customer account.
+ * @param {APIRequest} request                  Playwright request fixture.
+ * @param {string}     baseURL                  Test site base URL.
+ * @param {Object}     options                  BIS option toggles.
+ * @param {boolean}    [options.allowSignups]   Whether the signup form is rendered on product pages.
+ * @param {boolean}    [options.doubleOptIn]    Whether signups require email verification before activating.
+ * @param {boolean}    [options.requireAccount] Whether signups are limited to logged-in users.
  */
 export async function setBISOptions(
 	request: APIRequest,
@@ -102,7 +99,6 @@ export async function setBISOptions(
 		allowSignups?: boolean;
 		doubleOptIn?: boolean;
 		requireAccount?: boolean;
-		createAccountOnSignup?: boolean;
 	}
 ): Promise< void > {
 	const toYesNo = ( v: boolean | undefined ): string | undefined => {
@@ -116,10 +112,6 @@ export async function setBISOptions(
 		[ BIS_OPTIONS.allowSignups, toYesNo( options.allowSignups ) ],
 		[ BIS_OPTIONS.doubleOptIn, toYesNo( options.doubleOptIn ) ],
 		[ BIS_OPTIONS.requireAccount, toYesNo( options.requireAccount ) ],
-		[
-			BIS_OPTIONS.createAccountOnSignup,
-			toYesNo( options.createAccountOnSignup ),
-		],
 	];
 
 	for ( const [ name, value ] of entries ) {
@@ -489,30 +481,16 @@ export async function selectVariation(
 }
 
 /**
- * Locator for the account-creation consent checkbox on the PDP sign-up form.
- *
- * Its label is the store's registration privacy text, which the merchant can
- * edit, so it is located by name rather than by that label.
- *
- * @param {Page} page Playwright page on the product detail.
- */
-export function bisConsentCheckbox( page: Page ) {
-	return page.locator( 'input[name="wc_bis_opt_in"]' );
-}
-
-/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
  *
- * @param {Page}    page           Playwright page on the product detail.
- * @param {Object}  [opts]         Fill options.
- * @param {string}  [opts.email]   Email address to enter (guest flow only; logged-in PDP hides the field).
- * @param {boolean} [opts.consent] Tick the account-creation consent checkbox (only rendered with `createAccountOnSignup`).
+ * @param {Page}   page         Playwright page on the product detail.
+ * @param {Object} [opts]       Fill options.
+ * @param {string} [opts.email] Email address to enter (guest flow only; logged-in PDP hides the field).
  */
 export async function signUpOnProductPage(
 	page: Page,
 	opts: {
 		email?: string;
-		consent?: boolean;
 	} = {}
 ): Promise< void > {
 	if ( opts.email !== undefined ) {
@@ -521,10 +499,6 @@ export async function signUpOnProductPage(
 				name: /Email address to be notified/i,
 			} )
 			.fill( opts.email );
-	}
-
-	if ( opts.consent ) {
-		await bisConsentCheckbox( page ).check();
 	}
 
 	await page.getByRole( 'button', { name: /Notify me/i } ).click();
@@ -541,7 +515,6 @@ export async function signUpOnProductPage(
  * @param {Object}  opts                             Signup options.
  * @param {Object}  [opts.storageState]              Storage state for the signup context; a logged-out guest by default.
  * @param {string}  [opts.email]                     Email to enter; omit for a logged-in signup, where the field isn't rendered.
- * @param {boolean} [opts.consent]                   Tick the account-creation consent checkbox before submitting.
  * @param {RegExp}  [opts.expectedNotice]            Notice to wait for after the post; a generic success match by default.
  * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
  * @param {Object}  [opts.selectVariation.product]   The variable product handle.
@@ -553,7 +526,6 @@ export async function signUpInNewContext(
 	opts: {
 		storageState?: string | { cookies: []; origins: [] };
 		email?: string;
-		consent?: boolean;
 		expectedNotice?: RegExp;
 		selectVariation?: {
 			product: BISVariableProduct;
@@ -579,10 +551,7 @@ export async function signUpInNewContext(
 			);
 		}
 
-		await signUpOnProductPage( page, {
-			email: opts.email,
-			consent: opts.consent,
-		} );
+		await signUpOnProductPage( page, { email: opts.email } );
 
 		// The form posts and reloads the PDP with a notice. Wait for that notice
 		// before closing the context, or the submission can be aborted mid-flight
@@ -642,49 +611,6 @@ export async function signUpAsCustomer(
 }
 
 /**
- * Find the customer account registered for an email address, if any.
- *
- * @param {ApiClient} restApi WP REST client.
- * @param {string}    email   The email address.
- */
-export async function findCustomerByEmail(
-	restApi: ApiClient,
-	email: string
-): Promise< BISCustomer | undefined > {
-	const response = await restApi.get< BISCustomer[] >(
-		`${ WC_API_PATH }/customers`,
-		{
-			email,
-			role: 'all',
-		}
-	);
-
-	return response.data.find(
-		( customer: BISCustomer ) => customer.email === email
-	);
-}
-
-/**
- * A customer account, as far as these specs need to know it.
- */
-type BISCustomer = { id: number; email: string; username: string };
-
-/**
- * Permanently delete a customer account created by a signup.
- *
- * @param {ApiClient} restApi    WP REST client.
- * @param {number}    customerId The customer id.
- */
-export async function deleteCustomer(
-	restApi: ApiClient,
-	customerId: number
-): Promise< void > {
-	await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
-		force: true,
-	} );
-}
-
-/**
  * Make every verification link look expired to the server for this page's context.
  *
  * Expiry is filter-driven rather than an option, so it is set through the
@@ -737,39 +663,6 @@ export function bisAdminListUrl( productId: number ): string {
 }
 
 /**
- * Assert the product's notifications list holds no row for an email address.
- *
- * Opens its own admin context because the list is an admin-only screen, and
- * closes it in `finally` so a failure doesn't leak a context into the run.
- *
- * @param {Browser} browser   The test's browser fixture.
- * @param {number}  productId Product the list is filtered by.
- * @param {string}  email     The signup email address that must not be listed.
- */
-export async function expectNoSignupAsAdmin(
-	browser: Browser,
-	productId: number,
-	email: string
-): Promise< void > {
-	const adminContext = await browser.newContext( {
-		storageState: ADMIN_STATE_PATH,
-	} );
-
-	try {
-		const adminPage = await adminContext.newPage();
-		await adminPage.goto( bisAdminListUrl( productId ) );
-
-		await expect(
-			adminPage.getByRole( 'row' ).filter( {
-				has: adminPage.getByText( email, { exact: true } ),
-			} )
-		).toHaveCount( 0 );
-	} finally {
-		await adminContext.close();
-	}
-}
-
-/**
  * Generate a unique guest email address for a test so mail-log assertions don't collide.
  *
  * @param {string} prefix Short descriptor of the test.
@@ -818,7 +711,6 @@ export const test = baseTest.extend<
 		product: BISProduct;
 		variableProduct: BISVariableProduct;
 		anyAttributeVariableProduct: BISVariableProduct;
-		accountEmail: string;
 	},
 	{ bisEnvReady: void }
 >( {
@@ -871,24 +763,6 @@ export const test = baseTest.extend<
 		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( product );
 		productsToReap.push( product.id );
-	},
-
-	/**
-	 * A guest email address that a signup may register an account for.
-	 *
-	 * Teardown looks the address up and deletes the account if one exists, so
-	 * the customer is reaped whether the test failed on the notice, on the
-	 * lookup, or on the email — the test itself never has to hold the id.
-	 */
-	accountEmail: async ( { restApi }, use ) => {
-		const email = uniqueGuestEmail( 'bis-account' );
-		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
-		await use( email );
-
-		const account = await findCustomerByEmail( restApi, email );
-		if ( account ) {
-			await deleteCustomer( restApi, account.id );
-		}
 	},
 } );
 
@@ -965,19 +839,6 @@ export const bisNotice = {
 		),
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
-	/**
-	 * Single opt-in success where the signup also registered an account.
-	 *
-	 * @param {string} productName The product name.
-	 */
-	accountCreated: ( productName: string ): RegExp =>
-		new RegExp(
-			`You have successfully signed up and will be notified when "${ escapeRegExp(
-				productName
-			) }" is back in stock! Note that a new account has been created for you; please check your e-mail for details\\.`
-		),
-	accountCreatedDoubleOptIn:
-		/Thanks for signing up! An account has been created for you\. Please complete the sign-up process by following the verification link sent to your e-mail\./,
 	alreadyJoined: /You have already joined this waitlist\./,
 	accountRequired: /Please log in to sign up for stock notifications\./,
 	/**
@@ -1008,8 +869,6 @@ export const bisNotice = {
 	errors: {
 		invalidEmail: /Invalid email address\./,
 		invalidProduct: /Invalid product\./,
-		missingConsent:
-			/To proceed, please consent to the creation of a new account with your e-mail\./,
 		failed: /Failed to sign up\. Please try again\./,
 	},
 } as const;

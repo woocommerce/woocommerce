@@ -5,8 +5,7 @@ Covers the scenarios from the original plugin test plan that have a target in co
 - `signing-up.spec.ts` — PDP form rendering + signup flow across the settings
   matrix: signups disabled, logged-in single opt-in (with the "Manage
   notifications" CTA and the nonce rejection), guest single and double opt-in,
-  account creation on signup (consent checkbox, welcome email), and the
-  requires-account prompt through to a logged-in signup. Also the server-side
+  and the requires-account prompt through to a logged-in signup. Also the server-side
   rejections for an invalid email and a tampered product id.
 - `receiving-confirmations.spec.ts` — verify email + verified email + unsubscribe
   flow (double opt-in), the frontend verify/unsubscribe notices, the logged-in
@@ -54,14 +53,9 @@ Covers the scenarios from the original plugin test plan that have a target in co
   through the same cookie. Both tests clear the cookie afterwards with
   `clearFilters()`.
 - The email templates fork on `$is_guest`, which is "the signup has no
-  `WP_User`", not "the shopper was logged out": a guest signup with an email
-  that already belongs to an account, or one that created an account on signup,
-  also takes the logged-in branch. The specs cover it through the shared
-  `customer` account (`signUpAsCustomer()`).
-- Account-creation tests register a real customer for the guest's address. The
-  address comes from the `accountEmail` fixture, whose teardown looks it up and
-  deletes any account it finds, so a failed assertion (or a retry with a fresh
-  address) doesn't leave the account behind.
+  `WP_User`". A guest signup is never linked to an account by its email
+  address, so only a logged-in signup takes the other branch. The specs cover
+  it through the shared `customer` account (`signUpAsCustomer()`).
 
 ## Skipped scenarios
 
