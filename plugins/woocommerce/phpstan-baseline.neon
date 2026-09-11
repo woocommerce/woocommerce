@@ -48160,12 +48160,6 @@ parameters:
 			path: src/Admin/ReportCSVEmail.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportCSVEmail\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/ReportCSVEmail.php
-
-		-
 			message: '#^Call to method get_collection_params\(\) on an unknown class Automattic\\WooCommerce\\Admin\\WC_REST_Reports_Controller\.$#'
 			identifier: class.notFound
 			count: 1
