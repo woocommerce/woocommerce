@@ -1,5 +1,8 @@
 <?php
 
+declare( strict_types = 1 );
+
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -734,5 +737,78 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
+	}
+
+	/**
+	 * @testdox A custom array date can be normalized by an overridden parser before the parent validates it.
+	 */
+	public function test_custom_array_date_override_can_normalize_before_parent_parser(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2024-07-04T12:00:00' );
+		$product->save();
+
+		$sut = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Normalize the extension's custom date shape before using the parent parser.
+			 *
+			 * @param mixed  $query_var     A date query value.
+			 * @param string $key           Meta or database column key.
+			 * @param array  $wp_query_args WP_Query arguments.
+			 * @return array
+			 */
+			public function parse_date_for_wp_query( $query_var, $key, $wp_query_args = array() ) {
+				if ( is_array( $query_var ) && isset( $query_var['date'] ) ) {
+					$query_var = $query_var['date'];
+				}
+
+				return parent::parse_date_for_wp_query( $query_var, $key, $wp_query_args );
+			}
+		};
+
+		$result = $sut->query(
+			array(
+				'date_created' => array( 'date' => '2024-07-04' ),
+				'return'       => 'ids',
+				'limit'        => -1,
+				'paginate'     => false,
+				'type'         => ProductType::SIMPLE,
+			)
+		);
+
+		$this->assertContains( $product->get_id(), $result, 'The custom date parser must be able to produce a matching query.' );
+	}
+
+	/**
+	 * @testdox The public product query filter can replace a failed query with valid arguments.
+	 */
+	public function test_product_filter_can_replace_failed_query(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$replace_query_args = static function () use ( $product_id ) {
+			return array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'post__in'       => array( $product_id ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			);
+		};
+
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+
+		try {
+			$result = wc_get_products(
+				array(
+					'date_on_sale_from' => array( 'foo' ),
+					'return'            => 'ids',
+					'limit'             => -1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $replace_query_args, 99 );
+		}
+
+		$this->assertSame( array( $product_id ), array_values( $result ), 'The public filter must remain authoritative.' );
 	}
 }

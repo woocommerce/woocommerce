@@ -2502,7 +2502,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
-
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
 				foreach ( $existing_queries as $query_index => $query_contents ) {
@@ -2528,7 +2527,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['orderby'] = 'post__in';
 		}
 
-		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
+		/**
+		 * Filters the WP_Query arguments used for a legacy product query.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @param array                     $wp_query_args WP_Query arguments.
+		 * @param array                     $query_vars    Original WC_Product_Query arguments.
+		 * @param WC_Product_Data_Store_CPT $data_store   Current product data store.
+		 */
+		$wp_query_args = apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
+
+		return $wp_query_args;
 	}
 
 	/**

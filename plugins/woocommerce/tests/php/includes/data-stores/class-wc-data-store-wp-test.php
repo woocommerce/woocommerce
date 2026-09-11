@@ -252,6 +252,22 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Values that cannot be used as a string and used to raise an uncaught TypeError.
+	 *
+	 * `parse_date_for_wp_query()` guards its parsing with `catch ( Exception )`, but PHP 8 raises a
+	 * `TypeError` when such a value reaches `preg_match()`. `TypeError` extends `Error`, so it
+	 * escaped that guard and surfaced as a fatal error.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_unusable_date_query_vars(): array {
+		return array(
+			'array'  => array( array( 'foo' ) ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
 	 * @testdox Day-precision meta date queries should anchor on the site's local midnight for every operator.
 	 *
 	 * @dataProvider day_precision_meta_boundary_provider
@@ -305,6 +321,67 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 			$result['meta_query'],
 			'An unrepresentable date should constrain the query to an empty range rather than dropping the date filter'
 		);
+	}
+
+	/**
+	 * @dataProvider provider_unusable_date_query_vars
+	 * @testdox parse_date_for_wp_query fails closed for values that cannot be used as a string.
+	 *
+	 * @param mixed $query_var The malformed date value.
+	 */
+	public function test_parse_date_for_wp_query_handles_unusable_values( $query_var ): void {
+		$actual = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+
+		$this->assertNotEmpty( $actual['errors'] ?? array(), 'An unusable date value must fail the query closed.' );
+	}
+
+	/**
+	 * @testdox A date Stringable whose conversion throws fails the query closed.
+	 */
+	public function test_parse_date_for_wp_query_handles_throwing_stringable(): void {
+		$query_var = new class() {
+			/**
+			 * Simulate a failed string conversion.
+			 */
+			public function __toString(): string {
+				throw new TypeError( 'String conversion failed.' );
+			}
+		};
+
+		$result = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+
+		$this->assertNotEmpty( $result['errors'] ?? array(), 'A failed conversion must mark the query as invalid.' );
+	}
+
+	/**
+	 * @testdox A valid date Stringable is converted once before parsing.
+	 */
+	public function test_parse_date_for_wp_query_converts_stringable_once(): void {
+		$query_var = new class() {
+			/** @var int */
+			public $conversion_count = 0;
+
+			/**
+			 * Return a date only on the first conversion.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				++$this->conversion_count;
+
+				if ( 1 < $this->conversion_count ) {
+					throw new TypeError( 'String conversion repeated.' );
+				}
+
+				return '2024-07-04';
+			}
+		};
+		$expected  = $this->sut->parse_date_for_wp_query( '2024-07-04', 'post_date', array() );
+
+		$actual = $this->sut->parse_date_for_wp_query( $query_var, 'post_date', array() );
+
+		$this->assertSame( $expected, $actual, 'The Stringable date must retain the scalar date behavior.' );
+		$this->assertSame( 1, $query_var->conversion_count, 'A date Stringable must not be converted twice.' );
 	}
 
 	/**
@@ -397,5 +474,17 @@ final class WC_Data_Store_WP_Test extends WC_Unit_Test_Case {
 				'Timezone database ' . timezone_version_get() . " puts no DST transition on {$date} in {$timezone}."
 			);
 		}
+	}
+
+	/**
+	 * @testdox parse_date_for_wp_query keeps accepting WC_DateTime values.
+	 */
+	public function test_parse_date_for_wp_query_accepts_wc_datetime_values(): void {
+		$from_datetime = $this->sut->parse_date_for_wp_query(
+			new WC_DateTime( '2024-07-04 12:00:00', new DateTimeZone( 'UTC' ) ),
+			'post_date',
+			array()
+		);
+		$this->assertNotEmpty( $from_datetime['date_query'], 'WC_DateTime values must still build a date query.' );
 	}
 }

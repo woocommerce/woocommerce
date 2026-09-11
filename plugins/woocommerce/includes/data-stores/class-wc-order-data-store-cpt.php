@@ -911,6 +911,97 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Normalizes an order status value before it is prefixed.
+	 *
+	 * Arrays and null keep their pre-existing behavior. Stringable objects are converted once so
+	 * later status checks do not invoke extension code repeatedly.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $status            The status value to normalize.
+	 * @param mixed $normalized_status The normalized value, passed by reference.
+	 * @return bool True when the value can continue through status normalization.
+	 */
+	private function normalize_status_value( $status, &$normalized_status ) {
+		$normalized_status = $status;
+
+		if ( ! is_object( $status ) ) {
+			return true;
+		}
+
+		if ( ! method_exists( $status, '__toString' ) ) {
+			return false;
+		}
+
+		try {
+			$normalized_status = (string) $status;
+		} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Normalizes the leaves of a customer query value.
+	 *
+	 * Nested arrays are supported grouping constructs. Stringable leaves are converted once so the
+	 * customer meta-query builder receives only scalar values.
+	 *
+	 * @since 11.2.0
+	 * @param mixed $value            The value to normalize.
+	 * @param mixed $normalized_value The normalized value, passed by reference.
+	 * @return bool True when every leaf can be used as a string.
+	 */
+	private function normalize_customer_value( $value, &$normalized_value ) {
+		if ( is_array( $value ) ) {
+			$normalized_value = array();
+
+			foreach ( $value as $key => $item ) {
+				$normalized_item = null;
+
+				if ( ! $this->normalize_customer_value( $item, $normalized_item ) ) {
+					return false;
+				}
+
+				$normalized_value[ $key ] = $normalized_item;
+			}
+
+			return true;
+		}
+
+		if ( is_scalar( $value ) ) {
+			$normalized_value = $value;
+			return true;
+		}
+
+		if ( ! is_object( $value ) || ! method_exists( $value, '__toString' ) ) {
+			return false;
+		}
+
+		try {
+			$normalized_value = (string) $value;
+		} catch ( Throwable $e ) { // @phpstan-ignore catch.neverThrown (Stringable conversion can throw at runtime.)
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Marks a query as invalid, so it returns no orders rather than running without the filter the
+	 * caller asked for.
+	 *
+	 * @since 11.2.0
+	 * @param array  $wp_query_args WP_Query args, passed by reference.
+	 * @param string $code          Error code.
+	 * @param string $message       Error message.
+	 * @return void
+	 */
+	private function fail_query_closed( &$wp_query_args, $code, $message ) {
+		$wp_query_args['errors'][] = new WP_Error( $code, $message );
+	}
+
+	/**
 	 * Get valid WP_Query args from a WC_Order_Query's query variables.
 	 *
 	 * @since 3.1.0
@@ -939,18 +1030,52 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Add the 'wc-' prefix to status if needed.
+		// Add the 'wc-' prefix to status if needed. Objects are normalized once and rejected if
+		// conversion fails. Arrays and null retain their pre-existing WP_Query behavior.
+		$has_unusable_status = false;
+
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			if ( is_array( $query_vars['post_status'] ) ) {
-				foreach ( $query_vars['post_status'] as &$status ) {
-					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+				$normalized_statuses = array();
+
+				foreach ( $query_vars['post_status'] as $status ) {
+					$normalized_status = null;
+
+					if ( ! $this->normalize_status_value( $status, $normalized_status ) ) {
+						$has_unusable_status = true;
+						break;
+					}
+
+					$normalized_statuses[] = wc_is_order_status( 'wc-' . $normalized_status ) ? 'wc-' . $normalized_status : $normalized_status;
+				}
+
+				if ( $has_unusable_status ) {
+					unset( $query_vars['post_status'] );
+				} else {
+					$query_vars['post_status'] = $normalized_statuses;
 				}
 			} else {
-				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
+				$normalized_status = null;
+
+				if ( ! $this->normalize_status_value( $query_vars['post_status'], $normalized_status ) ) {
+					$has_unusable_status = true;
+					unset( $query_vars['post_status'] );
+				} else {
+					$query_vars['post_status'] = wc_is_order_status( 'wc-' . $normalized_status ) ? 'wc-' . $normalized_status : $normalized_status;
+				}
 			}
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( $has_unusable_status ) {
+			unset( $wp_query_args['post_status'] );
+			$this->fail_query_closed(
+				$wp_query_args,
+				'woocommerce_order_query_invalid_status',
+				__( 'Invalid order status.', 'woocommerce' )
+			);
+		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
@@ -977,7 +1102,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
-
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
 				$meta_query_index = array_search( $db_key, $existing_queries, true );
@@ -990,12 +1114,26 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( isset( $query_vars['customer'] ) && '' !== $query_vars['customer'] && array() !== $query_vars['customer'] ) {
-			$values         = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
-			$customer_query = $this->get_orders_generate_customer_meta_query( $values );
-			if ( is_wp_error( $customer_query ) ) {
-				$wp_query_args['errors'][] = $customer_query;
+			$values            = is_array( $query_vars['customer'] ) ? $query_vars['customer'] : array( $query_vars['customer'] );
+			$normalized_values = null;
+
+			// Reaches is_email()/strlen() in WP core and fatals before
+			// get_orders_generate_customer_meta_query() can return its WP_Error. Normalize recursively
+			// because a nested array is a supported AND-group shape, not malformed input.
+			if ( ! $this->normalize_customer_value( $values, $normalized_values ) ) {
+				$this->fail_query_closed(
+					$wp_query_args,
+					'woocommerce_order_query_invalid_customer',
+					__( 'Invalid customer query.', 'woocommerce' )
+				);
 			} else {
-				$wp_query_args['meta_query'][] = $customer_query;
+				$wp_query_args['customer'] = is_array( $query_vars['customer'] ) ? $normalized_values : $normalized_values[0];
+				$customer_query            = $this->get_orders_generate_customer_meta_query( $normalized_values );
+				if ( is_wp_error( $customer_query ) ) {
+					$wp_query_args['errors'][] = $customer_query;
+				} else {
+					$wp_query_args['meta_query'][] = $customer_query;
+				}
 			}
 		}
 
@@ -1052,7 +1190,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$wp_query_args['no_found_rows'] = true;
 		}
 
-		return apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
+		/**
+		 * Filters the WP_Query arguments used for a legacy order query.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array                   $wp_query_args WP_Query arguments.
+		 * @param array                   $query_vars    Original WC_Order_Query arguments.
+		 * @param WC_Order_Data_Store_CPT $data_store   Current order data store.
+		 */
+		$wp_query_args = apply_filters( 'woocommerce_order_data_store_cpt_get_orders_query', $wp_query_args, $query_vars, $this );
+
+		return $wp_query_args;
 	}
 
 	/**
