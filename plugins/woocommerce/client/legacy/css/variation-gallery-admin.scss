@@ -32,7 +32,6 @@
 
 	/* Colors (WP admin palette). */
 	--wc-vg-link: #2271b1;
-	--wc-vg-link-hover: #135e96;
 	--wc-vg-surface: #f0f0f1;
 	--wc-vg-surface-hover: #f6f7f7;
 	--wc-vg-surface-strong: #1d2327;
@@ -43,7 +42,6 @@
 	--wc-vg-border-hover: #8c8f94;
 	--wc-vg-text-strong: #1d2327;
 	--wc-vg-text-muted: #50575e;
-	--wc-vg-text-subtle: #787c82;
 	--wc-vg-text-placeholder: #a7aaad;
 	--wc-vg-focus-ring: rgba(34, 113, 177, 0.4);
 
@@ -129,48 +127,18 @@
 
 	.wc-variation-gallery-field__header {
 		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--wc-vg-space-4);
-	}
+		align-items: center;
+		gap: var(--wc-vg-space-1);
 
-	.wc-variation-gallery-field__title-block {
-		display: flex;
-		align-items: baseline;
-		gap: var(--wc-vg-space-2);
-		flex-wrap: wrap;
+		/* Line the label up with the SKU label in the next column. That one is a
+		 * `.form-field` paragraph, so its offset is the default 1em on a <p>. */
+		margin-top: 1em;
 	}
 
 	.wc-variation-gallery-field__title {
 		font-size: var(--wc-vg-font-size-sm);
-		font-weight: var(--wc-vg-font-weight-semibold);
+		font-weight: 400;
 		margin: 0;
-	}
-
-	.wc-variation-gallery-field__count {
-		color: var(--wc-vg-text-subtle);
-		font-size: var(--wc-vg-font-size-xs);
-
-		&::before {
-			content: "·";
-			margin-right: var(--wc-vg-space-1);
-		}
-	}
-
-	.wc-variation-gallery-manage {
-		color: var(--wc-vg-link);
-		background: transparent;
-		border: none;
-		padding: 0;
-		cursor: pointer;
-		font-size: var(--wc-vg-font-size-sm);
-		text-decoration: none;
-
-		&:hover,
-		&:focus {
-			color: var(--wc-vg-link-hover);
-			text-decoration: underline;
-		}
 	}
 
 	.wc-variation-gallery-field__hero {
@@ -295,6 +263,7 @@
 		min-height: 0;
 
 		.wc-variation-gallery-thumb,
+		.wc-variation-gallery-add,
 		.wc-metabox-sortable-placeholder {
 			width: var(--wc-vg-thumb-size);
 			height: var(--wc-vg-thumb-size);
@@ -402,6 +371,47 @@
 			}
 		}
 
+		.wc-variation-gallery-add {
+
+			/* Keep the tile visually last even when a thumbnail is dropped
+			 * past it in the DOM mid-drag. */
+			order: 1;
+		}
+
+		.wc-variation-gallery-add__button {
+
+			@include center-content;
+			width: 100%;
+			height: 100%;
+			padding: 0;
+			background: transparent;
+			border: 2px dashed var(--wc-vg-border-dashed);
+			border-radius: var(--wc-vg-radius-sm);
+			color: var(--wc-vg-text-muted);
+			cursor: pointer;
+			transition:
+				border-color var(--wc-vg-transition-fast),
+				color var(--wc-vg-transition-fast);
+
+			&:hover,
+			&:focus {
+				border-color: var(--wc-vg-link);
+				color: var(--wc-vg-link);
+				outline: none;
+			}
+
+			.dashicons {
+				font-size: var(--wc-vg-icon-md);
+				width: var(--wc-vg-icon-md);
+				height: var(--wc-vg-icon-md);
+				line-height: 1;
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+
 		.wc-metabox-sortable-placeholder {
 			border: 2px dashed var(--wc-vg-border-dashed);
 			background: transparent;
@@ -415,17 +425,6 @@
 	}
 
 	&.is-empty .wc-variation-gallery-field__thumbs {
-		display: none;
-	}
-
-	.wc-variation-gallery-field__hint {
-		margin: 0;
-		color: var(--wc-vg-text-muted);
-		font-size: var(--wc-vg-font-size-xs);
-		line-height: 1.4;
-	}
-
-	&.is-empty .wc-variation-gallery-field__hint {
 		display: none;
 	}
 }

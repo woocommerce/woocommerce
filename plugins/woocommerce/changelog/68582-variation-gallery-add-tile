@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Replace the variation gallery "Manage" link with an inline "+" tile next to the thumbnails, and move the reordering hint into a help tip on the label.
