@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Create shipping label button by showing a completion notice and a Reload page button after WooCommerce Shipping is installed and activated.
