@@ -46,6 +46,13 @@ class ReportExporter {
 	const EXPORT_RETENTION_PERIOD = WEEK_IN_SECONDS;
 
 	/**
+	 * How long the email waits for pages that are still running before reporting the export as failed.
+	 *
+	 * @since 11.2.0
+	 */
+	const EXPORT_WAIT_LIMIT = HOUR_IN_SECONDS;
+
+	/**
 	 * Get all available scheduling actions.
 	 * Used to determine action hook names and clear events.
 	 *
@@ -580,14 +587,44 @@ class ReportExporter {
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Optional. Report parameters the export was queued with. Exports queued
 	 *                            before WooCommerce 11.2.0 run without them.
+	 * @param int    $wait_until  Optional. Time to stop waiting for pages that are still running. Set on the
+	 *                            first re-queue, so an export the queue never finishes is reported instead
+	 *                            of waited on forever.
 	 * @return void
 	 */
-	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
+	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array(), $wait_until = 0 ) {
 		$progress = self::get_export_progress( $export_id );
+
+		\WC_Emails::instance();
+		$email = new ReportCSVEmail();
+		$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
 
 		// A page can be claimed by another runner between the dependency check and this call, so
 		// check again here rather than reporting on a file that is still being written.
 		if ( null !== $progress && $progress['unfinished'] > 0 ) {
+			$wait_until = (int) $wait_until;
+
+			if ( 0 === $wait_until ) {
+				$wait_until = time() + self::EXPORT_WAIT_LIMIT;
+			}
+
+			// A page can sit "in progress" for good when its runner died and the queue's cleanup is turned off.
+			if ( time() > $wait_until ) {
+				wc_get_logger()->error(
+					sprintf(
+						'%1$s report export %2$s gave up: %3$d of %4$d batches still had not finished after %5$s.',
+						$report_type,
+						$export_id,
+						$progress['unfinished'],
+						$progress['pages'],
+						human_time_diff( 0, self::EXPORT_WAIT_LIMIT )
+					),
+					array( 'source' => 'report-csv-exporter' )
+				);
+				$email->trigger_failed( $user_id, $report_type );
+				return;
+			}
+
 			/**
 			 * The queue.
 			 *
@@ -597,15 +634,11 @@ class ReportExporter {
 			$queue->schedule_single(
 				time() + 5,
 				(string) self::get_action( 'email_report_download_link' ),
-				array( $user_id, $export_id, $report_type, $report_args ),
+				array( $user_id, $export_id, $report_type, $report_args, $wait_until ),
 				(string) self::$group
 			);
 			return;
 		}
-
-		\WC_Emails::instance();
-		$email = new ReportCSVEmail();
-		$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
 
 		if ( null !== $progress && $progress['failed'] > 0 ) {
 			wc_get_logger()->error(

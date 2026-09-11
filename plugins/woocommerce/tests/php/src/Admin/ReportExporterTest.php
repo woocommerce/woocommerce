@@ -899,12 +899,6 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$this->run_action( array_key_first( $batches ) );
 		\ActionScheduler::store()->log_execution( array_key_last( $batches ) );
 
-		$this->assertInstanceOf(
-			\ActionScheduler_Action::class,
-			ReportExporter::get_next_blocking_job( 'email_report_download_link' ),
-			'A batch that is in progress should block the email action like a pending one.'
-		);
-
 		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
 		$pending    = count(
 			WC()->queue()->search(
@@ -932,6 +926,47 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			),
 			'The email should be re-queued to check again later.'
 		);
+	}
+
+	/**
+	 * @testdox A page that never finishes is reported as a failed export once the wait runs out.
+	 */
+	public function test_export_with_a_page_that_never_finishes_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		$this->create_reported_orders( 3 );
+		$export_id = $this->queue_orders_export();
+		$batches   = $this->get_batch_actions( $export_id );
+
+		$this->run_action( array_key_first( $batches ) );
+		// Its runner died, and the queue's cleanup that would mark it failed is turned off.
+		\ActionScheduler::store()->log_execution( array_key_last( $batches ) );
+
+		ReportExporter::email_report_download_link( 1, $export_id, 'orders', array(), time() - 1 );
+
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that never finished.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertCount( 1, $logger->errors, 'Giving up should be logged.' );
+		$this->assertStringContainsString( '1 of 2 batches still had not finished', $logger->errors[0], 'The log should say which pages never ran.' );
+	}
+
+	/**
+	 * @testdox An export with no queued batches and a percentage short of 100 is reported as failed.
+	 */
+	public function test_export_that_stopped_short_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger    = $this->capture_log_errors();
+		$export_id = (string) time();
+
+		// Batches ran synchronously and left only their percentage behind.
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 50 );
+		ReportExporter::email_report_download_link( 1, $export_id, 'orders' );
+
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for an export that stopped short.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertStringContainsString( 'stopped at 50%', $logger->errors[0], 'The log should carry the percentage it stopped at.' );
 	}
 
 	/**

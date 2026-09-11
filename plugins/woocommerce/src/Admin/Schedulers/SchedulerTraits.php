@@ -219,8 +219,7 @@ trait SchedulerTraits {
 
 		$blocking_jobs = self::queue()->search(
 			array(
-				// A dependency that another runner is executing right now blocks as much as a queued one.
-				'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+				'status'   => 'pending',
 				'orderby'  => 'date',
 				'order'    => 'DESC',
 				'per_page' => 1,
