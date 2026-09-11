@@ -952,6 +952,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
+		// WP_Query omits the status clause when none of the requested statuses are registered, which would return all orders.
+		if ( ! empty( $query_vars['post_status'] ) ) {
+			$requested_statuses = is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : explode( ',', $query_vars['post_status'] );
+			$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati() );
+
+			if ( ! array_intersect( $requested_statuses, $known_statuses ) ) {
+				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_invalid_order_status' );
+			}
+		}
+
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
