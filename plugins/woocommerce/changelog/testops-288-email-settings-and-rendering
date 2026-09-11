@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move Settings > Emails control coverage below E2E; ten browser titles become two installed journeys.
+
