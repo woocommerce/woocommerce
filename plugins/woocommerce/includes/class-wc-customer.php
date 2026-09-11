@@ -192,6 +192,46 @@ class WC_Customer extends WC_Legacy_Customer {
 			$tax_based_on = TaxBasedOn::BASE;
 		}
 
+		// When tax is based on the shipping address but there is effectively no shipping destination,
+		// fall back to the billing address the customer provided. This extends the billing fallback that
+		// WC_Abstract_Order::get_tax_location() applies for virtual orders: we cover both an empty
+		// shipping country and the active shopper's cart having no items that need shipping (e.g. only
+		// virtual products), which is the case reported in #58206 where the store base address would
+		// otherwise be used instead of the customer's address.
+		if ( TaxBasedOn::SHIPPING === $tax_based_on ) {
+			if ( ! $this->get_shipping_country() ) {
+				$tax_based_on = TaxBasedOn::BILLING;
+			} elseif ( WC()->customer === $this && WC()->cart instanceof WC_Cart ) {
+				// Only the active shopper's own cart is consulted, so a customer object built for an
+				// unrelated context (e.g. one passed explicitly to WC_Tax::get_tax_location()) is not
+				// affected by whatever happens to be in the global cart.
+				$cart          = WC()->cart;
+				$cart_contents = $cart->get_cart_contents();
+
+				if ( ! empty( $cart_contents ) ) {
+					// WC_Cart::needs_shipping() is the same "does the cart need a shipping address"
+					// decision checkout uses, including the woocommerce_cart_needs_shipping filter, so an
+					// extension that forces a virtual cart to collect shipping keeps shipping-based tax.
+					// It short-circuits to false when the store has no shipping methods configured, so in
+					// that case fall back to a per-item check to keep taxing a physical cart by its
+					// shipping address.
+					$cart_needs_shipping = $cart->needs_shipping();
+					if ( ! $cart_needs_shipping && ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) ) {
+						foreach ( $cart_contents as $cart_item ) {
+							if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
+								$cart_needs_shipping = true;
+								break;
+							}
+						}
+					}
+
+					if ( ! $cart_needs_shipping ) {
+						$tax_based_on = TaxBasedOn::BILLING;
+					}
+				}
+			}
+		}
+
 		if ( TaxBasedOn::BASE === $tax_based_on ) {
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();

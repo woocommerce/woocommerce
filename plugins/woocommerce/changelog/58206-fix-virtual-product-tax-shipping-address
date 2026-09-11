@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix virtual product tax calculation when tax is based on the shipping address: the cart now falls back to the customer's billing address instead of the store base address when the cart has no items that need shipping.
