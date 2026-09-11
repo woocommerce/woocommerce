@@ -44,8 +44,8 @@ Additional module requests on top of WordPress [Dependency Extraction Webpack Pl
 
 | Request | Global | Script handle | Notes |
 | --- | --- | --- | --- |
-| `@woocommerce/data` | `wc['data']` | `wc-store-data` | |
-| `@woocommerce/csv-export` | `wc['csvExport']` | `wc-csv` | |
+| `@woocommerce/data` | `wc['data']` | `wc-store-data` | Registered in wp-admin only. Not available on the storefront. |
+| `@woocommerce/csv-export` | `wc['csvExport']` | `wc-csv` | Registered in wp-admin only. Not available on the storefront. |
 | `@woocommerce/blocks-registry` | `wc['wcBlocksRegistry']` | `wc-blocks-registry` | |
 | `@woocommerce/block-data` | `wc['wcBlocksData']` | `wc-blocks-data-store` | This dependency does not have an associated npm package |
 | `@woocommerce/settings` | `wc['wcSettings']` | `wc-settings` | This is an alias for a WooCommerce core script, not the npm package of the same name. See below. |
