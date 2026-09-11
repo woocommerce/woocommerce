@@ -8,6 +8,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_attribute-filter'
 		);
+		// eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture `use`, not a React hook.
 		await use( compiler );
 	},
 } );
@@ -260,7 +261,6 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 		} );
 
 		// Skipping these tests until we can move this block to @wordpress/interactivity.
-		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip( 'filter is working inside overlay', async ( { page } ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
 			await page.goto( '/shop' );
