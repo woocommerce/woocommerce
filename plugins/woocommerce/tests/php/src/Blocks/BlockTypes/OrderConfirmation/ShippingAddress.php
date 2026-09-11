@@ -61,6 +61,57 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Shipping details render only for authorized orders that require a shipping address.
+	 * @dataProvider shipping_address_topology_cases
+	 *
+	 * @param string       $topology Order fulfillment topology.
+	 * @param string|false $permission View permission.
+	 * @param bool         $expected_visible Whether shipping content should render.
+	 */
+	public function test_shipping_address_topology( string $topology, $permission, bool $expected_visible ): void {
+		$original_shipping_option = get_option( 'woocommerce_calc_shipping', null );
+		list( $order, $product )  = $this->create_topology_order( $topology );
+
+		try {
+			update_option( 'woocommerce_calc_shipping', 'yes' );
+			$content = $this->render( $order, $permission );
+			if ( 'physical' === $topology ) {
+				$this->assertTrue( $order->needs_shipping_address(), 'A free-shipping order should require a shipping address.' );
+			} else {
+				$this->assertFalse( $order->needs_shipping_address(), 'Pickup and virtual orders should not require a shipping address.' );
+			}
+
+			if ( $expected_visible ) {
+				$this->assertStringContainsString( 'Shipping Marker', $content, 'Shipping details should be non-empty for a shipped order.' );
+			} else {
+				$this->assertSame( '', $content, 'Shipping details should be empty for this topology or permission.' );
+			}
+		} finally {
+			$order->delete( true );
+			$product->delete( true );
+			if ( null === $original_shipping_option ) {
+				delete_option( 'woocommerce_calc_shipping' );
+			} else {
+				update_option( 'woocommerce_calc_shipping', $original_shipping_option );
+			}
+		}
+	}
+
+	/**
+	 * Named shipping-address topology cases.
+	 *
+	 * @return array<string, array{string, string|false, bool}>
+	 */
+	public static function shipping_address_topology_cases(): array {
+		return array(
+			'physical free-shipping order' => array( 'physical', 'full', true ),
+			'local pickup order'           => array( 'local-pickup', 'full', false ),
+			'virtual downloadable order'   => array( 'virtual', 'full', false ),
+			'no view permission'           => array( 'physical', false, false ),
+		);
+	}
+
+	/**
 	 * Create an order placed via the Store API, with a shipping address and a value persisted for the shipping group of the test field.
 	 *
 	 * @param string $value Field value.
@@ -85,10 +136,11 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	/**
 	 * Render the shipping address block content for the given order with full view permissions.
 	 *
-	 * @param \WC_Order $order Order object.
+	 * @param \WC_Order    $order Order object.
+	 * @param string|false $permission View permission.
 	 * @return string
 	 */
-	private function render( \WC_Order $order ): string {
+	private function render( \WC_Order $order, $permission = 'full' ): string {
 		$proxy = new class() extends ShippingAddressBlock {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function __construct() {
@@ -99,6 +151,48 @@ final class ShippingAddress extends \WP_UnitTestCase {
 			}
 		};
 
-		return $proxy->render_content_proxy( $order, 'full' );
+		return $proxy->render_content_proxy( $order, $permission );
+	}
+
+	/**
+	 * Create an order with a persisted shipping address and fulfillment topology.
+	 *
+	 * @param string $topology Order fulfillment topology.
+	 * @return array{\WC_Order, \WC_Product}
+	 */
+	private function create_topology_order( string $topology ): array {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'downloadable' => 'virtual' === $topology,
+				'virtual'      => 'virtual' === $topology,
+			)
+		);
+		$product->set_virtual( 'virtual' === $topology );
+		$product->save();
+
+		$order = wc_create_order( array( 'customer_id' => 0 ) );
+		$item  = new \WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_quantity( 1 );
+		$order->add_item( $item );
+		$order->set_shipping_first_name( 'Shipping' );
+		$order->set_shipping_last_name( 'Marker' );
+		$order->set_shipping_address_1( '500 Shipping Avenue' );
+		$order->set_shipping_city( 'San Francisco' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '94105' );
+		$order->set_shipping_country( 'US' );
+
+		if ( 'virtual' !== $topology ) {
+			$shipping_item = new \WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'local-pickup' === $topology ? 'Local pickup' : 'Free shipping' );
+			$shipping_item->set_method_id( 'local-pickup' === $topology ? 'local_pickup' : 'free_shipping' );
+			$order->add_item( $shipping_item );
+		}
+
+		$order->save();
+
+		return array( $order, $product );
 	}
 }
