@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
+use Automattic\WooCommerce\Internal\Admin\Notes\RefundDoubleCountToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
@@ -31,6 +32,56 @@ class Analytics {
 	 * @since 10.8.0
 	 */
 	const FULL_REFUND_FIX_DATA_TOOL_ID = 'fix_woocommerce_analytics_full_refund_data';
+
+	/**
+	 * Double-counted refunds fix tool identifier.
+	 *
+	 * @since 11.2.0
+	 */
+	const REFUND_DOUBLE_COUNT_TOOL_ID = 'fix_woocommerce_analytics_refund_double_count';
+
+	/**
+	 * Option holding the state of the double-counted refunds fix tool.
+	 *
+	 * @since 11.2.0
+	 */
+	const REFUND_DOUBLE_COUNT_OPTION = 'woocommerce_analytics_refund_double_count';
+
+	/**
+	 * Action Scheduler hook for a double-counted refunds fix batch.
+	 *
+	 * @since 11.2.0
+	 */
+	const REFUND_DOUBLE_COUNT_FIX_HOOK = 'woocommerce_analytics_refund_double_count_fix_batch';
+
+	/**
+	 * Maximum number of affected parent orders re-imported per batch.
+	 *
+	 * @since 11.2.0
+	 */
+	const REFUND_DOUBLE_COUNT_BATCH_SIZE = 100;
+
+	/**
+	 * Number of order IDs checked per batch.
+	 *
+	 * @since 11.2.0
+	 */
+	const REFUND_DOUBLE_COUNT_RANGE_SIZE = 50000;
+
+	/**
+	 * Fix run statuses stored in the tool state.
+	 */
+	private const REFUND_DOUBLE_COUNT_STATUS_RUNNING   = 'running';
+	private const REFUND_DOUBLE_COUNT_STATUS_COMPLETE  = 'complete';
+	private const REFUND_DOUBLE_COUNT_STATUS_CANCELLED = 'cancelled';
+
+	/**
+	 * Receives the fix tool's Tracks events instead of Tracks when set. Tests use it because
+	 * WC_Tracks::record_event() skips PHPUnit users.
+	 *
+	 * @var callable|null
+	 */
+	private static $refund_double_count_event_recorder = null;
 
 	/**
 	 * Class instance.
@@ -76,6 +127,11 @@ class Analytics {
 		// Always register the batch hook so in-flight jobs survive after the legacy
 		// flag is cleared (clearing happens before the first batch is queued).
 		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
+
+		// Merchant-triggered repair of refunds double-counted before #66320.
+		add_filter( 'woocommerce_debug_tools', array( $this, 'register_refund_double_count_tool' ) );
+		add_action( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $this, 'process_refund_double_count_fix_batch' ), 10, 2 );
+		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'maybe_cancel_refund_double_count_fix_on_regenerate' ), 10, 2 );
 
 		if ( self::should_show_refund_fix_tool() ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
@@ -260,19 +316,7 @@ class Analytics {
 			return __( 'Tool dismissed.', 'woocommerce' );
 		}
 
-		$already_running = ! empty(
-			as_get_scheduled_actions(
-				array(
-					'hook'     => 'woocommerce_analytics_refund_fix_batch',
-					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
-					'per_page' => 1,
-					'orderby'  => 'none',
-				),
-				'ids'
-			)
-		);
-
-		if ( $already_running ) {
+		if ( self::is_batch_pending_or_running( 'woocommerce_analytics_refund_fix_batch' ) ) {
 			return __( 'A fix is already in progress, please check back later.', 'woocommerce' );
 		}
 
@@ -282,12 +326,7 @@ class Analytics {
 		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 		update_option( 'woocommerce_analytics_show_old_refund_data_tool', 'yes' );
 
-		WC()->queue()->schedule_single(
-			time(),
-			'woocommerce_analytics_refund_fix_batch',
-			array( 0 ),
-			'wc-admin-data'
-		);
+		self::schedule_batch( 'woocommerce_analytics_refund_fix_batch', array( 0 ) );
 
 		return __( 'Re-importing refunded orders in batches. Full refund data will be updated shortly.', 'woocommerce' );
 	}
@@ -340,13 +379,571 @@ class Analytics {
 
 		if ( count( $refunded_orders ) >= 100 ) {
 			$last_order_id = intval( end( $refunded_orders )->order_id );
-			WC()->queue()->schedule_single(
-				time() + 5,
-				'woocommerce_analytics_refund_fix_batch',
-				array( $last_order_id ),
-				'wc-admin-data'
+			self::schedule_batch( 'woocommerce_analytics_refund_fix_batch', array( $last_order_id ), 5 );
+		}
+	}
+
+	/**
+	 * Whether a store may have refunds double-counted by the bug fixed in #66320.
+	 *
+	 * Only stores that use the new full refund data and ran WooCommerce before 11.1.0,
+	 * where the write path was fixed, can have affected rows.
+	 *
+	 * @internal
+	 *
+	 * @return bool
+	 */
+	public static function is_refund_double_count_tool_applicable(): bool {
+		if ( ! OrderUtil::uses_new_full_refund_data() || OrderUtil::unknown_orders_data_store_in_use() ) {
+			return false;
+		}
+
+		if ( self::get_refund_double_count_state()['dismissed'] ) {
+			return false;
+		}
+
+		// Installs older than 9.2.0 never recorded their initial version.
+		$initial_version = get_option( \WC_Install::INITIAL_INSTALLED_VERSION );
+
+		return ! is_string( $initial_version ) || '' === $initial_version || version_compare( $initial_version, '11.1.0', '<' );
+	}
+
+	/**
+	 * Get the state of the double-counted refunds fix tool, with defaults applied.
+	 *
+	 * @internal
+	 *
+	 * @return array{run_id: string, status: string, max_order_id: int, fixed: int, unresolved: int, batches: int, started_at: int, completed_at: int, dismissed: bool}
+	 */
+	public static function get_refund_double_count_state(): array {
+		$state = get_option( self::REFUND_DOUBLE_COUNT_OPTION );
+		$state = is_array( $state ) ? $state : array();
+
+		return array(
+			'run_id'       => is_string( $state['run_id'] ?? null ) ? $state['run_id'] : '',
+			'status'       => is_string( $state['status'] ?? null ) ? $state['status'] : '',
+			'max_order_id' => absint( $state['max_order_id'] ?? 0 ),
+			'fixed'        => absint( $state['fixed'] ?? 0 ),
+			'unresolved'   => absint( $state['unresolved'] ?? 0 ),
+			'batches'      => absint( $state['batches'] ?? 0 ),
+			'started_at'   => absint( $state['started_at'] ?? 0 ),
+			'completed_at' => absint( $state['completed_at'] ?? 0 ),
+			'dismissed'    => ! empty( $state['dismissed'] ),
+		);
+	}
+
+	/**
+	 * Get the tool state from the database rather than the request cache, so that
+	 * a new run or a cancellation saved by another request is seen.
+	 *
+	 * @return array Tool state, as get_refund_double_count_state() returns it.
+	 */
+	private static function get_fresh_refund_double_count_state(): array {
+		// Clear 'notoptions' too, or a request that cached the option as missing never sees it once created.
+		wp_cache_delete( self::REFUND_DOUBLE_COUNT_OPTION, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+
+		return self::get_refund_double_count_state();
+	}
+
+	/**
+	 * Merge changes into the stored double-counted refunds fix tool state.
+	 *
+	 * @param array $changes State keys to overwrite.
+	 * @return void
+	 */
+	private static function update_refund_double_count_state( array $changes ): void {
+		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( self::get_fresh_refund_double_count_state(), $changes ), false );
+	}
+
+	/**
+	 * Whether a fix run is in progress. A run whose actions all died counts as not running.
+	 *
+	 * @param array $state Tool state from get_refund_double_count_state().
+	 * @return bool
+	 */
+	private static function is_refund_double_count_fix_running( array $state ): bool {
+		return self::REFUND_DOUBLE_COUNT_STATUS_RUNNING === $state['status']
+			&& self::is_batch_pending_or_running( self::REFUND_DOUBLE_COUNT_FIX_HOOK );
+	}
+
+	/**
+	 * Whether the given run is the current, still running fix run.
+	 *
+	 * @phpstan-impure
+	 *
+	 * @param string $run_id Run ID passed to a batch.
+	 * @return bool
+	 */
+	private static function is_current_refund_double_count_run( string $run_id ): bool {
+		return self::is_running_state_of( self::get_fresh_refund_double_count_state(), $run_id );
+	}
+
+	/**
+	 * Whether the tool state belongs to the given run and that run is still running.
+	 *
+	 * @param array  $state  Tool state from get_refund_double_count_state().
+	 * @param string $run_id Run ID passed to a batch.
+	 * @return bool
+	 */
+	private static function is_running_state_of( array $state, string $run_id ): bool {
+		return '' !== $run_id && $run_id === $state['run_id'] && self::REFUND_DOUBLE_COUNT_STATUS_RUNNING === $state['status'];
+	}
+
+	/**
+	 * Register the double-counted refunds fix tool on the WooCommerce > Status > Tools page.
+	 *
+	 * The button and status text follow the state of the current or last run.
+	 *
+	 * @internal
+	 *
+	 * @param array $debug_tools Available debug tool registrations.
+	 * @return array Filtered debug tool registrations.
+	 */
+	public function register_refund_double_count_tool( $debug_tools ) {
+		if ( ! is_array( $debug_tools ) || ! self::is_refund_double_count_tool_applicable() ) {
+			return $debug_tools;
+		}
+
+		$state       = self::get_refund_double_count_state();
+		$button      = __( 'Check and fix', 'woocommerce' );
+		$disabled    = false;
+		$status_text = '';
+
+		if ( self::is_refund_double_count_fix_running( $state ) ) {
+			$button      = __( 'Checking and fixing…', 'woocommerce' );
+			$disabled    = true;
+			$status_text = sprintf(
+				/* translators: %d: number of orders fixed so far. */
+				_n( '%d order fixed so far.', '%d orders fixed so far.', $state['fixed'], 'woocommerce' ),
+				$state['fixed']
+			);
+		} elseif ( self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE === $state['status'] && $state['unresolved'] > 0 ) {
+			$status_text = sprintf(
+				/* translators: %d: number of orders that could not be fixed. */
+				_n( '%d order could not be fixed. See the wc-analytics-order-import log for details.', '%d orders could not be fixed. See the wc-analytics-order-import log for details.', $state['unresolved'], 'woocommerce' ),
+				$state['unresolved']
+			);
+		} elseif ( self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE === $state['status'] ) {
+			$button      = __( 'Dismiss', 'woocommerce' );
+			$status_text = 0 === $state['fixed']
+				? __( 'No affected orders were found.', 'woocommerce' )
+				: sprintf(
+					/* translators: 1: number of orders fixed, 2: date the fix finished. */
+					_n( 'Fixed %1$d order on %2$s.', 'Fixed %1$d orders on %2$s.', $state['fixed'], 'woocommerce' ),
+					$state['fixed'],
+					wp_date( wc_date_format(), $state['completed_at'] )
+				);
+		} elseif ( '' !== $state['status'] ) {
+			$status_text = __( 'The previous run did not finish.', 'woocommerce' );
+		}
+
+		$debug_tools[ self::REFUND_DOUBLE_COUNT_TOOL_ID ] = array(
+			'name'             => __( 'Fix double-counted refunds in Analytics', 'woocommerce' ),
+			'button'           => $button,
+			'desc'             => __( 'This tool finds orders where a partial refund followed by a full refund was counted twice in the Analytics returns, and re-imports them. Only orders refunded before WooCommerce 11.1 can be affected.', 'woocommerce' ),
+			'status_text'      => esc_html( $status_text ),
+			'callback'         => array( $this, 'run_refund_double_count_tool' ),
+			'disabled'         => $disabled,
+			'requires_refresh' => true,
+		);
+
+		return $debug_tools;
+	}
+
+	/**
+	 * Handle the double-counted refunds fix tool button.
+	 *
+	 * Starts a fix run, or dismisses the tool once a run finished with nothing left to fix.
+	 * Also reachable through the system status tools REST API, so it re-checks the state.
+	 *
+	 * @internal
+	 *
+	 * @return string Result message.
+	 */
+	public function run_refund_double_count_tool() {
+		$state           = self::get_refund_double_count_state();
+		$previous_status = '' === $state['status'] ? 'none' : $state['status'];
+
+		if ( self::is_refund_double_count_fix_running( $state ) ) {
+			self::record_refund_double_count_tool_run( 'refused_running', $previous_status );
+			return __( 'A fix is already in progress, please check back later.', 'woocommerce' );
+		}
+
+		if ( self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE === $state['status'] && 0 === $state['unresolved'] ) {
+			self::update_refund_double_count_state( array( 'dismissed' => true ) );
+			self::record_refund_double_count_tool_run( 'dismissed', $previous_status );
+			return __( 'Tool dismissed.', 'woocommerce' );
+		}
+
+		if ( self::is_batch_pending_or_running( 'woocommerce_analytics_refund_fix_batch' ) ) {
+			self::record_refund_double_count_tool_run( 'refused_full_refund_fix', $previous_status );
+			return __( 'The full refund data fix is still running. Please try again once it has finished.', 'woocommerce' );
+		}
+
+		$run_id = wp_generate_uuid4();
+
+		self::update_refund_double_count_state(
+			array(
+				'run_id'       => $run_id,
+				'status'       => self::REFUND_DOUBLE_COUNT_STATUS_RUNNING,
+				'max_order_id' => self::get_max_order_stats_id(),
+				'fixed'        => 0,
+				'unresolved'   => 0,
+				'batches'      => 0,
+				'started_at'   => time(),
+				'completed_at' => 0,
+			)
+		);
+		self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 0, $run_id ) );
+		RefundDoubleCountToolNotice::delete_if_not_applicable();
+		self::record_refund_double_count_tool_run( 'started', $previous_status );
+
+		return __( 'Checking for affected orders and fixing them in the background. Reload this page to see the progress.', 'woocommerce' );
+	}
+
+	/**
+	 * Whether an Action Scheduler job for the given batch hook is currently
+	 * pending or running.
+	 *
+	 * Detected live from Action Scheduler so a batch that dies never leaves a
+	 * stuck "in progress" flag behind.
+	 *
+	 * @param string $hook Action Scheduler hook name.
+	 * @return bool
+	 */
+	private static function is_batch_pending_or_running( string $hook ): bool {
+		return ! empty(
+			as_get_scheduled_actions(
+				array(
+					'hook'     => $hook,
+					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+					'per_page' => 1,
+					'orderby'  => 'none',
+				),
+				'ids'
+			)
+		);
+	}
+
+	/**
+	 * Schedule a single batch job in the wc-admin-data group.
+	 *
+	 * @param string $hook  Action Scheduler hook name.
+	 * @param array  $args  Arguments passed to the batch.
+	 * @param int    $delay Seconds to wait before the batch may run.
+	 * @return void
+	 */
+	private static function schedule_batch( string $hook, array $args, int $delay = 0 ): void {
+		WC()->queue()->schedule_single(
+			time() + $delay,
+			$hook,
+			$args,
+			'wc-admin-data'
+		);
+	}
+
+	/**
+	 * Maximum number of affected parent orders re-imported per fix batch.
+	 *
+	 * @return int
+	 */
+	private static function get_refund_double_count_batch_size(): int {
+		/**
+		 * Filters the maximum number of parent orders re-imported per double-counted refunds fix batch.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $batch_size Maximum parent orders per batch.
+		 */
+		return max( 1, (int) apply_filters( 'woocommerce_analytics_refund_double_count_batch_size', self::REFUND_DOUBLE_COUNT_BATCH_SIZE ) );
+	}
+
+	/**
+	 * Number of order IDs checked per fix batch.
+	 *
+	 * @return int
+	 */
+	private static function get_refund_double_count_range_size(): int {
+		/**
+		 * Filters the number of order IDs checked per double-counted refunds fix batch.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param int $range_size Order IDs per batch.
+		 */
+		return max( 1, (int) apply_filters( 'woocommerce_analytics_refund_double_count_range_size', self::REFUND_DOUBLE_COUNT_RANGE_SIZE ) );
+	}
+
+	/**
+	 * Highest order_id present in the order stats table (0 when empty).
+	 *
+	 * @return int
+	 */
+	private static function get_max_order_stats_id(): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return intval( $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" ) );
+	}
+
+	/**
+	 * Get the parent orders whose refund rows add up to more than the order itself,
+	 * the sign of a partial refund followed by a double-counted full refund (#66320).
+	 *
+	 * Refunds are found through the parent index of the active order table, so the
+	 * query only reads the refunds of the parent orders that match the condition.
+	 *
+	 * @param string $parent_condition Prepared SQL condition on the parent stats row, aliased `o`.
+	 * @param int    $limit            Maximum number of IDs to return; 0 for no limit.
+	 * @return int[] Parent order IDs in ascending order.
+	 * @throws \Exception On database error.
+	 */
+	private static function get_refund_double_counted_parent_ids( string $parent_condition, int $limit = 0 ): array {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table  = OrdersTableDataStore::get_orders_table_name();
+			$id_column     = 'id';
+			$parent_column = 'parent_order_id';
+			$type_column   = 'type';
+		} else {
+			$orders_table  = $wpdb->posts;
+			$id_column     = 'ID';
+			$parent_column = 'post_parent';
+			$type_column   = 'post_type';
+		}
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+		$limit_sql   = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
+		// Half the smallest currency unit absorbs floating-point noise but still catches a double-counted
+		// smallest-unit refund. Capped at 8 decimals, beyond which DOUBLE sums get too noisy to compare.
+		$tolerance_sql = sprintf( '%.10F', 0.5 / ( 10 ** min( wc_get_price_decimals(), 8 ) ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table and column names are hardcoded; the condition is prepared by the caller.
+		$parent_ids = $wpdb->get_col(
+			"SELECT o.order_id
+			FROM {$stats_table} AS o
+			INNER JOIN {$orders_table} AS refund ON refund.{$parent_column} = o.order_id AND refund.{$type_column} = 'shop_order_refund'
+			INNER JOIN {$stats_table} AS r ON r.order_id = refund.{$id_column}
+			WHERE {$parent_condition} AND o.parent_id = 0
+			GROUP BY o.order_id
+			HAVING COUNT(*) > 1
+				AND ABS( SUM( r.net_total + r.tax_total + r.shipping_total ) ) > MAX( o.net_total + o.tax_total + o.shipping_total ) + {$tolerance_sql}
+			ORDER BY o.order_id ASC
+			{$limit_sql}"
+		);
+		// phpcs:enable
+
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'Double-counted refunds query failed: %s', $wpdb->last_error ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
+			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return array_map( 'intval', $parent_ids );
+	}
+
+	/**
+	 * Process one batch of the double-counted refunds fix.
+	 *
+	 * Re-imports the affected parent orders in the next range of order IDs, checks they
+	 * were repaired, and schedules the next batch until the highest order ID recorded when
+	 * the run started is covered. Batches of an older or cancelled run do nothing.
+	 *
+	 * @internal
+	 *
+	 * @param int    $cursor Exclusive lower bound on the parent order ID.
+	 * @param string $run_id ID of the run that scheduled the batch.
+	 * @return void
+	 * @throws \Exception On database error so Action Scheduler marks the action as failed.
+	 */
+	public function process_refund_double_count_fix_batch( $cursor = 0, $run_id = '' ): void {
+		global $wpdb;
+
+		$cursor = absint( $cursor );
+		$run_id = is_string( $run_id ) ? $run_id : '';
+
+		if ( ! self::is_current_refund_double_count_run( $run_id ) ) {
+			return;
+		}
+
+		$max_order_id = self::get_refund_double_count_state()['max_order_id'];
+		$batch_size   = self::get_refund_double_count_batch_size();
+		$range_end    = min( $cursor + self::get_refund_double_count_range_size(), $max_order_id );
+
+		$parent_ids = self::get_refund_double_counted_parent_ids(
+			$wpdb->prepare( 'o.order_id > %d AND o.order_id <= %d', $cursor, $range_end ),
+			$batch_size
+		);
+
+		foreach ( $parent_ids as $parent_id ) {
+			OrdersScheduler::import( $parent_id );
+		}
+
+		// OrdersScheduler::import() skips some orders silently, so check the result.
+		$unfixed_ids = array();
+		if ( $parent_ids ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $parent_ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Only %d placeholders are interpolated.
+			$unfixed_ids = self::get_refund_double_counted_parent_ids( $wpdb->prepare( "o.order_id IN ( {$placeholders} )", $parent_ids ) );
+		}
+
+		if ( $unfixed_ids ) {
+			wc_get_logger()->warning(
+				sprintf( 'Could not fix the double-counted refunds of orders: %s', implode( ', ', $unfixed_ids ) ),
+				array( 'source' => 'wc-analytics-order-import' )
 			);
 		}
+
+		// A newer run or a cancellation may have happened while the orders were re-imported. Check and
+		// write the same fresh copy of the state, so this batch never writes into another run's state.
+		$state = self::get_fresh_refund_double_count_state();
+		if ( ! self::is_running_state_of( $state, $run_id ) ) {
+			return;
+		}
+
+		$next_cursor = count( $parent_ids ) >= $batch_size ? (int) end( $parent_ids ) : $range_end;
+		$is_done     = $next_cursor >= $max_order_id;
+		$changes     = array(
+			'fixed'      => $state['fixed'] + count( $parent_ids ) - count( $unfixed_ids ),
+			'unresolved' => $state['unresolved'] + count( $unfixed_ids ),
+			'batches'    => $state['batches'] + 1,
+		);
+
+		if ( $is_done ) {
+			$changes['status']       = self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE;
+			$changes['completed_at'] = time();
+		}
+
+		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( $state, $changes ), false );
+
+		if ( $is_done ) {
+			self::record_refund_double_count_fix_finished( array_merge( $state, $changes ), self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE );
+		} else {
+			self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $next_cursor, $run_id ), 5 );
+		}
+	}
+
+	/**
+	 * Cancel a running double-counted refunds fix when a full historical import starts,
+	 * since that import re-imports every affected order anyway.
+	 *
+	 * @internal
+	 *
+	 * @param int|bool $days          Number of days to import, or false for the full history.
+	 * @param bool     $skip_existing Whether the import skips already imported orders.
+	 * @return void
+	 */
+	public function maybe_cancel_refund_double_count_fix_on_regenerate( $days, $skip_existing ): void {
+		if ( false !== $days || $skip_existing ) {
+			return;
+		}
+
+		$state = self::get_fresh_refund_double_count_state();
+		if ( self::REFUND_DOUBLE_COUNT_STATUS_RUNNING !== $state['status'] ) {
+			return;
+		}
+
+		self::update_refund_double_count_state( array( 'status' => self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED ) );
+		as_unschedule_all_actions( self::REFUND_DOUBLE_COUNT_FIX_HOOK );
+		self::record_refund_double_count_fix_finished( $state, self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED );
+	}
+
+	/**
+	 * Override where the fix tool's Tracks events go. Intended for tests only.
+	 *
+	 * @internal
+	 *
+	 * @param callable|null $recorder Receives `(string $event_name, array $properties)`. Pass null to send to Tracks again.
+	 * @return void
+	 */
+	public static function set_refund_double_count_event_recorder( ?callable $recorder ): void {
+		self::$refund_double_count_event_recorder = $recorder;
+	}
+
+	/**
+	 * Record a click on the fix tool's button and what it did.
+	 *
+	 * @param string $outcome         One of started, dismissed, refused_running or refused_full_refund_fix.
+	 * @param string $previous_status Run status before the click, or 'none'.
+	 * @return void
+	 */
+	private static function record_refund_double_count_tool_run( string $outcome, string $previous_status ): void {
+		self::record_refund_double_count_event(
+			'tool_run',
+			array(
+				'outcome'         => $outcome,
+				'previous_status' => $previous_status,
+			)
+		);
+	}
+
+	/**
+	 * Record the end of a fix run.
+	 *
+	 * @param array  $state  Tool state at the end of the run.
+	 * @param string $result complete or cancelled.
+	 * @return void
+	 */
+	private static function record_refund_double_count_fix_finished( array $state, string $result ): void {
+		self::record_refund_double_count_event(
+			'fix_finished',
+			array(
+				'result'           => $result,
+				'fixed_count'      => $state['fixed'],
+				'unresolved_count' => $state['unresolved'],
+				'batches'          => $state['batches'],
+				'duration_seconds' => $state['started_at'] > 0 ? max( 0, time() - $state['started_at'] ) : 0,
+				'max_order_id'     => $state['max_order_id'],
+				'db_engine'        => self::get_db_engine(),
+			)
+		);
+	}
+
+	/**
+	 * Send one of the fix tool's Tracks events. Telemetry failures never stop the fix.
+	 *
+	 * @param string $name       Event name after the analytics_refund_double_count_ prefix.
+	 * @param array  $properties Event properties.
+	 * @return void
+	 */
+	private static function record_refund_double_count_event( string $name, array $properties ): void {
+		$properties['order_storage'] = OrderUtil::custom_orders_table_usage_is_enabled() ? 'hpos' : 'cpt';
+		$event_name                  = 'analytics_refund_double_count_' . $name;
+
+		try {
+			if ( null !== self::$refund_double_count_event_recorder ) {
+				( self::$refund_double_count_event_recorder )( $event_name, $properties );
+				return;
+			}
+
+			if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
+				wc_admin_record_tracks_event( $event_name, $properties );
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+
+	/**
+	 * Database engine and major.minor version, e.g. mariadb-10.11 or mysql-8.0.
+	 *
+	 * @return string
+	 */
+	private static function get_db_engine(): string {
+		global $wpdb;
+
+		$server_info = (string) $wpdb->db_server_info();
+
+		if ( false !== stripos( $server_info, 'mariadb' ) ) {
+			// Older MariaDB servers report a "5.5.5-" prefix before the real version.
+			return preg_match( '/(\d+\.\d+)\.\d+-MariaDB/i', $server_info, $matches ) ? 'mariadb-' . $matches[1] : 'mariadb';
+		}
+
+		return preg_match( '/^(\d+\.\d+)/', $server_info, $matches ) ? 'mysql-' . $matches[1] : 'unknown';
 	}
 
 	/**
@@ -388,17 +985,7 @@ class Analytics {
 			);
 		}
 
-		$fix_in_progress = ! empty(
-			as_get_scheduled_actions(
-				array(
-					'hook'     => 'woocommerce_analytics_refund_fix_batch',
-					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
-					'per_page' => 1,
-					'orderby'  => 'none',
-				),
-				'ids'
-			)
-		);
+		$fix_in_progress = self::is_batch_pending_or_running( 'woocommerce_analytics_refund_fix_batch' );
 
 		wp_send_json_success(
 			array(
