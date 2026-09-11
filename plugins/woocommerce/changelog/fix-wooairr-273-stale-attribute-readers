@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep product responses, admin variation screens and CSV exports working for products loaded before one of their global attributes is deleted in the same request.
+Keep product responses, admin variation screens and CSV exports working after one of a product's global attributes is deleted.
