@@ -352,6 +352,139 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Should preserve cart tax totals through checkout and order reload.
+	 *
+	 * @dataProvider checkout_tax_totals_provider
+	 * @param string $tax_mode Whether catalog prices include tax.
+	 * @param string $country Customer billing country.
+	 * @param bool   $adjust_non_base_prices Whether to adjust prices outside the base location.
+	 * @param string $expected_subtotal Expected line subtotal excluding tax.
+	 * @param string $expected_tax Expected tax total.
+	 * @param string $expected_total Expected order total.
+	 */
+	public function test_checkout_preserves_cart_tax_totals( string $tax_mode, string $country, bool $adjust_non_base_prices, string $expected_subtotal, string $expected_tax, string $expected_total ): void {
+		$options          = array(
+			'woocommerce_calc_taxes'         => 'yes',
+			'woocommerce_prices_include_tax' => $tax_mode,
+			'woocommerce_tax_based_on'       => 'billing',
+			'woocommerce_default_country'    => 'GB',
+			'woocommerce_price_num_decimals' => '2',
+		);
+		$previous_options = array();
+		foreach ( $options as $name => $value ) {
+			$previous_options[ $name ] = get_option( $name );
+			update_option( $name, $value );
+		}
+		$adjust_prices_filter = $adjust_non_base_prices ? '__return_true' : '__return_false';
+		add_filter( 'woocommerce_adjust_non_base_location_prices', $adjust_prices_filter );
+		$tax_rate_ids = array();
+
+		try {
+			\WC_Tax::create_tax_class( 'Checkout tax totals', 'checkout-tax-totals' );
+			$tax_rates = array(
+				'GB' => '20',
+				'DE' => '10',
+			);
+			foreach ( $tax_rates as $tax_country => $rate ) {
+				$tax_rate_ids[] = \WC_Tax::_insert_tax_rate(
+					array(
+						'tax_rate_country'  => $tax_country,
+						'tax_rate'          => $rate,
+						'tax_rate_name'     => 'Checkout tax',
+						'tax_rate_priority' => 1,
+						'tax_rate_compound' => 0,
+						'tax_rate_shipping' => 0,
+						'tax_rate_class'    => 'checkout-tax-totals',
+					)
+				);
+			}
+			$fixtures = new FixtureData();
+			$product  = $fixtures->get_simple_product(
+				array(
+					'regular_price' => '132',
+					'virtual'       => true,
+					'tax_status'    => 'taxable',
+					'tax_class'     => 'checkout-tax-totals',
+				)
+			);
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( $product->get_id() );
+			WC()->customer->set_is_vat_exempt( false );
+			$billing_address = (object) array(
+				'first_name' => 'Test',
+				'last_name'  => 'Customer',
+				'address_1'  => '1 Test Street',
+				'city'       => 'Test City',
+				'state'      => '',
+				'postcode'   => 'GB' === $country ? 'CB24 1AB' : '10115',
+				'country'    => $country,
+				'email'      => 'testaccount@test.com',
+			);
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params( array( 'billing_address' => $billing_address ) );
+			$cart_response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $cart_response->get_status(), 'The cart request should succeed.' );
+			$cart_totals = (array) $cart_response->get_data()['totals'];
+			$this->assertSame( $expected_subtotal, $cart_totals['total_items'], 'Cart line subtotal should exclude the applicable tax.' );
+			$this->assertSame( $expected_tax, $cart_totals['total_tax'], 'Cart tax should use the customer location and adjustment setting.' );
+			$this->assertSame( $expected_total, $cart_totals['total_price'], 'Cart total should match the hand-calculated amount.' );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'billing_address' => $billing_address,
+					'payment_method'  => WC_Gateway_BACS::ID,
+					'expected_total'  => $expected_total,
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+			$this->assertGreaterThan( 0, $response->get_data()['order_id'], 'Checkout should create an order.' );
+
+			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+			$order = new \WC_Order( $response->get_data()['order_id'] );
+			$this->assertSame( 'yes' === $tax_mode, $order->get_prices_include_tax(), 'Persisted checkout tax mode should survive a store setting change.' );
+			$this->assertSame( (float) $expected_subtotal / 100, (float) $order->get_subtotal(), 'Saved line subtotal should match the cart.' );
+			$this->assertSame( (float) $expected_tax / 100, (float) $order->get_total_tax(), 'Saved order tax should match the cart.' );
+			$this->assertSame( (float) $expected_total / 100, (float) $order->get_total(), 'Saved order total should match the cart.' );
+		} finally {
+			remove_filter( 'woocommerce_adjust_non_base_location_prices', $adjust_prices_filter );
+			foreach ( $tax_rate_ids as $tax_rate_id ) {
+				\WC_Tax::_delete_tax_rate( $tax_rate_id );
+			}
+			\WC_Tax::delete_tax_class_by( 'slug', 'checkout-tax-totals' );
+			foreach ( $previous_options as $name => $value ) {
+				if ( false === $value ) {
+					delete_option( $name );
+				} else {
+					update_option( $name, $value );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tax totals for a 132 catalog price with 20% base tax and 10% non-base tax, in minor units.
+	 *
+	 * @return array
+	 */
+	public static function checkout_tax_totals_provider(): array {
+		return array(
+			'inclusive base adjusted'       => array( 'yes', 'GB', true, '11000', '2200', '13200' ),
+			'inclusive base unadjusted'     => array( 'yes', 'GB', false, '11000', '2200', '13200' ),
+			'inclusive non-base adjusted'   => array( 'yes', 'DE', true, '11000', '1100', '12100' ),
+			'inclusive non-base unadjusted' => array( 'yes', 'DE', false, '12000', '1200', '13200' ),
+			'exclusive base adjusted'       => array( 'no', 'GB', true, '13200', '2640', '15840' ),
+			'exclusive base unadjusted'     => array( 'no', 'GB', false, '13200', '2640', '15840' ),
+			'exclusive non-base adjusted'   => array( 'no', 'DE', true, '13200', '1320', '14520' ),
+			'exclusive non-base unadjusted' => array( 'no', 'DE', false, '13200', '1320', '14520' ),
+		);
+	}
+
+	/**
 	 * Ensure an order is placed when the expected total sent by the client matches the server total.
 	 */
 	public function test_post_data_accepts_matching_expected_total() {

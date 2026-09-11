@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Initialize new orders with the store's tax entry mode, and preserve saved order values when the store setting changes.
