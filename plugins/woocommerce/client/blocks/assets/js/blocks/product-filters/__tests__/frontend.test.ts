@@ -127,6 +127,50 @@ describe( 'product filters interactivity store', () => {
 		] );
 	} );
 
+	it( 'toggles an attribute and removes its query parameters when deselected', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const context = {
+			isOverlayOpened: false,
+			params: {},
+			activeFilters: [],
+			item: {
+				type: 'attribute/color',
+				label: 'Gray',
+				value: 'gray',
+				selected: false,
+				count: 2,
+				attributeQueryType: 'or' as const,
+			},
+			activeLabelTemplate: 'Color: {{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [
+			{
+				value: 'gray',
+				type: 'attribute/color',
+				activeLabel: 'Color: Gray',
+				attributeQueryType: 'or',
+			},
+		] );
+		expect( mockRegisteredStore.state.params ).toEqual( {
+			filter_color: 'gray',
+			query_type_color: 'or',
+		} );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( context.activeFilters ).toEqual( [] );
+		expect( mockRegisteredStore.state.params ).toEqual( {} );
+	} );
+
 	it( 'returns no selectable items when server context items are not an array', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Product filters store was not registered.' );
