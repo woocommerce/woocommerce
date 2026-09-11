@@ -11,6 +11,16 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
  */
 class NotificationTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->enable_stock_notifications_feature();
+	}
+
 	/**
 	 * @after
 	 */
@@ -19,6 +29,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -257,5 +268,32 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		$this->assertFalse( $notification->check_verification_key( 'test' ) );
+	}
+
+	/**
+	 * @testdox set_user_email() should store the canonical (trimmed, lowercased) form.
+	 */
+	public function test_set_user_email_stores_canonical_form(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( ' Foo@Bar.COM ' );
+		$notification->save();
+
+		$this->assertSame( 'foo@bar.com', $notification->get_user_email() );
+		$this->assertSame( 'foo@bar.com', ( new Notification( $notification->get_id() ) )->get_user_email() );
+	}
+
+	/**
+	 * @testdox validate() should still reject an invalid email after normalization.
+	 */
+	public function test_invalid_user_email_fails_validation(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'Not An Email' );
+
+		$result = $notification->save();
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'User Email is invalid.', $result->get_error_message() );
 	}
 }
