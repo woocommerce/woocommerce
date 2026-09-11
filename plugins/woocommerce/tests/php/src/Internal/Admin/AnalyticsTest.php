@@ -257,6 +257,43 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Detects a double-counted refund of the smallest currency unit on a store with six price decimals.
+	 */
+	public function test_fix_detects_a_smallest_unit_double_count_with_six_price_decimals(): void {
+		global $wpdb;
+
+		add_filter(
+			'wc_get_price_decimals',
+			function () {
+				return 6;
+			}
+		);
+		$order = $this->create_refunded_order( array( 0.01, 49.99 ) );
+
+		// A partial refund of 0.000001 followed by a full refund that recorded the whole $50 order total.
+		$amounts = array( -0.000001, -50 );
+		$ids     = array_map( fn( $refund ) => $refund->get_id(), $order->get_refunds() );
+		sort( $ids );
+		foreach ( $ids as $index => $refund_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->update(
+				$wpdb->prefix . 'wc_order_stats',
+				array(
+					'net_total'      => $amounts[ $index ],
+					'tax_total'      => 0,
+					'shipping_total' => 0,
+				),
+				array( 'order_id' => $refund_id )
+			);
+		}
+
+		$this->run_fix();
+
+		$this->assertSame( 1, Analytics::get_refund_double_count_state()['fixed'] );
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $order ), 0.000001 );
+	}
+
+	/**
 	 * @testdox Pages through full batches and order ID ranges until the highest order ID is covered.
 	 */
 	public function test_fix_pages_through_batches_and_ranges(): void {
@@ -376,6 +413,39 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'newer-run', $state['run_id'] );
 		$this->assertSame( 'running', $state['status'], 'The older batch must not complete the newer run' );
 		$this->assertSame( 0, $state['fixed'], 'The older batch must not add to the newer run counters' );
+	}
+
+	/**
+	 * @testdox A batch sees a run that another request created after this request cached the option as missing.
+	 */
+	public function test_batch_sees_a_run_created_after_the_option_was_cached_as_missing(): void {
+		global $wpdb;
+
+		$order = $this->create_refunded_order( array( 20, 30 ) );
+		$this->double_count_latest_refund( $order );
+		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
+		get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
+
+		// Create the run straight in the table, as another request would.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => Analytics::REFUND_DOUBLE_COUNT_OPTION,
+				'option_value' => maybe_serialize(
+					array(
+						'run_id'       => 'run',
+						'status'       => 'running',
+						'max_order_id' => $this->get_max_order_stats_id(),
+					)
+				),
+				'autoload'     => 'no',
+			)
+		);
+
+		$this->sut->process_refund_double_count_fix_batch( 0, 'run' );
+
+		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $order ), 0.001, 'The batch should fix the order instead of treating the run as gone' );
 	}
 
 	/**
