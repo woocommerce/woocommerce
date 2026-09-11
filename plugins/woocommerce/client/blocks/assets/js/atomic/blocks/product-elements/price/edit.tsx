@@ -6,7 +6,6 @@ import {
 	BlockControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
 import { isExperimentalWcRestApiV4Enabled } from '@woocommerce/block-settings';
 import { useProduct } from '@woocommerce/entities';
@@ -26,13 +25,12 @@ interface BlockAttributes {
 
 interface Attributes {
 	textAlign: 'left' | 'center' | 'right';
-	isDescendentOfSingleProduct: boolean;
-	isDescendentOfSingleProductBlock: boolean;
 	productId: number;
 }
 
 interface Context {
 	queryId: number;
+	postId: number;
 }
 
 interface Props {
@@ -62,19 +60,6 @@ const PriceEdit = ( {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-			} ),
-		[
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-			setAttributes,
-		]
-	);
-
 	const isExperimentalWcRestApiEnabled = isExperimentalWcRestApiV4Enabled();
 
 	const { product } = useProduct( context.postId );
@@ -96,6 +81,9 @@ const PriceEdit = ( {
 					isExperimentalWcRestApiEnabled ? (
 						<Block
 							{ ...blockAttrs }
+							isDescendentOfSingleProductTemplate={
+								isDescendentOfSingleProductTemplate
+							}
 							isAdmin={ true }
 							product={ product }
 							isExperimentalWcRestApiV4Enabled={
@@ -105,6 +93,9 @@ const PriceEdit = ( {
 					) : (
 						<Block
 							{ ...blockAttrs }
+							isDescendentOfSingleProductTemplate={
+								isDescendentOfSingleProductTemplate
+							}
 							product={ undefined }
 							isAdmin={ false }
 							isExperimentalWcRestApiV4Enabled={ false }

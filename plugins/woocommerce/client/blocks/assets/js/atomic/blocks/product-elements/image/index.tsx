@@ -1,14 +1,12 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
-import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
+import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { BlockAttributes } from './types';
 import deprecated from './deprecated';
 import edit from './edit';
 import { BLOCK_ICON as icon } from './constants';
@@ -18,13 +16,7 @@ registerBlockType( metadata, {
 	deprecated,
 	icon,
 	edit,
-	save: ( { attributes }: { attributes: BlockAttributes } ) => {
-		if (
-			attributes.isDescendentOfQueryLoop ||
-			attributes.isDescendentOfSingleProductBlock
-		) {
-			return <InnerBlocks.Content />;
-		}
-		return <div className={ clsx( 'is-loading', attributes.className ) } />;
-	},
+	// The `woocommerce/product-sale-badge` inner block needs to persist —
+	// returning `null` would drop it from the saved content.
+	save: () => <InnerBlocks.Content />,
 } );

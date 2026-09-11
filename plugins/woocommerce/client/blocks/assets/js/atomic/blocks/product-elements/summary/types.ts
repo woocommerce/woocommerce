@@ -8,9 +8,7 @@ import type { ProductEntityResponse } from '@woocommerce/entities';
 
 export interface Attributes {
 	productId: number;
-	isDescendentOfQueryLoop: boolean;
-	isDescendentOfSingleProductTemplate: boolean;
-	isDescendentOfSingleProductBlock: boolean;
+
 	isDescendantOfAllProducts: boolean;
 	showDescriptionIfEmpty: boolean;
 	showLink: boolean;
@@ -34,4 +32,5 @@ export type BlockProps = Attributes & {
 	className?: string;
 	product?: ProductEntityResponse | null | undefined;
 	isAdmin?: boolean;
+	isDescendentOfSingleProductTemplate?: boolean;
 };

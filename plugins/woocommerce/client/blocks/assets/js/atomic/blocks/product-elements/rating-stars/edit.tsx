@@ -7,7 +7,6 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 
 /**
@@ -15,8 +14,6 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
  */
 import Block from './block';
 import { BlockAttributes } from './types';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
@@ -30,30 +27,6 @@ const Edit = (
 		...context,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( {
-			blockClientId: blockProps?.id,
-		} );
-	let { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
-
-	if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-		isDescendentOfSingleProductTemplate = false;
-	}
-
-	useEffect( () => {
-		setAttributes( {
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductBlock,
-			isDescendentOfSingleProductTemplate,
-		} );
-	}, [
-		setAttributes,
-		isDescendentOfQueryLoop,
-		isDescendentOfSingleProductBlock,
-		isDescendentOfSingleProductTemplate,
-	] );
 
 	return (
 		<>

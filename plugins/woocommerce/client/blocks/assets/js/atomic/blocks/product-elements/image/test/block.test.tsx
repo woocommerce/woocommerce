@@ -166,7 +166,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -200,7 +199,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -233,7 +231,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -263,7 +260,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -291,7 +287,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.SINGLE }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -318,7 +313,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -346,7 +340,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
@@ -372,7 +365,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 						aspectRatio="3/5"
 					/>
 				</ProductDataContextProvider>
@@ -406,7 +398,6 @@ describe( 'Product Image Block', () => {
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
 						imageSizing={ ImageSizing.THUMBNAIL }
-						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
 			);
