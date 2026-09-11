@@ -801,6 +801,90 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders returns no orders when filtering by an unregistered custom status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_for_unregistered_custom_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'An unregistered custom status should not match orphaned or core-status orders' );
+	}
+
+	/**
+	 * @testdox wc_get_orders retains known statuses when filtering by known and unknown statuses.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_filters_by_known_status_when_mixed_with_unknown_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$core_order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::PROCESSING, 'foobar' ),
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $core_order_ids[1] ), $queried_order_ids, 'Known statuses should still be applied when unknown statuses are also requested' );
+	}
+
+	/**
+	 * Provides order storage configurations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function order_storage_provider(): array {
+		return array(
+			'HPOS'       => array( true ),
+			'legacy CPT' => array( false ),
+		);
+	}
+
+	/**
+	 * Creates an order with a custom status, then unregisters the status.
+	 *
+	 * @return WC_Order The created order.
+	 */
+	private function create_order_with_unregistered_custom_status(): WC_Order {
+		global $wp_post_statuses;
+
+		$register_custom_status = function ( array $statuses ): array {
+			$statuses['wc-foobar'] = 'Foobar';
+			return $statuses;
+		};
+
+		register_post_status(
+			'wc-foobar',
+			array(
+				'label'               => 'Foobar',
+				'exclude_from_search' => false,
+			)
+		);
+		add_filter( 'wc_order_statuses', $register_custom_status );
+		$order = new WC_Order();
+		$order->set_status( 'foobar' );
+		$order->save();
+		remove_filter( 'wc_order_statuses', $register_custom_status );
+		unset( $wp_post_statuses['wc-foobar'] );
+
+		return $order;
+	}
+
+	/**
 	 * Helper function to create orders with interleaved statuses and strictly decreasing creation dates.
 	 *
 	 * @param int $count Number of orders to create.
