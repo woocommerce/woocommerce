@@ -242,6 +242,37 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Queue at most two pages per chunk, so a three page export goes through chunk actions.
+	 *
+	 * @param int    $batch_size Batch size.
+	 * @param string $name       Scheduler name.
+	 * @param string $action     Batch action name.
+	 * @return int
+	 */
+	public function two_pages_per_chunk( $batch_size, $name, $action ): int {
+		return 'queue_batches' === $action ? 2 : (int) $batch_size;
+	}
+
+	/**
+	 * Get the chunk actions queued for an export, oldest first.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return \ActionScheduler_Action[] Keyed by action ID.
+	 */
+	private function get_chunk_actions( string $export_id ): array {
+		return WC()->queue()->search(
+			array(
+				'hook'     => ReportExporter::get_action( 'queue_batches' ),
+				'search'   => '"' . $export_id . '"',
+				'group'    => ReportExporter::$group,
+				'per_page' => -1,
+				'orderby'  => 'action_id',
+				'order'    => 'ASC',
+			)
+		);
+	}
+
+	/**
 	 * Get this export's queued batch actions, keyed by action ID in page order.
 	 *
 	 * @param string $export_id Export ID.
@@ -795,6 +826,82 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			),
 			'The email should be re-queued to check again later.'
 		);
+	}
+
+	/**
+	 * @testdox The email waits for pages that a queued chunk has not scheduled yet.
+	 */
+	public function test_email_waits_for_pages_a_chunk_has_yet_to_queue(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		add_filter( 'woocommerce_analytics_regenerate_batch_size', array( $this, 'two_pages_per_chunk' ), 10, 3 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$chunks    = $this->get_chunk_actions( $export_id );
+
+		$this->assertCount( 2, $chunks, 'Three pages at two per chunk should queue two chunks.' );
+		$this->assertCount( 0, $this->get_batch_actions( $export_id ), 'No page is queued until a chunk runs.' );
+
+		$this->run_action( array_key_first( $chunks ) );
+		foreach ( array_keys( $this->get_batch_actions( $export_id ) ) as $action_id ) {
+			$this->run_action( $action_id );
+		}
+
+		$progress = ReportExporter::get_export_progress( $export_id );
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertSame( 2, $progress['complete'], 'The first chunk queued two pages, and both ran.' );
+		$this->assertSame( 1, $progress['unfinished'], 'The second chunk still has a page to queue.' );
+		$this->assertFalse( $exporter->export_file_exists(), 'Every queued page ran, but the export is not complete while a chunk is pending.' );
+
+		$email_hook = ReportExporter::get_action( 'email_report_download_link' );
+		$email_args = array(
+			'hook'     => $email_hook,
+			'search'   => '"' . $export_id . '"',
+			'status'   => 'pending',
+			'per_page' => -1,
+		);
+		$emails     = WC()->queue()->search( $email_args, 'ids' );
+
+		$this->assertCount( 1, $emails, 'The export should have queued one email action.' );
+
+		// No page is pending, so nothing blocks the email action. It has to see the chunk itself.
+		$this->run_action( (int) reset( $emails ) );
+
+		$this->assertCount( 0, preg_grep( '/Orders Report/', $this->get_sent_subjects() ), 'Nothing should be emailed while a chunk has pages to queue.' );
+		$this->assertCount( 1, WC()->queue()->search( $email_args, 'ids' ), 'The email should be re-queued to check again later.' );
+
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$this->assertTrue( $exporter->export_file_exists(), 'The export completes once the last chunk has queued its page and it ran.' );
+		$this->assertCount( 1, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'The download link should be emailed.' );
+	}
+
+	/**
+	 * @testdox A chunk that failed to queue its pages is reported as a failed export.
+	 */
+	public function test_failed_chunk_is_reported(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( 1 );
+		$logger = $this->capture_log_errors();
+		add_filter( 'woocommerce_analytics_regenerate_batch_size', array( $this, 'two_pages_per_chunk' ), 10, 3 );
+		$this->create_reported_orders( 5 );
+		$export_id = $this->queue_orders_export();
+		$chunks    = $this->get_chunk_actions( $export_id );
+
+		$this->run_action( array_key_first( $chunks ) );
+		\ActionScheduler::store()->mark_failure( array_key_last( $chunks ) );
+		WC_Helper_Queue::run_all_pending( ReportExporter::$group );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( "wc-orders-report-export-{$export_id}" );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'An export missing a chunk of pages must not be served as complete.' );
+		$this->assertCount( 0, preg_grep( '/is ready/', $this->get_sent_subjects() ), 'No download link should be emailed for a broken export.' );
+		$this->assertCount( 1, preg_grep( '/did not complete/', $this->get_sent_subjects() ), 'The user should be told the export failed.' );
+		$this->assertCount( 1, $logger->errors, 'The failure should be logged.' );
+		$this->assertStringContainsString( '1 of 3 batches did not complete', $logger->errors[0], 'The failed chunk should count as a missing page.' );
 	}
 
 	/**

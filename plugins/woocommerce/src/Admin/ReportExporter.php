@@ -243,6 +243,11 @@ class ReportExporter {
 	 * The queue is the only record of how many pages were scheduled and which of them actually ran,
 	 * so completion is read from it rather than from a percentage each batch computes for itself.
 	 *
+	 * A large export is queued through chunk actions that each schedule a range of pages. A chunk that
+	 * has not run yet stands for pages the queue does not hold, so it counts as an unfinished page, and
+	 * a chunk that failed as a failed one. Otherwise the pages queued so far could all be complete
+	 * while whole ranges were still missing.
+	 *
 	 * @internal
 	 * @since 11.2.0
 	 * @param string $export_id Unique ID for report (timestamp expected).
@@ -255,6 +260,10 @@ class ReportExporter {
 			'complete'   => array( \ActionScheduler_Store::STATUS_COMPLETE ),
 			'unfinished' => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
 			'failed'     => array( \ActionScheduler_Store::STATUS_FAILED, \ActionScheduler_Store::STATUS_CANCELED ),
+		);
+		$hooks    = array(
+			self::get_action( 'export_report' ) => array_keys( $outcomes ),
+			self::get_action( 'queue_batches' ) => array( 'unfinished', 'failed' ),
 		);
 		$progress = array(
 			'pages'  => 0,
@@ -269,29 +278,37 @@ class ReportExporter {
 		$queue = self::queue();
 
 		foreach ( $outcomes as $outcome => $statuses ) {
-			// IDs only: an export can run to thousands of pages, and every page counts them again.
-			$action_ids = $queue->search(
-				array(
-					'hook'     => self::get_action( 'export_report' ),
-					'group'    => self::$group,
-					'status'   => $statuses,
-					// The quoted JSON form, so a longer export ID or an action ID cannot match.
-					'search'   => '"' . $export_id . '"',
-					'per_page' => -1,
-				),
-				'ids'
-			);
+			$progress[ $outcome ] = 0;
 
-			$progress[ $outcome ] = count( $action_ids );
-			$progress['pages']   += count( $action_ids );
+			foreach ( $hooks as $hook => $counted_outcomes ) {
+				if ( ! in_array( $outcome, $counted_outcomes, true ) ) {
+					continue;
+				}
 
-			if ( 'failed' === $outcome ) {
-				foreach ( $action_ids as $action_id ) {
-					// The failure is the last thing the queue logs for an action.
-					$log_entries = \ActionScheduler::logger()->get_logs( $action_id );
-					$log_entry   = end( $log_entries );
-					if ( $log_entry ) {
-						$progress['errors'][] = $log_entry->get_message();
+				// IDs only: an export can run to thousands of pages, and every page counts them again.
+				$action_ids = $queue->search(
+					array(
+						'hook'     => $hook,
+						'group'    => self::$group,
+						'status'   => $statuses,
+						// The quoted JSON form, so a longer export ID or an action ID cannot match.
+						'search'   => '"' . $export_id . '"',
+						'per_page' => -1,
+					),
+					'ids'
+				);
+
+				$progress[ $outcome ] += count( $action_ids );
+				$progress['pages']    += count( $action_ids );
+
+				if ( 'failed' === $outcome ) {
+					foreach ( $action_ids as $action_id ) {
+						// The failure is the last thing the queue logs for an action.
+						$log_entries = \ActionScheduler::logger()->get_logs( $action_id );
+						$log_entry   = end( $log_entries );
+						if ( $log_entry ) {
+							$progress['errors'][] = $log_entry->get_message();
+						}
 					}
 				}
 			}
