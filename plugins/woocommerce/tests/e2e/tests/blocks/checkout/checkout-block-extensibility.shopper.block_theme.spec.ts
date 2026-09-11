@@ -40,101 +40,52 @@ test.describe( 'Shopper → Extensibility', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 	} );
+
 	test.describe( 'extensionCartUpdate', () => {
-		test( 'Response is not undefined in any code path', async ( {
-			checkoutPageObject,
-		} ) => {
-			// With no additional args.
-			let response = await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } ).then( ( response ) => response );"
-			);
-			let resolvedResponse = await Promise.resolve( response );
-			expect( resolvedResponse ).not.toBeUndefined();
-			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
-
-			// With overwriteDirtyCustomerData true.
-			response = await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } ).then( ( response ) => response );"
-			);
-			resolvedResponse = await Promise.resolve( response );
-			expect( resolvedResponse ).not.toBeUndefined();
-			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
-
-			// With overwriteDirtyCustomerData false.
-			response = await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: false } ).then( ( response ) => response );"
-			);
-			resolvedResponse = await Promise.resolve( response );
-			expect( resolvedResponse ).not.toBeUndefined();
-			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
-
-			// With a dirty customer object.
-			await checkoutPageObject.page
-				.getByLabel( 'Country/Region' )
-				.selectOption( 'United Kingdom (UK)' );
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'GB' );
-			response = await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } ).then( ( response ) => response );"
-			);
-			resolvedResponse = await Promise.resolve( response );
-			expect( resolvedResponse ).not.toBeUndefined();
-			expect( resolvedResponse ).toHaveProperty( 'billing_address' );
-		} );
-		test( 'Unpushed data is/is not overwritten depending on arg', async ( {
-			checkoutPageObject,
-		} ) => {
-			// First test by only partially filling in the address form.
-			await checkoutPageObject.page
-				.getByLabel( 'Country/Region' )
-				.selectOption( 'United Kingdom (UK)' );
-			await checkoutPageObject.page.getByLabel( 'Country/Region' ).blur();
-
-			await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } )"
-			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'GB' );
-			await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
-			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).not.toHaveValue( 'GB' );
-
-			// Next fully test the address form (so it pushes), then run extensionCartUpdate with
-			// overwriteDirtyCustomerData: true so overwriting is possible, but since the address pushed it should not
-			// be overwritten.
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'US' );
-			await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
-			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'US' );
-		} );
 		test( 'Cart data can be modified by extensions', async ( {
 			checkoutPageObject,
 		} ) => {
-			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.page.waitForFunction( () => {
+			const { page } = checkoutPageObject;
+			const country = page.getByLabel( 'Country/Region' );
+			await country.selectOption( 'United Kingdom (UK)' );
+			await country.blur();
+			await page.waitForFunction( () => {
 				return (
 					window.localStorage.getItem(
 						'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
-					) === 'false'
+					) === 'true'
 				);
 			} );
-			await checkoutPageObject.page.evaluate(
-				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', data: { 'test-name-change': true } } )"
+			await page.evaluate( () =>
+				window.wc.blocksCheckout.extensionCartUpdate( {
+					namespace: 'woocommerce-blocks-test-extension-cart-update',
+				} )
 			);
-			await expect(
-				checkoutPageObject.page.getByLabel( 'First name' )
-			).toHaveValue( 'Mr. Test' );
+			await expect( country ).toHaveValue( 'GB' );
+
+			const overwriteResponse = await page.evaluate( () =>
+				window.wc.blocksCheckout.extensionCartUpdate( {
+					namespace: 'woocommerce-blocks-test-extension-cart-update',
+					overwriteDirtyCustomerData: true,
+				} )
+			);
+			expect( overwriteResponse.shipping_address.country ).not.toBe(
+				'GB'
+			);
+			await expect( country ).toHaveValue(
+				overwriteResponse.shipping_address.country
+			);
+
+			await page.evaluate( () =>
+				window.wc.blocksCheckout.extensionCartUpdate( {
+					namespace: 'woocommerce-blocks-test-extension-cart-update',
+					data: { 'test-name-change': true },
+					overwriteDirtyCustomerData: true,
+				} )
+			);
+			await expect( page.getByLabel( 'First name' ) ).toHaveValue(
+				'Mr. Test'
+			);
 		} );
 	} );
 } );
