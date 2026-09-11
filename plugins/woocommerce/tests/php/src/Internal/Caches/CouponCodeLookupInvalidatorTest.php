@@ -313,10 +313,8 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Make a coupon data store that resolves more than the published coupons the read-time check describes.
-	 *
-	 * @return callable The filter callback registering the store, to pass to remove_filter().
 	 */
-	private function use_private_resolving_coupon_data_store(): callable {
+	private function use_private_resolving_coupon_data_store(): void {
 		$store = new class() extends \WC_Coupon_Data_Store_CPT {
 			/**
 			 * Resolve private coupons alongside the published ones.
@@ -335,12 +333,12 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			}
 		};
 
-		$use_custom_store = function () use ( $store ) {
-			return $store;
-		};
-		add_filter( 'woocommerce_coupon_data_store', $use_custom_store );
-
-		return $use_custom_store;
+		add_filter(
+			'woocommerce_coupon_data_store',
+			function () use ( $store ) {
+				return $store;
+			}
+		);
 	}
 
 	/**
@@ -358,7 +356,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$use_custom_store = $this->use_private_resolving_coupon_data_store();
+		$this->use_private_resolving_coupon_data_store();
 
 		// Prime the lookup entry and the post cache the read-time check would have consulted.
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The custom data store should resolve the private coupon' );
@@ -367,8 +365,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$queries_before = $wpdb->num_queries;
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'The custom data store should resolve the private coupon' );
 		$this->assertSame( $queries_before, $wpdb->num_queries, "A custom data store's lookup entry should be served from the object cache, not thrown away and re-queried on every read" );
-
-		remove_filter( 'woocommerce_coupon_data_store', $use_custom_store );
 	}
 
 	/**
@@ -384,7 +380,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$use_custom_store = $this->use_private_resolving_coupon_data_store();
+		$this->use_private_resolving_coupon_data_store();
 
 		$coupon = new \WC_Coupon( $id );
 		$this->assertSame( $id, wc_get_coupon_id_by_code( $code ), 'The custom data store should resolve the private coupon' );
@@ -393,8 +389,6 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), 'Force deleting a coupon should invalidate its lookup entry whatever status it was in' );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), 'A force deleted coupon should not be resolvable by code' );
-
-		remove_filter( 'woocommerce_coupon_data_store', $use_custom_store );
 	}
 
 	/**

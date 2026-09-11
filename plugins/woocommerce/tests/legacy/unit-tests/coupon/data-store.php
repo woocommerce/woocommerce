@@ -103,7 +103,6 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 				'post_excerpt' => 'Updated description',
 			)
 		);
-		remove_action( 'save_post', $unpublish );
 
 		$this->assertEquals( 'draft', get_post_status( $coupon->get_id() ), 'The coupon should have been unpublished during save_post.' );
 		$this->assertFalse( wp_cache_get( $cache_name, 'coupons' ), 'Object cache should not resolve the coupon code after it is unpublished during save_post.' );

@@ -200,8 +200,9 @@ class CouponCodeLookupInvalidator {
 	/**
 	 * Delete the lookup entry of a published coupon post that is deleted.
 	 *
-	 * Deleting a coupon in any other status cannot strand a lookup entry, since only published
-	 * coupons are ever cached.
+	 * The core data store only caches published coupons, so deleting a coupon in any other status
+	 * cannot strand one of its entries. A custom data store can cache other statuses too, which is
+	 * why WC_Coupon_Data_Store_CPT::delete() also invalidates on force delete.
 	 *
 	 * @param int      $post_id Post id.
 	 * @param \WP_Post $post    Post object.
