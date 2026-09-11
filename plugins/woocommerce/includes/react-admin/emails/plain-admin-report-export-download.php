@@ -17,6 +17,18 @@ echo wp_kses_post( sprintf( __( 'Download your %1$s Report: %2$s', 'woocommerce'
 echo "\n\n";
 
 /**
+ * Date range the report covers, passed in by ReportCSVEmail. Empty for reports without one.
+ *
+ * @var string $date_range
+ */
+if ( ! empty( $date_range ) ) {
+	/* translators: %s: the date range the report covers, e.g. "June 1, 2025 - June 30, 2025" */
+	echo esc_html( sprintf( __( 'Date range: %s', 'woocommerce' ), $date_range ) );
+
+	echo "\n\n";
+}
+
+/**
  * Length of time the download link stays valid, passed in by ReportCSVEmail.
  *
  * @var string $retention
