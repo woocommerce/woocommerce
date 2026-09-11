@@ -250,13 +250,6 @@ class SingleProductTemplate extends AbstractTemplate {
 			return false;
 		}
 
-		// The 'Related Products' pattern of the Product Collection block is
-		// also considered a product-related block that should only be shown
-		// when not displaying the password form.
-		if ( 'woocommerce-blocks/related-products' === $block['attrs']['slug'] ) {
-			return true;
-		}
-
 		$pattern = \WP_Block_Patterns_Registry::get_instance()->get_registered( $block['attrs']['slug'] );
 
 		if ( empty( $pattern['content'] ) ) {
