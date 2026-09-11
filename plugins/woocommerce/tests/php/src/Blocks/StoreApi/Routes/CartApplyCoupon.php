@@ -217,6 +217,7 @@ class CartApplyCoupon extends ControllerTestCase {
 	 */
 	public function test_coupon_usage_limit() {
 		wc()->cart->remove_coupons();
+		wp_set_current_user( 1 );
 
 		$fixtures = new FixtureData();
 
@@ -244,10 +245,17 @@ class CartApplyCoupon extends ControllerTestCase {
 
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
+		wp_set_current_user( 0 );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_coupon_error', $data['code'] );
-		$this->assertStringContainsString( 'Usage limit', html_entity_decode( $data['message'] ) );
+		$this->assertSame(
+			sprintf(
+				'Usage limit for coupon "%s" has been reached.',
+				$limited_coupon->get_code()
+			),
+			html_entity_decode( $data['message'] )
+		);
 	}
 
 	/**

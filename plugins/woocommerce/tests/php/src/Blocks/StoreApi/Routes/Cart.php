@@ -154,6 +154,45 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Dispatches a Store API add-item request.
+	 *
+	 * @param array $body Request body.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_add_item_request( array $body ): \WP_REST_Response {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $body );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Gets a canonical map of the cart lines that participate in identity.
+	 *
+	 * @return array<string, array{key: string, product_id: int, variation_id: int, variation: array, quantity: int|float}>
+	 */
+	private function get_cart_line_identity_map(): array {
+		$cart_line_map = array();
+
+		foreach ( WC()->cart->get_cart() as $key => $cart_item ) {
+			$variation = $cart_item['variation'] ?? array();
+			ksort( $variation );
+
+			$cart_line_map[ $key ] = array(
+				'key'          => $key,
+				'product_id'   => (int) $cart_item['product_id'],
+				'variation_id' => (int) $cart_item['variation_id'],
+				'variation'    => $variation,
+				'quantity'     => wc_stock_amount( $cart_item['quantity'] ),
+			);
+		}
+
+		ksort( $cart_line_map );
+		return $cart_line_map;
+	}
+
+	/**
 	 * Test getting cart.
 	 */
 	public function test_get_item() {
@@ -333,6 +372,462 @@ class Cart extends ControllerTestCase {
 				'do_customer_callback',
 			)
 		);
+	}
+
+	/**
+	 * Test the shipping topology returned by the Store API.
+	 *
+	 * @testdox Store API serializes the expected rates and selected method for $scenario.
+	 * @dataProvider shipping_topology_provider
+	 *
+	 * @param string $scenario                 Scenario name.
+	 * @param bool   $has_default_rate         Whether the Rest of the World zone has a rate.
+	 * @param bool   $has_gb_rate              Whether the GB zone has a rate.
+	 * @param bool   $has_pickup               Whether Local Pickup is enabled.
+	 * @param bool   $requires_address          Whether rates require a complete address.
+	 * @param string $address_key               Address fixture key.
+	 * @param array  $expected_rate_keys        Expected rate fixture keys.
+	 * @param string $expected_selected_rate_key Expected selected rate fixture key.
+	 */
+	public function test_shipping_topology(
+		string $scenario,
+		bool $has_default_rate,
+		bool $has_gb_rate,
+		bool $has_pickup,
+		bool $requires_address,
+		string $address_key,
+		array $expected_rate_keys,
+		string $expected_selected_rate_key
+	): void {
+		unset( $scenario );
+
+		$option_names = array(
+			'woocommerce_default_customer_address',
+			'woocommerce_shipping_cost_requires_address',
+			'woocommerce_flat_rate_settings',
+			'woocommerce_pickup_location_settings',
+			'pickup_location_pickup_locations',
+		);
+		$options      = $this->capture_options( $option_names );
+		$customer     = $this->capture_shipping_address();
+		$session      = $this->capture_shipping_session();
+		$cart_context = WC()->cart->cart_context;
+		$country_data = get_object_vars( WC()->countries );
+		$has_locale   = array_key_exists( 'locale', $country_data );
+		$locale       = $has_locale ? $country_data['locale'] : array();
+		$fixtures     = new FixtureData();
+		$topology     = array();
+
+		try {
+			unset( WC()->countries->locale );
+			$this->configure_shipping_topology( $fixtures, $has_default_rate, $has_gb_rate, $has_pickup, $topology );
+
+			update_option( 'woocommerce_default_customer_address', 'blank' === $address_key ? '' : 'base' );
+			update_option( 'woocommerce_shipping_cost_requires_address', $requires_address ? 'yes' : 'no' );
+			WC()->cart->cart_context = 'store-api';
+			$this->clear_shipping_session();
+
+			$address = $this->get_shipping_address_fixture( $address_key );
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params( array( 'shipping_address' => (object) $address ) );
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertSame( 200, $response->get_status(), 'The customer update should succeed.' );
+			$this->assertTrue( $data['needs_shipping'], 'The cart should continue to require shipping.' );
+
+			$expected_package_count = $requires_address && 'blank' === $address_key && ! $has_pickup ? 0 : 1;
+			$this->assertCount( $expected_package_count, $data['shipping_rates'], 'The response should serialize the exact expected package count.' );
+
+			if ( 0 === $expected_package_count ) {
+				$this->assertSame( array(), WC()->session->get( 'chosen_shipping_methods', array() ), 'No hidden package should choose a shipping method.' );
+				return;
+			}
+
+			$package              = (array) $data['shipping_rates'][0];
+			$destination          = (array) $package['destination'];
+			$rates                = array_map(
+				function ( $rate ): array {
+					return (array) $rate;
+				},
+				$package['shipping_rates']
+			);
+			$expected_destination = array_intersect_key(
+				$address,
+				array_flip( array( 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) )
+			);
+
+			$this->assertSame( $expected_destination, $destination, 'The serialized package destination should match the submitted address exactly.' );
+
+			$expected_rate_ids = array_map(
+				function ( string $key ) use ( $topology ): string {
+					return $topology['rate_ids'][ $key ];
+				},
+				$expected_rate_keys
+			);
+			$actual_rate_ids   = array_column( $rates, 'rate_id' );
+			sort( $expected_rate_ids );
+			sort( $actual_rate_ids );
+
+			$this->assertSame( $expected_rate_ids, $actual_rate_ids, 'The response should contain only the expected concrete rates.' );
+
+			$expected_method_ids = array_map(
+				function ( string $key ) use ( $topology ): string {
+					return $topology['method_ids'][ $key ];
+				},
+				$expected_rate_keys
+			);
+			$actual_method_ids   = array_column( $rates, 'method_id' );
+			sort( $expected_method_ids );
+			sort( $actual_method_ids );
+
+			$this->assertSame( $expected_method_ids, $actual_method_ids, 'The response should contain only the expected shipping method types.' );
+
+			$selected_by_rate = array_column( $rates, 'selected', 'rate_id' );
+			foreach ( $expected_rate_ids as $rate_id ) {
+				$this->assertSame(
+					$expected_selected_rate_key && $topology['rate_ids'][ $expected_selected_rate_key ] === $rate_id,
+					$selected_by_rate[ $rate_id ],
+					"The selected flag should be exact for {$rate_id}."
+				);
+			}
+
+			$chosen_methods  = WC()->session->get( 'chosen_shipping_methods', array() );
+			$expected_chosen = $expected_selected_rate_key ? $topology['rate_ids'][ $expected_selected_rate_key ] : '';
+			$this->assertIsArray( $chosen_methods, 'A serialized package should persist indexed shipping choices.' );
+			$this->assertArrayHasKey( 0, $chosen_methods, 'A serialized package should persist a choice for package zero.' );
+			$this->assertSame( $expected_chosen, $chosen_methods[0], 'The session should persist the same method selected in the response.' );
+		} finally {
+			$this->remove_shipping_topology( $fixtures, $topology );
+			$this->restore_options( $options );
+			$this->restore_shipping_address( $customer );
+			WC()->shipping()->reset_shipping();
+			$this->restore_shipping_session( $session );
+			WC()->cart->cart_context = $cart_context;
+			if ( $has_locale ) {
+				WC()->countries->locale = $locale;
+			} else {
+				unset( WC()->countries->locale );
+			}
+			\WC_Cache_Helper::get_transient_version( 'shipping', true );
+			delete_transient( 'wc_shipping_method_count' );
+		}
+	}
+
+	/**
+	 * The topology owner restores both present and missing incoming session values.
+	 *
+	 * @testdox Shipping topology restores exact incoming shipping and customer session values.
+	 */
+	public function test_shipping_topology_restores_existing_session_state(): void {
+		$keys     = array( 'chosen_shipping_methods', 'customer', 'shipping_method_counts' );
+		$original = array();
+
+		foreach ( $keys as $key ) {
+			$original[ $key ] = array(
+				'exists' => isset( WC()->session->{$key} ),
+				'value'  => WC()->session->get( $key ),
+			);
+		}
+
+		try {
+			$chosen_methods = array( 'external_shipping:7' );
+			$customer       = array( 'shipping_country' => 'SE' );
+			WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+			WC()->session->set( 'customer', $customer );
+			WC()->session->set( 'shipping_method_counts', null );
+
+			$this->test_shipping_topology(
+				'session restoration',
+				false,
+				true,
+				true,
+				true,
+				'blank',
+				array( 'pickup' ),
+				''
+			);
+
+			$this->assertTrue( isset( WC()->session->chosen_shipping_methods ), 'The incoming chosen-method key should remain present.' );
+			$this->assertSame( $chosen_methods, WC()->session->get( 'chosen_shipping_methods' ), 'The incoming chosen methods should be restored exactly.' );
+			$this->assertTrue( isset( WC()->session->customer ), 'The incoming customer key should remain present.' );
+			$this->assertSame( $customer, WC()->session->get( 'customer' ), 'The incoming customer session value should be restored exactly.' );
+			$this->assertFalse( isset( WC()->session->shipping_method_counts ), 'An incoming missing session key should remain missing.' );
+		} finally {
+			foreach ( $original as $key => $session_value ) {
+				WC()->session->set( $key, $session_value['exists'] ? $session_value['value'] : null );
+			}
+		}
+	}
+
+	/**
+	 * Shipping topology scenarios.
+	 *
+	 * @return array<string, array{string, bool, bool, bool, bool, string, string[], string}>
+	 */
+	public function shipping_topology_provider(): array {
+		return array(
+			'default and any rates with pickup'       => array( 'default and any rates with pickup', true, true, true, false, 'us', array( 'default', 'pickup' ), 'default' ),
+			'default and any rates without pickup'    => array( 'default and any rates without pickup', true, true, false, false, 'us', array( 'default' ), 'default' ),
+			'default rate only'                       => array( 'default rate only', true, false, false, false, 'us', array( 'default' ), 'default' ),
+			'any rate only before address'            => array( 'any rate only before address', false, true, false, false, 'blank', array(), '' ),
+			'any rate only for a nonmatching address' => array( 'any rate only for a nonmatching address', false, true, false, false, 'us', array(), '' ),
+			'any rate only for a matching address'    => array( 'any rate only for a matching address', false, true, false, false, 'gb', array( 'gb' ), 'gb' ),
+			'pickup only without required address'    => array( 'pickup only without required address', false, false, true, false, 'blank', array( 'pickup' ), 'pickup' ),
+			'pickup only with required address'       => array( 'pickup only with required address', false, true, true, true, 'blank', array( 'pickup' ), '' ),
+			'no rates without required address'       => array( 'no rates without required address', false, false, false, false, 'blank', array(), '' ),
+			'no rates with required address'          => array( 'no rates with required address', false, false, false, true, 'blank', array(), '' ),
+			'required address before entry'           => array( 'required address before entry', true, true, false, true, 'blank', array(), '' ),
+			'required address with default rate'      => array( 'required address with default rate', true, true, false, true, 'us', array( 'default' ), 'default' ),
+			'required address with any rate'          => array( 'required address with any rate', true, true, false, true, 'gb', array( 'gb' ), 'gb' ),
+		);
+	}
+
+	/**
+	 * Configure real zones and shipping methods for a topology scenario.
+	 *
+	 * @param FixtureData $fixtures         Fixture helper.
+	 * @param bool        $has_default_rate Whether the default zone gets a rate.
+	 * @param bool        $has_gb_rate      Whether the GB zone gets a rate.
+	 * @param bool        $has_pickup       Whether pickup is enabled.
+	 * @param array       $topology         Created topology data, updated as records are added.
+	 */
+	private function configure_shipping_topology( FixtureData $fixtures, bool $has_default_rate, bool $has_gb_rate, bool $has_pickup, array &$topology ): void {
+		update_option( 'woocommerce_flat_rate_settings', array( 'enabled' => 'no' ) );
+
+		$topology = array(
+			'rate_ids'   => array( 'pickup' => 'pickup_location:0' ),
+			'method_ids' => array(
+				'default' => 'flat_rate',
+				'gb'      => 'flat_rate',
+				'pickup'  => 'pickup_location',
+			),
+		);
+
+		if ( $has_default_rate ) {
+			$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+			if ( ! $default_zone instanceof \WC_Shipping_Zone ) {
+				throw new \RuntimeException( 'The default shipping zone should be available.' );
+			}
+
+			$topology['default_instance_id'] = $default_zone->add_shipping_method( 'flat_rate' );
+			$topology['rate_ids']['default'] = 'flat_rate:' . $topology['default_instance_id'];
+			update_option(
+				'woocommerce_flat_rate_' . $topology['default_instance_id'] . '_settings',
+				array(
+					'enabled'    => 'yes',
+					'title'      => 'Default delivery',
+					'tax_status' => 'none',
+					'cost'       => '10',
+				)
+			);
+		}
+
+		if ( $has_gb_rate ) {
+			$gb_zone = new \WC_Shipping_Zone();
+			$gb_zone->set_zone_name( 'United Kingdom' );
+			$gb_zone->set_zone_locations(
+				array(
+					(object) array(
+						'code' => 'GB',
+						'type' => 'country',
+					),
+				)
+			);
+			$gb_zone->save();
+			$topology['gb_zone']        = $gb_zone;
+			$topology['gb_instance_id'] = $gb_zone->add_shipping_method( 'flat_rate' );
+			$topology['rate_ids']['gb'] = 'flat_rate:' . $topology['gb_instance_id'];
+			update_option(
+				'woocommerce_flat_rate_' . $topology['gb_instance_id'] . '_settings',
+				array(
+					'enabled'    => 'yes',
+					'title'      => 'UK delivery',
+					'tax_status' => 'none',
+					'cost'       => '15',
+				)
+			);
+		}
+
+		if ( $has_pickup ) {
+			$fixtures->shipping_add_pickup_location();
+			$topology['pickup_registered'] = true;
+		}
+
+		WC()->shipping()->reset_shipping();
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		delete_transient( 'wc_shipping_method_count' );
+	}
+
+	/**
+	 * Remove topology records created by a scenario.
+	 *
+	 * @param FixtureData $fixtures Fixture helper.
+	 * @param array       $topology Created topology data.
+	 */
+	private function remove_shipping_topology( FixtureData $fixtures, array $topology ): void {
+		if ( isset( $topology['default_instance_id'] ) ) {
+			$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+			if ( $default_zone instanceof \WC_Shipping_Zone ) {
+				$default_zone->delete_shipping_method( $topology['default_instance_id'] );
+			}
+		}
+
+		if ( isset( $topology['gb_zone'] ) && $topology['gb_zone'] instanceof \WC_Shipping_Zone ) {
+			$topology['gb_zone']->delete( true );
+		}
+
+		if ( ! empty( $topology['pickup_registered'] ) ) {
+			$fixtures->shipping_remove_pickup_location();
+		}
+	}
+
+	/**
+	 * Get an exact address fixture for a topology scenario.
+	 *
+	 * @param string $key Fixture key.
+	 * @return array<string, string>
+	 */
+	private function get_shipping_address_fixture( string $key ): array {
+		$addresses = array(
+			'blank' => array(
+				'first_name' => '',
+				'last_name'  => '',
+				'company'    => '',
+				'address_1'  => '',
+				'address_2'  => '',
+				'city'       => '',
+				'state'      => '',
+				'postcode'   => '',
+				'country'    => '',
+			),
+			'us'    => array(
+				'first_name' => 'Pat',
+				'last_name'  => 'Shopper',
+				'company'    => '',
+				'address_1'  => '60 29th Street',
+				'address_2'  => '',
+				'city'       => 'San Francisco',
+				'state'      => 'CA',
+				'postcode'   => '94110',
+				'country'    => 'US',
+			),
+			'gb'    => array(
+				'first_name' => 'Pat',
+				'last_name'  => 'Shopper',
+				'company'    => '',
+				'address_1'  => '1 New Change',
+				'address_2'  => '',
+				'city'       => 'London',
+				'state'      => '',
+				'postcode'   => 'EC4M 9AF',
+				'country'    => 'GB',
+			),
+		);
+
+		return $addresses[ $key ];
+	}
+
+	/**
+	 * Capture option values without turning missing options into stored values.
+	 *
+	 * @param string[] $option_names Option names.
+	 * @return array<string, array{exists: bool, value: mixed}>
+	 */
+	private function capture_options( array $option_names ): array {
+		$options = array();
+		$missing = new \stdClass();
+
+		foreach ( $option_names as $option_name ) {
+			$value                   = get_option( $option_name, $missing );
+			$options[ $option_name ] = array(
+				'exists' => $missing !== $value,
+				'value'  => $value,
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Restore captured options.
+	 *
+	 * @param array<string, array{exists: bool, value: mixed}> $options Captured options.
+	 */
+	private function restore_options( array $options ): void {
+		foreach ( $options as $option_name => $option ) {
+			if ( $option['exists'] ) {
+				update_option( $option_name, $option['value'] );
+			} else {
+				delete_option( $option_name );
+			}
+		}
+	}
+
+	/**
+	 * Capture the current shipping address.
+	 *
+	 * @return array<string, string>
+	 */
+	private function capture_shipping_address(): array {
+		$address = array();
+		foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) as $field ) {
+			$getter            = 'get_shipping_' . $field;
+			$address[ $field ] = WC()->customer->$getter();
+		}
+
+		return $address;
+	}
+
+	/**
+	 * Restore a shipping address.
+	 *
+	 * @param array<string, string> $address Shipping address.
+	 */
+	private function restore_shipping_address( array $address ): void {
+		foreach ( $address as $field => $value ) {
+			$setter = 'set_shipping_' . $field;
+			WC()->customer->$setter( $value );
+		}
+	}
+
+	/**
+	 * Capture session values involved in shipping selection and caching.
+	 *
+	 * @return array<string, array{exists: bool, value: mixed}>
+	 */
+	private function capture_shipping_session(): array {
+		$session = array();
+		foreach ( array( 'chosen_shipping_methods', 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'customer' ) as $key ) {
+			$session[ $key ] = array(
+				'exists' => isset( WC()->session->{$key} ),
+				'value'  => WC()->session->get( $key ),
+			);
+		}
+
+		return $session;
+	}
+
+	/**
+	 * Clear session values involved in shipping selection and caching.
+	 */
+	private function clear_shipping_session(): void {
+		foreach ( array( 'chosen_shipping_methods', 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0' ) as $key ) {
+			WC()->session->set( $key, null );
+		}
+		WC()->shipping()->reset_shipping();
+	}
+
+	/**
+	 * Restore shipping session values.
+	 *
+	 * @param array<string, array{exists: bool, value: mixed}> $session Session values.
+	 */
+	private function restore_shipping_session( array $session ): void {
+		foreach ( $session as $key => $session_value ) {
+			WC()->session->set( $key, $session_value['exists'] ? $session_value['value'] : null );
+		}
 	}
 
 	/**
@@ -1022,6 +1517,288 @@ class Cart extends ControllerTestCase {
 			$request,
 			400
 		);
+	}
+
+	/**
+	 * @testdox Re-adding a standalone product preserves its cart-line key and increments its quantity.
+	 */
+	public function test_add_item_preserves_standalone_cart_line_identity(): void {
+		wc_empty_cart();
+
+		$first_response = $this->dispatch_add_item_request(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$first_data     = $first_response->get_data();
+
+		$this->assertSame( 201, $first_response->get_status(), 'The first standalone add should succeed.' );
+		$this->assertCount( 1, $first_data['items'], 'The first add should create exactly one cart line.' );
+		$cart_item_key = $first_data['items'][0]['key'];
+		$this->assertSame(
+			array(
+				$cart_item_key => array(
+					'key'          => $cart_item_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+			),
+			$this->get_cart_line_identity_map(),
+			'The first add should create the expected standalone cart line.'
+		);
+
+		$second_response = $this->dispatch_add_item_request(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$second_data     = $second_response->get_data();
+
+		$this->assertSame( 201, $second_response->get_status(), 'The standalone re-add should succeed.' );
+		$this->assertCount( 1, $second_data['items'], 'The re-add should not create another cart line.' );
+		$this->assertSame( $cart_item_key, $second_data['items'][0]['key'], 'The re-add should preserve the server cart-line key.' );
+		$this->assertSame(
+			array(
+				$cart_item_key => array(
+					'key'          => $cart_item_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 2,
+				),
+			),
+			$this->get_cart_line_identity_map(),
+			'The re-add should increment only the existing standalone line.'
+		);
+	}
+
+	/**
+	 * @testdox Cart item data keeps a same-product meta line distinct from the standalone line.
+	 */
+	public function test_add_item_preserves_cart_item_data_identity(): void {
+		wc_empty_cart();
+
+		$add_cart_item_data = function ( $add_to_cart_data, $request ) {
+			if ( 'meta-line' === $request->get_param( 'cart_line_identity_marker' ) ) {
+				$add_to_cart_data['cart_item_data']['_cart_line_identity'] = 'meta-line';
+			}
+			return $add_to_cart_data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $add_cart_item_data, 10, 2 );
+
+		try {
+			$meta_response = $this->dispatch_add_item_request(
+				array(
+					'id'                        => $this->products[0]->get_id(),
+					'quantity'                  => 1,
+					'cart_line_identity_marker' => 'meta-line',
+				)
+			);
+			$meta_map      = $this->get_cart_line_identity_map();
+			$meta_key      = array_key_first( $meta_map );
+
+			$this->assertSame( 201, $meta_response->get_status(), 'The marker-scoped meta-line add should succeed.' );
+			$this->assertCount( 1, $meta_map, 'The first request should create exactly the meta line.' );
+
+			$plain_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $this->products[0]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$mixed_map      = $this->get_cart_line_identity_map();
+			$plain_keys     = array_values( array_diff( array_keys( $mixed_map ), array( $meta_key ) ) );
+
+			$this->assertSame( 201, $plain_response->get_status(), 'The first plain add should succeed.' );
+			$this->assertCount( 1, $plain_keys, 'The plain add should create one distinct standalone key.' );
+			$plain_key = $plain_keys[0];
+			$expected  = array(
+				$meta_key  => array(
+					'key'          => $meta_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+				$plain_key => array(
+					'key'          => $plain_key,
+					'product_id'   => $this->products[0]->get_id(),
+					'variation_id' => 0,
+					'variation'    => array(),
+					'quantity'     => 1,
+				),
+			);
+			ksort( $expected );
+			$this->assertSame( $expected, $mixed_map, 'The meta and standalone lines should remain distinct at quantity one.' );
+
+			$second_plain_response              = $this->dispatch_add_item_request(
+				array(
+					'id'       => $this->products[0]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$expected[ $plain_key ]['quantity'] = 2;
+
+			$this->assertSame( 201, $second_plain_response->get_status(), 'The standalone re-add should succeed.' );
+			$this->assertSame( $expected, $this->get_cart_line_identity_map(), 'Only the standalone line should increment.' );
+		} finally {
+			remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_cart_item_data, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Re-adding one variation preserves its key while another variation creates a distinct line.
+	 */
+	public function test_add_item_preserves_variation_identity(): void {
+		wc_empty_cart();
+
+		$fixtures         = new FixtureData();
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Cart line identity variable product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'blue' ) ),
+			)
+		);
+		$red_variation    = $fixtures->get_variation_product( $variable_product->get_id(), array( 'pa_color' => 'red' ) );
+		$blue_variation   = $fixtures->get_variation_product( $variable_product->get_id(), array( 'pa_color' => 'blue' ) );
+
+		$red_body       = array(
+			'id'        => $red_variation->get_id(),
+			'quantity'  => 1,
+			'variation' => array(
+				array(
+					'attribute' => 'pa_color',
+					'value'     => 'red',
+				),
+			),
+		);
+		$first_response = $this->dispatch_add_item_request( $red_body );
+		$first_map      = $this->get_cart_line_identity_map();
+		$red_key        = array_key_first( $first_map );
+
+		$this->assertSame( 201, $first_response->get_status(), 'The first variation add should succeed.' );
+		$this->assertCount( 1, $first_map, 'The first variation add should create exactly one line.' );
+
+		$second_response = $this->dispatch_add_item_request( $red_body );
+		$second_map      = $this->get_cart_line_identity_map();
+
+		$this->assertSame( 201, $second_response->get_status(), 'Re-adding the same variation should succeed.' );
+		$this->assertSame( array( $red_key ), array_keys( $second_map ), 'The same variation should preserve its cart-line key.' );
+		$this->assertSame( 2, $second_map[ $red_key ]['quantity'], 'The same variation should increment its line.' );
+
+		$blue_response = $this->dispatch_add_item_request(
+			array(
+				'id'        => $blue_variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'pa_color',
+						'value'     => 'blue',
+					),
+				),
+			)
+		);
+		$final_map     = $this->get_cart_line_identity_map();
+		$blue_keys     = array_values( array_diff( array_keys( $final_map ), array( $red_key ) ) );
+
+		$this->assertSame( 201, $blue_response->get_status(), 'Adding a different variation should succeed.' );
+		$this->assertCount( 1, $blue_keys, 'The different variation should create one distinct key.' );
+		$blue_key = $blue_keys[0];
+		$this->assertSame( $red_variation->get_id(), $final_map[ $red_key ]['variation_id'], 'The original key should still identify the red variation.' );
+		$this->assertSame( 2, $final_map[ $red_key ]['quantity'], 'The red variation quantity should remain two.' );
+		$this->assertSame( $blue_variation->get_id(), $final_map[ $blue_key ]['variation_id'], 'The new key should identify the blue variation.' );
+		$this->assertSame( 1, $final_map[ $blue_key ]['quantity'], 'The blue variation should start at quantity one.' );
+	}
+
+	/**
+	 * @testdox A rejected sold-individually re-add leaves the exact cart-line map unchanged.
+	 */
+	public function test_rejected_add_item_leaves_sold_individually_cart_unchanged(): void {
+		wc_empty_cart();
+
+		$product                    = $this->products[0];
+		$original_sold_individually = $product->get_sold_individually();
+		$product->set_sold_individually( true );
+		$product->save();
+
+		try {
+			$first_response  = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$before          = $this->get_cart_line_identity_map();
+			$second_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$second_data     = $second_response->get_data();
+
+			$this->assertSame( 201, $first_response->get_status(), 'The first sold-individually add should succeed.' );
+			$this->assertSame( 400, $second_response->get_status(), 'The sold-individually re-add should be rejected.' );
+			$this->assertSame( 'readonly_quantity', $second_data['code'], 'The rejection should report the Store API quantity-limit code.' );
+			$this->assertSame( $before, $this->get_cart_line_identity_map(), 'The rejected re-add should leave every cart line unchanged.' );
+		} finally {
+			$product->set_sold_individually( $original_sold_individually );
+			$product->save();
+		}
+	}
+
+	/**
+	 * @testdox A rejected managed-stock re-add leaves the exact cart-line map unchanged.
+	 */
+	public function test_rejected_add_item_leaves_managed_stock_cart_unchanged(): void {
+		wc_empty_cart();
+
+		$product                 = $this->products[1];
+		$original_manage_stock   = $product->get_manage_stock();
+		$original_stock_quantity = $product->get_stock_quantity();
+		$original_backorders     = $product->get_backorders();
+		$original_stock_status   = $product->get_stock_status();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		try {
+			$first_response  = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$before          = $this->get_cart_line_identity_map();
+			$second_response = $this->dispatch_add_item_request(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$second_data     = $second_response->get_data();
+
+			$this->assertSame( 201, $first_response->get_status(), 'The first managed-stock add should succeed.' );
+			$this->assertSame( 400, $second_response->get_status(), 'The managed-stock re-add should be rejected.' );
+			$this->assertSame( 'woocommerce_rest_product_partially_out_of_stock', $second_data['code'], 'The rejection should report the Store API partial-stock code.' );
+			$this->assertSame( $before, $this->get_cart_line_identity_map(), 'The rejected re-add should leave every cart line unchanged.' );
+		} finally {
+			$product->set_manage_stock( $original_manage_stock );
+			$product->set_stock_quantity( $original_stock_quantity );
+			$product->set_backorders( $original_backorders );
+			$product->set_stock_status( $original_stock_status );
+			$product->save();
+		}
 	}
 
 	/**

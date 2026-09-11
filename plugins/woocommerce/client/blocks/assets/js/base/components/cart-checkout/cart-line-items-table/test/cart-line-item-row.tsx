@@ -60,7 +60,14 @@ const mockGetSettingWithCoercion = getSettingWithCoercion as jest.Mock;
  * preview module's transitive imports (which expect `wcBlocksConfig` to be
  * populated at module-load time).
  */
-const buildLineItem = (): CartItem =>
+type RawPriceOverrides = Partial< {
+	precision: number;
+	price: string;
+	regular_price: string;
+	sale_price: string;
+} >;
+
+const buildLineItem = ( rawPriceOverrides: RawPriceOverrides = {} ): CartItem =>
 	( {
 		key: 'test-key',
 		id: 1,
@@ -102,6 +109,7 @@ const buildLineItem = (): CartItem =>
 				price: '10000000',
 				regular_price: '10000000',
 				sale_price: '10000000',
+				...rawPriceOverrides,
 			},
 		},
 		totals: {
@@ -163,16 +171,81 @@ const setSettings = ( {
 	);
 };
 
-const renderRow = () => {
+const renderRow = ( rawPriceOverrides?: RawPriceOverrides ) => {
 	// Wrap in a table so the row's <td>s render in a valid context.
 	return render(
 		<table>
 			<tbody>
-				<CartLineItemRow lineItem={ buildLineItem() } />
+				<CartLineItemRow
+					lineItem={ buildLineItem( rawPriceOverrides ) }
+				/>
 			</tbody>
 		</table>
 	);
 };
+
+describe( 'renders cart row price', () => {
+	it.each( [
+		{
+			name: 'sale price with its regular price',
+			rawPrices: {
+				precision: 6,
+				price: '8000000',
+				regular_price: '10000000',
+			},
+			currentPrice: '$8.00',
+			regularPrice: '$10.00',
+		},
+		{
+			name: 'ordinary price without sale markup',
+			rawPrices: {
+				price: '10000000',
+				regular_price: '10000000',
+			},
+			currentPrice: '$10.00',
+			regularPrice: undefined,
+		},
+		{
+			name: 'extension-filtered price above its regular price without sale markup',
+			rawPrices: {
+				price: '50000000',
+				regular_price: '10000000',
+			},
+			currentPrice: '$50.00',
+			regularPrice: undefined,
+		},
+	] )( '$name', ( { rawPrices, currentPrice, regularPrice } ) => {
+		const { container } = renderRow( rawPrices );
+		const price = container.querySelector( '.wc-block-cart-item__prices' );
+		const currentPriceElement = price?.querySelector(
+			'.wc-block-components-product-price__value'
+		);
+		const regularPriceElement = price?.querySelector(
+			'del.wc-block-components-product-price__regular'
+		);
+		const discountedPriceElement =
+			price?.querySelector( 'ins.is-discounted' );
+
+		expect( price ).toBeInTheDocument();
+		expect(
+			price?.querySelectorAll(
+				'.wc-block-components-product-price__value'
+			)
+		).toHaveLength( 1 );
+		expect( currentPriceElement?.textContent ).toBe( currentPrice );
+
+		expect( Boolean( regularPriceElement ) ).toBe(
+			Boolean( regularPrice )
+		);
+		expect( Boolean( discountedPriceElement ) ).toBe(
+			Boolean( regularPrice )
+		);
+		expect( regularPriceElement?.textContent ).toBe( regularPrice );
+		expect( discountedPriceElement?.textContent ).toBe(
+			regularPrice ? currentPrice : undefined
+		);
+	} );
+} );
 
 describe( 'CartLineItemRow — Save for later visibility', () => {
 	beforeEach( () => {

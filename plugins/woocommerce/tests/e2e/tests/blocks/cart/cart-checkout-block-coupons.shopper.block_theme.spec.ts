@@ -32,22 +32,6 @@ test.describe( 'Shopper → Coupon', () => {
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
-
-		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
-		).toBeVisible();
-
-		await page.getByLabel( 'Remove coupon "single-use-coupon"' ).click();
-
-		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
-		).toBeHidden();
-
 		await frontendUtils.goToCheckout();
 		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
@@ -70,42 +54,6 @@ test.describe( 'Shopper → Coupon', () => {
 
 		await expect(
 			page.getByRole( 'cell', { name: '–$2.00' } )
-		).toBeVisible();
-	} );
-
-	test( 'Logged in user cannot apply single-use coupon twice', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
-
-		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
-		).toBeVisible();
-
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
-
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
-
-		await expect(
-			page.getByText(
-				'Usage limit for coupon "SINGLE-USE-COUPON" has been reached.'
-			)
 		).toBeVisible();
 	} );
 } );
