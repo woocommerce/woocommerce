@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Checkout block shopper E2E tests from 13 to 5; a Jest suite and a Checkout block PHPUnit test own the shipping-topology guard.
+
