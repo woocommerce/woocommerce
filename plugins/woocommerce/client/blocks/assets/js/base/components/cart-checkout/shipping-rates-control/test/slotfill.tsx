@@ -348,6 +348,51 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		] );
 	} );
 
+	it( 'selects again for a package whose rates disappear and come back', () => {
+		const selectShippingRate = jest.fn();
+		( useShippingData as jest.Mock ).mockReturnValue( {
+			hasSelectedLocalPickup: false,
+			selectedRates: {},
+			selectShippingRate,
+		} );
+		const { rerender } = render(
+			<ShippingRatesControl
+				{ ...defaultProps }
+				shippingRates={ [ createShippingPackage( 0, 'flat_rate:1' ) ] }
+			/>
+		);
+
+		expect( selectShippingRate.mock.calls ).toEqual( [
+			[ 'flat_rate:1', 0 ],
+		] );
+
+		// An address the store cannot ship to leaves the package without rates.
+		rerender(
+			<ShippingRatesControl
+				{ ...defaultProps }
+				shippingRates={ [
+					generateShippingPackage( {
+						packageId: 0,
+						shippingRates: [],
+					} ),
+				] }
+			/>
+		);
+
+		// A shippable address brings different rates back, none of them selected.
+		rerender(
+			<ShippingRatesControl
+				{ ...defaultProps }
+				shippingRates={ [ createShippingPackage( 0, 'flat_rate:9' ) ] }
+			/>
+		);
+
+		expect( selectShippingRate.mock.calls ).toEqual( [
+			[ 'flat_rate:1', 0 ],
+			[ 'flat_rate:9', 0 ],
+		] );
+	} );
+
 	it( 'lets the rate lists own their selection in the editor only', () => {
 		( useShippingData as jest.Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
