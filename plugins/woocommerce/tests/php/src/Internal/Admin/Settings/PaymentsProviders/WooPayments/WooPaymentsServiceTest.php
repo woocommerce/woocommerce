@@ -54,6 +54,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	protected $mock_account_service;
 
+	/** @var \PHPUnit\Framework\MockObject\MockObject */
+	private $mock_readiness_request;
+
 	/**
 	 * The ID of the store admin user.
 	 *
@@ -144,9 +147,22 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
+		$this->mock_readiness_request = $this->getMockBuilder( \stdClass::class )->addMethods( array( 'send', 'assign_hook' ) )->getMock();
+
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
-			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
+			->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data', 'refresh_account_data' ) )
 			->getMock();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WCPay\Core\Server\Request' => array(
+					'get' => function ( $route ) {
+						$this->assertSame( 'accounts/readiness', $route );
+						return $this->mock_readiness_request;
+					},
+				),
+			)
+		);
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
@@ -6842,6 +6858,103 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'Onboarding step requirements are not met.' );
 
 		$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+	}
+
+	/**
+	 * @testdox Should fetch full account data only after readiness succeeds.
+	 */
+	public function test_onboarding_step_check_refreshes_stale_test_account(): void {
+		$this->mock_readiness_request->expects( $this->once() )->method( 'assign_hook' )->with( 'wcpay_get_account_readiness_request' );
+		$this->mock_readiness_request->expects( $this->once() )->method( 'send' )->willReturn( array( 'payments_enabled' => true ) );
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( true );
+		$this->mock_provider->method( 'is_account_connected' )->willReturn( true );
+		$this->mock_account_service->method( 'is_stripe_account_valid' )->willReturn( true );
+		$ready = false;
+		$this->mock_account_service->method( 'get_account_status_data' )->willReturnCallback(
+			static function () use ( &$ready ) {
+				return array(
+					'testDrive'       => true,
+					'paymentsEnabled' => $ready,
+				);
+			}
+		);
+		$this->mock_account_service->expects( $this->once() )->method( 'refresh_account_data' )->willReturnCallback(
+			static function () use ( &$ready ) {
+				$ready = true;
+			}
+		);
+
+		$first = $this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, 'US' );
+		$this->assertNotSame( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $first['status'] );
+		$this->current_time += 10;
+		$refreshed           = $this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, 'US' );
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $refreshed['status'] );
+		$this->current_time += 10;
+		$this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, 'US' );
+	}
+
+	/**
+	 * @testdox Should throttle pending checks and failed requests without refreshing the full account.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $fails Whether the readiness request fails.
+	 */
+	public function test_onboarding_step_check_throttles_failed_refreshes( bool $fails ): void {
+		$this->mock_account_service->method( 'is_stripe_account_valid' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( true );
+		$this->mock_provider->method( 'is_account_connected' )->willReturn( true );
+		$this->mock_account_service->method( 'get_account_status_data' )->willReturn(
+			array(
+				'testDrive'       => true,
+				'paymentsEnabled' => false,
+			)
+		);
+		$this->mock_account_service->expects( $this->never() )->method( 'refresh_account_data' );
+		$send = $this->mock_readiness_request->expects( $this->exactly( 2 ) )->method( 'send' );
+		if ( $fails ) {
+			$send->willThrowException( new \Exception( 'Unavailable' ) );
+		} else {
+			$send->willReturn( array( 'payments_enabled' => false ) );
+		}
+
+		// Poll between and at the 10-second refresh boundaries; only the checks at 10 and 20 seconds should send a request.
+		foreach ( array( 0, 3, 6, 9, 10, 12, 15, 19, 20 ) as $elapsed ) {
+			$this->current_time = self::TEST_EPOCH + $elapsed;
+			$result             = $this->sut->onboarding_step_check( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, 'US' );
+			$this->assertNotSame( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $result['status'] );
+		}
+	}
+
+	/**
+	 * @testdox Should leave other steps and working or non-test-drive accounts cached.
+	 *
+	 * @param string $step The step being checked.
+	 * @param bool   $test_drive Whether this is a test-drive account.
+	 * @param bool   $ready Whether payments are enabled.
+	 *
+	 * @testWith ["payment_methods", true, false]
+	 *           ["test_account", false, false]
+	 *           ["test_account", true, true]
+	 */
+	public function test_onboarding_step_check_does_not_refresh_other_accounts( string $step, bool $test_drive, bool $ready ): void {
+		$this->mock_account_service->method( 'is_stripe_account_valid' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( true );
+		$this->mock_provider->method( 'is_account_connected' )->willReturn( true );
+		$this->mock_account_service->method( 'get_account_status_data' )->willReturn(
+			array(
+				'testDrive'       => $test_drive,
+				'isLive'          => ! $test_drive,
+				'paymentsEnabled' => $ready,
+			)
+		);
+		$this->mock_account_service->expects( $this->never() )->method( 'refresh_account_data' );
+
+		$this->sut->onboarding_step_check( $step, 'US' );
+		$this->current_time += 10;
+		$this->sut->onboarding_step_check( $step, 'US' );
 	}
 
 	/**
