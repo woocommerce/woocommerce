@@ -145,6 +145,9 @@ class ReportExporter {
 		$report_batch_args = array( $export_id, $report_type, $report_args, $num_batches );
 
 		if ( 0 < $num_batches ) {
+			// Before the batches, not after: with queueing disabled they run right here, and a
+			// custom export id can be reused, so the previous run's 100 must not survive into this one.
+			self::reset_export_percentage_complete( $report_type, $export_id );
 			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
@@ -211,6 +214,21 @@ class ReportExporter {
 		}
 
 		$exports_status[ $status_key ] = $percentage;
+
+		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
+	}
+
+	/**
+	 * Start a report export's completion percentage over at 0, whatever it held before.
+	 *
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return void
+	 */
+	private static function reset_export_percentage_complete( $report_type, $export_id ) {
+		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
+
+		$exports_status[ self::get_status_key( $report_type, $export_id ) ] = 0;
 
 		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
 	}

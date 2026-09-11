@@ -611,6 +611,23 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Queueing an export under a reused id starts its progress over.
+	 */
+	public function test_queueing_an_export_starts_its_progress_over(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->create_products( 2 );
+
+		// A custom export id can be reused, leaving the previous run's 100 behind.
+		$export_id = 'reused';
+		ReportExporter::update_export_percentage_complete( 'stock', $export_id, 100 );
+
+		$this->use_test_queue();
+		ReportExporter::queue_report_export( $export_id, 'stock', array() );
+
+		$this->assertSame( 0, ReportExporter::get_export_percentage_complete( 'stock', $export_id ), 'A freshly queued export should not report the previous run as complete.' );
+	}
+
+	/**
 	 * @testdox The email action does not mistake itself for an unfinished batch.
 	 */
 	public function test_email_is_not_blocked_by_itself(): void {
