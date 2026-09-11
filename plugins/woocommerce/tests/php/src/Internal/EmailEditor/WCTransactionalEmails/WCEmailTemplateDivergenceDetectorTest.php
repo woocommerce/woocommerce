@@ -212,6 +212,36 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not fire `_update_available` when core moves under a post the merchant never edited.
+	 *
+	 * The other half of the version-advance guard. An uncustomized post is updated silently by
+	 * the auto-applier, so the merchant is never asked to review it and no update-available
+	 * event may fire, even though its stamped version is behind the registry's.
+	 */
+	public function test_reclassify_does_not_fire_update_available_for_uncustomized_version_advance(): void {
+		$email_id = 'wc_test_divergence_available_silent';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Core moves; the post still matches its stamp, so nobody edited it.
+		$this->use_canonical_content( $email_id, '<!-- wp:paragraph --><p>A new core release</p><!-- /wp:paragraph -->' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, '1.0.0' );
+
+		$captured = array();
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED, $status );
+		$this->assertSame( array(), $captured, 'An uncustomized post must not fire _update_available on a version advance.' );
+	}
+
+	/**
 	 * @testdox Should fire `_update_available` on a cross-release sweep even when status stays customized.
 	 *
 	 * Regression for the case where a merchant sits on a `core_updated_customized`
@@ -596,6 +626,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 
 		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $status );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
 	}
 
 	/**
@@ -608,6 +642,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Email Registered fixture email instance.
 	 */
 	private function register_fixture_email( string $email_id ): \WC_Email {
+		if ( ! class_exists( \WC_Email::class ) ) {
+			require_once WC_ABSPATH . 'includes/emails/class-wc-email.php';
+		}
+
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();
