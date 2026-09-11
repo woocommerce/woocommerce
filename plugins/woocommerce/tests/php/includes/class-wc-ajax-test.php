@@ -2386,6 +2386,137 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Percentage order fees added via AJAX are calculated on the net (ex-tax) order total.
+	 *
+	 * @testWith ["25%", 25.0, 5.0, 150.0]
+	 *           ["-25%", -25.0, -5.0, 90.0]
+	 *
+	 * @param string $amount          Fee amount posted to the AJAX handler.
+	 * @param float  $expected_fee    Expected fee line total (ex tax).
+	 * @param float  $expected_fee_tax Expected fee tax.
+	 * @param float  $expected_total  Expected order grand total.
+	 */
+	public function test_add_order_fee_percentage_uses_net_total( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
+		$order = $this->create_order_for_percentage_fee_tests();
+
+		$this->_setRole( 'administrator' );
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['amount']   = $amount;
+
+		$response = $this->do_ajax( 'woocommerce_add_order_fee' );
+
+		$this->assertTrue( $response['success'] ?? false, 'Adding a percentage fee via AJAX should succeed.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$fees  = array_values( $order->get_fees() );
+		$this->assertCount( 1, $fees, 'Exactly one fee should be added to the order.' );
+		$this->assertEquals( $expected_fee, (float) $fees[0]->get_total(), 'Fee total should be a percentage of the net order total.' );
+		$this->assertEquals( $expected_fee_tax, (float) $fees[0]->get_total_tax(), 'Fee tax should be calculated on the net fee amount.' );
+		$this->assertEquals( $expected_total, (float) $order->get_total(), 'Order total should include the net-based fee and its tax.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
+	}
+
+	/**
+	 * @testdox Percentage fee base includes shipping under option A (net items + shipping, ex tax).
+	 */
+	public function test_add_order_fee_percentage_includes_shipping_in_net_base(): void {
+		WC_Helper_Shipping::create_simple_flat_rate();
+
+		$order = $this->create_order_for_percentage_fee_tests();
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$this->_setRole( 'administrator' );
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['amount']   = '10%';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_fee' );
+
+		$this->assertTrue( $response['success'] ?? false, 'Adding a percentage fee via AJAX should succeed.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$fees  = array_values( $order->get_fees() );
+		$this->assertCount( 1, $fees, 'Exactly one fee should be added to the order.' );
+		// Net base is items (100) + shipping (10) = 110; 10% of that is 11, not 13.20 (10% of tax-inclusive 132).
+		$this->assertEquals( 11.0, (float) $fees[0]->get_total(), 'Percentage fee should use the net total including shipping.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
+		WC_Helper_Shipping::delete_simple_flat_rate();
+	}
+
+	/**
+	 * @testdox Fixed-amount order fees added via AJAX are unchanged.
+	 */
+	public function test_add_order_fee_fixed_amount_unchanged(): void {
+		$order = $this->create_order_for_percentage_fee_tests();
+
+		$this->_setRole( 'administrator' );
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['amount']   = '12.5';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_fee' );
+
+		$this->assertTrue( $response['success'] ?? false, 'Adding a fixed fee via AJAX should succeed.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$fees  = array_values( $order->get_fees() );
+		$this->assertCount( 1, $fees, 'Exactly one fee should be added to the order.' );
+		$this->assertEquals( 12.5, (float) $fees[0]->get_total(), 'Fixed fee amount should be stored as posted.' );
+		$this->assertEquals( 2.5, (float) $fees[0]->get_total_tax(), 'Fixed fee tax should remain 20% of the fee.' );
+		$this->assertEquals( 135.0, (float) $order->get_total(), 'Order total should include the fixed fee and its tax.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
+	}
+
+	/**
+	 * Create a $100 order with a 20% tax line for percentage fee AJAX tests.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_order_for_percentage_fee_tests(): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$this->assertEquals( 20.0, (float) $order->get_total_tax(), 'Fixture order should have a $20 tax line.' );
+		$this->assertEquals( 120.0, (float) $order->get_total(), 'Fixture order should total $120 gross.' );
+
+		return $order;
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
