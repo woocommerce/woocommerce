@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * A class for handling the business logic of the signup process.
@@ -87,6 +88,8 @@ class SignupService {
 	 * @return SignupResult|\WP_Error The signup result.
 	 */
 	public function signup( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		// Sanity checks.
 		if ( ! Config::allows_signups() ) {
@@ -200,6 +203,8 @@ class SignupService {
 	 * @return Notification|null The notification, or null if it doesn't exist.
 	 */
 	public function is_already_signed_up( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
+
+		$user_email = EmailNormalizer::normalize( $user_email );
 
 		if ( empty( $product_id ) ) {
 			return null;
@@ -344,20 +349,18 @@ class SignupService {
 		}
 
 		if ( ! $is_logged_in ) {
-			$email = isset( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : false;
-			if ( ! $email ) {
-				return new \WP_Error( self::ERROR_INVALID_EMAIL );
-			}
-
-			if ( ! is_email( $email ) ) {
+			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : '';
+			$email        = is_email( $posted_email ) ? EmailNormalizer::normalize( $posted_email ) : '';
+			if ( '' === $email ) {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}
 
 			$data['user_id']    = 0;
 			$data['user_email'] = $email;
 
-			// Check if user exists with this email.
-			$user = get_user_by( 'email', $email );
+			// Look up the account with the letter case as entered: `wp_users.user_email` is never
+			// normalized, so on a case-sensitive collation the lowercased form would miss it.
+			$user = get_user_by( 'email', $posted_email );
 			if ( $user ) {
 				$data['user_id'] = $user->ID;
 			}
@@ -368,7 +371,7 @@ class SignupService {
 			}
 
 			$data['user_id']    = $user->ID;
-			$data['user_email'] = $user->user_email;
+			$data['user_email'] = EmailNormalizer::normalize( $user->user_email );
 		}
 
 		return $data;

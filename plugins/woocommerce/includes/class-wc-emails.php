@@ -309,6 +309,10 @@ class WC_Emails {
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
 		}
+		if ( FeaturesUtil::feature_is_enabled( 'order_withdrawal' ) ) {
+			$emails['WC_Email_Customer_Order_Withdrawal_Requested'] = __DIR__ . '/emails/class-wc-email-customer-order-withdrawal-requested.php';
+			$emails['WC_Email_Order_Withdrawal_Requested']          = __DIR__ . '/emails/class-wc-email-order-withdrawal-requested.php';
+		}
 
 		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
