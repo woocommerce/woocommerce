@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Product Button E2E tests from 7 to 2; PHPUnit owns the add-to-cart text filter and the block theme script dequeue.
+
