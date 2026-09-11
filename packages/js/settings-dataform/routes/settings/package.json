@@ -1,0 +1,11 @@
+{
+	"name": "@woocommerce-settings-ui-experimental/settings-route",
+	"private": true,
+	"dependencies": {
+		"@woocommerce-settings-ui-experimental/settings-ui": "workspace:*"
+	},
+	"route": {
+		"path": "/",
+		"page": "wc-settings-dataform"
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"name": "@woocommerce-settings-ui-experimental/settings-ui",
+	"version": "0.0.0",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"module": "build-module/index.mjs",
+	"dependencies": {
+		"@wordpress/i18n": "catalog:wp-min",
+		"react": "18.3.1",
+		"react-dom": "18.3.1"
+	}
+}
