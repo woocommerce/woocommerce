@@ -1,0 +1,36 @@
+.woocommerce-finance-drawer__overlay {
+	// Keep the page visible behind the drawer, as the design treats it as a side panel.
+	background-color: rgba(0, 0, 0, 0.35);
+	// Recent WordPress versions center the modal frame with flexbox; push it to the inline end.
+	justify-content: flex-end;
+	align-items: stretch;
+}
+
+.components-modal__frame.woocommerce-finance-drawer {
+	// The modal header is absolutely positioned, so the frame must be its containing block.
+	position: relative;
+	inset-block: 0;
+	inset-inline-end: 0;
+	inset-inline-start: auto;
+	transform: none;
+	margin: 0;
+	inline-size: min(480px, 100%);
+	max-inline-size: none;
+	block-size: 100%;
+	max-block-size: none;
+	border-radius: 0;
+	animation: woocommerce-finance-drawer-slide-in 0.2s ease-out;
+
+	.components-modal__content {
+		padding-inline: $gap-large;
+	}
+}
+
+@keyframes woocommerce-finance-drawer-slide-in {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: none;
+	}
+}

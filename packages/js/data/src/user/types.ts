@@ -35,6 +35,7 @@ export type UserPreferences = {
 	launch_your_store_tour_hidden?: 'yes' | 'no' | '';
 	coming_soon_banner_dismissed?: 'yes' | 'no' | '';
 	scheduled_updates_promotion_notice_dismissed?: 'yes' | 'no' | '';
+	payments_finance_last_provider?: string;
 };
 
 export type WoocommerceMeta = {

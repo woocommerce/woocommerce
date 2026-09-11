@@ -1,0 +1,64 @@
+@import "@wordpress/dataviews/build-style/style.css";
+
+body.woocommerce-finance-payouts-page {
+	background: $white;
+}
+
+.woocommerce-finance-payouts {
+
+	.components-notice {
+		margin: 0 0 $gap;
+	}
+
+	.dataviews-wrapper {
+		background-color: $white;
+		border: 1px solid $gray-200;
+		border-radius: 4px;
+	}
+
+	.woocommerce-finance-payouts__id-button.components-button {
+		padding: 0;
+		block-size: auto;
+		font-family: monospace;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			text-decoration: underline;
+		}
+	}
+
+	.woocommerce-finance-payouts__empty {
+		margin: 0;
+		padding: $gap-large;
+		text-align: center;
+		color: $gray-700;
+	}
+}
+
+.woocommerce-finance-payout-details {
+	.woocommerce-finance-payout-details__list {
+		margin: 0 0 $gap;
+	}
+
+	.woocommerce-finance-payout-details__row {
+		display: grid;
+		grid-template-columns: minmax(120px, 1fr) 2fr;
+		gap: $gap-small;
+		padding-block: $gap-small;
+		border-block-end: 1px solid $gray-200;
+
+		dt {
+			color: $gray-700;
+		}
+
+		dd {
+			margin: 0;
+		}
+	}
+
+	.woocommerce-finance-payout-details__provider-link {
+		width: 100%;
+		justify-content: center;
+	}
+}

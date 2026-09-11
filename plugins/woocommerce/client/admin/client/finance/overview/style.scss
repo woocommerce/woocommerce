@@ -1,0 +1,49 @@
+.woocommerce-finance-overview {
+	&__title {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.components-notice {
+		margin: 0 0 $gap;
+	}
+}
+
+.woocommerce-finance-provider-table__scroll {
+	overflow-x: auto;
+}
+
+.woocommerce-finance-provider-table {
+	inline-size: 100%;
+	border-collapse: collapse;
+
+	th,
+	td {
+		padding-block: $gap-small;
+		padding-inline: $gap-smaller;
+		text-align: start;
+		vertical-align: top;
+		border-block-end: 1px solid $gray-200;
+	}
+
+	thead th {
+		color: $gray-700;
+		font-weight: 600;
+	}
+
+	tbody tr:last-child {
+		th,
+		td {
+			border-block-end: none;
+		}
+	}
+
+	&__note {
+		color: $gray-700;
+	}
+
+	&__actions {
+		text-align: end;
+	}
+}

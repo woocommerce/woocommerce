@@ -72,6 +72,13 @@ const MobileAppLoginPage = lazy( () =>
 	import( /* webpackChunkName: "mobile-app-login" */ '../mobile-app-login' )
 );
 
+const FinanceOverview = lazy( () =>
+	import( /* webpackChunkName: "finance-overview" */ '../finance/overview' )
+);
+const FinancePayouts = lazy( () =>
+	import( /* webpackChunkName: "finance-payouts" */ '../finance/payouts' )
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = ( reports = [] ) => {
@@ -163,6 +170,41 @@ export const getPages = ( reports = [] ) => {
 			},
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
 			capability: 'view_woocommerce_reports',
+		} );
+	}
+
+	if ( isFeatureEnabled( 'payments_finance' ) ) {
+		const financeBreadcrumb = [
+			'/finance/overview',
+			__( 'Finance', 'woocommerce' ),
+		];
+		pages.push( {
+			container: FinanceOverview,
+			path: '/finance/overview',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				financeBreadcrumb,
+				__( 'Overview', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--finance-overview',
+			navArgs: {
+				id: 'woocommerce-finance-overview',
+			},
+			capability: 'manage_woocommerce',
+		} );
+		pages.push( {
+			container: FinancePayouts,
+			path: '/finance/payouts',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				financeBreadcrumb,
+				__( 'Payouts', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--finance-overview',
+			navArgs: {
+				id: 'woocommerce-finance-payouts',
+			},
+			capability: 'manage_woocommerce',
 		} );
 	}
 
