@@ -76,6 +76,14 @@ class Analytics {
 	private const REFUND_DOUBLE_COUNT_STATUS_CANCELLED = 'cancelled';
 
 	/**
+	 * Receives the fix tool's Tracks events instead of Tracks when set. Tests use it because
+	 * WC_Tracks::record_event() skips PHPUnit users.
+	 *
+	 * @var callable|null
+	 */
+	private static $refund_double_count_event_recorder = null;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Analytics instance
@@ -405,7 +413,7 @@ class Analytics {
 	 *
 	 * @internal
 	 *
-	 * @return array{run_id: string, status: string, max_order_id: int, fixed: int, unresolved: int, completed_at: int, dismissed: bool}
+	 * @return array{run_id: string, status: string, max_order_id: int, fixed: int, unresolved: int, batches: int, started_at: int, completed_at: int, dismissed: bool}
 	 */
 	public static function get_refund_double_count_state(): array {
 		$state = get_option( self::REFUND_DOUBLE_COUNT_OPTION );
@@ -417,6 +425,8 @@ class Analytics {
 			'max_order_id' => absint( $state['max_order_id'] ?? 0 ),
 			'fixed'        => absint( $state['fixed'] ?? 0 ),
 			'unresolved'   => absint( $state['unresolved'] ?? 0 ),
+			'batches'      => absint( $state['batches'] ?? 0 ),
+			'started_at'   => absint( $state['started_at'] ?? 0 ),
 			'completed_at' => absint( $state['completed_at'] ?? 0 ),
 			'dismissed'    => ! empty( $state['dismissed'] ),
 		);
@@ -552,18 +562,22 @@ class Analytics {
 	 * @return string Result message.
 	 */
 	public function run_refund_double_count_tool() {
-		$state = self::get_refund_double_count_state();
+		$state           = self::get_refund_double_count_state();
+		$previous_status = '' === $state['status'] ? 'none' : $state['status'];
 
 		if ( self::is_refund_double_count_fix_running( $state ) ) {
+			self::record_refund_double_count_tool_run( 'refused_running', $previous_status );
 			return __( 'A fix is already in progress, please check back later.', 'woocommerce' );
 		}
 
 		if ( self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE === $state['status'] && 0 === $state['unresolved'] ) {
 			self::update_refund_double_count_state( array( 'dismissed' => true ) );
+			self::record_refund_double_count_tool_run( 'dismissed', $previous_status );
 			return __( 'Tool dismissed.', 'woocommerce' );
 		}
 
 		if ( self::is_batch_pending_or_running( 'woocommerce_analytics_refund_fix_batch' ) ) {
+			self::record_refund_double_count_tool_run( 'refused_full_refund_fix', $previous_status );
 			return __( 'The full refund data fix is still running. Please try again once it has finished.', 'woocommerce' );
 		}
 
@@ -576,11 +590,14 @@ class Analytics {
 				'max_order_id' => self::get_max_order_stats_id(),
 				'fixed'        => 0,
 				'unresolved'   => 0,
+				'batches'      => 0,
+				'started_at'   => time(),
 				'completed_at' => 0,
 			)
 		);
 		self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 0, $run_id ) );
 		RefundDoubleCountToolNotice::delete_if_not_applicable();
+		self::record_refund_double_count_tool_run( 'started', $previous_status );
 
 		return __( 'Checking for affected orders and fixing them in the background. Reload this page to see the progress.', 'woocommerce' );
 	}
@@ -793,6 +810,7 @@ class Analytics {
 		$changes     = array(
 			'fixed'      => $state['fixed'] + count( $parent_ids ) - count( $unfixed_ids ),
 			'unresolved' => $state['unresolved'] + count( $unfixed_ids ),
+			'batches'    => $state['batches'] + 1,
 		);
 
 		if ( $is_done ) {
@@ -802,7 +820,9 @@ class Analytics {
 
 		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( $state, $changes ), false );
 
-		if ( ! $is_done ) {
+		if ( $is_done ) {
+			self::record_refund_double_count_fix_finished( array_merge( $state, $changes ), self::REFUND_DOUBLE_COUNT_STATUS_COMPLETE );
+		} else {
 			self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $next_cursor, $run_id ), 5 );
 		}
 	}
@@ -822,12 +842,108 @@ class Analytics {
 			return;
 		}
 
-		if ( self::REFUND_DOUBLE_COUNT_STATUS_RUNNING !== self::get_refund_double_count_state()['status'] ) {
+		$state = self::get_fresh_refund_double_count_state();
+		if ( self::REFUND_DOUBLE_COUNT_STATUS_RUNNING !== $state['status'] ) {
 			return;
 		}
 
 		self::update_refund_double_count_state( array( 'status' => self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED ) );
 		as_unschedule_all_actions( self::REFUND_DOUBLE_COUNT_FIX_HOOK );
+		self::record_refund_double_count_fix_finished( $state, self::REFUND_DOUBLE_COUNT_STATUS_CANCELLED );
+	}
+
+	/**
+	 * Override where the fix tool's Tracks events go. Intended for tests only.
+	 *
+	 * @internal
+	 *
+	 * @param callable|null $recorder Receives `(string $event_name, array $properties)`. Pass null to send to Tracks again.
+	 * @return void
+	 */
+	public static function set_refund_double_count_event_recorder( ?callable $recorder ): void {
+		self::$refund_double_count_event_recorder = $recorder;
+	}
+
+	/**
+	 * Record a click on the fix tool's button and what it did.
+	 *
+	 * @param string $outcome         One of started, dismissed, refused_running or refused_full_refund_fix.
+	 * @param string $previous_status Run status before the click, or 'none'.
+	 * @return void
+	 */
+	private static function record_refund_double_count_tool_run( string $outcome, string $previous_status ): void {
+		self::record_refund_double_count_event(
+			'tool_run',
+			array(
+				'outcome'         => $outcome,
+				'previous_status' => $previous_status,
+			)
+		);
+	}
+
+	/**
+	 * Record the end of a fix run.
+	 *
+	 * @param array  $state  Tool state at the end of the run.
+	 * @param string $result complete or cancelled.
+	 * @return void
+	 */
+	private static function record_refund_double_count_fix_finished( array $state, string $result ): void {
+		self::record_refund_double_count_event(
+			'fix_finished',
+			array(
+				'result'           => $result,
+				'fixed_count'      => $state['fixed'],
+				'unresolved_count' => $state['unresolved'],
+				'batches'          => $state['batches'],
+				'duration_seconds' => $state['started_at'] > 0 ? max( 0, time() - $state['started_at'] ) : 0,
+				'max_order_id'     => $state['max_order_id'],
+				'db_engine'        => self::get_db_engine(),
+			)
+		);
+	}
+
+	/**
+	 * Send one of the fix tool's Tracks events. Telemetry failures never stop the fix.
+	 *
+	 * @param string $name       Event name after the analytics_refund_double_count_ prefix.
+	 * @param array  $properties Event properties.
+	 * @return void
+	 */
+	private static function record_refund_double_count_event( string $name, array $properties ): void {
+		$properties['order_storage'] = OrderUtil::custom_orders_table_usage_is_enabled() ? 'hpos' : 'cpt';
+		$event_name                  = 'analytics_refund_double_count_' . $name;
+
+		try {
+			if ( null !== self::$refund_double_count_event_recorder ) {
+				( self::$refund_double_count_event_recorder )( $event_name, $properties );
+				return;
+			}
+
+			if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
+				wc_admin_record_tracks_event( $event_name, $properties );
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+
+	/**
+	 * Database engine and major.minor version, e.g. mariadb-10.11 or mysql-8.0.
+	 *
+	 * @return string
+	 */
+	private static function get_db_engine(): string {
+		global $wpdb;
+
+		$server_info = (string) $wpdb->db_server_info();
+
+		if ( false !== stripos( $server_info, 'mariadb' ) ) {
+			// Older MariaDB servers report a "5.5.5-" prefix before the real version.
+			return preg_match( '/(\d+\.\d+)\.\d+-MariaDB/i', $server_info, $matches ) ? 'mariadb-' . $matches[1] : 'mariadb';
+		}
+
+		return preg_match( '/^(\d+\.\d+)/', $server_info, $matches ) ? 'mysql-' . $matches[1] : 'unknown';
 	}
 
 	/**
