@@ -24,4 +24,23 @@ describe( 'persistenceLayer', () => {
 		);
 		expect( persistenceLayer.get() ).toEqual( { itemsCount: 2 } );
 	} );
+
+	it( 'returns null instead of throwing when localStorage access throws', () => {
+		const storage = window.localStorage;
+		Object.defineProperty( window, 'localStorage', {
+			configurable: true,
+			get() {
+				throw new Error( 'denied' );
+			},
+		} );
+		try {
+			expect( () => persistenceLayer.get() ).not.toThrow();
+			expect( persistenceLayer.get() ).toBeNull();
+		} finally {
+			Object.defineProperty( window, 'localStorage', {
+				configurable: true,
+				value: storage,
+			} );
+		}
+	} );
 } );
