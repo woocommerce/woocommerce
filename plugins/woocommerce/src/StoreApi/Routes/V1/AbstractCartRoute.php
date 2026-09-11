@@ -193,7 +193,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cache-Control', 'no-store' );
 
-		if ( WC()->cart instanceof \WC_Cart ) {
+		if ( WC()->cart instanceof \WC_Cart && \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
 			$response->header( 'Cart-Token', $this->get_cart_token() );
 			$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 		}
@@ -204,20 +204,34 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Load the cart session before handling responses.
 	 *
+	 * @throws \RuntimeException When a previous cart session load failed.
+	 * @throws \Throwable When the cart session cannot be loaded.
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
+		if ( WC()->cart instanceof \WC_Cart && ! \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
+			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
 		}
-		$this->cart_controller->load_cart();
-		$this->cart_controller->normalize_cart();
+
+		try {
+			if ( $this->has_cart_token( $request ) ) {
+				// Overrides the core session class.
+				add_filter(
+					'woocommerce_session_handler',
+					function () {
+						return SessionHandler::class;
+					}
+				);
+			}
+			$this->cart_controller->load_cart();
+			$this->cart_controller->normalize_cart();
+		} catch ( \Throwable $error ) {
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			throw $error;
+		}
 	}
 
 	/**
