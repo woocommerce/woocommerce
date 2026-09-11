@@ -128,11 +128,31 @@ class MyAccountEndpoint {
 	}
 
 	/**
+	 * Check whether the customer can ask for the verification email again.
+	 *
+	 * Only pending sign-ups have anything to verify; the management service
+	 * enforces the same rule when the request comes in.
+	 *
+	 * @param Notification $notification The notification to check.
+	 * @return bool True when the notification is still awaiting confirmation.
+	 */
+	public static function can_resend( Notification $notification ): bool {
+		return NotificationStatus::PENDING === (string) $notification->get_status();
+	}
+
+	/**
 	 * Notification management service, owns the resend-verification domain logic.
 	 *
 	 * @var NotificationManagementService
 	 */
 	private NotificationManagementService $notification_management_service;
+
+	/**
+	 * Builds the template arguments for the endpoint.
+	 *
+	 * @var MyAccountView
+	 */
+	private MyAccountView $view;
 
 	/**
 	 * Constructor.
@@ -151,9 +171,11 @@ class MyAccountEndpoint {
 	 * @internal
 	 *
 	 * @param NotificationManagementService $notification_management_service The notification management service.
+	 * @param MyAccountView                 $view                            Builds the template arguments.
 	 */
-	final public function init( NotificationManagementService $notification_management_service ): void {
+	final public function init( NotificationManagementService $notification_management_service, MyAccountView $view ): void {
 		$this->notification_management_service = $notification_management_service;
+		$this->view                            = $view;
 	}
 
 	/**
@@ -311,15 +333,15 @@ class MyAccountEndpoint {
 
 		\wc_get_template(
 			'myaccount/stock-notifications.php',
-			array(
-				'notifications'         => $page['notifications'],
-				'pending_notifications' => $pending,
-				'has_pending'           => ! empty( $pending ),
-				'has_items'             => ! empty( $pending ) || ! empty( $page['notifications'] ),
-				'current_page'          => $page['current_page'],
-				'total_pages'           => $page['total_pages'],
-				'total_items'           => $page['total_items'],
-				'per_page'              => $per_page,
+			$this->view->get_template_args(
+				$pending,
+				$page['notifications'],
+				array(
+					'current_page' => $page['current_page'],
+					'total_pages'  => $page['total_pages'],
+					'total_items'  => $page['total_items'],
+					'per_page'     => $per_page,
+				)
 			)
 		);
 	}

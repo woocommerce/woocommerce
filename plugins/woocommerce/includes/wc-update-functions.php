@@ -39,6 +39,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
@@ -3913,6 +3914,82 @@ function wc_update_11202_reset_refund_returning_customer_markers() {
 
 	// Reports cached against half-migrated data would otherwise keep being served.
 	wc_update_11201_invalidate_analytics_reports_cache();
+
+	return false;
+}
+
+/**
+ * Rewrite stored Back in Stock customer emails in canonical form (trimmed, lowercased).
+ *
+ * Lookups on `user_email` use plain SQL equality, so rows written before emails were
+ * normalized would not match on a case-sensitive collation. Processes one batch per
+ * call and requeues itself while rows remain. A database error stops the migration
+ * and is logged instead of retried: an unnormalized row only keeps the pre-migration
+ * lookup behaviour, and the log names it for manual repair.
+ *
+ * @since 11.2.0
+ *
+ * @return bool True when another batch remains, false when done.
+ */
+function wc_update_11203_normalize_stock_notification_emails() {
+	global $wpdb;
+
+	$last_id_option = 'woocommerce_update_11203_last_stock_notification_id';
+	$table          = $wpdb->prefix . 'wc_stock_notifications';
+	$batch_size     = 500;
+
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT id, user_email FROM {$table} WHERE id > %d ORDER BY id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			(int) get_option( $last_id_option, 0 ),
+			$batch_size
+		)
+	);
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped normalizing stock notification emails: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		delete_option( $last_id_option );
+		return false;
+	}
+
+	// Normalize in PHP rather than with SQL LOWER()/TRIM() so stored values match exactly
+	// what EmailNormalizer produces at lookup time.
+	foreach ( $rows as $row ) {
+		$normalized = EmailNormalizer::normalize( (string) $row->user_email );
+		if ( $normalized === $row->user_email ) {
+			continue;
+		}
+
+		// Matching on the value read keeps a concurrent save (e.g. the privacy eraser) from being overwritten.
+		$updated = $wpdb->update(
+			$table,
+			array( 'user_email' => $normalized ),
+			array(
+				'id'         => (int) $row->id,
+				'user_email' => $row->user_email,
+			),
+			array( '%s' ),
+			array( '%d', '%s' )
+		);
+		if ( false === $updated ) {
+			wc_get_logger()->error(
+				sprintf( 'Stopped normalizing stock notification emails at notification #%d: %s', (int) $row->id, $wpdb->last_error ),
+				array( 'source' => 'wc-updater' )
+			);
+			delete_option( $last_id_option );
+			return false;
+		}
+	}
+
+	if ( count( $rows ) === $batch_size ) {
+		update_option( $last_id_option, (int) end( $rows )->id, false );
+		return true;
+	}
+
+	delete_option( $last_id_option );
 
 	return false;
 }
