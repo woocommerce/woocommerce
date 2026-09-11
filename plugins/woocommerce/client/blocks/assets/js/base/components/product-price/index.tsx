@@ -239,14 +239,9 @@ export interface ProductPriceProps {
 	 */
 	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
-	 * Custom margin to apply to the price wrapper.
+	 * Custom styles to apply to the price wrapper.
 	 */
-	style?:
-		| Pick<
-				React.CSSProperties,
-				'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
-		  >
-		| undefined;
+	style?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {

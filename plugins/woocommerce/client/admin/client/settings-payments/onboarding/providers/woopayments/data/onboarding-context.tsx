@@ -399,7 +399,7 @@ export const OnboardingProvider: React.FC< {
 		// This is important to ensure that the onboarding data is cleared when the modal is closed.
 		// This is to avoid stale data when the modal is opened again.
 		resetLocalState();
-		invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+		void invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 	};
 
 	/**
@@ -552,7 +552,7 @@ export const OnboardingProvider: React.FC< {
 
 					// Invalidate the getPaymentProviders store selector to ensure the latest data is fetched.
 					// This is important to ensure that the payment providers buttons are up to date.
-					invalidatePaymentProviders( 'getPaymentProviders' );
+					void invalidatePaymentProviders( 'getPaymentProviders' );
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,

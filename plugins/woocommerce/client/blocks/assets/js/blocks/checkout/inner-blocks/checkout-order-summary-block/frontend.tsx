@@ -8,12 +8,12 @@ import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { useId, useState } from '@wordpress/element';
 import clsx from 'clsx';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
  * Internal dependencies
  */
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
 import { useContainerWidthContext } from '../../../../base/context';
-import { FormattedMonetaryAmount } from '../../../../../../packages/components';
 import { FormStepHeading } from '../../form-step';
 
 const FrontendBlock = ( {

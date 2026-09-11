@@ -163,6 +163,7 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__image {
 				grid-column-start: 1;
 				grid-row-start: 1;
+				padding-right: $gap;
 			}
 			.wc-block-cart-item__product {
 				grid-column-start: 2;

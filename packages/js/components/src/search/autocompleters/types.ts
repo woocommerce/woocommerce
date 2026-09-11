@@ -49,7 +49,7 @@ export type AutoCompleter = {
 			key: string;
 			label: JSX.Element;
 			value: unknown;
-		}
+		},
 	];
 	/* A function to add regex expression to the filter the results, passed the search query. */
 	getSearchExpression?: ( query: string ) => string;

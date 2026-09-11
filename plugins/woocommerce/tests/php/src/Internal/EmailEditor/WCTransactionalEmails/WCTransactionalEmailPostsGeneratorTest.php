@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
@@ -50,33 +51,10 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 
 		// WCTransactionalEmailPostsManager is a process-wide singleton; its in-memory
 		// post_id <-> email_type cache survives DB transaction rollback between tests
-		// and would otherwise make generate_email_template_if_not_exists() return a
-		// stale post ID whose backing post was rolled back.
+		// and would otherwise leak stale mappings whose backing posts were rolled back.
 		$this->template_manager->clear_caches();
 
 		WCEmailTemplateSyncRegistry::reset_cache();
-	}
-
-	/**
-	 * Test that init sets up the transient.
-	 */
-	public function testInitSetsUpTransient(): void {
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
-
-		$this->email_generator->initialize();
-
-		$this->assertEquals( WOOCOMMERCE_VERSION, get_transient( 'wc_email_editor_initial_templates_generated' ) );
-	}
-
-	/**
-	 * Test that init doesn't run if transient exists.
-	 */
-	public function testInitDoesNotRunIfTransientExists(): void {
-		set_transient( 'wc_email_editor_initial_templates_generated', WOOCOMMERCE_VERSION, WEEK_IN_SECONDS );
-
-		$result = $this->email_generator->initialize();
-
-		$this->assertTrue( $result );
 	}
 
 	/**
@@ -118,64 +96,80 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that generate_email_template_if_not_exists generates template.
+	 * @testdox Should create a draft post carrying the email type and page template meta.
 	 */
-	public function testGenerateEmailTemplateIfNotExistsGeneratesTemplate(): void {
+	public function test_create_draft_creates_draft_with_identity_meta(): void {
 		$email_type = 'customer_new_account';
-		$email      = $this->createMock( \WC_Email::class );
-		$email->id  = $email_type;
+		$email      = $this->template_manager->get_email_by_id( $email_type );
+		$this->assertInstanceOf( \WC_Email::class, $email );
 
-		$this->email_generator->init_default_transactional_emails();
-		$this->template_manager->delete_email_template( $email_type );
-		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_type );
+		$post_id = $this->email_generator->create_draft( $email );
 
-		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
+		$this->assertSame( 'draft', get_post_status( $post_id ), 'Lazily created email posts must stay drafts until published.' );
+		$this->assertSame(
+			$email_type,
+			(string) get_post_meta( $post_id, WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY, true ),
+			'_wc_email_type meta must link the draft to its email type.'
+		);
+		$this->assertSame(
+			( new WooEmailTemplate() )->get_slug(),
+			(string) get_post_meta( $post_id, '_wp_page_template', true ),
+			'_wp_page_template meta must point at the Woo email template.'
+		);
 	}
 
 	/**
-	 * Test that generate_email_templates generates multiple templates.
+	 * @testdox Should not write the email_type to post_id option mapping when creating a draft.
 	 */
-	public function testGenerateEmailTemplatesGeneratesMultipleTemplates(): void {
-		$templates_to_generate = array( 'customer_new_account', 'customer_completed_order' );
-
-		$this->email_generator->init_default_transactional_emails();
-		foreach ( $templates_to_generate as $email_type ) {
-			// Delete the email template association if it exists.
-			$this->template_manager->delete_email_template( $email_type );
-		}
-		$result = $this->email_generator->generate_email_templates( $templates_to_generate );
-
-		$this->assertTrue( $result );
-		foreach ( $templates_to_generate as $email_type ) {
-			$this->assertNotFalse( get_option( 'woocommerce_email_templates_' . $email_type . '_post_id' ) );
-		}
-	}
-
-	/**
-	 * Test that generate_email_templates returns false when no templates are generated.
-	 */
-	public function testGenerateEmailTemplatesReturnsFalseWhenNoTemplatesAreGenerated(): void {
-		$templates_to_generate = array( 'invalid_email_type' );
-
-		$this->email_generator->init_default_transactional_emails();
-		$result = $this->email_generator->generate_email_templates( $templates_to_generate );
-
-		$this->assertFalse( $result );
-	}
-
-	/**
-	 * Core email is stamped with all three sync meta keys, and the hash is self-consistent with post_content.
-	 */
-	public function test_core_email_is_stamped_with_all_three_meta_keys(): void {
+	public function test_create_draft_does_not_write_option_mapping(): void {
 		$email_type = 'customer_new_account';
+		$email      = $this->template_manager->get_email_by_id( $email_type );
+		$this->assertInstanceOf( \WC_Email::class, $email );
 
-		$this->email_generator->init_default_transactional_emails();
-		$this->template_manager->delete_email_template( $email_type );
+		$post_id = $this->email_generator->create_draft( $email );
 
-		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_type );
+		$this->assertGreaterThan( 0, $post_id );
+		$this->assertEmpty(
+			$this->template_manager->get_email_template_post_id( $email_type ),
+			'The option mapping must only be written on publish, not when the draft is created.'
+		);
+	}
 
-		$this->assertIsInt( $post_id );
+	/**
+	 * @testdox Should force draft status even when the content-post-data filter sets publish.
+	 */
+	public function test_create_draft_forces_draft_status_over_filter(): void {
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( array $post_data ): array {
+				$post_data['post_status'] = 'publish';
+				return $post_data;
+			}
+		);
+
+		$email = $this->template_manager->get_email_by_id( 'customer_new_account' );
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$post_id = $this->email_generator->create_draft( $email );
+
+		$this->assertGreaterThan( 0, $post_id );
+		$this->assertSame(
+			'draft',
+			get_post_status( $post_id ),
+			'The post status is system-owned and must not be overridable by the woocommerce_email_content_post_data filter.'
+		);
+	}
+
+	/**
+	 * Core email is stamped with all sync meta keys, and the hash is self-consistent with post_content.
+	 */
+	public function test_core_email_is_stamped_with_all_sync_meta_keys(): void {
+		$email = $this->template_manager->get_email_by_id( 'customer_new_account' );
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$post_id = $this->email_generator->create_draft( $email );
+
 		$this->assertGreaterThan( 0, $post_id );
 
 		$version   = (string) get_post_meta( $post_id, '_wc_email_template_version', true );
@@ -197,20 +191,23 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 			$synced_at,
 			'_wc_email_last_synced_at should be a GMT MySQL-format timestamp.'
 		);
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Freshly created posts must be stamped in_sync.'
+		);
 	}
 
 	/**
-	 * @testdox Should stamp _wc_email_template_last_core_render meta with the canonical post_content at generation time.
+	 * @testdox Should stamp _wc_email_template_last_core_render meta with the canonical post_content at creation time.
 	 */
-	public function test_generation_stamps_last_core_render_meta(): void {
-		$email_type = 'customer_on_hold_order';
+	public function test_create_draft_stamps_last_core_render_meta(): void {
+		$email = $this->template_manager->get_email_by_id( 'customer_on_hold_order' );
+		$this->assertInstanceOf( \WC_Email::class, $email );
 
-		$this->email_generator->init_default_transactional_emails();
-		$this->template_manager->delete_email_template( $email_type );
+		$post_id = $this->email_generator->create_draft( $email );
 
-		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_type );
-
-		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
 
 		$stored_render = (string) get_post_meta(
@@ -222,17 +219,8 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertNotSame(
 			'',
 			$stored_render,
-			'_wc_email_template_last_core_render should be populated at generation time.'
+			'_wc_email_template_last_core_render should be populated at creation time.'
 		);
-
-		$email = null;
-		foreach ( \WC_Emails::instance()->get_emails() as $candidate ) {
-			if ( $candidate instanceof \WC_Email && $candidate->id === $email_type ) {
-				$email = $candidate;
-				break;
-			}
-		}
-		$this->assertInstanceOf( \WC_Email::class, $email );
 
 		$this->assertSame(
 			WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ),
@@ -243,25 +231,32 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Emails that are opted in for the block editor but whose templates lack a parseable @version
-	 * header are absent from the sync registry and must not be stamped.
+	 * header are absent from the sync registry: they get no version/synced-at meta, but the
+	 * source hash is still stamped — `was_never_edited()` checks depend on it for every email.
 	 */
-	public function test_email_absent_from_registry_is_not_stamped(): void {
+	public function test_email_absent_from_registry_gets_hash_but_no_version_meta(): void {
 		$email_id = 'wc_test_email_no_version';
-		$this->register_third_party_email_without_version( $email_id );
+		$email    = $this->register_third_party_email_without_version( $email_id );
 
 		WCEmailTemplateSyncRegistry::reset_cache();
 
-		$this->email_generator->init_default_transactional_emails();
-		$this->template_manager->delete_email_template( $email_id );
+		$post_id = $this->email_generator->create_draft( $email );
 
-		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_id );
-
-		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
 
 		$this->assertSame( '', (string) get_post_meta( $post_id, '_wc_email_template_version', true ) );
-		$this->assertSame( '', (string) get_post_meta( $post_id, '_wc_email_template_source_hash', true ) );
 		$this->assertSame( '', (string) get_post_meta( $post_id, '_wc_email_last_synced_at', true ) );
+
+		$post_content = (string) get_post( $post_id )->post_content;
+		$this->assertSame(
+			sha1( $post_content ),
+			(string) get_post_meta( $post_id, '_wc_email_template_source_hash', true ),
+			'The source hash must be stamped even for emails outside the sync registry.'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
 	}
 
 	/**
@@ -312,8 +307,9 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	 * WC_Emails::$emails and opt it in via the block-editor filter.
 	 *
 	 * @param string $email_id Email ID to inject.
+	 * @return \WC_Email The injected stub.
 	 */
-	private function register_third_party_email_without_version( string $email_id ): void {
+	private function register_third_party_email_without_version( string $email_id ): \WC_Email {
 		$stub = $this->getMockBuilder( \WC_Email::class )
 			->disableOriginalConstructor()
 			->getMock();
@@ -345,6 +341,78 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 				return $emails;
 			}
 		);
+
+		return $stub;
+	}
+
+	/**
+	 * @testdox Deprecated generation methods are no-ops that trigger a deprecation notice.
+	 */
+	public function test_deprecated_generation_methods_are_noops(): void {
+		$generator_class = WCTransactionalEmailPostsGenerator::class;
+		$this->setExpectedDeprecated( $generator_class . '::initialize' );
+		$this->setExpectedDeprecated( $generator_class . '::init_default_transactional_emails' );
+		$this->setExpectedDeprecated( $generator_class . '::generate_initial_email_templates' );
+		$this->setExpectedDeprecated( $generator_class . '::generate_email_templates' );
+
+		$this->email_generator->initialize();
+		$this->email_generator->init_default_transactional_emails();
+		$this->assertFalse( $this->email_generator->generate_initial_email_templates() );
+		$this->assertFalse( $this->email_generator->generate_email_templates( array( 'customer_processing_order' ) ) );
+
+		$this->assertFalse(
+			$this->template_manager->get_email_template_post_id( 'customer_processing_order' ),
+			'The deprecated no-ops must not create posts or mappings'
+		);
+	}
+
+	/**
+	 * @testdox Deprecated generate_email_template_if_not_exists() creates a published, mapped post and is idempotent.
+	 */
+	public function test_deprecated_generate_email_template_if_not_exists_creates_published_mapped_post(): void {
+		$this->setExpectedDeprecated( WCTransactionalEmailPostsGenerator::class . '::generate_email_template_if_not_exists' );
+
+		$post_id = $this->email_generator->generate_email_template_if_not_exists( 'customer_processing_order' );
+
+		$this->assertIsInt( $post_id );
+		$post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $post );
+		$this->assertSame( 'publish', $post->post_status );
+		$this->assertSame( $post_id, $this->template_manager->get_email_template_post_id( 'customer_processing_order' ) );
+
+		$this->assertSame(
+			$post_id,
+			$this->email_generator->generate_email_template_if_not_exists( 'customer_processing_order' ),
+			'A second call must return the existing post instead of creating another one'
+		);
+
+		$this->assertFalse(
+			$this->email_generator->generate_email_template_if_not_exists( 'this_email_type_is_not_registered' ),
+			'Unregistered email types must not create posts'
+		);
+	}
+
+	/**
+	 * @testdox Deprecated generate_email_template_if_not_exists() replaces a stale mapping pointing at a deleted post.
+	 */
+	public function test_deprecated_generate_email_template_if_not_exists_replaces_stale_mapping(): void {
+		$this->setExpectedDeprecated( WCTransactionalEmailPostsGenerator::class . '::generate_email_template_if_not_exists' );
+
+		// Stale mapping: the post behind it no longer exists.
+		$this->template_manager->save_email_template_post_id( 'customer_processing_order', 999999 );
+
+		$post_id = $this->email_generator->generate_email_template_if_not_exists( 'customer_processing_order' );
+
+		$this->assertIsInt( $post_id );
+		$this->assertNotSame( 999999, $post_id, 'A stale mapping must not be returned as a usable post ID' );
+		$post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $post );
+		$this->assertSame( 'publish', $post->post_status );
+		$this->assertSame(
+			$post_id,
+			$this->template_manager->get_email_template_post_id( 'customer_processing_order' ),
+			'The stale mapping must be replaced with the fresh post'
+		);
 	}
 
 	/**
@@ -365,11 +433,11 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 		}
 
 		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
+		remove_all_filters( 'woocommerce_email_content_post_data' );
 
 		WCEmailTemplateSyncRegistry::reset_cache();
 
 		parent::tearDown();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
 	}
 }

@@ -126,7 +126,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 				updatedContent = toHTMLString( { value: richTextValue } );
 			}
 
-			updateBlockAttributes( selectedBlockId, {
+			void updateBlockAttributes( selectedBlockId, {
 				[ blockContentKey ]: updatedContent,
 			} );
 		},
@@ -160,7 +160,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 							`<!--[${ originalTag }]-->`,
 							`<!--[${ updatedTag }]-->`
 						);
-						updateBlockAttributes( selectedBlockId, {
+						void updateBlockAttributes( selectedBlockId, {
 							[ blockContentKey ]: updatedContent,
 						} );
 					} }
@@ -184,7 +184,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 								return `<a${ beforeAttrs }data-link-href="${ newTag }"${ afterAttrs }>${ newText }</a>`;
 							}
 						);
-						updateBlockAttributes( selectedBlockId, {
+						void updateBlockAttributes( selectedBlockId, {
 							content: updatedContent,
 						} );
 					} }
@@ -214,7 +214,10 @@ function extendRichTextFormats() {
 		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
 		attributes: {},
-		interactive: true,
+		// Must stay non-interactive: blocks using `withoutInteractiveFormatting`
+		// (e.g. the Button block) drop interactive formats entirely, which would
+		// hide the Personalization Tags toolbar button there.
+		interactive: false,
 		edit: PersonalizationTagsButton,
 	} );
 

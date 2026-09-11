@@ -121,7 +121,7 @@ const ScrollOnError = ( {
 	useEffect( () => {
 		let scrollToTopTimeout: number;
 		if ( hasErrorsToDisplay ) {
-			showAllValidationErrors();
+			void showAllValidationErrors();
 			// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
 			scrollToTopTimeout = window.setTimeout( () => {
 				scrollToTop( {

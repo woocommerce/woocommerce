@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Replace deprecated PHPUnit at() matcher in Store API CartItems image-filtering test with an order-independent captured-arguments assertion.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement, useContext } from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
@@ -15,6 +15,7 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import CategorySelector from '../category-selector/category-selector';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
+import QualityBadgeFilter from '../quality-badge/quality-badge-filter';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { ADMIN_URL } from '~/utils/admin-settings';
@@ -68,38 +69,43 @@ export default function Products( props: ProductsProps ) {
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 
 	const containerClassName = clsx( baseContainerClass + labelForClassName );
-	const viewAllButonClassName = clsx(
+	const viewAllButtonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
 	);
 
-	if ( isLoading ) {
-		return (
-			<>
-				{ props.categorySelector && (
+	// The quality badge filter only applies to extensions; the component also
+	// renders nothing unless the WooCommerce.com API has the badge enabled.
+	const showQualityBadgeFilter = props.type === ProductType.extension;
+	const hasNoResults = ! isLoading && products.length === 0;
+	const showCategorySelector = Boolean( props.categorySelector );
+	const searchTerm = props.searchTerm?.trim() ?? '';
+
+	// The sub-header stays mounted across the loading/empty/loaded states so
+	// the filter toggle keeps keyboard focus while toggling triggers a refetch.
+	const subHeader = ( showQualityBadgeFilter || showCategorySelector ) && (
+		<nav className="woocommerce-marketplace__sub-header">
+			{ showQualityBadgeFilter && <QualityBadgeFilter /> }
+			<div className="woocommerce-marketplace__sub-header__categories">
+				{ showCategorySelector && (
 					<CategorySelector type={ props.type } />
 				) }
-				<ProductLoader hasTitle={ false } type={ props.type } />
-			</>
-		);
-	}
+			</div>
+		</nav>
+	);
 
-	if ( products.length === 0 ) {
-		let type = SearchResultType.all;
+	let noResultsType = SearchResultType.all;
 
-		switch ( props.type ) {
-			case ProductType.extension:
-				type = SearchResultType.extension;
-				break;
-			case ProductType.theme:
-				type = SearchResultType.theme;
-				break;
-			case ProductType.businessService:
-				type = SearchResultType.businessService;
-				break;
-		}
-
-		return <NoResults type={ type } showHeading={ false } />;
+	switch ( props.type ) {
+		case ProductType.extension:
+			noResultsType = SearchResultType.extension;
+			break;
+		case ProductType.theme:
+			noResultsType = SearchResultType.theme;
+			break;
+		case ProductType.businessService:
+			noResultsType = SearchResultType.businessService;
+			break;
 	}
 
 	const productListClass = clsx(
@@ -110,21 +116,36 @@ export default function Products( props: ProductsProps ) {
 
 	return (
 		<div className={ containerClassName }>
-			<nav className="woocommerce-marketplace__sub-header">
-				<div className="woocommerce-marketplace__sub-header__categories">
-					{ props.categorySelector && (
-						<CategorySelector type={ props.type } />
+			{ searchTerm && (
+				<h2 className="woocommerce-marketplace__search-results-heading">
+					{ sprintf(
+						/* translators: %s: the search term the merchant entered. */
+						__( 'Results for “%s”', 'woocommerce' ),
+						searchTerm
 					) }
-				</div>
-			</nav>
-			<ProductListContent
-				products={ products }
-				type={ props.type }
-				className={ productListClass }
-				searchTerm={ props.searchTerm }
-				category={ category }
-			/>
-			{ props.type === 'theme' && (
+				</h2>
+			) }
+			{ subHeader }
+			{ isLoading && (
+				<ProductLoader hasTitle={ false } type={ props.type } />
+			) }
+			{ hasNoResults && (
+				<NoResults
+					type={ noResultsType }
+					showHeading={ false }
+					showCategorySelector={ ! showCategorySelector }
+				/>
+			) }
+			{ ! isLoading && ! hasNoResults && (
+				<ProductListContent
+					products={ products }
+					type={ props.type }
+					className={ productListClass }
+					searchTerm={ props.searchTerm }
+					category={ category }
+				/>
+			) }
+			{ ! isLoading && ! hasNoResults && props.type === 'theme' && (
 				<div
 					className={
 						'woocommerce-marketplace__browse-wp-theme-directory'
@@ -136,7 +157,7 @@ export default function Products( props: ProductsProps ) {
 					<span key="wp-theme-directory-copy">
 						{ createInterpolateElement(
 							__(
-								' Browse the <a>WordPress.org theme directory</a> to discover more.',
+								'Browse the <a>WordPress.org theme directory</a> to discover more.',
 								'woocommerce'
 							),
 							{
@@ -155,9 +176,9 @@ export default function Products( props: ProductsProps ) {
 					</span>
 				</div>
 			) }
-			{ showAllButton && (
+			{ ! isLoading && ! hasNoResults && showAllButton && (
 				<Button
-					className={ viewAllButonClassName }
+					className={ viewAllButtonClassName }
 					variant="secondary"
 					text={ __( 'View all', 'woocommerce' ) }
 					onClick={ () => showSection( props.type ) }

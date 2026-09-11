@@ -235,12 +235,10 @@ test.describe.serial( 'Orders API tests', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			);
-			const { source_url: downloadFile2 } = await getMediaBySlug(
-				'image-02'
-			);
+			const { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' );
+			const { source_url: downloadFile2 } =
+				await getMediaBySlug( 'image-02' );
 
 			const simpleProducts = await request.post(
 				'./wp-json/wc/v3/products/batch',
@@ -2007,18 +2005,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review1JSON = await review1.json();
 
-			// We need to update the review in order for the product's
-			// average_rating to be recalculated.
-			// See: https://github.com/woocommerce/woocommerce/issues/29906.
-			//await updateProductReview(review1.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review2 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2034,15 +2020,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review2JSON = await review2.json();
 
-			//await updateProductReview(review2.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review3 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2057,14 +2034,6 @@ test.describe.serial( 'Orders API tests', () => {
 				}
 			);
 			const review3JSON = await review3.json();
-
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
 
 			return [ review1JSON.id, review2JSON.id, review3JSON.id ];
 		};
@@ -2121,13 +2090,11 @@ test.describe.serial( 'Orders API tests', () => {
 				productTags
 			);
 
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
 
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 
 			const variableProducts = await createSampleVariableProducts(
 				categories,
@@ -2137,9 +2104,8 @@ test.describe.serial( 'Orders API tests', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 
 			const orders = await createSampleProductOrders( simpleProducts );
 

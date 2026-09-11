@@ -13,8 +13,17 @@ jest.mock( '@wordpress/dom-ready', () => ( {
 	default: jest.fn( ( callback ) => callback() ),
 } ) );
 
-const loadFilter = ( adminPage: string | undefined, blockTypes: string[] ) => {
-	( window as Window & { adminpage?: string } ).adminpage = adminPage;
+const loadFilter = (
+	adminPage: string | undefined,
+	blockTypes: string[],
+	pageNow?: string
+) => {
+	const wordpressWindow = window as Window & {
+		adminpage?: string;
+		pagenow?: string;
+	};
+	wordpressWindow.adminpage = adminPage;
+	wordpressWindow.pagenow = pageNow;
 	( getBlockTypes as jest.Mock ).mockReturnValue(
 		blockTypes.map( ( name ) => ( { name } ) )
 	);
@@ -34,14 +43,22 @@ describe( 'unregister block types', () => {
 		( adminPage ) => {
 			loadFilter( adminPage, [
 				'woocommerce/breadcrumbs',
+				'woocommerce/catalog-sorting',
+				'woocommerce/product-results-count',
 				'woocommerce/product-reviews',
 				'woocommerce/product-search',
 				'myplugin/client-only',
 			] );
 
-			expect( unregisterBlockType ).toHaveBeenCalledTimes( 2 );
+			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/breadcrumbs'
+			);
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/catalog-sorting'
+			);
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/product-results-count'
 			);
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/product-reviews'
@@ -55,19 +72,30 @@ describe( 'unregister block types', () => {
 		}
 	);
 
-	it.each( [ 'widgets-php', 'customize-php' ] )(
+	it.each( [
+		[ 'widgets.php', 'widgets-php', undefined ],
+		[ 'the Customizer', undefined, 'customize' ],
+	] )(
 		'unregisters WooCommerce blocks outside the widget-editor allow list in %s',
-		( context ) => {
-			loadFilter( context, [
-				'woocommerce/product-search',
-				'woocommerce/product-filters',
-				'woocommerce/checkout',
-				'woocommerce/order-confirmation-status',
-				'woocommerce/new-widget-compatible-block',
-				'myplugin/client-only',
-			] );
+		( _context, adminPage, pageNow ) => {
+			loadFilter(
+				adminPage,
+				[
+					'woocommerce/product-search',
+					'woocommerce/product-filters',
+					'woocommerce/cart',
+					'woocommerce/checkout',
+					'woocommerce/order-confirmation-status',
+					'woocommerce/new-widget-compatible-block',
+					'myplugin/client-only',
+				],
+				pageNow
+			);
 
-			expect( unregisterBlockType ).toHaveBeenCalledTimes( 3 );
+			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
+			expect( unregisterBlockType ).toHaveBeenCalledWith(
+				'woocommerce/cart'
+			);
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/checkout'
 			);

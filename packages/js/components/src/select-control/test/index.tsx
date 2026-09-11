@@ -53,7 +53,7 @@ describe( 'SelectControl', () => {
 		expect( queryByRole( 'option', { name: 'bar' } ) ).toBeNull();
 	} );
 
-	it( "returns Türkiye when searching for Türkiye when ignoreDiacritics is true ", async () => {
+	it( 'returns Türkiye when searching for Türkiye when ignoreDiacritics is true ', async () => {
 		const options: Option[] = [
 			{ key: '1', label: 'One', value: { id: 'one' } },
 			{ key: '2', label: 'Two', value: { id: 'two' } },
@@ -61,7 +61,11 @@ describe( 'SelectControl', () => {
 		];
 
 		const { getByRole } = render(
-			<SelectControl ignoreDiacritics={ true } isSearchable options={ options } />
+			<SelectControl
+				ignoreDiacritics={ true }
+				isSearchable
+				options={ options }
+			/>
 		);
 
 		userEvent.type( getByRole( 'combobox' ), 'Türkiye' );
@@ -73,7 +77,7 @@ describe( 'SelectControl', () => {
 		);
 	} );
 
-	it( "returns Türkiye when searching for Turkiye when ignoreDiacritics is true", async () => {
+	it( 'returns Türkiye when searching for Turkiye when ignoreDiacritics is true', async () => {
 		const options: Option[] = [
 			{ key: '1', label: 'One', value: { id: 'one' } },
 			{ key: '2', label: 'Two', value: { id: 'two' } },
@@ -81,7 +85,11 @@ describe( 'SelectControl', () => {
 		];
 
 		const { getByRole } = render(
-			<SelectControl ignoreDiacritics={ true } isSearchable options={ options } />
+			<SelectControl
+				ignoreDiacritics={ true }
+				isSearchable
+				options={ options }
+			/>
 		);
 
 		userEvent.type( getByRole( 'combobox' ), 'Turkiye' );
@@ -93,7 +101,7 @@ describe( 'SelectControl', () => {
 		);
 	} );
 
-	it( "does not return Türkiye when searching for Turkiye when ignoreDiacritics is false", async () => {
+	it( 'does not return Türkiye when searching for Turkiye when ignoreDiacritics is false', async () => {
 		const options: Option[] = [
 			{ key: '1', label: 'One', value: { id: 'one' } },
 			{ key: '2', label: 'Two', value: { id: 'two' } },
@@ -101,15 +109,18 @@ describe( 'SelectControl', () => {
 		];
 
 		const { getByRole, queryByRole } = render(
-			<SelectControl ignoreDiacritics={ false } isSearchable options={ options } />
+			<SelectControl
+				ignoreDiacritics={ false }
+				isSearchable
+				options={ options }
+			/>
 		);
 
 		userEvent.type( getByRole( 'combobox' ), 'Turkiye' );
 
-		await waitFor(() => {
+		await waitFor( () => {
 			expect( queryByRole( 'option', { name: 'Türkiye' } ) ).toBeNull();
-		});
-
+		} );
 	} );
 
 	it( "doesn't return matching excluded elements", async () => {

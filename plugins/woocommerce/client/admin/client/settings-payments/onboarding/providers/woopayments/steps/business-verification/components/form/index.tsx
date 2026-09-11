@@ -197,7 +197,7 @@ interface OnboardingGroupedSelectFieldProps< ItemType >
 }
 
 export const OnboardingGroupedSelectField = <
-	ListItemType extends GroupedSelectItem
+	ListItemType extends GroupedSelectItem,
 >( {
 	onChange,
 	...rest

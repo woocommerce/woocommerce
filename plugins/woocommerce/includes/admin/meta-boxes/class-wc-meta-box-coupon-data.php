@@ -33,7 +33,7 @@ class WC_Meta_Box_Coupon_Data {
 		?>
 
 		<style type="text/css">
-			#edit-slug-box, #minor-publishing-actions { display:none }
+			#edit-slug-box { display:none }
 		</style>
 		<div id="coupon_options" class="panel-wrap coupon_data">
 

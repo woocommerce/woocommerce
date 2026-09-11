@@ -9,6 +9,7 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	SendingPreviewStatus,
 	State,
@@ -55,23 +56,17 @@ export const setEmailPost =
 export const invalidatePersonalizationTagsCache =
 	() =>
 	async ( { registry } ) => {
-		// Get the current post ID to build the exact query params
+		// `invalidateResolution` matches resolver arguments structurally, so this
+		// has to be the same query the selector fetched with — hence the shared
+		// builder rather than a second literal.
 		const postId = registry.select( storeName ).getEmailPostId();
-		const queryParams: Record< string, unknown > = {
-			context: 'view',
-			per_page: -1,
-		};
-		if ( postId ) {
-			queryParams.post_id = postId;
-		}
 
-		// Invalidate the resolution for this specific query
 		registry
 			.dispatch( coreDataStore )
 			.invalidateResolution( 'getEntityRecords', [
 				PERSONALIZATION_TAG_ENTITY.kind,
 				PERSONALIZATION_TAG_ENTITY.name,
-				queryParams,
+				getPersonalizationTagsQuery( postId ),
 			] );
 	};
 

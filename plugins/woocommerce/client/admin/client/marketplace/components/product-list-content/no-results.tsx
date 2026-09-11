@@ -18,6 +18,8 @@ export default function NoResults( props: {
 	type: SearchResultType;
 	showHeading?: boolean;
 	heading?: string;
+	// Set to false when the parent already renders a category selector.
+	showCategorySelector?: boolean;
 } ): React.JSX.Element {
 	const [ productGroups, setProductGroups ] = useState< ProductGroup[] >();
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -121,7 +123,10 @@ export default function NoResults( props: {
 	}
 
 	function categorySelector() {
-		if ( props.type === SearchResultType.all ) {
+		if (
+			props.showCategorySelector === false ||
+			props.type === SearchResultType.all
+		) {
 			return <></>;
 		}
 

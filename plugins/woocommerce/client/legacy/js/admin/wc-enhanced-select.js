@@ -268,6 +268,23 @@ jQuery( function ( $ ) {
 								dataType: 'json',
 								delay: 250,
 								data: function ( params ) {
+									let exclude = $( this ).data( 'exclude' );
+									const currentValue = $( this ).val();
+
+									// Hide already selected options from the results in multiple selects.
+									if (
+										Array.isArray( currentValue ) &&
+										$( this ).prop( 'multiple' )
+									) {
+										const defaultExcluded = exclude
+											? String( exclude ).split( ',' )
+											: [];
+										exclude = [
+											...defaultExcluded,
+											...currentValue,
+										];
+									}
+
 									return {
 										term: params.term,
 										action:
@@ -275,7 +292,7 @@ jQuery( function ( $ ) {
 											'woocommerce_json_search_products_and_variations',
 										security:
 											wc_enhanced_select_params.search_products_nonce,
-										exclude: $( this ).data( 'exclude' ),
+										exclude: exclude,
 										exclude_type:
 											$( this ).data( 'exclude_type' ),
 										include: $( this ).data( 'include' ),

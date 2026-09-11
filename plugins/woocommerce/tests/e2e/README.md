@@ -43,6 +43,8 @@ To re-create the environment for a fresh state:
 
 `pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
+Core and Blocks tests share the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:start:blocks` seeds the Blocks profile on top of whatever the database already holds, and `pnpm test:e2e:*` runs against the environment's current state. The Blocks seed resets the shipping zones, tax classes, and tax settings it relies on, so running it after Core tests is safe for those. Other state a Core run leaves behind can still leak into the Blocks profile. If Blocks tests fail after Core tests ran on the same environment, run `pnpm env:e2e:restart` and then `pnpm env:start:blocks`. To go back to Core tests after Blocks, run `pnpm env:e2e:restart`.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
@@ -169,7 +171,26 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ## Test helper plugins
 
-Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`, mounted via `.wp-env.e2e.json`'s `plugins` array.
+Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`.
+
+### Convention
+
+Every always-on or externally downloaded helper is a **self-contained folder** at `tests/e2e/test-plugins/<slug>/<slug>.php` (the main file matches the folder name), with a full plugin header (`Plugin Name`, `Description`, `Version`, `Requires PHP`, `Author`). Never bind-mount an individual `.php` file — mount a folder or download a zip. The per-test block plugins under `blocks/` are single files, but their whole parent folder is mounted at once (see below).
+
+Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (currently `7.4`, the same floor as WooCommerce itself) and keep the helper's code compatible with it. WordPress silently refuses to load a plugin whose `Requires PHP` is higher than the running version: it still reports as active, but none of its hooks run and its REST routes return `rest_no_route` (404).
+
+How a helper is wired up depends on when it needs to be active:
+
+- **Always-on helpers** are listed in `.wp-env.e2e.json`'s `plugins` array, which mounts the folder **and auto-activates** it. Do not add a manual `wp plugin activate …` line for these. Current always-on helpers:
+    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering four concerns in one plugin:
+        - **Filter setter** — registers WordPress filters from an `e2e-filters` cookie so tests can override filtered values on the fly.
+        - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
+        - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
+        - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
+    - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
+- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
+
+`woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.
 
 ### `wc-email-template-sync-test-helper`
 

@@ -116,7 +116,7 @@ export const PluginsTabPanel = ( {
 								isBusy={ currentPlugin === plugin.product }
 								disabled={ buttonDisabled }
 								onClick={ () => {
-									installAndActivate( plugin );
+									void installAndActivate( plugin );
 								} }
 							>
 								{ __( 'Install extension', 'woocommerce' ) }

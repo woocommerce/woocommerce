@@ -11,7 +11,7 @@ In this file we want to document settings and styles that are specific to the em
 - **layout**: We set content width to 660px, because it's the most common width for emails. This is meant as a default value.
 - **spacing**: We allow only px units, because they are the most reliable in email clients. We may add the support for other units later with some sort of conversion to px. We also disable margins because they are not supported in our renderer (margin collapsing might be tricky).
 - **border**: We want to allow all types of borders and border styles.
-- **typography**: We disabled fontWeight and dropCap appearance settings, because they are not supported in our renderer. We may add the support later. We also define a set of basic font families that are safe to use with emails. The list was copied from the battle tested legacy editor.
+- **typography**: We enable fontWeight, fontStyle, and letterSpacing because they are supported by our renderer. We disable the dropCap appearance setting because it is not supported. We also define a set of basic font families that are safe to use with emails. The list was copied from the battle-tested legacy editor.
 
 ## Styles
 

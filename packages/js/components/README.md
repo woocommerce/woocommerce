@@ -39,7 +39,7 @@ If you are using these components in a project that uses Jest for testing, you m
 Cannot find module '@woocommerce/settings' from 'node_modules/@woocommerce/experimental/node_modules/@woocommerce/navigation/build/index.js'
 ```
 
-To fix this, you will need to mock the `@woocommerce/settings` because it's an alias that points to the `window.wcSettings`, which in turn comes from and is maintained by the [WC Blocks](https://github.com/woocommerce/woocommerce-blocks) package, the front-end code for this is located [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/assets/js/settings/shared).
+To fix this, you will need to mock the `@woocommerce/settings` because it's an alias that points to the `window.wcSettings`, which in turn comes from and is maintained by the [WC Blocks](https://github.com/woocommerce/woocommerce-blocks) package, the front-end code for this is located [plugins/woocommerce/client/blocks/packages/public-api/settings](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/settings).
 
 This can be done by adding the following to your Jest config:
 
@@ -60,5 +60,5 @@ module.exports = {
 
 Then, you will need to create the following files:
 
-1. Create a new file called woocommerce-settings.js in the ./mock directory. You can find the content for this file [here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1).
-2. Next, create a file named setup-globals.js. You can find the content for this file [here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js#L44). The purpose of this file is to mock the wcSettings global variable.
+1. Create a new file called woocommerce-settings.js in the ./mock directory. You can find the content for this file [packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1).
+2. Next, create a file named setup-globals.js. You can find the content for this file [packages/js/internal-js-tests/src/setup-globals.js#L44](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js#L44). The purpose of this file is to mock the wcSettings global variable.
