@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move 5 Checkout block editor control E2E tests to Jest; the Checkout block merchant spec keeps 3 browser titles.
+
