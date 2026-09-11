@@ -19,7 +19,9 @@ jest.mock( '../../base/utils/errors', () => ( {
 } ) );
 
 const mockCategory = { name: 'Clothing' };
-const attributes = { categoryId: 1 };
+const attributes = /** @type {Record<string, unknown>} */ ( {
+	categoryId: 1,
+} );
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
@@ -80,6 +82,42 @@ describe( 'withCategory Component', () => {
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 
+		it( 'reloads when inherited context changes and clears an incompatible taxonomy', async () => {
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent
+						attributes={ {} }
+						context={ { termId: 42, taxonomy: 'product_cat' } }
+					/>
+				)
+			);
+			expect( mockUtils.getCategory ).toHaveBeenLastCalledWith( 42 );
+			expect( lastProps.effectiveCategoryId ).toBe( 42 );
+
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent
+						attributes={ {} }
+						context={ { termId: 43, taxonomy: 'product_cat' } }
+					/>
+				)
+			);
+			expect( mockUtils.getCategory ).toHaveBeenLastCalledWith( 43 );
+
+			mockUtils.getCategory.mockClear();
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent
+						attributes={ {} }
+						context={ { termId: 43, taxonomy: 'category' } }
+					/>
+				)
+			);
+			expect( mockUtils.getCategory ).not.toHaveBeenCalled();
+			expect( lastProps.category ).toBeNull();
+			expect( lastProps.effectiveCategoryId ).toBeUndefined();
+		} );
+
 		it( 'getCategory is hooked to the prop', async () => {
 			const { getCategory } = mockUtils;
 
@@ -105,6 +143,43 @@ describe( 'withCategory Component', () => {
 				...mockCategory,
 				id: attributes.categoryId,
 			} );
+		} );
+
+		it.each( [
+			{ termId: 42, taxonomy: 'product_cat' },
+			{ termId: 42, termTaxonomy: 'product_cat', taxonomy: 'category' },
+		] )( 'loads the category inherited from %j', async ( context ) => {
+			const { getCategory } = mockUtils;
+			await renderComponent( {
+				attributes: {},
+				context,
+			} );
+
+			expect( getCategory ).toHaveBeenLastCalledWith( 42 );
+			expect( lastProps.category ).toEqual( {
+				...mockCategory,
+				id: 42,
+			} );
+		} );
+
+		it( 'prefers an explicitly selected category over term context', async () => {
+			const { getCategory } = mockUtils;
+			await renderComponent( {
+				attributes: { categoryId: 7 },
+				context: { termId: 42, taxonomy: 'product_cat' },
+			} );
+
+			expect( getCategory ).toHaveBeenLastCalledWith( 7 );
+		} );
+
+		it( 'does not load a product category from a different taxonomy', async () => {
+			mockUtils.getCategory.mockClear();
+			await renderComponent( {
+				attributes: {},
+				context: { termId: 42, taxonomy: 'category' },
+			} );
+			expect( mockUtils.getCategory ).not.toHaveBeenCalled();
+			expect( lastProps.category ).toBeNull();
 		} );
 	} );
 

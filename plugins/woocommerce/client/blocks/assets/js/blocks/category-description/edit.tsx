@@ -22,30 +22,34 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
+		taxonomy?: string;
 	};
 }
 
 export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const { textAlign } = attributes;
-	const { termId, termTaxonomy } = context;
+	const { termId, termTaxonomy, taxonomy } = context;
+	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
 		( select ) => {
-			if ( ! termId ) return false;
+			if ( ! termId ) {
+				return false;
+			}
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
+				name: effectiveTaxonomy,
 				id: termId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const [ rawDescription = '', setDescription, fullDescription ] =
 		useEntityProp(
 			'taxonomy',
-			termTaxonomy || 'product_cat',
+			effectiveTaxonomy,
 			'description',
 			String( termId )
 		);

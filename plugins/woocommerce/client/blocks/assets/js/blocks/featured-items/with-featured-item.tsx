@@ -1,5 +1,3 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
-
 /**
  * External dependencies
  */
@@ -163,7 +161,9 @@ export const withFeaturedItem =
 				const element =
 					featuredProductParentRef.current as HTMLElement | null;
 
-				if ( ! element ) return;
+				if ( ! element ) {
+					return;
+				}
 
 				observer.observe( element );
 			}
@@ -242,14 +242,16 @@ export const withFeaturedItem =
 			return (
 				<BlockContextProvider
 					value={ {
-						termId: category.term_id,
+						termId: category.id,
 						termTaxonomy: 'product_cat',
+						taxonomy: 'product_cat',
 					} }
 				>
 					<div className={ `${ className }__inner-blocks` }>
 						<InnerBlocks
 							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
-								category
+								category,
+								! attributes.categoryId
 							) }
 							templateLock={ false }
 						/>

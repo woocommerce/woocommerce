@@ -31,6 +31,74 @@ class FeaturedCategory extends FeaturedItem {
 	}
 
 	/**
+	 * Register the term context used by this block.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return array
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'termId', 'termTaxonomy', 'taxonomy' ];
+	}
+
+	/**
+	 * Render the selected category or the product category inherited from context.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
+	 * @return string
+	 */
+	protected function render( $attributes, $content, $block ) {
+		$attributes['categoryId'] = self::resolve_category_id( $attributes, $block->context );
+
+		return parent::render( $attributes, $content, $block );
+	}
+
+	/**
+	 * Pass the resolved product category to inner blocks.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array          $context      Block context.
+	 * @param array          $parsed_block Block attributes.
+	 * @param \WP_Block|null $parent_block Parent block instance.
+	 * @return array Updated block context.
+	 */
+	public function update_context( $context, $parsed_block, $parent_block ) {
+		$context = parent::update_context( $context, $parsed_block, $parent_block );
+
+		if ( is_array( $context ) && $parent_block instanceof \WP_Block && 'woocommerce/featured-category' === $parent_block->name ) {
+			$category_id = self::resolve_category_id( $parent_block->attributes, $parent_block->context );
+			if ( $category_id ) {
+				$context['termId']       = $category_id;
+				$context['termTaxonomy'] = 'product_cat';
+				$context['taxonomy']     = 'product_cat';
+			}
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Resolve the selected or inherited product category ID.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @param array $context Block context.
+	 * @return int
+	 */
+	private static function resolve_category_id( array $attributes, array $context ): int {
+		if ( ! empty( $attributes['categoryId'] ) ) {
+			return absint( $attributes['categoryId'] );
+		}
+
+		$taxonomy = $context['termTaxonomy'] ?? $context['taxonomy'] ?? '';
+		return 'product_cat' === $taxonomy ? absint( $context['termId'] ?? 0 ) : 0;
+	}
+
+	/**
 	 * Returns the featured category.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
