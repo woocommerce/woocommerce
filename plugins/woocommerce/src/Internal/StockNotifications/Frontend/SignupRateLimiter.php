@@ -220,8 +220,8 @@ class SignupRateLimiter {
 		// default, and a negative delay would clear the limit instead of setting one, so it
 		// is clamped to zero.
 		return array(
-			'enabled'       => $this->to_bool( $options['enabled'] ?? $defaults['enabled'] ),
-			'proxy_support' => $this->to_bool( $options['proxy_support'] ?? $defaults['proxy_support'] ),
+			'enabled'       => $this->to_bool( $options['enabled'] ?? $defaults['enabled'], $defaults['enabled'] ),
+			'proxy_support' => $this->to_bool( $options['proxy_support'] ?? $defaults['proxy_support'], $defaults['proxy_support'] ),
 			'client_delay'  => is_numeric( $options['client_delay'] ?? null ) ? max( 0, (int) $options['client_delay'] ) : $defaults['client_delay'],
 			'email_delay'   => is_numeric( $options['email_delay'] ?? null ) ? max( 0, (int) $options['email_delay'] ) : $defaults['email_delay'],
 		);
@@ -230,9 +230,16 @@ class SignupRateLimiter {
 	/**
 	 * Coerce a filtered option to a boolean, accepting the usual 'yes'/'true'/1 spellings.
 	 *
-	 * @param mixed $value The filtered value.
+	 * @param mixed $value    The filtered value.
+	 * @param bool  $fallback The value to use when the filtered value spells no boolean.
 	 */
-	private function to_bool( $value ): bool {
-		return is_bool( $value ) ? $value : filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+	private function to_bool( $value, bool $fallback ): bool {
+		if ( is_bool( $value ) ) {
+			return $value;
+		}
+
+		$filtered = filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+		return null === $filtered ? $fallback : $filtered;
 	}
 }

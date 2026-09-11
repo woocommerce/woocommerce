@@ -229,6 +229,17 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep rate limiting when the enabled option spells no recognized boolean.
+	 */
+	public function test_unrecognized_enabled_option_falls_back_to_the_default(): void {
+		$this->set_options( array( 'enabled' => 'ture' ) );
+
+		$this->sut->apply( 'shopper@example.com' );
+
+		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A value that spells no boolean should fall back to the default rather than switch the limiter off' );
+	}
+
+	/**
 	 * @testdox Should fire an action naming the rate limit that was hit.
 	 */
 	public function test_exceeded_action_fires_with_the_rate_limit_id(): void {
