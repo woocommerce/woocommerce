@@ -40,7 +40,7 @@ For the full list of managed tests and what each one checks, see the [QIT docume
 
 The fourth factor, Merchant-approved, has two parts and a product needs both: a strong average customer rating, and enough reviews to reflect real use. This is the part no code change can fix. It rewards products that merchants trust over time.
 
-The exact thresholds are calibrated at launch and will evolve as the program grows. The Vendor Dashboard shows each product's QIT checklist and current badge state, so it's the place to check technical progress: Vendor **Dashboard** > **Products**.
+The exact thresholds were calibrated at launch and will evolve as the program grows. The Vendor Dashboard shows each product's QIT checklist and current badge state, so it's the place to check technical progress: Vendor **Dashboard** > **Products**.
 
 ## How to improve a product's badge standing
 
@@ -68,7 +68,7 @@ Status is re-checked automatically as new versions ship and as ratings change. I
 
 The badge is live on the Marketplace, and it arrived in stages that left time to prepare.
 
-Vendors got visibility into their status through the dashboard first. An adjustment window followed before the thresholds were locked, leaving time for metadata and test-package fixes, and pass rates were measured before the final thresholds were set and the badge went live.
+Vendors got visibility into their status through the dashboard first. An adjustment window of at least two weeks followed before the thresholds were locked, leaving time for metadata and test-package fixes, and pass rates were measured before the final thresholds were set and the badge went live.
 
 The checks are automated and run continuously, so launch was never the only chance to qualify. A product that missed the badge at launch can earn it at any point after: every new version is a fresh opportunity.
 
@@ -77,7 +77,7 @@ Changes to the program and its criteria will continue to be announced in vendor 
 ## Frequently asked questions
 
 <details>
-<summary>How many products will have the badge at launch?</summary>
+<summary>How many products had the badge at launch?</summary>
 
 Only a limited share of products qualified at launch. Many are only a few targeted fixes away, so that number is expected to grow as vendors make improvements.
 
