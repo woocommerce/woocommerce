@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Support Core Terms Query context in category title, category description, and Featured Category blocks, including dynamic Shop now links for inherited categories.
