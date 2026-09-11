@@ -8,6 +8,9 @@ import type {
 	FormField,
 	Rules,
 } from '@wordpress/dataviews';
+import { createElement } from '@wordpress/element';
+import type { ReactNode } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -21,13 +24,14 @@ import {
 } from './registry';
 import type {
 	SettingsFieldContext,
+	SettingsRelativeDateValue,
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUISchema,
 	SettingsValues,
 	SettingsVisibilityPredicate,
 } from './types';
-import { valueMatchesVisibilityRule } from './values';
+import { isRelativeDateValue, valueMatchesVisibilityRule } from './values';
 
 // The adapter assumes the canonical value vocabulary from the PHP schema
 // builder, so no value coercion happens here.
@@ -158,9 +162,53 @@ const createIsVisible = (
 const isAttributeSet = ( value: string | number | boolean | undefined ) =>
 	typeof value !== 'undefined' && value !== false;
 
-const isFieldDisabled = ( settingsField: SettingsUIField ) =>
+const isFieldStaticallyDisabled = ( settingsField: SettingsUIField ) =>
 	Boolean( settingsField.disabled ) ||
 	isAttributeSet( settingsField.customAttributes?.disabled );
+
+const getDisabledControllers = ( settingsField: SettingsUIField ) => {
+	const controllers = settingsField.disabledWhenAllUnchecked;
+
+	return Array.isArray( controllers )
+		? controllers.filter( ( controller ) => Boolean( controller ) )
+		: [];
+};
+
+export const isSettingsFieldDisabled = (
+	settingsField: SettingsUIField,
+	values: SettingsValues
+) => {
+	if ( isFieldStaticallyDisabled( settingsField ) ) {
+		return true;
+	}
+
+	const controllers = getDisabledControllers( settingsField );
+	return (
+		controllers.length > 0 &&
+		controllers.every( ( controller ) => values[ controller ] !== true )
+	);
+};
+
+const buildIsDisabled = (
+	settingsField: SettingsUIField
+): Field< SettingsValues >[ 'isDisabled' ] => {
+	if ( getDisabledControllers( settingsField ).length === 0 ) {
+		return isFieldStaticallyDisabled( settingsField );
+	}
+
+	return ( { item } ) => isSettingsFieldDisabled( settingsField, item );
+};
+
+const getFieldDescription = ( settingsField: SettingsUIField ) => {
+	const disabledTooltip =
+		settingsField.customAttributes?.[ 'disabled-tooltip' ];
+	const descriptions = [
+		settingsField.description,
+		typeof disabledTooltip === 'string' ? disabledTooltip : undefined,
+	].filter( Boolean );
+
+	return descriptions.length > 0 ? descriptions.join( '<br />' ) : undefined;
+};
 
 // Range constraints only validate against matching value types: numbers for
 // number fields, date strings for date fields. Other types have no range
@@ -205,6 +253,116 @@ const toLengthConstraint = ( value: string | number | boolean | undefined ) => {
 // Classic settings express constraints as HTML custom_attributes; map the
 // ones with DataForm rule slots. Step stays unmapped because DataForm derives
 // it from format.decimals rather than a rule.
+// The number and unit are one stored value, so both controls project onto the
+// same field id through getValue/setValue. DataForm renders them with its own
+// controls, and the row layout puts them on one line.
+const RELATIVE_DATE_FALLBACK: SettingsRelativeDateValue = {
+	number: '',
+	unit: 'days',
+};
+
+const readRelativeDate = (
+	item: SettingsValues,
+	fieldId: string
+): SettingsRelativeDateValue => {
+	const value = item[ fieldId ];
+	return isRelativeDateValue( value ) ? value : RELATIVE_DATE_FALLBACK;
+};
+
+const relativeDateChildId = (
+	fieldId: string,
+	part: 'number' | 'unit' | 'description'
+) => `${ fieldId }__${ part }`;
+
+// The stored number is '' when the setting is unset, which DataForm's integer
+// control expresses as undefined.
+const buildRelativeDateFields = (
+	settingsField: SettingsUIField,
+	options: DataFormAdapterOptions
+): Field< SettingsValues >[] => {
+	const isVisible = createIsVisible( settingsField, options );
+	const isDisabled = buildIsDisabled( settingsField );
+	const fieldId = settingsField.id;
+
+	return [
+		{
+			id: relativeDateChildId( fieldId, 'number' ),
+			label: __( 'Number', 'woocommerce' ),
+			placeholder: settingsField.placeholder,
+			type: 'integer',
+			isVisible,
+			isDisabled,
+			isValid: { min: 1 },
+			getValue: ( { item }: { item: SettingsValues } ) => {
+				const { number } = readRelativeDate( item, fieldId );
+				return number === '' ? undefined : number;
+			},
+			setValue: ( {
+				item,
+				value,
+			}: {
+				item: SettingsValues;
+				value: unknown;
+			} ) => ( {
+				[ fieldId ]: {
+					...readRelativeDate( item, fieldId ),
+					number:
+						value === null ||
+						value === undefined ||
+						value === '' ||
+						Number.isNaN( Number( value ) )
+							? ''
+							: Number( value ),
+				},
+			} ),
+		},
+		{
+			id: relativeDateChildId( fieldId, 'unit' ),
+			label: __( 'Unit', 'woocommerce' ),
+			type: 'text',
+			Edit: 'select',
+			elements: settingsField.options,
+			isVisible,
+			isDisabled,
+			getValue: ( { item }: { item: SettingsValues } ) =>
+				readRelativeDate( item, fieldId ).unit,
+			setValue: ( {
+				item,
+				value,
+			}: {
+				item: SettingsValues;
+				value: unknown;
+			} ) => ( {
+				[ fieldId ]: {
+					...readRelativeDate( item, fieldId ),
+					unit: value as SettingsRelativeDateValue[ 'unit' ],
+				},
+			} ),
+		},
+		// No container layout renders a description, so it becomes a read-only
+		// sibling below the row, where the classic page puts it too.
+		...( settingsField.description
+			? [
+					{
+						id: relativeDateChildId( fieldId, 'description' ),
+						label: '',
+						description: createSettingsHelpElement(
+							settingsField.description
+						),
+						type: 'text' as const,
+						readOnly: true,
+						isVisible,
+						render: ( {
+							field,
+						}: {
+							field: { description?: ReactNode };
+						} ) => renderFieldDescription( field.description ),
+					} as unknown as Field< SettingsValues >,
+			  ]
+			: [] ),
+	];
+};
+
 const buildValidationRules = (
 	settingsField: SettingsUIField,
 	descriptor: SettingsTypeDescriptor | undefined
@@ -276,13 +434,15 @@ export const buildDataFormField = (
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
-		description: createSettingsHelpElement( settingsField.description ),
+		description: createSettingsHelpElement(
+			getFieldDescription( settingsField )
+		),
 		placeholder: settingsField.placeholder,
 		type: descriptor?.type,
 		elements: settingsField.options,
 		isValid: buildValidationRules( settingsField, descriptor ),
 		isVisible: createIsVisible( settingsField, options ),
-		isDisabled: isFieldDisabled( settingsField ),
+		isDisabled: buildIsDisabled( settingsField ),
 	};
 
 	if ( registeredComponent ) {
@@ -306,7 +466,7 @@ export const buildDataFormField = (
 		// The description is already a sanitized element, and DataForm paints
 		// the label for a read-only field, so info reuses it as its body.
 		field.render = ( { field: normalizedField } ) =>
-			normalizedField.description ?? null;
+			renderFieldDescription( normalizedField.description );
 		return field;
 	}
 
@@ -327,16 +487,83 @@ export const buildDataFormField = (
 	return field;
 };
 
+// DataForm paints a description as muted help text for its own controls, and
+// muted card text for a card container. A description we render ourselves gets
+// neither, so it carries the class that matches them.
+const renderFieldDescription = ( description?: ReactNode ) =>
+	description
+		? createElement(
+				'div',
+				{ className: 'wc-settings-ui__field-description' },
+				description
+		  )
+		: null;
+
 // FormField.description only accepts a plain string, so a group description
 // keeps its text and loses its markup until DataForm accepts an element.
-const buildGroupFormField = ( group: SettingsUIGroup ): FormField => ( {
+const buildFormChild = (
+	field: SettingsUIField
+): Array< FormField | string > => {
+	if ( field.type !== 'relative_date_selector' ) {
+		return [ field.id ];
+	}
+
+	// The number stays narrow so the pair reads as one control rather than two
+	// equal columns.
+	return [
+		{
+			id: field.id,
+			label: field.label,
+			layout: {
+				type: 'row',
+				alignment: 'start',
+				styles: {
+					[ relativeDateChildId( field.id, 'number' ) ]: {
+						flex: '0 1 8rem',
+					},
+					[ relativeDateChildId( field.id, 'unit' ) ]: {
+						flex: '0 1 10rem',
+					},
+				},
+			},
+			children: [
+				relativeDateChildId( field.id, 'number' ),
+				relativeDateChildId( field.id, 'unit' ),
+			].map( ( id ) => ( {
+				id,
+				layout: {
+					type: 'regular' as const,
+					labelPosition: 'none' as const,
+				},
+			} ) ),
+		},
+		// DataForm falls back to the field id when a label is empty, so the
+		// description renders with its label position turned off.
+		...( field.description
+			? [
+					{
+						id: relativeDateChildId( field.id, 'description' ),
+						layout: {
+							type: 'regular' as const,
+							labelPosition: 'none' as const,
+						},
+					},
+			  ]
+			: [] ),
+	];
+};
+
+const buildGroupFormField = (
+	group: SettingsUIGroup,
+	visibleFields: SettingsUIField[]
+): FormField => ( {
 	id: group.id,
 	label: group.title || undefined,
 	description: toPlainText( group.description ),
 	layout: group.title
 		? { type: 'card', isCollapsible: false }
 		: { type: 'card', withHeader: false },
-	children: group.fields.map( ( field ) => field.id ),
+	children: visibleFields.flatMap( buildFormChild ),
 } );
 
 export const createDataFormAdapter = (
@@ -344,15 +571,28 @@ export const createDataFormAdapter = (
 ): DataFormAdapter => {
 	const groups = Object.values( options.schema.groups );
 	const fields = groups.flatMap( ( group ) =>
-		group.fields.map( ( field ) => buildDataFormField( field, options ) )
+		group.fields.flatMap( ( field ) =>
+			field.type === 'relative_date_selector'
+				? buildRelativeDateFields( field, options )
+				: [ buildDataFormField( field, options ) ]
+		)
 	);
-	const fieldsById = new Map(
-		fields.map( ( field ) => [ field.id, field ] )
+	// A relative date field builds two DataForm fields, so visibility is keyed
+	// by the schema field id rather than by the DataForm field id.
+	const visibilityBySettingsFieldId = new Map(
+		groups.flatMap( ( group ) =>
+			group.fields.map(
+				( field ) =>
+					[ field.id, createIsVisible( field, options ) ] as const
+			)
+		)
 	);
 
 	// A field without an isVisible callback is shown, matching DataForm.
 	const isFieldVisible = ( fieldId: string, values: SettingsValues ) =>
-		Boolean( fieldsById.get( fieldId )?.isVisible?.( values ) ?? true );
+		Boolean(
+			visibilityBySettingsFieldId.get( fieldId )?.( values ) ?? true
+		);
 
 	const isGroupVisible = (
 		group: SettingsUIGroup,
@@ -380,10 +620,22 @@ export const createDataFormAdapter = (
 		);
 	};
 
+	// DataForm only consults isVisible for a form field without children, so a
+	// hidden relative date row is dropped here instead. Leaving it in would
+	// render its label above two hidden controls.
 	const getForm = ( values: SettingsValues ): Form => ( {
 		fields: groups
 			.filter( ( group ) => isGroupVisible( group, values ) )
-			.map( buildGroupFormField ),
+			.map( ( group ) =>
+				buildGroupFormField(
+					group,
+					group.fields.filter(
+						( field ) =>
+							field.type !== 'relative_date_selector' ||
+							isFieldVisible( field.id, values )
+					)
+				)
+			),
 	} );
 
 	return { fields, getForm };

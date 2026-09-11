@@ -104,6 +104,21 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
+	 * Whether a section of this settings page renders through the settings UI.
+	 *
+	 * Tax rate tables and the tax options view render their own markup and field
+	 * types, so this page stays on the classic renderer.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $section Section id. An empty string means the default section.
+	 * @return bool
+	 */
+	public function supports_settings_ui( string $section ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- The section is part of the opt-out contract; this implementation applies to every section.
+		return false;
+	}
+
+	/**
 	 * Output the settings.
 	 */
 	public function output() {

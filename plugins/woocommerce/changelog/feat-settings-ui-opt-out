@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Make the experimental Settings UI renderer opt-out instead of opt-in, and add WC_Settings_Page::supports_settings_ui() and the woocommerce_settings_ui_page_supported filter to keep a page or section on the classic renderer.

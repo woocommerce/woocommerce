@@ -13,4 +13,13 @@ Rules for this package and its call sites:
 - Never delete or rename a class file that has shipped in a release. A stale classmap entry pointing at a missing file fatals inside the autoloader, where no guard can catch it.
 - Never add a required method to an interface here. Stale implementers fail at class-link time, uncatchably. Add a concrete default to the `SettingsSection` base class instead, the way `SettingsSectionUIPageProviderInterface` was introduced.
 
+## Rendering is opt-out
+
+Every `WC_Settings_Page` renders through the Settings UI when the `settings-ui` feature is enabled. `WC_Settings_Page::get_settings_ui_page()` returns a `LegacySettingsPageAdapter` by default; a page keeps the classic renderer by returning false from `WC_Settings_Page::supports_settings_ui( string $section )`, per page or per section. `SettingsUIRequestContext::page_supports_settings_ui()` also runs the `woocommerce_settings_ui_page_supported` filter.
+
+Two rules follow from the opt-out default:
+
+- `supports_settings_ui()` is called through `method_exists()` plus `try/catch (\Throwable)`. It shipped after 10.9, so a stale class copy will not have it, and a page's own override can throw.
+- The React renderer fails closed on a field type it cannot draw, and PHP keeps no list of supported types on purpose. A core page that renders its own markup, or that uses a field type with no built-in control (`slotfill_placeholder`, `relative_date_selector`, `notice`, the `email_*` types), must opt out explicitly. Check this before adding a field type to a page that has not opted out.
+
 Guarded call sites to copy from: `includes/admin/views/html-admin-settings.php`, `WC_Settings_Page::add_settings_ui_body_class()`, `Settings::add_settings_ui_schema()`, `WCAdminAssets::get_settings_ui_script_dependencies()`.

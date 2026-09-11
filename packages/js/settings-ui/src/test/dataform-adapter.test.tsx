@@ -767,9 +767,252 @@ describe( 'dataform adapter', () => {
 			);
 			expect( fieldDisabled.isDisabled ).toBe( true );
 		} );
+
+		it( 'derives disabled state from current unsaved controller values', () => {
+			const dependentField = {
+				id: 'registration_generate_password',
+				label: 'Send password setup link',
+				type: 'checkbox',
+				disabledWhenAllUnchecked: [
+					'checkout_registration',
+					'my_account_registration',
+					'subscriptions_registration',
+				],
+			} as SettingsUIField;
+			const field = buildDataFormField(
+				dependentField,
+				createOptions( [ dependentField ] )
+			);
+			const isDisabled = field.isDisabled;
+
+			expect( typeof isDisabled ).toBe( 'function' );
+			if ( typeof isDisabled !== 'function' ) {
+				throw new Error( 'Expected a live disabled-state callback.' );
+			}
+
+			const normalizedField = field as Parameters<
+				typeof isDisabled
+			>[ 0 ][ 'field' ];
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: false,
+					},
+					field: normalizedField,
+				} )
+			).toBe( true );
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: true,
+					},
+					field: normalizedField,
+				} )
+			).toBe( false );
+			expect(
+				isDisabled( {
+					item: {
+						checkout_registration: false,
+						my_account_registration: false,
+						subscriptions_registration: true,
+					},
+					field: normalizedField,
+				} )
+			).toBe( false );
+		} );
+
+		it( 'includes the disabled tooltip in DataForm help', () => {
+			const field = buildDataFormField(
+				{
+					...textField,
+					description: 'How this setting works.',
+					customAttributes: {
+						'disabled-tooltip':
+							'Enable account creation to use this feature.',
+					},
+				},
+				createOptions( [] )
+			);
+			const { container } = renderElement( <>{ field.description }</> );
+
+			expect( container.textContent ).toBe(
+				'How this setting works.Enable account creation to use this feature.'
+			);
+		} );
+	} );
+
+	describe( 'relative date fields', () => {
+		const retentionField: SettingsUIField = {
+			id: 'retention',
+			label: 'Retention',
+			type: 'relative_date_selector',
+			options: [
+				{ label: 'Day(s)', value: 'days' },
+				{ label: 'Week(s)', value: 'weeks' },
+			],
+		};
+
+		it( 'builds two built-in fields that project onto one stored value', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [ retentionField ] )
+			);
+
+			expect( adapter.fields.map( ( field ) => field.id ) ).toEqual( [
+				'retention__number',
+				'retention__unit',
+			] );
+			// Built-in controls, so neither field carries a custom renderer.
+			expect(
+				adapter.fields.every(
+					( field ) => ! field.Edit || field.Edit === 'select'
+				)
+			).toBe( true );
+
+			const item = { retention: { number: 3, unit: 'weeks' as const } };
+			const [ numberField, unitField ] = adapter.fields;
+			expect( numberField.getValue?.( { item } ) ).toBe( 3 );
+			expect( unitField.getValue?.( { item } ) ).toBe( 'weeks' );
+			expect( numberField.setValue?.( { item, value: 9 } ) ).toEqual( {
+				retention: { number: 9, unit: 'weeks' },
+			} );
+			expect( unitField.setValue?.( { item, value: 'days' } ) ).toEqual( {
+				retention: { number: 3, unit: 'days' },
+			} );
+		} );
+
+		it( 'groups both controls on one row under the field label', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [ retentionField ] )
+			);
+			const form = adapter.getForm( {
+				retention: { number: 3, unit: 'weeks' },
+			} );
+			const [ row ] = ( form.fields?.[ 0 ] as { children: unknown[] } )
+				.children as Array< {
+				id: string;
+				label: string;
+				layout: { type: string };
+				children: string[];
+			} >;
+
+			expect( row.id ).toBe( 'retention' );
+			expect( row.label ).toBe( 'Retention' );
+			expect( row.layout.type ).toBe( 'row' );
+			// Labels are hidden from vision but kept for screen readers.
+			expect( row.children ).toEqual( [
+				{
+					id: 'retention__number',
+					layout: { type: 'regular', labelPosition: 'none' },
+				},
+				{
+					id: 'retention__unit',
+					layout: { type: 'regular', labelPosition: 'none' },
+				},
+			] );
+		} );
+
+		it( 'drops the row when the field is hidden, so no orphan label renders', () => {
+			const adapter = createDataFormAdapter(
+				createOptions( [
+					{ id: 'enabled', label: 'Enabled', type: 'checkbox' },
+					{
+						...retentionField,
+						visibility: { controller: 'enabled', value: true },
+					},
+				] )
+			);
+
+			const shown = adapter.getForm( {
+				enabled: true,
+				retention: { number: 3, unit: 'weeks' },
+			} );
+			const hidden = adapter.getForm( {
+				enabled: false,
+				retention: { number: 3, unit: 'weeks' },
+			} );
+
+			const childIds = ( form: typeof shown ) =>
+				(
+					( form.fields?.[ 0 ] as { children: unknown[] } )
+						.children as Array< string | { id: string } >
+				 ).map( ( child ) =>
+					typeof child === 'string' ? child : child.id
+				);
+
+			expect( childIds( shown ) ).toContain( 'retention' );
+			expect( childIds( hidden ) ).not.toContain( 'retention' );
+		} );
 	} );
 
 	describe( 'mounted DataForm behaviour', () => {
+		it( 'edits a relative date through two grouped built-in controls', () => {
+			const retentionField: SettingsUIField = {
+				id: 'retention',
+				label: 'Retention',
+				type: 'relative_date_selector',
+				placeholder: 'N/A',
+				options: [
+					{ label: 'Day(s)', value: 'days' },
+					{ label: 'Week(s)', value: 'weeks' },
+					{ label: 'Month(s)', value: 'months' },
+					{ label: 'Year(s)', value: 'years' },
+				],
+			};
+			const options = createOptions( [ retentionField ] );
+			const adapter = createDataFormAdapter( options );
+			const data = { retention: { number: 30, unit: 'days' } as const };
+			const onChange = jest.fn();
+
+			const { container } = renderElement(
+				<DataForm
+					data={ data }
+					fields={ adapter.fields }
+					form={ adapter.getForm( data ) }
+					onChange={ onChange }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			const select = container.querySelector( 'select' );
+			expect( input ).toHaveAttribute( 'min', '1' );
+			expect( input ).toHaveAttribute( 'step', '1' );
+			expect(
+				Array.from( select?.options ?? [] ).map(
+					( option ) => option.value
+				)
+			).toEqual( [ 'days', 'weeks', 'months', 'years' ] );
+
+			act( () => {
+				const numberInput = input as globalThis.HTMLInputElement;
+				Object.getOwnPropertyDescriptor(
+					globalThis.HTMLInputElement.prototype,
+					'value'
+				)?.set?.call( numberInput, '' );
+				numberInput.dispatchEvent(
+					new Event( 'input', { bubbles: true } )
+				);
+			} );
+			expect( onChange ).toHaveBeenCalledWith( {
+				retention: { number: '', unit: 'days' },
+			} );
+
+			act( () => {
+				const unitSelect = select as globalThis.HTMLSelectElement;
+				Object.getOwnPropertyDescriptor(
+					globalThis.HTMLSelectElement.prototype,
+					'value'
+				)?.set?.call( unitSelect, 'months' );
+				unitSelect.dispatchEvent(
+					new Event( 'change', { bubbles: true } )
+				);
+			} );
+			expect( onChange ).toHaveBeenCalledWith( {
+				retention: { number: 30, unit: 'months' },
+			} );
+		} );
+
 		it( 'honours isDisabled on package controls', () => {
 			const enabledField: SettingsUIField = {
 				id: 'enabled_field',

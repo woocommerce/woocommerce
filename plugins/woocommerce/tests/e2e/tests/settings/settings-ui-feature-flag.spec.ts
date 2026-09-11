@@ -388,4 +388,31 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			page.getByRole( 'button', { name: 'Save changes' } )
 		).toBeVisible();
 	} );
+
+	test( 'renders a page that never opted in through the settings UI', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=general' );
+
+		await expect( page.locator( '[data-wc-settings-ui]' ) ).toBeVisible();
+		await expect(
+			page.locator( 'body.woocommerce-settings-ui-page' )
+		).toHaveCount( 1 );
+	} );
+
+	test( 'keeps a page that opts out on the classic renderer', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax' );
+
+		await expect( page.locator( '[data-wc-settings-ui]' ) ).toHaveCount(
+			0
+		);
+		await expect(
+			page.locator( 'body.woocommerce-settings-ui-page' )
+		).toHaveCount( 0 );
+		await expect(
+			page.getByRole( 'button', { name: 'Save changes' } )
+		).toBeVisible();
+	} );
 } );

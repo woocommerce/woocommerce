@@ -8,7 +8,11 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
-import { areValuesEqual, toStoreLocalDateTime } from './values';
+import {
+	areValuesEqual,
+	isRelativeDateValue,
+	toStoreLocalDateTime,
+} from './values';
 
 type HiddenInput = {
 	name: string;
@@ -42,6 +46,17 @@ const serializeCanonicalValue = (
 	value: SettingsValue,
 	serializeDateTimeAsStoreLocal: boolean
 ): HiddenInput[] => {
+	if ( field.type === 'relative_date_selector' ) {
+		if ( ! isRelativeDateValue( value ) ) {
+			return [];
+		}
+
+		return [
+			{ name: `${ name }[number]`, value: String( value.number ) },
+			{ name: `${ name }[unit]`, value: value.unit },
+		];
+	}
+
 	if ( field.type === 'checkbox' ) {
 		// Accept the canonical boolean as well as the legacy truthy-string
 		// forms ('yes'/'1') that the exported getHiddenInputs()/HiddenInputs()
@@ -96,15 +111,26 @@ export const getHiddenInputs = (
 	field: SettingsUIField,
 	value: SettingsValue,
 	{
+		disabled = false,
 		initialCanonicalValue,
 		serializeDateTimeAsStoreLocal = false,
 		strict = false,
 	}: {
+		disabled?: boolean;
 		initialCanonicalValue?: SettingsValue;
 		serializeDateTimeAsStoreLocal?: boolean;
 		strict?: boolean;
 	} = {}
 ): HiddenInput[] => {
+	if (
+		disabled ||
+		field.disabled ||
+		( typeof field.customAttributes?.disabled !== 'undefined' &&
+			field.customAttributes.disabled !== false )
+	) {
+		return [];
+	}
+
 	const adapter = field.save?.adapter || 'form_post';
 
 	if ( adapter === 'none' ) {
@@ -143,6 +169,7 @@ export const getHiddenInputs = (
 	}
 
 	if (
+		field.type !== 'relative_date_selector' &&
 		field.save &&
 		Object.prototype.hasOwnProperty.call( field.save, 'initialValue' ) &&
 		typeof initialCanonicalValue !== 'undefined' &&
@@ -165,18 +192,21 @@ export const getHiddenInputs = (
 export const HiddenInputs = ( {
 	field,
 	value,
+	disabled = false,
 	initialCanonicalValue,
 	serializeDateTimeAsStoreLocal = false,
 	strict = false,
 }: {
 	field: SettingsUIField;
 	value: SettingsValue;
+	disabled?: boolean;
 	initialCanonicalValue?: SettingsValue;
 	serializeDateTimeAsStoreLocal?: boolean;
 	strict?: boolean;
 } ) => (
 	<>
 		{ getHiddenInputs( field, value, {
+			disabled,
 			initialCanonicalValue,
 			serializeDateTimeAsStoreLocal,
 			strict,

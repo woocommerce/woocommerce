@@ -6,7 +6,7 @@ sidebar_position: 7
 
 # Settings UI
 
-The settings UI is an experimental, opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The settings UI is an experimental path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow. It is opt-out: with the feature flag enabled, every settings page renders through it unless the page opts out.
 
 It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
@@ -16,7 +16,7 @@ It is designed for extension authors who want to migrate incrementally. PHP stil
 
 -   The settings UI is behind the `settings-ui` feature flag.
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
--   With the flag enabled, a settings page still has to opt in explicitly.
+-   With the flag enabled, every settings page renders through the settings UI unless it opts out.
 -   Saves use the existing WooCommerce settings form POST flow by default.
 -   The public PHP API is available under `Automattic\WooCommerce\Admin\Settings`.
 
@@ -45,17 +45,12 @@ add_filter(
 );
 ```
 
-## Opt in a settings page
+## Settings pages render through the settings UI by default
 
-A `WC_Settings_Page` subclass opts in by returning a settings UI adapter from `get_settings_ui_page()`.
-
-For pages that only need built-in fields, use `LegacySettingsPageAdapter`:
+A `WC_Settings_Page` subclass needs no code to render through the settings UI. `WC_Settings_Page::get_settings_ui_page()` returns a `LegacySettingsPageAdapter` for every page, so the page's existing `get_settings()` array becomes a settings UI schema:
 
 ```php
 <?php
-use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
-
 class My_Plugin_Settings_Page extends WC_Settings_Page {
 	public function __construct() {
 		$this->id    = 'my_plugin';
@@ -64,13 +59,74 @@ class My_Plugin_Settings_Page extends WC_Settings_Page {
 		parent::__construct();
 	}
 
-	public function get_settings_ui_page(): ?SettingsUIPageInterface {
-		return new LegacySettingsPageAdapter( $this );
+	// No settings UI code needed. The page renders through the settings UI
+	// when the feature flag is enabled, and through the classic renderer when
+	// it is disabled.
+}
+```
+
+Override `get_settings_ui_page()` when a page needs a different schema, page title, save adapter, or script handles:
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+
+public function get_settings_ui_page(): ?SettingsUIPageInterface {
+	return new My_Plugin_Settings_UI_Page( $this );
+}
+```
+
+## Opt a settings page out
+
+A page that renders its own markup, or that uses field types the settings UI cannot draw, keeps the classic PHP renderer by overriding `supports_settings_ui()`:
+
+```php
+<?php
+class My_Plugin_Settings_Page extends WC_Settings_Page {
+	public function supports_settings_ui( string $section ): bool {
+		return false;
 	}
 }
 ```
 
-WooCommerce only uses the adapter when the `settings-ui` feature flag is enabled. Returning an adapter does not change the page while the feature flag is disabled.
+The method receives the section id, so a page can opt out one section at a time. An empty string means the default section:
+
+```php
+<?php
+public function supports_settings_ui( string $section ): bool {
+	// Everything except the custom report screen renders through the settings UI.
+	return 'reports' !== $section;
+}
+```
+
+Site owners and third parties can opt a page out with the `woocommerce_settings_ui_page_supported` filter:
+
+```php
+<?php
+add_filter(
+	'woocommerce_settings_ui_page_supported',
+	static function ( bool $supported, string $page_id, string $section ): bool {
+		return 'my_plugin' === $page_id ? false : $supported;
+	},
+	10,
+	3
+);
+```
+
+Both cover a settings page's own sections only. A section registered through `SettingsSectionRegistry` carries its own settings UI behavior and is not affected.
+
+Opting out changes nothing while the feature flag is disabled: every page already renders through the classic PHP renderer then.
+
+### When to opt out
+
+The React renderer fails closed on a field it cannot draw, so opt a page or section out when it:
+
+-   renders its own markup instead of calling `WC_Settings_Page::output()`;
+-   uses a field type with no built-in control and no registered type renderer, such as `slotfill_placeholder` or a custom `woocommerce_admin_field_*` type;
+-   relies on inline JavaScript that queries the classic settings table markup.
+
+The built-in field types are listed under [DataForm field migration](#dataform-field-migration).
 
 ## Register a section under an existing settings tab
 
@@ -197,6 +253,7 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 -   `single_select_country`
 -   `single_select_page`
 -   `info`
+-   `relative_date_selector`
 
 Fields before the first `title` marker are placed into a default group automatically.
 
@@ -328,20 +385,31 @@ $schema['shell']['badges']   = array(
 
 `intent` is decorative styling only — it conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
 
-## Reference migration in WooCommerce core
+## WooCommerce core settings pages
 
-The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.
+With `settings-ui` enabled, these core tabs render through the settings UI:
 
-Use this page to verify the DataForm migration path before testing a plugin-specific page such as WooPayments.
+| Tab | Sections rendered through the settings UI |
+| --- | --- |
+| Products | all |
+| General | all |
+| Point of Sale | all |
+| Accounts & Privacy | all |
+| Advanced | WooCommerce.com and Legacy API only |
+| Shipping | Shipping settings only |
+
+The remaining core tabs opt out: Emails, Integrations, Payments, Tax, and Site visibility. They render their own screens or use field types the settings UI cannot draw. Sections that extensions register under the Payments tab are unaffected and keep rendering through the settings UI.
+
+Products is the Core reference migration. Use it to verify the DataForm migration path before testing a plugin-specific page such as WooPayments.
 
 ## Testing an extension integration
 
 1. Enable the `settings-ui` feature flag.
-2. Return a settings UI adapter from your `WC_Settings_Page` subclass.
-3. Start with built-in fields and confirm the page renders and saves.
-4. Add `component` metadata only for fields that need custom UI.
-5. Register scoped JavaScript components with `registerSettingsExtension()`.
-6. Return custom script handles from `get_script_handles()` so they load before mount.
+2. Load your `WC_Settings_Page` subclass and confirm it renders and saves through the settings UI with no code changes.
+3. Add `component` metadata only for fields that need custom UI.
+4. Register scoped JavaScript components with `registerSettingsExtension()`.
+5. Return custom script handles from `get_script_handles()` so they load before mount.
+6. Opt out any section that has to keep the classic renderer, with `supports_settings_ui()`.
 7. Disable the feature flag and confirm the legacy page still renders unchanged.
 
 ## Diagnostics

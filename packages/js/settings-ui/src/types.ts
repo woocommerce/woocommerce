@@ -1,4 +1,25 @@
-export type SettingsValue = string | number | boolean | string[] | null;
+export const SETTINGS_RELATIVE_DATE_UNITS = [
+	'days',
+	'weeks',
+	'months',
+	'years',
+] as const;
+
+export type SettingsRelativeDateUnit =
+	( typeof SETTINGS_RELATIVE_DATE_UNITS )[ number ];
+
+export type SettingsRelativeDateValue = {
+	number: number | '';
+	unit: SettingsRelativeDateUnit;
+};
+
+export type SettingsValue =
+	| string
+	| number
+	| boolean
+	| string[]
+	| SettingsRelativeDateValue
+	| null;
 
 export type SettingsValues = Record< string, SettingsValue >;
 
@@ -39,6 +60,7 @@ export type SettingsUIField = {
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	disabledWhenAllUnchecked?: string[];
 	customAttributes?: Record< string, string | number | boolean >;
 	validation?: {
 		min?: number;

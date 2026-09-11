@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the Accounts & Privacy personal data retention fields in the experimental Settings UI, and keep account creation options disabled while no account creation method is enabled.

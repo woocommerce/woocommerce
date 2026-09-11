@@ -18,7 +18,10 @@ import type { ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
-import { createDataFormAdapter } from './dataform-adapter';
+import {
+	createDataFormAdapter,
+	isSettingsFieldDisabled,
+} from './dataform-adapter';
 import { DataForm } from './dataform-runtime';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
@@ -480,6 +483,32 @@ export const SettingsUIPage = ( {
 		setPendingNavigation( null );
 	}, [ schema ] );
 
+	useEffect( () => {
+		const handleCustomizeLinkClick = ( event: MouseEvent ) => {
+			const target = event.target;
+			if (
+				! ( target instanceof Element ) ||
+				! target.closest( 'a.delayed-account-creation-customize-link' )
+			) {
+				return;
+			}
+
+			const tracks = (
+				window as typeof window & {
+					wcTracks?: { recordEvent?: ( eventName: string ) => void };
+				}
+			 ).wcTracks;
+			tracks?.recordEvent?.(
+				'delayed_account_creation_customize_link_clicked'
+			);
+		};
+
+		document.addEventListener( 'click', handleCustomizeLinkClick );
+		return () => {
+			document.removeEventListener( 'click', handleCustomizeLinkClick );
+		};
+	}, [] );
+
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
 	}, [] );
@@ -791,6 +820,10 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							disabled={ isSettingsFieldDisabled(
+								field,
+								values
+							) }
 							initialCanonicalValue={ initialValues[ field.id ] }
 							serializeDateTimeAsStoreLocal
 							strict

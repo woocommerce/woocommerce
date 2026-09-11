@@ -8,6 +8,7 @@
 
 declare( strict_types = 1);
 
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
@@ -113,14 +114,51 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get the settings UI page adapter for this settings page.
 		 *
-		 * Settings pages can override this to opt in to the settings UI renderer
-		 * while retaining the classic WooCommerce settings page route and save flow.
+		 * The settings UI renderer is opt-out: every settings page gets the legacy
+		 * settings adapter by default, so its existing settings array renders through
+		 * the settings UI while the classic route and save flow stay in place.
+		 *
+		 * Pages that need a different schema, title, or save adapter override this and
+		 * return their own adapter. Pages that cannot render through the settings UI
+		 * opt out through `supports_settings_ui()` rather than by returning null here,
+		 * so the opt-out can be per section and third parties can see it.
 		 *
 		 * @since 10.9.0
 		 * @return SettingsUIPageInterface|null
 		 */
 		public function get_settings_ui_page(): ?SettingsUIPageInterface {
-			return null;
+			// The adapter class can be missing mid-update: a 10.9 copy of this file may
+			// load before the autoloader class map can safely resolve it, so a direct
+			// call would fatal and white-screen the settings page.
+			try {
+				if ( ! class_exists( LegacySettingsPageAdapter::class ) ) {
+					return null;
+				}
+
+				return new LegacySettingsPageAdapter( $this );
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		/**
+		 * Whether a section of this settings page renders through the settings UI.
+		 *
+		 * The settings UI renderer is opt-out. Override this and return false to keep
+		 * the classic PHP renderer, either for the whole page or for the sections that
+		 * render their own markup or use field types the settings UI cannot draw.
+		 *
+		 * This only governs the page's own sections. Sections registered through
+		 * `SettingsSectionRegistry` carry their own settings UI opt-in and are not
+		 * affected.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param string $section Section id. An empty string means the default section.
+		 * @return bool
+		 */
+		public function supports_settings_ui( string $section ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- The section is part of the opt-out contract; this implementation applies to every section.
+			return true;
 		}
 
 		/**

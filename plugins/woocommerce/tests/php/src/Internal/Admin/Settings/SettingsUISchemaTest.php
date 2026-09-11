@@ -1180,6 +1180,124 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It canonicalizes relative date values with the classic settings rules.
+	 *
+	 * @dataProvider relative_date_values
+	 *
+	 * @param mixed      $raw_value Raw relative date value.
+	 * @param int|string $expected_number Expected number or blank value.
+	 * @param string     $expected_unit Expected unit.
+	 */
+	public function test_from_legacy_settings_canonicalizes_relative_date_values( $raw_value, $expected_number, string $expected_unit ): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => 'acme_retention',
+					'label' => 'Retention',
+					'type'  => 'relative_date_selector',
+					'value' => $raw_value,
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame(
+			array(
+				'number' => $expected_number,
+				'unit'   => $expected_unit,
+			),
+			$field['value'],
+			'The relative date should use the classic canonical value.'
+		);
+		$this->assertSame(
+			array( 'days', 'weeks', 'months', 'years' ),
+			array_column( $field['options'], 'value' ),
+			'The relative date should expose only the classic unit choices.'
+		);
+		$this->assertArrayNotHasKey( 'initialValue', $field['save'], 'Composite values should always post their nested canonical representation.' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * Relative date value fixtures.
+	 *
+	 * @return array<string, array{mixed, int|string, string}>
+	 */
+	public static function relative_date_values(): array {
+		return array(
+			'days'                 => array(
+				array(
+					'number' => '2',
+					'unit'   => 'days',
+				),
+				2,
+				'days',
+			),
+			'weeks'                => array(
+				array(
+					'number' => '2',
+					'unit'   => 'weeks',
+				),
+				2,
+				'weeks',
+			),
+			'months'               => array(
+				array(
+					'number' => '2',
+					'unit'   => 'months',
+				),
+				2,
+				'months',
+			),
+			'years'                => array(
+				array(
+					'number' => '2',
+					'unit'   => 'years',
+				),
+				2,
+				'years',
+			),
+			'blank number'         => array(
+				array(
+					'number' => '',
+					'unit'   => 'months',
+				),
+				'',
+				'months',
+			),
+			'zero number'          => array(
+				array(
+					'number' => '0',
+					'unit'   => 'months',
+				),
+				'',
+				'months',
+			),
+			'absolute number'      => array(
+				array(
+					'number' => '-3',
+					'unit'   => 'weeks',
+				),
+				3,
+				'weeks',
+			),
+			'invalid unit'         => array(
+				array(
+					'number' => '2',
+					'unit'   => 'decades',
+				),
+				2,
+				'days',
+			),
+			'scalar classic value' => array( '', '', 'days' ),
+		);
+	}
+
+	/**
 	 * @testdox It canonicalizes native numeric values without rounding unsafe integers first.
 	 *
 	 * @dataProvider canonical_numeric_values

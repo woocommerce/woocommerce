@@ -6,8 +6,10 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\GeneralSettingsPageAdapter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -55,6 +57,25 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'cog';
+
+	/**
+	 * Get the settings UI page adapter for this settings page.
+	 *
+	 * The General adapter restates the classic country-picker visibility rules,
+	 * so it only fits this page's exact field set. A subclass, or a missing
+	 * adapter class mid-update, falls back to the default legacy adapter rather
+	 * than dropping the page onto the classic renderer.
+	 *
+	 * @since 11.2.0
+	 * @return SettingsUIPageInterface|null
+	 */
+	public function get_settings_ui_page(): ?SettingsUIPageInterface {
+		if ( self::class !== get_class( $this ) || ! class_exists( GeneralSettingsPageAdapter::class ) ) {
+			return parent::get_settings_ui_page();
+		}
+
+		return new GeneralSettingsPageAdapter( $this );
+	}
 
 	/**
 	 * Get settings or the default section.

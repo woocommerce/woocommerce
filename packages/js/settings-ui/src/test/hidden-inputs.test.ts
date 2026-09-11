@@ -124,6 +124,51 @@ describe( 'getHiddenInputs', () => {
 		] );
 	} );
 
+	it( 'serializes a relative date as nested number and unit inputs', () => {
+		expect(
+			getHiddenInputs(
+				{
+					id: 'retention',
+					label: 'Retention',
+					type: 'relative_date_selector',
+					save: { adapter: 'form_post', name: 'retention' },
+				},
+				{ number: 30, unit: 'days' }
+			)
+		).toEqual( [
+			{ name: 'retention[number]', value: '30' },
+			{ name: 'retention[unit]', value: 'days' },
+		] );
+	} );
+
+	it( 'serializes a blank relative date without using object string coercion', () => {
+		const inputs = getHiddenInputs(
+			{
+				id: 'retention',
+				label: 'Retention',
+				type: 'relative_date_selector',
+				save: {
+					adapter: 'form_post',
+					name: 'retention',
+					initialValue: '',
+				},
+			},
+			{ number: '', unit: 'months' },
+			{
+				initialCanonicalValue: { number: '', unit: 'months' },
+			}
+		);
+
+		expect( inputs ).toEqual( [
+			{ name: 'retention[number]', value: '' },
+			{ name: 'retention[unit]', value: 'months' },
+		] );
+		expect( inputs ).not.toContainEqual( {
+			name: 'retention',
+			value: '[object Object]',
+		} );
+	} );
+
 	it( 'omits an unchanged empty array like the classic form', () => {
 		expect(
 			getHiddenInputs(
@@ -399,12 +444,52 @@ describe( 'getHiddenInputs', () => {
 		] );
 	} );
 
-	it( 'keeps disabled fields in the form-post entry list', () => {
+	it( 'omits statically disabled fields like a classic form', () => {
 		expect(
 			getHiddenInputs( formPostField( { disabled: true } ), 2, {
 				initialCanonicalValue: 1,
 			} )
-		).toEqual( [ { name: 'quantity', value: '2' } ] );
+		).toEqual( [] );
+	} );
+
+	it.each( [ true, false ] )(
+		'omits a dynamically disabled checkbox with value %p',
+		( value ) => {
+			expect(
+				getHiddenInputs(
+					formPostField( {
+						type: 'checkbox',
+						save: {
+							adapter: 'form_post',
+							name: 'woocommerce_registration_generate_password',
+						},
+					} ),
+					value,
+					{ disabled: true }
+				)
+			).toEqual( [] );
+		}
+	);
+
+	it( 'serializes a checkbox when its live disabled rule is false', () => {
+		expect(
+			getHiddenInputs(
+				formPostField( {
+					type: 'checkbox',
+					save: {
+						adapter: 'form_post',
+						name: 'woocommerce_registration_generate_password',
+					},
+				} ),
+				true,
+				{ disabled: false }
+			)
+		).toEqual( [
+			{
+				name: 'woocommerce_registration_generate_password',
+				value: 'yes',
+			},
+		] );
 	} );
 
 	it( 'keeps hidden fields in the form-post entry list', () => {

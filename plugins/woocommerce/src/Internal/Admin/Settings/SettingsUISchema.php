@@ -41,6 +41,7 @@ class SettingsUISchema {
 		'number',
 		'password',
 		'radio',
+		'relative_date_selector',
 		'select',
 		'tel',
 		'text',
@@ -54,7 +55,14 @@ class SettingsUISchema {
 	 *
 	 * @var string[]
 	 */
-	private const TYPED_VALUE_FIELD_TYPES = array( 'array', 'checkbox', 'datetime-local', 'integer', 'number' );
+	private const TYPED_VALUE_FIELD_TYPES = array( 'array', 'checkbox', 'datetime-local', 'integer', 'number', 'relative_date_selector' );
+
+	/**
+	 * Units accepted by the classic relative date selector.
+	 *
+	 * @var string[]
+	 */
+	private const RELATIVE_DATE_UNITS = array( 'days', 'weeks', 'months', 'years' );
 
 	/**
 	 * Custom attributes that describe an input range.
@@ -595,6 +603,9 @@ class SettingsUISchema {
 				case 'integer':
 					$field['value'] = self::canonicalize_number( $field['value'], true, $field['id'], 'value' );
 					break;
+				case 'relative_date_selector':
+					$field['value'] = self::canonicalize_relative_date_value( $field['value'] );
+					break;
 				case 'datetime-local':
 					$field['value'] = self::canonicalize_datetime( $field['value'], $field['id'] );
 					break;
@@ -813,6 +824,21 @@ class SettingsUISchema {
 		}
 
 		throw self::invalid_schema( sprintf( 'Field "%s" checkbox value is ambiguous.', $field_id ) );
+	}
+
+	/**
+	 * Canonicalize a relative date value with the classic settings rules.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return array{number: int|string, unit: string}
+	 */
+	private static function canonicalize_relative_date_value( $value ): array {
+		$parsed = wc_parse_relative_date_option( $value );
+
+		return array(
+			'number' => $parsed['number'],
+			'unit'   => $parsed['unit'],
+		);
 	}
 
 	/**
@@ -1207,6 +1233,10 @@ class SettingsUISchema {
 					continue;
 				}
 
+				if ( 'relative_date_selector' === ( $field['type'] ?? null ) ) {
+					continue;
+				}
+
 				$original = $original_values[ $field['id'] ];
 				if ( ( $field['value'] ?? null ) === $original || 'form_post' !== self::get_field_save_adapter( $field ) ) {
 					continue;
@@ -1433,7 +1463,10 @@ class SettingsUISchema {
 			$save = array( 'adapter' => 'none' );
 		}
 		$raw_value = self::get_field_raw_value( $setting, $save );
-		$field     = array(
+		if ( 'relative_date_selector' === $canonical_type ) {
+			$raw_value = self::canonicalize_relative_date_value( $raw_value );
+		}
+		$field = array(
 			'id'          => $id,
 			'label'       => self::get_field_label( $setting, $id, $type ),
 			'type'        => $canonical_type,
@@ -1442,7 +1475,7 @@ class SettingsUISchema {
 			'save'        => $save,
 		);
 
-		if ( 'form_post' === ( $save['adapter'] ?? null ) && ! array_key_exists( 'initialValue', $save ) && self::is_form_value( $raw_value ) ) {
+		if ( 'relative_date_selector' !== $canonical_type && 'form_post' === ( $save['adapter'] ?? null ) && ! array_key_exists( 'initialValue', $save ) && self::is_form_value( $raw_value ) ) {
 			$field['save']['initialValue'] = 'array' === $canonical_type && '' === $raw_value ? array() : $raw_value;
 		}
 
@@ -1456,12 +1489,26 @@ class SettingsUISchema {
 			$field['customAttributes'] = self::get_custom_attributes( $setting['custom_attributes'] );
 		}
 
+		if ( isset( $setting['disabled_when_all_unchecked'] ) && is_array( $setting['disabled_when_all_unchecked'] ) ) {
+			$field['disabledWhenAllUnchecked'] = array_values(
+				array_filter(
+					array_map(
+						static fn( $controller ): string => is_scalar( $controller ) ? (string) $controller : '',
+						$setting['disabled_when_all_unchecked']
+					),
+					static fn( string $controller ): bool => '' !== $controller
+				)
+			);
+		}
+
 		$visibility = self::get_field_visibility( $setting, $visibility_controller );
 		if ( $visibility ) {
 			$field['visibility'] = $visibility;
 		}
 
-		$options = self::get_options( $setting );
+		$options = 'relative_date_selector' === $canonical_type
+			? self::get_relative_date_options()
+			: self::get_options( $setting );
 		if ( ! empty( $options ) ) {
 			$field['options'] = $options;
 		}
@@ -1474,6 +1521,30 @@ class SettingsUISchema {
 		}
 
 		return $field;
+	}
+
+	/**
+	 * Get the choices used by the classic relative date selector.
+	 *
+	 * @return array[] Unit choices.
+	 */
+	private static function get_relative_date_options(): array {
+		$labels = array(
+			'days'   => __( 'Day(s)', 'woocommerce' ),
+			'weeks'  => __( 'Week(s)', 'woocommerce' ),
+			'months' => __( 'Month(s)', 'woocommerce' ),
+			'years'  => __( 'Year(s)', 'woocommerce' ),
+		);
+
+		return array_map(
+			static function ( string $unit ) use ( $labels ): array {
+				return array(
+					'label' => $labels[ $unit ],
+					'value' => $unit,
+				);
+			},
+			self::RELATIVE_DATE_UNITS
+		);
 	}
 
 	/**
@@ -1985,6 +2056,35 @@ class SettingsUISchema {
 		self::assert_field_validation( $field );
 		self::assert_field_save( $field );
 		self::assert_visibility( $field );
+		self::assert_disabled_when_all_unchecked( $field );
+	}
+
+	/**
+	 * Assert the controllers for a live disabled-state rule.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_disabled_when_all_unchecked( array $field ): void {
+		if ( ! array_key_exists( 'disabledWhenAllUnchecked', $field ) ) {
+			return;
+		}
+
+		$controllers = $field['disabledWhenAllUnchecked'];
+		if ( ! is_array( $controllers ) || ! ArrayUtil::array_is_list( $controllers ) || empty( $controllers ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" disabledWhenAllUnchecked must be a non-empty list.', $field['id'] ) );
+		}
+
+		$seen = array();
+		foreach ( $controllers as $controller ) {
+			if ( ! is_string( $controller ) || '' === $controller ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" disabledWhenAllUnchecked controllers must be non-empty strings.', $field['id'] ) );
+			}
+
+			if ( isset( $seen[ $controller ] ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" disabledWhenAllUnchecked controller "%2$s" is duplicated.', $field['id'], $controller ) );
+			}
+			$seen[ $controller ] = true;
+		}
 	}
 
 	/**
@@ -2010,6 +2110,12 @@ class SettingsUISchema {
 				break;
 			case 'integer':
 				$valid = null === $value || ( is_int( $value ) && self::is_canonical_number( $value ) );
+				break;
+			case 'relative_date_selector':
+				$valid = is_array( $value )
+					&& array( 'number', 'unit' ) === array_keys( $value )
+					&& ( '' === $value['number'] || ( is_int( $value['number'] ) && 1 <= $value['number'] ) )
+					&& in_array( $value['unit'], self::RELATIVE_DATE_UNITS, true );
 				break;
 			case 'datetime-local':
 				$valid = null === $value || ( is_string( $value ) && 1 === preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/', $value ) );

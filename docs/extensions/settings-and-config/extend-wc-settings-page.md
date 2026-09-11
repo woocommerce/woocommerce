@@ -342,22 +342,31 @@ add_action(
 
 For older WooCommerce versions, use the filter-based approach documented in [How to add a section to a settings tab](./adding-a-section-to-a-settings-tab.md).
 
-## Opt in to the React settings UI
+## The React settings UI
 
 > **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
-`WC_Settings_Page` still owns registration, permissions, schema, and persistence when a page opts in to the React settings UI. To render a page with the React settings UI when the feature flag is enabled, return a settings UI adapter from `get_settings_ui_page()`.
+`WC_Settings_Page` still owns registration, permissions, schema, and persistence when a page renders through the React settings UI. Rendering is opt-out: with the feature flag enabled, your page renders through the settings UI with no extra code, because `WC_Settings_Page::get_settings_ui_page()` returns a `LegacySettingsPageAdapter` for every page.
+
+Override `get_settings_ui_page()` only when the page needs a custom schema, title, save adapter, or script handles:
 
 ```php
-use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 public function get_settings_ui_page(): ?SettingsUIPageInterface {
-	return new LegacySettingsPageAdapter( $this );
+	return new My_Plugin_Settings_UI_Page( $this );
 }
 ```
 
-This is optional. If the feature flag is disabled, or the page does not return an adapter, WooCommerce renders the classic PHP settings table. See [Settings UI](./settings-ui.md) for custom React components, script handles, save adapters, and migration details.
+To keep the classic PHP settings table, opt out with `supports_settings_ui()`. The section id lets a page opt out one section at a time, and an empty string means the default section:
+
+```php
+public function supports_settings_ui( string $section ): bool {
+	return false;
+}
+```
+
+When the feature flag is disabled, or the page opts out, WooCommerce renders the classic PHP settings table. See [Settings UI](./settings-ui.md) for custom React components, script handles, save adapters, and migration details.
 
 ## Further reading
 
