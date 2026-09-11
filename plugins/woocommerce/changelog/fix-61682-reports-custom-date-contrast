@@ -1,3 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Reports: fix insufficient color contrast on the custom date range text (WCAG AA).
+
+Improve the color contrast of the active date range tab in legacy Reports.
