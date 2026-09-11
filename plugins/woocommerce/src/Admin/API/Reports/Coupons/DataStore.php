@@ -47,9 +47,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected $column_types = array(
 		'reporting_missing_orders' => 'intval',
-		'coupon_id'    => 'intval',
-		'amount'       => 'floatval',
-		'orders_count' => 'intval',
+		'coupon_id'                => 'intval',
+		'amount'                   => 'floatval',
+		'orders_count'             => 'intval',
 	);
 
 	/**

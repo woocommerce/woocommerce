@@ -130,7 +130,7 @@ class Segmenter extends ReportsSegmenter {
 		$segments_orders = $wpdb->get_results(
 			"SELECT
 						$segmenting_groupby AS $segmenting_dimension_name
-												{$segmenting_selections['order_level']}
+						{$segmenting_selections['order_level']}
 					FROM
 						$table_name
 						$segmenting_from
@@ -191,7 +191,7 @@ class Segmenter extends ReportsSegmenter {
 			"SELECT
 						{$intervals_query['select_clause']} AS time_interval,
 						$segmenting_groupby AS $segmenting_dimension_name
-												{$segmenting_selections['order_level']}
+						{$segmenting_selections['order_level']}
 					FROM
 						$table_name
 						$segmenting_from

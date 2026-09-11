@@ -175,9 +175,9 @@ class Controller extends GenericController implements ExportableInterface {
 
 		$schema['properties']['reporting_missing_orders'] = array(
 			'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
-			'type' => 'integer',
-			'context' => array( 'view', 'edit' ),
-			'readonly' => true,
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
 		);
 		return $this->add_additional_fields_schema( $schema );
 	}
