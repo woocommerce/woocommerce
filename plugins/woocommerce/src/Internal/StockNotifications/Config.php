@@ -162,15 +162,6 @@ class Config {
 	}
 
 	/**
-	 * Check if an account is created on signup.
-	 *
-	 * @return bool
-	 */
-	public static function creates_account_on_signup(): bool {
-		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' );
-	}
-
-	/**
 	 * How long to keep pending notifications before deleting them (in days).
 	 *
 	 * @return int
