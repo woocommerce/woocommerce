@@ -36,29 +36,7 @@ In non-WordPress projects, link to the `build-style/card/style.css` file directl
 If you are using these components in a project that uses Jest for testing, you may get an error that looks like this:
 
 ```bash
-Cannot find module '@woocommerce/settings' from 'node_modules/@woocommerce/experimental/node_modules/@woocommerce/navigation/build/index.js'
+Cannot find module '@woocommerce/settings' from 'node_modules/@woocommerce/navigation/build/index.js'
 ```
 
-To fix this, you will need to mock the `@woocommerce/settings` because it's an alias that points to the `window.wcSettings`, which in turn comes from and is maintained by the [WC Blocks](https://github.com/woocommerce/woocommerce-blocks) package, the front-end code for this is located [plugins/woocommerce/client/blocks/packages/public-api/settings](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/settings).
-
-This can be done by adding the following to your Jest config:
-
-```js
-module.exports = {
-  moduleNameMapper: {
-    '@woocommerce/settings': path.resolve(
-      __dirname,
-      './mock/woocommerce-settings'
-    ),
-  }
-  setupFiles: [
-    path.resolve( __dirname, 'build/setup-globals.js' ),
-  ],
-  // ...other config
-}
-```
-
-Then, you will need to create the following files:
-
-1. Create a new file called woocommerce-settings.js in the ./mock directory. You can find the content for this file [packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1).
-2. Next, create a file named setup-globals.js. You can find the content for this file [packages/js/internal-js-tests/src/setup-globals.js#L44](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js#L44). The purpose of this file is to mock the wcSettings global variable.
+`@woocommerce/settings` is an alias for the `window.wcSettings` global from WooCommerce core, not an npm package, so Jest cannot resolve it. Some dependencies of this package import it. To fix the error, map the alias to a local mock and define the `wcSettings` global in a Jest setup file. See [Using `@woocommerce/settings` with Jest](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/dependency-extraction-webpack-plugin/README.md#using-woocommercesettings-with-jest) in the dependency extraction plugin README for the config and mock to use.
