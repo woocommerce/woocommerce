@@ -546,7 +546,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		);
 
 		if ( $product->get_image_id() ) {
-			$image_alt = get_post_meta( $product->get_image_id(), '_wp_attachment_image_alt', true );
+			$image_alt = get_post_meta( (int) $product->get_image_id(), '_wp_attachment_image_alt', true );
 			$attr      = array(
 				'alt' => ( $image_alt ? $image_alt : $product->get_name() ),
 			);
