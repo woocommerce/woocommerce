@@ -735,11 +735,14 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The cap is the store's local time on a store set to a manual UTC offset.
+	 * @testdox The cap is the store's local time on a store set to a manual UTC offset, and is not run through wp_date().
 	 */
 	public function test_report_period_cap_uses_the_store_utc_offset(): void {
 		update_option( 'timezone_string', '' );
 		update_option( 'gmt_offset', 10 );
+		// Calendar plugins rewrite wp_date() output into dates the report cannot parse.
+		add_filter( 'wp_date', array( $this, 'not_a_date' ) );
+
 		$capped = ReportExporter::freeze_report_period( 'orders', array( 'before' => '2100-01-01T00:00:00' ) );
 
 		$this->assertStringEndsWith( '+10:00', $capped['before'], 'The cap should spell out the store offset.' );
@@ -759,6 +762,15 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		CustomersDataStore::update_registered_customer( $user_id );
 
 		$this->assertSame( 1, ReportExporter::queue_report_export( (string) time(), 'customers', array(), false ), 'The customer with no orders should be the one row exported.' );
+	}
+
+	/**
+	 * Stand-in for a calendar plugin's wp_date filter.
+	 *
+	 * @return string
+	 */
+	public function not_a_date(): string {
+		return 'not a date';
 	}
 
 	/**

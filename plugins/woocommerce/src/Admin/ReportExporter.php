@@ -198,10 +198,10 @@ class ReportExporter {
 			return $report_args;
 		}
 
-		// Local wall time with its offset spelled out. The data store reads a bare time as local, and on a
-		// store set to a manual UTC offset the only local clock available is wp_date(): WC_DateTime keeps
-		// that offset out of format(). The offset also pins down the repeated hour when DST ends.
-		$report_args['before'] = wp_date( 'Y-m-d\TH:i:sP', $now );
+		// Local wall time with its offset spelled out, so the data store reads it back as this instant
+		// and the repeated hour when DST ends is not ambiguous. Not wp_date(): calendar plugins filter
+		// it into dates the report then rejects. wp_timezone() also covers stores set to a manual offset.
+		$report_args['before'] = ( new \DateTimeImmutable( '@' . $now ) )->setTimezone( wp_timezone() )->format( 'Y-m-d\TH:i:sP' );
 
 		return $report_args;
 	}
