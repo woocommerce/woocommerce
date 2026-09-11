@@ -5,14 +5,11 @@ import { expect, request, tags } from '../../fixtures/fixtures';
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
-	bisConsentCheckbox,
 	bisEmailSubject,
 	bisFormLocator,
 	bisNotice,
 	bisTargetProductInput,
 	expectEmailAsAdmin,
-	expectNoSignupAsAdmin,
-	findCustomerByEmail,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
@@ -35,7 +32,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -75,7 +71,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -193,7 +188,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -212,9 +206,11 @@ test.describe(
 					page.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
 
-				// The consent checkbox only belongs to the account-creation
-				// setup, which is off here.
-				await expect( bisConsentCheckbox( page ) ).toHaveCount( 0 );
+				// Guest signups never register an account, so no consent
+				// checkbox is rendered.
+				await expect(
+					page.locator( 'input[name="wc_bis_opt_in"]' )
+				).toHaveCount( 0 );
 			} );
 
 			test( 'submitting the form surfaces a success notice', async ( {
@@ -274,7 +270,6 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: true,
 					requireAccount: false,
-					createAccountOnSignup: false,
 				} );
 			} );
 
@@ -302,119 +297,12 @@ test.describe(
 			} );
 		} );
 
-		test.describe( 'Guest — create account on signup', () => {
-			test.describe( 'Single opt-in', () => {
-				test.beforeAll( async ( { baseURL } ) => {
-					await setBISOptions( request, baseURL!, {
-						allowSignups: true,
-						doubleOptIn: false,
-						requireAccount: false,
-						createAccountOnSignup: true,
-					} );
-				} );
-
-				test( 'the consent checkbox renders and the signup is refused until it is ticked', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-
-					const consent = bisConsentCheckbox( page );
-					await expect( consent ).toBeVisible();
-					await expect( consent ).not.toBeChecked();
-
-					await signUpOnProductPage( page, { email } );
-
-					await expect(
-						page.getByText( bisNotice.errors.missingConsent )
-					).toBeVisible();
-
-					// The refusal has to happen before anything is written:
-					// no account for the address, and no signup either.
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeUndefined();
-					await expectNoSignupAsAdmin( browser, product.id, email );
-				} );
-
-				test( 'ticking consent signs up, registers an account and sends the welcome email', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-					await signUpOnProductPage( page, { email, consent: true } );
-
-					await expect(
-						page.getByText(
-							bisNotice.accountCreated( product.name )
-						)
-					).toBeVisible();
-
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeDefined();
-
-					// The "check your e-mail for details" in the notice is
-					// WooCommerce's own new-account email, sent with the
-					// generated password.
-					await expectEmailAsAdmin(
-						browser,
-						email,
-						/account has been created!/
-					);
-				} );
-			} );
-
-			test.describe( 'Double opt-in', () => {
-				test.beforeAll( async ( { baseURL } ) => {
-					await setBISOptions( request, baseURL!, {
-						allowSignups: true,
-						doubleOptIn: true,
-						requireAccount: false,
-						createAccountOnSignup: true,
-					} );
-				} );
-
-				test( 'ticking consent registers an account and still asks for email verification', async ( {
-					page,
-					product,
-					restApi,
-					browser,
-					accountEmail: email,
-				} ) => {
-					await page.goto( product.permalink );
-					await signUpOnProductPage( page, { email, consent: true } );
-
-					await expect(
-						page.getByText( bisNotice.accountCreatedDoubleOptIn )
-					).toBeVisible();
-
-					expect(
-						await findCustomerByEmail( restApi, email )
-					).toBeDefined();
-
-					await expectEmailAsAdmin(
-						browser,
-						email,
-						bisEmailSubject.verify( product.name )
-					);
-				} );
-			} );
-		} );
-
 		test.describe( 'Guest — requires account', () => {
 			test.beforeAll( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
 					requireAccount: true,
-					createAccountOnSignup: false,
 				} );
 			} );
 

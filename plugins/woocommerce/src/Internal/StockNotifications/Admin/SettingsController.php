@@ -182,24 +182,12 @@ class SettingsController {
 				),
 
 				array(
-					'title'           => __( 'Guest sign-up', 'woocommerce' ),
-					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_customer_stock_notifications_require_account',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
-					'checkboxgroup'   => 'start',
-					'hide_if_checked' => 'option',
-				),
-
-				array(
-					'desc'            => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_customer_stock_notifications_create_account_on_signup',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'end',
-					'hide_if_checked' => 'yes',
-					'autoload'        => true,
+					'title'    => __( 'Guest sign-up', 'woocommerce' ),
+					'desc'     => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
+					'id'       => 'woocommerce_customer_stock_notifications_require_account',
+					'default'  => 'no',
+					'type'     => 'checkbox',
+					'desc_tip' => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
 				),
 
 				array(
@@ -224,21 +212,6 @@ class SettingsController {
 		$screen = get_current_screen();
 		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id || ! isset( $_GET['section'] ) || 'customer_stock_notifications' !== $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
-		}
-
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' ) ) {
-			wp_admin_notice(
-				sprintf(
-					/* translators: %s settings page link */
-					__( 'WooCommerce is currently <a href="%s">configured</a> to create new accounts without generating passwords automatically. Guests who sign up to receive stock notifications will need to reset their password before they can log into their new account.', 'woocommerce' ),
-					esc_url( admin_url( 'admin.php?page=wc-settings&tab=account' ) )
-				),
-				array(
-					'id'          => 'message',
-					'type'        => 'warning',
-					'dismissible' => false,
-				)
-			);
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && Config::allows_signups() ) {
