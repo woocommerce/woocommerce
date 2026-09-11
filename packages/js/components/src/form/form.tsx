@@ -49,6 +49,8 @@ const UNWRITABLE_KEYS = [ '__proto__', 'constructor', 'prototype' ];
 // Copied from lodash's private isKey(), the check setWith() uses to decide
 // whether a name is one literal key or a path to split. A name is a key when
 // it is not a dotted or balanced-bracket path, or when the object holds it.
+// The one deviation is the last term, which drops lodash's Object() wrapper
+// around the object, since the only caller always passes a plain object.
 const PLAIN_KEY = /^\w*$/;
 const DEEP_PATH = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
 
