@@ -45,10 +45,10 @@ const Packages = ( {
 	// Attempt initialization once; failed rates remain unchecked so shoppers can retry them.
 	const initializedPackageIds = useRef< Set< string | number > >( new Set() );
 
-	// Initial selection is coordinated here rather than in each rate list because
-	// a multi-package checkout renders every list inside a collapsed Panel, which
-	// does not mount its children until the shopper opens it. Running from the
-	// parent initializes every package whether or not its panel is open.
+	// Initial selection is coordinated here because the rate lists render the store's
+	// selected rate rather than their own state, so they no longer choose one on mount.
+	// Running it from the parent also reaches packages whose list is not mounted, such
+	// as a consumer that renders them in collapsed panels.
 	useEffect( () => {
 		const currentPackageIds = new Set(
 			packages.map( ( shippingPackage ) => shippingPackage.package_id )
