@@ -143,6 +143,106 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Orders in different currencies are totalled separately, never added together.
+	 */
+	public function test_mixed_currency_orders_are_totalled_separately(): void {
+		$previous_currency = get_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+		try {
+			$native = WC_Helper_Order::create_order( $customer_id );
+			$native->set_status( 'completed' );
+			$native->set_currency( 'EUR' );
+			$native->set_total( 41.90 );
+			$native->save();
+
+			$foreign = WC_Helper_Order::create_order( $customer_id );
+			$foreign->set_status( 'completed' );
+			$foreign->set_currency( 'GBP' );
+			$foreign->set_total( 36.00 );
+			$foreign->save();
+
+			ob_start();
+			$this->sut->output( $native );
+			$output = ob_get_clean();
+
+			// Both orders count, but 41.90 and 36.00 are never added into 77.90.
+			$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output );
+			$this->assertStringNotContainsString( '77.90', $output, 'Amounts in different currencies must not be summed' );
+			$this->assertMatchesRegularExpression( '/data-currency="EUR"[^>]*>[\s\S]{0,200}?41\.90/', $output );
+			$this->assertMatchesRegularExpression( '/data-currency="GBP"[^>]*>[\s\S]{0,200}?36\.00/', $output );
+			// Each currency reports how many of the orders it covers.
+			$this->assertStringContainsString( '1 order', $output );
+		} finally {
+			update_option( 'woocommerce_currency', $previous_currency );
+		}
+	}
+
+	/**
+	 * @testdox A refund reduces only the total for the currency its order was placed in.
+	 */
+	public function test_refund_applies_only_to_its_own_currency(): void {
+		$previous_currency = get_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+		try {
+			$native = WC_Helper_Order::create_order( $customer_id );
+			$native->set_status( 'completed' );
+			$native->set_currency( 'EUR' );
+			$native->set_total( 100.00 );
+			$native->save();
+
+			$foreign = WC_Helper_Order::create_order( $customer_id );
+			$foreign->set_status( 'completed' );
+			$foreign->set_currency( 'GBP' );
+			$foreign->set_total( 50.00 );
+			$foreign->save();
+
+			wc_create_refund(
+				array(
+					'order_id' => $foreign->get_id(),
+					'amount'   => 20.00,
+				)
+			);
+
+			ob_start();
+			$this->sut->output( $native );
+			$output = ob_get_clean();
+
+			$this->assertMatchesRegularExpression( '/data-currency="EUR"[^>]*>[\s\S]{0,200}?100\.00/', $output, 'EUR total is untouched by a GBP refund' );
+			$this->assertMatchesRegularExpression( '/data-currency="GBP"[^>]*>[\s\S]{0,200}?30\.00/', $output, 'GBP total drops by the GBP refund' );
+		} finally {
+			update_option( 'woocommerce_currency', $previous_currency );
+		}
+	}
+
+	/**
+	 * @testdox A single-currency customer renders exactly as before, with no per-currency chrome.
+	 */
+	public function test_single_currency_customer_is_unchanged(): void {
+		$previous_currency = get_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+		try {
+			$order = WC_Helper_Order::create_order( $customer_id );
+			$order->set_status( 'completed' );
+			$order->set_currency( 'EUR' );
+			$order->set_total( 25.00 );
+			$order->save();
+
+			ob_start();
+			$this->sut->output( $order );
+			$output = ob_get_clean();
+
+			$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*25\.00/', $output );
+			// The order-count suffix belongs to the mixed-currency case only.
+			$this->assertStringNotContainsString( '1 order<', $output );
+		} finally {
+			update_option( 'woocommerce_currency', $previous_currency );
+		}
+	}
+
+	/**
 	 * @testdox Should fetch data correctly for a guest customer matched by billing email (HPOS).
 	 */
 	public function test_guest_customer_by_email(): void {
