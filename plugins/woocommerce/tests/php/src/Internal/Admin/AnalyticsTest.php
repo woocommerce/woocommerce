@@ -26,6 +26,13 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Tracks events recorded by the fix tool, as [ name, properties ] pairs.
+	 *
+	 * @var array
+	 */
+	private $events = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -33,6 +40,13 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->sut = Analytics::get_instance();
 		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
 		update_option( \WC_Install::INITIAL_INSTALLED_VERSION, '10.5.0' );
+
+		$this->events = array();
+		Analytics::set_refund_double_count_event_recorder(
+			function ( string $event_name, array $properties ): void {
+				$this->events[] = array( $event_name, $properties );
+			}
+		);
 	}
 
 	/**
@@ -40,6 +54,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			Analytics::set_refund_double_count_event_recorder( null );
 			// Action Scheduler actions are not covered by the options rollback.
 			as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
 			as_unschedule_all_actions( 'woocommerce_analytics_refund_fix_batch' );
@@ -181,6 +196,21 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Properties of the recorded fix tool events with the given name, oldest first.
+	 *
+	 * @param string $event_name Event name without the wcadmin_ prefix.
+	 * @return array[]
+	 */
+	private function get_events( string $event_name ): array {
+		return array_values(
+			array_map(
+				fn( $event ) => $event[1],
+				array_filter( $this->events, fn( $event ) => $event_name === $event[0] )
+			)
+		);
+	}
+
+	/**
 	 * Get the tool registration, or null when the tool is not registered.
 	 *
 	 * @return array|null
@@ -216,6 +246,17 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $correct_partial_then_full ), 0.001 );
 		$this->assertEqualsWithDelta( -50.0, $this->get_refunds_total( $single_full ), 0.001 );
 		$this->assertEqualsWithDelta( -20.0, $this->get_refunds_total( $partials_under_total ), 0.001 );
+
+		$finished = $this->get_events( 'analytics_refund_double_count_fix_finished' );
+		$this->assertCount( 1, $finished, 'The end of the run should be recorded once' );
+		$this->assertSame( 'complete', $finished[0]['result'] );
+		$this->assertSame( 2, $finished[0]['fixed_count'] );
+		$this->assertSame( 0, $finished[0]['unresolved_count'] );
+		$this->assertSame( 1, $finished[0]['batches'] );
+		$this->assertSame( $state['max_order_id'], $finished[0]['max_order_id'] );
+		$this->assertGreaterThanOrEqual( 0, $finished[0]['duration_seconds'] );
+		$this->assertMatchesRegularExpression( '/^(mysql|mariadb)(-\d+\.\d+)?$|^unknown$/', $finished[0]['db_engine'] );
+		$this->assertContains( $finished[0]['order_storage'], array( 'hpos', 'cpt' ) );
 	}
 
 	/**
@@ -307,6 +348,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 3, $batches, 'Two full batches of one order, then a final batch that finds nothing' );
 		$this->assertSame( 2, Analytics::get_refund_double_count_state()['fixed'] );
+		$this->assertSame( 3, $this->get_events( 'analytics_refund_double_count_fix_finished' )[0]['batches'] );
 
 		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
 		$this->double_count_latest_refund( $first );
@@ -334,6 +376,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $state['fixed'] );
 		$this->assertSame( 1, $state['unresolved'] );
 		$this->assertSame( 'Check and fix', $this->get_tool()['button'], 'The tool should offer another run instead of Dismiss' );
+		$this->assertSame( 1, $this->get_events( 'analytics_refund_double_count_fix_finished' )[0]['unresolved_count'] );
 	}
 
 	/**
@@ -465,6 +508,15 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, Analytics::get_refund_double_count_state()['status'] );
 		$this->assertSame( 'running' === $expected, as_has_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK ) );
+
+		$finished = $this->get_events( 'analytics_refund_double_count_fix_finished' );
+		if ( 'cancelled' === $expected ) {
+			$this->assertCount( 1, $finished );
+			$this->assertSame( 'cancelled', $finished[0]['result'] );
+			$this->assertSame( 0, $finished[0]['batches'] );
+		} else {
+			$this->assertCount( 0, $finished, 'A run that keeps going has not finished' );
+		}
 	}
 
 	/**
@@ -577,13 +629,14 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Refuses to start a run while another run or the full refund data fix is in progress.
-	 * @testWith ["woocommerce_analytics_refund_double_count_fix_batch", "A fix is already in progress"]
-	 *           ["woocommerce_analytics_refund_fix_batch", "full refund data fix is still running"]
+	 * @testWith ["woocommerce_analytics_refund_double_count_fix_batch", "A fix is already in progress", "refused_running"]
+	 *           ["woocommerce_analytics_refund_fix_batch", "full refund data fix is still running", "refused_full_refund_fix"]
 	 *
 	 * @param string $pending_hook     Hook of the pending action.
 	 * @param string $expected_message Expected message fragment.
+	 * @param string $expected_outcome Expected tool_run outcome.
 	 */
-	public function test_tool_refuses_to_start_while_busy( string $pending_hook, string $expected_message ): void {
+	public function test_tool_refuses_to_start_while_busy( string $pending_hook, string $expected_message, string $expected_outcome ): void {
 		update_option(
 			Analytics::REFUND_DOUBLE_COUNT_OPTION,
 			array(
@@ -597,6 +650,18 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( $expected_message, $message );
 		$this->assertSame( 'current', Analytics::get_refund_double_count_state()['run_id'], 'No new run should start' );
+		$this->assertSame(
+			array(
+				array(
+					'outcome'         => $expected_outcome,
+					'previous_status' => 'running',
+				),
+			),
+			array_map(
+				fn( $properties ) => array_intersect_key( $properties, array_flip( array( 'outcome', 'previous_status' ) ) ),
+				$this->get_events( 'analytics_refund_double_count_tool_run' )
+			)
+		);
 	}
 
 	/**
@@ -609,5 +674,9 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( Analytics::get_refund_double_count_state()['dismissed'] );
 		$this->assertNull( $this->get_tool() );
+
+		$tool_runs = $this->get_events( 'analytics_refund_double_count_tool_run' );
+		$this->assertSame( array( 'started', 'dismissed' ), array_column( $tool_runs, 'outcome' ) );
+		$this->assertSame( array( 'none', 'complete' ), array_column( $tool_runs, 'previous_status' ) );
 	}
 }
