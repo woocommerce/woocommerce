@@ -578,4 +578,112 @@ describe( 'Testing Checkout', () => {
 		// Given we're checking for invisible errors here, reaching to the data store is a good option.
 		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
 	} );
+
+	it( 'Places the order after a coupon fails to apply', async () => {
+		const user = userEvent.setup();
+		const couponError =
+			'Coupon code "5fixedcheckout" has already been applied.';
+		let checkoutRequests = 0;
+
+		server.use(
+			http.post( '/wc/store/v1/batch', () =>
+				HttpResponse.json(
+					{
+						code: 'woocommerce_rest_cart_coupon_error',
+						message: couponError,
+						data: { status: 400, details: { cart: couponError } },
+					},
+					{ status: 400 }
+				)
+			),
+			http.post( '/wc/store/v1/checkout', () => {
+				checkoutRequests++;
+				return HttpResponse.json(
+					{
+						code: 'woocommerce_rest_checkout_test_stop',
+						message: 'Stop here.',
+						data: { status: 400 },
+					},
+					{ status: 400 }
+				);
+			} )
+		);
+
+		render( <CheckoutBlock /> );
+
+		await waitFor( () =>
+			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
+		);
+
+		// Apply a coupon the server rejects.
+		await act( async () => {
+			await user.click( screen.getByText( 'Add coupons' ) );
+		} );
+		await act( async () => {
+			await user.type(
+				screen.getByLabelText( 'Enter code' ),
+				'5fixedcheckout'
+			);
+		} );
+		await act( async () => {
+			await user.click( screen.getByRole( 'button', { name: 'Apply' } ) );
+		} );
+		expect( await screen.findByText( couponError ) ).toBeVisible();
+
+		// Fill the rest of the form.
+		const shippingForm = screen.getByRole( 'group', {
+			name: /shipping address/i,
+		} );
+		await act( async () => {
+			await user.selectOptions(
+				within( shippingForm ).getByLabelText( /Country\/Region/i ),
+				'Spain'
+			);
+		} );
+		await act( async () => {
+			await user.type(
+				screen.getByLabelText( /Email address/i ),
+				'test@test.com'
+			);
+			await user.type(
+				within( shippingForm ).getByLabelText( /First name/i ),
+				'John'
+			);
+			await user.type(
+				within( shippingForm ).getByLabelText( /Last name/i ),
+				'Doe'
+			);
+			await user.type(
+				within( shippingForm ).getByLabelText( 'Address' ),
+				'123 Main St'
+			);
+			await user.type(
+				within( shippingForm ).getByLabelText( /City/i ),
+				'BCN'
+			);
+			await user.selectOptions(
+				within( shippingForm ).getByLabelText( /Province/i ),
+				'Barcelona'
+			);
+			await user.click(
+				screen.getByRole( 'checkbox', {
+					name: /terms and conditions/i,
+				} )
+			);
+		} );
+
+		await act( async () => {
+			await user.click(
+				screen.getByRole( 'button', { name: /Place order/i } )
+			);
+		} );
+
+		// The coupon failure must not stop the order from being sent.
+		await waitFor( () => expect( checkoutRequests ).toBe( 1 ), {
+			timeout: 3000,
+		} );
+		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
+		// Placing the order drops the stale coupon message.
+		expect( screen.queryByText( couponError ) ).not.toBeInTheDocument();
+	} );
 } );
