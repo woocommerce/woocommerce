@@ -222,6 +222,8 @@ export class SelectControl extends Component< Props, State > {
 	node: HTMLDivElement | null = null;
 	activePromise: Promise< void | Option[] > | null = null;
 	cacheSearchOptions: Option[] = [];
+	lastSearchQuery: string | null = null;
+	isUnmounted = false;
 
 	constructor( props: Props ) {
 		super( props );
@@ -257,6 +259,14 @@ export class SelectControl extends Component< Props, State > {
 		}
 	}
 
+	componentWillUnmount() {
+		this.isUnmounted = true;
+		// Cancel any pending debounced search to avoid requests after unmount.
+		( this.updateSearchOptions as {
+			cancel?: () => void;
+		} ).cancel?.();
+	}
+
 	bindNode( node: HTMLDivElement ) {
 		this.node = node;
 	}
@@ -264,6 +274,10 @@ export class SelectControl extends Component< Props, State > {
 	reset( selected: Selected | Option[] | undefined = this.getSelected() ) {
 		const { multiple, excludeSelectedOptions } = this.props;
 		const newState = { ...initialState };
+
+		// Reset the last search query so future searches with the same
+		// query are allowed (e.g., after selecting an option).
+		this.lastSearchQuery = null;
 		// Reset selectedIndex if single selection.
 		if (
 			! multiple &&
@@ -480,6 +494,18 @@ export class SelectControl extends Component< Props, State > {
 	}
 
 	search( query: string | null ) {
+		// Skip if the query hasn't changed to prevent duplicate API requests
+		// (e.g., from focus events re-triggering the same search).
+		if (
+			query === this.lastSearchQuery &&
+			query !== null &&
+			query !== ''
+		) {
+			return;
+		}
+
+		this.lastSearchQuery = query;
+
 		const cacheSearchOptions = this.cacheSearchOptions || [];
 		const searchOptions =
 			query !== null && ! query.length && ! this.props.hideBeforeSearch
@@ -512,6 +538,9 @@ export class SelectControl extends Component< Props, State > {
 		const promise = ( this.activePromise = Promise.resolve(
 			onSearch!( options, query )
 		).then( ( promiseOptions ) => {
+			if ( this.isUnmounted ) {
+				return;
+			}
 			if ( promise !== this.activePromise ) {
 				// Another promise has become active since this one was asked to resolve, so do nothing,
 				// or else we might end triggering a race condition updating the state.
