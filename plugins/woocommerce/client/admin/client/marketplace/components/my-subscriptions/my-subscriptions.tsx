@@ -7,6 +7,7 @@ import {
 	createInterpolateElement,
 	useContext,
 	useEffect,
+	useRef,
 } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
@@ -47,6 +48,7 @@ let pageLoadErrorReported = false;
 export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const installedHeadingRef = useRef< HTMLHeadingElement >( null );
 
 	// Report the failure captured at page load as the notice a failed refresh
 	// would report, under the same id. The Refresh button reruns the very
@@ -209,11 +211,17 @@ export default function MySubscriptions(): React.JSX.Element {
 				<section className="woocommerce-marketplace__my-subscriptions__notices">
 					<Notices />
 				</section>
-				<MySubscriptionsAccount />
+				<MySubscriptionsAccount
+					onDismiss={ () => installedHeadingRef.current?.focus() }
+				/>
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">
-							<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+							<h2
+								className="woocommerce-marketplace__my-subscriptions__heading"
+								ref={ installedHeadingRef }
+								tabIndex={ -1 }
+							>
 								{ __(
 									'Installed on this store',
 									'woocommerce'

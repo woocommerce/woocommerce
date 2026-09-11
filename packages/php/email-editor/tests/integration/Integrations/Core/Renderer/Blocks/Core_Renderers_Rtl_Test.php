@@ -110,8 +110,7 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertNotFalse( $media_position );
 		$this->assertNotFalse( $text_position );
 		$this->assertLessThan( $text_position, $media_position );
-		$this->assertStringContainsString( 'text-align:right;', $rendered );
-		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertWrapperIsRtlAlignedWithoutFloat( $rendered, 'email-block-media-text' );
 	}
 
 	/**
@@ -202,8 +201,7 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 			$this->rtl_context
 		);
 
-		$this->assertStringContainsString( 'text-align:right;', $rendered );
-		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertWrapperIsRtlAlignedWithoutFloat( $rendered, 'email-block-gallery' );
 	}
 
 	/**
@@ -223,6 +221,40 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'align="right"', $rendered );
 		$this->assertOuterSpacerAligned( $rendered, 'right' );
+	}
+
+	/**
+	 * Assert that a block's wrapper table carries its RTL alignment as a `text-align` declaration
+	 * rather than as an `align` attribute.
+	 *
+	 * `align="right"` on a table renders as `float: right` in email clients, taking the block out of
+	 * normal flow so the block that follows fails to clear it. Searching the whole render for the
+	 * substring `align="right"` does not pin this down: the Outlook-only spacer table emitted by
+	 * Abstract_Block_Renderer::add_spacer() carries one inside a conditional comment, so such an
+	 * assertion keeps passing after the wrapper's own attribute is gone. Inspect the wrapper tag.
+	 *
+	 * @param string $rendered Rendered HTML.
+	 * @param string $wrapper_class Class identifying the block's wrapper table.
+	 */
+	private function assertWrapperIsRtlAlignedWithoutFloat( string $rendered, string $wrapper_class ): void {
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'table',
+					'class_name' => $wrapper_class,
+				)
+			),
+			sprintf( 'Expected a wrapper table with the %s class.', $wrapper_class )
+		);
+
+		// No float-triggering align attribute ( get_attribute() is null when the attribute is absent ).
+		$this->assertNull( $processor->get_attribute( 'align' ) );
+
+		// RTL alignment is carried by the text-align declaration instead, keeping the block in flow.
+		$style = $processor->get_attribute( 'style' );
+		$this->assertIsString( $style );
+		$this->assertStringContainsString( 'text-align:right;', $style );
 	}
 
 	/**

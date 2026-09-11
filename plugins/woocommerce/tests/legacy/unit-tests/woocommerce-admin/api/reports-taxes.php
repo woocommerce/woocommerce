@@ -373,6 +373,30 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the CSV export column order stays in sync with the report table.
+	 *
+	 * @testdox Should keep the CSV export column order in sync with the report table.
+	 */
+	public function test_export_column_order_matches_report_table() {
+		// Mirrors getHeadersContent() in
+		// client/admin/client/analytics/report/taxes/table.js. Keys differ
+		// between the two, the order must not.
+		$expected_order = array(
+			'tax_code',
+			'rate',
+			'total_tax',
+			'order_tax',
+			'shipping_tax',
+			'taxable_amount',
+			'orders_count',
+		);
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller();
+
+		$this->assertSame( $expected_order, array_keys( $controller->get_export_columns() ), 'The CSV column order must match the column order in table.js' );
+	}
+
+	/**
 	 * Test reports schema.
 	 *
 	 * @since 3.5.0
@@ -385,7 +409,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 12, count( $properties ) );
 		$this->assertSame( 'integer', $properties['reporting_missing_orders']['type'] );
 		$this->assertArrayHasKey( 'tax_rate_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
@@ -396,6 +420,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'total_tax', $properties );
 		$this->assertArrayHasKey( 'order_tax', $properties );
 		$this->assertArrayHasKey( 'shipping_tax', $properties );
+		$this->assertArrayHasKey( 'taxable_amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 	}
 
@@ -539,7 +564,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			ob_start();
 			$exporter->stream_export_file();
 			$csv = ob_get_clean();
-			$this->assertSame( 3, substr_count( $csv, 'Unavailable' ), $csv );
+			$this->assertSame( 4, substr_count( $csv, 'Unavailable' ), $csv );
 			foreach ( array( '6.98', '5.82', '1.16' ) as $amount ) {
 				$this->assertStringNotContainsString( $amount, $csv );
 			}
@@ -636,13 +661,13 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			ob_start();
 			$exporter->stream_export_file();
 			$csv = ob_get_clean();
-			$this->assertSame( 3, substr_count( $csv, 'Unavailable' ), $csv );
+			$this->assertSame( 4, substr_count( $csv, 'Unavailable' ), $csv );
 			$csv_rows = array_map( 'str_getcsv', explode( "\n", trim( $csv ) ) );
 			$this->assertCount( 3, $csv_rows );
-			$this->assertSame( array( 'Unavailable', 'Unavailable', 'Unavailable' ), array_slice( $csv_rows[1], 2, 3 ) );
+			$this->assertSame( array( 'Unavailable', 'Unavailable', 'Unavailable', 'Unavailable' ), array_slice( $csv_rows[1], 2, 4 ) );
 			$this->assertSame( array( '7.00', '5.00', '2.00' ), array_slice( $csv_rows[2], 2, 3 ) );
-			$this->assertSame( '2', $csv_rows[1][5] );
-			$this->assertSame( '1', $csv_rows[2][5] );
+			$this->assertSame( '2', $csv_rows[1][6] );
+			$this->assertSame( '1', $csv_rows[2][6] );
 		} finally {
 			remove_filter( 'woocommerce_admin_taxes_report_export_batch_limit', $one_row );
 			wp_delete_file( $path );

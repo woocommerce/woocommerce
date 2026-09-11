@@ -54,6 +54,11 @@ export class TaxesReportTable extends Component {
 				isSortable: true,
 			},
 			{
+				label: __( 'Taxable amount', 'woocommerce' ),
+				key: 'taxable_amount',
+				isSortable: true,
+			},
+			{
 				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
@@ -80,8 +85,31 @@ export class TaxesReportTable extends Component {
 				tax_rate_id: taxRateId,
 				total_tax: totalTax,
 				shipping_tax: shippingTax,
+				taxable_amount: taxableAmount,
 			} = tax;
 			const incomplete = Number( tax.reporting_missing_orders ) > 0;
+			// A zero base under a non-zero tax marks a lookup row recorded before the
+			// taxable amount existed (or a manual tax line) - unknown, not zero.
+			const hasTaxableAmount =
+				taxableAmount !== undefined &&
+				! ( taxableAmount === 0 && totalTax !== 0 );
+			// Taxable amount is money too: unavailable when the row's currency cannot be
+			// qualified, and unknown (N/A) when no base was recorded for it.
+			let taxableCell = {
+				display: __( 'N/A', 'woocommerce' ),
+				value: '',
+			};
+			if ( incomplete ) {
+				taxableCell = {
+					display: __( 'Unavailable', 'woocommerce' ),
+					value: __( 'Unavailable', 'woocommerce' ),
+				};
+			} else if ( hasTaxableAmount ) {
+				taxableCell = {
+					display: renderCurrency( taxableAmount ),
+					value: getCurrencyFormatDecimal( taxableAmount ),
+				};
+			}
 			const taxCode = getTaxCode( tax );
 
 			const persistedQuery = getPersistedQuery( query );
@@ -132,6 +160,7 @@ export class TaxesReportTable extends Component {
 						? __( 'Unavailable', 'woocommerce' )
 						: getCurrencyFormatDecimal( shippingTax ),
 				},
+				taxableCell,
 				{
 					display: formatValue(
 						getCurrencyConfig(),

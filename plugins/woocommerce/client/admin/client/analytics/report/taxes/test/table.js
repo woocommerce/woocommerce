@@ -28,14 +28,14 @@ describe( 'Taxes table incomplete historical currency data', () => {
 		const row = table().getRowsContent( [
 			{ ...tax, reporting_missing_orders: 1 },
 		] )[ 0 ];
-		for ( const index of [ 2, 3, 4 ] ) {
+		for ( const index of [ 2, 3, 4, 5 ] ) {
 			expect( row[ index ] ).toEqual( {
 				display: 'Unavailable',
 				value: 'Unavailable',
 			} );
 		}
 		expect( row[ 1 ].value ).toBe( 20 );
-		expect( row[ 5 ].value ).toBe( 2 );
+		expect( row[ 6 ].value ).toBe( 2 );
 	} );
 	test( 'preserves all complete tax amounts', () => {
 		const row = table().getRowsContent( [
