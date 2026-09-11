@@ -92,17 +92,18 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_lists_providers_with_servable_data_types(): void {
 		$icon_url           = home_url( '/wp-content/plugins/mock/icon.svg' );
-		$provider           = new FakeFinanceDataProvider( 'mock' );
+		$provider           = new FakeFinanceDataProvider( 'mock', null, 'Mock Gateway' );
 		$provider->icon_url = $icon_url;
 		$this->registry->register( $provider );
-		$this->registry->register( new FakeBaseFinanceDataProvider( 'mock_two', array( FinanceDataSource::BALANCE => 1 ) ) );
+		$this->registry->register( new FakeBaseFinanceDataProvider( 'mock_two', array( FinanceDataSource::BALANCE => 1 ), 'Mock Two' ) );
 		$this->registry->register(
 			new FakeFinanceDataProvider(
 				'mock_three',
 				array(
 					FinanceDataSource::BALANCE => 2,
 					FinanceDataSource::PAYOUTS => 1,
-				)
+				),
+				'Mock Three'
 			)
 		);
 
@@ -277,7 +278,7 @@ class FinanceServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_flags_declared_but_unimplemented_data_type(): void {
 		$this->setExpectedIncorrectUsage( FinanceService::class . '::resolve_provider' );
-		$this->registry->register( new FakeBaseFinanceDataProvider( 'mock', array( FinanceDataSource::BALANCE => 1 ) ) );
+		$this->registry->register( new FakeBaseFinanceDataProvider( 'mock', array( FinanceDataSource::BALANCE => 1 ), 'Mock' ) );
 
 		$exception = $this->catch_exception( fn() => $this->sut->get_balances( 'mock' ) );
 
