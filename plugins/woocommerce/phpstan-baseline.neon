@@ -9685,12 +9685,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Parameter \#2 \$value of function wc_setcookie expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10186,12 +10180,6 @@ parameters:
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/class-wc-cart.php
-
-		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/class-wc-cart.php
 
 		-
@@ -69472,12 +69460,6 @@ parameters:
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 4
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 3
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
