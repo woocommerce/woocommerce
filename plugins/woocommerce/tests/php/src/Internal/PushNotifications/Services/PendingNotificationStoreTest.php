@@ -4,19 +4,21 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
-use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the PendingNotificationStore class.
  */
 class PendingNotificationStoreTest extends WC_Unit_Test_Case {
+
+	use PushNotificationsTestTrait;
 
 	/**
 	 * An instance of PendingNotificationStore.
@@ -289,18 +291,5 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$this->store->add( $this->create_stock_mock( 42, StockNotification::EVENT_LOW_STOCK ) );
 
 		$this->assertSame( 1, $this->store->count() );
-	}
-
-	/**
-	 * Creates a push tokens data store whose has_tokens() returns $has_tokens.
-	 *
-	 * @param bool $has_tokens What has_tokens() should report.
-	 * @return PushTokensDataStore
-	 */
-	private function create_data_store_with_tokens( bool $has_tokens ): PushTokensDataStore {
-		$data_store = $this->createMock( PushTokensDataStore::class );
-		$data_store->method( 'has_tokens' )->willReturn( $has_tokens );
-
-		return $data_store;
 	}
 }

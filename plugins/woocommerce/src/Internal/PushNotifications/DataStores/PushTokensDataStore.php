@@ -33,11 +33,12 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
-	 * In-memory cache for get_user_ids_with_tokens(). Null until the first lookup.
+	 * Memoizes a positive has_tokens() result only. A stale true costs one
+	 * lookup; a stale false would drop a notification.
 	 *
-	 * @var int[]|null
+	 * @var bool
 	 */
-	private ?array $users_with_tokens_cache = null;
+	private bool $has_tokens = false;
 
 	const SUPPORTED_META = array(
 		'origin',
@@ -87,8 +88,6 @@ class PushTokensDataStore {
 		}
 
 		$push_token->set_id( $id );
-
-		$this->invalidate_token_caches();
 
 		return $push_token;
 	}
@@ -183,8 +182,6 @@ class PushTokensDataStore {
 			delete_post_meta( (int) $push_token->get_id(), 'device_uuid' );
 		}
 
-		$this->invalidate_token_caches();
-
 		return true;
 	}
 
@@ -203,13 +200,7 @@ class PushTokensDataStore {
 			throw new PushTokenNotFoundException();
 		}
 
-		$deleted = (bool) wp_delete_post( (int) $id, true );
-
-		if ( $deleted ) {
-			$this->invalidate_token_caches();
-		}
-
-		return $deleted;
+		return (bool) wp_delete_post( (int) $id, true );
 	}
 
 	/**
@@ -329,47 +320,6 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Clears the in-memory token caches after a write, so a later read in the
-	 * same request sees the change. Both caches are derived from the same rows,
-	 * and update() can move a token to a different user, so every write clears
-	 * both.
-	 *
-	 * @return void
-	 */
-	private function invalidate_token_caches(): void {
-		$this->users_with_tokens_cache = null;
-		$this->tokens_by_roles_cache   = array();
-	}
-
-	/**
-	 * Returns the IDs of users that own at least one push token.
-	 *
-	 * Memoized per request, so a token registered later in the same request is
-	 * not reflected.
-	 *
-	 * @return int[]
-	 */
-	private function get_user_ids_with_tokens(): array {
-		if ( null !== $this->users_with_tokens_cache ) {
-			return $this->users_with_tokens_cache;
-		}
-
-		global $wpdb;
-
-		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
-		$user_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
-				PushToken::POST_TYPE
-			)
-		);
-
-		$this->users_with_tokens_cache = array_map( 'intval', $user_ids );
-
-		return $this->users_with_tokens_cache;
-	}
-
-	/**
 	 * Determines whether any push token exists, ignoring roles and preferences
 	 * so callers can bail out before the cost of get_tokens_for_roles().
 	 *
@@ -377,7 +327,21 @@ class PushTokensDataStore {
 	 * @return bool True if at least one push token exists.
 	 */
 	public function has_tokens(): bool {
-		return ! empty( $this->get_user_ids_with_tokens() );
+		if ( $this->has_tokens ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index.
+		$this->has_tokens = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' LIMIT 1",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->has_tokens;
 	}
 
 	/**
@@ -419,7 +383,15 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		$users_with_tokens = $this->get_user_ids_with_tokens();
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
+		$users_with_tokens = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
 
 		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
