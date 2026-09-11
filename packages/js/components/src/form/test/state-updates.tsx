@@ -729,4 +729,59 @@ describe( 'Form state updates', () => {
 		expect( onChange ).not.toHaveBeenCalled();
 		expect( onChanges ).not.toHaveBeenCalled();
 	} );
+
+	it( 'drops a write to a bracketed name with no segments, as lodash set() does', () => {
+		const initialValues: Record< string, unknown > = { other: 2 };
+		const { validate, onChange, onChanges } = renderForm(
+			initialValues,
+			( { setValue } ) => (
+				<button onClick={ () => setValue( '[.[', 'Updated' ) }>
+					Write bracketed name
+				</button>
+			)
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Write bracketed name' } )
+		);
+
+		expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
+		expect( validate ).not.toHaveBeenCalled();
+		expect( onChange ).not.toHaveBeenCalled();
+		expect( onChanges ).not.toHaveBeenCalled();
+	} );
+
+	// lodash treats every symbol as a key, boxed ones included, so the name never
+	// reaches the string checks, which would throw on it.
+	it( 'writes a boxed symbol name as a key, as lodash set() does', () => {
+		const name = Object( Symbol( 'boxed' ) );
+		const initialValues: Record< string, unknown > = { other: 2 };
+		let latest: Record< string, unknown > = {};
+		const { onChange, onChanges } = renderForm(
+			initialValues,
+			( { setValue, values } ) => {
+				latest = values;
+				return (
+					<button
+						onClick={ () =>
+							setValue( name as unknown as string, 'Updated' )
+						}
+					>
+						Write boxed symbol
+					</button>
+				);
+			}
+		);
+
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Write boxed symbol' } )
+		);
+
+		// The rendered output goes through JSON.stringify(), which drops symbol keys.
+		expect( Object.getOwnPropertySymbols( latest ) ).toHaveLength( 1 );
+		expect( latest[ name as unknown as string ] ).toBe( 'Updated' );
+		// setValues() reports through Object.keys(), so a symbol write names nothing.
+		expect( onChange ).not.toHaveBeenCalled();
+		expect( onChanges ).toHaveBeenCalledWith( [], latest, true );
+	} );
 } );

@@ -18,6 +18,7 @@ import _get from 'lodash/get';
 import _clone from 'lodash/clone';
 import _toPath from 'lodash/toPath';
 import _isEqual from 'lodash/isEqual';
+import _isSymbol from 'lodash/isSymbol';
 import _omit from 'lodash/omit';
 
 /**
@@ -61,7 +62,8 @@ function isKey( name: unknown, object: object ): boolean {
 		type === 'symbol' ||
 		type === 'boolean' ||
 		name === null ||
-		name === undefined
+		name === undefined ||
+		_isSymbol( name )
 	) {
 		return true;
 	}
