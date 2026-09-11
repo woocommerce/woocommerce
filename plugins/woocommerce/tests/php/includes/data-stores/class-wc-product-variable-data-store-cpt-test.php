@@ -98,6 +98,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
+		delete_option( 'woocommerce_hide_out_of_stock_items' );
 		parent::tearDown();
 	}
 
@@ -471,6 +472,51 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$data_store->sync_stock_status( $product );
 
 		$this->assertSame( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox A parent inheriting a custom stock status drops the out of stock visibility term and stays in the catalog.
+	 */
+	public function test_inherited_custom_stock_status_changes_catalog_visibility(): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		$out_of_stock_product = $this->create_variable_product_with_child_stock_statuses(
+			array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::OUT_OF_STOCK )
+		);
+		$data_store->sync_stock_status( $out_of_stock_product );
+		$out_of_stock_product->save();
+
+		$custom_status_product = $this->create_variable_product_with_child_stock_statuses(
+			array( 'custom_status_a', 'custom_status_a' )
+		);
+		$data_store->sync_stock_status( $custom_status_product );
+		$custom_status_product->save();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $out_of_stock_product->get_stock_status() );
+		$this->assertSame( 'custom_status_a', $custom_status_product->get_stock_status() );
+
+		$out_of_stock_terms  = wp_get_object_terms( $out_of_stock_product->get_id(), 'product_visibility', array( 'fields' => 'slugs' ) );
+		$custom_status_terms = wp_get_object_terms( $custom_status_product->get_id(), 'product_visibility', array( 'fields' => 'slugs' ) );
+
+		$this->assertContains( ProductStockStatus::OUT_OF_STOCK, $out_of_stock_terms, 'A parent stored as out of stock carries the outofstock visibility term.' );
+		$this->assertNotContains( ProductStockStatus::OUT_OF_STOCK, $custom_status_terms, 'A parent holding a custom status carries no outofstock visibility term.' );
+
+		// Assert through the real catalog query rather than is_visible(), which routes through is_in_stock() and so
+		// returns the same answer before and after this change once a store filters woocommerce_product_is_in_stock.
+		$visible_ids = ( new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => ProductStatus::PUBLISH,
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'tax_query'      => WC()->query->get_tax_query(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		) )->posts;
+
+		$this->assertNotContains( $out_of_stock_product->get_id(), $visible_ids, 'Hide out of stock items excludes the out of stock parent.' );
+		$this->assertContains( $custom_status_product->get_id(), $visible_ids, 'The parent holding a custom status is no longer excluded, matching a simple product with the same status.' );
 	}
 
 	/**
