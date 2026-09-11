@@ -795,6 +795,112 @@ describe( 'start of week setting', () => {
 	} );
 } );
 
+describe( 'weekday names', () => {
+	const HEBREW_WEEKDAYS_SHORT = [ 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש' ];
+	const ENGLISH_WEEKDAYS_SHORT = [
+		'Sun',
+		'Mon',
+		'Tue',
+		'Wed',
+		'Thu',
+		'Fri',
+		'Sat',
+	];
+	const ENGLISH_WEEKDAYS_MIN = [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ];
+	const GERMAN_WEEKDAYS_SHORT = [
+		'So.',
+		'Mo.',
+		'Di.',
+		'Mi.',
+		'Do.',
+		'Fr.',
+		'Sa.',
+	];
+	const GERMAN_WEEKDAYS_MIN = [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ];
+	const RUSSIAN_WEEKDAYS_SHORT = [ 'вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб' ];
+
+	/**
+	 * Defines a locale and loads the package against it, on a moment of their
+	 * own so the surrounding tests keep theirs. Without a `weekdaysMin` this is
+	 * the shape WordPress leaves behind, and moment falls back to the English
+	 * names.
+	 *
+	 * @param {Object} config - Locale configuration.
+	 * @return {Object} - The locale data moment holds once the package loaded.
+	 */
+	function loadWithLocale( config: moment.LocaleSpecification ) {
+		let localeData = moment.localeData();
+
+		jest.isolateModules( () => {
+			/* eslint-disable @typescript-eslint/no-require-imports -- isolateModules only tracks synchronous requires. */
+			const momentLib = require( 'moment' );
+
+			momentLib.defineLocale( 'test_locale', config );
+			require( '../index' );
+			/* eslint-enable @typescript-eslint/no-require-imports */
+
+			localeData = momentLib.localeData();
+		} );
+
+		return localeData;
+	}
+
+	it( 'should fill in the missing weekdaysMin from the translated short names', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+	} );
+
+	it( 'should keep the rest of the locale data untouched', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
+			longDateFormat: {
+				L: 'DD/MM/YYYY',
+				LL: 'D [ב]MMMM YYYY',
+				LLL: 'D [ב]MMMM YYYY HH:mm',
+				LLLL: 'dddd, D [ב]MMMM YYYY HH:mm',
+				LT: 'HH:mm',
+				LTS: 'HH:mm:ss',
+			},
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+		expect( localeData.longDateFormat( 'L' ) ).toBe( 'DD/MM/YYYY' );
+		expect( localeData.longDateFormat( 'LL' ) ).toBe( 'D [ב]MMMM YYYY' );
+		expect( localeData.weekdaysShort() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+	} );
+
+	it( 'should leave an English locale on the moment fallback', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: ENGLISH_WEEKDAYS_SHORT,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
+	} );
+
+	it( 'should keep the weekdaysMin something else already supplied', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: GERMAN_WEEKDAYS_SHORT,
+			weekdaysMin: GERMAN_WEEKDAYS_MIN,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( GERMAN_WEEKDAYS_MIN );
+	} );
+
+	it( 'should leave a locale that holds its short names in another shape alone', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: {
+				format: RUSSIAN_WEEKDAYS_SHORT,
+				standalone: RUSSIAN_WEEKDAYS_SHORT,
+			} as unknown as string[],
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
+	} );
+} );
+
 describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates on the same day', () => {
 		const label = getRangeLabel(
