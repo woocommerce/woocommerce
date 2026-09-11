@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
+use Automattic\WooCommerce\Enums\CartBehaviorOnLogout;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
@@ -1277,7 +1278,21 @@ class WC_Install {
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
-		if ( self::is_new_install() ) {
+		$is_new_install = self::is_new_install();
+
+		// New stores keep the cart through logout; existing stores stay on the behavior they have always
+		// had, and their merchants opt in. This runs here rather than as an update callback so the value
+		// is in place before anything can read it: update callbacks are queued through Action Scheduler,
+		// which would leave a window where the setting is visible but not yet corrected. add_option() is
+		// a no-op once a value exists, so a merchant's own choice is never overwritten.
+		add_option(
+			'woocommerce_cart_behavior_on_logout',
+			$is_new_install ? CartBehaviorOnLogout::PRESERVE : CartBehaviorOnLogout::CLEAR,
+			'',
+			false
+		);
+
+		if ( $is_new_install ) {
 			// Define initial tax classes.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
