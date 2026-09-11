@@ -256,4 +256,109 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$featured_product->delete();
 		$regular_product->delete();
 	}
+
+	/**
+	 * @testdox Product categories are sorted by their order term meta when no orderby is requested.
+	 */
+	public function test_product_cat_default_sort_uses_order_term_meta(): void {
+		$unordered = wp_insert_term( 'Category A', 'product_cat' );
+		$third     = wp_insert_term( 'Category B', 'product_cat' );
+		$first     = wp_insert_term( 'Category C', 'product_cat' );
+		$second    = wp_insert_term( 'Category D', 'product_cat' );
+
+		delete_term_meta( $unordered['term_id'], 'order' );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+		update_term_meta( $third['term_id'], 'order', 3 );
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'include'    => array( $unordered['term_id'], $third['term_id'], $first['term_id'], $second['term_id'] ),
+			)
+		);
+
+		$this->assertSame(
+			array( (int) $unordered['term_id'], (int) $first['term_id'], (int) $second['term_id'], (int) $third['term_id'] ),
+			array_map( 'intval', $terms ),
+			'Categories should come back in order meta sequence, and categories without order meta should still be returned.'
+		);
+	}
+
+	/**
+	 * @testdox A term meta filter passed to get_terms is honored on product categories, without losing the default sorting.
+	 * @dataProvider provider_term_meta_filter_args
+	 *
+	 * @param array $filter_args The meta filter arguments to pass to get_terms().
+	 */
+	public function test_product_cat_honors_caller_term_meta_filter( array $filter_args ): void {
+		$second    = wp_insert_term( 'Category A', 'product_cat' );
+		$first     = wp_insert_term( 'Category B', 'product_cat' );
+		$unmatched = wp_insert_term( 'Category C', 'product_cat' );
+
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+
+		$terms = get_terms(
+			array_merge(
+				array(
+					'taxonomy'   => 'product_cat',
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'include'    => array( $second['term_id'], $first['term_id'], $unmatched['term_id'] ),
+				),
+				$filter_args
+			)
+		);
+
+		$this->assertSame(
+			array( (int) $first['term_id'], (int) $second['term_id'] ),
+			array_map( 'intval', $terms ),
+			'Only the categories matching the meta filter should be returned, in order meta sequence.'
+		);
+	}
+
+	/**
+	 * Both forms WordPress accepts for a term meta filter.
+	 *
+	 * @return array
+	 */
+	public function provider_term_meta_filter_args(): array {
+		return array(
+			'meta_key and meta_value' => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				),
+			),
+			'nested meta_query'       => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => 'wc_test_flag',
+							'value' => 'yes',
+						),
+					),
+				),
+			),
+			'both forms combined'     => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'order',
+							'value'   => 2,
+							'compare' => '<=',
+						),
+					),
+				),
+			),
+		);
+	}
 }
