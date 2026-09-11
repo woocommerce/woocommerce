@@ -522,11 +522,13 @@ class QueryBuilder {
 				// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
 				$attribute_value = explode( ',', $attribute_value );
 
-				$acc[] = array(
-					'taxonomy' => str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name ),
-					'field'    => 'slug',
-					'terms'    => $attribute_value,
-					'operator' => 'and' === $attribute_query ? 'AND' : 'IN',
+				$taxonomy = str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name );
+				$acc[]    = array(
+					'taxonomy'        => $taxonomy,
+					'field'           => 'slug',
+					'terms'           => $attribute_value,
+					'operator'        => 'and' === $attribute_query ? 'AND' : 'IN',
+					'filter_taxonomy' => $taxonomy,
 				);
 
 				return $acc;
@@ -699,10 +701,11 @@ class QueryBuilder {
 			}
 
 			$tax_queries[] = array(
-				'taxonomy' => $taxonomy_slug,
-				'field'    => 'slug',
-				'terms'    => $term_slugs,
-				'operator' => 'IN',
+				'taxonomy'        => $taxonomy_slug,
+				'field'           => 'slug',
+				'terms'           => $term_slugs,
+				'operator'        => 'IN',
+				'filter_taxonomy' => $taxonomy_slug,
 			);
 		}
 
