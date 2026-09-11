@@ -1056,6 +1056,65 @@ describe( 'settings HTML rendering', () => {
 		}
 	} );
 
+	it( 'excludes unknown control fields from custom save payloads', async () => {
+		const saveHandler = jest.fn().mockResolvedValue( undefined );
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/custom-field': ( { field, onChange } ) => (
+					<button
+						type="button"
+						onClick={ () =>
+							onChange( {
+								[ field.id ]: 'changed',
+								unknown: 'stray',
+							} )
+						}
+					>
+						Change fields
+					</button>
+				),
+			},
+			saveHandlers: { 'test/save': saveHandler },
+		} );
+		const schema = createSingleFieldSchema(
+			{
+				id: 'name',
+				label: 'Name',
+				type: 'text',
+				value: 'initial',
+				component: 'test/custom-field',
+			},
+			{ save: { adapter: 'custom', handler: 'test/save' } }
+		);
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		try {
+			act( () => container.querySelector( 'button' )!.click() );
+			const saveButton = container.querySelector(
+				'.woocommerce-save-button'
+			);
+			if ( ! ( saveButton instanceof window.HTMLButtonElement ) ) {
+				throw new Error( 'Expected a save button.' );
+			}
+			await act( async () => {
+				saveButton.click();
+			} );
+			expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+			expect( saveHandler.mock.calls[ 0 ][ 0 ] ).toEqual(
+				expect.objectContaining( {
+					values: { name: 'changed' },
+					changedValues: { name: 'changed' },
+					dirtyFields: [ 'name' ],
+				} )
+			);
+		} finally {
+			act( () => root.unmount() );
+			container.remove();
+		}
+	} );
+
 	it.each( [ 'number', 'integer', 'datetime-local' ] )(
 		'keeps a cleared %s field canonical as null',
 		( fieldType ) => {

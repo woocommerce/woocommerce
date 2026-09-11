@@ -662,7 +662,11 @@ export const SettingsUIPage = ( {
 				const mergedValues = { ...currentValues };
 				Object.entries( nextValues ).forEach(
 					( [ fieldId, value ] ) => {
-						const fieldType = fieldsById.get( fieldId )?.type;
+						const field = fieldsById.get( fieldId );
+						if ( ! field ) {
+							return;
+						}
+						const fieldType = field.type;
 						const emptyValue =
 							fieldType === 'number' ||
 							fieldType === 'integer' ||
