@@ -52,6 +52,11 @@ Covers the scenarios from the original plugin test plan that have a target in co
   not an option, so `expireVerificationLinks()` sets it to a negative value
   through the same cookie. Both tests clear the cookie afterwards with
   `clearFilters()`.
+- Sign-ups are rate limited per client and per e-mail
+  (`woocommerce_customer_stock_notifications_signup_rate_limit_options`), and
+  the suite submits the form far more often than a shopper would from one
+  customer and one IP. `signUpOnProductPage()` disables the limiter through the
+  same cookie before every submit, so no spec has to opt in.
 - The email templates fork on `$is_guest`, which is "the signup has no
   `WP_User`". A guest signup is never linked to an account by its email
   address, so only a logged-in signup takes the other branch. The specs cover
