@@ -191,7 +191,7 @@ class SignupService {
 	}
 
 	/**
-	 * Get the active notification for the request data.
+	 * Get the active or pending notification for the request data.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -209,48 +209,68 @@ class SignupService {
 			return null;
 		}
 
-		$found = false;
+		// A customer may have signed up as a guest (user_id 0) before creating an account with the same
+		// email, or vice versa. Match on user ID first, then fall back to the email so both states are found.
+		$identities = array();
 		if ( ! empty( $user_id ) ) {
-			$found = NotificationQuery::notification_exists_by_user_id( $product_id, $user_id );
-		} else {
-			$found = NotificationQuery::notification_exists_by_email( $product_id, $user_email );
+			$identities[] = array( 'user_id' => $user_id );
+		}
+		if ( ! empty( $user_email ) ) {
+			$identities[] = array( 'user_email' => $user_email );
 		}
 
-		if ( ! $found ) {
-			return null;
-		}
-
-		$query_args = array( 'product_id' => $product_id );
-		if ( ! empty( $user_id ) ) {
-			$query_args['user_id'] = $user_id;
-		} else {
-			$query_args['user_email'] = $user_email;
-		}
-
-		$query_args['return'] = 'ids';
-		$query_args['limit']  = 1;
-		if ( ! empty( $posted_attributes ) ) {
-			// Hint: We need to compare the posted attributes with the stored attributes to handle variations with "any" attributes.
-			$query_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				array(
-					'key'     => 'posted_attributes',
-					'value'   => maybe_serialize( $posted_attributes ),
-					'compare' => '=',
-				),
+		foreach ( $identities as $identity ) {
+			$notifications = NotificationQuery::get_notifications(
+				array_merge(
+					$identity,
+					array(
+						'product_id' => $product_id,
+						'status'     => array( NotificationStatus::ACTIVE, NotificationStatus::PENDING ),
+						'order_by'   => array( 'id' => 'DESC' ),
+						'return'     => 'objects',
+					)
+				)
 			);
+
+			foreach ( $notifications as $notification ) {
+				if ( $notification instanceof Notification && $this->matches_posted_attributes( $notification, $posted_attributes ) ) {
+					return $notification;
+				}
+			}
 		}
 
-		$ids = NotificationQuery::get_notifications( $query_args );
-		if ( empty( $ids ) || ! is_numeric( $ids[0] ) ) {
-			return null;
+		return null;
+	}
+
+	/**
+	 * Check whether a notification was signed up for with the posted attributes.
+	 *
+	 * A variation with "any" attributes can be signed up for more than once with different
+	 * attribute values, so the stored attributes have to match the posted ones. An empty set
+	 * of posted attributes matches any notification.
+	 *
+	 * @param Notification $notification The notification.
+	 * @param array        $posted_attributes The posted attributes.
+	 * @return bool True if the notification matches the posted attributes.
+	 */
+	private function matches_posted_attributes( Notification $notification, array $posted_attributes ): bool {
+
+		if ( empty( $posted_attributes ) ) {
+			return true;
 		}
 
-		$notification = Factory::get_notification( $ids[0] );
-		if ( ! $notification ) {
-			return null;
+		$stored_attributes = $notification->get_meta( 'posted_attributes' );
+		if ( ! is_array( $stored_attributes ) || count( $stored_attributes ) !== count( $posted_attributes ) ) {
+			return false;
 		}
 
-		return $notification;
+		foreach ( $posted_attributes as $key => $value ) {
+			if ( ! array_key_exists( $key, $stored_attributes ) || (string) $stored_attributes[ $key ] !== (string) $value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
