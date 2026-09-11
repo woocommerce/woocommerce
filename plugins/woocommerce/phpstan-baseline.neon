@@ -66253,12 +66253,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
 
 		-
-			message: '#^Cannot call method get_user_email\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:maybe_restore_notification_locale\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -66302,12 +66296,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_unsubscribe_key\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifiedEmail.php
-
-		-
-			message: '#^Cannot call method get_user_email\(\) on bool\|object\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifiedEmail.php
