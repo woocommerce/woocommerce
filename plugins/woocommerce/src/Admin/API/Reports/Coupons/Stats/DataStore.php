@@ -25,7 +25,9 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 * @return array Typed values, with unavailable amounts represented by null.
 	 */
 	protected function cast_numbers( $data ) {
-		$values = parent::cast_numbers( $data );
+		// The parent always builds and returns an array; its docblock overstates the
+		// return as array|WP_Error, so cast rather than propagate a type that cannot occur.
+		$values = (array) parent::cast_numbers( $data );
 		if ( ! empty( $values['allocation_missing_orders'] ) && array_key_exists( 'amount', $values ) ) {
 			$values['amount'] = null;
 		}
@@ -92,8 +94,10 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		);
 		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
 			global $wpdb;
+			// %i needs WordPress 6.2 and is not implemented by every $wpdb, so the
+			// code-derived table name is interpolated. The value stays prepared.
 			$stats          = $wpdb->prefix . 'wc_order_stats';
-			$currency_match = $wpdb->prepare( '%i.reporting_currency = %s', $stats, get_woocommerce_currency() );
+			$currency_match = $stats . '.reporting_currency = ' . $wpdb->prepare( '%s', get_woocommerce_currency() );
 			$this->report_columns['reporting_missing_orders'] = "COUNT(DISTINCT CASE WHEN $currency_match AND $stats.reporting_exchange_rate = 1 AND $stats.reporting_basis = 'native' THEN NULL ELSE CASE WHEN $stats.parent_id > 0 THEN $stats.parent_id ELSE $table_name.order_id END END) AS reporting_missing_orders";
 		}
 	}

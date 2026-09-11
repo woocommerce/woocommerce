@@ -33,9 +33,9 @@ class Controller extends GenericStatsController {
 	/**
 	 * Validate the optional selector before the variation label lookup uses it.
 	 *
-	 * @param mixed           $value Parent IDs supplied by the client.
-	 * @param WP_REST_Request $request REST request.
-	 * @param string          $parameter Parameter name.
+	 * @param mixed                                  $value Parent IDs supplied by the client.
+	 * @param \WP_REST_Request<array<string, mixed>> $request REST request.
+	 * @param string                                 $parameter Parameter name.
 	 * @return bool|\WP_Error Validation result.
 	 */
 	public function validate_variation_parent( $value, $request, $parameter ) {
