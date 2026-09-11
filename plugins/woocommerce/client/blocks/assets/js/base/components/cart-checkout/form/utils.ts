@@ -22,6 +22,7 @@ export interface FieldProps {
 	required: boolean;
 	placeholder: string | undefined;
 	className: string;
+	mask?: string;
 }
 
 const SECTIONED_ADDRESS_TYPES = [ 'billing', 'shipping' ];
@@ -98,6 +99,7 @@ export const createFieldProps = (
 		'/',
 		'-'
 	), // Replace all slashes with hyphens to avoid invalid HTML classes.,
+	...( field?.mask ? { mask: field.mask } : {} ),
 	...field?.attributes,
 } );
 

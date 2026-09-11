@@ -61,6 +61,8 @@ module.exports = {
 		'@woocommerce/icons': 'assets/js/icons',
 		'^@woocommerce/settings/(.*)$': 'packages/public-api/settings/$1',
 		'^@woocommerce/settings$': 'packages/public-api/settings',
+		'^@woocommerce/input-mask$':
+			'<rootDir>/node_modules/@woocommerce/input-mask/src',
 		'@woocommerce/blocks/(.*)$': 'assets/js/blocks/$1',
 		'@woocommerce/block-settings': 'assets/js/settings/blocks',
 		'@woocommerce/editor-components(.*)$': 'assets/js/editor-components/$1',
