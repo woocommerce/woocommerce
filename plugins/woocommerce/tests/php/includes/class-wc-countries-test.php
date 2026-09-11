@@ -827,6 +827,77 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Country locale settings asked for while the country list is being built are rebuilt once the list is complete.
+	 */
+	public function test_country_locale_settings_survive_a_lookup_made_while_countries_are_built(): void {
+		$sut      = new WC_Countries();
+		$callback = function ( $countries ) use ( $sut ) {
+			$sut->get_country_locale();
+			return $countries;
+		};
+		add_filter( 'woocommerce_countries', $callback );
+
+		$sut->get_countries();
+
+		remove_filter( 'woocommerce_countries', $callback );
+
+		$this->assertArrayHasKey( 'DE', $sut->get_country_locale(), 'A lookup made while the country list is being built should not drop country locale entries.' );
+	}
+
+	/**
+	 * @testdox Specific country lists asked for while the country list is being built are empty, then complete.
+	 *
+	 * @dataProvider provide_specific_country_list_methods
+	 *
+	 * @param string $method                   Method under test.
+	 * @param string $mode_option              Country restriction mode option.
+	 * @param string $specific_countries_option Specific countries option.
+	 */
+	public function test_specific_country_lists_asked_for_while_countries_are_built_are_empty_then_complete( $method, $mode_option, $specific_countries_option ): void {
+		update_option( $mode_option, 'specific' );
+		update_option( $specific_countries_option, array( 'US', 'DE', 'CA' ) );
+		$sut      = new WC_Countries();
+		$nested   = null;
+		$callback = function ( $countries ) use ( $sut, $method, &$nested ) {
+			$nested = $sut->$method();
+			return $countries;
+		};
+		add_filter( 'woocommerce_countries', $callback );
+
+		$sut->get_countries();
+
+		remove_filter( 'woocommerce_countries', $callback );
+
+		$this->assertSame( array(), $nested, 'A lookup made while the country list is being built should get no countries rather than null entries.' );
+		$this->assertSame( array( 'US', 'DE', 'CA' ), array_keys( $sut->$method() ), 'The list should be complete once the country list is built.' );
+	}
+
+	/**
+	 * @testdox Country locale settings are rebuilt after a locale filter throws part-way through a build.
+	 */
+	public function test_country_locale_settings_are_rebuilt_after_a_locale_filter_throws(): void {
+		$sut      = new WC_Countries();
+		$callback = function () {
+			throw new \Exception( 'Locale filter failure.' );
+		};
+		add_filter( 'woocommerce_get_country_locale_default', $callback );
+
+		try {
+			$sut->get_country_locale();
+			$this->fail( 'The locale filter exception should reach the caller.' );
+		} catch ( \Exception $e ) {
+			$this->assertSame( 'Locale filter failure.', $e->getMessage() );
+		}
+
+		remove_filter( 'woocommerce_get_country_locale_default', $callback );
+
+		$locale = $sut->get_country_locale();
+
+		$this->assertArrayHasKey( 'default', $locale, 'A build that threw should not be reused.' );
+		$this->assertArrayHasKey( 'DE', $locale, 'The rebuild after a throw should be complete.' );
+	}
+
+	/**
 	 * @testdox Switching locales keeps per-locale caches while a locale filter reads geographical data.
 	 *
 	 * @dataProvider provide_switched_locale_lookups
@@ -956,6 +1027,18 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		return array(
 			'array'                 => array( array() ),
 			'non-stringable object' => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * Specific-country list methods and their options.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_specific_country_list_methods() {
+		return array(
+			'allowed countries'  => array( 'get_allowed_countries', 'woocommerce_allowed_countries', 'woocommerce_specific_allowed_countries' ),
+			'shipping countries' => array( 'get_shipping_countries', 'woocommerce_ship_to_countries', 'woocommerce_specific_ship_to_countries' ),
 		);
 	}
 

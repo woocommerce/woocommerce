@@ -51,6 +51,13 @@ class WC_Countries {
 	private $country_locale_built_for = null;
 
 	/**
+	 * Whether get_country_locale() is building the country locale settings.
+	 *
+	 * @var bool
+	 */
+	private $country_locale_building = false;
+
+	/**
 	 * Locale most recently resolved by get_cache_locale().
 	 *
 	 * @var string|null
@@ -469,12 +476,16 @@ class WC_Countries {
 				}
 			}
 		} elseif ( 'specific' === $allowed_countries ) {
+			$all_countries = $countries;
 			$countries     = array();
 			$raw_countries = get_option( 'woocommerce_specific_allowed_countries', array() );
 
 			if ( $raw_countries ) {
 				foreach ( $raw_countries as $country ) {
-					$countries[ $country ] = $this->read_geo_property( 'countries' )[ $country ];
+					// The list is empty while it is being built, so a lookup made from a country filter gets no entries.
+					if ( isset( $all_countries[ $country ] ) ) {
+						$countries[ $country ] = $all_countries[ $country ];
+					}
 				}
 			}
 		}
@@ -506,12 +517,16 @@ class WC_Countries {
 		if ( 'all' === get_option( 'woocommerce_ship_to_countries' ) ) {
 			$countries = $this->read_geo_property( 'countries' );
 		} elseif ( 'specific' === get_option( 'woocommerce_ship_to_countries' ) ) {
+			$all_countries = $this->read_geo_property( 'countries' );
 			$countries     = array();
 			$raw_countries = get_option( 'woocommerce_specific_ship_to_countries', array() );
 
 			if ( $raw_countries ) {
 				foreach ( $raw_countries as $country ) {
-					$countries[ $country ] = $this->read_geo_property( 'countries' )[ $country ];
+					// The list is empty while it is being built, so a lookup made from a country filter gets no entries.
+					if ( isset( $all_countries[ $country ] ) ) {
+						$countries[ $country ] = $all_countries[ $country ];
+					}
 				}
 			}
 		}
@@ -1045,854 +1060,892 @@ class WC_Countries {
 		$cache_locale = $this->get_cache_locale();
 
 		if ( empty( $this->locale ) || ( null !== $this->country_locale_built_for && $cache_locale !== $this->country_locale_built_for ) ) {
-			// Record the target first, so a lookup made during the rebuild (for example from a locale filter) does not rebuild again.
-			$this->country_locale_built_for = $cache_locale;
-
-			$this->locale = apply_filters(
-				'woocommerce_get_country_locale',
-				array(
-					'AE' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'required' => false,
-						),
-					),
-					'AF' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'AL' => array(
-						'state' => array(
-							'label' => __( 'County', 'woocommerce' ),
-						),
-					),
-					'AO' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'AT' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'AU' => array(
-						'city'     => array(
-							'label' => __( 'Suburb', 'woocommerce' ),
-						),
-						'postcode' => array(
-							'label' => __( 'Postcode', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'State', 'woocommerce' ),
-						),
-					),
-					'AX' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BA' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'label'    => __( 'Canton', 'woocommerce' ),
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BD' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'state'    => array(
-							'label' => __( 'District', 'woocommerce' ),
-						),
-					),
-					'BE' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BG' => array(
-						'state' => array(
-							'required' => false,
-						),
-					),
-					'BH' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BI' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BO' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'BS' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'BW' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-							'label'    => __( 'District', 'woocommerce' ),
-						),
-					),
-					'BZ' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'required' => false,
-						),
-					),
-					'CA' => array(
-						'postcode' => array(
-							'label' => __( 'Postal code', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'CH' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'label'    => __( 'Canton', 'woocommerce' ),
-							'required' => false,
-						),
-					),
-					'CL' => array(
-						'city'     => array(
-							'required' => true,
-						),
-						'postcode' => array(
-							'required' => false,
-							// Hidden for stores within Chile. @see https://github.com/woocommerce/woocommerce/issues/36546.
-							'hidden'   => 'CL' === $this->get_base_country(),
-						),
-						'state'    => array(
-							'label' => __( 'Region', 'woocommerce' ),
-						),
-					),
-					'CN' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'CO' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'state'    => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'CR' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'CW' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'required' => false,
-						),
-					),
-					'CY' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'CZ' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'DE' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-						),
-					),
-					'DK' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'DO' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'EC' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'EE' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'ET' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'FI' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'FR' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'GG' => array(
-						'state' => array(
-							'required' => false,
-							'label'    => __( 'Parish', 'woocommerce' ),
-						),
-					),
-					'GH' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'state'    => array(
-							'label' => __( 'Region', 'woocommerce' ),
-						),
-					),
-					'GP' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'GF' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'GR' => array(
-						'state' => array(
-							'required' => false,
-						),
-					),
-					'GT' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'state'    => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'HK' => array(
-						'postcode' => array(
-							'required' => false,
-						),
-						'city'     => array(
-							'label' => __( 'Town / District', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'Region', 'woocommerce' ),
-						),
-					),
-					'HN' => array(
-						'state' => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'HU' => array(
-						'last_name'  => array(
-							'class'    => array( 'form-row-first' ),
-							'priority' => 10,
-						),
-						'first_name' => array(
-							'class'    => array( 'form-row-last' ),
-							'priority' => 20,
-						),
-						'postcode'   => array(
-							'class'    => array( 'form-row-first', 'address-field' ),
-							'priority' => 65,
-						),
-						'city'       => array(
-							'class' => array( 'form-row-last', 'address-field' ),
-						),
-						'address_1'  => array(
-							'priority' => 71,
-						),
-						'address_2'  => array(
-							'priority' => 72,
-						),
-						'state'      => array(
-							'label'    => __( 'County', 'woocommerce' ),
-							'required' => false,
-						),
-					),
-					'ID' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'IE' => array(
-						'postcode' => array(
-							'required' => true,
-							'label'    => __( 'Eircode', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'County', 'woocommerce' ),
-						),
-					),
-					'IS' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'IL' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'IM' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'IN' => array(
-						'postcode' => array(
-							'label' => __( 'PIN Code', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'State', 'woocommerce' ),
-						),
-					),
-					'IR' => array(
-						'state'     => array(
-							'priority' => 50,
-						),
-						'city'      => array(
-							'priority' => 60,
-						),
-						'address_1' => array(
-							'priority' => 70,
-						),
-						'address_2' => array(
-							'priority' => 80,
-						),
-					),
-					'IT' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => true,
-							'label'    => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'JM' => array(
-						'city'     => array(
-							'label' => __( 'Town / City / Post Office', 'woocommerce' ),
-						),
-						'postcode' => array(
-							'required' => false,
-							'label'    => __( 'Postal Code', 'woocommerce' ),
-						),
-						'state'    => array(
-							'required' => true,
-							'label'    => __( 'Parish', 'woocommerce' ),
-						),
-					),
-					'JP' => array(
-						'last_name'  => array(
-							'class'    => array( 'form-row-first' ),
-							'priority' => 10,
-						),
-						'first_name' => array(
-							'class'    => array( 'form-row-last' ),
-							'priority' => 20,
-						),
-						'postcode'   => array(
-							'class'    => array( 'form-row-first', 'address-field' ),
-							'priority' => 65,
-						),
-						'state'      => array(
-							'label'    => __( 'Prefecture', 'woocommerce' ),
-							'class'    => array( 'form-row-last', 'address-field' ),
-							'priority' => 66,
-						),
-						'city'       => array(
-							'priority' => 67,
-						),
-						'address_1'  => array(
-							'priority' => 68,
-						),
-						'address_2'  => array(
-							'priority' => 69,
-						),
-					),
-					'KN' => array(
-						'postcode' => array(
-							'required' => false,
-							'label'    => __( 'Postal code', 'woocommerce' ),
-						),
-						'state'    => array(
-							'required' => true,
-							'label'    => __( 'Parish', 'woocommerce' ),
-						),
-					),
-					'KR' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'KW' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'LV' => array(
-						'state' => array(
-							'label'    => __( 'Municipality', 'woocommerce' ),
-							'required' => false,
-						),
-					),
-					'LB' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'MF' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'MQ' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'MT' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'MZ' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'NI' => array(
-						'state' => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'NL' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'NG' => array(
-						'postcode' => array(
-							'label'    => __( 'Postcode', 'woocommerce' ),
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'label' => __( 'State', 'woocommerce' ),
-						),
-					),
-					'NZ' => array(
-						'postcode' => array(
-							'label' => __( 'Postcode', 'woocommerce' ),
-						),
-						'state'    => array(
-							'required' => false,
-							'label'    => __( 'Region', 'woocommerce' ),
-						),
-					),
-					'NO' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'NP' => array(
-						'state'    => array(
-							'label' => __( 'State / Zone', 'woocommerce' ),
-						),
-						'postcode' => array(
-							'required' => false,
-						),
-					),
-					'PA' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'PL' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'PR' => array(
-						'city'  => array(
-							'label' => __( 'Municipality', 'woocommerce' ),
-						),
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'PT' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'PY' => array(
-						'state' => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'QA' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'required' => false,
-						),
-					),
-					'RE' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'RO' => array(
-						'state' => array(
-							'label'    => __( 'County', 'woocommerce' ),
-							'required' => true,
-						),
-					),
-					'RS' => array(
-						'city'     => array(
-							'required' => true,
-						),
-						'postcode' => array(
-							'required' => true,
-						),
-						'state'    => array(
-							'label'    => __( 'District', 'woocommerce' ),
-							'required' => false,
-						),
-					),
-					'RW' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'SG' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'city'  => array(
-							'required' => false,
-						),
-					),
-					'SK' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'SI' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'SR' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'SV' => array(
-						'state' => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'ES' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'LI' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'LK' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'LU' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'MD' => array(
-						'state' => array(
-							'label' => __( 'Municipality / District', 'woocommerce' ),
-						),
-					),
-					'SE' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'TR' => array(
-						'postcode' => array(
-							'priority' => 65,
-						),
-						'state'    => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'UG' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'city'     => array(
-							'label'    => __( 'Town / Village', 'woocommerce' ),
-							'required' => true,
-						),
-						'state'    => array(
-							'label'    => __( 'District', 'woocommerce' ),
-							'required' => true,
-						),
-					),
-					'US' => array(
-						'postcode' => array(
-							'label' => __( 'ZIP Code', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label' => __( 'State', 'woocommerce' ),
-						),
-					),
-					'UY' => array(
-						'state' => array(
-							'label' => __( 'Department', 'woocommerce' ),
-						),
-					),
-					'GB' => array(
-						'postcode' => array(
-							'label' => __( 'Postcode', 'woocommerce' ),
-						),
-						'state'    => array(
-							'label'    => __( 'County', 'woocommerce' ),
-							'required' => false,
-						),
-					),
-					'ST' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'state'    => array(
-							'label' => __( 'District', 'woocommerce' ),
-						),
-					),
-					'VN' => array(
-						'state'     => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-						'postcode'  => array(
-							'priority' => 65,
-							'required' => false,
-							'hidden'   => false,
-						),
-						'address_2' => array(
-							'required' => false,
-							'hidden'   => false,
-						),
-					),
-					'WS' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'YT' => array(
-						'state' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-					'ZA' => array(
-						'state' => array(
-							'label' => __( 'Province', 'woocommerce' ),
-						),
-					),
-					'ZW' => array(
-						'postcode' => array(
-							'required' => false,
-							'hidden'   => true,
-						),
-					),
-				)
-			);
-
-			$this->locale = array_intersect_key( $this->locale, array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() ) );
-
-			// Default Locale Can be filtered to override fields in get_address_fields(). Countries with no specific locale will use default.
-			$this->locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
-
-			// Filter default AND shop base locales to allow overrides via a single function. These will be used when changing countries on the checkout.
-			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) {
-				$this->locale[ $this->get_base_country() ] = $this->locale['default'];
+			// The settings are narrowed to the country list, so a lookup made while either is being built gets the previous settings.
+			if ( $this->country_locale_building || isset( $this->geo_cache_building['countries'][ $cache_locale ] ) ) {
+				return $this->locale;
 			}
 
-			$this->locale['default']                   = apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
-			$this->locale[ $this->get_base_country() ] = apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );
+			$this->country_locale_building = true;
 
-			// Country cannot be hidden or optional via locale — it is the lookup key for locale resolution.
-			// Merchants who sell to a single country should use "Sell to specific countries" instead.
-			foreach ( $this->locale as &$locale_entry ) {
-				if ( isset( $locale_entry['country'] ) ) {
-					$locale_entry['country']['hidden']   = false;
-					$locale_entry['country']['required'] = true;
+			try {
+				/**
+				 * Filters the address field settings of each country.
+				 *
+				 * @since 1.5.4
+				 *
+				 * @param array $locale Address field settings keyed by country code.
+				 */
+				$locale = apply_filters(
+					'woocommerce_get_country_locale',
+					array(
+						'AE' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'required' => false,
+							),
+						),
+						'AF' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'AL' => array(
+							'state' => array(
+								'label' => __( 'County', 'woocommerce' ),
+							),
+						),
+						'AO' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'AT' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'AU' => array(
+							'city'     => array(
+								'label' => __( 'Suburb', 'woocommerce' ),
+							),
+							'postcode' => array(
+								'label' => __( 'Postcode', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'State', 'woocommerce' ),
+							),
+						),
+						'AX' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BA' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'label'    => __( 'Canton', 'woocommerce' ),
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BD' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'state'    => array(
+								'label' => __( 'District', 'woocommerce' ),
+							),
+						),
+						'BE' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BG' => array(
+							'state' => array(
+								'required' => false,
+							),
+						),
+						'BH' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BI' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BO' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'BS' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'BW' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+								'label'    => __( 'District', 'woocommerce' ),
+							),
+						),
+						'BZ' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'required' => false,
+							),
+						),
+						'CA' => array(
+							'postcode' => array(
+								'label' => __( 'Postal code', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'CH' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'label'    => __( 'Canton', 'woocommerce' ),
+								'required' => false,
+							),
+						),
+						'CL' => array(
+							'city'     => array(
+								'required' => true,
+							),
+							'postcode' => array(
+								'required' => false,
+								// Hidden for stores within Chile. @see https://github.com/woocommerce/woocommerce/issues/36546.
+								'hidden'   => 'CL' === $this->get_base_country(),
+							),
+							'state'    => array(
+								'label' => __( 'Region', 'woocommerce' ),
+							),
+						),
+						'CN' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'CO' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'state'    => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'CR' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'CW' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'required' => false,
+							),
+						),
+						'CY' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'CZ' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'DE' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+							),
+						),
+						'DK' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'DO' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'EC' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'EE' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'ET' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'FI' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'FR' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'GG' => array(
+							'state' => array(
+								'required' => false,
+								'label'    => __( 'Parish', 'woocommerce' ),
+							),
+						),
+						'GH' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'state'    => array(
+								'label' => __( 'Region', 'woocommerce' ),
+							),
+						),
+						'GP' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'GF' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'GR' => array(
+							'state' => array(
+								'required' => false,
+							),
+						),
+						'GT' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'state'    => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'HK' => array(
+							'postcode' => array(
+								'required' => false,
+							),
+							'city'     => array(
+								'label' => __( 'Town / District', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'Region', 'woocommerce' ),
+							),
+						),
+						'HN' => array(
+							'state' => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'HU' => array(
+							'last_name'  => array(
+								'class'    => array( 'form-row-first' ),
+								'priority' => 10,
+							),
+							'first_name' => array(
+								'class'    => array( 'form-row-last' ),
+								'priority' => 20,
+							),
+							'postcode'   => array(
+								'class'    => array( 'form-row-first', 'address-field' ),
+								'priority' => 65,
+							),
+							'city'       => array(
+								'class' => array( 'form-row-last', 'address-field' ),
+							),
+							'address_1'  => array(
+								'priority' => 71,
+							),
+							'address_2'  => array(
+								'priority' => 72,
+							),
+							'state'      => array(
+								'label'    => __( 'County', 'woocommerce' ),
+								'required' => false,
+							),
+						),
+						'ID' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'IE' => array(
+							'postcode' => array(
+								'required' => true,
+								'label'    => __( 'Eircode', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'County', 'woocommerce' ),
+							),
+						),
+						'IS' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'IL' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'IM' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'IN' => array(
+							'postcode' => array(
+								'label' => __( 'PIN Code', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'State', 'woocommerce' ),
+							),
+						),
+						'IR' => array(
+							'state'     => array(
+								'priority' => 50,
+							),
+							'city'      => array(
+								'priority' => 60,
+							),
+							'address_1' => array(
+								'priority' => 70,
+							),
+							'address_2' => array(
+								'priority' => 80,
+							),
+						),
+						'IT' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => true,
+								'label'    => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'JM' => array(
+							'city'     => array(
+								'label' => __( 'Town / City / Post Office', 'woocommerce' ),
+							),
+							'postcode' => array(
+								'required' => false,
+								'label'    => __( 'Postal Code', 'woocommerce' ),
+							),
+							'state'    => array(
+								'required' => true,
+								'label'    => __( 'Parish', 'woocommerce' ),
+							),
+						),
+						'JP' => array(
+							'last_name'  => array(
+								'class'    => array( 'form-row-first' ),
+								'priority' => 10,
+							),
+							'first_name' => array(
+								'class'    => array( 'form-row-last' ),
+								'priority' => 20,
+							),
+							'postcode'   => array(
+								'class'    => array( 'form-row-first', 'address-field' ),
+								'priority' => 65,
+							),
+							'state'      => array(
+								'label'    => __( 'Prefecture', 'woocommerce' ),
+								'class'    => array( 'form-row-last', 'address-field' ),
+								'priority' => 66,
+							),
+							'city'       => array(
+								'priority' => 67,
+							),
+							'address_1'  => array(
+								'priority' => 68,
+							),
+							'address_2'  => array(
+								'priority' => 69,
+							),
+						),
+						'KN' => array(
+							'postcode' => array(
+								'required' => false,
+								'label'    => __( 'Postal code', 'woocommerce' ),
+							),
+							'state'    => array(
+								'required' => true,
+								'label'    => __( 'Parish', 'woocommerce' ),
+							),
+						),
+						'KR' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'KW' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'LV' => array(
+							'state' => array(
+								'label'    => __( 'Municipality', 'woocommerce' ),
+								'required' => false,
+							),
+						),
+						'LB' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MF' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MQ' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MT' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MZ' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'NI' => array(
+							'state' => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'NL' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'NG' => array(
+							'postcode' => array(
+								'label'    => __( 'Postcode', 'woocommerce' ),
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'State', 'woocommerce' ),
+							),
+						),
+						'NZ' => array(
+							'postcode' => array(
+								'label' => __( 'Postcode', 'woocommerce' ),
+							),
+							'state'    => array(
+								'required' => false,
+								'label'    => __( 'Region', 'woocommerce' ),
+							),
+						),
+						'NO' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'NP' => array(
+							'state'    => array(
+								'label' => __( 'State / Zone', 'woocommerce' ),
+							),
+							'postcode' => array(
+								'required' => false,
+							),
+						),
+						'PA' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'PL' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'PR' => array(
+							'city'  => array(
+								'label' => __( 'Municipality', 'woocommerce' ),
+							),
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'PT' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'PY' => array(
+							'state' => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'QA' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'required' => false,
+							),
+						),
+						'RE' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'RO' => array(
+							'state' => array(
+								'label'    => __( 'County', 'woocommerce' ),
+								'required' => true,
+							),
+						),
+						'RS' => array(
+							'city'     => array(
+								'required' => true,
+							),
+							'postcode' => array(
+								'required' => true,
+							),
+							'state'    => array(
+								'label'    => __( 'District', 'woocommerce' ),
+								'required' => false,
+							),
+						),
+						'RW' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'SG' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'city'  => array(
+								'required' => false,
+							),
+						),
+						'SK' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'SI' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'SR' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'SV' => array(
+							'state' => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'ES' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'LI' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'LK' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'LU' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MD' => array(
+							'state' => array(
+								'label' => __( 'Municipality / District', 'woocommerce' ),
+							),
+						),
+						'SE' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'TR' => array(
+							'postcode' => array(
+								'priority' => 65,
+							),
+							'state'    => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'UG' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'city'     => array(
+								'label'    => __( 'Town / Village', 'woocommerce' ),
+								'required' => true,
+							),
+							'state'    => array(
+								'label'    => __( 'District', 'woocommerce' ),
+								'required' => true,
+							),
+						),
+						'US' => array(
+							'postcode' => array(
+								'label' => __( 'ZIP Code', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label' => __( 'State', 'woocommerce' ),
+							),
+						),
+						'UY' => array(
+							'state' => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
+						'GB' => array(
+							'postcode' => array(
+								'label' => __( 'Postcode', 'woocommerce' ),
+							),
+							'state'    => array(
+								'label'    => __( 'County', 'woocommerce' ),
+								'required' => false,
+							),
+						),
+						'ST' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'District', 'woocommerce' ),
+							),
+						),
+						'VN' => array(
+							'state'     => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'postcode'  => array(
+								'priority' => 65,
+								'required' => false,
+								'hidden'   => false,
+							),
+							'address_2' => array(
+								'required' => false,
+								'hidden'   => false,
+							),
+						),
+						'WS' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'YT' => array(
+							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'ZA' => array(
+							'state' => array(
+								'label' => __( 'Province', 'woocommerce' ),
+							),
+						),
+						'ZW' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+					)
+				);
+
+				$locale = array_intersect_key( $locale, array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() ) );
+
+				/**
+				 * Filters the default address field settings, which get_address_fields() uses for countries without their own.
+				 *
+				 * @since 1.5.4
+				 *
+				 * @param array $fields Default address field settings.
+				 */
+				$locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
+
+				// Filter default AND shop base locales to allow overrides via a single function. These will be used when changing countries on the checkout.
+				if ( ! isset( $locale[ $this->get_base_country() ] ) ) {
+					$locale[ $this->get_base_country() ] = $locale['default'];
 				}
+
+				/**
+				 * Filters the default and shop base country address field settings, which apply when the checkout country changes.
+				 *
+				 * @since 1.5.4
+				 *
+				 * @param array $fields Address field settings.
+				 */
+				$locale['default'] = apply_filters( 'woocommerce_get_country_locale_base', $locale['default'] );
+				/**
+				 * Filters the default and shop base country address field settings, which apply when the checkout country changes.
+				 *
+				 * @since 1.5.4
+				 *
+				 * @param array $fields Address field settings.
+				 */
+				$locale[ $this->get_base_country() ] = apply_filters( 'woocommerce_get_country_locale_base', $locale[ $this->get_base_country() ] );
+
+				// Country cannot be hidden or optional via locale — it is the lookup key for locale resolution.
+				// Merchants who sell to a single country should use "Sell to specific countries" instead.
+				foreach ( $locale as &$locale_entry ) {
+					if ( isset( $locale_entry['country'] ) ) {
+						$locale_entry['country']['hidden']   = false;
+						$locale_entry['country']['required'] = true;
+					}
+				}
+				unset( $locale_entry );
+
+				$this->locale                   = $locale;
+				$this->country_locale_built_for = $cache_locale;
+			} finally {
+				$this->country_locale_building = false;
 			}
-			unset( $locale_entry );
 		}
 
 		return $this->locale;
