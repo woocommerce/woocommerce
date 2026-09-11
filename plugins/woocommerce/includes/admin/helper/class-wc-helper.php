@@ -28,6 +28,20 @@ class WC_Helper {
 	 */
 	public static $log;
 
+	/**
+	 * Per-request cache of get_local_woo_plugins(), keyed by plugin file.
+	 *
+	 * @var array|null
+	 */
+	private static $local_woo_plugins_cache = null;
+
+	/**
+	 * Per-request cache of get_local_woo_themes(), keyed by stylesheet path.
+	 *
+	 * @var array|null
+	 */
+	private static $local_woo_themes_cache = null;
+
 	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
 
 	/**
@@ -1767,9 +1781,20 @@ class WC_Helper {
 	/**
 	 * Obtain a list of data about locally installed Woo extensions.
 	 *
+	 * Scanning every installed plugin is expensive, so the result is cached for the rest of the
+	 * request. Pass false after installing or removing a plugin to rescan and refresh the cache.
+	 *
+	 * @since 11.2.0 Added the `$use_cache` parameter.
+	 *
+	 * @param bool $use_cache Whether to return the cached list when one exists.
+	 *
 	 * @return array
 	 */
-	public static function get_local_woo_plugins() {
+	public static function get_local_woo_plugins( bool $use_cache = true ) {
+		if ( $use_cache && null !== self::$local_woo_plugins_cache ) {
+			return self::$local_woo_plugins_cache;
+		}
+
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -1826,15 +1851,28 @@ class WC_Helper {
 			$woo_plugins[ $filename ] = $data;
 		}
 
+		self::$local_woo_plugins_cache = $woo_plugins;
+
 		return $woo_plugins;
 	}
 
 	/**
 	 * Get locally installed Woo themes.
 	 *
+	 * Scanning every installed theme is expensive, so the result is cached for the rest of the
+	 * request. Pass false after installing or removing a theme to rescan and refresh the cache.
+	 *
+	 * @since 11.2.0 Added the `$use_cache` parameter.
+	 *
+	 * @param bool $use_cache Whether to return the cached list when one exists.
+	 *
 	 * @return array
 	 */
-	public static function get_local_woo_themes() {
+	public static function get_local_woo_themes( bool $use_cache = true ) {
+		if ( $use_cache && null !== self::$local_woo_themes_cache ) {
+			return self::$local_woo_themes_cache;
+		}
+
 		$themes     = wp_get_themes();
 		$woo_themes = array();
 
@@ -1877,6 +1915,8 @@ class WC_Helper {
 
 			$woo_themes[ $data['_filename'] ] = $data;
 		}
+
+		self::$local_woo_themes_cache = $woo_themes;
 
 		return $woo_themes;
 	}
@@ -2710,7 +2750,8 @@ class WC_Helper {
 	 * @return void
 	 */
 	public static function activated_plugin( $filename ) {
-		$plugins = self::get_local_woo_plugins();
+		// The plugin may have been installed earlier in this request, after the list was cached.
+		$plugins = self::get_local_woo_plugins( false );
 
 		// Not a local woo plugin.
 		if ( empty( $plugins[ $filename ] ) ) {
@@ -2783,7 +2824,7 @@ class WC_Helper {
 		}
 
 		wp_clean_themes_cache( false );
-		$themes = self::get_local_woo_themes();
+		$themes = self::get_local_woo_themes( false );
 
 		$themes = array_filter(
 			$themes,
@@ -3013,6 +3054,19 @@ class WC_Helper {
 	 */
 	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+	}
+
+	/**
+	 * Drop the per-request caches of get_local_woo_plugins() and get_local_woo_themes(),
+	 * so the next call rescans the installed products.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return void
+	 */
+	public static function flush_local_woo_products_cache(): void {
+		self::$local_woo_plugins_cache = null;
+		self::$local_woo_themes_cache  = null;
 	}
 
 	/**

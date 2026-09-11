@@ -893,6 +893,7 @@ class WC_Helper_Updater {
 	 */
 	public static function upgrader_process_complete() {
 		delete_transient( '_woocommerce_helper_updates_count' );
+		WC_Helper::flush_local_woo_products_cache();
 	}
 
 	/**

@@ -14,6 +14,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->cleanup_helper_transients();
+		WC_Helper::flush_local_woo_products_cache();
 	}
 
 	/**
@@ -829,6 +830,44 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		wp_clean_plugins_cache( false );
 
 		$this->assertArrayHasKey( $woocommerce_key, $woo_plugins );
+	}
+
+	/**
+	 * @testdox The local Woo plugin list is cached for the request until a caller asks for a rescan.
+	 */
+	public function test_get_local_woo_plugins_is_cached_until_a_rescan_is_requested(): void {
+		$first  = array(
+			'first-woo-plugin/first-woo-plugin.php' => array(
+				'Name'    => 'First',
+				'Version' => '1.0.0',
+				'Woo'     => '111:aaa',
+			),
+		);
+		$second = array(
+			'second-woo-plugin/second-woo-plugin.php' => array(
+				'Name'    => 'Second',
+				'Version' => '1.0.0',
+				'Woo'     => '222:bbb',
+			),
+		);
+
+		wp_cache_set( 'plugins', array( '' => $first ), 'plugins' );
+		$this->assertSame( array_keys( $first ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// A plugin installed after the first scan is invisible to cached calls.
+		wp_cache_set( 'plugins', array( '' => $first + $second ), 'plugins' );
+		$this->assertSame( array_keys( $first ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// Asking for a rescan returns the new list and refreshes the cache for later callers.
+		$this->assertSame( array_keys( $first + $second ), array_keys( WC_Helper::get_local_woo_plugins( false ) ) );
+		$this->assertSame( array_keys( $first + $second ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// Flushing drops the cache, so the next default call scans again.
+		wp_cache_set( 'plugins', array( '' => $second ), 'plugins' );
+		WC_Helper::flush_local_woo_products_cache();
+		$this->assertSame( array_keys( $second ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		wp_clean_plugins_cache( false );
 	}
 
 	/**
