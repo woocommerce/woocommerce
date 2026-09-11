@@ -136,7 +136,7 @@ const getNavigationHref = ( event: MouseEvent ) => {
 
 	if (
 		link.hasAttribute( 'download' ) ||
-		( link.target && link.target !== '_self' )
+		( link.target && link.target.toLowerCase() !== '_self' )
 	) {
 		return undefined;
 	}

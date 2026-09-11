@@ -435,6 +435,47 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it.each( [ '_self', '_SELF', '_Self' ] )(
+		'prompts before navigation with target "%s" while settings are dirty',
+		( target ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'next', label: 'Next', href: '#next' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			try {
+				const input = container.querySelector( 'input' )!;
+				const link = container.querySelector( 'a' )!;
+				link.target = target;
+				act( () => changeTextInput( input, 'Changed' ) );
+				let intercepted: boolean | undefined;
+				link.addEventListener( 'click', ( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				} );
+				act( () => link.click() );
+				expect( intercepted ).toBe( true );
+				expect(
+					document.querySelector(
+						'.wc-settings-ui__unsaved-changes-modal'
+					)
+				).not.toBeNull();
+			} finally {
+				act( () => root.unmount() );
+				container.remove();
+			}
+		}
+	);
+
 	it.each( [ '', 'settings.csv' ] )(
 		'allows a download with attribute "%s" while settings are dirty',
 		( download ) => {
