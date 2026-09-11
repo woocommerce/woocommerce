@@ -63,6 +63,17 @@
 			}
 		}
 	}
+	.wc-admin-shipping-banner-install-info {
+		color: #007cba;
+		> .info-icon {
+			margin-right: 3px;
+			vertical-align: middle;
+			margin-top: -2px;
+			path {
+				fill: #007cba;
+			}
+		}
+	}
 	.components-external-link__icon {
 		display: none;
 	}
