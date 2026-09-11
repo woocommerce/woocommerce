@@ -33,20 +33,14 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 	private int $music_id;
 
 	/**
-	 * Set up a deterministic category tree so the rendered markup can be counted exactly.
+	 * Build the category tree the tests assert against.
+	 *
+	 * Nothing pre-existing is removed. The only term a fresh install ships with is the
+	 * default "Uncategorized", and it holds no products, so `hide_empty` keeps it out of
+	 * the rendered list and the counts below stay exact.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		$existing_terms = get_terms(
-			array(
-				'taxonomy'   => 'product_cat',
-				'hide_empty' => false,
-			)
-		);
-		foreach ( $existing_terms as $existing_term ) {
-			wp_delete_term( $existing_term->term_id, 'product_cat' );
-		}
 
 		$this->clothing_id = (int) wp_insert_term( 'Clothing', 'product_cat' )['term_id'];
 		$this->hoodies_id  = (int) wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $this->clothing_id ) )['term_id'];
