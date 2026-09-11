@@ -41,8 +41,8 @@ class CartLogoutBehavior implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		// WC_Session_Handler::destroy_session() is hooked to wp_logout at the default priority of 10,
-		// so the cart has to be read before that and written back after it.
+		// WC_Session_Handler::init_hooks() attaches destroy_session() to wp_logout at priority 10, so the
+		// cart has to be read before that and written back after it. Keep the two in step if either moves.
 		add_action( 'wp_logout', array( $this, 'handle_wp_logout_capture' ), 5 );
 		add_action( 'wp_logout', array( $this, 'handle_wp_logout_restore' ), 15 );
 	}
