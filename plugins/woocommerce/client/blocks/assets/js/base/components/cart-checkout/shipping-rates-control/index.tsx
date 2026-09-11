@@ -39,6 +39,9 @@ const Packages = ( {
 	context = '',
 }: PackagesProps ): JSX.Element | null => {
 	const { selectShippingRate } = useShippingData();
+	// In the editor the cart store never changes (the thunk returns early), so the rate
+	// lists have to keep owning their selection or clicking a rate would do nothing.
+	const { isEditor } = useEditorContext();
 	// Attempt initialization once; failed rates remain unchecked so shoppers can retry them.
 	const initializedPackageIds = useRef< Set< string | number > >( new Set() );
 
@@ -96,7 +99,7 @@ const Packages = ( {
 					showItems={ showItems }
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
-					manageSelectionLocally={ false }
+					manageSelectionLocally={ isEditor }
 				/>
 			) ) }
 		</>

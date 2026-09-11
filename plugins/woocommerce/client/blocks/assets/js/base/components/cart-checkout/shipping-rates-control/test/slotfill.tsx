@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { useShippingData, useStoreCart } from '@woocommerce/base-context';
+import {
+	useEditorContext,
+	useShippingData,
+	useStoreCart,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -342,5 +346,48 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:2', 1 ],
 		] );
+	} );
+
+	it( 'lets the rate lists own their selection in the editor only', () => {
+		( useShippingData as jest.Mock ).mockReturnValue( {
+			hasSelectedLocalPickup: false,
+			selectedRates: {},
+			selectShippingRate: jest.fn(),
+		} );
+
+		render(
+			<ShippingRatesControl
+				{ ...defaultProps }
+				shippingRates={ [ createShippingPackage( 0, 'flat_rate:1' ) ] }
+			/>
+		);
+
+		expect( mockShippingRatesControlPackage ).toHaveBeenCalledWith(
+			expect.objectContaining( { manageSelectionLocally: false } )
+		);
+
+		// The cart store never changes in the editor, because the selectShippingRate
+		// thunk returns early there, so the rate list has to render its own state or
+		// clicking a rate in the block preview would do nothing.
+		mockShippingRatesControlPackage.mockClear();
+		( useEditorContext as jest.Mock ).mockReturnValue( { isEditor: true } );
+		try {
+			render(
+				<ShippingRatesControl
+					{ ...defaultProps }
+					shippingRates={ [
+						createShippingPackage( 0, 'flat_rate:1' ),
+					] }
+				/>
+			);
+
+			expect( mockShippingRatesControlPackage ).toHaveBeenCalledWith(
+				expect.objectContaining( { manageSelectionLocally: true } )
+			);
+		} finally {
+			( useEditorContext as jest.Mock ).mockReturnValue( {
+				isEditor: false,
+			} );
+		}
 	} );
 } );

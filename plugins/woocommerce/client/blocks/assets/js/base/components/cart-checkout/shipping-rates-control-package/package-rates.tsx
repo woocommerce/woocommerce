@@ -48,7 +48,8 @@ const PackageRates = ( {
 	>( () => getSelectedOrFirstRateId( rates ) );
 
 	// Standalone controls synchronize on mount and replace pending selections.
-	// Core disables this effect and coordinates initial selections in the parent.
+	// Core disables this effect outside the editor and coordinates initial
+	// selections in the parent.
 	useEffect( () => {
 		if ( manageSelectionLocally && selectedOption ) {
 			onSelectRate( selectedOption );
