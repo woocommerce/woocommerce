@@ -168,7 +168,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 12, count( $properties ) );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'order_id', $properties );
 		$this->assertArrayHasKey( 'order_number', $properties );
@@ -180,6 +180,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'total_formatted', $properties );
 		$this->assertArrayHasKey( 'customer_type', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
+		$this->assertArrayHasKey( 'reporting_missing_orders', $properties );
 	}
 
 	/**
@@ -552,5 +553,38 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$second_order_from_response   = $response_orders[ $second_order->get_id() ];
 		$second_order_formatted_total = wp_strip_all_tags( html_entity_decode( $second_order->get_formatted_order_total() ), true );
 		$this->assertEquals( $second_order_from_response['total_formatted'], $second_order_formatted_total );
+	}
+
+	/**
+	 * An order in another currency cannot be reported in the store currency.
+	 */
+	public function test_foreign_currency_order_amount_is_unavailable() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		$currency = get_woocommerce_currency();
+
+		$native = WC_Helper_Order::create_order( $this->user );
+		$native->set_currency( $currency );
+		$native->set_status( OrderStatus::COMPLETED );
+		$native->save();
+
+		$foreign = WC_Helper_Order::create_order( $this->user );
+		$foreign->set_currency( 'GBP' === $currency ? 'EUR' : 'GBP' );
+		$foreign->set_status( OrderStatus::COMPLETED );
+		$foreign->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'extended_info', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$rows = array_column( $response->get_data(), null, 'order_id' );
+		$this->assertSame( 0, $rows[ $native->get_id() ]['reporting_missing_orders'] );
+		$this->assertSame( 1, $rows[ $foreign->get_id() ]['reporting_missing_orders'] );
+
+		$controller = new \Automattic\WooCommerce\Admin\API\Reports\Orders\Controller();
+		$this->assertSame( 'Unavailable', $controller->prepare_item_for_export( $rows[ $foreign->get_id() ] )['net_total'] );
+		$this->assertEquals( $rows[ $native->get_id() ]['net_total'], $controller->prepare_item_for_export( $rows[ $native->get_id() ] )['net_total'] );
 	}
 }

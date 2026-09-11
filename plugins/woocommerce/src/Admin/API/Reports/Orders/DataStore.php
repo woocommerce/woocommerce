@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
@@ -71,16 +72,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'order_id'         => 'intval',
-		'parent_id'        => 'intval',
-		'date_created'     => 'strval',
-		'date_created_gmt' => 'strval',
-		'status'           => 'strval',
-		'customer_id'      => 'intval',
-		'net_total'        => 'floatval',
-		'total_sales'      => 'floatval',
-		'num_items_sold'   => 'intval',
-		'customer_type'    => 'strval',
+		'reporting_missing_orders' => 'intval',
+		'order_id'                 => 'intval',
+		'parent_id'                => 'intval',
+		'date_created'             => 'strval',
+		'date_created_gmt'         => 'strval',
+		'status'                   => 'strval',
+		'customer_id'              => 'intval',
+		'net_total'                => 'floatval',
+		'total_sales'              => 'floatval',
+		'num_items_sold'           => 'intval',
+		'customer_type'            => 'strval',
 	);
 
 	/**
@@ -125,6 +127,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'num_items_sold'   => "{$table_name}.num_items_sold",
 			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
 		);
+
+		// An order's amount is reportable only once it is known in the store currency, natively
+		// or at a recorded historical rate: the same rule the Orders Stats totals apply.
+		$this->report_columns['reporting_missing_orders'] = '1 AS reporting_missing_orders';
+		if ( OrdersStatsDataStore::has_reporting_currency_columns() ) {
+			global $wpdb;
+			$currency_match = $table_name . '.reporting_currency = ' . $wpdb->prepare( '%s', get_woocommerce_currency() );
+			$qualified      = "$currency_match AND $table_name.reporting_exchange_rate > 0 AND $table_name.reporting_basis IN ('native', 'historical_order_rate', 'historical_processor_rate')";
+
+			$this->report_columns['reporting_missing_orders'] = "CASE WHEN $qualified THEN 0 ELSE 1 END AS reporting_missing_orders";
+		}
 	}
 
 	/**

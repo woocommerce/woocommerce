@@ -132,6 +132,7 @@ class OrdersReportTable extends Component {
 				status,
 				customer_type: customerType,
 			} = row;
+			const incomplete = Number( row.reporting_missing_orders ) > 0;
 			const extendedInfo = row.extended_info || {};
 			const { coupons, customer, products } = extendedInfo;
 
@@ -245,8 +246,12 @@ class OrdersReportTable extends Component {
 						.join( ', ' ),
 				},
 				{
-					display: renderCurrency( netTotal, currency ),
-					value: netTotal,
+					display: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: renderCurrency( netTotal, currency ),
+					value: incomplete
+						? __( 'Unavailable', 'woocommerce' )
+						: netTotal,
 				},
 				{
 					display: extendedInfo.attribution.origin,
@@ -265,6 +270,7 @@ class OrdersReportTable extends Component {
 			coupons_count: couponsCount = 0,
 			net_revenue: netRevenue = 0,
 		} = totals;
+		const incomplete = Number( totals.reporting_missing_orders ) > 0;
 		const { formatAmount, getCurrencyConfig } = this.context;
 		const currency = getCurrencyConfig();
 		return [
@@ -300,7 +306,9 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				value: incomplete
+					? __( 'Unavailable', 'woocommerce' )
+					: formatAmount( netRevenue ),
 			},
 		];
 	}

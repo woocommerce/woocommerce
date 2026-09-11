@@ -117,6 +117,8 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 				),
 			),
 		);
+		// A store-currency order qualifies for reporting.
+		$expected->data[0]['reporting_missing_orders'] = 0;
 		$this->assertEquals( $expected, $data );
 	}
 

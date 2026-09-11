@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Show unavailable currency summaries and comparisons when Analytics reports missing historical currency data, while preserving nonmonetary counts.
+Show unavailable currency summaries, comparisons and Orders report amounts when Analytics reports missing historical currency data, while preserving nonmonetary counts.

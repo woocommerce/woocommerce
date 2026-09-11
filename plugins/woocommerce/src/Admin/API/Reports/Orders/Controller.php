@@ -222,6 +222,13 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 		);
 
+		$schema['properties']['reporting_missing_orders'] = array(
+			'description' => __( 'Number of orders with missing historical currency data.', 'woocommerce' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -501,7 +508,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total' 	  => $item['net_total'],
+			'net_total'       => ! empty( $item['reporting_missing_orders'] ) ? __( 'Unavailable', 'woocommerce' ) : $item['net_total'],
 			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
