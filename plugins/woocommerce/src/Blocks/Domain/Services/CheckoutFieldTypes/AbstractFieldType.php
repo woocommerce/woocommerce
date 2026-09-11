@@ -19,6 +19,18 @@ use WP_Error;
 abstract class AbstractFieldType {
 
 	/**
+	 * Adds type-specific defaults to a field's validation schema.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array $schema The supplied validation schema.
+	 * @return array The schema with defaults applied.
+	 */
+	public function prepare_validation_schema( array $schema ): array {
+		return $schema;
+	}
+
+	/**
 	 * Validates the options that apply to every field type: callbacks, hidden state, and rule schemas.
 	 *
 	 * Subclasses adding checks should call this parent method first.
@@ -175,6 +187,27 @@ abstract class AbstractFieldType {
 	 */
 	public function format_value( $value, array $field ) {
 		return $value;
+	}
+
+	/**
+	 * Converts a stored meta value into the type the rest of checkout works with.
+	 *
+	 * @param mixed $value The stored value.
+	 * @return mixed The converted value.
+	 */
+	public function from_storage( $value ) {
+		return $value;
+	}
+
+	/**
+	 * Applies type-specific keywords to a field's REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_value_schema( array $field_schema, array $field ): array {
+		return $field_schema;
 	}
 
 	/**

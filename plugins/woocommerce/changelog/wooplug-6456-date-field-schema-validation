@@ -1,0 +1,5 @@
+Significance: minor
+Type: add
+
+Allow additional checkout field rules to reference other field values with `$data`, and compare date strings with `formatMinimum`, `formatMaximum`, and their exclusive variants.
+Default date comparison schemas to date strings and report the keyword and reason when a schema is invalid.
