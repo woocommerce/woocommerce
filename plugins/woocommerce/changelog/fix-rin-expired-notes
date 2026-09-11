@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide a remote inbox notification's store alert once its end date has passed, even if the notification is no longer being served.
